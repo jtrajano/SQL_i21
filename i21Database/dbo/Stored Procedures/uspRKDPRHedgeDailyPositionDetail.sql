@@ -738,79 +738,20 @@ UNION
 
                 
                 INSERT INTO @tempFinal(strCommodityCode,strType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId)
-                SELECT @strDescription
-                                ,'Avail for Spot Sale' [strType]
-                                ,(isnull(CompanyTitled, 0) + (isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0))) - isnull(ReceiptProductQty, 0)
-                                + CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then  0 ELSE -isnull(DP ,0) end AS dblTotal,
-                                @intCommodityUnitMeasureId,@intCommodityId
-                FROM (
-                                SELECT (invQty) 
-                                 AS CompanyTitled
-                                                ,ReceiptProductQty
-                                                ,OpenPurchasesQty
-                                                ,OpenSalesQty
-                                                ,DP
-                                FROM (
-                                                SELECT (
-                                                                                (SELECT sum(qty) Qty from (
-                                                                SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0)))  qty,s.intLocationId intLocationId
-                                                                FROM vyuICGetItemStockUOM s
-                                                                JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
-                                                                JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
-                                                                WHERE s.intCommodityId  = @intCommodityId
-                                                                AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end                                                                        
-                                                                )t             WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                                                                                                                                                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                                                                                                                                ELSE isnull(ysnLicensed, 0) END
-                                                                                                                                                                                                                                                ))                                                                                             
-                                                                                ) AS invQty
-
-                                                                ,(SELECT sum(Qty) FROM (
-                                                                                SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
-                                                                                FROM @tblGetOpenContractDetail  CD  
-                                                                                WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=c.intCommodityId and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
-                                                                )t             WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                ELSE isnull(ysnLicensed, 0) END)                                
-                                                                ) AS ReceiptProductQty
-                                                                ,(SELECT sum(Qty) FROM (
-                                                                                SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty,intCompanyLocationId                   
-                                                                                FROM @tblGetOpenContractDetail  CD   
-                                                                                WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=c.intCommodityId and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
-                                                                                )t             WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                ELSE isnull(ysnLicensed, 0) END) 
-                                                                                ) AS OpenPurchasesQty --req      
-                                                                ,(select sum(dblTotal) dblTotal from (
-                                                                                SELECT 
-                                                                dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
-                                                                                ,ch.intCompanyLocationId
-                                                                                FROM vyuGRGetStorageDetail ch
-                                                                                WHERE ch.intCommodityId  = @intCommodityId               AND ysnDPOwnedType = 1
-                                                                                                AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
-                                                                                )t             WHERE intCompanyLocationId  IN (
-                                                                SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                ELSE isnull(ysnLicensed, 0) END
-                                                                ) ) AS DP               
-                                                                                        
-                                                                ,(SELECT sum(Qty) FROM (
-                                                                                SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty,
-                                                                                CD.intCompanyLocationId
-                                                                                FROM @tblGetOpenContractDetail  CD   
-                                                                                WHERE   intContractTypeId=2 and intPricingTypeId in(1,2) and CD.intCommodityId=c.intCommodityId and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end
-                                                                                )t  WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                ELSE isnull(ysnLicensed, 0) END)) AS OpenSalesQty
-                                                FROM tblICCommodity c
-                                                WHERE c.intCommodityId  = @intCommodityId
-                                                ) t            
-                                )t1
+				SELECT @strDescription
+					,'Avail for Spot Sale' [strType],sum(dblTotal)-sum(dblPurQty),@intCommodityUnitMeasureId,@intCommodityId from(
+					select dblTotal,
+					(SELECT sum(Qty) FROM (
+								SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
+								FROM @tblGetOpenContractDetail  CD  
+								WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=@intCommodityId
+									and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
+							)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+											WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+											ELSE isnull(ysnLicensed, 0) END)			
+							) dblPurQty
+   				FROM @tempFinal t where strType='Basis Risk' and t.intCommodityId=@intCommodityId)t	
 
                 select @intUnitMeasureId =null
                 select @strUnitMeasure =null
