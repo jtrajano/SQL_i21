@@ -6787,6 +6787,7 @@
     <Build Include="dbo\Views\vyuSTItemCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARInvoicesForPaymentIntegration.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPaymentIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
