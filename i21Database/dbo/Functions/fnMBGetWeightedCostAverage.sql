@@ -16,7 +16,8 @@ BEGIN
 	SELECT intMeterReadingId
 		, intMeterReadingDetailId
 		, intItemId
-		, dblCost = (SUM(ISNULL(dblTotalCost, 0))) / (SUM(ISNULL(dblQuantity, 0)))
+		, dblCost = case when (SUM(ISNULL(dblQuantity, 0))) = 0 then 0.00 else (SUM(ISNULL(dblTotalCost, 0))) / (SUM(ISNULL(dblQuantity, 0))) end
+		--, dblCost = (SUM(ISNULL(dblTotalCost, 0))) / (SUM(ISNULL(dblQuantity, 0)))
 	FROM (
 		SELECT MRDetail.intMeterReadingId
 			, MRDetail.intMeterReadingDetailId
