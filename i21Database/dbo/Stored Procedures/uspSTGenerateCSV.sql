@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
-	@intVendorId int,
-	@strStoreIdList NVARCHAR(MAX),
-	@dtmBeginningDate datetime,
-	@dtmEndingDate datetime,
-	@intCsvFormat INT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT,
-	@strCSVHeader NVARCHAR(MAX) OUTPUT,
-	@intVendorAccountNumber INT OUTPUT
+@intVendorId int,
+@strStoreIdList NVARCHAR(MAX),
+@dtmBeginningDate datetime,
+@dtmEndingDate datetime,
+@intCsvFormat INT,
+@strStatusMsg NVARCHAR(1000) OUTPUT,
+@strCSVHeader NVARCHAR(MAX) OUTPUT,
+@intVendorAccountNumber INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -392,17 +392,26 @@ BEGIN
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') THEN 'Y'
 									ELSE 'N' 	
 								  END as strPromotionFlag
 
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlMatchQuantity ELSE 0 END as intOutletMultipackQuantity
-									--(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
-								  --ELSE 0 END as intOutletMultipackQuantity
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
+								  -- Multi-Pack Discount
+								, CASE 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN 'Y' 
+									ELSE 'N' 
+								  END as strOutletMultipackFlag
+								, CASE 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
+								    ELSE 0 
+								  END as intOutletMultipackQuantity
+								, CASE 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN dblTrlMatchLineTrlPromoAmount 
+									ELSE 0 
+								  END as dblOutletMultipackDiscountAmount
 
 								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
 								, '' as strAccountPromotionName --21
