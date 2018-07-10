@@ -23,7 +23,7 @@ WHERE	tblCMBankAccount.intBankAccountId = @intBankAccountId
 IF @glBalance = 0 RETURN -1
 IF @bankBalance = 0 RETURN -2
 
-SELECT @result = @bankBalance/@glBalance
+SELECT @result = @glBalance/@bankBalance
 RETURN @result
 END
 
