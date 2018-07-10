@@ -10,9 +10,11 @@ SELECT @strCommodityCode = strCommodityCode
 FROM tblICCommodity
 WHERE intCommodityId = @intCommodityId
 
-SELECT DISTINCT intFutOptTransactionId, (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract
+SELECT DISTINCT intFutOptTransactionId, (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,
+	strLocationName,dblContractSize,strFutureMarket
+,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 FROM (
-	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract, (
+	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId ,(
 			SELECT SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
@@ -21,19 +23,21 @@ FROM (
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC
-				) intRowNum, ot.intFutOptTransactionId, ot.intNewNoOfContract intNoOfContract
+				) intRowNum, ot.intFutOptTransactionId, ot.intNewNoOfContract intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket 
+				,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 		FROM tblRKFutOptTransactionHistory ot
 		WHERE ot.strNewBuySell = 'Buy' AND isnull(ot.strInstrumentType, '') = 'Futures' AND convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) AND ot.strCommodity = CASE WHEN isnull(@strCommodityCode, '') = '' THEN ot.strCommodity ELSE @strCommodityCode END
 		) t
 	WHERE t.intRowNum = 1
-	GROUP BY intFutOptTransactionId
+	GROUP BY intFutOptTransactionId,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 	) t1
 
 UNION
 
-SELECT DISTINCT intFutOptTransactionId, - (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract
+SELECT DISTINCT intFutOptTransactionId, - (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket
+,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 FROM (
-	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract, (
+	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, (
 			SELECT SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
@@ -42,19 +46,19 @@ FROM (
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC
-				) intRowNum, ot.intFutOptTransactionId, ot.intNewNoOfContract intNoOfContract
+				) intRowNum, ot.intFutOptTransactionId, ot.intNewNoOfContract intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 		FROM tblRKFutOptTransactionHistory ot
 		WHERE ot.strNewBuySell = 'Sell' AND isnull(ot.strInstrumentType, '') = 'Futures' AND convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) AND ot.strCommodity = CASE WHEN isnull(@strCommodityCode, '') = '' THEN ot.strCommodity ELSE @strCommodityCode END
 		) t
 	WHERE t.intRowNum = 1
-	GROUP BY intFutOptTransactionId
+	GROUP BY intFutOptTransactionId,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 	) t1
 
 UNION
 
-SELECT DISTINCT intFutOptTransactionId, (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract
+SELECT DISTINCT intFutOptTransactionId, (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 FROM (
-	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract, (
+	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, (
 				SELECT isnull(SUM(mf.intMatchQty),0)
 			FROM tblRKMatchDerivativesHistoryForOption mf
 			WHERE  mf.intLFutOptTransactionId=intFutOptTransactionId
@@ -63,21 +67,23 @@ FROM (
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC) intRowNum,
 				 ot.intFutOptTransactionId, 
-				 ot.intNewNoOfContract intNoOfContract
+				 ot.intNewNoOfContract intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket
+				 ,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 		FROM tblRKFutOptTransactionHistory ot
 		WHERE ot.strNewBuySell = 'Buy' AND isnull(ot.strInstrumentType, '') = 'Options'
 			and convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate)  
 			AND ot.strCommodity = CASE WHEN isnull(@strCommodityCode, '') = '' THEN ot.strCommodity ELSE @strCommodityCode END
 		) t
 	WHERE t.intRowNum = 1
-	GROUP BY intFutOptTransactionId
+	GROUP BY intFutOptTransactionId,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 	) t1
 
 UNION
 
-SELECT DISTINCT intFutOptTransactionId, -(intNoOfContract - isnull(intOpenContract, 0)) intOpenContract
+SELECT DISTINCT intFutOptTransactionId, -(intNoOfContract - isnull(intOpenContract, 0)) intOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket
+,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 FROM (
-	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract, (
+	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, (
 				SELECT isnull(SUM(mf.intMatchQty),0)
 			FROM tblRKMatchDerivativesHistoryForOption mf
 			WHERE  mf.intLFutOptTransactionId=intFutOptTransactionId
@@ -86,12 +92,12 @@ FROM (
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC) intRowNum,
 				 ot.intFutOptTransactionId, 
-				 ot.intNewNoOfContract intNoOfContract
+				 ot.intNewNoOfContract intNoOfContract,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 		FROM tblRKFutOptTransactionHistory ot
 		WHERE ot.strNewBuySell = 'Sell' AND isnull(ot.strInstrumentType, '') = 'Options'
 			and convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate)  
 			AND ot.strCommodity = CASE WHEN isnull(@strCommodityCode, '') = '' THEN ot.strCommodity ELSE @strCommodityCode END
 		) t
 	WHERE t.intRowNum = 1
-	GROUP BY intFutOptTransactionId
+	GROUP BY intFutOptTransactionId,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId
 	) t1
