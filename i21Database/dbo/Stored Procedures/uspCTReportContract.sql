@@ -48,7 +48,9 @@ BEGIN TRY
 			@intApproverGroupId			INT,
 			@type						NVARCHAR(50),
 			@strIds						NVARCHAR(MAX),
-			@strGABShipDelv				NVARCHAR(MAX)
+			@strGABShipDelv				NVARCHAR(MAX),
+			@intReportLogoHeight		INT,
+			@intReportLogoWidth			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -117,6 +119,8 @@ BEGIN TRY
 	WHERE	[fieldname] = 'Type'
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
+
+	SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference
 
 	INSERT INTO @tblSequenceHistoryId
 	(
@@ -471,6 +475,8 @@ BEGIN TRY
 			,strIds									=	@strIds
 			,strType								=	@type
 			,intLaguageId							=	@intLaguageId
+			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
+			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId
