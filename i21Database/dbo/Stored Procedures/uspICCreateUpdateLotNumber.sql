@@ -387,13 +387,14 @@ BEGIN
 	END 	
 
 	-- If weight UOM is specified, make sure weight is not zero. 
-	IF ISNULL(@intWeightUOMId, 0) <> 0 AND ISNULL(@dblWeight, 0) = 0
+	IF	ISNULL(@intWeightUOMId, 0) <> 0 
+		AND ISNULL(@dblWeight, 0) = 0
 	BEGIN 
 		SELECT	@strItemNo = strItemNo
 		FROM	dbo.tblICItem Item
 		WHERE	Item.intItemId = @intItemId
 
-		IF @intLotTypeId = @LotType_Serial
+		IF @intLotTypeId = @LotType_Serial AND ISNULL(@strLotNumber, '') = ''
 		BEGIN 
 			SET @strLotNumber = '(To be generated)'
 		END 
