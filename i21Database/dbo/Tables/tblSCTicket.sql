@@ -11,6 +11,7 @@
     [dtmTicketDateTime] DATETIME NULL, 
     [dtmTicketTransferDateTime] DATETIME NULL, 
     [dtmTicketVoidDateTime] DATETIME NULL, 
+	[dtmTransactionDateTime] DATETIME NULL DEFAULT GETDATE(), 
     [intProcessingLocationId] INT NULL, 
     [strScaleOperatorUser] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intEntityScaleOperatorId] INT NULL, 
