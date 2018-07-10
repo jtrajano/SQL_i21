@@ -41,6 +41,8 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 	LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 	WHERE SCTicket.intTicketId = @intTicketId
 
+	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
 	CREATE TABLE #tmpAddItemReceiptResult (
@@ -79,8 +81,8 @@ BEGIN TRY
 			,intStorageLocationId
 			,ysnIsStorage
 			,dblFreightRate
-			--,dblGross
-			--,dblNet
+			,dblGross
+			,dblNet
 			,intSourceId
 			,intSourceType	
 			,strSourceScreenName
@@ -100,7 +102,10 @@ BEGIN TRY
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
 			,intItemUOMId				= SC.intItemUOMIdTo
-			,intGrossNetUOMId			= NULL
+			,intGrossNetUOMId			= CASE
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
+											ELSE SC.intItemUOMIdTo
+										END
 			,intCostUOMId				= SC.intItemUOMIdTo
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
@@ -113,12 +118,19 @@ BEGIN TRY
 			,intStorageLocationId		= SC.intStorageLocationId
 			,ysnIsStorage				= 0
 			,dblFreightRate				= SC.dblFreightRate
-			--,dblGross					= SC.dblGrossWeight
-			--,dblNet						= SC.dblGrossWeight - SC.dblTareWeight
+			,dblGross					=  CASE
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SC.dblGrossWeight - SC.dblTareWeight)
+											ELSE SC.dblGrossUnits
+										END
+			,dblNet						= CASE
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
+											ELSE SC.dblNetUnits 
+										END
 			,intSourceId				= SC.intTicketId
 			,intSourceType		 		= 1 -- Source type for scale is 1 
 			,strSourceScreenName		= 'Scale Ticket'
 	FROM	tblSCTicket SC 
+	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
 	--Fuel Freight
@@ -213,7 +225,6 @@ BEGIN TRY
     IF (@total = 0)
 	   RETURN;
 	
-	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 	IF @intLotType != 0
 	BEGIN 
 		INSERT INTO @ReceiptItemLotStagingTable(
@@ -248,13 +259,10 @@ BEGIN TRY
 			,[intSubLocationId]		= RE.intSubLocationId
 			,[intStorageLocationId] = RE.intStorageLocationId
 			,[intCurrencyId]		= RE.intCurrencyId
-			,[intItemUnitMeasureId] = CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
-										ELSE RE.intItemUOMId
-									END
+			,[intItemUnitMeasureId] = RE.intItemUOMId
 			,[dblQuantity]			= RE.dblQty
-			,[dblGrossWeight]		= RE.dblQty
-			,[dblTareWeight]		= 0
+			,[dblGrossWeight]		= RE.dblGross
+			,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate
@@ -276,8 +284,6 @@ BEGIN TRY
 	SET		SC.intInventoryReceiptId = addResult.intInventoryReceiptId
 	FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddItemReceiptResult addResult
 				ON SC.intTicketId = addResult.intSourceId
-
-
 
 _PostOrUnPost:
 	-- Post the Inventory Receipts                                            
@@ -301,7 +307,15 @@ _PostOrUnPost:
 		FROM	dbo.tblSMUserSecurity 
 		WHERE	[intEntityId] = @intUserId
 		BEGIN
-		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;			
+		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		  
+			UPDATE	SC
+			SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
+			FROM	dbo.tblSCTicket SC 
+			INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
+			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
+			INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+			WHERE SC.intTicketId = @intTicketId			
 		END
 
 		DELETE	FROM #tmpAddItemReceiptResult 
