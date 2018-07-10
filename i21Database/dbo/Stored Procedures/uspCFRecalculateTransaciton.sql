@@ -4566,10 +4566,10 @@ BEGIN
 		BEGIN
 			
 			DECLARE @dblTransferCostGrossPrice NUMERIC(18,6)
-			SET @dblTransferCostGrossPrice = ROUND(ISNULL(@dblNetTransferCost,0) + ISNULL(@dblAdjustments,0) + Round((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6) , 6)
+			SET @dblTransferCostGrossPrice = ROUND(ISNULL(@dblGrossTransferCost,0) + ISNULL(@dblAdjustments,0) - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) , 6)
 
 			DECLARE @dblTransferCostGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblNetTransferCost,0) + ISNULL(@dblAdjustments,0) + Round((ISNULL(@totalCalculatedTaxZeroQuantity,0)/ @dblZeroQuantity),6) , 6)
+			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblGrossTransferCost,0) + ISNULL(@dblAdjustments,0)  - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) , 6)
 
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
