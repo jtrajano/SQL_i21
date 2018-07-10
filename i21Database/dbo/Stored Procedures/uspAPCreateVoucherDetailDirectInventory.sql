@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @detailCreated AS Id
+DECLARE @voucherIds AS Id;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
