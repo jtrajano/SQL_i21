@@ -500,7 +500,7 @@ BEGIN
 
 	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
 	BEGIN
-		IF @transcount = 0 COMMIT TRANSACTION
+		IF @transCount = 0 COMMIT TRANSACTION
 		GOTO DONE;
 	END
 
