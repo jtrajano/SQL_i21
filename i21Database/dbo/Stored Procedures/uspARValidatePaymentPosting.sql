@@ -24,7 +24,7 @@ INSERT INTO @PaymentIds SELECT @PaymentId
 
 DECLARE @PaymentData AS [dbo].[ReceivePaymentPostingTable]
 INSERT INTO @PaymentData
-SELECT * FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @BatchId, @BankAccountId, @Post, 0, @UserId)
+SELECT * FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @BatchId, @BankAccountId, @Post, 0, @UserId, NULL)
 
 
 DECLARE @InvalidData TABLE (

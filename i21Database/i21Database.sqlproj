@@ -6781,6 +6781,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPaymentIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
