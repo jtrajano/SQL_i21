@@ -21,5 +21,5 @@ BEGIN
 		and a.intLanguageId = isnull(@intLanguageId, 0)
 		and b.strLabelName = isnull(@strExpression, '');
 
-	RETURN @strCustomLabel;
+	RETURN ISNULL(@strCustomLabel,@strExpression);
 END
