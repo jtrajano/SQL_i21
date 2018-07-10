@@ -1028,7 +1028,7 @@ BEGIN
 		DELETE A
 		FROM tblAPAppliedPrepaidAndDebit A
 		INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
-		WHERE A.dblAmountApplied = 0
+		WHERE A.dblAmountApplied = 0 AND A.ysnApplied = 0
 
 		--If Prepaid was made the bill fully paid, update the ysnPaid to 1
 		UPDATE A

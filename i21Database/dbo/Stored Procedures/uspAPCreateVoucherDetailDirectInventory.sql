@@ -21,15 +21,23 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intAccountId]					,
 		[intItemId]						,
 		[strMiscDescription]			,
-		[dblTotal]						,
+		-- [dblTotal]						,
+		[intUnitOfMeasureId]			,
 		[dblQtyOrdered]					,
+		[dblUnitQty]					,
 		[dblQtyReceived]				,
 		[dblDiscount]					,
+		[intCostUOMId]					,
 		[dblCost]						,
+		[dblCostUnitQty]				,
 		[int1099Form]					,
 		[int1099Category]				,
 		[intLineNo]						,
 		[intTaxGroupId]					,
+		[intContractDetailId]			,
+		[intContractHeaderId]			,
+		[intLoadDetailId]				,
+		[intLoadId]						,
 		[intScaleTicketId]
 	)
 	OUTPUT inserted.intBillDetailId INTO @detailCreated
@@ -38,12 +46,25 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
 		[intItemId]						=	C.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[dblTotal]						=	CAST((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 
-												- ((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL(18,2)),
-		[dblQtyOrdered]					=	A.dblQtyReceived,
-		[dblQtyReceived]				=	A.dblQtyReceived,
+		-- [dblTotal]						=	CAST((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 
+		-- 										- ((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL(18,2)),
+		[intUnitOfMeasureId]			=	CASE WHEN ctd.intItemUOMId > 0 
+												THEN ctd.intItemUOMId
+												ELSE A.intUnitOfMeasureId
+											END,
+		[dblQtyOrdered]					=	dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
+																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
+																			,A.dblQtyReceived),
+		[dblUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE A.dblUnitQty END,
+		[dblQtyReceived]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
+																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
+																			,A.dblQtyReceived),
 		[dblDiscount]					=	A.[dblDiscount],
-		[dblCost]						=	ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0)),
+		[intCostUOMId]					=	CASE WHEN ctd.intCostUOMId > 0 THEN ctd.intCostUOMId ELSE A.intCostUOMId END,
+		[dblCost]						=	dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
+																		,CASE WHEN ctd.intCostUOMId > 0 THEN ctd.intCostUOMId ELSE A.intCostUOMId END
+																		,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
+		[dblCostUnitQty]				=	CASE WHEN ctd.intCostUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
@@ -61,11 +82,17 @@ IF @transCount = 0 BEGIN TRANSACTION
 											ELSE ISNULL(F.int1099CategoryId, 0) END,
 		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
 		[intTaxGroupId]					=	A.[intTaxGroupId],
+		[intContractDetailId]			=	ctd.intContractDetailId,
+		[intContractHeaderId]			=	ctd.intContractHeaderId,
+		[intLoadDetailId]				=	A.intLoadDetailId,
+		[intLoadId]						=	lgLoad.intLoadId,
 		[intScaleTicketId]				=	A.[intScaleTicketId]										
 	FROM @voucherDetailDirect A
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
+	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
+	LEFT JOIN tblLGLoad lgLoad ON A.intLoadDetailId = lgLoad.intLoadDetailId
 	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
 	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = B.intShipToId
 	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
@@ -73,6 +100,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	WHERE B.intBillId = @voucherId
 
 	EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+	INSERT INTO @voucherIds
+	SELECT @voucherId
+	EXEC uspAPUpdateVoucherTotal @voucherIds
 
 IF @transCount = 0 COMMIT TRANSACTION
 
