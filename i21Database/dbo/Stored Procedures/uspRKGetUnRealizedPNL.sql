@@ -10,6 +10,19 @@ BEGIN TRY
   
   DECLARE @ErrMsg NVARCHAR(MAX)
   
+  DECLARE @DefaultCompanyId	 INT
+  DECLARE @DefaultCompanyName	 NVARCHAR(200)
+  
+  IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
+  BEGIN
+		 SELECT 
+		 @DefaultCompanyId = intMultiCompanyId
+		,@DefaultCompanyName = strCompanyName 
+		FROM tblSMMultiCompany
+
+		SET @intCompanyId = 0
+  END
+
   /*
 			intTransactionType
 			1 - Contract
@@ -1254,8 +1267,8 @@ BEGIN TRY
 	  ,dblMarketDifferential				
 	  ,dblNetM2MPrice						
 	  ,dblSettlementPrice
-	  ,intCompanyId					
-	  ,strCompanyName
+	  ,ISNULL(intCompanyId,@DefaultCompanyId) intCompanyId					
+	  ,ISNULL(strCompanyName,@DefaultCompanyName)strCompanyName
 	  FROM @tblUnRealizedPNL 
 	  ORDER BY strTransaction				
 	
