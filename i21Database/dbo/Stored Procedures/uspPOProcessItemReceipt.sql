@@ -107,6 +107,7 @@ BEGIN
 			,intFreightTermId
 			,intForexRateTypeId
 			,dblForexRate
+			,intTaxGroupId
 	)
 	SELECT	
 			strReceiptType			= @ReceiptType_PurchaseOrder
@@ -142,6 +143,8 @@ BEGIN
 			,intFreightTermId		= PO.intFreightTermId
 			,intForexRateTypeId		= PODetail.intForexRateTypeId
 			,dblForexRate			= PODetail.dblForexRate
+			,intTaxGroupId          = ISNULL(PODetail.intTaxGroupId, NULL)
+
 
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
