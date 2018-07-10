@@ -327,38 +327,6 @@ BEGIN TRY
 							JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
 							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
 							WHERE CD.intContractHeaderId = @intContractHeaderId
-	 
-	IF	@type = 'MULTIPLE'
-	BEGIN
-		SELECT @strGABShipDelv = STUFF((
-		SELECT	CHAR(13)+CHAR(10) + CH.strContractNumber + ' - ' + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + UM.strUnitMeasure + ISNULL(' in ' + CD.strPackingDescription,'') + ISNULL('(' + LTRIM(CD.intNumberOfContainers) + ' Containers)','') + 
-				CHAR(13)+CHAR(10) + CASE WHEN PO.strPosition = 'Spot' THEN 'Delivery ' ELSE 'Shipment ' END + DATENAME(MONTH,CD.dtmEndDate) + ' ' +  DATENAME(yyyy,CD.dtmEndDate) +
-				CHAR(13)+CHAR(10) + 'at ' + MA.strFutMarketName + ' ' + MO.strFutureMonth  + ' ' +  
-				CASE WHEN CD.intPricingTypeId = 2 THEN '('+ CASE WHEN CD.dblBasis < 0 THEN '-' ELSE '+' END + ') ' ELSE ' ' END +
-				CASE	WHEN	CD.intPricingTypeId = 2 
-						THEN	dbo.fnRemoveTrailingZeroes(CD.dblBasis) + ' ' + BC.strCurrency + '/' + BM.strUnitMeasure
-						ELSE	dbo.fnRemoveTrailingZeroes(CD.dblCashPrice) + ' ' + CY.strCurrency + '/' + PM.strUnitMeasure
-				END
-		FROM	tblCTContractDetail		CD
-		JOIN	tblCTContractHeader		CH	ON CD.intContractHeaderId		=	CH.intContractHeaderId
-		JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId				=	CD.intItemUOMId		
-		JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
-		JOIN	tblCTPosition			PO	ON	PO.intPositionId			=	CH.intPositionId
-		JOIN	tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
-		JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId	
-		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
-		JOIN	tblSMCurrency			BC	ON	BC.intCurrencyID			=	CD.intBasisCurrencyId	
-		JOIN	tblICItemUOM			BU	ON	BU.intItemUOMId				=	CD.intBasisUOMId		
-		JOIN	tblICUnitMeasure		BM	ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
-		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		
-		JOIN	tblICUnitMeasure		PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId
-		WHERE	CD.intContractHeaderId		IN	(SELECT Item FROM dbo.fnSplitString(@strIds,','))
-		FOR XML PATH(''), TYPE				
-			   ).value('.','varchar(max)')
-			   ,1,2, ''						
-		)  			
-
-	END
 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
@@ -499,7 +467,10 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt12.strTranslation,LTRIM(RTRIM(EC.strEntityCountry))) END,'')
 			,striDealPrice							=	strFutMarketName + ' ' + strFutureMonth + ' ' + LTRIM(dblBasis)+' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN 'Delivery' ELSE 'Shipment' END
+			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
+			,strIds									=	@strIds
+			,strType								=	@type
+			,intLaguageId							=	@intLaguageId
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId
