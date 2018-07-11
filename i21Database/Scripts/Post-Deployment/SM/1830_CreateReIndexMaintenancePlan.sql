@@ -1,4 +1,16 @@
-﻿-- Get the current database
+﻿-- Turn On Agent XPs --
+msdb.dbo.SP_CONFIGURE 'SHOW ADVANCE',1
+GO
+RECONFIGURE
+GO
+msdb.dbo.SP_CONFIGURE 'AGENT XPs',1
+GO
+RECONFIGURE
+GO
+
+
+
+-- Get the current database
 DECLARE @currentDatabaseName varchar(100)
 SET @currentDatabaseName = DB_NAME()
 
