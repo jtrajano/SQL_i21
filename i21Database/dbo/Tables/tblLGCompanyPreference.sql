@@ -57,6 +57,8 @@
 [ysnPrintLogo] BIT,
 [intCreateShipmentDefaultSourceType] INT,
 [ysnShowReportLangaugeSelection] [bit] NULL,
+[intReportLogoHeight] INT NULL,
+[intReportLogoWidth] INT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

@@ -206,6 +206,24 @@ BEGIN
         AND P.[dblAmountPaid] < @ZeroDecimal
 
     UNION
+    --Negative Payment is not allowed.
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Negative Payment is not allowed.'
+	FROM
+		@Payments P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NULL
+        AND P.[strPaymentMethod] <> 'ACH'
+        AND P.[ysnInvoicePrepayment] = 0
+        AND P.[dblAmountPaid] < @ZeroDecimal
+
+    UNION
 
     --Fiscal Year
 	SELECT

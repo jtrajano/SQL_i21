@@ -1,12 +1,13 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetPaymentDetailsForPosting]
 (
-     @PaymentIds	[dbo].[Id]      READONLY
-    ,@PostDate      DATETIME        = NULL
-    ,@BatchId       NVARCHAR(40)    = NULL
-    ,@BankAccountId INT             = NULL
-    ,@Post          BIT             = NULL
-    ,@Recap         BIT             = 0
-    ,@UserId        BIT             = NULL
+     @PaymentIds	    [dbo].[Id]      READONLY
+    ,@PostDate          DATETIME        = NULL
+    ,@BatchId           NVARCHAR(40)    = NULL
+    ,@BankAccountId     INT             = NULL
+    ,@Post              BIT             = NULL
+    ,@Recap             BIT             = 0
+    ,@UserId            BIT             = NULL
+    ,@IntegrationLogId  INT             = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -24,6 +25,8 @@ RETURNS @returntable TABLE
     ,[intPaymentMethodId]               INT             NOT NULL
     ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[strNotes]                         NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[intExchangeRateTypeId]			INT												NULL
+	,[dblExchangeRate]					NUMERIC(18,6)	NULL
     ,[dtmDatePaid]                      DATETIME        NOT NULL
     ,[dtmPostDate]                      DATETIME        NOT NULL
     ,[intWriteOffAccountId]             INT             NULL
@@ -105,6 +108,478 @@ SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPre
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
 
+DECLARE @IntegrationHeader AS [dbo].[ReceivePaymentPostingTable]
+DECLARE @IntegrationDetail AS [dbo].[ReceivePaymentPostingTable]
+IF @IntegrationLogId IS NOT NULL AND EXISTS(SELECT TOP 1 NULL FROM tblARPaymentIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId)
+BEGIN
+    INSERT @IntegrationHeader
+        ([intTransactionId]
+        ,[intTransactionDetailId]
+        ,[strTransactionId]
+        ,[strReceivePaymentType]
+        ,[intEntityCustomerId]
+        ,[strCustomerNumber]
+        ,[intCompanyLocationId]
+        ,[strLocationName]
+        ,[intUndepositedFundsId]
+        ,[intSalesAdvAcct]
+        ,[intCurrencyId]
+        ,[intPaymentMethodId]
+        ,[strPaymentMethod]
+        ,[strNotes]
+    	,[intExchangeRateTypeId]
+    	,[dblExchangeRate]
+        ,[dtmDatePaid]
+        ,[dtmPostDate]
+        ,[intWriteOffAccountId]
+        ,[intAccountId]
+        ,[intBankAccountId]
+        ,[intARAccountId]
+        ,[intDiscountAccount]
+        ,[intInterestAccount]
+        ,[intCFAccountId]
+        ,[intGainLossAccount]
+	    ,[ysnPosted]
+        ,[ysnInvoicePrepayment]
+        ,[strBatchId]
+        ,[ysnPost]
+        ,[ysnRecap]
+        ,[intEntityId]
+        ,[intUserId]
+        ,[ysnUserAllowedToPostOtherTrans]
+
+        ,[dblAmountPaid]
+        ,[dblBaseAmountPaid]
+        ,[dblUnappliedAmount]
+        ,[dblBaseUnappliedAmount]
+        ,[dblPayment]
+        ,[dblBasePayment]
+        ,[dblDiscount]
+        ,[dblBaseDiscount]
+        ,[dblInterest]
+        ,[dblBaseInterest]
+        ,[dblInvoiceTotal]
+        ,[dblBaseInvoiceTotal]
+        ,[dblAmountDue]
+        ,[dblBaseAmountDue]
+
+        ,[intInvoiceId]
+        ,[ysnExcludedFromPayment]
+        ,[ysnForgiven]
+    	,[intBillId]
+        ,[strTransactionNumber]
+        ,[strTransactionType]
+        ,[strType]
+        ,[intTransactionAccountId]
+        ,[ysnTransactionPosted]
+    	,[ysnTransactionPaid]
+        ,[ysnTransactionProcessed]
+        ,[dtmTransactionPostDate]
+    	,[dblTransactionDiscount]
+        ,[dblBaseTransactionDiscount]
+        ,[dblTransactionInterest]
+        ,[dblBaseTransactionInterest]
+        ,[dblTransactionAmountDue]
+        ,[dblBaseTransactionAmountDue]
+        ,[intCurrencyExchangeRateTypeId]
+        ,[dblCurrencyExchangeRate]
+        ,[strRateType])
+    SELECT 
+         [intTransactionId]                 = ARP.[intPaymentId]
+        ,[intTransactionDetailId]           = NULL
+        ,[strTransactionId]                 = ARP.[strRecordNumber]
+        ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
+        ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
+        ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+        ,[intCompanyLocationId]             = ARP.[intLocationId]
+        ,[strLocationName]                  = SMCL.[strLocationName]
+        ,[intUndepositedFundsId]            = CASE WHEN @BankAccountId IS NULL
+                                                   THEN (
+		    									        CASE WHEN (CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END) <> 'CF Invoice' 
+                                                             THEN ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId])
+                                                             ELSE ISNULL(ARP.intAccountId,ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]))
+                                                        END
+                                                        )
+                                                    ELSE
+								    				(SELECT [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
+                                               END
+        ,[intSalesAdvAcct]                  = SMCL.[intSalesAdvAcct]
+        ,[intCurrencyId]                    = ARP.[intCurrencyId]
+        ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
+        ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
+        ,[strNotes]                         = ARP.[strNotes]
+	    ,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	    ,[dblExchangeRate]					= ARP.[dblExchangeRate]
+        ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
+        ,[dtmPostDate]                      = @PostDate
+        ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
+        ,[intAccountId]                     = ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId])
+        ,[intBankAccountId]                 = ARP.[intBankAccountId]
+        ,[intARAccountId]                   = ISNULL(SMCL.[intARAccount], @ARAccount)
+        ,[intDiscountAccount]               = ISNULL(SMCL.[intSalesDiscounts], @DiscountAccount)
+        ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
+        ,[intCFAccountId]                   = @CFAccount
+        ,[intGainLossAccount]               = @GainLossAccount
+	    ,[ysnPosted]                        = ARP.[ysnPosted]
+        ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
+        ,[strBatchId]                       = @BatchId
+        ,[ysnPost]                          = @Post
+        ,[ysnRecap]                         = @Recap
+        ,[intEntityId]                      = ARP.[intEntityId]
+        ,[intUserId]                        = @UserId
+        ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+
+        ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
+        ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
+        ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
+        ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+        ,[dblPayment]                       = @ZeroDecimal
+        ,[dblBasePayment]                   = @ZeroDecimal
+        ,[dblDiscount]                      = @ZeroDecimal
+        ,[dblBaseDiscount]                  = @ZeroDecimal
+        ,[dblInterest]                      = @ZeroDecimal
+        ,[dblBaseInterest]                  = @ZeroDecimal
+        ,[dblInvoiceTotal]                  = @ZeroDecimal
+        ,[dblBaseInvoiceTotal]              = @ZeroDecimal
+        ,[dblAmountDue]                     = @ZeroDecimal
+        ,[dblBaseAmountDue]                 = @ZeroDecimal
+
+        ,[intInvoiceId]                     = NULL
+        ,[ysnExcludedFromPayment]           = 0
+        ,[ysnForgiven]                      = 0
+    	,[intBillId]                        = NULL
+        ,[strTransactionNumber]             = ''
+        ,[strTransactionType]               = ''
+        ,[strType]                          = ''
+        ,[intTransactionAccountId]          = NULL
+        ,[ysnTransactionPosted]             = 0
+    	,[ysnTransactionPaid]               = 0
+        ,[ysnTransactionProcessed]          = 0
+        ,[dtmTransactionPostDate]           = NULL
+    	,[dblTransactionDiscount]           = @ZeroDecimal
+        ,[dblBaseTransactionDiscount]       = @ZeroDecimal
+        ,[dblTransactionInterest]           = @ZeroDecimal
+        ,[dblBaseTransactionInterest]       = @ZeroDecimal
+        ,[dblTransactionAmountDue]          = @ZeroDecimal
+        ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
+        ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
+        ,[dblCurrencyExchangeRate]          = @ZeroDecimal
+        ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
+    
+    FROM
+        tblARPayment ARP
+    INNER JOIN
+        (
+    	SELECT [intPaymentId] FROM tblARPaymentIntegrationLogDetail 
+    	WHERE [ysnPost] IS NOT NULL AND [ysnPost] = @Post AND [ysnHeader] = 1 AND [intIntegrationLogId] = @IntegrationLogId
+    	) ARPILD
+            ON ARP.[intPaymentId] = ARPILD.[intPaymentId]
+    INNER JOIN
+        (
+        SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH(NoLock)
+        ) ARC
+            ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
+    LEFT OUTER JOIN
+        (
+        SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intSalesAdvAcct], [intInterestAccountId], [intSalesDiscounts], [intARAccount] FROM tblSMCompanyLocation  WITH(NoLock)
+        ) SMCL
+            ON ARP.[intLocationId] = SMCL.[intCompanyLocationId]
+    LEFT OUTER JOIN
+        (
+        SELECT [intPaymentMethodID], [strPaymentMethod] FROM tblSMPaymentMethod WITH(NoLock)
+        ) SMPM
+            ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
+    LEFT OUTER JOIN
+        (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
+            ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+    OPTION(recompile)
+
+    INSERT @IntegrationDetail
+        ([intTransactionId]
+        ,[intTransactionDetailId]
+        ,[strTransactionId]
+        ,[strReceivePaymentType]
+        ,[intEntityCustomerId]
+        ,[strCustomerNumber]
+        ,[intCompanyLocationId]
+        ,[strLocationName]
+        ,[intUndepositedFundsId]
+        ,[intSalesAdvAcct]
+        ,[intCurrencyId]
+        ,[intPaymentMethodId]
+        ,[strPaymentMethod]
+        ,[strNotes]
+	    ,[intExchangeRateTypeId]
+	    ,[dblExchangeRate]
+        ,[dtmDatePaid]
+        ,[dtmPostDate]
+        ,[intWriteOffAccountId]
+        ,[intAccountId]
+        ,[intBankAccountId]
+        ,[intARAccountId]
+        ,[intDiscountAccount]
+        ,[intInterestAccount]
+        ,[intCFAccountId]
+        ,[intGainLossAccount]
+	    ,[ysnPosted]
+        ,[ysnInvoicePrepayment]
+        ,[strBatchId]
+        ,[ysnPost]
+        ,[ysnRecap]
+        ,[intEntityId]
+        ,[intUserId]
+        ,[ysnUserAllowedToPostOtherTrans]
+
+        ,[dblAmountPaid]
+        ,[dblBaseAmountPaid]
+        ,[dblUnappliedAmount]
+        ,[dblBaseUnappliedAmount]
+        ,[dblPayment]
+        ,[dblBasePayment]
+        ,[dblDiscount]
+        ,[dblBaseDiscount]
+        ,[dblInterest]
+        ,[dblBaseInterest]
+        ,[dblInvoiceTotal]
+        ,[dblBaseInvoiceTotal]
+        ,[dblAmountDue]
+        ,[dblBaseAmountDue]
+
+        ,[intInvoiceId]
+        ,[ysnExcludedFromPayment]
+        ,[ysnForgiven]
+	    ,[intBillId]
+        ,[strTransactionNumber]
+        ,[strTransactionType]
+        ,[strType]
+        ,[intTransactionAccountId]
+        ,[ysnTransactionPosted]
+	    ,[ysnTransactionPaid]
+        ,[ysnTransactionProcessed]
+        ,[dtmTransactionPostDate]
+    	,[dblTransactionDiscount]
+        ,[dblBaseTransactionDiscount]
+        ,[dblTransactionInterest]
+        ,[dblBaseTransactionInterest]
+        ,[dblTransactionAmountDue]
+        ,[dblBaseTransactionAmountDue]
+        ,[intCurrencyExchangeRateTypeId]
+        ,[dblCurrencyExchangeRate]
+        ,[strRateType])
+    SELECT 
+         [intTransactionId]                 = ARP.[intTransactionId]
+        ,[intTransactionDetailId]           = ARPD.[intPaymentDetailId]
+        ,[strTransactionId]                 = ARP.[strTransactionId]
+        ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
+        ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
+        ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+        ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
+        ,[strLocationName]                  = ARP.[strLocationName]
+        ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]
+        ,[intSalesAdvAcct]                  = ARP.[intSalesAdvAcct]
+        ,[intCurrencyId]                    = ARP.[intCurrencyId]
+        ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
+        ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
+        ,[strNotes]                         = ARP.[strNotes]
+    	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+    	,[dblExchangeRate]					= ARP.[dblExchangeRate]
+        ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
+        ,[dtmPostDate]                      = ARP.[dtmPostDate]
+        ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
+        ,[intAccountId]                     = ARP.[intAccountId]
+        ,[intBankAccountId]                 = ARP.[intBankAccountId]
+        ,[intARAccountId]                   = ARP.[intARAccountId]
+        ,[intDiscountAccount]               = ARP.[intDiscountAccount]
+        ,[intInterestAccount]               = ARP.[intInterestAccount]
+        ,[intCFAccountId]                   = ARP.[intCFAccountId]
+        ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+	    ,[ysnPosted]                        = ARP.[ysnPosted]
+        ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
+        ,[strBatchId]                       = @BatchId
+        ,[ysnPost]                          = @Post
+        ,[ysnRecap]                         = @Recap
+        ,[intEntityId]                      = ARP.[intEntityId]
+        ,[intUserId]                        = @UserId
+        ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+
+        ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
+        ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
+        ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
+        ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+        ,[dblPayment]                       = ARPD.[dblPayment]
+        ,[dblBasePayment]                   = ARPD.[dblBasePayment]
+        ,[dblDiscount]                      = ARPD.[dblDiscount]
+        ,[dblBaseDiscount]                  = ARPD.[dblBaseDiscount]
+        ,[dblInterest]                      = ARPD.[dblInterest]
+        ,[dblBaseInterest]                  = ARPD.[dblBaseInterest]
+        ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
+        ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+        ,[dblAmountDue]                     = ARPD.[dblAmountDue]
+        ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+
+        ,[intInvoiceId]                     = ARI.[intInvoiceId]
+        ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
+        ,[ysnForgiven]                      = ARI.[ysnForgiven]
+    	,[intBillId]                        = NULL
+        ,[strTransactionNumber]             = ARI.[strInvoiceNumber]
+        ,[strTransactionType]               = ARI.[strTransactionType]
+        ,[strType]                          = ARI.[strType]
+        ,[intTransactionAccountId]          = ARPD.[intAccountId]
+        ,[ysnTransactionPosted]             = ARI.[ysnPosted]
+    	,[ysnTransactionPaid]               = ARI.[ysnPaid]
+        ,[ysnTransactionProcessed]          = ARI.[ysnProcessed]
+        ,[dtmTransactionPostDate]           = ARI.[dtmPostDate]
+    	,[dblTransactionDiscount]           = ARI.[dblDiscount]
+        ,[dblBaseTransactionDiscount]       = ARI.[dblBaseDiscount]
+        ,[dblTransactionInterest]           = ARI.[dblInterest]
+        ,[dblBaseTransactionInterest]       = ARI.[dblBaseInterest]
+        ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
+        ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
+     	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
+        ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
+        ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
+    FROM
+        tblARPaymentDetail ARPD
+    INNER JOIN
+        (
+    	SELECT [intPaymentDetailId] FROM tblARPaymentIntegrationLogDetail 
+    	WHERE [ysnPost] IS NOT NULL AND [ysnPost] = @Post AND [ysnHeader] = 0 AND [intIntegrationLogId] = @IntegrationLogId
+    	) ARPILD
+            ON ARPD.[intPaymentDetailId] = ARPILD.[intPaymentDetailId]
+    INNER JOIN
+        @IntegrationHeader ARP
+            ON ARPD.[intPaymentId] = ARP.[intTransactionId]
+    INNER JOIN
+        (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue] FROM tblARInvoice) ARI
+            ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
+    LEFT OUTER JOIN
+        (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
+            ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+
+    UNION
+
+    SELECT 
+         [intTransactionId]                 = ARP.[intTransactionId]
+        ,[intTransactionDetailId]           = ARPD.[intPaymentDetailId]
+        ,[strTransactionId]                 = ARP.[strTransactionId]
+        ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
+        ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
+        ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+        ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
+        ,[strLocationName]                  = ARP.[strLocationName]
+        ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]
+        ,[intSalesAdvAcct]                  = ARP.[intSalesAdvAcct]
+        ,[intCurrencyId]                    = ARP.[intCurrencyId]
+        ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
+        ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
+        ,[strNotes]                         = ARP.[strNotes]
+	    ,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	    ,[dblExchangeRate]					= ARP.[dblExchangeRate]
+        ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
+        ,[dtmPostDate]                      = ARP.[dtmPostDate]
+        ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
+        ,[intAccountId]                     = ARP.[intAccountId]
+        ,[intBankAccountId]                 = ARP.[intBankAccountId]
+        ,[intARAccountId]                   = ARP.[intARAccountId]
+        ,[intDiscountAccount]               = ARP.[intDiscountAccount]
+        ,[intInterestAccount]               = ARP.[intInterestAccount]
+        ,[intCFAccountId]                   = ARP.[intCFAccountId]
+        ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+    	,[ysnPosted]                        = ARP.[ysnPosted]
+        ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
+        ,[strBatchId]                       = @BatchId
+        ,[ysnPost]                          = @Post
+        ,[ysnRecap]                         = @Recap
+        ,[intEntityId]                      = ARP.[intEntityId]
+        ,[intUserId]                        = @UserId
+        ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+
+        ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
+        ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
+        ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
+        ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+        ,[dblPayment]                       = ARPD.[dblPayment]
+        ,[dblBasePayment]                   = ARPD.[dblBasePayment]
+        ,[dblDiscount]                      = ARPD.[dblDiscount]
+        ,[dblBaseDiscount]                  = ARPD.[dblBaseDiscount]
+        ,[dblInterest]                      = ARPD.[dblInterest]
+        ,[dblBaseInterest]                  = ARPD.[dblBaseInterest]
+        ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
+        ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+        ,[dblAmountDue]                     = ARPD.[dblAmountDue]
+        ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+
+        ,[intInvoiceId]                     = NULL
+        ,[ysnExcludedFromPayment]           = 0
+        ,[ysnForgiven]                      = 0
+    	,[intBillId]                        = APB.[intBillId]
+        ,[strTransactionNumber]             = APB.[strBillId]
+        ,[strTransactionType]               = (CASE WHEN APB.[intTransactionType] = 1 THEN 'Voucher'
+    												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment'
+    												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo'
+    												WHEN APB.[intTransactionType] = 7 THEN 'Invalid Type'
+    												WHEN APB.[intTransactionType] = 9 THEN '1099 Adjustment'
+    												WHEN APB.[intTransactionType] = 11 THEN 'Claim'
+    												WHEN APB.[intTransactionType] = 13 THEN 'Basis Advance'
+    												WHEN APB.[intTransactionType] = 14 THEN 'Deferred Interest'
+    												ELSE 'Invalid Type' COLLATE Latin1_General_CI_AS
+        										   END)
+        ,[strType]                          = ''
+        ,[intTransactionAccountId]          = ARPD.[intAccountId]
+        ,[ysnTransactionPosted]             = APB.[ysnPosted]
+    	,[ysnTransactionPaid]               = APB.[ysnPaid]
+    	,[ysnTransactionProcessed]          = 0
+        ,[dtmTransactionPostDate]           = APB.[dtmBillDate]
+    	,[dblTransactionDiscount]           = APB.[dblDiscount]
+        ,[dblBaseTransactionDiscount]       = APB.[dblDiscount]
+        ,[dblTransactionInterest]           = APB.[dblInterest]
+        ,[dblBaseTransactionInterest]       = APB.[dblInterest]
+        ,[dblTransactionAmountDue]          = APB.[dblAmountDue]
+        ,[dblBaseTransactionAmountDue]      = APB.[dblAmountDue]
+     	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
+        ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
+        ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
+    FROM
+        tblARPaymentDetail ARPD
+    INNER JOIN
+        (
+        SELECT [intPaymentDetailId] FROM tblARPaymentIntegrationLogDetail 
+        WHERE [ysnPost] IS NOT NULL AND [ysnPost] = @Post AND [ysnHeader] = 0 AND [intIntegrationLogId] = @IntegrationLogId
+        ) ARPILD
+            ON ARPD.[intPaymentDetailId] = ARPILD.[intPaymentDetailId]
+    INNER JOIN
+        @IntegrationHeader ARP
+            ON ARP.[intTransactionId] = ARPD.[intPaymentId]
+    INNER JOIN
+        (SELECT [intBillId], [strBillId], [ysnPosted], [ysnPaid], [dtmBillDate], [dblDiscount], [dblInterest], [dblAmountDue], [intAccountId], [intTransactionType] FROM tblAPBill) APB
+            ON ARPD.[intBillId] = APB.[intBillId]
+    LEFT OUTER JOIN
+        (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
+            ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+    OPTION(recompile)
+
+END
+
+DECLARE @DistinctPaymentIds AS Id
+DELETE FROM @DistinctPaymentIds
+INSERT INTO @DistinctPaymentIds
+SELECT
+    [intId] 
+FROM
+    @PaymentIds P
+WHERE
+    NOT EXISTS(SELECT NULL FROM @IntegrationHeader I WHERE I.[intTransactionId] = P.[intId])
+
+IF NOT EXISTS(SELECT NULL FROM @DistinctPaymentIds)
+BEGIN
+    INSERT INTO @returntable
+    SELECT * FROM @IntegrationHeader
+    UNION
+    SELECT * FROM @IntegrationDetail
+
+    RETURN
+END
+
 DECLARE @Header AS [dbo].[ReceivePaymentPostingTable]
 INSERT @Header
     ([intTransactionId]
@@ -121,6 +596,8 @@ INSERT @Header
     ,[intPaymentMethodId]
     ,[strPaymentMethod]
     ,[strNotes]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
     ,[dtmDatePaid]
     ,[dtmPostDate]
     ,[intWriteOffAccountId]
@@ -189,7 +666,7 @@ SELECT
                                                THEN (
 											        CASE WHEN (CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END) <> 'CF Invoice' 
                                                          THEN ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId])
-                                                         ELSE ARP.intAccountId
+                                                         ELSE ISNULL(ARP.intAccountId,ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]))
                                                     END
                                                     )
                                                 ELSE
@@ -200,6 +677,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
@@ -254,12 +733,12 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
     ,[dblCurrencyExchangeRate]          = @ZeroDecimal
-    ,[strRateType]                      = case when rtype.intCurrencyExchangeRateTypeId is null then '' else rtype.strCurrencyExchangeRateType end
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
     
 FROM
     tblARPayment ARP
 INNER JOIN
-    @PaymentIds P
+    @DistinctPaymentIds P
         ON ARP.[intPaymentId] = P.[intId]
 INNER JOIN
     (
@@ -276,8 +755,9 @@ LEFT OUTER JOIN
     SELECT [intPaymentMethodID], [strPaymentMethod] FROM tblSMPaymentMethod WITH(NoLock)
     ) SMPM
         ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
-left join (select intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType from tblSMCurrencyExchangeRateType with (nolock) ) rtype
-	on rtype.intCurrencyExchangeRateTypeId = ARP.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN
+    (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
+        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OPTION(recompile)
 
 DECLARE @Detail AS [dbo].[ReceivePaymentPostingTable]
@@ -296,6 +776,8 @@ INSERT @Detail
     ,[intPaymentMethodId]
     ,[strPaymentMethod]
     ,[strNotes]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
     ,[dtmDatePaid]
     ,[dtmPostDate]
     ,[intWriteOffAccountId]
@@ -366,6 +848,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
@@ -420,21 +904,21 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
-    ,[strRateType]                      = SMCER.[strCurrencyExchangeRateType]
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
 FROM
     tblARPaymentDetail ARPD
 INNER JOIN
-    @PaymentIds P
+    @DistinctPaymentIds P
         ON ARPD.[intPaymentId] = P.[intId]
 INNER JOIN
     @Header ARP
-        ON ARPD.[intPaymentId] = ARP.[intTransactionId]
+        ON ARP.[intTransactionId] = ARPD.[intPaymentId]
 INNER JOIN
     (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue] FROM tblARInvoice) ARI
         ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
-        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+        ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 
 UNION
 
@@ -453,6 +937,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
@@ -516,11 +1002,11 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = APB.[dblAmountDue]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
-    ,[strRateType]                      = SMCER.[strCurrencyExchangeRateType]    
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
 FROM
     tblARPaymentDetail ARPD
 INNER JOIN
-    @PaymentIds P
+    @DistinctPaymentIds P
         ON ARPD.[intPaymentId] = P.[intId]
 INNER JOIN
     @Header ARP
@@ -530,16 +1016,19 @@ INNER JOIN
         ON ARPD.[intBillId] = APB.[intBillId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
-        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+        ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OPTION(recompile)
 
 
 INSERT INTO @returntable
+SELECT * FROM @IntegrationHeader
+UNION
+SELECT * FROM @IntegrationDetail
+UNION
 SELECT * FROM @Header
 UNION
 SELECT * FROM @Detail
 
+RETURN
 
-
-	RETURN
 END

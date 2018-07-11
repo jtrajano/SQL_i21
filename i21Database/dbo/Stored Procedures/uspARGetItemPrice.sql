@@ -111,6 +111,8 @@ AS
 			,@InvoiceType
 			,@TermId
 			,@GetAllAvailablePricing
+			,@CurrencyExchangeRate
+			,@CurrencyExchangeRateTypeId
 		)
 
 		IF @SpecialPriceId is not null or @SpecialPriceId > 0

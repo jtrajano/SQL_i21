@@ -161,6 +161,8 @@ CROSS APPLY
 		,ARI.[strType]				--@InvoiceType
 		,ARI.[intTermId]			--@TermId
 		,1							--@GetAllAvailablePricing
+		,1.000000					--@CurrencyExchangeRate
+		,NULL						--@CurrencyExchangeRateTypeId
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 
@@ -334,6 +336,8 @@ CROSS APPLY
 		,SO.[strType]				--@InvoiceType
 		,SO.[intTermId]				--@TermId
 		,1							--@GetAllAvailablePricing
+		,1.000000					--@CurrencyExchangeRate
+		,NULL						--@CurrencyExchangeRateTypeId
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 

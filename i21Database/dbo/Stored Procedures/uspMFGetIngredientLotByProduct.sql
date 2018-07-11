@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetIngredientLotByProduct (
+﻿Create PROCEDURE uspMFGetIngredientLotByProduct (
 	@intItemId INT
 	,@intStorageLocationId INT
 	,@intLocationId INT
@@ -7,12 +7,20 @@
 	,@intWorkOrderId INT = 0
 	,@intLotId INT = 0
 	,@intInputItemId INT = 0
+	,@strLotId NVARCHAR(MAX) = ''
+	,@strItemStockUOMId NVARCHAR(MAX) = ''
 	)
 AS
 BEGIN
 	DECLARE @dtmCurrentDate DATETIME
 		,@intManufacturingProcessId INT
 		,@strDefaultConsumptionUOM NVARCHAR(50)
+
+	IF @strLotId IS NULL
+		SELECT @strLotId = ''
+
+	IF @strItemStockUOMId IS NULL
+		SELECT @strItemStockUOMId = ''
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 	FROM tblMFWorkOrder
@@ -77,6 +85,7 @@ BEGIN
 				WHEN @strDefaultConsumptionUOM = 3
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
+			,0 AS intItemStockUOMId
 		FROM dbo.tblMFRecipe R
 		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
@@ -186,6 +195,7 @@ BEGIN
 					THEN U.strUnitMeasure
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
+			,S.intItemStockUOMId
 		FROM dbo.tblMFRecipe R
 		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
@@ -280,6 +290,7 @@ BEGIN
 				WHEN @strDefaultConsumptionUOM = 3
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
+			,0 AS intItemStockUOMId
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -304,7 +315,7 @@ BEGIN
 				)
 			AND I.strInventoryTracking = 'Lot Level'
 			AND R.intWorkOrderId = @intWorkOrderId
-		JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
+		JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 			AND L.intStorageLocationId = @intStorageLocationId
 			AND L.intItemId = (
 				CASE 
@@ -332,7 +343,8 @@ BEGIN
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
-		LEFT JOIN vyuMFStockReservationByWorkOrder SR ON SR.intLotId = L.intLotId and SR.intWorkOrderId <>R.intWorkOrderId
+		LEFT JOIN vyuMFStockReservationByWorkOrder SR ON SR.intLotId = L.intLotId
+			AND SR.intWorkOrderId <> R.intWorkOrderId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -353,6 +365,10 @@ BEGIN
 					ELSE L.dblQty
 					END
 				) - IsNULL(SR.dblWeight, 0) > 0
+			AND L.intLotId NOT IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strLotId, ',')
+				)
 		
 		UNION
 		
@@ -387,6 +403,7 @@ BEGIN
 					THEN U.strUnitMeasure
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
+			,S.intItemStockUOMId
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -421,7 +438,6 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
-
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
@@ -433,6 +449,10 @@ BEGIN
 		LEFT JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE S.dblOnHand - S.dblUnitReserved > 0
 			AND I.strStatus = 'Active'
+			AND S.intItemStockUOMId NOT IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strItemStockUOMId, ',')
+				)
 		ORDER BY dtmDateCreated ASC
 	END
 END

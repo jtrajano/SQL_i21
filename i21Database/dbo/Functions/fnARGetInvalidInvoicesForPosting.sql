@@ -1242,7 +1242,7 @@ IF(ISNULL(@Post,0)) = 1
 		) LOT
 		WHERE ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
 		  AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
-		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) <> 3) OR ISNULL(I.[intLoadId], 0) IS NULL)
+		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) NOT IN (2, 3)) OR ISNULL(I.[intLoadId], 0) IS NULL)
 
 		UNION
 		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS

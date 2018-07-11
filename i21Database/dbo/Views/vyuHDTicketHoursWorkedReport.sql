@@ -12,6 +12,7 @@
 			,strJobCode = c.strItemNo
 			,ysnBillable = b.ysnBillable
 			,bdlRate = b.dblRate
+			,dblRate = b.dblRate
 			,strDescription = b.strDescription
 			,ysnExported = b.ysnBilled
 			,strInvoiceNo = d.strInvoiceNumber

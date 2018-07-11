@@ -86,7 +86,9 @@
 			null,	
 			'Invoice',
 			null,
-			0		    					
+			0,
+			1.000000,
+			null
 		) c
  
 	 WHERE g.strItemNo is not null

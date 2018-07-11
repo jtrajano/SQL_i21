@@ -45,7 +45,12 @@ BEGIN TRY
 			@intLaguageId				INT,
 			@strExpressionLabelName		NVARCHAR(50) = 'Expression',
 			@strMonthLabelName			NVARCHAR(50) = 'Month',
-			@intApproverGroupId			INT
+			@intApproverGroupId			INT,
+			@type						NVARCHAR(50),
+			@strIds						NVARCHAR(MAX),
+			@strGABShipDelv				NVARCHAR(MAX),
+			@intReportLogoHeight		INT,
+			@intReportLogoWidth			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -97,7 +102,7 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
     
-	SELECT	@intContractHeaderId = [from]
+	SELECT	@strIds = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractHeaderId'
 	
@@ -108,6 +113,14 @@ BEGIN TRY
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrLanguageId'
+
+	SELECT	@type = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'Type'
+
+	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
+
+	SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference
 
 	INSERT INTO @tblSequenceHistoryId
 	(
@@ -318,7 +331,7 @@ BEGIN TRY
 							JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
 							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
 							WHERE CD.intContractHeaderId = @intContractHeaderId
-	 
+
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
@@ -457,7 +470,13 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt12.strTranslation,LTRIM(RTRIM(EC.strEntityCountry))) END,'')
-			,striDealPrice								=	strFutMarketName + ' ' + strFutureMonth + ' ' + LTRIM(dblBasis)+' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+			,striDealPrice							=	strFutMarketName + ' ' + strFutureMonth + ' ' + LTRIM(dblBasis)+' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
+			,strIds									=	@strIds
+			,strType								=	@type
+			,intLaguageId							=	@intLaguageId
+			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
+			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId

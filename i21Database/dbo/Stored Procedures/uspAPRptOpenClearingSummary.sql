@@ -50,7 +50,8 @@ BEGIN
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
-		0 AS intAging
+		0 AS intAging,
+		NULL as dtmCurrentDate
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -145,6 +146,7 @@ SET @query = '
 		,SUM(dblTotal) as dblTotal
 		,SUM(dblVoucherAmount) dblVoucherAmount
 		,SUM(dblAmountDue) as dblAmountDue
+		,GETDATE() as dtmCurrentDate
 	FROM (
 		SELECT DISTINCT
 		--IR.strVendorId

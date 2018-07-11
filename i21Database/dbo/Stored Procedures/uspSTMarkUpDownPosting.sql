@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTMarkUpDownPosting]
-@intMarkUpDownId INT
-,@intCurrentUserId INT
-,@ysnRecap BIT
-,@ysnPost BIT
-,@strStatusMsg NVARCHAR(1000) OUTPUT
-,@strBatchId NVARCHAR(1000) OUTPUT
-,@ysnIsPosted BIT OUTPUT
+	@intMarkUpDownId INT
+	,@intCurrentUserId INT
+	,@ysnRecap BIT
+	,@ysnPost BIT
+	,@strStatusMsg NVARCHAR(1000) OUTPUT
+	,@strBatchId NVARCHAR(1000) OUTPUT
+	,@ysnIsPosted BIT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -313,7 +313,8 @@ BEGIN TRY
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
 								,dblUnitRetail			= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN NULL ELSE ItemPricing.dblSalePrice + MUD.dblRetailPerUnit
+															--WHEN MU.strType = @MarkUpType_DepartmentLevel THEN NULL ELSE ItemPricing.dblSalePrice + MUD.dblRetailPerUnit
+															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN NULL ELSE MUD.dblRetailPerUnit
 														END
 
 								-- Department Manage
@@ -354,7 +355,7 @@ BEGIN TRY
 							WHERE Item.intCategoryId = MUD.intCategoryId
 						) CategoryItem
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
-			
+
 				END
 			ELSE IF(@strAdjustmentType = @AdjustmentType_WriteOff)
 				BEGIN
@@ -456,11 +457,8 @@ BEGIN TRY
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
 				END
 
-			---- COMMIT HERE Note sure
-			--IF(@intTransactionCount = 0)
-			--	BEGIN
-			--		COMMIT TRANSACTION @SavedPointTransaction
-			--	END
+			-- COMMIT HERE Note sure
+			--COMMIT TRANSACTION @SavedPointTransaction
 
 			-- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 

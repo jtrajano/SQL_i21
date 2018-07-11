@@ -2,11 +2,11 @@
 AS
 SELECT ST.* 
 	   , PO.strPaymentOptionId
-	   , CAST(CustomerCharge.intRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCustomerCharge
-	   , CAST(CashTransaction.intRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCashTransaction
-	   , CAST(LoyaltyDiscount.intRegisterMop AS NVARCHAR(100)) AS strRegisterMopForLoyaltyDiscount
-	   , CAST(RemoveProprietart.intRegisterMop AS NVARCHAR(100)) AS strRegisterMopForRemoveProprietart
-	   , CAST(AddProprietart.intRegisterMop AS NVARCHAR(100)) AS strRegisterMopForAddProprietart
+	   , CAST(CustomerCharge.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCustomerCharge
+	   , CAST(CashTransaction.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCashTransaction
+	   , CAST(LoyaltyDiscount.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForLoyaltyDiscount
+	   , CAST(RemoveProprietart.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForRemoveProprietart
+	   , CAST(AddProprietart.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForAddProprietart
 	   , TG.strTaxGroup
 	   , EM.strName
 	   , ItemCustomerCharges.strItemNo AS strCustomerChargesItemNo

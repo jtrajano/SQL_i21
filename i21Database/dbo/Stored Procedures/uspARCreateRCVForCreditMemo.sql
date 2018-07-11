@@ -53,6 +53,7 @@ INSERT INTO tblARPayment (
    , dblBaseUnappliedAmount
    , dblOverpayment
    , dblBaseOverpayment
+   , intCurrencyExchangeRateTypeId
    , dblExchangeRate
    , ysnApplytoBudget
 )
@@ -72,11 +73,13 @@ SELECT TOP 1
    , dblBaseUnappliedAmount	= 0.00
    , dblOverpayment			    = 0.00
    , dblBaseOverpayment		  = 0.00
-   , dblExchangeRate		    = 1.00
+   , intCurrencyExchangeRateTypeId = CER.intCurrencyExchangeRateTypeId 
+   , dblExchangeRate		    = CER.[dblCurrencyExchangeRate]
    , ysnApplytoBudget		    = 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+CROSS APPLY dbo.[fnARGetDefaultForexRate](I.dtmPostDate, I.intCurrencyId, NULL) CER
 WHERE intInvoiceId = @intInvoiceId
 
 SET @intPaymentId = SCOPE_IDENTITY()

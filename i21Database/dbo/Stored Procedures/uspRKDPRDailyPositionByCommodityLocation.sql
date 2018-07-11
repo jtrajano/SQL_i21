@@ -128,10 +128,25 @@ IF OBJECT_ID('tempdb..#invQty1') IS NOT NULL
 
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
-		intOpenContract  int)
-INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract)
+		intOpenContract  int,
+		strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
+		dblContractSize numeric(24,10),
+		strFutureMarket nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strOptionMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+		dblStrike numeric(24,10),
+		strOptionType nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strInstrumentType nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strBrokerAccount nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
+		intFutOptTransactionHeaderId int 
+		)
+INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
+			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
 EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
-
 DECLARE @tblGetOpenContractDetail TABLE (
 		intRowNum int, 
 		strCommodityCode  nvarchar(100),
@@ -604,48 +619,49 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityI
 		,intOpenContract AS dblTotal,@intCommodityId,
 		@intCommodityUnitMeasureId,intLocationId,strLocationName
 	FROM (select sum(intOpenContract)intOpenContract,intLocationId,strLocationName
-			 from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
-			 ,intLocationId,strLocationName
-		from @tblGetOpenFutureByDate otr  
-		JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
-				  		  			AND  intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+			 from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId, intOpenContract*t.dblContractSize) as intOpenContract 
+			 ,intCompanyLocationId intLocationId,t.strLocationName
+		from @tblGetOpenFutureByDate t 
+		join tblICCommodity th on th.strCommodityCode=t.strCommodityCode
+		join tblSMCompanyLocation l on l.strLocationName=t.strLocationName
+		join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
+		JOIN tblICCommodityUnitMeasure cuc1 on cuc1.intCommodityId=@intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
+		WHERE th.intCommodityId=@intCommodityId
+		AND l.intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
-		JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
-		JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
-		join tblSMCompanyLocation cl on cl.intCompanyLocationId=t.intLocationId
-		WHERE t.intCommodityId=@intCommodityId		
 		 )t group by intLocationId,strLocationName) intOpenContract   
 		
 ----	-- Option NetHedge
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName)
-	select intSeqId,strSeqHeader,strCommodityCode,sum(dblTotal) dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName from(
+	SELECT intSeqId,strSeqHeader,strCommodityCode,sum(dblTotal) dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName from(
 		SELECT 40 intSeqId,'Price Risk' strSeqHeader,@strDescription strCommodityCode,	
 				intOpenContract * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
-						AND ft.dblStrike = mm.dblStrike
+						WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND t.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
-				),0)*m.dblContractSize AS dblTotal,ft.intCommodityId, m.intUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId,l.strLocationName
-	FROM @tblGetOpenFutureByDate oc
-	JOIN tblRKFutOptTransaction ft on oc.intFutOptTransactionId=ft.intFutOptTransactionId
-	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
-					  		  			AND  intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				),0)*m.dblContractSize AS dblTotal,th.intCommodityId, m.intUnitMeasureId intFromCommodityUnitMeasureId, intCompanyLocationId, l.strLocationName
+	FROM @tblGetOpenFutureByDate t
+	join tblICCommodity th on th.strCommodityCode=t.strCommodityCode
+	join tblSMCompanyLocation l on l.strLocationName=t.strLocationName 
+	join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
+	join tblRKOptionsMonth om on om.strOptionMonth=t.strOptionMonth
+	INNER JOIN tblRKBrokerageAccount ba ON t.strBrokerAccount = ba.strAccountNumber
+	INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Options'
+	INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE th.intCommodityId = @intCommodityId 
+			and l.intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
-	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
-	INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
-	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
-	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-	WHERE ft.intCommodityId = @intCommodityId AND ft.intFutOptTransactionId NOT IN (
-	SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND ft.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)	
+	AND t.intFutOptTransactionId NOT IN (
+	SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)	
 	)t group by intSeqId,strSeqHeader,strCommodityCode,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName
 ----		-- Net Hedge option end
 	

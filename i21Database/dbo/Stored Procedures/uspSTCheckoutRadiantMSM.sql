@@ -139,11 +139,11 @@ BEGIN
        
 
     UPDATE dbo.tblSTCheckoutHeader 
-    SET intTotalNoSalesCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
+    SET dblTotalNoSalesCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
     WHERE intCheckoutId = @intCheckoutId
        
     UPDATE dbo.tblSTCheckoutHeader 
-    SET intFuelAdjustmentCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
+    SET dblFuelAdjustmentCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
     WHERE intCheckoutId = @intCheckoutId
        
     UPDATE dbo.tblSTCheckoutHeader 
@@ -151,7 +151,7 @@ BEGIN
     WHERE intCheckoutId = @intCheckoutId
        
     UPDATE dbo.tblSTCheckoutHeader 
-    SET intTotalRefundCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
+    SET dblTotalRefundCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
     WHERE intCheckoutId = @intCheckoutId
        
     UPDATE dbo.tblSTCheckoutHeader 

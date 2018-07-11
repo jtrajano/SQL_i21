@@ -58,6 +58,11 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intStorageLocationId INT
 		,@intRecipeTypeId INT
+		,@intIncludeConsumptionByLocationInPickOrder int
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+		,@intIncludeConsumptionByLocationInPickOrder= case When IsNULL(ysnIncludeConsumptionByLocationInPickOrder,0) =1 Then 2 else 1 end
+	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -502,7 +507,7 @@ BEGIN TRY
 				)
 			AND ri.intConsumptionMethodId IN (
 				1
-				,2
+				,@intIncludeConsumptionByLocationInPickOrder
 				)
 		--,2
 		GROUP BY ri.intItemId
@@ -733,6 +738,7 @@ BEGIN TRY
 					,dblSubstituteRatio NUMERIC(18, 6)
 					,dblMaxSubstituteRatio NUMERIC(18, 6)
 					,strInventoryTracking NVARCHAR(50)
+					,intSubstituteItemUOMId INT
 					)
 
 				INSERT INTO @tblSubstituteItem (
@@ -740,11 +746,13 @@ BEGIN TRY
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
 					,strInventoryTracking
+					,intSubstituteItemUOMId
 					)
 				SELECT rs.intSubstituteItemId
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
 					,I.strInventoryTracking
+					,rs.intItemUOMId
 				FROM dbo.tblMFRecipe r
 				JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
 				JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -783,22 +791,15 @@ BEGIN TRY
 						,@dblMaxSubstituteRatio = NULL
 						,@intSubstituteItemId = NULL
 						,@strInventoryTracking = NULL
+						,@intSubstituteItemUOMId=NULL
 
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 						,@intSubstituteItemId = intSubstituteItemId
 						,@strInventoryTracking = strInventoryTracking
+						,@intSubstituteItemUOMId=intSubstituteItemUOMId
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
-
-					SELECT @intUnitMeasureId = intUnitMeasureId
-					FROM dbo.tblICItemUOM
-					WHERE intItemUOMId = @intItemUOMId
-
-					SELECT @intSubstituteItemUOMId = intItemUOMId
-					FROM tblICItemUOM
-					WHERE intItemId = @intSubstituteItemId
-						AND intUnitMeasureId = @intUnitMeasureId
 
 					SELECT @dblAvailableQty = 0
 
@@ -1058,8 +1059,7 @@ BEGIN TRY
 				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
 
-	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
-	FROM tblMFCompanyPreference
+
 
 	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
 	BEGIN

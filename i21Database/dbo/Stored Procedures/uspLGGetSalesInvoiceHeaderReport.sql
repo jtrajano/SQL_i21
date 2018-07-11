@@ -112,7 +112,16 @@ BEGIN
 		ShippingLine.strName AS strShippingLineName,
 		ysnDisplayPIInfo = @ysnDisplayPIInfo,
 		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType,
-		strReportName = @strReportName
+		strReportName = @strReportName,
+		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+		dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
+		ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
+		ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
+		'' AS strOurVATNo,
+		C.strVatNumber AS strYourVATNo,
+		'' AS strBrokerReferenceNo,
+		'' AS strRemarks,
+		ICT.strICTDesc
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
@@ -120,11 +129,13 @@ BEGIN
 	JOIN tblSMTerm Term ON Term.intTermID = Inv.intTermId
 	JOIN tblSMCompanyLocation Comp ON Comp.intCompanyLocationId = Inv.intCompanyLocationId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
+	LEFT JOIN tblARICT ICT ON ICT.intICTId = Inv.intICTId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+	CROSS APPLY tblLGCompanyPreference CP
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END

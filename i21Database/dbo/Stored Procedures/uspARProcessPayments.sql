@@ -11,12 +11,14 @@
 																	-- 6 = [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
 																	-- 7 = [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]
 																	-- 8 = [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]
+																	-- 9 = [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]'
+																	--10 = [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]
 	,@RaiseError					BIT								= 0
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
 	,@LogId							INT								= NULL			OUTPUT
 AS
 
-BEGIN
+BEGIN 
 
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -63,6 +65,9 @@ BEGIN TRY
 		,[strPaymentInfo]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[strNotes]						NVARCHAR (250)	COLLATE Latin1_General_CI_AS	NULL		
 		,[strPaymentOriginalId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		,[strReceivePaymentType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		,[intExchangeRateTypeId]		INT												NULL
+		,[dblExchangeRate]				NUMERIC(18, 6)									NULL
 		,[ysnProcessed]					BIT												NULL		
 		,[ysnForInsert]					BIT												NULL
 		,[ysnForUpdate]					BIT												NULL
@@ -74,15 +79,18 @@ BEGIN TRY
 			,@Columns AS VARCHAR(MAX)
 			
 	SET @Columns =	(CASE 
-						WHEN @GroupingOption = 0 THEN '[intId]'
-						WHEN @GroupingOption = 1 THEN '[intEntityCustomerId]'
-						WHEN @GroupingOption = 2 THEN '[intEntityCustomerId], [intCompanyLocationId]'
-						WHEN @GroupingOption = 3 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]'
-						WHEN @GroupingOption = 4 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]'
-						WHEN @GroupingOption = 5 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]'
-						WHEN @GroupingOption = 6 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]'		
-						WHEN @GroupingOption = 7 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]'
-						WHEN @GroupingOption = 8 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]'
+						WHEN @GroupingOption = 0  THEN '[intId]'
+						WHEN @GroupingOption = 1  THEN '[intEntityCustomerId]'
+						WHEN @GroupingOption = 2  THEN '[intEntityCustomerId], [intCompanyLocationId]'
+						WHEN @GroupingOption = 3  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]'
+						WHEN @GroupingOption = 4  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]'
+						WHEN @GroupingOption = 5  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]'
+						WHEN @GroupingOption = 6  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]'		
+						WHEN @GroupingOption = 7  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]'
+						WHEN @GroupingOption = 8  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]'
+						WHEN @GroupingOption = 9  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]'
+						WHEN @GroupingOption = 10 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]'
+						WHEN @GroupingOption = 11 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]'
 					END)
 					
 				
@@ -182,6 +190,9 @@ BEGIN
 		,[intBankAccountId]
 		,[intWriteOffAccountId]		
 		,[dblAmountPaid]
+		,[intExchangeRateTypeId]
+		,[dblExchangeRate]
+		,[strReceivePaymentType]
 		,[strPaymentOriginalId]
 		,[ysnUseOriginalIdAsPaymentNumber]
 		,[ysnApplytoBudget]
@@ -189,7 +200,7 @@ BEGIN
 		,[ysnInvoicePrepayment]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
-		,[ysnAllowPrepayment]
+		,[ysnAllowPrepayment]		
 		,[ysnPost]
 		,[ysnRecap]
 		,[ysnUnPostAndUpdate]
@@ -232,6 +243,9 @@ BEGIN
 		,[intBankAccountId]						= IE.[intBankAccountId]
 		,[intWriteOffAccountId]					= IE.[intWriteOffAccountId]		
 		,[dblAmountPaid]						= IE.[dblAmountPaid]
+		,[intExchangeRateTypeId]				= IE.[intExchangeRateTypeId]
+		,[dblExchangeRate]						= IE.[dblExchangeRate]
+		,[strReceivePaymentType]				= IE.[strReceivePaymentType]
 		,[strPaymentOriginalId]					= IE.[strPaymentOriginalId]
 		,[ysnUseOriginalIdAsPaymentNumber]		= IE.[ysnUseOriginalIdAsPaymentNumber]
 		,[ysnApplytoBudget]						= IE.[ysnApplytoBudget]
@@ -351,6 +365,9 @@ BEGIN
 			,[intBankAccountId]
 			,[intWriteOffAccountId]		
 			,[dblAmountPaid]
+			,[intExchangeRateTypeId]
+			,[dblExchangeRate]
+			,[strReceivePaymentType]
 			,[strPaymentOriginalId]
 			,[ysnUseOriginalIdAsPaymentNumber]
 			,[ysnApplytoBudget]
@@ -400,6 +417,9 @@ BEGIN
 			,[intBankAccountId]						= ITG.[intBankAccountId]
 			,[intWriteOffAccountId]					= ITG.[intWriteOffAccountId]		
 			,[dblAmountPaid]						= ITG.[dblAmountPaid]
+			,[intExchangeRateTypeId]				= ITG.[intExchangeRateTypeId]
+			,[dblExchangeRate]						= ITG.[dblExchangeRate]
+			,[strReceivePaymentType]				= ITG.[strReceivePaymentType]
 			,[strPaymentOriginalId]					= EFP.[strPaymentOriginalId]
 			,[ysnUseOriginalIdAsPaymentNumber]		= ITG.[ysnUseOriginalIdAsPaymentNumber]
 			,[ysnApplytoBudget]						= ITG.[ysnApplytoBudget]
@@ -444,6 +464,9 @@ BEGIN
 				AND (ISNULL(ITG.[strPaymentInfo],'') = ISNULL(EFP.[strPaymentInfo],'') OR (EFP.[strPaymentInfo] IS NULL AND @GroupingOption < 6))        
 				AND (ISNULL(ITG.[strNotes],0) = ISNULL(EFP.[strNotes],0) OR (EFP.[strNotes] IS NULL AND @GroupingOption < 7))        							
 				AND (ISNULL(ITG.[strPaymentOriginalId],'') = ISNULL(EFP.[strPaymentOriginalId],'') OR (EFP.[strPaymentOriginalId] IS NULL AND @GroupingOption < 8))
+				AND (ISNULL(ITG.[intExchangeRateTypeId],0) = ISNULL(EFP.[intExchangeRateTypeId],0) OR (EFP.[intExchangeRateTypeId] IS NULL AND @GroupingOption < 9))
+				AND (ISNULL(ITG.[dblExchangeRate],0) = ISNULL(EFP.[dblExchangeRate],0) OR (EFP.[dblExchangeRate] IS NULL AND @GroupingOption < 10))
+				AND (ISNULL(ITG.[strReceivePaymentType],'') = ISNULL(EFP.[strReceivePaymentType],'') OR (EFP.[strReceivePaymentType] IS NULL AND @GroupingOption < 11))
 		WHERE
 		ISNULL(EFP.[ysnForInsert],0) = 1
 

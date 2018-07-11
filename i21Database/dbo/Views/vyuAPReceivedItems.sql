@@ -623,9 +623,10 @@ FROM
 	)  IRCT
 	OUTER APPLY 
 	(
-		SELECT intEntityVendorId,dblQtyReceived FROM tblAPBillDetail BD
+		SELECT intEntityVendorId,SUM(ISNULL(dblQtyReceived,0)) AS dblQtyReceived FROM tblAPBillDetail BD
 		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
 		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+		GROUP BY intEntityVendorId, BD.intInventoryReceiptChargeId
 
 	) Billed
 	--OUTER APPLY 
@@ -637,7 +638,7 @@ FROM
 			
 	--) Qty
 	WHERE  
-		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty <> 0)) AND A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)
+		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 	UNION ALL
 	SELECT
 	DISTINCT  

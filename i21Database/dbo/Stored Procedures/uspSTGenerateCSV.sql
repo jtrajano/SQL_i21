@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
-	@intVendorId int,
-	@strStoreIdList NVARCHAR(MAX),
-	@dtmBeginningDate datetime,
-	@dtmEndingDate datetime,
-	@intCsvFormat INT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT,
-	@strCSVHeader NVARCHAR(MAX) OUTPUT,
-	@intVendorAccountNumber INT OUTPUT
+@intVendorId int,
+@strStoreIdList NVARCHAR(MAX),
+@dtmBeginningDate datetime,
+@dtmEndingDate datetime,
+@intCsvFormat INT,
+@strStatusMsg NVARCHAR(1000) OUTPUT,
+@strCSVHeader NVARCHAR(MAX) OUTPUT,
+@intVendorAccountNumber INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -391,18 +391,47 @@ BEGIN
 
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL THEN 'Y' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') THEN 'Y'
 									ELSE 'N' 	
 								  END as strPromotionFlag
 
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlMatchQuantity ELSE 0 END as intOutletMultipackQuantity
-									--(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
-								  --ELSE 0 END as intOutletMultipackQuantity
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
+								  -- Multi-Pack Discount
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'N' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+										THEN 'Y'
+									ELSE 'N' 
+								  END as strOutletMultipackFlag
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 2 -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
+								    ELSE 0 
+								  END as intOutletMultipackQuantity
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
+											THEN (
+													SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+													FROM tblSTTranslogRebates tbl
+													WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+													AND tbl.intCheckoutId = TR.intCheckoutId
+													AND tbl.strTrlDept = 'OTP' 
+													AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+													AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+													AND tbl.strTrpPaycode != 'Change'
+												 )
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN dblTrlMatchLineTrlPromoAmount 
+									ELSE 0 
+								  END as dblOutletMultipackDiscountAmount
 
 								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
 								, '' as strAccountPromotionName --21

@@ -878,6 +878,8 @@ BEGIN
 			,L.strDischargePerUnit
 			,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 			,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+			,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+			,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth
 			,strShippingInstructionStandardText = (
 				SELECT TOP 1 strShippingInstructionText
 				FROM tblLGCompanyPreference
