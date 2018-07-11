@@ -101,6 +101,7 @@
 			('tblSMUserRoleDashboardPermission'), --12
 			('tblSMUserRoleFRPermission'), --13
 			('tblSMMasterMenu'), --143
+			('tblSMContactMenu'), --144
 			('tblSMUserRoleMenu'), --14
 			('tblSMUserRoleReportPermission'), --15
 			('tblSMUserRoleScreenPermission'), --16
