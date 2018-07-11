@@ -169,6 +169,7 @@ BEGIN
 		,W.intWorkOrderId
 		,SL.intStorageLocationId
 		,SL.strName AS strStorageLocationName
+		,CSL.strSubLocationName
 		,ISNULL(W.intMachineId, 0) AS intMachineId
 		,ISNULL(M.strName, '') AS strMachineName
 		,W.ysnProductionReversed
@@ -207,6 +208,7 @@ BEGIN
 	JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = W.intMachineId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
