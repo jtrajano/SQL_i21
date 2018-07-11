@@ -520,7 +520,7 @@ BEGIN
 			,strCode					
 			,strReference				
 			,intCurrencyId			
-			,intCurrencyExchangeRateTypeId	
+			-- ,intCurrencyExchangeRateTypeId	
 			,dblExchangeRate			
 			,dtmDateEntered				
 			,dtmTransactionDate			
