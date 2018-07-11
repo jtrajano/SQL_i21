@@ -1018,6 +1018,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SELECT @voucherId
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
+	IF  EXISTS (SELECT 1 FROM tblAPBillDetail where intBillDetailId  IN (SELECT intBillDetailId FROM @detailCreated) and intContractDetailId > 0)
+	BEGIN
+		DECLARE @voucherDetailId INT
+		SELECT  @voucherDetailId = intBillDetailId FROM @detailCreated 		
+		EXEC [uspAPUpdateQty] @voucherDetailId
+	END
+
 IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY

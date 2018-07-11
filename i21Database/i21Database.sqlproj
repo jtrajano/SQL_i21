@@ -6789,6 +6789,7 @@
     <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostPaymentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportGABMulti.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
