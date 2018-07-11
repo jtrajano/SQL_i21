@@ -61,6 +61,7 @@ SELECT C.intManufacturingCellId
 	,SW.strComments AS strScheduleComment
 	,SL.intStorageLocationId
 	,SL.strName AS [strStorageLocation]
+	,CLSL.strSubLocationName AS strCompanySubLocationName
 	,WS.strBackColorName
 	,SL.intSubLocationId
 	,BR.strDemandNo
@@ -101,6 +102,7 @@ JOIN dbo.tblSMUserSecurity LM ON LM.[intEntityId] = W.intLastModifiedUserId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 LEFT JOIN dbo.tblMFWorkOrder PW ON PW.intWorkOrderId = W.intParentWorkOrderId
 LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 LEFT JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
 LEFT JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	AND EXISTS (
