@@ -20,8 +20,10 @@ BEGIN
 		SELECT SL.intStorageLocationId
 			,SL.strName
 			,SL.intSubLocationId
+			,CSL.strSubLocationName
 		FROM dbo.tblICStorageLocation SL
 		JOIN dbo.tblICRestriction R on R.intRestrictionId =IsNULL(SL.intRestrictionId,R.intRestrictionId) and R.strInternalCode ='STOCK'
+		JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		WHERE intLocationId = @intLocationId
 			AND SL.ysnAllowConsume = 1
 			AND SL.strName LIKE @strName + '%'
@@ -39,8 +41,10 @@ BEGIN
 		SELECT SL.intStorageLocationId
 			,SL.strName
 			,SL.intSubLocationId
+			,CSL.strSubLocationName
 		FROM dbo.tblICStorageLocation SL
 		JOIN dbo.tblICRestriction R on R.intRestrictionId =IsNULL(SL.intRestrictionId,R.intRestrictionId) and R.strInternalCode ='STOCK'
+		JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		WHERE intLocationId = @intLocationId
 			AND SL.ysnAllowConsume = 1
 			AND SL.strName LIKE @strName + '%'
