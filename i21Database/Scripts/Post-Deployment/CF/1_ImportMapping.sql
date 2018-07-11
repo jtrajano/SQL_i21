@@ -873,3 +873,86 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @taxFileHeaderId, 5, 22, NULL, N'tblCFNetworkCost', N'dblTaxesPerUnit', NULL, 6, N'', 1, 1)
 END
 ---- Network Cost CFN
+
+
+----GASBOY
+
+
+GO
+DECLARE @gasboyBodyImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Gasboy Detail') =  0)
+BEGIN
+
+INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Gasboy Detail', N'Delimiter', N'Space', NULL, NULL, 1, 16)
+SET @gasboyBodyImportHeader = SCOPE_IDENTITY();
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Transaction Date', 0, 44, NULL, 0, 4, N'MM/DD HH:MM', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 1, 1, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, 11, NULL, 1, 4)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Card Number', 0, 19, NULL, 2, 3, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 3, 2, NULL, N'tblCFCard', N'strCardNumber', NULL, 4, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Vehicle Number', 0, 29, NULL, NULL, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 4, NULL, NULL, N'tblCFVehicle', N'strVehicleNumber', NULL, 7, NULL, 1, 2)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Odometer', 0, 88, NULL, NULL, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 5, NULL, NULL, N'tblCFTransaction', N'intOdometer', NULL, 6, NULL, 1, 2)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Sequence Number', 0, 0, NULL, NULL, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 6, NULL, NULL, N'tblCFTransaction', N'strSequenceNumber', NULL, 4, NULL, 1, 2)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Pump Number', 0, 56, NULL, NULL, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 7, NULL, NULL, N'tblCFTransaction', N'intPumpNumber', NULL, 2, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Product Id', 0, 59, NULL, NULL, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 8, NULL, NULL, N'tblCFItem', N'strProductNumber', NULL, 2, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Quantity', 0, 64, NULL, NULL, 3, N'2 Implied Decimals', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 9, NULL, NULL, N'tblCFTransaction', N'dblQuantity', NULL, 7, NULL, 1, 3)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Transfer Cost', 0, NULL, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 10, NULL, NULL, N'tblCFTransaction', N'dblTransferCost', NULL, NULL, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Price', 0, 72, NULL, NULL, 2, N'3 Implied Decimals', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 11, NULL, NULL, N'tblCFTransaction', N'dblOriginalGrossPrice', NULL, 5, NULL, 1, 2)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'ISO', 0, 32, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 12, NULL, NULL, N'tblCFCreditCard', N'strPrefix', NULL, 4, NULL, 1, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Transaction Time', 0, 50, NULL, 0, 3, N'HH:MM', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 13, 2, NULL, NULL, NULL, NULL, 5, NULL, 0, 4)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyBodyImportHeader, N'Account', 0, 12, NULL, 2, 2, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyBodyImportHeader, SCOPE_IDENTITY(), 14, 1, NULL, NULL, NULL, NULL, 6, NULL, 1, 2)
+
+END
+
+
+
+GO
+DECLARE @gasboyHeaderImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Gasboy Header') =  0)
+BEGIN
+
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Gasboy Header', N'Delimiter', N'Space', NULL, NULL, 1, 1)
+	SET @gasboyHeaderImportHeader = SCOPE_IDENTITY();
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@gasboyHeaderImportHeader, N'Site Number', 0, 21, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@gasboyHeaderImportHeader, SCOPE_IDENTITY(), 1, 0, NULL, N'tblCFSite', N'strSiteNumber', NULL, 4, N'', 1, 1)
+END
+
+
+GO
+DECLARE @advanceMappingHeader INT
+IF ((SELECT COUNT(*) FROM [tblCFAdvanceMapping] WHERE [strAdvanceMappingId] = 'Gasboy Advance Mapping') =  0)
+BEGIN
+	INSERT [dbo].[tblCFAdvanceMapping] ([strAdvanceMappingId], [intConcurrencyId]) VALUES (N'Gasboy Advance Mapping', 1)
+	SET @advanceMappingHeader = SCOPE_IDENTITY();
+
+	INSERT [dbo].[tblCFAdvanceMappingDetail] ([intAdvanceMappingId], [strRecordType], [intRecordTypePosition], [intRecordTypeLength], [strFileType], [intLinkFieldPosition], [intLinkFieldLength], [strSequenceId], [intImportMapping], [strRuleId], [intConcurrencyId]) VALUES (@advanceMappingHeader, N'Transactions at site', 0, 20, N'txt', 0, 0, N'Header', null, N'With each detail', 1)
+	INSERT [dbo].[tblCFAdvanceMappingDetail] ([intAdvanceMappingId], [strRecordType], [intRecordTypePosition], [intRecordTypeLength], [strFileType], [intLinkFieldPosition], [intLinkFieldLength], [strSequenceId], [intImportMapping], [strRuleId], [intConcurrencyId]) VALUES (@advanceMappingHeader, N'=(type)Numeric', 0, 4, N'txt', 0, 0, N'Detail', null, N'', 1)
+
+END
+
+
+----GASBOY
