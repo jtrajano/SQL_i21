@@ -68,7 +68,7 @@ FROM (
 						 , strInvoiceNumber
 						 , strTransactionType
 						 , dtmDueDate
-						 , dblInvoiceTotal
+						 , dblInvoiceTotal = dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblInvoiceTotal
 					FROM dbo.tblARInvoice 
 		) ARI ON PD.intInvoiceId = ARI.intInvoiceId
 		WHERE PD.dblPayment <> 0
