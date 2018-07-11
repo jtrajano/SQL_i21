@@ -1643,6 +1643,11 @@ IF @recap = 0
 					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
 				END
 
+			UPDATE A
+                SET A.intCurrentStatus = 5
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
+
 			--UPDATE BatchIds Used
 			UPDATE tblARPayment 
 			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END
@@ -1652,6 +1657,10 @@ IF @recap = 0
 			  , intCurrentStatus = CASE WHEN @post = 1 THEN 4 ELSE 5 END
 			WHERE intPaymentId IN (SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData)
 			
+			UPDATE A
+                SET A.intCurrentStatus = NULL
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 		END	
 
 SET @successfulCount = @totalRecords
