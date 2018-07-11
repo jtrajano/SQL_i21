@@ -283,6 +283,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=LTRIM(RTRIM(a.gastr_com_cd)) COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+									          AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS
@@ -349,6 +350,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+												  AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
@@ -415,6 +417,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+												AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
