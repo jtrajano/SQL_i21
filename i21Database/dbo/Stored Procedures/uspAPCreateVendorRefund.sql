@@ -43,6 +43,7 @@ FROM tblCMBankAccount bank WHERE intBankAccountId = @bankAccountId
 INSERT INTO @paymentDetail(
 	[intId]
 	,[strSourceTransaction]
+	,[strReceivePaymentType]
 	,[intSourceId]
 	,[strSourceId]
 	,[intPaymentId]
@@ -89,6 +90,7 @@ INSERT INTO @paymentDetail(
 SELECT
 	[intId]								=	A.intBillId
 	,[strSourceTransaction]				=	'Voucher'
+	,[strReceivePaymentType]			=	'Vendor Refund'
 	,[intSourceId]						=	A.intBillId
 	,[strSourceId]						=	A.strBillId
 	,[intPaymentId]						=	NULL
@@ -165,10 +167,10 @@ SELECT @totalPaymentCreated = COUNT(*) FROM @paymentIds
 
 IF @totalPaymentCreated > 0
 BEGIN
-	UPDATE A
-		SET A.strReceivePaymentType = 'Vendor Refund'
-	FROM tblARPayment A
-	INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
+	--UPDATE A
+	--	SET A.strReceivePaymentType = 'Vendor Refund'
+	--FROM tblARPayment A
+	--INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
 
 	SELECT
 		@paymentCreated = COALESCE(@paymentCreated + ',', '') +  CONVERT(VARCHAR(12),intId)

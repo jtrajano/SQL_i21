@@ -563,14 +563,14 @@ END
 DECLARE @DistinctPaymentIds AS Id
 DELETE FROM @DistinctPaymentIds
 INSERT INTO @DistinctPaymentIds
-SELECT DISTINCT
+SELECT
     [intId] 
 FROM
-    @PaymentIds
+    @PaymentIds P
 WHERE
-    [intId] NOT IN (SELECT [intTransactionId] FROM @IntegrationHeader)
+    NOT EXISTS(SELECT NULL FROM @IntegrationHeader I WHERE I.[intTransactionId] = P.[intId])
 
-IF NOT EXISTS(SELECT TOP 1 NULL FROM @DistinctPaymentIds WHERE ISNULL([intId], 0) <> 0)
+IF NOT EXISTS(SELECT NULL FROM @DistinctPaymentIds)
 BEGIN
     INSERT INTO @returntable
     SELECT * FROM @IntegrationHeader
@@ -758,14 +758,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
---LEFT OUTER JOIN
---    (
---    SELECT [intTransactionId] FROM @IntegrationHeader 
---	) IH
---        ON IH.[intTransactionId] = P.[intId]
---WHERE
-    --IH.[intTransactionId] IS NULL
-    --P.[intId] NOT IN (SELECT [intTransactionId] FROM @IntegrationHeader WHERE [intTransactionDetailId] IS NULL)
 OPTION(recompile)
 
 DECLARE @Detail AS [dbo].[ReceivePaymentPostingTable]
