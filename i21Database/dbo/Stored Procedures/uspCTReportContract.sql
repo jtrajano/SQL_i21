@@ -332,6 +332,17 @@ BEGIN TRY
 							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
 							WHERE CD.intContractHeaderId = @intContractHeaderId
 
+	IF @type = 'MULTIPLE'
+	BEGIN
+		SELECT @ErrMsg =  STUFF((
+										  		SELECT DISTINCT '-' + RIGHT(strContractNumber,3)
+										  		FROM tblCTContractHeader
+										  		WHERE intContractHeaderId IN (SELECT Item FROM dbo.fnSplitString(@strIds,','))
+												AND intContractHeaderId <> @intContractHeaderId
+										  		FOR XML PATH('')
+										  		), 1, 1, '')
+	END
+
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
@@ -449,7 +460,7 @@ BEGIN TRY
 														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
 														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber		
+			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber+ISNULL('-' + @ErrMsg , '')		
 			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
 														+ ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,striDealAssociation					=	@rtStriDealAssociation
