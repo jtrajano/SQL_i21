@@ -2281,6 +2281,9 @@ BEGIN
 									SET @CreatedIvoices = ''
 
 									BEGIN TRY
+										-- Begin Trsaction
+										BEGIN TRANSACTION
+
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
 													@InvoiceEntries	 = @EntriesForInvoice
@@ -2295,11 +2298,23 @@ BEGIN
 									BEGIN CATCH
 										SET @ErrorMessage = ERROR_MESSAGE()
 										SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
+
+										-- ********************************************************
+										-- Having Problem on Invoice posting
+										-- It still create Invoice even there's error on posting
+										-- Need to call rollback after error message
+										-- Rollback Transaction here
+										ROLLBACK TRANSACTION
+										-- ********************************************************
+										
 									END CATCH
 								END
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
+								-- Commit Transaction
+								COMMIT TRANSACTION
+
 							    -- Insert to temp table
 								INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
 								SELECT [intID] AS intInvoiceId 
@@ -2343,8 +2358,6 @@ BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
 								SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
 
-								---- ROLLBACK TRANSACTION
-								--GOTO With_Rollback_Exit;
 							END
 							END
 				ELSE 
@@ -2369,6 +2382,9 @@ BEGIN
 						SET @ysnSuccess = 1
 
 						BEGIN TRY
+							-- Begin Trsaction
+							BEGIN TRANSACTION
+
 							EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
 											@post				= 0, -- 0 = UnPost
@@ -2392,6 +2408,10 @@ BEGIN
 							SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
 							SET @ysnSuccess = CAST(0 AS BIT)
 							SET @strStatusMsg = 'Unpost Invoice error: ' + ERROR_MESSAGE()
+
+							-- Rollback Transaction here
+							ROLLBACK TRANSACTION
+
 						END CATCH
 
 						-- Example OutPut params
@@ -2402,6 +2422,9 @@ BEGIN
 
 						IF(@ysnSuccess = CAST(1 AS BIT))
 							BEGIN
+								-- Commit Transaction
+								COMMIT TRANSACTION
+
 								SET @ysnInvoiceStatus = 0
 								-----------------------------------------------------------------------
 								------------- START UNPOST MArk Up / Down -------------------------------

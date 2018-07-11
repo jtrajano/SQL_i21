@@ -391,23 +391,43 @@ BEGIN
 
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL THEN 'Y' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') THEN 'Y'
 									ELSE 'N' 	
 								  END as strPromotionFlag
 
 								  -- Multi-Pack Discount
 								, CASE 
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-										THEN 'Y' 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'N' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+										THEN 'Y'
 									ELSE 'N' 
 								  END as strOutletMultipackFlag
 								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 2 -- 2 Can Deal
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
 										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
 								    ELSE 0 
 								  END as intOutletMultipackQuantity
 								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
+											THEN (
+													SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+													FROM tblSTTranslogRebates tbl
+													WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+													AND tbl.intCheckoutId = TR.intCheckoutId
+													AND tbl.strTrlDept = 'OTP' 
+													AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+													AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+													AND tbl.strTrpPaycode != 'Change'
+												 )
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
 										THEN dblTrlMatchLineTrlPromoAmount 
 									ELSE 0 
