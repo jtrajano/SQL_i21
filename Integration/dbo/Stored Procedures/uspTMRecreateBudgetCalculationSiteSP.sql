@@ -323,7 +323,9 @@ BEGIN
 					--						,NULL --@ShipToLocationId  
 					--						,NULL --@VendorLocationId
 					--						,NULL --@InvoiceType
-					--						,0	  --@GetAllAvailablePricing								
+					--						,0	  --@GetAllAvailablePricing
+					--						,1    --@CurrencyExchangeRate	
+					--						,NULL --@CurrencyExchangeRateTypeId							
 					--						)
 					--				ELSE
 					--					B.dblPrice

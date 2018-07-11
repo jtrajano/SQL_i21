@@ -52,6 +52,8 @@ AS
 			,@InvoiceType
 			,@TermId
 			,0
+			,1.000000
+			,NULL
 		)
 
 RETURN 0

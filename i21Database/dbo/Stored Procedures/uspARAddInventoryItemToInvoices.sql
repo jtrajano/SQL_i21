@@ -357,6 +357,8 @@ BEGIN TRY
 		,IE.[strType]				--@InvoiceType
 		,IE.[intTermId]				--@TermId
 		,0							--@GetAllAvailablePricing
+		,ISNULL(IE.[dblCurrencyExchangeRate], 1)	--@CurrencyExchangeRate
+		,IE.[intCurrencyExchangeRateId] --@CurrencyExchangeRateTypeId
 	) IP
 	WHERE
 		ISNULL(IE.[ysnRefreshPrice],0) = 1

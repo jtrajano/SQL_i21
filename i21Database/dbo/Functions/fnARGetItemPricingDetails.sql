@@ -27,6 +27,8 @@
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
 	,@GetAllAvailablePricing	BIT
+	,@CurrencyExchangeRate		NUMERIC(18,6)
+	,@CurrencyExchangeRateTypeId INT
 )
 RETURNS @returntable TABLE
 (
@@ -82,10 +84,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@TermDiscountRate				NUMERIC(18,6)
 		,@TermDiscountExempt			BIT
 		,@PricingType					NVARCHAR(50)
-		,@TermDiscountBy				NVARCHAR(50)
-		,@CurrencyExchangeRateTypeId	INT
+		,@TermDiscountBy				NVARCHAR(50)		
         ,@CurrencyExchangeRateType		NVARCHAR(20)
-        ,@CurrencyExchangeRate			NUMERIC(18,6) = 1.000000
 		,@SubCurrencyRate				NUMERIC(18,6) = 1.000000
 		,@SubCurrencyId					INT
 		,@SubCurrency					NVARCHAR(40)
@@ -100,7 +100,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractPricingLevelId		INT = NULL
 		,@Sort							INT = 0
 	SET @OriginalItemUOMId = @ItemUOMId
-
+	SET @CurrencyExchangeRate = ISNULL(@CurrencyExchangeRate, 1)
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
 	IF @CustomerPricingOnly IS NULL
@@ -557,12 +557,6 @@ DECLARE	 @Price							NUMERIC(18,6)
 				IF @GetAllAvailablePricing = 0 RETURN
 			END	
 	END
-	
-	--DECLARE @ItemVendorId				INT
-	--		,@ItemLocationId			INT
-	--		,@ItemCategoryId			INT
-	--		,@ItemCategory				NVARCHAR(100)
-	--		,@UOMQuantity				NUMERIC(18,6)
 
 	SELECT TOP 1 
 		 @ItemVendorId				= intItemVendorId
@@ -586,16 +580,63 @@ DECLARE	 @Price							NUMERIC(18,6)
 	--Item Standard Pricing
 	IF ISNULL(@UOMQuantity,0) = 0
 		SET @UOMQuantity = 1
-	SET @Price = @UOMQuantity *	
-						( 
-							SELECT
-								P.dblSalePrice
-							FROM
-								tblICItemPricing P
-							WHERE
-								P.intItemId = @ItemId
-								AND P.intItemLocationId = @ItemLocationId
-							)
+
+	SELECT TOP 1 @CurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+			   , @CurrencyExchangeRate		 = dblCurrencyExchangeRate
+	FROM dbo.fnARGetDefaultForexRate(@TransactionDate, @CurrencyId, NULL)
+
+	DECLARE @dblCalculatedExchangeRate		NUMERIC(18, 6) = ISNULL(@CurrencyExchangeRate, 1)
+		  , @ysnToBse						BIT = 1
+		  , @intDefaultCurrencyId			INT = (SELECT TOP 1 [intDefaultCurrencyId] FROM tblSMCompanyPreference)
+
+	IF @CurrencyExchangeRateTypeId IS NOT NULL AND ISNULL(@dblCalculatedExchangeRate, 0.000000) <> 1.000000
+		BEGIN
+			SET @ysnToBse = 1
+			SELECT TOP 1
+				@dblCalculatedExchangeRate =  SMCERD.[dblRate]
+			FROM			
+				tblSMCurrencyExchangeRateType SMCERT
+			INNER JOIN
+				tblSMCurrencyExchangeRateDetail SMCERD
+					ON SMCERT.[intCurrencyExchangeRateTypeId] = SMCERD.[intRateTypeId]
+			INNER JOIN
+				tblSMCurrencyExchangeRate SMCER
+					ON SMCERD.[intCurrencyExchangeRateId] = SMCER.[intCurrencyExchangeRateId]
+			WHERE
+				SMCERT.[intCurrencyExchangeRateTypeId] = @CurrencyExchangeRateTypeId
+				AND dbo.fnDateLessThanEquals(SMCERD.[dtmValidFromDate], @TransactionDate) = 1
+				AND SMCER.[intToCurrencyId] = @intDefaultCurrencyId
+				AND SMCER.[intFromCurrencyId] = @CurrencyId
+			ORDER BY
+				SMCERD.[dtmValidFromDate] DESC
+
+			IF @dblCalculatedExchangeRate IS NULL
+				BEGIN
+					SET @ysnToBse = 0
+					SELECT TOP 1
+						@dblCalculatedExchangeRate =  SMCERD.[dblRate]
+					FROM			
+						tblSMCurrencyExchangeRateType SMCERT
+					INNER JOIN
+						tblSMCurrencyExchangeRateDetail SMCERD
+							ON SMCERT.[intCurrencyExchangeRateTypeId] = SMCERD.[intRateTypeId]
+					INNER JOIN
+						tblSMCurrencyExchangeRate SMCER
+							ON SMCERD.[intCurrencyExchangeRateId] = SMCER.[intCurrencyExchangeRateId]
+					WHERE
+						SMCERT.[intCurrencyExchangeRateTypeId] = @CurrencyExchangeRateTypeId
+						AND dbo.fnDateLessThanEquals(SMCERD.[dtmValidFromDate], @TransactionDate) = 1
+						AND SMCER.[intToCurrencyId] = @CurrencyId
+						AND SMCER.[intFromCurrencyId] = @intDefaultCurrencyId
+					ORDER BY
+						SMCERD.[dtmValidFromDate] DESC
+				END
+		END	
+	
+	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
+	SET @Price = @UOMQuantity *	(SELECT P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
+
 	IF(@Price IS NOT NULL)
 		BEGIN
 			DECLARE @DefaultCurrencyExchangeRateTypeId INT

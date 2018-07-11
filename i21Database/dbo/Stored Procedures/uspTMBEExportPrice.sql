@@ -90,7 +90,9 @@ CROSS APPLY (
         ,NULL
         ,NULL
         ,NULL --TermId
-        ,NULL --@GetAllAvailablePricing		
+        ,NULL --@GetAllAvailablePricing
+		,NULL --@CurrencyExchangeRate
+		,NULL --@CurrencyExchangeRateTypeId
         )
 ) B
 
