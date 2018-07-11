@@ -679,12 +679,12 @@ SELECT @strDescription,
 				,dblPrice dblUCost
 				,sum(dblAmountDue) over (partition by c.intTicketId) dblUnitCost				
 				,sum(dblQtyReceived) over (partition by c.intTicketId) dblQtyReceived
-				,c.intCommodityId,c.strCurrency,strDistributionOption,ysnPost
+				,s.intCommodityId,c.strCurrency,strDistributionOption,ysnPost
 				,c.intInvoiceId,e.strName strCustomerReference
 			FROM vyuARInvoiceTransactionHistory c		
 			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
 				LEFT JOIN tblEMEntity e on s.intEntityId=e.intEntityId 
-			WHERE c.intCommodityId = @intCommodityId
+			WHERE s.intCommodityId = @intCommodityId
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 				 and ysnPost is not null
@@ -841,12 +841,12 @@ BEGIN
 				,dblPrice dblUCost
 				,sum(dblAmountDue) over (partition by c.intTicketId) dblUnitCost				
 				,sum(dblQtyReceived) over (partition by c.intTicketId) dblQtyReceived
-				,c.intCommodityId,c.strCurrency,strName strCustomerReference,strDistributionOption,ysnPost
+				,s.intCommodityId,c.strCurrency,strName strCustomerReference,strDistributionOption,ysnPost
 				,c.intInvoiceId
 			FROM vyuARInvoiceTransactionHistory c		
 			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
 			LEFT JOIN tblEMEntity e on e.intEntityId=s.intEntityId	
-			WHERE c.intCommodityId = @intCommodityId and e.intEntityId =@intVendorId
+			WHERE s.intCommodityId = @intCommodityId and e.intEntityId =@intVendorId
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 				 and ysnPost is not null				
