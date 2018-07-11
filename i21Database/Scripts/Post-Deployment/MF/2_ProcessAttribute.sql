@@ -764,11 +764,11 @@ BEGIN
         ,5
         ,2
         ,0
-        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId'
+        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute SEt intAttributeTypeId =1,strSQL='select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId' Where intAttributeId = 36
+	Update tblMFAttribute SEt intAttributeTypeId =1,strSQL='select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember' Where intAttributeId = 36
 End
 GO
 
@@ -915,12 +915,12 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId'
+        ,'select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId Order by DisplayMember'
 END
 ELSE
 UPDATE tblMFAttribute 
 	Set strAttributeName='Partial Quantity Sub Location',
-	strSQL='select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId',
+	strSQL='select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId Order by DisplayMember',
 	intAttributeTypeId=1
 	WHERE intAttributeId = 43
 GO
@@ -965,11 +965,11 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'Select convert(varchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId'
+        ,'Select convert(varchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember'
 END
 ELSE
 UPDATE tblMFAttribute 
-	Set strSQL='Select convert(varchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId'
+	Set strSQL='Select convert(varchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember'
 	WHERE intAttributeId = 45
 GO
 IF NOT EXISTS (
@@ -1630,11 +1630,11 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId'
+        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember'
 END
 ELSE
 BEGIN
-	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId' WHERE intAttributeId =75
+	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =75
 END
 GO
 IF NOT EXISTS (
@@ -1656,11 +1656,11 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''STAGING'' AND SL.intLocationId=@intLocationId'
+        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember'
 END
 ELSE
 BEGIN
-	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''STAGING'' AND SL.intLocationId=@intLocationId' WHERE intAttributeId =76
+	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =76
 END
 
 GO
@@ -1750,11 +1750,11 @@ BEGIN
         ,5
         ,1
         ,1
-        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation  Where intLocationId=@intLocationId UNION Select NULL as ValueMember, NULL as DisplayMember  Order by strName'
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation  Where intLocationId=@intLocationId UNION Select NULL as ValueMember, NULL as DisplayMember   Order by strName' Where intAttributeId = 80
+	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember' Where intAttributeId = 80
 End
 GO
 IF NOT EXISTS (
@@ -1776,11 +1776,11 @@ BEGIN
         ,5
         ,1
         ,1
-        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId UNION Select NULL as ValueMember, NULL as DisplayMember Order by strName'
+        ,'Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation Where intLocationId=@intLocationId UNION Select NULL as ValueMember, NULL as DisplayMember   Order by strName' Where intAttributeId = 81
+	Update tblMFAttribute Set strSQL='Select CONVERT(nvarchar,intStorageLocationId) as ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember' Where intAttributeId = 81
 End
 GO
 IF NOT EXISTS (
@@ -1990,11 +1990,11 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId'
+        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute Set strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId' Where intAttributeId = 90
+	Update tblMFAttribute Set strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' Where intAttributeId = 90
 End
 GO
 IF NOT EXISTS (
