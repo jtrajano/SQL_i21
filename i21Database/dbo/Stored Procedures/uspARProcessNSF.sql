@@ -173,6 +173,13 @@ SET ysnProcessedToNSF	= 1
   , intPaymentMethodId	= @intNSFPaymentMethodId
   , strPaymentInfo		= 'NSF: ' + ISNULL(strPaymentInfo, '')  
   , strPaymentMethod	= 'NSF'
+  , intCurrentStatus 	= 5
+FROM tblARPayment P
+INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intPaymentId
+WHERE ysnPosted = 1
+
+UPDATE P
+SET  intCurrentStatus 	= NULL
 FROM tblARPayment P
 INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intPaymentId
 WHERE ysnPosted = 1
