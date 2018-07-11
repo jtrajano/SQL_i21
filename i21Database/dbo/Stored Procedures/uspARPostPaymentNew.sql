@@ -112,7 +112,9 @@ FROM [dbo].[fnARGetPaymentDetailsForPosting](@TempPaymentIds, @PostDate, @BatchI
 --@PaymentIds
 DELETE FROM @TempPaymentIds
 INSERT INTO @TempPaymentIds
-SELECT [intHeaderId] FROM @PaymentIds
+SELECT P.[intHeaderId] FROM @PaymentIds P WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData I WHERE I.[intTransactionId] = P.[intHeaderId] AND I.[intTransactionDetailId] IS NULL)
+
+
 
 INSERT INTO @ARReceivablePostData 
 SELECT *

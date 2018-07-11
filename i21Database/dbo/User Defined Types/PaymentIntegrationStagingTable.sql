@@ -27,6 +27,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblBalance]							NUMERIC(18, 6)									NULL		-- Amount Paid
 	,[intExchangeRateTypeId]				INT												NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
 	,[dblExchangeRate]						NUMERIC(18, 6)									NULL
+	,[strReceivePaymentType]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values > 1. "Cash Receipts"(Default) 2. "Vendor Refund"
 	,[strPaymentOriginalId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
 	,[ysnUseOriginalIdAsPaymentNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 	,[ysnApplytoBudget]						BIT												NULL		-- 	
