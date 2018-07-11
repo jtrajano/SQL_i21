@@ -79,6 +79,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
+:r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
