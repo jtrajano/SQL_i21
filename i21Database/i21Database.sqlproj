@@ -6796,6 +6796,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherStorageItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherChargeItemGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTaxGLEntry.sql" />
+    <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
