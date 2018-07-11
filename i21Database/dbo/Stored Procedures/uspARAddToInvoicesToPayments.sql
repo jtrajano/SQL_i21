@@ -769,13 +769,13 @@ BEGIN TRY
 		 [intHeaderId]
 		,[intDetailId])
 	SELECT 
-		 [intHeaderId]						= [intPaymentId]
+		 [intHeaderId]						= ARPD.[intPaymentId]
 		,[intDetailId]						= NULL
 	 FROM
-		(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 1 AND ISNULL([ysnSuccess], 0) = 1) ARPD
+		(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 0 AND ISNULL([ysnSuccess], 0) = 1) ARPD
 	INNER JOIN
-		(SELECT [intId] FROM @ItemEntries) IFI
-			ON IFI. [intId] = ARPD.[intId] 
+		(SELECT [intId], [intPaymentId] FROM @ItemEntries) IFI
+			ON IFI. [intPaymentId] = ARPD.[intPaymentId] 
 
 	EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 
