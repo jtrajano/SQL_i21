@@ -9,7 +9,7 @@ AS
 
 BEGIN
  
-IF ISNULL(@strPurchaseSales,'') <> ''
+if isnull(@strPurchaseSales,'') <> ''
 BEGIN
 	if @strPurchaseSales='Purchase'
 	BEGIN
@@ -20,7 +20,7 @@ BEGIN
 		SELECT @strPurchaseSales='Purchase'
 	END
 END
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+
 DECLARE @strCommodityCode NVARCHAR(50)
 
 	 DECLARE @Commodity AS TABLE 
@@ -54,7 +54,6 @@ DECLARE @List AS TABLE (
 	 ,dblDelta NUMERIC(24, 10)
 	 ,intBrokerageAccountId int
 	 ,strInstrumentType nvarchar(50)
-	 ,strEntityName  nvarchar(100)
      ) 
 
 DECLARE @FinalList AS TABLE (  
@@ -80,7 +79,6 @@ DECLARE @FinalList AS TABLE (
 	 ,dblDelta NUMERIC(24, 10)
 	 ,intBrokerageAccountId int
 	 ,strInstrumentType nvarchar(50)
-	 ,strEntityName  nvarchar(100)
      ) 
 
 
@@ -123,39 +121,19 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strItemNo  nvarchar(100),
 		dtmContractDate datetime,
 		strEntityName  nvarchar(100),
-		strCustomerContract  nvarchar(100)
-		,intFutureMarketId int
-		,intFutureMonthId	int
-		)
+		strCustomerContract  nvarchar(100))
 
 INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
-	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
-	   	,intFutureMarketId,intFutureMonthId)	
+	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
 
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
-		intOpenContract  int,
-		strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
-		dblContractSize numeric(24,10),
-		strFutureMarket nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strOptionMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
-		dblStrike numeric(24,10),
-		strOptionType nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strInstrumentType nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strBrokerAccount nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
-		strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
-		intFutOptTransactionHeaderId int 
-		)
-INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
-			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
+		intOpenContract  int)
+INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract)
 EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
 
-INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId,strEntityName)
+INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId)
 	SELECT strCommodityCode,CD.intCommodityId,intContractHeaderId,strContractNumber
 		,CD.strType [strType]
 		,strLocationName
@@ -165,8 +143,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContra
 		else
 		-dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))
 		end AS dblTotal,		
-		CD.intUnitMeasureId,
-		CD.strEntityName
+		CD.intUnitMeasureId
 	FROM @tblGetOpenContractDetail CD
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CD.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId  and CD.intContractStatusId <> 3
 			AND intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -183,72 +160,77 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
        SELECT strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, strFutureMonth,dtmFutureMonthsDate,HedgedQty,intUnitMeasureId
        ,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot
        FROM (
-         SELECT t.strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,th.intCommodityId,dtmFutureMonthsDate,
+        		 SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,f.intCommodityId,dtmFutureMonthsDate,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,  
-		ISNULL(intOpenContract, 0) * t.dblContractSize) AS HedgedQty,
-		l.strLocationName,left(t.strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth,m.intUnitMeasureId,
-		e.strName + '-' + ba.strAccountNumber strAccountNumber,strNewBuySell as strTranType,ba.intBrokerageAccountId,
-		t.strInstrumentType as strInstrumentType,
-		ISNULL(intOpenContract, 0) dblNoOfLot 
-		FROM @tblGetOpenFutureByDate t
-		join tblICCommodity th on th.strCommodityCode=t.strCommodityCode
-		join tblSMCompanyLocation l on l.strLocationName=t.strLocationName
-		join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
-		LEFT join tblRKBrokerageAccount ba on ba.strAccountNumber=t.strBrokerAccount
-		INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Futures'
-		JOIN tblICCommodityUnitMeasure cuc1 on cuc1.intCommodityId=@intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId	
-		INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0	
-		WHERE th.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
-			AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end		
-				 and  e.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then e.intEntityId else @intVendorId end 
-		AND  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																ELSE isnull(ysnLicensed, 0) END
-												)
+		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end * dblContractSize) AS HedgedQty,
+		l.strLocationName,left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth,m.intUnitMeasureId,
+		e.strName + '-' + ba.strAccountNumber strAccountNumber,strBuySell as strTranType,f.intBrokerageAccountId,
+		case when f.intInstrumentTypeId = 1 then 'Futures' else 'Options ' end as strInstrumentType,
+		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end dblNoOfLot 
+		FROM @tblGetOpenFutureByDate oc
+		JOIN tblRKFutOptTransaction f on oc.intFutOptTransactionId=f.intFutOptTransactionId and oc.intOpenContract <> 0
+		INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId	     
+		INNER JOIN tblICCommodity ic on f.intCommodityId=ic.intCommodityId
+		JOIN tblICCommodityUnitMeasure cuc1 on f.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
+		INNER JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=f.intFutureMonthId
+		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId 
+											AND  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+															ELSE isnull(ysnLicensed, 0) END
+											)
+		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
+		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1		
+		WHERE ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
+			AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end			
 		) t
 
  --Option NetHEdge
 		INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,
 							intFromCommodityUnitMeasureId,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType)	
-		SELECT DISTINCT t.strCommodityCode,th.intCommodityId,t.strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge' ,t.strLocationName,
-				 left(t.strFutureMonth,4) +  '20'+convert(nvarchar(2),fm.intYear) strFutureMonth, 	
-				 left(t.strFutureMonth,4) +  '20'+convert(nvarchar(2),fm.intYear) dtmFutureMonthsDate,			
-				intOpenContract * isnull((
+		SELECT DISTINCT strCommodityCode,ft.intCommodityId,ft.strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge' ,strLocationName,
+				 left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth, 	
+				 left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) dtmFutureMonthsDate,			
+				CASE WHEN ft.strBuySell = 'Buy' THEN (
+						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
+						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) END * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-						WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
-						AND t.dblStrike = mm.dblStrike
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
 				),0)*m.dblContractSize AS dblTotal, m.intUnitMeasureId,				
 		e.strName + '-' + strAccountNumber AS strAccountNumber, 		
-		strNewBuySell AS TranType, 
-		intOpenContract AS dblNoOfLot, 
+		strBuySell AS TranType, 
+		CASE WHEN ft.strBuySell = 'Buy' THEN (
+					ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
+					ELSE - (ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)
+				) END AS dblNoOfLot, 
 		ISNULL((SELECT TOP 1 dblDelta
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-		WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
-		AND t.dblStrike = mm.dblStrike
+		WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+		AND ft.dblStrike = mm.dblStrike
 		ORDER BY dtmPriceDate DESC
-		),0) AS dblDelta,ba.intBrokerageAccountId,'Options ' as strInstrumentType
-	FROM @tblGetOpenFutureByDate t
-	join tblICCommodity th on th.strCommodityCode=t.strCommodityCode
-	join tblSMCompanyLocation l on l.strLocationName=t.strLocationName 
-	join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
-	join tblRKOptionsMonth om on om.strOptionMonth=t.strOptionMonth
-	INNER JOIN tblRKBrokerageAccount ba ON t.strBrokerAccount = ba.strAccountNumber
-	INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Options'
-	INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
-	WHERE th.intCommodityId = @intCommodityId AND intCompanyLocationId = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end 
-	AND t.intFutOptTransactionId NOT IN (
-			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
-				 and  e.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then e.intEntityId else @intVendorId end 
-			AND  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-															ELSE isnull(ysnLicensed, 0) END
-											)
+		),0) AS dblDelta,ft.intBrokerageAccountId,case when ft.intInstrumentTypeId  = 1 then 'Futures' else 'Options ' end as strInstrumentType
+	FROM tblRKFutOptTransaction ft
+	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
+						AND ft.intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+								ELSE isnull(ysnLicensed, 0) END
+				)
+	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
+	INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
+	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
+	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
+	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end 
+	AND intFutOptTransactionId NOT IN (
+			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 --Net Hedge option end
 		
 DECLARE @intUnitMeasureId int
@@ -256,12 +238,12 @@ DECLARE @strUnitMeasure nvarchar(50)
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure WHERE intUnitMeasureId=@intUnitMeasureId
 
-INSERT INTO @FinalList (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName)
+INSERT INTO @FinalList (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType )
 SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth, strContractEndMonthNearBy,
 	  		 Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
 		case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
 	case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure  ,strAccountNumber,strTranType,dblNoOfLot,dblDelta,
-	intBrokerageAccountId,strInstrumentType,strEntityName  FROM @List t
+	intBrokerageAccountId,strInstrumentType  FROM @List t
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 		
 	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
@@ -273,30 +255,32 @@ END
 
 UPDATE @FinalList set strContractEndMonth = 'Near By' where CONVERT(DATETIME,'01 '+ strContractEndMonth) < CONVERT(DATETIME,getdate())
 DELETE FROM @List
-INSERT INTO @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName )
+INSERT INTO @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType )
 SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth, strContractEndMonthNearBy,
 	isnull(dblTotal,0)  dblTotal,
-	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName  FROM @FinalList WHERE strContractEndMonth = 'Near By' 
+	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @FinalList WHERE strContractEndMonth = 'Near By' 
 
-INSERT INTO @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName )
+INSERT INTO @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType )
 SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth, strContractEndMonthNearBy,
 	isnull(dblTotal,0) dblTotal,
-	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName  FROM @FinalList WHERE strContractEndMonth <> 'Near By' 
+	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @FinalList WHERE strContractEndMonth <> 'Near By' 
 	ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
 
-INSERT into @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName )
+INSERT into @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType )
 SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,'Position',strLocationName,strContractEndMonth, strContractEndMonthNearBy,
 	isnull(dblTotal,0) dblTotal,
-	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName  FROM @List 
+	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @List 
 
-UPDATE @List set intSeqNo = 1 where strType='Purchase Priced'
-UPDATE @List set intSeqNo = 2 where strType='Purchase Basis'
-UPDATE @List set intSeqNo = 3 where strType='Purchase HTA'
-UPDATE @List set intSeqNo = 4 where strType='Sale Priced'
-UPDATE @List set intSeqNo = 5 where strType='Sale Basis'
-UPDATE @List set intSeqNo = 6 where strType='Sale HTA'
-UPDATE @List set intSeqNo = 7 where strType='Net Hedge'
-UPDATE @List set intSeqNo = 8 where strType='Position'
+UPDATE @List set intSeqNo = 1 where strType='Purchase DP (Priced Later)'
+UPDATE @List set intSeqNo = 2 where strType='Purchase Priced'
+UPDATE @List set intSeqNo = 3 where strType='Purchase Basis'
+UPDATE @List set intSeqNo = 4 where strType='Purchase HTA'
+UPDATE @List set intSeqNo = 5 where strType='Sale DP (Priced Later)'
+UPDATE @List set intSeqNo = 6 where strType='Sale Priced'
+UPDATE @List set intSeqNo = 7 where strType='Sale Basis'
+UPDATE @List set intSeqNo = 8 where strType='Sale HTA'
+UPDATE @List set intSeqNo = 9 where strType='Net Hedge'
+UPDATE @List set intSeqNo = 10 where strType='Position'
 
 DECLARE @strType nvarchar(max)
 declare @strContractEndMonth nvarchar(max)
@@ -309,18 +293,16 @@ FROM @List where strContractEndMonth not in (select distinct  @strContractEndMon
 
 IF isnull(@intVendorId,0) = 0
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName  
+SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
 FROM @List where dblTotal <> 0 
-ORDER BY strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
  
 END
 ELSE
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType ,strEntityName 
-FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
-ORDER BY strType
+SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
+FROM @List where dblTotal <> 0  and  strType<>'Net Hedge' 
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
 END
