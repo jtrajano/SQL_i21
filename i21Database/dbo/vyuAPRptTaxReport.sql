@@ -4,9 +4,9 @@ AS
 SELECT APB.strBillId
 	   ,APB.dtmDate
 	   ,APB.strVendorOrderNumber
-	   ,V.strVendorId 
+	   ,ISNULL(V.strVendorId, E.strEntityNo)  as strVendorId 
 	   ,E.strName 
-	   ,V.strVendorId + ' ' + E.strName AS strVendorName
+	   ,ISNULL(V.strVendorId, E.strEntityNo) + ' ' + E.strName AS strVendorName
 	   ,C.strCompanyName
 	   ,C.strCompanyAddress
 	   ,APB.intCurrencyId
