@@ -86,14 +86,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	ctd.intContractDetailId,
 		[intContractHeaderId]			=	ctd.intContractHeaderId,
 		[intLoadDetailId]				=	A.intLoadDetailId,
-		[intLoadId]						=	lgLoad.intLoadId,
+		[intLoadId]						=	lgDetail.intLoadId,
 		[intScaleTicketId]				=	A.[intScaleTicketId]										
 	FROM @voucherDetailDirect A
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
-	LEFT JOIN tblLGLoad lgLoad ON A.intLoadDetailId = lgLoad.intLoadDetailId
+	LEFT JOIN tblLGLoadDetail lgDetail ON A.intLoadDetailId = lgDetail.intLoadDetailId
 	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
 	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = B.intShipToId
 	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
