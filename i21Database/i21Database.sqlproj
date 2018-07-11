@@ -6791,6 +6791,11 @@
     <Build Include="dbo\Stored Procedures\uspARPostPaymentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportGABMulti.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateQty.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailDebitEntry.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherReceiptItemCostAdjGLEntry.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherStorageItemCostAdjGLEntry.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherChargeItemGLEntry.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherTaxGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
