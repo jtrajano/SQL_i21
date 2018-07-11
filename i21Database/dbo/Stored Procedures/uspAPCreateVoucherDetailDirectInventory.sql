@@ -61,11 +61,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
 																			,A.dblQtyReceived),
 		[dblDiscount]					=	A.[dblDiscount],
-		[intCostUOMId]					=	CASE WHEN ctd.intCostUOMId > 0 THEN ctd.intCostUOMId ELSE A.intCostUOMId END,
+		[intCostUOMId]					=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
 		[dblCost]						=	dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
-																		,CASE WHEN ctd.intCostUOMId > 0 THEN ctd.intCostUOMId ELSE A.intCostUOMId END
+																		,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
 																		,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
-		[dblCostUnitQty]				=	CASE WHEN ctd.intCostUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
+		[dblCostUnitQty]				=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
