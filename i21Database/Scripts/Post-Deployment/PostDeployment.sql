@@ -497,6 +497,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
 
+--SM - this should always be the last to execute
+	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
+:r .\SM\1830_ReIndexTables.sql
+:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+
 
 
 print 'END POST DEPLOYMENT'
