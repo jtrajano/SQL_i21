@@ -38,7 +38,9 @@ BEGIN
 		UPDATE tblCMUndepositedFund SET strReferenceNo = @intEFTNextNo WHERE intUndepositedFundId = @intTransactionId AND (strReferenceNo = '' OR strReferenceNo IS NULL)
 		
 		--Update the reference no of other module's transaction (AR Transaction)
+		UPDATE tblARPayment SET intCurrentStatus = 5 WHERE strRecordNumber = @strTransactionId
 		UPDATE tblARPayment SET strPaymentInfo = @intEFTNextNo WHERE strRecordNumber = @strTransactionId
+		UPDATE tblARPayment SET intCurrentStatus = NULL WHERE strRecordNumber = @strTransactionId
 		
 		SET @intEFTNextNo =  @intEFTNextNo + 1
 		DELETE FROM #tmpACHFromCustomer WHERE intUndepositedFundId = @intTransactionId
