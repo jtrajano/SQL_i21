@@ -118,7 +118,7 @@ AS
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
 	TotalDiscount = ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0),
-	NetDue = (BillDtl.dblTotal + BillDtl.dblTax) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) ,
+	NetDue = (BillDtl.dblTotal + BillDtl.dblTax) ,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 	PYMT.dblAmountPaid as CheckAmount,
@@ -130,7 +130,7 @@ AS
 	INNER JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId =  PYMT.strPaymentRecordNum
 	INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId is null
+	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId --AND BillDtl.intInventoryReceiptChargeId is null
 	INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 	LEFT JOIN tblGRStorageHistory GRH ON GRH.intCustomerStorageId = BillDtl.intCustomerStorageId AND GRH.strType = 'From Scale'
 	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
