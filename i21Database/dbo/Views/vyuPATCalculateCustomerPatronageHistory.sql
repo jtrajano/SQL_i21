@@ -10,7 +10,7 @@ SELECT	RCat.intRefundCategoryId,
 		PC.strCategoryCode,
 		dblRate = RCat.dblRefundRate,
 		RCat.dblVolume,
-		dblRefundAmount =  CASE WHEN R.dblMinimumRefund > (RCat.dblRefundRate * RCat.dblVolume) THEN 0 ELSE (RCat.dblRefundRate * RCat.dblVolume) END
+		dblRefundAmount =  RCat.dblRefundRate * RCat.dblVolume
 FROM tblPATRefundCustomer RCus
 INNER JOIN tblPATRefund R
 	ON RCus.intRefundId = R.intRefundId
