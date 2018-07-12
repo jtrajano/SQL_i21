@@ -229,105 +229,33 @@ BEGIN TRY
 								,intCategoryId
 								,dblAdjustCostValue
 								,dblAdjustRetailValue
-						) 
-						-- Decrease quantities from cost bucket first for Item managed. 
-						SELECT		
-								intItemId				= i.intItemId
-								,intItemLocationId		= il.intItemLocationId
-								,intItemUOMId			= iu.intItemUOMId
-								,dtmDate				= MU.dtmMarkUpDownDate
-
-								-- Item Manage
-								,dblQty					= MUD.intQty * -1
-								,dblUOMQty				= iu.dblUnitQty 
-								,dblCost				= [dbo].[fnCalculateCostBetweenUOM](
-																dbo.fnGetItemStockUOM(MUD.intItemId)
-																,iu.intItemUOMId
-																,ItemPricing.dblLastCost
-															)		
-								,intTransactionId		= MU.intMarkUpDownId -- Parent Id
-								,intTransactionDetailId	= MUD.intMarkUpDownDetailId -- Child Id
-								,strTransactionId		= MU.strMarkUpDownNumber --@strMarkUpDownBatchId -- 'POS-10001'
-								,intTransactionTypeId	= @InventoryTransactionType_MarkUpOrDown
-								,intSubLocationId		= NULL -- Optional
-								,intStorageLocationId	= NULL -- Optional 
-								,intCurrencyId			= NULL -- Optional. You will use this if you are using multi-currency. 
-								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
-								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
-								,dblUnitRetail			= NULL
-
-								-- Department Manage
-								,intCategoryId			= NULL
-								,dblAdjustCostValue		= NULL
-								,dblAdjustRetailValue	= NULL -- -200 -- $$$ value to adjust the retail value.
-						FROM tblSTMarkUpDownDetail MUD
-						INNER JOIN tblSTMarkUpDown MU 
-							ON MU.intMarkUpDownId = MUD.intMarkUpDownId
-						--If Item Manage, query item fields that are needed
-						INNER JOIN (
-							tblICItem i INNER JOIN tblICItemLocation il
-								ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
-							INNER JOIN tblICItemUOM iu
-								ON iu.intItemId = i.intItemId AND iu.intItemUOMId = il.intIssueUOMId -- Defaulted to issue uom id as per ST-313
-							INNER JOIN tblICItemPricing ItemPricing
-								ON ItemPricing.intItemId = i.intItemId AND ItemPricing.intItemLocationId = il.intItemLocationId
-						) ON i.intItemId = MUD.intItemId
-						WHERE MU.intMarkUpDownId = @intMarkUpDownId 
-						AND MU.strType = @MarkUpType_ItemLevel
-						UNION ALL
-
+						)
 						-- Query all the MarkUp/Down for Item & Category managed
 						SELECT		
 								intItemId				= ISNULL(i.intItemId, CategoryItem.intItemId)
 								,intItemLocationId		= ISNULL(il.intItemLocationId, CategoryItem.intItemLocationId)
 								,intItemUOMId			= ISNULL(iu.intItemUOMId, CategoryItem.intItemUOMId)
 								,dtmDate				= MU.dtmMarkUpDownDate
-
-								-- Item Manage
-								,dblQty					= CASE 
-															WHEN MU.strType = @MarkUpType_ItemLevel THEN MUD.intQty
-															ELSE 0
-														END -- 0 -- Required field so specify zero. 
-								,dblUOMQty				= CASE
-															WHEN MU.strType = @MarkUpType_ItemLevel THEN iu.dblUnitQty 
-															ELSE 0
-														END -- 0 -- Required field so specify zero. 
-								,dblCost				= CASE
-															WHEN MU.strType = @MarkUpType_ItemLevel THEN [dbo].[fnCalculateCostBetweenUOM](
-																dbo.fnGetItemStockUOM(MUD.intItemId)
-																,iu.intItemUOMId
-																,ItemPricing.dblLastCost
-															)
-															ELSE 0
-														END			
+								,dblQty					= CASE
+															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN 0 ELSE MUD.intQty
+														END
+								,dblUOMQty				= 0
+								,dblCost				= 0			
 								,intTransactionId		= MU.intMarkUpDownId -- Parent Id
 								,intTransactionDetailId	= MUD.intMarkUpDownDetailId -- Child Id
 								,strTransactionId		= MU.strMarkUpDownNumber--@strMarkUpDownBatchId -- 'POS-10001'
-								,intTransactionTypeId	= CASE --@intCategoryAdjustmentType -- 49 50 33 -- For demo purposes, use 33, the transaction type for Invoice. 
-															WHEN MU.strAdjustmentType = @AdjustmentType_Regular THEN @InventoryTransactionType_MarkUpOrDown
-															ELSE @InventoryTransactionType_WriteOff
-														END
+								,intTransactionTypeId	= @InventoryTransactionType_MarkUpOrDown
 								,intSubLocationId		= NULL -- Optional
 								,intStorageLocationId	= NULL -- Optional 
 								,intCurrencyId			= NULL -- Optional. You will use this if you are using multi-currency. 
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
-								,dblUnitRetail			= CASE
-															--WHEN MU.strType = @MarkUpType_DepartmentLevel THEN NULL ELSE ItemPricing.dblSalePrice + MUD.dblRetailPerUnit
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN NULL ELSE MUD.dblRetailPerUnit
-														END
-
-								-- Department Manage
+								,dblUnitRetail			= MUD.dblRetailPerUnit
 								,intCategoryId			= CASE
 															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.intCategoryId ELSE NULL
 														END
-								,dblAdjustCostValue		= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblTotalCostAmount ELSE NULL
-														END
-								,dblAdjustRetailValue	= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN -MUD.dblTotalRetailAmount * -1 ELSE NULL
-														END -- -200 -- $$$ value to adjust the retail value.
-
+								,dblAdjustCostValue		= MUD.dblTotalCostAmount
+								,dblAdjustRetailValue	= MUD.dblTotalRetailAmount
 						FROM tblSTMarkUpDownDetail MUD
 						INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
 					
@@ -340,6 +268,7 @@ BEGIN TRY
 							INNER JOIN tblICItemPricing ItemPricing
 								ON ItemPricing.intItemId = i.intItemId AND ItemPricing.intItemLocationId = il.intItemLocationId
 						) ON i.intItemId = MUD.intItemId
+
 						--Category Managed. Since item Ids are required, we'll fill those fields. This is just a temporary fix
 						OUTER APPLY ( 
 							SELECT TOP 1	Item.intItemId,
@@ -377,6 +306,7 @@ BEGIN TRY
 								,intCurrencyId
 								,intForexRateTypeId
 								,dblForexRate
+								,dblUnitRetail
 								,intCategoryId
 								,dblAdjustCostValue
 								,dblAdjustRetailValue
@@ -396,14 +326,14 @@ BEGIN TRY
 															WHEN MU.strType = @MarkUpType_ItemLevel THEN iu.dblUnitQty 
 															ELSE 0
 														END -- 0 -- Required field so specify zero. 
-								,dblCost				= CASE
-															WHEN MU.strType = @MarkUpType_ItemLevel THEN [dbo].[fnCalculateCostBetweenUOM](
-																dbo.fnGetItemStockUOM(MUD.intItemId)
-																,iu.intItemUOMId
-																,ItemPricing.dblLastCost
-															)
-															ELSE 0
-														END			
+								,dblCost				= 0--CASE
+														--	WHEN MU.strType = @MarkUpType_ItemLevel THEN [dbo].[fnCalculateCostBetweenUOM](
+														--		dbo.fnGetItemStockUOM(MUD.intItemId)
+														--		,iu.intItemUOMId
+														--		,ItemPricing.dblLastCost
+														--	)
+														--	ELSE 0
+														--END
 								,intTransactionId		= MU.intMarkUpDownId -- Parent Id
 								,intTransactionDetailId	= MUD.intMarkUpDownDetailId -- Child Id
 								,strTransactionId		= MU.strMarkUpDownNumber--@strMarkUpDownBatchId -- 'POS-10001'
@@ -416,6 +346,10 @@ BEGIN TRY
 								,intCurrencyId			= NULL -- Optional. You will use this if you are using multi-currency. 
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
+								,dblUnitRetail			= CASE
+															WHEN MU.strType = @MarkUpType_ItemLevel THEN MUD.dblRetailPerUnit
+															ELSE NULL
+														END
 
 								-- Department Manage
 								,intCategoryId			= CASE
@@ -425,8 +359,8 @@ BEGIN TRY
 															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblTotalCostAmount * -1 ELSE NULL
 														END
 								,dblAdjustRetailValue	= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblTotalRetailAmount * -1 ELSE NULL
-														END -- -200 -- $$$ value to adjust the retail value.
+															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblTotalRetailAmount * -1  ELSE NULL -- -200 -- $$$ value to adjust the retail value.
+														END 
 
 						FROM tblSTMarkUpDownDetail MUD
 						INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId
@@ -532,6 +466,9 @@ BEGIN TRY
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intCurrentUserId
 						,@strAdjustmentType
+
+
+
 
 					--IF @intReturnValue < 0 GOTO With_Rollback_Exit
 					IF (@intReturnValue < 0)
