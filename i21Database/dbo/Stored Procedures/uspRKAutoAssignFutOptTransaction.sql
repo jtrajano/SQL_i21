@@ -45,8 +45,8 @@ BEGIN
                            (SELECT ISNULL(SUM(intNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId))  
                            BEGIN                        
                 
-                                  INSERT INTO tblRKAssignFuturesToContractSummaryHeader  
-                                  SELECT 1   
+                                  INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId)
+								  VALUES(1)
                                   SET @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()  
 
 										     SELECT TOP 1 @ysnMultiplePriceFixation= case when isnull(intContractHeaderId,0) =0 then 1 else 0 end FROM tblRKMatchFuturesPSDetail ps  
