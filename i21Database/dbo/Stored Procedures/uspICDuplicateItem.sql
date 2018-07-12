@@ -520,7 +520,7 @@ BEGIN
 	SELECT 
 		@NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
-		dblAmountPercent,
+		dblAmountPercent = ISNULL(dblAmountPercent,0.00),
 		0.00,
 		0.00,
 		strPricingMethod,
@@ -531,6 +531,21 @@ BEGIN
 		intSort 
 	FROM tblICItemPricing
 	WHERE intItemId = @ItemId
+	UNION
+	SELECT
+		intItemId,
+		intItemLocationId,
+		0.00,
+		0.00,
+		0.00,
+		'None',
+		0.00,
+		0.00,
+		0.00,
+		0.00,
+		intSort
+	FROM tblICItemLocation
+	WHERE intItemId = @NewItemId
 	-------------------------------------------
 	-- End duplication of Item Pricing table --
 	-------------------------------------------
