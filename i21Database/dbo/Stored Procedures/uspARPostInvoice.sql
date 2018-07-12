@@ -741,25 +741,22 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 --Process Split Invoice
 BEGIN TRY
-	IF @recap = 0
-	BEGIN
-		DECLARE @InvoiceIds TABLE(
-			id  	INT
-		)
-		INSERT INTO @InvoiceIds(id)
-		SELECT distinct intInvoiceId FROM @PostInvoiceData
+	DECLARE @InvoiceIds TABLE(
+		id  	INT
+	)
+	INSERT INTO @InvoiceIds(id)
+	SELECT distinct intInvoiceId FROM @PostInvoiceData
 
-		WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
-		BEGIN				
-			DECLARE @InvoiceId1 INT
-						
-			SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
-			
-			EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @userId, 1, @post
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
+	BEGIN				
+		DECLARE @InvoiceId1 INT
+					
+		SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
+		
+		EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @userId, 1, @post
 
-			DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
-		END
-	END		 
+		DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
+	END	 
 
 	IF @post = 1 AND @recap = 0
 	BEGIN
