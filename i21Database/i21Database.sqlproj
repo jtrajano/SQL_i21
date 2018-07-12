@@ -6354,6 +6354,8 @@
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryCount.sql" />
     <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
+    <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblIPFTPServer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
