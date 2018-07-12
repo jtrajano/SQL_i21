@@ -492,7 +492,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 												THEN  (
 														CASE WHEN A.intSourceType = 1 --SCALE
 														THEN E1.intItemUOMId
-														ELSE NULL END)
+														ELSE B.intUnitMeasureId END)
 												ELSE B.intUnitMeasureId END,
 			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
