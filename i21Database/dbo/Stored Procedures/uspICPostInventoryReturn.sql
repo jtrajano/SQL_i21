@@ -48,6 +48,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
+		,@intEntityVendorId AS INT 
 		
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -83,6 +84,7 @@ BEGIN
 			,@receiptType = strReceiptType
 			,@intTransferorId = intTransferorId
 			,@intLocationId = intLocationId
+			,@intEntityVendorId = intEntityVendorId
 	FROM	dbo.tblICInventoryReceipt   
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
@@ -1356,6 +1358,10 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
+		UPDATE @GLEntries
+		SET intEntityId = @intEntityVendorId
+		WHERE intEntityId IS NULL 
+
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
 	

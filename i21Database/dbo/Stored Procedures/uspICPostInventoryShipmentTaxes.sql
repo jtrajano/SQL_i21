@@ -111,6 +111,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
+		,intEntityId
 	)
 	AS 
 	(
@@ -140,6 +141,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityId						= Shipment.intEntityCustomerId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -186,6 +188,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityId						= ShipmentCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -228,8 +231,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -287,8 +290,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
