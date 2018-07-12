@@ -81,6 +81,7 @@ SELECT id							= NEWID()
 	 , ysnBlended					= SHIPPEDITEMS.ysnBlended
 	 , intRecipeId					= SHIPPEDITEMS.intRecipeId
 	 , intSubLocationId				= SHIPPEDITEMS.intSubLocationId
+	 , intOwnershipType				= ISNULL(SHIPPEDITEMS.intOwnershipType,0)
 	 , intCostTypeId				= SHIPPEDITEMS.intCostTypeId
 	 , intMarginById				= SHIPPEDITEMS.intMarginById
 	 , intCommentTypeId				= SHIPPEDITEMS.intCommentTypeId
@@ -165,6 +166,7 @@ FROM (
 		 , ysnBlended						= SOD.ysnBlended
 		 , intRecipeId						= SOD.intRecipeId
 		 , intSubLocationId					= ISNULL(SHP.intSubLocationId, SOD.intSubLocationId)
+		 , intOwnershipType					= SHP.intOwnershipType
 		 , intCostTypeId					= SOD.intCostTypeId
 		 , intMarginById					= SOD.intMarginById
 		 , intCommentTypeId					= SOD.intCommentTypeId
@@ -209,6 +211,7 @@ FROM (
 			 , ISH.intCurrencyId
 			 , ISI.intForexRateTypeId
 			 , ISI.dblForexRate
+			 , ISI.intOwnershipType
 		FROM dbo.tblICInventoryShipmentItem ISI WITH (NOLOCK)
 		INNER JOIN (
 			 SELECT intInventoryShipmentId
@@ -221,7 +224,6 @@ FROM (
 			 WHERE ysnPosted = 1
 		) ISH ON ISI.intInventoryShipmentId = ISH.intInventoryShipmentId
 		WHERE ISI.intLineNo = SOD.intSalesOrderDetailId
-		  AND ISNULL(ISI.intOwnershipType, 0) <> 2
 		GROUP BY ISI.intInventoryShipmentItemId
 			   , ISH.strShipmentNumber
 			   , ISH.intInventoryShipmentId
@@ -243,6 +245,7 @@ FROM (
 			   , ISH.intCurrencyId
 			   , ISI.intForexRateTypeId
 			   , ISI.dblForexRate
+			   , ISI.intOwnershipType
 	) SHP
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
@@ -337,6 +340,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= ICISI.intSubLocationId
+		 , intOwnershipType					= ICISI.intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -371,19 +375,15 @@ FROM (
 			intPriceUOMId,
 			dblUnitPrice,
 			dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
-			dblDestinationQuantity
+			dblDestinationQuantity,
+			intOwnershipType
 		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
 		WHERE 
-			(	ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
-				AND
-				ISNULL(intOwnershipType, 0) <> 2
-			)
+			ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
 			OR
 			(	ISNULL(ysnDestinationWeightsAndGrades, 0) = 1 
 				AND 
 				dblDestinationQuantity IS NOT NULL
-				AND
-				ISNULL(intOwnershipType, 0) <> 2
 			)
 	) ICISI 
 	INNER JOIN (
@@ -571,6 +571,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -671,6 +672,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= MFR.intRecipeId
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -781,6 +783,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= ICISI.intOwnershipType
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -823,7 +826,6 @@ FROM (
 		FROM tblMFRecipeItem WITH(NOLOCK)
 	) MFI ON MFG.intRecipeItemId = MFI.intRecipeItemId
 	WHERE ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 0
-	  AND ISNULL(ICISI.intOwnershipType, 0) <> 2
 
 	UNION ALL 
 
@@ -889,6 +891,7 @@ FROM (
 	     , ysnBlended						= ysnBlended
 	     , intRecipeId						= intRecipeId
 	     , intSubLocationId					= intSubLocationId
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= intCostTypeId
 	     , intMarginById					= intMarginById
 	     , intCommentTypeId					= intCommentTypeId
@@ -971,6 +974,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -1089,6 +1093,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -1215,6 +1220,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
