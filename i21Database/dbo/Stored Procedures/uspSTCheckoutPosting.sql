@@ -163,6 +163,9 @@ BEGIN
 		----------------------------------------------------------------------
 		IF(@ysnPost = 1)
 			BEGIN
+				-- Begin Trsaction
+				BEGIN TRANSACTION
+
 				----------------------------------------------------------------------
 				---------------------------- PUMP TOTALS -----------------------------
 				----------------------------------------------------------------------
@@ -2246,8 +2249,8 @@ BEGIN
 
 				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
-						
-						-- Filter None Lotted Items Only
+
+						    -- Filter None Lotted Items Only
 							INSERT INTO @tblTempItems
 							(
 								intItemId
@@ -2264,6 +2267,7 @@ BEGIN
 							-- Validate Items if Lotted
 							IF EXISTS(SELECT * FROM @tblTempItems)
 								BEGIN
+
 									DECLARE @strLottedItem AS NVARCHAR(MAX) = ''
 
 									SELECT @strLottedItem = @strLottedItem + temp.strItemNo + ', '
@@ -2272,8 +2276,8 @@ BEGIN
 
 									SET @ysnUpdateCheckoutStatus = 0
 									SET @strStatusMsg = 'Lotted Items (' + @strLottedItem + ') Only None Lotted Items are allowed '
-									
-									--GOTO With_Rollback_Exit;
+
+									RETURN
 								END
 							ELSE
 								BEGIN
@@ -2281,9 +2285,6 @@ BEGIN
 									SET @CreatedIvoices = ''
 
 									BEGIN TRY
-										-- Begin Trsaction
-										BEGIN TRANSACTION
-
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
 													@InvoiceEntries	 = @EntriesForInvoice
@@ -2305,6 +2306,7 @@ BEGIN
 										-- Need to call rollback after error message
 										-- Rollback Transaction here
 										ROLLBACK TRANSACTION
+										RETURN
 										-- ********************************************************
 										
 									END CATCH
@@ -2312,9 +2314,6 @@ BEGIN
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
-								-- Commit Transaction
-								COMMIT TRANSACTION
-
 							    -- Insert to temp table
 								INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
 								SELECT [intID] AS intInvoiceId 
@@ -2357,19 +2356,28 @@ BEGIN
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
 								SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
-
+								RETURN
 							END
 							END
 				ELSE 
 					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
 						SET @strStatusMsg = 'No records found to Post'
+						RETURN
 					END
+
+				-- Commit Transaction
+				COMMIT TRANSACTION
+
 				----------------------------------------------------------------------
 				---------------------------- END POST --------------------------------
 				----------------------------------------------------------------------
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
+				-- Begin Trsaction
+				BEGIN TRANSACTION
+
 				--SET @strInvoiceIdList = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
 
 				----------------------------------------------------------------------
@@ -2382,8 +2390,6 @@ BEGIN
 						SET @ysnSuccess = 1
 
 						BEGIN TRY
-							-- Begin Trsaction
-							BEGIN TRANSACTION
 
 							EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
@@ -2411,7 +2417,7 @@ BEGIN
 
 							-- Rollback Transaction here
 							ROLLBACK TRANSACTION
-
+							RETURN
 						END CATCH
 
 						-- Example OutPut params
@@ -2422,8 +2428,6 @@ BEGIN
 
 						IF(@ysnSuccess = CAST(1 AS BIT))
 							BEGIN
-								-- Commit Transaction
-								COMMIT TRANSACTION
 
 								SET @ysnInvoiceStatus = 0
 								-----------------------------------------------------------------------
@@ -2449,6 +2453,9 @@ BEGIN
 						SET @strStatusMsg = 'There are no Invoice to Unpost'
 					END
 				
+				-- Commit Transaction
+				COMMIT TRANSACTION
+
 			END
 		----------------------------------------------------------------------
 		----------------------- END POST / UNPOST ----------------------------
