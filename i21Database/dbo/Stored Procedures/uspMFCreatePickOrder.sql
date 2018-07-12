@@ -977,7 +977,7 @@ BEGIN TRY
 
 				SELECT @intLineNo = MIn(intLineNo)
 				FROM @OrderDetailInformation
-				WHERE @intLineNo > intLineNo
+				WHERE intLineNo > @intLineNo
 			END
 
 			SELECT @intLineNo = MIn(intLineNo)
