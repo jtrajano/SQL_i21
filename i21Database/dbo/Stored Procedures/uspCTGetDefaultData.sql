@@ -233,6 +233,7 @@ BEGIN
 		FROM	tblICCommodityUnitMeasure	CU
 		JOIN	tblICUnitMeasure			UM ON UM.intUnitMeasureId = CU.intUnitMeasureId
 		WHERE	intCommodityId = @intCommodityId	
+		AND		CU.ysnDefault = 1
 	END
 
 END
