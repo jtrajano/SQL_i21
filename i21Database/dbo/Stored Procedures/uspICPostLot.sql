@@ -245,10 +245,10 @@ BEGIN
 	ELSE IF (ISNULL(@dblQty, 0) > 0)
 	BEGIN 
 
-		----------------------------------------------------------------------------------------------
+		-------------------------------------------------------------------------------------------------
 		-- Bagged vs Weight. 
-		----------------------------------------------------------------------------------------------
-		-- 1. If Costing Lot table is using a weight UOM, then convert the UOM and Qty to weight. 
+		-------------------------------------------------------------------------------------------------
+		-- 1. If Costing Lot table is using a weight UOM, then convert the Qty, UOM, and Cost weight UOM. 
 		-- 2. Otherwise, keep the same Qty, Cost, and UOM Id. 
 		BEGIN 
 			SET @dblAddQty = ISNULL(@dblQty, 0) 
@@ -262,31 +262,23 @@ BEGIN
 						AND Lot.intWeightUOMId IS NOT NULL 
 			)			 
 			BEGIN 
-				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
-				-- and also compute the Qty if it has weights. 
+				-- Retrieve the correct Lot's UOM
+				-- Compute the new Add Qty
+				-- Recompute the Cost. Convert it to the Lot's Weight UOM. 
+				-- and recompute the unit retail. Convert it to the Lot's Weight UOM. 
 				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
-						,@intItemUOMId = Lot.intWeightUOMId 				
+						,@intItemUOMId = Lot.intWeightUOMId
+						,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblCost)
+						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intItemUOMId, @dblUnitRetail)
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 
 				SET @dblAddQty = ISNULL(@dblAddQty, 0)
 
-				---- Get the unit cost. 
-				--SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
-
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
-
-				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)
-						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblUnitRetail)
-				FROM	tblICItemUOM StockUOM
-				WHERE	StockUOM.intItemId = @intItemId 
-						AND StockUOM.ysnStockUnit = 1
-
-				---- Adjust the cost to the new UOM
-				--SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
 			END 
 		END 
 						
