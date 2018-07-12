@@ -6,7 +6,8 @@
 	@dtmDate AS DATETIME = NULL,
 	@intLotId AS INT = NULL, 
 	@strLotNumber AS NVARCHAR(50) = NULL,
-	@intOwnershipType AS INT = 1 
+	@intOwnershipType AS INT = 1, 
+	@ysnHasStockOnly AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -209,3 +210,5 @@ GROUP BY i.intItemId
 		,CostMethod.strCostingMethod
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
+HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
+		OR @ysnHasStockOnly = 0 
