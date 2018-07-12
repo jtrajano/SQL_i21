@@ -156,7 +156,7 @@ BEGIN TRY
 														THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) / 100
 														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) * CD.dblRate
 												END
-								END) + ' ' + IY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,FN.strUnitMeasure) ,
+								END) + ' ' + IY.strCurrency + ' ' + @per + ' ' +  dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',FN.intUnitMeasureId,@intLaguageId,'Name',FN.strUnitMeasure),
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strSummary
 								ELSE	''

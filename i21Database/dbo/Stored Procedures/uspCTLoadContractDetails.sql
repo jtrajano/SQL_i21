@@ -92,7 +92,7 @@ BEGIN TRY
 				BT.strName						AS	strBillTo,
 				SH.strName						AS	strShipper,
 				SN.strName						AS	strShippingLine,
-				EF.strFarmNumber,
+				EF.strLocationName				AS	strFarmNumber,
 				ES.strSplitNumber,
 				DS.strDiscountDescription,
 				SI.strDescription				AS	strScheduleCode,
@@ -156,7 +156,7 @@ BEGIN TRY
 		LEFT	JOIN	tblEMEntity						SN	ON	SN.intEntityId						=		CD.intShippingLineId		--strShippingLine
 		LEFT    JOIN	tblEMEntity						SV	ON	SV.intEntityId						=		CD.intShipViaId				--strShipVia
 		LEFT    JOIN	tblEMEntity						PR	ON	PR.intEntityId						=		CD.intProducerId			--strProducer
-		LEFT	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId					=		CD.intFarmFieldId			--strFarmNumber
+		LEFT	JOIN	tblEMEntityLocation				EF	ON	EF.intEntityLocationId				=		CD.intFarmFieldId			--strFarmNumber
 		LEFT	JOIN	tblEMEntitySplit				ES	ON	ES.intSplitId						=		CD.intSplitId				--strSplitNumber
 	
 		LEFT    JOIN	tblGRDiscountId					DC	ON	DC.intDiscountId					=		CD.intDiscountId			--strDiscountId
