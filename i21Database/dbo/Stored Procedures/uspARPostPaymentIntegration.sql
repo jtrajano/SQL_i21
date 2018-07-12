@@ -453,49 +453,35 @@ BEGIN
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
 END
 
-
+--UPDATE CUSTOMER AR BALANCE
 UPDATE CUSTOMER
-SET
-    dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
-FROM
-    dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-INNER JOIN
-    (
-    SELECT
-         intEntityCustomerId
-        ,dblTotalPayment = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
-    FROM
-        dbo.tblARPaymentDetail PD WITH (NOLOCK)
-    INNER JOIN
-        @PaymentIds PTU
-            ON PD.[intPaymentId] = PTU.[intId]
-    INNER JOIN
-        (
-        SELECT
-             intPaymentId
-            ,intEntityCustomerId
-        FROM
-            dbo.tblARPayment WITH (NOLOCK)
-        ) P
-            ON PD.intPaymentId = P.intPaymentId    
+SET dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
+FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+INNER JOIN (
+    SELECT intEntityCustomerId
+        , dblTotalPayment = ABS(SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END))
+    FROM dbo.tblARPayment P WITH (NOLOCK)
+    LEFT JOIN (
+        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
+            , intPaymentId
+        FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+        GROUP BY intPaymentId
+    ) PD ON PD.intPaymentId = P.intPaymentId
+    WHERE P.intPaymentId IN (SELECT intId FROM @PaymentIds)
     GROUP BY intEntityCustomerId
-    ) PAYMENT
-        ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
-
+--UPDATE CUSTOMER CREDIT LIMIT REACHED DATE
 UPDATE CUSTOMER
-SET
-    dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
-FROM
-    dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-CROSS APPLY
-    (
+SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
+FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+CROSS APPLY (
     SELECT TOP 1 P.dtmDatePaid
     FROM dbo.tblARPayment P
     INNER JOIN @PaymentIds U ON P.intPaymentId = U.intId
     WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
     ORDER BY P.dtmDatePaid DESC
-    ) PAYMENT
+) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
 --Update Customer's Budget 
