@@ -148,7 +148,7 @@ BEGIN TRY
 	IF @isContact = 1
 	BEGIN
 		DECLARE @entityCustomerId INT
-		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)'
+		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
 
 		DECLARE @btnDeleteLocId INT
 		SELECT @btnDeleteLocId = intControlId FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'

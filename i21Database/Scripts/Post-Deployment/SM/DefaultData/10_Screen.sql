@@ -918,10 +918,14 @@ GO
 		VALUES (N'Bank Accounts', N'Bank Accounts', N'CashManagement.view.BankAccounts', N'Cash Management', N'tblCMBankAccount', 1, N'Cash Management')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'Customers') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Customers', N'Customers', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strPortalName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Customers', N'Customers', N'My Company', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET  strScreenId = 'Customers', strScreenName = 'Customers', strPortalName = N'My Company', strModule = 'Accounts Receivable' WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
 	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson') 

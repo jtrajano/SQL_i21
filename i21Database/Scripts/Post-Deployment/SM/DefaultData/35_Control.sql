@@ -2,7 +2,7 @@
 	PRINT N'BEGIN INSERT DEFAULT CONTROL'
 GO
 	DECLARE @entityCustomerId INT
-	SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)'
+	SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
 
 	IF @entityCustomerId IS NOT NULL
 	BEGIN

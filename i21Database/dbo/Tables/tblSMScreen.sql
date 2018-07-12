@@ -2,6 +2,7 @@
     [intScreenId]      INT            IDENTITY (1, 1) NOT NULL,
     [strScreenId]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strScreenName]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strPortalName]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strNamespace]     NVARCHAR (150) COLLATE Latin1_General_CI_AS NOT NULL,
     [strModule]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strTableName]     NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
