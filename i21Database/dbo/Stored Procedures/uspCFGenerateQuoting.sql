@@ -182,7 +182,7 @@ BEGIN
 		AND intSiteId = @loopSiteId
 		AND intItemId = @loopARItemId
 		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
-		ORDER BY dtmDate ASC
+		ORDER BY dtmDate DESC
 
 		
 
