@@ -307,6 +307,7 @@ BEGIN TRY
 			SET @NewSalesOrderId = @NewTransactionId
 
 			EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
+			EXEC dbo.[uspSOUpdateOrderIntegrationsPost] @NewSalesOrderId, 0, 0, @UserId
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH

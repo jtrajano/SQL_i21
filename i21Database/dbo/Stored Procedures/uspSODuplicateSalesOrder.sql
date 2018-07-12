@@ -339,6 +339,7 @@ BEGIN
 		END	
 
 	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
+	EXEC dbo.[uspSOUpdateOrderIntegrationsPost] @NewSalesOrderId, 0, 0, @UserId
 	
 	SELECT 
 		@ysnRecurringDuplicate = ysnRecurring 
