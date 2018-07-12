@@ -73,6 +73,8 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
+DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
+DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 
 DECLARE @intReturnValue AS INT 
 
@@ -525,6 +527,7 @@ BEGIN
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
+	IF(@intTransactionTypeId != @InventoryTransactionType_MarkUpOrDown) -- Do not include update when Mark Up/Down
 	BEGIN 
 		-- Get the current average cost and stock qty 
 		DECLARE @CurrentStockQty AS NUMERIC(38, 20) = NULL 
@@ -706,6 +709,7 @@ BEGIN
 	FROM	@ItemsToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
+			AND intTransactionTypeId NOT IN (@InventoryTransactionType_MarkUpOrDown)
 
 	SET @intInventoryTransactionId = NULL 
 

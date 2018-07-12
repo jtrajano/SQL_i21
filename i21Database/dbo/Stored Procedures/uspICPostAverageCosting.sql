@@ -73,6 +73,8 @@ DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
 DECLARE @INVENTORY_REVALUE_SOLD AS INT = 3;
 DECLARE @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35;
+DECLARE @INVENTORY_MarkUpOrDown AS INT = 49;
+DECLARE @INVENTORY_WriteOff AS INT = 50;
 
 -- Create the variables 
 DECLARE @RemainingQty AS NUMERIC(38,20);
@@ -82,6 +84,10 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @CategoryCostValue AS NUMERIC(38,20);
+DECLARE @CategoryRetailValue AS NUMERIC(38,20);
+DECLARE @MarkUpDownValue AS NUMERIC(38,20);
+
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -203,7 +209,7 @@ BEGIN
 	END
 
 	-- Add stock 
-	ELSE IF (ISNULL(@dblQty, 0) > 0)
+	ELSE IF (ISNULL(@dblQty, 0) > 0 AND @intTransactionTypeId != @INVENTORY_MarkUpOrDown)
 	BEGIN 
 
 		SET @dblAddQty = ISNULL(@dblQty, 0)
@@ -394,4 +400,43 @@ BEGIN
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 		END 
 	END 
+	-- Do Mark Up/Down. Only the Retail Value will be affected, not the cost.
+	ELSE IF (ISNULL(@dblQty, 0) > 0 AND @intTransactionTypeId = @INVENTORY_MarkUpOrDown)
+	BEGIN
+		SET @CategoryRetailValue = dbo.fnMultiply(@dblQty, @dblUnitRetail);
+
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
+				,@intSubLocationId = @intSubLocationId
+				,@intStorageLocationId = @intStorageLocationId
+				,@dtmDate = @dtmDate
+				,@dblQty = 0
+				,@dblUOMQty = 0
+				,@dblCost = 0
+				,@dblValue = NULL
+				,@dblSalesPrice = 0
+				,@intCurrencyId = @intCurrencyId
+				--,@dblExchangeRate = @dblExchangeRate
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @intTransactionTypeId
+				,@intLotId = NULL 
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @AVERAGECOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
+				,@dblUnitRetail = 0
+				,@dblCategoryRetailValue = @CategoryRetailValue
+
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+	END
 END 
