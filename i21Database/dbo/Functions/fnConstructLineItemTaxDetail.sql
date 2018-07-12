@@ -286,7 +286,7 @@ BEGIN
 			WHERE
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
 			SET @TaxableByOtherUnitTax = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
@@ -339,7 +339,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 0
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffUnitTax = SUM(@Quantity * [dblRate])
@@ -348,7 +348,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 1
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 				
 			SET @TotalUnitTax = ((ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)) + ISNULL(@TaxableByOtherUnitTax, @ZeroDecimal))
@@ -360,7 +360,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 0
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffRate = SUM([dblRate])
@@ -369,7 +369,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 1
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 
 			DELETE FROM @TaxableByOtherTaxUnit
@@ -421,7 +421,7 @@ BEGIN
 			WHERE
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
 			SET @TaxableByOtherRate = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
@@ -622,10 +622,10 @@ BEGIN
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00) AND @DisregardExemptionSetup = 0
 				SET @ItemTaxAmount = 0.00;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00) OR @DisregardExemptionSetup = 1
 				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
 				
 			IF(@CheckoffTax = 1)
