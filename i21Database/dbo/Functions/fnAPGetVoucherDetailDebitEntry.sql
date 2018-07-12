@@ -48,14 +48,13 @@ RETURNS TABLE AS RETURN
 									END																		
 						END
 			END AS DECIMAL(18,2)) AS dblForeignTotal
-		,(CASE WHEN F.intItemId IS NULL THEN B.dblQtyReceived 
-				ELSE
-					CASE WHEN F.strType = 'Inventory' THEN --units is only of inventory item
-						dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
-														THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END), 
-													itemUOM.intItemUOMId,
-													CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
-					ELSE 0 END
+		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType != 'Inventory' THEN 0
+			   ELSE
+		       --units is only of inventory item
+			   dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
+												  THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END), 
+													itemUOM.intItemUOMId, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
+					 
 		END) as dblTotalUnits
 		,CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL 
 				THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
