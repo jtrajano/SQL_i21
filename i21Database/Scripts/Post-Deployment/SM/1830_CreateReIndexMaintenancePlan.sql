@@ -1,21 +1,15 @@
-﻿-- Turn On Agent XPs --
-msdb.dbo.SP_CONFIGURE 'SHOW ADVANCE',1
-GO
-RECONFIGURE
-GO
-msdb.dbo.SP_CONFIGURE 'AGENT XPs',1
-GO
-RECONFIGURE
-GO
-
-
-
--- Get the current database
+﻿-- Get the current database
 DECLARE @currentDatabaseName varchar(100)
 SET @currentDatabaseName = DB_NAME()
 
 -- Maintenance plan always used msdb
 USE msdb;  
+
+-- Turn On Agent XPs --
+EXEC SP_CONFIGURE 'SHOW ADVANCE',1
+RECONFIGURE
+EXEC SP_CONFIGURE 'AGENT XPs',1
+RECONFIGURE
 
 BEGIN TRANSACTION
 DECLARE @ReturnCode INT
