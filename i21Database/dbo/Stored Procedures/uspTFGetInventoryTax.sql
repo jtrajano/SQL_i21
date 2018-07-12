@@ -247,11 +247,12 @@ BEGIN TRY
 						tblTRLoadDistributionHeader.intShipToLocationId,
 						tblTRLoadDistributionHeader.intEntityCustomerId,
 						tblTRLoadDistributionHeader.strDestination,
+						CASE WHEN vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId IS NULL THEN tblTRLoadDistributionDetail.strReceiptLink ELSE  vyuTRGetLoadBlendIngredient.strReceiptLink END strReceiptLink,
 						CASE WHEN vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId IS NULL THEN tblTRLoadDistributionDetail.dblUnits ELSE  vyuTRGetLoadBlendIngredient.dblQuantity END dblUnits
 					 FROM tblTRLoadDistributionDetail INNER JOIN tblTRLoadDistributionHeader 
 					 ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
 					 LEFT JOIN vyuTRGetLoadBlendIngredient ON vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId = tblTRLoadDistributionDetail.intLoadDistributionDetailId
-				) DistributionDetail ON DistributionDetail.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND DistributionDetail.intItemId = tblTRLoadReceipt.intItemId
+				) DistributionDetail ON DistributionDetail.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND DistributionDetail.intItemId = tblTRLoadReceipt.intItemId AND DistributionDetail.strReceiptLink = tblTRLoadReceipt.strReceiptLine
 					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = DistributionDetail.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = DistributionDetail.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = DistributionDetail.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
@@ -431,11 +432,12 @@ BEGIN TRY
 						tblTRLoadDistributionHeader.intShipToLocationId,
 						tblTRLoadDistributionHeader.intEntityCustomerId,
 						tblTRLoadDistributionHeader.strDestination,
+						CASE WHEN vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId IS NULL THEN tblTRLoadDistributionDetail.strReceiptLink ELSE  vyuTRGetLoadBlendIngredient.strReceiptLink END strReceiptLink,
 						CASE WHEN vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId IS NULL THEN tblTRLoadDistributionDetail.dblUnits ELSE  vyuTRGetLoadBlendIngredient.dblQuantity END dblUnits
 					 FROM tblTRLoadDistributionDetail INNER JOIN tblTRLoadDistributionHeader 
 					 ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
 					 LEFT JOIN vyuTRGetLoadBlendIngredient ON vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId = tblTRLoadDistributionDetail.intLoadDistributionDetailId
-				) DistributionDetail ON DistributionDetail.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND DistributionDetail.intItemId = tblTRLoadReceipt.intItemId
+				) DistributionDetail ON DistributionDetail.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND DistributionDetail.intItemId = tblTRLoadReceipt.intItemId AND DistributionDetail.strReceiptLink = tblTRLoadReceipt.strReceiptLine
 					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = DistributionDetail.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = DistributionDetail.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = DistributionDetail.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
