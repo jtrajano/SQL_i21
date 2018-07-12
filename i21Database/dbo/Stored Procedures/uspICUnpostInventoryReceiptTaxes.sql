@@ -341,8 +341,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NULL  
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -392,8 +392,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NULL  
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

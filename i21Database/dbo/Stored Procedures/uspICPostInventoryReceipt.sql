@@ -58,6 +58,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strForexRateType AS NVARCHAR(50)
+		,@intEntityVendorId AS INT = NULL 
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -105,6 +106,7 @@ BEGIN
 			,@intLocationId = intLocationId
 			,@intSourceType = intSourceType 
 			,@strFobPoint = ft.strFobPoint
+			,@intEntityVendorId = r.intEntityVendorId
 	FROM	dbo.tblICInventoryReceipt r LEFT JOIN tblSMFreightTerms ft
 				ON r.intFreightTermId = ft.intFreightTermId
 	WHERE	strReceiptNumber = @strTransactionId  
@@ -2063,6 +2065,10 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
+		UPDATE @GLEntries
+		SET intEntityId = @intEntityVendorId
+		WHERE intEntityId IS NULL 
+
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 

@@ -135,8 +135,8 @@ BEGIN
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= GLEntries.intEntityId
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -194,8 +194,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NULL 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative
@@ -242,8 +242,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NULL 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative
