@@ -21,3 +21,7 @@
 )
 
 GO
+
+
+	CREATE INDEX [IX_tblTFReportingComponent_intMasterId] ON [dbo].[tblTFReportingComponent] ([intMasterId])
+	GO
