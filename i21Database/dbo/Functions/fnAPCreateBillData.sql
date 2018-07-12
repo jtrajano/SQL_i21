@@ -134,7 +134,7 @@ BEGIN
 
 	SELECT
 		@apAccount = CASE WHEN ISNULL(@apAccountId,0) > 0 THEN @apAccountId 
-						ELSE (CASE WHEN @type IN (2, 11) THEN intPurchaseAdvAccount
+						ELSE (CASE WHEN @type IN (2, 13) THEN intPurchaseAdvAccount
 							 	ELSE intAPAccount  END)
 						END,
 		@shipToAddress = strAddress,
