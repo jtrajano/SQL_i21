@@ -216,6 +216,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
+	Select @strPackagingCategory=strCategoryCode 
+	from tblICCategory
+	Where intCategoryId =@intPMCategoryId
+
 	If @intPMCategoryId is null
 	Begin
 		Select @intPMCategoryId=0,@strPackagingCategory=''
