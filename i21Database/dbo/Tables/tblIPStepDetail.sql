@@ -10,6 +10,8 @@
 	[intPosition] INT DEFAULT 0,
 	[strSourceColumnName] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[ysnDetail] BIT DEFAULT 0,
+	[ysnMultipleFileIndicator] BIT DEFAULT 0,
+	[strFormat] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblIPStepDetail_intStepDetailId] PRIMARY KEY ([intStepDetailId]),
 	CONSTRAINT [FK_tblIPStepDetail_tblIPStep_intStepId] FOREIGN KEY ([intStepId]) REFERENCES [tblIPStep]([intStepId]) ON DELETE CASCADE,
