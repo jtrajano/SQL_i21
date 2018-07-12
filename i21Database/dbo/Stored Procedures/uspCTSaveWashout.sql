@@ -34,9 +34,13 @@ BEGIN TRY
 			,@intCompanyLocationId	INT 
 			,@intLoadId				INT
 			,@intLocationId			INT
+			,@intSalesPersonId		INT
+			,@intProfitCenter		INT
 			,@voucherNonInvDetails	VoucherDetailNonInventory
 			,@InvoiceEntries		InvoiceIntegrationStagingTable	
 			,@LineItemTaxEntries	LineItemTaxDetailStagingTable
+			,@strSourceContractNo	NVARCHAR(50)
+			,@strWashoutContractNo	NVARCHAR(50)
 
 	SELECT   @intSourceHeaderId		=	intSourceHeaderId
 			,@intSourceDetailId		=   intSourceDetailId
@@ -126,6 +130,26 @@ BEGIN TRY
 	SELECT	@ErrMsg = LTRIM(@intSourceDetailId)+','+LTRIM(@intWashoutDetailId)
 	EXEC	[uspCTChangeContractStatus] @ErrMsg, 3, @intCreatedById
 
+	SELECT	@intSalesPersonId	=	intSalespersonId
+	FROM	tblCTContractHeader 
+	WHERE	intContractHeaderId IN (@intSourceHeaderId, @intWashoutHeaderId)
+	AND		intContractTypeId	=	2
+
+	SELECT	@intItemId				=	CD.intItemId,
+			@intCompanyLocationId	=	CD.intCompanyLocationId,
+			@intProfitCenter		=	CL.intProfitCenter
+	FROM	tblCTContractDetail		CD
+	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId
+	WHERE	intContractDetailId = @intWashoutDetailId
+
+	SELECT	@strSourceContractNo	=	strContractNumber
+	FROM	tblCTContractHeader 
+	WHERE	intContractHeaderId IN (@intSourceHeaderId)
+
+	SELECT	@strWashoutContractNo	=	strContractNumber
+	FROM	tblCTContractHeader 
+	WHERE	intContractHeaderId IN (@intWashoutHeaderId)
+
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
 		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
@@ -133,7 +157,7 @@ BEGIN TRY
 	   
 		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
 
-		EXEC		uspAPCreateBillData
+		EXEC	uspAPCreateBillData
 				@userId					=   @intCreatedById,
 				@vendorId				=   @intEntityId,
 				@type					=   @type,
@@ -151,8 +175,49 @@ BEGIN TRY
 
     IF @strDocType = 'AR Credit Memo' OR @strDocType = 'AR Invoice'
     BEGIN
-	   INSERT  INTO @InvoiceEntries(strTransactionType,strSourceTransaction,strSourceId,intEntityCustomerId,intCompanyLocationId,dtmDate,intEntityId,intItemId,dblQtyOrdered,dblQtyShipped,dblPrice,dblUnitPrice)
-	   SELECT	 REPLACE(@strDocType,'AR ',''), 'Direct', '', @intEntityId, @intCompanyLocationId, GETDATE(), @intEntityId, @intItemId,1, 1, ABS(@dblAmount), ABS(@dblAmount)
+	   INSERT  INTO @InvoiceEntries
+	   (
+			    strTransactionType
+			   ,strSourceTransaction
+			   ,strSourceId
+			   ,intEntityCustomerId
+			   ,intCompanyLocationId
+			   ,dtmDate,intEntityId
+			   ,intItemId
+			   ,dblQtyOrdered
+			   ,dblQtyShipped
+			   ,dblPrice
+			   ,dblUnitPrice
+			   ,intEntitySalespersonId
+			   ,intSalesAccountId
+			   ,strItemDescription
+	   )
+	   SELECT	 REPLACE(@strDocType,'AR ','')
+				,'Direct'
+				,''
+				,@intEntityId
+				,@intCompanyLocationId
+				,GETDATE()
+				,@intEntityId
+				,NULL
+				,0
+				,1
+				,ABS(@dblAmount)
+				,ABS(@dblAmount)
+				,@intSalesPersonId
+				,ISNULL(
+					[dbo].[fnGetGLAccountIdFromProfitCenter]
+					(ISNULL(
+							dbo.fnGetItemGLAccount(@intItemId, @intCompanyLocationId, N'Sales Account'), 
+							NULLIF(dbo.fnGetItemBaseGLAccount(@intItemId, @intCompanyLocationId, N'Sales Account'), 0)
+						), @intProfitCenter
+					), 
+					ISNULL(
+						dbo.fnGetItemGLAccount(@intItemId, @intCompanyLocationId, N'Sales Account'), 
+						NULLIF(dbo.fnGetItemBaseGLAccount(@intItemId, @intCompanyLocationId, N'Sales Account'), 0)
+						)
+				)
+			    ,'Washout net diff: Original Contract  ' + @strSourceContractNo + ' and Washout Contract ' + @strWashoutContractNo
 
 	   EXEC		uspARProcessInvoices
 				@InvoiceEntries		=   @InvoiceEntries,
