@@ -6790,6 +6790,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherStorageItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTaxGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrationsPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeVoucherDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
