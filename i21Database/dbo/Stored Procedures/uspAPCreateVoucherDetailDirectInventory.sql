@@ -37,6 +37,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intTaxGroupId]					,
 		[intContractDetailId]			,
 		[intContractHeaderId]			,
+		[intContractSeq]				,
 		[intLoadDetailId]				,
 		[intLoadId]						,
 		[intScaleTicketId]
@@ -85,6 +86,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intTaxGroupId]					=	A.[intTaxGroupId],
 		[intContractDetailId]			=	ctd.intContractDetailId,
 		[intContractHeaderId]			=	ctd.intContractHeaderId,
+		[intContractSeq]				=	ctd.intContractSeq,
 		[intLoadDetailId]				=	A.intLoadDetailId,
 		[intLoadId]						=	lgDetail.intLoadId,
 		[intScaleTicketId]				=	A.[intScaleTicketId]										
