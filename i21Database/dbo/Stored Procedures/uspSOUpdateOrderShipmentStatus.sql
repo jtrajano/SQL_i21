@@ -218,7 +218,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 			, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
 		WHERE intSalesOrderId = @intSOToUpdate
 
-		IF @ysnForDelete = 1
+		IF @ysnForDelete = 1 AND @strTransactionType = 'Sales Order' 
 			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @intSOToUpdate, @intUserId = @intUserId, @ysnDelete = 1
 
 		DELETE FROM @tblSOToUpdate WHERE intId = @intSOToUpdate
