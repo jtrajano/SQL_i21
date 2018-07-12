@@ -11,3 +11,7 @@
 	CONSTRAINT [FK_tblTFReportingComponentOriginState_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblTFReportingComponentOriginState_tblTFOriginDestinationState] FOREIGN KEY ([intOriginDestinationStateId]) REFERENCES [tblTFOriginDestinationState]([intOriginDestinationStateId])
 )
+GO
+
+CREATE INDEX [IX_tblTFReportingComponentOriginState_intMasterId] ON [dbo].[tblTFReportingComponentOriginState] ([intMasterId])
+GO

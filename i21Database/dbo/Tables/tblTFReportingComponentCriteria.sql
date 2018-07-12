@@ -9,3 +9,7 @@
     CONSTRAINT [PK_tblTFReportingComponentCriteria] PRIMARY KEY ([intReportingComponentCriteriaId] ASC),
 	CONSTRAINT [FK_tblTFReportingComponentCriteria_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE
 )
+GO
+
+CREATE INDEX [IX_tblTFReportingComponentCriteria_intMasterId] ON [dbo].[tblTFReportingComponentCriteria] ([intMasterId])
+GO

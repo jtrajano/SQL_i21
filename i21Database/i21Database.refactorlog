@@ -6888,4 +6888,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intHandheldScannerImportCountId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8b5d3fb0-1d3d-4423-ae8a-0eeded24271c" ChangeDateTime="07/12/2018 05:35:37">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponent].[IX_tblTFReportingComponent_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponent]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponent_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="74a00a03-4df8-43b0-8b4d-b924566d0f1a" ChangeDateTime="07/12/2018 05:41:51">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentConfiguration].[IX_tblTFReportingComponentConfiguration_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentConfiguration_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9bf1ea8d-4409-4be5-82ad-ce947954b937" ChangeDateTime="07/12/2018 05:43:48">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentCriteria].[IX_tblTFReportingComponentCriteria_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentCriteria]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentCriteria_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a03705be-1e7f-4c27-87d1-d13699a6ce96" ChangeDateTime="07/12/2018 05:45:37">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentDestinationState].[IX_tblTFReportingComponentDestinationState_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentDestinationState_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="06137bfe-17d7-4c81-8a68-4ac004091f75" ChangeDateTime="07/12/2018 05:47:38">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentField].[IX_tblTFReportingComponentField_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentField]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentField_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d8d249e8-7350-4196-b1d9-6ae507e17836" ChangeDateTime="07/12/2018 05:55:59">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentOriginState].[IX_tblTFReportingComponentOriginState_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentOriginState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentOriginState_intMasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bf89edfe-16b5-4609-887a-bbf498708b11" ChangeDateTime="07/12/2018 05:57:48">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentProductCode].[IX_tblTFReportingComponentProductCode_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentProductCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentProductCode_intMasterId]" />
+  </Operation>
 </Operations>

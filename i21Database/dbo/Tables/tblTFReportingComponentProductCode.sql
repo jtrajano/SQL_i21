@@ -10,3 +10,7 @@
     CONSTRAINT [FK_tblTFReportingComponentProductCode_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblTFReportingComponentProductCode_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId])
 )
+GO
+
+CREATE INDEX [IX_tblTFReportingComponentProductCode_intMasterId] ON [dbo].[tblTFReportingComponentProductCode] ([intMasterId])
+GO

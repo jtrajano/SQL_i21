@@ -24,5 +24,7 @@
 GO
 
 CREATE INDEX [IX_tblTFReportingComponentConfiguration_strTemplateItemId] ON [dbo].[tblTFReportingComponentConfiguration] ([strTemplateItemId])
+GO
 
+CREATE INDEX [IX_tblTFReportingComponentConfiguration_intMasterId] ON [dbo].[tblTFReportingComponentConfiguration] ([intMasterId])
 GO
