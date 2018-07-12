@@ -46,7 +46,7 @@ FROM	tblICInventoryReceipt Receipt
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
 					,dblUnitCost = (CASE WHEN rc.strCostMethod = 'Per Unit' THEN  ROUND(rc.dblRate, 2) ELSE ROUND(rc.dblAmount, 2) END )
-					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(ABS(rc.dblQuantityPriced),0) ELSE ISNULL(ABS(rc.dblAmountBilled),0) END)
+					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(ABS(rc.dblQuantityPriced),0) ELSE ISNULL(ABS(rc.dblQuantity),0) END)
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
