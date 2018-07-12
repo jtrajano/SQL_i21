@@ -6789,6 +6789,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherReceiptItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherStorageItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTaxGLEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrationsPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
