@@ -154,6 +154,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
+		,intEntityVendorId
 	)
 	AS 
 	(
@@ -180,6 +181,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= Receipt.intEntityVendorId 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -222,6 +224,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -264,6 +267,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -306,8 +310,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -357,8 +361,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
