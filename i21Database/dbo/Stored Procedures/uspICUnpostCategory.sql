@@ -21,6 +21,8 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
+		,@INV_TRANS_TYPE_MarkUpOrDown AS INT = 49
+		,@INV_TRANS_TYPE_WriteOff AS INT = 50
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -81,7 +83,8 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY
+					AND (dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY 
+						OR (inventory_transaction.intTransactionTypeId = @INV_TRANS_TYPE_MarkUpOrDown AND inventory_transaction.dblCategoryRetailValue IS NOT NULL))
 					AND 
 					(
 						-- Link to the main transaction
