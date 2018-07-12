@@ -54,6 +54,7 @@ DECLARE @LotType_Manual AS INT = 1
 DECLARE @GLEntries AS RecapTableType 
 		,@dummyGLEntries AS RecapTableType 
 		,@intReturnValue AS INT
+		,@intEntityCustomerId AS INT 
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -75,6 +76,7 @@ BEGIN
 			,@intCreatedEntityId = s.intEntityId  
 			,@intFobPointId = fp.intFobPointId
 			,@intLocationId = s.intShipFromLocationId
+			,@intEntityCustomerId = s.intEntityCustomerId
 	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
 				ON s.intFreightTermId = ft.intFreightTermId
 			LEFT JOIN tblICFobPoint fp
@@ -1152,6 +1154,10 @@ BEGIN
 			 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
+		UPDATE @GLEntries
+		SET intEntityId = @intEntityCustomerId
+		WHERE intEntityId IS NULL 
+
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
 
