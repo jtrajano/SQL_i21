@@ -98,6 +98,11 @@ SELECT Lot.intLotId
 	   , CTDetail.intSubBookId AS intSubBookId 
 	   , SB.strSubBook COLLATE Latin1_General_CI_AS AS strSubBook 
 	   , 0 AS intCropYear
+	   ,FM.intFutureMarketId
+	   ,C.intCurrencyID AS intDefaultCurrencyId
+	   ,C.strCurrency AS strDefaultCurrency
+	   ,UM.intUnitMeasureId AS intDefaultUOMId
+	   ,UM.strUnitMeasure AS strDefaultUOM
 	   , '' COLLATE Latin1_General_CI_AS AS strCropYear 
 	   , '' COLLATE Latin1_General_CI_AS AS strProducer 
 	   , '' COLLATE Latin1_General_CI_AS AS strCertification  
@@ -128,5 +133,10 @@ LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CTDetail.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CTDetail.intSubBookId
+LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = COM.intFutureMarketId
+LEFT JOIN tblSMCurrency C ON C.intCurrencyID = FM.intCurrencyId
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = FM.intUnitMeasureId
+LEFT JOIN tblICItemUOM IU ON IU.intUnitMeasureId = UM.intUnitMeasureId
+	AND IU.intItemId = Item.intItemId
 WHERE Lot.dblQty > 0 
 ) InvLots
