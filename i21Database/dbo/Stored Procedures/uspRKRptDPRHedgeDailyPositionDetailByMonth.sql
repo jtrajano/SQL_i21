@@ -343,16 +343,11 @@ SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeN
 	isnull(dblTotal,0) dblTotal,
 	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strEntityName  FROM @List 
 
-UPDATE @List set intSeqNo = 1 where strType='Purchase DP (Priced Later)'
-UPDATE @List set intSeqNo = 2 where strType='Purchase Priced'
-UPDATE @List set intSeqNo = 3 where strType='Purchase Basis'
-UPDATE @List set intSeqNo = 4 where strType='Purchase HTA'
-UPDATE @List set intSeqNo = 5 where strType='Sale DP (Priced Later)'
-UPDATE @List set intSeqNo = 6 where strType='Sale Priced'
-UPDATE @List set intSeqNo = 7 where strType='Sale Basis'
-UPDATE @List set intSeqNo = 8 where strType='Sale HTA'
-UPDATE @List set intSeqNo = 9 where strType='Net Hedge'
-UPDATE @List set intSeqNo = 10 where strType='Position'
+
+UPDATE @List set intSeqNo = 1 where strType like 'Purchase%'
+UPDATE @List set intSeqNo = 2 where strType like 'Sale%'
+UPDATE @List set intSeqNo = 3 where strType='Net Hedge'
+UPDATE @List set intSeqNo = 4 where strType='Position'
 
 
 DECLARE @FinalListforReport AS TABLE (  
