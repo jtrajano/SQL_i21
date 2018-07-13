@@ -16,6 +16,8 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
+		-- BEGIN TRANSACTION
+		BEGIN TRANSACTION 
 
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
@@ -163,9 +165,6 @@ BEGIN
 		----------------------------------------------------------------------
 		IF(@ysnPost = 1)
 			BEGIN
-				-- Begin Trsaction
-				BEGIN TRANSACTION
-
 				----------------------------------------------------------------------
 				---------------------------- PUMP TOTALS -----------------------------
 				----------------------------------------------------------------------
@@ -2277,6 +2276,8 @@ BEGIN
 									SET @ysnUpdateCheckoutStatus = 0
 									SET @strStatusMsg = 'Lotted Items (' + @strLottedItem + ') Only None Lotted Items are allowed '
 
+									-- ROLLBACK
+									GOTO ExitWithRollback
 									RETURN
 								END
 							ELSE
@@ -2305,7 +2306,9 @@ BEGIN
 										-- It still create Invoice even there's error on posting
 										-- Need to call rollback after error message
 										-- Rollback Transaction here
-										ROLLBACK TRANSACTION
+
+										-- ROLLBACK
+										GOTO ExitWithRollback
 										RETURN
 										-- ********************************************************
 										
@@ -2356,6 +2359,9 @@ BEGIN
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
 								SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
+
+								-- ROLLBACK
+								GOTO ExitWithRollback
 								RETURN
 							END
 							END
@@ -2363,11 +2369,11 @@ BEGIN
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
 						SET @strStatusMsg = 'No records found to Post'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
 						RETURN
 					END
-
-				-- Commit Transaction
-				COMMIT TRANSACTION
 
 				----------------------------------------------------------------------
 				---------------------------- END POST --------------------------------
@@ -2375,8 +2381,6 @@ BEGIN
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
-				-- Begin Trsaction
-				BEGIN TRANSACTION
 
 				--SET @strInvoiceIdList = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
 
@@ -2415,9 +2419,10 @@ BEGIN
 							SET @ysnSuccess = CAST(0 AS BIT)
 							SET @strStatusMsg = 'Unpost Invoice error: ' + ERROR_MESSAGE()
 
-							-- Rollback Transaction here
-							ROLLBACK TRANSACTION
+							-- ROLLBACK
+							GOTO ExitWithRollback
 							RETURN
+
 						END CATCH
 
 						-- Example OutPut params
@@ -2451,11 +2456,11 @@ BEGIN
 				ELSE 
 					BEGIN
 						SET @strStatusMsg = 'There are no Invoice to Unpost'
-					END
-				
-				-- Commit Transaction
-				COMMIT TRANSACTION
 
+						-- ROLLBACK
+						GOTO ExitWithRollback
+						RETURN
+					END
 			END
 		----------------------------------------------------------------------
 		----------------------- END POST / UNPOST ----------------------------
@@ -2558,6 +2563,9 @@ BEGIN
 				BEGIN
 					DROP TABLE #tmpCustomerInvoiceIdList
 				END
+
+			-- COMMIT
+			GOTO ExitWithCommit
 	END TRY
 
 	BEGIN CATCH
@@ -2568,5 +2576,20 @@ BEGIN
 			END
 
 		SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
+
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	ROLLBACK TRANSACTION 
+		
+ExitPost:
