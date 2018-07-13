@@ -271,8 +271,8 @@ BEGIN
 				-- Recompute the Cost. Convert it to the Lot's Weight UOM. 
 				-- and recompute the unit retail. Convert it to the Lot's Weight UOM. 
 				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
-						,@intItemUOMId = Lot.intWeightUOMId
 						,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblCost)
+						,@intItemUOMId = Lot.intWeightUOMId
 						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intItemUOMId, @dblUnitRetail)
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
