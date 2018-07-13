@@ -9,7 +9,8 @@ BEGIN
 	     WHEN LEN(A.strCode) > B.intLength 	 THEN LEFT(A.strCode,B.intLength)ELSE A.strCode END
 	FROM tblGLCOATemplateDetail A INNER JOIN tblGLAccountStructure B ON A.intAccountStructureId = B.intAccountStructureId
 	
-	EXEC dbo.uspGLGenerateAccountRange
+	DECLARE @result nvarchar(20)
+	EXEC dbo.uspGLGenerateAccountRange @result out
 	
 END
 
