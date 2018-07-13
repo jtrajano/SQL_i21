@@ -33,6 +33,7 @@ BEGIN
 			ON SOD.intItemId = ICI.intItemId
 	WHERE
 		ISNULL(SOD.ysnBlended,0) = 1
+		AND SOD.[intSalesOrderId] = @SalesOrderId
 		
 	IF RTRIM(LTRIM(ISNULL(@ErrorMessage,''))) <> ''
 		RAISERROR(@ErrorMessage, 16, 1);
