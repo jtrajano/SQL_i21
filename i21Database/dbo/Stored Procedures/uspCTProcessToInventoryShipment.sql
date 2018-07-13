@@ -98,7 +98,7 @@ AS
 		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	AND
 													EL.ysnDefaultLocation	=	1			
 		JOIN	tblICItemUOM				IU	ON	IU.intItemId	=	CD.intItemId	
-												AND	IU.ysnStockUOM	=	1															
+												AND	IU.ysnStockUnit	=	1															
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges
@@ -152,7 +152,7 @@ AS
 
 		IF NOT EXISTS(SELECT * FROM  @ShipmentStagingTable)
 		BEGIN
-			RETURN
+			RAISERROR('Please verify the stock unit for the item or default location is available for the entity.',16,1)
 		END
 
 		EXEC dbo.uspICAddItemShipment @ShipmentStagingTable,@OtherCharges,@ShipmentItemLotStaging,@intUserId;
