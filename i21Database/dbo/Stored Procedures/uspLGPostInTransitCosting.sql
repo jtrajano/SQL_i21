@@ -67,16 +67,16 @@ BEGIN TRY
 			)
 		SELECT LD.intItemId
 			,IL.intItemLocationId
-			,LD.intItemUOMId
+			,LD.intWeightItemUOMId
 			,GETDATE()
-			,LD.dblQuantity
+			,LD.dblNet
 			,IU.dblUnitQty
 			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
 					THEN CASE 
 							WHEN CUR.ysnSubCurrency = 1
-								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
-							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
 							END
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
@@ -88,15 +88,15 @@ BEGIN TRY
 				WHEN LD.strPriceStatus = 'Basis'
 					THEN CASE 
 							WHEN CUR.ysnSubCurrency = 1
-								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
-							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
 							END
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END,0) * LD.dblQuantity dblValue
+				END,0) * LD.dblNet dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
@@ -116,7 +116,7 @@ BEGIN TRY
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
 			AND LD.intPCompanyLocationId = IL.intLocationId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -128,6 +128,7 @@ BEGIN TRY
 			,IL.intItemLocationId
 			,LD.intItemUOMId
 			,LD.dblQuantity
+			,LD.dblNet
 			,IU.dblUnitQty
 			,AD.dblSeqPrice
 			,L.intLoadId
