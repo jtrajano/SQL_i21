@@ -6799,6 +6799,7 @@
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrationsPost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeVoucherDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateReIndexMaintenancePlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
