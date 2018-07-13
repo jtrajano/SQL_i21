@@ -1,10 +1,15 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout North Carolina Default Data
-	PRINT ('Deploying North Carolina Tax Forms')
-	DECLARE @TaxAuthorityCode NVARCHAR(10) = 'NC'
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'NC'
 		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
-	-- Product Codes
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+	
+	PRINT ('Deploying North Carolina Tax Forms')
+		
+-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId AS NVARCHAR(10)) 
 		+ CASE WHEN strProductCode IS NULL THEN ', strProductCode = NULL' ELSE ', strProductCode = ''' + strProductCode + ''''  END
@@ -4152,4 +4157,5 @@ select strQuery = 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacket
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+END
 GO

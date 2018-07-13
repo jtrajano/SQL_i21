@@ -1,8 +1,13 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Pennsylvania Default Data
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'PA'
+	, @TaxAuthorityId INT
+
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+
 	PRINT ('Deploying Pennsylvania Tax Forms')
-	DECLARE @TaxAuthorityCode NVARCHAR(10) = 'PA'
-		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 	-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
@@ -1555,4 +1560,5 @@ select strQuery = 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacket
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+END
 GO
