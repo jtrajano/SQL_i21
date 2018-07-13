@@ -262,8 +262,8 @@ BEGIN
 				-- Compute the new Add Qty
 				-- and Recompute the Cost. Convert it to the Lot's Weight UOM. 
 				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
-						,@intItemUOMId = Lot.intWeightUOMId
 						,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblCost)
+						,@intItemUOMId = Lot.intWeightUOMId
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 
