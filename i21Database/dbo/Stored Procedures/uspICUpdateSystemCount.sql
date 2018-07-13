@@ -2,30 +2,50 @@
 AS
 
 UPDATE cd
-SET cd.dblSystemCount = ISNULL(s.dblOnHand, 0)
+SET cd.dblSystemCount = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0),
+	cd.dblWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0)
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
-	INNER JOIN (
+	INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
+	LEFT OUTER JOIN (
 		SELECT
-			StockUOM.intItemStockUOMId,
 			StockUOM.intItemId,
+			StockUOM.intItemUOMId,
 			intLocationId = ItemLoc.intLocationId,
 			StockUOM.intItemLocationId,
-			StockUOM.intItemUOMId,
-			dblOnHand = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN ISNULL(StockUOM.dblOnHand, 0) ELSE ISNULL(Lot.dblQty, 0) END),	
-			dblUnitQty = ItemUOM.dblUnitQty,
-			ysnStockUnit = ItemUOM.ysnStockUnit
+			dblOnHand = ISNULL(StockUOM.dblOnHand, 0),
+			StockUOM.intSubLocationId,
+			StockUOM.intStorageLocationId
 		FROM tblICItemStockUOM StockUOM
-			LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
-			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = StockUOM.intItemUOMId
-			LEFT JOIN tblICLot Lot ON Lot.intItemId = StockUOM.intItemId
-				AND Lot.intItemLocationId = StockUOM.intItemLocationId
-				AND Lot.intItemUOMId = StockUOM.intItemUOMId
-				AND Lot.intSubLocationId = StockUOM.intSubLocationId
-				AND Lot.intStorageLocationId = StockUOM.intStorageLocationId
-		WHERE ItemUOM.ysnStockUnit = 1
-	) s ON s.intItemId = cd.intItemId
-		AND s.intLocationId = c.intLocationId
+			INNER JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
+			INNER JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
+		WHERE Item.strLotTracking = 'No'
+	) nonLotted ON nonLotted.intItemId = cd.intItemId
+		AND nonLotted.intItemLocationId = cd.intItemLocationId
+		AND nonLotted.intItemUOMId = cd.intItemUOMId
+		AND nonLotted.intSubLocationId = cd.intSubLocationId
+		AND nonLotted.intStorageLocationId = cd.intStorageLocationId
+	LEFT OUTER JOIN (
+		SELECT 
+			Lot.strLotNumber,
+			ISNULL(Lot.dblQty, 0) dblOnHand,
+			ISNULL(Lot.dblWeight, 0) dblWeight,
+			Lot.intItemLocationId,
+			Lot.intItemId,
+			Lot.intItemUOMId,
+			Lot.intWeightUOMId,
+			Lot.intStorageLocationId,
+			Lot.intSubLocationId,
+			Lot.intLotId
+		FROM tblICLot Lot
+			INNER JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
+		WHERE Item.strLotTracking <> 'No'
+	) lotted ON lotted.intItemId = cd.intItemId
+		AND lotted.intItemLocationId = cd.intItemLocationId
+		AND lotted.intItemUOMId = cd.intItemUOMId
+		AND lotted.intSubLocationId = cd.intSubLocationId
+		AND lotted.intStorageLocationId = cd.intStorageLocationId
+		AND lotted.strLotNumber = cd.strLotNo
 WHERE c.intImportFlagInternal = 1
 
 -- Update Last Cost, Calculate Physical Count, Physical Weight, & Qty Per Pallet
