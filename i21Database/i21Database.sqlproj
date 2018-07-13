@@ -6792,6 +6792,7 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrationsPost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeVoucherDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateReIndexMaintenancePlan.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1830_Encrypt_Merchant_Password.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
