@@ -1004,14 +1004,6 @@ IF @recap = 0
             FROM tblARPayment A 
             WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
-
-			--update payment record
-            UPDATE A
-                SET A.intCurrentStatus = 5
-            FROM tblARPayment A 
-            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
-
-
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1132,11 +1124,19 @@ IF @recap = 0
 			--update payment record based on record from tblCMBankTransaction
 			UPDATE tblARPayment
 				SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+					, intCurrentStatus = 5
 			FROM tblARPayment A 
 				INNER JOIN tblCMBankTransaction B
 					ON A.strRecordNumber = B.strTransactionId
 			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
 			
+			UPDATE tblARPayment
+				SET intCurrentStatus = NULL
+			FROM tblARPayment A 
+				INNER JOIN tblCMBankTransaction B
+					ON A.strRecordNumber = B.strTransactionId
+			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+
 			--DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
 			DELETE FROM tblCMBankTransaction
 			WHERE strTransactionId IN (
