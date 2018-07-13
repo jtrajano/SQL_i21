@@ -1,7 +1,7 @@
-﻿PRINT N'BEGIN - IC Data Fix for 18.1. #11'
+﻿PRINT N'BEGIN - IC Data Fix for 18.3. #11'
 GO
 
-IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.3)
 BEGIN 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = N'tmptblICItem' )
 	BEGIN
@@ -36,4 +36,4 @@ END
 
 GO
 
-PRINT N'END - IC Data Fix for 18.1. #11'
+PRINT N'END - IC Data Fix for 18.3. #11'
