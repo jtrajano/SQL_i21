@@ -77,3 +77,4 @@ GROUP BY intCompanyLocationId
 	, strItemDescription
 	, intItemLocationId	
 	, strCommodityCode	
+HAVING SUM(dblStock) <> 0

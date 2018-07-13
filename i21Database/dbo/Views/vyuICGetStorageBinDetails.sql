@@ -19,7 +19,7 @@ FROM tblICItemStockUOM stockUOM
 	LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = itemUOM.intUnitMeasureId
 	INNER JOIN tblICStorageLocation storageLocation ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId
 	INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = storageLocation.intLocationId
-	INNER JOIN (
+	LEFT OUTER JOIN (
 		SELECT storageLocation.intStorageLocationId, storageLocation.intItemId,
 			SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) dblStock
 		FROM tblICItemStockUOM stockUOM
@@ -40,3 +40,4 @@ GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId, subLocation.i
 	storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot, summary.dblStock, unitMeasure.strUnitMeasure,
 	commodity.strCommodityCode, mrc.dblAirSpaceReading, storageLocation.dblResidualUnit, grd.strDiscountId, grd.strDiscountDescription,
 	smr.dtmDate
+HAVING CAST(SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) AS NUMERIC(16, 8)) <> 0
