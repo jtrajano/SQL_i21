@@ -294,6 +294,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.1\09_RemoveAfter18.3_DataFix.sql 
 :r .\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
 :r .\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql 
+:r .\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

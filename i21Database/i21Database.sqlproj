@@ -6257,7 +6257,6 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
-    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
     <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
@@ -6361,6 +6360,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\07_Inventory_Constraints.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
