@@ -116,8 +116,10 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.dblConvertedUOMQty,
 	SC.strCostMethod,
 	SC.strElevatorReceiptNumber,
-	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
+	(ISNULL(SC.dblUnitPrice,0) + ISNULL(SC.dblUnitBasis,0)) AS dblCashPrice,
 	SC.intSalesOrderId,
+	SC.intDeliverySheetId,
+	SC.dtmTransactionDateTime,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
 	SC.strDistributionOption = 'LOD' THEN 'Load' WHEN
@@ -163,8 +165,11 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemNumber
 		ELSE IC.strItemNo
 	END) AS strItemNumber,
-	SO.strSalesOrderNumber
+	SO.strSalesOrderNumber,
+	SCD.strDeliverySheetNumber,
+	SCD.strSplitDescription
   FROM tblSCTicket SC
+  --SELECT EM.intEntityId,SM.blbDetail
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
@@ -183,10 +188,9 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
-  OUTER APPLY(
-		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
-		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
-  ) SMS
+  LEFT JOIN tblEMEntitySignature EM ON EM.intEntityId = SC.intEntityScaleOperatorId
+  LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
+  LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
