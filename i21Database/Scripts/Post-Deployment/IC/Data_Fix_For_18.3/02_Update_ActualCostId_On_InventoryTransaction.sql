@@ -1,14 +1,14 @@
 ﻿
 /****************************************************************************************************************
-	The strActualCostId is new in 17.3 (Blocker Release) and in 18.1. 
+	The strActualCostId is new in 17.3 (Blocker Release) and in 18.3. 
 	This script will populate all inventory transactions with the missing actual cost id. 
 	The Actual Cost Id is needed when rebuilding stocks. 
 ****************************************************************************************************************/
 
-PRINT N'BEGIN - IC Data Fix for 18.1. #2'
+PRINT N'BEGIN - IC Data Fix for 18.3. #2'
 GO
 
-IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.3)
 BEGIN 
 	UPDATE	t
 	SET		t.strActualCostId = cb.strActualCostId
@@ -30,5 +30,5 @@ BEGIN
 END 
 
 GO 
-PRINT N'END - IC Data Fix for 18.1. #2'
+PRINT N'END - IC Data Fix for 18.3. #2'
 GO

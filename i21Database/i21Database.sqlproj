@@ -184,7 +184,7 @@
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
     <Folder Include="Scripts\Post-Deployment\CCR" />
     <Folder Include="Scripts\Post-Deployment\VR" />
-    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
+    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -6789,17 +6789,17 @@
     <Build Include="dbo\Stored Procedures\uspCTBeforeVoucherDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateReIndexMaintenancePlan.sql" />
     <None Include="Scripts\Post-Deployment\SM\1830_Encrypt_Merchant_Password.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\09_RemoveAfter18.3_DataFix.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\05_FixDebitCreditUnits.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\08_Populate_Shipment_LineTotal.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\01_UpdateContractItemStatuses.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\02_Update_ActualCostId_On_InventoryTransaction.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\03_MigratePackedTypeToQuantityType.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\04_AddStockUOM.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\06_CompanyPreferenceForOriginLastTask.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\07_Inventory_Constraints.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
-    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\09_RemoveAfter18.3_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\05_FixDebitCreditUnits.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\08_Populate_Shipment_LineTotal.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\04_AddStockUOM.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\06_CompanyPreferenceForOriginLastTask.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\07_Inventory_Constraints.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
