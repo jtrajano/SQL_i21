@@ -149,14 +149,14 @@ BEGIN TRY
 			strDifferential = dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice =	dbo.fnRemoveTrailingZeroes(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(
+			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
 										ELSE	CASE	WHEN	CY.intMainCurrencyId	=	CD.intInvoiceCurrencyId
 														THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) / 100
 														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) * CD.dblRate
 												END
-								END) + ' ' + IY.strCurrency + ' ' + @per + ' ' +  dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',FN.intUnitMeasureId,@intLaguageId,'Name',FN.strUnitMeasure),
+								END,2)) + ' ' + IY.strCurrency + ' ' + @per + ' ' +  dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',FN.intUnitMeasureId,@intLaguageId,'Name',FN.strUnitMeasure),
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strSummary
 								ELSE	''

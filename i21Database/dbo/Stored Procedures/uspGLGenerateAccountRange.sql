@@ -1,10 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange]
+﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange] 
+	@result NVARCHAR (20 ) OUTPUT
 AS
 	SET NOCOUNT ON;
-	DECLARE @ysnRangeBuilt BIT = 0
-	IF EXISTS(SELECT TOP 1   1 FROM tblGLAccountRange)
-		SET @ysnRangeBuilt = 1
-	
+	--DECLARE @ysnRangeBuilt BIT = 0
+	--IF EXISTS(SELECT TOP 1   1 FROM tblGLAccountRange)
+		--SET @ysnRangeBuilt = 1
+		
+	BEGIN TRY
 	MERGE 
 	INTO	dbo.tblGLAccountRange
 	WITH	(HOLDLOCK) 
@@ -39,7 +41,7 @@ AS
 			,RangeHardCodedValues.intAccountGroupId
 			,1
 		);
-	IF (@ysnRangeBuilt = 1)RETURN
+	--IF (@ysnRangeBuilt = 1)RETURN
 	
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
@@ -59,7 +61,11 @@ AS
 	SET intMinRange = B.intMinRange , intMaxRange =B.intMaxRange
 	FROM tblGLAccountRange A 
 	JOIN R1 B ON A.strAccountType = B.strAccountType
-
+		SET @result = 'SUCCESS'
+	END TRY
+	BEGIN CATCH
+		SELECT @result = ERROR_MESSAGE()
+	END CATCH
 	
 GO
 

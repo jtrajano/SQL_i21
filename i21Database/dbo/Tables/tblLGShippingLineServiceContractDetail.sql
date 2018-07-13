@@ -3,6 +3,7 @@
 	[intShippingLineServiceContractDetailId] INT NOT NULL PRIMARY KEY IDENTITY (1, 1),
 	[intShippingLineServiceContractId] INT NOT NULL,
 	[strServiceContractNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intOriginId] INT NULL,
 	[dtmContractDate] DATETIME NOT NULL,
 	[strAmendmentNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[dtmAmendmentDate] DATETIME,
