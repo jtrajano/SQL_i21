@@ -2,7 +2,8 @@
 AS
 
 UPDATE cd
-SET cd.dblSystemCount = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0)
+SET cd.dblSystemCount = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0),
+	cd.dblWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0)
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
 	INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
@@ -28,6 +29,7 @@ FROM tblICInventoryCountDetail cd
 		SELECT 
 			Lot.strLotNumber,
 			ISNULL(Lot.dblQty, 0) dblOnHand,
+			ISNULL(Lot.dblWeight, 0) dblWeight,
 			Lot.intItemLocationId,
 			Lot.intItemId,
 			Lot.intItemUOMId,
