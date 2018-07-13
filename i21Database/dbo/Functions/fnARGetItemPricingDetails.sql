@@ -581,6 +581,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 
 	SELECT TOP 1 @CurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 			   , @CurrencyExchangeRate		 = dblCurrencyExchangeRate
+			   , @CurrencyExchangeRateType	 = strCurrencyExchangeRateType
 	FROM dbo.fnARGetDefaultForexRate(@TransactionDate, @CurrencyId, NULL)
 
 	DECLARE @dblCalculatedExchangeRate		NUMERIC(18, 6) = ISNULL(@CurrencyExchangeRate, 1)
