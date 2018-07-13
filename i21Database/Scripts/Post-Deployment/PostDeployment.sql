@@ -299,6 +299,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\10_M2MComputations.sql 
 :r .\IC\11_AdjustmentInventoryTerms.sql 
 :r .\IC\12_StockTypes.sql 
+:r .\IC\13_Add_Default_Edi_Mapping_Template.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -310,6 +311,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\09_RemoveAfter18.3_DataFix.sql 
 :r .\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
 :r .\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql 
+:r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

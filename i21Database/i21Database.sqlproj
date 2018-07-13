@@ -6293,7 +6293,6 @@
     <Build Include="dbo\Views\vyuHDProjectDetailSearch.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockTransferred.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
-    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReopenWorkOrder.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
     <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
@@ -6800,6 +6799,8 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\07_Inventory_Constraints.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql" />
+    <None Include="Scripts\Post-Deployment\IC\13_Add_Default_Edi_Mapping_Template.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6976,7 +6977,6 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
     <None Include="Scripts\Post-Deployment\EncryptionDataFix.sql" />
-    <None Include="Scripts\Post-Deployment\IC\31_Add_Default_Edi_Mapping_Template.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
     <Build Include="dbo\User Defined Types\UdtCompanyLocations.sql" />
