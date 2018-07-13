@@ -56,3 +56,4 @@ BEGIN
 		WHERE t.strName = 'Inventory Receipts'
 	) s ON s.strIdentifier = d.strIdentifier
 END
+

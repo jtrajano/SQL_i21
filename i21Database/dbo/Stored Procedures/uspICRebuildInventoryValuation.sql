@@ -19,6 +19,7 @@ DECLARE @intItemId AS INT
 		,@intCategoryId AS INT 
 		,@dtmRebuildDate AS DATETIME = GETDATE() 
 		,@intFobPointId AS INT 
+		,@intEntityId AS INT 
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 SELECT @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode 
@@ -843,6 +844,8 @@ BEGIN
 								ELSE 
 									NULL 
 						END
+
+			SET @intEntityId = NULL 
 
 			SELECT	@strTransactionType = strName  
 			FROM	tblICInventoryTransactionType 
@@ -1795,6 +1798,12 @@ BEGIN
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 						AND ItemLocation.intLocationId IS NOT NULL
+
+				-- Get the Customer Entity Id 
+				SELECT	@intEntityId = intEntityCustomerId 
+				FROM	tblICInventoryShipment s
+				WHERE	s.intInventoryShipmentId = @intTransactionId
+						AND s.strShipmentNumber = @strTransactionId
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -2402,6 +2411,12 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
 
+				-- Get the Vendor Entity Id 
+				SELECT	@intEntityId = intEntityVendorId
+				FROM	tblICInventoryReceipt r
+				WHERE	r.intInventoryReceiptId = @intTransactionId
+						AND r.strReceiptNumber = @strTransactionId
+
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
@@ -2784,8 +2799,14 @@ BEGIN
 			DECLARE @intReturnCode AS INT = 0;
 
 			-- Set ysnRebuild = 1 to tell GL that the GL entries are from stock rebuild. 
-			UPDATE @GLEntries
-			SET ysnRebuild = 1
+			UPDATE	@GLEntries
+			SET		ysnRebuild = 1
+
+			-- Update the entity id
+			UPDATE	@GLEntries
+			SET		intEntityId = @intEntityId
+			WHERE	intEntityId IS NULL 
+					AND @intEntityId IS NOT NULL 
 
 			EXEC @intReturnCode = dbo.uspGLBookEntries 
 				@GLEntries
