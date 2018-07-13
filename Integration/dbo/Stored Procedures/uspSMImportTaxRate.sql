@@ -8,6 +8,7 @@ EXEC
 	CREATE PROCEDURE [dbo].[uspSMImportTaxRate]
 		@taxCode NVARCHAR(100),
 		@calculationMethod NVARCHAR(15),
+		@unitOfMeasure NVARCHAR(50),
 		@rate NUMERIC(18, 6),
 		@effectiveDate DATETIME
 	AS
@@ -24,11 +25,14 @@ EXEC
 
 		SELECT @taxCodeId = intTaxCodeId FROM tblSMTaxCode WHERE strTaxCode = @taxCode
 
+		DECLARE @unitOfMeasureId INT
+		SELECT @unitOfMeasureId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @unitOfMeasure
+
 		-- Insert tax code rate if not exist
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMTaxCodeRate WHERE intTaxCodeId = @taxCodeId AND strCalculationMethod = @calculationMethod AND dtmEffectiveDate = @effectiveDate)
 		BEGIN
-			INSERT INTO tblSMTaxCodeRate(intTaxCodeId, strCalculationMethod, dblRate, dtmEffectiveDate) 
-			VALUES(@taxCodeId, @calculationMethod, @rate, @effectiveDate)
+			INSERT INTO tblSMTaxCodeRate(intTaxCodeId, strCalculationMethod, intUnitMeasureId, dblRate, dtmEffectiveDate) 
+			VALUES(@taxCodeId, @calculationMethod, @unitOfMeasureId, @rate, @effectiveDate)
 		END
 		-- Update exisiting tax code rate
 		ELSE
