@@ -67,17 +67,17 @@ BEGIN TRY
 			)
 		SELECT LD.intItemId
 			,IL.intItemLocationId
-			,LD.intWeightItemUOMId
+			,LD.intItemUOMId
 			,GETDATE()
-			,LD.dblNet
+			,LD.dblQuantity
 			,IU.dblUnitQty
 			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
-					THEN CASE 
+					THEN ((CASE 
 							WHEN CUR.ysnSubCurrency = 1
 								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
 							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
-							END
+							END)/WU.dblUnitQty)*IU.dblUnitQty
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
@@ -86,17 +86,17 @@ BEGIN TRY
 				END,0) dblCost
 			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
-					THEN CASE 
+					THEN ((CASE 
 							WHEN CUR.ysnSubCurrency = 1
 								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
 							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
-							END
+							END)/WU.dblUnitQty)*IU.dblUnitQty
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END,0) * LD.dblNet dblValue
+				END,0) * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
@@ -120,6 +120,7 @@ BEGIN TRY
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CASE WHEN L.intPurchaseSale = 3 THEN 1 ELSE L.intFreightTermId END
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
@@ -130,6 +131,7 @@ BEGIN TRY
 			,LD.dblQuantity
 			,LD.dblNet
 			,IU.dblUnitQty
+			,WU.dblUnitQty
 			,AD.dblSeqPrice
 			,L.intLoadId
 			,L.intCurrencyId
