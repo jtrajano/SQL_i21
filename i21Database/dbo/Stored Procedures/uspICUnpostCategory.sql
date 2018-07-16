@@ -83,8 +83,13 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND (dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY 
-						OR (inventory_transaction.intTransactionTypeId = @INV_TRANS_TYPE_MarkUpOrDown AND inventory_transaction.dblCategoryRetailValue IS NOT NULL))
+					AND (
+						dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY 
+						OR (
+							inventory_transaction.intTransactionTypeId = @INV_TRANS_TYPE_MarkUpOrDown 
+							AND inventory_transaction.dblCategoryRetailValue IS NOT NULL
+						)
+					)
 					AND 
 					(
 						-- Link to the main transaction
