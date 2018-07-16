@@ -200,7 +200,11 @@ COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
 BEGIN
-	SET @batchId = NEWID();
+	--if there is a value passed on batchId do not generate
+	IF @batchId IS NULL
+	BEGIN
+		SET @batchId = NEWID();
+	END
 	SET @batchIdUsed = @batchId;
 	
 	UPDATE A
