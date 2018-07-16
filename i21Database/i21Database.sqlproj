@@ -6365,6 +6365,7 @@
     <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
     <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblIPFTPServer.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
