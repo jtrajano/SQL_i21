@@ -489,17 +489,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intContractHeaderId]		=	E.intContractHeaderId,
 			[intContractSeq]			=	E1.intContractSeq,
 			[intUnitOfMeasureId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract'  
-												THEN  (
-														CASE WHEN A.intSourceType = 1 --SCALE
-														THEN E1.intItemUOMId
-														ELSE B.intUnitMeasureId END)
+												THEN  E1.intItemUOMId
 												ELSE B.intUnitMeasureId END,
 			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
 			[dblCostUnitQty]			=	ABS(ISNULL(voucherDetailReceipt.dblCostUnitQty,0)),
-			[dblUnitQty]				=	ItemUOM.dblUnitQty,
+			[dblUnitQty]				=	ItemContractUOM.dblUnitQty,
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
@@ -536,6 +533,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemContractUOM ON ItemContractUOM.intItemUOMId = E1.intItemUOMId 
+														AND E1.intContractDetailId = B.intLineNo AND E.intContractHeaderId = B.intOrderId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
