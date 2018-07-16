@@ -155,12 +155,11 @@ INNER JOIN
 			) ARI 
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
-    (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGL.[intLoadId] = ARI.[intLoadId]
-INNER JOIN
     (SELECT [intLoadId], [intLoadDetailId], [intSCompanyLocationId] FROM tblLGLoadDetail WITH (NOLOCK)) LGLD
-		ON LGL.[intLoadId] = ARI.[intLoadId]
-		AND LGLD.[intLoadDetailId] = ARID.[intLoadDetailId]
+		ON ARID.[intLoadDetailId] = LGLD.[intLoadDetailId] 
+INNER JOIN
+    (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGLD.[intLoadId] = LGL.[intLoadId]
 INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
