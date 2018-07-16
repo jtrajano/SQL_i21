@@ -6802,6 +6802,9 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_Add_Default_Edi_Mapping_Template.sql" />
     <Build Include="dbo\Views\vyuSMMasterMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDisconReplicationAddBidirectionalArticle.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDisconReplicationSetIdentityNotForReplication.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDisconReplicationSetRangeStart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
