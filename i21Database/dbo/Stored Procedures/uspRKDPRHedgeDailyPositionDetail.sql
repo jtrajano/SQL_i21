@@ -884,7 +884,7 @@ BEGIN
 				,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
 				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency,intInvoiceId,isnull(strInvoiceNumber,'') strInvoiceNumber,intBillId,isnull(strBillId,'') strBillId
 	FROM @Final where dblTotal <> 0 
-	ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
+	ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
 ELSE
 BEGIN
@@ -893,5 +893,5 @@ BEGIN
 				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency,intInvoiceId,isnull(strInvoiceNumber,'') strInvoiceNumber,intBillId,isnull(strBillId,'') strBillId 			
 	FROM @Final 
 	where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
-	ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
+	ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
