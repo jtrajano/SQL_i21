@@ -1920,7 +1920,7 @@ BEGIN
 		 SELECT   
 		  CL.[strLocationNumber]										--[ptloc_loc_no] 
 		  ,CL.[strLocationName]											--[ptloc_name]  
-		  ,CL.[strAddress]												--[ptloc_addr] 
+		  ,SUBSTRING(CL.[strAddress], 1, 30)							--[ptloc_addr] 
 		  ,CL.[strCity]													--[ptloc_city]  
 		  ,CL.[strStateProvince]										--[ptloc_state]  
 		  ,CL.[strZipPostalCode]										--[ptloc_zip]  
@@ -2049,7 +2049,7 @@ BEGIN
 		 UPDATE [ptlocmst]  
 		 SET   
 		  [ptloc_name] = CL.[strLocationName]  
-		  ,[ptloc_addr] = CL.[strAddress] --[ptloc_addr] 
+		  ,[ptloc_addr] = SUBSTRING(CL.[strAddress], 1, 30) --[ptloc_addr] 
 		  ,[ptloc_city] = CL.[strCity]   
 		  ,[ptloc_state] = CL.[strStateProvince]  
 		  ,[ptloc_zip] = CL.[strZipPostalCode]  
