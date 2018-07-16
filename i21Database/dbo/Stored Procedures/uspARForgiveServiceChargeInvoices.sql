@@ -62,6 +62,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			INNER JOIN @ServiceChargeToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
 			WHERE INV.ysnPosted = 1
 			  AND INV.ysnForgiven = CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END
+			  AND ysnPaid = 0
 			  AND INV.strType = 'Service Charge'
 
 			DECLARE @InvoicesToForgive TABLE (intInvoiceId INT)
