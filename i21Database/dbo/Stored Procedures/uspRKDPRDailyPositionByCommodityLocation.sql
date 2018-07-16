@@ -747,11 +747,11 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityI
 	  SELECT 45,'Avail for Spot Sale' ,@strDescription
 		,sum(dblTotal)-sum(dblPurQty),@intCommodityId,@intCommodityUnitMeasureId,intCompanyLocationId,strLocationName FROM (
 			select distinct
-					(SELECT sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))) as Qty               
+					round((SELECT sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))) as Qty               
 					FROM @tblGetOpenContractDetail  CD  
-					WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=@intCommodityId
-						 and CD.intCompanyLocationId=cl.intCompanyLocationId) dblPurQty,
-					(select sum(dblTotal) FROM @Final t where strSeqHeader='Basis Risk' and t.intCommodityId=@intCommodityId and t.intCompanyLocationId=cl.intCompanyLocationId) dblTotal
+					WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and CD.intCommodityId=@intCommodityId
+						 and CD.intCompanyLocationId=cl.intCompanyLocationId),2) dblPurQty,
+					round((select sum(dblTotal) FROM @Final t where strSeqHeader='Basis Risk' and t.intCommodityId=@intCommodityId and t.intCompanyLocationId=cl.intCompanyLocationId),2) dblTotal
 					,intCompanyLocationId,strLocationName
 	  		from tblSMCompanyLocation cl
 			JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId 
