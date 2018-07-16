@@ -783,17 +783,17 @@ SELECT 33 ,'Basis Risk',@strDescription,isnull(CompanyTitled, 0) AS dblTotal,@in
 INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId,intFromCommodityUnitMeasureId)	
 		SELECT 45,'Avail for Spot Sale' ,@strDescription
 		,sum(dblTotal)-sum(dblPurQty),@intCommodityId,@intCommodityUnitMeasureId from(
-		select dblTotal,
-		(SELECT sum(Qty) FROM (
+		select round(dblTotal,2) dblTotal,
+		round((SELECT sum(Qty) FROM (
 					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
 					FROM @tblGetOpenContractDetail  CD  
-					WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=@intCommodityId
+					WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and CD.intCommodityId=@intCommodityId
 					 and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
 				)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END)			
-				) dblPurQty
+				),2) dblPurQty
 		
 	  FROM @Final t where strSeqHeader='Basis Risk' and t.intCommodityId=@intCommodityId)t			 
 
