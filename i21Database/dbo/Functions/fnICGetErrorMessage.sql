@@ -20,7 +20,7 @@ BEGIN
 		WHEN @msgId = 80004 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.'
 		WHEN @msgId = 80005 THEN 'Please specify the lot numbers for %s.'
 		WHEN @msgId = 80006 THEN 'The Qty to Receive for %s is %f. Total Lot Quantity is %f. The difference is %f.'
-		WHEN @msgId = 80007 THEN 'Not enough stocks for %s. Reserved stocks is %f while On Hand Qty is %f.'
+		WHEN @msgId = 80007 THEN 'Not enough stocks for %s. Available Qty after reserved is %f. Please verify if correct Storage Location and/or Unit is selected.'
 		WHEN @msgId = 80008 THEN '%s at %s is missing a GL account setup for %s account category.'
 		WHEN @msgId = 80009 THEN 'Unable to generate the serial lot number for %s.'
 		WHEN @msgId = 80010 THEN 'Failed to process the lot number for %s. It may have been used on a different sub-location or storage location.'
