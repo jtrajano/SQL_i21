@@ -74,7 +74,7 @@ SELECT
 	,bin.dblCapacity
 	,bin.strStorageLocation
 	,dblSpaceAvailable = bin.dblAvailable
-	,dblPercentFull = (bin.dblAvailable/dblCapacity) * 100
+	,dblPercentFull = dbo.fnMultiply(dbo.fnDivide(bin.dblAvailable, dblCapacity), 100) 
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
