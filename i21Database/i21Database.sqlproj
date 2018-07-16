@@ -6801,6 +6801,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_Add_Default_Edi_Mapping_Template.sql" />
+    <Build Include="dbo\Views\vyuSMMasterMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
