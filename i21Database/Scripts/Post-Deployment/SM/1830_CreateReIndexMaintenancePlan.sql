@@ -39,7 +39,7 @@ BEGIN
 
 	IF ISNULL(@isUserHasRole, 0) = 1
 	BEGIN
-		PRINT N'USER IS SYSADMIN/SERVERADMIN CONTINUE'
+		PRINT N'USER IS SYSADMIN/SERVERADMIN - VALID FOR CREATION OF MAINTENANCE PLAN'
 		 --Get the current database
 		DECLARE @currentDatabaseName varchar(100)
 		SET @currentDatabaseName = DB_NAME()
