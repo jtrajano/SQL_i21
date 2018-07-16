@@ -6363,6 +6363,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql" />
     <Build Include="dbo\Views\vyuSMMasterMenu.sql" />
     <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
