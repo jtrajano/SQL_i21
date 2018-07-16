@@ -6805,7 +6805,8 @@
     <Build Include="dbo\Stored Procedures\uspSMDisconReplicationAddBidirectionalArticle.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDisconReplicationSetIdentityNotForReplication.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDisconReplicationSetRangeStart.sql" />
-	<Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
+    <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6993,7 +6994,7 @@
     <Build Include="dbo\Views\vyuGRGetDiscountScheduleCode.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountScheduleWithCrossReference.sql" />
     <Build Include="dbo\Tables\tblSCImportLogFile.sql" />
-	<None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
