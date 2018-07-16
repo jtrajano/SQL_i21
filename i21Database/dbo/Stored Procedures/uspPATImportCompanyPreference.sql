@@ -1,4 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportCompanyPreference]
+	@checking BIT = 0,
+	@isImported BIT = 0 OUTPUT,
+	@isDisabled BIT = 0 OUTPUT,
+	@total INT = 0 OUTPUT
 AS
 BEGIN
 
@@ -8,6 +12,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 2;
+
+IF(@isImported = 0)
+BEGIN
 	DECLARE @RefundInd CHAR(1), 
 	@RefundMinAmt DECIMAL(5, 2), 
 	@ServiceFee DECIMAL(5, 2),
@@ -22,6 +30,7 @@ SET ANSI_WARNINGS OFF
 	@NonVotingGLId INT, 
 	@FracShareGLId INT,
 	@ServiceFeeGLId INT;
+
 
 	---------------------------- BEGIN - COLUMN ASSIGNMENTS ----------------------------------------------
 	SET @RefundInd = (SELECT pactl_refund_ind from pactlmst where pactl_key = 01);
@@ -54,11 +63,15 @@ SET ANSI_WARNINGS OFF
 						WHERE PACT.pactl_key ='03');
 	---------------------------- END - COLUMN ASSIGNMENTS ----------------------------------------------
 
+	SET @total = 1;
 
 	---------------------------- BEGIN - UPDATE COMPANY PREFERENCE FROM ORIGIN ----------------------------------------------
-	IF EXISTS(SELECT 1 FROM tblPATCompanyPreference)
-	BEGIN
-	UPDATE	tblPATCompanyPreference SET 
+	MERGE 
+	INTO [dbo].[tblPATCompanyPreference]
+	WITH (HOLDLOCK)
+	AS CompanyPrefSource
+	USING(SELECT
+			intCompanyPreferenceId = 1,
 			strRefund = @RefundInd,
 			dblMinimumRefund = @RefundMinAmt,
 			dblServiceFee = @ServiceFee,
@@ -72,12 +85,62 @@ SET ANSI_WARNINGS OFF
 			intNonVotingStockId = @NonVotingGLId,
 			intFractionalShareId = @FracShareGLId,
 			intServiceFeeIncomeId = @ServiceFeeGLId
-	WHERE intCompanyPreferenceId = 1
+	) AS CompanyPrefOrigin
+		ON CompanyPrefSource.intCompanyPreferenceId = CompanyPrefOrigin.intCompanyPreferenceId
+	WHEN MATCHED THEN
+			UPDATE SET 
+				strRefund = @RefundInd,
+				dblMinimumRefund = @RefundMinAmt,
+				dblServiceFee = @ServiceFee,
+				dblCutoffAmount = @CutOffAmt,
+				strCutoffTo = @CutOffCashEquity,
+				strPayOnGrain = @GaPayStlInd,
+				dblMinimumDividends = @MinDivAmt,
+				ysnProRatedDividends = @ProrateDiv,
+				dtmCutoffDate = @ProrateCutOffDt,
+				intVotingStockId = @VotingGLId,
+				intNonVotingStockId = @NonVotingGLId,
+				intFractionalShareId = @FracShareGLId,
+				intServiceFeeIncomeId = @ServiceFeeGLId
+	WHEN NOT MATCHED THEN
+		INSERT (
+				strRefund, 
+				dblMinimumRefund, 
+				dblServiceFee, 
+				dblCutoffAmount, 
+				strCutoffTo, 
+				strPayOnGrain, 
+				dblMinimumDividends, 
+				ysnProRatedDividends, 
+				dtmCutoffDate, 
+				intVotingStockId, 
+				intNonVotingStockId, 
+				intFractionalShareId, 
+				intServiceFeeIncomeId, 
+				intConcurrencyId
+		)
+		VALUES(
+				CompanyPrefOrigin.strRefund, 
+				CompanyPrefOrigin.dblMinimumRefund, 
+				CompanyPrefOrigin.dblServiceFee, 
+				CompanyPrefOrigin.dblCutoffAmount, 
+				CompanyPrefOrigin.strCutoffTo, 
+				CompanyPrefOrigin.strPayOnGrain, 
+				CompanyPrefOrigin.dblMinimumDividends, 
+				CompanyPrefOrigin.ysnProRatedDividends, 
+				CompanyPrefOrigin.dtmCutoffDate, 
+				CompanyPrefOrigin.intVotingStockId, 
+				CompanyPrefOrigin.intNonVotingStockId, 
+				CompanyPrefOrigin.intFractionalShareId, 
+				CompanyPrefOrigin.intServiceFeeIncomeId, 
+				1
+		);
+
+		UPDATE tblPATImportOriginFlag
+		SET ysnIsImported = 1, intImportCount = @total
+		WHERE intImportOriginLogId = 2
+
+		SET @isImported = CAST(1 AS BIT);
 	END
-	ELSE
-	BEGIN
-		INSERT INTO tblPATCompanyPreference(strRefund, dblMinimumRefund, dblServiceFee, dblCutoffAmount, strCutoffTo, strPayOnGrain, dblMinimumDividends, ysnProRatedDividends, dtmCutoffDate, intVotingStockId, intNonVotingStockId, intFractionalShareId, intServiceFeeIncomeId, intConcurrencyId)
-		VALUES(@RefundInd, @RefundMinAmt, @ServiceFee, @CutOffAmt, @CutOffCashEquity, @GaPayStlInd, @MinDivAmt, @ProrateDiv, @ProrateCutOffDt, @VotingGLId, @NonVotingGLId, @FracShareGLId, @ServiceFeeGLId, 1)
-	END
-	---------------------------- END - UPDATE COMPANY PREFERENCE FROM ORIGIN ----------------------------------------------
 END
+---------------------------- END - UPDATE COMPANY PREFERENCE FROM ORIGIN ---------------------------------------------
