@@ -105,8 +105,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = BILL.strBillId
 			,strInvoice = BILL.strVendorOrderNumber
-			,strCADDate = REPLACE(CONVERT(NVARCHAR(10), BILL.dtmBillDate, 111), '/', '-')
-			,dtmDate = BILL.dtmBillDate
+			,dtmDate = BILL.dtmDueDate
 			,strComment = SUBSTRING(BILL.strComment,1,25)
 			,dblAmount = CASE WHEN BILL.intTransactionType = 3
 						THEN BILL.dblTotal * -1
@@ -154,8 +153,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = preBILL.strBillId
 			,strInvoice = preBILL.strVendorOrderNumber
-			,strCADDate = REPLACE(CONVERT(NVARCHAR(10), preBILL.dtmBillDate, 111), '/', '-')
-			,dtmDate = preBILL.dtmBillDate
+			,dtmDate = preBILL.dtmDueDate
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
 			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
 						THEN preBILL.dblTotal * -1
@@ -196,8 +194,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = INV.strInvoiceNumber
 			,strInvoice = ''
-			,strCADDate = REPLACE(CONVERT(NVARCHAR(10), INV.dtmDate, 111), '/', '-')
-			,dtmDate = INV.dtmDate
+			,dtmDate = INV.dtmDueDate
 			,strComment = SUBSTRING(INV.strComments,1,25)
 			,dblAmount = INV.dblInvoiceTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
