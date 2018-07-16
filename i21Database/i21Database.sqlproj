@@ -6362,7 +6362,6 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql" />
     <Build Include="dbo\Views\vyuSMMasterMenu.sql" />
-    <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6529,7 +6528,6 @@
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
-    <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

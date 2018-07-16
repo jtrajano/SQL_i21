@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportPatronageCategory]
 	@checking BIT = 0,
-	@isImported BIT = 0 OUTPUT,
-	@isDisabled BIT = 0 OUTPUT,
 	@total INT = 0 OUTPUT
 AS
 BEGIN
@@ -10,11 +8,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 1;
-
-IF(@isImported = 0)
-BEGIN
 
 	DECLARE @patronageTable TABLE(
 		[intTempId] INT IDENTITY PRIMARY KEY,
@@ -136,12 +129,13 @@ BEGIN
 
 	
 	---------------------------- BEGIN - COUNT ORIGIN DATA TO BE IMPORTED -----------------------
-	SELECT @total = COUNT(*) FROM @patronageTable tempPC
-	LEFT OUTER JOIN tblPATPatronageCategory PC
-		ON tempPC.strCategoryCode COLLATE Latin1_General_CI_AS = PC.strCategoryCode
-	WHERE tempPC.strCategoryCode COLLATE Latin1_General_CI_AS NOT IN (SELECT strCategoryCode FROM tblPATPatronageCategory)
 	IF(@checking = 1)
 	BEGIN
+		SELECT @total = COUNT(*) FROM @patronageTable tempPC
+		LEFT OUTER JOIN tblPATPatronageCategory PC
+			ON tempPC.strCategoryCode COLLATE Latin1_General_CI_AS = PC.strCategoryCode
+		WHERE tempPC.strCategoryCode COLLATE Latin1_General_CI_AS NOT IN (SELECT strCategoryCode FROM tblPATPatronageCategory)
+		
 		RETURN @total;
 	END
 	---------------------------- END - COUNT ORIGIN DATA TO BE IMPORTED -----------------------
@@ -156,10 +150,4 @@ BEGIN
 	WHERE tempPC.strCategoryCode COLLATE Latin1_General_CI_AS NOT IN (SELECT strCategoryCode FROM tblPATPatronageCategory)
 	---------------------------- END - INSERT ORIGIN DATA -----------------------
 
-	UPDATE tblPATImportOriginFlag
-	SET ysnIsImported = 1, intImportCount = @total
-	WHERE intImportOriginLogId = 1
-
-	SET @isImported = CAST(1 AS BIT);
-END
 END

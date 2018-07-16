@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportStockDetails]
 	@checking BIT = 0,
-	@isImported BIT = 0 OUTPUT,
-	@isDisabled BIT = 0 OUTPUT,
 	@total INT = 0 OUTPUT
 AS
 BEGIN
@@ -11,18 +9,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-
-SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 6;
-
-IF(@isImported = 0)
-BEGIN
-
-	IF EXISTS(SELECT 1 FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 3 AND ysnIsImported = 0)
-	BEGIN
-		SET @isDisabled = 1;
-		RETURN @isDisabled;
-	END
 
 	DECLARE @customerStockTable TABLE(
 		[intTempId] INT IDENTITY PRIMARY KEY,
@@ -148,11 +134,4 @@ BEGIN
 	AND strActivityStatus = 'Retire'
 	---------------------------- END - INSERT INTO CUSTOMER STOCK TABLE -----------------------
 
-	UPDATE tblPATImportOriginFlag
-	SET ysnIsImported = 1
-	WHERE intImportOriginLogId = 6
-
-	SET @isImported = CAST(1 AS BIT);
-
-END
 END

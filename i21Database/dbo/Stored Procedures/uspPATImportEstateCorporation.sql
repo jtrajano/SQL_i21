@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportEstateCorporation]
 	@checking BIT = 0,
-	@isImported BIT = 0 OUTPUT,
-	@isDisabled BIT = 0 OUTPUT,
 	@total INT = 0 OUTPUT
 AS
 BEGIN
@@ -11,17 +9,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 5;
-
-IF(@isImported = 0)
-BEGIN
-
-	IF EXISTS(SELECT 1 FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 4 AND ysnIsImported = 0)
-	BEGIN
-		SET @isDisabled = 1;
-		RETURN @isDisabled;
-	END
 
 	DECLARE @estateCorporationTable TABLE(
 		[intTempId] INT IDENTITY PRIMARY KEY,
@@ -42,13 +29,13 @@ BEGIN
 
 
 	------------------- BEGIN - RETURN COUNT TO BE IMPORTED ----------------------------
-	SELECT @total = COUNT(*) FROM @estateCorporationTable tempEC
-	LEFT OUTER JOIN tblPATEstateCorporation EC
-		ON tempEC.intCorporateCustomerId = EC.intCorporateCustomerId AND tempEC.intRefundTypeId = EC.intRefundTypeId
-	WHERE tempEC.intCorporateCustomerId NOT IN (SELECT intCorporateCustomerId FROM tblPATEstateCorporation) AND tempEC.intRefundTypeId NOT IN (SELECT intRefundTypeId FROM tblPATEstateCorporation)
-
 	IF(@checking = 1)
 	BEGIN
+		SELECT @total = COUNT(*) FROM @estateCorporationTable tempEC
+		LEFT OUTER JOIN tblPATEstateCorporation EC
+			ON tempEC.intCorporateCustomerId = EC.intCorporateCustomerId AND tempEC.intRefundTypeId = EC.intRefundTypeId
+		WHERE tempEC.intCorporateCustomerId NOT IN (SELECT intCorporateCustomerId FROM tblPATEstateCorporation) AND tempEC.intRefundTypeId NOT IN (SELECT intRefundTypeId FROM tblPATEstateCorporation)
+
 		RETURN @total;
 	END
 	------------------- END - RETURN COUNT TO BE IMPORTED ----------------------------
@@ -85,12 +72,4 @@ BEGIN
 	INNER JOIN (SELECT pacus_birth_rev_dt from pacusmst) PAC
 		ON PAC.pacus_birth_rev_dt = PAEST.paest_cus_no
 	---------------------------- END - INSERT INTO ESTATE CORPORATION DETAIL TABLE -----------------------
-	
-	UPDATE tblPATImportOriginFlag
-	SET ysnIsImported = 1, intImportCount = @total
-	WHERE intImportOriginLogId = 5
-
-
-	SET @isImported = CAST(1 AS BIT);
-END
 END

@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportRefundRate]
 	@checking BIT = 0,
-	@isImported BIT = 0 OUTPUT,
-	@isDisabled BIT = 0 OUTPUT,
 	@total INT = 0 OUTPUT
 AS
 BEGIN
@@ -12,16 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 4;
-
-IF(@isImported = 0)
-BEGIN
-
-	IF EXISTS(SELECT 1 FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 1 AND ysnIsImported = 0)
-	BEGIN
-		SET @isDisabled = 1;
-		RETURN @isDisabled;
-	END
 	
 	DECLARE @refundRateTable TABLE(
 		[intTempId] INT IDENTITY PRIMARY KEY,
@@ -62,13 +50,13 @@ BEGIN
 	---------------------------- END - INSERT INTO  REFUND RATE TEMPORARY TABLE -----------------------
 
 	------------------- BEGIN - RETURN COUNT TO BE IMPORTED ----------------------------
-	SELECT @total = COUNT(*) FROM @refundRateTable tempRR
-	LEFT OUTER JOIN tblPATRefundRate RR
-		ON tempRR.strRefundType COLLATE Latin1_General_CI_AS = RR.strRefundType
-	WHERE tempRR.strRefundType COLLATE Latin1_General_CI_AS NOT IN (SELECT strRefundType FROM tblPATRefundRate) AND tempRR.strRefundType IS NOT NULL
-
 	IF(@checking = 1)
 	BEGIN
+		SELECT @total = COUNT(*) FROM @refundRateTable tempRR
+		LEFT OUTER JOIN tblPATRefundRate RR
+			ON tempRR.strRefundType COLLATE Latin1_General_CI_AS = RR.strRefundType
+		WHERE tempRR.strRefundType COLLATE Latin1_General_CI_AS NOT IN (SELECT strRefundType FROM tblPATRefundRate) AND tempRR.strRefundType IS NOT NULL
+
 		RETURN @total;
 	END
 	------------------- END - RETURN COUNT TO BE IMPORTED ----------------------------
@@ -305,12 +293,4 @@ BEGIN
 		ON RR.strRefundType = CONVERT(CHAR(5), tempRRD.intRefundTypeId)
 	WHERE tempRRD.intPatronageCategoryId IS NOT NULL
 	---------------------------- END - INSERT INTO REFUND RATE DETAIL TABLE -----------------------
-
-	
-	UPDATE tblPATImportOriginFlag
-	SET ysnIsImported = 1, intImportCount = @total
-	WHERE intImportOriginLogId = 4
-
-	SET @isImported = CAST(1 AS BIT);
-END
 END
