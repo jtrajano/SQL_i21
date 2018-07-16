@@ -524,7 +524,7 @@ FROM (
 		 , intStorageLocationId				= NULL
 		 , intTermId						= NULL
 		 , intEntityShipViaId				= NULL
-		 , intTicketId						= NULL
+		 , intTicketId						= ICISI.intSourceId
 		 , intTaxGroupId					= NULL
 		 , dblGrossWt						= 0
 		 , dblTareWt						= 0
@@ -562,6 +562,12 @@ FROM (
 		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) ICIS ON ICISC.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	OUTER APPLY (
+		SELECT TOP 1 intSourceId
+		FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
+		WHERE ISNULL(ICISI.strChargesLink, '') = ICISC.strChargesLink
+		  AND ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+	) ICISI
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentChargeId
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
