@@ -70,7 +70,7 @@ FROM
 	tblARInvoice ARI
 INNER JOIN
 	tblARInvoice PRO
-		ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+		ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId] AND PRO.[strType] = 'Provisional'
 WHERE
 	ARI.[intInvoiceId] = @InvoiceId
 	
