@@ -465,9 +465,9 @@ BEGIN
 	END 
 
 	-- Do Mark Up/Down. Only the Retail Value will be affected, not the cost.
-	ELSE IF @intTransactionTypeId = @INVENTORY_MarkUpOrDown AND ISNULL(@dblUnitRetail, 0) <> 0 
+	ELSE IF (ISNULL(@dblQty, 0) > 0 AND @intTransactionTypeId = @INVENTORY_MarkUpOrDown)
 	BEGIN
-		SET @CategoryRetailValue = @dblUnitRetail 
+		SET @CategoryRetailValue = dbo.fnMultiply(@dblQty, @dblUnitRetail);
 
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
