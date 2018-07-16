@@ -29,7 +29,7 @@ CREATE  PROCEDURE [dbo].[uspSMRepAddArticleSubToParent]
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN [parentDB].[dbo].[tblSMReplicationTable] AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = ''Subsidiary'' OR (strType = ''Parent'' AND strTableName LIKE ''%tblGL%'') AND ysnCommitted = 1 AND ysnEnabled = 1 AND (ysnInitOnly = 0 OR ysnInitOnly IS null )'
+		WHERE  ysnCommitted = 1 AND ysnEnabled = 1 AND (ysnInitOnly = 0 OR ysnInitOnly IS null )'
 	
 
 		
