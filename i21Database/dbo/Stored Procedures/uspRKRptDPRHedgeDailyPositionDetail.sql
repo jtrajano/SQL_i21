@@ -717,7 +717,7 @@ SELECT @strDescription,
 		(SELECT sum(Qty) FROM (
 					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
 					FROM @tblGetOpenContractDetail  CD  
-					WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=@intCommodityId
+					WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and CD.intCommodityId=@intCommodityId
 					 and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
 				)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -941,7 +941,7 @@ IF isnull(@intVendorId,0) = 0
 BEGIN
 	SELECT intSeqNo+.123456 intSeqNo,strCommodityCode , strType,sum(isnull(dblTotal,0)) dblTotal,strUnitMeasure 
 	FROM @Final where dblTotal <> 0 group by intSeqNo,strCommodityCode,strType,strUnitMeasure,intContractHeaderId,intContractHeaderId,intFutOptTransactionHeaderId
-	ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
+	ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
 ELSE
 BEGIN
@@ -949,6 +949,6 @@ BEGIN
 	FROM @Final   
 	where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
 	group by intSeqNo,strCommodityCode,strType,strUnitMeasure,intContractHeaderId,intContractHeaderId,intFutOptTransactionHeaderId
-	 ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
+	 ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
 	
