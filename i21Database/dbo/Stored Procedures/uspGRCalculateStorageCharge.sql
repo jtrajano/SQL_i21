@@ -404,10 +404,11 @@ BEGIN TRY
 				,@dtmDEffectiveDate     = dtmEffectiveDate
 				,@dtmEndingDate         = dtmEndingDate
 				,@intNumberOfDays       = ISNULL(intNumberOfDays, 0)
-				,@dblStorageRate        = CASE 
-												WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
-												WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
-										  END
+				,@dblStorageRate        = dblStorageRate
+										  --CASE 
+												--WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
+												--WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
+										  --END
 				,@dblFeeRate		    = dblFeeRate
 				,@strFeeType			= ISNULL(strFeeType,'')
 			FROM @tblGRStorageSchedulePeriod
@@ -653,6 +654,8 @@ BEGIN TRY
 			END
 
 			SET @dblStorageDuePerUnit				 = ISNULL(@dblStorageDuePerUnit, 0)     + @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
+																							+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 			SET @TotalDaysApplicableForStorageCharge = @TotalDaysApplicableForStorageCharge - ISNULL(@CalculatedNumberOfDays,0)
 			SET @dtmDeliveryDate					 = @dtmDeliveryDate						+ ISNULL(@CalculatedNumberOfDays,0)
 
@@ -678,7 +681,7 @@ BEGIN TRY
 				,[intNumberOfDays]					= @intNumberOfDays
 				,[CalculatedNumberOfDays]			= @CalculatedNumberOfDays 
 				,[dblStorageRate]					= @dblStorageRate
-				,[dblStorageDuePerUnit]				= @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
+				,[dblStorageDuePerUnit]				= @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 				,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit + @dblFlatFeeTotal
 			END
 			
@@ -719,10 +722,11 @@ BEGIN TRY
 					,@dtmDEffectiveDate		= dtmEffectiveDate
 					,@dtmEndingDate			= dtmEndingDate
 					,@intNumberOfDays		= ISNULL(intNumberOfDays, 0)
-					,@dblStorageRate		= CASE 
-											  	   WHEN ISNULL(strFeeType,'') = 'Flat'      THEN dblStorageRate 
-											  	   WHEN ISNULL(strFeeType,'') = 'Per Unit'  THEN dblStorageRate + dblFeeRate
-											  END
+					,@dblStorageRate		= dblStorageRate
+											 --CASE 
+											 -- 	   WHEN ISNULL(strFeeType,'') = 'Flat'      THEN dblStorageRate 
+											 -- 	   WHEN ISNULL(strFeeType,'') = 'Per Unit'  THEN dblStorageRate + dblFeeRate
+											 -- END
 				FROM @tblGRStorageSchedulePeriod
 				WHERE intSchedulePeriodId = @intSchedulePeriodId
 
@@ -934,6 +938,8 @@ BEGIN TRY
 				END			
 				
 				SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
+																				- CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 				SET @TotalDaysApplicableForStorageCharge = @TotalDaysApplicableForStorageCharge - ISNULL(@CalculatedNumberOfDays,0)
 				SET @dtmDeliveryDate = @dtmDeliveryDate + ISNULL(@CalculatedNumberOfDays,0)
 				
@@ -959,7 +965,7 @@ BEGIN TRY
 					,[intNumberOfDays]					= @intNumberOfDays
 					,[CalculatedNumberOfDays]			= @CalculatedNumberOfDays
 					,[dblStorageRate]					= @dblStorageRate
-					,[dblStorageDuePerUnit]				= -@dblStorageRate * @CalculatedNumberOfDays
+					,[dblStorageDuePerUnit]				= -@dblStorageRate * @CalculatedNumberOfDays - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 					,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit							
 				END
 									
@@ -996,10 +1002,11 @@ BEGIN TRY
 				,@dtmDEffectiveDate = dtmEffectiveDate
 				,@dtmEndingDate		= dtmEndingDate
 				,@intNumberOfDays   = ISNULL(intNumberOfDays, 0)
-				,@dblStorageRate        = CASE 
-												WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
-												WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
-										  END
+				,@dblStorageRate    = dblStorageRate
+											  --CASE 
+													--WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
+													--WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
+											  --END
 				,@dblFeeRate		    = dblFeeRate
 				,@strFeeType			= ISNULL(strFeeType,'')
 			FROM @tblGRStorageSchedulePeriod
@@ -1042,6 +1049,7 @@ BEGIN TRY
 																	WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																	ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 															   END)
+															+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
@@ -1100,6 +1108,8 @@ BEGIN TRY
 																	  WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																	  ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 																   END
+																+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								INSERT INTO @StorageCharge
@@ -1145,7 +1155,9 @@ BEGIN TRY
 									IF @StorageChargeDate > @dtmEndingDate
 									BEGIN
 										---Intermediate Month Charges
-										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate *(DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1) 																															
+										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate *(DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+																	    																															
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 											
 											INSERT INTO @StorageCharge
@@ -1180,7 +1192,10 @@ BEGIN TRY
 									ELSE
 									BEGIN
 										--Intermediate Month charges
-										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0)
+																	   + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+																	   
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 											INSERT INTO @StorageCharge
@@ -1217,6 +1232,8 @@ BEGIN TRY
 																												WHEN @strLastMonth = 'Full Month' THEN @dblStorageRate 
 																												ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 																										   END
+
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 																										   
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
@@ -1275,6 +1292,8 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
 											INSERT INTO @StorageCharge
@@ -1310,6 +1329,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 											INSERT INTO @StorageCharge
@@ -1346,6 +1366,8 @@ BEGIN TRY
 																												WHEN @strLastMonth = 'Full Month' THEN @dblStorageRate 
 																												ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 																										   END
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
 										INSERT INTO @StorageCharge([strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])										
@@ -1407,6 +1429,7 @@ BEGIN TRY
 																									WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																									ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 																							   END
+														  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
@@ -1462,6 +1485,8 @@ BEGIN TRY
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge
@@ -1496,6 +1521,8 @@ BEGIN TRY
 								ELSE
 								BEGIN									
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) +(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge
@@ -1537,6 +1564,8 @@ BEGIN TRY
 									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge
@@ -1572,6 +1601,8 @@ BEGIN TRY
 										IF @strLastMonth = 'Full Month'
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1606,6 +1637,8 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1644,6 +1677,8 @@ BEGIN TRY
 										IF @strLastMonth = 'Full Month'
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1678,6 +1713,8 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1722,6 +1759,8 @@ BEGIN TRY
 									BEGIN									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge
@@ -1757,6 +1796,8 @@ BEGIN TRY
 										IF @strLastMonth = 'Full Month'
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1791,6 +1832,8 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1829,6 +1872,7 @@ BEGIN TRY
 										IF @strLastMonth = 'Full Month'
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+																		   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1863,6 +1907,8 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -1928,7 +1974,7 @@ BEGIN TRY
 							--When FirstMonth and Last Month not are Matching then Charge Full month
 							IF @strFirstMonth <> @strLastMonth
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								INSERT INTO @StorageCharge
@@ -1964,7 +2010,7 @@ BEGIN TRY
 							BEGIN
 								IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									     INSERT INTO @StorageCharge
@@ -2000,6 +2046,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 										INSERT INTO @StorageCharge
@@ -2040,7 +2087,7 @@ BEGIN TRY
 								---First Month Charge
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge
@@ -2076,6 +2123,8 @@ BEGIN TRY
 								BEGIN
 																	
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge
@@ -2114,7 +2163,10 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																					+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										
 										INSERT INTO @StorageCharge
 										(  
@@ -2149,6 +2201,8 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										INSERT INTO @StorageCharge
@@ -2183,7 +2237,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											 INSERT INTO @StorageCharge
@@ -2218,7 +2272,9 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) 
+																		   + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 												
 												 INSERT INTO @StorageCharge
@@ -2262,6 +2318,7 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
 										INSERT INTO @StorageCharge
@@ -2297,6 +2354,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge
@@ -2331,7 +2389,7 @@ BEGIN TRY
 										--Last Month Charge										
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											 INSERT INTO @StorageCharge
@@ -2367,6 +2425,8 @@ BEGIN TRY
 										ELSE
 										BEGIN										
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -2417,7 +2477,7 @@ BEGIN TRY
 						--When FirstMonth and Last Month not are Matching then Charge Full month
 						IF @strFirstMonth <> @strLastMonth
 						BEGIN
-							SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+							SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
 						    INSERT INTO @StorageCharge
@@ -2454,7 +2514,7 @@ BEGIN TRY
 						BEGIN
 							IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								   
 								INSERT INTO @StorageCharge
@@ -2489,6 +2549,8 @@ BEGIN TRY
 							ELSE
 							BEGIN
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+															  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								 INSERT INTO @StorageCharge
@@ -2529,7 +2591,7 @@ BEGIN TRY
 							---First Month Charge
 							IF @strFirstMonth = 'Full Month'
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								INSERT INTO @StorageCharge
@@ -2564,6 +2626,7 @@ BEGIN TRY
 							ELSE
 							BEGIN
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+															  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 							     INSERT INTO @StorageCharge
@@ -2600,6 +2663,7 @@ BEGIN TRY
 							BEGIN
 								--Intermediate Month charges
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+															  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								
 								 INSERT INTO @StorageCharge
@@ -2634,7 +2698,7 @@ BEGIN TRY
 								--Last Month Charge
 								IF @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge
@@ -2670,6 +2734,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge
@@ -2710,6 +2775,7 @@ BEGIN TRY
 							BEGIN
 								--Intermediate Month charges
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+															   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								
 								INSERT INTO @StorageCharge
@@ -2744,7 +2810,7 @@ BEGIN TRY
 								--Last Month Charge									
 								IF @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									 INSERT INTO @StorageCharge
@@ -2779,6 +2845,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+									+ CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									INSERT INTO @StorageCharge
@@ -2836,7 +2903,7 @@ BEGIN TRY
 							--When FirstMonth and Last Month not are Matching then Charge Full month
 							IF @strFirstMonth <> @strLastMonth
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 								 INSERT INTO @StorageCharge
@@ -2872,7 +2939,7 @@ BEGIN TRY
 							BEGIN
 								IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge
@@ -2907,6 +2974,8 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
+
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									INSERT INTO @StorageCharge
@@ -2947,7 +3016,7 @@ BEGIN TRY
 								---First Month Charge
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge
@@ -2982,6 +3051,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge
@@ -3023,6 +3093,7 @@ BEGIN TRY
 									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										INSERT INTO @StorageCharge
@@ -3057,7 +3128,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											 INSERT INTO @StorageCharge
@@ -3092,6 +3163,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3129,7 +3201,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3164,6 +3236,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3208,6 +3281,7 @@ BEGIN TRY
 									BEGIN									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
+																	  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge
@@ -3242,7 +3316,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3277,6 +3351,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		  + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3314,7 +3389,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3349,6 +3424,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
+																		   + CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge
@@ -3449,6 +3525,7 @@ BEGIN TRY
 																									WHEN  @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																									ELSE  (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 																							   END
+														    - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
 							INSERT INTO @StorageCharge
@@ -3506,6 +3583,7 @@ BEGIN TRY
 																		WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																		ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 																  END
+																- CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 																  
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
@@ -3553,6 +3631,7 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 											
 											INSERT INTO @StorageCharge
@@ -3588,6 +3667,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 											INSERT INTO @StorageCharge
@@ -3624,6 +3704,7 @@ BEGIN TRY
 																												WHEN @strLastMonth = 'Full Month' THEN  @dblStorageRate 
 																												ELSE  (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
 																										  END
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 																										  
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
@@ -3682,6 +3763,7 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3704,6 +3786,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3727,6 +3810,8 @@ BEGIN TRY
 																												WHEN @strLastMonth = 'Full Month' THEN @dblStorageRate 
 																												ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
 																										   END
+																	 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END																										
+
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
 										INSERT INTO @StorageCharge([strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])										
@@ -3789,6 +3874,7 @@ BEGIN TRY
 																  WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 																  ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 															  END
+															- CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
@@ -3830,7 +3916,7 @@ BEGIN TRY
 								---First Month Charge
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3852,6 +3938,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3880,6 +3967,7 @@ BEGIN TRY
 									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3901,7 +3989,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3923,6 +4011,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3947,7 +4036,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -3969,6 +4058,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4000,6 +4090,7 @@ BEGIN TRY
 									BEGIN									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4021,7 +4112,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4043,6 +4134,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4067,7 +4159,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4089,6 +4181,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4141,7 +4234,7 @@ BEGIN TRY
 							--When FirstMonth and Last Month not are Matching then Charge Full month
 							IF @strFirstMonth <> @strLastMonth
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4164,7 +4257,7 @@ BEGIN TRY
 							BEGIN
 								IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									     INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4187,6 +4280,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																   - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4214,7 +4308,7 @@ BEGIN TRY
 								---First Month Charge
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4237,6 +4331,7 @@ BEGIN TRY
 								BEGIN
 																	
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4262,6 +4357,7 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4284,6 +4380,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4305,7 +4402,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4328,6 +4425,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 												
 												 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4357,6 +4455,7 @@ BEGIN TRY
 									BEGIN
 										---Intermediate Month Charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4379,6 +4478,7 @@ BEGIN TRY
 									BEGIN
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4400,7 +4500,7 @@ BEGIN TRY
 										--Last Month Charge										
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4423,6 +4523,7 @@ BEGIN TRY
 										ELSE
 										BEGIN										
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4460,7 +4561,7 @@ BEGIN TRY
 						--When FirstMonth and Last Month not are Matching then Charge Full month
 						IF @strFirstMonth <> @strLastMonth
 						BEGIN
-							SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+							SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
 						    INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4483,7 +4584,7 @@ BEGIN TRY
 						BEGIN
 							IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								   
 								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4505,6 +4606,7 @@ BEGIN TRY
 							ELSE
 							BEGIN
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+															  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4532,7 +4634,7 @@ BEGIN TRY
 							---First Month Charge
 							IF @strFirstMonth = 'Full Month'
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4554,6 +4656,7 @@ BEGIN TRY
 							ELSE
 							BEGIN
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+															  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
 							     INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4577,6 +4680,7 @@ BEGIN TRY
 							BEGIN
 								--Intermediate Month charges
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+															 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 								
 								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4598,7 +4702,7 @@ BEGIN TRY
 								--Last Month Charge
 								IF @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4620,6 +4724,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4646,6 +4751,7 @@ BEGIN TRY
 							BEGIN
 								--Intermediate Month charges
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+															 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 								
 								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4667,7 +4773,7 @@ BEGIN TRY
 								--Last Month Charge									
 								IF @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4689,6 +4795,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4733,7 +4840,7 @@ BEGIN TRY
 							--When FirstMonth and Last Month not are Matching then Charge Full month
 							IF @strFirstMonth <> @strLastMonth
 							BEGIN
-								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4756,7 +4863,7 @@ BEGIN TRY
 							BEGIN
 								IF @strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4778,6 +4885,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																 - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4805,7 +4913,7 @@ BEGIN TRY
 								---First Month Charge
 								IF @strFirstMonth = 'Full Month'
 								BEGIN
-									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4827,6 +4935,7 @@ BEGIN TRY
 								ELSE
 								BEGIN
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
+																	- CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
 									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4855,6 +4964,7 @@ BEGIN TRY
 									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4876,7 +4986,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4898,6 +5008,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4922,7 +5033,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4943,7 +5054,8 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0)-(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		   - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END	
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4976,6 +5088,7 @@ BEGIN TRY
 									
 										--Intermediate Month charges
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
+																	  - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
 										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -4997,7 +5110,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -5018,7 +5131,8 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																		   - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -5043,7 +5157,7 @@ BEGIN TRY
 										--Last Month Charge
 										IF @strLastMonth = 'Full Month'
 										BEGIN
-											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate
+											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate - CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
@@ -5065,6 +5179,7 @@ BEGIN TRY
 										ELSE
 										BEGIN
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) -(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1)
+																			- CASE WHEN @strFeeType = 'Per Unit' THEN @dblFeeRate ELSE 0 END
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
 											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
