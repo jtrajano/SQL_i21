@@ -527,7 +527,7 @@ BEGIN
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
-	IF(@intTransactionTypeId != @InventoryTransactionType_MarkUpOrDown) -- Do not include update when Mark Up/Down
+	IF(@intTransactionTypeId <> @InventoryTransactionType_MarkUpOrDown) -- Do not include update when Mark Up/Down
 	BEGIN 
 		-- Get the current average cost and stock qty 
 		DECLARE @CurrentStockQty AS NUMERIC(38, 20) = NULL 
