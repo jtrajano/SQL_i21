@@ -132,43 +132,7 @@ WHERE
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
 	AND @intOwnershipType = 2 -- Storage Stocks
 
--- If transaction does not exists, add a dummy record. 
-IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransaction)
-BEGIN
-	INSERT INTO @tblInventoryTransaction
-	SELECT	i.intItemId,
-			intItemUOMId		= ItemUOMStock.intItemUOMId,
-			intItemLocationId	= DefaultLocation.intItemLocationId,
-			intSubLocationId	= @intSubLocationId,
-			intStorageLocationId= @intStorageLocationId,
-			intLotId			= NULL,
-			intCostingMethod	= DefaultLocation.intCostingMethod,
-			dtmDate				= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime),
-			dblQty				= CAST(0 AS NUMERIC(38, 20)) ,
-			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)) ,
-			dblCost				= ItemPricing.dblLastCost,
-			intOwnershipType	= 1
-	FROM tblICItem i
-	CROSS APPLY(
-		SELECT	intItemUOMId
-		FROM	tblICItemUOM iuStock 
-		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
-	) ItemUOMStock
-	CROSS APPLY (
-		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
-		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
-			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
-		WHERE ItemLocation.intItemId = i.intItemId
-		AND [Location].intCompanyLocationId = @intLocationId
-	) DefaultLocation
-	LEFT JOIN tblICItemPricing ItemPricing 
-		ON i.intItemId = ItemPricing.intItemId 
-		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
-	WHERE i.intItemId = @intItemId
-		AND i.strLotTracking = 'No'
-END
-
--- Get the top record and ordered by the quantity. 
+-- Group the transaction to aggregrate the quantities. 
 INSERT INTO @tblInventoryTransactionGrouped (
 	intItemId
 	,intItemUOMId
@@ -200,6 +164,49 @@ GROUP BY
 HAVING 
 	SUM(ISNULL(t.dblQty, 0)) <> 0 
 	OR SUM(ISNULL(t.dblUnitStorage, 0)) <> 0 
+
+-- If transaction does not exists, add a dummy record. 
+IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransactionGrouped)
+BEGIN
+	INSERT INTO @tblInventoryTransactionGrouped (
+		intItemId
+		,intItemUOMId
+		,intItemLocationId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,dblUnitStorage
+		,dblCost
+	
+	)
+	SELECT	
+		intItemId				= i.intItemId
+		,intItemUOMId			= ItemUOMStock.intItemUOMId
+		,intItemLocationId		= DefaultLocation.intItemLocationId
+		,intSubLocationId		= @intSubLocationId
+		,intStorageLocationId	= @intStorageLocationId
+		,dblQty					= CAST(0 AS NUMERIC(38, 20)) 
+		,dblUnitStorage			= CAST(0 AS NUMERIC(38, 20)) 
+		,dblCost				= ItemPricing.dblLastCost
+	FROM tblICItem i
+	CROSS APPLY(
+		SELECT	intItemUOMId
+		FROM	tblICItemUOM iuStock 
+		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
+	) ItemUOMStock
+	CROSS APPLY (
+		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
+		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
+		WHERE ItemLocation.intItemId = i.intItemId
+		AND [Location].intCompanyLocationId = @intLocationId
+	) DefaultLocation
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON i.intItemId = ItemPricing.intItemId 
+		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
+	WHERE i.intItemId = @intItemId
+		AND i.strLotTracking = 'No'
+END
 
 -- Return the result back to the caller. 
 SELECT 
