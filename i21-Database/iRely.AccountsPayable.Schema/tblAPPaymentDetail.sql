@@ -51,3 +51,44 @@ INCLUDE ( 	[intPaymentId],
 	[dblInterest],
 	[dblWithheld]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+
+
+CREATE TRIGGER trg_tblAPPaymentDetail
+ON dbo.tblAPPaymentDetail
+AFTER DELETE AS
+BEGIN
+INSERT INTO tblAPPaymentDetailDeleted
+(
+	[intPaymentDetailId]	,
+	[intPaymentId]			,
+	[intBillId]         	,
+	[intAccountId]      	,
+	[dblDiscount]       	,
+	[dblAmountDue]      	,
+	[dblPayment]        	,
+	[dblInterest]       	,
+	[dblTotal] 				,
+	[intConcurrencyId] 		,
+	[dblWithheld] 			,
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
+)
+SELECT 
+	[intPaymentDetailId]	,
+	[intPaymentId]			,
+	[intBillId]         	,
+	[intAccountId]      	,
+	[dblDiscount]       	,
+	[dblAmountDue]      	,
+	[dblPayment]        	,
+	[dblInterest]       	,
+	[dblTotal] 				,
+	[intConcurrencyId] 		,
+	[dblWithheld] 			,
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
+FROM DELETED
+END
+GO
