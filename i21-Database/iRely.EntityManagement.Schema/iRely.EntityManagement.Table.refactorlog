@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="3cf6186d-cfdc-40a1-9b49-01452bdfcb6f" ChangeDateTime="03/10/2015 03:13:39">
+    <Property Name="ElementName" Value="[dbo].[tblEntityContact].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e4c5c4cf-6b51-4bc1-88bf-146b006dc1bd" ChangeDateTime="03/10/2015 04:01:50">
+    <Property Name="ElementName" Value="[dbo].[tblEntityContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5e6e1c31-fbcc-4ab7-b06e-66820a310da1" ChangeDateTime="03/10/2015 04:03:14">
+    <Property Name="ElementName" Value="[dbo].[tblEntityToContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+</Operations>

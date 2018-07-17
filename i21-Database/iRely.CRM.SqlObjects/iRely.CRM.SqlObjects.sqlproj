@@ -63,9 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PreDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -262,8 +259,5 @@
     <Build Include="Views\vyuCRMSalesPerson.sql" />
     <Build Include="Views\vyuCRMSalesRepSummary.sql" />
     <Build Include="Views\vyuCRMWinLossAnalysis.sql" />
-    <None Include="Scripts\PostDeployment\RenameCRMScreen.sql" />
-    <None Include="Scripts\PostDeployment\SplitCRMData.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

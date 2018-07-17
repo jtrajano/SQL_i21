@@ -64,9 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Functions\fnAP1099EFileBPayee.sql" />
@@ -362,38 +359,6 @@
     <Build Include="Triggers\trgPOVoucherPayablePurchaseDetail.sql" />
     <Build Include="Triggers\trgAPPaymentDetail.sql" />
     <Build Include="Views\vyuAPYearMISC.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\Categories1099.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\Categories1099DIV.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\Categories1099PATR.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\DeferredPaymentInterest.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\InsertWriteOffPaymentMethod.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\POOrderStatus.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\Threshold1099.sql" />
-    <None Include="Scripts\PostDeployment\CleanBasisAdvance.sql" />
-    <None Include="Scripts\PostDeployment\ClearPostResult.sql" />
-    <None Include="Scripts\PostDeployment\DateCreatedValueDefault.sql" />
-    <None Include="Scripts\PostDeployment\DefaultDataBalance.sql" />
-    <None Include="Scripts\PostDeployment\DeleteInvalidBasisAdvanceStaging.sql" />
-    <None Include="Scripts\PostDeployment\FixPaymentRecordStatus.sql" />
-    <None Include="Scripts\PostDeployment\FixVendorGLAccountExpense.sql" />
-    <None Include="Scripts\PostDeployment\MigratePOForApprovals.sql" />
-    <None Include="Scripts\PostDeployment\MigrateVouchersForApproval.sql" />
-    <None Include="Scripts\PostDeployment\RemoveBillTemplate.sql" />
-    <None Include="Scripts\PostDeployment\UpdateAmountSign.sql" />
-    <None Include="Scripts\PostDeployment\UpdateApprovalRecords.sql" />
-    <None Include="Scripts\PostDeployment\UpdateBillBatch.sql" />
-    <None Include="Scripts\PostDeployment\UpdateBillDetailCurrencies.sql" />
-    <None Include="Scripts\PostDeployment\UpdateBillDetailRate.sql" />
-    <None Include="Scripts\PostDeployment\UpdateBillGLEntriesRecords.sql" />
-    <None Include="Scripts\PostDeployment\UpdateBillPayToAddress.sql" />
-    <None Include="Scripts\PostDeployment\UpdateNewShipFromEntity.sql" />
-    <None Include="Scripts\PostDeployment\UpdateOldCost.sql" />
-    <None Include="Scripts\PostDeployment\UpdatePOPendingStatus.sql" />
-    <None Include="Scripts\PostDeployment\UpdatePrepayVoucherStatus.sql" />
-    <None Include="Scripts\PostDeployment\UpdateTaxGroupId.sql" />
-    <None Include="Scripts\PostDeployment\UpdateVoucherDetail1099.sql" />
-    <None Include="Scripts\PostDeployment\UpdateVoucherForApproval.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">

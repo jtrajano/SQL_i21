@@ -63,8 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -338,16 +336,5 @@
     <Build Include="Views\vyuSTTranslogDetails.sql" />
     <Build Include="Views\vyuSTTranslogHeader.sql" />
     <Build Include="Views\vyuSTVendorList.sql" />
-    <None Include="Scripts\PostDeployment\1_FileFieldMapping_PricebookSale.sql" />
-    <None Include="Scripts\PostDeployment\10_Checkout_Commander_Translog.sql" />
-    <None Include="Scripts\PostDeployment\2_FileFieldMapping_PromotionItemList.sql" />
-    <None Include="Scripts\PostDeployment\3_FileFieldMapping_PromotionCombo.sql" />
-    <None Include="Scripts\PostDeployment\4_FileFieldMapping_PricebookMixMatch.sql" />
-    <None Include="Scripts\PostDeployment\5_FileFieldMapping_PricebookSendSapphire.sql" />
-    <None Include="Scripts\PostDeployment\6_Checkout_Radiant_ISM.sql" />
-    <None Include="Scripts\PostDeployment\7_Checkout_Radiant_MCM.sql" />
-    <None Include="Scripts\PostDeployment\8_Checkout_Radiant_FGM.sql" />
-    <None Include="Scripts\PostDeployment\9_Checkout_Radiant_MSM.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

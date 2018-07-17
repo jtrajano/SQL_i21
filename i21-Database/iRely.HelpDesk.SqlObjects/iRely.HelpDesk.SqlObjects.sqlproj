@@ -64,9 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -295,12 +292,5 @@
     <Build Include="Triggers\trgHDAfterUpdateProjectTask.sql" />
     <Build Include="Triggers\trgHDTicketHistory.sql" />
     <Build Include="Triggers\trgHDTicketStatus.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1_StatusData.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\2_Screen.sql" />
-    <None Include="Scripts\PostDeployment\CustomField.sql" />
-    <None Include="Scripts\PostDeployment\HDEntryDataFix.sql" />
-    <None Include="Scripts\PostDeployment\RemoveHDObsoleteScreen.sql" />
-    <None Include="Scripts\PostDeployment\RenameHDScreen.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

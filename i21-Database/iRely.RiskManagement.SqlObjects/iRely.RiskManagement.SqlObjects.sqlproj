@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -451,9 +449,6 @@
     <Build Include="Views\vyuRKSOptionPSTransaction.sql" />
     <Build Include="Views\vyuRKSourcingContractDetail.sql" />
     <Build Include="Views\vyuRKUnrealizedPnL.sql" />
-    <None Include="Scripts\PostDeployment\01_MasterScript.sql" />
-    <None Include="Scripts\PostDeployment\02_DataFix.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Triggers\trgRKAfterInsertDerivativeEntry.sql" />

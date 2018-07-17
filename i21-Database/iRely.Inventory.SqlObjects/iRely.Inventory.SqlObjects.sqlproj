@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -488,32 +486,5 @@
     <Build Include="Triggers\trgICCustomJDESAPReceiptUpdateExportFlag.sql" />
     <Build Include="Triggers\trgICItemPricingDateChanged.sql" />
     <Build Include="Triggers\trgICItemPricingLevelDateChanged.sql" />
-    <None Include="Scripts\PostDeployment\01_InventoryTransactionTypes.sql" />
-    <None Include="Scripts\PostDeployment\03_DefaultData.sql" />
-    <None Include="Scripts\PostDeployment\04_CostingMethods.sql" />
-    <None Include="Scripts\PostDeployment\05_LotStatus.sql" />
-    <None Include="Scripts\PostDeployment\07_Status.sql" />
-    <None Include="Scripts\PostDeployment\08_InventoryTransactionPostingIntegration.sql" />
-    <None Include="Scripts\PostDeployment\09_InventoryTransactionsWithNoCounterAccountCategory.sql" />
-    <None Include="Scripts\PostDeployment\15_InventoryCostAdjustmentTypes.sql" />
-    <None Include="Scripts\PostDeployment\1740_DataFix_FixIntTransactionDetailId.sql" />
-    <None Include="Scripts\PostDeployment\18_FOBPointTypes.sql" />
-    <None Include="Scripts\PostDeployment\19_M2MComputations.sql" />
-    <None Include="Scripts\PostDeployment\20_UpdateContractItemStatuses.sql" />
-    <None Include="Scripts\PostDeployment\21_AdjustmentInventoryTerms.sql" />
-    <None Include="Scripts\PostDeployment\22_StockTypes.sql" />
-    <None Include="Scripts\PostDeployment\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
-    <None Include="Scripts\PostDeployment\23_Update_ActualCostId_On_InventoryTransaction.sql" />
-    <None Include="Scripts\PostDeployment\24_ImplementBasketChanges.sql" />
-    <None Include="Scripts\PostDeployment\25_MigratePackedTypeToQuantityType.sql" />
-    <None Include="Scripts\PostDeployment\26_AddStockUOM.sql" />
-    <None Include="Scripts\PostDeployment\27_RemoveAfter18.1_DataFix.sql" />
-    <None Include="Scripts\PostDeployment\28_Company_Preferences.sql" />
-    <None Include="Scripts\PostDeployment\29_Inventory_Constraints.sql" />
-    <None Include="Scripts\PostDeployment\30_Populate_Shipment_LineTotal.sql" />
-    <None Include="Scripts\PostDeployment\31_Add_Default_Edi_Mapping_Template.sql" />
-    <None Include="Scripts\PostDeployment\31_RemoveAfter18.3_DataFix.sql" />
-    <None Include="Scripts\PostDeployment\PopulateLotContainerNoAndCondition.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

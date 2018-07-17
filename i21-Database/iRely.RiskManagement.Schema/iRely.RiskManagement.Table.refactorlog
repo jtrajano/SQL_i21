@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="daba9ecc-4104-4f89-80e9-fc3ed0a37239" ChangeDateTime="03/13/2015 08:10:19">
+    <Property Name="ElementName" Value="[dbo].[tblRKOptSettlementPriceMarketMap].[intType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKOptSettlementPriceMarketMap]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a272f90-594e-48b3-9ba7-214e60c8f763" ChangeDateTime="04/08/2015 15:08:00">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHistoryStartTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strHistoryStartTime" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5f56d392-d248-4362-be64-30f6fd2a0027" ChangeDateTime="04/08/2015 15:08:06">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHisotryEndTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strHisotryEndTime" />
+  </Operation>
+</Operations>

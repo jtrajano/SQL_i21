@@ -1,3 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="c64b3c9a-ddf9-432c-b8e7-b9ef8909afc7" ChangeDateTime="03/10/2015 03:06:06">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendorToContact].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendorToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="be0f48a1-8293-4afd-bb69-2a63488ff740" ChangeDateTime="03/10/2015 03:06:57">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendorToContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendorToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
 </Operations>

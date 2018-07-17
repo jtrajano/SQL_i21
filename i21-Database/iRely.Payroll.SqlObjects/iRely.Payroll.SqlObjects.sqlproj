@@ -63,12 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DataFixes" />
-    <Folder Include="Scripts\PostDeployment\DefaultData" />
-    <Folder Include="Scripts\PostDeployment\Reports" />
-    <Folder Include="Scripts\PostDeployment\Reports\SubReports" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -286,23 +280,5 @@
     <Build Include="Views\vyuPRReportWorkersCompensation.sql" />
     <Build Include="Views\vyuPRTimeOffRequest.sql" />
     <Build Include="Views\vyuPRUnpaidEmployeeReport.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\AddPaycheckDirectDepositEntries.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\ResetEaningHoursToProcess.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\SynchronizePaycheckCheckNumber.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\UpdateEarningDeductionTaxId.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\UpdateOldData.sql" />
-    <None Include="Scripts\PostDeployment\DataFixes\UpdatePaycheckTotalHours.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1_TaxStatesAndLocalities.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\2_ElectronicFileFormats.sql" />
-    <None Include="Scripts\PostDeployment\Reports\DashboardPanelViews.sql" />
-    <None Include="Scripts\PostDeployment\Reports\PaycheckBottom.sql" />
-    <None Include="Scripts\PostDeployment\Reports\PaycheckMiddle.sql" />
-    <None Include="Scripts\PostDeployment\Reports\PaycheckTop.sql" />
-    <None Include="Scripts\PostDeployment\Reports\SubReports\PaycheckDeductionSubReport.sql" />
-    <None Include="Scripts\PostDeployment\Reports\SubReports\PaycheckEarningSubReport.sql" />
-    <None Include="Scripts\PostDeployment\Reports\SubReports\PaycheckTaxSubReport.sql" />
-    <None Include="Scripts\PostDeployment\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

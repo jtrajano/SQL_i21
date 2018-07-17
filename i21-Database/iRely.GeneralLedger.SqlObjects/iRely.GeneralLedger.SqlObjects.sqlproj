@@ -65,10 +65,6 @@
     <Folder Include="Views" />
     <Folder Include="Triggers" />
     <Folder Include="Indexes" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DefaultData" />
-    <Folder Include="Scripts\PostDeployment\ReportData" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -333,31 +329,5 @@
     <Build Include="Indexes\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="Indexes\IX_tblGLJournal_strSourceType.sql" />
     <Build Include="Indexes\IX_tblGLJournalDetail_intJournalId.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1a_AccountStructure.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1b_AccountType.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1c_AccountGroup.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1d_RemoveDuplicateCOGSales_AccountGroup.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1e_AccountCategory.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1e_AccountCategoryMaintenance.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1f_AccountTemplate.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1g_AccountSegmentTemplate.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1h_AccountRange.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1i_RemoveCOGSales_AccountRange.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1j_FiscalYearPeriod.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1k_AccountCurrency.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1l_AlterTable.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1o_SegmentType.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1p_CompanyPreferenceOption.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1q_InsertOriginMapping.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1r_UpdateModuleCategory.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1s_UpdateChartDescription.sql" />
-    <None Include="Scripts\PostDeployment\ReportData\BalanceSheetStandard.sql" />
-    <None Include="Scripts\PostDeployment\ReportData\GeneralLedgerByAccountDetail.sql" />
-    <None Include="Scripts\PostDeployment\ReportData\IncomeStatementStandard.sql" />
-    <None Include="Scripts\PostDeployment\ReportData\TrialBalance.sql" />
-    <None Include="Scripts\PostDeployment\ReportData\TrialBalanceDetail.sql" />
-    <None Include="Scripts\PostDeployment\GLEntryDataFix.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

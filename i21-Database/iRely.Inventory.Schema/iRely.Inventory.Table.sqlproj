@@ -216,7 +216,4 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
     </ArtifactReference>
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="iRely.Inventory.Table.refactorlog" />
-  </ItemGroup>
 </Project>

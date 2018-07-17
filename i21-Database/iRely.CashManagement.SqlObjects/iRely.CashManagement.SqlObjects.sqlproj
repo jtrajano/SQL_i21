@@ -62,8 +62,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -303,10 +301,5 @@
     <Build Include="Triggers\trgCMDeleteUndepositedFunds.sql" />
     <Build Include="Triggers\trgCMInsteadOfInserBank.sql" />
     <Build Include="Triggers\trgCMInsteadOfUpdateBank.sql" />
-    <None Include="Scripts\PostDeployment\1_BankTransactionTypes.sql" />
-    <None Include="Scripts\PostDeployment\2_DataImportStatus.sql" />
-    <None Include="Scripts\PostDeployment\3_PopulateSourceSystemData.sql" />
-    <None Include="Scripts\PostDeployment\4_DataFix.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

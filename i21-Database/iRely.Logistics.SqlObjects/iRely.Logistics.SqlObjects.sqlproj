@@ -63,9 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PreDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -408,7 +405,5 @@
     <Build Include="Views\vyuLGWeightClaimOtherCharges.sql" />
     <Build Include="Views\vyuLGWeightClaimSearch.sql" />
     <Build Include="Stored Procedures\uspValidateShippingAdvice.sql" />
-    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

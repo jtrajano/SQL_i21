@@ -1,0 +1,8 @@
+﻿--THIS SCRIPT WILL UPDATE THE dblOldCost TO NULLABLE
+IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE dblOldCost = 0)
+BEGIN
+	UPDATE A
+		SET A.dblOldCost = NULL
+	FROM tblAPBillDetail A
+	WHERE A.dblOldCost = 0
+END

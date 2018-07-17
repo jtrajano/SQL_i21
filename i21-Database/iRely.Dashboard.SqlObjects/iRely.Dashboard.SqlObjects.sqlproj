@@ -63,21 +63,12 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="Views\vyuDBActivePanel.sql" />
     <Build Include="Views\vyuDBActivePanelTab.sql" />
     <Build Include="Views\vyuDBPanel.sql" />
-    <None Include="Scripts\PostDeployment\1_CannedPanels_Panel.sql" />
-    <None Include="Scripts\PostDeployment\2_CannedPanels_Column.sql" />
-    <None Include="Scripts\PostDeployment\3_CannedPanels_Format.sql" />
-    <None Include="Scripts\PostDeployment\4_Create_Role_for_DashboardReports.sql" />
-    <None Include="Scripts\PostDeployment\6_PanelOwnerMigration.sql" />
-    <None Include="Scripts\PostDeployment\7_DeleteAllFloatingPanels.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">

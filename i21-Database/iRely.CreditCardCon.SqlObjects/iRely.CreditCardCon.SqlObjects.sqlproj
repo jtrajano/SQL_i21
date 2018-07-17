@@ -62,9 +62,6 @@
     <Folder Include="Properties" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PreDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -236,8 +233,5 @@
     <Build Include="Views\vyuCCSiteHeaderSearch.sql" />
     <Build Include="Views\vyuCCVendor.sql" />
     <Build Include="Views\vyuCCVendorCombo.sql" />
-    <None Include="Scripts\PostDeployment\RemoveCCRObsoleteScreen.sql" />
-    <None Include="Scripts\PostDeployment\SiteDataFix.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

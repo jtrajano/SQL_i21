@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -295,13 +293,5 @@
     <Build Include="Views\vyuPATTransferDetails.sql" />
     <Build Include="Views\vyuPATVolumeDetails.sql" />
     <Build Include="Triggers\trgPATPurchaseSale.sql" />
-    <None Include="Scripts\PostDeployment\1_AddDefaultLetters.sql" />
-    <None Include="Scripts\PostDeployment\1_DropStoredProcedures.sql" />
-    <None Include="Scripts\PostDeployment\2_DefaultCompanyPreference.sql" />
-    <None Include="Scripts\PostDeployment\2_MigrateStockRecords.sql" />
-    <None Include="Scripts\PostDeployment\3_UpdateIssueStockNo.sql" />
-    <None Include="Scripts\PostDeployment\4_UpdateRetiredStockNo.sql" />
-    <None Include="Scripts\PostDeployment\5_UpdatePayoutType.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

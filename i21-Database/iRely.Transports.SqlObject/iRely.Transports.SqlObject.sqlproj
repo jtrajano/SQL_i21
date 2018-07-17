@@ -63,8 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -274,8 +272,5 @@
     <Build Include="Views\vyuTRRackItems.sql" />
     <Build Include="Views\vyuTRSearchQuote.sql" />
     <Build Include="Views\vyuTRSearchQuoteDetail.sql" />
-    <None Include="Scripts\PostDeployment\RemoveObsoleteScreen.sql" />
-    <None Include="Scripts\PostDeployment\CleanUp_TR_Data.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

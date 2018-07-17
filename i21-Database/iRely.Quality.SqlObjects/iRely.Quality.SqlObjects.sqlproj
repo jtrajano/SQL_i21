@@ -63,8 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -319,7 +317,5 @@
     <Build Include="Views\vyuQMTemplateList.sql" />
     <Build Include="Views\vyuQMTestList.sql" />
     <Build Include="Views\vyuQMTestResultNotMapped.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
-    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
   </ItemGroup>
 </Project>

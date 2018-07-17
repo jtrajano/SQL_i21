@@ -63,8 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -335,9 +333,5 @@
     <Build Include="Views\vyuGRStorageStmtStorageType.sql" />
     <Build Include="Views\vyuGRUnPricedNotMapped.sql" />
     <Build Include="Views\vyuGRUnPricedSpotTicketNotMapped.sql" />
-    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
-    <None Include="Scripts\PostDeployment\GRDataMigrations.sql" />
-    <None Include="Scripts\PostDeployment\TicketTypes.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

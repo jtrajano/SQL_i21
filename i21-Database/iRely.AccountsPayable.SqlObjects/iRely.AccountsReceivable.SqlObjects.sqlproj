@@ -64,9 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Functions\fnARComputeDiscountForEarlyPayment.sql" />
@@ -257,29 +254,6 @@
     <Build Include="Triggers\trgARSalesOrderNumber.sql" />
     <Build Include="Triggers\trgARPaymentDetailUpdate.sql" />
     <Build Include="Triggers\trgARCommissionNumber.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\1_CustomerPortalMenu.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\12_UpdatesActualCostIdInInvoice.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\13_FixOnOrderCommittedQuantity.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\15_FixInvoiceDateForCredits.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\17_AddDefaultQuoteOrderTemplate.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\19_UpdateUsedCustomerBudget.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\23_AddDefaultCollectionLetters.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\24_AddDefaultPlaceHolders.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\27_RenamePricingForContracts.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\29_UpdateInvoiceDetailLotId.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\31_UpdateCustomerRackQuoteHeader.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\33_UpdateSalesOrderQuoteTypes.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\34_UpdateUnitPriceUOM.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\5_UpdateOrderStatus.sql" />
-    <None Include="Scripts\PostDeployment\DefaultData\9_FixServiceChargeStartingNumber.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">

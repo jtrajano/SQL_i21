@@ -64,9 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PostDeployment\DataMigration" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -305,54 +302,5 @@
     <Build Include="Views\vyuEntityEFTInformation.sql" />
     <Build Include="Views\vyuEPContactMenu.sql" />
     <Build Include="Triggers\trgDeleteEntityToContact.sql" />
-    <None Include="Scripts\PostDeployment\DataMigration\1710_1720_CCSite_migration.sql" />
-    <None Include="Scripts\PostDeployment\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
-    <None Include="Scripts\PostDeployment\001_EMEntityPortalMenu.sql" />
-    <None Include="Scripts\PostDeployment\002_UpdateMenuuEntityType.sql" />
-    <None Include="Scripts\PostDeployment\003_FixVendorBadData.sql" />
-    <None Include="Scripts\PostDeployment\004_MoveFuturesBrokerData.sql" />
-    <None Include="Scripts\PostDeployment\005_MoveForwardingAgentData.sql" />
-    <None Include="Scripts\PostDeployment\006_MoveTerminalData.sql" />
-    <None Include="Scripts\PostDeployment\007_MoveShippingLineData.sql" />
-    <None Include="Scripts\PostDeployment\008_MoveTruckerData.sql" />
-    <None Include="Scripts\PostDeployment\009_UpdateEntityContactTypeData.sql" />
-    <None Include="Scripts\PostDeployment\010_UpdateVendorAccountNumber.sql" />
-    <None Include="Scripts\PostDeployment\011_FixEntityLocationNullTerms.sql" />
-    <None Include="Scripts\PostDeployment\012_DeleteOldTables.sql" />
-    <None Include="Scripts\PostDeployment\013_SetDefaultLocationToActive.sql" />
-    <None Include="Scripts\PostDeployment\014_UpdateCustomerPricingLevel.sql" />
-    <None Include="Scripts\PostDeployment\015_UpdateEntityTariffType.sql" />
-    <None Include="Scripts\PostDeployment\016_MoveCustomerAccountStatusToNewTable.sql" />
-    <None Include="Scripts\PostDeployment\017_MoveSplitCategoryToNewTable.sql" />
-    <None Include="Scripts\PostDeployment\018_UpdateRoleId_ForEntityCredential.sql" />
-    <None Include="Scripts\PostDeployment\019_RemoveEmailToParentEntity.sql" />
-    <None Include="Scripts\PostDeployment\020_DefaultDataForEntityImportSchemaCSV.sql" />
-    <None Include="Scripts\PostDeployment\021_MoveCustomerMessageToEntity.sql" />
-    <None Include="Scripts\PostDeployment\022_DefaultDataForContactTypeAndImport.sql" />
-    <None Include="Scripts\PostDeployment\023_RenameEntityContactEmailDistribution.sql" />
-    <None Include="Scripts\PostDeployment\024_CleanOrphanCustomerGroup.sql" />
-    <None Include="Scripts\PostDeployment\024_delete_old_entity_table.sql" />
-    <None Include="Scripts\PostDeployment\025_UpdatePhoneNumberAndCreateBackup.sql" />
-    <None Include="Scripts\PostDeployment\026_ImportPhoneNumbersToNewTable.sql" />
-    <None Include="Scripts\PostDeployment\027_MassUpdatePhoneNumber.sql" />
-    <None Include="Scripts\PostDeployment\028_MassCountryFormat.sql" />
-    <None Include="Scripts\PostDeployment\029_FillInPhoneAndMobile.sql" />
-    <None Include="Scripts\PostDeployment\030-FixSalesperson.sql" />
-    <None Include="Scripts\PostDeployment\031_UpdatePhoneAreaLength.sql" />
-    <None Include="Scripts\PostDeployment\032_MigrateVendorApprovalList.sql" />
-    <None Include="Scripts\PostDeployment\033_UpdateUserSecurityAdmin.sql" />
-    <None Include="Scripts\PostDeployment\034_EntityClassData.sql" />
-    <None Include="Scripts\PostDeployment\034_UpdateEntityEmail.sql" />
-    <None Include="Scripts\PostDeployment\035_EncryptEFTAccountNumber.sql" />
-    <None Include="Scripts\PostDeployment\036_MoveTheTermsPerType.sql" />
-    <None Include="Scripts\PostDeployment\037_DefaultDataLocationPayee.sql" />
-    <None Include="Scripts\PostDeployment\039_MoveDefaultTermsToVendorTerm.sql" />
-    <None Include="Scripts\PostDeployment\1730_Fix_SplitTypeEntry.sql" />
-    <None Include="Scripts\PostDeployment\1740_Activate_Default_Contact.sql" />
-    <None Include="Scripts\PostDeployment\1810_Fix_Check_Payee_Name.sql" />
-    <None Include="Scripts\PostDeployment\1810_Set_Default_Language.sql" />
-    <None Include="Scripts\PostDeployment\5_FixUserIdDataEntry.sql" />
-    <None Include="Scripts\PostDeployment\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

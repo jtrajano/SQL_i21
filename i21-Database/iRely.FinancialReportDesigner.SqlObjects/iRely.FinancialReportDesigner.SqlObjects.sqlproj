@@ -62,8 +62,6 @@
     <Folder Include="Properties" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -246,7 +244,5 @@
     <Build Include="Stored Procedures\uspFRDValidateDesign.sql" />
     <Build Include="Views\vyuFRDColumnDesign.sql" />
     <Build Include="Views\vyuFRDRowDesign.sql" />
-    <None Include="Scripts\PostDeployment\FRDEntryDataFix.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

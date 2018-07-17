@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -451,9 +449,5 @@
     <Build Include="Views\vyuCTSimultaneousFixation.sql" />
     <Build Include="Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="Triggers\trgCTAfterUpdateAmendmentApproval.sql" />
-    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
-    <None Include="Scripts\PostDeployment\172To173.sql" />
-    <None Include="Scripts\PostDeployment\174To181.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

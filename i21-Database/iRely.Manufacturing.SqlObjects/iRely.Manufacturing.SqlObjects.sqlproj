@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Functions\fnMFCalculateRecipeItemLowerTolerance.sql" />
@@ -539,10 +537,6 @@
     <Build Include="Views\vyuMFWastageWorkOrder.sql" />
     <Build Include="Triggers\trgMFAfterUpdateLogBudget.sql" />
     <Build Include="Triggers\trgMFAfterInsertScheduledMaintenance.sql" />
-    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
-    <None Include="Scripts\PostDeployment\2_ProcessAttribute.sql" />
-    <None Include="Scripts\PostDeployment\7_ProcessAttributeDefaultValue.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">

@@ -63,9 +63,6 @@
     <Folder Include="Functions" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="Scripts\PreDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -287,22 +284,5 @@
     <Build Include="Views\vyuTFGetTaxAuthorityCustomerLicense.sql" />
     <Build Include="Views\vyuTFGetTransaction.sql" />
     <Build Include="Views\vyuTFGetTransactionSummary.sql" />
-    <None Include="Scripts\PostDeployment\01_TaxAuthority.sql" />
-    <None Include="Scripts\PostDeployment\02_TerminalControl.sql" />
-    <None Include="Scripts\PostDeployment\AfterUpgradeCleanup.sql" />
-    <None Include="Scripts\PostDeployment\IL_Illinois.sql" />
-    <None Include="Scripts\PostDeployment\IN_Indiana.sql" />
-    <None Include="Scripts\PostDeployment\LA_Louisiana.sql" />
-    <None Include="Scripts\PostDeployment\MI_Michigan.sql" />
-    <None Include="Scripts\PostDeployment\MS_Mississippi.sql" />
-    <None Include="Scripts\PostDeployment\NC_NorthCarolina.sql" />
-    <None Include="Scripts\PostDeployment\NE_Nebraska.sql" />
-    <None Include="Scripts\PostDeployment\NM_NewMexico.sql" />
-    <None Include="Scripts\PostDeployment\OH_Ohio.sql" />
-    <None Include="Scripts\PostDeployment\OR_Oregon.sql" />
-    <None Include="Scripts\PostDeployment\PA_Pennsylvania.sql" />
-    <None Include="Scripts\PostDeployment\SC_SouthCarolina.sql" />
-    <None Include="Scripts\PostDeployment\WA_Washington.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

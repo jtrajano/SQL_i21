@@ -62,8 +62,6 @@
     <Folder Include="Properties" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -245,7 +243,5 @@
     <Build Include="Stored Procedures\uspNRReportUCCTracking.sql" />
     <Build Include="Stored Procedures\uspNRScheduleHistoryReversePayment.sql" />
     <Build Include="Views\vyuNRNotesReceivableSearch.sql" />
-    <None Include="Scripts\PostDeployment\1_NoteTransType.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

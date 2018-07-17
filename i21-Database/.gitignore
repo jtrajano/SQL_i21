@@ -1,0 +1,23 @@
+#Ignore these files/folders when pushing to Bitbucket.
+.idea
+.sencha
+**/bin
+**/obj
+server/TestResults/
+node_modules/
+*publish.xml
+**/*.dbmdl
+i21.v11.suo
+*.sublime*
+TestAP/TestAP.sqlproj.user
+i21.v12.suo
+*.jfm
+.vs/i21/v14/.suo
+**/Deploy
+**/SQLTddExtender.config
+.vs/i21/v15/sqlite3/storage.ide
+.vs/i21/v15/Server/sqlite3/storage.ide-wal
+.vs/i21/v15/Server/sqlite3/storage.ide-shm
+.vs/i21/v15/Server/sqlite3/storage.ide
+.vs/i21/v15/Server/sqlite3/db.lock
+team-extension.log

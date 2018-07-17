@@ -64,8 +64,6 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views" />
     <Folder Include="Triggers" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\PostDeployment" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
@@ -320,9 +318,6 @@
     <Build Include="Views\vyuCFUsageExceptionAlertTransaction.sql" />
     <Build Include="Views\vyuCFVehicleAccountCustomer.sql" />
     <Build Include="Triggers\trgCFTransactionRecordNumber.sql" />
-    <None Include="Scripts\PostDeployment\1_ImportMapping.sql" />
-    <None Include="Scripts\PostDeployment\2_DataFix.sql" />
-    <None Include="Scripts\PostDeployment\3_DataFixPriceAdjustment.sql" />
-    <PostDeploy Include="Scripts\PostDeploy.sql" />
+    <Build Include="Views\vyuCFAccountCustomer.sql" />
   </ItemGroup>
 </Project>

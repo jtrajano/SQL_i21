@@ -1,0 +1,7 @@
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE ysnExported IS NULL)
+BEGIN
+	UPDATE A
+		SET A.ysnExported = 0
+	FROM tblAPBill A
+	WHERE A.ysnExported IS NULL
+END

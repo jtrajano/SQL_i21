@@ -361,7 +361,4 @@
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="iRely.Circular.Table.refactorlog" />
-  </ItemGroup>
 </Project>
