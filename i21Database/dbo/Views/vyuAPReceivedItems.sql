@@ -985,7 +985,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(1 AS BIT)
+		,[ysnReturn]								=	CASE WHEN CC.ysnAccrue > 0 THEN CAST(0 AS BIT) ELSE  CAST(1 AS BIT) END
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
