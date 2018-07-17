@@ -1,5 +1,5 @@
 ﻿CREATE TRIGGER [dbo].[trgAfterUpdatetblSMCompanySetUp]
-ON  [dbo].[tblSMCompanySetUp]
+ON  [dbo].[tblSMCompanySetup]
 AFTER UPDATE
 AS 
 BEGIN
