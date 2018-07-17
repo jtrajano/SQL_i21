@@ -107,6 +107,9 @@ BEGIN TRY
 			dblNoOfLots				= CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
 									  END,
+			strLots				    = dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots),
+			dblRatio			    = dbo.fnRemoveTrailingZeroes(CD.dblRatio),
+			strMarketMonth			= MA.strFutMarketName + ' ' + REPLACE(MO.strFutureMonth ,' ','(' + MO.strSymbol +') ') ,
 			strAmendedColumns		= CASE WHEN ISNULL(@strDetailAmendedColumns,'') <>'' THEN @strDetailAmendedColumns ELSE  AM.strAmendedColumns END,
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,
@@ -120,6 +123,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM		PM	ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 	JOIN	tblICUnitMeasure	PU	ON	PU.intUnitMeasureId		=	PM.intUnitMeasureId		LEFT
 	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
+	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId	LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
 	JOIN	tblICItem			IM	ON	IM.intItemId			=	CD.intItemId			LEFT
 	JOIN	[tblEMEntityFarm]	EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT

@@ -50,7 +50,8 @@ BEGIN TRY
 			@strIds						NVARCHAR(MAX),
 			@strGABShipDelv				NVARCHAR(MAX),
 			@intReportLogoHeight		INT,
-			@intReportLogoWidth			INT
+			@intReportLogoWidth			INT,
+			@strBasisComponent			NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -269,6 +270,7 @@ BEGIN TRY
 
 	/*Declared variables for translating expression*/
 	declare @rtContract nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Contract'), 'Contract');
+	declare @rtConfirmation nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Confirmation'), 'Confirmation');
 	declare @rtWeConfirmHaving nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having'), 'We confirm having');
 	declare @rtBoughtFrom nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bought from'), 'bought from');
 	declare @rtSoldTo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'sold to'), 'sold to');
@@ -343,8 +345,13 @@ BEGIN TRY
 										  		), 1, 1, '')
 	END
 
+ 
+	SELECT @strBasisComponent = COALESCE(@strBasisComponent + ', ', '') + strItemNo + ' ' + dbo.fnRemoveTrailingZeroes(dblRate) + ' ' + strCurrency + '/' + strUOM
+	FROM vyuCTContractCostView WHERE ysnBasis = 1 AND intContractDetailId = (SELECT MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
+
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
+			,strHersheyCaption						= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtConfirmation+':- ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
 			,strAtlasDeclaration					= @rtWeConfirmHaving			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' '+@rtBoughtFrom+' '   ELSE ' '+@rtSoldTo+' ' END + @rtYouAsFollows + ':'
 			,strPurchaseOrder						= TP.strContractType + ' '+@rtOrder+':- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
@@ -488,6 +495,7 @@ BEGIN TRY
 			,intLaguageId							=	@intLaguageId
 			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
 			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
+			,strBasisComponent						=	@strBasisComponent
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId
