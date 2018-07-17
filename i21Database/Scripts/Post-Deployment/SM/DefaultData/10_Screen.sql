@@ -767,7 +767,31 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Employees', N'Employees', N'Payroll.view.EntityEmployee', N'Payroll', N'tblPREmployee', 1, N'Payroll')
 	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Employees', strScreenName = 'Employees', strModule = 'Payroll' WHERE strNamespace = 'Payroll.view.EntityEmployee'
+	END
 	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityLead') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Leads', N'Leads', N'AccountsReceivable.view.EntityLead', N'CRM', NULL, 1, N'CRM')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Leads', strScreenName = 'Leads', strModule = 'CRM' WHERE strNamespace = 'AccountsReceivable.view.EntityLead'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.EntityVeterinary') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Veterinary', N'Veterinary', N'EntityManagement.view.EntityVeterinary', N'System Manager', NULL, 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Veterinary', strScreenName = 'Veterinary', strModule = 'System Manager' WHERE strNamespace = 'EntityManagement.view.EntityVeterinary'
+	END
+
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor?searchCommand=EntityShippingLine') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
