@@ -392,10 +392,11 @@ BEGIN
 
 	-------------------------------------------------------------------------------------------------------------------------------------------------------
 		
-	 SELECT * FROM ( SELECT  NULL AS strCustomerNumber    
+	 SELECT * FROM ( SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber    
 		 ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber    
 		 ,'' AS strSiteNumber     
-		 ,null AS dtmDate      
+		 ,tblARInvoice.dtmDate AS dtmDate      
+		 ,tblICItem.strItemNo AS strItemNumber
 		 ,0 AS intLineItem     
 		 ,'' AS strFileName     
 		 ,strMessage  AS strStatus      
@@ -404,22 +405,25 @@ BEGIN
 		 ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType  
 		 FROM tblARInvoiceIntegrationLogDetail    
 		 LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId  
-    
-		 WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId 
+		 LEFT JOIN tblARInvoiceDetail ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId  
+		 LEFT JOIN tblICItem ON tblARInvoiceDetail.intItemId = tblICItem.intItemId
+		 LEFT JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
+		 WHERE intIntegrationLogId = @LogId 
+		 --WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId 
 		 --AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )  
-		 UNION  
-		 SELECT   NULL AS strCustomerNumber    
-		   ,'' AS strInvoiceNumber    
-		   ,'' AS strSiteNumber     
-		   ,null AS dtmDate      
-		   ,0 AS intLineItem     
-		   ,'' AS strFileName     
-		   ,strMessage  AS strStatus      
-		   ,ysnSuccess AS ysnSuccessful     
-		   ,ISNULL(intInvoiceId,0) AS intInvoiceId  
-		   ,strTransactionType AS strTransactionType  
-		 FROM tblARInvoiceIntegrationLogDetail   
-		 WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId  
+		 --UNION  
+		 --SELECT   NULL AS strCustomerNumber    
+		 --  ,'' AS strInvoiceNumber    
+		 --  ,'' AS strSiteNumber     
+		 --  ,null AS dtmDate      
+		 --  ,0 AS intLineItem     
+		 --  ,'' AS strFileName     
+		 --  ,strMessage  AS strStatus      
+		 --  ,ysnSuccess AS ysnSuccessful     
+		 --  ,ISNULL(intInvoiceId,0) AS intInvoiceId  
+		 --  ,strTransactionType AS strTransactionType  
+		 --FROM tblARInvoiceIntegrationLogDetail   
+		 --WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId  
 		 ) ResultTableLog
 		--SELECT * FROM @ResultTableLog
 
