@@ -1329,6 +1329,24 @@ ELSE
 			ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
 
 		UNION
+
+		SELECT 
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'This invoice is currently attached to ' + ISNULL(I2.strTransactionType,'') + ': ' + ISNULL(I2.strInvoiceNumber ,'')
+		FROM @Invoices I
+		INNER JOIN tblARInvoiceDetail D
+			ON D.intInvoiceId = I.intInvoiceId
+		INNER JOIN tblARInvoiceDetail D2
+			ON D2.intOriginalInvoiceDetailId = D.intInvoiceDetailId
+		INNER JOIN tblARInvoice I2
+			ON I2.intInvoiceId = D2.intInvoiceId
+
+		UNION
 		--If ysnAllowUserSelfPost is True in User Role
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
