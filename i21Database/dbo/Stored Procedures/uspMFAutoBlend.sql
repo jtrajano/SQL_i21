@@ -15,19 +15,10 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT OFF
+SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-DECLARE @InitialTransaction AS INT 
-DECLARE @Savepoint AS VARCHAR(MAX)
-SET @Savepoint = SUBSTRING(('MFAutoBlend' + CONVERT(VARCHAR, @InitialTransaction)), 1, 32)
-SET @InitialTransaction = @@TRANCOUNT
 
 BEGIN TRY
-	IF (@InitialTransaction = 0)
-		BEGIN TRANSACTION
-	ELSE
-		SAVE TRANSACTION @Savepoint
-
 	SET @dtmDate = ISNULL(@dtmDate, GETDATE()) 
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -1059,7 +1050,6 @@ BEGIN TRY
 			WHERE	intLoadDistributionDetailId = @intLoadDistributionDetailId 
 					AND intWorkOrderId > @intWorkOrderId
 	END
-IF @InitialTransaction = 0
 	COMMIT TRAN
 END TRY   
 BEGIN CATCH  

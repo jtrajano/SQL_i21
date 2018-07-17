@@ -70,7 +70,7 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Reference' , @
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'intCurrencyId' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Type Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId'
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Type Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Exchange Rate' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'dblExchangeRate' 
 GO

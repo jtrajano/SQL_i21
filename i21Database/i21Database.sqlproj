@@ -6777,8 +6777,6 @@
     <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryCount.sql" />
     <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
-    <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
-    <Build Include="dbo\Tables\tblIPFTPServer.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReindexAllUserDefinedTables.sql" />
     <Build Include="dbo\Views\vyuSTItemCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARInvoicesForPaymentIntegration.sql" />
@@ -6815,6 +6813,8 @@
     <Build Include="dbo\Stored Procedures\uspSMDisconReplicationSetRangeStart.sql" />
     <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
     <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
+    <Build Include="dbo\Views\vyuGRItemsSettlementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
