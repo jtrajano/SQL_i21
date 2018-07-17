@@ -6815,6 +6815,8 @@
     <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
     <Build Include="dbo\Views\vyuGRItemsSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMImportTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
