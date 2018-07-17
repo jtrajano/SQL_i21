@@ -50,6 +50,10 @@ BEGIN
 			BEGIN
 				SET @strPosDescription = ''
 			END
+		IF(@intEntityVendorId = 0 OR @intEntityVendorId IS NULL)
+			BEGIN
+				SET @intEntityVendorId = NULL
+			END
 
 		-- Create Filters
 			DECLARE @intCurrentLocationId AS INT
