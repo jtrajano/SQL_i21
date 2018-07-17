@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetUnsavedAOPDetail]
 	@intItemId INT,
+	@intCompanyLocationId INT,
 	@strYear NVARCHAR(50)
 
 AS
@@ -10,6 +11,7 @@ BEGIN TRY
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY IM.intItemId,BI.intItemId) AS INT) AS intUniqueId,
 			IM.intCommodityId,
+			@intCompanyLocationId intCompanyLocationId,
 			IM.intItemId,
 			BI.intItemId AS intBasisItemId,
 			(SELECT TOP 1 dblVolume FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS dblVolume,
@@ -19,7 +21,8 @@ BEGIN TRY
 			--(SELECT TOP 1 intPriceUOMId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intPriceUOMId,
 			BI.strItemNo AS strBasisItemNo,
 			CO.strCommodityCode,
-			IM.strItemNo
+			IM.strItemNo,
+			(SELECT strLocationName FROM  tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) AS strLocationName
 
 	FROM	tblICItem			IM 
 	JOIN	tblICCommodity		CO	ON	CO.intCommodityId = IM.intCommodityId CROSS 

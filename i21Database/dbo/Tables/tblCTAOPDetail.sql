@@ -3,6 +3,7 @@
 	intAOPDetailId int IDENTITY(1,1) NOT NULL,
 	intAOPId int NOT NULL,
 	intCommodityId INT,
+	intCompanyLocationId INT,
 	intItemId INT,
 	intBasisItemId INT,
 	dblVolume NUMERIC(18,6),
@@ -21,6 +22,7 @@
 	CONSTRAINT FK_tblCTAOPDetail_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId),
 	CONSTRAINT FK_tblCTAOPDetail_tblICItem_intBasisItemId_intItemId FOREIGN KEY (intBasisItemId) REFERENCES tblICItem(intItemId),
 
+	CONSTRAINT [FK_tblCTAOPDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY (intCompanyLocationId) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT FK_tblCTAOPDetail_tblICItemUOM_intVolumeUOMId_intItemUOMId FOREIGN KEY (intVolumeUOMId) REFERENCES tblICItemUOM(intItemUOMId),
 	CONSTRAINT [FK_tblCTAOPDetail_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT FK_tblCTAOPDetail_tblICItemUOM_intWeightUOMId_intItemUOMId FOREIGN KEY (intWeightUOMId) REFERENCES tblICItemUOM(intItemUOMId),
