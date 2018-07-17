@@ -1,7 +1,6 @@
 ﻿CREATE  PROCEDURE [dbo].[uspSMDisconReplicationAddBidirectionalArticle]
 @result int output,
-@publication  As sysname,
-@parentDB NVARCHAR(100)
+@publication  As sysname
 
  AS
 
