@@ -145,8 +145,8 @@ FROM (
 		 , dblPriceUOMQuantity				= SOD.dblUnitQuantity
 		 , dblDiscount						= SOD.dblDiscount 
 		 , dblPrice							= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblUnitPrice						= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
