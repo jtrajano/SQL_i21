@@ -83,8 +83,7 @@ BEGIN TRY
 			WHERE	SCD.intDeliverySheetId = @intTicketId AND IUOM.ysnStockUnit = 1
 		END
 
-	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
-	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
+	SELECT	@ApplyScaleToBasis = ISNULL(ysnApplyScaleToBasis,0) FROM tblCTCompanyPreference
 
 	IF	ISNULL(@intContractDetailId,0) > 0
 	BEGIN
