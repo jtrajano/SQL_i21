@@ -394,7 +394,21 @@ BEGIN CATCH
 END CATCH
 		
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
-UPDATE tblARInvoice SET ysnReturned = 1 WHERE intInvoiceId = @InvoiceId
+
+UPDATE I 
+SET dblDiscountAvailable = @ZeroDecimal
+  , dblBaseDiscountAvailable = @ZeroDecimal
+FROM tblARInvoice I
+INNER JOIN (
+	SELECT intID 
+	FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
+) CI ON I.intInvoiceId = CI.intID
+
+UPDATE tblARInvoice 
+SET ysnReturned = 1 
+  , dblDiscountAvailable = @ZeroDecimal
+  , dblBaseDiscountAvailable = @ZeroDecimal
+WHERE intInvoiceId = @InvoiceId
 
 --POS RETURN
 
