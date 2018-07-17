@@ -6,7 +6,6 @@
 	,@strPositionIncludes nvarchar(100) = NULL
 AS
 
-
 BEGIN
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -973,7 +972,7 @@ BEGIN
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 END
-		
+	
 DECLARE @intUnitMeasureId int
 DECLARE @strUnitMeasure nvarchar(250)
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
@@ -1009,7 +1008,7 @@ SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUni
 					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
-FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0 AND ISNULL(strTicket,'') <> ''
+FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0 
  ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END
 ELSE

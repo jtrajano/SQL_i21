@@ -107,7 +107,6 @@ BEGIN
 	,strFarmNumber
 	,strFieldNumber
 	,strDiscountComment
-	,strCommodityCode
 	,intCommodityId
 	,intDiscountId
 	,intContractId
@@ -120,8 +119,8 @@ BEGIN
 	)
 	 SELECT	 
 	 intConcurrencyId 		   =  A4GLIdentity
-	,strTicketStatus		   = 'O'
-	,strTicketNumber		   = LTRIM(RTRIM(gastl_tic_no))
+	,strTicketStatus		   = 'C'
+	,strTicketNumber		   = LTRIM(RTRIM(gastl_tic_no))+'/'+LTRIM(GT.gastl_rec_type)+'/'+LTRIM(GT.gastl_tie_breaker)
 	,intScaleSetupId		   = @intScaleSetupId
 	,intTicketPoolId		   = @intTicketPoolId
 	,intTicketLocationId	   = CL.intCompanyLocationId
@@ -194,9 +193,8 @@ BEGIN
 	,intGradingFactor		   = NULL
 	,strVarietyType			   = NULL
 	,strFarmNumber			   = NULL
-	,strFieldNumber			   = NULL
+	,strFieldNumber			   = 'NonScale'
 	,strDiscountComment		   = LTRIM(RTRIM(gastl_tic_comment))
-	,strCommodityCode		   = LTRIM(RTRIM(gastl_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
 	,intContractId			   = [Contract].intContractDetailId
@@ -243,13 +241,12 @@ BEGIN
 					  ,CD.intContractSeq
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId =CH.intContractHeaderId
-			  ) [Contract] ON [Contract].strContractNumber = LTRIM(RTRIM(GT.gastl_cnt_no)) collate Latin1_General_CI_AS 
+			  ) [Contract] ON LEFT([Contract].strContractNumber,8) = LTRIM(RTRIM(GT.gastl_cnt_no)) collate Latin1_General_CI_AS 
 			  			  AND [Contract].intContractSeq	 = gastl_cnt_seq_no 
 			  			  AND [Contract].intEntityId		 = t.intEntityId
 			  			  AND [Contract].intCommodityId	 = CO.intCommodityId
 			  			  AND [Contract].intContractTypeId = CASE WHEN GT.gastl_pur_sls_ind='P' THEN 1 ELSE 2 END
 	WHERE GT.gastl_pd_yn <> 'Y' AND GT.gastl_rec_type IN('C','M','1','2','3','4','5','6','7','8')
-	AND LTRIM(RTRIM(gastl_tic_no)) NOT IN('14170j0000','473468')
 	
   
 	UPDATE tblSCTicket SET strDistributionOption='CNT',intStorageScheduleTypeId = -2 WHERE intContractId >0
@@ -268,9 +265,9 @@ BEGIN
   	SELECT 
   	DISTINCT 
   	 1 AS intConcurrencyId
-  	,gasct_reading AS dblGradeReading
-  	,gasct_shrk_what AS strShrinkWhat
-  	,gasct_shrk_pct AS dblShrinkPercent
+  	,gastl_reading AS dblGradeReading
+  	,gastl_shrk_what AS strShrinkWhat
+  	,gastl_shrk_pct AS dblShrinkPercent
   	,intDiscountScheduleCodeId
   	,intTicketId
   	,intTicketId AS intTicketFileId
@@ -278,26 +275,26 @@ BEGIN
   	,'Dollar' strDiscountChargeType 
   	FROM (
   			SELECT	
-  				gasct_disc_cd_1		gasct_disc_cd,
-  				gasct_reading_1		gasct_reading,
-  				gasct_disc_calc_1	gasct_disc_calc,
-  				gasct_un_disc_amt_1 gasct_un_disc_amt,
-  				gasct_shrk_what_1	gasct_shrk_what,
-  				gasct_shrk_pct_1	gasct_shrk_pct,
+  				gastl_disc_cd_1		gastl_disc_cd,
+  				gastl_reading_1		gastl_reading,
+  				gastl_disc_calc_1	gastl_disc_calc,
+  				gastl_un_disc_amt_1 gastl_un_disc_amt,
+  				gastl_shrk_what_1	gastl_shrk_what,
+  				gastl_shrk_pct_1	gastl_shrk_pct,
   				A4GLIdentity		
-  				FROM gasctmst 
-  				WHERE gasct_disc_cd_1 IS NOT NULL
+  				FROM gastlmst 
+  				WHERE gastl_disc_cd_1 IS NOT NULL
   
   			UNION ALL
-  				SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
-  				FROM gasctmst  WHERE gasct_disc_cd_2 IS NOT NULL
+  				SELECT gastl_disc_cd_2,gastl_reading_2,gastl_disc_calc_2,gastl_un_disc_amt_2,gastl_shrk_what_2,gastl_shrk_pct_2,A4GLIdentity      
+  				FROM gastlmst  WHERE gastl_disc_cd_2 IS NOT NULL
   			UNION ALL
   			
-  				SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>'TW' 
+  				SELECT gastl_disc_cd_3,gastl_reading_3,gastl_disc_calc_3,gastl_un_disc_amt_3,gastl_shrk_what_3,gastl_shrk_pct_3,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_3 IS NOT NULL AND gastl_disc_cd_3 <> gastl_disc_cd_4 AND gastl_disc_cd_4 <>'TW' 
   			UNION ALL
-  				SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>'TW'
+  				SELECT gastl_disc_cd_4,gastl_reading_4,gastl_disc_calc_4,gastl_un_disc_amt_4,gastl_shrk_what_4,gastl_shrk_pct_4,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_4 IS NOT NULL AND gastl_disc_cd_3 <> gastl_disc_cd_4 AND gastl_disc_cd_4 <>'TW'
   			UNION ALL
   				(
   				 SELECT disc_cd
@@ -305,38 +302,38 @@ BEGIN
   				 	,SUM(disc_calc)
   				 	,SUM(un_disc)
   				 	,shrk_what
-  				 	,SUM(gasct_shrk_pct)
+  				 	,SUM(gastl_shrk_pct)
   				 	,A4GLIdentity
   				 FROM (
   				 		SELECT 
-  				 		 gasct_disc_cd_4 disc_cd
-  				 		,Convert(FLOAT, gasct_reading_4) reading
-  				 		,Convert(FLOAT, gasct_disc_calc_4) disc_calc
-  				 		,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
-  				 		,gasct_shrk_what_4 shrk_what
-  				 		,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
+  				 		 gastl_disc_cd_4 disc_cd
+  				 		,Convert(FLOAT, gastl_reading_4) reading
+  				 		,Convert(FLOAT, gastl_disc_calc_4) disc_calc
+  				 		,Convert(FLOAT, gastl_un_disc_amt_4) un_disc
+  				 		,gastl_shrk_what_4 shrk_what
+  				 		,Convert(FLOAT, gastl_shrk_pct_4) gastl_shrk_pct
   				 		,A4GLIdentity
-  				 	    FROM gasctmst
-  				 	    WHERE gasct_disc_cd_4 IS NOT NULL
-  				 	    	AND gasct_disc_cd_3 IS NOT NULL
-  				 	    	AND gasct_disc_cd_3 = gasct_disc_cd_4
-  				 	    	AND gasct_disc_cd_4 = 'TW'
+  				 	    FROM gastlmst
+  				 	    WHERE gastl_disc_cd_4 IS NOT NULL
+  				 	    	AND gastl_disc_cd_3 IS NOT NULL
+  				 	    	AND gastl_disc_cd_3 = gastl_disc_cd_4
+  				 	    	AND gastl_disc_cd_4 = 'TW'
   				 	
   				 	UNION ALL
   				 	
   				 	SELECT 
-  				 		gasct_disc_cd_3
-  				 		,Convert(FLOAT, gasct_reading_3)
-  				 		,Convert(FLOAT, gasct_disc_calc_3)
-  				 		,Convert(FLOAT, gasct_un_disc_amt_3)
-  				 		,gasct_shrk_what_3
-  				 		,Convert(FLOAT, gasct_shrk_pct_3)
+  				 		gastl_disc_cd_3
+  				 		,Convert(FLOAT, gastl_reading_3)
+  				 		,Convert(FLOAT, gastl_disc_calc_3)
+  				 		,Convert(FLOAT, gastl_un_disc_amt_3)
+  				 		,gastl_shrk_what_3
+  				 		,Convert(FLOAT, gastl_shrk_pct_3)
   				 		,A4GLIdentity
-  				 	    FROM gasctmst
-  				 	    WHERE gasct_disc_cd_3 IS NOT NULL
-  				 	    	AND gasct_disc_cd_4 IS NOT NULL
-  				 	    	AND gasct_disc_cd_3 = gasct_disc_cd_4
-  				 	    	AND gasct_disc_cd_3 = 'TW'
+  				 	    FROM gastlmst
+  				 	    WHERE gastl_disc_cd_3 IS NOT NULL
+  				 	    	AND gastl_disc_cd_4 IS NOT NULL
+  				 	    	AND gastl_disc_cd_3 = gastl_disc_cd_4
+  				 	    	AND gastl_disc_cd_3 = 'TW'
   				 	) t
   				 GROUP BY disc_cd
   				 	,shrk_what
@@ -344,35 +341,35 @@ BEGIN
   				 
   				) 
   			UNION ALL
-  				SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
+  				SELECT gastl_disc_cd_5,gastl_reading_5,gastl_disc_calc_5,gastl_un_disc_amt_5,gastl_shrk_what_5,gastl_shrk_pct_5,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_5 IS NOT NULL 
   			UNION ALL
-  				SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
+  				SELECT gastl_disc_cd_6,gastl_reading_6,gastl_disc_calc_6,gastl_un_disc_amt_6,gastl_shrk_what_6,gastl_shrk_pct_6,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_6 IS NOT NULL
   			UNION ALL
-  				SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
+  				SELECT gastl_disc_cd_7,gastl_reading_7,gastl_disc_calc_7,gastl_un_disc_amt_7,gastl_shrk_what_7,gastl_shrk_pct_7,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_7 IS NOT NULL 
   			UNION ALL
-  				SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
+  				SELECT gastl_disc_cd_8,gastl_reading_8,gastl_disc_calc_8,gastl_un_disc_amt_8,gastl_shrk_what_8,gastl_shrk_pct_8,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_8 IS NOT NULL  
   			UNION ALL
-  				SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
+  				SELECT gastl_disc_cd_9,gastl_reading_9,gastl_disc_calc_9,gastl_un_disc_amt_9,gastl_shrk_what_9,gastl_shrk_pct_9,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_9 IS NOT NULL 
   			UNION ALL
-  				SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
+  				SELECT gastl_disc_cd_10,gastl_reading_10,gastl_disc_calc_10,gastl_un_disc_amt_10,gastl_shrk_what_10,gastl_shrk_pct_10,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_10 IS NOT NULL 
   			UNION ALL
-  				SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
+  				SELECT gastl_disc_cd_11,gastl_reading_11,gastl_disc_calc_11,gastl_un_disc_amt_11,gastl_shrk_what_11,gastl_shrk_pct_11,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_11 IS NOT NULL 
   			UNION ALL
-  				SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
-  				FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+  				SELECT gastl_disc_cd_12,gastl_reading_12,gastl_disc_calc_12,gastl_un_disc_amt_12,gastl_shrk_what_12,gastl_shrk_pct_12,A4GLIdentity
+  				FROM gastlmst  WHERE gastl_disc_cd_12 IS NOT NULL
   	)b 
-  	JOIN tblSCTicket k ON	k.intConcurrencyId = b.A4GLIdentity AND b.gasct_disc_cd is not null
+  	JOIN tblSCTicket k ON	k.intConcurrencyId = b.A4GLIdentity AND b.gastl_disc_cd is not null
   	JOIN tblGRDiscountSchedule d ON d.intDiscountScheduleId = k.intDiscountSchedule
   	JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = @intStorageScheduleTypeId
-  	JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
-  	WHERE b.gasct_disc_cd IS NOT NULL
+  	JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gastl_disc_cd  COLLATE Latin1_General_CI_AS
+  	WHERE b.gastl_disc_cd IS NOT NULL
 
 	UPDATE tblSCTicket SET intConcurrencyId = 1
 

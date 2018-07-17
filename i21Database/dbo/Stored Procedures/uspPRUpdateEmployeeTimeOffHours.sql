@@ -106,9 +106,11 @@ BEGIN
 												INNER JOIN tblPREmployeeTimeOff ET 
 													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
-												WHERE (P.ysnPosted = 1 OR P.intPaycheckId = #tmpEmployees.intPaycheckId)
+												WHERE 
+													((#tmpEmployees.intPaycheckId IS NOT NULL AND P.intPaycheckId = #tmpEmployees.intPaycheckId)
+													OR (#tmpEmployees.intPaycheckId IS NULL AND P.ysnPosted = 1 
+														AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward))
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
-													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 								WHEN (strPeriod = 'Day') THEN 
 									DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)

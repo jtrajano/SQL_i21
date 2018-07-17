@@ -112,8 +112,7 @@ SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL
 
 -- Report Query:  
 SELECT	
-		strCADDate = REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')  
-		,CHK.dtmDate
+		CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee = CASE

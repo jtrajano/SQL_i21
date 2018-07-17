@@ -8,7 +8,7 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 	,Left(WP.strParentLotNumber, 5) AS [Production Lot]
 	,IsNULL(SUM(WP.dblPhysicalCount * I.intInnerUnits), 0) AS [Good produced Pouches]
 	,IsNULL((
-			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
+			SELECT SUM(Convert(DECIMAL(24, 10), Replace(TR.strPropertyValue, ',', '')))
 			FROM dbo.tblQMTestResult TR
 			JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 			WHERE P.strPropertyName = 'Number of bags that pass'
@@ -17,7 +17,7 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) AS [Total Pouches passed through counter]
 	,IsNULL((
-			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
+			SELECT SUM(Convert(DECIMAL(24, 10), Replace(TR.strPropertyValue, ',', '')))
 			FROM dbo.tblQMTestResult TR
 			JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 			WHERE P.strPropertyName = 'Record underweight units'
@@ -26,7 +26,7 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) AS [Underweight Pouches]
 	,IsNULL((
-			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
+			SELECT SUM(Convert(DECIMAL(24, 10), Replace(TR.strPropertyValue, ',', '')))
 			FROM dbo.tblQMTestResult TR
 			JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 			WHERE P.strPropertyName = 'Record over-weight units'
@@ -35,7 +35,7 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) AS [Overweight Pouches]
 	,IsNULL((
-			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
+			SELECT SUM(Convert(DECIMAL(24, 10), Replace(TR.strPropertyValue, ',', '')))
 			FROM dbo.tblQMTestResult TR
 			JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 			WHERE P.strPropertyName = 'Sweeps in lbs'

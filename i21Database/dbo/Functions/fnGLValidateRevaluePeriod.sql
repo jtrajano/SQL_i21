@@ -1,5 +1,5 @@
 CREATE FUNCTION fnGLValidateRevaluePeriod(@intConsolidationId INT)
-RETURNS @errTable TABLE(errorCode INT, strModule NVARCHAR(50), strStatus NVARCHAR(10))
+RETURNS @errTable TABLE(errorCode INT, strModule NVARCHAR(50) COLLATE Latin1_General_CI_AS, strStatus NVARCHAR(10) COLLATE Latin1_General_CI_AS)
 AS 
 
 BEGIN
