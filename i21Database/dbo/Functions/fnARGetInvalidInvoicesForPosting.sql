@@ -1337,7 +1337,7 @@ ELSE
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'This invoice is currently attached to ' + ISNULL(I2.strTransactionType,'') + ': ' + ISNULL(I2.strInvoiceNumber ,'')
+			,[strPostingError]		= 'You cannot unpost an Invoice with ' + ISNULL(I2.strTransactionType,'') + ' created- ' + ISNULL(I2.strInvoiceNumber ,'')
 		FROM @Invoices I
 		INNER JOIN tblARInvoiceDetail D
 			ON D.intInvoiceId = I.intInvoiceId
