@@ -209,7 +209,7 @@ select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(0 AS NVARCHAR(10))
 from tblTFReportingComponentCriteria TaxCrit
 left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
-where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @TaxAuthorityId
+where RC.intTaxAuthorityId = @TaxAuthorityId 
 */
 	DECLARE @TaxCriteria AS TFTaxCriteria
 
