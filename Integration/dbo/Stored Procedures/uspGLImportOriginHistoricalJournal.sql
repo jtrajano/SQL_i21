@@ -22,7 +22,11 @@ BEGIN
 	SELECT ''Origin table is empty.''
 	RETURN -1
 END
-
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intEntityId)
+BEGIN
+	SELECT CONVERT(NVARCHAR(4),@intEntityId) + '' Entity Id is not valid. Please re-login your credential.''
+	RETURN -1
+END
 
 --BEGIN TRANSACTION
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT

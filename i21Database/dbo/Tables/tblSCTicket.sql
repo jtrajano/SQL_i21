@@ -11,6 +11,7 @@
     [dtmTicketDateTime] DATETIME NULL, 
     [dtmTicketTransferDateTime] DATETIME NULL, 
     [dtmTicketVoidDateTime] DATETIME NULL, 
+	[dtmTransactionDateTime] DATETIME NULL DEFAULT GETDATE(), 
     [intProcessingLocationId] INT NULL, 
     [strScaleOperatorUser] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intEntityScaleOperatorId] INT NULL, 
@@ -88,7 +89,6 @@
     [strFarmNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strFieldNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strDiscountComment] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
-	[strCommodityCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[intCommodityId] INT NULL,
 	[intDiscountId] INT NULL,
 	[intContractId] INT NULL,
@@ -135,6 +135,9 @@
 	[intBillId] INT NULL,
 	[intInvoiceId] INT NULL,
 	[intCompanyId] INT NULL,
+	[intEntityContactId] INT NULL,
+	[strPlateNumber] NVARCHAR(50) NULL,
+	[blbPlateNumber] VARBINARY(MAX) NULL,
 	[ysnDestinationWeightGradePost] BIT NOT NULL DEFAULT 0, 
 	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
@@ -819,15 +822,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strDiscountComment'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Commodity Code',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strCommodityCode'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Commodity Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -1069,3 +1063,34 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'ysnDeliverySheetPost'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Driver entity id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityContactId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Plate number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strPlateNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Plate number image',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'blbPlateNumber'
+
+
+
+	

@@ -5,6 +5,7 @@ SELECT RC.intReasonCodeId
 	,RC.strDescription
 	,RC.ysnReduceavailabletime
 	,RC.ysnExplanationrequired
+	,RC.ysnActive
 	,RC.ysnDefault
 	,RT.strReasonName
 	,ITT.intTransactionTypeId

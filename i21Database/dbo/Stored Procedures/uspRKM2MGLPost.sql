@@ -27,11 +27,9 @@ SELECT
 FROM tblRKM2MInquiry 
 WHERE intM2MInquiryId=@intM2MInquiryId
 
---Getting the data of the prevously posted transaction. We are going to use it as our reference for the reversal entry
 SELECT TOP 1 
 	 @dtmPreviousGLPostDate = dtmGLPostDate
 	,@dtmPreviousGLReverseDate = dtmGLReverseDate
-	,@strPreviousBatchId = strBatchId  
 FROM tblRKM2MInquiry 
 WHERE ysnPost=1 and intCommodityId=@intCommodityId ORDER BY dtmGLPostDate DESC
 
@@ -42,7 +40,7 @@ END
 
 IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPreviousGLReverseDate))
 BEGIN
-RAISERROR('Current date cannot less than the previous post date',16,1)
+RAISERROR('GL Post Date cannot be less than or equal to the previous post date',16,1)
 END
 
 --IF EXISTS(SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnBasisId,0) = 0)
@@ -450,11 +448,11 @@ BEGIN TRANSACTION
 	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
 
 
-	--Reversal of the previously posted transaction
-	IF ISNULL(@strPreviousBatchId,'') <> '' AND ISNULL(@dtmPreviousGLReverseDate,'') <> ''
-	BEGIN
-		DECLARE @ReverseGLEntries AS RecapTableType
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
+	--Post Reversal using the reversal date
+	
+		DECLARE @ReverseGLEntries AS RecapTableType,
+				@strReversalBatchId AS NVARCHAR(100)
+		EXEC uspSMGetStartingNumber 3, @strReversalBatchId OUT
 
 		INSERT INTO @ReverseGLEntries (
 			 [dtmDate]
@@ -483,8 +481,8 @@ BEGIN TRANSACTION
 			,[intSourceLocationId]
 			,[intSourceUOMId]
 			)
-		SELECT [dtmDate]
-			,@batchId
+		SELECT @dtmGLReverseDate
+			,@strReversalBatchId
 			,[intAccountId]
 			,[dblCredit] --Reversal - credit value will become debit value
 			,[dblDebit]
@@ -492,27 +490,28 @@ BEGIN TRANSACTION
 			,[dblDebitUnit]
 			,[strDescription]
 			,[intCurrencyId]
-			,[dtmTransactionDate]
+			,@dtmGLReverseDate --[dtmTransactionDate]
 			,[strTransactionId]
 			,[intTransactionId]
-			,[strTransactionType]
+			,'Mark To Market'--[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]
 			,[dblExchangeRate]
-			,@dtmPreviousGLReverseDate
-			,[ysnIsUnposted]
-			,[strCode]
+			,GETDATE() --[dtmDateEntered]
+			,0
+			,'RK'--[strCode]
 			,[strReference]  
 			,[intEntityId]
 			,[intUserId]  
 			,[intSourceLocationId]
 			,[intSourceUOMId]
-		FROM tblGLDetail
-		WHERE strBatchId = @strPreviousBatchId
+		FROM tblRKM2MPostRecap
+		WHERE intM2MInquiryId = @intM2MInquiryId
 
 		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
-	END
+	
+		UPDATE tblRKM2MPostRecap SET strReversalBatchId = @strReversalBatchId WHERE intM2MInquiryId = @intM2MInquiryId
 	
 
 	COMMIT TRAN	

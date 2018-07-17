@@ -818,7 +818,7 @@ END
 ELSE
 BEGIN
 SELECT intSeqId+.123456 as intSeqId,strSeqHeader, strCommodityCode ,sum(dblTotal) dblTotal ,strUnitMeasure		
-FROM @FinalTable WHERE dblTotal <> 0 and strType <> 'Company Titled Stock' and strType not like '%'+@strPurchaseSales+'%'
+FROM @FinalTable WHERE dblTotal <> 0 and strType <> 'Company Titled Stock' --and strType not like '%'+@strPurchaseSales+'%'
 group by intSeqId,strSeqHeader, strCommodityCode,strUnitMeasure
 ORDER BY strCommodityCode,intSeqId ASC
 END

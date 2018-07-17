@@ -82,6 +82,8 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@ItemSalesAccountId			INT				= NULL
+	,@ItemstrAddonDetailKey			VARCHAR(MAX)    = NULL
+	,@ItemysnAddonParent			BIT				= NULL
 AS
 
 BEGIN
@@ -374,6 +376,8 @@ BEGIN TRY
 				,[intDestinationGradeId]
 				,[intDestinationWeightId]
 				,[strVFDDocumentNumber]
+				,[strAddonDetailKey]
+				,[ysnAddonParent]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -424,11 +428,11 @@ BEGIN TRY
 				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
 				,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,[ysnBlended]						= @ItemIsBlended
-				,[intAccountId]						= Acct.[intAccountId] 
-				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
-				,[intSalesAccountId]				= ISNULL(@ItemSalesAccountId, Acct.[intSalesAccountId])
-				,[intInventoryAccountId]			= Acct.[intInventoryAccountId]
-				,[intServiceChargeAccountId]		= Acct.[intAccountId]
+				,[intAccountId]						= NULL --Acct.[intAccountId] 
+				,[intCOGSAccountId]					= NULL --Acct.[intCOGSAccountId] 
+				,[intSalesAccountId]				= @ItemSalesAccountId --ISNULL(@ItemSalesAccountId, Acct.[intSalesAccountId])
+				,[intInventoryAccountId]			= NULL --Acct.[intInventoryAccountId]
+				,[intServiceChargeAccountId]		= NULL --Acct.[intAccountId]
 				,[strMaintenanceType]				= @ItemMaintenanceType
 				,[strFrequency]						= @ItemFrequency
 				,[dtmMaintenanceDate]				= @ItemMaintenanceDate
@@ -482,16 +486,20 @@ BEGIN TRY
 				,[intDestinationGradeId]			= @ItemDestinationGradeId
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
 				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
+				,[strAddonDetailKey]				= @ItemstrAddonDetailKey
+				,[ysnAddonParent]					= @ItemysnAddonParent
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC
 			INNER JOIN
 				tblICItemLocation IL
 					ON IC.intItemId = IL.intItemId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount Acct
-					ON IC.[intItemId] = Acct.[intItemId]
-					AND IL.[intLocationId] = Acct.[intLocationId]
+			--No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
+			--And this has been causing performance issue
+			--LEFT OUTER JOIN
+			--	vyuARGetItemAccount Acct
+			--		ON IC.[intItemId] = Acct.[intItemId]
+			--		AND IL.[intLocationId] = Acct.[intLocationId]
 			WHERE
 				IC.[intItemId] = @ItemId
 				AND IL.[intLocationId] = @CompanyLocationId
@@ -605,6 +613,3 @@ RETURN 1;
 	
 	
 END
-GO
-
-

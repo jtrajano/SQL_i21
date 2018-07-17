@@ -136,6 +136,7 @@ FROM
 			WHERE ID.intInvoiceId = ARI.intInvoiceId
 		) ARID
 		WHERE ARI.ysnPosted = 1
+		  AND ARI.strType <> 'Service Charge'
 		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId

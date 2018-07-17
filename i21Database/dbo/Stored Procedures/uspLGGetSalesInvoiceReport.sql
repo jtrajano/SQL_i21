@@ -157,6 +157,8 @@ BEGIN
 		,InvDet.dblShipmentNetWt
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 		,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+		,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+		,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strContactName AS strCompanyContactName
@@ -166,7 +168,7 @@ BEGIN
 		,@strZip AS strCompanyZip
 		,@strCountry AS strCompanyCountry
 		,@strPhone AS strCompanyPhone
-		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 		,'Gross ' + CHAR(9)+ LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Tare ' + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Net ' + CHAR(9) + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
 		,ROUND(InvDet.dblShipmentGrossWt, 2) dblGrossWt
 		,isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) strGrossUOM
@@ -182,7 +184,7 @@ BEGIN
 		,strPriceUOM = isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure)
 		,strWeightUOM = isnull(rtWtUOMTranslation.strTranslation,WtUOM.strUnitMeasure)
 		,CH.strCustomerContract
-		,CH.strContractNumber
+		,LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq) AS strContractNumber
 		,CD.intContractSeq
 		,Cont.strContainerNumber
 		,Cont.strMarks
@@ -228,7 +230,7 @@ BEGIN
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ISNULL(LD.intLoadDetailId, ReceiptItem.intSourceId) --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
-		
+	CROSS APPLY tblLGCompanyPreference CP
 	left join tblSMScreen				rtWUOMScreen on rtWUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtWUOMTransaction on rtWUOMTransaction.intScreenId = rtWUOMScreen.intScreenId and rtWUOMTransaction.intRecordId = WUOM.intUnitMeasureId
 	left join tblSMReportTranslation	rtWUOMTranslation on rtWUOMTranslation.intLanguageId = @intLaguageId and rtWUOMTranslation.intTransactionId = rtWUOMTransaction.intTransactionId and rtWUOMTranslation.strFieldName = 'Name'

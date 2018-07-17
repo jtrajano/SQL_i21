@@ -35,6 +35,7 @@ BEGIN
 				,strTaxableByOtherTaxes NVARCHAR (MAX) 
 				,strCalculationMethod	NVARCHAR(50)
 				,dblRate				NUMERIC(18,6)
+				,dblBaseRate			NUMERIC(18,6)
 				,dblTax					NUMERIC(18,6)
 				,dblAdjustedTax			NUMERIC(18,6)
 				,intTaxAccountId		INT
@@ -101,6 +102,7 @@ BEGIN
 					,strTaxableByOtherTaxes
 					,strCalculationMethod
 					,dblRate
+					,dblBaseRate
 					,dblTax
 					,dblAdjustedTax
 					,intTaxAccountId
@@ -237,7 +239,7 @@ BEGIN
 						,[intUnitMeasureId]				= @TaxUOMId
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Cost, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @TaxUOMId) vendorTax
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Cost, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @TaxUOMId, NULL, NULL, NULL) vendorTax
 						LEFT JOIN tblICInventoryReceiptCharge rc 
 							ON rc.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 

@@ -7,6 +7,17 @@ BEGIN TRY
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 
+DECLARE @DefaultCompanyId	 INT
+DECLARE @DefaultCompanyName	 NVARCHAR(200)
+  
+  IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
+  BEGIN
+		 SELECT 
+		 @DefaultCompanyId = intMultiCompanyId
+		,@DefaultCompanyName = strCompanyName 
+		 FROM tblSMMultiCompany
+
+  END
 
 	 DECLARE @tblRealizedPNL AS TABLE 
 	 (
@@ -27,11 +38,11 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strEntityName							NVARCHAR(100)
 		,strInternalCompany						NVARCHAR(20)
-		,dblQuantity							NUMERIC(24, 10)
+		,dblQuantity							NUMERIC(38,20)
 		,intQuantityUOMId						INT							---ItemUOM
 		,intQuantityUnitMeasureId				INT							---UnitMeasure
 		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblWeight								NUMERIC(24, 10)
+		,dblWeight								NUMERIC(38,20)
 		,intWeightUOMId							INT							---ItemUOM		
 		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intOriginId							INT
@@ -47,20 +58,20 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dtmEndDate								DATETIME
 		,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strIncoTermLocation					NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblContractDifferential				NUMERIC(24, 10)
+		,dblContractDifferential				NUMERIC(38,20)
 		,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFuturesPrice						NUMERIC(24, 10)
+		,dblFuturesPrice						NUMERIC(38,20)
 		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblCashPrice							NUMERIC(24, 10)
+		,dblCashPrice							NUMERIC(38,20)
 		,intPriceUOMId							INT							---ItemUOM
 		,intPriceUnitMeasureId					INT							---UnitMeasure
 		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFixedLots							NUMERIC(24, 10)
-		,dblUnFixedLots							NUMERIC(24, 10)
-		,dblContractInvoiceValue				NUMERIC(24, 10)
-		,dblSecondaryCosts						NUMERIC(24, 10)
-		,dblCOGSOrNetSaleValue					NUMERIC(24, 10)
+		,dblFixedLots							NUMERIC(38,20)
+		,dblUnFixedLots							NUMERIC(38,20)
+		,dblContractInvoiceValue				NUMERIC(38,20)
+		,dblSecondaryCosts						NUMERIC(38,20)
+		,dblCOGSOrNetSaleValue					NUMERIC(38,20)
 		,intFutureMarketId						INT
 		,strFutureMarket						NVARCHAR(100)
 		,intFutureMarketUOMId					INT
@@ -70,19 +81,19 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,intFutureMonthId						INT
 		,strFutureMonth							NVARCHAR(100)
 		,dtmRealizedDate						DATETIME
-		,dblRealizedQty							NUMERIC(24, 10)
-		,dblRealizedPNLValue					NUMERIC(24, 10)
-		,dblPNLPreDayValue						NUMERIC(24, 10)
-		,dblProfitOrLossValue					NUMERIC(24, 10)
-		,dblPNLChange							NUMERIC(24, 10)
+		,dblRealizedQty							NUMERIC(38,20)
+		,dblRealizedPNLValue					NUMERIC(38,20)
+		,dblPNLPreDayValue						NUMERIC(38,20)
+		,dblProfitOrLossValue					NUMERIC(38,20)
+		,dblPNLChange							NUMERIC(38,20)
 		,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingType							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strInvoiceStatus						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblNetFuturesValue					    NUMERIC(24, 10)
-		,dblRealizedFuturesPNLValue			    NUMERIC(24, 10)
-		,dblNetPNLValue						    NUMERIC(24, 10)
-		,dblFXValue							    NUMERIC(24, 10)
-		,dblFXConvertedValue				    NUMERIC(24, 10)
+		,dblNetFuturesValue					    NUMERIC(38,20)
+		,dblRealizedFuturesPNLValue			    NUMERIC(38,20)
+		,dblNetPNLValue						    NUMERIC(38,20)
+		,dblFXValue							    NUMERIC(38,20)
+		,dblFXConvertedValue				    NUMERIC(38,20)
 		,strSalesReturnAdjustment				NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intCompanyId							INT
 		,strCompany								NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -226,7 +237,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		 ,intFutureMonthId					
 		 ,strFutureMonth						
 		 ,dtmRealizedDate					
-		 ,dblRealizedQty						
+		 ,dblRealizedQty		 = SUM(dblRealizedQty)			
 		 ,dblRealizedPNLValue				
 		 ,dblPNLPreDayValue					
 		 ,dblProfitOrLossValue				
@@ -234,11 +245,11 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		 ,strFixedBy							
 		 ,strPricingType						
 		 ,strInvoiceStatus					
-		 ,dblNetFuturesValue					
+		 ,dblNetFuturesValue	= SUM(CASE WHEN intContractTypeId = 1 THEN dblNetFuturesValue ELSE - dblNetFuturesValue END)				
 		 ,dblRealizedFuturesPNLValue			
 		 ,dblNetPNLValue						
 		 ,dblFXValue							
-		 ,dblFXConvertedValue				
+		 ,dblFXConvertedValue		= SUM(dblFXConvertedValue)		
 		 ,strSalesReturnAdjustment			
 		 ,intCompanyId						
 		 ,strCompany							
@@ -323,7 +334,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,intFutureMonthId							= FMonth.intFutureMonthId
 		,strFutureMonth								= FMonth.strFutureMonth
 		,dtmRealizedDate							= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)	
-		,dblRealizedQty								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)
+		,dblRealizedQty								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
 		,dblRealizedPNLValue						= NULL
 		,dblPNLPreDayValue							= NULL
 		,dblProfitOrLossValue						= NULL
@@ -331,7 +342,14 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= Invoice.strType
-		,dblNetFuturesValue							= 0
+		,dblNetFuturesValue							= dbo.fnCTConvertQuantityToTargetItemUOM
+																							(
+																							 InvoiceDetail.intItemId
+																							,ShipUOM.intUnitMeasureId
+																							,Market.intUnitMeasureId
+																							,InvoiceDetail.dblQtyShipped
+																							)
+													  * CD.dblFutures /(CASE WHEN MarketCY.ysnSubCurrency = 1 THEN MarketCY.intCent ELSE 1 END)
 		,dblRealizedFuturesPNLValue					= 0
 		,dblNetPNLValue								= 0
 		,dblFXValue									= NULL
@@ -498,7 +516,14 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= Invoice.strType
-		,dblNetFuturesValue							= 0
+		,dblNetFuturesValue							= dbo.fnCTConvertQuantityToTargetItemUOM
+																							(
+																							 InvoiceDetail.intItemId
+																							,ShipUOM.intUnitMeasureId
+																							,Market.intUnitMeasureId
+																							,InvoiceDetail.dblQtyShipped
+																							)
+													   * CD.dblFutures/(CASE WHEN MarketCY.ysnSubCurrency = 1 THEN MarketCY.intCent ELSE 1 END) 
 		,dblRealizedFuturesPNLValue					= 0
 		,dblNetPNLValue								= 0
 		,dblFXValue									= NULL
@@ -632,20 +657,17 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 	   ,intMarketCurrencyId				
 	   ,intFutureMonthId					
 	   ,strFutureMonth					
-	   ,dtmRealizedDate					
-	   ,dblRealizedQty					
+	   ,dtmRealizedDate	
 	   ,dblRealizedPNLValue				
 	   ,dblPNLPreDayValue					
 	   ,dblProfitOrLossValue				
 	   ,dblPNLChange						
 	   ,strFixedBy						
 	   ,strPricingType					
-	   ,strInvoiceStatus					
-	   ,dblNetFuturesValue				
+	   ,strInvoiceStatus
 	   ,dblRealizedFuturesPNLValue		
 	   ,dblNetPNLValue					
-	   ,dblFXValue						
-	   ,dblFXConvertedValue				
+	   ,dblFXValue
 	   ,strSalesReturnAdjustment			
 	   ,intCompanyId						
 	   ,strCompany						
@@ -658,11 +680,13 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 														   CASE WHEN intContractTypeId =1 THEN 1 ELSE -1 END
 
 		UPDATE  g 
-		SET dblNetFuturesValue = (CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END) 
-								 * t.dblContractSize 
-								 *CASE WHEN g.intContractTypeId=1 THEN t.dblWeightedValue ELSE t1.dblWeightedValue END
+		SET 
+			--dblNetFuturesValue = (CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END) 
+			--					 * t.dblContractSize 
+			--					 *CASE WHEN g.intContractTypeId=1 THEN t.dblWeightedValue ELSE t1.dblWeightedValue END
 
-			,dblFixedLots =     CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END
+			--,
+			dblFixedLots =     CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END
 		FROM @tblRealizedPNL g
 		JOIN @tblRealizedPNL gp on gp.strAllocationRefNo = g.strAllocationRefNo AND gp.intContractTypeId = 1
 		JOIN @tblRealizedPNL gs on gs.strAllocationRefNo = g.strAllocationRefNo AND gs.intContractTypeId = 2
@@ -693,27 +717,42 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 				GROUP BY Summary.intContractDetailId,Market.dblContractSize,ysnSubCurrency,Currency.intCent,FutOpt.strBuySell
 		)t1 on t1.intContractDetailId = gs.intContractDetailId
 
-		UPDATE tblRealized 
-		SET  tblRealized.dblRealizedPNLValue = t.dblCOGSOrNetSaleValue * 
-													CASE 
-														 WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN  1  ELSE 0 END
-														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
-													 END
+			UPDATE tblRealized 
+					SET  tblRealized.dblRealizedPNLValue = t.dblCOGSOrNetSaleValue * 
+																					CASE 
+																					  WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN  1  ELSE 0 END
+																					  WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
+																					 END            
+     
+			FROM @tblRealizedPNL tblRealized
+			JOIN (
+					 SELECT 
+					  strAllocationRefNo
+					 ,SUM(dblCOGSOrNetSaleValue) * -1 dblCOGSOrNetSaleValue    
+					 FROM  @tblRealizedPNL
+					 GROUP BY strAllocationRefNo
+				  )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
 											 
-		    ,tblRealized.dblRealizedFuturesPNLValue = t.dblNetFuturesValue *
+	
+		UPDATE tblRealized 
+		SET  tblRealized.dblRealizedFuturesPNLValue = (tblRealized.dblNetFuturesValue + t.dblNetFuturesValue) 
+													 *
 													 CASE 
-														 WHEN t.dblNetFuturesValue > 0 THEN CASE WHEN intContractTypeId = 1 THEN -1  ELSE 0 END
-														 WHEN t.dblNetFuturesValue <= 0 THEN CASE WHEN intContractTypeId = 2 THEN 1 ELSE 0 END
+														 WHEN (tblRealized.dblNetFuturesValue + t.dblNetFuturesValue) > 0  THEN CASE WHEN t.intContractTypeId = 1 THEN  1  ELSE 0 END
+														 WHEN (tblRealized.dblNetFuturesValue + t.dblNetFuturesValue) <= 0 THEN CASE WHEN t.intContractTypeId = 2 THEN  1 ELSE 0 END
 													 END
 		FROM @tblRealizedPNL tblRealized
 		JOIN (
-				SELECT 
+				SELECT
+				 intContractTypeId, 
 				 strAllocationRefNo
-				,SUM(dblCOGSOrNetSaleValue) * -1 dblCOGSOrNetSaleValue 
 				,SUM(dblNetFuturesValue) dblNetFuturesValue 
 				FROM  @tblRealizedPNL
-				GROUP BY strAllocationRefNo
-			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
+				GROUP BY 
+				intContractTypeId,
+				strAllocationRefNo
+			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo AND  t.intContractTypeId <> tblRealized.intContractTypeId
+
 		
 		
 		UPDATE tblRealized 
@@ -732,7 +771,85 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 				GROUP BY strAllocationRefNo
 			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo	
 
-		SELECT * FROM @tblRealizedPNL ORDER BY strAllocationRefNo, intContractTypeId
+		SELECT
+		 intRealizedPNL                     
+		,intContractTypeId					
+		,intContractDetailId				
+		,intBookId							
+		,strBook							
+		,strSubBook							
+		,intCommodityId						
+		,strCommodity						
+		,strProductType						
+		,strRealizedType					
+		,dtmContractDate					
+		,strTransactionType					
+		,dtmInvoicePostedDate				
+		,strContract						
+		,strAllocationRefNo					
+		,strEntityName						
+		,strInternalCompany					
+		,dblQuantity						
+		,intQuantityUOMId					
+		,intQuantityUnitMeasureId			
+		,strQuantityUOM						
+		,dblWeight							
+		,intWeightUOMId						
+		,strWeightUOM						
+		,intOriginId						
+		,strOrigin							
+		,strItemDescription					
+		,strGrade							
+		,strCropYear						
+		,strProductionLine					
+		,strCertification					
+		,strTerms							
+		,strPosition						
+		,dtmStartDate						
+		,dtmEndDate							
+		,strPriceTerms						
+		,strIncoTermLocation				
+		,dblContractDifferential			
+		,strContractDifferentialUOM			
+		,dblFuturesPrice					
+		,strFuturesPriceUOM					
+		,dblCashPrice						
+		,intPriceUOMId						
+		,intPriceUnitMeasureId				
+		,strContractPriceUOM				
+		,strFixationDetails					
+		,dblFixedLots						
+		,dblUnFixedLots						
+		,dblContractInvoiceValue			
+		,dblSecondaryCosts					
+		,dblCOGSOrNetSaleValue				
+		,intFutureMarketId					
+		,strFutureMarket					
+		,intFutureMarketUOMId				
+		,intFutureMarketUnitMeasureId		
+		,strFutureMarketUOM					
+		,intMarketCurrencyId				
+		,intFutureMonthId					
+		,strFutureMonth						
+		,dtmRealizedDate					
+		,dblRealizedQty						
+		,dblRealizedPNLValue				
+		,dblPNLPreDayValue					
+		,dblProfitOrLossValue				
+		,dblPNLChange						
+		,strFixedBy							
+		,strPricingType						
+		,strInvoiceStatus					
+		,dblNetFuturesValue					
+		,dblRealizedFuturesPNLValue			
+		,dblNetPNLValue						
+		,dblFXValue							
+		,dblFXConvertedValue				
+		,strSalesReturnAdjustment			
+		,ISNULL(intCompanyId,@DefaultCompanyId) intCompanyId						
+		,ISNULL(strCompany,@DefaultCompanyName)	strCompany						 
+		FROM @tblRealizedPNL 
+		ORDER BY strAllocationRefNo, intContractTypeId
 
 					  
 END TRY  

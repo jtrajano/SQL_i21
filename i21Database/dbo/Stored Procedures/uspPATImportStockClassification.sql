@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATImportStockClassification]
 	@checking BIT = 0,
+	@isImported BIT = 0 OUTPUT,
+	@isDisabled BIT = 0 OUTPUT,
 	@total INT = 0 OUTPUT
 AS
 BEGIN
@@ -8,6 +10,11 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+SELECT @isImported = ysnIsImported FROM tblPATImportOriginFlag WHERE intImportOriginLogId = 3;
+
+IF(@isImported = 0)
+BEGIN
 
 	DECLARE @stockClassificationTable TABLE(
 		[intTempId] INT IDENTITY PRIMARY KEY,
@@ -203,13 +210,12 @@ SET ANSI_WARNINGS OFF
 
 
 	------------------- BEGIN - RETURN COUNT TO BE IMPORTED ----------------------------
+	SELECT @total = COUNT(*) FROM @stockClassificationTable tempSC
+	LEFT OUTER JOIN tblPATStockClassification SC
+		ON tempSC.strStockName COLLATE Latin1_General_CI_AS = SC.strStockName
+	WHERE tempSC.strStockName COLLATE Latin1_General_CI_AS NOT IN (SELECT strStockName FROM tblPATStockClassification) AND tempSC.strStockName IS NOT NULL
 	IF(@checking = 1)
 	BEGIN
-		SELECT @total = COUNT(*) FROM @stockClassificationTable tempSC
-		LEFT OUTER JOIN tblPATStockClassification SC
-			ON tempSC.strStockName COLLATE Latin1_General_CI_AS = SC.strStockName
-		WHERE tempSC.strStockName COLLATE Latin1_General_CI_AS NOT IN (SELECT strStockName FROM tblPATStockClassification) AND tempSC.strStockName IS NOT NULL
-
 		RETURN @total;
 	END
 	------------------- END - RETURN COUNT TO BE IMPORTED ----------------------------
@@ -223,4 +229,11 @@ SET ANSI_WARNINGS OFF
 		ON tempSC.strStockName COLLATE Latin1_General_CI_AS = SC.strStockName
 	WHERE tempSC.strStockName COLLATE Latin1_General_CI_AS NOT IN (SELECT strStockName FROM tblPATStockClassification) AND tempSC.strStockName IS NOT NULL AND tempSC.intDividendsGLAccount IS NOT NULL
 	---------------------------- END - INSERT ORIGIN DATA -----------------------
+	
+	UPDATE tblPATImportOriginFlag
+	SET ysnIsImported = 1, intImportCount = @total
+	WHERE intImportOriginLogId = 3
+
+	SET @isImported = CAST(1 AS BIT);
+END
 END

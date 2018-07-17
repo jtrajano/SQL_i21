@@ -337,17 +337,38 @@ Begin --Sales Order Pick List
 	if @intRecipeGuideId>0
 		Set @intPickListId=0
 
-	Select @dblTotalPickQty=SUM(dblQtyOrdered) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
+	Select @dblTotalPickQty=SUM(SO.dblQtyOrdered)
+	From tblSOSalesOrderDetail SO
+	JOIN tblICItem I ON I.intItemId = SO.intItemId
+	Where SO.intSalesOrderId = @intSalesOrderId
+		AND I.strType <> 'Other Charge'
 	
 	If @dblBatchSize > 0
-		Begin
-			Set @intNoOfBatches=ceiling(@dblTotalPickQty / @dblBatchSize)
-			Set @intNoOfBatchesCopy=@intNoOfBatches
-		End
+	Begin
+		Set @intNoOfBatches=ceiling(@dblTotalPickQty / @dblBatchSize)
+		Set @intNoOfBatchesCopy=@intNoOfBatches
+	End
 				 
 	Select TOP 1 @strUOM = um.strUnitMeasure 
 	From tblSOSalesOrderDetail sd Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId 
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where sd.intSalesOrderId=@intSalesOrderId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	JOIN tblICItem I ON I.intItemId = sd.intItemId Where sd.intSalesOrderId=@intSalesOrderId AND I.strType <> 'Other Charge'
+
+	-- If having 2 different pick qty UOM, resetting the value
+	IF (
+			SELECT COUNT(DISTINCT um.strUnitMeasure)
+			FROM tblSOSalesOrderDetail sd
+			JOIN tblICItemUOM iu ON sd.intItemUOMId = iu.intItemUOMId
+			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+			JOIN tblICItem I ON I.intItemId = sd.intItemId
+			WHERE sd.intSalesOrderId = @intSalesOrderId
+				AND I.strType <> 'Other Charge'
+			) > 1
+	BEGIN
+		SELECT @dblTotalPickQty = NULL
+			,@strUOM = NULL
+	END
+
 
 	Select @intLocationId=intCompanyLocationId,@strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 

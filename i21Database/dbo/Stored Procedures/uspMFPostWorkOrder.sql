@@ -282,7 +282,7 @@ BEGIN TRY
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
 						,@ysnPostGL = @ysnPostGL
-						,@dtmDate=@dtmCurrentDateTime
+						,@dtmDate = @dtmCurrentDateTime
 				END
 				ELSE
 				BEGIN
@@ -372,7 +372,7 @@ BEGIN TRY
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
 						,@ysnPostGL = @ysnPostGL
-						,@dtmDate=@dtmCurrentDateTime
+						,@dtmDate = @dtmCurrentDateTime
 				END
 
 				SELECT @intMachineId = MIN(intMachineId)
@@ -1227,12 +1227,23 @@ BEGIN TRY
 	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
 	WHERE SW.intWorkOrderId = @intWorkOrderId
 
+	DECLARE @intOrderHeaderId INT
+
+	SELECT @intOrderHeaderId = OH.intOrderHeaderId
+	FROM dbo.tblMFOrderHeader OH
+	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
+	WHERE SW.intWorkOrderId = @intWorkOrderId
+
 	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intWorkOrderId
 		,@intTransactionTypeId = 8
 		,@ysnPosted = 1
 
 	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intWorkOrderId
 		,@intTransactionTypeId = 9
+		,@ysnPosted = 1
+
+	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
+		,@intTransactionTypeId = 34
 		,@ysnPosted = 1
 
 	IF @intTransactionCount = 0

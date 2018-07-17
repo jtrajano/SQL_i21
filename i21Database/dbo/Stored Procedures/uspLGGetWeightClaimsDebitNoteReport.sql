@@ -115,7 +115,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
 	--,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
-	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -176,6 +176,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,IRI.dblNet AS dblReceivedNet
 	,(ISNULL(IRI.dblGross,0) - ISNULL(IRI.dblNet,0)) AS dblReceivedTare
 	,WC.dtmActualWeighingDate
+	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth	
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
@@ -290,6 +292,8 @@ GROUP BY WC.intWeightClaimId
 	,rtUMTranslation.strTranslation
 	,rtPRUTranslation.strTranslation
 	,rtITranslation.strTranslation
+	,CP.intReportLogoHeight
+	,CP.intReportLogoWidth
 /*
 CREATE PROCEDURE uspLGGetWeightClaimsDebitNoteReport 
 	@xmlParam NVARCHAR(MAX) = NULL

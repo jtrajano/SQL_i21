@@ -65,7 +65,8 @@ BEGIN TRY
 				FO.dblPrice,
 				MM.strUnitMeasure strHedgeUOM,
 				PF.intPriceContractId,
-				PC.strPriceContractNo
+				PC.strPriceContractNo,
+				PD.dblFutures
 
 		FROM	tblCTPriceFixationDetail			PD
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId	
@@ -564,13 +565,15 @@ BEGIN TRY
 				AD.intPContractDetailId intContractDetailId,
 				'Sale' strContractType,
 				AD.intAllocationHeaderId,
-				AH.strAllocationNumber
+				AH.strAllocationNumber,
+				AW.strSequenceNumber	AS	strAllocatedWith
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId
 											AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+		JOIN	vyuCTContractSequence	AW	ON	AW.intContractDetailId		=	AD.intPContractDetailId
 		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		CROSS	
 		APPLY	tblLGCompanyPreference	LP
 
@@ -583,13 +586,15 @@ BEGIN TRY
 				AD.intSContractDetailId,
 				'Purchase' strContractType,
 				AD.intAllocationHeaderId,
-				AH.strAllocationNumber
+				AH.strAllocationNumber,
+				AW.strSequenceNumber	AS	strAllocatedWith
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId
 											AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+		JOIN	vyuCTContractSequence	AW	ON	AW.intContractDetailId		=	AD.intSContractDetailId
 		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			CROSS	
 		APPLY	tblLGCompanyPreference	LP
 	END

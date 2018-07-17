@@ -73,6 +73,10 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
+DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
+DECLARE @InventoryTransactionType_WriteOff AS INT = 50
+
+DECLARE @intReturnValue AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
@@ -180,7 +184,7 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostAverageCosting
+		EXEC @intReturnValue = dbo.uspICPostAverageCosting
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -202,12 +206,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- FIFO 
 	IF (@CostingMethod = @FIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostFIFO
+		EXEC @intReturnValue = dbo.uspICPostFIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -229,12 +235,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LIFO 
 	IF (@CostingMethod = @LIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostLIFO
+		EXEC @intReturnValue = dbo.uspICPostLIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -256,12 +264,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostLot
+		EXEC @intReturnValue = dbo.uspICPostLot
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -284,12 +294,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- CATEGORY 
 	IF (@CostingMethod = @CATEGORY AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostCategory
+		EXEC @intReturnValue = dbo.uspICPostCategory
 			@intCategoryId
 			,@intItemId
 			,@intItemLocationId
@@ -314,6 +326,8 @@ BEGIN
 			,@dblForexRate
 			,@dblAdjustCostValue 
 			,@dblAdjustRetailValue
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- ACTUAL COST 
@@ -337,7 +351,7 @@ BEGIN
 
 			IF @intCostingMethod = @AVERAGECOST
 			BEGIN 
-				EXEC dbo.uspICPostAverageCosting
+				EXEC @intReturnValue = dbo.uspICPostAverageCosting
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -359,11 +373,13 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
 			BEGIN 
-				EXEC dbo.uspICPostFIFO
+				EXEC @intReturnValue = dbo.uspICPostFIFO
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -385,11 +401,13 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
 			BEGIN
-				EXEC dbo.uspICPostLIFO
+				EXEC @intReturnValue = dbo.uspICPostLIFO
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -411,11 +429,13 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
 			BEGIN 
-				EXEC dbo.uspICPostLot
+				EXEC @intReturnValue = dbo.uspICPostLot
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -438,11 +458,13 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @CATEGORY
 			BEGIN 
-				EXEC dbo.uspICPostCategory
+				EXEC @intReturnValue = dbo.uspICPostCategory
 					@intCategoryId
 					,@intItemId
 					,@intItemLocationId
@@ -467,11 +489,13 @@ BEGIN
 					,@dblForexRate
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
 		END 
 		ELSE 
 		BEGIN 
-			EXEC dbo.uspICPostActualCost
+			EXEC @intReturnValue = dbo.uspICPostActualCost
 				@strActualCostId 
 				,@intItemId 
 				,@intItemLocationId 
@@ -495,12 +519,15 @@ BEGIN
 				,@dblForexRate
 				,@dblUnitRetail
 				;
+
+			IF @intReturnValue < 0 GOTO _TerminateLoop;
 		END 
 	END
 
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
+	IF(@intTransactionTypeId <> @InventoryTransactionType_MarkUpOrDown) -- Do not include update when Mark Up/Down
 	BEGIN 
 		-- Get the current average cost and stock qty 
 		DECLARE @CurrentStockQty AS NUMERIC(38, 20) = NULL 
@@ -585,14 +612,16 @@ BEGIN
 		------------------------------------------------------------
 		-- Update the Item Pricing
 		------------------------------------------------------------
-		EXEC uspICUpdateItemPricing
+		EXEC @intReturnValue = uspICUpdateItemPricing
 			@intItemId
 			,@intItemLocationId
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 
 		------------------------------------------------------------
 		-- Update the Stock Quantity
 		------------------------------------------------------------
-		EXEC [dbo].[uspICPostStockQuantity]
+		EXEC @intReturnValue = [dbo].[uspICPostStockQuantity]
 			@intItemId
 			,@intItemLocationId
 			,@intSubLocationId
@@ -601,6 +630,8 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@intLotId
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -635,8 +666,12 @@ END;
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
+_TerminateLoop:
+
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @intReturnValue < 0 RETURN @intReturnValue;
 
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
@@ -674,6 +709,7 @@ BEGIN
 	FROM	@ItemsToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
+			AND intTransactionTypeId NOT IN (@InventoryTransactionType_MarkUpOrDown)
 
 	SET @intInventoryTransactionId = NULL 
 
@@ -936,8 +972,6 @@ BEGIN
 		WHERE intInTransitSourceLocationId IS NOT NULL 
 	END 
 
-	DECLARE @intReturnValue INT
-
 	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
@@ -945,6 +979,6 @@ BEGIN
 		,@strGLDescription
 		,@intContraInventory_ItemLocationId
 
-	IF @intReturnValue < 0 RETURN -1
+	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
 

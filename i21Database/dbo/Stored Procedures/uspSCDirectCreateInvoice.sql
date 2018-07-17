@@ -328,8 +328,8 @@ BEGIN TRY
 						WHEN ICI.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
 						WHEN ICI.strCostMethod = 'Amount' THEN 
 						CASE 
-							WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId) * -1)
-							WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId)
+							WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1)
+							WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis)))
 						END
 					END
 		,[ysnRefreshPrice] = 0
@@ -346,6 +346,15 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 		LEFT JOIN tblICItem ICI ON ICI.intItemId = GR.intItemId		
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
+		LEFT JOIN (
+			SELECT 
+			CTD.intContractHeaderId
+			,CTD.intContractDetailId
+			,CTD.intPricingTypeId
+			,AD.dblSeqPrice
+			FROM tblCTContractDetail CTD
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+		) CNT ON CNT.intContractDetailId = SC.intContractId
 		WHERE SC.intTicketId = @intTicketId
 
 	SELECT @recCount = COUNT(*) FROM @invoiceIntegrationStagingTable;

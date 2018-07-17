@@ -169,14 +169,21 @@ BEGIN
 			RETURN 	
 		END	
 		
-				
+
+	DECLARE @ItemLocationId INT
+			,@ExpenseAccountId INT
+	
+	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @ShipFromLocationId
+	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
+					
 	SELECT TOP 1
 		@TaxCodeExemption = 'Invalid Purchase Tax Account for Tax Code ' + TC.[strTaxCode]
 	FROM
 		tblSMTaxCode TC
 	WHERE
 		TC.[intTaxCodeId] = @TaxCodeId
-		AND	ISNULL(TC.[intPurchaseTaxAccountId],0) = 0	
+		AND	ISNULL(TC.[intPurchaseTaxAccountId],0) = 0
+		AND ISNULL(@ExpenseAccountId,0) = 0
 			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0

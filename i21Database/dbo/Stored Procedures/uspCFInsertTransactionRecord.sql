@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -768,6 +767,37 @@ BEGIN
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
 	END
+	ELSE IF (@strNetworkType = 'Non Network')
+	BEGIN 
+		IF(ISNULL(@intSiteId,0) != 0)
+		BEGIN
+			DECLARE @ysnPetrovendDualCard INT
+			SELECT TOP 1 @ysnPetrovendDualCard = ysnPetrovendDualCard
+			FROM tblCFSite where intSiteId = @intSiteId
+
+			IF(ISNULL(@ysnPetrovendDualCard,0) = 1)
+			BEGIN
+				--DECLARE @i NVARCHAR(MAX)
+				--SET @i = '0000000'
+				--SELECT CONVERT(BIGINT, @i)
+
+				IF(ISNULL(@strCardId,0) = 0)
+				BEGIN
+					SET @strCardId = @strVehicleId
+					SET @strVehicleId = null
+				END
+
+				IF (ISNUMERIC(@strCardId) = 1)
+				BEGIN
+					IF (CONVERT(BIGINT, @strCardId) = 0)
+					BEGIN
+						SET @strCardId = @strVehicleId
+						SET @strVehicleId = null
+					END
+				END
+			END
+		END
+	END
 	
 	--FIND CARD--
 	
@@ -1501,7 +1531,7 @@ BEGIN
 		,@dblGrossTransferCost			= dblGrossTransferCost
 		,@dblNetTransferCost			= dblNetTransferCost
 		,@dblAdjustmentRate				= dblAdjustmentRate
-		FROM ##tblCFTransactionPricingType
+		FROM tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
 		--BEGIN
@@ -1745,17 +1775,17 @@ BEGIN
 			,dblTaxCalculatedAmount		
 			,intTaxCodeId	
 			,dblTaxRate	
-		FROM ##tblCFTransactionTaxType
+		FROM tblCFTransactionTaxType
 
 
 		UPDATE tblCFTransaction
 		SET
 		dblCalculatedTotalTax		= (SELECT 
 		SUM(ISNULL(dblTaxCalculatedAmount,0))
-		FROM ##tblCFTransactionTaxType as tax)
+		FROM tblCFTransactionTaxType as tax)
 		,dblOriginalTotalTax		= (SELECT 
 		SUM(ISNULL(dblTaxOriginalAmount,0))
-		FROM ##tblCFTransactionTaxType as tax)
+		FROM tblCFTransactionTaxType as tax)
 	
 
 		------------------------------------------------------------

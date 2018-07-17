@@ -12,7 +12,7 @@ SELECT Trans.intTransactionId
 	, RC.strScheduleName
 	, intProductCodeId = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.intProductCodeId ELSE Exception.intProductCodeId END
 	, strProductCode = CASE WHEN Exception.intExceptionId IS NULL THEN (CASE WHEN Trans.intProductCodeId = NULL THEN 'No record found.' ELSE Trans.strProductCode END) ELSE Exception.strProductCode END
-	, strProductCodeDescription = CASE WHEN Exception.intExceptionId IS NULL THEN PC.strDescription ELSE Exception.strProductCodeDescription END
+	, strProductCodeDescription = PC.strDescription
 	, strTaxCode = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxCode ELSE Exception.strTaxCode END
 	, strType = RC.strType
 	, strItemNo = Item.strItemNo
@@ -102,8 +102,8 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, RC.strScheduleCode
 	, RC.strScheduleName
 	, Exception.intProductCodeId
-	, Exception.strProductCode
-	, Exception.strProductCodeDescription
+	, PC.strProductCode
+	, strProductCodeDescription = PC.strDescription
 	, Exception.strTaxCode
 	, RC.strType
 	, Item.strItemNo
@@ -174,6 +174,7 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strReason
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
+LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeId
 LEFT JOIN tblICItem Item ON Item.intItemId = Exception.intItemId
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 	AND strExceptionType = 'Add'

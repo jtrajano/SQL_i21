@@ -72,6 +72,9 @@ BEGIN TRY
 		,[intScaleSetupId]
 		,[dblFreightRate]
 		,[dblTicketFees]
+		,[dblGross]
+		,[dblTare]
+		,[strChargesLink]
 		,[ysnIsStorage]
 	)
 	SELECT 
@@ -93,6 +96,9 @@ BEGIN TRY
 		,[intScaleSetupId]				= SC.intScaleSetupId
 		,[dblFreightRate]				= SC.dblFreightRate
 		,[dblTicketFees]				= SC.dblTicketFees
+		,[dblGross]						= SC.dblGrossUnits
+		,[dblTare]						= SC.dblShrink
+		,[strChargesLink]				= ICSI.strChargesLink
 		,[ysnIsStorage]					= CASE WHEN ICSI.intOwnershipType = 1 THEN 1 ELSE 0 END
 	FROM tblSCTicket SC 
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intSourceId = SC.intTicketId
@@ -106,14 +112,18 @@ BEGIN TRY
 		,[intSourceId] 
 		,[intInventoryShipmentId] 
 		,[intInventoryShipmentItemId] 
+		,[dblDestinationGross]
+		,[dblDestinationNet]
 	)
 	SELECT	
-		[intItemId] = SC.intItemId 
-		,[intItemLocationId] = ICIL.intItemLocationId
-		,[dblDestinationQty] = SC.dblQty
-		,[intSourceId] = 1
-		,[intInventoryShipmentId] = SC.intTransactionHeaderId
-		,[intInventoryShipmentItemId] = SC.intTransactionDetailId 
+		[intItemId]						= SC.intItemId 
+		,[intItemLocationId]			= ICIL.intItemLocationId
+		,[dblDestinationQty]			= SC.dblQty
+		,[intSourceId]					= 1
+		,[intInventoryShipmentId]		= SC.intTransactionHeaderId
+		,[intInventoryShipmentItemId]	= SC.intTransactionDetailId
+		,[dblDestinationGross]			= SC.dblGross
+		,[dblDestinationNet]			= (SC.dblGross - SC.dblTare)
 	FROM @scaleStaging SC 
 	INNER JOIN tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intItemLocationId 
 	WHERE SC.intTicketId = @intTicketId
@@ -122,6 +132,7 @@ BEGIN TRY
 	(
 		intInventoryShipmentId
 		,intContractId 
+		,intContractDetailId 
 		,intChargeId 
 		,strCostMethod 
 		,dblRate 
@@ -133,17 +144,19 @@ BEGIN TRY
 		,ysnPrice 
 		,intForexRateTypeId 
 		,dblForexRate 
+		,strChargesLink 
 	)
 	SELECT
 	--Charges
 	[intInventoryShipmentId]			= SC.intTransactionHeaderId
 	,[intContractId]					= SC.intContractHeaderId
-	,[intChargeId]						= SC.intItemId
+	,[intContractDetailId]				= SC.intContractDetailId
+	,[intChargeId]						= GR.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE
-												WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId, 0) * -1)
+												WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost, 0) * -1)
 												ELSE (QM.dblDiscountAmount * -1)
 											END 
 											WHEN IC.strCostMethod = 'Amount' THEN 0
@@ -160,8 +173,8 @@ BEGIN TRY
 													WHEN SC.ysnIsStorage = 0 THEN 0
 													ELSE
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId, 0) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost, 0) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost) * -1)
 													END
 												END 
 											END
@@ -170,6 +183,7 @@ BEGIN TRY
 	,[ysnPrice]							= 1
 	,[intForexRateTypeId]				= NULL
 	,[dblForexRate]						= NULL
+	,[strChargesLink]					= SC.strChargesLink
 	FROM @scaleStaging SC
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -181,7 +195,8 @@ BEGIN TRY
 	INSERT INTO @ShipmentCharges
 	(
 		intInventoryShipmentId
-		,intContractId 
+		,intContractId
+		,intContractDetailId 
 		,intChargeId 
 		,strCostMethod 
 		,dblRate 
@@ -192,36 +207,39 @@ BEGIN TRY
 		,ysnAccrue 
 		,ysnPrice 
 		,intForexRateTypeId 
-		,dblForexRate 
+		,dblForexRate
+		,strChargesLink 
 	)
 	SELECT	
-		intInventoryShipmentId = SC.intTransactionHeaderId 
-		,intContractId = SC.intContractHeaderId 
-		,intChargeId = SCSetup.intDefaultFeeItemId
-		,strCostMethod = IC.strCostMethod 
-		,dblRate = CASE
-						WHEN IC.strCostMethod = 'Per Unit' THEN 
-						CASE
-							WHEN @ysnDeductFeesCusVen = 1 THEN (SC.dblTicketFees * -1)
-							WHEN @ysnDeductFeesCusVen = 0 THEN SC.dblTicketFees
-						END
-						WHEN IC.strCostMethod = 'Amount' THEN 0
-					END
-		,intCostUOMId = dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, SC.intItemUOMId) 
-		,intCurrency = SC.intCurrencyId
-		,dblAmount = CASE
-						WHEN IC.strCostMethod = 'Per Unit' THEN 0
-						WHEN IC.strCostMethod = 'Amount' THEN 
-						CASE
-							WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2)
-							WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2) * -1
-						END
-					END
-		,intEntityVendorId = null
-		,ysnAccrue = 0
-		,ysnPrice = 1
-		,intForexRateTypeId = null 
-		,dblForexRate = null
+		intInventoryShipmentId		= SC.intTransactionHeaderId 
+		,intContractId				= SC.intContractHeaderId 
+		,intContractDetailId		= SC.intContractDetailId 
+		,intChargeId				= SCSetup.intDefaultFeeItemId
+		,strCostMethod				= IC.strCostMethod 
+		,dblRate					= CASE
+										WHEN IC.strCostMethod = 'Per Unit' THEN 
+										CASE
+											WHEN @ysnDeductFeesCusVen = 1 THEN (SC.dblTicketFees * -1)
+											WHEN @ysnDeductFeesCusVen = 0 THEN SC.dblTicketFees
+										END
+										WHEN IC.strCostMethod = 'Amount' THEN 0
+									END
+		,intCostUOMId				= dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, SC.intItemUOMId) 
+		,intCurrency				= SC.intCurrencyId
+		,dblAmount					= CASE
+										WHEN IC.strCostMethod = 'Per Unit' THEN 0
+										WHEN IC.strCostMethod = 'Amount' THEN 
+										CASE
+											WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2)
+											WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2) * -1
+										END
+									END
+		,intEntityVendorId			= null
+		,ysnAccrue					= 0
+		,ysnPrice					= 1
+		,intForexRateTypeId			= null 
+		,dblForexRate				= null
+		,strChargesLink				= SC.strChargesLink
 	FROM @scaleStaging SC
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 	INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
@@ -263,7 +281,8 @@ BEGIN TRY
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId 
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -274,11 +293,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= LoadDetail.intSContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= SC.strCostMethod
 							,[dblRate]						= CASE
@@ -296,8 +317,9 @@ BEGIN TRY
 							,[ysnPrice]						= @ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
@@ -307,7 +329,8 @@ BEGIN TRY
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId 
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -318,11 +341,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= LoadDetail.intSContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= LoadCost.strCostMethod
 							,[dblRate]						= CASE
@@ -340,8 +365,9 @@ BEGIN TRY
 							,[ysnPrice]						= @ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							WHERE LoadCost.intItemId != @intFreightItemId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 							AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0 AND SC.intTicketId = @intTicketId
@@ -351,7 +377,8 @@ BEGIN TRY
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId 
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -362,11 +389,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= SC.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= SC.strCostMethod
 							,[dblRate]						= CASE
@@ -384,17 +413,19 @@ BEGIN TRY
 							,[ysnPrice]						= @ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractHeaderId = @intLoadContractId 
+							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractDetailId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId 
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -405,11 +436,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= SC.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= ContractCost.strCostMethod
 							,[dblRate]						= CASE
@@ -427,8 +460,9 @@ BEGIN TRY
 							,[ysnPrice]						= ContractCost.ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 							WHERE ContractCost.intItemId != @intFreightItemId AND SC.intContractHeaderId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
@@ -440,7 +474,8 @@ BEGIN TRY
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId 
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -451,11 +486,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= LoadDetail.intSContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= LoadCost.strCostMethod
 							,[dblRate]						= CASE
@@ -473,6 +510,7 @@ BEGIN TRY
 							,[ysnPrice]						= LoadCost.ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblLGLoadDetail LoadDetail
 							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
@@ -484,7 +522,8 @@ BEGIN TRY
 							INSERT INTO @ShipmentCharges
 							(
 								intInventoryShipmentId
-								,intContractId 
+								,intContractId
+								,intContractDetailId  
 								,intChargeId 
 								,strCostMethod 
 								,dblRate 
@@ -495,11 +534,13 @@ BEGIN TRY
 								,ysnAccrue 
 								,ysnPrice 
 								,intForexRateTypeId 
-								,dblForexRate 
+								,dblForexRate
+								,strChargesLink 
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= ContractCost.intContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
+							,[intContractDetailId]			= ContractCost.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= ContractCost.strCostMethod
 							,[dblRate]						= CASE
@@ -518,8 +559,9 @@ BEGIN TRY
 							,[ysnPrice]						= ContractCost.ysnPrice
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
+							,[strChargesLink]				= SC.strChargesLink
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 							WHERE SC.intContractHeaderId = @intLoadContractId AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
 				END
@@ -531,7 +573,8 @@ BEGIN TRY
 					INSERT INTO @ShipmentCharges
 					(
 						intInventoryShipmentId
-						,intContractId 
+						,intContractId
+						,intContractDetailId 
 						,intChargeId 
 						,strCostMethod 
 						,dblRate 
@@ -542,11 +585,13 @@ BEGIN TRY
 						,ysnAccrue 
 						,ysnPrice 
 						,intForexRateTypeId 
-						,dblForexRate 
+						,dblForexRate
+						,strChargesLink 
 					)
 					SELECT	
 					[intInventoryShipmentId]		= SC.intTransactionHeaderId
 					,[intContractId]				= NULL
+					,[intContractDetailId]			= NULL
 					,[intChargeId]					= @intFreightItemId
 					,[strCostMethod]				= SC.strCostMethod
 					,[dblRate]						= CASE
@@ -567,6 +612,7 @@ BEGIN TRY
 					,[ysnPrice]						= @ysnPrice
 					,[intForexRateTypeId]			= NULL
 					,[dblForexRate]					= NULL
+					,[strChargesLink]				= SC.strChargesLink
 					FROM @scaleStaging SC
 					LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 					LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
@@ -579,7 +625,8 @@ BEGIN TRY
 						INSERT INTO @ShipmentCharges
 						(
 							intInventoryShipmentId
-							,intContractId 
+							,intContractId
+							,intContractDetailId 
 							,intChargeId 
 							,strCostMethod 
 							,dblRate 
@@ -590,11 +637,13 @@ BEGIN TRY
 							,ysnAccrue 
 							,ysnPrice 
 							,intForexRateTypeId 
-							,dblForexRate 
+							,dblForexRate
+							,strChargesLink 
 						)
 						SELECT	
 						[intInventoryShipmentId]	= SC.intTransactionHeaderId
 						,[intContractId]			= SC.intContractHeaderId
+						,[intContractDetailId]		= SC.intContractDetailId
 						,[intChargeId]				= SCS.intFreightItemId
 						,[strCostMethod]			= SC.strCostMethod
 						,[dblRate]					= CASE
@@ -619,11 +668,12 @@ BEGIN TRY
 						,[ysnPrice]					= @ysnPrice
 						,[intForexRateTypeId]		= NULL
 						,[dblForexRate]				= NULL
+						,[strChargesLink]			= SC.strChargesLink
 						FROM @scaleStaging SC
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						OUTER APPLY(
-							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractHeaderId 
+							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractDetailId 
 							AND dblRate != 0 
 							AND intItemId = @intFreightItemId
 						) CT
@@ -634,7 +684,8 @@ BEGIN TRY
 						INSERT INTO @ShipmentCharges
 						(
 							intInventoryShipmentId
-							,intContractId 
+							,intContractId
+							,intContractDetailId 
 							,intChargeId 
 							,strCostMethod 
 							,dblRate 
@@ -645,11 +696,13 @@ BEGIN TRY
 							,ysnAccrue 
 							,ysnPrice 
 							,intForexRateTypeId 
-							,dblForexRate 
+							,dblForexRate
+							,strChargesLink 
 						)
 						SELECT	
 						[intInventoryShipmentId]		= SC.intTransactionHeaderId
 						,[intContractId]				= SC.intContractHeaderId
+						,[intContractDetailId]			= SC.intContractDetailId
 						,[intChargeId]					= ContractCost.intItemId
 						,[strCostMethod]				= SC.strCostMethod
 						,[dblRate]						= CASE
@@ -667,8 +720,9 @@ BEGIN TRY
 						,[ysnPrice]						= @ysnPrice
 						,[intForexRateTypeId]			= NULL
 						,[dblForexRate]					= NULL
+						,[strChargesLink]				= SC.strChargesLink
 						FROM tblCTContractCost ContractCost
-						LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+						LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						WHERE ContractCost.intItemId = @intFreightItemId 
@@ -678,7 +732,8 @@ BEGIN TRY
 						INSERT INTO @ShipmentCharges
 						(
 							intInventoryShipmentId
-							,intContractId 
+							,intContractId
+							,intContractDetailId 
 							,intChargeId 
 							,strCostMethod 
 							,dblRate 
@@ -689,11 +744,13 @@ BEGIN TRY
 							,ysnAccrue 
 							,ysnPrice 
 							,intForexRateTypeId 
-							,dblForexRate 
+							,dblForexRate
+							,strChargesLink 
 						)
 						SELECT	
 						[intInventoryShipmentId]		= SC.intTransactionHeaderId
 						,[intContractId]				= NULL
+						,[intContractDetailId]			= NULL
 						,[intChargeId]					= @intFreightItemId
 						,[strCostMethod]				= SC.strCostMethod
 						,[dblRate]						= CASE
@@ -714,17 +771,19 @@ BEGIN TRY
 						,[ysnPrice]						= @ysnPrice
 						,[intForexRateTypeId]			= NULL
 						,[dblForexRate]					= NULL
+						,[strChargesLink]				= SC.strChargesLink
 						FROM @scaleStaging SC
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-						WHERE SC.dblFreightRate > 0 AND SC.intTicketId = @intTicketId
+						WHERE SC.dblFreightRate > 0 AND SC.intContractDetailId IS NULL AND SC.intTicketId = @intTicketId
 					END
 			END
 
 			INSERT INTO @ShipmentCharges
 			(
 				intInventoryShipmentId
-				,intContractId 
+				,intContractId
+				,intContractDetailId 
 				,intChargeId 
 				,strCostMethod 
 				,dblRate 
@@ -735,11 +794,13 @@ BEGIN TRY
 				,ysnAccrue 
 				,ysnPrice 
 				,intForexRateTypeId 
-				,dblForexRate 
+				,dblForexRate
+				,strChargesLink 
 			)
 			SELECT	
 			[intInventoryShipmentId]			= SC.intTransactionHeaderId
 			,[intContractId]					= SC.intContractHeaderId
+			,[intContractDetailId]				= SC.intContractDetailId
 			,[intChargeId]						= ContractCost.intItemId
 			,[strCostMethod]					= ContractCost.strCostMethod
 			,[dblRate]							= CASE
@@ -757,8 +818,9 @@ BEGIN TRY
 			,[ysnPrice]							= ContractCost.ysnPrice
 			,[intForexRateTypeId]				= NULL
 			,[dblForexRate]						= NULL
+			,[strChargesLink]					= SC.strChargesLink
 			FROM tblCTContractCost ContractCost
-			LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+			LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 			WHERE ContractCost.intItemId != @intFreightItemId AND ContractCost.dblRate != 0 
 			AND SC.intTicketId = @intTicketId
 		END

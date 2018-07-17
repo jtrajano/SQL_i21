@@ -1,36 +1,42 @@
 ﻿CREATE VIEW vyuSTStorePumpItemList
 AS
-
 SELECT 
-	ICItem.intItemId
-	,ICItem.strItemNo
-	,ICItem.strShortName
-	,ICItem.strDescription as strPumpItemDescription
-	,ICItem.intCategoryId
-	,ICCat.strCategoryCode
-	,ICCat.strDescription as strCategoryDescription
-	,ICUom.strUpcCode
-	,ICUom.strLongUPCCode
-	,ICUom.intItemUOMId
-	,SMLoc.intCompanyLocationId
-	,SMLoc.strLocationName 
-	,ICItem.ysnFuelItem
-	,ICItemPricing.dblSalePrice as dblPrice
-	,ICLoc.intFamilyId
-	,ICLoc.intClassId
-	,STPumpItem.intStorePumpItemId
-	,STPumpItem.intStoreId
-from tblICItem ICItem
-inner join tblICItemUOM ICUom on ICItem.intItemId = ICUom.intItemId
-inner join tblICItemLocation ICLoc on ICUom.intItemId =  ICLoc.intItemId
-inner join tblICItemPricing ICItemPricing on ICItemPricing.intItemLocationId = ICLoc.intItemLocationId
-inner join tblSMCompanyLocation SMLoc on ICLoc.intLocationId = SMLoc.intCompanyLocationId
-inner join tblSTStore STStore on SMLoc.intCompanyLocationId = STStore.intCompanyLocationId
-inner join tblSTPumpItem STPumpItem on STStore.intStoreId = STPumpItem.intStoreId
-left join tblICCategory ICCat on STPumpItem.intCategoryId = ICCat.intCategoryId
-where ICItem.strType = 'Inventory'
-and ICItem.strStatus = 'Active'
-and STPumpItem.intItemUOMId =  ICUom.intItemUOMId
-
-
-
+	I.intItemId
+	,I.strItemNo
+	,I.strShortName
+	,I.strDescription as strPumpItemDescription
+	,I.intCategoryId
+	,C.strCategoryCode
+	,C.strDescription as strCategoryDescription
+	,UOM.strUpcCode
+	,UOM.strLongUPCCode
+	,UOM.intItemUOMId
+	,CL.intCompanyLocationId
+	,CL.strLocationName 
+	,I.ysnFuelItem
+	,IP.dblSalePrice as dblPrice
+	,IL.intFamilyId
+	,IL.intClassId
+	,SPI.intStorePumpItemId
+	,SPI.intStoreId
+	,I.strType
+	,I.strStatus
+	,I.strLotTracking
+FROM tblICItem I
+INNER JOIN tblICItemUOM UOM 
+	ON I.intItemId = UOM.intItemId
+INNER JOIN tblICItemLocation IL 
+	ON UOM.intItemId =  IL.intItemId
+INNER JOIN tblICItemPricing IP 
+	ON IP.intItemLocationId = IL.intItemLocationId
+INNER JOIN tblSMCompanyLocation CL 
+	ON IL.intLocationId = CL.intCompanyLocationId
+INNER JOIN tblSTStore ST 
+	ON CL.intCompanyLocationId = ST.intCompanyLocationId
+INNER JOIN tblSTPumpItem SPI 
+	ON ST.intStoreId = SPI.intStoreId
+LEFT JOIN tblICCategory C 
+	ON SPI.intCategoryId = C.intCategoryId
+--where I.strType = 'Inventory'
+--and I.strStatus = 'Active'
+WHERE SPI.intItemUOMId =  UOM.intItemUOMId

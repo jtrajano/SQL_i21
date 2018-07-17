@@ -2,7 +2,7 @@
 AS
 SELECT l.intLotId
 	,l.strLotNumber
-	,dbo.fnGetLotUnitCost(l.intLotId) AS dblLastCost
+	,Case When CP.ysnCostEnabled =1 Then dbo.fnGetLotUnitCost(l.intLotId) Else l.dblLastCost End AS dblLastCost
 	,l.dtmDateCreated
 	,l.dtmExpiryDate
 	,l.strLotAlias
@@ -112,7 +112,7 @@ SELECT l.intLotId
 			ELSE 0
 			END AS BIT) AS ysnPartialPallet
 	,l.intUnitPallet
-	,w.intWorkOrderId
+	,LI.intWorkOrderId
 	,mp.intAttributeTypeId
 	,DATEDIFF(dd, l.dtmDateCreated, GETDATE()) AS intAge
 	,DATEDIFF(dd, GETDATE(), l.dtmExpiryDate) AS intRemainingLife
@@ -124,6 +124,9 @@ SELECT l.intLotId
 	,l.strCertificate AS strCertification
 	,l.strCertificateId AS strCertificationId
 	,l.strTrackingNumber
+	,ISNULL(RC.strReportName, 'LotLabel') AS strReportName
+	,ISNULL(RC.intNoOfLabel, 1) AS intNoOfLabel
+	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -145,6 +148,8 @@ LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
 LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
-LEFT JOIN tblMFWorkOrder w ON l.strTransactionId = w.strWorkOrderNo
-LEFT JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
 Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId
+LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
+LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId
+LEFT JOIN tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
+Left JOIN tblMFCompanyPreference CP on 1=1

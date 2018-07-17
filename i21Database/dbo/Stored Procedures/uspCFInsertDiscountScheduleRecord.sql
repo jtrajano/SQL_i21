@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspCFInsertDiscountScheduleRecord]
 	,@intFromQty					INT				 =    0
 	,@intThruQty					INT				 =    0
 	,@dblRate						NUMERIC(18,6)	 =    0
+	,@ysnShowOnCFInvoice			NVARCHAR(MAX)	 =	 ''
 
 AS
 BEGIN
@@ -65,7 +66,7 @@ BEGIN
 	ELSE
 		BEGIN 
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strDiscountSchedule,'Invalid card active value'+ @ysnDiscountOnRemotes +'. Value should be Y or N only')
+			VALUES (@strDiscountSchedule,'Invalid discount on remotes value'+ @ysnDiscountOnRemotes +'. Value should be Y or N only')
 			SET @ysnHasError = 1
 		END
 
@@ -81,9 +82,28 @@ BEGIN
 	ELSE
 		BEGIN 
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strDiscountSchedule,'Invalid card active value'+ @ysnDiscountOnExtRemotes +'. Value should be Y or N only')
+			VALUES (@strDiscountSchedule,'Invalid discount on ext remotes value'+ @ysnDiscountOnExtRemotes +'. Value should be Y or N only')
 			SET @ysnHasError = 1
 		END
+
+		--Discount on Ext Remote
+	IF (@ysnShowOnCFInvoice = 'N')
+		BEGIN 
+			SET @ysnShowOnCFInvoice = 0
+		END
+	ELSE IF (@ysnShowOnCFInvoice = 'Y' OR @ysnShowOnCFInvoice IS NULL OR @ysnShowOnCFInvoice = '')
+		BEGIN
+			SET @ysnShowOnCFInvoice = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strDiscountSchedule,'Invalid show on cf invoice value'+ @ysnShowOnCFInvoice +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+
+		
 	---------------------------------------------------------
 
 	IF(@ysnHasError = 1)
@@ -143,12 +163,14 @@ BEGIN
 				,strDescription
 				,ysnDiscountOnRemotes
 				,ysnDiscountOnExtRemotes
+				,ysnShowOnCFInvoice
 			 )
 			VALUES(
 				 @strDiscountSchedule
 				,@strDescription
 				,@ysnDiscountOnRemotes
 				,@ysnDiscountOnExtRemotes
+				,@ysnShowOnCFInvoice
 			 )
 
 			SET @intId = SCOPE_IDENTITY()

@@ -55,6 +55,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.strCurrency
 	, Lot.dblAvailableQty
 	, ShipmentItemLot.strWarehouseCargoNumber 
+	, dblWeightPerQty = Lot.dblWeightPerQty
+	, Lot.intConcurrencyId
 FROM tblICInventoryShipmentItemLot ShipmentItemLot
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId

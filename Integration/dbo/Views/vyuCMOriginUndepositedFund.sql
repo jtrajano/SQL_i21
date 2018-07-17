@@ -23,6 +23,8 @@ BEGIN
 				,uf.strName
 				,intEntityCustomerId = null
 				,uf.dtmDate
+				,intCurrencyId = null
+				,dblWeightRate = 1
 		FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
 					ON gl.apegl_cbk_no = v.aptrx_cbk_no
 					AND gl.apegl_vnd_no = v.aptrx_vnd_no
@@ -35,7 +37,8 @@ BEGIN
 						+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 					) COLLATE Latin1_General_CI_AS
 
-		UNION SELECT
+		UNION 
+		SELECT
 			id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
 			intUndepositedFundId	= CMUF.intUndepositedFundId, 
 			intBankAccountId		= CMUF.intBankAccountId, 
@@ -44,7 +47,9 @@ BEGIN
 			dblAmount				= CMUF.dblAmount,
 			strName					= CMUF.strName, 
 			intEntityCustomerId		= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intEntityCustomerId ELSE ARI.intEntityCustomerId END,
-			dtmDate					= CMUF.dtmDate
+			dtmDate					= CMUF.dtmDate,
+			intCurrencyId			= ARP.intCurrencyId,
+			dblWeightRate			= F.dblWeightRate
 		FROM
 			tblCMUndepositedFund CMUF
 		LEFT OUTER JOIN
@@ -55,6 +60,14 @@ BEGIN
 			tblARInvoice ARI
 				ON CMUF.intSourceTransactionId = ARI.intInvoiceId
 				AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber 
+		OUTER APPLY(
+			SELECT dblWeightRate = 
+				SUM(CASE WHEN dblCurrencyExchangeRate > 0 
+					THEN dblCurrencyExchangeRate
+					ELSE 1 END * dblPayment )/
+				SUM(dblPayment) 
+			FROM tblARPaymentDetail WHERE intPaymentId = ARP.intPaymentId
+		)F
 
 
 	')

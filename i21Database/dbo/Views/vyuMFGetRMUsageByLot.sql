@@ -60,8 +60,7 @@ FROM (
 	JOIN dbo.tblICLot IL ON IL.intLotId = WI.intLotId
 	JOIN dbo.tblICParentLot IPL ON IPL.intParentLotId = IL.intParentLotId
 	JOIN dbo.tblICItem I1 ON I1.intItemId = IL.intItemId
-	JOIN dbo.tblICCategory C ON C.intCategoryId = I1.intCategoryId
-	WHERE C.strCategoryCode NOT IN (
+	WHERE I1.intCategoryId NOT IN (
 			SELECT PA.strAttributeValue
 			FROM tblMFManufacturingProcessAttribute PA
 			WHERE PA.intManufacturingProcessId = W.intManufacturingProcessId

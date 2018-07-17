@@ -69,7 +69,9 @@ BEGIN
 		,@AllowQtyToExceed		
 		,@InvoiceType			
 		,@TermId				
-		,@GetAllAvailablePricing)
+		,@GetAllAvailablePricing
+		,1.000000
+		,NULL)
 
 	RETURN
 END

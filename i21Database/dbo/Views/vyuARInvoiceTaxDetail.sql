@@ -14,6 +14,7 @@ SELECT
 	,TC.strTaxCode
 	,ITX.strCalculationMethod 
 	,ITX.dblRate
+	,ITX.dblBaseRate
 	,D.dblQtyShipped 
 	,D.dblPrice 
 	,D.dblTotal

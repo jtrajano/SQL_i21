@@ -489,7 +489,7 @@ BEGIN
 	UPDATE tblMFWorkOrderProducedLot
 	SET intLotId = @intLotId
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
-		,intProducedLotId=@intLotId
+		,intProducedLotId = @intLotId
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
 	UPDATE tblMFLotInventory
@@ -632,4 +632,13 @@ BEGIN
 		SET ysnPickAllowed = 0
 		WHERE intLotId = @intLotId
 	END
+	UPDATE tblMFLotInventory
+	SET ysnPickAllowed = CASE 
+			WHEN @strPickLot = 'True'
+				THEN 0
+			ELSE 1
+			END
+		,intWorkOrderId = @intWorkOrderId
+		,intManufacturingProcessId=@intManufacturingProcessId
+	WHERE intLotId = @intLotId
 END

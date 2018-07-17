@@ -22,6 +22,8 @@
 	,@VendorLocationId			INT
 	,@InvoiceType				NVARCHAR(200)
 	,@GetAllAvailablePricing	BIT
+	,@CurrencyExchangeRate		NUMERIC(18,6)
+	,@CurrencyExchangeRateTypeId INT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -59,6 +61,8 @@ BEGIN
 			,@InvoiceType
 			,NULL
 			,@GetAllAvailablePricing
+			,@CurrencyExchangeRate
+			,@CurrencyExchangeRateTypeId
 		)
 
 	RETURN @ItemPrice

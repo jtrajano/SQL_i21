@@ -18,6 +18,7 @@ DECLARE @Ownership_Own AS INT = 1
 		
 DECLARE @dblReservedQty AS NUMERIC(38,20)
 		,@dblOnHandQty AS NUMERIC(38,20)
+		,@dblAvailableQty AS NUMERIC(38,20)
 		,@intLotId AS INT 
 
 SET @intInvalidItemId = NULL 
@@ -31,6 +32,7 @@ SELECT	TOP 1
 		,@intInvalidItemId = Item.intItemId 
 		,@dblReservedQty = ISNULL(Reserves.dblQuantity, 0)
 		,@dblOnHandQty = ISNULL(StockUOM.dblOnHand, 0)
+		,@dblAvailableQty = ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0)
 FROM	(
 			SELECT	intItemId
 					,intItemLocationId
@@ -99,8 +101,8 @@ WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - Validate
 -- If invalid, exit immediately.
 IF @intInvalidItemId IS NOT NULL 
 BEGIN 
-	-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'			
-	EXEC uspICRaiseError 80007, @strInvalidItemNo, @dblReservedQty, @dblOnHandQty
+	-- 'Not enough stocks for {Item}. Available Qty after reserved is {Available Qty}. Please verify if correct Storage Location and/or Unit is selected.'
+	EXEC uspICRaiseError 80007, @strInvalidItemNo, @dblAvailableQty
 	RETURN 80007;
 END 	
 

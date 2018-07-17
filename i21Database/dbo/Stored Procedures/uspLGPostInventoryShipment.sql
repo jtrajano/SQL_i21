@@ -225,12 +225,12 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ItemUOM.intItemUOMId
+			,intItemUOMId = LoadDetail.intWeightItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = - 1 * CASE 
 				WHEN Lot.intLotId IS NULL
-					THEN ISNULL(LoadDetail.dblQuantity, 0)
-				ELSE ISNULL(DetailLot.dblLotQuantity, 0)
+					THEN ISNULL(LoadDetail.dblNet, 0)
+				ELSE ISNULL(DetailLot.dblNet, 0)
 				END
 			,dblUOMQty = CASE 
 				WHEN Lot.intLotId IS NULL

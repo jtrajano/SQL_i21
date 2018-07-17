@@ -40,6 +40,8 @@ SELECT DISTINCT
 		 											END
 	, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
 	, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+	, strItemUOM = ItemUOMName.strUnitMeasure
+	, strCostUOM = ItemUOMName.strUnitMeasure
 FROM vyuAPShipmentChargesForBilling A
 LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -58,8 +60,13 @@ LEFT JOIN tblSMTaxCode D ON D.intTaxClassId = C.intTaxClassId
 LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
-																													WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0, NULL) Taxes
+																													WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0, NULL, NULL, NULL, NULL) Taxes
 LEFT JOIN dbo.tblICInventoryShipment IIS ON A.intInventoryShipmentId = IIS.intInventoryShipmentId
+LEFT JOIN (
+			tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure ItemUOMName
+				ON ItemUOM.intUnitMeasureId = ItemUOMName.intUnitMeasureId
+		)
+		ON ItemUOM.intItemUOMId = A.intCostUnitMeasureId
 OUTER APPLY 
 (
 	SELECT intEntityVendorId,

@@ -12,6 +12,7 @@
 	,[intAccountId]					INT				NULL
 	,[intDeferredRevenueAccountId]	INT				NULL
 	,[intCurrencyId]				INT				NULL
+	,[dblCurrencyExchangeRate]		NUMERIC(18, 6)	NULL
 	,[intTermId]					INT				NULL
 	,[dblInvoiceTotal]				NUMERIC(18, 6)	NULL
 	,[dblShipping]					NUMERIC(18, 6)	NULL

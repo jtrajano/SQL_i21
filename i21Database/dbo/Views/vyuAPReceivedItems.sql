@@ -329,12 +329,18 @@ FROM
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
 			GROUP BY G.intPurchaseDetailId
 		) Billed
+		OUTER APPLY
+		(
+			select strApprovalStatus from tblSMTransaction T
+			WHERE T.intRecordId = A.intPurchaseId and T.strTransactionNo = strPurchaseOrderNumber
+		) approval
 	WHERE 1 = CASE WHEN C.intItemId IS NOT NULL THEN 
 				(CASE WHEN C.strType IN ('Service','Software','Non-Inventory','Other Charge') THEN 1 ELSE 0 END )
 			ELSE 1
 			END
 	AND B.dblQtyOrdered != B.dblQtyReceived
-	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
+	AND ((Billed.dblQty <= B.dblQtyReceived) OR Billed.dblQty IS NULL)
+	AND (approval.strApprovalStatus != 'Waiting for Approval' or approval.strApprovalStatus is null) --WILL NOT SHOW FOR APPROVAL TRANSACTION
 	UNION ALL
 	--DIRECT TYPE
 	SELECT DISTINCT
@@ -522,7 +528,9 @@ FROM
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	CAST(A.dblUnitCost AS DECIMAL(38,20))
+		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
+														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / A.intSubCurrencyCents ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
+														ELSE CAST(A.dblUnitCost AS DECIMAL(38,20)) END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
@@ -617,9 +625,10 @@ FROM
 	)  IRCT
 	OUTER APPLY 
 	(
-		SELECT intEntityVendorId FROM tblAPBillDetail BD
+		SELECT intEntityVendorId,SUM(ISNULL(dblQtyReceived,0)) AS dblQtyReceived FROM tblAPBillDetail BD
 		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
 		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+		GROUP BY intEntityVendorId, BD.intInventoryReceiptChargeId
 
 	) Billed
 	--OUTER APPLY 
@@ -631,7 +640,7 @@ FROM
 			
 	--) Qty
 	WHERE  
-		A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
+		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 	UNION ALL
 	SELECT
 	DISTINCT  
@@ -676,7 +685,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -799,7 +808,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -923,7 +932,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -976,7 +985,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(1 AS BIT)
+		,[ysnReturn]								=	CASE WHEN CC.ysnAccrue > 0 THEN CAST(0 AS BIT) ELSE  CAST(1 AS BIT) END
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -1047,7 +1056,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -1342,7 +1351,7 @@ FROM
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intItemId
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
-																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0, NULL) Taxes
+																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0, NULL, NULL, NULL, NULL) Taxes
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD

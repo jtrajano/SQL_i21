@@ -35,7 +35,7 @@ WHERE
 
 IF (ISNULL(@InvoiceNumber,'') <> '')
 	BEGIN
-			RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
+		RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
 		RETURN 0;
 	END
 
@@ -107,7 +107,6 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
-
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
@@ -603,9 +602,16 @@ INNER JOIN
 		ON ICISI.intItemId = ICI.intItemId
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
+	AND ICISI.intOwnershipType = 1
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
+	BEGIN
+		RAISERROR('There is no available item to Invoice.', 16, 1);
+		RETURN 0;
+	END
 
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice
@@ -711,6 +717,7 @@ INSERT INTO @LineItemTaxEntries(
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[intTaxAccountId]
 	,[dblTax]
 	,[dblAdjustedTax]
@@ -731,6 +738,7 @@ SELECT
 	,[strTaxableByOtherTaxes]	= SOSODT.[strTaxableByOtherTaxes] 
 	,[strCalculationMethod]		= SOSODT.[strCalculationMethod]
 	,[dblRate]					= SOSODT.[dblRate]
+	,[dblBaseRate]				= SOSODT.[dblBaseRate]
 	,[intTaxAccountId]			= SOSODT.[intSalesTaxAccountId]
 	,[dblTax]					= SOSODT.[dblTax]
 	,[dblAdjustedTax]			= SOSODT.[dblAdjustedTax]

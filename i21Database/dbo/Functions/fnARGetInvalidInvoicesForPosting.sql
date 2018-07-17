@@ -1242,7 +1242,7 @@ IF(ISNULL(@Post,0)) = 1
 		) LOT
 		WHERE ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
 		  AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
-		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) <> 3) OR ISNULL(I.[intLoadId], 0) IS NULL)
+		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) NOT IN (2, 3)) OR ISNULL(I.[intLoadId], 0) IS NULL)
 
 		UNION
 		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS
@@ -1329,6 +1329,24 @@ ELSE
 			ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
 
 		UNION
+
+		SELECT 
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'You cannot unpost an Invoice with ' + ISNULL(I2.strTransactionType,'') + ' created- ' + ISNULL(I2.strInvoiceNumber ,'')
+		FROM @Invoices I
+		INNER JOIN tblARInvoiceDetail D
+			ON D.intInvoiceId = I.intInvoiceId
+		INNER JOIN tblARInvoiceDetail D2
+			ON D2.intOriginalInvoiceDetailId = D.intInvoiceDetailId
+		INNER JOIN tblARInvoice I2
+			ON I2.intInvoiceId = D2.intInvoiceId
+
+		UNION
 		--If ysnAllowUserSelfPost is True in User Role
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
@@ -1382,6 +1400,46 @@ ELSE
 			@Recap = 0
 
 		UNION
+		--Payments from Pay Voucher
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= APP.[strPaymentRecordNum] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
+		FROM 
+			(SELECT [intPaymentId], [strPaymentRecordNum] FROM tblAPPayment WITH (NOLOCK)) APP
+		INNER JOIN 
+			(SELECT [intPaymentId], [intInvoiceId] FROM tblAPPaymentDetail WITH (NOLOCK)) APPD 
+				ON APP.[intPaymentId] = APPD.[intPaymentId]						
+		INNER JOIN 
+			@Invoices I
+				ON APPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
+
+		UNION
+		--Payments from Pay Voucher
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= APP.[strPaymentRecordNum] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
+		FROM 
+			(SELECT [intPaymentId], [strPaymentRecordNum] FROM tblAPPayment WITH (NOLOCK)) APP
+		INNER JOIN 
+			(SELECT [intPaymentId], [intInvoiceId] FROM tblAPPaymentDetail WITH (NOLOCK)) APPD 
+				ON APP.[intPaymentId] = APPD.[intPaymentId]						
+		INNER JOIN 
+			@Invoices I
+				ON APPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
+
+		UNION
 		--Invoice with created Bank Deposit
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
@@ -1421,6 +1479,7 @@ ELSE
 			WHERE P.intInvoiceId = I.intInvoiceId
 			  AND P.ysnPosted = 1
 		) PAT
+		WHERE @Recap = 0
 
 		UNION
 		--CASH REFUND ALREADY APPLIED IN PAY VOUCHER

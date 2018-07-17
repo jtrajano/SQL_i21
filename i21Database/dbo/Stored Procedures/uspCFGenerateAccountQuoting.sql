@@ -2,6 +2,7 @@
 	  @intCustomerId				INT  
 	 ,@intCustomerGroupId			INT
 	 ,@dtmQuoteDate					DATETIME
+	 ,@intEntityUserId				INT
 )
 AS
 BEGIN
@@ -40,7 +41,7 @@ BEGIN
 		tblCFAccount WHERE intCustomerGroupId = @intCustomerGroupId
 	END
 
-	DELETE FROM tblCFAccountQuote
+	DELETE FROM tblCFAccountQuote WHERE intEntityUserId = @intEntityUserId OR ISNULL(intEntityUserId,0) = 0 
 
 	WHILE(EXISTS(SELECT TOP 1 * FROM @tblCFAccountList))
 	BEGIN
@@ -110,7 +111,8 @@ BEGIN
 					@intProductId		= @intQuoteProduct1Id,
 					@dtmDate			= @dtmQuoteDate,
 					@ysnAccountQuote	= 1,
-					@intItemSequence	= 1
+					@intItemSequence	= 1,
+					@intEntityUserId	= @intEntityUserId
 				END
 
 				IF(ISNULL(@intQuoteProduct2Id,0) != 0)
@@ -121,7 +123,8 @@ BEGIN
 					@intProductId		= @intQuoteProduct2Id,
 					@dtmDate			= @dtmQuoteDate,
 					@ysnAccountQuote	= 1,
-					@intItemSequence	= 2
+					@intItemSequence	= 2,
+					@intEntityUserId	= @intEntityUserId
 				END
 
 				IF(ISNULL(@intQuoteProduct3Id,0) != 0)
@@ -132,7 +135,8 @@ BEGIN
 					@intProductId		= @intQuoteProduct3Id,
 					@dtmDate			= @dtmQuoteDate,
 					@ysnAccountQuote	= 1,
-					@intItemSequence	= 3
+					@intItemSequence	= 3,
+					@intEntityUserId	= @intEntityUserId
 				END
 
 				IF(ISNULL(@intQuoteProduct4Id,0) != 0)
@@ -143,7 +147,8 @@ BEGIN
 					@intProductId		= @intQuoteProduct4Id,
 					@dtmDate			= @dtmQuoteDate,
 					@ysnAccountQuote	= 1,
-					@intItemSequence	= 4
+					@intItemSequence	= 4,
+					@intEntityUserId	= @intEntityUserId
 				END
 
 				IF(ISNULL(@intQuoteProduct5Id,0) != 0)
@@ -154,7 +159,8 @@ BEGIN
 					@intProductId		= @intQuoteProduct5Id,
 					@dtmDate			= @dtmQuoteDate,
 					@ysnAccountQuote	= 1,
-					@intItemSequence	= 5
+					@intItemSequence	= 5,
+					@intEntityUserId	= @intEntityUserId
 				END
 
 

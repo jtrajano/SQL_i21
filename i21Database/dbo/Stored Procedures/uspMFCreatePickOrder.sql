@@ -56,8 +56,13 @@ BEGIN TRY
 		,@strReferernceNo NVARCHAR(50)
 		,@ysnGenerateTaskOnCreatePickOrder BIT
 		,@strInventoryTracking NVARCHAR(50)
-		,@intStorageLocationId int
-		,@intRecipeTypeId int
+		,@intStorageLocationId INT
+		,@intRecipeTypeId INT
+		,@intIncludeConsumptionByLocationInPickOrder int
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+		,@intIncludeConsumptionByLocationInPickOrder= case When IsNULL(ysnIncludeConsumptionByLocationInPickOrder,0) =1 Then 2 else 1 end
+	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -226,6 +231,10 @@ BEGIN TRY
 	
 	SELECT @intPMStageLocationId
 
+	DELETE
+	FROM @tblMFStageLocation
+	WHERE intStageLocationId IS NULL
+
 	IF (
 			(
 				@strStageLocationType = 'Production Staging Location'
@@ -250,7 +259,8 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	SELECT @strReferernceNo = strWorkOrderNo,@intRecipeTypeId=intRecipeTypeId 
+	SELECT @strReferernceNo = strWorkOrderNo
+		,@intRecipeTypeId = intRecipeTypeId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
 			SELECT intWorkOrderId
@@ -462,7 +472,13 @@ BEGIN TRY
 			,''
 			,CASE 
 				WHEN C.intCategoryId = @intPMCategoryId
-					THEN (CASE WHEN @intPMStageLocationId = 0 THEN NULL ELSE @intPMStageLocationId END)
+					THEN (
+							CASE 
+								WHEN @intPMStageLocationId = 0
+									THEN NULL
+								ELSE @intPMStageLocationId
+								END
+							)
 				ELSE NULL
 				END
 			,I.strInventoryTracking
@@ -489,7 +505,10 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId in (1,2)
+			AND ri.intConsumptionMethodId IN (
+				1
+				,@intIncludeConsumptionByLocationInPickOrder
+				)
 		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
@@ -502,7 +521,8 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM @OrderDetail
-				) and @intRecipeTypeId<>3
+				)
+			AND @intRecipeTypeId <> 3
 		BEGIN
 			RAISERROR (
 					'There is no input item to create a pick list. Please check the recipe input item set up.'
@@ -653,7 +673,7 @@ BEGIN TRY
 				,@intItemUOMId = NULL
 				,@intStagingLocationId = NULL
 				,@strInventoryTracking = NULL
-				,@intStorageLocationId =NULL
+				,@intStorageLocationId = NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
@@ -661,7 +681,7 @@ BEGIN TRY
 				,@intItemUOMId = intItemUOMId
 				,@intStagingLocationId = intStagingLocationId
 				,@strInventoryTracking = strInventoryTracking
-				,@intStorageLocationId=intStorageLocationId
+				,@intStorageLocationId = intStorageLocationId
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
@@ -706,22 +726,11 @@ BEGIN TRY
 				OR @dblAvailableQty < 0
 			BEGIN
 				SELECT @dblAvailableQty = 0
-
-				DELETE
-				FROM @OrderDetailInformation
-				WHERE intLineNo = @intLineNo
-					AND dblQty = dblRequiredQty
 			END
 
 			IF @dblQty - @dblAvailableQty > 0
 			BEGIN
 				SELECT @dblQty = @dblQty - @dblAvailableQty
-
-				UPDATE @OrderDetailInformation
-				SET dblQty = @dblAvailableQty
-					,dblWeight = @dblAvailableQty
-					,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
-				WHERE intLineNo = @intLineNo
 
 				DECLARE @tblSubstituteItem TABLE (
 					intItemRecordId INT Identity(1, 1)
@@ -729,6 +738,7 @@ BEGIN TRY
 					,dblSubstituteRatio NUMERIC(18, 6)
 					,dblMaxSubstituteRatio NUMERIC(18, 6)
 					,strInventoryTracking NVARCHAR(50)
+					,intSubstituteItemUOMId INT
 					)
 
 				INSERT INTO @tblSubstituteItem (
@@ -736,11 +746,13 @@ BEGIN TRY
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
 					,strInventoryTracking
+					,intSubstituteItemUOMId
 					)
 				SELECT rs.intSubstituteItemId
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
 					,I.strInventoryTracking
+					,rs.intItemUOMId
 				FROM dbo.tblMFRecipe r
 				JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
 				JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -749,6 +761,26 @@ BEGIN TRY
 					AND r.intLocationId = @intLocationId
 					AND r.ysnActive = 1
 					AND ri.intItemId = @intItemId
+
+				IF EXISTS (
+						SELECT *
+						FROM @tblSubstituteItem
+						)
+				BEGIN
+					IF @dblAvailableQty = 0
+					BEGIN
+						DELETE
+						FROM @OrderDetailInformation
+						WHERE intLineNo = @intLineNo
+							AND dblQty = dblRequiredQty
+					END
+
+					UPDATE @OrderDetailInformation
+					SET dblQty = @dblAvailableQty
+						,dblWeight = @dblAvailableQty
+						,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
+					WHERE intLineNo = @intLineNo
+				END
 
 				SELECT @intItemRecordId = MIN(intItemRecordId)
 				FROM @tblSubstituteItem
@@ -759,22 +791,15 @@ BEGIN TRY
 						,@dblMaxSubstituteRatio = NULL
 						,@intSubstituteItemId = NULL
 						,@strInventoryTracking = NULL
+						,@intSubstituteItemUOMId=NULL
 
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 						,@intSubstituteItemId = intSubstituteItemId
 						,@strInventoryTracking = strInventoryTracking
+						,@intSubstituteItemUOMId=intSubstituteItemUOMId
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
-
-					SELECT @intUnitMeasureId = intUnitMeasureId
-					FROM dbo.tblICItemUOM
-					WHERE intItemUOMId = @intItemUOMId
-
-					SELECT @intSubstituteItemUOMId = intItemUOMId
-					FROM tblICItemUOM
-					WHERE intItemId = @intSubstituteItemId
-						AND intUnitMeasureId = @intUnitMeasureId
 
 					SELECT @dblAvailableQty = 0
 
@@ -860,7 +885,7 @@ BEGIN TRY
 								FROM tblMFPickListPreference
 								)
 							,(
-								SELECT MAX(intLineNo) + 1
+								SELECT IsNULL(MAX(intLineNo), 0) + 1
 								FROM @OrderDetailInformation
 								)
 							,NULL
@@ -909,7 +934,7 @@ BEGIN TRY
 								FROM tblMFPickListPreference
 								)
 							,(
-								SELECT MAX(intLineNo) + 1
+								SELECT IsNULL(MAX(intLineNo), 0) + 1
 								FROM @OrderDetailInformation
 								)
 							,NULL
@@ -961,7 +986,7 @@ BEGIN TRY
 
 				SELECT @intLineNo = MIn(intLineNo)
 				FROM @OrderDetailInformation
-				WHERE @intLineNo > intLineNo
+				WHERE intLineNo > @intLineNo
 			END
 
 			SELECT @intLineNo = MIn(intLineNo)
@@ -1034,8 +1059,7 @@ BEGIN TRY
 				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
 
-	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
-	FROM tblMFCompanyPreference
+
 
 	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
 	BEGIN

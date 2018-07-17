@@ -3,8 +3,11 @@
     [strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankTransactionTypeId] INT              NOT NULL,
     [intBankAccountId]         INT              NOT NULL,
-    [intCurrencyId]            INT              NULL,
+
+	[intCurrencyId]            INT              NULL,
     [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
+
     [dtmDate]                  DATETIME         NOT NULL,
     [strPayee]                 NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
     [intPayeeId]               INT              NULL,

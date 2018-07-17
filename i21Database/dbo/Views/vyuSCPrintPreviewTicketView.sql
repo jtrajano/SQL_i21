@@ -21,7 +21,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strScaleOperatorUser,
 	SC.intEntityScaleOperatorId,
 	SC.strTruckName,
-	SC.strDriverName, 
 	SC.ysnDriverOff,
 	SC.ysnSplitWeightTicket,
 	SC.ysnGrossManual,
@@ -93,7 +92,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strFarmNumber,
 	SC.strFieldNumber,
 	SC.strDiscountComment,
-	SC.strCommodityCode,
 	SC.intCommodityId,
 	SC.intDiscountId,
 	SC.intContractId,
@@ -117,7 +115,11 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.dblConvertedUOMQty,
 	SC.strCostMethod,
 	SC.strElevatorReceiptNumber,
-	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
+	SC.intEntityContactId,
+	(ISNULL(SC.dblUnitPrice,0) + ISNULL(SC.dblUnitBasis,0)) AS dblCashPrice,
+	SC.intSalesOrderId,
+	SC.intDeliverySheetId,
+	SC.dtmTransactionDateTime,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
 	SC.strDistributionOption = 'LOD' THEN 'Load' WHEN
@@ -163,8 +165,12 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemNumber
 		ELSE IC.strItemNo
 	END) AS strItemNumber,
-	SO.strSalesOrderNumber
+	SO.strSalesOrderNumber,
+	EMDriver.strName AS strDriverName,
+	SCD.strDeliverySheetNumber,
+	SCD.strSplitDescription
   FROM tblSCTicket SC
+  --SELECT EM.intEntityId,SM.blbDetail
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
@@ -183,10 +189,10 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
-  OUTER APPLY(
-		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
-		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
-  ) SMS
+  LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
+  LEFT JOIN tblEMEntitySignature EM ON EM.intEntityId = SC.intEntityScaleOperatorId
+  LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
+  LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
@@ -200,9 +206,12 @@ AS SELECT SC.intTicketId, (CASE WHEN
   OUTER APPLY(
 	SELECT 
 		strSalesOrderNumber,
-		strItemNumber = STUFF(( SELECT ', ' + strItemDescription FROM tblSOSalesOrderDetail WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
+		strItemNumber = STUFF(( SELECT ', ' + IC.strItemNo FROM tblSOSalesOrderDetail SOD
+			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
+			WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
 		strStorageLocation = STUFF(( SELECT ', ' + ICS.strDescription FROM tblSOSalesOrderDetail SOD
 			LEFT JOIN tblICStorageLocation ICS on ICS.intStorageLocationId = SOD.intStorageLocationId
+			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
 			WHERE SOD.intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
 	FROM tblSOSalesOrderDetail AS x
 	INNER JOIN tblICItem IC ON IC.intItemId = x.intItemId

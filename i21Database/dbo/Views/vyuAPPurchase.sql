@@ -66,7 +66,7 @@ OUTER APPLY (
 			ON H.intScreenId = I.intScreenId
 		INNER JOIN dbo.tblSMApproval J 
 			ON I.intTransactionId = J.intTransactionId
-		INNER JOIN dbo.tblEMEntity K 
+		LEFT JOIN dbo.tblEMEntity K 
 			ON J.intApproverId = K.intEntityId
 	WHERE H.strScreenName = 'Purchase Order' 
 		AND H.strModule = 'Accounts Payable' 

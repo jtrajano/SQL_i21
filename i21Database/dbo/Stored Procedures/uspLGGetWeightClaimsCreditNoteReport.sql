@@ -1,5 +1,4 @@
-﻿-----------------uspLGGetWeightClaimsCreditNoteReport
-CREATE PROCEDURE uspLGGetWeightClaimsCreditNoteReport 
+﻿CREATE PROCEDURE uspLGGetWeightClaimsCreditNoteReport 
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 DECLARE @intWeightClaimId INT
@@ -113,7 +112,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
 	--,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
-	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -172,6 +171,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,WC.dtmActualWeighingDate
 	,INV.strComments
 	,CUS.strVatNumber
+	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth			
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
@@ -279,6 +280,8 @@ GROUP BY WC.intWeightClaimId
 	,rtUMTranslation.strTranslation
 	,rtPRUTranslation.strTranslation
 	,rtITranslation.strTranslation
+	,CP.intReportLogoHeight
+	,CP.intReportLogoWidth
 
 /*
 CREATE PROCEDURE uspLGGetWeightClaimsCreditNoteReport 

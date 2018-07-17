@@ -153,6 +153,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -201,6 +202,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
@@ -251,6 +253,7 @@ ELSE
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -260,7 +263,6 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]			
-			,strRateType
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -280,6 +282,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
@@ -291,9 +294,7 @@ ELSE
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
-			,strCurrencyExchangeRateType
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
-		LEFT JOIN tblSMCurrencyExchangeRateType Rate on A.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
 		EXEC dbo.uspGLPostRecap 

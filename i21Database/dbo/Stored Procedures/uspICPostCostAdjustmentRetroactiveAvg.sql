@@ -479,6 +479,7 @@ BEGIN
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
 
+			SET @EscalateInventoryTransactionTypeId = NULL 
 			EXEC [uspICPostCostAdjustmentEscalate]
 				@dtmDate 
 				,@t_intItemId 

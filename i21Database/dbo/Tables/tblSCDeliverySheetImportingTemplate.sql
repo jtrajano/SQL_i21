@@ -5,6 +5,9 @@
     [strTemplateDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intDelimiterId] INT NULL,
 	[strDelimiterType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[intDiscountScheduleId] INT NULL,
+	[intCurrencyId] INT NULL,
+	[intCommodityId] INT NULL,
 	[ysnLastTemplateUsed] BIT NOT NULL DEFAULT 0, 
 	[ysnActive] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -56,6 +59,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCDeliverySheetImportingTemplate',
     @level2type = N'COLUMN',
     @level2name = N'strDelimiterType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount schedule Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDeliverySheetImportingTemplate',
+    @level2type = N'COLUMN',
+    @level2name = N'intDiscountScheduleId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Template active',

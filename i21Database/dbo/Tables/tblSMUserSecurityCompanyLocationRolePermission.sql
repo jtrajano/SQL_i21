@@ -11,7 +11,7 @@
 	CONSTRAINT [FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]),
 	CONSTRAINT [FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMMultiCompany] FOREIGN KEY ([intMultiCompanyId]) REFERENCES [tblSMMultiCompany]([intMultiCompanyId]),
 	CONSTRAINT [FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE, 
-    CONSTRAINT [AK_tblSMUserSecurityCompanyLocationRolePermission_Column] UNIQUE ([intEntityUserSecurityId], [intUserRoleId], [intCompanyLocationId])
+    CONSTRAINT [AK_tblSMUserSecurityCompanyLocationRolePermission_Column] UNIQUE ([intEntityUserSecurityId], [intUserRoleId], [intMultiCompanyId], [intCompanyLocationId])
 )
 
 

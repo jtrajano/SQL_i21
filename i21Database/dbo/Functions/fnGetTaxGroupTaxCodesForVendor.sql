@@ -1,12 +1,15 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForVendor]
 (
-	 @TaxGroupId			INT
-	,@VendorId				INT
-	,@TransactionDate		DATETIME
-	,@ItemId				INT
-	,@ShipFromLocationId	INT
-	,@IncludeExemptedCodes	BIT
-	,@UOMId					INT = NULL
+	 @TaxGroupId					INT
+	,@VendorId						INT
+	,@TransactionDate				DATETIME
+	,@ItemId						INT
+	,@ShipFromLocationId			INT
+	,@IncludeExemptedCodes			BIT
+	,@UOMId							INT				= NULL
+	,@CurrencyId					INT				= NULL
+	,@CurrencyExchangeRateTypeId	INT				= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -18,6 +21,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblBaseRate]					NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
@@ -35,9 +39,13 @@ BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@ItemCategoryId INT
+			,@ItemLocationId INT
+			,@ExpenseAccountId INT
 
 	SET @ZeroDecimal = 0.000000
-	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+	SELECT @ItemCategoryId = [intCategoryId] FROM tblICItem WHERE [intItemId] = @ItemId 
+	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @ShipFromLocationId
+	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
 
 	-- IF (ISNULL(@UOMId,0) = 0)
 	-- 	SET @UOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
@@ -52,9 +60,10 @@ BEGIN
 		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
 		,[strCalculationMethod]			= R.[strCalculationMethod]
 		,[dblRate]						= R.[dblRate]
+		,[dblBaseRate]					= R.[dblBaseRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]
+		,[intTaxAccountId]				= CASE WHEN TC.[ysnExpenseAccountOverride] = 1 THEN ISNULL(@ExpenseAccountId,TC.[intPurchaseTaxAccountId]) ELSE TC.[intPurchaseTaxAccountId] END
 		,[ysnSeparateOnInvoice]			= 0
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]
@@ -74,7 +83,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId) R		
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

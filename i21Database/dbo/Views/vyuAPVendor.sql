@@ -49,7 +49,24 @@ SELECT
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency,
-	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityId]) 
+	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 
+											FROM dbo.tblAPBill G 
+											WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityId]
+											UNION 
+											SELECT 1
+											FROM tblARInvoice AA
+											WHERE 
+												NOT EXISTS( SELECT TOP 1 1 
+															FROM tblAPBillDetail apbilldetail
+															INNER JOIN tblAPBill apbill 
+																ON apbilldetail.intBillId = apbill.intBillId 
+															WHERE apbill.ysnPosted = 1
+																AND intInvoiceId = AA.intInvoiceId
+														   )
+												AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash')
+												AND AA.ysnPosted = 1
+												AND AA.intEntityCustomerId = B.[intEntityId]
+											) 
 						THEN 1 ELSE 0 END) AS BIT),
 	B.intApprovalListId,
 	C.intFreightTermId,
@@ -71,6 +88,7 @@ SELECT
 	B.intCsvFormat,
 	storeDescription = I.strDescription,
 	ysnTransportTerminal
+	,strTerm = J.strTerm
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -94,3 +112,5 @@ FROM
 		ON B.intPaymentMethodId = H.intPaymentMethodID
 	LEFT JOIN dbo.tblSTStore I
 		ON I.intStoreId = B.intStoreStoreId
+	LEFT JOIN tblSMTerm J
+		ON B.intTermsId = J.intTermID

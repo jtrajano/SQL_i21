@@ -178,7 +178,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			 , strItemDescription		= ID.strItemDescription
 			 , strUnitMeasure			= ID.strUnitMeasure
 			 , dblAdjustedTax			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblAdjustedTax, 0) * -1 ELSE ISNULL(ID.dblAdjustedTax, 0) END 
-			 , dblQtyShipped			= ID.dblQtyShipped
+			 , dblQtyShipped			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblQtyShipped, 0) * -1 ELSE ISNULL(ID.dblQtyShipped, 0) END
 			 , dblTotalTax				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblTotalTax, 0) * -1 ELSE ISNULL(ID.dblTotalTax, 0) END
 		INTO #TRANSACTIONS
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
@@ -337,6 +337,8 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, ysnPrintDetail
 			, ysnPrintRecap
 			, strFormattingOptions
+			, dtmFilterFrom
+			, dtmFilterTo
 		)
 		SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 			, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
@@ -389,6 +391,8 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, ysnPrintDetail		= @ysnPrintDetail
 			, ysnPrintRecap			= @ysnPrintRecap
 			, strFormattingOptions	= @strFormattingOptions
+			, dtmFilterFrom			= @dtmDateFrom
+			, dtmFilterTo			= @dtmDateTo
 		FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 		INNER JOIN (
 			SELECT C.intEntityId

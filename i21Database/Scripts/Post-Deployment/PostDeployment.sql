@@ -79,6 +79,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
+:r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
+:r .\SM\1830_Encrypt_Merchant_Password.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -243,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
+:r .\AR\DefaultData\99_ReCreateTriggers.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -281,38 +284,39 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\CleanBasisAdvance.sql
 :r .\AP\UpdateNewShipFromEntity.sql
 :r .\AP\UpdatePOPendingStatus.sql
+:r .\AP\UpdateVendorCreatePostVoucher.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
-:r .\IC\03_DefaultData.sql 
-:r .\IC\04_CostingMethods.sql 
-:r .\IC\05_LotStatus.sql
-:r .\IC\07_Status.sql
-:r .\IC\08_InventoryTransactionPostingIntegration.sql
-:r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
-:r .\IC\15_InventoryCostAdjustmentTypes.sql
-:r .\IC\18_FOBPointTypes.sql
-:r .\IC\19_M2MComputations.sql
-:r .\IC\20_UpdateContractItemStatuses.sql
-:r .\IC\21_AdjustmentInventoryTerms.sql
-:r .\IC\22_StockTypes.sql
-:r .\IC\PopulateLotContainerNoAndCondition.sql
-:r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
-:r .\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql
-:r .\IC\23_Update_ActualCostId_On_InventoryTransaction.sql
-:r .\IC\24_ImplementBasketChanges.sql
-:r .\IC\25_MigratePackedTypeToQuantityType.sql
-:r .\IC\26_AddStockUOM.sql
-:r .\IC\27_RemoveAfter18.1_DataFix.sql 
-:r .\IC\28_Company_Preferences.sql
-:r .\IC\29_Inventory_Constraints.sql
-:r .\IC\30_Populate_Shipment_LineTotal.sql
-:r .\IC\31_RemoveAfter18.3_DataFix.sql 
-:r .\IC\31_Add_Default_Edi_Mapping_Template.sql
+:r .\IC\02_DefaultData.sql 
+:r .\IC\03_CostingMethods.sql 
+:r .\IC\04_LotStatus.sql 
+:r .\IC\05_Status.sql 
+:r .\IC\06_InventoryTransactionPostingIntegration.sql 
+:r .\IC\07_InventoryTransactionsWithNoCounterAccountCategory.sql 
+:r .\IC\08_InventoryCostAdjustmentTypes.sql 
+:r .\IC\09_FOBPointTypes.sql 
+:r .\IC\10_M2MComputations.sql 
+:r .\IC\11_AdjustmentInventoryTerms.sql 
+:r .\IC\12_StockTypes.sql 
+:r .\IC\13_Add_Default_Edi_Mapping_Template.sql 
+:r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
+:r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
+:r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
+:r .\IC\Data_Fix_For_18.3\04_AddStockUOM.sql 
+:r .\IC\Data_Fix_For_18.3\05_FixDebitCreditUnits.sql 
+:r .\IC\Data_Fix_For_18.3\06_CompanyPreferenceForOriginLastTask.sql 
+:r .\IC\Data_Fix_For_18.3\07_Inventory_Constraints.sql 
+:r .\IC\Data_Fix_For_18.3\08_Populate_Shipment_LineTotal.sql 
+:r .\IC\Data_Fix_For_18.3\09_RemoveAfter18.3_DataFix.sql 
+:r .\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
+:r .\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql 
+:r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
 :r .\PAT\DefaultData\2_DefaultCompanyPreference.sql
+:r .\PAT\DefaultData\3_DefaultImportOriginFlag.sql
 :r .\PAT\1_DropStoredProcedures.sql
 :r .\PAT\2_MigrateStockRecords.sql
 :r .\PAT\3_UpdateIssueStockNo.sql
@@ -402,6 +406,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\037_DefaultDataLocationPayee.sql
 --:r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
+:r .\EM\040_UpdatePasswordHistoryEncryption.sql
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
@@ -414,16 +419,20 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\QM\1_MasterTables.sql
 
 -- Store Module
-:r .\ST\1_FileFieldMapping_PricebookSale.sql
-:r .\ST\2_FileFieldMapping_PromotionItemList.sql
-:r .\ST\3_FileFieldMapping_PromotionCombo.sql
-:r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
-:r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
-:r .\ST\6_Checkout_Radiant_ISM.sql
-:r .\ST\7_Checkout_Radiant_MCM.sql
-:r .\ST\8_Checkout_Radiant_FGM.sql
-:r .\ST\9_Checkout_Radiant_MSM.sql
+:r .\ST\01_FileFieldMapping_PricebookSale.sql
+:r .\ST\02_FileFieldMapping_PromotionItemList.sql
+:r .\ST\03_FileFieldMapping_PromotionCombo.sql
+:r .\ST\04_FileFieldMapping_PricebookMixMatch.sql
+:r .\ST\05_FileFieldMapping_PricebookSendSapphire.sql
+:r .\ST\06_Checkout_Radiant_ISM.sql
+:r .\ST\07_Checkout_Radiant_MCM.sql
+:r .\ST\08_Checkout_Radiant_FGM.sql
+:r .\ST\09_Checkout_Radiant_MSM.sql
 :r .\ST\10_Checkout_Commander_Translog.sql
+:r .\ST\11_FileFieldMapping_Passport_ISM.sql
+:r .\ST\12_FileFieldMapping_Passport_FGM.sql
+:r .\ST\13_FileFieldMapping_Passport_MCM.sql
+:r .\ST\14_FileFieldMapping_Passport_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
@@ -488,6 +497,11 @@ print 'BEGIN POST DEPLOYMENT'
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
+
+--SM - this should always be the last to execute
+	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
+:r .\SM\1830_ReIndexTables.sql
+:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 
 
 

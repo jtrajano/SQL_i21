@@ -122,7 +122,8 @@ BEGIN
 	END 
 END 
 
--- Mark stock reservation as posted (or unposted)
+-- Mark stock reservation as posted 
+IF @ysnPost = 1
 BEGIN 
 	EXEC dbo.uspICPostStockReservation
 		@intTransactionId

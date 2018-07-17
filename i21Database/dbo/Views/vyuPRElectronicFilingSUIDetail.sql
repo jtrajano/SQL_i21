@@ -44,8 +44,8 @@ FROM
 					strEEOCCode, dtmOriginalDateHired, dtmTerminated FROM tblPREmployee) EMP ON SUI.intEntityId = EMP.[intEntityId]
 	INNER JOIN (SELECT intYear, intQuarter, strState, strSUIAccountNumber, strAuthorizationNumber FROM tblPRElectronicFilingSUI) ESUI 
 		ON ESUI.intYear = SUI.intYear AND ESUI.intQuarter = SUI.intQuarter
-	LEFT JOIN (SELECT intEntityId, intYear, intQuarter, dblAdjustedGross, dblStateTotal FROM vyuPRReportQuarterlyStateTax) ST 
-		ON SUI.intEntityId = ST.intEntityId AND SUI.intYear = ST.intYear AND SUI.intQuarter = ST.intQuarter
+	LEFT JOIN (SELECT intEntityId, intYear, intQuarter, strCode, dblAdjustedGross, dblStateTotal FROM vyuPRReportQuarterlyStateTax) ST 
+		ON SUI.intEntityId = ST.intEntityId AND SUI.intYear = ST.intYear AND SUI.intQuarter = ST.intQuarter AND ST.strCode = ESUI.strState
 	LEFT JOIN (SELECT intEntityId = intEntityEmployeeId, intYear = YEAR(dtmPayDate), intQuarter = DATEPART(QQ, dtmPayDate), dblTotal = SUM(dblTotal) 
 				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND strCalculationType = 'Tip'
 				GROUP BY intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) TIP

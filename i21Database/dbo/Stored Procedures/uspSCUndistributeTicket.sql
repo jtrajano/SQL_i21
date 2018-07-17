@@ -46,7 +46,18 @@ DECLARE @InventoryReceiptId INT
         ,@strContractNumber NVARCHAR(40)
         ,@strContractStatus NVARCHAR(40)
         ,@intContractSeq INT
-        ,@intId INT;
+        ,@intId INT
+		,@intStorageScheduleTypeId INT
+		,@dblScheduleQty NUMERIC(38,20)
+		,@intMatchTicketItemUOMId INT
+		,@intMatchLoadId INT
+		,@intMatchLoadDetailId INT
+		,@intMatchLoadContractId INT
+		,@dblMatchScheduledUnits NUMERIC(38,20)
+		,@dblMatchDeliveredQuantity NUMERIC(38,20)
+		,@dblMatchLoadScheduledUnits NUMERIC(38,20)
+		,@strMatchTicketStatus NVARCHAR(40)
+		,@intTicketType INT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -169,7 +180,7 @@ BEGIN TRY
 									,@param = @intBillId
 									,@userId = @intUserId
 									,@success = @success OUTPUT
-									,@batchIdUsed = @success OUTPUT
+									,@batchIdUsed = @batchIdUsed OUTPUT
 								END
 							IF ISNULL(@success, 0) = 0
 							BEGIN
@@ -198,65 +209,102 @@ BEGIN TRY
 					EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 				END
 				ELSE
-					BEGIN
-						SELECT @intMatchTicketId = intMatchTicketId FROM tblSCTicket WHERE intTicketId = @intTicketId
+				BEGIN
+					SELECT @strMatchTicketStatus = strTicketStatus
+						, @intMatchTicketId = intTicketId
+						, @intTicketType = intTicketType
+						, @intStorageScheduleTypeId = intStorageScheduleTypeId
+						, @intMatchTicketItemUOMId = intItemUOMIdTo
+						, @intContractDetailId = intContractId
+						, @dblScheduleQty = (dblScheduleQty * -1) 
+					FROM tblSCTicket WHERE intMatchTicketId = @intTicketId
 
-						IF EXISTS (SELECT intMatchTicketId FROM tblSCTicket WHERE intTicketId = @intMatchTicketId AND strTicketStatus = 'C')
-						BEGIN
-							RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
-							RETURN;
+					IF @strMatchTicketStatus = 'C'
+					BEGIN
+						RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
+						RETURN;
+					END
+					IF ISNULL(@intMatchTicketId,0) > 0 AND @intTicketType = 6
+					BEGIN 
+						IF @intStorageScheduleTypeId = -6
+						BEGin
+							SELECT @intMatchLoadId = LGLD.intLoadId 
+							, @intMatchLoadDetailId = LGLD.intLoadDetailId
+							, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
+							, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
+							, @intMatchLoadContractId = LGLD.intSContractDetailId
+							FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
+							WHERE LGL.intTicketId = @intMatchTicketId
+
+							IF ISNULL(@intMatchLoadDetailId, 0) > 0
+							BEGIN
+								EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
+								SET @dblMatchDeliveredQuantity = @dblMatchDeliveredQuantity * -1;
+								EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
+								EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+								UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
+							END
 						END
-						
-						SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intTicketId
-						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
-						IF @ysnPosted = 1
-						BEGIN
-							EXEC [dbo].[uspAPPostBill]
-							@post = 0
-							,@recap = 0
-							,@isBatch = 0
-							,@param = @intBillId
-							,@userId = @intUserId
-							,@success = @success OUTPUT
+						ELSE IF @intStorageScheduleTypeId = -2
+						BEGIN  
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 						END
-						IF ISNULL(@intBillId, 0) > 0
-							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+
 						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
-
-						INSERT INTO @ItemsToIncreaseInTransitDirect(
-							[intItemId]
-							,[intItemLocationId]
-							,[intItemUOMId]
-							,[intLotId]
-							,[intSubLocationId]
-							,[intStorageLocationId]
-							,[dblQty]
-							,[intTransactionId]
-							,[strTransactionId]
-							,[intTransactionTypeId]
-							,[intFOBPointId]
-						)
-						SELECT 
-							intItemId = SC.intItemId
-							,intItemLocationId = ICIL.intItemLocationId
-							,intItemUOMId = SC.intItemUOMIdTo
-							,intLotId = SC.intLotId
-							,intSubLocationId = SC.intSubLocationId
-							,intStorageLocationId = SC.intStorageLocationId
-							,dblQty = (SC.dblNetUnits * -1)
-							,intTransactionId = 1
-							,strTransactionId = SC.strTicketNumber
-							,intTransactionTypeId = 1
-							,intFOBPointId = NULL
-						FROM tblSCTicket SC 
-						INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-						WHERE SC.intTicketId = @intTicketId
-						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
-
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
+						
+					SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intTicketId
+					SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+					IF @ysnPosted = 1
+					BEGIN
+						EXEC [dbo].[uspAPPostBill]
+						@post = 0
+						,@recap = 0
+						,@isBatch = 0
+						,@param = @intBillId
+						,@userId = @intUserId
+						,@success = @success OUTPUT
+					END
+					IF ISNULL(@intBillId, 0) > 0
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+					UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
+					DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+
+					INSERT INTO @ItemsToIncreaseInTransitDirect(
+						[intItemId]
+						,[intItemLocationId]
+						,[intItemUOMId]
+						,[intLotId]
+						,[intSubLocationId]
+						,[intStorageLocationId]
+						,[dblQty]
+						,[intTransactionId]
+						,[strTransactionId]
+						,[intTransactionTypeId]
+						,[intFOBPointId]
+					)
+					SELECT 
+						intItemId = SC.intItemId
+						,intItemLocationId = ICIL.intItemLocationId
+						,intItemUOMId = SC.intItemUOMIdTo
+						,intLotId = SC.intLotId
+						,intSubLocationId = SC.intSubLocationId
+						,intStorageLocationId = SC.intStorageLocationId
+						,dblQty = (SC.dblNetUnits * -1)
+						,intTransactionId = 1
+						,strTransactionId = SC.strTicketNumber
+						,intTransactionTypeId = 1
+						,intFOBPointId = NULL
+					FROM tblSCTicket SC 
+					INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+					WHERE SC.intTicketId = @intTicketId
+					EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+
+					EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+				END
 			END
 		ELSE
 			BEGIN

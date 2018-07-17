@@ -7,6 +7,7 @@
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
+    ,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -41,6 +42,7 @@ CREATE TABLE #tmpGLDetail (
 	,[intTransactionId] [int] NULL
 	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[intCurrencyId] [int] NULL
+	,[intCurrencyExchangeRateTypeId] [int] NULL
 	,[dblExchangeRate] [numeric](38, 20) NOT NULL
 	,[dtmDateEntered] [datetime] NOT NULL
 	,[dtmTransactionDate] [datetime] NULL
@@ -81,6 +83,10 @@ DECLARE
 	,@ysnAllowUserSelfPost AS BIT = 0
 	,@dblRate DECIMAL (18,6)
 	,@dblHistoricRate DECIMAL (18,6)
+	,@intCurrencyIdFrom INT
+	,@intCurrencyIdTo INT
+	,@intDefaultCurrencyId INT
+	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
 	,@GLEntries AS RecapTableType
@@ -103,8 +109,19 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 		,@dblRate = dblRate
 		,@dblHistoricRate = dblHistoricRate
-FROM	[dbo].tblCMBankTransfer 
+		,@intCurrencyIdFrom = B.intCurrencyId
+		,@intCurrencyIdTo = C.intCurrencyId
+FROM	[dbo].tblCMBankTransfer A JOIN
+[dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN
+[dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo
 WHERE	strTransactionId = @strTransactionId 
+
+
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+IF @intCurrencyIdTo <> @intDefaultCurrencyId AND @intCurrencyIdFrom = @intDefaultCurrencyId
+	SET @dblHistoricRate = @dblRate
+		
+
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 -- Read the user preference
@@ -257,7 +274,12 @@ END
 -- Get the batch post id. 
 IF (@strBatchId IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	IF (@ysnRecap = 0)
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	ELSE
+		SELECT @strBatchId = NEWID()
+
+	SELECT @outBatchId = @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
@@ -281,6 +303,7 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -298,17 +321,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= A.dblAmount * ISNULL(A.dblRate,1) 
-			,[dblCredit]			= 0
-			,[dblDebitForeign]		= A.dblAmount 
-			,[dblCreditForeign]		= 0
+			,[dblDebit]				= 0
+			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE A.dblAmount / ISNULL(@dblHistoricRate,1)  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
-			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1-- ISNULL(A.dblRate,1)
+			,[intCurrencyId]		= @intCurrencyIdFrom
+			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
+			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -334,17 +358,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= 0 -- 0.8 --ISNULL( A.dblHistoricRate,1) -- ISNULL(A.dblHistoricRate,1) * A.dblAmount 
-			,[dblCredit]			=  A.dblAmount * ISNULL(A.dblHistoricRate, 1)
-			,[dblDebitForeign]		= 0 
-			,[dblCreditForeign]		= A.dblAmount
+			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
+			,[dblCredit]			= 0 
+			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN A.dblAmount/ ISNULL(@dblRate, 1)  ELSE A.dblAmount END
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
-			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1 --ISNULL(A.dblHistoricRate, 1)
+			,[intCurrencyId]		= @intCurrencyIdTo
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  ISNULL(@dblRate, 1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -362,8 +387,8 @@ BEGIN
 	WHERE	A.strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
-	if(@dblRate <> @dblHistoricRate)
-		EXEC [uspCMInsertGainLossBankTransfer] 
+	if(@dblRate <> @dblHistoricRate AND @intDefaultCurrencyId = @intCurrencyIdTo AND @intDefaultCurrencyId <> @intCurrencyIdFrom )
+		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss from Bank Transfer'
 	
 END
 ELSE IF @ysnPost = 0
@@ -389,12 +414,15 @@ BEGIN
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -416,12 +444,15 @@ SELECT
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -453,6 +484,7 @@ FROM #tmpGLDetail
 			,intBankTransactionTypeId
 			,intBankAccountId
 			,intCurrencyId
+			,intCurrencyExchangeRateTypeId
 			,dblExchangeRate
 			,dtmDate
 			,strPayee
@@ -485,8 +517,9 @@ FROM #tmpGLDetail
 		SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_WD_PREFIX
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
-				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdFrom)
-				,dblExchangeRate			= ISNULL(A.dblRate,1)
+				,intCurrencyId				= @intCurrencyIdFrom
+				,intCurrencyExchangeRateTypeId =  A.intCurrencyExchangeRateTypeId
+				,dblExchangeRate			= ISNULL(@dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -495,9 +528,9 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(A.dblRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(A.dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblRate,1))
+				,dblAmount					= A.dblAmount * ISNULL(@dblHistoricRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(@dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblHistoricRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -529,8 +562,9 @@ FROM #tmpGLDetail
 		SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
-				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
-				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
+				,intCurrencyId				= @intCurrencyIdTo
+				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
+				,dblExchangeRate			= ISNULL(@dblRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -539,9 +573,9 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(A.dblHistoricRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(A.dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblHistoricRate,1))
+				,dblAmount					= A.dblAmount * ISNULL(@dblRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(@dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -589,12 +623,15 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -615,12 +652,15 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -637,7 +677,7 @@ BEGIN
 			,[intConcurrencyId]
 	FROM	#tmpGLDetail
 	IF @@ERROR <> 0	GOTO Post_Rollback
-			
+		
 	GOTO Recap_Rollback
 END
 
@@ -659,8 +699,12 @@ Post_Rollback:
 	
 Recap_Rollback: 
 	SET @isSuccessful = 1
-	ROLLBACK TRANSACTION 
-	EXEC dbo.uspCMPostRecap @RecapTable
+	ROLLBACK TRANSACTION
+	
+	--EXEC dbo.uspCMPostRecap @RecapTable
+	EXEC dbo.uspGLPostRecap 
+			@RecapTable
+			,@intEntityId
 	GOTO Post_Exit
 
 Audit_Log:
@@ -682,3 +726,5 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+GO
+

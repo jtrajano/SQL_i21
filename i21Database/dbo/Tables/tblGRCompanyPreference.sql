@@ -17,8 +17,10 @@
 	[ysnCanadianPrimaryElevatorReceipt] BIT NULL DEFAULT 0,
 	[ysnDeliverySheet] BIT DEFAULT 0 NOT NULL,
 	[intItemId] INT NULL, 
+	[intUnitMeasureId] INT NULL, 
     [ysnShowOpenContract] BIT NOT NULL DEFAULT 1, 
     [ysnShowStorage] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )

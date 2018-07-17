@@ -27,7 +27,6 @@
        ,SCT.strScaleOperatorUser
        ,SCT.intEntityScaleOperatorId
        ,SCT.strTruckName
-       ,SCT.strDriverName
        ,SCT.ysnDriverOff
        ,SCT.ysnSplitWeightTicket
        ,SCT.ysnGrossManual
@@ -99,7 +98,6 @@
        ,SCT.strFarmNumber
        ,SCT.strFieldNumber
        ,SCT.strDiscountComment
-       ,SCT.strCommodityCode
        ,SCT.intCommodityId
        ,SCT.intDiscountId
        ,SCT.intContractId
@@ -124,6 +122,8 @@
 	   ,SCT.intDeliverySheetId
 	   ,SCT.strElevatorReceiptNumber
 	   ,SCT.intSalesOrderId
+	   ,SCT.intEntityContactId
+	   ,SCT.dtmTransactionDateTime
 	   ,(SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) AS dblTotalGrossWeight
 	   ,(SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0)) AS dblTotalTareWeight
 	   ,((SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) - (SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0))) AS dblTotalNetWeight
@@ -155,6 +155,7 @@
 	   ,ICCA.strDescription AS strGrade
 	   ,SO.strSalesOrderNumber
 	   ,IC.strItemNo AS strItemNumber
+	   ,EMDriver.strName AS strDriverName
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -174,3 +175,4 @@
 	LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	LEFT JOIN tblICItem IC ON IC.intItemId = SCT.intItemId
+	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId

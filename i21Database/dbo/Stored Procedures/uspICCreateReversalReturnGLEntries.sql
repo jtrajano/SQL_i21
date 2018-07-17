@@ -127,8 +127,8 @@ BEGIN
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= GLEntries.intEntityId
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -143,7 +143,7 @@ BEGIN
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType			
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+                ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
 				AND GLEntries.strTransactionId = Reversal.strTransactionId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
@@ -174,8 +174,8 @@ BEGIN
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= NULL 
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -227,8 +227,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= NULL 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative
@@ -276,8 +276,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= NULL 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative

@@ -147,6 +147,7 @@ BEGIN
 	--Create Earning Distribution Temporary Table
 	CREATE TABLE #tmpEarning (
 		intTmpEarningId			INT IDENTITY(1, 1)
+		,intPaycheckEarningId	INT
 		,intPaycheckId			INT
 		,intEmployeeEarningId	INT
 		,intTypeEarningId		INT
@@ -156,13 +157,15 @@ BEGIN
 		,intDepartmentId		INT
 		,intProfitCenter		INT
 		,intLOB					INT
+		,intWCCodeId			INT
 	)
 
 	--Insert Earning Distribution to Temporary Table
-	INSERT INTO #tmpEarning (intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
-	SELECT A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, A.dblTotal, B.dblPercentage, C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
-	FROM (SELECT tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
-			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, dblTotal 
+	INSERT INTO #tmpEarning (intPaycheckEarningId, intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB, intWCCodeId)
+	SELECT A.intPaycheckEarningId, A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0), ISNULL(B.dblPercentage, 0),
+			C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB, intWCCodeId = A.intWorkersCompensationId
+	FROM (SELECT intPaycheckEarningId, tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
+			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
 		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
 				ON A.intEntityEmployeeId = B.intEntityEmployeeId
@@ -177,13 +180,13 @@ BEGIN
 	FROM #tmpEarning WHERE intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
 	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
 
-	DECLARE @intEarningTempEarningId INT, @intEarningTempDepartmentId INT, @intEarningTempAccountId INT,
+	DECLARE @intEarningTempEarningId INT, @intEarningTempDepartmentId INT, @intEarningTempWCCodeId INT, @intEarningTempAccountId INT,
 		@intEarningTempProfitCenter INT, @intEarningTempLOB INT, @intEarningTempFinalAccountId INT, @strMsg NVARCHAR(MAX) = ''
 
 	--Validate Earning GL Distribution
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningValidateAccounts)
 	BEGIN
-		SELECT TOP 1 @intEarningTempEarningId = intTypeEarningId, @intEarningTempDepartmentId = intDepartmentId
+		SELECT TOP 1 @intEarningTempEarningId = intTypeEarningId, @intEarningTempDepartmentId = intDepartmentId, @intEarningTempWCCodeId = intWCCodeId
 					,@intEarningTempAccountId = intAccountId, @intEarningTempProfitCenter = intProfitCenter, @intEarningTempLOB = intLOB
 					,@intEarningTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
 					FROM #tmpEarningValidateAccounts
@@ -218,41 +221,44 @@ BEGIN
 			WHERE intTypeEarningId = @intEarningTempEarningId
 			AND intAccountId = @intEarningTempAccountId
 			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
+			AND ISNULL(intWCCodeId, 0) = ISNULL(@intEarningTempWCCodeId, 0)
 			AND ISNULL(intProfitCenter, 0) = ISNULL(@intEarningTempProfitCenter, 0)
 			AND ISNULL(intLOB, 0) = ISNULL(@intEarningTempLOB, 0)
 	END
 
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Earning to Temporary Table to Distribute Amounts
-	SELECT intTmpEarningId, intTypeEarningId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
-	DECLARE @intTypeEarningId INT, @dblEarningFullAmount NUMERIC(18, 6), @intTmpEarningId INT
+	SELECT intTmpEarningId, intPaycheckEarningId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
+	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT
 
 	--Distribute Amounts
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningAmount)
 	BEGIN
-		SELECT TOP 1 @dblEarningFullAmount = dblAmount
-					,@intTypeEarningId = intTypeEarningId
+		SELECT TOP 1 @dblAmountTempEarningFullAmount = dblAmount
+					,@intAmountTempPaycheckEarningId = intPaycheckEarningId
 		FROM #tmpEarningAmount
 
-		WHILE (@dblEarningFullAmount <> 0)
+		WHILE (@dblAmountTempEarningFullAmount <> 0)
 		BEGIN
-			SELECT TOP 1 @intTmpEarningId = intTmpEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
+			SELECT TOP 1 @intAmountTempTmpEarningId = intTmpEarningId FROM #tmpEarningAmount 
+			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
 
-			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId) = 1) 
+			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId) = 1) 
 				BEGIN
-					UPDATE #tmpEarning SET dblAmount = @dblEarningFullAmount WHERE intTmpEarningId = @intTmpEarningId
-					SELECT @dblEarningFullAmount = 0.000000
+					UPDATE #tmpEarning SET dblAmount = @dblAmountTempEarningFullAmount WHERE intTmpEarningId = @intAmountTempTmpEarningId
+					SELECT @dblAmountTempEarningFullAmount = 0.000000
 				END
 			ELSE
 				BEGIN
-					SELECT @dblEarningFullAmount = @dblEarningFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intTmpEarningId
-					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpEarningId = @intTmpEarningId
+					SELECT @dblAmountTempEarningFullAmount = @dblAmountTempEarningFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intAmountTempTmpEarningId
+					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpEarningId = @intAmountTempTmpEarningId
 				END
 
-			DELETE FROM #tmpEarningAmount WHERE intTmpEarningId = @intTmpEarningId
+			DELETE FROM #tmpEarningAmount WHERE intTmpEarningId = @intAmountTempTmpEarningId
 		END
 
-		DELETE FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
+		DELETE FROM #tmpEarningAmount 
+			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
 	END
 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
@@ -314,7 +320,7 @@ BEGIN
 	INSERT INTO #tmpDeduction (intPaycheckId, intEmployeeDeductionId, intTypeDeductionId, strPaidBy, intAccountId, intExpenseAccountId, 
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
 	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
-			A.dblTotal, ISNULL(B.dblPercentage, A.dblDepartmentPercent), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+			ISNULL(A.dblTotal, 0), ISNULL(ISNULL(B.dblPercentage, A.dblDepartmentPercent), 0), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
 	FROM (SELECT PD.intPaycheckId, intEmployeeDeductionId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
 			intTypeDeductionId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
 		  FROM tblPRPaycheckDeduction PD
@@ -497,7 +503,7 @@ BEGIN
 	INSERT INTO #tmpTax (intPaycheckId, intTypeTaxId, strPaidBy, intAccountId, intExpenseAccountId, 
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
 	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
-			A.dblTotal, ISNULL(B.dblPercentage, A.dblDepartmentPercent), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+			A.dblTotal, ISNULL(ISNULL(B.dblPercentage, A.dblDepartmentPercent), 0), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
 	FROM (SELECT PD.intPaycheckId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
 			intTypeTaxId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
 		  FROM tblPRPaycheckTax PD

@@ -340,6 +340,7 @@ BEGIN
 		,dblForexRate
 		,strRateType
 		,strItemNo 
+		,intEntityId
 	)
 	AS 
 	(
@@ -362,6 +363,7 @@ BEGIN
 				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
 				,Charge.strItemNo
+				,intEntityId = Shipment.intEntityCustomerId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
@@ -445,8 +447,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -503,8 +505,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -567,8 +569,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -622,8 +624,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

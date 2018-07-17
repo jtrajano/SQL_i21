@@ -225,6 +225,9 @@ BEGIN TRY
 		SELECT @intPMCategoryId = 0
 			,@strPackagingCategory = ''
 	END
+	Select @strPackagingCategory=strCategoryCode 
+	from tblICCategory
+	Where intCategoryId =@intPMCategoryId
 
 	IF @intTransactionCount = 0
 		BEGIN TRAN

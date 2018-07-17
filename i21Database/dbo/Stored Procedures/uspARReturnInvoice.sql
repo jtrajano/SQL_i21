@@ -315,6 +315,7 @@ INSERT INTO @LineItemTaxes(
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[intTaxAccountId]
 	,[dblTax]
 	,[dblAdjustedTax]
@@ -335,6 +336,7 @@ SELECT
 	,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes] 
 	,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
 	,[dblRate]					= ARIDT.[dblRate]
+	,[dblBaseRate]				= ISNULL(ARIDT.[dblBaseRate], ARIDT.[dblRate])
 	,[intTaxAccountId]			= ARIDT.[intSalesTaxAccountId]
 	,[dblTax]					= ARIDT.[dblTax]
 	,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
@@ -392,7 +394,21 @@ BEGIN CATCH
 END CATCH
 		
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
-UPDATE tblARInvoice SET ysnReturned = 1 WHERE intInvoiceId = @InvoiceId
+
+UPDATE I 
+SET dblDiscountAvailable = @ZeroDecimal
+  , dblBaseDiscountAvailable = @ZeroDecimal
+FROM tblARInvoice I
+INNER JOIN (
+	SELECT intID 
+	FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
+) CI ON I.intInvoiceId = CI.intID
+
+UPDATE tblARInvoice 
+SET ysnReturned = 1 
+  , dblDiscountAvailable = @ZeroDecimal
+  , dblBaseDiscountAvailable = @ZeroDecimal
+WHERE intInvoiceId = @InvoiceId
 
 --POS RETURN
 
@@ -421,17 +437,22 @@ BEGIN
 	IF(@posStrPayment != 'On Account')
 	BEGIN
 		--create cash refund
-		EXEC uspARProcessRefund @param = @creditMemoIntId
+			EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @intUserId = @UserId, @strErrorMessage = @ErrorMessage  OUTPUT
 	END
-
+	
+	IF(@ErrorMessage IS NULL)
+	BEGIN
+		UPDATE tblARPOS
+		SET ysnReturn = 1
+		WHERE intInvoiceId = @InvoiceId
+	END
 
 END
 
 --END OF POS RETURN
 
 IF ISNULL(@RaiseError,0) = 0
+BEGIN
 	COMMIT TRANSACTION 
-	
-RETURN 1;
-
-GO
+	RETURN 1;
+END

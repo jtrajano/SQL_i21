@@ -56,8 +56,10 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
 	, @intItemId = intItemId 
 	, @strWhereFinalizedWeight = strWeightFinalized
-	, @strWhereFinalizedWeight = strGradeFinalized
-FROM vyuSCTicketScreenView where @intTicketId = @intTicketId
+	, @strWhereFinalizedGrade = strGradeFinalized
+	, @strInOutFlag = strInOutFlag
+	, @intLoadId = intLoadId
+FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -84,22 +86,20 @@ OPEN intListCursor;
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
 						IF @strDistributionOption = 'LOD'
-							BEGIN 
-								SELECT @intLoadId = intLoadId, @strInOutFlag = strInOutFlag FROM tblSCTicket WHERE intTicketId = @intTicketId;
-							END
-							BEGIN
-								IF @strInOutFlag = 'I'
-									SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
-								ELSE
-									SELECT @intLoadContractId = LGL.intSContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
-							END
+						BEGIN 
+							IF @strInOutFlag = 'I'
+								SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
+							ELSE
+								SELECT @intLoadContractId = LGL.intSContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
+							
 							IF @intLoadContractId IS NOT NULL
 							BEGIN
 								SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 							BEGIN
-								INSERT INTO [dbo].[tblSCTicketCost](
+								INSERT INTO [dbo].[tblSCTicketCost]
+								(
 									[intTicketId]
 									,[intConcurrencyId]
 									,[intItemId]
@@ -111,49 +111,54 @@ OPEN intListCursor;
 									,[ysnMTM]
 									,[ysnPrice]
 								)
-								SELECT	@intTicketId,
-										1, 
-										LD.intItemId,
-										LD.intVendorId,
-										LD.strCostMethod,
-										LD.dblRate,
-										LD.intItemUOMId,
-										LD.ysnAccrue,
-										LD.ysnMTM,
-										LD.ysnPrice
+								SELECT	
+									@intTicketId,
+									1, 
+									LD.intItemId,
+									LD.intVendorId,
+									LD.strCostMethod,
+									LD.dblRate,
+									LD.intItemUOMId,
+									LD.ysnAccrue,
+									LD.ysnMTM,
+									LD.ysnPrice
 								FROM tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
 							END
-							IF @strDistributionOption = 'CNT'
-								BEGIN
-									INSERT INTO [dbo].[tblSCTicketCost]
-											   ([intTicketId]
-											   ,[intConcurrencyId]
-											   ,[intItemId]
-											   ,[intEntityVendorId]
-											   ,[strCostMethod]
-											   ,[dblRate]
-											   ,[intItemUOMId]
-											   ,[ysnAccrue]
-											   ,[ysnMTM]
-											   ,[ysnPrice])
-									SELECT	@intTicketId,
-											1, 
-											CC.intItemId,
-											CC.intVendorId,
-											CC.strCostMethod,
-											CC.dblRate,
-											CC.intItemUOMId,
-											CC.ysnAccrue,
-											CC.ysnMTM,
-											CC.ysnPrice
-									FROM tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId AND CC.ysnBasis = 0
-								END
-							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
-							BEGIN
-								IF	ISNULL(@intLoopContractId,0) != 0
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-							END
+						END
+						ELSE IF @strDistributionOption = 'CNT'
+						BEGIN
+							INSERT INTO [dbo].[tblSCTicketCost]
+							(
+								[intTicketId]
+								,[intConcurrencyId]
+								,[intItemId]
+								,[intEntityVendorId]
+								,[strCostMethod]
+								,[dblRate]
+								,[intItemUOMId]
+								,[ysnAccrue]
+								,[ysnMTM]
+								,[ysnPrice]
+							)
+							SELECT	
+								@intTicketId,
+								1, 
+								CC.intItemId,
+								CC.intVendorId,
+								CC.strCostMethod,
+								CC.dblRate,
+								CC.intItemUOMId,
+								CC.ysnAccrue,
+								CC.ysnMTM,
+								CC.ysnPrice
+							FROM tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId AND CC.ysnBasis = 0
+						END
+						
+						IF	ISNULL(@intLoopContractId,0) != 0
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+						END
 						INSERT INTO @ItemsForItemShipment (
 								intItemId
 								,intItemLocationId
@@ -356,31 +361,24 @@ IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 ELSE
  	SET @intOrderId = 4
 
-BEGIN 
 	EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
-END
 
-BEGIN 
 	SELECT	@strTransactionId = ship.strShipmentNumber
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+
+	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+	--INVOICE intergration
+	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
+	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
+	WHERE intInventoryShipmentId = @InventoryShipmentId
+
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
+	BEGIN
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 	END
-	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking = 'No' -- temporary fixes for 16.2
-	--IF @strLotTracking != 'Yes - Manual'
-		BEGIN
-			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-			--INVOICE intergration
-			SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-			WHERE intInventoryShipmentId = @InventoryShipmentId
-
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
-			BEGIN
-				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-			END
-		END
 _Exit:
 	
 END TRY

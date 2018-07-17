@@ -72,7 +72,6 @@
 	tblSCTicket.strFarmNumber,
 	tblSCTicket.strFieldNumber,
 	tblSCTicket.strDiscountComment,
-	tblSCTicket.strCommodityCode,
 	tblSCTicket.intCommodityId,
 	tblSCTicket.intDiscountId,
 	tblSCTicket.intContractId,

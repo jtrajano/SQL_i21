@@ -127,6 +127,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
 	,CASE WHEN @ysnPrintLogo = 1 THEN 'true' else 'false' END AS ysnPrintLogo
 	,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	
+	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth	
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblEMEntity E ON E.intEntityId = WCD.intPartyEntityId
@@ -175,3 +177,5 @@ WC.intWeightClaimId
 	,WCD.intInvoiceId
 	,INV.strFooterComments
 	,CP.ysnFullHeaderLogo
+	,CP.intReportLogoHeight
+	,CP.intReportLogoWidth

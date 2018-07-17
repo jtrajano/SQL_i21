@@ -300,7 +300,7 @@ BEGIN
 		FROM @DataForReceiptHeader RawHeaderData
 		WHERE RawHeaderData.intId = @intId
 
-		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 5 OR @valueSourceTypeId < 0
+		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 6 OR @valueSourceTypeId < 0
 			BEGIN
 				-- Source Type Id is invalid or missing.
 				EXEC uspICRaiseError 80115; 
@@ -827,7 +827,7 @@ BEGIN
 				,dblOrderQty			= --ISNULL(RawData.dblQty, 0)
 										(
 											CASE	WHEN RawData.strReceiptType = 'Purchase Contract' THEN 
-														CASE	WHEN RawData.intSourceType = 0 OR RawData.intSourceType = 1 THEN -- None
+														CASE	WHEN RawData.intSourceType = 0 OR RawData.intSourceType = 1 OR RawData.intSourceType = 6 THEN -- None
 																	CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 																				ISNULL(ContractView.intNoOfLoad, 0)
 																			ELSE 
@@ -1566,6 +1566,7 @@ BEGIN
 						ON ItemLot.strLotNumber = l.strLotNumber
 						AND ItemLot.intLotId = l.intLotId
 			WHERE	ItemLot.strLotNumber IS NOT NULL 
+					AND ItemLot.intLotId IS NOT NULL 
 					AND l.strLotNumber IS NULL 
 
 			IF @valueLotRecordItemId > 0
@@ -1704,6 +1705,9 @@ BEGIN
 					GOTO _Exit_With_Rollback;
 				END 
 			END 
+
+			DECLARE @DefaultLotCondition NVARCHAR(50)
+			SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
 			
 			-- Insert Lot for Receipt Item
 			INSERT INTO dbo.tblICInventoryReceiptItemLot (
@@ -1771,7 +1775,7 @@ BEGIN
 				,[strVendorLotId] = ItemLot.strVendorLotId
 				,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
 				,[strRemarks] = ItemLot.strRemarks
-				,[strCondition] = ItemLot.strCondition
+				,[strCondition] = ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
 				,[dtmCertified] = ItemLot.dtmCertified
 				,[dtmExpiryDate] = 
 					ISNULL(

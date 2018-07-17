@@ -67,6 +67,7 @@ SELECT DISTINCT
 			WHEN CI.dbl10Days > 0 OR CI.dbl30Days > 0 OR CI.dbl60Days > 0 OR CI.dbl90Days > 0 OR CI.dbl91Days > 0 THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)
 		END
+	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END
 FROM tblARCustomer CUSTOMER
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId

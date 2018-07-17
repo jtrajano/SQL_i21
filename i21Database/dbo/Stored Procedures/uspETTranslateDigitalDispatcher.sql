@@ -39,6 +39,7 @@ BEGIN
 	DECLARE @intSiteId								INT
 	DECLARE @intTaxGroupId							INT		
 	DECLARE @LogId									INT
+	DECLARE @intLocation INT
 	DECLARE @strStatus NVARCHAR(50)
 	
 	--DECLARE @TransactionType						NVARCHAR(25)
@@ -164,8 +165,11 @@ BEGIN
 			--Get Entity ID of the Driver
 			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo COLLATE Latin1_General_CI_AS = @strDriverNumber )
 			
-			--Get Location Id
-			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE Latin1_General_CI_AS = @strLocation)
+			--Get Location Id  
+			/*Convert to Numeric DIGITAL DISPATCH send divisionNUm as numeric(int)*/
+   			SET @intLocation  = (SELECT CASE WHEN ISNUMERIC(@strLocation) = 1 THEN CAST(@strLocation AS INT) ELSE NULL END)
+			SET @intLocationId = ISNULL((SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation 
+								WHERE (CASE WHEN ISNUMERIC(strLocationNumber) = 1 THEN CAST(strLocationNumber  AS INT) ELSE 0 END) = @intLocation),0)  
 			
 			--------Get Item Unit Measure Id = ()
 			------SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
@@ -387,37 +391,41 @@ BEGIN
 					--SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
 	-------------------------------------------------------------------------------------------------------------------------------------------------------
-	
-	
-	SELECT * FROM (	SELECT 	NULL AS strCustomerNumber		
-					,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber		
-					,'' AS strSiteNumber			
-					,null AS dtmDate				
-					,0 AS intLineItem			
-					,'' AS strFileName			
-					,S.strMessage  +  STUFF((SELECT ',' + CAST(T2.strWarning AS VARCHAR(100))  FROM @WarningTableLog T2 WHERE S.intId = T2.intLineItem FOR XML PATH('')),1,1,'') AS strStatus				
-					,S.ysnSuccess AS ysnSuccessful			
-					,ISNULL(S.intInvoiceId,0) AS intInvoiceId
-					,S.strTransactionType AS strTransactionType
-					FROM tblARInvoiceIntegrationLogDetail  S
-					LEFT JOIN tblARInvoice ON S.intInvoiceId = tblARInvoice.intInvoiceId
-					WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )
-					UNION
-					SELECT 		NULL AS strCustomerNumber		
-							,'' AS strInvoiceNumber		
-							,'' AS strSiteNumber			
-							,null AS dtmDate				
-							,0 AS intLineItem			
-							,'' AS strFileName			
-							,F.strMessage  +  STUFF((SELECT ',' + CAST(T2.strWarning AS VARCHAR(100))  FROM @WarningTableLog T2 WHERE F.intId = T2.intLineItem FOR XML PATH('')),1,1,'') AS strStatus				
-							,F.ysnSuccess AS ysnSuccessful			
-							,ISNULL(intInvoiceId,0) AS intInvoiceId
-							,strTransactionType AS strTransactionType
-					FROM tblARInvoiceIntegrationLogDetail F
-					WHERE ysnHeader = 1 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId
-					
-					) ResultTableLog
-	--SELECT * FROM @ResultTableLog
+		
+	 SELECT * FROM ( SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber    
+		 ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber    
+		 ,'' AS strSiteNumber     
+		 ,tblARInvoice.dtmDate AS dtmDate      
+		 ,tblICItem.strItemNo AS strItemNumber
+		 ,0 AS intLineItem     
+		 ,'' AS strFileName     
+		 ,strMessage  AS strStatus      
+		 ,ysnSuccess AS ysnSuccessful     
+		 ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId  
+		 ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType  
+		 FROM tblARInvoiceIntegrationLogDetail    
+		 LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId  
+		 LEFT JOIN tblARInvoiceDetail ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId  
+		 LEFT JOIN tblICItem ON tblARInvoiceDetail.intItemId = tblICItem.intItemId
+		 LEFT JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
+		 WHERE intIntegrationLogId = @LogId 
+		 --WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId 
+		 --AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )  
+		 --UNION  
+		 --SELECT   NULL AS strCustomerNumber    
+		 --  ,'' AS strInvoiceNumber    
+		 --  ,'' AS strSiteNumber     
+		 --  ,null AS dtmDate      
+		 --  ,0 AS intLineItem     
+		 --  ,'' AS strFileName     
+		 --  ,strMessage  AS strStatus      
+		 --  ,ysnSuccess AS ysnSuccessful     
+		 --  ,ISNULL(intInvoiceId,0) AS intInvoiceId  
+		 --  ,strTransactionType AS strTransactionType  
+		 --FROM tblARInvoiceIntegrationLogDetail   
+		 --WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId  
+		 ) ResultTableLog
+		--SELECT * FROM @ResultTableLog
 
 END
 GO

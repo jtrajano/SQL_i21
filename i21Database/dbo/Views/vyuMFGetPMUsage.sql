@@ -47,8 +47,7 @@ JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = WC.intItemIssuedUOMId
 JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblICItem I1 ON I1.intItemId = WC.intItemId
-JOIN dbo.tblICCategory C ON C.intCategoryId = I1.intCategoryId
-WHERE C.strCategoryCode IN (
+WHERE I1.intCategoryId  IN (
 		SELECT PA.strAttributeValue
 		FROM tblMFManufacturingProcessAttribute PA
 		WHERE PA.intManufacturingProcessId = W.intManufacturingProcessId

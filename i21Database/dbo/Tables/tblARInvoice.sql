@@ -40,6 +40,7 @@
 	[dblBasePayment]					NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblProvisionalAmount]				NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblBaseProvisionalAmount]			NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblCurrencyExchangeRate]			NUMERIC(18, 6)									CONSTRAINT [DF_tblARInvoice_dblCurrencyExchangeRate] DEFAULT ((1)) NULL,
     [intEntitySalespersonId]			INT												NULL,    
     [intFreightTermId]					INT												NULL,
     [intShipViaId]						INT												NULL,

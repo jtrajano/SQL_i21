@@ -8,7 +8,14 @@ AS
 -- Get the A/P Clearing account 
 BEGIN 
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
+	DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense';
 	DECLARE @GLAccounts AS dbo.ItemGLAccount;
+
+	DECLARE 
+		@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 	INSERT INTO @GLAccounts (
 		intItemId 
@@ -95,7 +102,12 @@ BEGIN
 			ChargeItem.intChargeId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,TaxCode.intPurchaseTaxAccountId
+			,CASE 
+				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+					dbo.fnGetItemGLAccount(ChargeItem.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+				ELSE 
+					TaxCode.intPurchaseTaxAccountId 
+			END
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
 				ON Receipt.intInventoryReceiptId = ChargeItem.intInventoryReceiptId
@@ -154,6 +166,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
+		,intEntityVendorId
 	)
 	AS 
 	(
@@ -173,13 +186,14 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
-				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
+				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= Receipt.intEntityVendorId 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -195,7 +209,8 @@ BEGIN
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId		
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		
 		-- Other Charge taxes for the Receipt Vendor. 
 		UNION ALL 
@@ -215,13 +230,24 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ReceiptCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,intPurchaseTaxAccountId			= 
+														CASE 
+															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+																dbo.fnGetItemGLAccount(
+																	ReceiptCharge.intChargeId
+																	, ItemLocation.intItemLocationId
+																	, @AccountCategory_OtherChargeExpense
+																) 
+															ELSE 
+																TaxCode.intPurchaseTaxAccountId 
+														END
+				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -257,13 +283,24 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ReceiptCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,intPurchaseTaxAccountId			= 
+														CASE 
+															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+																dbo.fnGetItemGLAccount(
+																	ReceiptCharge.intChargeId
+																	, ItemLocation.intItemLocationId
+																	, @AccountCategory_OtherChargeExpense
+																) 
+															ELSE 
+																TaxCode.intPurchaseTaxAccountId 
+														END
+				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -306,8 +343,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -357,8 +394,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

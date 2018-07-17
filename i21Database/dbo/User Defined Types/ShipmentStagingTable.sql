@@ -47,6 +47,7 @@
 	dblGross NUMERIC(38, 20) NULL, 
 	dblTare NUMERIC(38, 20) NULL, 
 	dblNet NUMERIC(38, 20) NULL, 
+	ysnDestinationWeightsAndGrades BIT NULL,
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,

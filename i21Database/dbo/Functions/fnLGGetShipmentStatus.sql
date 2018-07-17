@@ -17,7 +17,7 @@ BEGIN
 			SELECT TOP 1 CASE 
 					WHEN C <> ''
 						AND W <> ''
-						THEN C + ',' + W
+						THEN W + ',' + C
 					ELSE CASE 
 							WHEN C <> ''
 								THEN C
@@ -48,7 +48,6 @@ BEGIN
 				SELECT CASE 
 						WHEN ISNULL(CD.dblInvoicedQty, 0) > 0
 							THEN 'C'
-						ELSE ''
 						END AS C
 					,CASE 
 						WHEN (
@@ -58,44 +57,26 @@ BEGIN
 									WHERE intLineNo = CD.intContractDetailId
 									)
 								) > 0
+								AND (ISNULL(CD.dblInvoicedQty, 0) <> ISNULL(CD.dblQuantity, 0) )
 							THEN 'W'
-						ELSE ''
 						END AS W
 					,CASE 
 						WHEN ISNULL(SLD.intPContractDetailId, 0) <> 0
-							AND (
-								(
-									SELECT COUNT(*)
-									FROM tblLGLoadDocuments
-									WHERE intLoadId = SLD.intLoadId
-										AND ysnReceived = 1
-									) > 0
-								)
+							AND (SLD.dtmDocsReceivedDate IS NOT NULL)
 							THEN 'L'
-						ELSE ''
 						END AS L
 					,CASE 
 						WHEN ISNULL(SLD.intPContractDetailId, 0) <> 0
-							AND (
-								(
-									SELECT COUNT(*)
-									FROM tblLGLoadDocuments
-									WHERE intLoadId = SLD.intLoadId
-										AND ysnReceived = 1
-									) = 0
-								)
+							AND SLD.dtmDocsReceivedDate IS NULL
 							THEN 'A'
-						ELSE ''
 						END AS A
 					,CASE 
-						WHEN ISNULL(SLD.intPContractDetailId, 0) = 0
+						WHEN ISNULL(SILD.intPContractDetailId, 0) <> 0 AND ISNULL(SLD.intPContractDetailId, 0) = 0
 							THEN 'O'
-						ELSE ''
 						END AS O
 					,CASE 
 						WHEN ISNULL(SILD.intPContractDetailId, 0) = 0
 							THEN 'E'
-						ELSE ''
 						END AS E
 					,CD.intContractDetailId
 				FROM tblCTContractDetail CD
@@ -108,6 +89,7 @@ BEGIN
 					) SILD ON SILD.intPContractDetailId = CD.intContractDetailId
 				LEFT JOIN (
 					SELECT L.strLoadNumber
+						,L.dtmDocsReceivedDate
 						,LD.*
 					FROM tblLGLoadDetail LD
 					JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId

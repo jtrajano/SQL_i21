@@ -176,7 +176,7 @@ BEGIN
 				L.strDestinationCity,
 				L.dtmBLDate,
 				L.dtmScheduledDate,
-				strScheduledDate = datename(dd, L.dtmScheduledDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(L.dtmScheduledDate, 'MMM')),format(L.dtmScheduledDate, 'MMM')) + ' ' + datename(yyyy, L.dtmScheduledDate),
+				strScheduledDate = datename(dd, L.dtmScheduledDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)),LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)) + ' ' + datename(yyyy, L.dtmScheduledDate),
 				L.dtmETAPOL,
 				L.dtmETAPOD,
 				L.dtmETSPOL,
@@ -262,6 +262,8 @@ BEGIN
 				Via.strName strShipVia,
 				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 				dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
+				ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
+				ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
 				@strCompanyName AS strCompanyName,
 				@strCompanyAddress AS strCompanyAddress,
 				@strContactName AS strCompanyContactName ,
@@ -300,9 +302,9 @@ BEGIN
 				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) AS strShipmentQtyInfo,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
-				strStartDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmStartDate, 'MMM')),format(CD.dtmStartDate, 'MMM')) + '-' + datename(yyyy, CD.dtmStartDate),
-				strEndDate = datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmEndDate, 'MMM')),format(CD.dtmEndDate, 'MMM')) + '-' + datename(yyyy, CD.dtmEndDate),
-				strStartToEndDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmStartDate, 'MMM')),format(CD.dtmStartDate, 'MMM')) + '-' + datename(yyyy, CD.dtmStartDate) + ' - ' + datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmEndDate, 'MMM')),format(CD.dtmEndDate, 'MMM')) + '-' + datename(yyyy, CD.dtmEndDate),
+				strStartDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + datename(yyyy, CD.dtmStartDate),
+				strEndDate = datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + datename(yyyy, CD.dtmEndDate),
+				strStartToEndDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + datename(yyyy, CD.dtmStartDate) + ' - ' + datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + datename(yyyy, CD.dtmEndDate),
 				(SELECT STUFF((
 						SELECT ', ' + LTRIM(MRK.strMarks)
 						FROM (
@@ -383,7 +385,7 @@ BEGIN
 		left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
 
 		left join tblSMScreen				rtUMScreen on rtUMScreen.strNamespace = 'Inventory.view.ReportTranslation'
-		left join tblSMTransaction			rtUMTransaction on rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = WUM.intUnitMeasureId
+		left join tblSMTransaction			rtUMTransaction on rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = UM.intUnitMeasureId
 		left join tblSMReportTranslation	rtUMTranslation on rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'Name'
 	
 		--

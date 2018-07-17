@@ -52,7 +52,8 @@ BEGIN
 	NULL AS strPayee,
 	NULL AS strBankName,			
 	NULL AS strCompanyAddress,
-	NULL AS strCompanyName
+	NULL AS strCompanyName,
+	NULL AS dtmCurrentDate
 
 END
 
@@ -110,7 +111,8 @@ SET @innerQuery =
 			strPayee,
 			strBankName,			
 			(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
-			(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
+			(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName,
+			GETDATE() as dtmCurrentDate
 		FROM dbo.vyuAPRptCheckRegister'
 
 IF @dateFrom IS NOT NULL
@@ -178,5 +180,3 @@ END
 --PRINT @query
 
 EXEC sp_executesql @query
-
-GO

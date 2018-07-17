@@ -134,14 +134,21 @@ FROM
 	) ChargesLink  
 
 	OUTER APPLY (
-		SELECT	A.intInventoryReceiptItemId
+		SELECT	A.intInventoryReceiptChargeId				
 				,c = COUNT(1) 
-		FROM	tblICInventoryReceiptChargePerItem A		
+		FROM	tblICInventoryReceiptChargePerItem A 
 		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-		GROUP BY A.intInventoryReceiptItemId		
+		GROUP BY 
+				A.intInventoryReceiptChargeId
 		HAVING	COUNT(1) = 1 
 
-	) ComputedChargesLink 
+	) ChargesPerItem 
+
+	OUTER APPLY (
+		SELECT	B.intInventoryReceiptItemId
+		FROM	tblICInventoryReceiptChargePerItem B
+		WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
+	) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 
@@ -301,14 +308,21 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	) ChargesLink
 
 	OUTER APPLY (
-		SELECT	A.intInventoryReceiptItemId
+		SELECT	A.intInventoryReceiptChargeId
 				,c = COUNT(1) 
-		FROM	tblICInventoryReceiptChargePerItem A		
+		FROM	tblICInventoryReceiptChargePerItem A 
 		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-		GROUP BY A.intInventoryReceiptItemId		
+		GROUP BY 
+				A.intInventoryReceiptChargeId
 		HAVING	COUNT(1) = 1 
 
-	) ComputedChargesLink 
+	) ChargesPerItem 
+
+	OUTER APPLY (
+		SELECT	B.intInventoryReceiptItemId
+		FROM	tblICInventoryReceiptChargePerItem B
+		WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
+	) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 

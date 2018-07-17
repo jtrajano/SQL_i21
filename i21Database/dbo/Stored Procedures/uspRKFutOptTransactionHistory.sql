@@ -23,6 +23,9 @@ BEGIN TRY
            (intFutOptTransactionHeaderId
            ,strSelectedInstrumentType
            ,intFutOptTransactionId
+		   ,strInternalTradeNo
+		   ,strLocationName
+		   ,dblContractSize
            ,strInstrumentType
            ,strFutureMarket
            ,strCurrency
@@ -51,6 +54,9 @@ BEGIN TRY
 			 H.intFutOptTransactionHeaderId
 			,H.strSelectedInstrumentType
 			,T.intFutOptTransactionId
+			,strInternalTradeNo
+		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intLocationId=T.intLocationId)
+			,dblContractSize=(select TOP 1 dblContractSize from tblRKFutureMarket where intFutureMarketId=T.intFutureMarketId)
 			,strInstrumentType = (CASE WHEN intInstrumentTypeId = 1 THEN 'Futures'
 				WHEN intInstrumentTypeId = 2 THEN 'Options'
 				WHEN intInstrumentTypeId = 3 THEN 'Currency Contract'
@@ -96,6 +102,9 @@ BEGIN TRY
            (intFutOptTransactionHeaderId
            ,strSelectedInstrumentType
            ,intFutOptTransactionId
+		   ,strInternalTradeNo
+		   ,strLocationName
+		   ,dblContractSize
            ,strInstrumentType
            ,strFutureMarket
            ,strCurrency
@@ -124,6 +133,9 @@ BEGIN TRY
 			 H.intFutOptTransactionHeaderId
 			,H.strSelectedInstrumentType
 			,T.intFutOptTransactionId
+			,strInternalTradeNo
+		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intLocationId=T.intLocationId)
+			,dblContractSize=(select TOP 1 dblContractSize from tblRKFutureMarket where intFutureMarketId=T.intFutureMarketId)
 			,strInstrumentType = (CASE WHEN intInstrumentTypeId = 1 THEN 'Futures'
 				WHEN intInstrumentTypeId = 2 THEN 'Options'
 				WHEN intInstrumentTypeId = 3 THEN 'Currency Contract'

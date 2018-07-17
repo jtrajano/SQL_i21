@@ -640,7 +640,12 @@ BEGIN
 				@GLEntries
 				,@intEntityUserSecurityId
 		END
-
+		ELSE 
+		BEGIN 
+			-- Post preview is not available. Financials are only booked for company-owned stocks.
+			EXEC uspICRaiseError 80185; 
+		END 		 
+		
 		COMMIT TRAN @TransactionName
 	END 
 	ELSE 

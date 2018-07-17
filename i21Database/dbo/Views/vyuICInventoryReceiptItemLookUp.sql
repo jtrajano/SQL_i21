@@ -72,7 +72,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 				WHEN Receipt.intSourceType = 5
 					THEN SCDeliverySheet.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
-
+				WHEN Receipt.intSourceType = 6
+					THEN PCOView.strPurchaseOrderNumber
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
 			)
@@ -91,7 +92,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 		, strOrderUOM =  (
 				CASE	WHEN Receipt.strReceiptType = 'Purchase Contract' THEN (
-							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 THEN -- None
+							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 OR Receipt.intSourceType = 6 THEN -- None
                                         CASE WHEN ContractView.ysnLoad = 1 
 												THEN 'Load' 
 											ELSE ContractView.strItemUOM 
@@ -119,7 +120,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 		, dblOrdered = (
 				CASE	WHEN Receipt.strReceiptType = 'Purchase Contract' THEN 
-							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 THEN -- None
+							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 OR Receipt.intSourceType = 6 THEN -- None
 										CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 													ISNULL(ContractView.intNoOfLoad, 0)
 												ELSE 
@@ -146,7 +147,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		)
 		, dblReceived = (
 				CASE	WHEN Receipt.strReceiptType = 'Purchase Contract' THEN
-							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 THEN -- None
+							CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 1 OR Receipt.intSourceType = 6 THEN -- None
 										CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 													ISNULL(ContractView.intLoadReceived, 0)
 												ELSE ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) 
@@ -173,7 +174,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		)
 		, dblOrderUOMConvFactor = (
 			CASE	WHEN Receipt.strReceiptType = 'Purchase Contract' THEN 
-						CASE	WHEN Receipt.intSourceType = 0  THEN -- None
+						CASE	WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 6 THEN -- None
 									1
 								WHEN Receipt.intSourceType = 1 THEN -- Scale
 									0
@@ -392,3 +393,14 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			WHERE	SCDeliverySheet.intDeliverySheetId = ReceiptItem.intSourceId 
 					AND Receipt.intSourceType = 5 -- Delivery Sheets 		
 		) SCDeliverySheet
+
+		-- 9. Purchase Order from Contracts
+		OUTER APPLY (
+			SELECT	strPurchaseOrderNumber				
+			FROM	vyuPODetails POView
+			WHERE	POView.intPurchaseId = ReceiptItem.intSourceId 
+					--AND intPurchaseDetailId = ReceiptItem.intLineNo
+					AND (
+						Receipt.strReceiptType = 'Purchase Contract'
+					)	
+		) PCOView

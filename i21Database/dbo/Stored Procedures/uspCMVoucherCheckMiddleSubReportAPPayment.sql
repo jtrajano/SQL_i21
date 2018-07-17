@@ -105,7 +105,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = BILL.strBillId
 			,strInvoice = BILL.strVendorOrderNumber
-			,dtmDate = BILL.dtmBillDate
+			,dtmDate = BILL.dtmDueDate
 			,strComment = SUBSTRING(BILL.strComment,1,25)
 			,dblAmount = CASE WHEN BILL.intTransactionType = 3
 						THEN BILL.dblTotal * -1
@@ -153,7 +153,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = preBILL.strBillId
 			,strInvoice = preBILL.strVendorOrderNumber
-			,dtmDate = preBILL.dtmBillDate
+			,dtmDate = preBILL.dtmDueDate
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
 			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
 						THEN preBILL.dblTotal * -1
@@ -194,7 +194,7 @@ SELECT  TOP 10 * FROM(
 			intTransactionId = F.intTransactionId
 			,strBillId = INV.strInvoiceNumber
 			,strInvoice = ''
-			,dtmDate = INV.dtmDate
+			,dtmDate = INV.dtmDueDate
 			,strComment = SUBSTRING(INV.strComments,1,25)
 			,dblAmount = INV.dblInvoiceTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 

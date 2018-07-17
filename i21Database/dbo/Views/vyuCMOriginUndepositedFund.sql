@@ -5,7 +5,6 @@
 
 CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
 AS
-
 SELECT
 	id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
 	intUndepositedFundId	= CMUF.intUndepositedFundId, 
@@ -15,7 +14,10 @@ SELECT
 	dblAmount				= CMUF.dblAmount,
 	strName					= CMUF.strName, 
 	intEntityCustomerId		= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intEntityCustomerId ELSE ARI.intEntityCustomerId END,
-	dtmDate					= CMUF.dtmDate
+	dtmDate					= CMUF.dtmDate,
+	intCurrencyId			= ARI.intCurrencyId,
+	dblWeightRate			= case when F.dblWeightRate is null then 1 else F.dblWeightRate end,
+	ARP.intPaymentId
 FROM
 	tblCMUndepositedFund CMUF
 LEFT OUTER JOIN
@@ -26,4 +28,13 @@ LEFT OUTER JOIN
 	tblARInvoice ARI
 		ON CMUF.intSourceTransactionId = ARI.intInvoiceId
 		AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber 
+OUTER APPLY(
+	SELECT dblWeightRate = 
+		SUM(CASE WHEN dblCurrencyExchangeRate > 0 
+			THEN dblCurrencyExchangeRate
+			ELSE 1 END * dblPayment )/
+		SUM(dblPayment) 
+    FROM tblARPaymentDetail WHERE intPaymentId = ARP.intPaymentId
+)F
+
 

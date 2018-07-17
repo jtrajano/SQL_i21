@@ -27,6 +27,10 @@ END
 
 -- INSERT THE RECAP DATA. 
 -- THE RECAP DATA WILL BE STORED IN A PERMANENT TABLE SO THAT WE CAN QUERY IT LATER USING A BUFFERED STORE. 
+-- REMOVE EXISTING BATCHID SINCE ON THE RECAP MODULES ARE ROLLING BACK TRANSACTION AND WOULD INSERT AN EXISTING BATCH ID
+DELETE FROM tblGLPostRecap WHERE
+strBatchId IN (SELECT strBatchId from @RecapTable)
+
 INSERT INTO tblGLPostRecap (
 		[dtmDate]
 		,[strBatchId]
@@ -43,6 +47,7 @@ INSERT INTO tblGLPostRecap (
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId]
+		,[intCurrencyExchangeRateTypeId]
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
@@ -84,6 +89,7 @@ SELECT	[dtmDate]
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId] = udtRecap.intCurrencyId
+		,[intCurrencyExchangeRateTypeId] = udtRecap.[intCurrencyExchangeRateTypeId]
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
@@ -97,10 +103,11 @@ SELECT	[dtmDate]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[strRateType]
+		,[strRateType] =  Rate.strCurrencyExchangeRateType
 		,[intConcurrencyId] = 1
 FROM	@RecapTable udtRecap INNER JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId
+		LEFT JOIN tblSMCurrencyExchangeRateType Rate on udtRecap.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		INNER JOIN tblGLAccountGroup gg
 			ON gg.intAccountGroupId = gl.intAccountGroupId
 

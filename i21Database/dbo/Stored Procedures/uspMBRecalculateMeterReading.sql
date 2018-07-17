@@ -66,6 +66,9 @@ BEGIN
 			, @ItemUOMId
 			,NULL   --@CFSiteId
 			,0		--@IsDeliver
+			,NULL --@CurrencyId
+			,NULL -- @CurrencyExchangeRateTypeId
+			,NULL -- @@CurrencyExchangeRate	
 		)
 
 		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblRate, 0)), 0)

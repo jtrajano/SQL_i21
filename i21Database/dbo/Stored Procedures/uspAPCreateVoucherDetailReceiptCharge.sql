@@ -117,7 +117,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	A.intContractDetailId,
 		[intContractSeq]				=	A.intContractSeq,
 		[intContractHeaderId]			=	A.intContractHeaderId,
-		[intUnitOfMeasureId]			=	A.intCostUnitMeasureId,
+		[intUnitOfMeasureId]			=	(CASE WHEN A.intContractDetailId IS NOT NULL THEN cd.intItemUOMId ELSE A.intCostUnitMeasureId END),
 		[intCostUOMId]              	=   A.intCostUnitMeasureId,
 		[intWeightUOMId]				=	NULL,
 		[intLineNo]						=	1,
@@ -160,6 +160,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = @currentDateFilter
 	LEFT JOIN vyuPATEntityPatron patron ON IR.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblAP1099Category H ON entity.str1099Type = H.strCategory
+	LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = A.intContractDetailId 
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -215,11 +216,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	--recalculate tax if partial
 	UPDATE voucherDetails
-		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
+		--BILL DETAIL TAX SHOULD BE POSSITIVE IF PRICE DOWN AND CHECKOFF 
+		SET voucherDetails.dblTax =( CASE WHEN D.ysnPrice = 1 AND taxes.ysnCheckOffTax = 1 THEN  ISNULL(taxes.dblTax,0) * -1 ELSE  ISNULL(taxes.dblTax,0) END)
 		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
-		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		SELECT SUM(ISNULL(dblTax,0)) dblTax, ysnCheckOffTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		GROUP BY ysnCheckOffTax , dblTax
 	) taxes
 	INNER JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = voucherDetails.intInventoryReceiptChargeId
 	WHERE voucherDetails.intBillDetailId IN (SELECT intBillDetailId FROM @detailCreated)

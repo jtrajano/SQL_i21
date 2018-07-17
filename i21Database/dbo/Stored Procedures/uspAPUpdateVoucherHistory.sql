@@ -45,10 +45,10 @@ BEGIN
 	FROM tblAPBill A 
 	INNER JOIN @voucherIds ids ON A.intBillId = ids.intId
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	CROSS APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
 	INNER JOIN tblSMCompanyLocation loc ON A.intShipToId = loc.intCompanyLocationId
 	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
 	LEFT JOIN tblICItem item ON B.intItemId = item.intItemId
+	LEFT JOIN tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 	LEFT JOIN tblSCTicket ticket ON B.intScaleTicketId = ticket.intTicketId
 	LEFT JOIN (tblICItemUOM uom INNER JOIN tblICUnitMeasure unitMeasure ON uom.intUnitMeasureId = unitMeasure.intUnitMeasureId)
 			ON B.intUnitOfMeasureId = uom.intItemUOMId
@@ -94,31 +94,53 @@ BEGIN
 END
 
 --payment posting
+--calling this stored procedure assumes that the payment detail data has been updated ex. dblAmountDue
 IF EXISTS(SELECT 1 FROM @paymentDetailIds)
 BEGIN
 	SELECT 
 		[intBillId]				=	A.intBillId,
 		[strBillId]				=	A.strBillId,
-		[dblQtyReceived]		=	CASE WHEN @post = 0 THEN -pd.dblPayment ELSE pd.dblPayment END,
-		[dblCost]				=	pd.dblPayment, 
-		[dblTotal]				=	CASE WHEN @post = 0 THEN -pd.dblPayment ELSE pd.dblPayment END,
-		[dblAmountDue]			=	A.dblAmountDue,
-		[strCommodity]			=	NULL,
-		[strItemNo]				=	NULL,
+		[dblQtyReceived]		=	(pd.dblPayment + (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END))
+		 							--get the percentage of payment made to total amount due
+									/ (CASE WHEN @post = 1 THEN (voucher.dblAmountDue + pd.dblPayment) 
+											ELSE (voucher.dblAmountDue) END) --get the percentage of payment
+									* voucherDetail.dblQtyReceived
+									* (CASE WHEN @post = 1 THEN -1 ELSE 1 END),
+		[dblCost]				=	voucherDetail.dblCost, 
+		[dblTotal]				=	CAST(CASE WHEN @post = 1 
+											THEN -dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment 
+																		+ (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END)
+																		, voucher.dblTotal) 
+									ELSE dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment 
+																		+ (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END)
+																		, voucher.dblTotal) END AS DECIMAL(18,2)),
+		[dblAmountDue]			=	pd.dblAmountDue,
+		[strCommodity]			=	ISNULL(commodity.strCommodityCode, 'None'),
+		[strItemNo]				=	ISNULL(item.strItemNo, voucherDetail.strMiscDescription),
 		[strLocation]			=	loc.strLocationName,
-		[strTicketNumber]		=	NULL,
-		[strQtyUnitMeasure]		=	NULL,
-		[strCostUnitMeasure]	=	NULL,
+		[strTicketNumber]		=	ticket.strTicketNumber,
+		[strQtyUnitMeasure]		=	unitMeasure.strUnitMeasure,
+		[strCostUnitMeasure]	=	costUnitMeasure.strUnitMeasure,
 		[strCurrency]			=	cur.strCurrency,
-		[dtmTransactionDate]	=	A.dtmDate,
-		[dtmTicketDateTime]		=	NULL,
+		[dtmTransactionDate]	=	GETDATE(),
+		[dtmTicketDateTime]		=	ticket.dtmTicketDateTime,
 		[dtmDateEntered]		=	A.dtmDateCreated
 	INTO #tmpVoucherPaymentHistory
 	FROM tblAPBill A 
 	INNER JOIN tblAPPaymentDetail pd ON A.intBillId = ISNULL(pd.intBillId, pd.intOrigBillId)
 	INNER JOIN @paymentDetailIds ids ON pd.intPaymentDetailId = ids.intId
-	INNER JOIN tblSMCompanyLocation loc ON A.intShipToId = loc.intCompanyLocationId
-	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
+	INNER JOIN tblAPBill voucher ON pd.intBillId = voucher.intBillId
+	INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
+	LEFT JOIN tblICItem item ON voucherDetail.intItemId = item.intItemId
+	LEFT JOIN tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+	INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+	INNER JOIN tblSMCurrency cur ON voucher.intCurrencyId = cur.intCurrencyID
+	LEFT JOIN tblSCTicket ticket ON voucherDetail.intScaleTicketId = ticket.intTicketId
+	LEFT JOIN (tblICItemUOM uom INNER JOIN tblICUnitMeasure unitMeasure ON uom.intUnitMeasureId = unitMeasure.intUnitMeasureId)
+			ON voucherDetail.intUnitOfMeasureId = uom.intItemUOMId
+	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
+			ON voucherDetail.intCostUOMId = costuom.intItemUOMId
+
 
 	INSERT INTO tblAPVoucherHistory (
 		[intBillId]				

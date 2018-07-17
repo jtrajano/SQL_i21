@@ -29,16 +29,24 @@ SELECT	intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEn
 		, receiptAndVoucheredCharges.strCurrency
 		, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
 		, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		, strItemUOM = ItemUOMName.strUnitMeasure
+		, strCostUOM = ItemUOMName.strUnitMeasure
 FROM	tblICInventoryReceipt Receipt 
 		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 		LEFT JOIN tblSMCompanyLocation c
 			ON c.intCompanyLocationId = Receipt.intLocationId
+		LEFT JOIN (
+			tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure ItemUOMName
+				ON ItemUOM.intUnitMeasureId = ItemUOMName.intUnitMeasureId
+		)
+		ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
+	
 		OUTER APPLY (
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
 					,dblUnitCost = (CASE WHEN rc.strCostMethod = 'Per Unit' THEN  ROUND(rc.dblRate, 2) ELSE ROUND(rc.dblAmount, 2) END )
-					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(rc.dblQuantityPriced,0) ELSE ISNULL(rc.dblAmountBilled,0) END)
+					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(ABS(rc.dblQuantityPriced),0) ELSE ISNULL(ABS(rc.dblQuantity),0) END)
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
@@ -110,6 +118,7 @@ FROM	tblICInventoryReceipt Receipt
 
 			WHERE	rc.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND rc.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+					AND ct.intPricingTypeId != 2
 		) receiptAndVoucheredCharges
 		OUTER APPLY (					
 			SELECT	TOP 1 
@@ -173,7 +182,7 @@ FROM	tblICInventoryReceipt Receipt
 WHERE	Receipt.ysnPosted = 1
 		AND ReceiptCharge.ysnAccrue = 1
 		AND receiptAndVoucheredCharges.dblReceiptQty <> receiptAndVoucheredCharges.dblVoucherQty
-		AND ReceiptCharge.dblAmount <> 0
+		AND ReceiptCharge.dblAmount <> 0 --WILL NOT SHOW RECEIPT FROM STORAGE
 GO
 
 

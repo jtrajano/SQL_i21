@@ -98,6 +98,8 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Instruction Report Format - 1'
 		WHEN 2
 			THEN 'Shipping Instruction Report Format - 2'
+		WHEN 3
+			THEN 'Shipping Instruction Report Format - 3'
 		END AS strShippingInstructionReportFormat
 	,CP.intDeliveryOrderReportFormat
 	,CASE CP.intDeliveryOrderReportFormat
@@ -214,6 +216,8 @@ SELECT CP.intCompanyPreferenceId
 	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
 	,CP.ysnFullHeaderLogo
 	,CP.ysnContainerNoUnique
+	,CP.intReportLogoHeight
+	,CP.intReportLogoWidth
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId

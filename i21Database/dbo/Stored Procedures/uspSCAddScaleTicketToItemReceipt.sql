@@ -41,12 +41,21 @@ DECLARE @intScaleStationId AS INT
 		,@currencyDecimal AS INT
 		,@ysnRequireProducerQty AS BIT;
 		
-BEGIN 
-	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId, @splitDistribution = SC.strDistributionOption
-	, @intItemId = SC.intItemId , @ticketStatus = SC.strTicketStatus, @intContractCostId = SC.intContractCostId
+	SELECT @intTicketItemUOMId = UM.intItemUOMId
+	, @intLoadId = SC.intLoadId
+	, @intContractDetailId = SC.intContractId
+	, @splitDistribution = SC.strDistributionOption
+	, @intItemId = SC.intItemId 
+	, @ticketStatus = SC.strTicketStatus
+	, @intContractCostId = SC.intContractCostId
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+
+IF @ticketStatus = 'C'
+BEGIN
+	 --Raise the error:
+	RAISERROR('Ticket already completed', 16, 1);
+	RETURN;
 END
 
 SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
@@ -296,12 +305,12 @@ WHERE SCTicket.intTicketId = @intTicketId
 											CASE 
 												WHEN QM.dblDiscountAmount < 0 THEN 
 												CASE
-													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0) * -1)
+													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
 													ELSE (QM.dblDiscountAmount * -1)
 												END 
 												WHEN QM.dblDiscountAmount > 0 THEN 
 												CASE
-													WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0)
+													WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
 													ELSE QM.dblDiscountAmount
 												END
 											END
@@ -321,13 +330,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
+														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
 													END 
 												END
 											END
@@ -1041,8 +1050,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																END
 							,[intContractHeaderId]				= RE.intContractHeaderId
 							,[intContractDetailId]				= RE.intContractDetailId
-							,[ysnAccrue]						= @ysnAccrue
-							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
+							,[ysnAccrue]						= ContractCost.ysnAccrue
+							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId

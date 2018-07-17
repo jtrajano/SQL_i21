@@ -42,6 +42,8 @@ INSERT INTO tblARPayment (
    , intCurrencyId
    , intPaymentMethodId
    , intLocationId
+   , intBankAccountId
+   , intEntityId
    , dtmDatePaid
    , strReceivePaymentType
    , strPaymentMethod
@@ -51,26 +53,33 @@ INSERT INTO tblARPayment (
    , dblBaseUnappliedAmount
    , dblOverpayment
    , dblBaseOverpayment
+   , intCurrencyExchangeRateTypeId
    , dblExchangeRate
    , ysnApplytoBudget
 )
 SELECT TOP 1 
-     intEntityCustomerId	= I.intEntityCustomerId
-   , intCurrencyId			= I.intCurrencyId
-   , intPaymentMethodId		= @intPaymentMethodId
-   , intLocationId			= I.intCompanyLocationId
-   , dtmDatePaid			= I.dtmPostDate
+     intEntityCustomerId	  = I.intEntityCustomerId
+   , intCurrencyId			    = I.intCurrencyId
+   , intPaymentMethodId		  = @intPaymentMethodId
+   , intLocationId			    = I.intCompanyLocationId
+   , intBankAccountId				= BA.intBankAccountId
+   , intEntityId            = ISNULL(@intUserId, I.intEntityId)
+   , dtmDatePaid			      = I.dtmPostDate
    , strReceivePaymentType	= 'Cash Receipts'
-   , strPaymentMethod		= @strPaymentMethod
-   , dblAmountPaid			= 0.00
-   , dblBaseAmountPaid		= 0.00
-   , dblUnappliedAmount		= 0.00
+   , strPaymentMethod		    = @strPaymentMethod
+   , dblAmountPaid			    = 0.00
+   , dblBaseAmountPaid		  = 0.00
+   , dblUnappliedAmount		  = 0.00
    , dblBaseUnappliedAmount	= 0.00
-   , dblOverpayment			= 0.00
-   , dblBaseOverpayment		= 0.00
-   , dblExchangeRate		= 1.00
-   , ysnApplytoBudget		= 0
+   , dblOverpayment			    = 0.00
+   , dblBaseOverpayment		  = 0.00
+   , intCurrencyExchangeRateTypeId = CER.intCurrencyExchangeRateTypeId 
+   , dblExchangeRate		    = CER.[dblCurrencyExchangeRate]
+   , ysnApplytoBudget		    = 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+CROSS APPLY dbo.[fnARGetDefaultForexRate](I.dtmPostDate, I.intCurrencyId, NULL) CER
 WHERE intInvoiceId = @intInvoiceId
 
 SET @intPaymentId = SCOPE_IDENTITY()

@@ -918,10 +918,14 @@ GO
 		VALUES (N'Bank Accounts', N'Bank Accounts', N'CashManagement.view.BankAccounts', N'Cash Management', N'tblCMBankAccount', 1, N'Cash Management')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'Customers') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Customers', N'Customers', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strPortalName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Customers', N'Customers', N'My Company', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET  strScreenId = 'Customers', strScreenName = 'Customers', strPortalName = N'My Company', strModule = 'Accounts Receivable' WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
 	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson') 
@@ -935,7 +939,10 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Vendors', N'Vendors', N'AccountsPayable.view.EntityVendor', N'Accounts Payable', N'tblAPVendor', 1, N'Accounts Payable')
 	END
-
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET [strScreenId] = 'Vendors', [strScreenName] = 'Vendors', [strModule] = 'Accounts Payable' WHERE strNamespace = 'AccountsPayable.view.EntityVendor'
+	END
 
 	-- Subsidiary
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.OptionsLifecycle') 
@@ -1030,9 +1037,9 @@ GO
 
 	------------------------ END REPLICATION SCREEN ------------------------
 	
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)') 
-	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'My Company (Portal)', N'My Company (Portal)', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
-	END
+	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)') 
+	--BEGIN
+	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+	--	VALUES (N'My Company (Portal)', N'My Company (Portal)', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+	--END
 GO

@@ -60,6 +60,7 @@ ELSE
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
+			,[intCurrencyExchangeRateTypeId]
 			,[intUserId]
 			,[intEntityId]
 			,[dtmDateEntered]
@@ -68,7 +69,6 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,strRateType
 		)
 		SELECT 
 			 [strTransactionId]
@@ -86,7 +86,8 @@ ELSE
 			,A.[dtmDate]				
 			,[ysnIsUnposted]		
 			,A.[intConcurrencyId]		
-			,[dblExchangeRate]		
+			,[dblExchangeRate]
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
@@ -95,10 +96,8 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			, strCurrencyExchangeRateType
 		FROM	tblGLDetail A
 		LEFT JOIN tblGLJournalDetail D ON D.intJournalDetailId = A.intJournalLineNo AND D.intJournalId = A.intTransactionId
-		LEFT JOIN tblSMCurrencyExchangeRateType Rate on D.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 		ORDER BY intGLDetailId
 

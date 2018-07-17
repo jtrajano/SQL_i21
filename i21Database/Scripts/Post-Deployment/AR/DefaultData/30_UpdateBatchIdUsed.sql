@@ -23,9 +23,10 @@ print('/*******************  BEGIN Fix amounts for tblARPayment.strBatchId, dtmB
 GO
 
 UPDATE P
-SET strBatchId		= CASE WHEN P.ysnPosted = 1 THEN GL.strBatchId ELSE NULL END
-  , dtmBatchDate	= CASE WHEN P.ysnPosted = 1 THEN GL.dtmDateEntered ELSE NULL END
-  , intPostedById	= CASE WHEN P.ysnPosted = 1 THEN GL.intEntityId ELSE NULL END
+SET strBatchId				= CASE WHEN P.ysnPosted = 1 THEN GL.strBatchId ELSE NULL END
+  , dtmBatchDate			= CASE WHEN P.ysnPosted = 1 THEN GL.dtmDateEntered ELSE NULL END
+  , intPostedById			= CASE WHEN P.ysnPosted = 1 THEN GL.intEntityId ELSE NULL END
+	, intCurrentStatus 	= CASE WHEN P.ysnPosted = 1 THEN 4 ELSE 5 END
 FROM tblARPayment P
 OUTER APPLY (
 	SELECT TOP 1 strBatchId

@@ -109,7 +109,8 @@ BEGIN TRY
 			CH.strWeight,
 			CH.strGrade,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-			strPrintableRemarks
+			strPrintableRemarks,
+			CH.strTerm
 
 	FROM	vyuCTContractHeaderView CH
 	LEFT

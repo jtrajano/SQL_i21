@@ -34,7 +34,7 @@
 	[strNotificationEmailUrl] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnEnableCreditCardProcessing] BIT NOT NULL DEFAULT 0, 
 	[strMerchantId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strMerchantPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strMerchantPassword] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPaymentServer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
 	[strCreditCardProcessingType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,  
 	[strPaymentExternalLink] NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,  
@@ -44,6 +44,8 @@
 	[ysnValidatePassword] BIT NOT NULL DEFAULT 0, 
 	[ysnAutoRefreshOnOpen] BIT NOT NULL DEFAULT 0, 
 	[intDefaultTermId] INT NULL, 
+	[strReportDateFormat] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+	[strReportNumberFormat] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
     [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1

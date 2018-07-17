@@ -158,6 +158,8 @@ BEGIN
 	-- Update the destination qty. 
 	UPDATE	si
 	SET		si.dblDestinationQuantity = d.dblDestinationQty
+			,si.dblDestinationGross = d.dblDestinationGross
+			,si.dblDestinationNet = d.dblDestinationNet
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItemLocation l
@@ -185,6 +187,7 @@ BEGIN
 			, dblAmount
 			, dblRate
 			, intContractId
+			, intContractDetailId
 			, ysnPrice
 			, ysnAccrue
 			, intCostUOMId
@@ -192,6 +195,7 @@ BEGIN
 			, intForexRateTypeId 
 			, dblForexRate 
 			, strAllocatePriceBy
+			, strChargesLink
 			, intConcurrencyId
 	)
 	SELECT 
@@ -202,6 +206,7 @@ BEGIN
 			, sc.dblAmount
 			, sc.dblRate
 			, sc.intContractId
+			, sc.intContractDetailId
 			, sc.ysnPrice
 			, sc.ysnAccrue
 			, sc.intCostUOMId
@@ -209,6 +214,7 @@ BEGIN
 			, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 			, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
 			, ISNULL(sc.strAllocatePriceBy, 'Unit') 
+			, sc.strChargesLink 
 			, intConcurrencyId = 1
 	FROM	@ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 				ON sc.intInventoryShipmentId = s.intInventoryShipmentId 

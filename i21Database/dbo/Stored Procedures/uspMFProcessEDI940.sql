@@ -13,6 +13,7 @@ BEGIN TRY
 		,@intTransactionId INT
 		,@intScreenId INT
 		,@intCustomTabId INT
+		,@intCustomTabDetailId0 INT
 		,@intCustomTabDetailId1 INT
 		,@intCustomTabDetailId2 INT
 		,@intCustomTabDetailId3 INT
@@ -87,6 +88,11 @@ BEGIN TRY
 	FROM tblSMCustomTab
 	WHERE intScreenId = @intScreenId
 
+	SELECT @intCustomTabDetailId0 = Extent1.intCustomTabDetailId
+	FROM dbo.tblSMCustomTabDetail AS Extent1
+	WHERE Extent1.intCustomTabId = @intCustomTabId
+		AND strFieldName = 'Id'
+
 	SELECT @intCustomTabDetailId1 = Extent1.intCustomTabDetailId
 	FROM dbo.tblSMCustomTabDetail AS Extent1
 	WHERE Extent1.intCustomTabId = @intCustomTabId
@@ -101,6 +107,23 @@ BEGIN TRY
 	FROM dbo.tblSMCustomTabDetail AS Extent1
 	WHERE Extent1.intCustomTabId = @intCustomTabId
 		AND strFieldName = 'CustomerPickUp'
+
+	DECLARE @tblCustomTabColumn TABLE (
+		intCustomTabDetailId INT
+		,strValue NVARCHAR(50)
+		)
+
+	INSERT INTO @tblCustomTabColumn
+	SELECT Extent1.intCustomTabDetailId
+		,NULL
+	FROM dbo.tblSMCustomTabDetail AS Extent1
+	WHERE Extent1.intCustomTabId = @intCustomTabId
+		AND strFieldName NOT IN (
+			'Id'
+			,'CustomerPickUp'
+			,'CustomerPONo'
+			,'CreatedByEDI'
+			)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -1025,7 +1048,7 @@ BEGIN TRY
 						FROM @FinalShipmentStagingTable
 						)
 				BEGIN
-					EXEC dbo.uspICAddItemShipment @Entries = @FinalShipmentStagingTable
+					EXEC dbo.uspICAddItemShipment @Items = @FinalShipmentStagingTable
 						,@Charges = @OtherCharges
 						,@intUserId = @intUserId;
 
@@ -1284,7 +1307,7 @@ BEGIN TRY
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = EDI.strUOM
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
-				AND NOT EXISTS (
+					AND NOT EXISTS (
 						SELECT *
 						FROM @ShipmentStagingTable SST
 						WHERE SST.intItemId = I.intItemId
@@ -1464,6 +1487,25 @@ BEGIN TRY
 						SELECT *
 						FROM tblSMFieldValue
 						WHERE intTabRowId = @intTabRowId
+							AND intCustomTabDetailId = @intCustomTabDetailId0
+						)
+				BEGIN
+					INSERT dbo.tblSMFieldValue (
+						intTabRowId
+						,intCustomTabDetailId
+						,strValue
+						,intConcurrencyId
+						)
+					SELECT @intTabRowId
+						,@intCustomTabDetailId0
+						,1
+						,1
+				END
+
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblSMFieldValue
+						WHERE intTabRowId = @intTabRowId
 							AND intCustomTabDetailId = @intCustomTabDetailId1
 						)
 				BEGIN
@@ -1549,6 +1591,24 @@ BEGIN TRY
 						AND intCustomTabDetailId = @intCustomTabDetailId3
 				END
 			END
+
+			INSERT dbo.tblSMFieldValue (
+				intTabRowId
+				,intCustomTabDetailId
+				,strValue
+				,intConcurrencyId
+				)
+			SELECT @intTabRowId
+				,C.intCustomTabDetailId
+				,C.strValue
+				,1
+			FROM @tblCustomTabColumn C
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblSMFieldValue FV
+					WHERE FV.intTabRowId = @intTabRowId
+						AND FV.intCustomTabDetailId = C.intCustomTabDetailId
+					)
 
 			INSERT INTO tblMFEDI940Archive (
 				intEDI940Id

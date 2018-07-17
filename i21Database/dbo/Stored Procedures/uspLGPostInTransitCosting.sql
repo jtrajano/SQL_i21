@@ -71,32 +71,32 @@ BEGIN TRY
 			,GETDATE()
 			,LD.dblQuantity
 			,IU.dblUnitQty
-			,CASE 
+			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
-					THEN CASE 
+					THEN ((CASE 
 							WHEN CUR.ysnSubCurrency = 1
-								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
-							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
-							END
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+							END)/WU.dblUnitQty)*IU.dblUnitQty
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END dblCost
-			,CASE 
+				END,0) dblCost
+			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
-					THEN CASE 
+					THEN ((CASE 
 							WHEN CUR.ysnSubCurrency = 1
-								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
-							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
-							END
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+							END)/WU.dblUnitQty)*IU.dblUnitQty
 				ELSE CASE 
 						WHEN AD.ysnSeqSubCurrency = 1
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END * LD.dblQuantity dblValue
+				END,0) * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
@@ -110,16 +110,17 @@ BEGIN TRY
 			,0
 			,FP.intFobPointId
 			,IL.intItemLocationId
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN CD.intRateTypeId ELSE NULL END
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN CD.dblRate ELSE 1 END
+			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
+			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
 			AND LD.intPCompanyLocationId = IL.intLocationId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CASE WHEN L.intPurchaseSale = 3 THEN 1 ELSE L.intFreightTermId END
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
@@ -128,7 +129,9 @@ BEGIN TRY
 			,IL.intItemLocationId
 			,LD.intItemUOMId
 			,LD.dblQuantity
+			,LD.dblNet
 			,IU.dblUnitQty
+			,WU.dblUnitQty
 			,AD.dblSeqPrice
 			,L.intLoadId
 			,L.intCurrencyId
@@ -146,6 +149,8 @@ BEGIN TRY
 			,LD.intPriceUOMId
 			,LD.dblUnitPrice
 			,CUR.ysnSubCurrency
+			,LD.intForexRateTypeId
+			,LD.dblForexRate
 
 		BEGIN
 			INSERT INTO @GLEntries (

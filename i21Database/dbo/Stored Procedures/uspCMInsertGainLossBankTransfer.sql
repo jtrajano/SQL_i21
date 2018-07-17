@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
+@strDescription nvarchar(300)
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -48,7 +49,7 @@ BEGIN
 			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= 'Gain / Loss on Multicurrency Bank Transfer'
+			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
 			,[strCode]				= A.strCode
 			,[strReference]			= A.strReference
 			,[intCurrencyId]		= A.intCurrencyId
@@ -68,3 +69,5 @@ BEGIN
 		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intAccountsPayableRealizedId
 	)GL
 END
+GO
+

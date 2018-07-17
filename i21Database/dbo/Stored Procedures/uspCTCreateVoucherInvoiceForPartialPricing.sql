@@ -63,7 +63,8 @@ BEGIN TRY
 			@intInvoiceQtyUOMId				INT,
 			@dblInvoicePrice				NUMERIC(18,6),
 			@dblVoucherPrice				NUMERIC(18,6),
-			@dblQtyToCheck					NUMERIC(18,6)
+			@dblQtyToCheck					NUMERIC(18,6),
+			@batchIdUsed					NVARCHAR(MAX)
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -133,9 +134,9 @@ BEGIN TRY
 													AND IR.strReceiptType				=   'Purchase Contract'
 			JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
 	  LEFT  JOIN    tblAPBillDetail				BD  ON  BD.intInventoryReceiptItemId	=   RI.intInventoryReceiptItemId 
-
+													AND	BD.intInventoryReceiptChargeId	IS	NULL
 			WHERE	RI.intLineNo	=   @intContractDetailId 
-			AND		BD.intInventoryReceiptChargeId IS NULL
+			
 
 			IF ISNULL(@intBillId,0) = 0
 			BEGIN
@@ -179,7 +180,7 @@ BEGIN TRY
 				BEGIN
 					SELECT	@intInventoryReceiptId = intInventoryId,@dblQtyToBill = dblQty,@intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId							
 
-					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId)
+					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
 					BEGIN
 						SELECT	@intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				    
@@ -275,7 +276,16 @@ BEGIN TRY
 					BEGIN
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
-								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
+								IF ISNULL(@ysnSuccess, 0) = 0
+								BEGIN
+									SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+									IF ISNULL(@ErrMsg, '') != ''
+									BEGIN
+										RAISERROR(@ErrMsg, 11, 1);
+										RETURN;
+									END
+								END
 							END
 
 							UPDATE tblAPBillDetail SET dblQtyOrdered = @dblQtyToCheck, dblQtyReceived = @dblQtyToCheck WHERE intBillDetailId = @intBillDetailId

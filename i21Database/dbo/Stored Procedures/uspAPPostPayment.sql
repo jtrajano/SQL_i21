@@ -71,14 +71,6 @@ DECLARE @totalInvalid INT = 0;
 
 SET @recapId = '1'
 
---SET BatchId
-IF(@batchId IS NULL)
-BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-END
-
-SET @batchIdUsed = @batchId
-
 --=====================================================================================================================================
 -- 	POPULATE TRANSACTIONS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -162,6 +154,7 @@ SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
 --OVERIDE THE INVALID TRANSACTION COUNT TO HANDLE VOIDED RECAP VIEWING
 DECLARE @totalVoided INT
+DECLARE @postResult TABLE(id INT)
 SELECT @totalVoided = COUNT(*) FROM tblAPPayment B 
 INNER JOIN tblCMBankTransaction C ON B.strPaymentRecordNum = C.strTransactionId
 WHERE intPaymentId IN (SELECT intId FROM @payments) AND C.ysnCheckVoid = 1
@@ -174,6 +167,7 @@ IF(@totalInvalid > 0)
 BEGIN
 
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intId INTO @postResult
 	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpPayableInvalidData
 
 	SET @invalidCount = @totalInvalid
@@ -206,21 +200,48 @@ FROM
 ) PaymentRecords
 IF(@totalRecords = 0)  
 BEGIN
-	SET @success = 1
-	RETURN;
+
+	SET @batchId = NEWID();
+	SET @batchIdUsed = @batchId;
+	
+	UPDATE A
+		SET A.strBatchNumber = @batchId
+	FROM tblAPPostResult A
+	INNER JOIN @postResult B ON A.intId = B.id
+
+	GOTO DONE;
 END
 
 -- END
 
---DOUBLE VALIDATE, MAKE SURE TO NOT CONTINUE POSTING WHEN NOT RECORDS TO POST
+--DOUBLE VALIDATE, MAKE SURE TO NOT CONTINUE POSTING WHEN NO RECORDS TO POST
 IF @totalRecords = 0
 BEGIN
 	RAISERROR('No payment to post.', 16, 1);
+	RETURN;
 END
 
 --START THE TRANSACTION HERE, WE WANT THE ABOVE RESULT TO BE SAVED.. IT WILL USED BY THE POST RESULT SCREEN;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
+
+
+--SET BatchId
+IF(@batchId IS NULL)
+BEGIN
+	--DO NOT GENERATE IF UNPOST
+	IF NOT (@post = 0 AND @recap = 0)
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+	ELSE
+		SET @batchId = NEWID()
+END
+
+SET @batchIdUsed = @batchId
+
+UPDATE A
+	SET A.strBatchNumber = @batchId
+FROM tblAPPostResult A
+INNER JOIN @postResult B ON A.intId = B.id
 
 IF ISNULL(@post,0) = 1
 BEGIN
@@ -236,6 +257,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -269,6 +291,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -304,6 +327,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -341,6 +365,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -374,6 +399,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -409,6 +435,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -473,6 +500,7 @@ BEGIN
 
 	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
 	BEGIN
+		IF @transCount = 0 COMMIT TRANSACTION
 		GOTO DONE;
 	END
 
@@ -612,11 +640,13 @@ END
 ELSE
 	BEGIN
 
+		ROLLBACK TRANSACTION;
 		--RECAP
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLPostRecap
-			WHERE intTransactionId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds);
+		WHERE strBatchId = @batchIdUsed
+		--WHERE intTransactionId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds);
 
 		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
@@ -674,7 +704,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,A.strRateType
+			,rateType.strCurrencyExchangeRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -683,7 +713,10 @@ ELSE
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign;
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign
+		LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+
+		GOTO DONE;
 	END
 
 IF(ISNULL(@recap,0) = 0)
@@ -712,8 +745,9 @@ END
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
 
-DONE:
 IF @transCount = 0 COMMIT TRANSACTION
+
+DONE:
 SET @success = 1
 SET @successfulCount = @totalRecords
 

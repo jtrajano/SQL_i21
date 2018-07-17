@@ -42,12 +42,16 @@ DECLARE	@GLEntries AS RecapTableType
 
 DECLARE	@InTransit_Outbound AS InTransitTableType
 		,@InTransit_Inbound AS InTransitTableType
-		,@ItemsForInTransitCosting AS ItemInTransitCostingTableType
+		,@CompanyOwnedStockInTransit AS ItemInTransitCostingTableType
 
 DECLARE	@sourceType_None AS INT = 0
 		,@sourceType_Scale AS INT = 1
 		,@sourceType_InboundShipment AS INT = 2
 		,@sourceType_Transports AS INT = 3
+
+DECLARE	@ownershipType_Own AS INT = 1
+		,@ownershipType_Storage AS INT = 2
+		,@ownershipType_ConsignedPurchase AS INT = 3
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -268,8 +272,8 @@ BEGIN
 	
 	-- Process the "From" Stock 
 	BEGIN 
-		DECLARE @ItemsForRemovalPost AS ItemCostingTableType  
-		INSERT INTO @ItemsForRemovalPost (  
+		DECLARE @CompanyOwnedStock AS ItemCostingTableType  
+		INSERT INTO @CompanyOwnedStock (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -319,51 +323,121 @@ BEGIN
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 		WHERE Header.intInventoryTransferId = @intTransactionId
 			AND Item.strType <> 'Comment'
+			AND Detail.intOwnershipType = @ownershipType_Own
+
+		DECLARE @StorageOwnedStock AS ItemCostingTableType  
+		INSERT INTO @StorageOwnedStock (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId  
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+		) 
+		SELECT	Detail.intItemId  
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+				,intItemUOMId = Detail.intItemUOMId
+				,Header.dtmTransferDate
+				,dblQty = -Detail.dblQuantity
+				,dblUOMQty = ItemUOM.dblUnitQty
+				,COALESCE(NULLIF(Detail.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
+				,0
+				,@DefaultCurrencyId
+				,1
+				,@intTransactionId 
+				,Detail.intInventoryTransferDetailId
+				,@strTransactionId
+				,@intTransactionType
+				,Detail.intLotId 
+				,Detail.intFromSubLocationId
+				,Detail.intFromStorageLocationId
+				,strActualCostId = Detail.strFromLocationActualCostId
+		FROM tblICInventoryTransferDetail Detail 
+			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+			LEFT JOIN dbo.tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT JOIN dbo.tblICLot Lot ON Lot.intLotId = Detail.intLotId
+				AND Lot.intItemId = Detail.intItemId
+			LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+		WHERE Header.intInventoryTransferId = @intTransactionId
+			AND Item.strType <> 'Comment'
+			AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
 		-- Call the costing SP	
 		-------------------------------------------
-		INSERT INTO @DummyGLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]	
-				,[dblDebitReport]	
-				,[dblCreditForeign]	
-				,[dblCreditReport]	
-				,[dblReportingRate]	
-				,[dblForeignRate]
-				,[strRateType]
-		)
-		EXEC	@intReturnValue = dbo.uspICPostCosting  
-				@ItemsForRemovalPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intEntityUserSecurityId
+		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
+		BEGIN 
+			INSERT INTO @DummyGLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+			)
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
+					@CompanyOwnedStock  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+					,@intEntityUserSecurityId
 
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END 
+
+		-------------------------------------------
+		-- Call the storage sp
+		-------------------------------------------
+		IF EXISTS (SELECT TOP 1 1 FROM @StorageOwnedStock)
+		BEGIN 
+			EXEC	@intReturnValue = dbo.uspICPostStorage  
+					@StorageOwnedStock 
+					,@strBatchId  
+					,@intEntityUserSecurityId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END 
 	END
 
 	-- Replace the cost for post-preview purposes only. 
@@ -388,8 +462,8 @@ BEGIN
 	-- Process the "To" Stock (Shipment is NOT required). 
 	IF @ysnShipmentRequired = 0 
 	BEGIN 
-		DECLARE @ItemsForTransferPost AS ItemCostingTableType  
-		INSERT INTO @ItemsForTransferPost (  
+		DECLARE @TransferCompanyOwnedStock AS ItemCostingTableType  
+		INSERT INTO @TransferCompanyOwnedStock (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -451,27 +525,110 @@ BEGIN
 			AND FromStock.strBatchId = @strBatchId
 			AND Item.strType <> 'Comment'
 			AND Header.intInventoryTransferId = @intTransactionId
+			AND Detail.intOwnershipType = @ownershipType_Own
 
-		-- Clear the GL entries 
-		DELETE FROM @GLEntries
+		DECLARE @TransferStoragetock AS ItemCostingTableType  
+		INSERT INTO @TransferStoragetock (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+		) 
+		SELECT Detail.intItemId
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
+				,Header.dtmTransferDate
+				,dblQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
+				,dblUOMQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE WeightUOM.dblUnitQty END
+				,dblCost = 
+					CASE	WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) 
+							ELSE 
+								CASE	WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 
+										ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), Detail.dblNet)
+								END 
+					END
+				,dblSalesPrice = 0
+				,@DefaultCurrencyId
+				,dblExchangeRate = 1
+				,@intTransactionId 
+				,Detail.intInventoryTransferDetailId
+				,@strTransactionId
+				,@INVENTORY_TRANSFER_TYPE
+				,Detail.intNewLotId
+				,Detail.intToSubLocationId
+				,Detail.intToStorageLocationId
+				,strActualCostId = Detail.strToLocationActualCostId
+		FROM	tblICInventoryTransfer Header INNER JOIN tblICInventoryTransferDetail Detail 
+					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+				INNER JOIN tblICItem Item 
+					ON Item.intItemId = Detail.intItemId
+				INNER JOIN dbo.tblICInventoryTransaction FromStock 
+					ON FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
+					AND FromStock.intTransactionId = Detail.intInventoryTransferId
+					AND FromStock.intItemId = Detail.intItemId
+					AND FromStock.strTransactionId = Header.strTransferNo
+					AND FromStock.dblQty < 0 
+				LEFT JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				LEFT JOIN tblICItemUOM WeightUOM 
+					ON WeightUOM.intItemUOMId = Detail.intGrossNetUOMId
+		WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
+			AND FromStock.strBatchId = @strBatchId
+			AND Item.strType <> 'Comment'
+			AND Header.intInventoryTransferId = @intTransactionId
+			AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
 		-- Call the costing SP
 		-------------------------------------------
-		EXEC	@intReturnValue = dbo.uspICPostCosting  
-				@ItemsForTransferPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intEntityUserSecurityId
+		IF EXISTS (SELECT TOP 1 1 FROM @TransferCompanyOwnedStock)
+		BEGIN 
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
+					@TransferCompanyOwnedStock  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+					,@intEntityUserSecurityId
 
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END
+
+		-------------------------------------------
+		-- Call the storage sp	
+		-------------------------------------------
+		IF EXISTS (SELECT TOP 1 1 FROM @TransferStoragetock)
+		BEGIN 
+			EXEC	@intReturnValue = dbo.uspICPostStorage  
+					@TransferStoragetock  
+					,@strBatchId  
+					,@intEntityUserSecurityId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END 
+
+		-- Clear the GL entries 
+		DELETE FROM @GLEntries
+
 	END
 
 	-- Process the "To" Stock (Shipment is REQUIRED). 
 	IF @ysnShipmentRequired = 1
 	BEGIN 
 		-- Get values for the In-Transit Costing 
-		INSERT INTO @ItemsForInTransitCosting (
+		INSERT INTO @CompanyOwnedStockInTransit (
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
@@ -526,7 +683,7 @@ BEGIN
 				AND FromStock.strBatchId = @strBatchId
 				AND FromStock.dblQty < 0 -- Ensure the Qty is negative. 
 
-		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
+		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStockInTransit)
 		BEGIN 
 			-- Call the post routine for the In-Transit costing. 
 			INSERT INTO @DummyGLEntries (
@@ -563,7 +720,7 @@ BEGIN
 					,[dblForeignRate]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
-					@ItemsForInTransitCosting  
+					@CompanyOwnedStockInTransit  
 					,@strBatchId  
 					,NULL 
 					,@intEntityUserSecurityId
@@ -573,7 +730,10 @@ BEGIN
 	-- Check if From and To locations are the same. If not, then generate the GL entries. 
 	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
 	BEGIN 	
-		SET @ysnGLEntriesRequired = 1
+		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
+		BEGIN 
+			SET @ysnGLEntriesRequired = 1
+		END 
 
 		-----------------------------------------
 		-- Generate a new set of g/l entries
@@ -671,7 +831,14 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Check if From and To locations are the same. If not, then generate the GL entries. 
-	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
+					ON t.intInventoryTransferId = td.intInventoryTransferId
+		WHERE	t.intInventoryTransferId = @intTransactionId 
+				AND t.intFromLocationId <> t.intToLocationId
+				AND td.intOwnershipType = @ownershipType_Own
+	)
 	BEGIN 
 		SET @ysnGLEntriesRequired = 1;
 	END 
@@ -718,8 +885,15 @@ BEGIN
 				,@strTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
-				,@ysnRecap 		
+				,@ysnRecap
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
+		exec @intReturnValue =  [dbo].[uspICUnpostStorage]
+			@intTransactionId 
+			,@strTransactionId 
+			,@strBatchId 
+			,@intEntityUserSecurityId 
+			,@ysnRecap
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
@@ -738,9 +912,25 @@ BEGIN
 		ROLLBACK TRAN @TransactionName
 		COMMIT TRAN @TransactionName
 
-		-- 'Recap is not applicable when doing an inventory transfer for the same location.'
-		EXEC uspICRaiseError 80045;
-		GOTO Post_Exit  
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
+						ON t.intInventoryTransferId = td.intInventoryTransferId
+			WHERE	t.intInventoryTransferId = @intTransactionId 
+					AND t.intFromLocationId = t.intToLocationId
+					AND td.intOwnershipType = @ownershipType_Own
+		)
+		BEGIN
+			-- 'Post Preview is not applicable when doing an inventory transfer for the same location.'
+			EXEC uspICRaiseError 80045;
+			GOTO Post_Exit  
+		END 
+		ELSE 
+		BEGIN 
+			-- 'Post preview is not available. Financials are only booked for company-owned stocks.'
+			EXEC uspICRaiseError 80185;
+			GOTO Post_Exit  
+		END 
 	END 
 	ELSE 
 	BEGIN 
@@ -816,10 +1006,12 @@ BEGIN
 			FROM dbo.tblICInventoryTransfer h
 				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
 				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
-				INNER JOIN dbo.tblICItemLocation itemLocation ON itemLocation.intItemId = d.intItemId
+				INNER JOIN dbo.tblICItemLocation itemLocation 
+					ON itemLocation.intItemId = d.intItemId
 					AND itemLocation.intLocationId = h.intFromLocationId
 			WHERE h.intInventoryTransferId = @intTransactionId
 				AND Item.strType <> 'Comment'
+				AND d.intOwnershipType = @ownershipType_Own
 
 			EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 		END
@@ -851,11 +1043,13 @@ BEGIN
 			FROM dbo.tblICInventoryTransfer h
 				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
 				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
-				INNER JOIN dbo.tblICItemLocation itemLocation ON itemLocation.intItemId = d.intItemId
+				INNER JOIN dbo.tblICItemLocation itemLocation 
+					ON itemLocation.intItemId = d.intItemId
 					AND itemLocation.intLocationId = h.intToLocationId
 			WHERE h.intInventoryTransferId = @intTransactionId
 				AND ISNULL(h.ysnShipmentRequired, 0) = 1
 				AND Item.strType <> 'Comment'
+				AND d.intOwnershipType = @ownershipType_Own
 
 			EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
 		END 		

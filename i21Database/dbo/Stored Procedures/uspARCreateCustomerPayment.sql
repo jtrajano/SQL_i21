@@ -25,7 +25,9 @@
 	,@InvoicePrepayment	BIT				= 0
 	,@WriteOffAccountId	INT				= NULL 
 	,@PaymentOriginalId	NVARCHAR(25)	= NULL		-- Reference to the original/parent record
-	,@UseOriginalIdAsPaymentNumber	BIT	= 0		
+	,@UseOriginalIdAsPaymentNumber	BIT	= 0
+	,@ExchangeRateTypeId INT			= NULL
+	,@ExchangeRate		NUMERIC(18, 6)	= NULL
 AS
 
 BEGIN
@@ -171,6 +173,8 @@ BEGIN TRY
 		,[strRecordNumber]
 		,[strPaymentInfo]
 		,[strNotes]
+		,[intCurrencyExchangeRateTypeId]
+		,[dblExchangeRate]
 		,[ysnApplytoBudget]
 		,[ysnApplyOnAccount]
 		,[intEntityId]
@@ -197,6 +201,8 @@ BEGIN TRY
 		,[strRecordNumber]				= CASE WHEN ISNULL(@UseOriginalIdAsPaymentNumber, 0) = 1 THEN @PaymentOriginalId ELSE NULL END
 		,[strPaymentInfo]				= @PaymentInfo
 		,[strNotes]						= @Notes
+		,[intCurrencyExchangeRateTypeId]	= CER.[intCurrencyExchangeRateTypeId] 
+		,[dblExchangeRate]				= CER.[dblCurrencyExchangeRate]
 		,[ysnApplytoBudget]				= @ApplytoBudget
 		,[ysnApplyOnAccount]			= @ApplyOnAccount
 		,[intEntityId]					= @EntityId
@@ -205,7 +211,9 @@ BEGIN TRY
 		,[intWriteOffAccountId]			= @WriteOffAccountId
 		,[intConcurrencyId]				= 0		
 	FROM	
-		tblARCustomer ARC	
+		tblARCustomer ARC
+	CROSS APPLY
+		dbo.[fnARGetDefaultForexRate](@DatePaid, ISNULL(@CurrencyId, ISNULL(ARC.[intCurrencyId], @DefaultCurrency)), @ExchangeRateTypeId) CER
 	WHERE ARC.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

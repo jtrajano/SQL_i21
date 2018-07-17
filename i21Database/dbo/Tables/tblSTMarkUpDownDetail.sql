@@ -6,7 +6,7 @@
 	[intCategoryId] INT NULL,
 	[strMarkUpOrDown] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strRetailShrinkRS] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[intQty] int, 
+	[intQty] NUMERIC(18, 6) NULL, 
     [dblRetailPerUnit] NUMERIC(18, 6) NULL, 
     [dblTotalRetailAmount] NUMERIC(18, 6) NULL, 
     [dblTotalCostAmount] NUMERIC(18, 6) NULL, 

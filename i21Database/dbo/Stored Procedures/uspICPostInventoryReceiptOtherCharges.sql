@@ -569,6 +569,7 @@ BEGIN
 		,strCharge
 		,strItem
 		,strBundleType
+		,intEntityVendorId
 	)
 	AS 
 	(
@@ -600,6 +601,7 @@ BEGIN
 				,strCharge = Charge.strItemNo
 				,strItem = Item.strItemNo
 				,strBundleType = ISNULL(Item.strBundleType,'')
+				,intEntityVendorId = ReceiptCharges.intEntityVendorId 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -687,8 +689,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -746,8 +748,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -811,8 +813,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -867,8 +869,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -933,8 +935,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -989,8 +991,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= InventoryCostCharges.intEntityVendorId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -1048,6 +1050,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType 
 		,strCharge 
+		,intEntityVendorId
 	)
 	AS 
 	(
@@ -1075,6 +1078,7 @@ BEGIN
 				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
 				,strCharge = Charge.strItemNo
+				,intEntityVendorId = ReceiptCharges.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt 
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -1150,8 +1154,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1208,8 +1212,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1273,8 +1277,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1329,8 +1333,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1393,8 +1397,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1448,8 +1452,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName

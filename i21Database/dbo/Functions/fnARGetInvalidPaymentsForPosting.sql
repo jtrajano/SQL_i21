@@ -128,24 +128,24 @@ BEGIN
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
-    UNION
+    --UNION
 
-    --Exclude Recieved Amount in Final Invoice enabled
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' was posted with ''Exclude Recieved Amount in Final Invoice'' option enabled! Payment not allowed!'  
-	FROM
-		@Payments P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NOT NULL
-        AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
-        AND P.[ysnExcludedFromPayment] = 1
+ --   --Exclude Recieved Amount in Final Invoice enabled
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' was posted with ''Exclude Recieved Amount in Final Invoice'' option enabled! Payment not allowed!'  
+	--FROM
+	--	@Payments P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[intTransactionDetailId] IS NOT NULL
+ --       AND P.[intInvoiceId] IS NOT NULL
+ --       AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
+ --       AND P.[ysnExcludedFromPayment] = 1
 
     UNION
 
@@ -202,6 +202,24 @@ BEGIN
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NULL
         AND P.[strPaymentMethod] = 'ACH'
+        AND P.[ysnInvoicePrepayment] = 0
+        AND P.[dblAmountPaid] < @ZeroDecimal
+
+    UNION
+    --Negative Payment is not allowed.
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Negative Payment is not allowed.'
+	FROM
+		@Payments P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NULL
+        AND P.[strPaymentMethod] <> 'ACH'
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 
@@ -315,28 +333,29 @@ BEGIN
 
     UNION
 
-    --NOT BALANCE
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = NULL
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The debit and credit amounts are not balanced.'
-	FROM
-		@Payments P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NOT NULL
-    GROUP BY
-         P.[intTransactionId]
-        ,P.[strTransactionId]
-        ,P.[strBatchId]
-    HAVING
-            AVG(P.[dblAmountPaid]) < SUM(P.[dblPayment])
-        --OR  AVG(P.[dblBaseAmountPaid]) < SUM(P.[dblBasePayment])
+-- let uspGLBookEntries do the checking
+ --   --NOT BALANCE
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = NULL
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = 'The debit and credit amounts are not balanced.'
+	--FROM
+	--	@Payments P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[intTransactionDetailId] IS NOT NULL
+ --   GROUP BY
+ --        P.[intTransactionId]
+ --       ,P.[strTransactionId]
+ --       ,P.[strBatchId]
+ --   HAVING
+ --           AVG(P.[dblAmountPaid]) < SUM(P.[dblPayment])
+ --       --OR  AVG(P.[dblBaseAmountPaid]) < SUM(P.[dblBasePayment])
 
-    UNION
+ --   UNION
 
     --Payment Date
 	SELECT
@@ -371,8 +390,11 @@ BEGIN
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblTransactionInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseTransactionDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]), @ZeroDecimal) <> @ZeroDecimal
         AND ISNULL(P.[intGainLossAccount],0) = 0
+		AND P.[strTransactionType] <> 'Claim'
+		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
+			AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
+
 
     UNION
 
@@ -481,7 +503,7 @@ BEGIN
         ,P.[strTransactionNumber]
         ,P.[strBatchId]
     HAVING
-            (-((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount]))) < ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
+            (-((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount]))) > ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
 
     UNION
 
@@ -774,28 +796,28 @@ BEGIN
         AND CMUF.[strSourceSystem] = 'AR'
 		AND @Recap = 0
 
-    UNION
+    -- UNION
 
     --Payment with applied Prepayment
-	SELECT
-        [intTransactionId]         = P.[intTransactionId]
-		,[strTransactionId]         = P.[strTransactionId]
-		,[strTransactionType]       = @TransType
-		,[intTransactionDetailId]   = P.[intTransactionDetailId]
-		,[strBatchId]               = P.[strBatchId]
-		,[strError]                 = 'You cannot unpost this transaction: ' + P.strTransactionNumber + ' was already applied in ' + PREPAIDS.strInvoiceNumber 
-	FROM
-		@Payments P
-	CROSS APPLY (
-		SELECT TOP 1 I.strInvoiceNumber
-		FROM tblARPrepaidAndCredit ARPC
-		INNER JOIN tblARInvoice I ON ARPC.intInvoiceId = I.intInvoiceId
-		WHERE P.[intInvoiceId] = ARPC.[intPrepaymentId]
-		AND ARPC.[ysnApplied] = 1
-		AND ARPC.[dblAppliedInvoiceDetailAmount] <> 0
-	) PREPAIDS    
-	WHERE @Post = 0
-	 AND P.[intTransactionDetailId] IS NOT NULL
+	-- SELECT
+    --     [intTransactionId]         = P.[intTransactionId]
+	-- 	,[strTransactionId]         = P.[strTransactionId]
+	-- 	,[strTransactionType]       = @TransType
+	-- 	,[intTransactionDetailId]   = P.[intTransactionDetailId]
+	-- 	,[strBatchId]               = P.[strBatchId]
+	-- 	,[strError]                 = 'You cannot unpost this transaction: ' + P.strTransactionNumber + ' was already applied in ' + PREPAIDS.strInvoiceNumber 
+	-- FROM
+	-- 	@Payments P
+	-- CROSS APPLY (
+	-- 	SELECT TOP 1 I.strInvoiceNumber
+	-- 	FROM tblARPrepaidAndCredit ARPC
+	-- 	INNER JOIN tblARInvoice I ON ARPC.intInvoiceId = I.intInvoiceId
+	-- 	WHERE P.[intInvoiceId] = ARPC.[intPrepaymentId]
+	-- 	AND ARPC.[ysnApplied] = 1
+	-- 	AND ARPC.[dblAppliedInvoiceDetailAmount] <> 0
+	-- ) PREPAIDS    
+	-- WHERE @Post = 0
+	--  AND P.[intTransactionDetailId] IS NOT NULL
 
     UNION
 

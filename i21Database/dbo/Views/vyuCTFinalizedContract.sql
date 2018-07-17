@@ -7,7 +7,7 @@
 ,strPONumber								= PH.strContractNumber+ '-' + LTRIM(PD.intContractSeq)
 ,strSalesEntity								= Entity.strEntityName
 ,strSONumber								= SH.strContractNumber+ '-' + LTRIM(SD.intContractSeq)
-,dblPOQuantity								= ISNULL(PD.dblBalance,0)-ISNULL(PD.dblScheduleQty,0)
+,dblPOQuantity								= ISNULL(PD.dblQuantity,0)
 ,strPOUOM									= UnitMeasure.strUnitMeasure
 ,strInvoiceNumber							= Invoice.strInvoiceNumber
 ,dtmInvoiceDate								= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)

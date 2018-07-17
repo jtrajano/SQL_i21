@@ -114,8 +114,8 @@
 	[strBuybackSubmitted]					NVARCHAR(1)		CONSTRAINT [DF_tblARInvoiceDetail_strBuybackSubmitted] DEFAULT (N'N') NOT NULL,
 	[dblBuybackAmount]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBuybackAmount] DEFAULT ((0)) NULL,
 	[dblBaseBuybackAmount]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseBuybackAmount] DEFAULT ((0)) NULL,
-
-
+	[strAddonDetailKey]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
+	[ysnAddonParent]						BIT			NULL,
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

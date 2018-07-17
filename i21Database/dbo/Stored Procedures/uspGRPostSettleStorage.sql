@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @EntityId INT
 	DECLARE @LocationId INT
 	DECLARE @ItemId INT
+	DECLARE @strItemNo NVARCHAR(20)
 	DECLARE @intUnitMeasureId INT
 	DECLARE @CommodityStockUomId INT
 	DECLARE @TicketNo NVARCHAR(20)
@@ -49,7 +50,7 @@ BEGIN TRY
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
-	DECLARE @FeeItemId INT
+	--DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
 	DECLARE @intCurrencyId INT
 	DECLARE @intDefaultCurrencyId INT
@@ -92,6 +93,20 @@ BEGIN TRY
 	DECLARE @dblTotal AS DECIMAL(18,6)
 
 	DECLARE @intCashPriceUOMId INT
+
+  DECLARE @strOwnedPhysicalStock NVARCHAR(20)
+	DECLARE @dblSettlementRatio DECIMAL(24, 10)
+	DECLARE @dblOriginalInventoryGLAmount DECIMAL(24, 10)
+	
+	DECLARE @GLAccounts AS dbo.ItemGLAccount;
+	DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
+	DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment'
+	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
+	DECLARE @ACCOUNT_CATEGORY_APClearing AS NVARCHAR(30) = 'AP Clearing'
+	DECLARE @ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
+	DECLARE @ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
+
+	DECLARE @adjustCostOfDelayedPricingStock AS ItemCostAdjustmentTableType
 
 	SET @dtmDate = GETDATE()
 
@@ -197,7 +212,7 @@ BEGIN TRY
 		WHERE intSettleStorageId = @intSettleStorageId
 	
 		SELECT
-		@intFutureMarketId=ISNULL(Com.intFutureMarketId,0)
+		@intFutureMarketId=ISNULL(Com.intFutureMarketId,0),@strItemNo = Item.strItemNo
 		FROM tblICItem Item
 		JOIN tblICCommodity Com ON Com.intCommodityId=Item.intCommodityId
 		WHERE Item.intItemId = @ItemId
@@ -239,12 +254,12 @@ BEGIN TRY
 		FROM tblSMUserSecurity
 		WHERE [intEntityId] = @intCreatedUserId
 
-		SELECT @FeeItemId = intItemId
-		FROM tblGRCompanyPreference
+		-- SELECT @FeeItemId = intItemId
+		-- FROM tblGRCompanyPreference
 
-		SELECT @strFeeItem = strItemNo
-		FROM tblICItem
-		WHERE intItemId = @FeeItemId
+		-- SELECT @strFeeItem = strItemNo
+		-- FROM tblICItem
+		-- WHERE intItemId = @FeeItemId
 
 		SELECT @dblUOMQty = dblUnitQty
 			,@intUnitMeasureId = intUnitMeasureId
@@ -370,7 +385,11 @@ BEGIN TRY
 					,intContractHeaderId   = NULL
 					,intContractDetailId   = NULL
 					,dblUnits			   = SST.dblUnits
-					,dblCashPrice		   = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)) 
+					,dblCashPrice		   = CASE WHEN QM.strDiscountChargeType = 'Percent'
+														THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))) * (SELECT dblFuturesPrice + dblFuturesBasis FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+											ELSE --Dollar
+												dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
+											END
 					,intItemId             = DItem.intItemId 
 					,intItemType           = 3 
 					,IsProcessed           = 0
@@ -410,12 +429,21 @@ BEGIN TRY
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
 					,dblUnits             = SST.dblUnits
-					,dblCashPrice         = (ISNULL(dblFeesPaid, 0) - ISNULL(dblFeesDue, 0))
-					,intItemId            = @FeeItemId
+					,dblCashPrice         = CS.dblFeesDue
+					,intItemId            = IC.intItemId
 					,intItemType          = 4
 					,IsProcessed          = 0
 				FROM tblGRCustomerStorage CS
-				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
+				INNER JOIN tblGRSettleStorageTicket SST 
+					ON 	SST.intCustomerStorageId = CS.intCustomerStorageId 
+						AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
+				INNER JOIN tblSCTicket SC 
+					ON 	SC.intTicketId = CS.intTicketId 
+						OR SC.intDeliverySheetId = CS.intDeliverySheetId
+				INNER JOIN tblSCScaleSetup SCSetup 
+					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+				INNER JOIN tblICItem IC 
+					ON IC.intItemId = SCSetup.intDefaultFeeItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
@@ -835,6 +863,15 @@ BEGIN TRY
 				DELETE 
 				FROM @GLEntries
 
+				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+				FROM tblGRCustomerStorage CS 
+				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE CS.intCustomerStorageId = @intCustomerStorageId
+				
+				SELECT TOP 1 @intReceiptId = intInventoryReceiptId
+				FROM tblGRStorageHistory
+				WHERE strType = 'FROM Scale' AND intCustomerStorageId = @intCustomerStorageId
+
 				INSERT INTO @ItemsToStorage 
 				(
 					 intItemId
@@ -861,6 +898,8 @@ BEGIN TRY
 					,intItemUOMId				=  @intInventoryItemStockUOMId
 					,dtmDate					=  GETDATE()
 					,dblQty						= CASE 
+														WHEN @strOwnedPhysicalStock ='Customer' THEN
+																										CASE 
 														WHEN 
 															dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage >0 
 															AND dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage < 0.00001
@@ -868,6 +907,8 @@ BEGIN TRY
 														ELSE
 																-dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 													END
+														ELSE 0 
+												  END			
 					,dblUOMQty					=  @dblUOMQty
 					,dblCost					=  CASE 
 														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
@@ -916,10 +957,13 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+					,dblQty						= CASE 
+														WHEN @strOwnedPhysicalStock ='Customer' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+												        ELSE 0
+												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
-														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice] + ISNULL(OtherCharge.dblCashPrice,0)
+														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
@@ -936,13 +980,6 @@ BEGIN TRY
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-				LEFT JOIN (
-							SELECT intCustomerStorageId
-							      ,SUM(dblCashPrice) dblCashPrice 
-						    FROM @SettleVoucherCreate 
-							WHERE intItemType = 3
-							GROUP BY intCustomerStorageId
-						  ) OtherCharge ON OtherCharge.intCustomerStorageId = SV.intCustomerStorageId
 				WHERE SV.intItemType = 1
 
 				--Reduce the On-Storage Quantity		
@@ -957,13 +994,25 @@ BEGIN TRY
 				END
 
 				BEGIN
-					--EXEC uspICPostCosting 
-					--	 @ItemsToPost
-					--	,@strBatchId
-					--	,'Cost of Goods'
-					--	,@intCreatedUserId
+					  SELECT @dblUnits = SUM(dblUnits) FROM @SettleVoucherCreate WHERE intItemType = 1
+					  
+					  SELECT @dblSettlementRatio = @dblUnits / dblOriginalBalance 
+					  FROM vyuGRStorageSearchView WHERE intCustomerStorageId = @intCustomerStorageId
+					  
+					  SELECT @dblOriginalInventoryGLAmount = SUM(dblOpenReceive*dblUnitCost) 
+					  FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
 
-						INSERT INTO @GLEntries (
+				END
+				
+				BEGIN
+									
+						IF @strOwnedPhysicalStock ='Customer' 
+						BEGIN
+
+							DELETE FROM @GLEntries
+
+							INSERT INTO @GLEntries 
+							(
 							[dtmDate] 
 							,[strBatchId]
 							,[intAccountId]
@@ -1010,6 +1059,56 @@ BEGIN TRY
 					BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
 					END 
+						    
+							DELETE FROM @GLEntries
+							
+							INSERT INTO @GLEntries 
+							(
+							 [dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+						)
+							EXEC uspGRCreateGLEntries 
+							 'Storage Settlement'
+							,'OtherCharges'
+							,@intSettleStorageId
+							,@strBatchId
+							,@intCreatedUserId
+							,@ysnPosted
+							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+							BEGIN 
+									EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+							END
+					END
 				END
 			END
 
@@ -1095,24 +1194,15 @@ BEGIN TRY
 				 intCustomerStorageId = SST.intCustomerStorageId
 				,intItemId = ReceiptCharge.[intChargeId]
 				,[intAccountId] = NULL
-				--,[dblQtyReceived] = SST.dblUnits
-				,[dblQtyReceived] = ROUND(dbo.fnCalculateQtyBetweenUOM(ReceiptCharge.intCostUOMId,@intCashPriceUOMId,SST.dblUnits),2)
+				,[dblQtyReceived]	  = CASE WHEN ISNULL(Item.strCostMethod,'')='Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
 				,[strMiscDescription] = Item.[strItemNo]
 				,[dblCost] = CASE 
-								WHEN ReceiptCharge.strCostMethod='Per Unit'		THEN
-																					CASE 
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN    ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -  ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-																									WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-						 															END
-                           
-								WHEN ReceiptCharge.strCostMethod='Amount'		THEN
-																					CASE 
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN     ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance),2)
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN   - ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance), 2)
-																									WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN  - ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance), 2)
-						 															END
-							 END
+  											WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN    ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
+  											WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -  ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+  											WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+											  WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	- ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+											  WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	- ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+							        END
 				,[intContractHeaderId] = NULL
 				,[intContractDetailId] = NULL
 				--,[intUnitOfMeasureId] = ReceiptCharge.intCostUOMId
@@ -1139,9 +1229,12 @@ BEGIN TRY
 				 (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 				  OR
 				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+				  OR
+				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
+				 OR
+				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
 				)
 								
-				
 				---Adding Contract Other Charges.
 				INSERT INTO @voucherDetailStorage 
 				(
@@ -1171,8 +1264,8 @@ BEGIN TRY
 				 ,[strMiscDescription]	  = Item.[strItemNo]
 				 ,[dblCost]				  = (
 											  CASE 
-											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)*-1 
-											  		ELSE  CC.dblRate * -1  
+											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)
+											  		ELSE  CC.dblRate
 											  END
 											 )
 											 /											
@@ -1199,7 +1292,6 @@ BEGIN TRY
 				 JOIN @SettleVoucherCreate SV ON SV.intContractDetailId = CD.intContractDetailId AND SV.intItemType = 1
 				 JOIN tblICItem Item ON Item.intItemId = CC.intItemId
 				 LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CC.intItemUOMId
-				 WHERE ISNULL(CC.ysnPrice,0) =1
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
@@ -1336,7 +1428,12 @@ BEGIN TRY
 				END
 
 				UPDATE CS
-				SET CS.dblOpenBalance = CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit)
+				SET CS.dblOpenBalance 
+					 = CASE 
+							WHEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4,1) > 0.0009 
+									THEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4)
+							ELSE 0
+					   END				    
 				FROM tblGRCustomerStorage CS
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
 				JOIN (

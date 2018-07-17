@@ -9,9 +9,9 @@ DECLARE @ConvertYear int
 
 SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 
-IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI')
+IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI' OR @strDateTimeFormat = 'MM DD YYYY' OR @strDateTimeFormat ='YYYY MM DD')
 SELECT @ConvertYear=101
-ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')
+ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI' OR @strDateTimeFormat = 'DD MM YYYY' OR @strDateTimeFormat ='YYYY DD MM')
 SELECT @ConvertYear=103
 
 DECLARE @strInternalTradeNo int= null
@@ -43,7 +43,10 @@ JOIN tblSMCurrency cur on  cur.strCurrency=ti.strCurrency
 JOIN tblRKFuturesMonth m on m.strFutureMonth=replace(ti.strFutureMonth,'-',' ') and m.intFutureMarketId=fm.intFutureMarketId
 Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-',' ') and om.intFutureMarketId=fm.intFutureMarketId 
 LEFT JOIN tblCTBook b on b.strBook=ti.strBook
-LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook)t order by strInternalTradeNo
+LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook
+where isnull(ti.strName,'') <> '' and isnull(ti.strFutMarketName,'') <> '' and isnull(ti.strInstrumentType,'') <> ''
+AND isnull(ti.strAccountNumber,'') <> '' and isnull(ti.strCommodityCode,'') <> '' and isnull(ti.strLocationName,'') <> '' and isnull(ti.strSalespersonId,'') <> ''
+)t order by strInternalTradeNo
 
 INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
 									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,

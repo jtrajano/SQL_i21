@@ -22,7 +22,9 @@ BEGIN TRY
 			@LastModifiedUserSign      VARBINARY(MAX),
 			@intLaguageId			INT,
 			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month'
+			@strMonthLabelName		NVARCHAR(50) = 'Month',
+			@intReportLogoHeight		INT,
+			@intReportLogoWidth			INT
 			
 			DECLARE @TotalQuantity DECIMAL(24,10)
 			DECLARE @TotalNetQuantity DECIMAL(24,10)			
@@ -96,6 +98,8 @@ BEGIN TRY
 	JOIN tblCTPriceFixation PF ON PF.intPriceContractId=PC.intPriceContractId 
 	WHERE PF.intPriceFixationId=@intPriceFixationId
 	
+	SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference
+
 	SELECT @LastModifiedUserSign = Sig.blbDetail 
 								   FROM tblSMSignature Sig 
 								   JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
@@ -145,14 +149,14 @@ BEGIN TRY
 			strDifferential = dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice =	dbo.fnRemoveTrailingZeroes(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(
+			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
 										ELSE	CASE	WHEN	CY.intMainCurrencyId	=	CD.intInvoiceCurrencyId
 														THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) / 100
 														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) * CD.dblRate
 												END
-								END) + ' ' + IY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,FN.strUnitMeasure) ,
+								END,2)) + ' ' + IY.strCurrency + ' ' + @per + ' ' +  dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',FN.intUnitMeasureId,@intLaguageId,'Name',FN.strUnitMeasure),
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strSummary
 								ELSE	''
@@ -207,7 +211,10 @@ BEGIN TRY
 			strCompanyName = @strCompanyName,
 			strCPContract  = CH.strCPContract,
 			intLanguageId = @intLaguageId,
-			xmlParam = @xmlParam
+			xmlParam = @xmlParam,
+			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference,
+			ISNULL(@intReportLogoHeight,0) intReportLogoHeight,
+			ISNULL(@intReportLogoWidth,0) intReportLogoWidth
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
@@ -242,7 +249,7 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
 	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
 	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	LEFT
-	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId
+	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId		LEFT
 
 	JOIN	tblSMCurrency				IY	ON	IY.intCurrencyID				=	CD.intInvoiceCurrencyId	LEFT
 	JOIN	tblICItemUOM				FO	ON	FO.intItemUOMId					=	CD.intFXPriceUOMId		LEFT	

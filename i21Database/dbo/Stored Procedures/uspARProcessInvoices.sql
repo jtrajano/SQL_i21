@@ -364,7 +364,7 @@ BEGIN
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
-		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
+		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Load Schedule', 'Weight Claim') THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' OR (ISNULL([strSourceTransaction],'') = 'Invoice' AND ISNULL([strTransactionType],'') = 'Credit Memo') THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@TruckDriverId					= [intTruckDriverId]
@@ -519,13 +519,13 @@ BEGIN
 						SET @SourceTable = 'tblCTContractHeader'
 					END
 
-				IF ISNULL(@SourceTransaction,'') = 'Load Schedule'
+				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule', 'Weight Claim')
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -1013,6 +1013,7 @@ BEGIN
 							,[strTaxableByOtherTaxes]
 							,[strCalculationMethod]
 							,[dblRate]
+							,[dblBaseRate]
 							,[intTaxAccountId]
 							,[dblTax]
 							,[dblAdjustedTax]
@@ -1031,6 +1032,7 @@ BEGIN
 							,[strTaxableByOtherTaxes]
 							,[strCalculationMethod]
 							,[dblRate]
+							,[dblBaseRate]
 							,[intTaxAccountId]
 							,[dblTax]
 							,[dblAdjustedTax]
@@ -1379,13 +1381,13 @@ BEGIN TRY
 						SET @SourceTable = 'tblCTContractHeader'
 					END	
 
-			IF ISNULL(@SourceTransaction,'') = 'Load Schedule'
+			IF ISNULL(@SourceTransaction,'') IN ('Load Schedule', 'Weight Claim')
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
 					END
 
-			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
 				BEGIN
 					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 				END
@@ -1758,6 +1760,7 @@ BEGIN TRY
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
 								,[dblRate]
+								,[dblBaseRate]
 								,[intTaxAccountId]
 								,[dblTax]
 								,[dblAdjustedTax]
@@ -1776,6 +1779,7 @@ BEGIN TRY
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
 								,[dblRate]
+								,[dblBaseRate]
 								,[intTaxAccountId]
 								,[dblTax]
 								,[dblAdjustedTax]
@@ -2115,6 +2119,7 @@ BEGIN TRY
 						,[strTaxableByOtherTaxes]
 						,[strCalculationMethod]
 						,[dblRate]
+						,[dblBaseRate]
 						,[intTaxAccountId]
 						,[dblTax]
 						,[dblAdjustedTax]
@@ -2133,6 +2138,7 @@ BEGIN TRY
 						,[strTaxableByOtherTaxes]
 						,[strCalculationMethod]
 						,[dblRate]
+						,[dblBaseRate]
 						,[intTaxAccountId]
 						,[dblTax]
 						,[dblAdjustedTax]

@@ -19,11 +19,12 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
 	  , @dtmAsOfDateFrom			AS DATETIME			= NULL
-
+	  , @ysnDetailedFormatLocal		AS BIT				= 0
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
+SET @ysnDetailedFormatLocal		= ISNULL(@ysnDetailedFormat, 0)
 
 IF @strAsOfDateFrom <> ''
 	SET @dtmAsOfDateFrom		= ISNULL(CONVERT(DATETIME, @strAsOfDateFrom), GETDATE())
@@ -63,7 +64,7 @@ FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
 	FROM tblARCustomer WITH (NOLOCK)
-	WHERE ISNULL(strStatementFormat, 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')
+	WHERE (@ysnDetailedFormatLocal = 0 AND ISNULL(strStatementFormat, 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
 ) C ON AGING.intEntityCustomerId = C.intEntityId
 OUTER APPLY (
 	SELECT intEmailSetupCount = COUNT(*) 
@@ -84,7 +85,7 @@ IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
 										  WHERE dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId) LIKE '%' + @strAccountStatusCodeLocal + '%')
 	END
 
-IF @ysnDetailedFormat = 0
+IF @ysnDetailedFormatLocal = 0
 	BEGIN
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)

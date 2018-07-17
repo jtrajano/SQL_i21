@@ -116,6 +116,7 @@ FROM (
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 		, ContractView.intContractSeq
+		, strLotCondition			= ICPreference.strLotCondition
 	FROM vyuCTContractAddOrdersLookup ContractView
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -141,6 +142,11 @@ FROM (
 			,ISNULL(ContractView.intRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
 			,ContractView.dtmContractDate
 		) defaultForexRate 
+
+		OUTER APPLY (
+			SELECT	TOP 1 *
+			FROM	 tblICCompanyPreference			
+		) ICPreference
 
 		-- The following are bundle/basket related queries:
 		--LEFT JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId

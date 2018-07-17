@@ -142,11 +142,11 @@ SELECT
 														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
 												THEN B.dblOpenReceive - B.dblBillQty
 												ELSE A.dblQtyReceived END),
-	[dblCost]						=	CASE WHEN contractDetail.dblCashPrice > 0 
-														THEN contractDetail.dblCashPrice
+	[dblCost]						=	CASE WHEN contractDetail.dblSeqPrice > 0 
+														THEN contractDetail.dblSeqPrice
 														ELSE 
-															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
-																THEN contractDetail.dblCashPrice
+															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblSeqPrice > 0
+																THEN contractDetail.dblSeqPrice
 																ELSE B.dblUnitCost
 																END)
 													END, --use cash price of contract if unit cost of receipt item is 0,
@@ -208,10 +208,13 @@ LEFT JOIN tblICItemBundle itemBundle ON itemBundle.intItemBundleId = A.intItemBu
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 LEFT JOIN vyuPATEntityPatron patron ON C.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
-LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
-				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
-				ON contractHeader.intContractHeaderId = B.intOrderId 
+LEFT JOIN vyuCTContractDetailView contractDetail 
+			ON 	contractDetail.intContractHeaderId = B.intOrderId 
 				AND contractDetail.intContractDetailId = B.intLineNo
+-- LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
+-- 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
+-- 				ON contractHeader.intContractHeaderId = B.intOrderId 
+-- 				AND contractDetail.intContractDetailId = B.intLineNo
 LEFT JOIN tblICItemUOM ContractItemCostUOM ON ContractItemCostUOM.intItemUOMId = contractDetail.intPriceItemUOMId
 LEFT JOIN tblAP1099Category F ON entity.str1099Type = F.strCategory
 WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
@@ -485,13 +488,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intContractDetailId]		=	E1.intContractDetailId,
 			[intContractHeaderId]		=	E.intContractHeaderId,
 			[intContractSeq]			=	E1.intContractSeq,
-			[intUnitOfMeasureId]		=	B.intUnitMeasureId,
+			[intUnitOfMeasureId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract'  
+												THEN  E1.intItemUOMId
+												ELSE B.intUnitMeasureId END,
 			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
 			[dblCostUnitQty]			=	ABS(ISNULL(voucherDetailReceipt.dblCostUnitQty,0)),
-			[dblUnitQty]				=	ItemUOM.dblUnitQty,
+			[dblUnitQty]				=	ItemContractUOM.dblUnitQty,
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
@@ -528,6 +533,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemContractUOM ON ItemContractUOM.intItemUOMId = E1.intItemUOMId 
+														AND E1.intContractDetailId = B.intLineNo AND E.intContractHeaderId = B.intOrderId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
@@ -1009,6 +1016,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO @voucherIds
 	SELECT @voucherId
 	EXEC uspAPUpdateVoucherTotal @voucherIds
+
+	IF  EXISTS (SELECT 1 FROM tblAPBillDetail where intBillDetailId  IN (SELECT intBillDetailId FROM @detailCreated) and intContractDetailId > 0)
+	BEGIN
+		DECLARE @voucherDetailId INT
+		SELECT  @voucherDetailId = intBillDetailId FROM @detailCreated 		
+		EXEC [uspAPUpdateQty] @voucherDetailId
+	END
 
 IF @transCount = 0 COMMIT TRANSACTION
 

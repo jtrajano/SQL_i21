@@ -60,9 +60,9 @@ JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId
  and isnull(il.strDescription,'') <> 'In-Transit'
 WHERE i.intCommodityId=@intCommodityId  
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and strTransactionId not like'%IS%'
-and it.intItemLocationId = @intLocationId
+and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
-UNION
+UNION 
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit from(
 select  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty,r.strReceiptNumber  
@@ -81,9 +81,9 @@ FROM tblSCTicket st
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and st.intProcessingLocationId = @intLocationId)a
+		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)a
 
-UNION --IR came from Delivery Sheet
+UNION all --IR came from Delivery Sheet
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit from(
 select  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) dblInQty,r.strReceiptNumber  
@@ -103,11 +103,11 @@ FROM tblSCDeliverySheet DS
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and DS.intCompanyLocationId = @intLocationId
+		 and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId else @intLocationId end
 		 AND DS.ysnPost = 1)a
 		 
 
-union
+union 
 SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit from(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblOutQty,r.strShipmentNumber  
@@ -129,9 +129,9 @@ FROM tblSCTicket st
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and gs.strOwnedPhysicalStock='Customer'
-		and st.intProcessingLocationId = @intLocationId)a
+		and st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end)a
 
-union --IS came from Delivery Sheet
+union all--IS came from Delivery Sheet
 SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit from(
 SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
@@ -154,8 +154,86 @@ FROM tblSCDeliverySheet DS
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and gs.strOwnedPhysicalStock='Customer'
-		and DS.intCompanyLocationId = @intLocationId)a
-)t
+		and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then  DS.intCompanyLocationId  else @intLocationId end)a
+
+UNION ALL --Delivery Sheet
+select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+from(
+SELECT
+	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+	DSS.strDistributionOption,
+	'' strShipDistributionOption,
+	'' as strAdjDistributionOption,
+	'' as strCountDistributionOption,
+	'' as tranShipmentNumber,
+	(CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END)  tranShipQty,
+	'' tranReceiptNumber,
+	(CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END) tranRecQty,
+	'' tranAdjNumber,
+	0.0 dblAdjustmentQty,
+	'' tranCountNumber,
+	0.0 dblCountQty,
+	'' tranInvoiceNumber,
+	0.0 dblInvoiceQty,
+	null intInventoryReceiptId,
+	NULL intInventoryShipmentId,
+	null intInventoryAdjustmentId,
+	null intInventoryCountId,
+	null intInvoiceId,
+	DS.intDeliverySheetId,
+	DS.strDeliverySheetNumber + '*' AS deliverySheetNumber,
+	null intTicketId,
+	'' AS ticketNumber  
+FROM tblSCTicket st
+	JOIN tblICItem i on i.intItemId=st.intItemId
+	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
+	JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+	AND i.intCommodityId= @intCommodityId
+	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
+	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H')t
+	
+
+UNION ALL --On Hold without Delivery Sheet
+select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+from(
+SELECT
+	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+	st.strDistributionOption,
+	'' strShipDistributionOption,
+	'' as strAdjDistributionOption,
+	'' as strCountDistributionOption,
+	'' as tranShipmentNumber,
+	(CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END)  tranShipQty,
+	'' tranReceiptNumber,
+	(CASE WHEN strInOutFlag='I' THEN dblNetUnits  ELSE 0 END) tranRecQty,
+	'' tranAdjNumber,
+	0.0 dblAdjustmentQty,
+	'' tranCountNumber,
+	0.0 dblCountQty,
+	'' tranInvoiceNumber,
+	0.0 dblInvoiceQty,
+	null intInventoryReceiptId,
+	NULL intInventoryShipmentId,
+	null intInventoryAdjustmentId,
+	null intInventoryCountId,
+	null intInvoiceId,
+	null intDeliverySheetId,
+	'' AS deliverySheetNumber ,
+	st.intTicketId,
+	st.strTicketNumber AS ticketNumber 
+FROM tblSCTicket st
+	JOIN tblICItem i on i.intItemId=st.intItemId
+WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+	AND i.intCommodityId= @intCommodityId
+	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+	AND st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
+	AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H')t1
+
+ )t
 
 --Previous value start 
 INSERT INTO @tblResultInventory (BalanceForward)

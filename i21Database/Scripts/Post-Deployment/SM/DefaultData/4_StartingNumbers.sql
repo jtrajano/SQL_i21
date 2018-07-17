@@ -33,6 +33,11 @@ GO
 	UPDATE tblSMStartingNumber SET strPrefix = 'PTR-'
 	WHERE strPrefix = 'TRF-' AND strTransactionType = N'Transfer' AND strModule = 'Patronage'	
 
+	UPDATE tblSMStartingNumber SET strPrefix = N''
+	WHERE strPrefix = N' ' AND strTransactionType = N'CPE Receipt' AND strModule = 'Ticket Management'	
+
+	UPDATE tblSMStartingNumber SET strPrefix = N''
+	WHERE strPrefix = N' ' AND strTransactionType = N'Delivery Sheet' AND strModule = 'Ticket Management'	
 GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 
@@ -375,12 +380,12 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 36
-			 ,[strTransactionType]	= N'ContractAdjNo'
-           ,[strPrefix]				= N'Adj - '
-           ,[intNumber]				= 1
-           ,[strModule]				= 'Contract Management'
-           ,[ysnEnable]				= 1
-           ,[intConcurrencyId]		= 1
+			,[strTransactionType]	= N'ContractAdjNo'
+			,[strPrefix]			= N'Adj - '
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ContractAdjNo')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 38
@@ -1154,7 +1159,7 @@ GO
 	UNION ALL
 	SELECT	 [intStartingNumberId]	= 120
 			,[strTransactionType]	= N'CPE Receipt'
-			,[strPrefix]			= N' '
+			,[strPrefix]			= N''
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
@@ -1164,7 +1169,7 @@ GO
 	UNION ALL
 	SELECT	 [intStartingNumberId]	= 121
 			,[strTransactionType]	= N'Delivery Sheet'
-			,[strPrefix]			= N' '
+			,[strPrefix]			= N''
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1

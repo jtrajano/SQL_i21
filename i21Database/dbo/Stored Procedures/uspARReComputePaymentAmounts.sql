@@ -12,7 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE  @ZeroDecimal	DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000
+SET @ZeroDecimal = 0.000000 
 
 UPDATE ARPD
 SET
@@ -21,30 +21,52 @@ FROM
 	tblARPaymentDetail ARPD
 WHERE 
 	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
+
+UPDATE ARP
+SET
+	 ARP.[dblExchangeRate]	= [dbo].fnRoundBanker(ISNULL(PD.[dblCurrencyExchangeRate], 1.000000) / ISNULL(PD.[intCount], 1.000000), 6)
+FROM tblARPayment ARP
+INNER JOIN 
+	(SELECT
+		 [intPaymentId]			= [intPaymentId]
+		,[dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+		,[intCount]					= COUNT([intPaymentId])
+	FROM
+		tblARPaymentDetail GROUP BY intPaymentId
+	) PD
+		ON ARP.[intPaymentId] = PD.[intPaymentId]
+WHERE
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
 						
 UPDATE ARPD
 SET
 	 ARPD.[dblDiscount]					= ISNULL(ARPD.[dblDiscount], @ZeroDecimal)
-	,ARPD.[dblBaseDiscount]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscount], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseDiscount]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscount], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblDiscountAvailable]		= ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal)
-	,ARPD.[dblBaseDiscountAvailable]	= ISNULL(ARPD.[dblBaseDiscountAvailable], @ZeroDecimal)
+	,ARPD.[dblBaseDiscountAvailable]	= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblInterest]					= ISNULL(ARPD.[dblInterest], @ZeroDecimal)
-	,ARPD.[dblBaseInterest]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblInterest], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseInterest]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblInterest], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblAmountDue]				= ISNULL(ARPD.[dblAmountDue], @ZeroDecimal)
-	,ARPD.[dblBaseAmountDue]			= [dbo].fnRoundBanker(ISNULL(ARPD.[dblAmountDue], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseAmountDue]			= [dbo].fnRoundBanker(ISNULL(ARPD.[dblAmountDue], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblPayment]					= ISNULL(ARPD.[dblPayment], @ZeroDecimal)
-	,ARPD.[dblBasePayment]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblPayment], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBasePayment]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblPayment], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
+INNER JOIN
+	tblARPayment ARP
+		ON ARPD.[intPaymentId] = ARP.[intPaymentId]
 WHERE 
 	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
 
 UPDATE ARPD
 SET	
 	 ARPD.[dblAmountDue]		= (ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType])) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType])) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType])) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
+INNER JOIN
+	tblARPayment ARP
+		ON ARPD.[intPaymentId] = ARP.[intPaymentId]
 INNER JOIN
 	tblARInvoice ARI
 		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId] 
@@ -54,9 +76,12 @@ WHERE
 UPDATE ARPD
 SET	
 	 ARPD.[dblAmountDue]		= (ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
+INNER JOIN
+	tblARPayment ARP
+		ON ARPD.[intPaymentId] = ARP.[intPaymentId]
 INNER JOIN
 	(SELECT
 		[intBillId]
@@ -80,6 +105,7 @@ UPDATE ARP
 SET
 	 ARP.[dblAmountPaid]		= PD.[dblPaymentTotal]
 	,ARP.[dblBaseAmountPaid]	= PD.[dblBasePaymentTotal]
+	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT
@@ -99,6 +125,7 @@ SET
 	,ARP.[dblBaseUnappliedAmount]	= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
 	,ARP.[dblOverpayment]			= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
 	,ARP.[dblBaseOverpayment]		= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
+	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT

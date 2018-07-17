@@ -1,26 +1,29 @@
 ﻿CREATE FUNCTION [dbo].[fnConstructLineItemTaxDetail]
 (
-	 @Quantity					NUMERIC(18,6)					= 0
-	,@GrossAmount				NUMERIC(18,6)					= 0
-	,@LineItemTaxEntries		LineItemTaxDetailStagingTable	READONLY
-	,@IsReversal				BIT								= 0	
-	,@ItemId					INT								= NULL	
-	,@EntityCustomerId			INT								= NULL
-	,@CompanyLocationId			INT								= NULL
-	,@TaxGroupId				INT								= NULL
-	,@Price						NUMERIC(18,6)					= 0	
-	,@TransactionDate			DATE							= NULL	
-	,@ShipToLocationId			INT								= NULL
-	,@IncludeExemptedCodes		BIT								= 0
-	,@SiteId					INT								= NULL
-	,@FreightTermId				INT								= NULL
-	,@CardId					INT								= NULL
-	,@VehicleId					INT								= NULL
-	,@DisregardExemptionSetup	BIT								= 0
-	,@ExcludeCheckOff			BIT								= 0
-	,@ItemUOMId					INT								= NULL
-	,@CFSiteId					INT								= NULL
-	,@IsDeliver					BIT								= 0
+	 @Quantity						NUMERIC(18,6)					= 0
+	,@GrossAmount					NUMERIC(18,6)					= 0
+	,@LineItemTaxEntries			LineItemTaxDetailStagingTable	READONLY
+	,@IsReversal					BIT								= 0	
+	,@ItemId						INT								= NULL	
+	,@EntityCustomerId				INT								= NULL
+	,@CompanyLocationId				INT								= NULL
+	,@TaxGroupId					INT								= NULL
+	,@Price							NUMERIC(18,6)					= 0	
+	,@TransactionDate				DATE							= NULL	
+	,@ShipToLocationId				INT								= NULL
+	,@IncludeExemptedCodes			BIT								= 0
+	,@SiteId						INT								= NULL
+	,@FreightTermId					INT								= NULL
+	,@CardId						INT								= NULL
+	,@VehicleId						INT								= NULL
+	,@DisregardExemptionSetup		BIT								= 0
+	,@ExcludeCheckOff				BIT								= 0
+	,@ItemUOMId						INT								= NULL
+	,@CFSiteId						INT								= NULL
+	,@IsDeliver						BIT								= 0
+	,@CurrencyId					INT								= NULL
+	,@CurrencyExchangeRateTypeId	INT								= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)					= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -30,6 +33,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblBaseRate]					NUMERIC(18,6)
 	,[dblExemptionPercent]			NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
@@ -53,6 +57,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 		,[strCalculationMethod]			NVARCHAR(30)
 		,[dblRate]						NUMERIC(18,6)
+		,[dblBaseRate]					NUMERIC(18,6)
 		,[dblExemptionPercent]			NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
@@ -77,6 +82,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -95,6 +101,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -127,6 +134,9 @@ BEGIN
 						,@CFSiteId
 						,@IsDeliver
 						,@ItemUOMId
+						,@CurrencyId
+						,@CurrencyExchangeRateTypeId
+						,@CurrencyExchangeRate
 					) 	
 		END
 
@@ -146,6 +156,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -163,8 +174,9 @@ BEGIN
 		,[intTaxCodeId]				= LITE.[intTaxCodeId]
 		,[intTaxClassId]			= ISNULL(LITE.[intTaxClassId], SMTC.[intTaxClassId])
 		,[strTaxableByOtherTaxes]	= ISNULL(LITE.[strTaxableByOtherTaxes], SMTC.[strTaxableByOtherTaxes])
-		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId)))
-		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId))), @ZeroDecimal)
+		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)))
+		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
+		,[dblBaseRate]				= ISNULL(ISNULL(LITE.[dblBaseRate], (SELECT [dblBaseRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
 		,[dblExemptionPercent]		= @ZeroDecimal
 		,[dblTax]					= LITE.[dblTax]
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]
@@ -210,6 +222,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 				,[strCalculationMethod]			NVARCHAR(30)
 				,[dblRate]						NUMERIC(18,6)
+				,[dblBaseRate]					NUMERIC(18,6)
 				,[dblExemptionPercent]			NUMERIC(18,6)
 				,[dblTax]						NUMERIC(18,6)
 				,[dblAdjustedTax]				NUMERIC(18,6)
@@ -232,6 +245,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -253,6 +267,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -271,7 +286,7 @@ BEGIN
 			WHERE
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
 			SET @TaxableByOtherUnitTax = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
@@ -324,7 +339,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 0
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffUnitTax = SUM(@Quantity * [dblRate])
@@ -333,7 +348,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 1
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 				
 			SET @TotalUnitTax = ((ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)) + ISNULL(@TaxableByOtherUnitTax, @ZeroDecimal))
@@ -345,7 +360,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 0
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffRate = SUM([dblRate])
@@ -354,7 +369,7 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 1
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 
 			DELETE FROM @TaxableByOtherTaxUnit
@@ -365,6 +380,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -386,6 +402,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
@@ -404,7 +421,7 @@ BEGIN
 			WHERE
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
-				AND [ysnTaxExempt] = 0
+				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
 			SET @TaxableByOtherRate = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
@@ -605,10 +622,10 @@ BEGIN
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00) AND @DisregardExemptionSetup = 0
 				SET @ItemTaxAmount = 0.00;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00) OR @DisregardExemptionSetup = 1
 				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
 				
 			IF(@CheckoffTax = 1)
@@ -634,6 +651,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -651,6 +669,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]

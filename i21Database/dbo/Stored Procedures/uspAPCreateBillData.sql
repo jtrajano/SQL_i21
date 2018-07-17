@@ -67,10 +67,18 @@ IF @transCount = 0 BEGIN TRANSACTION
 		FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 	END
 
-	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
-	IF (@APAccount IS NULL OR @APAccount <= 0) AND @type NOT IN (2, 11)
+	SET @APAccount = (SELECT CASE WHEN @type IN (2, 13) THEN intPurchaseAdvAccount ELSE intAPAccount END 
+						FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
+	IF (@APAccount IS NULL OR @APAccount <= 0) 
 	BEGIN
-		SET @error =  'Please setup default AP Account.';
+		IF (@type NOT IN (2, 13))
+		BEGIN
+			SET @error =  'Please setup default AP Account.';
+		END
+		ELSE
+		BEGIN
+			SET @error =  'Please setup default Prepaid Account.';
+		END
 		IF @throwError = 1
 		BEGIN
 			RAISERROR(@error, 16, 1);

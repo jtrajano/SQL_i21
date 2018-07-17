@@ -18,7 +18,10 @@ BEGIN
 			[begingroup]	NVARCHAR(50),  
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
-	)  
+	)
+  	DECLARE @strDocumentNumber NVARCHAR(100)
+	DECLARE @ysnDisplayPIInfo BIT = 0
+	DECLARE @strReportName NVARCHAR(100)	  
   
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
@@ -39,6 +42,33 @@ BEGIN
 	SELECT	@intInvoiceId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intInvoiceId' 
+ 
+ 	SELECT @strDocumentNumber = strDocumentNumber
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @intInvoiceId
+
+	SELECT @strReportName = CASE 
+			WHEN strType = 'Provisional'
+				THEN 'Provisional Invoice'
+			ELSE CASE 
+					WHEN strType = 'Standard'
+						THEN strTransactionType
+					END
+			END
+	FROM tblARInvoice I
+	JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+	WHERE I.intInvoiceId = @intInvoiceId
+
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblARInvoice Inv
+			JOIN tblARInvoiceDetail InvDet ON Inv.intInvoiceId = InvDet.intInvoiceId
+			WHERE Inv.strType = 'Provisional'
+				AND Inv.strInvoiceNumber = @strDocumentNumber
+			)
+	BEGIN
+		SET @ysnDisplayPIInfo = 1
+	END
     
 	SELECT Top(1)
 		Inv.intInvoiceId,
@@ -69,7 +99,7 @@ BEGIN
 		L.dtmDeliveredDate,
 		CB.strContractBasis,
 		C.strFLOId,
-		Inv.dblInvoiceTotal,
+		CASE WHEN strTransactionType = 'Credit Memo' THEN ABS(Inv.dblInvoiceTotal - ISNULL(Inv.dblProvisionalAmount,0)) ELSE Inv.dblInvoiceTotal END dblInvoiceTotal ,
 		Inv.strTransactionType,
 		L.strBLNumber,
 		L.dtmBLDate,
@@ -80,18 +110,32 @@ BEGIN
 		L.dtmETAPOD,
 		L.intNumberOfContainers,
 		ShippingLine.strName AS strShippingLineName,
-		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType
+		ysnDisplayPIInfo = @ysnDisplayPIInfo,
+		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType,
+		strReportName = @strReportName,
+		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+		dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
+		ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
+		ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
+		'' AS strOurVATNo,
+		C.strVatNumber AS strYourVATNo,
+		'' AS strBrokerReferenceNo,
+		'' AS strRemarks,
+		ICT.strICTDesc
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
 	JOIN tblSMTerm Term ON Term.intTermID = Inv.intTermId
 	JOIN tblSMCompanyLocation Comp ON Comp.intCompanyLocationId = Inv.intCompanyLocationId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
-	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
+	LEFT JOIN tblARICT ICT ON ICT.intICTId = Inv.intICTId
+	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+	CROSS APPLY tblLGCompanyPreference CP
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END

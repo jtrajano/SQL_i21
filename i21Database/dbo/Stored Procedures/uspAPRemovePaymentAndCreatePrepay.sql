@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPRemovePaymentAndCreatePrepay]
 	@voucherId INT,
 	@userId INT,
+	@paymentId INT,
 	@prepayCreatedIds NVARCHAR(MAX) OUTPUT
 AS
 
@@ -13,14 +14,17 @@ SET ANSI_WARNINGS OFF
 DECLARE @prepayCreated INT;
 DECLARE @transCount INT;
 CREATE TABLE #paymentInfo(intId INT, strRecordNum NVARCHAR(50), dblAmountPaid DECIMAL(18, 6));
-DECLARE @paymentId INT;
+DECLARE @paymentRecordId INT = @paymentId;
+DECLARE @currentPaymentId INT;
 DECLARE @payment DECIMAL(18,6);
 DECLARE @paymentRecordNum NVARCHAR(50);
 DECLARE @voucherKey INT = @voucherId;
 DECLARE @prepayAccount INT, @apAccount INT, @prepaymentCategory INT;
 DECLARE @postPrepayResult BIT;
 DECLARE @postPrepayParam NVARCHAR(100);
-DECLARE @error NVARCHAR(100);
+DECLARE @voucherBillId NVARCHAR(100)
+DECLARE @prepayBillId NVARCHAR(100);
+DECLARE @error NVARCHAR(1000);
 DECLARE @batchIdUsed NVARCHAR(50);
 
 BEGIN TRY
@@ -32,6 +36,7 @@ SELECT TOP 1 @prepayAccount = intAccountId FROM vyuGLAccountDetail WHERE intAcco
 SELECT
 	@prepayAccount = ISNULL(loc.intPurchaseAdvAccount,@prepayAccount)
 	,@apAccount = voucher.intAccountId
+	,@voucherBillId = voucher.strBillId
 FROM tblSMCompanyLocation loc
 INNER JOIN tblAPBill voucher ON loc.intCompanyLocationId = voucher.intShipToId
 WHERE voucher.intBillId = @voucherKey;
@@ -42,8 +47,6 @@ BEGIN
 	RETURN;
 END
 
---get all payment associated with the voucher
---this procedure is only for this payment (printed or cleared)
 INSERT INTO #paymentInfo
 SELECT
 	DISTINCT pay.intPaymentId,
@@ -54,6 +57,7 @@ INNER JOIN tblAPPaymentDetail payDetail ON pay.intPaymentId = payDetail.intPayme
 INNER JOIN tblCMBankTransaction bankTran ON pay.strPaymentRecordNum = bankTran.strTransactionId
 WHERE payDetail.intBillId = @voucherKey AND pay.ysnPosted = 1 
 AND bankTran.ysnCheckVoid = 0 AND (bankTran.dtmCheckPrinted IS NOT NULL OR bankTran.ysnClr = 1) 
+AND pay.intPaymentId = @paymentRecordId
 
 SET @transCount = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -62,7 +66,7 @@ DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 FOR
     SELECT intId, dblAmountPaid, strRecordNum FROM #paymentInfo
 OPEN c;
-FETCH NEXT FROM c INTO @paymentId, @payment, @paymentRecordNum
+FETCH NEXT FROM c INTO @currentPaymentId, @payment, @paymentRecordNum
 
 WHILE @@FETCH_STATUS = 0 
 BEGIN
@@ -75,18 +79,19 @@ BEGIN
 		@type = 2,
 		@billCreatedId  = @prepayCreated OUTPUT;
 
+	SET @prepayBillId = (SELECT strBillId FROM tblAPBill WHERE intBillId = @prepayCreated)
 	--MAKE SURE PREPAID ONLY HAS 1 DETAIL
 	IF (SELECT COUNT(*) FROM tblAPBillDetail WHERE intBillId = @prepayCreated) > 1
 	BEGIN
 		DELETE prepayDetail
 		FROM tblAPBillDetail prepayDetail
-		CROSS APPLY (
+		OUTER APPLY (
 			SELECT 
 				TOP 1 intBillDetailId
 			FROM tblAPBillDetail detail
 			WHERE detail.intBillId = @prepayCreated
-			AND detail.intBillDetailId != prepayDetail.intBillDetailId
 		) details
+		WHERE prepayDetail.intBillId = @prepayCreated AND prepayDetail.intBillDetailId != details.intBillDetailId
 	END
 
 	UPDATE prepayDetail
@@ -97,6 +102,7 @@ BEGIN
 		,prepayDetail.intItemId = NULL
 		,prepayDetail.strMiscDescription = NULL
 		,prepayDetail.dblQtyReceived = 1
+		,prepayDetail.dblTax = 0
 		,prepayDetail.dblQtyOrdered = 1
 		,prepayDetail.intAccountId = @apAccount
 		,prepayDetail.dblCost = @payment
@@ -109,7 +115,10 @@ BEGIN
 		SET prepay.intAccountId = @prepayAccount
 		,prepay.dblDiscount = 0
 		,prepay.dblPayment = 0
-		,prepay.dblAmountDue = prepay.dblTotal
+		,prepay.dblTax = 0
+		,prepay.dblAmountDue = @payment
+		,prepay.dblTotal = @payment
+		,prepay.dblSubtotal = @payment
 		,prepay.ysnPaid = 0
 		,prepay.dtmDatePaid = NULL
 	FROM tblAPBill prepay
@@ -131,34 +140,59 @@ BEGIN
 		RAISERROR('Posting prepay failed.', 16, 1);
 		RETURN;
 	END
+	
+	--CONVERT THE PAYMENT TO PREPAID
+	--update original bills associated to payment to unpaid
+	UPDATE origBill
+		SET origBill.ysnPaid = 0
+		,origBill.dblPayment = origBill.dblPayment - payDetail.dblPayment
+		,origBill.dblAmountDue = origBill.dblAmountDue + payDetail.dblPayment
+		,origBill.dtmDatePaid = NULL
+	FROM tblAPBill origBill
+	INNER JOIN tblAPPaymentDetail payDetail ON origBill.intBillId = payDetail.intBillId
+	INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId
+	WHERE pay.intPaymentId = @currentPaymentId
+	-- WHERE origBill.intBillId = @voucherKey
+
 	--update the payment to prepayment
 	UPDATE pay
 		SET pay.ysnPrepay = 1
 	FROM tblAPPayment pay
-	WHERE pay.intPaymentId = @paymentId;
+	WHERE pay.intPaymentId = @currentPaymentId;
+
+	--REMOVE OTHER BILL ASSOCIATED TO THE PAYMENT, IT SHOULD ONLY HAVE 1 BILL WHICH IS THE PREPAID CREATED
+	DELETE payDetail
+	FROM tblAPPaymentDetail payDetail
+	WHERE payDetail.intPaymentId = @currentPaymentId AND payDetail.intBillId != @voucherKey
+
 	--update the association to the payment
 	UPDATE payDetail
 		SET payDetail.intBillId = @prepayCreated
-	FROM tblAPPayment pay
-	INNER JOIN tblAPPaymentDetail payDetail ON pay.intPaymentId = payDetail.intPaymentId
-	WHERE pay.intPaymentId = @paymentId;
+	FROM tblAPPaymentDetail payDetail 
+	WHERE payDetail.intPaymentId = @currentPaymentId;
+
 	--update the gl record of payment
+	--SET THE OTHER GL DETAIL OF PAYMENT TO UNPOSTED (DO NOT DELETE FOR HISTORY PURPOSES)
 	UPDATE gl
-		SET gl.strJournalLineDescription = (SELECT strBillId FROM tblAPBill WHERE intBillId = @prepayCreated)
-		,gl.intAccountId = @prepayAccount
+		SET gl.ysnIsUnposted = 1
+			,gl.strComments = gl.strComments + ' - ' + 'Reversed with ' + @voucherBillId
 	FROM tblGLDetail gl
-	WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @paymentId
-	--update original bill to unpaid
-	UPDATE origBill
-		SET origBill.ysnPaid = 0
-		,origBill.dblPayment = 0
-		,origBill.dblAmountDue = origBill.dblTotal
-		,origBill.dtmDatePaid = NULL
-	FROM tblAPBill origBill
-	WHERE origBill.intBillId = @voucherKey
+	WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
+	AND gl.strJournalLineDescription != @voucherBillId
+
+	--UPDATE THE JOURNAL LINE DESCRIPTION
+	UPDATE gl
+		SET gl.strJournalLineDescription = @prepayBillId
+		,gl.intAccountId = @prepayAccount
+		--to ensure correct debit/credit to update, check first if that is not equal to 0
+		,gl.dblDebit = (CASE WHEN gl.dblDebit != 0 THEN @payment ELSE gl.dblDebit END)
+		,gl.dblCredit = (CASE WHEN gl.dblCredit != 0 THEN @payment ELSE gl.dblCredit END)
+	FROM tblGLDetail gl
+	WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
+	AND gl.ysnIsUnposted = 0 --filter with unposted only to make sure we only update the correct association for the prepaid
 
 	SET @prepayCreatedIds = CAST(@prepayCreated AS NVARCHAR) + ','
-	FETCH NEXT FROM c INTO @paymentId, @payment, @paymentRecordNum
+	FETCH NEXT FROM c INTO @currentPaymentId, @payment, @paymentRecordNum
 
 END
 CLOSE c; DEALLOCATE c;

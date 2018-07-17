@@ -23,14 +23,14 @@ CREATE  PROCEDURE [dbo].[uspSMRepAddArticleSubToParent]
 		DECLARE @sql NVARCHAR(MAX) = N'';
 		DECLARE @insertSQL NVARCHAR(MAX) = '';
 	
-
-	  SET @insertSQL = N'INSERT INTO #ListOfArticles
+	 SET @insertSQL = N'INSERT INTO #ListOfArticles
 		SELECT DISTINCT Tab.strTableName FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
 		INNER JOIN [parentDB].[dbo].[tblSMReplicationConfigurationTable] AS ConTab
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN [parentDB].[dbo].[tblSMReplicationTable] AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 AND (ysnInitOnly = 0 OR ysnInitOnly IS null) '
+		WHERE  ysnCommitted = 1 AND ysnEnabled = 1 AND (ysnInitOnly = 0 OR ysnInitOnly IS null )'
+	
 
 		
 		--SET @insertSQL = 'Exec('' ' + Replace(@insertSQL, 'parentDB', @parentDB) + ' '')'

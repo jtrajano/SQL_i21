@@ -73,7 +73,7 @@ AS
 	INSERT INTO tblEMEntityToContact( 
 		intEntityId,	intEntityContactId,		intEntityLocationId,	ysnDefaultContact,	ysnPortalAccess,	intConcurrencyId)
 	SELECT 
-		@EntityNewId,	@EntityNewContactId,	@EntityLocationId,		1				,	0				,	1
+		@EntityNewId,	@EntityNewContactId,	@EntityNewLocationId,		1				,	0				,	1
 
 	INSERT INTO tblEMEntityType(	intEntityId,	strType,	intConcurrencyId)
 	SELECT							@EntityNewId,	'Vendor',	1
@@ -84,7 +84,7 @@ AS
 		select @LocationCurrentyId = intDefaultCurrencyId From tblSMCompanyPreference
 	end
 
-	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId, intCurrencyId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber, @LocationCurrentyId
+	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId, intCurrencyId, ysnPostVoucher) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber, @LocationCurrentyId, 1
 	INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) SELECT @EntityNewId, @DefaultTerms
 
 	UPDATE tblEMEntityLocation 

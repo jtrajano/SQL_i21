@@ -28,7 +28,6 @@ SELECT
 	,dblLimit = vyuPRPaycheckTax.dblLimit
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
 	,vyuPRPaycheckTax.strTaxId
-	,vyuPRPaycheckTax.intTypeTaxStateId
 	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
 	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM
@@ -73,7 +72,6 @@ GROUP BY
 	,vyuPRPaycheckTax.dblAmount
 	,vyuPRPaycheckTax.dblLimit
 	,vyuPRPaycheckTax.strTaxId
-	,vyuPRPaycheckTax.intTypeTaxStateId
 	,tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
 

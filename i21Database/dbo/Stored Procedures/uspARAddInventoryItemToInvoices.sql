@@ -357,6 +357,8 @@ BEGIN TRY
 		,IE.[strType]				--@InvoiceType
 		,IE.[intTermId]				--@TermId
 		,0							--@GetAllAvailablePricing
+		,ISNULL(IE.[dblCurrencyExchangeRate], 1)	--@CurrencyExchangeRate
+		,IE.[intCurrencyExchangeRateId] --@CurrencyExchangeRateTypeId
 	) IP
 	WHERE
 		ISNULL(IE.[ysnRefreshPrice],0) = 1
@@ -430,13 +432,13 @@ USING
 		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IP.[dblSubCurrencyRate], 0.000000) <> @ZeroDecimal THEN IP.[dblSubCurrencyRate] ELSE (CASE WHEN ISNULL(IE.[dblSubCurrencyRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblSubCurrencyRate], 1.000000) END) END
 		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
 		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
-		,[intAccountId]							= Acct.[intAccountId]
-		,[intCOGSAccountId]						= Acct.[intCOGSAccountId]
-		,[intSalesAccountId]					= ISNULL(IE.[intSalesAccountId], Acct.[intSalesAccountId])
-		,[intInventoryAccountId]				= Acct.[intInventoryAccountId]
-		,[intServiceChargeAccountId]			= Acct.[intAccountId]
-		,[intLicenseAccountId]					= Acct.[intGeneralAccountId]
-		,[intMaintenanceAccountId]				= Acct.[intMaintenanceSalesAccountId]
+		,[intAccountId]							= NULL --Acct.[intAccountId]
+		,[intCOGSAccountId]						= NULL --Acct.[intCOGSAccountId]
+		,[intSalesAccountId]					= IE.[intSalesAccountId] --ISNULL(IE.[intSalesAccountId], Acct.[intSalesAccountId])
+		,[intInventoryAccountId]				= NULL --Acct.[intInventoryAccountId]
+		,[intServiceChargeAccountId]			= NULL --Acct.[intAccountId]
+		,[intLicenseAccountId]					= NULL --Acct.[intGeneralAccountId]
+		,[intMaintenanceAccountId]				= NULL --Acct.[intMaintenanceSalesAccountId]
 		,[strMaintenanceType]					= IE.[strMaintenanceType]
 		,[strFrequency]							= IE.[strFrequency]
 		,[dtmMaintenanceDate]					= IE.[dtmMaintenanceDate]
@@ -559,21 +561,23 @@ USING
 			AND (IE.[intId] = IP.[intId]
 				OR
 				IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
-	LEFT OUTER JOIN
-		(
-		SELECT
-			 [intAccountId] 
-			,[intCOGSAccountId] 
-			,[intSalesAccountId]
-			,[intInventoryAccountId]	
-			,[intGeneralAccountId]
-			,[intMaintenanceSalesAccountId]		
-			,[intItemId]
-			,[intLocationId]			
-		FROM vyuARGetItemAccount WITH (NOLOCK)
-		) Acct
-			ON IC.[intItemId] = Acct.[intItemId]
-			AND IL.[intLocationId] = Acct.[intLocationId]		
+	--No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
+	--And this has been causing performance issue
+	--LEFT OUTER JOIN
+	--	(
+	--	SELECT
+	--		 [intAccountId] 
+	--		,[intCOGSAccountId] 
+	--		,[intSalesAccountId]
+	--		,[intInventoryAccountId]	
+	--		,[intGeneralAccountId]
+	--		,[intMaintenanceSalesAccountId]		
+	--		,[intItemId]
+	--		,[intLocationId]			
+	--	FROM vyuARGetItemAccount WITH (NOLOCK)
+	--	) Acct
+	--		ON IC.[intItemId] = Acct.[intItemId]
+	--		AND IL.[intLocationId] = Acct.[intLocationId]		
 	)
 AS Source
 ON Target.[intInvoiceDetailId] = Source.[intInvoiceDetailId]

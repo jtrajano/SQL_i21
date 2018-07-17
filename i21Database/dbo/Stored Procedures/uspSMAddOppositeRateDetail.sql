@@ -25,8 +25,8 @@ BEGIN
 		DECLARE @rateTypeId INT
 		DECLARE @validFromDate DATETIME
 	
-		SELECT @rateTypeId = intRateTypeId FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = @rateId
-		SELECT @validFromDate = dtmValidFromDate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = @rateId
+		SELECT @rateTypeId = intRateTypeId FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateDetailId = @rateDetailId
+		SELECT @validFromDate = dtmValidFromDate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateDetailId = @rateDetailId
 
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = @oppsiteId AND intRateTypeId = @rateTypeId AND dtmValidFromDate = @validFromDate)
 		BEGIN

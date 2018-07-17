@@ -58,6 +58,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strForexRateType AS NVARCHAR(50)
+		,@intEntityVendorId AS INT = NULL 
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -105,6 +106,7 @@ BEGIN
 			,@intLocationId = intLocationId
 			,@intSourceType = intSourceType 
 			,@strFobPoint = ft.strFobPoint
+			,@intEntityVendorId = r.intEntityVendorId
 	FROM	dbo.tblICInventoryReceipt r LEFT JOIN tblSMFreightTerms ft
 				ON r.intFreightTermId = ft.intFreightTermId
 	WHERE	strReceiptNumber = @strTransactionId  
@@ -802,19 +804,22 @@ BEGIN
 					,iu.intItemUOMId 
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						CASE		
-							-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
-							WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
-								-dbo.fnCalculateQtyBetweenUOM(
-									ri.intWeightUOMId
-									, ri.intUnitMeasureId
-									, ri.dblNet
-								)
+						-- Load Shipment is increasing the In-Transit by Packing Unit and not by Weight. 
+						-- IR should reduce the In-Transit in the same way. 
+						-ri.dblOpenReceive  
+						--CASE		
+						--	-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
+						--	WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
+						--		-dbo.fnCalculateQtyBetweenUOM(
+						--			ri.intWeightUOMId
+						--			, ri.intUnitMeasureId
+						--			, ri.dblNet
+						--		)
 
-							-- If Gross/Net UOM is missing, then get the item/lot qty. 
-							ELSE 
-								-ri.dblOpenReceive  
-						END							
+						--	-- If Gross/Net UOM is missing, then get the item/lot qty. 
+						--	ELSE 
+						--		-ri.dblOpenReceive  
+						--END							
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
@@ -2060,6 +2065,10 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
+		UPDATE @GLEntries
+		SET intEntityId = @intEntityVendorId
+		WHERE intEntityId IS NULL 
+
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 

@@ -1,5 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuCRMOpportunityLink]
 	AS
+		with closed as (
+			select b.intRecordId, intClosed = convert(numeric(16,8),count(c.intActivityId))
+			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
+			where a.strNamespace = 'CRM.view.Opportunity'
+			and b.intScreenId = a.intScreenId
+			and c.intTransactionId = b.intTransactionId
+			and c.strStatus = 'Closed'
+			group by b.intRecordId
+		),
+		notclosed as (
+			select b.intRecordId, intOpen = convert(numeric(16,8),count(c.intActivityId))
+			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
+			where a.strNamespace = 'CRM.view.Opportunity'
+			and b.intScreenId = a.intScreenId
+			and c.intTransactionId = b.intTransactionId
+			--and c.strStatus <> 'Closed'
+			group by b.intRecordId
+		)
 		select
 			a.intOpportunityId
 			,a.strName
@@ -19,7 +37,7 @@
 			,a.dtmCreated
 			,a.dtmClose
 			,a.dtmGoLive
-			,a.intPercentComplete
+			,intPercentComplete = case when s.intOpen = 0 then 0.00 when s.intOpen is null then 0.00 else isnull(isnull(r.intClosed, 0.00) / isnull(s.intOpen, 0.00),0.00) end
 			,a.ysnCompleted
 			,a.intSort
 			,a.ysnActive
@@ -94,3 +112,5 @@
 			left join tblSMCompanyLocation o on o.intCompanyLocationId = a.intCompanyLocationId
 			left join tblEMEntityLocation p on p.intEntityLocationId = a.intEntityLocationId
 			left join tblEMEntity q on q.intEntityId = a.intLostToCompetitorId
+			left join closed r on r.intRecordId = a.intOpportunityId
+			left join notclosed s on s.intRecordId = a.intOpportunityId

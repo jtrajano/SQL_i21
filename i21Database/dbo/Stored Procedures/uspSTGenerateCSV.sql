@@ -97,7 +97,7 @@ BEGIN
 				[strUpcCode] nvarchar(14) COLLATE Latin1_General_CI_AS NULL,
 				[strSkuUpcDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 				[strUnitOfMeasure] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
-				[intQuantitySold] numeric(10, 2) NULL,
+				[intQuantitySold] INT NULL, --numeric(10, 2) NULL,
 				[intConsumerUnits] int NULL,
 				[strMultiPackIndicator] nvarchar(1) COLLATE Latin1_General_CI_AS NULL,
 				[intMultiPackRequiredQuantity] int NULL,
@@ -237,16 +237,70 @@ BEGIN
 								, strTrlUPC as strSKUCode --14
 								, strTrlUPC as strUpcCode
 								, strTrlDesc as strSkuUpcDescription
-								, 'PACK' as strUnitOfMeasure
+								, CASE	
+									WHEN TR.strTrlDept = 'OTP'
+										THEN 'CANS'
+									WHEN TR.strTrlDept = 'CIGARETTES'
+										THEN 'PACKS'
+								  END as strUnitOfMeasure
 
 								--, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold  ST-680
-								, CAST(CASE WHEN strTrpPaycode != 'Change' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold
+								, CASE 
+									WHEN strTrpPaycode != 'Change' 
+										THEN CAST(dblTrlQty as INT) 
+									ELSE 0 
+								  END as intQuantitySold
 
 								, 1 as intConsumerUnits
 
-								, 'N' as strMultiPackIndicator
-								, 0 as intMultiPackRequiredQuantity
-								, 0 as dblMultiPackDiscountAmount
+								, CASE
+									-- 2 Can Deal
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+										--AND (
+										--		SELECT COUNT(tbl.intTranslogId) 
+										--		FROM tblSTTranslogRebates tbl
+										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+										--		AND tbl.intCheckoutId = TR.intCheckoutId
+										--		AND tbl.strTrlDept = 'OTP' 
+										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+										--		AND tbl.strTrpPaycode != 'Change'
+										--	) > 1
+											THEN 'Y'
+									ELSE 'N'
+								  END AS strMultiPackIndicator	
+								, CASE
+									-- 2 Can Deal
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+										--AND (
+										--		SELECT COUNT(tbl.intTranslogId) 
+										--		FROM tblSTTranslogRebates tbl
+										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+										--		AND tbl.intCheckoutId = TR.intCheckoutId
+										--		AND tbl.strTrlDept = 'OTP' 
+										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+										--		AND tbl.strTrpPaycode != 'Change'
+										--	) > 1
+											THEN 2
+									ELSE NULL
+								  END as intMultiPackRequiredQuantity
+								, CASE
+									-- 2 Can Deal
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											--THEN (
+											--		SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+											--		FROM tblSTTranslogRebates tbl
+											--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+											--		AND tbl.intCheckoutId = TR.intCheckoutId
+											--		AND tbl.strTrlDept = 'OTP' 
+											--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+											--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+											--		AND tbl.strTrpPaycode != 'Change'
+											--	 )
+										THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+									ELSE NULL
+								  END as dblMultiPackDiscountAmount
 
 								, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 								, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
@@ -259,7 +313,7 @@ BEGIN
 
 								--, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
 								--		ELSE dblTrlLineTot END as dblFinalSalesPrice ST-680
-								, dblTrpAmt as dblFinalSalesPrice
+								, dblTrlUnitPrice as dblFinalSalesPrice --dblTrpAmt as dblFinalSalesPrice (Issue: Please see attached. It appears our pricing is not reporting correctly on cigarettes. We’ll want to make sure that is correct especially before next quarter. I included Edgar’s contact information below if you need to discuss directly with him.)
 
 								--Optional Fields
 								, NULL AS intStoreTelephone
@@ -333,20 +387,57 @@ BEGIN
 								, dblTrlUnitPrice as dblPrice
 								, strTrlUPC as strUpcCode
 								, REPLACE(strTrlDesc, ',', ' ') as strUpcDescription
-								, 'PACK' as strUnitOfMeasure
+								, CASE	
+									WHEN TR.strTrlDept = 'OTP'
+										THEN 'CANS'
+									WHEN TR.strTrlDept = 'CIGARETTES'
+										THEN 'PACKS'
+									ELSE 'PACKS'
+								  END as strUnitOfMeasure
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' ELSE 'N' 	
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL THEN 'Y' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') THEN 'Y'
+									ELSE 'N' 	
 								  END as strPromotionFlag
 
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlMatchQuantity ELSE 0 END as intOutletMultipackQuantity
-									--(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
-								  --ELSE 0 END as intOutletMultipackQuantity
-								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
+								  -- Multi-Pack Discount
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'N' 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 'Y' -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+										THEN 'Y'
+									ELSE 'N' 
+								  END as strOutletMultipackFlag
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 THEN 2 -- 2 Can Deal
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
+								    ELSE 0 
+								  END as intOutletMultipackQuantity
+								, CASE 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 0 
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
+											THEN (
+													SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+													FROM tblSTTranslogRebates tbl
+													WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+													AND tbl.intCheckoutId = TR.intCheckoutId
+													AND tbl.strTrlDept = 'OTP' 
+													AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+													AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+													AND tbl.strTrpPaycode != 'Change'
+												 )
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+										THEN dblTrlMatchLineTrlPromoAmount 
+									ELSE 0 
+								  END as dblOutletMultipackDiscountAmount
 
 								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
 								, '' as strAccountPromotionName --21
@@ -356,7 +447,12 @@ BEGIN
 								, 0 as dblAccountDiscountAmount --22
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50 ELSE 0 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+										THEN CRP.dblManufacturerDiscountAmount 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+										THEN dblTrlMatchLineTrlPromoAmount
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
+									ELSE 0 
 								  END as dblManufacturerDiscountAmount
 
 								-- COUPONS
@@ -370,7 +466,12 @@ BEGIN
 								, 0 as dblManufacturerMultipackDiscountAmount
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc ELSE '' 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+										THEN CRP.strManufacturerPromotionDescription 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+										THEN strTrlDesc
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
+									ELSE '' 
 								  END as strManufacturerPromotionDescription
 
 								, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription
@@ -464,19 +565,19 @@ BEGIN
 
 		IF(@intCsvFormat = 0) -- 0 = PM Morris
 		BEGIN
-				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
+				--------------------------------------------------- CSV HEADER FOR PM MORRIS ---------------------------------------------------
 					DECLARE @intNumberOfRecords int = 0
 					DECLARE @intSoldQuantity int = 0
 					DECLARE @dblFinalSales decimal(10, 2) = 0
 
 					
-					SELECT @intNumberOfRecords = COUNT(*)				--Get total number of records
-							, @intSoldQuantity = SUM(intQuantitySold)	--Get total quantity sold
-							, @dblFinalSales = SUM(dblFinalSalesPrice)	--Get sum of the final sales price field
+					SELECT @intNumberOfRecords = COUNT(*)				-- Get total number of records
+							, @intSoldQuantity = SUM(intQuantitySold)	-- Get total quantity sold
+							, @dblFinalSales = SUM(dblFinalSalesPrice)	-- Get sum of the final sales price field
 					FROM @tblTempPMM
 
 					SET @strCSVHeader = CAST(ISNULL(@intNumberOfRecords, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@intSoldQuantity, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@dblFinalSales, 0) as NVARCHAR(50)) + CHAR(13)
-				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
+				--------------------------------------------------- CSV HEADER FOR PM MORRIS ---------------------------------------------------
 
 			SELECT * FROM @tblTempPMM
 			ORDER BY CAST(strStoreNumber AS INT) ASC

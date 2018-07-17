@@ -66,7 +66,9 @@ CROSS APPLY (
         ,NULL
         ,NULL
         ,NULL --TermId
-        ,NULL --@GetAllAvailablePricing		
+        ,NULL --@GetAllAvailablePricing
+		,1.000000 --@CurrencyExchangeRate
+		,NULL --@CurrencyExchangeRateTypeId		
         )
 ) B
 

@@ -20,8 +20,8 @@
 					,intBillableHours = sum(result.intBillableHours)
 					,intNonBillableHours = sum(result.intNonBillableHours)
 					,dblTotalBilled = isnull(sum(result.intTotalBilled),0)
-					,dblAmountDue = invoice.dblAmountDue
-					,dblPayment = invoice.dblPayment
+					,dblAmountDue = isnull(invoice.dblAmountDue,0.00)
+					,dblPayment = isnull(invoice.dblPayment,0.00)
 					,result.intInternalProjectManager
 					,result.strInternalProjectManager
 		from
@@ -58,10 +58,9 @@
 					left join tblEMEntity g on g.intEntityId = a.intAgentEntityId
 					left join tblHDJobCode h on h.intJobCodeId = a.intJobCodeId
 					left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
-		) as result,estimatedhours,invoice
-		where
-			estimatedhours.intProjectId = result.intProjectId
-			and invoice.intProjectId = result.intProjectId
+		) as result
+		left join estimatedhours on estimatedhours.intProjectId = result.intProjectId
+		left join invoice on invoice.intProjectId = result.intProjectId
 		group by
 					result.intProjectId
 					,result.strProjectName

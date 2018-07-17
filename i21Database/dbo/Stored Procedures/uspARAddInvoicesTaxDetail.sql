@@ -39,6 +39,7 @@ BEGIN TRY
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[intSalesTaxAccountId]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -58,6 +59,7 @@ BEGIN TRY
 		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(TD.[strTaxableByOtherTaxes],'') <> '' THEN ISNULL(TD.[strTaxableByOtherTaxes],'') ELSE ISNULL(SMTC.[strTaxableByOtherTaxes],'') END
 		,strCalculationMethod	= CASE WHEN ISNULL(TD.[strCalculationMethod],'') <> '' THEN TD.[strCalculationMethod] ELSE TRD.[strCalculationMethod] END
 		,dblRate				= CASE WHEN ISNULL(TD.[dblRate],0) <> 0 THEN TD.[dblRate] ELSE TRD.dblRate END
+		,dblBaseRate			= CASE WHEN ISNULL(TD.[dblBaseRate],0) <> 0 THEN TD.[dblBaseRate] ELSE TRD.dblBaseRate END
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(TD.[intTaxAccountId],0) <> 0 THEN TD.[intTaxAccountId] ELSE SMTC.[intSalesTaxAccountId] END
 		,dblTax					= ISNULL(TD.[dblTax], @ZeroDecimal)
 		,dblAdjustedTax			= ISNULL(TD.[dblAdjustedTax], ISNULL(TD.[dblTax], @ZeroDecimal))
@@ -72,13 +74,16 @@ BEGIN TRY
 	FROM
 		@TaxDetails TD
 	INNER JOIN
-		tblARInvoiceDetail ARID
+		(SELECT [intInvoiceDetailId], [intInvoiceId], [intItemUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate] FROM tblARInvoiceDetail WITH(NOLOCK)) ARID
 			ON TD.[intDetailId] = ARID.[intInvoiceDetailId]
 	INNER JOIN
-		tblSMTaxCode SMTC
+		(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice WITH(NOLOCK)) ARI
+			ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
+	INNER JOIN
+		(SELECT [intTaxCodeId], [intTaxClassId], [strTaxableByOtherTaxes], [intSalesTaxAccountId], [ysnCheckoffTax] FROM tblSMTaxCode WITH(NOLOCK))  SMTC
 			ON TD.[intTaxCodeId] = SMTC.[intTaxCodeId]
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], ARID.[intItemUOMId]) TRD		
+		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], ARID.[intItemUOMId], ARI.[intCurrencyId], ARID.[intCurrencyExchangeRateTypeId], ARID.[dblCurrencyExchangeRate]) TRD		
 			
 END TRY
 BEGIN CATCH

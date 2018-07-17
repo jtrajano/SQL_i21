@@ -13,7 +13,8 @@
 	@intContractTypeId		INT = NULL,
 	@intCurrencyId			INT = NULL,
 	@intRateTypeId			INT = NULL,
-	@intInvoiceCurrencyId	INT = NULL
+	@intInvoiceCurrencyId	INT = NULL,
+	@intLoggedInUserId		INT	= NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -37,7 +38,8 @@ BEGIN
 			@intEntityId			= CASE WHEN @intEntityId= 0 THEN NULL ELSE @intEntityId END,
 			@intCurrencyId			= CASE WHEN @intCurrencyId= 0 THEN NULL ELSE @intCurrencyId END,
 			@intRateTypeId			= CASE WHEN @intRateTypeId= 0 THEN NULL ELSE @intRateTypeId END,
-			@intInvoiceCurrencyId	= CASE WHEN @intInvoiceCurrencyId= 0 THEN NULL ELSE @intInvoiceCurrencyId END
+			@intInvoiceCurrencyId	= CASE WHEN @intInvoiceCurrencyId= 0 THEN NULL ELSE @intInvoiceCurrencyId END,
+			@intLoggedInUserId		= CASE WHEN @intLoggedInUserId= 0 THEN NULL ELSE @intLoggedInUserId END
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
@@ -233,6 +235,19 @@ BEGIN
 		FROM	tblICCommodityUnitMeasure	CU
 		JOIN	tblICUnitMeasure			UM ON UM.intUnitMeasureId = CU.intUnitMeasureId
 		WHERE	intCommodityId = @intCommodityId	
+		AND		CU.ysnDefault = 1
 	END
 
+	IF @strType = 'SalesPerson'
+	BEGIN
+		SELECT intEntityId,strEntityName from vyuCTEntity WHERE strEntityType = 'SalesPerson' AND intEntityId = @intLoggedInUserId
+	END
+
+	IF @strType = 'MarketZone'
+	BEGIN
+		SELECT	C.intMarketZoneId,M.strMarketZoneCode 
+		FROM	tblARCustomer C 
+		JOIN	tblARMarketZone M ON M.intMarketZoneId = C.intMarketZoneId
+		WHERE	intEntityId = @intEntityId
+	END
 END

@@ -61,6 +61,7 @@ BEGIN
 			@OtherCharges			ReceiptOtherChargesTableType
 
 	DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
+			,@ReceiptType_PurchaseOrderContract AS NVARCHAR(100) = 'Purchase Contract'
 			,@intInventoryReceiptId AS INT 
 
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
@@ -107,25 +108,26 @@ BEGIN
 			,intFreightTermId
 			,intForexRateTypeId
 			,dblForexRate
+			,intTaxGroupId
 	)
 	SELECT	
-			strReceiptType			= @ReceiptType_PurchaseOrder
+			strReceiptType			= (CASE WHEN PODetail.intContractHeaderId IS NOT NULL THEN @ReceiptType_PurchaseOrderContract ELSE @ReceiptType_PurchaseOrder END)
 			,intEntityVendorId		= PO.intEntityVendorId
 			,intShipFromId			= PO.intShipFromId
 			,intLocationId			= PO.intShipToId
 			,intItemId				= PODetail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ItemUOM.intItemUOMId
-			,intContractHeaderId	= PODetail.intPurchaseId -- Shown in the Order Id column. 
-			,intContractDetailId	= PODetail.intPurchaseDetailId -- As intLineNo. Link between PO Detail id and IR detail. 
+			,intContractHeaderId	= (CASE WHEN PODetail.intContractHeaderId IS NOT NULL THEN PODetail.intContractHeaderId ELSE PODetail.intPurchaseId END)    -- Shown in the Order Id column. 
+			,intContractDetailId	= (CASE WHEN PODetail.intContractDetailId IS NOT NULL THEN PODetail.intContractDetailId ELSE PODetail.intPurchaseDetailId END) -- As intLineNo. Link between PO Detail id and IR detail. 
 			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 			,intShipViaId			= PO.intShipViaId
 			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
-			,intGrossNetUOMId		= NULL 
+			,intGrossNetUOMId		= PODetail.intWeightUOMId
 			,dblGross				= PODetail.dblQtyOrdered
-			,dblNet					= PODetail.dblQtyOrdered
+			,dblNet					= PODetail.dblNetWeight
 			,dblCost				= PODetail.dblCost - (PODetail.dblCost * (ISNULL(PODetail.dblDiscount,0) / 100))
-			,intCostUOMId			= ItemUOM.intItemUOMId
+			,intCostUOMId			= PODetail.intCostUOMId
 			,intCurrencyId			= PO.intCurrencyId
 			,intSubCurrencyCents	= (CASE WHEN PODetail.ysnSubCurrency > 0 THEN PO.intSubCurrencyCents ELSE 1 END)
 			,dblExchangeRate		= ISNULL(PO.dblExchangeRate, 1) 
@@ -133,15 +135,17 @@ BEGIN
 			,intSubLocationId		= PODetail.intSubLocationId
 			,intStorageLocationId	= PODetail.intStorageLocationId
 			,ysnIsStorage			= 0
-			,intSourceId			= NULL 
-			,intSourceType		 	= 0 -- None 
-			,strSourceId			= PO.strPurchaseOrderNumber
-			,strSourceScreenName	= @ReceiptType_PurchaseOrder
+			,intSourceId			= (CASE WHEN PODetail.intContractDetailId IS NOT NULL THEN PODetail.intPurchaseId ELSE NULL END)  
+			,intSourceType		 	= (CASE WHEN PODetail.intContractDetailId IS NOT NULL THEN 6 ELSE 0 END)  -- None 
+			,strSourceId			= PO.strPurchaseOrderNumber 
+			,strSourceScreenName	= @ReceiptType_PurchaseOrder 
 			,ysnSubCurrency			= 0 
 			,strVendorRefNo			= PO.strReference
 			,intFreightTermId		= PO.intFreightTermId
 			,intForexRateTypeId		= PODetail.intForexRateTypeId
 			,dblForexRate			= PODetail.dblForexRate
+			,intTaxGroupId          = ISNULL(PODetail.intTaxGroupId, NULL)
+
 
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId

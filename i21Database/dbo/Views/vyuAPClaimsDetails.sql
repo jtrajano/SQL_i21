@@ -24,7 +24,7 @@ AS
 			,E.intContractDetailId
 			,E.intContractHeaderId
 			,E.intContractSeq
-			,E.dblTotalCost AS dblAmountPaid
+			,ISNULL(E.dblTotalCost,A.dblPayment) AS dblAmountPaid
 			,E.dblQuantity AS dblContractItemQty
 			,H.strContractNumber
 			,I.dblFranchise
@@ -53,7 +53,7 @@ AS
 		INNER JOIN tblICInventoryReceipt D ON C2.intInventoryReceiptId = D.intInventoryReceiptId
 		INNER JOIN tblCTContractDetail E ON C2.intLineNo = E.intContractDetailId
 		INNER JOIN tblCTContractHeader H ON H.intContractHeaderId = E.intContractHeaderId
-		INNER JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
+		LEFT JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
@@ -64,7 +64,7 @@ AS
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
-		LEFT JOIN tblSMTerm Term ON H.intTermId = Term.intTermID
+		LEFT JOIN tblSMTerm Term ON ISNULL(H.intTermId,A.intTermsId) = Term.intTermID
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
 					AND E.intContractDetailId = L.intContractDetailId
@@ -72,7 +72,8 @@ AS
 		CROSS APPLY (
 			SELECT SUM(dblNetQtyReceived) dblNetQtyReceived FROM (
 				SELECT 
-					(CASE WHEN B.dblNetWeight > 0 THEN C.dblNet * (ISNULL(ICWeightUOM.dblUnitQty,1) / ICUOM.dblUnitQty)
+					(CASE WHEN B.dblNetWeight > 0 THEN  (CASE WHEN C.dblNet = C.dblGross THEN  C.dblNet * (ISNULL(ICWeightUOM.dblUnitQty,1) / ICUOM.dblUnitQty) --TARE CHANGES FROM LS
+															   ELSE  C.dblNet END) -- TARE CHANGES FROM IR
 							ELSE C.dblOrderQty END) AS dblNetQtyReceived
 				FROM tblICInventoryReceiptItem C 
 				INNER JOIN tblICItemUOM ICUOM ON C.intUnitMeasureId = ICUOM.intItemUOMId AND C.intItemId = ICUOM.intItemId
@@ -140,3 +141,7 @@ AS
 				 ,B.ysnSubCurrency
 				 ,Term.intTermID
 				 ,Term.strTerm
+				 ,A.dblPayment
+
+
+

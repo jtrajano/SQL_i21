@@ -1,8 +1,13 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Mississippi Default Data
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MS'
+	, @TaxAuthorityId INT
+
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+
 	PRINT ('Deploying Mississippi Tax Forms')
-	DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MS'
-		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 	-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
@@ -196,22 +201,22 @@ select strQuery = 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReport
 
 EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
-	-- Tax Criteria
-	/* Generate script for Tax Criteria. Specify Tax Authority Id to filter out specific Tax Criteria only.
-select strQuery = 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intReportingComponentCriteriaId AS NVARCHAR(10))
-		+ CASE WHEN TaxCat.strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + TaxCat.strTaxCategory + ''''  END
-		+ CASE WHEN TaxCat.strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + TaxCat.strState + ''''  END
-		+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
-		+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
-		+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
-		+ CASE WHEN strCriteria IS NULL THEN ', strCriteria = NULL' ELSE ', strCriteria = ''' + strCriteria + '''' END
-		+ ', intMasterId = ' + CASE WHEN TaxCrit.intMasterId IS NULL THEN CAST(24 AS NVARCHAR(20)) + CAST(intReportingComponentCriteriaId AS NVARCHAR(20)) ELSE CAST(TaxCrit.intMasterId AS NVARCHAR(20)) END
-	from tblTFReportingComponentCriteria TaxCrit
-	left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
-	left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
-	where RC.intTaxAuthorityId = 24 and TaxCat.intTaxAuthorityId = 24
+-- Tax Criteria
+/* Generate script for Tax Criteria. Specify Tax Authority Id to filter out specific Tax Criteria only.
+select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(0 AS NVARCHAR(10))
+	+ CASE WHEN TaxCat.strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + TaxCat.strTaxCategory + ''''  END
+	+ CASE WHEN TaxCat.strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + TaxCat.strState + ''''  END
+	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
+	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
+	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
+	+ CASE WHEN strCriteria IS NULL THEN ', strCriteria = NULL' ELSE ', strCriteria = ''' + strCriteria + '''' END
+--	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(TaxCrit.intMasterId, '') = '' THEN intReportingComponentCriteriaId ELSE TaxCrit.intMasterId END) AS NVARCHAR(20)) -- Old Format
+	+ ', intMasterId = ' + CASE WHEN TaxCrit.intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intReportingComponentCriteriaId AS NVARCHAR(20)) ELSE CAST(TaxCrit.intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
+from tblTFReportingComponentCriteria TaxCrit
+left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId 
 */
-
 	DECLARE @TaxCriteria AS TFTaxCriteria
 
 	INSERT INTO @TaxCriteria(
@@ -2326,4 +2331,5 @@ select strQuery = 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacket
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+END
 GO

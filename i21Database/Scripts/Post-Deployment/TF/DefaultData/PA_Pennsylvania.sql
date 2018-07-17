@@ -1,8 +1,13 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Pennsylvania Default Data
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'PA'
+	, @TaxAuthorityId INT
+
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+
 	PRINT ('Deploying Pennsylvania Tax Forms')
-	DECLARE @TaxAuthorityCode NVARCHAR(10) = 'PA'
-		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 	-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
@@ -163,22 +168,22 @@ select strQuery = 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReport
 
 EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
-	-- Tax Criteria
-	/* Generate script for Tax Criteria. Specify Tax Authority Id to filter out specific Tax Criteria only.
-select strQuery = 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intReportingComponentCriteriaId AS NVARCHAR(10))
-		+ CASE WHEN TaxCat.strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + TaxCat.strTaxCategory + ''''  END
-		+ CASE WHEN TaxCat.strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + TaxCat.strState + ''''  END
-		+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
-		+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
-		+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
-		+ CASE WHEN strCriteria IS NULL THEN ', strCriteria = NULL' ELSE ', strCriteria = ''' + strCriteria + '''' END
-		+ ', intMasterId = ' + CASE WHEN TaxCrit.intMasterId IS NULL THEN CAST(38 AS NVARCHAR(20)) + CAST(intReportingComponentCriteriaId AS NVARCHAR(20)) ELSE CAST(TaxCrit.intMasterId AS NVARCHAR(20)) END
-	from tblTFReportingComponentCriteria TaxCrit
-	left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
-	left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
-	where RC.intTaxAuthorityId = 38 and TaxCat.intTaxAuthorityId = 38
+-- Tax Criteria
+/* Generate script for Tax Criteria. Specify Tax Authority Id to filter out specific Tax Criteria only.
+select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(0 AS NVARCHAR(10))
+	+ CASE WHEN TaxCat.strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + TaxCat.strTaxCategory + ''''  END
+	+ CASE WHEN TaxCat.strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + TaxCat.strState + ''''  END
+	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
+	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
+	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
+	+ CASE WHEN strCriteria IS NULL THEN ', strCriteria = NULL' ELSE ', strCriteria = ''' + strCriteria + '''' END
+--	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(TaxCrit.intMasterId, '') = '' THEN intReportingComponentCriteriaId ELSE TaxCrit.intMasterId END) AS NVARCHAR(20)) -- Old Format
+	+ ', intMasterId = ' + CASE WHEN TaxCrit.intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intReportingComponentCriteriaId AS NVARCHAR(20)) ELSE CAST(TaxCrit.intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
+from tblTFReportingComponentCriteria TaxCrit
+left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId 
 */
-
 	DECLARE @TaxCriteria AS TFTaxCriteria
 
 	INSERT INTO @TaxCriteria(
@@ -391,7 +396,36 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7000, strProductCode = '065', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387000
  UNION ALL SELECT intValidProductCodeId = 7001, strProductCode = '124', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387001
  UNION ALL SELECT intValidProductCodeId = 7014, strProductCode = '123', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387014
- 
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387106
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387107
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387108
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387109
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387110
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387111
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387112
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387113
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387114
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387115
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387116
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387117
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387118
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387119
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387120
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387121
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387122
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387123
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387124
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387125
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387126
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387127
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387128
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387129
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387130
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387131
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387132
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387133
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387134
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387135
 
 EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
@@ -1526,4 +1560,5 @@ select strQuery = 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacket
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+END
 GO

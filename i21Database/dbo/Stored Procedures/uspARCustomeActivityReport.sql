@@ -174,6 +174,8 @@ INSERT INTO tblARCustomerActivityStagingTable (
 	, dtmAsOfDate
 	, ysnPrintDetail
 	, ysnPrintRecap
+	, dtmFilterFrom
+	, dtmFilterTo
 )
 SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 	, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
@@ -225,6 +227,8 @@ SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) +
 	, dtmAsOfDate			= AGING.dtmAsOfDate
 	, ysnPrintDetail		= @ysnPrintDetail
 	, ysnPrintRecap			= @ysnPrintRecap
+	, dtmFilterFrom			= @dtmDateFrom
+	, dtmFilterTo			= @dtmDateTo
 FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT C.intEntityId

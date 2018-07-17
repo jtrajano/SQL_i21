@@ -13,8 +13,8 @@ BEGIN
 	strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,
 	ysnInterfaceToTargetOrders, ysnAllowUseForClosingPrices, ysnAllowUseForEndOfMonth, ysnInterfaceToScales, intSaveHistoryEveryId, strIntervalStartTime,
 	strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, strHelperUrlDomain, ysnEnableCreditCardProcessing, strMerchantId, strMerchantPassword, 
-	strPaymentServer, [intCurrencyDecimal], [intLockedRecordExpiration], [ysnValidatePassword], [intMultiCurrencyId], intCompanySetupId)
-	VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', 0, '', '', '', 2, '', '', @multiCurrencyId, @companySetupId)
+	strPaymentServer, [intCurrencyDecimal], [intLockedRecordExpiration], [ysnValidatePassword], [intMultiCurrencyId], intCompanySetupId, [strReportDateFormat], [strReportNumberFormat])
+	VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', 0, '', '', '', 2, '', '', @multiCurrencyId, @companySetupId, 'MM/dd/yyyy', '1,234,567.89')
 END
 ELSE
 BEGIN
@@ -62,6 +62,17 @@ BEGIN
 	BEGIN
 		UPDATE tblSMCompanyPreference SET intMultiCurrencyId = (SELECT TOP 1 intMultiCurrencyId FROM tblSMMultiCurrency ORDER BY intMultiCurrencyId ASC)
 	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE strReportDateFormat IS NULL OR strReportDateFormat = '')
+	BEGIN
+		UPDATE tblSMCompanyPreference SET strReportDateFormat = 'MM/dd/yyyy' WHERE intCompanyPreferenceId = 1
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE strReportNumberFormat IS NULL OR strReportDateFormat = '')
+	BEGIN
+		UPDATE tblSMCompanyPreference SET strReportNumberFormat = '1,234,567.89' WHERE intCompanyPreferenceId = 1
+	END
+
 END
 
 

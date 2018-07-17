@@ -143,21 +143,39 @@ BEGIN TRY
 	INNER JOIN tblSMMasterMenu mastermenu ON rolemenu.intMenuId = mastermenu.intMenuID
 	AND mastermenu.strMenuName = 'Dashboards'
 
+	-- Subject to be moved after 18.3
 	-- Assigned Default Control Permission
 	IF @isContact = 1
 	BEGIN
 		DECLARE @entityCustomerId INT
-		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)'
+		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
 
-		DECLARE @controlId INT
-		SELECT @controlId = intControlId FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'
+		DECLARE @btnDeleteLocId INT
+		SELECT @btnDeleteLocId = intControlId FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @controlId AND strPermission = 'Disable')
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @btnDeleteLocId)
 		BEGIN
-			IF @controlId IS NOT NULL
+			IF @btnDeleteLocId IS NOT NULL
 			BEGIN
 				INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission])
-				VALUES (@UserRoleID, @controlId, 'Disable')
+				VALUES (@UserRoleID, @btnDeleteLocId, 'Disable')
+			END
+		END
+	END
+	ELSE
+	BEGIN
+		DECLARE @entityVendorId INT
+		SELECT @entityVendorId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor' and strModule = 'Accounts Payable'
+
+		DECLARE @txtVendorAccountNoId INT
+		SELECT @txtVendorAccountNoId = intControlId FROM tblSMControl WHERE intScreenId = @entityVendorId AND strControlId = 'txtVendorAccountNo'
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @txtVendorAccountNoId)
+		BEGIN
+			IF @txtVendorAccountNoId IS NOT NULL
+			BEGIN
+				INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission], [ysnRequired])
+				VALUES (@UserRoleID, @txtVendorAccountNoId, 'Editable', 1)
 			END
 		END
 	END

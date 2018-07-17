@@ -539,7 +539,7 @@ BEGIN TRY
 		UPDATE @ItemsToReserve
 		SET intLotId = @intNewLotId
 			,intStorageLocationId = @intNewStorageLocationId
-			,intSubLocationId = @intSubLocationId
+			,intSubLocationId = @intNewSubLocationId
 		WHERE intLotId = @intLotId
 
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve

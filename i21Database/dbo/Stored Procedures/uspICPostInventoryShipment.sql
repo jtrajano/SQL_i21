@@ -54,6 +54,7 @@ DECLARE @LotType_Manual AS INT = 1
 DECLARE @GLEntries AS RecapTableType 
 		,@dummyGLEntries AS RecapTableType 
 		,@intReturnValue AS INT
+		,@intEntityCustomerId AS INT 
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -75,6 +76,7 @@ BEGIN
 			,@intCreatedEntityId = s.intEntityId  
 			,@intFobPointId = fp.intFobPointId
 			,@intLocationId = s.intShipFromLocationId
+			,@intEntityCustomerId = s.intEntityCustomerId
 	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
 				ON s.intFreightTermId = ft.intFreightTermId
 			LEFT JOIN tblICFobPoint fp
@@ -1086,10 +1088,11 @@ BEGIN
 			LEFT JOIN tblICInventoryShipmentItemLot sil
 				ON sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 			LEFT JOIN tblICLot l
-				ON l.intLotId = sil.intLotId            
+				ON l.intLotId = sil.intLotId
 			LEFT JOIN tblICItemUOM lotPackUOM
-				ON lotPackUOM.intItemUOMId = l.intItemUOMId            			
+				ON lotPackUOM.intItemUOMId = l.intItemUOMId
 	WHERE   s.intInventoryShipmentId = @intTransactionId
+			AND ISNULL(si.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 
 	UPDATE @InTransit_Outbound
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
@@ -1178,6 +1181,10 @@ BEGIN
 			 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
+		UPDATE @GLEntries
+		SET intEntityId = @intEntityCustomerId
+		WHERE intEntityId IS NULL 
+
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
 

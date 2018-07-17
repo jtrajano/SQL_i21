@@ -39,12 +39,16 @@ ON dbo.tblARPaymentDetail
 INSTEAD OF UPDATE
 AS
 BEGIN
+	--Apply changes to i21Database\Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql
+
 	--SELECT ysnPosted FROM inserted WHERE ysnPosted = 1
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
 	SELECT @ysnPosted = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId AND P.intCurrentStatus <> 5
 	SELECT @ysnPostedNew = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId
-		
+
+	SET @ysnPosted = ISNULL(@ysnPosted,0)
+	SET @ysnPostedNew = ISNULL(@ysnPostedNew,0)		
 	IF(@ysnPosted = 1 and @ysnPostedNew != 0)
 		RAISERROR('Cannot update detail of posted payment',16,1)
 	ELSE
@@ -74,7 +78,7 @@ BEGIN
 			,PD.intConcurrencyId               =  i.intConcurrencyId             
 		FROM tblARPaymentDetail PD
 		INNER JOIN inserted i
-			ON i.intPaymentId = PD.intPaymentId
+			ON i.intPaymentDetailId = PD.intPaymentDetailId
 END
 GO
 

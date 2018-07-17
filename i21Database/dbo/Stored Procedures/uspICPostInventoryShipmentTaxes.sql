@@ -9,6 +9,7 @@ AS
 -- Get the A/P Clearing account 
 BEGIN 
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
+	DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense';
 	DECLARE @GLAccounts AS dbo.ItemGLAccount;
 	
 	INSERT INTO @GLAccounts (
@@ -55,7 +56,13 @@ BEGIN
 			ShipmentCharge.intChargeId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,TaxCode.intPurchaseTaxAccountId
+		   ,intPurchaseTaxCodeId = 
+			CASE 
+				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+				 dbo.fnGetItemGLAccount(ShipmentCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+				ELSE 
+				 TaxCode.intPurchaseTaxAccountId 
+		   END
 			,@strBatchId
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
@@ -104,6 +111,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
+		,intEntityId
 	)
 	AS 
 	(
@@ -116,13 +124,24 @@ BEGIN
 				,dblTax								= CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -ChargeTaxes.dblTax ELSE ChargeTaxes.dblTax END
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ShipmentCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,intPurchaseTaxAccountId			= 
+													 CASE 
+														  WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ShipmentCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														  ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													 END
+				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityId						= Shipment.intEntityCustomerId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -152,13 +171,24 @@ BEGIN
 				,dblTax								= ChargeTaxes.dblTax 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ShipmentCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,intPurchaseTaxAccountId			= 
+													 CASE 
+														  WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ShipmentCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														  ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													 END
+				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intEntityId						= ShipmentCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -201,8 +231,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -260,8 +290,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
+			,intUserId					= @intEntityUserSecurityId
+			,intEntityId				= ForGLEntries_CTE.intEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

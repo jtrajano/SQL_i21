@@ -63,7 +63,13 @@ INSERT INTO tblICCategoryAccount (
 	,intAccountCategoryId
 	,intAccountId
 	,intConcurrencyId
-	) (
+	) 
+SELECT intCategoryId
+	,AccountCategoryId
+	,intAccountId
+	,ConcurrencyId
+FROM
+	(
 	SELECT cat.intCategoryId
 --	,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Sales Account') AccountCategoryId
@@ -126,8 +132,8 @@ UNION
 	WHERE coa.strExternalId = cls.agcls_inv_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 	AND cls.agcls_cd  in (select agcls_cd from #TMPCLS where agcls_cd = cls.agcls_cd)
-)
-	
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = a.AccountCategoryId AND intCategoryId = a.intCategoryId)
 
 
 --** From Control File (agctlmst) table below 2 accounts (Pending A/P and COGS account) are mapped into tblICCategoryAccount
@@ -138,7 +144,12 @@ INSERT INTO tblICCategoryAccount (
 	,intAccountCategoryId
 	,intAccountId
 	,intConcurrencyId
-	) (
+	)
+	SELECT intCategoryId
+	,AccountCategoryId
+	,intAccountId
+	,ConcurrencyId
+FROM (
 	SELECT cat.intCategoryId
 --	,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'AP Clearing') AccountCategoryId
@@ -150,7 +161,8 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.agcgl_pend_ap 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cgl.agcgl_pend_ap
-)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = a.AccountCategoryId AND intCategoryId = a.intCategoryId)
 ------------------------------------------------------
 --import gl accounts for 'Other Charge' category
 
@@ -160,7 +172,12 @@ INSERT INTO tblICCategoryAccount (
 	,intAccountCategoryId
 	,intAccountId
 	,intConcurrencyId
-	) (
+	) 
+	SELECT intCategoryId
+	,AccountCategoryId
+	,intAccountId
+	,ConcurrencyId
+FROM (
 	SELECT cat.intCategoryId
 --	,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') AccountCategoryId
@@ -172,14 +189,19 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_sls_acct_no
 	and cat.strInventoryType = 'Other Charge'
-)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = a.AccountCategoryId AND intCategoryId = a.intCategoryId)
 
 INSERT INTO tblICCategoryAccount (
 	intCategoryId
 	,intAccountCategoryId
 	,intAccountId
 	,intConcurrencyId
-	) (
+	) SELECT intCategoryId
+	,AccountCategoryId
+	,intAccountId
+	,ConcurrencyId
+FROM (
 	SELECT cat.intCategoryId
 --	,seg.intAccountCategoryId
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') AccountCategoryId
@@ -191,7 +213,8 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
-)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = a.AccountCategoryId AND intCategoryId = a.intCategoryId)
 
 ---------------------------------------------------------------------------------------------------
 ----update the account table with correct account category required for inventory & sales accounts to function

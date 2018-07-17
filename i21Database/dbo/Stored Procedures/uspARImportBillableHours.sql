@@ -95,6 +95,26 @@ ELSE
 		INNER JOIN fnGetRowsFromDelimitedValues(@HoursWorkedIDs) SELECTED
 		ON SELECTED.intID = BILLABLE.intTicketHoursWorkedId
 	END
+
+IF(OBJECT_ID('tempdb..#INACTIVECUSTOMERS') IS NOT NULL)
+BEGIN
+    DROP TABLE #INACTIVECUSTOMERS
+END
+
+SELECT C.strName
+INTO #INACTIVECUSTOMERS
+FROM #BILLABLE B
+INNER JOIN vyuARCustomerSearch C ON B.intEntityCustomerId = C.intEntityCustomerId
+WHERE C.ysnActive = 0
+
+IF EXISTS (SELECT TOP 1 NULL FROM #INACTIVECUSTOMERS)
+	BEGIN
+		DECLARE @strErrorMsg  NVARCHAR(500) = 'Customer: ' + ISNULL((SELECT TOP 1 strName FROM #INACTIVECUSTOMERS), '') + ' is Inactive.'
+		SET @IsSuccess = 0
+
+		RAISERROR(@strErrorMsg, 16, 1)
+		RETURN 0
+	END
 	
 INSERT INTO @tblInvoiceEntries (
 	 [strSourceTransaction]
@@ -188,22 +208,17 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 
 				IF @Post = 1
 				BEGIN
-					DECLARE	@batchId		NVARCHAR(20),
-							@SuccessCount	INT,
-							@InvCount		INT
-				
 					EXEC [dbo].[uspARPostInvoice]
 							@post				= 1,
 							@recap				= 0,
 							@param				= @strCreatedInvoices,
 							@userId				= @UserId,
-							@successfulCount	= @SuccessCount OUT,
-							@invalidCount		= @InvCount OUT,
+							@successfulCount	= @SuccessfulCount OUT,
+							@invalidCount		= @InvalidCount OUT,
 							@success			= @IsSuccess OUT,
 							@batchIdUsed		= @BatchIdUsed OUT,
 							@recapId			= NULL,
-							@transType			= N'Invoice'
-				
+							@transType			= N'Invoice'				
 				END 
 			END
 	END

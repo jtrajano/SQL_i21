@@ -17,6 +17,7 @@ RETURNS @returntable TABLE
 	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL DEFAULT 'AP',    
 	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]             INT              NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
 	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
 	[dtmDateEntered]            DATETIME         NOT NULL DEFAULT GETDATE(),
 	[dtmTransactionDate]        DATETIME         NULL,
@@ -54,9 +55,12 @@ BEGIN
 		[strDescription]            ,
 		[strReference]              ,
 		[intCurrencyId]             ,
+		[intCurrencyExchangeRateTypeId],
 		[dblExchangeRate]           ,
 		[dtmTransactionDate]        ,
 		[intJournalLineNo]			,
+		[strJournalLineDescription]	,
+		[strTransactionType]		,
 		[intUserId]                 ,
 		[intEntityId]				,
 		[strTransactionId]          ,
@@ -80,9 +84,12 @@ BEGIN
 		[strDescription]            =	voucher.strReference,
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
+		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 1 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
+		[strTransactionType]		=	CASE WHEN voucher.intTransactionType = 1 THEN 'Vendor Prepayment' ELSE 'Basis Advance' END,
 		[intUserId]                 =	@userId,
 		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
@@ -99,11 +106,15 @@ BEGIN
 	INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
 	OUTER APPLY
 	(
-		SELECT (voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal , voucherDetail.dblRate AS dblRate, currencyExchange.strCurrencyExchangeRateType
+		SELECT (voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal 
+				, voucherDetail.dblRate AS dblRate
+				, currencyExchange.strCurrencyExchangeRateType
+				, currencyExchange.intCurrencyExchangeRateTypeId
 		FROM dbo.tblAPBillDetail voucherDetail
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
+	WHERE voucher.intTransactionType IN (2,12,13)
 	UNION ALL
 	SELECT
 		[dtmDate]                   =	DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0),
@@ -116,9 +127,12 @@ BEGIN
 		[strDescription]            =	voucher.strReference,
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
+		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 1 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
+		[strTransactionType]		=	CASE WHEN voucher.intTransactionType = 1 THEN 'Vendor Prepayment' ELSE 'Basis Advance' END,
 		[intUserId]                 =	@userId,
 		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
@@ -140,11 +154,13 @@ BEGIN
 			(voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal,
 			voucherDetail.dblRate AS dblRate, 
 			currencyExchange.strCurrencyExchangeRateType, 
+			currencyExchange.intCurrencyExchangeRateTypeId, 
 			voucherDetail.intAccountId
 		FROM dbo.tblAPBillDetail voucherDetail
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
+	WHERE voucher.intTransactionType IN (2,12,13)
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

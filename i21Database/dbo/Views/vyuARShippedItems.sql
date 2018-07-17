@@ -57,6 +57,7 @@ SELECT id							= NEWID()
 	 , dblTotal						= SHIPPEDITEMS.dblTotal
 	 , intStorageLocationId			= SHIPPEDITEMS.intStorageLocationId
 	 , strStorageLocationName		= STORAGELOCATION.strName
+	 , strSubLocationName			= SUBLOCATION.strSubLocationName
 	 , intTermID					= SHIPPEDITEMS.intTermId
 	 , strTerm						= TERM.strTerm
 	 , intEntityShipViaId			= SHIPPEDITEMS.intEntityShipViaId
@@ -80,6 +81,7 @@ SELECT id							= NEWID()
 	 , ysnBlended					= SHIPPEDITEMS.ysnBlended
 	 , intRecipeId					= SHIPPEDITEMS.intRecipeId
 	 , intSubLocationId				= SHIPPEDITEMS.intSubLocationId
+	 , intOwnershipType				= ISNULL(SHIPPEDITEMS.intOwnershipType,0)
 	 , intCostTypeId				= SHIPPEDITEMS.intCostTypeId
 	 , intMarginById				= SHIPPEDITEMS.intMarginById
 	 , intCommentTypeId				= SHIPPEDITEMS.intCommentTypeId
@@ -142,9 +144,9 @@ FROM (
 		 , dblQtyRemaining					= SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
 		 , dblPriceUOMQuantity				= SOD.dblUnitQuantity
 		 , dblDiscount						= SOD.dblDiscount 
-		 , dblPrice							= CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblUnitPrice						= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
+		 , dblPrice							= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
@@ -164,6 +166,7 @@ FROM (
 		 , ysnBlended						= SOD.ysnBlended
 		 , intRecipeId						= SOD.intRecipeId
 		 , intSubLocationId					= ISNULL(SHP.intSubLocationId, SOD.intSubLocationId)
+		 , intOwnershipType					= SHP.intOwnershipType
 		 , intCostTypeId					= SOD.intCostTypeId
 		 , intMarginById					= SOD.intMarginById
 		 , intCommentTypeId					= SOD.intCommentTypeId
@@ -208,6 +211,7 @@ FROM (
 			 , ISH.intCurrencyId
 			 , ISI.intForexRateTypeId
 			 , ISI.dblForexRate
+			 , ISI.intOwnershipType
 		FROM dbo.tblICInventoryShipmentItem ISI WITH (NOLOCK)
 		INNER JOIN (
 			 SELECT intInventoryShipmentId
@@ -241,6 +245,7 @@ FROM (
 			   , ISH.intCurrencyId
 			   , ISI.intForexRateTypeId
 			   , ISI.dblForexRate
+			   , ISI.intOwnershipType
 	) SHP
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
@@ -288,35 +293,35 @@ FROM (
 	     , intFreightTermId					= ICIS.intFreightTermId
 	     , intItemId						= ICISI.intItemId
 	     , strItemDescription				= NULL
-	     , intItemUOMId						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
+	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
 		 , intPriceUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intPriceItemUOMId ELSE ICISI.intPriceUOMId END
 	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
-	     , dblQtyShipped					= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN ICISI.dblDestinationQuantity
+	     , dblQtyShipped					= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0)) --ICISI.dblDestinationQuantity
 												ELSE
-													CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
+													dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
 												END)
 	     , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN ICISI.dblDestinationQuantity
+	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0)) --ICISI.dblDestinationQuantity
 												ELSE
-													CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
+													dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
+												END)     
+	     , dblShipmentQtyShippedTotal		= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0)) --ICISI.dblDestinationQuantity
+												ELSE
+													dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
 												END)	     
-	     , dblShipmentQtyShippedTotal		= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN ICISI.dblDestinationQuantity
+	     , dblQtyRemaining					= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0)) - ISNULL(ID.dblQtyShipped, 0)--ICISI.dblDestinationQuantity
 												ELSE
-													CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
-												END)	     
-	     , dblQtyRemaining					= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL THEN ICISI.dblDestinationQuantity
-												ELSE
-													CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) - ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0) END
-												END)												
+													dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), (ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0))) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
+												END)																							
 		 , dblPriceUOMQuantity				= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblPriceUOMQuantity ELSE (CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END) END
 	     , dblDiscount						= 0.000000 
 	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= ISNULL(ICISI.dblConvertedPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice))
-	     , strPricing						= ''
+	     , dblShipmentUnitPrice				= ISNULL(ARCC.dblOrderPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice))--ISNULL(ICISI.dblConvertedPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice))
+	     , strPricing						= ''	     
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0.000000
 	     , dblTotal							= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) * ISNULL(ARCC.dblCashPrice, ICISI.dblConvertedPrice) ELSE ISNULL(ICISI.dblQuantity,0) * ICISI.dblConvertedPrice END
@@ -335,6 +340,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= ICISI.intSubLocationId
+		 , intOwnershipType					= ICISI.intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -350,31 +356,36 @@ FROM (
 	     , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
-	FROM 
-		(
-			select 
-				dblForexRate,
-				intDestinationGradeId,
-				intDestinationWeightId,
-				intSubLocationId,
-				intSourceId,
-				intStorageLocationId,
-				intInventoryShipmentId,
-				intInventoryShipmentItemId,
-				intForexRateTypeId,
-				intLineNo,
-				intItemId,
-				intItemUOMId,
-				dblQuantity,
-				intWeightUOMId,
-				intPriceUOMId,
-				dblUnitPrice,
-				dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
-				dblDestinationQuantity
-			from
-				dbo.tblICInventoryShipmentItem WITH (NOLOCK)
-		)
-		ICISI 
+	FROM (
+		SELECT 
+			dblForexRate,
+			intDestinationGradeId,
+			intDestinationWeightId,
+			intSubLocationId,
+			intSourceId,
+			intStorageLocationId,
+			intInventoryShipmentId,
+			intInventoryShipmentItemId,
+			intForexRateTypeId,
+			intLineNo,
+			intItemId,
+			intItemUOMId,
+			dblQuantity,
+			intWeightUOMId,
+			intPriceUOMId,
+			dblUnitPrice,
+			dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
+			dblDestinationQuantity,
+			intOwnershipType
+		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
+		WHERE 
+			ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
+			OR
+			(	ISNULL(ysnDestinationWeightsAndGrades, 0) = 1 
+				AND 
+				dblDestinationQuantity IS NOT NULL
+			)
+	) ICISI 
 	INNER JOIN (
 		SELECT intInventoryShipmentId
 			 , intShipFromLocationId
@@ -461,6 +472,7 @@ FROM (
 			 , intItemWeightUOMId
 			 , dblCashPrice
 			 , dblUnitPrice
+			 , dblOrderPrice
 			 , dblDetailQuantity
 			 , intFreightTermId
 			 , dblShipQuantity
@@ -547,7 +559,7 @@ FROM (
 		 , intStorageLocationId				= NULL
 		 , intTermId						= NULL
 		 , intEntityShipViaId				= NULL
-		 , intTicketId						= NULL
+		 , intTicketId						= ICISI.intSourceId
 		 , intTaxGroupId					= NULL
 		 , dblGrossWt						= 0
 		 , dblTareWt						= 0
@@ -559,6 +571,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -587,6 +600,12 @@ FROM (
 		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) ICIS ON ICISC.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	OUTER APPLY (
+		SELECT TOP 1 intSourceId
+		FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
+		WHERE ISNULL(ICISI.strChargesLink, '') = ICISC.strChargesLink
+		  AND ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+	) ICISI
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentChargeId
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
@@ -659,6 +678,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= MFR.intRecipeId
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -769,6 +789,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= ICISI.intOwnershipType
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -810,6 +831,7 @@ FROM (
 			 , intRecipeId
 		FROM tblMFRecipeItem WITH(NOLOCK)
 	) MFI ON MFG.intRecipeItemId = MFI.intRecipeItemId
+	WHERE ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 0
 
 	UNION ALL 
 
@@ -875,6 +897,7 @@ FROM (
 	     , ysnBlended						= ysnBlended
 	     , intRecipeId						= intRecipeId
 	     , intSubLocationId					= intSubLocationId
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= intCostTypeId
 	     , intMarginById					= intMarginById
 	     , intCommentTypeId					= intCommentTypeId
@@ -957,6 +980,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -1075,6 +1099,7 @@ FROM (
 	     , ysnBlended						= NULL
 	     , intRecipeId						= NULL
 	     , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 	     , intCostTypeId					= NULL
 	     , intMarginById					= NULL
 	     , intCommentTypeId					= NULL
@@ -1201,6 +1226,7 @@ FROM (
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
 		 , intSubLocationId					= NULL
+		 , intOwnershipType					= NULL --intOwnershipType
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -1395,6 +1421,11 @@ LEFT OUTER JOIN (
 		 , strName = CAST(ISNULL(strName, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblICStorageLocation WITH (NOLOCK)
 ) STORAGELOCATION ON SHIPPEDITEMS.intStorageLocationId = STORAGELOCATION.intStorageLocationId
+LEFT OUTER JOIN (
+	SELECT intCompanyLocationSubLocationId
+		 , strSubLocationName = CAST(ISNULL(strSubLocationName, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	FROM dbo.tblSMCompanyLocationSubLocation WITH (NOLOCK)
+) SUBLOCATION ON SHIPPEDITEMS.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
 LEFT OUTER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName

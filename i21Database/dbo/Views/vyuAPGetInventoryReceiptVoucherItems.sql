@@ -34,7 +34,7 @@ SELECT	Receipt.intEntityVendorId
 		, intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 		, strItemUOM = ItemUOMName.strUnitMeasure
 		, intCostUOMId = COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
-		, strCostUOM = ItemUOMName.strUnitMeasure
+		, strCostUOM = CostUOMName.strUnitMeasure
 FROM	tblICInventoryReceipt Receipt 
 		INNER JOIN tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -271,4 +271,4 @@ FROM	tblICInventoryReceipt Receipt
 
 WHERE	Receipt.ysnPosted = 1
 		AND receiptAndVoucheredItems.dblReceiptQty <> receiptAndVoucheredItems.dblVoucherQty
-		AND receiptAndVoucheredItems.dblUnitCost != 0
+		AND receiptAndVoucheredItems.dblUnitCost != 0 --WILL NOT SHOW RECEIPT FROM STORAGE

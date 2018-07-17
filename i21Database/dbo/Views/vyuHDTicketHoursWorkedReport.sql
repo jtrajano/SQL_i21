@@ -9,9 +9,10 @@
 			,strAgent = ltrim(rtrim(entityCreator.strName))
 			,intHours = b.intHours
 			,dtmDateCreated = b.dtmDate
-			,strJobCode = c.strJobCode
+			,strJobCode = c.strItemNo
 			,ysnBillable = b.ysnBillable
 			,bdlRate = b.dblRate
+			,dblRate = b.dblRate
 			,strDescription = b.strDescription
 			,ysnExported = b.ysnBilled
 			,strInvoiceNo = d.strInvoiceNumber
@@ -20,7 +21,8 @@
         from
 			tblHDTicket a
 			inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId
-			left outer join tblHDJobCode c on c.intJobCodeId = b.intJobCodeId
+			--left outer join tblHDJobCode c on c.intJobCodeId = b.intJobCodeId
+			left outer join tblICItem c on c.intItemId = b.intItemId
 			left outer join tblARInvoice d on d.intInvoiceId = b.intInvoiceId
 			left outer join tblEMEntity entity on entity.intEntityId = a.intCustomerId
 			left outer join tblEMEntity entityContact on entityContact.intEntityId = a.intCustomerContactId

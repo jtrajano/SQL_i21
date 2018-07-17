@@ -13,6 +13,8 @@ SET XACT_ABORT ON
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
+DECLARE @voucherCreated NVARCHAR(MAX);
+DECLARE @billId INT;
 	
 CREATE TABLE #tmpBillIds (
 	[intBillId] [INT] PRIMARY KEY,
@@ -20,28 +22,34 @@ CREATE TABLE #tmpBillIds (
 	[intEntityVendorId] INT,
 	[intCurrencyId] INT
 )
+-- EXEC dbo.[uspAPCreateBillFromIR] 
+-- 	@intRecordId,
+-- 	@intUserId
+EXEC [dbo].[uspICProcessToBill]
+	@intReceiptId = @intRecordId,
+	@intUserId = @intUserId,
+	@intBillId = @billId OUTPUT,
+	@strBillIds = @voucherCreated OUTPUT
 
-INSERT INTO #tmpBillIds
-EXEC dbo.[uspAPCreateBillFromIR] 
-	@intRecordId,
-	@intUserId
+SET @intBillId = @billId;
+SET @strBillIds = @voucherCreated;
 
-SELECT TOP 1 @intBillId = intBillId FROM #tmpBillIds
+-- SELECT TOP 1 @intBillId = intBillId FROM #tmpBillIds
 
-SELECT @strBillIds = 
-	LTRIM(
-		STUFF(
-				' ' + (
-					SELECT  CONVERT(NVARCHAR(50), intBillId) + '|^|'
-					FROM	#tmpBillIds
-					ORDER BY intBillId
-					FOR xml path('')
-				)
-			, 1
-			, 1
-			, ''
-		)
-	)
+-- SELECT @strBillIds = 
+-- 	LTRIM(
+-- 		STUFF(
+-- 				' ' + (
+-- 					SELECT  CONVERT(NVARCHAR(50), intBillId) + '|^|'
+-- 					FROM	#tmpBillIds
+-- 					ORDER BY intBillId
+-- 					FOR xml path('')
+-- 				)
+-- 			, 1
+-- 			, 1
+-- 			, ''
+-- 		)
+-- 	)
 
 DROP TABLE #tmpBillIds
 GO

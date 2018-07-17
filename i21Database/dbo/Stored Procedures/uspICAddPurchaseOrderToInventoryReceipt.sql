@@ -198,6 +198,7 @@ BEGIN
 		,strTaxableByOtherTaxes NVARCHAR (MAX) 
 		,strCalculationMethod	NVARCHAR(50)
 		,dblRate				NUMERIC(18,6)
+		,dblBaseRate			NUMERIC(18,6)
 		,dblTax					NUMERIC(18,6)
 		,dblAdjustedTax			NUMERIC(18,6)
 		,intTaxAccountId		INT
@@ -258,6 +259,7 @@ BEGIN
 			,strTaxableByOtherTaxes
 			,strCalculationMethod
 			,dblRate
+			,dblBaseRate
 			,dblTax
 			,dblAdjustedTax
 			,intTaxAccountId
@@ -335,7 +337,7 @@ BEGIN
 				,[strTaxCode]					= [strTaxCode]
 				,[intSort]						= 1
 				,[intConcurrencyId]				= 1
-		FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @CostUOMId)
+		FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @CostUOMId, NULL, NULL, NULL)
 
 		--Compute the tax
 		BEGIN 

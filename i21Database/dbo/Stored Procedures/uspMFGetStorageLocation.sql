@@ -8,7 +8,10 @@ BEGIN
 	SELECT SL.intStorageLocationId
 		,SL.strName
 		,SL.intSubLocationId
+		,CSL.strSubLocationName
+		,SL.strDescription
 	FROM dbo.tblICStorageLocation SL
+	JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	WHERE intLocationId = @intLocationId
 		AND strName LIKE @strName + '%'
 		AND SL.intStorageLocationId = (

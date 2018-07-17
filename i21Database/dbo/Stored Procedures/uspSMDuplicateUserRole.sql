@@ -75,7 +75,9 @@ BEGIN
 		   [strDefaultValue],
 		   [ysnRequired]
 	FROM [tblSMUserRoleControlPermission]
-	WHERE [intUserRoleId] = @intUserRoleId
+	WHERE [intUserRoleId] = @intUserRoleId 
+	-- Subject to be moved after 18.3
+	AND intControlId NOT IN (SELECT intControlId FROM [tblSMUserRoleControlPermission] WHERE intUserRoleId = @newUserRoleId)
 
 	INSERT INTO [tblSMUserRoleCompanyLocationPermission]([intUserRoleId], [intCompanyLocationId])
 	SELECT @newUserRoleId, 

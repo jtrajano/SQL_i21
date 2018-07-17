@@ -283,6 +283,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=LTRIM(RTRIM(a.gastr_com_cd)) COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+									          AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS
@@ -349,6 +350,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+												  AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
@@ -415,6 +417,7 @@ BEGIN
 				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+												AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
 				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
@@ -774,7 +777,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId1
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,1
@@ -826,7 +829,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId2
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,2
@@ -879,7 +882,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId3
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,3
@@ -931,7 +934,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId4
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,4
@@ -983,7 +986,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId5
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,5
@@ -1035,7 +1038,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId6
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,6
@@ -1087,7 +1090,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId7
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,7
@@ -1139,7 +1142,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId8
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,8
@@ -1191,7 +1194,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId9
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,9
@@ -1243,7 +1246,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId10
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,10
@@ -1295,7 +1298,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId11
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,11
@@ -1347,7 +1350,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId12
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,12

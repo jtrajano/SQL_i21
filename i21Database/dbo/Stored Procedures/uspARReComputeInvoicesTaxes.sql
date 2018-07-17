@@ -15,23 +15,25 @@ SET @ZeroDecimal = 0.000000
 
 
 DECLARE @InvoiceDetail AS TABLE(
-	 [intInvoiceDetailId]		INT PRIMARY KEY
-	,[intInvoiceId]				INT
-	,[intItemId]				INT
-	,[intEntityCustomerId]		INT
-	,[intCompanyLocationId]		INT
-	,[dtmTransactionDate]		DATETIME
-	,[intDistributionHeaderId]	INT
-	,[intCustomerLocationId]	INT
-	,[dblSubCurrencyRate]		DECIMAL(18,6)
-	,[intFreightTermId]			INT
-	,[dblPrice]					DECIMAL(18,6) 
-	,[dblQtyShipped]			DECIMAL(18,6) 
-	,[dblCurrencyExchangeRate]	DECIMAL(18,6) 
-	,[intTaxGroupId]			INT
-	,[strItemType]				NVARCHAR(100)
-	,[intSiteId]				INT
-	,[intItemUOMId]				INT
+	 [intInvoiceDetailId]				INT PRIMARY KEY
+	,[intInvoiceId]						INT
+	,[intItemId]						INT
+	,[intEntityCustomerId]				INT
+	,[intCurrencyId]					INT
+	,[intCompanyLocationId]				INT
+	,[dtmTransactionDate]				DATETIME
+	,[intDistributionHeaderId]			INT
+	,[intCustomerLocationId]			INT
+	,[dblSubCurrencyRate]				DECIMAL(18,6)
+	,[intFreightTermId]					INT
+	,[dblPrice]							DECIMAL(18,6) 
+	,[dblQtyShipped]					DECIMAL(18,6) 
+	,[intCurrencyExchangeRateTypeId]	INT
+	,[dblCurrencyExchangeRate]			DECIMAL(18,6) 	
+	,[intTaxGroupId]					INT
+	,[strItemType]						NVARCHAR(100)
+	,[intSiteId]						INT
+	,[intItemUOMId]						INT
 	UNIQUE ([intInvoiceDetailId])
 );
 
@@ -41,6 +43,7 @@ INSERT INTO @InvoiceDetail
 	,[intInvoiceId]
 	,[intItemId]
 	,[intEntityCustomerId]
+	,[intCurrencyId]
 	,[intCompanyLocationId]
 	,[dtmTransactionDate]
 	,[intDistributionHeaderId]
@@ -49,33 +52,36 @@ INSERT INTO @InvoiceDetail
 	,[intFreightTermId]
 	,[dblPrice]
 	,[dblQtyShipped]
+	,[intCurrencyExchangeRateTypeId]
 	,[dblCurrencyExchangeRate]
 	,[intTaxGroupId]
 	,[strItemType]
 	,[intSiteId]
 	,[intItemUOMId])
 SELECT
-	 [intInvoiceDetailId]		= ARID.[intInvoiceDetailId]
-	,[intInvoiceId]				= ARI.[intInvoiceId]
-	,[intItemId]				= ARID.[intItemId]
-	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]
-	,[intCompanyLocationId]		= ARI.[intCompanyLocationId]
-	,[dtmTransactionDate]		= ARI.[dtmDate]
-	,[intDistributionHeaderId]	= ARI.[intDistributionHeaderId]
-	,[intCustomerLocationId]	= (CASE WHEN ISNULL(SMFT.[strFobPoint],'Destination') = 'Origin ' THEN ARI.[intBillToLocationId] ELSE ARI.[intShipToLocationId] END)
-	,[dblSubCurrencyRate]		= ISNULL(ARID.[dblSubCurrencyRate], 1)
-	,[intFreightTermId]			= ARI.[intFreightTermId]
-	,[dblPrice]					= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblPrice] ELSE ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) END) / ISNULL(ARID.[dblSubCurrencyRate], 1)
-	,[dblQtyShipped]			= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblQtyShipped] ELSE ISNULL(ARID.[dblShipmentNetWt], @ZeroDecimal) END)
-	,[dblCurrencyExchangeRate]	= ISNULL(ARID.[dblCurrencyExchangeRate], 1)
-	,[intTaxGroupId]			= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END
-	,[strItemType]				= ICI.[strType]
-	,[intSiteId]				= ARID.[intSiteId]
-	,[intItemUOMId]				= ARID.[intItemUOMId] 
+	 [intInvoiceDetailId]				= ARID.[intInvoiceDetailId]
+	,[intInvoiceId]						= ARI.[intInvoiceId]
+	,[intItemId]						= ARID.[intItemId]
+	,[intEntityCustomerId]				= ARI.[intEntityCustomerId]
+	,[intCurrencyId]					= ARI.[intCurrencyId]
+	,[intCompanyLocationId]				= ARI.[intCompanyLocationId]
+	,[dtmTransactionDate]				= ARI.[dtmDate]
+	,[intDistributionHeaderId]			= ARI.[intDistributionHeaderId]
+	,[intCustomerLocationId]			= (CASE WHEN ISNULL(SMFT.[strFobPoint],'Destination') = 'Origin ' THEN ARI.[intBillToLocationId] ELSE ARI.[intShipToLocationId] END)
+	,[dblSubCurrencyRate]				= ISNULL(ARID.[dblSubCurrencyRate], 1)
+	,[intFreightTermId]					= ARI.[intFreightTermId]
+	,[dblPrice]							= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblPrice] ELSE ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) END) / ISNULL(ARID.[dblSubCurrencyRate], 1)
+	,[dblQtyShipped]					= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblQtyShipped] ELSE ISNULL(ARID.[dblShipmentNetWt], @ZeroDecimal) END)
+	,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
+	,[dblCurrencyExchangeRate]			= ISNULL(ARID.[dblCurrencyExchangeRate], 1)
+	,[intTaxGroupId]					= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END
+	,[strItemType]						= ICI.[strType]
+	,[intSiteId]						= ARID.[intSiteId]
+	,[intItemUOMId]						= ARID.[intItemUOMId] 
 FROM
 	tblARInvoiceDetail ARID WITH (NOLOCK)
 INNER JOIN
-	(SELECT [intEntityCustomerId], [intCompanyLocationId], [dtmDate], [intDistributionHeaderId], [intFreightTermId], [intBillToLocationId],[intShipToLocationId], [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) ARI
+	(SELECT [intEntityCustomerId], [intCompanyLocationId], [dtmDate], [intDistributionHeaderId], [intFreightTermId], [intBillToLocationId],[intShipToLocationId], [intInvoiceId], [intCurrencyId] FROM tblARInvoice WITH (NOLOCK)) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
 	(SELECT [intFreightTermId], [strFobPoint] FROM tblSMFreightTerms WITH (NOLOCK)) SMFT
@@ -114,6 +120,7 @@ INSERT INTO [tblARInvoiceDetailTax]
     ,[strTaxableByOtherTaxes]
     ,[strCalculationMethod]
     ,[dblRate]
+	,[dblBaseRate]
 	,[dblExemptionPercent]
     ,[intSalesTaxAccountId]
     ,[dblTax]
@@ -125,6 +132,7 @@ INSERT INTO [tblARInvoiceDetailTax]
     ,[ysnTaxExempt]
 	,[ysnTaxOnly]
 	,[strNotes] 
+	,[intUnitMeasureId]
     ,[intConcurrencyId])		
 SELECT
 	 [intInvoiceDetailId]		= IDs.[intInvoiceDetailId] 
@@ -134,6 +142,7 @@ SELECT
 	,[strTaxableByOtherTaxes]	= TD.[strTaxableByOtherTaxes]
 	,[strCalculationMethod]		= TD.[strCalculationMethod]
 	,[dblRate]					= TD.[dblRate]
+	,[dblBaseRate]				= TD.[dblBaseRate]
 	,[dblExemptionPercent]		= TD.[dblExemptionPercent]
 	,[intTaxAccountId]			= TD.[intTaxAccountId]
 	,[dblTax]					= TD.[dblTax]
@@ -145,11 +154,12 @@ SELECT
 	,[ysnTaxExempt]				= TD.[ysnTaxExempt]
 	,[ysnTaxOnly]				= TD.[ysnTaxOnly]
 	,[strNotes]					= TD.[strNotes]
+	,[intUnitMeasureId]			= TD.[intUnitMeasureId]
 	,[intConcurrencyId]			= 1
 FROM
 	@InvoiceDetail IDs
 CROSS APPLY
-	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, IDs.[intItemUOMId]) TD
+	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 		

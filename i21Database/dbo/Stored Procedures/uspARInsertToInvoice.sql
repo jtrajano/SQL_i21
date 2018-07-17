@@ -102,7 +102,9 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
 							intSalesOrderId					INT NULL,
 							intStorageLocationId			INT NULL,
-							intCompanyLocationSubLocationId	INT NULL)
+							intCompanyLocationSubLocationId	INT NULL,
+							strAddonDetailKey				VARCHAR(MAX) NULL,
+							ysnAddonParent					BIT NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							intItemId						INT, 
@@ -154,7 +156,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
 							intSalesOrderId					INT NULL,
 							intStorageLocationId			INT NULL,
-							intCompanyLocationSubLocationId	INT NULL)
+							intCompanyLocationSubLocationId	INT NULL,
+							strAddonDetailKey				VARCHAR(MAX) NULL,
+							ysnAddonParent					BIT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -219,6 +223,8 @@ SELECT intItemId						= SI.intItemId
 	 , intSalesOrderId					= SI.intSalesOrderId
 	 , intStorageLocationId				= SOD.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
+	 ,strAddonDetailKey					= SOD.strAddonDetailKey
+	 ,ysnAddonParent					= SOD.ysnAddonParent
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -281,6 +287,8 @@ SELECT intItemId						= SOD.intItemId
 	 , intSalesOrderId					= NULL
 	 , intStorageLocationId				= NULL
 	 , intCompanyLocationSubLocationId	= NULL
+	 ,strAddonDetailKey					= SOD.strAddonDetailKey
+	 ,ysnAddonParent					= SOD.ysnAddonParent
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -338,6 +346,8 @@ SELECT intItemId						= ICSI.intItemId
 	 , intSalesOrderId					= SO.intSalesOrderId
 	 , intStorageLocationId				= SOD.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
+	 ,strAddonDetailKey					= SOD.strAddonDetailKey
+	 ,ysnAddonParent					= SOD.ysnAddonParent
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -398,6 +408,8 @@ SELECT intItemId						= ARSI.intItemId
 	 , intSalesOrderId					= ARSI.intSalesOrderId
 	 , intStorageLocationId				= ARSI.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= ARSI.intSubLocationId
+	 ,strAddonDetailKey					= ARSI.strAddonDetailKey
+	 ,ysnAddonParent					= ARSI.ysnAddonParent
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -588,7 +600,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ItemOrderUOMId			=	@intNewSoftwareUOMId,
 							@ItemQtyOrdered			=	@dblNewSoftwareOrderedQty,
 							@ItemQtyShipped			=	@dblNewSoftwareOrderedQty,							
-							@ItemMaintenanceType	=	@strNewSoftwareItemMaintType,
+							@ItemMaintenanceType	=	'Maintenance Only',
 							@ItemFrequency			=	@strNewSoftwareItemMainFreq,
 							@ItemMaintenanceDate	=	@dtmSOMaintenanceDate,
 							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
@@ -600,7 +612,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 						DECLARE @softwareToPost NVARCHAR(MAX)
 						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
 
-						EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @softwareToPost, @userId = @UserId, @transType = N'Invoice'							
+						EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @softwareToPost, @userId = @UserId, @transType = N'Invoice'
+						EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId = @intNewSoftwareInvoiceId, @strTransactionType = 'Invoice'
 					END
 			END
 		ELSE
@@ -761,7 +774,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intCurrencyExchangeRateTypeId]
 					,[dblCurrencyExchangeRate]
 					,[intSubLocationId]
-					,[intStorageLocationId])
+					,[intStorageLocationId]
+					,[strAddonDetailKey]
+					,[ysnAddonParent])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -806,6 +821,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblCurrencyExchangeRate]
 					,[intSubLocationId]
 					,[intStorageLocationId]
+					,[strAddonDetailKey]
+					,[ysnAddonParent]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -817,6 +834,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 			END
 
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @SoftwareInvoiceId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId = @SoftwareInvoiceId, @strTransactionType = 'Invoice'
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
@@ -920,7 +938,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCurrencyExchangeRateTypeId		INT,
 						@ItemCurrencyExchangeRate			NUMERIC(18, 6),
 						@ItemCompanyLocationSubLocationId	INT,
-						@ItemStorageLocationId				INT
+						@ItemStorageLocationId				INT,
+						@ItemstrAddonDetailKey					VARCHAR(MAX),
+						@ItemysnAddonParent						BIT
 
 				SELECT TOP 1
 						@intItemToInvoiceId					= intItemToInvoiceId,
@@ -966,7 +986,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCurrencyExchangeRateTypeId		= intCurrencyExchangeRateTypeId,
 						@ItemCurrencyExchangeRate			= dblCurrencyExchangeRate,
 						@ItemStorageLocationId				= intStorageLocationId,
-						@ItemCompanyLocationSubLocationId	= intCompanyLocationSubLocationId
+						@ItemCompanyLocationSubLocationId	= intCompanyLocationSubLocationId,
+						@ItemstrAddonDetailKey				= strAddonDetailKey,
+						@ItemysnAddonParent					= ysnAddonParent
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -1017,6 +1039,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemCurrencyExchangeRate			= @ItemCurrencyExchangeRate
 							,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
 							,@ItemStorageLocationId				= @ItemStorageLocationId
+							,@ItemstrAddonDetailKey				= @ItemstrAddonDetailKey
+							,@ItemysnAddonParent				= @ItemysnAddonParent
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
@@ -1053,6 +1077,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[strTaxableByOtherTaxes]
 									,[strCalculationMethod]
 									,[dblRate]
+									,[dblBaseRate]
 									,[dblExemptionPercent]
 									,[intSalesTaxAccountId]
 									,[dblTax]
@@ -1073,6 +1098,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[strTaxableByOtherTaxes]
 									,[strCalculationMethod]
 									,[dblRate]
+									,ISNULL([dblBaseRate], [dblRate])
 									,[dblExemptionPercent]
 									,[intSalesTaxAccountId]
 									,[dblTax]

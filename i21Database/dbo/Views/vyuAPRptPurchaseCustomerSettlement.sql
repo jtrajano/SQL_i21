@@ -16,23 +16,29 @@ AS
 	strVendorAddress = dbo.fnConvertToFullAddress(NULL, Bill.strShipFromCity, Bill.strShipFromState, NULL),
 	intTicketId = 
 		(CASE 
-		WHEN INVRCPT.intSourceType = 4 
-		THEN (SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		WHEN INVRCPT.intSourceType IS NULL 
-		THEN (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
-		ELSE (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+			THEN (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
+		ELSE INVRCPTITEM.intSourceId
 		END),
 	strTicketNumber =
-		(CASE WHEN INVRCPT.intSourceType = 4 
-		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		(CASE 
+		WHEN INVRCPT.intSourceType = 5 
+			THEN (SELECT TOP 1 SCD.strDeliverySheetNumber FROM tblSCDeliverySheet SCD WHERE intDeliverySheetId = INVRCPTITEM.intSourceId)
+		WHEN INVRCPT.intSourceType = 4 
+			THEN (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		WHEN INVRCPT.intSourceType IS NULL 
-		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
-		ELSE (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+			THEN (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
+		ELSE 
+		(SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	INVRCPT.strReceiptNumber,
 	INVRCPTITEM.intInventoryReceiptItemId,
 	Bill.strBillId as RecordId,
-	strSourceType = (CASE WHEN INVRCPT.intSourceType = 4 
+	strSourceType = 
+		(CASE 
+		 WHEN INVRCPT.intSourceType = 5 
+		 THEN 'Scale'
+		 WHEN INVRCPT.intSourceType = 4 
 		 THEN 'Settle Storage'
 	     WHEN INVRCPT.intSourceType = 3 
 		 THEN 'Transport'
@@ -76,21 +82,30 @@ AS
 		END),
 	dtmBillDate = Bill.dtmDate,
 	dblGrossWeight =
-		(CASE WHEN INVRCPT.intSourceType = 4 
+		(CASE 
+		WHEN INVRCPT.intSourceType = 5  --DS
+		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR LEFT JOIN tblSCTicket SC ON INVRCPTITEM.intSourceId = SC.intDeliverySheetId )
+		WHEN INVRCPT.intSourceType = 4  --OPEN STORAGE
 		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		WHEN  INVRCPT.intSourceType IS NULL
 		THEN  (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)    
 		ELSE (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	dblTareWeight = 
-		(CASE WHEN INVRCPT.intSourceType = 4 
+		(CASE 
+		WHEN INVRCPT.intSourceType = 5 --DS
+		THEN (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR LEFT JOIN tblSCTicket SC ON INVRCPTITEM.intSourceId = SC.intDeliverySheetId )
+		WHEN INVRCPT.intSourceType = 4 --OPEN STORAGE
 		THEN (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
 		WHEN  INVRCPT.intSourceType IS NULL
 		THEN  (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)    
 		ELSE (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	dblNetWeight = 
-		(CASE WHEN INVRCPT.intSourceType = 4 
+		(CASE 
+		WHEN INVRCPT.intSourceType = 5 --DS
+		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR LEFT JOIN tblSCTicket SC ON INVRCPTITEM.intSourceId = SC.intDeliverySheetId )
+		WHEN INVRCPT.intSourceType = 4 --OPEN STORAGE
 		THEN (SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		WHEN  INVRCPT.intSourceType IS NULL
 		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)  
@@ -102,8 +117,8 @@ AS
 	BillDtl.dblTotal,
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax ) as NetDue,
+	TotalDiscount = ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0),
+	NetDue = (BillDtl.dblTotal + BillDtl.dblTax) ,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 	PYMT.dblAmountPaid as CheckAmount,
@@ -115,7 +130,7 @@ AS
 	INNER JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId =  PYMT.strPaymentRecordNum
 	INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId is null
+	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId --AND BillDtl.intInventoryReceiptChargeId is null
 	INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 	LEFT JOIN tblGRStorageHistory GRH ON GRH.intCustomerStorageId = BillDtl.intCustomerStorageId AND GRH.strType = 'From Scale'
 	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
@@ -127,6 +142,7 @@ AS
 	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	--LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = INVRCPTITEM.intSourceId
 	OUTER APPLY (
 				SELECT 
 					SUM(dblTotal) AS dblTotal,
@@ -135,7 +151,6 @@ AS
 				WHERE D.intBillId = Bill.intBillId														
 			) detailTransaction
 	WHERE Bill.ysnPosted = 1
-
 	UNION ALL 
 	
 	SELECT
@@ -164,7 +179,12 @@ AS
 	INVSHIP.strShipmentNumber,
 	strReceiptNumber = 0,
 	INV.strInvoiceNumber as RecordId,
-	CASE WHEN INVSHIP.intSourceType = 4 THEN
+	CASE
+		WHEN 
+		INVSHIP.intSourceType = 5 THEN 
+		'Scale'
+		WHEN 
+		INVSHIP.intSourceType = 4 THEN
 		'Settle Storage'
 		WHEN INVSHIP.intSourceType = 3 THEN
 		'Transport'
@@ -235,8 +255,8 @@ AS
 	INVDTL.dblTotal,
 	INVDTL.dblTotalTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  AS TotalDiscount,
-	(INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)) as NetDue,
+	TotalDiscount = ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0),
+	NetDue = (INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)),
 	INV.strInvoiceNumber as strId,
 	PYMT.intPaymentId,
 	PYMT.dblAmountPaid as CheckAmount,

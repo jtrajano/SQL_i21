@@ -75,8 +75,8 @@ SELECT E.intEntityId
 	 CL.strZipPostalCode + ' ' + CL.strCity + CHAR(13) +  
 	 CL.strStateProvince + ' ' + CL.strCountry AS strSupplierFullAddress
 	,'( ' + @strUserName + ' )' AS strUserName
-	,dbo.fnSMGetCompanyLogo('OrganicDeclarationHeader') AS blbHeaderLogo
-	,dbo.fnSMGetCompanyLogo('OrganicDeclarationFooter') AS blbFooterLogo
+	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
 	,@strSKALCompanyNo AS strCompanyNumberSupplier
 	,FWE.strName + CASE 
 		WHEN ISNULL(FWEL.strCity, '') <> ''
@@ -92,6 +92,9 @@ SELECT E.intEntityId
 			THEN E.strName + CHAR(13) + CEL.strAddress + CHAR(13) + CEL.strZipCode + ' ' + CEL.strCity + CHAR(13) + CEL.strState + ' ' + CEL.strCountry
 		ELSE NULL
 		END AS strDeliveryAddress
+
+	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth
 FROM tblEMEntity E
 JOIN (
 	SELECT TOP 1 LD.intSCompanyLocationId
@@ -109,3 +112,4 @@ LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LOAD.intSCompanyL
 LEFT JOIN tblEMEntity FWE ON FWE.intEntityId = LOAD.intForwardingAgentEntityId
 LEFT JOIN tblEMEntityLocation FWEL ON FWEL.intEntityId = FWE.intEntityId
 LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LOAD.intCustomerEntityLocationId
+CROSS APPLY tblLGCompanyPreference CP

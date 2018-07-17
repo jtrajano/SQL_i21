@@ -108,11 +108,78 @@ BEGIN TRANSACTION
 
 	EXEC dbo.uspGLBookEntries @GLEntries,0 --@ysnPost
 
-	DECLARE @strOldBatchId NVARCHAR(50)
 
-	SELECT @strOldBatchId = strBatchId FROM tblRKM2MPostRecap WHERE intM2MInquiryId = @intM2MInquiryId
+	DECLARE @strOldBatchId NVARCHAR(50),
+			@strOldReversalBatchId NVARCHAR(50)
 
-	UPDATE	tblGLDetail SET	ysnIsUnposted = 1WHERE	strBatchId = @strOldBatchId 
+	SELECT @strOldBatchId = strBatchId, @strOldReversalBatchId = strReversalBatchId FROM tblRKM2MPostRecap WHERE intM2MInquiryId = @intM2MInquiryId
+
+
+	--Upost reversal transaction
+	
+	DECLARE @ReverseGLEntries AS RecapTableType,
+			@strReversalBatchId AS NVARCHAR(100)
+	EXEC uspSMGetStartingNumber 3, @strReversalBatchId OUT
+
+	INSERT INTO @ReverseGLEntries (
+		 [dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[intCurrencyId]
+		,[dtmTransactionDate]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[ysnIsUnposted]
+		,[strCode]
+		,[strReference]  
+		,[intEntityId]
+		,[intUserId]      
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		)
+	SELECT [dtmDate]
+		,@strReversalBatchId
+		,[intAccountId]
+		,[dblCredit] 
+		,[dblDebit]
+		,[dblCreditUnit]
+		,[dblDebitUnit]
+		,[strDescription]
+		,[intCurrencyId]
+		,[dtmTransactionDate]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblExchangeRate]
+		,GETDATE() --[dtmDateEntered]
+		,1
+		,[strCode]
+		,[strReference]  
+		,[intEntityId]
+		,[intUserId]  
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+	FROM tblGLDetail
+	WHERE strBatchId = @strOldReversalBatchId
+
+	EXEC dbo.uspGLBookEntries @ReverseGLEntries,0
+
+
+	UPDATE	tblGLDetail SET	ysnIsUnposted = 1 WHERE	strBatchId IN( @strOldBatchId ,@strOldReversalBatchId)
 	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=0,strBatchId=null WHERE intM2MInquiryId = @intM2MInquiryId
 	UPDATE tblRKM2MInquiry SET ysnPost=0,dtmPostedDateTime=null,strBatchId=null,dtmUnpostedDateTime=getdate() WHERE intM2MInquiryId = @intM2MInquiryId
 

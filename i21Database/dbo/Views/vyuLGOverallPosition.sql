@@ -3,6 +3,7 @@ AS
 SELECT *
 FROM (
 	SELECT CH.intContractHeaderId
+		,CD.intContractDetailId
 		,CASE 
 			WHEN CH.intContractTypeId = 1
 				THEN 'PO'
@@ -141,4 +142,4 @@ FROM (
 		,CD.dblAllocatedQty
 		,CD.dblInvoicedQty
 		,IRI.intSubLocationId
-	) tbl
+	) tbl WHERE Shipment_Status <> 'C'

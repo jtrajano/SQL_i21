@@ -39,6 +39,7 @@ SELECT
     INV.dblBasePayment,
     INV.dblProvisionalAmount,
     INV.dblBaseProvisionalAmount,
+	INV.dblCurrencyExchangeRate,
     INV.intEntitySalespersonId,
     INV.intFreightTermId,
     INV.intShipViaId,

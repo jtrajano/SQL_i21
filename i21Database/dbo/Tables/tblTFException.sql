@@ -19,7 +19,7 @@
 	[dblBillQty] NUMERIC(18, 6) DEFAULT((0)) NULL,
 	[dblTax] NUMERIC(18, 6) DEFAULT((0)) NULL,
 	[dblTaxExempt] NUMERIC(18, 6) DEFAULT((0)) NULL,
-	[dblQtyShipped] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblQtyShipped] NUMERIC(18, 6) DEFAULT((0)) NULL,
 	[strInvoiceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPONumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTerminalControlNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

@@ -24,6 +24,7 @@
 	[strVoucher] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[intSettleStorageId] INT NULL,
 	[intDeliverySheetId] INT NULL,
+	[dtmDistributionDate] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	

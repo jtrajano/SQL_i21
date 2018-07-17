@@ -73,6 +73,8 @@ where	C.intCategoryId = tblICItem.intCategoryId
 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 
+--====Delete obsolete items. It is not required in i21 as history is not imported===
+Delete from tblICItem where strStatus = 'Discontinued'
 --UPDATE tblICItem
 --SET strType = 'Other Charge'
 --WHERE strDescription LIKE '%CHARGE%'

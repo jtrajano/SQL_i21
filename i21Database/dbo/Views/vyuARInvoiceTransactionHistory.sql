@@ -4,10 +4,10 @@
 	SELECT DISTINCT
 		A.intInvoiceId
 		,A.intInvoiceDetailId
-		,A.dblQtyReceived
+		,dblQtyReceived = A.dblQtyReceived
 		,A.dblPrice
-		,dblAmountDue = case  (isnull(A.ysnPost, 1)) when 1 then  A.dblAmountDue else (A.dblAmountDue *-1) end
-		,isnull(P.dblPayment, 0) as dblAmountPaid
+		,dblAmountDue = A.dblAmountDue
+		,isnull(A.dblInvoicePayment, 0) as dblAmountPaid
 		,A.intItemId
 		,A.intItemUOMId
 		,A.intCompanyLocationId
@@ -26,6 +26,7 @@
 		,A.intCommodityId
 		,CM.strCommodityCode
 		, strEvent = case  (A.ysnPost) when 1 then  'Post' when 0 then 'Unpost' else 'Add/Edit' end
+		--, dblBalanceAmount = A.dblInvoiceAmountDue + A.dblInvoicePayment
 	FROM
 		tblARInvoiceTransactionHistory A
 	INNER JOIN tblARInvoice B

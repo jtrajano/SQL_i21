@@ -27,7 +27,12 @@ BEGIN TRY
 	PRINT (''Deploying ' + @TADescription + ' Tax Forms'')
 	DECLARE @TaxAuthorityCode NVARCHAR(10) = ''' + @TaxAuthorityCode + '''
 		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode')
+	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+	
+	IF(@TaxAuthorityId IS NOT NULL)
+	BEGIN
+
+	')
 
 	DECLARE @ProductCodeQuery NVARCHAR(MAX)
 		, @ProductCodeQueryALL NVARCHAR(MAX)
@@ -494,6 +499,8 @@ BEGIN TRY
 	PRINT @FPResults
 
 	PRINT (CHAR(10) + 'EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets')
+
+	PRINT (CHAR(10) + 'END')
 
 	PRINT (CHAR(10) + 'GO')
 	

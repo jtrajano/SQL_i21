@@ -32,12 +32,12 @@ LEFT OUTER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId INNER JOIN
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId) AS cfSiteItem ON 
                          cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId AND cfSiteItem.intItemId = cfTrans.intProductId 
-						 INNER JOIN
-                             (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-                                FROM         dbo.tblCFTransactionPrice
-                                WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
+						 --INNER JOIN
+       --                      (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+       --                         FROM         dbo.tblCFTransactionPrice
+       --                         WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
 								 LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
-WHERE     (cfTrans.ysnPosted IS NULL OR
-                         cfTrans.ysnPosted <> 1) AND (cfTrans.ysnInvalid IS NULL OR
-                         cfTrans.ysnInvalid <> 1) AND (ISNULL(cfTrans.ysnOnHold,0) = 0)
+WHERE     (ISNULL(cfTrans.ysnPosted,0) = 0) 
+AND		(ISNULL(cfTrans.ysnInvalid,0) = 0) 
+AND		(ISNULL(cfTrans.ysnOnHold,0) = 0)

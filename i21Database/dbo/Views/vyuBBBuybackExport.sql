@@ -50,5 +50,6 @@ AS
 	LEFT JOIN tblVRUOMXref K
 		ON J.intUnitMeasureId = K.intUnitMeasureId
 			AND M.intVendorSetupId = K.intVendorSetupId
+	WHERE D.ysnPosted = 1
 GO
 

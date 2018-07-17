@@ -91,7 +91,7 @@ BEGIN TRY
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE ISNULL(intInvoiceId,0) != 0 AND strUserId = @username) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
 	------------GROUP BY CUSTOMER-----------
@@ -746,6 +746,7 @@ BEGIN TRY
 	FROM vyuCFDiscountSchedule as dis 
 	INNER JOIN tblCFInvoiceStagingTable as inv
 	ON dis.intDiscountScheduleId = inv.intDiscountScheduleId
+	AND dis.intAccountId = inv.intAccountId
 	WHERE strUserId = @username
 
 	INSERT INTO tblCFInvoiceFeeHistoryStagingTable

@@ -17,7 +17,8 @@ BEGIN
 		  , @TransactionType		NVARCHAR(50)
 		  , @DistributionHeaderId	INT
 		  , @errorMsg				NVARCHAR(500)
-
+		  , @ysnTaxExempt			BIT
+	SELECT @ysnTaxExempt = ysnTaxExempt FROM vyuARCustomerSearch WHERE intEntityCustomerId = @intSplitEntityId
 	SET @ZeroDecimal	= 0.000000
 	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
@@ -364,8 +365,7 @@ BEGIN
 								,[strItemDescription]
 								,[intItemUOMId]
 								,(CASE WHEN  @TransactionType='Invoice' 
-										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null) 
-										OR (intInventoryShipmentItemId is null OR intSalesOrderDetailId is null))
+										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null))
 			                            THEN dblQtyShipped * @dblSplitPercent  ELSE 0 END)
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  
@@ -419,6 +419,7 @@ BEGIN
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
 								,[dblRate]
+								,[dblBaseRate]
 								,[intSalesTaxAccountId]
 								,[dblTax]
 								,[dblAdjustedTax]
@@ -435,13 +436,14 @@ BEGIN
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
 								,[dblRate]
+								,[dblBaseRate]
 								,[intSalesTaxAccountId]
 								,[dblTax] * @dblSplitPercent
 								,[dblAdjustedTax] * @dblSplitPercent
 								,[ysnTaxAdjusted]
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
-								,[ysnTaxExempt]
+								,@ysnTaxExempt
 								,[strNotes] 
 								,1
 							FROM tblARInvoiceDetailTax 

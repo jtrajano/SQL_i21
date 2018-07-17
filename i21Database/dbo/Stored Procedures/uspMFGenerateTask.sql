@@ -242,25 +242,17 @@ BEGIN TRY
 			,oli.intOrderDetailId
 			,i.intItemId
 			,oli.dblQty - ISNULL((
-					SELECT SUM(CASE 
-								WHEN t.intTaskTypeId = 13
-									THEN l.dblQty - t.dblQty
-								ELSE t.dblQty
-								END)
+					SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(t.intItemUOMId, OD.intItemUOMId, t.dblQty))
 					FROM tblMFTask t
-					JOIN tblICLot l ON l.intLotId = t.intLotId
+					JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = t.intOrderDetailId
 					WHERE t.intOrderHeaderId = oh.intOrderHeaderId
 						AND t.intItemId = oli.intItemId
 					), 0) dblRemainingLineItemQty
 			,oli.intItemUOMId
 			,oli.dblWeight - ISNULL((
-					SELECT SUM(CASE 
-								WHEN t.intTaskTypeId = 13
-									THEN l.dblWeight - t.dblWeight
-								ELSE t.dblWeight
-								END)
+					SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(t.intWeightUOMId, OD.intWeightUOMId, t.dblWeight))
 					FROM tblMFTask t
-					JOIN tblICLot l ON l.intLotId = t.intLotId
+					JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = t.intOrderDetailId
 					WHERE t.intOrderHeaderId = oh.intOrderHeaderId
 						AND t.intItemId = oli.intItemId
 					), 0)
@@ -567,7 +559,8 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+					AND SR.ysnPosted = 0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -587,18 +580,8 @@ BEGIN TRY
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						(
-							@ysnPickByLotCode = 0
-							AND L.dtmDateCreated BETWEEN @dtmDateCreated1
-								AND @dtmDateCreated2
-							)
-						OR (
-							@ysnPickByLotCode = 1
-							AND Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits) BETWEEN @intLotCode1
-								AND @intLotCode2
-							)
-						)
+					AND L.dtmDateCreated BETWEEN @dtmDateCreated1
+						AND @dtmDateCreated2
 					AND ISNULL(L.intLotId, 0) = ISNULL((
 							CASE 
 								WHEN @intLineItemLotId IS NULL
@@ -745,7 +728,8 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+					AND SR.ysnPosted = 0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'

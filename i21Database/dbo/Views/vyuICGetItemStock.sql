@@ -180,6 +180,7 @@ FROM
 	LEFT JOIN (
 		tblICItemUOM GrossUOM INNER JOIN tblICUnitMeasure gUOM 
 			ON gUOM.intUnitMeasureId = GrossUOM.intUnitMeasureId
+			AND gUOM.strUnitType IN ('Volume', 'Weight')
 	)
 		ON GrossUOM.intItemUOMId = ItemLocation.intGrossUOMId
 	LEFT JOIN (

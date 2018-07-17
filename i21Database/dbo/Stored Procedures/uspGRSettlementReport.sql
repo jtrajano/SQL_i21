@@ -72,7 +72,7 @@ DECLARE @temp_xml_table TABLE
 	  ,strReferenceNo					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strEntityName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strVendorAddress					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	  ,dtmDeliveryDate					DATETIME NULL
+	  ,dtmDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,intTicketId						INT 
 	  ,strTicketNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strReceiptNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -289,13 +289,13 @@ BEGIN
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'				    ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
 		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
-		,dtmDeliveryDate					= SC.dtmTicketDateTime 
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 		,intTicketId						= SC.intTicketId		
 		,strTicketNumber					= SC.strTicketNumber 
 		,strReceiptNumber					= SC.strElevatorReceiptNumber
@@ -311,9 +311,22 @@ BEGIN
 		,lblFarmField						= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField						= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 		,dtmDate							= Bill.dtmDate
-		,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0) 		
-		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0) 		
-		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- ,dblGrossWeight                     = ISNULL(SC.dblGrossWeight, 0)         
+        -- ,dblTareWeight                      = ISNULL(SC.dblTareWeight, 0)         
+        -- ,dblNetWeight                       = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblGrossWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											END
+		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
+		,dblNetWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											END
 		,dblDockage							= ROUND(SC.dblShrink,3)		 
 		,dblCost							= BillDtl.dblCost
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -331,7 +344,7 @@ BEGIN
 															WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
 															WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
 															WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
-															WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
+															WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
 															ELSE 'None'
 														END
 											      ELSE CNTRCT.strContractNumber
@@ -381,7 +394,7 @@ BEGIN
 	   ,lblPartialPrepayment			   = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'								ELSE NULL END						 
 	   ,blbHeaderLogo					   = @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+	   ,strDeliveryDate					   = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 		AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -406,7 +419,7 @@ BEGIN
 	LEFT JOIN tblEMEntitySplit EM ON EM.intSplitId = SC.intSplitId AND SC.intSplitId <> 0
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
 	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
-	
+	LEFT JOIN vyuSCGetScaleDistribution SD ON INVRCPTITEM.intInventoryReceiptItemId = SD.intInventoryReceiptItemId
 	LEFT JOIN (
 				SELECT intBillDetailId,SUM(dblAmount) dblTotal 
 				FROM vyuGRSettlementSubReport 
@@ -479,13 +492,13 @@ BEGIN
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'					ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber				    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo					    = BNKTRN.strReferenceNo
 		,strEntityName					    = ENTITY.strName
 		,strVendorAddress				    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-		,dtmDeliveryDate					= SC.dtmTicketDateTime
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 		,intTicketId						= SC.intTicketId
 		,strTicketNumber					= SC.strTicketNumber
 		,strReceiptNumber					= SC.strElevatorReceiptNumber 
@@ -501,9 +514,22 @@ BEGIN
 		,lblFarmField						= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField						= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate							= Bill.dtmDate		
-		,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
-		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
-		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- ,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
+		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
+		-- ,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblGrossWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											END
+		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
+		,dblNetWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -521,7 +547,7 @@ BEGIN
 															WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
 															WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
 															WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-															WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+															WHEN StrgHstry.intTransactionTypeId = 1 THEN SD.strDistributionType --'Scale'
 															ELSE 'None'
 														END
 											      ELSE CNTRCT.strContractNumber
@@ -559,7 +585,7 @@ BEGIN
 	   ,lblPartialPrepayment				= CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			THEN 'Partial Payment Adj'								 ELSE NULL END
 	   ,blbHeaderLogo						= @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+	   ,strDeliveryDate						= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -570,6 +596,7 @@ BEGIN
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
 	JOIN tblSCTicket SC ON SC.intTicketId = CS.intTicketId
+	LEFT JOIN vyuSCGetScaleDistribution SD ON CS.intCustomerStorageId = SD.intCustomerStorageId
 	LEFT JOIN (
 			SELECT A.intBillId,SUM(dblTotal) dblTotal
 			FROM tblAPBillDetail A
@@ -663,13 +690,13 @@ BEGIN
 		,lblGrade							= NULL
 		,strGrade							= NULL
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
 		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-		,dtmDeliveryDate					= CS.dtmDeliveryDate
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 		,intTicketId						= DS.intDeliverySheetId
 		,strTicketNumber					= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 		,strReceiptNumber					= '' 
@@ -685,9 +712,22 @@ BEGIN
 		,lblFarmField						= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField						= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber		
 		,dtmDate							= Bill.dtmDate		
-		,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
-		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
-		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- ,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
+		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
+		-- ,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblGrossWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											END
+		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
+		,dblNetWeight						= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -705,7 +745,7 @@ BEGIN
 															WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
 															WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
 															WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-															WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+															WHEN StrgHstry.intTransactionTypeId = 1 THEN SD.strDistributionType --'Scale'
 															ELSE 'None'
 														END
 											      ELSE CNTRCT.strContractNumber
@@ -742,7 +782,7 @@ BEGIN
 	   ,lblPartialPrepayment               = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'							    ELSE NULL END
 	   ,blbHeaderLogo                      = @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate					   = CONVERT(VARCHAR(10), GETDATE(), 110)
+	   ,strDeliveryDate					   = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -752,31 +792,40 @@ BEGIN
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
+	LEFT JOIN vyuSCGetScaleDistribution SD ON CS.intCustomerStorageId = SD.intCustomerStorageId
 	JOIN (
 			 SELECT intDeliverySheetId
-			,SUM(ISNULL(dblGrossWeight, 0)) dblGrossWeight
-			,SUM(ISNULL(dblTareWeight, 0)) dblTareWeight
-			,SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)) dblNetWeight
-			,SUM(dblShrink) dblShrink
+					,SUM(ISNULL(dblGrossWeight, 0)) dblGrossWeight
+					,SUM(ISNULL(dblTareWeight, 0)) dblTareWeight
+					,SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)) dblNetWeight
+					,SUM(dblShrink) dblShrink
+					,intItemUOMIdFrom
+					,intItemUOMIdTo
 			FROM tblSCTicket
-			GROUP BY intDeliverySheetId
+			GROUP BY intDeliverySheetId, intItemUOMIdFrom, intItemUOMIdTo
 		)SC ON SC.intDeliverySheetId = CS.intDeliverySheetId
 	JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId = SC.intDeliverySheetId AND CS.intDeliverySheetId =SC.intDeliverySheetId
 	LEFT JOIN (
-			SELECT A.intBillId,SUM(dblTotal) dblTotal
+			SELECT 
+				A.intBillId
+				,SUM(dblTotal) dblTotal
 			FROM tblAPBillDetail A
 			JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 			GROUP BY A.intBillId
 		  ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
     
 	JOIN (
-			SELECT A.intBillId,SUM(dblTax) dblTax
+			SELECT 
+				A.intBillId
+				,SUM(dblTax) dblTax
 			FROM tblAPBillDetail A		  
 			GROUP BY A.intBillId
 		  ) tblTax ON tblTax.intBillId = Bill.intBillId
     
 	LEFT JOIN (
-				SELECT A.intBillId,SUM(dblTotal) dblTotal
+				SELECT 
+					A.intBillId
+					,SUM(dblTotal) dblTotal
 				FROM tblAPBillDetail A
 				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
 				GROUP BY A.intBillId
@@ -784,8 +833,8 @@ BEGIN
     
 	LEFT JOIN (
 				SELECT
-				PYMT.intPaymentId
-				,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
+					PYMT.intPaymentId
+					,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 				FROM tblAPPayment PYMT
 				JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 				JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
@@ -795,31 +844,34 @@ BEGIN
     
 	LEFT JOIN (
 				SELECT				
-				intBillId
-				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+					intBillId
+					,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
 				FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
 				GROUP BY intBillId
 				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 
 	LEFT JOIN (	
-				   SELECT 
-				   intPaymentId
-				  ,SUM(dblPayment) dblPayment 
-				  FROM tblAPPaymentDetail
-				  WHERE intInvoiceId IS NOT NULL
-				  GROUP BY intPaymentId
+				SELECT 
+					intPaymentId
+					,SUM(dblPayment) dblPayment 
+				FROM tblAPPaymentDetail
+				WHERE intInvoiceId IS NOT NULL
+				GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
     
-	LEFT JOIN (  SELECT 
-				  intPaymentId
-				 ,SUM(dblTotal) dblTotals
-				 ,SUM(dblPayment) dblPayment 
-				  FROM tblAPPaymentDetail
-				  WHERE intBillId IS NOT NULL
-				  GROUP BY intPaymentId
+	LEFT JOIN (  
+				SELECT 
+					intPaymentId
+					,SUM(dblTotal) dblTotals
+					,SUM(dblPayment) dblPayment 
+				FROM tblAPPaymentDetail
+				WHERE intBillId IS NOT NULL
+				GROUP BY intPaymentId
 			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
     LEFT JOIN (
-				SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+				SELECT 
+					A.intBillId
+					,SUM(dblQtyOrdered) dblTotalQty
 				FROM tblAPBillDetail A
 				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
 				GROUP BY A.intBillId
@@ -942,13 +994,13 @@ BEGIN
 				,lblGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 				,strCommodity			    = Commodity.strCommodityCode
-				,strDate				    = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate				    = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime				    = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber		    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    = BNKTRN.strReferenceNo
 				,strEntityName			    = ENTITY.strName
 				,strVendorAddress		    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
-				,dtmDeliveryDate		    = SC.dtmTicketDateTime 
+				,dtmDeliveryDate		    = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime) 
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
 				,strReceiptNumber		    = SC.strElevatorReceiptNumber
@@ -964,9 +1016,22 @@ BEGIN
 				,lblFarmField				= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END
 				,strFarmField				= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 				,dtmDate					= Bill.dtmDate
-				,dblGrossWeight				= ISNULL(SC.dblGrossWeight, 0) 		
-				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0) 		
-				,dblNetWeight				= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- ,dblGrossWeight				= ISNULL(SC.dblGrossWeight, 0) 		
+				-- ,dblTareWeight				= ISNULL(SC.dblTareWeight, 0) 		
+				-- ,dblNetWeight				= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				,dblGrossWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											  END
+				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
+				,dblNetWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											  END
 				,dblDockage					= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
 				,dblCost					= BillDtl.dblCost
 				,Net						= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -984,7 +1049,7 @@ BEGIN
 															WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
 															WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
 															WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
-															WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
+															WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
 															ELSE 'None'
 														END
 											      ELSE CNTRCT.strContractNumber
@@ -1034,7 +1099,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'									ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1057,6 +1122,7 @@ BEGIN
 			LEFT JOIN tblEMEntitySplit EM ON EM.intSplitId = SC.intSplitId AND SC.intSplitId <> 0
 			LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
 			LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
+			LEFT JOIN vyuSCGetScaleDistribution SD ON INVRCPTITEM.intInventoryReceiptItemId = SD.intInventoryReceiptItemId
 			LEFT JOIN (
 						SELECT intBillDetailId,SUM(dblAmount) dblTotal 
 						FROM vyuGRSettlementSubReport 
@@ -1129,13 +1195,13 @@ BEGIN
 				,lblGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 				,strCommodity				 = Commodity.strCommodityCode
-				,strDate					 = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate					 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime					 = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
 				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-				,dtmDeliveryDate			 = SC.dtmTicketDateTime		
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)		
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
 				,strReceiptNumber			 = SC.strElevatorReceiptNumber
@@ -1151,9 +1217,22 @@ BEGIN
 				,lblFarmField				 = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 				,strFarmField				 = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 				,dtmDate					 = Bill.dtmDate
-				,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
-				,dblTareWeight				 =  ISNULL(SC.dblTareWeight, 0)
-				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- ,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
+				-- ,dblTareWeight				 =  ISNULL(SC.dblTareWeight, 0)
+				-- ,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				,dblGrossWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											  END
+				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
+				,dblNetWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -1171,7 +1250,7 @@ BEGIN
 															WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
 															WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
 															WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-															WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+															WHEN StrgHstry.intTransactionTypeId = 1 THEN SD.strDistributionType --'Scale'
 															ELSE 'None'
 														END
 											      ELSE CNTRCT.strContractNumber
@@ -1208,7 +1287,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			   THEN 'Partial Payment Adj'								ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1218,21 +1297,28 @@ BEGIN
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
 			JOIN tblSCTicket SC ON SC.intTicketId = CS.intTicketId
+			LEFT JOIN vyuSCGetScaleDistribution SD ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
-					SELECT A.intBillId,SUM(dblTotal) dblTotal
+					SELECT 
+						A.intBillId
+						,SUM(dblTotal) dblTotal
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
 				  ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
 			
 			JOIN (
-					SELECT A.intBillId,SUM(dblTax) dblTax
+					SELECT 
+						A.intBillId
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A		  
 					GROUP BY A.intBillId
 				  ) tblTax ON tblTax.intBillId = Bill.intBillId
 			
 			LEFT JOIN (
-						SELECT A.intBillId,SUM(dblTotal) dblTotal
+						SELECT 
+							A.intBillId
+							,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
 						GROUP BY A.intBillId
@@ -1240,8 +1326,8 @@ BEGIN
 			
 			LEFT JOIN (
 						SELECT
-						PYMT.intPaymentId
-						,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
+							PYMT.intPaymentId
+							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 						FROM tblAPPayment PYMT
 						JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
@@ -1250,31 +1336,34 @@ BEGIN
 					  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
 			
 			LEFT JOIN (
-						 SELECT
-						 intBillId
-						,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+						SELECT
+							intBillId
+							,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
 						FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
 						GROUP BY intBillId
 						) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 			
 			LEFT JOIN (
-						 SELECT 
-						 intPaymentId
-						 ,SUM(dblPayment) dblPayment 
-						 FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
-						 GROUP BY intPaymentId
+						SELECT 
+							intPaymentId
+							,SUM(dblPayment) dblPayment 
+						FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
+						GROUP BY intPaymentId
 					    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 			
-			LEFT JOIN (  SELECT 
-						  intPaymentId
-						 ,SUM(dblTotal) dblTotals
-						 ,SUM(dblPayment) dblPayment 
-						  FROM tblAPPaymentDetail
-						  WHERE intBillId IS NOT NULL
-						  GROUP BY intPaymentId
+			LEFT JOIN (  
+						SELECT 
+							intPaymentId
+							,SUM(dblTotal) dblTotals
+							,SUM(dblPayment) dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intBillId IS NOT NULL
+						GROUP BY intPaymentId
 					    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 			 LEFT JOIN (
-						SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+						SELECT 
+							A.intBillId
+							,SUM(dblQtyOrdered) dblTotalQty
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
 						GROUP BY A.intBillId
@@ -1309,13 +1398,13 @@ BEGIN
 				,lblGrade					 = NULL
 				,strGrade					 = NULL
 				,strCommodity				 = Commodity.strCommodityCode
-				,strDate					 = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate					 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime					 = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
 				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-				,dtmDeliveryDate			 = CS.dtmDeliveryDate		
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)		
 				,intTicketId				 = DS.intDeliverySheetId		
 				,strTicketNumber			 = DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 				,strReceiptNumber			 = ''
@@ -1331,9 +1420,22 @@ BEGIN
 				,lblFarmField				 = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 		
 				,strFarmField				 = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 				,dtmDate					 = Bill.dtmDate
-				,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
-				,dblTareWeight				 = ISNULL(SC.dblTareWeight, 0)
-				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- ,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
+				-- ,dblTareWeight				 = ISNULL(SC.dblTareWeight, 0)
+				-- ,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				,dblGrossWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0)
+											  END
+				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
+				,dblNetWeight				= CASE 
+												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+												ELSE
+													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+											  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -1351,7 +1453,7 @@ BEGIN
 											 				WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
 											 				WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
 											 				WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-											 				WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+											 				WHEN StrgHstry.intTransactionTypeId = 1 THEN SD.strDistributionType --'Scale'
 											 				ELSE 'None'
 											 			END
 											       ELSE CNTRCT.strContractNumber
@@ -1388,7 +1490,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'								  ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), GETDATE(), 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1397,31 +1499,41 @@ BEGIN
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
+			LEFT JOIN vyuSCGetScaleDistribution SD ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			JOIN (
-					SELECT intDeliverySheetId
-					,SUM(ISNULL(dblGrossWeight, 0)) dblGrossWeight
-					,SUM(ISNULL(dblTareWeight, 0)) dblTareWeight
-					,SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)) dblNetWeight
-					,SUM(dblShrink) dblShrink
+					SELECT 
+						intDeliverySheetId
+						,SUM(ISNULL(dblGrossWeight, 0)) dblGrossWeight
+						,SUM(ISNULL(dblTareWeight, 0)) dblTareWeight
+						,SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)) dblNetWeight
+						,SUM(dblShrink) dblShrink
+						,intItemUOMIdFrom
+						,intItemUOMIdTo
 					FROM tblSCTicket
-					GROUP BY intDeliverySheetId
+					GROUP BY intDeliverySheetId, intItemUOMIdFrom, intItemUOMIdTo
 				 )SC ON SC.intDeliverySheetId = CS.intDeliverySheetId
 			JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId = SC.intDeliverySheetId AND CS.intDeliverySheetId =SC.intDeliverySheetId
 			LEFT JOIN (
-					SELECT A.intBillId,SUM(dblTotal) dblTotal
+					SELECT 
+						A.intBillId
+						,SUM(dblTotal) dblTotal
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
 				  ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
 			
 			JOIN (
-					SELECT A.intBillId,SUM(dblTax) dblTax
+					SELECT 
+						A.intBillId
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A		  
 					GROUP BY A.intBillId
 				  ) tblTax ON tblTax.intBillId = Bill.intBillId
 			
 			LEFT JOIN (
-						SELECT A.intBillId,SUM(dblTotal) dblTotal
+						SELECT 
+							A.intBillId
+							,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
 						GROUP BY A.intBillId
@@ -1429,8 +1541,8 @@ BEGIN
 			
 			LEFT JOIN (
 						SELECT
-						PYMT.intPaymentId
-						,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
+							PYMT.intPaymentId
+							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 						FROM tblAPPayment PYMT
 						JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
@@ -1439,31 +1551,34 @@ BEGIN
 					  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
 			
 			LEFT JOIN (
-						 SELECT
-						 intBillId
-						,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+						SELECT
+							intBillId
+							,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
 						FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
 						GROUP BY intBillId
 						) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 			
 			LEFT JOIN (
-						 SELECT 
-						 intPaymentId
-						 ,SUM(dblPayment) dblPayment 
-						 FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
-						 GROUP BY intPaymentId
+						SELECT 
+							intPaymentId
+							,SUM(dblPayment) dblPayment 
+						FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
+						GROUP BY intPaymentId
 					    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 			
-			LEFT JOIN (  SELECT 
-						  intPaymentId
-						 ,SUM(dblTotal) dblTotals
-						 ,SUM(dblPayment) dblPayment 
-						  FROM tblAPPaymentDetail
-						  WHERE intBillId IS NOT NULL
-						  GROUP BY intPaymentId
+			LEFT JOIN (  
+						SELECT 
+							intPaymentId
+							,SUM(dblTotal) dblTotals
+							,SUM(dblPayment) dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intBillId IS NOT NULL
+						GROUP BY intPaymentId
 					    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 			LEFT JOIN (
-						SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+						SELECT 
+							A.intBillId
+							,SUM(dblQtyOrdered) dblTotalQty
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
 						GROUP BY A.intBillId

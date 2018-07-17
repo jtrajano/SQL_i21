@@ -141,7 +141,7 @@ BEGIN
     -- AccountNumber encryption - END
   END
 
-  IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBank.strRTN')
+  IF EXISTS (SELECT * FROM tblCMBank WHERE LEN(strRTN) < 300)
     AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM tblCMBank RTN re-encryption using certificate')
   BEGIN
     EXEC('
@@ -189,7 +189,7 @@ BEGIN
     ')
   END
 
-  IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strBankAccountNo')
+  IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strBankAccountNo) < 300)
     AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM BankAccountNo re-encryption using certificate')
   BEGIN
     EXEC('
@@ -229,7 +229,7 @@ BEGIN
     ')
   END
 
-  IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strRTN')
+  IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(ISNULL(strRTN, '')) < 300)
     AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM tblCMBankAccount RTN re-encryption using certificate')
   BEGIN
     EXEC('
@@ -242,7 +242,7 @@ BEGIN
     ')
   END
 
-  IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strMICRBankAccountNo')
+  IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRBankAccountNo) < 300)
     AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM tblCMBankAccount MICRBankAccountNo re-encryption using certificate')
   BEGIN
     EXEC('
@@ -282,7 +282,7 @@ BEGIN
     ')
   END
 
-  IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM Encrypt tblCMBankAccount.strMICRRoutingNo')
+  IF EXISTS (SELECT * FROM tblCMBankAccount WHERE LEN(strMICRRoutingNo) < 300)
     AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'CM tblCMBankAccount MICRRoutingNo re-encryption using certificate')
   BEGIN
     EXEC('
