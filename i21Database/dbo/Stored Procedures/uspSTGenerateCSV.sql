@@ -242,6 +242,7 @@ BEGIN
 										THEN 'CANS'
 									WHEN TR.strTrlDept = 'CIGARETTES'
 										THEN 'PACKS'
+									ELSE 'PACKS'
 								  END as strUnitOfMeasure
 
 								--, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold  ST-680
