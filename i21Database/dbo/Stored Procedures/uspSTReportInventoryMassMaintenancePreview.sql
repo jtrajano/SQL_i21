@@ -29,6 +29,10 @@ BEGIN TRANSACTION
 		BEGIN
 			SET @strPosDescription = ''
 		END
+	IF(@intEntityVendorId = 0 OR @intEntityVendorId IS NULL)
+		BEGIN
+			SET @intEntityVendorId = NULL
+		END
 
 	-- Retail Price - @dblSalePrice
 	-- Last Cost - @dblLastCost
