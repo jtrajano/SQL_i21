@@ -54,6 +54,8 @@ INSERT INTO #tmpGLDetail (
 		,[intAccountId]
 		,[dblDebit]
 		,[dblCredit]
+		,[dblDebitForeign]
+		,[dblCreditForeign]
 		,[dblDebitUnit]
 		,[dblCreditUnit]
 		,[strDescription]
@@ -81,6 +83,8 @@ SELECT	[strTransactionId]
 		,[intAccountId]
 		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
+		,[dblDebitForeign] = [dblCreditForeign]
+		,[dblCreditForeign] = [dblDebitForeign]
 		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
 		,[strDescription]
