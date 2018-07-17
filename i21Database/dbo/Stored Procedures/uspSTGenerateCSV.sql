@@ -392,6 +392,7 @@ BEGIN
 										THEN 'CANS'
 									WHEN TR.strTrlDept = 'CIGARETTES'
 										THEN 'PACKS'
+									ELSE 'PACKS'
 								  END as strUnitOfMeasure
 
 								, CASE 
@@ -446,8 +447,11 @@ BEGIN
 								, 0 as dblAccountDiscountAmount --22
 
 								, CASE 
-									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN CRP.dblManufacturerDiscountAmount 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+										THEN CRP.dblManufacturerDiscountAmount 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+										THEN dblTrlMatchLineTrlPromoAmount
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
 									ELSE 0 
 								  END as dblManufacturerDiscountAmount
 
@@ -462,8 +466,11 @@ BEGIN
 								, 0 as dblManufacturerMultipackDiscountAmount
 
 								, CASE 
-									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN CRP.strManufacturerPromotionDescription 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+										THEN CRP.strManufacturerPromotionDescription 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+										THEN strTrlDesc
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
 									ELSE '' 
 								  END as strManufacturerPromotionDescription
 
