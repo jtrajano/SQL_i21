@@ -64,6 +64,5 @@ FROM            dbo.tblCMBankTransaction AS BT INNER JOIN
                          dbo.tblCMBankTransactionDetail AS BTD ON BT.intTransactionId = BTD.intTransactionId INNER JOIN
                          dbo.tblCMUndepositedFund AS Unde ON BTD.intUndepositedFundId = Unde.intUndepositedFundId INNER JOIN
                          dbo.tblARPayment AS Pay ON Unde.intSourceTransactionId = Pay.intPaymentId INNER JOIN
-                         dbo.tblARPaymentDetail AS PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId INNER JOIN
-						 dbo.tblARInvoice AS Inv ON PayDtl.intInvoiceId = Inv.intInvoiceId
+						 dbo.tblARInvoice AS Inv ON Pay.intPaymentId = Inv.intPaymentId
 WHERE        (Pay.intPaymentMethodId = 2)
