@@ -159,7 +159,7 @@ BEGIN
 			,PD.intConcurrencyId               =  i.intConcurrencyId             
 		FROM tblARPaymentDetail PD
 		INNER JOIN inserted i
-			ON i.intPaymentId = PD.intPaymentId
+			ON i.intPaymentDetailId = PD.intPaymentDetailId
 END
 GO
 
