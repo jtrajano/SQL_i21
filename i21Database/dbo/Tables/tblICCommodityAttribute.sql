@@ -19,6 +19,7 @@ Type the overview for the table here.
 		[intDefaultPackingUOMId] INT NULL,
 		[intCountryID] INT NULL,
 		[intPurchasingGroupId] INT NULL,
+		[dblRatio] NUMERIC(18, 6) NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
