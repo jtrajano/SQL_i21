@@ -13,6 +13,7 @@
     [intAccountId]        INT             NULL,
     [intExpenseAccountId] INT             NULL,
 	[ysnUseLocationDistribution] BIT      DEFAULT ((1)) NOT NULL,
+	[ysnUseLocationDistributionExpense] BIT      DEFAULT ((1)) NOT NULL,
     [intAllowance]        INT             DEFAULT ((0)) NULL,
     [strPaidBy]           NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strVal1]             NVARCHAR (75)    COLLATE Latin1_General_CI_AS NULL,
