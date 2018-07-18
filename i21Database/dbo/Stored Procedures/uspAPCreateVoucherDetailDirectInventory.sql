@@ -57,7 +57,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyOrdered]					=	dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
 																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
 																			,A.dblQtyReceived),
-		[dblUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE A.dblUnitQty END,
+		[dblUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
 		[dblQtyReceived]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
 																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
 																			,A.dblQtyReceived),
