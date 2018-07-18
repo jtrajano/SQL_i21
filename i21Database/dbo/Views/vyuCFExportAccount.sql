@@ -26,7 +26,7 @@ SELECT
 	dbo.tblEMEntity AS emEnt INNER JOIN
 	dbo.vyuEMEntityContact as emContact ON emEnt.intEntityId = emContact.intEntityId AND emContact.ysnDefaultContact = 1 INNER JOIN
 	dbo.tblARCustomer AS arCus ON emEnt.intEntityId = arCus.intEntityId INNER JOIN
-	dbo.tblEMEntityLocation AS emEntLoc ON emEnt.intEntityId = emEntLoc.intEntityId INNER JOIN 
+	dbo.tblEMEntityLocation AS emEntLoc ON emEnt.intEntityId = emEntLoc.intEntityId AND emEntLoc.ysnDefaultLocation =1 INNER JOIN 
 	dbo.tblCFAccount AS cfAcc ON arCus.intEntityId = cfAcc.intCustomerId INNER JOIN
 	dbo.tblCFCard AS cfCrd ON cfAcc.intAccountId = cfCrd.intAccountId INNER JOIN
 	dbo.tblCFNetwork AS cfNet ON cfCrd.intNetworkId = cfNet.intNetworkId
