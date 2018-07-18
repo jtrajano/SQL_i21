@@ -60,8 +60,8 @@ WHERE
 
 UPDATE ARPD
 SET	
-	 ARPD.[dblAmountDue]		= (ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType])) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType])) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	 ARPD.[dblAmountDue]		= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * ((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal))))
+	,ARPD.[dblBaseAmountDue]	= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * [dbo].fnRoundBanker((((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal))))) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN

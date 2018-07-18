@@ -336,7 +336,9 @@ BEGIN
 	BEGIN
 
 		UPDATE EFP
-		SET EFP.[intPaymentId] = IL.[intPaymentId]
+		SET 
+			EFP.[intPaymentId] = IL.[intPaymentId]
+
 		FROM
 			#EntriesForProcessing EFP
 		INNER JOIN
@@ -418,7 +420,7 @@ BEGIN
 			,[intWriteOffAccountId]					= ITG.[intWriteOffAccountId]		
 			,[dblAmountPaid]						= ITG.[dblAmountPaid]
 			,[intExchangeRateTypeId]				= ITG.[intExchangeRateTypeId]
-			,[dblExchangeRate]						= ITG.[dblExchangeRate]
+			,[dblExchangeRate]						= EFP.[dblExchangeRate]
 			,[strReceivePaymentType]				= ITG.[strReceivePaymentType]
 			,[strPaymentOriginalId]					= EFP.[strPaymentOriginalId]
 			,[ysnUseOriginalIdAsPaymentNumber]		= ITG.[ysnUseOriginalIdAsPaymentNumber]
