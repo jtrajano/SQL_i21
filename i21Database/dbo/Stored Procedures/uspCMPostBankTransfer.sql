@@ -528,8 +528,15 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(@dblHistoricRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(@dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				--,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
+				--,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount ELSE 0 END 
+
+				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) --CAD TO USD
+												   ELSE A.dblAmount
+											  END
+				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
+												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  A.dblAmount / ISNULL(@dblHistoricRate,1)
+											  ELSE 0 END 
 				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblHistoricRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
@@ -573,8 +580,13 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(@dblRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(@dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(A.dblRate,1) --CAD TO USD
+												   ELSE A.dblAmount
+											  END
+				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
+												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  A.dblAmount / ISNULL(A.dblRate,1)
+											  ELSE 0 END 
+
 				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 

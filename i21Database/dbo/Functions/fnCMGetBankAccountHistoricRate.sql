@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCMGetBankAccountHistoricRate]
 	(
-	@intBankAccountId INT ,
-	@dtmDate DATETIME 
+	@intBankAccountId INT,
+	@dtmDate DATETIME
 	)
 RETURNS  DECIMAL(18,6)
 
@@ -12,7 +12,7 @@ DECLARE @result DECIMAL(18,6)
 DECLARE @bankBalance decimal(18,6)
 DECLARE @glBalance decimal(18,6)
 
-SELECT	@bankBalance = [dbo].[fnGetBankBalance] (@intBankAccountId, @dtmDate)
+SELECT	@bankBalance = [dbo].[fnCMGetBankBalance] (@intBankAccountId, @dtmDate,0)
 SELECT	@glBalance = ISNULL(SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)), 0)
 FROM	[dbo].[tblGLDetail] INNER JOIN [dbo].[tblCMBankAccount]
 			ON [dbo].[tblGLDetail].intAccountId = [dbo].[tblCMBankAccount].intGLAccountId

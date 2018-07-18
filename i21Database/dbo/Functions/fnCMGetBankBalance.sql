@@ -1,10 +1,8 @@
-﻿/*
-Created new udf (fnGetCMBankBalance) to cater multicurrency.
-*/
-CREATE FUNCTION [dbo].[fnGetBankBalance]
+﻿CREATE FUNCTION [dbo].[fnCMGetBankBalance]
 (
 	@intBankAccountId INT = NULL,
-	@dtmDate AS DATETIME = NULL
+	@dtmDate AS DATETIME = NULL,
+	@isForeignCurrency AS BIT = 0
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -42,6 +40,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 DECLARE @openingBalance AS NUMERIC(18,6)		
 DECLARE @returnBalance AS NUMERIC(18,6)	
 
+
+
+
 -- Get the opening balance from the first bank reconciliation record. 
 SELECT TOP 1 
 		@openingBalance = dblStatementOpeningBalance
@@ -49,7 +50,7 @@ FROM	tblCMBankReconciliation
 WHERE 	intBankAccountId = @intBankAccountId
 
 -- Get bank amounts from Misc Check, Bank Transfer (WD), Origin Checks, Origin Withdrawal, Origin EFT, and Origin Wire
-SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0) * -1)
+SELECT	@returnBalance = SUM(ISNULL(CASE WHEN @isForeignCurrency=0 THEN dblAmount ELSE dblAmountForeign END , 0) * -1)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND ysnCheckVoid = 0
@@ -59,7 +60,7 @@ WHERE	ysnPosted = 1
 		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH )
 
 --Include voided check that not yet effect in the bank balance for the voiding date is greater than the statement date
-SELECT	 @returnBalance = ISNULL(@returnBalance,0) + ISNULL(SUM(ISNULL(dblAmount, 0) * -1),0)
+SELECT	 @returnBalance = ISNULL(@returnBalance,0) + ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency=0 THEN dblAmount ELSE dblAmountForeign END, 0) * -1),0)
 FROM	[dbo].[tblCMBankTransaction] A
 WHERE	ysnPosted = 1
 		AND ysnCheckVoid = 1 
@@ -77,7 +78,7 @@ WHERE	ysnPosted = 1
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
-SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)
+SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN  B.dblCredit ELSE B.dblCreditForeign END, 0)), 0) - ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN B.dblDebit ELSE dblDebitForeign END, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
 WHERE	A.ysnPosted = 1
@@ -88,7 +89,7 @@ WHERE	A.ysnPosted = 1
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
-SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
+SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency=0 THEN dblAmount ELSE dblAmountForeign END, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND ysnCheckVoid = 0
@@ -102,4 +103,4 @@ SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance
 
 RETURN ISNULL(@returnBalance, 0)
 
-END 
+END

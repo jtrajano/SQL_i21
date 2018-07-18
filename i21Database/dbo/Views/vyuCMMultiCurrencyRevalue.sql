@@ -43,7 +43,7 @@ FROM
   )NewRate
  
   OUTER APPLY(
-		SELECT [dbo].[fnGetBankBalance] (BT.intBankAccountId, EOP.Value) Value
+		SELECT [dbo].[fnCMGetBankBalance] (BT.intBankAccountId, EOP.Value,0) Value
   ) BankBalance
   OUTER APPLY (
 		SELECT [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency
