@@ -47,6 +47,7 @@ BEGIN
 		,I.intUnitPerLayer
 		,WO.dblQuantity
 		,WO.dblProducedQuantity
+		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderRecipe R
 	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intWorkOrderId = R.intWorkOrderId

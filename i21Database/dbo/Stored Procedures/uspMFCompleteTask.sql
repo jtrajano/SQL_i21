@@ -545,23 +545,23 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
-			IF EXISTS (
-					SELECT *
-					FROM dbo.tblICInventoryShipmentItem
-					WHERE intInventoryShipmentItemId = @intShipmentItemId
-						AND (
-							intSubLocationId IS NULL
-							OR intStorageLocationId IS NULL
-							OR intDockDoorId IS NULL
-							)
-					)
-			BEGIN
-				UPDATE tblICInventoryShipmentItem
-				SET intSubLocationId = @intNewSubLocationId
-					,intStorageLocationId = @intNewStorageLocationId
-					,intDockDoorId = @intNewStorageLocationId
-				WHERE intInventoryShipmentItemId = @intShipmentItemId
-			END
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM dbo.tblICInventoryShipmentItem
+			--		WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--			AND (
+			--				intSubLocationId IS NULL
+			--				OR intStorageLocationId IS NULL
+			--				OR intDockDoorId IS NULL
+			--				)
+			--		)
+			--BEGIN
+			--	UPDATE tblICInventoryShipmentItem
+			--	SET intSubLocationId = @intNewSubLocationId
+			--		,intStorageLocationId = @intNewStorageLocationId
+			--		,intDockDoorId = @intNewStorageLocationId
+			--	WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--END
 
 			IF NOT EXISTS (
 					SELECT *
