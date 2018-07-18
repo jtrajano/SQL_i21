@@ -299,3 +299,12 @@ BEGIN
 	WHERE SH.intTransactionTypeId = 4 AND SH.strVoucher IS NULL
 END
 GO
+IF EXISTS(SELECT * FROM tblGRUnPricedSpotTicket WHERE intEntityId IS NULL)
+BEGIN
+		UPDATE PS 
+		SET PS.intEntityId = SC.intEntityId
+		FROM tblGRUnPricedSpotTicket PS 
+		JOIN tblSCTicket SC ON SC.intTicketId = PS.intTicketId
+		WHERE SC.intStorageScheduleTypeId = -3
+END
+GO

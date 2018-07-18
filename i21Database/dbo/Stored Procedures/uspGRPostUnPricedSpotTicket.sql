@@ -65,13 +65,9 @@ BEGIN TRY
 	)
 
 	INSERT INTO @tblEntity (intEntityId)
-	SELECT DISTINCT SC.intEntityId
-	FROM tblSCTicket SC
-	JOIN tblGRUnPricedSpotTicket SpotTicket 
-		ON SpotTicket.intTicketId = SC.intTicketId
-	WHERE SpotTicket.intUnPricedId = @intUnPricedId
-
-	
+	SELECT DISTINCT intEntityId
+	FROM tblGRUnPricedSpotTicket
+	WHERE intUnPricedId = @intUnPricedId
 
 	IF @ysnPosted = 1
 	BEGIN
