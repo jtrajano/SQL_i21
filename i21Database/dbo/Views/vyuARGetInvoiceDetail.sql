@@ -206,7 +206,7 @@ FROM  ( SELECT intInvoiceId, intCompanyLocationId
 		ON INV.intTaxGroupId = TAXGROUP.intTaxGroupId
 	LEFT JOIN ( SELECT intAccountId, strAccountId 
 				FROM tblGLAccount WITH(NOLOCK)) GL
-		ON INV.intAccountId = GL.intAccountId
+		ON INV.intSalesAccountId = GL.intAccountId
 	LEFT JOIN ( SELECT intStorageLocationId, strName
 				FROM tblICStorageLocation WITH(NOLOCK)) ICSLOC
 		ON INV.intStorageLocationId = ICSLOC.intStorageLocationId
