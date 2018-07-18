@@ -75,6 +75,7 @@ BEGIN TRY
 			,[intItemId]
 			,[strMiscDescription]
 			,[dblQtyReceived]
+			,[dblUnitQty]
 			,[dblDiscount]
 			,[dblCost]
 			,[intTaxGroupId]
@@ -103,6 +104,7 @@ BEGIN TRY
 			,intItemId					= SC.intItemId
 			,strMiscDescription			= ICI.strDescription
 			,dblQtyReceived				= SC.dblNetUnits
+			,dblUnitQty					= SC.dblConvertedUOMQty
 			,dblDiscount				= 0
 			,dblCost					= CASE
 											WHEN CNT.intPricingTypeId = 2 THEN 
@@ -190,7 +192,8 @@ BEGIN TRY
 			[intAccountId],
 			[intItemId],
 			[strMiscDescription],
-			[dblQtyReceived], 
+			[dblQtyReceived],
+			[dblUnitQty],
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
@@ -207,6 +210,7 @@ BEGIN TRY
 			[intItemId],
 			[strMiscDescription],
 			[dblQtyReceived], 
+			[dblUnitQty],
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
@@ -225,6 +229,7 @@ BEGIN TRY
 			[intItemId],
 			[strMiscDescription],
 			[dblQtyReceived], 
+			[dblUnitQty],
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
@@ -245,6 +250,7 @@ BEGIN TRY
 										WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
 										ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblGrossUnits ELSE SC.dblGrossUnits * -1 END
 									END
+			,dblUnitQty				= SC.dblUnitQty
 			,dblDiscount			= 0
 			,dblCost				= SC.dblFreightRate
 			,intTaxGroupId			= SC.intTaxGroupId
@@ -265,6 +271,7 @@ BEGIN TRY
 			[intItemId],
 			[strMiscDescription],
 			[dblQtyReceived], 
+			[dblUnitQty],
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
@@ -286,6 +293,7 @@ BEGIN TRY
 											ELSE (SC.dblNetUnits) * -1 
 										END
 									ELSE 1 END
+			,dblUnitQty				= SC.dblUnitQty
 			,dblDiscount			= 0
 			,dblCost				= SC.dblTicketFees
 			,intTaxGroupId			= SC.intTaxGroupId
@@ -306,6 +314,7 @@ BEGIN TRY
 			[intItemId],
 			[strMiscDescription],
 			[dblQtyReceived], 
+			[dblUnitQty],
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
@@ -326,6 +335,7 @@ BEGIN TRY
 											WHEN QM.dblDiscountAmount > 0 THEN -1
 										END
 									END
+			,dblUnitQty				= SC.dblUnitQty
 			,dblDiscount			= 0
 			,dblCost				=  CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
