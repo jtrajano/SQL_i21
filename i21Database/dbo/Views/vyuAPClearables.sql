@@ -15,7 +15,7 @@ SELECT	DISTINCT
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
 			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
 			,dblVoucherAmount = CASE 
-								WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
+								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
 								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
 								ELSE 0 END    
 			,dblWithheld = 0
@@ -29,10 +29,10 @@ SELECT	DISTINCT
 			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 			,dblQtyToReceive = dblReceiptQty
-			,dblQtyVouchered = CASE WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
+			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
 			,dblQtyToVoucher = dblOpenQty
 			,dblAmountToVoucher = CASE 
-									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - (totalVouchered.dblTotal),0)
+									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - ISNULL((totalVouchered.dblTotal),0),0)
 									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
 									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
 			,dblChargeAmount = 0
@@ -59,7 +59,7 @@ SELECT	DISTINCT
 						,dblOpenQty
 						,strContainerNumber
 						,dblUnitCost
-				FROM	vyuICGetInventoryReceiptVoucherItems items
+				FROM	[vyuAPGetInventoryReceiptItems] items
 				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
 			OUTER APPLY (
@@ -78,7 +78,7 @@ SELECT	DISTINCT
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
 WHERE ((dblReceiptQty - dblVoucherQty)) != 0 --AND bill.ysnPosted = 0
-AND receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+AND receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR
 
 UNION ALL 
 
@@ -113,9 +113,10 @@ SELECT DISTINCT
 	,dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
 	,dblQtyToVoucher = (ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-	,dblAmountToVoucher = CASE  WHEN Bill.dblQtyReceived <> 0 THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  ISNULL(Bill.dblDetailTotal,0) AS DECIMAL (18,2)) 
+	,dblAmountToVoucher = CASE  WHEN ReceiptCharge.dblQuantityBilled = 0  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
+								WHEN Bill.dblQtyReceived <> 0 THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  ISNULL(Bill.dblDetailTotal,0) AS DECIMAL (18,2)) 
 								ELSE CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
-								END 
+								END  
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
@@ -176,7 +177,7 @@ SELECT DISTINCT
 		THEN Bill.dblDetailTotal 
 		ELSE Bill.dblDetailTotal 
 	  END,0) AS dblAmountDue 
-	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) ELSE 0 END  
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -190,9 +191,10 @@ SELECT DISTINCT
 	, dblQtyToReceive = ISNULL(-ReceiptCharge.dblQuantity,-1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(-ReceiptCharge.dblQuantityBilled,-1) ELSE 0 END 
 	, dblQtyToVoucher = -(ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
-	, dblAmountToVoucher = -(CASE WHEN Bill.dblQtyReceived <> 0 THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  (ISNULL(Bill.dblDetailTotal,0)) AS DECIMAL (18,2)) 
-								 ELSE CAST(( (ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2))  
-								 END) 
+	, dblAmountToVoucher = -(CASE WHEN ReceiptCharge.dblQuantityBilled = 0 AND strCostMethod = 'Per Unit'  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
+								  WHEN Bill.dblQtyReceived <> 0  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  (ISNULL(Bill.dblDetailTotal,0)) AS DECIMAL (18,2)) 
+								  ELSE CAST(( (ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2))  
+							 END) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
