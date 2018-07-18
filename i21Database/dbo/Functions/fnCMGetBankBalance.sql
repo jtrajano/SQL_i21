@@ -78,7 +78,7 @@ WHERE	ysnPosted = 1
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
-SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN  B.dblCredit ELSE B.dblCreditForeign END, 0)), 0) - ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN B.dblDebit ELSE dblDebitForeign END, 0)), 0)
+SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN  B.dblCredit ELSE B.dblCreditForeign END, 0)), 0) - ISNULL(SUM(ISNULL(CASE WHEN @isForeignCurrency = 0 THEN B.dblDebit ELSE B.dblDebitForeign END, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
 WHERE	A.ysnPosted = 1
