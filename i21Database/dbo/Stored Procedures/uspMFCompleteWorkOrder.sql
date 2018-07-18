@@ -104,12 +104,18 @@ BEGIN TRY
 		,@dblBiProductQuantity NUMERIC(38, 20)
 		,@intWorkOrderProducedLotParentId INT
 		,@intBiProductLotId INT
+		,@ysnCPMergeOnMove BIT
+
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intId INT identity(1, 1)
 		,intItemId INT
 		,intItemUOMId INT
 		,dblQuantity NUMERIC(38, 20)
 		)
+		
+
+	SELECT TOP 1 @ysnCPMergeOnMove=ysnMergeOnMove
+				FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -272,13 +278,14 @@ BEGIN TRY
 
 	IF @ysnAllowMultipleLot = 0
 		AND @ysnMergeOnMove = 1
+		and @ysnCPMergeOnMove=1
 	BEGIN
 		SELECT @strOutputLotNumber = strLotNumber
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND dblQty > 0
-			AND intLotStatusId = 1
+			--AND intLotStatusId = 1
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 	END
 	ELSE IF EXISTS (

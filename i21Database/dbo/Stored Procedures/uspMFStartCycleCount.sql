@@ -42,6 +42,9 @@ BEGIN TRY
 		,@strUnitMeasure NVARCHAR(50)
 		,@strError NVARCHAR(MAX)
 		,@intRecipeTypeId int
+		,@intItemUOMId int
+		--,@intUnitMeasureId int
+
 	DECLARE @tblMFProcessCycleCount TABLE (
 		intItemId INT
 		,intMachineId INT
@@ -167,9 +170,14 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@strWorkOrderNo = strWorkOrderNo
 		,@intRecipeTypeId=intRecipeTypeId 
+		,@intItemUOMId=intItemUOMId
 	FROM dbo.tblMFWorkOrder W
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	Select @intUnitMeasureId=intUnitMeasureId
+	From tblICItemUOM
+	Where intItemUOMId=@intItemUOMId
 
 	IF @dtmPlannedDateTime > @dtmCurrentDateTime
 	BEGIN
@@ -624,9 +632,10 @@ BEGIN TRY
 					AND intLocationId = @intLocationId
 					AND intAttributeId = 75 --'Production Staging Location'
 				))
-		,SUM(WP.dblPhysicalCount)
+		,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId,IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId),WP.dblPhysicalCount))
 		,MIN(WP.intPhysicalItemUOMId)
 	FROM dbo.tblMFWorkOrderProducedLot WP
+	Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.ysnFillPartialPallet = 0
@@ -672,9 +681,10 @@ BEGIN TRY
 					AND intLocationId = @intLocationId
 					AND intAttributeId = 75 --'Production Staging Location'
 				))
-		,SUM(WP.dblPhysicalCount)
+		,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId,IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId),WP.dblPhysicalCount))
 		,MIN(WP.intPhysicalItemUOMId)
 	FROM dbo.tblMFWorkOrderProducedLot WP
+	Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.ysnFillPartialPallet = 1

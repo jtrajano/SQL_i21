@@ -6818,6 +6818,8 @@
     <Build Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblSMCompanySetUp.sql" />
     <Build Include="dbo\Functions\fnCMGetBankBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

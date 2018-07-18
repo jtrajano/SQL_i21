@@ -25,6 +25,7 @@ BEGIN
 				ELSE 0
 				END
 			)) AS ysnInputItemEnabled
+		,I.intCategoryId
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
