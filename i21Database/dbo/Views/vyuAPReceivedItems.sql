@@ -525,7 +525,7 @@ FROM
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
-		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
+		,[intInventoryReceiptItemId]				=	ISNULL (A.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
