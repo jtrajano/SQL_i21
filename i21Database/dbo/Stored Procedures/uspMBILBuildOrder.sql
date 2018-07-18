@@ -174,21 +174,25 @@ INSERT INTO tblMBILOrderItem
 SELECT * INTO #tempDriverOrder FROM (SELECT A.*,B.intMBILOrderItemId FROM tblMBILOrder A LEFT JOIN tblMBILOrderItem B ON A.intOrderId = B.intOrderId WHERE A.intDriverId = @intDriverId) tblOrder
 
 
-DECLARE  @MBILOrderId				INT				= NULL
-		,@ItemId					INT				= NULL
-		,@LocationId				INT				= NULL
-		,@CustomerId				INT				= NULL	
-		,@CustomerLocationId		INT				= NULL	
-		,@TransactionDate			DATETIME		= NULL
-		,@TaxGroupId				INT				= NULL		
-		,@SiteId					INT				= NULL
-		,@FreightTermId				INT				= NULL
-		,@CardId					INT				= NULL
-		,@VehicleId					INT				= NULL
-		,@DisregardExemptionSetup	BIT				= 0
-		,@ItemUOMId					INT				= NULL
-		,@CFSiteId					INT				= NULL
-		,@IsDeliver					BIT				= NULL
+DECLARE  @MBILOrderId					INT				= NULL
+		,@ItemId						INT				= NULL
+		,@LocationId					INT				= NULL
+		,@CustomerId					INT				= NULL	
+		,@CustomerLocationId			INT				= NULL	
+		,@TransactionDate				DATETIME		= NULL
+		,@TaxGroupId					INT				= NULL		
+		,@SiteId						INT				= NULL
+		,@FreightTermId					INT				= NULL
+		,@CardId						INT				= NULL
+		,@VehicleId						INT				= NULL
+		,@DisregardExemptionSetup		BIT				= 0
+		,@ItemUOMId						INT				= NULL
+		,@CFSiteId						INT				= NULL
+		,@IsDeliver						BIT				= NULL
+		,@CurrencyId					INT				= NULL
+		,@CurrencyExchangeRateTypeId	INT				= NULL
+		,@CurrencyExchangeRate			NUMERIC(18,6)	= NULL
+
 
 
 CREATE TABLE #tempOrderTaxCode (
@@ -201,6 +205,7 @@ CREATE TABLE #tempOrderTaxCode (
 	,[strTaxableByOtherTaxes]	NVARCHAR(MAX)
 	,[strCalculationMethod]		NVARCHAR(MAX)
 	,[dblRate]					NUMERIC(18, 6)
+	,[dblBaseRate]				NUMERIC(18, 6)
 	,[dblExemptionPercent]		NUMERIC(18, 6)
 	,[dblTax]					NUMERIC(18, 6)
 	,[dblAdjustedTax]			NUMERIC(18, 6)
@@ -221,21 +226,24 @@ CREATE TABLE #tempOrderTaxCode (
 WHILE EXISTS(SELECT 1 FROM #tempDriverOrder)
 BEGIN
 	
-	SELECT TOP 1 @MBILOrderId				= [intMBILOrderItemId]
-				,@ItemId					= [intItemId]
-				,@LocationId				= [intLocationId]
-				,@CustomerId				= [intEntityId]
-				,@CustomerLocationId		= [intShipToId]
-				,@TransactionDate			= GETDATE()
-				,@TaxGroupId				= [intTaxStateID]
-				,@SiteId					= [intSiteId]
-				,@FreightTermId				= NULL
-				,@CardId					= NULL
-				,@VehicleId					= NULL
-				,@DisregardExemptionSetup	= 0
-				,@ItemUOMId					= [intItemUOMId]
-				,@CFSiteId					= NULL
-				,@IsDeliver					= NULL
+	SELECT TOP 1 @MBILOrderId					= [intMBILOrderItemId]
+				,@ItemId						= [intItemId]
+				,@LocationId					= [intLocationId]
+				,@CustomerId					= [intEntityId]
+				,@CustomerLocationId			= [intShipToId]
+				,@TransactionDate				= GETDATE()
+				,@TaxGroupId					= [intTaxStateID]
+				,@SiteId						= [intSiteId]
+				,@FreightTermId					= NULL
+				,@CardId						= NULL
+				,@VehicleId						= NULL
+				,@DisregardExemptionSetup		= 0
+				,@ItemUOMId						= [intItemUOMId]
+				,@CFSiteId						= NULL
+				,@IsDeliver						= NULL
+				,@CurrencyId					= NULL
+				,@CurrencyExchangeRateTypeId	= NULL
+				,@CurrencyExchangeRate			= NULL
 			FROM #tempDriverOrder
 
 	INSERT INTO #tempOrderTaxCode ([intTransactionDetailTaxId]
@@ -247,6 +255,7 @@ BEGIN
 									,[strTaxableByOtherTaxes]
 									,[strCalculationMethod]
 									,[dblRate]
+									,[dblBaseRate]
 									,[dblExemptionPercent]
 									,[dblTax]
 									,[dblAdjustedTax]
@@ -276,6 +285,9 @@ BEGIN
 						  ,@ItemUOMId
 						  ,@CFSiteId
 						  ,@IsDeliver
+						  ,@CurrencyId
+						  ,@CurrencyExchangeRateTypeId
+						  ,@CurrencyExchangeRate
 
 
 	INSERT INTO tblMBILOrderTaxCode ([intMBILOrderItemId]
