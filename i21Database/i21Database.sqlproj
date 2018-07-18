@@ -6365,6 +6365,8 @@
     <Build Include="dbo\Tables\tblPATImportOriginFlag.sql" />
     <Build Include="dbo\Views\vyuRKGetAllowedFuturesMonthTraded.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
