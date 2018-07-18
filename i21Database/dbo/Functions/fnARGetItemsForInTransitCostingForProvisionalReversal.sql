@@ -121,7 +121,6 @@ WHERE
 	AND ARI.[intSourceId] IS NOT NULL
 	AND ARI.[intOriginalInvoiceId] <> 0
 	AND ARI.[intSourceId] = 2
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 UNION ALL
 
@@ -166,11 +165,12 @@ INNER JOIN
 			) ARI 
 			ON ARID.[intInvoiceId] = ARI.[intOriginalInvoiceId]
 INNER JOIN
-    (SELECT [intLoadId], [intLoadDetailId], [intSCompanyLocationId] FROM tblLGLoadDetail WITH (NOLOCK)) LGLD
-		ON LGLD.[intLoadDetailId] = ARID.[intLoadDetailId]
-INNER JOIN
     (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGLD.[intLoadId] = LGL.[intLoadId]
+		ON LGL.[intLoadId] = ARI.[intLoadId]
+INNER JOIN
+    (SELECT [intLoadId], [intLoadDetailId], [intSCompanyLocationId] FROM tblLGLoadDetail WITH (NOLOCK)) LGLD
+		ON LGL.[intLoadId] = ARI.[intLoadId]
+		AND LGLD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
@@ -183,7 +183,6 @@ WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 										
 	RETURN
 END
