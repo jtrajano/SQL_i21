@@ -82,6 +82,8 @@ WHERE
 				ID.[intInventoryShipmentItemId] IS NULL
 				AND
 				ID.[intInventoryShipmentChargeId] IS NULL
+				AND
+				I.strTransactionType <> 'Credit Memo'
 				--AND (ISNULL(I.intDistributionHeaderId, 0) = 0 AND ISNULL(I.intLoadDistributionHeaderId, 0) = 0)
 				--AND ISNULL(ID.intLoadDetailId, 0) = 0
 				--AND ISNULL(I.intTransactionId, 0) = 0
