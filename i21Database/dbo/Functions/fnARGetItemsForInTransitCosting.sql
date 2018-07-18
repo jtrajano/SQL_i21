@@ -114,6 +114,7 @@ WHERE
 		OR
 			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
 		)
+	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 UNION ALL
 
@@ -151,7 +152,7 @@ INNER JOIN
 		((INV.[strType] <> 'Provisional' AND (INV.[intOriginalInvoiceId] IS NULL OR INV.[intSourceId] <> 2))
 			OR
 		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
-		)
+		)		
 			) ARI 
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
@@ -172,6 +173,7 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL 
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
+	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 										
 	RETURN
