@@ -250,7 +250,7 @@ BEGIN TRY
 								,intCurrencyId			= NULL -- Optional. You will use this if you are using multi-currency. 
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
-								,dblUnitRetail			= MUD.dblRetailPerUnit
+								,dblUnitRetail			= MUD.dblTotalRetailAmount
 								,intCategoryId			= CASE
 															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.intCategoryId ELSE NULL
 														END
