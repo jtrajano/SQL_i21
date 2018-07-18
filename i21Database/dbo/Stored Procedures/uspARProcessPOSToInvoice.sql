@@ -276,7 +276,7 @@ BEGIN
 							SET @dblDiscrepancy = (@dblCounter + @dblAmount) - @dblInvoiceTotal
 
 							UPDATE #POSPAYMENTS SET ysnComputed = 1, dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
-							UPDATE tblARPOSPayment SET dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
+							--UPDATE tblARPOSPayment SET dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
 
 							DELETE FROM tblARPOSPayment WHERE intPOSPaymentId IN (SELECT intPOSPaymentId FROM #POSPAYMENTS WHERE ysnComputed = 0)
 							DELETE FROM #POSPAYMENTS WHERE ysnComputed = 0
