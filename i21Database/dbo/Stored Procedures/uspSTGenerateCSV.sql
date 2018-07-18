@@ -283,12 +283,12 @@ BEGIN
 								, CASE 
 									WHEN strTrpPaycode = 'COUPONS' 
 										THEN TR.dblTrpAmt 
-									ELSE 0 
+									ELSE NULL 
 								  END as dblMFGDealDiscountAmountONE
 								, '' as strMFGDealNameTWO
-								, 0 as dblMFGDealDiscountAmountTWO
+								, NULL as dblMFGDealDiscountAmountTWO
 								, '' as strMFGDealNameTHREE
-								, 0 as dblMFGDealDiscountAmountTHREE
+								, NULL as dblMFGDealDiscountAmountTHREE
 
 								, ((TR.dblTrlLineTot) - (CASE 
 															WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
