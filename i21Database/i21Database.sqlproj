@@ -6361,6 +6361,10 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql" />
+    <Build Include="dbo\Views\vyuAPBillForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPayVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTempData.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
