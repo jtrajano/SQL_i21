@@ -257,64 +257,44 @@ BEGIN
 								, CASE
 									-- 2 Can Deal
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-										--AND (
-										--		SELECT COUNT(tbl.intTranslogId) 
-										--		FROM tblSTTranslogRebates tbl
-										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-										--		AND tbl.intCheckoutId = TR.intCheckoutId
-										--		AND tbl.strTrlDept = 'OTP' 
-										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-										--		AND tbl.strTrpPaycode != 'Change'
-										--	) > 1
-											THEN 'Y'
+										THEN 'Y'
 									ELSE 'N'
 								  END AS strMultiPackIndicator	
 								, CASE
 									-- 2 Can Deal
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-										--AND (
-										--		SELECT COUNT(tbl.intTranslogId) 
-										--		FROM tblSTTranslogRebates tbl
-										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-										--		AND tbl.intCheckoutId = TR.intCheckoutId
-										--		AND tbl.strTrlDept = 'OTP' 
-										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-										--		AND tbl.strTrpPaycode != 'Change'
-										--	) > 1
-											THEN 2
+										THEN 2
 									ELSE NULL
 								  END as intMultiPackRequiredQuantity
 								, CASE
 									-- 2 Can Deal
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-											--THEN (
-											--		SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
-											--		FROM tblSTTranslogRebates tbl
-											--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-											--		AND tbl.intCheckoutId = TR.intCheckoutId
-											--		AND tbl.strTrlDept = 'OTP' 
-											--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-											--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-											--		AND tbl.strTrpPaycode != 'Change'
-											--	 )
 										THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
 									ELSE NULL
 								  END as dblMultiPackDiscountAmount
 
 								, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 								, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
-								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END as strMFGDealNameONE
-								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 0.50 ELSE 0 END as dblMFGDealDiscountAmountONE
+								, CASE 
+									WHEN strTrpPaycode = 'COUPONS' 
+										THEN 'Coupon' 
+									ELSE '' 
+								  END as strMFGDealNameONE
+								, CASE 
+									WHEN strTrpPaycode = 'COUPONS' 
+										THEN TR.dblTrpAmt 
+									ELSE 0 
+								  END as dblMFGDealDiscountAmountONE
 								, '' as strMFGDealNameTWO
 								, 0 as dblMFGDealDiscountAmountTWO
 								, '' as strMFGDealNameTHREE
 								, 0 as dblMFGDealDiscountAmountTHREE
 
-								--, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
-								--		ELSE dblTrlLineTot END as dblFinalSalesPrice ST-680
-								, dblTrlUnitPrice as dblFinalSalesPrice --dblTrpAmt as dblFinalSalesPrice (Issue: Please see attached. It appears our pricing is not reporting correctly on cigarettes. We’ll want to make sure that is correct especially before next quarter. I included Edgar’s contact information below if you need to discuss directly with him.)
+								, ((TR.dblTrlLineTot) - (CASE 
+															WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
+																THEN TR.dblTrpAmt
+															ELSE 0
+														 END)) as dblFinalSalesPrice
 
 								--Optional Fields
 								, NULL AS intStoreTelephone

@@ -1281,15 +1281,12 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
-			--AND 
-			--(
-			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
-			--)
-
-
-
-
+			AND 
+			(
+				-- http://jira.irelyserver.com/browse/ST-846 
+				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			)
 
 
 		   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '') --AND strNewData = ''
