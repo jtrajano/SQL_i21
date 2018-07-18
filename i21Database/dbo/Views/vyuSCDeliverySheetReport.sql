@@ -19,6 +19,9 @@ SELECT
 	,SCD.dblNet
 	,SCD.ysnPost
 	,EM.strAddress AS strEntityAddress
+	,EM.strZipCode AS strEntityZipCode
+	,EM.strCity AS strEntityCity
+	,EM.strState AS strEntityState
 	,EMS.strSplitNumber
 	,ICC.strCommodityCode	
 	,SMC.strCompanyName
