@@ -30,6 +30,8 @@ BEGIN TRY
 			,'' AS 'ysnScannedCountEntry'
 			,'' AS 'ysnCountByLots'
 			,'' AS 'ysnCountByPallets'
+			,'' AS 'ysnIncludeOnHand'
+			,'' AS 'dblOnHand'
 			,'' AS 'dblPhysicalCount'
 		RETURN
 	END
@@ -104,6 +106,8 @@ BEGIN TRY
 				   ,InvCount.ysnScannedCountEntry
 				   ,InvCount.ysnCountByLots
 				   ,InvCount.ysnCountByPallets
+				   ,InvCount.ysnIncludeOnHand
+				   ,dblOnHand = InvCountDetail.dblSystemCount
 				   ,dblPhysicalCount = InvCountDetail.dblPhysicalCount --ISNULL(InvCountDetail.dblPallets, 0) * ISNULL(InvCountDetail.dblQtyPerPallet, 0) 
 			FROM tblICInventoryCount InvCount 
 				 LEFT JOIN tblICInventoryCountDetail InvCountDetail ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
