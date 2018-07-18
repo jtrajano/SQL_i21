@@ -309,6 +309,8 @@ BEGIN
 		,strPaidBy				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL
 		,intAccountId			INT
 		,intExpenseAccountId	INT
+		,ysnSplitAccount		BIT
+		,ysnSplitExpense		BIT
 		,dblAmount				NUMERIC (18, 6)
 		,dblPercentage			NUMERIC (18, 6)
 		,intDepartmentId		INT
@@ -317,14 +319,16 @@ BEGIN
 	)
 
 	--Insert Deduction Distribution to Temporary Table
-	INSERT INTO #tmpDeduction (intPaycheckId, intEmployeeDeductionId, intTypeDeductionId, strPaidBy, intAccountId, intExpenseAccountId, 
+	INSERT INTO #tmpDeduction (intPaycheckId, intEmployeeDeductionId, intTypeDeductionId, strPaidBy, intAccountId, intExpenseAccountId, ysnSplitAccount, ysnSplitExpense,
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
-	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
+	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId, A.ysnSplitAccount, A.ysnSplitExpense,
 			ISNULL(A.dblTotal, 0), ISNULL(ISNULL(B.dblPercentage, A.dblDepartmentPercent), 0), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
-	FROM (SELECT PD.intPaycheckId, intEmployeeDeductionId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
-			intTypeDeductionId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
+	FROM (SELECT PD.intPaycheckId, PD.intEmployeeDeductionId, PC.intEntityEmployeeId, PD.strPaidBy, PD.intAccountId, PD.intExpenseAccountId,
+			ysnSplitAccount = ED.ysnUseLocationDistribution, ysnSplitExpense = ED.ysnUseLocationDistributionExpense,
+			PD.intTypeDeductionId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
 		  FROM tblPRPaycheckDeduction PD
 			INNER JOIN tblPRPaycheck PC ON PD.intPaycheckId = PC.intPaycheckId
+			INNER JOIN tblPREmployeeDeduction ED ON PD.intEmployeeDeductionId = ED.intEmployeeDeductionId
 			OUTER APPLY (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) DP
 			) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
@@ -337,7 +341,8 @@ BEGIN
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
 	--Place Deduction to Temporary Table to Validate Account ID Distribution
 	SELECT * INTO #tmpDeductionValidateAccounts 
-	FROM #tmpDeduction WHERE intEmployeeDeductionId IN (SELECT intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	FROM #tmpDeduction WHERE intEmployeeDeductionId IN (SELECT intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEmployeeId
+														AND (ysnUseLocationDistribution = 1 OR ysnUseLocationDistributionExpense = 1))
 	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
 
 	DECLARE @intDeductionTempDeductionId INT, @intDeductionTempDepartmentId INT, @intDeductionTempAccountId INT, @intDeductionTempExpenseAccountId INT,
@@ -349,8 +354,8 @@ BEGIN
 		SELECT TOP 1 @intDeductionTempDeductionId = intTypeDeductionId, @intDeductionTempDepartmentId = intDepartmentId
 					,@intDeductionTempAccountId = intAccountId, @intDeductionTempExpenseAccountId = intExpenseAccountId 
 					,@intDeductionTempProfitCenter = intProfitCenter, @intDeductionTempLOB = intLOB
-					,@intDeductionTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
-					,@intDeductionTempFinalExpenseAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB)
+					,@intDeductionTempFinalAccountId = CASE WHEN (ysnSplitAccount = 1) THEN dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB) ELSE intAccountId END
+					,@intDeductionTempFinalExpenseAccountId = CASE WHEN (ysnSplitExpense = 1) THEN dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB) ELSE intExpenseAccountId END
 					FROM #tmpDeductionValidateAccounts
 
 		--Replace the Deduction Account with the Distribution Account
@@ -492,6 +497,8 @@ BEGIN
 		,strPaidBy				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL
 		,intAccountId			INT
 		,intExpenseAccountId	INT
+		,ysnSplitAccount		BIT
+		,ysnSplitExpense		BIT
 		,dblAmount				NUMERIC (18, 6)
 		,dblPercentage			NUMERIC (18, 6)
 		,intDepartmentId		INT
@@ -500,14 +507,16 @@ BEGIN
 	)
 
 	--Insert Tax Distribution to Temporary Table
-	INSERT INTO #tmpTax (intPaycheckId, intTypeTaxId, strPaidBy, intAccountId, intExpenseAccountId, 
+	INSERT INTO #tmpTax (intPaycheckId, intTypeTaxId, strPaidBy, intAccountId, intExpenseAccountId, ysnSplitAccount, ysnSplitExpense,
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
-	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
+	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId, A.ysnSplitAccount, A.ysnSplitExpense,
 			A.dblTotal, ISNULL(ISNULL(B.dblPercentage, A.dblDepartmentPercent), 0), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
-	FROM (SELECT PD.intPaycheckId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
-			intTypeTaxId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
+	FROM (SELECT PD.intPaycheckId, PC.intEntityEmployeeId, PD.strPaidBy, PD.intAccountId, PD.intExpenseAccountId, 
+			ysnSplitAccount = ET.ysnUseLocationDistribution, ysnSplitExpense = ET.ysnUseLocationDistributionExpense,
+			PD.intTypeTaxId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
 		  FROM tblPRPaycheckTax PD
 			INNER JOIN tblPRPaycheck PC ON PD.intPaycheckId = PC.intPaycheckId
+			INNER JOIN tblPREmployeeTax ET ON PD.intTypeTaxId = ET.intTypeTaxId AND ET.intEntityEmployeeId = PC.intEntityEmployeeId
 			OUTER APPLY (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) DP
 			) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
@@ -520,7 +529,7 @@ BEGIN
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
 	--Place Tax to Temporary Table to Validate Account ID Distribution
 	SELECT * INTO #tmpTaxValidateAccounts 
-	FROM #tmpTax WHERE intTypeTaxId IN (SELECT intTypeTaxId FROM tblPREmployeeTax WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	FROM #tmpTax WHERE intTypeTaxId IN (SELECT intTypeTaxId FROM tblPREmployeeTax WHERE intEntityEmployeeId = @intEmployeeId AND (ysnUseLocationDistribution = 1 OR ysnUseLocationDistributionExpense = 1))
 	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
 
 	DECLARE @intTaxTempTaxId INT, @intTaxTempDepartmentId INT, @intTaxTempAccountId INT, @intTaxTempExpenseAccountId INT,
@@ -532,8 +541,8 @@ BEGIN
 		SELECT TOP 1 @intTaxTempTaxId = intTypeTaxId, @intTaxTempDepartmentId = intDepartmentId
 					,@intTaxTempAccountId = intAccountId, @intTaxTempExpenseAccountId = intExpenseAccountId 
 					,@intTaxTempProfitCenter = intProfitCenter, @intTaxTempLOB = intLOB
-					,@intTaxTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
-					,@intTaxTempFinalExpenseAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB)
+					,@intTaxTempFinalAccountId = CASE WHEN (ysnSplitAccount = 1) THEN dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB) ELSE intAccountId END
+					,@intTaxTempFinalExpenseAccountId = CASE WHEN (ysnSplitExpense = 1) THEN dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB) ELSE intExpenseAccountId END
 					FROM #tmpTaxValidateAccounts
 
 		--Replace the Tax Account with the Distribution Account
