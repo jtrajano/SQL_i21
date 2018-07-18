@@ -252,7 +252,10 @@ BEGIN TRY
 			[strReceiptType]		= RE.strReceiptType
 			,[intItemId]			= RE.intItemId
 			,[intLotId]				= RE.intLotId
-			,[strLotNumber]			= SC.strLotNumber
+			,[strLotNumber]			= CASE
+										WHEN SC.strLotNumber = '' THEN NULL
+										ELSE SC.strLotNumber
+									END
 			,[intLocationId]		= RE.intLocationId
 			,[intShipFromId]		= RE.intShipFromId
 			,[intShipViaId]			= RE.intShipViaId
