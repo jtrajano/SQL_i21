@@ -9,22 +9,28 @@ SELECT
 ,strItemNo				= Item.strItemNo
 ,intCompanyLocationId	= SC.intProcessingLocationId
 ,strLocationName		= Loc.strLocationName
-,intEntityId			= SC.intEntityId
+,intEntityId			= ISNULL(TS.intCustomerId,SC.intEntityId)
 ,strEntityName          = Entity.strName
-,dblUnits				= SC.dblNetUnits
+,dblUnits				= ISNULL(TS.dblSplitPercent,100)*SC.dblNetUnits/100.0
 ,dtmTicketDateTime		= SC.dtmTicketDateTime
-,intItemUOMIdTo			 = SC.intItemUOMIdTo
-,strItemStockUOM		 = UnitMeasure.strUnitMeasure
+,intItemUOMIdTo			= SC.intItemUOMIdTo
+,strItemStockUOM		= UnitMeasure.strUnitMeasure
 FROM tblSCTicket SC
-JOIN tblICItem Item ON Item.intItemId = SC.intItemId
-JOIN tblSCListTicketTypes TicketType ON TicketType.intTicketTypeId = SC.intTicketTypeId
-JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId=SC.intProcessingLocationId
-JOIN tblEMEntity Entity ON Entity.intEntityId=SC.intEntityId
-JOIN tblICItemUOM UOM ON UOM.intItemUOMId=SC.intItemUOMIdTo
-JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId=UOM.intUnitMeasureId
+LEFT JOIN tblSCTicketSplit TS		 ON TS.intTicketId				 = SC.intTicketId AND TS.intStorageScheduleTypeId = -3
+JOIN tblICItem Item					 ON Item.intItemId				 = SC.intItemId
+JOIN tblSCListTicketTypes TicketType ON TicketType.intTicketTypeId	 = SC.intTicketTypeId
+JOIN tblSMCompanyLocation Loc		 ON Loc.intCompanyLocationId	 = SC.intProcessingLocationId
+JOIN tblEMEntity Entity				 ON Entity.intEntityId			 = ISNULL(TS.intCustomerId,SC.intEntityId)
+JOIN tblICItemUOM UOM				 ON UOM.intItemUOMId			 = SC.intItemUOMIdTo
+JOIN tblICUnitMeasure UnitMeasure	 ON UnitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE 
 ISNULL(SC.dblUnitPrice,0) = 0 
 AND ISNULL(SC.dblUnitBasis,0) = 0
-AND SC.intStorageScheduleTypeId = -3
+AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
 AND SC.strTicketStatus = 'C'
-AND SC.intTicketId NOT IN (SELECT intTicketId FROM tblGRUnPricedSpotTicket)
+AND SC.intTicketId NOT IN (
+						   CASE 
+								WHEN SC.intStorageScheduleTypeId = -3 THEN  (SELECT intTicketId FROM tblGRUnPricedSpotTicket)
+						   END
+						  )
+
