@@ -84,7 +84,7 @@ LEFT JOIN (
        ) S ON S.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblLGLoadDetail DOD ON DOD.intPickLotDetailId = PLD.intPickLotDetailId
 LEFT JOIN tblLGLoad DO ON DO.intLoadId = DOD.intLoadId 
-WHERE ISNULL(DO.intShipmentStatus,0) <> 6 
+WHERE ISNULL(DO.intShipmentStatus,0) NOT IN (6, 11)
 
 UNION ALL
 

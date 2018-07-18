@@ -225,13 +225,15 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = LoadDetail.intWeightItemUOMId
+			,intItemUOMId = ISNULL(Lot.intWeightUOMId, LoadDetail.intWeightItemUOMId)
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-			,dblQty = - 1 * CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ISNULL(LoadDetail.dblNet, 0)
-				ELSE ISNULL(DetailLot.dblNet, 0)
-				END
+			,dblQty = - 1 * (
+				CASE 
+					WHEN Lot.intLotId IS NULL
+						THEN ISNULL(LoadDetail.dblNet, 0)
+					ELSE ISNULL(DetailLot.dblNet, 0)
+					END
+				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, Lot.intWeightUOMId, 1)
 			,dblUOMQty = CASE 
 				WHEN Lot.intLotId IS NULL
 					THEN ItemUOM.dblUnitQty
@@ -266,7 +268,7 @@ BEGIN
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE LOAD.intLoadId = @intTransactionId
 
 		-- Call the post routine 
