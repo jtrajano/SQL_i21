@@ -16,8 +16,6 @@ BEGIN
 	,@dblGrossShrink AS NUMERIC(18, 6)
 	,@dblWetShrinkPercentage AS NUMERIC(18, 6)
 	,@dblGrossShrinkPercentage AS NUMERIC(18, 6)
-	,@dblTicketGrossWeight AS NUMERIC(18, 6)
-	,@dblTicketTareWeight AS NUMERIC(18, 6)
 	,@dblTicketNetWeight AS NUMERIC(18, 6)
 	,@dblTicketGrossUnit AS NUMERIC(18, 6)
 	,@dblTicketShrinkUnit AS NUMERIC(18, 6)
@@ -31,24 +29,30 @@ BEGIN
 	,@dblQtyToDistribute AS NUMERIC(38, 20)
 	,@strDiscountChargeType NVARCHAR(10);
 
-	SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNetUnits 
-	, @dblTicketGrossWeight = (dblGrossWeight + ISNULL(dblGrossWeight1, 0) + ISNULL(dblGrossWeight2, 0))
-	, @dblTicketTareWeight = (dblTareWeight + ISNULL(dblTareWeight1, 0) + ISNULL(dblTareWeight2, 0))
-	, @intItemId = intItemId
-	FROM tblSCTicket WHERE intTicketId = @intTicketId
-	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod, @strDiscountChargeType = strDiscountChargeType 
-	FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
-
 	IF @ysnDeliverySheet = 0
 	BEGIN
-		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId;
+		SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink
+			, @dblTicketNetUnits = dblNetUnits , @intItemId = intItemId
+		FROM tblSCTicket WHERE intTicketId = @intTicketId
+		
+		SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod, @strDiscountChargeType = strDiscountChargeType 
+		FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId
+
+		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId
 	END
 	ELSE
 	BEGIN
-		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCDeliverySheetSplit WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intTicketId;
-	END
-	SET @dblSplitPercent = @dblSplitPercent / 100;
+		SELECT @dblTicketGrossUnit = dblGross, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNet , @intItemId = intItemId
+		FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId
 
+		SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod, @strDiscountChargeType = strDiscountChargeType 
+		FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId
+
+		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCDeliverySheetSplit WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intTicketId
+	END
+
+	SET @dblSplitPercent = @dblSplitPercent / 100;
+	
 	IF ISNULL(@intUnitMeasureId,0 ) > 0
 		SELECT @dblUOMQty = dblUnitQty FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intUnitMeasureId
 	
@@ -56,24 +60,25 @@ BEGIN
 		SET @dblUOMQty = 1
 
 	IF @strDiscountCalculationOptionId = '1' --NET WEIGHT
-		BEGIN
-			SET @dblQtyToDistribute = @dblTicketNetUnits * @dblSplitPercent
-			SET @calculatedValue = (@dblQtyToDistribute/ @dblUOMQty) * @dblDiscountAmount
-		END
+	BEGIN
+		SET @dblQtyToDistribute = @dblTicketNetUnits * @dblSplitPercent
+		SET @calculatedValue = (@dblQtyToDistribute/ @dblUOMQty) * @dblDiscountAmount
+	END
 	ELSE IF  @strDiscountCalculationOptionId = '2' --WET WEIGHT
-		BEGIN
-			SELECT @dblGrossShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Gross Weight'
-			SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
-			SET @dblGrossShrink = @dblQtyToDistribute * ISNULL(@dblGrossShrinkPercentage,0);
-			SET @dblGrossShrink = @dblGrossShrink / 100;
-			SET @dblTicketWetUnits = (@dblQtyToDistribute / @dblUOMQty) - @dblGrossShrink
-			SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
-		END
+	BEGIN
+		SELECT @dblGrossShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Gross Weight'
+		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
+		SET @dblGrossShrink = @dblQtyToDistribute * ISNULL(@dblGrossShrinkPercentage,0);
+		SET @dblGrossShrink = @dblGrossShrink / 100;
+		SET @dblTicketWetUnits = (@dblQtyToDistribute / @dblUOMQty) - @dblGrossShrink
+		SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
+	END
 	ELSE 
 		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
 		SET @calculatedValue =  (@dblQtyToDistribute / @dblUOMQty) * @dblDiscountAmount
 	
 	IF @strDiscountChargeType = 'Percent'
 		RETURN (@calculatedValue * @dblCost)
+	
 	RETURN @calculatedValue
 END
