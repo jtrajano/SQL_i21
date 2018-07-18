@@ -62,8 +62,8 @@ BEGIN
 			UPDATE ID 
 			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
 											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ID.ysnAddonParent <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
-											WHEN ID.ysnAddonParent = 0 THEN (CASE WHEN ISNULL(ParentAddon.intInvoiceDetailId,0) = 0 THEN ID.dblQtyShipped  ELSE dbo.fnRoundBanker((@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty)) * ISNULL(AddOnQty.dblQuantity,0), 2)  END) --FOR SCALE ITEMS ELSE ID.dblQtyShipped END)
-											ELSE ID.dblQtyShipped --REGULAR ITEMS
+											WHEN ID.ysnAddonParent = 0 AND ISNULL(ITEM.ysnUseWeighScales, 0) = 1  THEN (CASE WHEN ISNULL(ParentAddon.intInvoiceDetailId,0) = 0 THEN ParentAddon.dblQtyShipped  ELSE dbo.fnRoundBanker((@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty)) * ISNULL(AddOnQty.dblQuantity,0), 2)  END) --FOR SCALE ITEMS ELSE ID.dblQtyShipped END)
+											ELSE ParentAddon.dblQtyShipped --REGULAR ITEMS
 										END
 				, ID.intItemUOMId		= CASE WHEN ITEM.ysnUseWeighScales = 1 THEN @intScaleUOMId ELSE ID.intItemUOMId END
 				, ID.intTicketId		= @intTicketId
@@ -99,8 +99,15 @@ BEGIN
 			INNER JOIN dbo.tblICItem I ON ID.intItemId = I.intItemId AND I.ysnUseWeighScales = 1
 			WHERE ID.intInvoiceId = @intNewInvoiceId
 			  AND ISNULL(ID.intContractDetailId, 0) <> 0
+			  AND ISNULL(ID.ysnAddonParent,0) = 1
 			  AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0)
-			
+			--Addon items
+			INSERT INTO #CONTRACTLINEITEMS
+			SELECT DISTINCT ID1.intInvoiceDetailId  FROM tblARInvoiceDetail ID
+			INNER JOIN tblARInvoiceDetail ID1
+				ON ID1.intInvoiceId = ID.intInvoiceId AND ID1.strAddonDetailKey = ID.strAddonDetailKey AND ID1.ysnAddonParent <> 1
+			WHERE ID.intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM #CONTRACTLINEITEMS)
+
 			WHILE EXISTS(SELECT TOP 1 NULL FROM #CONTRACTLINEITEMS)
 				BEGIN
 					DECLARE @ItemId						INT
