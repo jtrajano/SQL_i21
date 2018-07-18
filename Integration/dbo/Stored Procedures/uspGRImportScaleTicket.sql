@@ -18,7 +18,10 @@ BEGIN
 		IF EXISTS(SELECT 1 FROM tblSCTicket)
 			SELECT @Total = 0
 		ELSE
-			SELECT @Total = COUNT(1) FROM gasctmst
+			SELECT @Total = COUNT(1) FROM gasctmst 
+			WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
+			AND   ISNULL(gasct_open_close_ind,'') <> 'C'
+			AND   gasct_tic_type IN('I','O')
 			
 			SELECT @Total = @Total + COUNT(1) FROM gastlmst GT 
 			WHERE GT.gastl_pd_yn <> 'Y' 
