@@ -9,7 +9,11 @@ GO
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc') 
 		BEGIN
 			INSERT [dbo].[tblSMControl] ([intScreenId],[strControlId],[strControlName],[strContainer],[strControlType])
-			VALUES (@entityCustomerId, N'btnDeleteLoc', N'Remove', N'', 'Button')
+			VALUES (@entityCustomerId, N'btnDeleteLoc', N'Delete Loc', N'', 'Button')
+		END
+		ELSE
+		BEGIN
+			UPDATE [tblSMControl] SET [strControlName] = 'Delete Loc' WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'
 		END
 	END
 

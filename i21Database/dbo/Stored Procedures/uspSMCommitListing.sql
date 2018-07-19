@@ -40,6 +40,14 @@ BEGIN TRANSACTION
 	WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment' 
 	--AND intScreenId NOT IN (SELECT intScreenId FROM tblSMTransaction)
 	
+	-- DELETE Controls
+	DELETE tblSMControl 
+	FROM tblSMControlStage A
+			INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
+			INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
+			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
+	WHERE ISNULL(A.strChange, '') = 'Deleted'
+
 	-- INSERT Controls
 	INSERT INTO tblSMControl (
 		strControlId,
@@ -61,13 +69,7 @@ BEGIN TRANSACTION
 	 INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
 	WHERE ISNULL(A.strChange, '') = 'Added'
 	
-	-- DELETE Controls
-	DELETE tblSMControl 
-	FROM tblSMControlStage A
-			INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
-			INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
-			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
-	WHERE ISNULL(A.strChange, '') = 'Deleted'
+
 
 	-- UPDATE MODULE
 	UPDATE tblSMScreen SET strModule = 'Ticket Management'
