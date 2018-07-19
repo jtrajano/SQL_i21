@@ -818,18 +818,15 @@ UNION
                 
                 INSERT INTO @tempFinal(strCommodityCode,strType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId)
 				SELECT @strDescription
-					,'Avail for Spot Sale' [strType],sum(dblTotal)-sum(dblPurQty),@intCommodityUnitMeasureId,@intCommodityId from(
-					select dblTotal,
-					(SELECT sum(Qty) FROM (
-								SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
-								FROM @tblGetOpenContractDetail  CD  
-								WHERE  intContractTypeId=1 and intPricingTypeId in(1,2) and CD.intCommodityId=@intCommodityId
-									and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
-							)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-											WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-											ELSE isnull(ysnLicensed, 0) END)			
-							) dblPurQty
+				,'Avail for Spot Sale' [strType],sum(dblTotal)-sum(dblPurQty),@intCommodityUnitMeasureId,@intCommodityId from(
+				select round(dblTotal,2) dblTotal,
+				round((SELECT sum(Qty) FROM (
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) as Qty ,CD.intCompanyLocationId                 
+					FROM @tblGetOpenContractDetail  CD  
+					WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and CD.intCommodityId=@intCommodityId
+					 and CD.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end 
+				)t 		
+				),2) dblPurQty
    				FROM @tempFinal t where strType='Basis Risk' and t.intCommodityId=@intCommodityId)t	
 
                 select @intUnitMeasureId =null
