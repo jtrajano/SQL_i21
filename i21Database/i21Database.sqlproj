@@ -6822,6 +6822,7 @@
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
     <Build Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteMultipleTransactions.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
