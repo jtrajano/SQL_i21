@@ -482,8 +482,8 @@ BEGIN
 								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
-							AND UOM.ysnStockUnit = CAST(1 AS BIT)
-
+							
+							-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
 				END
 				--ELSE
@@ -699,7 +699,8 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE IM.intCheckoutId = @intCheckoutId
 								AND IM.dblTotalSales > 0
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+
+						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
 				END
 				--ELSE 
@@ -2242,6 +2243,8 @@ BEGIN
 				----------------------------------------------------------------------
 				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
 				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
+
+				
 
 				-- Filter dblPrice should not be 0 and null
 				DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
