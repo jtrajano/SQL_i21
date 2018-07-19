@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceAgingReport]
 AS
 SELECT AGING.*
-     , dblCreditLimit			= CUSTOMER.dblCreditLimit
+     , dblCreditLimit			= ISNULL(CUSTOMER.dblCreditLimit, 0)
      , strShipToLocation		= SHIPTOLOCATION.strAddress
 	 , strBillToLocation		= BILLTOLOCATION.strAddress
 	 , strDefaultLocation		= DEFAULTLOCATION.strAddress

@@ -3,7 +3,7 @@
     --[intEntityCustomerId]                   INT             IDENTITY (1, 1) NOT NULL,
     [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
     [strType]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dblCreditLimit]                  NUMERIC (18, 6) NOT NULL,
+    [dblCreditLimit]                  NUMERIC (18, 6) NULL,
     [dblARBalance]                    NUMERIC (18, 6) NOT NULL,
     [strAccountNumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTaxNumber]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

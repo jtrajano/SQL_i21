@@ -83,7 +83,7 @@ FROM (
 
 SELECT strCustomerName = CUSTOMER.strName
 	 , strEntityNo = CUSTOMER.strCustomerNumber
-	 , dblCreditLimit = CUSTOMER.dblCreditLimit
+	 , dblCreditLimit = ISNULL(CUSTOMER.dblCreditLimit, 0)
 	 , AGING.*
 FROM (
 	SELECT intEntityCustomerId
