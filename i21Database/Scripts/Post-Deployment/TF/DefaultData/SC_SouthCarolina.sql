@@ -59,30 +59,6 @@ select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId
 
 EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
-	-- Tax Category
-	/* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
-select strQuery = 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHAR(10))
-		+ CASE WHEN strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + strState + ''''  END
-		+ CASE WHEN strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + strTaxCategory + ''''  END
-		+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(40 AS NVARCHAR(20)) + CAST(intTaxCategoryId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END
-	from tblTFTaxCategory
-	where intTaxAuthorityId = 40
-*/
-
-	DECLARE @TaxCategories AS TFTaxCategory
-
-	INSERT INTO @TaxCategories(
-		intTaxCategoryId
-		, strState
-		, strTaxCategory
-		, intMasterId
-	)
-	-- Insert generated script here. Remove first instance of "UNION ALL "
- SELECT intTaxCategoryId = 133, strState = 'SC', strTaxCategory = 'SC User Fee Gasoline', intMasterId = 40133
- UNION ALL SELECT intTaxCategoryId = 134, strState = 'SC', strTaxCategory = 'SC User Fee Diesel Clear', intMasterId = 40134
- 
-
-EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
 
 	-- Reporting Component
 	/* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.

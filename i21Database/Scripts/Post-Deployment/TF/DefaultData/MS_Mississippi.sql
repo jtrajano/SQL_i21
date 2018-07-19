@@ -51,34 +51,6 @@ select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId
 
 EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
-	-- Tax Category
-	/* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
-select strQuery = 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHAR(10))
-		+ CASE WHEN strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + strState + ''''  END
-		+ CASE WHEN strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + strTaxCategory + ''''  END
-		+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(24 AS NVARCHAR(20)) + CAST(intTaxCategoryId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END
-	from tblTFTaxCategory
-	where intTaxAuthorityId = 24
-*/
-
-	DECLARE @TaxCategories AS TFTaxCategory
-
-	INSERT INTO @TaxCategories(
-		intTaxCategoryId
-		, strState
-		, strTaxCategory
-		, intMasterId
-	)
-	-- Insert generated script here. Remove first instance of "UNION ALL "
- SELECT intTaxCategoryId = 49, strState = 'MS', strTaxCategory = 'MS Excise Tax Automotive Gasoline', intMasterId = 241035
- UNION ALL SELECT intTaxCategoryId = 50, strState = 'MS', strTaxCategory = 'MS Excise Tax Aviation Gasoline', intMasterId = 241036
- UNION ALL SELECT intTaxCategoryId = 51, strState = 'MS', strTaxCategory = 'MS Excise Tax Undyed Diesel', intMasterId = 241037
- UNION ALL SELECT intTaxCategoryId = 52, strState = 'MS', strTaxCategory = 'MS Excise Tax Dyed Diesel', intMasterId = 241038
- UNION ALL SELECT intTaxCategoryId = 53, strState = 'MS', strTaxCategory = 'MS Excise Tax Jet Fuel', intMasterId = 241039
- UNION ALL SELECT intTaxCategoryId = 54, strState = 'MS', strTaxCategory = 'MS Excise Tax Fuel Oil and Other Special Fuel', intMasterId = 241058
- 
-
-EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
 
 	-- Reporting Component
 	/* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.

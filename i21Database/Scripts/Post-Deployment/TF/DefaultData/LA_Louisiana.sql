@@ -44,30 +44,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
--- Tax Category
-/* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
-select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(0 AS NVARCHAR(10))
-	+ CASE WHEN strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + strState + ''''  END
-	+ CASE WHEN strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + strTaxCategory + ''''  END
---	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(intMasterId, '') = '' THEN intTaxCategoryId ELSE intMasterId END) AS NVARCHAR(20)) -- Old Format
-	+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intTaxCategoryId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
-from tblTFTaxCategory
-where intTaxAuthorityId = @TaxAuthorityId
-*/
-	DECLARE @TaxCategories AS TFTaxCategory
-
-	INSERT INTO @TaxCategories(
-		intTaxCategoryId
-		, strState
-		, strTaxCategory
-		, intMasterId
-	)
-	SELECT intTaxCategoryId = 0, strState = 'LA', strTaxCategory = 'LA Excise Tax Gasoline', intMasterId = 182059
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'LA', strTaxCategory = 'LA Excise Tax Gasohol', intMasterId = 182060
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'LA', strTaxCategory = 'LA Excise Tax Diesel Clear', intMasterId = 182061
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'LA', strTaxCategory = 'LA Inspection Fee', intMasterId = 182062
-
-	EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
 
 -- Reporting Component
 /* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.

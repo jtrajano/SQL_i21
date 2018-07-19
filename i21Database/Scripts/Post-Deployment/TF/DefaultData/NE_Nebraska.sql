@@ -49,42 +49,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
 
--- Tax Category
-/* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
-select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(0 AS NVARCHAR(10))
-	+ CASE WHEN strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + strState + ''''  END
-	+ CASE WHEN strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + strTaxCategory + ''''  END
---	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(intMasterId, '') = '' THEN intTaxCategoryId ELSE intMasterId END) AS NVARCHAR(20)) -- Old Format
-	+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intTaxCategoryId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
-from tblTFTaxCategory
-where intTaxAuthorityId = @TaxAuthorityId
-*/
-	DECLARE @TaxCategory AS TFTaxCategory
-
-	INSERT INTO @TaxCategory(
-		intTaxCategoryId
-		, strState
-		, strTaxCategory
-		, intMasterId
-	)
-	SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Gasoline', intMasterId = 2718
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Diesel Clear', intMasterId = 2719
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Gasoline', intMasterId = 2720
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Diesel Clear', intMasterId = 2721
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Gasohol', intMasterId = 2724
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Ethanol', intMasterId = 2725
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Compressed Fuels', intMasterId = 2726
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Aviation Gasoline', intMasterId = 2727
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE Excise Tax Jet Fuel', intMasterId = 2728
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Gasohol', intMasterId = 2729
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Ethanol', intMasterId = 2730
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Aviation Gasoline', intMasterId = 2731
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee Jet Fuel', intMasterId = 2733
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF Fee All Other Petroleum Products', intMasterId = 2734
-
-	EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategory
-
-
 -- Reporting Component
 /* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.
 select 'UNION ALL SELECT intReportingComponentId = ' + CAST(0 AS NVARCHAR(10))

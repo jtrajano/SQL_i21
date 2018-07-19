@@ -6820,6 +6820,7 @@
     <Build Include="dbo\Functions\fnCMGetBankBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
+    <Build Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
