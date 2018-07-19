@@ -126,7 +126,7 @@ AS
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CD.intItemId	
-												AND	IU.ysnStockUOM			=	1		
+												AND	IU.ysnStockUnit			=	1		
 
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 
@@ -275,7 +275,7 @@ AS
 
 		IF NOT EXISTS(SELECT * FROM  @ReceiptStagingTable)
 		BEGIN
-			RETURN 0
+			RAISERROR('Please verify the stock unit for the item or default location is available for the entity.',16,1)
 		END
 
 		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable;
