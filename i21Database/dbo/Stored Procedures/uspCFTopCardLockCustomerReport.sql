@@ -103,7 +103,7 @@ BEGIN
 				IF(@Fieldname = 'dtmDate')
 				BEGIN
 					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + CONVERT(varchar, DATEADD(year, -1, DATEADD(year, -1, @From)), 101) + '''' + ' AND ' +  '''' + CONVERT(varchar, DATEADD(year, -1, DATEADD(year, -1, @To)), 101) + '''' + ' )'
+					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 101) + '''' + ' AND ' +  '''' + CONVERT(varchar, DATEADD(year, -1, @To), 101) + '''' + ' )'
 				END
 				ELSE
 				BEGIN
