@@ -225,6 +225,7 @@ BEGIN
 		,intTermID
 		,dtmInvoiceDate
 		,intSalesPersonId
+		HAVING SUM(dblTotalAmount) <> 0
 		----------------------------------------
 
 		----------FEE ENTRIES FOR INVOICE-----------
@@ -399,6 +400,7 @@ BEGIN
 			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM tblCFInvoiceFeeStagingTable
 		WHERE strUserId = @username
+		--AND intCustomerId IN (SELECT intCustomerId FROM @EntriesForInvoice)
 
 		--GROUP BY 
 		--intCustomerId
