@@ -363,7 +363,7 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.'
+        ,[strError]                 = CASE WHEN ISNULL(P.intCurrencyExchangeRateTypeId, 0) = 0 THEN 'Base amounts are not equal. This needs data fix.' ELSE 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.' END
 	FROM
 		@Payments P
     WHERE
