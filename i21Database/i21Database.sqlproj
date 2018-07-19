@@ -6365,6 +6365,9 @@
     <Build Include="dbo\Stored Procedures\uspAPPayVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTempData.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearVoucherTempData.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherPaymentDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfoOfForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
