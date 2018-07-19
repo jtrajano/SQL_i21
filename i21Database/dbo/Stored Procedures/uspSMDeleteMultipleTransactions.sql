@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSMTDeleteMultipleTransactions]
+﻿CREATE PROCEDURE [dbo].[uspSMDeleteMultipleTransactions]
 	@recordIds nvarchar(500),
 	@namespace nvarchar(500)
 AS
