@@ -478,7 +478,7 @@ BEGIN
 														ELSE
 															-dbo.fnMultiply(
 																DetailLot.dblQuantityShipped
-																, DetailLot.dblWeightPerQty
+																, Lot.dblWeightPerQty
 															)
 												END
 
@@ -756,7 +756,7 @@ BEGIN
 														ELSE
 															-dbo.fnMultiply(
 																DetailLot.dblQuantityShipped
-																, DetailLot.dblWeightPerQty
+																, Lot.dblWeightPerQty
 															)
 												END
 
