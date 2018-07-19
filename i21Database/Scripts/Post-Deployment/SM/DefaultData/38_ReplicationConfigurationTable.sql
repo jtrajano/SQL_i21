@@ -188,6 +188,7 @@ VALUES
 	('tblSMCountry', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMScreen', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMApprovalList', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	('tblSMTaxCode', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroup', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroupCode', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroupCodeCategoryExemption', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
