@@ -1256,7 +1256,7 @@ BEGIN
 									END
 			,[dblTareWeight]		= CASE 
 										WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * (RE.dblGross - RE.dblNet)
-										ELSE (RE.dblGross - RE.dblNet)
+										ELSE CASE WHEN SC.dblShrink > 0 THEN (RE.dblGross - RE.dblNet) ELSE 0 END
 									END
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
@@ -1321,7 +1321,7 @@ BEGIN
 			,[intItemUnitMeasureId] = RE.intItemUOMId
 			,[dblQuantity]			= RE.dblQty
 			,[dblGrossWeight]		= RE.dblGross 
-			,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
+			,[dblTareWeight]		= CASE WHEN SC.dblShrink > 0 THEN (RE.dblGross - RE.dblNet) ELSE 0 END
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate

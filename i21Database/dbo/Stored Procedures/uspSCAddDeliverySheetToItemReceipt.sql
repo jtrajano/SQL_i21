@@ -255,16 +255,8 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightR
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
 												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN 
-													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1) * -1)
-														ELSE (QM.dblDiscountAmount * -1)
-													END 
-													WHEN QM.dblDiscountAmount > 0 THEN 
-													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1)
-														ELSE QM.dblDiscountAmount
-													END
+													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
@@ -280,16 +272,8 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightR
 													WHEN RE.ysnIsStorage = 1 THEN 0
 													WHEN RE.ysnIsStorage = 0 THEN
 													CASE
-														WHEN QM.dblDiscountAmount < 0 THEN 
-														CASE
-															WHEN SCD.intSplitId > 0 THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1) * -1)
-															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
-														END 
-														WHEN QM.dblDiscountAmount > 0 THEN 
-														CASE
-															WHEN SCD.intSplitId > 0 THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1)
-															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
-														END 
+														WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1) * -1)
+														WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 1)
 													END
 												END
 											END
@@ -460,7 +444,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 														WHEN RE.ysnIsStorage = 0 THEN 
 														CASE 
 															WHEN ISNULL(ContractCost.intContractCostId, 0) > 0
-																THEN ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SCD.dblGross), 2)
+																THEN ROUND (ISNULL(ContractCost.dblRate, @dblFreightRate) * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SCD.dblGross), 2)
 															ELSE ROUND (((RE.dblQty / SCD.dblNet) * @dblFreightRate), 2)
 														END
 													END
