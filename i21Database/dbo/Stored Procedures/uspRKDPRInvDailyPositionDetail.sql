@@ -322,10 +322,12 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 	FROM vyuICGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   		  
-	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
+	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
+	LEFT JOIN tblSCTicket t on s.strSourceNumber=t.strTicketNumber		  
+	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0 
 			AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
-			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate) 
+			and isnull(t.strDistributionOption,'') <> 'DP'
 			and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -363,9 +365,9 @@ BEGIN
 			,[Storage Due],intLocationId 
 	FROM(	
 	SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
-					dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
+					sum(dblTotal) dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 					,null [Storage Due],intLocationId intLocationId
-					FROM #invQty
+					FROM #invQty group by strLocationName,strItemNo,intLocationId
 			UNION all
 				SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription,[Storage Type] AS [strType],
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(Balance,0)),
