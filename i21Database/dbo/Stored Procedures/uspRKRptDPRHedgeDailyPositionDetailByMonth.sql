@@ -81,6 +81,8 @@ DECLARE @strCommodityCode NVARCHAR(50)
 	 INSERT INTO @Commodity(intCommodity)
 	 SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
 
+SELECT  @strCommodityCode = strCommodityCode FROM tblICCommodity    WHERE intCommodityId IN (SELECT intCommodityId FROM @Commodity)
+
 DECLARE @List AS TABLE (  
 	 intSeqNo int,
      intRowNumber INT,
@@ -106,6 +108,12 @@ DECLARE @List AS TABLE (
 	 INSERT INTO @List
 	 EXEC uspRKDPRHedgeDailyPositionDetailByMonth @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes
 
+	DECLARE @ctr as int
+	SELECT @ctr = COUNT(intRowNumber) FROM @List 
+
+    IF @ctr > 0 
+    BEGIN
+
 	 SELECT 
 		strCommodityCode
 		,strContractEndMonth
@@ -130,4 +138,23 @@ DECLARE @List AS TABLE (
             for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Sale Basis],[Sale Priced],[Sale HTA],[Net Hedge],[Position])
 				
          ) p 
+
+	END
+	ELSE
+		    SELECT 
+            @strCommodityCode as strCommodityCode
+            ,'' as strContractEndMonth
+            ,NULL as PurcahseBasis
+            ,NULL as PurchasePriced
+            ,NULL as PurchaseHTA
+            ,NULL as PurchaseRatio
+            ,NULL as SaleBasis
+            ,NULL as SalePriced
+            ,NULL as SaleHTA
+            ,NULL as SaleRatio
+            ,NULL as NetHedge
+            ,NULL as Position
+            ,@xmlParam as xmlParam
+
+
 END
