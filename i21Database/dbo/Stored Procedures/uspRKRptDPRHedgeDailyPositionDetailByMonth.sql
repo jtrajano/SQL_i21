@@ -1,14 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKRptDPRHedgeDailyPositionDetailByMonth]
 		@xmlParam NVARCHAR(MAX) = NULL
 AS
+
 BEGIN
 	DECLARE @idoc INT
 		,@intCommodityId nvarchar(max)
 		,@intLocationId nvarchar(max) = NULL		
 		,@intVendorId int = null
 		,@strPurchaseSales nvarchar(50) = NULL
-		,@strPositionIncludes nvarchar(max) 
-		,@dtmToDate nvarchar(max) 
+		,@strPositionIncludes nvarchar(50) = NULL
+		,@dtmToDate datetime = null
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -54,16 +55,16 @@ SELECT *
 	SELECT @strPurchaseSales = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'strPurchaseSales'
-			SELECT @strPositionIncludes = [from]
+
+	SELECT @strPositionIncludes = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'strPositionIncludes'
 
-		SELECT @dtmToDate = [from]
+	SELECT @dtmToDate = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'dtmToDate'
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
-IF ISNULL(@strPurchaseSales,'') <> ''
+if isnull(@strPurchaseSales,'') <> ''
 BEGIN
 	if @strPurchaseSales='Purchase'
 	BEGIN
@@ -84,6 +85,8 @@ DECLARE @strCommodityCode NVARCHAR(50)
 	 )
 	 INSERT INTO @Commodity(intCommodity)
 	 SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
+
+SELECT  @strCommodityCode = strCommodityCode FROM tblICCommodity	WHERE intCommodityId IN (SELECT intCommodityId FROM @Commodity)
 
 DECLARE @List AS TABLE (  
      intRowNumber INT IDENTITY(1,1),
@@ -349,45 +352,117 @@ UPDATE @List set intSeqNo = 2 where strType like 'Sale%'
 UPDATE @List set intSeqNo = 3 where strType='Net Hedge'
 UPDATE @List set intSeqNo = 4 where strType='Position'
 
+DECLARE @strType nvarchar(max)
+declare @strContractEndMonth nvarchar(max)
+ SELECT TOP 1  @strType=strType,@strContractEndMonth=strContractEndMonth from @List order by  intRowNumber asc
+ 
+ INSERT INTO @List (strCommodityCode,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractEndMonth,dblTotal)
+ SELECT DISTINCT  strCommodityCode,null strContractNumber,null  intContractHeaderId,null strInternalTradeNo,null intFutOptTransactionHeaderId,@strType  strType,strContractEndMonth  ,null
+FROM @List where strContractEndMonth not in (select distinct  @strContractEndMonth from @List where strContractEndMonth not in('Near By','Total'))
+ 
 
-DECLARE @FinalListforReport AS TABLE (  
-     intMonthOrder INT IDENTITY(1,1),
-	 intSeqNo int,
-	 strCommodityCode NVARCHAR(200),
-	 strContractEndMonth NVARCHAR(200),
-	 dblTotal numeric(24, 10),
-	 strType NVARCHAR(200),
-	 intMonthSeq int
-)
+DECLARE @ctr as int
+SELECT @ctr = COUNT(intRowNumber) FROM @List 
+
 IF isnull(@intVendorId,0) = 0
 BEGIN
-	INSERT INTO @FinalListforReport (strCommodityCode,strContractEndMonth,dblTotal,strType,intMonthSeq,intSeqNo)
-	SELECT strCommodityCode ,strContractEndMonth,sum(dblTotal) dblTotal,strType,1 intMonthSeq,intSeqNo
-	FROM @List where dblTotal <> 0  and strContractEndMonth='Near By'
-	GROUP BY intSeqNo,strCommodityCode ,strContractEndMonth,strType
-
-	INSERT INTO @FinalListforReport (strCommodityCode,strContractEndMonth,dblTotal,strType,intMonthSeq,intSeqNo)
-	SELECT strCommodityCode ,strContractEndMonth,sum(dblTotal) dblTotal,strType,RANK() OVER (ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) )+1 intMonthSeq,intSeqNo
-	FROM @List where dblTotal <> 0  and strContractEndMonth<>'Near By'
-	group by strCommodityCode ,strContractEndMonth,strType,intSeqNo
-	order by CONVERT(DATETIME,'01 '+ strContractEndMonth) 
-
+	IF @ctr > 0 
+	BEGIN
+		 SELECT 
+			strCommodityCode
+			,strContractEndMonth
+			,[Purchase Basis] as PurcahseBasis
+			,[Purchase Priced] as PurchasePriced
+			,[Purchase HTA] as PurchaseHTA
+			,[Purchase Ratio] as PurchaseRatio
+			,[Sale Basis] as SaleBasis
+			,[Sale Priced] as SalePriced
+			,[Sale HTA] as SaleHTA
+			,[Sale Ratio] as SaleRatio
+			,[Net Hedge] as NetHedge
+			,[Position]
+			,xmlParam
+			,@dtmToDate as dtmToDate
+		 FROM
+			(
+				select strCommodityCode, strType, dblTotal, strContractEndMonth, @xmlParam AS xmlParam
+				from @List
+				group by strContractEndMonth,strCommodityCode,strType,dblTotal
+			 ) x
+			 pivot 
+			 (
+				sum(dblTotal)
+				for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Purchase Ratio],[Sale Basis],[Sale Priced],[Sale HTA],[Sale Ratio],[Net Hedge],[Position])
+				
+			 ) p 
+	END
+	ELSE
+	SELECT 
+			@strCommodityCode as strCommodityCode
+			,'' as strContractEndMonth
+			,NULL as PurcahseBasis
+			,NULL as PurchasePriced
+			,NULL as PurchaseHTA
+			,NULL as PurchaseRatio
+			,NULL as SaleBasis
+			,NULL as SalePriced
+			,NULL as SaleHTA
+			,NULL as SaleRatio
+			,NULL as NetHedge
+			,NULL as Position
+			,@xmlParam as xmlParam
+			,@dtmToDate as dtmToDate
+ 
 END
 ELSE
 BEGIN
-	INSERT INTO @FinalListforReport (intSeqNo,strCommodityCode,strContractEndMonth,dblTotal,strType,intMonthSeq)
-	SELECT intSeqNo,strCommodityCode ,strContractEndMonth,sum(dblTotal) dblTotal,strType,1
-	FROM @List where dblTotal <> 0  --and strType NOT like '%'+@strPurchaseSales+'%'
-	 and  strType<>'Net Hedge' and  strContractEndMonth='Near By'
-	GROUP BY intSeqNo,strCommodityCode ,strContractEndMonth,strType 
-
-	INSERT INTO @FinalListforReport (intSeqNo,strCommodityCode,strContractEndMonth,dblTotal,strType,intMonthSeq)
-
-	SELECT intSeqNo,strCommodityCode ,strContractEndMonth,sum(dblTotal) dblTotal,strType,RANK() OVER (ORDER BY strContractEndMonth)+1 intMonthSeq 
-	FROM @List where dblTotal <> 0 -- and strType NOT like '%'+@strPurchaseSales+'%'
-	 and  strType<>'Net Hedge'  and strContractEndMonth<>'Near By'
-	GROUP BY intSeqNo,strCommodityCode ,strContractEndMonth,strType
-	ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) 
-
+IF @ctr > 0 
+	BEGIN
+		 SELECT 
+			strCommodityCode
+			,strContractEndMonth
+			,[Purchase Basis] as PurcahseBasis
+			,[Purchase Priced] as PurchasePriced
+			,[Purchase HTA] as PurchaseHTA
+			,[Purchase Ratio] as PurchaseRatio
+			,[Sale Basis] as SaleBasis
+			,[Sale Priced] as SalePriced
+			,[Sale HTA] as SaleHTA
+			,[Sale Ratio] as SaleRatio
+			,[Net Hedge] as NetHedge
+			,[Position]
+			,xmlParam
+			,@dtmToDate as dtmToDate
+		 FROM
+			(
+				select strCommodityCode, strType, dblTotal, strContractEndMonth, @xmlParam AS xmlParam
+				from @List
+				where strType<>'Net Hedge' 
+				group by strContractEndMonth,strCommodityCode,strType,dblTotal
+			 ) x
+			 pivot 
+			 (
+				sum(dblTotal)
+				for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Purchase Ratio],[Sale Basis],[Sale Priced],[Sale HTA],[Sale Ratio],[Net Hedge],[Position])
+				
+			 ) p 
+	END
+	ELSE
+	SELECT 
+			@strCommodityCode as strCommodityCode
+			,'' as strContractEndMonth
+			,NULL as PurcahseBasis
+			,NULL as PurchasePriced
+			,NULL as PurchaseHTA
+			,NULL as PurchaseRatio
+			,NULL as SaleBasis
+			,NULL as SalePriced
+			,NULL as SaleHTA
+			,NULL as SaleRatio
+			,NULL as NetHedge
+			,NULL as Position
+			,@xmlParam as xmlParam
+			,@dtmToDate as dtmToDate
 END
-SELECT intMonthSeq+.123456 intSeqNo,strCommodityCode,strContractEndMonth,dblTotal,strType,intMonthSeq+.123456  as intMonthOrder,intSeqNo,@xmlParam as xmlParam FROM @FinalListforReport ORDER BY intMonthOrder asc
+
+
