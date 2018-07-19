@@ -48,7 +48,8 @@ BEGIN
 		0 AS dblWithheld,
 		0 AS dblAmountPaid,
 		NULL AS strCompanyAddress,
-		NULL AS strCompanyName
+		NULL AS strCompanyName,
+		NULL AS dtmCurrentDate
 
 END
 
@@ -103,6 +104,7 @@ SET @innerQuery =
 			 dblAmountPaid
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 			,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
+			,GETDATE() as dtmCurrentDate
 		FROM dbo.vyuAPRptCashRequirements'
 
 IF @dateFrom IS NOT NULL
@@ -167,7 +169,3 @@ END
 --PRINT @query
 
 EXEC sp_executesql @query
-
-GO
-
-
