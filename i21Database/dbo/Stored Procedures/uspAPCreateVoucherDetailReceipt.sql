@@ -299,7 +299,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblTotal]						=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
@@ -315,7 +315,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END) 
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
@@ -445,7 +445,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblTotal]						=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
@@ -461,7 +461,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END) 
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
@@ -607,7 +607,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblTotal]						=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
@@ -623,7 +623,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END) 
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
@@ -770,7 +770,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblTotal]						=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
@@ -786,7 +786,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END) 
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
-																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
+																	* (B.dblNet * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
 																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
