@@ -57,7 +57,7 @@ SELECT dtmDate,
 	(SELECT top 1 strDistributionOption FROM tblICInventoryShipment ir 
 	 JOIN tblICInventoryShipmentItem ir1 on ir.intInventoryShipmentId=ir1.intInventoryShipmentId
 	 JOIN tblSCTicket st ON st.intTicketId = ir1.intSourceId WHERE ir.strShipmentNumber=it.strTransactionId) strShipDistributionOption,
-       '' as strAdjDistributionOption,
+       CASE WHEN isnull((SELECT top 1 strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId),'')  <> '' THEN 'ADJ' ELSE '' END as strAdjDistributionOption,
 	   '' as strCountDistributionOption,
 (SELECT top 1 strShipmentNumber FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipmentNumber,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId)) ,6)tranShipQty,
@@ -385,6 +385,7 @@ SELECT distinct
        
     CASE WHEN isnull(strDistributionOption,'') <> '' THEN strDistributionOption
                                             WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption
+											WHEN isnull(strAdjDistributionOption,'') <> '' then strAdjDistributionOption
                                             END 
                                             strDistribution,
        tranRecQty [dblIN],isnull(tranShipmentNumber,'') [strShipTicketNo],
