@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspGLPostRecap
+﻿CREATE PROCEDURE [dbo].[uspGLPostRecap]
 	@RecapTable RecapTableType READONLY 
 	,@intEntityUserSecurityId AS INT = NULL
 	,@ysnBatch BIT = 0
@@ -14,9 +14,13 @@ DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 IF (@ysnBatch = 0)
-	DELETE FROM tblGLPostRecap WHERE strBatchId = @strBatchId OR strTransactionId = @strTransactionId 
-DELETE	FROM tblGLPostRecap 
-WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
+BEGIN
+	DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT strBatchId FROM @RecapTable)
+	DELETE FROM tblGLPostRecap WHERE strTransactionId IN (SELECT strTransactionId FROM @RecapTable)
+	DELETE	FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
+END
+
+
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
@@ -25,11 +29,6 @@ BEGIN
 	GOTO _Exit
 END
 
--- INSERT THE RECAP DATA. 
--- THE RECAP DATA WILL BE STORED IN A PERMANENT TABLE SO THAT WE CAN QUERY IT LATER USING A BUFFERED STORE. 
--- REMOVE EXISTING BATCHID SINCE ON THE RECAP MODULES ARE ROLLING BACK TRANSACTION AND WOULD INSERT AN EXISTING BATCH ID
-DELETE FROM tblGLPostRecap WHERE
-strBatchId IN (SELECT strBatchId from @RecapTable)
 
 INSERT INTO tblGLPostRecap (
 		[dtmDate]
