@@ -1334,15 +1334,14 @@ BEGIN
 		FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Footer'
 			AND intDocumentMaintenanceId = @DocumentMaintenanceId
 
-		UPDATE tblARInvoice SET 
-				intDocumentMaintenanceId = @DocumentMaintenanceId,
-				strComments = @HeaderComment,
-				strFooterComments = @FooterComment
-			WHERE intInvoiceId = @NewInvoiceId
-
+		UPDATE tblARInvoice 
+		SET intDocumentMaintenanceId = @DocumentMaintenanceId
+		  , strComments = @HeaderComment
+		  ,	strFooterComments = @FooterComment
+		WHERE intInvoiceId = @NewInvoiceId
 	END
 
-	
+	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId	
 END
 
 --COMMIT TRANSACTION
