@@ -6367,6 +6367,7 @@
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptItems.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
