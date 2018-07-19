@@ -6821,6 +6821,7 @@
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
     <Build Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTDeleteMultipleTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
