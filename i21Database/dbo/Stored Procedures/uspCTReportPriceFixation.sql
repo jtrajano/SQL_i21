@@ -8,29 +8,30 @@ BEGIN TRY
 	
 	 
 
-	DECLARE @strCompanyName			NVARCHAR(500),
-			@strAddress				NVARCHAR(500),
-			@strCounty				NVARCHAR(500),
-			@strCity				NVARCHAR(500),
-			@strState				NVARCHAR(500),
-			@strZip					NVARCHAR(500),
-			@strCountry				NVARCHAR(500),
-			@intPriceFixationId		INT,
-			@xmlDocumentId			INT,
-			@strContractDocuments	NVARCHAR(MAX),
-			@intLastModifiedUserId	INT,
-			@LastModifiedUserSign      VARBINARY(MAX),
-			@intLaguageId			INT,
-			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month',
+	DECLARE @strCompanyName				NVARCHAR(500),
+			@strAddress					NVARCHAR(500),
+			@strCounty					NVARCHAR(500),
+			@strCity					NVARCHAR(500),
+			@strState					NVARCHAR(500),
+			@strZip						NVARCHAR(500),
+			@strCountry					NVARCHAR(500),
+			@intPriceFixationId			INT,
+			@xmlDocumentId				INT,
+			@strContractDocuments		NVARCHAR(MAX),
+			@intLastModifiedUserId		INT,
+			@LastModifiedUserSign		VARBINARY(MAX),
+			@intLaguageId				INT,
+			@strExpressionLabelName		NVARCHAR(50) = 'Expression',
+			@strMonthLabelName			NVARCHAR(50) = 'Month',
 			@intReportLogoHeight		INT,
-			@intReportLogoWidth			INT
-			
-			DECLARE @TotalQuantity DECIMAL(24,10)
-			DECLARE @TotalNetQuantity DECIMAL(24,10)			
-			DECLARE @IntNoOFUniFormItemUOM INT
-			DECLARE @IntNoOFUniFormNetWeightUOM INT
-			DECLARE @intContractHeaderId INT
+			@intReportLogoWidth			INT,			
+			@TotalQuantity				DECIMAL(24,10),
+			@TotalNetQuantity			DECIMAL(24,10),			
+			@IntNoOFUniFormItemUOM		INT,
+			@IntNoOFUniFormNetWeightUOM INT,
+			@intContractHeaderId		INT,
+			@strBasisComponent			NVARCHAR(MAX),
+			@intContractDetailId		INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -86,7 +87,7 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrLanguageId'
 
-	SELECT  @intContractHeaderId= intContractHeaderId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
+	SELECT  @intContractHeaderId= intContractHeaderId,@intContractDetailId = intContractDetailId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
 	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intUnitMeasureId)  FROM tblCTContractDetail  WHERE intContractHeaderId= @intContractHeaderId
 	SELECT  @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT U.intUnitMeasureId)  FROM tblCTContractDetail D
 	JOIN	tblICItemUOM	U	ON	U.intItemUOMId	=	D.intNetWeightUOMId
@@ -119,13 +120,22 @@ BEGIN TRY
 	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
 	/*Declared variables for translating expression*/
-	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been fully fixed as follows:'), 'This confirms that the above contract has been fully fixed as follows:');
-	declare @strStatus2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been partially fixed as follows:'),'This confirms that the above contract has been partially fixed as follows:');
+	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');
+	declare @strStatus2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been partially priced as follows:'),'This confirms that the above contract has been partially priced as follows:');
 	declare @per nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'per'),'per');
 	declare @strSummary nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'All lot(s) are fixed.'),'All lot(s) are fixed.');
 	declare @FinalPrice nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Final Price'),'Final Price');
 	declare @Lotstobefixed nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Lots to be fixed'),'Lots to be fixed');
 	declare @bags nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bags'),'bags');
+
+	IF ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+
+		SELECT	@strBasisComponent = COALESCE(@strBasisComponent + ', ', '') + strItemNo + ' ' + dbo.fnRemoveTrailingZeroes(dblRate) + ' ' + strCurrency + '/' + strUOM
+		FROM	vyuCTContractCostView 
+		WHERE	ysnBasis = 1 
+		AND		intContractDetailId = @intContractDetailId
+	END
 
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
@@ -214,7 +224,9 @@ BEGIN TRY
 			xmlParam = @xmlParam,
 			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference,
 			ISNULL(@intReportLogoHeight,0) intReportLogoHeight,
-			ISNULL(@intReportLogoWidth,0) intReportLogoWidth
+			ISNULL(@intReportLogoWidth,0) intReportLogoWidth,
+			@strBasisComponent AS strBasisComponent,
+			CD.strERPPONumber
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
