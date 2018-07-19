@@ -96,7 +96,7 @@ BEGIN
 	SET @stepCommand = N'
 	GO
 	BEGIN TRY
-		USE ' + Convert(varchar(50), @currentDatabaseName) + ' 
+		USE [' + Convert(varchar(50), @currentDatabaseName) + '] 
 		EXEC [uspSMReindexAllUserDefinedTables]
 	END TRY
 	BEGIN CATCH
@@ -125,10 +125,16 @@ BEGIN
 			@step_id = @maxStepId,
 			@step_name = @stepName,
 			@subsystem = N'TSQL',   
-			@command = @stepCommand,
+			--@command = @stepCommand,
 			@os_run_priority=0,
 			@output_file_name=N'C:\\i21Log\i21_Reindex_Log', 
 			@flags=2														--Append to output file
+		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+
+		EXEC @ReturnCode = msdb.dbo.sp_update_jobstep
+			 @job_id = @jobId, 
+			 @step_id = @maxStepId,
+			 @command = @stepCommand
 		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
 		EXEC @ReturnCode = msdb.dbo.sp_update_job 
@@ -149,8 +155,8 @@ BEGIN
 			@freq_recurrence_factor = 1, 
 			@active_start_date= @currentDate, 
 			@active_end_date = 99991231, 
-			--@active_start_time = 10000,			-- 1AM
-			@active_start_time = 175400,			-- 1AM
+			@active_start_time = 10000,			-- 1AM
+			--@active_start_time = 175400,			-- 1AM
 			@active_end_time = 235959
 		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
@@ -175,6 +181,14 @@ BEGIN
 
 		DELETE FROM @DirTree
 
+	END
+	ELSE
+	BEGIN
+		EXEC @ReturnCode = msdb.dbo.sp_update_jobstep
+				 @job_id = @jobId, 
+				 @step_id = @stepId,
+				 @command = @stepCommand
+			IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 	END
 
 	COMMIT TRANSACTION
