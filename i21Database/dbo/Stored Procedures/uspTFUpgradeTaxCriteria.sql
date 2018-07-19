@@ -31,7 +31,6 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
-		AND RC.intTaxAuthorityId = TaxCat.intTaxAuthorityId
 	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	AND TaxCat.intMasterId != 0
 
