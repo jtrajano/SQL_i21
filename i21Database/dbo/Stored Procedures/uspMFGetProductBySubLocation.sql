@@ -25,7 +25,6 @@ BEGIN
 			,U.intUnitMeasureId
 			,U.strUnitMeasure
 			,R.intManufacturingProcessId
-			,I.intCategoryId
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -65,7 +64,6 @@ BEGIN
 			,U.intUnitMeasureId
 			,U.strUnitMeasure
 			,R.intManufacturingProcessId
-			,I.intCategoryId
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId

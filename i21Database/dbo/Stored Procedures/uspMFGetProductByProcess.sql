@@ -13,7 +13,6 @@ BEGIN
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
 		,I.strLotTracking
-		,I.intCategoryId
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId and IU.intUnitMeasureId = I.intWeightUOMId
