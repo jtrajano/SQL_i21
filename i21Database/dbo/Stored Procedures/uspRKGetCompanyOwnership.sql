@@ -179,5 +179,5 @@ SELECT convert(INT, ROW_NUMBER() OVER (
 	,intReceiptId
 FROM @tblResult T1
 WHERE ISNULL(T1.dtmDate ,'') <> '' AND ISNULL(T1.strReceiptNumber,'') <> ''
-ORDER BY dtmDate
-	,strReceiptNumber ASC
+ORDER BY dtmDate DESC
+	,strReceiptNumber DESC

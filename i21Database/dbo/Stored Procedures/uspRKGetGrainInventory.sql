@@ -394,4 +394,4 @@ SELECT distinct
        dblAdjustmentQty [dblAdjQty],tranCountNumber [strCountNumber],dblCountQty [dblCountQty],BalanceForward dblDummy,
 (SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
 	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,intDeliverySheetId,deliverySheetNumber,intTicketId,ticketNumber
-FROM @tblResult T1)t order by strReceiptNumber
+FROM @tblResult T1)t order by dtmDate desc,strReceiptNumber desc
