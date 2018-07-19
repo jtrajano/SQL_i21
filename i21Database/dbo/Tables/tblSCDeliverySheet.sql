@@ -15,6 +15,7 @@
     [dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dblShrink] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)),
+	[intStorageScheduleRuleId] INT NULL, 
 	[intCompanyId] INT NULL,
     [ysnPost] BIT NULL DEFAULT (0),
 	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -27,6 +28,7 @@
 	CONSTRAINT [FK_tblSCDeliverySheet_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY ([intTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblSCDeliverySheet_tblGRStorageScheduleRule_intStorageScheduleRuleId] FOREIGN KEY ([intStorageScheduleRuleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
