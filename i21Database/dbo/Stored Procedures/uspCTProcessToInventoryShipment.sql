@@ -155,7 +155,11 @@ AS
 			RAISERROR('Please verify the stock unit for the item or default location is available for the entity.',16,1)
 		END
 
-		EXEC dbo.uspICAddItemShipment @ShipmentStagingTable,@OtherCharges,@ShipmentItemLotStaging,@intUserId;
+		EXEC dbo.uspICAddItemShipment 
+			@Items = @ShipmentStagingTable
+			,@Charges = @OtherCharges
+			,@Lots = @ShipmentItemLotStaging
+			,@intUserId = @intUserId;
 		
 		IF EXISTS(SELECT * FROM #tmpAddItemShipmentResult)
 		BEGIN
