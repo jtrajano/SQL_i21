@@ -211,7 +211,7 @@ BEGIN
 						,@ItemTermDiscount				= dblItemTermDiscount
 						,@ItemTermDiscountBy			= strItemTermDiscountBy
 						,@ItemUnitPrice					= dblUnitPrice
-						,@ItemPrice						= dblPrice
+						,@ItemPrice						= 0
 						,@ItemPricing					= strPricing
 						,@ItemVFDDocumentNumber			= strVFDDocumentNumber
 						,@ItemMaintenanceType			= strMaintenanceType
