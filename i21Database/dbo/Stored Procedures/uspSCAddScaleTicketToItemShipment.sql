@@ -1242,10 +1242,10 @@ BEGIN
 END
 
 EXEC dbo.uspICAddItemShipment
-		@ShipmentStagingTable
-		,@ShipmentChargeStagingTable
-		,@ShipmentItemLotStagingTable
-		,@intUserId;
+		@Items = @ShipmentStagingTable
+		,@Charges = @ShipmentChargeStagingTable
+		,@Lots = @ShipmentItemLotStagingTable
+		,@intUserId = @intUserId;
 
 -- Insert into the reservation table. 
 --BEGIN 
