@@ -38,7 +38,7 @@ BEGIN
 		SELECT TOP 1 @intFutureMarketId=intFutureMarketId FROM tblRKCommodityMarketMapping where intCommodityId=@intCommodityId
 				
 		SELECT TOP 1 @intFutureMonthId=intFutureMonthId
-			FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = 1 ORDER BY dtmSpotDate DESC ,intYear DESC
+			FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = @intFutureMarketId ORDER BY dtmSpotDate DESC ,intYear DESC
 			
 	END
 	IF @intSequenceTypeId in(1,3)
