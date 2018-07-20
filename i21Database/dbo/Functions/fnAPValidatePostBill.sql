@@ -217,6 +217,7 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
 			AND C.dblQuantityBilled = C.dblQuantity	  
 			AND A.intTransactionType = 1
+			AND C.ysnPrice = 0
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
