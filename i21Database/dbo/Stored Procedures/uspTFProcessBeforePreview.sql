@@ -68,7 +68,6 @@ BEGIN TRY
 			WHERE intTransactionId IN (SELECT DISTINCT intTransactionId FROM #tmpTransaction)
 				AND (ISNULL(strOriginTCN, '') <> '' OR ISNULL(strDestinationTCN, '') <> '')
 		END
-
 		ELSE IF (@TaxAuthorityCode = 'OR')
 		BEGIN
 			DELETE FROM tblTFTransactionDynamicOR
@@ -148,13 +147,35 @@ BEGIN TRY
 
 			INSERT INTO tblTFTransactionDynamicMI(
 				intTransactionId
-				, strMIOriginCountry
+				, strMIDestinationAddress
 				, strMIDestinationCountry
+				, strMIDestinationTCN
+				, strMIDestinationZipCode
+				, strMIOriginAddress
+				, strMIOriginCountry
+				, strMIOriginZipCode
 			)
-			SELECT Trans.intTransactionId
-				, strCounty = 'USA'
-				, strLocation = 'USA'
-			FROM #tmpTransaction Trans
+			SELECT intTransactionId, UnCommonField.*  
+			FROM (
+				SELECT [strMIDestinationAddress], [strMIDestinationCountry], [strMIDestinationTCN], [strMIDestinationZipCode], [strMIOriginAddress] , [strMIOriginCountry], [strMIOriginZipCode]
+				FROM  
+				(
+					SELECT RCFIELD.strColumn, RCCONFIG.strConfiguration FROM
+					tblTFReportingComponentField RCFIELD
+					INNER JOIN tblTFReportingComponentConfiguration RCCONFIG ON RCCONFIG.strDescription = RCFIELD.strColumn AND RCCONFIG.intReportingComponentId = RCFIELD.intReportingComponentId
+					WHERE RCFIELD.ysnFromConfiguration = 1
+					AND RCCONFIG.ysnOutputDesigner = 1
+					AND ISNULL(RCCONFIG.strConfiguration, '') <> ''
+					AND RCFIELD.intReportingComponentId = @RCId
+				) AS SourceTable  
+				PIVOT  
+				(  
+					MAX(strConfiguration)  
+					FOR strColumn IN ([strMIDestinationAddress], [strMIDestinationCountry], [strMIDestinationTCN], [strMIDestinationZipCode], [strMIOriginAddress] , [strMIOriginCountry], [strMIOriginZipCode])  
+				) AS PvtTbl
+			) UnCommonField 
+			CROSS JOIN tblTFTransaction
+
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
