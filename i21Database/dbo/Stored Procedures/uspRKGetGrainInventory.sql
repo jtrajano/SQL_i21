@@ -334,6 +334,11 @@ WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETW
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end 
+	AND  st.intProcessingLocationId  IN (
+											SELECT intCompanyLocationId FROM tblSMCompanyLocation
+											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+											WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+											ELSE isnull(ysnLicensed, 0) END)
 	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H'
 	
 
@@ -369,6 +374,11 @@ WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETW
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 	AND st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end 
+	AND  st.intProcessingLocationId  IN (
+											SELECT intCompanyLocationId FROM tblSMCompanyLocation
+											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+											WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+											ELSE isnull(ysnLicensed, 0) END)
 	AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 
  )t
