@@ -1238,7 +1238,7 @@ BEGIN
 		,[intItemUnitMeasureId] = RE.intItemUOMId
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= RE.dblGross 
-		,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
+		,[dblTareWeight]		= CASE WHEN SC.dblShrink > 0 THEN (RE.dblGross - RE.dblNet) ELSE 0 END
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
 		,[dtmManufacturedDate]	= RE.dtmDate
