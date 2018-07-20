@@ -356,19 +356,23 @@ BEGIN TRY
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+		JOIN tblICItem I ON I.intItemId = CV.intItemId
+		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 				WHEN ISNULL(LD.intPContractDetailId, 0) = 0
 					THEN LD.intSContractDetailId
 				ELSE LD.intPContractDetailId
 				END
-		JOIN tblICItem I ON I.intItemId = CV.intItemId
-		JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE 
-				WHEN ISNULL(LD.intPContractDetailId, 0) = 0
-					THEN LD.intCustomerEntityId
+		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE 
+				WHEN L.intSourceType <> 1
+					THEN CASE 
+							WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+								THEN LD.intCustomerEntityId
+							ELSE LD.intVendorEntityId
+							END
 				ELSE LD.intVendorEntityId
 				END
 			AND EL.ysnDefaultLocation = 1
-		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		WHERE L.intLoadId = @intLoadId
 		GROUP BY CV.intEntityVendorId
 			,CV.intItemId
@@ -895,15 +899,19 @@ BEGIN TRY
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+		JOIN tblICItem I ON I.intItemId = CV.intItemId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 				WHEN ISNULL(LD.intPContractDetailId, 0) = 0
 					THEN LD.intSContractDetailId
 				ELSE LD.intPContractDetailId
 				END
-		JOIN tblICItem I ON I.intItemId = CV.intItemId
-		JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE 
-				WHEN ISNULL(LD.intPContractDetailId, 0) = 0
-					THEN LD.intCustomerEntityId
+		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE 
+				WHEN L.intSourceType <> 1
+					THEN CASE 
+							WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+								THEN LD.intCustomerEntityId
+							ELSE LD.intVendorEntityId
+							END
 				ELSE LD.intVendorEntityId
 				END
 			AND EL.ysnDefaultLocation = 1
