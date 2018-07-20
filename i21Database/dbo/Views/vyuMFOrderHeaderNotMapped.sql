@@ -61,7 +61,7 @@ SELECT OH.intOrderHeaderId
 	,OT.strOrderType
 	,OS.strOrderStatus
 	,'' AS strCustomer
-	,'' AS strStagingLocationName
+	,S1.strName AS strStagingLocationName
 	,'' AS strDockDoorLocationName
 	,'' AS strItemDescription
 	,NULL AS dblQuantity
@@ -70,3 +70,4 @@ FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	AND OT.intOrderTypeId = 2
 JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
+LEFT JOIN tblICStorageLocation S1 ON S1.intStorageLocationId = OH.intStagingLocationId
