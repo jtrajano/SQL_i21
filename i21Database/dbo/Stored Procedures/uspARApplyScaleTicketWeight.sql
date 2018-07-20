@@ -99,7 +99,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem I ON ID.intItemId = I.intItemId AND I.ysnUseWeighScales = 1
 			WHERE ID.intInvoiceId = @intNewInvoiceId
 			  AND ISNULL(ID.intContractDetailId, 0) <> 0
-			  AND ISNULL(ID.ysnAddonParent,0) = 1
+			  AND ISNULL(ID.ysnAddonParent, 1) = 1
 			  AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0)
 			--Addon items
 			INSERT INTO #CONTRACTLINEITEMS
