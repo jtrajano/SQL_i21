@@ -14,12 +14,15 @@ IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
 IF OBJECT_ID('tempdb..#final') IS NOT NULL
     DROP TABLE #final
 
-SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet
+DECLARE @ysnDisplayAllStorage bit
+select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
+
+SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId
  into #tempCustomer 
  FROM (
-   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2))dblOut,round(sum(dblInQty),2)-sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2)) dblNet FROM(		
+   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2))dblOut,round(sum(dblInQty),2)-sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2)) dblNet,intStorageScheduleTypeId FROM(		
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  
+																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,gs.intStorageScheduleTypeId  
 			,(select sum(SH.dblUnits) from tblGRStorageHistory SH
 				JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
 				JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
@@ -48,7 +51,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 				,strStorageTypeDescription
 				,CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100)  ELSE 0 END dblInQty
-				,CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100)  ELSE 0 END dblOutQty  
+				,CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100)  ELSE 0 END dblOutQty,gs.intStorageScheduleTypeId  
 				,(select sum(SH.dblUnits) from tblGRStorageHistory SH
 						JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
 						JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
@@ -80,7 +83,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 				,'On Hold' as strStorageTypeDescription
 				,CASE WHEN strInOutFlag='I' THEN dblNetUnits   ELSE 0 END dblInQty
-				,CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END dblOutQty  
+				,CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END dblOutQty, st.intStorageScheduleTypeId  
 				,NULL dblSettleUnit			
 			FROM tblSCTicket st
 				JOIN tblICItem i on i.intItemId=st.intItemId
@@ -97,8 +100,20 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
 
-		  )t     GROUP BY  dtmDate,strStorageTypeDescription
+		  )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
 ) t1
+
+IF (@ysnDisplayAllStorage=1)
+BEGIN			 
+	declare @intRowNumber int
+	SELECT TOP 1 @intRowNumber=intRowNum FROM #tempCustomer order by intRowNum desc
+	INSERT INTO #tempCustomer (intRowNum,dtmDate,strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId)
+		SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription))+@intRowNumber,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),strStorageTypeDescription,0.0,0.0,0.0,intStorageScheduleTypeId
+		FROM tblGRStorageScheduleRule SSR 
+		INNER JOIN tblGRStorageType  ST ON SSR.intStorageType = ST.intStorageScheduleTypeId 
+		WHERE SSR.intCommodity = @intCommodityId AND ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND intStorageScheduleTypeId not in(SELECT DISTINCT intStorageScheduleTypeId FROM #tempCustomer)
+END
+
 declare @TempTableCreate nvarchar(max)=''
 SELECT @TempTableCreate+='['+t.strDistribution +'_strDistribution] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL,'+
 	   '['+t.strDistribution +'_In]  NUMERIC(18, 6) NULL,'+

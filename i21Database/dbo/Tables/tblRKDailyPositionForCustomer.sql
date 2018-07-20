@@ -40,5 +40,9 @@
 	[strDistributionJ] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL, 
 	[dblJIn]  NUMERIC(18, 6) NULL,
 	[dblJOut] NUMERIC(18, 6) NULL,
-	[dblJNet] NUMERIC(18, 6) NULL	
+	[dblJNet] NUMERIC(18, 6) NULL,
+	[strDistributionK] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL, 
+	[dblKIn]  NUMERIC(18, 6) NULL,
+	[dblKOut] NUMERIC(18, 6) NULL,
+	[dblKNet] NUMERIC(18, 6) NULL		
 )
