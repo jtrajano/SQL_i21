@@ -239,6 +239,7 @@ BEGIN TRY
 						AND WP.ysnProductionReversed = 0
 					)
 			)
+		AND @dblProducedQuantity > 0
 	BEGIN
 		RAISERROR (
 				'Cannot close the work order. One or more mandatory items are not produced.'
@@ -620,13 +621,13 @@ BEGIN TRY
 					AND WP.intWorkOrderId = @intWorkOrderId
 				)
 	END
-	
+
 	DELETE T
 	FROM dbo.tblMFTask T
 	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
 	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	WHERE SW.intWorkOrderId = @intWorkOrderId
-	
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
