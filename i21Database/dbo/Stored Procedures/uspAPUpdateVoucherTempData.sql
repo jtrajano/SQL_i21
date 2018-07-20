@@ -83,13 +83,13 @@ BEGIN
 				,voucher.dblTempInterest = @tempInterest
 				,voucher.dblTempPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END --when not ready for payment, set the payment to 0
 				,voucher.dblTempWithheld = @tempWithheld
-				,voucher.strTempPaymentInfo = @tempPaymentInfo
+				,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
 				,voucher.ysnReadyForPayment = @readyForPayment
 		FROM tblAPBill voucher
 		INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 
 		SET @recordsUpdated = @@ROWCOUNT;
-
+		SET @newPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END; 
 		--return the new payment if ready for payment only
 		SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END; 
 

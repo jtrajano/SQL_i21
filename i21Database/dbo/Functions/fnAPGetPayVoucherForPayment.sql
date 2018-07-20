@@ -10,6 +10,7 @@ RETURNS TABLE AS RETURN
 	SELECT
 		forPay.intBillId
 		,forPay.intTransactionType
+		,forPay.intPayToAddressId
 		,forPay.ysnReadyForPayment
 		,forPay.dtmDueDate
 		,forPay.strVendorOrderNumber
