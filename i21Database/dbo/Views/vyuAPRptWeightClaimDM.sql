@@ -252,7 +252,7 @@ FROM
 									ELSE MainCurrency.strCurrency
 									END
 		,strConcern				=	''
-		,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
+		,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN QtyUOMDetails.strUnitMeasure 
 										WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL 
 										WHEN ContractCost.intContractCostId > 0 THEN ContractCostItemMeasure.strUnitMeasure
