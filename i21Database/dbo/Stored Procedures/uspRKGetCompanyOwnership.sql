@@ -134,12 +134,49 @@ FROM (
 				FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 				)
-		LEFT JOIN tblICInventoryReceiptItem ir ON bd.intInventoryReceiptItemId = ir.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceiptItem ir ON bd.intInventoryReceiptItemId = ir.intInventoryReceiptItemId
 		LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
 		LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 			AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
 		) t
+
+		UNION
+		
+		SELECT *
+			,round(dblInQty, 2) dblUnpaidIn
+			,round(dblOutQty, 2) dblUnpaidOut
+		FROM (
+			SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
+				,grt.dblUnits dblUnitCost1
+				,'' as intInventoryReceiptItemId--ir.intInventoryReceiptItemId
+				,i.strItemNo
+				,isnull(bd.dblQtyReceived, 0) dblInQty
+				,(
+					bd.dblTotal - isnull((
+							SELECT CASE WHEN sum(pd.dblPayment) - max(dblTotal) = 0 THEN bd.dblTotal ELSE sum(pd.dblPayment) END
+							FROM tblAPPaymentDetail pd
+							WHERE pd.intBillId = b.intBillId AND intConcurrencyId <> 0
+							), 0)
+					) / CASE WHEN isnull(bd.dblCost, 0) = 0 THEN 1 ELSE dblCost END AS dblOutQty
+				,st.strDistributionOption
+				,b.strBillId AS strReceiptNumber
+				,b.intBillId AS intReceiptId
+			FROM tblAPBill b
+			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (
+					SELECT intCompanyLocationId
+					FROM tblSMCompanyLocation
+					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+					)
+			INNER JOIN tblGRSettleStorage gr ON gr.intBillId = b.intBillId
+			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
+			INNER JOIN tblGRCustomerStorage grs ON  grt.intCustomerStorageId = grs.intCustomerStorageId
+			LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
+			LEFT JOIN vyuSCTicketView st ON st.intTicketId = grs.intTicketId
+			WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
+				AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
+			) t
+
 	) t2
 
 UNION
