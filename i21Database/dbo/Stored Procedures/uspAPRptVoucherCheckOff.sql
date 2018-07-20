@@ -42,7 +42,7 @@ BEGIN
 					[Location] ,
 					BillDate AS dtmBillDate,
 					PostDate AS dtmPostDate ,
-					PaymentDate AS dtmPaymentDate,
+					PaymentDate AS dtmDatePaid,
 					ExemptUnits ,
 					dblTotal ,
 					dblTax ,
@@ -90,15 +90,15 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmPaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmPaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmPaymentDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDatePaid'
 
 IF @dtmBillDate IS NOT NULL
 BEGIN	
@@ -152,7 +152,7 @@ SET @query = 'SELECT * FROM (
 					Location ,
 					BillDate as dtmBillDate,
 					PostDate as dtmPostDate ,
-					PaymentDate as dtmPaymentDate,
+					PaymentDate as dtmDatePaid,
 					ExemptUnits ,
 					dblTotal ,
 					dblTax ,
