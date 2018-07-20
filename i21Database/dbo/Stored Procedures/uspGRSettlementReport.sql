@@ -314,14 +314,14 @@ BEGIN
         -- ,dblNetWeight                       = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		,dblGrossWeight						= CASE 
 												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)													
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
 												ELSE
 													ISNULL(SC.dblGrossWeight, 0)
 											END
 		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
 		,dblNetWeight						= CASE 
 												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)
 												ELSE
 													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 											END
@@ -511,22 +511,22 @@ BEGIN
 		,lblFarmField						= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField						= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate							= Bill.dtmDate		
-		-- ,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
-		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
-		-- ,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-		,dblGrossWeight						= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0)
-											END
-		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
-		,dblNetWeight						= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-											END
+		,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
+		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
+		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- ,dblGrossWeight						= CASE 
+		-- 										WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+		-- 											THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+		-- 										ELSE
+		-- 											ISNULL(SC.dblGrossWeight, 0)
+		-- 									END
+		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
+		-- ,dblNetWeight						= CASE 
+		-- 										WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+		-- 											THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+		-- 										ELSE
+		-- 											ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- 									END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -708,22 +708,22 @@ BEGIN
 		,lblFarmField						= CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField						= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber		
 		,dtmDate							= Bill.dtmDate		
-		-- ,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
-		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
-		-- ,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-		,dblGrossWeight						= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0)
-											END
-		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
-		,dblNetWeight						= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-											END
+		,dblGrossWeight						= ISNULL(SC.dblGrossWeight, 0)		
+		,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)		
+		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- ,dblGrossWeight						= CASE 
+		-- 										WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+		-- 											THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+		-- 										ELSE
+		-- 											ISNULL(SC.dblGrossWeight, 0)
+		-- 									END
+		-- ,dblTareWeight						= ISNULL(SC.dblTareWeight, 0)						  								 
+		-- ,dblNetWeight						= CASE 
+		-- 										WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+		-- 											THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+		-- 										ELSE
+		-- 											ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		-- 									END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -1015,14 +1015,14 @@ BEGIN
 				-- ,dblNetWeight				= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				,dblGrossWeight				= CASE 
 												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)													
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
 												ELSE
 													ISNULL(SC.dblGrossWeight, 0)
 											  END
 				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
 				,dblNetWeight				= CASE 
 												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblBillQty)
+													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)
 												ELSE
 													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 											  END
@@ -1210,22 +1210,22 @@ BEGIN
 				,lblFarmField				 = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 				,strFarmField				 = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 				,dtmDate					 = Bill.dtmDate
-				-- ,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
-				-- ,dblTareWeight				 =  ISNULL(SC.dblTareWeight, 0)
-				-- ,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-				,dblGrossWeight				= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0)
-											  END
-				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
-				,dblNetWeight				= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-											  END
+				,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
+				,dblTareWeight				 =  ISNULL(SC.dblTareWeight, 0)
+				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- ,dblGrossWeight				= CASE 
+				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+				-- 								ELSE
+				-- 									ISNULL(SC.dblGrossWeight, 0)
+				-- 							  END
+				-- ,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
+				-- ,dblNetWeight				= CASE 
+				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+				-- 								ELSE
+				-- 									ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- 							  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
@@ -1412,22 +1412,22 @@ BEGIN
 				,lblFarmField				 = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 		
 				,strFarmField				 = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 				,dtmDate					 = Bill.dtmDate
-				-- ,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
-				-- ,dblTareWeight				 = ISNULL(SC.dblTareWeight, 0)
-				-- ,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-				,dblGrossWeight				= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0)
-											  END
-				,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
-				,dblNetWeight				= CASE 
-												WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-													THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
-												ELSE
-													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-											  END
+				,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
+				,dblTareWeight				 = ISNULL(SC.dblTareWeight, 0)
+				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- ,dblGrossWeight				= CASE 
+				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
+				-- 								ELSE
+				-- 									ISNULL(SC.dblGrossWeight, 0)
+				-- 							  END
+				-- ,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
+				-- ,dblNetWeight				= CASE 
+				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
+				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
+				-- 								ELSE
+				-- 									ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+				-- 							  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
