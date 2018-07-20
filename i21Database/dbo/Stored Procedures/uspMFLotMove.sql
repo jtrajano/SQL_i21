@@ -12,6 +12,7 @@
 	,@ysnBulkChange BIT = 0
 	,@ysnSourceLotEmptyOut BIT = 0
 	,@ysnDestinationLotEmptyOut BIT = 0
+	,@intNewLotId INT = NULL OUTPUT
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -35,7 +36,6 @@ BEGIN TRY
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-		,@intNewLotId INT
 		,@blnIsPartialMove BIT
 		,@strStorageLocationName NVARCHAR(50)
 		,@strItemNumber NVARCHAR(50)
@@ -46,6 +46,7 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@ysnAllowMultipleLots INT
 		,@ysnAllowMultipleItems INT
+		,@ysnMergeOnMove BIT
 		,@intDestinationLotStatusId INT
 		,@intCategoryId INT
 		,@dblDefaultResidueQty NUMERIC(38, 20)
@@ -66,6 +67,10 @@ BEGIN TRY
 		,@intInventoryTransactionType INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+		,@ysnCPMergeOnMove BIT
+
+	SELECT TOP 1 @ysnCPMergeOnMove = ysnMergeOnMove
+	FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -98,8 +103,37 @@ BEGIN TRY
 
 	SELECT @intDestinatinLocationRestrictionId = intRestrictionId
 		,@intNewLocationId = intLocationId
+		,@ysnAllowMultipleLots = ysnAllowMultipleLot
+		,@ysnAllowMultipleItems = ysnAllowMultipleItem
+		,@ysnMergeOnMove = ysnMergeOnMove
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intNewStorageLocationId
+
+	SELECT @intNewLotId = intLotId
+	FROM tblICLot
+	WHERE intStorageLocationId = @intNewStorageLocationId
+		AND intItemId = @intItemId
+		AND dblQty > 0
+		AND intLotStatusId = @intLotStatusId
+		AND ISNULL(dtmExpiryDate, @dtmDate) >= @dtmDate
+
+	IF @ysnAllowMultipleLots = 0
+		AND @ysnMergeOnMove = 1
+		AND @ysnCPMergeOnMove = 1
+		AND @intNewLotId IS NOT NULL
+	BEGIN
+		EXEC [uspMFLotMerge] @intLotId = @intLotId
+			,@intNewLotId = @intNewLotId
+			,@dblMergeQty = @dblMoveQty
+			,@intMergeItemUOMId = @intMoveItemUOMId
+			,@intUserId = @intUserId
+			,@blnValidateLotReservation = 0
+			,@dtmDate = @dtmDate
+			,@strReasonCode = @strReasonCode
+			,@strNotes = @strNotes
+
+		RETURN
+	END
 
 	IF @intDestinatinLocationRestrictionId IS NULL
 		SELECT @intDestinatinLocationRestrictionId = 0
@@ -131,11 +165,6 @@ BEGIN TRY
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
-
-	SELECT @ysnAllowMultipleLots = ysnAllowMultipleLot
-		,@ysnAllowMultipleItems = ysnAllowMultipleItem
-	FROM tblICStorageLocation
-	WHERE intStorageLocationId = @intNewStorageLocationId
 
 	SELECT @dblLotAvailableQty = (
 			CASE 
@@ -213,11 +242,8 @@ BEGIN TRY
 				SELECT intLotId
 				FROM tblICLot
 				WHERE intStorageLocationId = @intNewStorageLocationId
-					AND intItemId = @intItemId
-					AND (
-						dblQty > 0
-						OR dblWeight > 0
-						)
+					AND intItemId <> @intItemId
+					AND dblQty > 0
 				)
 		BEGIN
 			SET @ErrMsg = 'The storage location is already used by another item.'
@@ -531,6 +557,7 @@ BEGIN TRY
 	SELECT @intNewLotId = intLotId
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strNewLotNumber
+		AND intItemId = @intItemId
 		AND intStorageLocationId = @intNewStorageLocationId
 
 	IF @blnInventoryMove = 1

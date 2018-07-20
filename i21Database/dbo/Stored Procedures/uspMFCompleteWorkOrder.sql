@@ -285,7 +285,7 @@ BEGIN TRY
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND dblQty > 0
-			--AND intLotStatusId = 1
+			AND intLotStatusId = @intLotStatusId
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 	END
 	ELSE IF EXISTS (
