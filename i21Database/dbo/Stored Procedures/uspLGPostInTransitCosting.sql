@@ -23,6 +23,7 @@ BEGIN TRY
 	DECLARE @dummyGLEntries AS RecapTableType
 	DECLARE @intSalesContractId INT
 	DECLARE @intItemLocationId INT
+	DECLARE @intDestinationFOBPointId INT
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
@@ -32,6 +33,10 @@ BEGIN TRY
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
 	WHERE intLoadId = @intLoadId
+
+	SELECT @intDestinationFOBPointId = intFobPointId
+	FROM tblICFobPoint
+	WHERE strFobPoint = 'Destination'
 
 	EXEC dbo.uspSMGetStartingNumber 3
 		,@strBatchId OUT
@@ -84,7 +89,7 @@ BEGIN TRY
 			,L.intLoadId
 			,strLoadNumber
 			,0
-			,FP.intFobPointId
+			,CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,IL.intItemLocationId
 			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
 			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
@@ -97,7 +102,7 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CASE WHEN L.intPurchaseSale = 3 THEN 1 ELSE L.intFreightTermId END
+		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
 		WHERE L.intLoadId = @intLoadId
@@ -128,6 +133,7 @@ BEGIN TRY
 			,LD.intForexRateTypeId
 			,LD.dblForexRate
 			,LD.dblAmount
+			,L.intPurchaseSale
 
 		BEGIN
 			INSERT INTO @GLEntries (
