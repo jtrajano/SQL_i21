@@ -1,9 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuARBatchPostingTransaction]
 AS
 SELECT
-	 GL.strBatchId
-	,dtmDate					= GL.dtmDateEntered
-	,GL.strTransactionType
+	 AR.strBatchId
+	,dtmDate					= AR.dtmBatchDate
+	,AR.strTransactionType
 	,dblEntriesCount			= COUNT(AR.intTransactionId)  
 	,dblTotalAmount				= SUM(AR.dblTotal) 
 	,strUserName				= E.strName
@@ -12,29 +12,21 @@ SELECT
 	,AR.strCurrency
 	,AR.strCurrencyDescription
 FROM
-	(SELECT DISTINCT
-		  strBatchId
-		, strCode
-		, intTransactionId
-		, strTransactionId
-		, dtmDate
-		, dtmDateEntered = CAST(dtmDateEntered AS DATE)
-		, intEntityId
-		, strTransactionType
-		, intAccountId
-	 FROM
-		tblGLDetail
-	 WHERE
-		ysnIsUnposted = 0) GL
-INNER JOIN 
-	(
-		SELECT 
-			 intEntityId
-			,strName
-		FROM 
-			tblEMEntity
-	) E ON GL.intEntityId = E.intEntityId			
-INNER JOIN
+	--(SELECT DISTINCT
+	--	  strBatchId
+	--	, strCode
+	--	, intTransactionId
+	--	, strTransactionId
+	--	, dtmDate
+	--	, dtmDateEntered = CAST(dtmDateEntered AS DATE)
+	--	, intEntityId
+	--	, strTransactionType
+	--	, intAccountId
+	-- FROM
+	--	tblGLDetail
+	-- WHERE
+	--	ysnIsUnposted = 0) GL
+--INNER JOIN
 	(
 		SELECT
 			 strPostingType			= 'Invoice' 
@@ -46,6 +38,11 @@ INNER JOIN
 			,intCurrencyID			= SMC.intCurrencyID
 			,strCurrency			= SMC.strCurrency
 			,strCurrencyDescription	= SMC.strDescription
+			,dtmPostDate			= INV.dtmPostDate
+			,strBatchId				= INV.strBatchId
+			,dtmBatchDate			= CAST(INV.dtmBatchDate AS DATE)
+			,intPostedById			= INV.intPostedById	
+			,strTransactionType		= INV.strTransactionType
 		FROM
 			(SELECT 
 				intInvoiceId
@@ -53,7 +50,12 @@ INNER JOIN
 				, intAccountId
 				, intCompanyLocationId
 				, dblInvoiceTotal	
-				, intCurrencyId			
+				, intCurrencyId
+				, dtmPostDate
+				, strBatchId
+				, dtmBatchDate
+				, intPostedById	
+				, strTransactionType
 			 FROM 
 				tblARInvoice
 			 WHERE
@@ -83,6 +85,11 @@ INNER JOIN
 			,intCurrencyID			= SMC.intCurrencyID
 			,strCurrency			= SMC.strCurrency
 			,strCurrencyDescription	= SMC.strDescription
+			,dtmPostDate			= AR.dtmDatePaid
+			,strBatchId				= AR.strBatchId
+			,dtmBatchDate			= CAST(AR.dtmBatchDate AS DATE)
+			,intPostedById			= AR.intPostedById
+			,strTransactionType		= 'Receive Payments'	
 		FROM
 			(SELECT 
 				intPaymentId
@@ -91,6 +98,10 @@ INNER JOIN
 				, dblAmountPaid
 				, intLocationId
 				, intCurrencyId
+				, dtmDatePaid
+				, strBatchId
+				, dtmBatchDate
+				, intPostedById	
 			 FROM 
 				tblARPayment
 			 WHERE 
@@ -108,16 +119,20 @@ INNER JOIN
 				FROM 
 					tblSMCurrency) SMC ON AR.intCurrencyId = SMC.intCurrencyID	
 	) AR
-ON GL.intTransactionId = AR.intTransactionId	
-AND GL.strTransactionType IN ('Invoice','Receive Payments', 'Credit Memo')
-AND GL.strCode = 'AR'		
-AND GL.strTransactionId = AR.strTransactionId
-AND GL.intAccountId = AR.intAccountId		
+INNER JOIN 
+    (
+        SELECT 
+             intEntityId
+            ,strName
+        FROM 
+            tblEMEntity
+    ) E ON AR.intPostedById = E.intEntityId            
+	
 GROUP BY
-	 GL.strBatchId
+	 AR.strBatchId
 	--,GL.dtmDate
-	,GL.dtmDateEntered
-	,GL.strTransactionType 
+	,AR.dtmBatchDate
+	,AR.strTransactionType 
 	,E.strName
 	,AR.strLocationName
 	,AR.intCurrencyID
