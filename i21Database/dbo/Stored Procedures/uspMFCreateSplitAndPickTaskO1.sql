@@ -79,7 +79,7 @@ BEGIN TRY
 		,dtmLastModified
 		)
 	VALUES (
-		0
+		1
 		,@strTaskNo
 		,@intTaskTypeId
 		,CASE 
