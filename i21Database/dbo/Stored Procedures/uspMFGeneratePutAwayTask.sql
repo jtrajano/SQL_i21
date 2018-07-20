@@ -81,7 +81,7 @@ BEGIN TRY
 		,dblPickQty
 		)
 	VALUES (
-		0
+		1
 		,@strTaskNo
 		,5
 		,CASE 

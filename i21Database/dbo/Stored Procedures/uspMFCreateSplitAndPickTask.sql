@@ -78,7 +78,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified)
 	VALUES 
-		(0
+		(1
 		,@strTaskNo
 		,@intTaskTypeId
 		,Case When @intDefaultConsumptionLocationId is null Then (CASE 
