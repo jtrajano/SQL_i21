@@ -122,7 +122,11 @@ BEGIN TRY
 	IF @strSourceType = @SALES_ORDER
 	BEGIN 
 
-		EXEC dbo.uspICAddItemShipment @Items, @Charges, @ItemLots, @intEntityUserSecurityId
+		EXEC dbo.uspICAddItemShipment 
+			@Items = @Items
+			,@Charges = @Charges
+			,@Lots = @ItemLots
+			,@intUserId = @intEntityUserSecurityId
 
 		DECLARE cur CURSOR LOCAL FAST_FORWARD
 		FOR SELECT intInventoryShipmentId FROM #tmpAddItemShipmentResult
