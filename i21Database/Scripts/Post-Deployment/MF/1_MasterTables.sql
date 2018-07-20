@@ -3403,3 +3403,7 @@ UPDATE tblMFCompanyPreference
 SET ysnMergeOnMove = 0
 WHERE ysnMergeOnMove IS NULL
 Go
+UPDATE tblMFRecipeItem
+SET dblCalculatedQuantity = dblQuantity
+WHERE intRecipeItemTypeId = 2 AND dblCalculatedQuantity = 0
+GO
