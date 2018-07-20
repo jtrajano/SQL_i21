@@ -2,16 +2,14 @@
 	@recordIds nvarchar(500),
 	@namespace nvarchar(500)
 AS
+BEGIN TRANSACTION
+
 BEGIN TRY
-	BEGIN TRANSACTION
-		IF ISNULL(@recordIds, 0) <> 0 and ISNULL(@namespace, 0) <> 0
-		BEGIN
-			DELETE FROM tblSMTransaction where intTransactionId in (select * from dbo.fnSplitStringWithTrim(@recordIds,','))
-			AND intScreenId = (SELECT top 1 intScreenId from tblSMScreen where strNamespace = @namespace)
-		END
+	DELETE FROM tblSMTransaction where intTransactionId in (select * from dbo.fnSplitStringWithTrim(@recordIds,','))
+	AND intScreenId = (SELECT top 1 intScreenId from tblSMScreen where strNamespace = @namespace)
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
-	IF @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
+IF @@TRANCOUNT > 0
+	ROLLBACK TRANSACTION
 END CATCH
