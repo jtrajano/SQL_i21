@@ -104,7 +104,7 @@ JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and it.in
 WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
-and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
+and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%' and strTransactionId not like'%STR%'
 AND il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end)t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,

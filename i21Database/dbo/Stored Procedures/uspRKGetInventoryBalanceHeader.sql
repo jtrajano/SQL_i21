@@ -193,5 +193,7 @@ isnull(dblGNet,0)+isnull(dblHNet,0)+isnull(dblINet,0)+isnull(dblJNet,0)) + dblTo
 	[dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
    ,dblUnpaidIn,dblUnpaidOut,dblBalance,dblPaidBalance,dblTotalCompanyOwned,dblUnpaidBalance
   FROM #final list
-  FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01'))t order by dtmDate
+  FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01'))t 
+  WHERE ISNULL(dtmDate,'') <> '' 
+  order by dtmDate
 
