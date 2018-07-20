@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFImportGroupAdjustmentRate]
-	@strSiteGroup					NVARCHAR(MAX)	 =	 ''
+	@intResult						INT				 OUT --- 0 = haserror, 1 = inserted, 2 = skipped, 3= updated
+	,@strSiteGroup					NVARCHAR(MAX)	 =	 ''
 	,@strItemNumber					NVARCHAR(MAX)	 =	 ''
 	,@strPriceRuleGroup				NVARCHAR(MAX)	 =	 ''
 	,@dtmDate						DATETIME	     =	 NULL
@@ -16,6 +17,8 @@ BEGIN
 	DECLARE @intPriceRuleGroupId					  INT = NULL
 	DECLARE @intSiteGroupPriceAdjustmentId			  INT = 0
 	DECLARE @intSiteGroupPriceAdjustmentHeaderId		INT = 0
+	DECLARE @intSiteGroupPriceAdjustmentIdSameRate			  INT = 0
+	DECLARE @dblOldRate									NUMERIC(18,6)	 =	 0
 	
 	---------------------------------------------------------
 
@@ -52,6 +55,7 @@ BEGIN
 
 	IF(@ysnHasError = 1)
 	BEGIN
+		SET @intResult = 0
 		RETURN
 	END
 
@@ -107,6 +111,7 @@ BEGIN
 
 	IF(@ysnHasError = 1)
 	BEGIN
+		SET @intResult = 0
 		RETURN
 	END
 
@@ -144,12 +149,35 @@ BEGIN
 				,intPriceGroupId = @intPriceRuleGroupId
 				,intARItemId = @intItemId
 				,dblRate = @dblRate
+
+			SET @intResult = 1
 		END
 		ELSE
 		BEGIN
 
+
+			----- CHECK for Existing price adjustment For same rate
+			SELECT TOP 1 @intSiteGroupPriceAdjustmentIdSameRate = intSiteGroupPriceAdjustmentId
+			FROM tblCFSiteGroupPriceAdjustment
+			WHERE intSiteGroupPriceAdjustmentHeaderId = @intSiteGroupPriceAdjustmentHeaderId
+				AND intARItemId = @intItemId
+				AND intPriceGroupId = @intPriceRuleGroupId
+				AND dblRate = @dblRate
+	
+			IF(ISNULL(@intSiteGroupPriceAdjustmentIdSameRate,0) <> 0)
+			BEGIN
+				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+				VALUES (@strSiteGroup,'Duplicate record/Same price - Skipped')
+				ROLLBACK TRANSACTION
+				SET @intResult = 2
+				RETURN 
+			END
+			
+
 			----- CHECK for Existing price adjustment
-			SELECT TOP 1 @intSiteGroupPriceAdjustmentId = intSiteGroupPriceAdjustmentId
+			SELECT TOP 1 
+				@intSiteGroupPriceAdjustmentId = intSiteGroupPriceAdjustmentId
+				,@dblOldRate = dblRate
 			FROM tblCFSiteGroupPriceAdjustment
 			WHERE intSiteGroupPriceAdjustmentHeaderId = @intSiteGroupPriceAdjustmentHeaderId
 				AND intARItemId = @intItemId
@@ -161,6 +189,10 @@ BEGIN
 				UPDATE tblCFSiteGroupPriceAdjustment SET
 					dblRate = @dblRate
 				WHERE intSiteGroupPriceAdjustmentId = @intSiteGroupPriceAdjustmentId
+				SET @intResult = 3
+
+				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+				VALUES (@strSiteGroup,'Item Rate for - ' + @strItemNumber + ' is changed from ' + CAST(@dblOldRate AS NVARCHAR(30)) + ' to ' + CAST(@dblRate AS NVARCHAR(30)))
 			END
 			ELSE
 			BEGIN
@@ -176,10 +208,12 @@ BEGIN
 					,intPriceGroupId = @intPriceRuleGroupId
 					,intARItemId = @intItemId
 					,dblRate = @dblRate
+
+				SET @intResult = 1
 			END
 		END
 		COMMIT TRANSACTION
-		RETURN 1
+		RETURN 
 	END TRY
 	BEGIN CATCH
 		ROLLBACK TRANSACTION
