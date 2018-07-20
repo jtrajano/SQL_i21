@@ -34,16 +34,15 @@ BEGIN
 				WHERE a.intUserRoleID  = @id
 			)
 		END
-		ELSE IF @roleType = 'Portal Default'
+		ELSE IF @roleType = 'Portal Admin'
 		BEGIN
 			UPDATE t SET intConcurrencyId = (t.intConcurrencyId + 1)
 			FROM tblEMEntityCredential t
-			WHERE intEntityId IN 
-			(
-				SELECT DISTINCT c.intEntityContactId FROM tblSMUserRole a
-				INNER JOIN tblEMEntityToRole b ON a.intUserRoleID = b.intEntityRoleId
-				INNER JOIN tblEMEntityToContact c ON b.intEntityId = c.intEntityId
-			)
+			WHERE intEntityId IN   
+			(  
+				SELECT DISTINCT c.intEntityContactId FROM tblSMUserRole a  
+				INNER JOIN tblEMEntityToContact c ON a.intUserRoleID = c.intEntityRoleId  
+			) 
 		END
 		ELSE
 		BEGIN
