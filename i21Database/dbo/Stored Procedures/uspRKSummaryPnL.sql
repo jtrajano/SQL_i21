@@ -8,6 +8,8 @@
 	,@intBrokerageAccountId INT = NULL
 	,@intFutureMonthId INT = NULL
 	,@strBuySell nvarchar(10)=NULL
+	,@intBookId int=NULL
+	,@intSubBookId int=NULL
 AS
 
 
@@ -97,13 +99,15 @@ INSERT INTO @UnRelaized(RowNum, MonthOrder,intFutOptTransactionId ,GrossPnL ,dbl
 ,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 ,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,intOriginalQty ,intFutOptTransactionHeaderId 
 ,intCommodityId ,ysnExpired ,dblVariationMargin ,dblInitialMargin ,LongWaitedPrice,ShortWaitedPrice
 )
-EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell
+EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,
+		@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell,@intBookId=@intBookId,@intSubBookId=@intSubBookId
 
 INSERT INTO @Relaized(RowNum,MonthOrder,dblNetPL,dblGrossPL,intMatchFuturesPSHeaderId ,intMatchFuturesPSDetailId ,intFutOptTransactionId ,intLFutOptTransactionId ,
 intSFutOptTransactionId ,dblMatchQty,dtmLTransDate ,dtmSTransDate ,dblLPrice,dblSPrice,strLBrokerTradeNo,strSBrokerTradeNo,dblContractSize,dblFutCommission,
 strFutMarketName,strFutureMonth,intMatchNo ,dtmMatchDate ,strName,strAccountNumber,strCommodityCode,strLocationName,intFutureMarketId ,intCommodityId ,ysnExpired,intFutureMonthId 
 )
-EXEC uspRKRealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell
+EXEC uspRKRealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,
+	@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell,@intBookId=@intBookId,@intSubBookId=@intSubBookId
 
 
 BEGIN

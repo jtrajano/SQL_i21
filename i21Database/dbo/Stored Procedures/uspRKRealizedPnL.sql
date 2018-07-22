@@ -8,6 +8,8 @@
 	,@intBrokerageAccountId INT = NULL
 	,@intFutureMonthId INT = NULL
 	,@strBuySell nvarchar(10)=NULL
+	,@intBookId int=NULL
+	,@intSubBookId int=NULL
 AS  
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
@@ -81,6 +83,8 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
+	AND ot.intBookId= CASE WHEN ISNULL(@intBookId,0)=0 then ot.intBookId else @intBookId end
+	AND ot.intSubBookId= CASE WHEN ISNULL(@intSubBookId,0)=0 then ot.intSubBookId else @intSubBookId end
 	AND ot.intEntityId= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
 	AND ot.intBrokerageAccountId= CASE WHEN ISNULL(@intBrokerageAccountId,0)=0 then ot.intBrokerageAccountId else @intBrokerageAccountId end
 	AND ot.intFutureMonthId= CASE WHEN ISNULL(@intFutureMonthId,0)=0 then ot.intFutureMonthId else @intFutureMonthId end
