@@ -8,16 +8,16 @@ SELECT intRowNum	,
 strCommodityCode	,
 intCommodityId	,
 intContractHeaderId	,
-strContractNumber	,
-strLocationName	,
-dtmEndDate	,
-dblBalance	,
-intUnitMeasureId	,
-intPricingTypeId	,
-intContractTypeId	,
-intCompanyLocationId	,
-strContractType	,
-strPricingType	,
+strContractNumber,
+strLocationName,
+dtmEndDate,
+dblBalance,
+intUnitMeasureId,
+intPricingTypeId,
+intContractTypeId,
+intCompanyLocationId,
+strContractType,
+strPricingTypey,
 intCommodityUnitMeasureId	,
 intContractDetailId	,
 intContractStatusId	,
@@ -70,7 +70,7 @@ FROM (
 	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate 
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 	) a
-WHERE a.intRowNum = 1  AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6)
+WHERE a.intRowNum = 1  AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId  in (1,2)
 
 UNION
 

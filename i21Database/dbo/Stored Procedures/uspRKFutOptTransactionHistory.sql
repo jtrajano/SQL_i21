@@ -11,11 +11,7 @@ BEGIN TRY
 		,@intOldNoOfContract INT
 		,@strOldBuySell NVARCHAR(10)
 
-	--SELECT TOP 1 @intOldNoOfContract = intNewNoOfContract
-	--	,@strOldBuySell = strNewBuySell
-	--FROM [tblRKFutOptTransactionHistory]
-	--WHERE intFutOptTransactionId = @intFutOptTransactionId
-	--ORDER BY intFutOptTransactionHistoryId DESC
+
 
 	IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. It will look for the history table to insert delete entry to those transaction that doesn't have. 
 	BEGIN
@@ -55,7 +51,7 @@ BEGIN TRY
 			,H.strSelectedInstrumentType
 			,T.intFutOptTransactionId
 			,strInternalTradeNo
-		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intLocationId=T.intLocationId)
+		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intCompanyLocationId=T.intLocationId)
 			,dblContractSize=(select TOP 1 dblContractSize from tblRKFutureMarket where intFutureMarketId=T.intFutureMarketId)
 			,strInstrumentType = (CASE WHEN intInstrumentTypeId = 1 THEN 'Futures'
 				WHEN intInstrumentTypeId = 2 THEN 'Options'
@@ -134,7 +130,7 @@ BEGIN TRY
 			,H.strSelectedInstrumentType
 			,T.intFutOptTransactionId
 			,strInternalTradeNo
-		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intLocationId=T.intLocationId)
+		    ,strLocationName=(select TOP 1 strLocationName from tblSMCompanyLocation where intCompanyLocationId=T.intLocationId)
 			,dblContractSize=(select TOP 1 dblContractSize from tblRKFutureMarket where intFutureMarketId=T.intFutureMarketId)
 			,strInstrumentType = (CASE WHEN intInstrumentTypeId = 1 THEN 'Futures'
 				WHEN intInstrumentTypeId = 2 THEN 'Options'

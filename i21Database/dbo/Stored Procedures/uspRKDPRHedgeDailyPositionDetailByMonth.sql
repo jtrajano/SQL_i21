@@ -5,6 +5,7 @@
 		,@strPurchaseSales nvarchar(50) = NULL
 		,@strPositionIncludes NVARCHAR(100) = NULL
 		,@dtmToDate datetime = NULL
+		,@strByType nvarchar(50) = null
 AS
 
 BEGIN
