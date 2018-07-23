@@ -123,7 +123,7 @@ BEGIN
 		--END UPDATING OF PAYMENT INFO
 
 		--DO NOT ALLOW OVER PAY
-		IF @readyForPayment = 1 AND @newPayment > @amountDue
+		IF @readyForPayment = 1 AND @newPayment > (@amountDue + @tempInterest - @tempDiscount)
 		BEGIN
 			RAISERROR('PAYVOUCHEROVERPAY', 16, 1);
 			RETURN;
