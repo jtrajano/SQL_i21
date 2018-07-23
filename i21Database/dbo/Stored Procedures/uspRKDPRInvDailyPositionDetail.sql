@@ -7,13 +7,13 @@
 	,@dtmToDate datetime=null
 	,@strByType nvarchar(50) = null
 AS
---declare 		 @intCommodityId nvarchar(max)= '18'
+--declare 		 @intCommodityId nvarchar(max)= ''
 --		,@intLocationId int = null
 --		,@intVendorId int = null
 --		,@strPurchaseSales nvarchar(50) = null
 --		,@strPositionIncludes NVARCHAR(100) = 'All Storage'
 --		,@dtmToDate datetime = getdate()
---		,@strByType nvarchar(50) = ''
+--		,@strByType nvarchar(50) = 'ByCommodity'
 BEGIN
 
 DECLARE @ysnDisplayAllStorage bit
@@ -566,14 +566,14 @@ SELECT * into #tempCollateral FROM (
 SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblQuantity ,0)))  dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
 	,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 	,null [Storage Due],s.intLocationId intLocationId,strTransactionId,strTransactionType,i.intItemId  into #invQty
-	FROM vyuICGetInventoryValuation s  		
+	FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
 	LEFT JOIN tblSCTicket t on s.strSourceNumber=t.strTicketNumber		  
 	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0 
 			AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
-			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate) 
+			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate) 
 			and isnull(t.strDistributionOption,'') <> 'DP'
 			and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -815,11 +815,11 @@ IF (@ysnDisplayAllStorage=1)
 				AND intStorageScheduleTypeId NOT IN(SELECT DISTINCT isnull(intStorageScheduleTypeId,0) FROM @Final WHERE intSeqId=5)
 	END
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strLocationName)
-	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Purchase' AS [strType],isnull(dblTotal, 0) dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=10
+	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Purchase' AS [strType],-isnull(dblTotal, 0) dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=9
 	union
 	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Sale' AS [strType],isnull(dblTotal, 0)dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=8
 	union
-	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Receipted' AS [strType],-isnull(dblTotal, 0) dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=9
+	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Receipted' AS [strType],isnull(dblTotal, 0) dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=10
 	
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 					  [Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId,intCompanyLocationId,intTicketId,strTicketNumber)
@@ -850,7 +850,7 @@ IF (@ysnDisplayAllStorage=1)
 			@intCommodityId intCommodityId,cl.strLocationName,cd.strItemNo,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
 					strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,strReceiptNumber,
 					cd.strContractNumber,intContractHeaderId,r.intInventoryReceiptId
-						FROM vyuICGetInventoryValuation v
+						FROM vyuRKGetInventoryValuation v
 			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT') and  isnull(ysnInTransit,0)=0 
@@ -858,7 +858,7 @@ IF (@ysnDisplayAllStorage=1)
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 			)t	WHERE  intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -876,7 +876,7 @@ IF (@ysnDisplayAllStorage=1)
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber
 			,r.intInventoryShipmentId,strShipmentNumber strShipmentNumber1
-			FROM vyuICGetInventoryValuation v 
+			FROM vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN #tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
@@ -884,7 +884,7 @@ IF (@ysnDisplayAllStorage=1)
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 			)t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -900,21 +900,23 @@ IF (@ysnDisplayAllStorage=1)
 	FROM @Final where strSeqHeader='In-House' and strType='Receipt' and intCommodityId=@intCommodityId)t
 	group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 
+
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strLocationName)
 	select * from (
 	SELECT distinct intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal ,intCommodityId,intFromCommodityUnitMeasureId,strLocationName from(
 	SELECT 15 AS intSeqId,'Company Titled Stock' strSeqHeader ,@strDescription strCommodityCode,[strType],
 	case when strType = 'Collateral Purchase' then isnull(dblTotal, 0) else -isnull(dblTotal, 0) end dblTotal,
 		@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,strLocationName strLocationName
-		 FROM @Final where intSeqId=11  and strType in('Collateral Purchase','Collateral Sale') )t
+		 FROM @Final where intSeqId in (9,8) and strType in('Collateral Purchase','Collateral Sale') and intCommodityId=@intCommodityId )t
 		 GROUP BY intSeqId,strSeqHeader,strCommodityCode,strType,intCommodityId,intFromCommodityUnitMeasureId,strLocationName) t where dblTotal<>0
-	
+
+
+
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
 							intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intInventoryShipmentId,strShipmentNumber)
 	select 15 intSeqId,'Company Titled Stock'strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
 						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intInventoryShipmentId,strShipmentNumber 
-	from @Final where intSeqId = 14 and intCommodityId=@intCommodityId
-
+	FROM @Final WHERE intSeqId = 14 and intCommodityId=@intCommodityId
 
 	If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
 	BEGIN
@@ -1218,7 +1220,7 @@ IF (@ysnDisplayAllStorage=1)
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0)) AS dblTotal,
 			@intCommodityId intCommodityId,cl.strLocationName,cd.strItemNo,strName,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
 					strDistributionOption,@intCommodityUnitMeasureId AS intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,cd.strContractNumber,intContractHeaderId
-			FROM vyuICGetInventoryValuation v
+			FROM vyuRKGetInventoryValuation v
 			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
@@ -1228,7 +1230,7 @@ IF (@ysnDisplayAllStorage=1)
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId 
 			AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			AND st.intEntityId= @intVendorId and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+			AND st.intEntityId= @intVendorId and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 			)t 	WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -1244,7 +1246,7 @@ IF (@ysnDisplayAllStorage=1)
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strName,cd.strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,cd.strContractNumber 
-			FROM  vyuICGetInventoryValuation v 
+			FROM  vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN #tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
@@ -1253,7 +1255,7 @@ IF (@ysnDisplayAllStorage=1)
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 			WHERE cd.intCommodityId = @intCommodityId 
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-			and cd.intEntityId= @intVendorId and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=CONVERT(DATETIME,@dtmToDate))t
+			and cd.intEntityId= @intVendorId and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=CONVERT(DATETIME,@dtmToDate))t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -1316,7 +1318,7 @@ BEGIN
 
 			SELECT strCommodityCode,strUnitMeasure,strSeqHeader,SUM(dblTotal) dblTotal,intCommodityId,strLocationName
 			FROM @FinalTable 
-			where  strSeqHeader in('Company Titled Stock','In-House') and isnull(dblTotal,0) <>0
+			where  strSeqHeader in('Company Titled Stock','In-House') and isnull(dblTotal,0) <>0 
 			GROUP BY strCommodityCode,strUnitMeasure,strSeqHeader,intCommodityId,strLocationName
 END
 ELSE
@@ -1325,7 +1327,7 @@ BEGIN
 			SELECT strCommodityCode,strUnitMeasure,strSeqHeader,SUM(dblTotal) dblTotal,intCommodityId
 			FROM @FinalTable 
 			where dblTotal <> 0 and strSeqHeader in('Company Titled Stock','In-House')  and isnull(dblTotal,0) <>0
-			GROUP BY strCommodityCode,strUnitMeasure,strSeqHeader,intCommodityId
+			GROUP BY strCommodityCode,strUnitMeasure,strSeqHeader,intCommodityId 
 END
 ELSE
 BEGIN
