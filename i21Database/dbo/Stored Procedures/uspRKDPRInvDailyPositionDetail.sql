@@ -7,15 +7,9 @@
 	,@dtmToDate datetime=null
 	,@strByType nvarchar(50) = null
 AS
---declare 		 @intCommodityId nvarchar(max)= ''
---		,@intLocationId int = null
---		,@intVendorId int = null
---		,@strPurchaseSales nvarchar(50) = null
---		,@strPositionIncludes NVARCHAR(100) = 'All Storage'
---		,@dtmToDate datetime = getdate()
---		,@strByType nvarchar(50) = 'ByCommodity'
-BEGIN
 
+BEGIN
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @ysnDisplayAllStorage bit
 select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
 
@@ -515,7 +509,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY   GR1.intCustomerStorageId ORDER BY dtmHi
 SELECT * FROM (
 	SELECT ROW_NUMBER() OVER (PARTITION BY SCDS.intDeliverySheetSplitId ORDER BY dtmDeliverySheetHistoryDate DESC) intRowNum, 
 		SCDS.intDeliverySheetSplitId, GR.strStorageTypeDescription [Storage Type],@strDescription strCommodityCode,GR.strStorageTypeDescription strType,
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,((SCT.dblNetUnits * SCDS.dblSplitPercent) / 100)) dblTotal,
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,((SCDS.dblQuantity * SCDS.dblSplitPercent) / 100)) dblTotal,
 	strName strCustomerReference,strDeliverySheetNumber+('*') strTicket,convert(datetime,CONVERT(VARCHAR(10),dtmDeliverySheetDate ,110),110) dtmDelivarydate,l.strLocationName strLocationName,i.strItemNo,
 	SCT.intCommodityId intCommodityId, @intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName,null [Storage Due],l.intCompanyLocationId  intCompanyLocationId
 	, E.intEntityId , strOwnedPhysicalStock,ysnReceiptedStorage,GR.intStorageScheduleTypeId,intTicketId,strTicketNumber,E.strName strCustomer
