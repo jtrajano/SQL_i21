@@ -606,9 +606,9 @@ UPDATE tblSMCSVDynamicImport SET
 				SET @IsValid = 0
 			end catch
 		end
-		if @miscstatementformat <> '''' and @miscstatementformat not in (''Open Item'', ''Open Statement - Lazer'', ''Balance Forward'', ''Budget Reminder'', ''Payment Activity'', ''Running Balance'', ''None'')               
+		if @miscstatementformat <> '''' and @miscstatementformat not in (''Open Item'', ''Open Statement - Lazer'', ''Balance Forward'', ''Budget Reminder'', ''Payment Activity'', ''Running Balance'', ''Full Details - No Card Lock'', ''None'')               
 		begin
-			set @ValidationMessage = @ValidationMessage + '', Statement Format (''+  @miscstatementformat +'') does not exists. Use one in (Open Item, Open Statement - Lazer, Balance Forward, Budget Reminder, Payment Activity, Running Balance, None).''
+			set @ValidationMessage = @ValidationMessage + '', Statement Format (''+  @miscstatementformat +'') does not exists. Use one in (Open Item, Open Statement - Lazer, Balance Forward, Budget Reminder, Payment Activity, Running Balance, Full Details - No Card Lock, None).''
 			set @IsValid = 0
 		end
 

@@ -244,6 +244,25 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 			, @intEntityUserId				= @intEntityUserId
 	END
+ELSE IF @strStatementFormat = 'Full Details - No Card Lock'
+	BEGIN
+		EXEC dbo.uspARCustomerStatementFullDetailReport
+			  @dtmDateTo					= @dtmDateTo
+			, @dtmDateFrom					= @dtmDateFrom
+			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+			, @ysnIncludeBudget				= @ysnIncludeBudget
+			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnActiveCustomers			= @ysnActiveCustomers
+			, @strCustomerNumber			= @strCustomerNumber
+			, @strAccountStatusCode			= @strAccountStatusCode
+			, @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
+			, @strCustomerIds				= @strCustomerIds
+			, @ysnEmailOnly					= @ysnEmailOnly
+			, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
+			, @intEntityUserId				= @intEntityUserId
+	END
 
 INSERT INTO @temp_SOA_table
 SELECT @strCustomerName
