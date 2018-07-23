@@ -33,13 +33,17 @@ DECLARE @intHaulerId AS INT,
 		@batchId AS NVARCHAR(40),
 		@ticketBatchId AS NVARCHAR(40),
 		@splitDistribution AS NVARCHAR(40),
-		@dblFreightRate AS DECIMAL(38,20);
-		
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId
-	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intDeliverySheetId
-END
+		@dblFreightRate AS DECIMAL(38,20),
+		@intItemId AS INT,
+		@intLotType AS INT;
+
+SELECT @intTicketItemUOMId = ICUOM.intItemUOMId
+	, @intItemId = SCD.intItemId
+FROM tblICItemUOM ICUOM 
+INNER JOIN tblSCDeliverySheet SCD ON SCD.intItemId = ICUOM.intItemId
+WHERE ICUOM.ysnStockUnit = 1 AND SCD.intDeliverySheetId = @intDeliverySheetId
+
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
@@ -124,7 +128,7 @@ SELECT
 		,intItemId					= SCD.intItemId
 		,intItemLocationId			= SCD.intCompanyLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= NULL
+		,intGrossNetUOMId			= LI.intItemUOMId
 		,intCostUOMId				= CASE
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
