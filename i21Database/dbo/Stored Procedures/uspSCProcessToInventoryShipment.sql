@@ -194,8 +194,8 @@ BEGIN TRY
 					,intStorageScheduleTypeId 
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
-				SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
-				SET @dblRemainingUnits = (@dblRemainingUnits - @dblRemainingUnitStorage)
+				SELECT TOP 1 @dblQtyShipped = dblQty FROM @ItemsForItemShipment IIS
+				SET @dblRemainingUnits = (@dblRemainingUnits - CASE WHEN ISNULL(@dblQtyShipped,0) = 0 THEN 0 ELSE (@dblRemainingUnitStorage * -1) END)
 				IF(@dblRemainingUnits > 0)
 					BEGIN
 						INSERT INTO @ItemsForItemShipment (

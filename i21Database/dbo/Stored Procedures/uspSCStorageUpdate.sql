@@ -51,19 +51,16 @@ DECLARE @ErrorState INT;
 DECLARE @PostShipment INT = 1;
 DECLARE @total AS INT;
 
-
-DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
-		,@SALES_ORDER AS NVARCHAR(50) = 'SalesOrder'
-		,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
-		,@strSourceType AS NVARCHAR(100) = 'SalesOrder'
-		,@InventoryShipmentId AS INT
-
-DECLARE @ErrMsg             NVARCHAR(MAX),
-        @dblBalance          NUMERIC(12,4),                    
-        @intItemId           INT,
-        @dblNewBalance       NUMERIC(12,4),
-        @strInOutFlag        NVARCHAR(4),
-        @dblQuantity         NUMERIC(12,4)
+DECLARE @ItemsForItemShipment AS ItemCostingTableType
+		,@ItemsForItemShipmentContract AS ItemCostingTableType
+		,@InventoryShipmentId	INT
+		,@ErrMsg				NVARCHAR(MAX)
+        ,@dblBalance			NUMERIC(12,4)
+        ,@intItemId				INT
+        ,@dblNewBalance			NUMERIC(12,4)
+        ,@strInOutFlag			NVARCHAR(4)
+        ,@dblQuantity			NUMERIC(12,4)
+        ,@strAdjustmentNo		NVARCHAR(50)
 
 BEGIN TRY
 

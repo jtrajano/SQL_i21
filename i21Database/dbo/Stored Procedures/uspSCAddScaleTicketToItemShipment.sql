@@ -208,7 +208,7 @@ BEGIN
 										END
 									  END
 		,intItemUOMId				= LI.intItemUOMId
-		,intItemLotGroup			= LI.intItemId
+		,intItemLotGroup			= LI.intId
 		,intDestinationGradeId		= SC.intGradeId
 		,intDestinationWeightId		= SC.intWeightId
 		,intOrderId					= CNT.intContractHeaderId
