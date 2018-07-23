@@ -81,13 +81,13 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  
- WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
-	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
-	AND ot.intBookId= CASE WHEN ISNULL(@intBookId,0)=0 then ot.intBookId else @intBookId end
-	AND ot.intSubBookId= CASE WHEN ISNULL(@intSubBookId,0)=0 then ot.intSubBookId else @intSubBookId end
-	AND ot.intEntityId= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
-	AND ot.intBrokerageAccountId= CASE WHEN ISNULL(@intBrokerageAccountId,0)=0 then ot.intBrokerageAccountId else @intBrokerageAccountId end
-	AND ot.intFutureMonthId= CASE WHEN ISNULL(@intFutureMonthId,0)=0 then ot.intFutureMonthId else @intFutureMonthId end
+ WHERE  isnull(ot.intCommodityId,0)= CASE WHEN ISNULL(@intCommodityId,0)=0 then isnull(ot.intCommodityId,0) else @intCommodityId end
+	AND isnull(ot.intFutureMarketId,0)= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then isnull(ot.intFutureMarketId,0) else @intFutureMarketId end
+	AND isnull(ot.intBookId,0)= CASE WHEN ISNULL(@intBookId,0)=0 then isnull(ot.intBookId,0) else @intBookId end
+	AND isnull(ot.intSubBookId,0)= CASE WHEN ISNULL(@intSubBookId,0)=0 then isnull(ot.intSubBookId,0) else @intSubBookId end
+	AND isnull(ot.intEntityId,0)= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
+	AND isnull(ot.intBrokerageAccountId,0)= CASE WHEN ISNULL(@intBrokerageAccountId,0)=0 then ot.intBrokerageAccountId else @intBrokerageAccountId end
+	AND isnull(ot.intFutureMonthId,0)= CASE WHEN ISNULL(@intFutureMonthId,0)=0 then ot.intFutureMonthId else @intFutureMonthId end
 	AND ot.strBuySell= CASE WHEN ISNULL(@strBuySell,'0')= '0' then ot.strBuySell else @strBuySell end
 	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),psh.dtmMatchDate,110),110) BETWEEN @dtmFromDate AND @dtmToDate
 	AND psh.strType = 'Realize'
