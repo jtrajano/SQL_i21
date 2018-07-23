@@ -87,10 +87,10 @@ BEGIN
 				AND ShipmentItems.intItemId = ItemLocation.intItemId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON ShipmentItems.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
-				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 			INNER JOIN tblICItem Item 
 				ON Item.intItemId = ShipmentItems.intItemId
+			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
+				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND dbo.fnGetItemLotType(ShipmentItems.intItemId) = @LotType_No
 			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
@@ -106,8 +106,8 @@ BEGIN
 			,intTransactionId = Shipment.intInventoryShipmentId
 			,strTransactionId = Shipment.strShipmentNumber
 			,intTransactionTypeId = @intInventoryTransactionType
-			,intSubLocationId = ISNULL(ShipmentItems.intSubLocationId, StorageLocation.intSubLocationId) 
-			,intStorageLocationId = ShipmentItems.intStorageLocationId
+			,intSubLocationId = Lot.intSubLocationId  
+			,intStorageLocationId = Lot.intStorageLocationId 
 			,intOwnershipTypeId = ShipmentItems.intOwnershipType
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
@@ -120,8 +120,7 @@ BEGIN
 				ON ShipmentItems.intInventoryShipmentItemId = ShipmentItemLots.intInventoryShipmentItemId
 			INNER JOIN dbo.tblICLot Lot
 				ON Lot.intLotId = ShipmentItemLots.intLotId
-			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
-				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
+				AND Lot.intItemLocationId = ItemLocation.intItemLocationId
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = ShipmentItems.intItemId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
