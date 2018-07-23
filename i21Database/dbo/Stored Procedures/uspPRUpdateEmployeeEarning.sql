@@ -4,15 +4,27 @@ AS
 BEGIN
 
 	--Update Earning 
-	UPDATE tblPREmployeeEarning
+	UPDATE EmpEarning
 		SET strCalculationType = Earning.strCalculationType,
 			dblAmount = Earning.dblAmount,
+			dblRateAmount = CASE WHEN (Earning.strCalculationType IN ('Rate Factor', 'Overtime')) 
+				THEN 
+					CASE WHEN (EmpEarningLink.strCalculationType IN ('Fixed Amount', 'Salary', 'Annual Salary'))
+					THEN (ISNULL(EmpEarningLink.dblAmount, 1) / (CASE WHEN ISNULL(EmpEarningLink.dblDefaultHours, 1) > 1 
+																	THEN ISNULL(EmpEarningLink.dblDefaultHours, 1) 
+																	ELSE 1 END)) * Earning.dblAmount
+					ELSE ISNULL(EmpEarningLink.dblAmount, 1) * Earning.dblAmount END
+				ELSE Earning.dblAmount END,
 			dblDefaultHours = Earning.dblDefaultHours,
 			strW2Code = Earning.strW2Code,
 			intAccountId = Earning.intAccountId,
 			intTaxCalculationType = Earning.intTaxCalculationType
-		FROM tblPRTypeEarning Earning INNER JOIN tblPREmployeeEarning EmpEarning
-		ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
+		FROM tblPRTypeEarning Earning 
+			INNER JOIN tblPREmployeeEarning EmpEarning
+				ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
+			LEFT JOIN tblPREmployeeEarning EmpEarningLink
+				ON EmpEarning.intTypeEarningId = EmpEarningLink.intEmployeeEarningLinkId
+				AND EmpEarning.intEntityEmployeeId = EmpEarningLink.intEntityEmployeeId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId
 
 	--Insert Employee Earnings to Temp Table
