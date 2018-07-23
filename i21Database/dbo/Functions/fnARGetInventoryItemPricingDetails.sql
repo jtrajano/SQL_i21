@@ -77,9 +77,9 @@ BEGIN
 							ELSE
 								(CASE
 									WHEN ICISP.strDiscountBy = 'Amount'
-										THEN ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  ISNULL(ICISP.dblDiscount, @ZeroDecimal) ELSE @ZeroDecimal END ) 
+										THEN ICISP.dblUnitAfterDiscount - (CASE WHEN @Quantity <= ICISP.dblDiscountThruQty THEN ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  ISNULL(ICISP.dblDiscount, @ZeroDecimal) ELSE @ZeroDecimal END )  ELSE 0 END)
 									ELSE	
-										ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  (ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, @ZeroDecimal)/100.000000) ) ELSE @ZeroDecimal END ) 
+										ICISP.dblUnitAfterDiscount - (CASE WHEN @Quantity <= ICISP.dblDiscountThruQty THEN ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  (ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, @ZeroDecimal)/100.000000) ) ELSE @ZeroDecimal END ) ELSE 0 END)
 								END)
 							END)
 				 
