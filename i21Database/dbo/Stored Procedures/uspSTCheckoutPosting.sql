@@ -2439,21 +2439,34 @@ BEGIN
 
 								SET @ysnInvoiceStatus = 0
 								-----------------------------------------------------------------------
-								------------- START UNPOST MArk Up / Down -------------------------------
+								------------- START UNPOST MArk Up / Down -----------------------------
 								-----------------------------------------------------------------------
-								-- UNPOST	
-								EXEC uspSTMarkUpDownCheckoutPosting
-											@intCheckoutId
-											,@intCurrentUserId
-											,0 -- UNPOST
-											,@strMarkUpDownPostingStatusMsg OUTPUT
-											,@strBatchId OUTPUT
-											,@ysnIsPosted OUTPUT
-								-----------------------------------------------------------------------
-								------------- END UNPOST MArk Up / Down ---------------------------------
-								-----------------------------------------------------------------------
+								IF EXISTS(SELECT * FROM tblSTCheckoutMarkUpDowns WHERE intCheckoutId = @intCheckoutId)
+									BEGIN
+										-- UNPOST	
+										BEGIN TRY
+											EXEC uspSTMarkUpDownCheckoutPosting
+													@intCheckoutId
+													,@intCurrentUserId
+													,0 -- UNPOST
+													,@strMarkUpDownPostingStatusMsg OUTPUT
+													,@strBatchId OUTPUT
+													,@ysnIsPosted OUTPUT
+										END TRY
 
-								SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
+										BEGIN CATCH
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Unpost Mark Up/Down error: ' + ERROR_MESSAGE()
+											RETURN
+
+										END CATCH
+
+										SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
+									END
+								-----------------------------------------------------------------------
+								------------- END UNPOST MArk Up / Down -------------------------------
+								-----------------------------------------------------------------------
 							END
 					END
 				ELSE 
