@@ -30,6 +30,13 @@ SELECT C.intManufacturingCellId
 	,U.strUnitMeasure
 	,WS.intStatusId
 	,WS.strName AS strStatusName
+	,(
+		CASE 
+			WHEN ISNULL(WS1.strName, 'New') = 'New'
+				THEN 'Not Started'
+			ELSE WS1.strName
+			END
+		) AS strCountStatusName
 	,PT.intProductionTypeId
 	,PT.strName AS strProductionType
 	,W.dtmPlannedDate
@@ -114,3 +121,4 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 LEFT JOIN tblSMCompanyLocationSubLocation csl ON W.intSubLocationId = csl.intCompanyLocationSubLocationId
 LEFT JOIN vyuARCustomer cs ON W.intCustomerId = cs.intEntityId
 LEFT JOIN tblMFDepartment d ON W.intDepartmentId = d.intDepartmentId
+LEFT JOIN tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intCountStatusId
