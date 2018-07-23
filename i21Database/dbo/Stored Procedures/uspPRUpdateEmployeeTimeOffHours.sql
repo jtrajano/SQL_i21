@@ -70,7 +70,11 @@ BEGIN
 									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1)
 								END
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
-								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
+								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
+									DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
+								ELSE 
+									DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired) + 1, dtmDateHired)
+								END							
 							 WHEN (strAwardPeriod = 'Paycheck') THEN
 								dtmPaycheckEndDate
 							 ELSE NULL 
