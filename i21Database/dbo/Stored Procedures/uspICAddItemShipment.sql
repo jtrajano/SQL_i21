@@ -929,6 +929,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, dblTare
 	, dblNet
 	, ysnDestinationWeightsAndGrades
+	, intSort 
 )
 SELECT 
 	se.intShipmentId
@@ -971,6 +972,7 @@ SELECT
 	, se.dblTare
 	, se.dblNet
 	, se.ysnDestinationWeightsAndGrades
+	, se.intItemLotGroup
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 
@@ -1055,16 +1057,10 @@ FROM @ShipmentItemLots l INNER JOIN @ShipmentEntries se
 		AND se.intShipToLocationId = l.intShipToLocationId
 		AND se.intFreightTermId = l.intFreightTermId
 	INNER JOIN tblICInventoryShipment s 
-		ON se.intOrderType = s.intOrderType
-		AND se.intSourceType = s.intSourceType
-		AND se.intEntityCustomerId = s.intEntityCustomerId
-		AND se.dtmShipDate = s.dtmShipDate
-		AND se.intShipFromLocationId = s.intShipFromLocationId
-		AND se.intShipToLocationId = s.intShipToLocationId
-		AND se.intFreightTermId = s.intFreightTermId
+		ON s.intInventoryShipmentId = se.intShipmentId
 	INNER JOIN tblICInventoryShipmentItem si 
 		ON si.intInventoryShipmentId = s.intInventoryShipmentId
-		AND si.intItemId = se.intItemId
+		AND si.intSort = se.intItemLotGroup
 	INNER JOIN tblICItem i 
 		ON i.intItemId = si.intItemId
 WHERE i.strLotTracking <> 'No'
