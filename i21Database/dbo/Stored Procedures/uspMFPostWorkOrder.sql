@@ -733,8 +733,8 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost * PL.dblQuantity
-				ELSE ((@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity)
+					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)
+				ELSE ((@dblNewCost * RI.dblPercentage / 100/SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)) Over(Partition By PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity))
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
@@ -756,6 +756,7 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
+		Left JOIN dbo.tblICItemUOM IU on IU.intItemId=PL.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 		JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
