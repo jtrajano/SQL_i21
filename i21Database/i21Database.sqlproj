@@ -6825,6 +6825,9 @@
     <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementFullDetailReport.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryValuation.sql" />
+    <Build Include="dbo\Tables\tblCTImportBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessImportBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
