@@ -309,7 +309,7 @@ LEFT JOIN (
 		 , strPONumber				= NULL
 		 , strTransactionType		= 'Payment'
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(P.strPaymentInfo, '') + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
 		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
@@ -397,7 +397,8 @@ INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 --INSERT INTO STATEMENT STAGING
-DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock'
+DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 
+DELETE FROM #STATEMENTREPORT WHERE intInvoiceId IS NULL AND intPaymentId IS NULL
 INSERT INTO tblARCustomerStatementStagingTable (
 	  intRowId
 	, intEntityCustomerId
@@ -436,7 +437,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblPrepayments
 	, blbLogo
 )
-SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.dtmDate, STATEMENTREPORT.strTransactionType))
+SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType))
     , intEntityCustomerId		= STATEMENTREPORT.intEntityCustomerId
 	, intInvoiceId				= STATEMENTREPORT.intInvoiceId
 	, intInvoiceDetailId		= STATEMENTREPORT.intInvoiceDetailId
