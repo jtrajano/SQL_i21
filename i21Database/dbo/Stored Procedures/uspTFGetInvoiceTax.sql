@@ -187,8 +187,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, CASE WHEN tblARInvoice.strType != 'Tank Delivery' THEN Transporter.strName ELSE (SELECT TOP 1 strShipVia from tblSMShipVia WHERE ysnCompanyOwnedCarrier = 1 ORDER BY intEntityId) END AS strTransporterName
+					, CASE WHEN tblARInvoice.strType != 'Tank Delivery' THEN Transporter.strFederalTaxId ELSE (SELECT TOP 1 strFederalId from tblSMShipVia WHERE ysnCompanyOwnedCarrier = 1 ORDER BY intEntityId) END AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -366,8 +366,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, CASE WHEN tblARInvoice.strType != 'Tank Delivery' THEN Transporter.strName ELSE (SELECT TOP 1 strShipVia from tblSMShipVia WHERE ysnCompanyOwnedCarrier = 1 ORDER BY intEntityId) END AS strTransporterName
+					, CASE WHEN tblARInvoice.strType != 'Tank Delivery' THEN Transporter.strFederalTaxId ELSE (SELECT TOP 1 strFederalId from tblSMShipVia WHERE ysnCompanyOwnedCarrier = 1 ORDER BY intEntityId) END AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
