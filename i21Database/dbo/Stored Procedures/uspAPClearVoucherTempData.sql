@@ -24,7 +24,7 @@ BEGIN
 	SET @recordsToUpdate = (SELECT COUNT(*) FROM @ids);
 
 	UPDATE voucher
-		SET voucher.ysnReadyForPayment = 0, voucher.dblTempPayment = 0, voucher.strTempPaymentInfo = null
+		SET voucher.ysnReadyForPayment = 0, voucher.dblTempPayment = 0, voucher.dblTempWithheld voucher.strTempPaymentInfo = null
 	FROM tblAPBill voucher
 	INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 	WHERE voucher.ysnPosted = 1
