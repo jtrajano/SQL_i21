@@ -207,12 +207,18 @@ BEGIN TRY
 		SELECT	@intContractHeaderId = CD.intContractHeaderId,
 				@dblBalance		=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
 				@dblQuantity	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
-				@dblCost		=	ISNULL(CD.dblCashPrice, ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0)),
+				@dblCost		=	CASE	WHEN	CD.intPricingTypeId = 2
+											THEN	ISNULL(dblSeqBasis,0)
+											WHEN	CD.intPricingTypeId = 3
+											THEN	ISNULL(dblSeqFutures,0)
+											ELSE	ISNULL(CD.dblCashPrice,0)
+									END,
 				@dblAvailable	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)),
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
+ CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		IF @ysnDP = 1
