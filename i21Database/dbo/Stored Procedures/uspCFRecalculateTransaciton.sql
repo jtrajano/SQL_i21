@@ -2264,7 +2264,7 @@ BEGIN
 						SELECT TOP 1 
 							ysnTaxExempt
 							,dblTax
-						FROM @tblCFCalculatedTax
+						FROM @tblCFCalculatedTaxZeroQuantity
 						WHERE originalTax.intTaxGroupId = intTaxGroupId
 						AND originalTax.intTaxCodeId = intTaxCodeId
 						AND originalTax.intTaxClassId = intTaxClassId
@@ -3818,7 +3818,7 @@ BEGIN
 						SELECT TOP 1 
 							ysnTaxExempt
 							,dblTax
-						FROM @tblCFCalculatedTax
+						FROM @tblCFCalculatedTaxZeroQuantity
 						WHERE originalTax.intTaxGroupId = intTaxGroupId
 						AND originalTax.intTaxCodeId = intTaxCodeId
 						AND originalTax.intTaxClassId = intTaxClassId
@@ -5172,7 +5172,7 @@ BEGIN
 						SELECT TOP 1 
 							ysnTaxExempt
 							,dblTax
-						FROM @tblCFCalculatedTax
+						FROM @tblCFCalculatedTaxZeroQuantity
 						WHERE originalTax.intTaxGroupId = intTaxGroupId
 						AND originalTax.intTaxCodeId = intTaxCodeId
 						AND originalTax.intTaxClassId = intTaxClassId
