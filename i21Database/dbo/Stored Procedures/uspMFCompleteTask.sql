@@ -70,6 +70,10 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intOutputItemId INT
 		,@strWorkOrderNo NVARCHAR(MAX)
+		,@Items ShipmentStagingTable
+		,@Charges ShipmentChargeStagingTable
+		,@Lots ShipmentItemLotStagingTable
+		,@lotsOnly ShipmentItemLotsOnlyStagingTable
 
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
@@ -674,57 +678,69 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
-			--IF EXISTS (
+			--IF NOT EXISTS (
 			--		SELECT *
-			--		FROM dbo.tblICInventoryShipmentItem
+			--		FROM tblICInventoryShipmentItemLot
 			--		WHERE intInventoryShipmentItemId = @intShipmentItemId
-			--			AND (
-			--				intSubLocationId IS NULL
-			--				OR intStorageLocationId IS NULL
-			--				OR intDockDoorId IS NULL
-			--				)
+			--			AND intLotId = @intNewLotId
 			--		)
 			--BEGIN
-			--	UPDATE tblICInventoryShipmentItem
-			--	SET intSubLocationId = @intNewSubLocationId
-			--		,intStorageLocationId = @intNewStorageLocationId
-			--		,intDockDoorId = @intNewStorageLocationId
-			--	WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--	INSERT INTO tblICInventoryShipmentItemLot (
+			--		intInventoryShipmentItemId
+			--		,intLotId
+			--		,dblQuantityShipped
+			--		,dblGrossWeight
+			--		,dblTareWeight
+			--		,dblWeightPerQty
+			--		,intConcurrencyId
+			--		)
+			--	VALUES (
+			--		@intShipmentItemId
+			--		,@intNewLotId
+			--		,@dblMoveQty
+			--		,@dblMoveQty * @dblWeightPerQty
+			--		,0
+			--		,@dblWeightPerQty
+			--		,1
+			--		)
 			--END
-			IF NOT EXISTS (
-					SELECT *
-					FROM tblICInventoryShipmentItemLot
-					WHERE intInventoryShipmentItemId = @intShipmentItemId
-						AND intLotId = @intNewLotId
-					)
-			BEGIN
-				INSERT INTO tblICInventoryShipmentItemLot (
-					intInventoryShipmentItemId
-					,intLotId
-					,dblQuantityShipped
-					,dblGrossWeight
-					,dblTareWeight
-					,dblWeightPerQty
-					,intConcurrencyId
-					)
-				VALUES (
-					@intShipmentItemId
-					,@intNewLotId
-					,@dblMoveQty
-					,@dblMoveQty * @dblWeightPerQty
-					,0
-					,@dblWeightPerQty
-					,1
-					)
-			END
-			ELSE
-			BEGIN
-				UPDATE tblICInventoryShipmentItemLot
-				SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
-					,dblGrossWeight = dblGrossWeight + (@dblMoveQty * @dblWeightPerQty)
-				WHERE intInventoryShipmentItemId = @intShipmentItemId
-					AND intLotId = @intNewLotId
-			END
+			--ELSE
+			--BEGIN
+			--	UPDATE tblICInventoryShipmentItemLot
+			--	SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
+			--		,dblGrossWeight = dblGrossWeight + (@dblMoveQty * @dblWeightPerQty)
+			--	WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--		AND intLotId = @intNewLotId
+			--END
+			DELETE
+			FROM @lotsOnly
+
+			INSERT INTO @lotsOnly (
+				intInventoryShipmentId
+				,intInventoryShipmentItemId
+				-- Lot Details 
+				,intLotId
+				,dblQuantityShipped
+				,dblGrossWeight
+				,dblTareWeight
+				,dblWeightPerQty
+				,strWarehouseCargoNumber
+				)
+			SELECT intInventoryShipmentId = @intInventoryShipmentId
+				,intInventoryShipmentItemId = @intShipmentItemId
+				-- Lot Details 
+				,intLotId = @intNewLotId
+				,dblQuantityShipped = @dblMoveQty
+				,dblGrossWeight = @dblMoveQty * @dblWeightPerQty
+				,dblTareWeight = 0
+				,dblWeightPerQty = @dblWeightPerQty
+				,strWarehouseCargoNumber = ''
+
+			EXEC dbo.uspICAddItemShipment @Items = @Items
+				,@Charges = @Charges
+				,@Lots = @Lots
+				,@LotsOnly = @lotsOnly
+				,@intUserId = 1
 
 			SELECT @dblAllocatedQty = NULL
 
