@@ -13,7 +13,12 @@ RETURNS	@returntable	TABLE
 	strSeqPriceUOM					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dblQtyToPriceUOMConvFactor		NUMERIC(18,6),
 	dblNetWtToPriceUOMConvFactor	NUMERIC(18,6),
-	dblCostUnitQty					NUMERIC(18,6)
+	dblCostUnitQty					NUMERIC(38, 20),
+	dblSeqBasis						NUMERIC(18,6),
+	intSeqBasisCurrencyId			INT,
+	intSeqBasisUOMId				INT,
+	ysnValidFX						BIT,
+	dblSeqFutures					NUMERIC(18,6)
 )
 
 AS
@@ -36,11 +41,17 @@ BEGIN
 				@intMainCurrencyId	INT,
 				@ysnUseFXPrice		BIT,
 				@intNetWeightUOMId	INT,
-				@dblCostUnitQty		NUMERIC(18,6),
-				@dblFXCostUnitQty	NUMERIC(18,6)
+				@dblCostUnitQty		NUMERIC(38, 20),
+				@dblFXCostUnitQty	NUMERIC(38, 20),
+				@dblBasis			NUMERIC(18,6),
+				@dblMainBasis		NUMERIC(18,6),
+				@intBasisCurrencyId	INT,
+				@intBasisUOMId		INT,
+				@dblFutures			INT,
+				@dblMainFutures		INT
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
-				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END,
+				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
 				@intCurrencyId		=	CD.intCurrencyId,
 				@intMainCurrencyId	=	ISNULL(CY.intMainCurrencyId,CD.intCurrencyId),
 				@ysnSubCurrency		=	CY.ysnSubCurrency,
@@ -55,7 +66,13 @@ BEGIN
 				@ysnUseFXPrice		=	ysnUseFXPrice,
 				@intNetWeightUOMId	=	CD.intNetWeightUOMId,
 				@dblCostUnitQty		=	ISNULL(IU.dblUnitQty,1),
-				@dblFXCostUnitQty	=	ISNULL(FU.dblUnitQty,1)
+				@dblFXCostUnitQty	=	ISNULL(FU.dblUnitQty,1),
+				@dblBasis			=	CD.dblBasis,
+				@dblMainBasis		=	CD.dblBasis / CASE WHEN AY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(AY.intCent,0) = 0 THEN 1 ELSE AY.intCent END ELSE 1 END,
+				@intBasisCurrencyId	=	CD.intBasisCurrencyId,
+				@intBasisUOMId		=	CD.intBasisUOMId,
+				@dblFutures			=	CD.dblFutures,
+				@dblMainFutures		=	CD.dblFutures / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END
 
 	FROM		tblCTContractDetail CD
 	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	= CD.intCurrencyId
@@ -63,19 +80,20 @@ BEGIN
 	LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN	tblICItemUOM		FU	ON	FU.intItemUOMId		= CD.intFXPriceUOMId
 	LEFT JOIN	tblICUnitMeasure	FM	ON	FM.intUnitMeasureId = FU.intUnitMeasureId
+	LEFT JOIN	tblSMCurrency		AY	ON	AY.intCurrencyID	= CD.intBasisCurrencyId
 	WHERE		intContractDetailId = @intContractDetailId
 
 
 	IF	ISNULL(@ysnUseFXPrice,0) = 1 AND @intExchangeRateId IS NOT NULL AND @dblRate IS NOT NULL AND @intFXPriceUOMId IS NOT NULL
 	BEGIN
-		IF EXISTS(SELECT * FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId)
+		IF EXISTS(SELECT * FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId)
 		BEGIN
-			SELECT @intSeqCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId
+			SELECT @intSeqCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId
 			SELECT @dblRate = 1 / CASE WHEN ISNULL(@dblRate,0) = 0 THEN 1 ELSE @dblRate END
 		END
 		ELSE
 		BEGIN
-			SELECT @intSeqCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId
+			SELECT @intSeqCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId
 		END
 
 		SELECT @strSeqCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSeqCurrencyId
@@ -89,7 +107,12 @@ BEGIN
 				@strFXPriceUOM,
 				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intFXPriceUOMId,1),
 				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intFXPriceUOMId,1),
-				@dblFXCostUnitQty
+				@dblFXCostUnitQty,
+				dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intBasisUOMId,@dblMainBasis) * @dblRate,
+				@intSeqCurrencyId,
+				@intFXPriceUOMId,
+				1,
+				dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainFutures) * @dblRate
 	END
 	ELSE
 	BEGIN
@@ -102,7 +125,12 @@ BEGIN
 				@strPriceUOM,
 				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intPriceItemUOMId,1),
 				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intPriceItemUOMId,1),
-				@dblCostUnitQty
+				@dblCostUnitQty,
+				@dblBasis,
+				@intBasisCurrencyId,
+				@intBasisUOMId,
+				0,
+				@dblFutures
 	END
 
 	RETURN;
