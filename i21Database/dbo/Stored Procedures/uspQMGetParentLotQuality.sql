@@ -61,7 +61,7 @@ BEGIN TRY
 	BEGIN
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
-		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotNumber]', 'PL.strParentLotNumber')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strParentLotNumber]', 'PL.strParentLotNumber')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
@@ -98,7 +98,7 @@ BEGIN TRY
 			,I.strItemNo  
 			,I.strDescription  
 			,PL.intParentLotId AS intLotId
-			,PL.strParentLotNumber AS strLotNumber
+			,PL.strParentLotNumber
 			,LS.strSecondaryStatus AS strLotStatus
 			,L.strLotAlias
 			,S.strSampleNumber
@@ -144,7 +144,7 @@ BEGIN TRY
 	BEGIN
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
-		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotNumber]', 'PL.strParentLotNumber')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strParentLotNumber]', 'PL.strParentLotNumber')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
@@ -174,7 +174,7 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
-	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strLotNumber'
+	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strParentLotNumber'
 	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strBook,strSubBook,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
 	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
@@ -184,7 +184,7 @@ BEGIN TRY
 	,strItemNo  
 	,strDescription  
 	,intLotId  
-	,strLotNumber
+	,strParentLotNumber
 	,strLotStatus
 	,strLotAlias
 	,strSampleNumber
@@ -206,7 +206,7 @@ BEGIN TRY
 			,strItemNo  
 			,CQ.strDescription  
 			,intLotId
-			,strLotNumber
+			,strParentLotNumber
 			,strLotStatus
 			,strLotAlias
 			,strSampleNumber

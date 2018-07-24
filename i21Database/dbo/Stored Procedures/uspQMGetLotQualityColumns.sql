@@ -58,11 +58,11 @@ BEGIN TRY
 
 	IF ISNULL(@str, '') <> ''
 	BEGIN
-		SELECT @SQL = 'CREATE TABLE ##LotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,strComment INT,' + @str + ')'
+		SELECT @SQL = 'CREATE TABLE ##LotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strParentLotNumber INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,strComment INT,' + @str + ')'
 	END
 	ELSE
 	BEGIN
-		SELECT @SQL = 'CREATE TABLE ##LotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,strComment INT)'
+		SELECT @SQL = 'CREATE TABLE ##LotProperty (intSampleId INT,intItemId INT,intLotId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strParentLotNumber INT,strLotNumber INT,strLotStatus INT,strLotAlias INT,dblLotQty INT,strUnitMeasure INT,dtmDateCreated INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,strComment INT)'
 	END
 
 	EXEC sp_executesql @SQL

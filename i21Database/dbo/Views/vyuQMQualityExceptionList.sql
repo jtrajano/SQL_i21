@@ -21,8 +21,12 @@ SELECT TR.intTestResultId
 	,S.dblRepresentingQty
 	,UM1.strUnitMeasure AS strRepresentingUOM
 	,COALESCE(SC.strContainerNumber, S.strContainerNumber) AS strContainerNumber
-	,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
-	,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
+	--,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
+	--,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
+	,L.intLotId
+	,L.strLotNumber
+	,LPL.intParentLotId
+	,LPL.strParentLotNumber
 	,S.strSampleNumber
 	,S.strSampleRefNo
 	,E.strName
@@ -62,6 +66,7 @@ LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
+LEFT JOIN tblICParentLot AS LPL ON LPL.intParentLotId = L.intParentLotId
 LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId
 	AND S.intProductTypeId = 11
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
