@@ -129,6 +129,13 @@ AS
 			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
 			CP.ysnRequireProducerQty,
 
+			CASE	WHEN	CD.intPricingTypeId = 2
+					THEN	dblSeqBasis
+					WHEN	CD.intPricingTypeId = 3
+					THEN	dblSeqFutures
+					ELSE	dblSeqPrice
+			END		dblSeqCost,
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,

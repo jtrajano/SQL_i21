@@ -17,7 +17,8 @@ RETURNS	@returntable	TABLE
 	dblSeqBasis						NUMERIC(18,6),
 	intSeqBasisCurrencyId			INT,
 	intSeqBasisUOMId				INT,
-	ysnValidFX						BIT
+	ysnValidFX						BIT,
+	dblSeqFutures					NUMERIC(18,6)
 )
 
 AS
@@ -45,7 +46,9 @@ BEGIN
 				@dblBasis			NUMERIC(18,6),
 				@dblMainBasis		NUMERIC(18,6),
 				@intBasisCurrencyId	INT,
-				@intBasisUOMId		INT
+				@intBasisUOMId		INT,
+				@dblFutures			INT,
+				@dblMainFutures		INT
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
 				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
@@ -67,7 +70,9 @@ BEGIN
 				@dblBasis			=	CD.dblBasis,
 				@dblMainBasis		=	CD.dblBasis / CASE WHEN AY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(AY.intCent,0) = 0 THEN 1 ELSE AY.intCent END ELSE 1 END,
 				@intBasisCurrencyId	=	CD.intBasisCurrencyId,
-				@intBasisUOMId		=	CD.intBasisUOMId
+				@intBasisUOMId		=	CD.intBasisUOMId,
+				@dblFutures			=	CD.dblFutures,
+				@dblMainFutures		=	CD.dblFutures / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END
 
 	FROM		tblCTContractDetail CD
 	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	= CD.intCurrencyId
@@ -106,7 +111,8 @@ BEGIN
 				dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intBasisUOMId,@dblMainBasis) * @dblRate,
 				@intSeqCurrencyId,
 				@intFXPriceUOMId,
-				1
+				1,
+				dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainFutures) * @dblRate
 	END
 	ELSE
 	BEGIN
@@ -123,7 +129,8 @@ BEGIN
 				@dblBasis,
 				@intBasisCurrencyId,
 				@intBasisUOMId,
-				0
+				0,
+				@dblFutures
 	END
 
 	RETURN;
