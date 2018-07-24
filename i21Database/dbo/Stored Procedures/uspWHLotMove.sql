@@ -52,10 +52,17 @@ BEGIN TRY
 		,@intInventoryTransactionType INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+		,@ysnAllowMultipleLots INT
+		,@ysnAllowMultipleItems INT
+		,@ysnCPMergeOnMove BIT
+		,@ysnMergeOnMove BIT
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
+		,@ysnCPMergeOnMove = ysnMergeOnMove
 	FROM tblMFCompanyPreference
+
+	SELECT @dtmDate = GETDATE()
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -85,8 +92,37 @@ BEGIN TRY
 
 	SELECT @intDestinatinLocationRestrictionId = intRestrictionId
 		,@intNewLocationId = intLocationId
+		,@ysnAllowMultipleLots = ysnAllowMultipleLot
+		,@ysnAllowMultipleItems = ysnAllowMultipleItem
+		,@ysnMergeOnMove = ysnMergeOnMove
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intNewStorageLocationId
+
+	SELECT @intNewLotId = intLotId
+	FROM tblICLot
+	WHERE intStorageLocationId = @intNewStorageLocationId
+		AND intItemId = @intItemId
+		AND dblQty > 0
+		AND intLotStatusId = @intLotStatusId
+		AND ISNULL(dtmExpiryDate, @dtmDate) >= @dtmDate
+
+	IF @ysnAllowMultipleLots = 0
+		AND @ysnMergeOnMove = 1
+		AND @ysnCPMergeOnMove = 1
+		AND @intNewLotId IS NOT NULL
+	BEGIN
+		EXEC [uspMFLotMerge] @intLotId = @intLotId
+			,@intNewLotId = @intNewLotId
+			,@dblMergeQty = @dblMoveQty
+			,@intMergeItemUOMId = @intItemUOMId
+			,@intUserId = @intUserId
+			,@blnValidateLotReservation = 0
+			,@dtmDate = @dtmDate
+			,@strReasonCode = NULL
+			,@strNotes = NULL
+
+		RETURN
+	END
 
 	IF @intDestinatinLocationRestrictionId IS NULL
 		SELECT @intDestinatinLocationRestrictionId = 0
@@ -161,8 +197,6 @@ BEGIN TRY
 	END
 
 	SELECT @strNewLotNumber = @strLotNumber
-
-	SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -320,6 +354,70 @@ BEGIN TRY
 		BEGIN
 			RAISERROR (
 					'Scanned lot/pallet is not bond released. Please scan bond released lot/pallet to continue.'
+					,16
+					,1
+					)
+		END
+	END
+
+	IF @ysnAllowMultipleLots = 0
+		AND @ysnAllowMultipleItems = 0
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND (
+						dblQty > 0
+						OR dblWeight > 0
+						)
+				)
+		BEGIN
+			RAISERROR (
+					'The storage location is already used by another lot .'
+					,16
+					,1
+					)
+		END
+	END
+	ELSE IF @ysnAllowMultipleLots = 0
+		AND @ysnAllowMultipleItems = 1
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intItemId = @intItemId
+					AND (
+						dblQty > 0
+						OR dblWeight > 0
+						)
+				)
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by other lot of item ' + @strItemNumber + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+	END
+	ELSE IF @ysnAllowMultipleLots = 1
+		AND @ysnAllowMultipleItems = 0
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intItemId <> @intItemId
+					AND dblQty > 0
+				)
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by another item.'
+
+			RAISERROR (
+					@ErrMsg
 					,16
 					,1
 					)

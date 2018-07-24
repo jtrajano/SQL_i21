@@ -1406,7 +1406,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						--@str1099Name    = agcus_1099_name,
 						@str1099Form	= '''',
 						@str1099Type	= '''',
-						@strFederalTaxId	= NULL, --To Map
+						@strFederalTaxId	= ptcus_sales_tax_id, --To Map
 						@dtmW9Signed	= NULL, --To Map,
 						@imgPhoto = NULL,
 

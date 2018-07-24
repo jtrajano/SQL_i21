@@ -10,13 +10,13 @@ BEGIN TRY
 		,@intLocationId INT
 		,@dtmCurrentDate DATETIME
 		,@strUserName NVARCHAR(50)
-		,@strOrderNo nvarchar(50) 
-		,@intStageLocationTypeId int
-		,@strStageLocationType nvarchar(50)
-		,@intProductionStagingId int
-		,@intProductionStageLocationId int
-		,@intStagingId int
-		,@intStageLocationId int
+		,@strOrderNo NVARCHAR(50)
+		,@intStageLocationTypeId INT
+		,@strStageLocationType NVARCHAR(50)
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
+		,@intStagingId INT
+		,@intStageLocationId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -29,12 +29,6 @@ BEGIN TRY
 			intLocationId INT
 			,intUserId INT
 			) x
-
-	DECLARE @intBlendProductionStagingUnitId INT
-
-	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intLocationId
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
@@ -51,33 +45,6 @@ BEGIN TRY
 		,@ysnProposed = 0
 		,@strPatternString = @strOrderNo OUTPUT
 
-	SELECT @intStageLocationTypeId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Staging Location Type'
-
-	SELECT @strStageLocationType = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intLocationId = @intLocationId
-		AND intAttributeId = @intStageLocationTypeId
-
-	SELECT @intProductionStagingId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Production Staging Location'
-
-	SELECT @intProductionStageLocationId = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intLocationId = @intLocationId
-		AND intAttributeId = @intProductionStagingId
-
-	SELECT @intStagingId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Staging Location'
-
-	SELECT @intStageLocationId = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intLocationId = @intLocationId
-		AND intAttributeId = @intStagingId
-
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
@@ -93,18 +60,18 @@ BEGIN TRY
 		,strComment
 		,dtmOrderDate
 		,strLastUpdateBy
+		,intLocationId
 		)
 	SELECT 1
 		,2
 		,1
 		,@strOrderNo
 		,''
-		,Case When @strStageLocationType='Alternate Staging Location' Then NULL
-				When @strStageLocationType='Production Staging Location' Then @intProductionStageLocationId
-				Else @intStageLocationId End
+		,NULL
 		,''
 		,@dtmCurrentDate
 		,@strUserName
+		,@intLocationId
 
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
@@ -171,7 +138,7 @@ BEGIN TRY
 		,I.intLayerPerPallet
 		,L.dtmDateCreated
 
-	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation =@OrderDetailInformation
+	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
 	INSERT INTO dbo.tblMFOrderManifest (
 		intConcurrencyId

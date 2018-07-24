@@ -114,6 +114,9 @@ SELECT l.intLotId
 	,l.intUnitPallet
 	,LI.intWorkOrderId
 	,mp.intAttributeTypeId
+	,ISNULL(RC.strReportName, 'LotLabel') AS strReportName
+	,ISNULL(RC.intNoOfLabel, 1) AS intNoOfLabel
+	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -137,3 +140,5 @@ LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
 LEFT JOIN tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
 Left JOIN tblMFCompanyPreference CP on 1=1
+LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
+LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId

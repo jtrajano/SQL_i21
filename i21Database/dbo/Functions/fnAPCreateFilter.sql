@@ -20,6 +20,12 @@ BEGIN
 	SET @filter = @filter + CASE @datatype
 				WHEN 'Date'
 					THEN ' BETWEEN ' + @from + ' AND ' + @to
+				WHEN 'DateTime'
+					THEN
+						CASE UPPER(@condition)
+						WHEN UPPER('Between') THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
+						WHEN UPPER('Equal To') THEN ' = ''' + @from + ''''
+						END
 				WHEN 'String'
 					THEN
 						CASE UPPER(@condition)

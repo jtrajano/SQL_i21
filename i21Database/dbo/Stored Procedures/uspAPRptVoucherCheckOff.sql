@@ -29,7 +29,7 @@ DECLARE @datatype NVARCHAR(50)
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
+	SELECT PaymentDate AS dtmDatePaid,* FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -72,15 +72,15 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDatePaid'
 
 IF @dtmBillDate IS NOT NULL
 BEGIN	
@@ -134,7 +134,7 @@ SET @query = 'SELECT * FROM (
 					Location ,
 					BillDate ,
 					PostDate ,
-					PaymentDate ,
+					PaymentDate AS dtmDatePaid ,
 					ExemptUnits ,
 					dblTotal ,
 					dblTax ,

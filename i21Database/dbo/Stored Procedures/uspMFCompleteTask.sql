@@ -111,8 +111,8 @@ BEGIN TRY
 		BEGIN TRANSACTION
 
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intOrderHeaderId
-			,34
+		,@intOrderHeaderId
+		,34
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -265,8 +265,17 @@ BEGIN TRY
 				,@intItemId = T.intItemId
 				,@intStorageLocationId = T.intFromStorageLocationId
 			FROM tblMFTask T
-			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
+			LEFT JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
 			WHERE T.intTaskId = @intTaskId
+
+			IF @intNewStorageLocationId IS NULL
+			BEGIN
+				RAISERROR (
+						'Destination storage unit cannot be blank.'
+						,11
+						,1
+						)
+			END
 
 			SELECT @intSubLocationId = intSubLocationId
 			FROM tblICStorageLocation
@@ -317,14 +326,18 @@ BEGIN TRY
 					,@blnValidateLotReservation = 0
 					,@blnInventoryMove = @blnInventoryMove
 					,@strNotes = @strDescription
+					,@intNewLotId = @intNewLotId
 
-				SELECT TOP 1 @intNewLotId = intLotId
-				FROM tblICLot
-				WHERE strLotNumber = @strLotNumber
-					AND intItemId = @intItemId
-					AND intLocationId = @intLotLocationId
-					AND intSubLocationId = @intNewSubLocationId
-					AND intStorageLocationId = @intNewStorageLocationId
+				IF @intNewLotId IS NULL
+				BEGIN
+					SELECT TOP 1 @intNewLotId = intLotId
+					FROM tblICLot
+					WHERE strLotNumber = @strLotNumber
+						AND intItemId = @intItemId
+						AND intLocationId = @intLotLocationId
+						AND intSubLocationId = @intNewSubLocationId
+						AND intStorageLocationId = @intNewStorageLocationId
+				END
 			END
 			ELSE
 			BEGIN
@@ -545,24 +558,23 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
-			IF EXISTS (
-					SELECT *
-					FROM dbo.tblICInventoryShipmentItem
-					WHERE intInventoryShipmentItemId = @intShipmentItemId
-						AND (
-							intSubLocationId IS NULL
-							OR intStorageLocationId IS NULL
-							OR intDockDoorId IS NULL
-							)
-					)
-			BEGIN
-				UPDATE tblICInventoryShipmentItem
-				SET intSubLocationId = @intNewSubLocationId
-					,intStorageLocationId = @intNewStorageLocationId
-					,intDockDoorId = @intNewStorageLocationId
-				WHERE intInventoryShipmentItemId = @intShipmentItemId
-			END
-
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM dbo.tblICInventoryShipmentItem
+			--		WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--			AND (
+			--				intSubLocationId IS NULL
+			--				OR intStorageLocationId IS NULL
+			--				OR intDockDoorId IS NULL
+			--				)
+			--		)
+			--BEGIN
+			--	UPDATE tblICInventoryShipmentItem
+			--	SET intSubLocationId = @intNewSubLocationId
+			--		,intStorageLocationId = @intNewStorageLocationId
+			--		,intDockDoorId = @intNewStorageLocationId
+			--	WHERE intInventoryShipmentItemId = @intShipmentItemId
+			--END
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblICInventoryShipmentItemLot
