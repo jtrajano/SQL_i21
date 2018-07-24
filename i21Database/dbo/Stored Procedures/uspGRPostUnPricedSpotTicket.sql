@@ -124,7 +124,7 @@ BEGIN TRY
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 				
 				UNION
 				--Discount Item
@@ -155,7 +155,7 @@ BEGIN TRY
 				JOIN tblICItem DItem 
 					ON DItem.intItemId = a.intItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 					AND ISNULL(QM.dblDiscountDue, 0) <> 0
 				
 				UNION
@@ -182,7 +182,7 @@ BEGIN TRY
 				JOIN tblICItem Item 
 					ON Item.intItemId = Setup.intDefaultFeeItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 					AND ISNULL(SC.dblTicketFees, 0) <> 0
 
 				EXEC [dbo].[uspAPCreateBillData] 
@@ -246,7 +246,7 @@ BEGIN TRY
 					JOIN tblSCTicket SC 
 						ON SC.intTicketId = SpotTicket.intTicketId
 					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
-						AND SC.intEntityId = @intEntityId
+						AND SpotTicket.intEntityId = @intEntityId
 
 					UPDATE SC
 					SET dblUnitPrice = @dblFuturesPrice
@@ -255,7 +255,7 @@ BEGIN TRY
 					JOIN tblSCTicket SC 
 						ON SC.intTicketId = SpotTicket.intTicketId
 					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
-						AND SC.intEntityId = @intEntityId
+						AND SpotTicket.intEntityId = @intEntityId
 
 				END
 
@@ -466,7 +466,7 @@ BEGIN TRY
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 
 				UNION
 
@@ -563,7 +563,7 @@ BEGIN TRY
 					ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
 						AND ICS.intSourceType = 1
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 					AND ISNULL(QM.dblDiscountDue, 0) <> 0
 				
 				UNION
@@ -668,7 +668,7 @@ BEGIN TRY
 					ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
 						AND ICS.intSourceType = 1
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
-					AND SC.intEntityId = @intEntityId
+					AND SpotTicket.intEntityId = @intEntityId
 					AND ISNULL(SC.dblTicketFees, 0) <> 0
 
 				EXEC [dbo].[uspARProcessInvoices] 
@@ -689,14 +689,14 @@ BEGIN TRY
 					SET intInvoiceId = CONVERT(INT,@CreatedIvoices)
 					FROM tblGRUnPricedSpotTicket SpotTicket
 					JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
-					WHERE SpotTicket.intUnPricedId = @intUnPricedId AND SC.intEntityId = @intEntityId
+					WHERE SpotTicket.intUnPricedId = @intUnPricedId AND SpotTicket.intEntityId = @intEntityId
 
 					UPDATE SC
 					SET dblUnitPrice = @dblFuturesPrice
 					   ,dblUnitBasis = @dblFuturesBasis
 					FROM tblGRUnPricedSpotTicket SpotTicket
 					JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
-					WHERE SpotTicket.intUnPricedId = @intUnPricedId AND SC.intEntityId = @intEntityId
+					WHERE SpotTicket.intUnPricedId = @intUnPricedId AND SpotTicket.intEntityId = @intEntityId
 
 				END
 				ELSE
