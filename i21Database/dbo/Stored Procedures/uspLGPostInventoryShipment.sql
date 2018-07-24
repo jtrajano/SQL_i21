@@ -233,7 +233,7 @@ BEGIN
 						THEN ISNULL(LoadDetail.dblNet, 0)
 					ELSE ISNULL(DetailLot.dblNet, 0)
 					END
-				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, Lot.intWeightUOMId, 1)
+				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId,LoadDetail.intWeightItemUOMId), 1)
 			,dblUOMQty = CASE 
 				WHEN Lot.intLotId IS NULL
 					THEN ItemUOM.dblUnitQty
