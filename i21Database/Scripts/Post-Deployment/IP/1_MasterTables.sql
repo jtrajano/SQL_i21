@@ -34,6 +34,12 @@ BEGIN
     VALUES(4,'XML')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPFileType WHERE intFileTypeId = 5)
+BEGIN
+    INSERT INTO tblIPFileType(intFileTypeId,strName)
+    VALUES(5,'IDOC XML')
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblIPDelimiter WHERE intDelimiterId = 44)
 BEGIN
     INSERT INTO tblIPDelimiter(intDelimiterId,strName)
