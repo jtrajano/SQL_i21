@@ -36,6 +36,7 @@ SELECT intSelectedInstrumentTypeId,
 	  ,ot.intBankId
 	  ,ot.intBankAccountId
 	   ,ot.intCurrencyExchangeRateTypeId
+	   ,ot.strBrokerTradeNo
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
@@ -81,6 +82,7 @@ SELECT intSelectedInstrumentTypeId,
 	  ,ot.intBankId
 	  ,ot.intBankAccountId
 	  ,ot.intCurrencyExchangeRateTypeId  	
+	  ,ot.strBrokerTradeNo
 FROM tblRKFutOptTransaction ot
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId

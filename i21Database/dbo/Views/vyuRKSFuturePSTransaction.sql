@@ -39,6 +39,7 @@ SELECT intSelectedInstrumentTypeId,
 	  ,ot.intBankAccountId
 	  , ot.intCurrencyExchangeRateTypeId    
 	  ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime     
+	  ,ot.strBrokerTradeNo
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
@@ -83,6 +84,7 @@ SELECT intSelectedInstrumentTypeId,
 	  ,ot.intBankAccountId 
 	  , ot.intCurrencyExchangeRateTypeId       
 	  ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime
+	  ,ot.strBrokerTradeNo
 FROM tblRKFutOptTransaction ot
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId

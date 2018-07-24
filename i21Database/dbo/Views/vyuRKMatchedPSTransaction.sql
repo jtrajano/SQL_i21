@@ -15,6 +15,8 @@ SELECT
 	,dtmSTransDate
 	,isnull(dblLPrice,0.0) as dblLPrice
 	,isnull(dblSPrice,0.0) as dblSPrice
+	,strLInternalTradeNo
+	,strSInternalTradeNo
 	,strLBrokerTradeNo
 	,strSBrokerTradeNo
 	,isnull(dblContractSize,0.0) as dblContractSize
@@ -41,8 +43,10 @@ FROM
 		,ot1.dtmTransactionDate dtmSTransDate
 		,isnull(ot.dblPrice,0) dblLPrice
 		,isnull(ot1.dblPrice,0) dblSPrice
-		,ot.strInternalTradeNo strLBrokerTradeNo
-		,ot1.strInternalTradeNo strSBrokerTradeNo
+		,ot.strInternalTradeNo strLInternalTradeNo
+		,ot1.strInternalTradeNo strSInternalTradeNo
+		,ot.strBrokerTradeNo strLBrokerTradeNo
+		,ot1.strBrokerTradeNo strSBrokerTradeNo
 		,fm.dblContractSize dblContractSize,0 as intConcurrencyId
 		--,(CASE WHEN bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end) / case when ysnSubCurrency = 'true' then intCent else 1 end as dblFutCommission
 		,psd.dblFutCommission
