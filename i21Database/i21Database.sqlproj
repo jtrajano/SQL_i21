@@ -6820,7 +6820,6 @@
     <Build Include="dbo\Functions\fnCMGetBankBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteMultipleTransactions.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementFullDetailReport.sql" />
@@ -7117,5 +7116,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorCreatePostVoucher.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
   </ItemGroup>
 </Project>
