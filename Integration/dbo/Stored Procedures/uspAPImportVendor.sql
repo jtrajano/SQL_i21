@@ -550,6 +550,14 @@ BEGIN
 			VALUES (@EntityId, ''Vendor'', 0)
 		END
 		
+		IF EXISTS (select TOP 1 1 from tblEMEntityLocation where strLocationName = @strLocationName)
+		BEGIN 
+			DECLARE @error NVARCHAR(1000) = NULL;
+			SET @error =  ''Throw message: Vendor Location is already existing.'';
+
+			RAISERROR(@error, 16, 1);
+			RETURN;
+		END
 
 		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
 		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
