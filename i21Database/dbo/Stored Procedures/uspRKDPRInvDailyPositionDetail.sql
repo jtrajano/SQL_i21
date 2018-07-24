@@ -7,6 +7,13 @@
 	,@dtmToDate datetime=null
 	,@strByType nvarchar(50) = null
 AS
+--declare 		 @intCommodityId nvarchar(max)= '1'
+--		,@intLocationId int = null
+--		,@intVendorId int = null
+--		,@strPurchaseSales nvarchar(50) = null
+--		,@strPositionIncludes NVARCHAR(100) = 'All Storage'
+--		,@dtmToDate datetime = getdate()
+--		,@strByType nvarchar(50) = null
 
 BEGIN
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
@@ -680,27 +687,26 @@ BEGIN
 	FROM (
 		SELECT * from @Final where strSeqHeader='In-House' and strType='Sales In-Transit')t 
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName ,strItemNo,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
-					  [Storage Due], dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId,intCompanyLocationId,intStorageScheduleTypeId,strTicketNumber,intTicketId)
-		SELECT 5,[Storage Type],@strDescription,strType,dblTotal,intCommodityId,strLocation,strItemNo,dtmDeliveryDate ,strTicket  
-		,strCustomerReference,strDPAReceiptNo ,dblDiscDue ,[Storage Due]  
-		,dtmLastStorageAccrueDate ,strScheduleId ,@intCommodityUnitMeasureId,intCompanyLocationId,intStorageScheduleTypeId,strTicketNumber,intTicketId   from (
-		SELECT [Storage Type],[Storage Type] strType,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(Balance, 0)) dblTotal,
-		r.intCommodityId,Loc AS strLocation ,r.strItemNo,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
-		,Customer as strCustomerReference,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS [Storage Due]  
-		,dtmLastStorageAccrueDate ,strScheduleId ,intCompanyLocationId,intStorageTypeId intStorageScheduleTypeId,strTicketNumber,intTicketId  
-		FROM #tblGetStorageDetailByDate  r
-		WHERE r.intCommodityId = @intCommodityId AND r.ysnDPOwnedType = 0  AND r.ysnReceiptedStorage = 0  
-		AND	intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-		)t 
-		WHERE intCompanyLocationId IN (
-				SELECT intCompanyLocationId FROM tblSMCompanyLocation
-				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-					ELSE isnull(ysnLicensed, 0) END
-				) 
-	-- Delivary sheet
+	
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
+	SELECT distinct 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
+	strName strCustomer,intTicketId,strTicketNumber,[Delivery Date] dtmDeliveryDate
+	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
+	,intCompanyLocationId
+	FROM #tblGetStorageDetailByDate s
+	JOIN tblEMEntity e on e.intEntityId= s.intEntityId
+	WHERE 
+	intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
+	and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+						ELSE isnull(ysnLicensed, 0) END
+						))t 
+	GROUP BY intSeqId,strSeqHeader,strCommodityCode,strType,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
+
+
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName ,strItemNo,dtmDeliveryDate ,strTicket ,strCustomerReference,strCustomer,
 					  intFromCommodityUnitMeasureId,intCompanyLocationId,strTicketNumber,intTicketId)
 

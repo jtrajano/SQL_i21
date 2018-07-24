@@ -7,7 +7,8 @@
 		,@dtmToDate datetime = NULL
 		,@strByType nvarchar(50) = null
 AS
---declare 		 @intCommodityId nvarchar(max)= '17'
+
+--declare 		 @intCommodityId nvarchar(max)= '1'
 --		,@intLocationId int = null
 --		,@intVendorId int = null
 --		,@strPurchaseSales nvarchar(50) = null
@@ -683,7 +684,7 @@ BEGIN
 						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
-
+	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT strCommodityCode,'Price Risk' [strType],'Open Contract' strContractType,
 	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
@@ -769,11 +770,7 @@ BEGIN
 				) group by intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 
 	END			
-	INSERT INTO @tempFinal(strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
-							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strCurrency)	
-	SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
-							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strCurrency
-	FROM @tempFinal WHERE  strType='Net Hedge' 
+
 
 	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
