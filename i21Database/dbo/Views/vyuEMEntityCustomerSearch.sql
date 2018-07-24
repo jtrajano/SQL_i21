@@ -63,10 +63,10 @@ SELECT DISTINCT
 	, strCreditCode			= CUSTOMER.strCreditCode
 	, dtmCreditLimitReached = CUSTOMER.dtmCreditLimitReached
 	, intCreditLimitReached = DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
-	, ysnHasPastDueBalances	= CASE 
+	, ysnHasPastDueBalances	= CAST(0 AS BIT) /*CASE 
 			WHEN CI.dbl10Days > 0 OR CI.dbl30Days > 0 OR CI.dbl60Days > 0 OR CI.dbl90Days > 0 OR CI.dbl91Days > 0 THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)
-		END
+		END*/
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END
 FROM tblARCustomer CUSTOMER
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
@@ -113,16 +113,16 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (intLineOfBusinessId)
 ) LINEOFBUSINESS
-LEFT JOIN (
-	SELECT intEntityCustomerId 
-		, dbl10Days
-		, dbl30Days
-		, dbl60Days
-		, dbl90Days
-		, dbl91Days
-	FROM
-	vyuARCustomerInquiry 
-) CI
-on CI.intEntityCustomerId = CUSTOMER.intEntityId
+-- LEFT JOIN (
+-- 	SELECT intEntityCustomerId 
+-- 		, dbl10Days
+-- 		, dbl30Days
+-- 		, dbl60Days
+-- 		, dbl90Days
+-- 		, dbl91Days
+-- 	FROM
+-- 	vyuARCustomerInquiry 
+-- ) CI
+-- on CI.intEntityCustomerId = CUSTOMER.intEntityId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO
