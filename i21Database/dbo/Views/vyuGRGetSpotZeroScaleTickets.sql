@@ -16,7 +16,13 @@ SELECT
 ,intItemUOMIdTo			= SC.intItemUOMIdTo
 ,strItemStockUOM		= UnitMeasure.strUnitMeasure
 FROM tblSCTicket SC
-LEFT JOIN tblSCTicketSplit TS		 ON TS.intTicketId				 = SC.intTicketId AND TS.intStorageScheduleTypeId = -3
+LEFT JOIN tblSCTicketSplit TS		 ON TS.intTicketId				 = SC.intTicketId AND TS.intStorageScheduleTypeId = -3 
+																		AND TS.intCustomerId NOT IN 
+																		(	
+																			SELECT intEntityId 
+																			FROM tblGRUnPricedSpotTicket 
+																			WHERE intTicketId = SC.intTicketId
+																		 )
 JOIN tblICItem Item					 ON Item.intItemId				 = SC.intItemId
 JOIN tblSCListTicketTypes TicketType ON TicketType.intTicketTypeId	 = SC.intTicketTypeId
 JOIN tblSMCompanyLocation Loc		 ON Loc.intCompanyLocationId	 = SC.intProcessingLocationId
@@ -28,9 +34,5 @@ ISNULL(SC.dblUnitPrice,0) = 0
 AND ISNULL(SC.dblUnitBasis,0) = 0
 AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
 AND SC.strTicketStatus = 'C'
-AND SC.intTicketId NOT IN (
-						   CASE 
-								WHEN SC.intStorageScheduleTypeId = -3 THEN  (SELECT intTicketId FROM tblGRUnPricedSpotTicket)
-						   END
-						  )
+
 
