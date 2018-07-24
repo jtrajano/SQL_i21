@@ -36,6 +36,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
+	  , @query								AS NVARCHAR(MAX)	= NULL
+	  , @queryRunningBalance				AS NVARCHAR(MAX)	= NULL
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -51,6 +53,11 @@ SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
 SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
 SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+
+IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
 BEGIN
@@ -214,8 +221,10 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , intInvoiceId				= TRANSACTIONS.intInvoiceId
 	 , intPaymentId				= TRANSACTIONS.intPaymentId
 	 , intInvoiceDetailId		= TRANSACTIONS.intInvoiceDetailId
+	 , intEntityUserId			= @intEntityUserIdLocal
 	 , strInvoiceNumber			= TRANSACTIONS.strTransactionNumber
 	 , dtmDate					= TRANSACTIONS.dtmDate
+	 , dtmAsOfDate				= @dtmDateToLocal
 	 , dblAmount				= TRANSACTIONS.dblAmount
 	 , dblQuantity				= TRANSACTIONS.dblQuantity	     
 	 , dblInvoiceDetailTotal	= TRANSACTIONS.dblInvoiceDetailTotal
@@ -339,8 +348,10 @@ IF @ysnIncludeBudgetLocal = 1
 			 , intInvoiceId				= CB.intCustomerBudgetId
 			 , intPaymentId				= NULL
 			 , intInvoiceDetailId		= NULL
+			 , intEntityUserId			= @intEntityUserIdLocal
 			 , strInvoiceNumber			= NULL
 			 , dtmDate					= CB.dtmBudgetDate
+			 , dtmAsOfDate				= @dtmDateToLocal
 			 , dblAmount				= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , dblQuantity				= 0.000000
 			 , dblInvoiceDetailTotal	= CB.dblBudgetAmount - CB.dblAmountPaid
@@ -365,8 +376,10 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , intInvoiceId				= -999
 	 , intPaymentId				= NULL
 	 , intInvoiceDetailId		= NULL
+	 , intEntityUserId			= @intEntityUserIdLocal
 	 , strInvoiceNumber			= NULL
 	 , dtmDate					= @dtmDateFromLocal
+	 , dtmAsOfDate				= @dtmDateToLocal
 	 , dblAmount				= ISNULL(BB.dblTotalAR, 0.000000)
 	 , dblQuantity				= NULL
 	 , dblInvoiceDetailTotal	= ISNULL(BB.dblTotalAR, 0.000000)
@@ -399,6 +412,8 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 --INSERT INTO STATEMENT STAGING
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 
 DELETE FROM #STATEMENTREPORT WHERE intInvoiceId IS NULL AND intPaymentId IS NULL
+
+SET @query = CAST('' AS NVARCHAR(MAX)) + '
 INSERT INTO tblARCustomerStatementStagingTable (
 	  intRowId
 	, intEntityCustomerId
@@ -442,9 +457,9 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, intInvoiceId				= STATEMENTREPORT.intInvoiceId
 	, intInvoiceDetailId		= STATEMENTREPORT.intInvoiceDetailId
 	, intPaymentId				= STATEMENTREPORT.intPaymentId
-	, intEntityUserId			= @intEntityUserIdLocal
+	, intEntityUserId			= STATEMENTREPORT.intEntityUserId
 	, dtmDate					= STATEMENTREPORT.dtmDate
-	, dtmAsOfDate				= @dtmDateToLocal
+	, dtmAsOfDate				= STATEMENTREPORT.dtmAsOfDate
 	, strCustomerNumber			= CUSTOMER.strCustomerNumber
 	, strCustomerName			= CUSTOMER.strName
 	, strAccountNumber			= CUSTOMER.strAccountNumber
@@ -457,11 +472,11 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, strStatementFooterComment = CUSTOMER.strStatementFooterComment
 	, strCompanyName			= COMPANY.strCompanyName
 	, strCompanyAddress			= COMPANY.strCompanyAddress
-	, strStatementFormat		= 'Full Details - No Card Lock'
+	, strStatementFormat		= ''Full Details - No Card Lock''
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
-	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType = 'Invoices' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId ORDER BY STATEMENTREPORT.dtmDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType = ''Invoices'' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
 	, dblTotalAR				= ISNULL(AGING.dblTotalAR, 0.000000)
 	, dblFuture					= ISNULL(AGING.dblFuture, 0.000000)
 	, dbl0Days					= ISNULL(AGING.dbl0Days, 0.000000)
@@ -472,7 +487,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dbl91Days					= ISNULL(AGING.dbl91Days, 0.000000)
 	, dblCredits				= ISNULL(AGING.dblCredits, 0.000000)
 	, dblPrepayments			= ISNULL(AGING.dblPrepayments, 0.000000)
-	, blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	, blbLogo					= dbo.fnSMGetCompanyLogo(''Header'')
 FROM #STATEMENTREPORT STATEMENTREPORT
 INNER JOIN (
 	SELECT intEntityCustomerId
@@ -480,7 +495,7 @@ INNER JOIN (
 		 , strName
 		 , strAccountNumber
 		 , strFullAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strBillToAddress, strBillToCity, strBillToState, strBillToZipCode, strBillToCountry, NULL, NULL)
-		 , strStatementFooterComment= dbo.fnARGetDefaultComment(NULL, intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
+		 , strStatementFooterComment= dbo.fnARGetDefaultComment(NULL, intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 	FROM vyuARCustomerSearch
 ) CUSTOMER ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 LEFT JOIN #AGINGSUMMARY AGING ON STATEMENTREPORT.intEntityCustomerId = AGING.intEntityCustomerId
@@ -489,4 +504,6 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-ORDER BY STATEMENTREPORT.dtmDate
+ORDER BY STATEMENTREPORT.dtmDate'
+
+EXEC sp_executesql @query
