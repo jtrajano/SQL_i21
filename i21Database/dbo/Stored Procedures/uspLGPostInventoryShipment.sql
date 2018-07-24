@@ -54,7 +54,7 @@ BEGIN
 
 	SELECT TOP 1 @intTransactionId = intLoadId
 		,@ysnTransactionPostedFlag = ysnPosted
-		,@dtmDate = dtmScheduledDate
+		,@dtmDate = GETDATE()
 		,@intCreatedEntityId = intEntityId
 		,@strFOBPoint = FT.strFobPoint
 		,@intFOBPointId = FP.intFobPointId
@@ -226,7 +226,7 @@ BEGIN
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
 			,intItemUOMId = ISNULL(Lot.intWeightUOMId, LoadDetail.intWeightItemUOMId)
-			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
+			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = - 1 * (
 				CASE 
 					WHEN Lot.intLotId IS NULL
@@ -754,7 +754,7 @@ BEGIN
 		,L.strLoadNumber
 		,1 AS intOrderType
 		,1 AS intSourceType
-		,L.dtmScheduledDate
+		,GETDATE()
 		,intCurrencyId = NULL
 		,[dblExchangeRate] = 1
 		,LD.intCustomerEntityId
