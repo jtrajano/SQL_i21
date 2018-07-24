@@ -15,7 +15,7 @@ SELECT ST.*
 		 END AS strUrlRequestTranslog
 FROM tblSTStore ST
 LEFT JOIN tblSTRegister R 
-	ON ST.intStoreId = R.intStoreId
+	ON ST.intRegisterId = R.intRegisterId
 JOIN tblSMCompanyLocation CL
 	ON ST.intCompanyLocationId = CL.intCompanyLocationId
 
