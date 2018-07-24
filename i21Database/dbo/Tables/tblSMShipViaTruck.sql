@@ -3,6 +3,7 @@
 	[intEntityShipViaTruckId]       INT				IDENTITY(1,1) NOT NULL,
 	[intEntityShipViaId]			INT				NOT NULL,
 	[strTruckNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTruckLicenseNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[dblTruckCapacity]				NUMERIC (18, 6) NOT NULL,
 	[dblTimePerStop]				NUMERIC (18, 6) NOT NULL,
 	[dblPumpingQty]					NUMERIC (18, 6) NOT NULL,

@@ -6827,6 +6827,7 @@
     <Build Include="dbo\Tables\tblCTImportBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessImportBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportBalance.sql" />
+    <Build Include="dbo\Tables\tblSMShipViaTrailer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
