@@ -108,12 +108,13 @@ BEGIN TRY
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
 									  END,
 			strLots				    = dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots),
-			dblRatio			    = dbo.fnRemoveTrailingZeroes(CD.dblRatio),
-			strMarketMonth			= MA.strFutMarketName + ' ' + REPLACE(MO.strFutureMonth ,' ','(' + MO.strSymbol +') ') ,
+			dblRatio			    = dbo.fnCTChangeNumericScale(CD.dblRatio,4),
+			strMarketMonth			= MA.strFutMarketName + ' ' + REPLACE(MO.strFutureMonth ,' ','-') ,
 			strAmendedColumns		= CASE WHEN ISNULL(@strDetailAmendedColumns,'') <>'' THEN @strDetailAmendedColumns ELSE  AM.strAmendedColumns END,
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,
-			strItemSpecification	= CD.strItemSpecification
+			strItemSpecification	= CD.strItemSpecification,
+			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY') 
 
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	

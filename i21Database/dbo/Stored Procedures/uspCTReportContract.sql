@@ -50,8 +50,7 @@ BEGIN TRY
 			@strIds						NVARCHAR(MAX),
 			@strGABShipDelv				NVARCHAR(MAX),
 			@intReportLogoHeight		INT,
-			@intReportLogoWidth			INT,
-			@strBasisComponent			NVARCHAR(MAX)
+			@intReportLogoWidth			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -345,10 +344,6 @@ BEGIN TRY
 										  		), 1, 1, '')
 	END
 
- 
-	SELECT @strBasisComponent = COALESCE(@strBasisComponent + ', ', '') + strItemNo + ' ' + dbo.fnRemoveTrailingZeroes(dblRate) + ' ' + strCurrency + '/' + strUOM
-	FROM vyuCTContractCostView WHERE ysnBasis = 1 AND intContractDetailId = (SELECT MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
-
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
 			,strHersheyCaption						= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtConfirmation+':- ' + CH.strContractNumber
@@ -366,10 +361,10 @@ BEGIN TRY
 			,strCityWarehouse						= CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strLocationName						= SQ.strLocationName			
 			,strCropYear							= CY.strCropYear
-			,srtLoadingPoint						= SQ.srtLoadingPoint + ' :' 
+			,srtLoadingPoint						= SQ.srtLoadingPoint
 			,strLoadingPointName					= SQ.strLoadingPointName
 			,strShipper								= SQ.strShipper
-			,srtDestinationPoint					= SQ.srtDestinationPoint + ' :' 
+			,srtDestinationPoint					= SQ.srtDestinationPoint 
 			,strDestinationPointName				= SQ.strDestinationPointName
 			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' '+@rtTo+' ' + SQ.strDestinationPointName
 			,strWeight								= isnull(rtrt4.strTranslation,W1.strWeightGradeDesc) 
@@ -495,7 +490,6 @@ BEGIN TRY
 			,intLaguageId							=	@intLaguageId
 			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
 			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
-			,strBasisComponent						=	@strBasisComponent
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId

@@ -37,7 +37,7 @@ BEGIN TRY
 					CD.strPurchasingGroup,			CD.strCreatedByNo,				CD.strContractNumber,				CD.dtmContractDate,
 					CD.strContractType,				CD.strCommodityCode,			CD.strEntityName,					''Unconfirmed'' AS strNotificationType,
 					CD.strItemDescription,			CH.dblQtyInStockUOM,			CD.intContractDetailId,				CD.strProductType,
-					dbo.fnCTGetBasisComponentString(CD.intContractDetailId) strBasisComponent,			
+					dbo.fnCTGetBasisComponentString(CD.intContractDetailId,''NOTIF'') strBasisComponent,			
 													CH.strPosition,					CH.strContractBasis,				CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,					CD.intContractStatusId,				CD.strContractItemName,		
 					CD.strContractItemNo,
