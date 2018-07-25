@@ -46,6 +46,21 @@ AS
 		,tic.strDescription
 		,tic.strResolution
 		,tic.strImageId
+		,tic.strFeedbackComment
+		,strFeedbackWithSolution = (case when tic.intFeedbackWithSolutionId = 1 then 'Very Dissatisfied'
+										 when tic.intFeedbackWithSolutionId = 2 then 'Dissatisfied'
+										 when tic.intFeedbackWithSolutionId = 3 then 'Neutral'
+										 when tic.intFeedbackWithSolutionId = 4 then 'Satisfied'
+										 when tic.intFeedbackWithSolutionId = 5 then 'Very Satisfied'
+										 else ''
+									end)
+		,strFeedbackWithRepresentative = (case when tic.intFeedbackWithRepresentativeId = 1 then 'Very Dissatisfied'
+											   when tic.intFeedbackWithRepresentativeId = 2 then 'Dissatisfied'
+											   when tic.intFeedbackWithRepresentativeId = 3 then 'Neutral'
+											   when tic.intFeedbackWithRepresentativeId = 4 then 'Satisfied'
+											   when tic.intFeedbackWithRepresentativeId = 5 then 'Very Satisfied'
+											   else ''
+										  end)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
