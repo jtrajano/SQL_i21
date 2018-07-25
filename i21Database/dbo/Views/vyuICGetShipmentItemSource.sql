@@ -19,8 +19,8 @@ SELECT
 	strSourceNumber =
 		CASE WHEN Shipment.intSourceType = 1 -- Scale
 				THEN ScaleView.strTicketNumber
-			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-				THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
+			--WHEN Shipment.intSourceType = 2 -- Inbound Shipment
+			--	THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
 			WHEN Shipment.intSourceType = 3 -- Pick Lot
 				THEN CONVERT(NVARCHAR(100), PickLot.[strPickLotNumber])
 			WHEN Shipment.intSourceType = 4
@@ -35,8 +35,8 @@ SELECT
 						THEN CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
 					--WHEN Shipment.intSourceType = 1 -- Scale
 						--THEN NULL
-					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-						THEN NULL
+					--WHEN Shipment.intSourceType = 2 -- Inbound Shipment
+						--THEN NULL
 					WHEN Shipment.intSourceType = 3 -- Pick Lot
 						THEN PickLotUOM.strUnitMeasure
 					ELSE NULL
@@ -57,8 +57,8 @@ SELECT
 						THEN ISNULL(ContractView.dblDetailQuantity, 0)
 					--WHEN Shipment.intSourceType = 1 -- Scale
 					--	THEN 0
-					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-						THEN 0
+					--WHEN Shipment.intSourceType = 2 -- Inbound Shipment
+						--THEN 0
 					--WHEN Shipment.intSourceType = 3 -- Transport
 						--THEN ISNULL(TransportView.dblOrderedQuantity, 0)
 					WHEN Shipment.intSourceType = 3 -- Pick Lot
