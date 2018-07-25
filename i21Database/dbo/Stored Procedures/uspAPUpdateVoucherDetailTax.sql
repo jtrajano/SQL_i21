@@ -163,6 +163,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 	) TaxAmount
 	WHERE TaxAmount.dblTax IS NOT NULL
 
+	UPDATE A
+		SET A.intTaxGroupId = B.intTaxGroupId
+	FROM tblAPBillDetail A 
+	INNER JOIN @billDetailIds C ON A.intBillDetailId = C.intId
+	INNER JOIN tblAPBillDetailTax B ON A.intBillDetailId = B.intBillDetailId 
+	OUTER APPLY(
+		SELECT TOP 1 intShipToId FROM tblAPBill C WHERE C.intBillId = A.intBillId
+	) Bill
+
 	INSERT INTO @voucherIds
 	SELECT DISTINCT
 		A.intBillId 
