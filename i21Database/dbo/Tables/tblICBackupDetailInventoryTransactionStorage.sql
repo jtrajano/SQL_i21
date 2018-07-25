@@ -32,6 +32,8 @@
 	[dtmCreated] DATETIME NULL, 
 	[intCreatedUserId] INT NULL,
 	[intCreatedEntityId] INT NULL,
+	[intForexRateTypeId] INT NULL,
+	[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
 	CONSTRAINT [PK_tblICBackupDetailInventoryTransactionStorage] PRIMARY KEY ([intBackupDetailId]),
 	CONSTRAINT [FK_tblICBackupDetailInventoryTransactionStorage_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])
 )

@@ -244,7 +244,7 @@ BEGIN
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
-			,[intTransactionTypeId] 			=	25
+			,[intTransactionTypeId] 			=	transType.intTransactionTypeId
 			,[intLotId] 						=	NULL 
 			,[intSubLocationId] 				=	E2.intSubLocationId
 			,[intStorageLocationId] 			=	E2.intStorageLocationId
@@ -270,6 +270,8 @@ BEGIN
 				ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 			LEFT JOIN tblICItemUOM receiptCostUOM
 				ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+			LEFT JOIN tblICInventoryTransactionType transType
+				ON transType.strName = 'Bill'
 	WHERE	A.intBillId = @intBillId
 			AND B.intInventoryReceiptChargeId IS NULL 
 			-- Compare the cost used in Voucher against the IR cost. 
