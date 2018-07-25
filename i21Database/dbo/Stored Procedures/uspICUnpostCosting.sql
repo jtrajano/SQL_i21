@@ -302,6 +302,7 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[strActualCostId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -337,6 +338,7 @@ BEGIN
 			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
+			,[strActualCostId]						= ActualTransaction.strActualCostId
 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
