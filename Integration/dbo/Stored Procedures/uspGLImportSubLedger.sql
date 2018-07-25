@@ -13,12 +13,12 @@
 GO
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
 BEGIN 
-EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
     	SET NOCOUNT ON;
-    	DECLARE @isCOAPresent BIT, @halt BIT  = 0, @postCount INT = 0, @intErrorCount INT, @success bit = 0
+    	DECLARE @isCOAPresent BIT, @halt BIT  = 0, @intErrorCount INT, @success bit = 0
     	SELECT @isCOAPresent = 1,@importLogId = 0
 		DECLARE @tblLog TABLE (
 				[strEventDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
@@ -39,7 +39,8 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				[decUnits] [decimal](16, 4) NULL,
 				[blnCorrection] [bit] NULL,
 				[strJournalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-				[dtePostDate] [date] NULL
+				[dtePostDate] [date] NULL,
+				[Id] int
 		)
 		DECLARE @tblLogSuccess TABLE (
 				[strEventDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
@@ -60,7 +61,8 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				[decUnits] [decimal](16, 4) NULL,
 				[blnCorrection] [bit] NULL,
 				[strJournalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-				[dtePostDate] [date] NULL
+				[dtePostDate] [date] NULL,
+				[Id] int
 		)
 
 
@@ -130,7 +132,9 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[strDebitCredit]
 						  ,[decAmount]
 						  ,[decUnits]
-						  ,[blnCorrection])
+						  ,[blnCorrection]
+						  ,Id
+						  )
 					SELECT 
 						''Invalid Date (glije_date) in Origin Table'',
 						A.glije_period,
@@ -148,13 +152,15 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						A.glije_dr_cr_ind,
 						A.glije_amt,
 						A.glije_units,
-						CASE WHEN UPPER(RTRIM(A.glije_correcting)) = ''Y'' THEN 1 ELSE 0 END
+						CASE WHEN UPPER(RTRIM(A.glije_correcting)) = ''Y'' THEN 1 ELSE 0 END,
+						A4GLIdentity
 						FROM glijemst A JOIN @tmpID B 
     					ON A.A4GLIdentity = B.ID
     					WHERE B.glije_date = 0
     			END
 				-- INSERT TO COA IMPORT LOG TABLE HERE
-    			RETURN
+				
+    			--RETURN
     		END
 
     		BEGIN TRY
@@ -208,8 +214,9 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			,ISNULL(A4GLIdentity, ''0'')
     			,@uid 
 			FROM glijemst a JOIN @tmpID b on a.A4GLIdentity = b.ID
+			and A4GLIdentity not in (select id from @tblLog)
 
-    		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID 
+    		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID and A4GLIdentity not in (select id from @tblLog)
 
     		DELETE FROM  @tmpID
     		-- CONVERTS glije_date to DATETIME for easy COMPARISON later
@@ -388,8 +395,9 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
 					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
-    				IF @successfulCount = 1
+    				IF @successfulCount > 0
     				BEGIN
+						
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					INSERT INTO @tblLogSuccess(
 							strEventDescription,
@@ -441,15 +449,14 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				DEALLOCATE cursor_postdate
 
 				set @success = 1
-				SELECT @intErrorCount = COUNT(1) FROM @tblLog
-				SELECT @postCount = COUNT(1) FROM @tblLogSuccess
+				SELECT @intErrorCount = COUNT(1) FROM @tblLog 
 
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
 					@msg=''Successful Transaction'', 
 					@user = @intUserId,
 					@version= @version,
-					@intSuccessCount= @postCount,
+					@intSuccessCount= @successfulCount,
 					@intErrorCount = @intErrorCount,
 					@intID = @importLogId OUTPUT
 
