@@ -214,9 +214,9 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			,ISNULL(A4GLIdentity, ''0'')
     			,@uid 
 			FROM glijemst a JOIN @tmpID b on a.A4GLIdentity = b.ID
-			and A4GLIdentity not in (select id from @tblLog)
+			and A4GLIdentity not in (select Id from @tblLog)
 
-    		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID and A4GLIdentity not in (select id from @tblLog)
+    		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID and A4GLIdentity not in (select Id from @tblLog)
 
     		DELETE FROM  @tmpID
     		-- CONVERTS glije_date to DATETIME for easy COMPARISON later
