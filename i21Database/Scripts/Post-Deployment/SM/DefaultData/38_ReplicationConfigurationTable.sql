@@ -252,10 +252,10 @@ VALUES
 --## Currencies and Currency Exchange Rates and Currency Exchange Rate Types
 --##-----------------------------------------------------------------------------------------------
 
-		('tblSMCurrency ', 'Currencies and Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
-		('tblSMCurrencyExchangeRate  ', 'Currencies and Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
-		('tblSMCurrencyExchangeRateDetail  ', 'Currencies and Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
-		('tblSMCurrencyExchangeRateType  ', 'Currencies and Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
+		('tblSMCurrency ', 'Currencies, Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
+		('tblSMCurrencyExchangeRate  ', 'Currencies, Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
+		('tblSMCurrencyExchangeRateDetail  ', 'Currencies, Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
+		('tblSMCurrencyExchangeRateType  ', 'Currencies, Currency Exchange Rates and Currency Exchange Rate Types', 'System Manager'),
 
 ---------------------------------------------------------------------------------------------------
 		
@@ -531,6 +531,7 @@ VALUES
 		('tblARCustomerLicenseModule', 'Customer', 'Sales'),
 		('tblARCustomerLineOfBusiness', 'Customer', 'Sales'),
 		('tblARCustomerMasterLicense ', 'Customer', 'Sales'),
+		('tblARCustomerMessage','Customer','Sales'),
 		('tblARCustomerPortalMenu', 'Customer', 'Sales'),
 		('tblARCustomerProductVersion', 'Customer', 'Sales'),
 		('tblARCustomerQuote', 'Customer', 'Sales'),

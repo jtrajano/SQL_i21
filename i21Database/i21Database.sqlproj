@@ -6829,6 +6829,8 @@
     <Build Include="dbo\Stored Procedures\uspCTImportBalance.sql" />
     <Build Include="dbo\Tables\tblSMShipViaTrailer.sql" />
     <Build Include="dbo\Functions\fnCTChangeNumericScale.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\40_DisconnectedReplicationTable.sql" />
+    <Build Include="dbo\Tables\tblSMDisconReplicationArticle.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
