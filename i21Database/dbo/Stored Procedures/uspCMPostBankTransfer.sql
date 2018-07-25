@@ -332,7 +332,7 @@ BEGIN
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= @intCurrencyIdFrom
 			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
+			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
