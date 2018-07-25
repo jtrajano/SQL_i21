@@ -27,6 +27,7 @@ SELECT
 	,voucher.ysnPosted
 	,voucher.ysnDiscountOverride
 	,voucher.intPayToAddressId
+	,voucher.ysnPrepayHasPayment
 	,vendor.intPaymentMethodId
 	,vendor.ysnOneBillPerPayment
 	,vendor.ysnWithholding

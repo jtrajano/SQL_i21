@@ -473,6 +473,7 @@ BEGIN
 
 	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
 	BEGIN
+		SET @totalRecords = 0;
 		GOTO DONE;
 	END
 

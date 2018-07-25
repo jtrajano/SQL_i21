@@ -32,6 +32,7 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnDiscountOverride
 		,forPay.intPaymentMethodId
 		,forPay.ysnOneBillPerPayment
+		,forPay.ysnPrepayHasPayment
 		,forPay.ysnWithholding
 		,forPay.strPaymentMethod
 		,forPay.strVendorId

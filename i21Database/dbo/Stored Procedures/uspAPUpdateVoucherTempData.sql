@@ -6,6 +6,7 @@
 	,@tempPayment DECIMAL(18,6) = 0
 	,@tempWithheld DECIMAL(18,6) = 0
 	,@readyForPayment BIT = 0
+	,@haveNegativePayment BIT = 0
 	,@tempPaymentInfo NVARCHAR(MAX) = NULL
 	,@newPayment DECIMAL(18,2) = 0 OUTPUT
 	,@newWithheld DECIMAL(18,2) = 0 OUTPUT
@@ -102,7 +103,7 @@ BEGIN
 											ELSE 0 END
 				,voucher.dblTempDiscount = @tempDiscount
 				,voucher.dblTempInterest = @tempInterest
-				,voucher.dblTempPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt - @updatedWithheld ELSE 0 END --when not ready for payment, set the payment to 0
+				,voucher.dblTempPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END --when not ready for payment, set the payment to 0
 				,voucher.dblTempWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END
 				,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
 				,voucher.ysnReadyForPayment = @readyForPayment
@@ -117,37 +118,8 @@ BEGIN
 		SET @recordsUpdated = @@ROWCOUNT;
 		SET @newPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END; 
 		--return the new payment if ready for payment only
-		SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt - @updatedWithheld ELSE 0 END; 
+		SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END; 
 		SET @newWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END;
-
-		--START UPDATING OF PAYMENT INFO
-		-- BEGIN
-		-- 	--GET ALL ASSOCIATED VOUCHERS WHEN PAYMENT WILL BE CREATED
-		-- 	DECLARE @voucherId INT = (SELECT TOP 1 intId FROM @ids); --get the voucher being update
-		-- 	DECLARE @tableVoucherForPaymentDetails TABLE(intBillId INT);
-		-- 	INSERT INTO @tableVoucherForPaymentDetails
-		-- 	SELECT
-		-- 		intBillId
-		-- 	FROM dbo.fnAPGetVoucherPaymentDetails(@voucherId) vouchersId
-			
-		-- 	SELECT
-		-- 		@vouchersForPaymentTran = COALESCE(@vouchersForPaymentTran + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-		-- 	FROM @tableVoucherForPaymentDetails vouchersId
-		-- 	ORDER BY intBillId
-
-		-- 	SET @paymentVoucherIds = @vouchersForPaymentTran
-
-		-- 	--IF temp payment info is empty, check to see if other vouchers already have temp payment info
-		-- 	IF NULLIF(@tempPaymentInfo,'') IS NULL
-		-- 	BEGIN
-		-- 		SELECT TOP 1
-		-- 			@newPaymentInfo = voucher.strTempPaymentInfo
-		-- 		FROM tblAPBill voucher
-		-- 		INNER JOIN @tableVoucherForPaymentDetails B ON voucher.intBillId = B.intBillId
-		-- 		WHERE voucher.strTempPaymentInfo IS NOT NULL
-		-- 	END
-		-- END
-		--END UPDATING OF PAYMENT INFO
 
 		--DO NOT ALLOW OVER PAY
 		IF @readyForPayment = 1 AND @newPayment > (@amountDue + @tempInterest - @tempDiscount)
@@ -155,13 +127,22 @@ BEGIN
 			RAISERROR('PAYVOUCHEROVERPAY', 16, 1);
 			RETURN;
 		END
-
 	END
 
 	IF @recordsToUpdate != @recordsUpdated
 	BEGIN
 		RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
 		RETURN;
+	END
+
+	--CHECK IF THERE ARE NEGATIVE PAYMENT
+	IF EXISTS(
+		SELECT 
+			TOP 1 1
+		FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
+		WHERE dblAmountPaid < 0)
+	BEGIN
+		SET @haveNegativePayment = 0;
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
