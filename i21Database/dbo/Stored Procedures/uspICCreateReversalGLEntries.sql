@@ -12,7 +12,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
+DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1
+		,@InventoryTransactionTypeId_CostAdjustment AS INT = 26;
+
 --DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
 --DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 
@@ -115,7 +117,7 @@ END
 
 BEGIN 
 	-------------------------------------------------------------------------------------------
-	-- Reverse the G/L entries for the main transaction and related transaction 
+	-- Reverse the G/L entries for the main transactions
 	-------------------------------------------------------------------------------------------
 	SELECT	
 			dtmDate						= GLEntries.dtmDate
@@ -150,27 +152,15 @@ BEGIN
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType
-	FROM	dbo.tblICInventoryTransaction Reversal CROSS APPLY (
-				SELECT	*
-				FROM	tblGLDetail GLEntries 
-				WHERE	GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId -- (intRelatedInventoryTransactionId was from the original intInventoryTransactionId)
-						AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-						AND (
-								(
-									GLEntries.intTransactionId = Reversal.intTransactionId
-									AND GLEntries.strTransactionId = Reversal.strTransactionId
-								)
-								--OR (
-								--	GLEntries.intTransactionId = Reversal.intRelatedTransactionId
-								--	AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId
-								--)					
-						)			
-			) GLEntries
-				
+	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
+				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+				AND GLEntries.intTransactionId = Reversal.intTransactionId
+				AND GLEntries.strTransactionId = Reversal.strTransactionId
+				AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 	WHERE	Reversal.strBatchId = @strBatchId			
-			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
+			AND Reversal.intTransactionTypeId NOT IN (@InventoryTransactionTypeId_AutoVariance, @InventoryTransactionTypeId_CostAdjustment)	
 			
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
@@ -270,6 +260,101 @@ BEGIN
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
+
+	-------------------------------------------------------------------------------------
+	-- Reverse the Cost Adjustments
+	-------------------------------------------------------------------------------------
+	UNION ALL  
+	SELECT	
+			dtmDate						= GLEntries.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLEntries.intAccountId
+			,dblDebit					= GLEntries.dblCredit
+			,dblCredit					= GLEntries.dblDebit
+			,dblDebitUnit				= GLEntries.dblCreditUnit 
+			,dblCreditUnit				= GLEntries.dblDebitUnit 
+			,strDescription				= GLEntries.strDescription
+			,strCode					= GLEntries.strCode
+			,strReference				= GLEntries.strReference
+			,intCurrencyId				= GLEntries.intCurrencyId
+			,dblExchangeRate			= GLEntries.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= GLEntries.dtmDate
+			,strJournalLineDescription	= GLEntries.strJournalLineDescription
+			,intJournalLineNo			= Reversal.intInventoryTransactionId
+			,ysnIsUnposted				= 1
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= GLEntries.strTransactionId
+			,intTransactionId			= GLEntries.intTransactionId
+			,strTransactionType			= GLEntries.strTransactionType
+			,strTransactionForm			= GLEntries.strTransactionForm
+			,strModuleName				= GLEntries.strModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= GLEntries.dblCreditForeign
+			,dblDebitReport				= GLEntries.dblDebitReport
+			,dblCreditForeign			= GLEntries.dblDebitForeign 
+			,dblCreditReport			= GLEntries.dblCreditReport
+			,dblReportingRate			= GLEntries.dblReportingRate
+			,dblForeignRate				= GLEntries.dblForeignRate
+			,strRateType				= currencyRateType.strCurrencyExchangeRateType
+	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
+				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+				AND GLEntries.intTransactionId = Reversal.intTransactionId
+				AND GLEntries.strTransactionId = Reversal.strTransactionId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
+	WHERE	Reversal.strBatchId = @strBatchId
+			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+			AND Reversal.intTransactionTypeId  = @InventoryTransactionTypeId_CostAdjustment
+	UNION ALL  
+	SELECT	
+			dtmDate						= ItemTransactions.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccounts.intInventoryId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= CreditUnit.Value
+			,dblCreditUnit				= DebitUnit.Value
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= 'ICA' 
+			,strReference				= '' 
+			,intCurrencyId				= ItemTransactions.intCurrencyId
+			,dblExchangeRate			= ItemTransactions.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ItemTransactions.dtmDate
+			,strJournalLineDescription	= '' 
+			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
+			,ysnIsUnposted				= 1
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= ItemTransactions.strTransactionId
+			,intTransactionId			= ItemTransactions.intTransactionId
+			,strTransactionType			= 'Cost Adjustment'
+			,strTransactionForm			= ItemTransactions.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= 0.00 
+			,dblDebitReport				= 0.00
+			,dblCreditForeign			= 0.00 
+			,dblCreditReport			= 0.00 
+			,dblReportingRate			= 0.00
+			,dblForeignRate				= 0.00 
+			,strRateType				= NULL 
+	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+				ON ItemTransactions.intItemId = GLAccounts.intItemId
+				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
+				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
+			INNER JOIN dbo.tblGLAccount	
+				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblValue, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
+	WHERE	ItemTransactions.strBatchId = @strBatchId
+			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_CostAdjustment
+			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
+
 END
 ;
 

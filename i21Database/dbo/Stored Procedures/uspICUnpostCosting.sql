@@ -321,6 +321,7 @@ BEGIN
 			,[dblCategoryCostValue]
 			,[dblCategoryRetailValue]
 			,[intCategoryId]
+			,[strActualCostId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -361,6 +362,8 @@ BEGIN
 			,[dblCategoryCostValue]					= -ActualTransaction.dblCategoryCostValue
 			,[dblCategoryRetailValue]				= -ActualTransaction.dblCategoryRetailValue
 			,[intCategoryId]						= ActualTransaction.intCategoryId 
+			,[strActualCostId]						= ActualTransaction.strActualCostId
+
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
