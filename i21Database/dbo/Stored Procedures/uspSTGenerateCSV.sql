@@ -293,6 +293,8 @@ BEGIN
 								, NULL as dblMFGDealDiscountAmountTHREE
 
 								, ((TR.dblTrlLineTot) - (CASE 
+															WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+																THEN TR.dblTrlMatchLineTrlPromoAmount
 															WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
 																THEN TR.dblTrpAmt
 															ELSE 0
@@ -371,20 +373,9 @@ BEGIN
 								-- PRICE
 								, CASE 
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-											THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-											--THEN (((
-											--		SELECT SUM(tbl.dblTrlMatchLineTrlPromoAmount)
-											--		FROM tblSTTranslogRebates tbl
-											--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-											--		AND tbl.intCheckoutId = TR.intCheckoutId
-											--		AND tbl.intStoreNumber = TR.intStoreNumber
-											--		AND tbl.strTrlDept = 'OTP' 
-											--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-											--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-											--		AND tbl.strTrpPaycode != 'Change'
-											--	 )  / TR.dblTrlQty) - TR.dblTrlUnitPrice)
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-										THEN ((dblTrlMatchLineTrlPromoAmount / dblTrlQty) - dblTrlUnitPrice)
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
+										THEN (dblTrlUnitPrice - (dblTrlMatchLineTrlPromoAmount / dblTrlQty))
 									ELSE dblTrlUnitPrice 
 								  END as dblPrice
 								--dblTrlUnitPrice as dblPrice
@@ -406,7 +397,7 @@ BEGIN
 										THEN 'Y' -- 2 Can Deal
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
 										THEN 'Y' 
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN 'Y'
 									ELSE 'N' 	
 								  END as strPromotionFlag
@@ -418,7 +409,7 @@ BEGIN
 										THEN 'Y' -- 2 Can Deal
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 										THEN 'N' 
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN 'Y'
 									ELSE 'N' 
 								  END as strOutletMultipackFlag
@@ -428,29 +419,18 @@ BEGIN
 										THEN 2
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 										THEN 0 	
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
 								    ELSE 0 
 								  END as intOutletMultipackQuantity
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-											THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
-											--THEN ((
-											--		SELECT SUM(tbl.dblTrlMatchLineTrlPromoAmount)
-											--		FROM tblSTTranslogRebates tbl
-											--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-											--		AND tbl.intCheckoutId = TR.intCheckoutId
-											--		AND tbl.intStoreNumber = TR.intStoreNumber
-											--		AND tbl.strTrlDept = 'OTP' 
-											--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-											--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-											--		AND tbl.strTrpPaycode != 'Change'
-											--	 ) / TR.dblTrlQty)
+											THEN TR.dblTrlMatchLineTrlPromoAmount
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 										THEN 0 
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
-										THEN (dblTrlMatchLineTrlPromoAmount / dblTrlQty)
+									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
+										THEN TR.dblTrlMatchLineTrlPromoAmount
 									ELSE 0 
 								  END as dblOutletMultipackDiscountAmount
 
@@ -500,10 +480,13 @@ BEGIN
 					(   
 						SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
-							WHERE ysnSubmitted = 0
-							AND intStoreId IN (SELECT DISTINCT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+							--SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
+							--FROM tblSTTranslogRebates
+							--WHERE ysnSubmitted = 0
+							--AND intStoreId IN (SELECT DISTINCT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+							--AND CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
 						WHERE TRR.rn = 1
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
@@ -511,12 +494,12 @@ BEGIN
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-					--LEFT JOIN
-					--(
-					--	SELECT DISTINCT [intID] 
-					--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-					--	GROUP BY [intID]
-					--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+					LEFT JOIN
+					(
+						SELECT DISTINCT [intID] 
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+						GROUP BY [intID]
+					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 					WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 
