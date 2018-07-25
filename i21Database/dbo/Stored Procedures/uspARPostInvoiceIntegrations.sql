@@ -50,6 +50,14 @@ IF @ysnPost = 1
 
 		EXEC dbo.uspARAutoApplyPrepaids @tblInvoiceIds = @tblInvoiceIds
 	END
+ELSE
+	BEGIN
+		DELETE CF 
+		FROM tblCMUndepositedFund CF
+		INNER JOIN tblARInvoice I ON CF.intSourceTransactionId = I.intInvoiceId AND CF.strSourceTransactionId = I.strInvoiceNumber
+		WHERE CF.strSourceSystem = 'AR'
+		AND I.intInvoiceId = @intTransactionId
+	END
 
 UPDATE ARID
 SET
