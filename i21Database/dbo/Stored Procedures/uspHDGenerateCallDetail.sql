@@ -138,7 +138,7 @@ daysoutstanding as
 		--and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		--and a.dtmCreated is not null
 		--and a.dtmCompleted is not null
-		and a.intTicketId = (select max(b.intTicketId) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
+		and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
 )
 
 INSERT INTO tblHDCallDetail
