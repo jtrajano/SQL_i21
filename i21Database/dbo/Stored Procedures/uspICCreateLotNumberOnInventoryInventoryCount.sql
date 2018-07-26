@@ -75,6 +75,7 @@ BEGIN
 	WHERE Header.intInventoryCountId = @intTransactionId
 		AND Detail.intLotId IS NULL
 		AND Item.strLotTracking <> 'No'
+		AND Detail.dblPhysicalCount IS NOT NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
