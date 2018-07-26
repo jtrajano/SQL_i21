@@ -632,7 +632,7 @@ SET @batchIdUsed = @batchId;
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS(SELECT * FROM #tempTransferDetails tempTD INNER JOIN tblPATIssueStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo)
+			IF NOT EXISTS(SELECT * FROM #tempTransferDetails tempTD INNER JOIN tblPATIssueStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo AND CS.ysnPosted = 1)
 			BEGIN
 				DELETE FROM tblPATIssueStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
 			END
