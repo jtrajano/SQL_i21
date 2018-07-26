@@ -29,7 +29,7 @@
 		--ORDER BY strTableName '
 
 		SET @insertSQL = N'INSERT INTO #ListOfArticles
-			SELECT strTableName FROM tblSMDisconReplicationArticle ORDER BY strTableName '
+			SELECT DISTINCT strTableName FROM tblSMDisconReplicationArticle ORDER BY strTableName '
  
 		
         EXECUTE sp_executesql @insertSQL;

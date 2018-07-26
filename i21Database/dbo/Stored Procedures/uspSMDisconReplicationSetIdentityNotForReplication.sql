@@ -27,7 +27,7 @@ BEGIN
 
 
 				SET @insertSQL = N'INSERT INTO #ListOfArticles
-					SELECT strTableName FROM tblSMDisconReplicationArticle ORDER BY strTableName '
+					SELECT DISTINCT strTableName FROM tblSMDisconReplicationArticle ORDER BY strTableName '
 	    END
 
 			      
