@@ -24,6 +24,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Check if there is a value to escalate. Exit immediately if zero. 
+IF ISNULL(@dblEscalateValue, 0) = 0 RETURN; 
+
 -- Create the temp table if it does not exists. 
 BEGIN 
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevalueProducedItems')) 
@@ -107,7 +110,6 @@ WHERE	@t_dblQty < 0
 -- If it was an offset from the negative stock scenario, the query below will do more digging. 
 IF @EscalateInventoryTransactionId IS NULL 
 BEGIN 
-
 	DECLARE @intInventoryTransactionId_NegativeStock AS INT 
 			,@strBatchId_NegativeStock AS NVARCHAR(50)
 			,@strTransactionId_NegativeStock AS NVARCHAR(50)
