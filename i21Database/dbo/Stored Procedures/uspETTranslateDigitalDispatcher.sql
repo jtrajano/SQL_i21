@@ -108,16 +108,20 @@ BEGIN
    --Get Customer Entity Id  
    SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)  
   
-   --TM - Get Site Id  
-   -------------------------------------------------------------------------------------------------------------------------------------------------  
-   SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID  
-              WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))  
-     
    --Get Tax Group Id  
    SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)  
   
    --Get Item id  
    SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)  
+
+   	/*Tank Management */
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/
+	SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+												WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
+
+	IF(@dblPercentFullAfterDelivery = 0 AND @dblQuantity > 0)
+	SET @dblPercentFullAfterDelivery = (SELECT TOP 1 dblDefaultFull FROM tblICItem WHERE intItemId = @intItemId)
+    /*------------------------------------------------------------------------------------------------------------------------------------------------- */
   
     --Invoice Number  
    SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '') 
@@ -205,7 +209,7 @@ BEGIN
        ,[strSourceId]  
        --,[intSourceId]  
        --,[strBillingBy]  
-       --,[dblPercentFull]  
+       ,[dblPercentFull]  
        --,[dblNewMeterReading]  
        --,[dblPreviousMeterReading]  
        --,[dblConversionFactor]  
@@ -301,7 +305,7 @@ BEGIN
        ,[strSourceId]    = @strInvoiceNumber  
        --,[intSourceId]    = @intImportDDToInvoiceId  
        --,[strBillingBy]    = @BillingBy  
-       --,[dblPercentFull]   = @PercentFull  
+       ,[dblPercentFull]   = @dblPercentFullAfterDelivery  
        --,[dblNewMeterReading]  = @NewMeterReading  
        --,[dblPreviousMeterReading] = @PreviousMeterReading  
        --,[dblConversionFactor]  = @ConversionFactor  
@@ -334,7 +338,7 @@ BEGIN
        --,[ysnPost]     = NULL  
        --,[strItemDescription]  = @ItemDescription  
        --,[dblDiscount]    = @DiscountPercentage  
-         
+     
    --Delete   
    DELETE FROM #tmpDDToInvoice WHERE intImportDDToInvoiceId = @intImportDDToInvoiceId    
  END  
@@ -357,37 +361,42 @@ BEGIN
   
  -------------------------------------------------------------------------------------------------------------------------------------------------------  
  --INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )  
-   
+  
 
- SELECT * FROM ( SELECT  NULL AS strCustomerNumber    
-     ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber    
-     ,'' AS strSiteNumber     
-     ,null AS dtmDate      
-     ,0 AS intLineItem     
-     ,'' AS strFileName     
-     ,strMessage  AS strStatus      
-     ,ysnSuccess AS ysnSuccessful     
-     ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId  
-     ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType  
-     FROM tblARInvoiceIntegrationLogDetail    
-     LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId  
-    
-	 WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId 
-	 --AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )  
-     UNION  
-     SELECT   NULL AS strCustomerNumber    
-       ,'' AS strInvoiceNumber    
-       ,'' AS strSiteNumber     
-       ,null AS dtmDate      
-       ,0 AS intLineItem     
-       ,'' AS strFileName     
-       ,strMessage  AS strStatus      
-       ,ysnSuccess AS ysnSuccessful     
-       ,ISNULL(intInvoiceId,0) AS intInvoiceId  
-       ,strTransactionType AS strTransactionType  
-     FROM tblARInvoiceIntegrationLogDetail   
-     WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId  
-     ) ResultTableLog  
+  SELECT * FROM ( SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber    
+		 ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber    
+		 ,'' AS strSiteNumber     
+		 ,tblARInvoice.dtmDate AS dtmDate      
+		 ,tblICItem.strItemNo AS strItemNumber
+		 ,0 AS intLineItem     
+		 ,'' AS strFileName     
+		 ,strMessage  AS strStatus      
+		 ,ysnSuccess AS ysnSuccessful     
+		 ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId  
+		 ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType  
+		 FROM tblARInvoiceIntegrationLogDetail    
+		 LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId  
+		 LEFT JOIN tblARInvoiceDetail ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId  
+		 LEFT JOIN tblICItem ON tblARInvoiceDetail.intItemId = tblICItem.intItemId
+		 LEFT JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
+		 WHERE intIntegrationLogId = @LogId 
+		 --WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId 
+		 --AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )  
+		 --UNION  
+		 --SELECT   NULL AS strCustomerNumber    
+		 --  ,'' AS strInvoiceNumber    
+		 --  ,'' AS strSiteNumber     
+		 --  ,null AS dtmDate      
+		 --  ,0 AS intLineItem     
+		 --  ,'' AS strFileName     
+		 --  ,strMessage  AS strStatus      
+		 --  ,ysnSuccess AS ysnSuccessful     
+		 --  ,ISNULL(intInvoiceId,0) AS intInvoiceId  
+		 --  ,strTransactionType AS strTransactionType  
+		 --FROM tblARInvoiceIntegrationLogDetail   
+		 --WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId  
+		 ) ResultTableLog
+		--SELECT * FROM @ResultTableLog
   
 END
 
