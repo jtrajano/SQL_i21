@@ -11,13 +11,13 @@ SELECT C.intCategoryId
 	  , ST.intStoreId
 	  , ST.intStoreNo
 FROM tblICCategory C
-JOIN tblICCategoryLocation CLOC
+LEFT JOIN tblICCategoryLocation CLOC
 	ON C.intCategoryId = CLOC.intCategoryId
-JOIN tblICItem I
+LEFT JOIN tblICItem I
 	ON CLOC.intGeneralItemId = I.intItemId
-JOIN tblSMCompanyLocation CL
+LEFT JOIN tblSMCompanyLocation CL
 	ON CLOC.intLocationId = CL.intCompanyLocationId
-JOIN tblSTStore ST
+LEFT JOIN tblSTStore ST
 	ON CL.intCompanyLocationId = ST.intCompanyLocationId
-JOIN tblICCategoryPricing CategoryPricing
+LEFT JOIN tblICCategoryPricing CategoryPricing
 	ON C.intCategoryId = CategoryPricing.intCategoryId
