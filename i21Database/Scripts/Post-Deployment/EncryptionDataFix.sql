@@ -164,14 +164,7 @@ BEGIN
         intBankId INT,
         strRTN VARBINARY(256)
       )
-	  PRINT(''*** Pad zeros in routing number ***'')
-	  UPDATE CMBank
-	  SET strRTN = LeadingZero.Value
-	  FROM tblCMBank CMBank
-	  OUTER APPLY (
-		SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(CMBank.strRTN, PATINDEX(''%[^0]%'', CMBank.strRTN), 10))) + SUBSTRING(CMBank.strRTN, PATINDEX(''%[^0]%'', CMBank.strRTN), 10) Value
-	  )LeadingZero
-
+	 
       PRINT(''*** Decrypting RTN (asymmetric) ***'')
       INSERT INTO @DecryptionTable
         SELECT intBankId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strRTN''''))'', ''varbinary(256)''))
@@ -216,15 +209,7 @@ BEGIN
         strBankAccountNo VARBINARY(256)
       )
 
-	  PRINT(''*** Pad zeros in routing number ***'')
-	  UPDATE CMBankAccount
-	  SET strRTN = LeadingZero.Value
-	  FROM tblCMBank CMBankAccount
-	  OUTER APPLY (
-		SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(CMBankAccount.strRTN, PATINDEX(''%[^0]%'', CMBankAccount.strRTN), 10))) + SUBSTRING(CMBankAccount.strRTN, PATINDEX(''%[^0]%'', CMBankAccount.strRTN), 10) Value
-	  )LeadingZero
-
-      PRINT(''*** Decrypting BankAccountNo (asymmetric) ***'')
+	    PRINT(''*** Decrypting BankAccountNo (asymmetric) ***'')
       INSERT INTO @DecryptionTable
         SELECT intBankAccountId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strBankAccountNo''''))'', ''varbinary(256)''))
         FROM tblCMBankAccount
