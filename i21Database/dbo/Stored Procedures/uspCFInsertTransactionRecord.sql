@@ -1806,6 +1806,7 @@ BEGIN
 		,dblOriginalTotalTax		= (SELECT 
 		SUM(ISNULL(dblTaxOriginalAmount,0))
 		FROM tblCFTransactionTaxType as tax)
+		WHERE intTransactionId = @Pk
 	
 
 		------------------------------------------------------------
