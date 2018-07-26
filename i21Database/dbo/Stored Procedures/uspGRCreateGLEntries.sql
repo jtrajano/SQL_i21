@@ -549,7 +549,8 @@ BEGIN
 		,intAPClearing		   = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing)
 		,intTransactionTypeId  = @intTransactionTypeId
 	FROM @tblItem Query 
-	WHERE intItemType IN (2,3) 
+	WHERE intItemType IN (2,3) 	
+		AND intItemLocationId IS NOT NULL
 
 	-------------------------------------------------------------------------------------------
 	-- Cost billed by: None
