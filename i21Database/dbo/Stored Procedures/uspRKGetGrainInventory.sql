@@ -178,7 +178,7 @@ SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributio
 		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,
-round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ,6) dblInQty,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ,6) dblInQty,
 r.strReceiptNumber,
 		strDistributionOption ,r.intInventoryReceiptId
 FROM tblSCDeliverySheet DS
@@ -192,8 +192,7 @@ FROM tblSCDeliverySheet DS
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
 		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityVendorId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId 
-		join tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId   
+		join tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1  
 WHERE 
 convert(datetime,CONVERT(VARCHAR(10),r.dtmReceiptDate,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
@@ -276,7 +275,7 @@ SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributio
 		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate,
-round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ,6) dblOutQty,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ,6) dblOutQty,
 r.strShipmentNumber,
 		strDistributionOption ,r.intInventoryShipmentId
 FROM tblSCDeliverySheet DS
@@ -291,7 +290,6 @@ FROM tblSCDeliverySheet DS
 		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityId 
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
 		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 WHERE convert(datetime,CONVERT(VARCHAR(10),r.dtmShipDate,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId

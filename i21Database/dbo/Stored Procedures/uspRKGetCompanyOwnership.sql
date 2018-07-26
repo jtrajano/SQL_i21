@@ -13,43 +13,46 @@ DECLARE @tblResult TABLE (
 	,dblUnpaidIn NUMERIC(24, 10)
 	,dblUnpaidOut NUMERIC(24, 10)
 	,dblUnpaidBalance NUMERIC(24, 10)
+	,dblPaidBalance  NUMERIC(24, 10)
 	,strDistributionOption NVARCHAR(50)
 	,InventoryBalanceCarryForward NUMERIC(24, 10)
 	,strReceiptNumber NVARCHAR(50)
 	,intReceiptId INT
 	)
 
+
 INSERT INTO @tblResult (
 	dblUnpaidBalance
 	,InventoryBalanceCarryForward
-	)
-SELECT sum(dblUnpaidBalance)
+)
+SELECT 
+	sum(dblUnpaidBalance)
 	,sum(InventoryBalanceCarryForward)
 FROM (
-	SELECT sum(dblUnpaidIn) - sum(dblUnpaidIn - dblUnpaidOut) dblUnpaidBalance
-		,(
-			SELECT sum(dblQty) BalanceForward
-			FROM tblICInventoryTransaction it
-			JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23,33, 44)
-			JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND isnull(il.strDescription, '') <> 'In-Transit' AND il.intLocationId IN (
+	SELECT 
+		sum(dblUnpaidIn) - sum(dblUnpaidIn - dblUnpaidOut) dblUnpaidBalance
+		,(SELECT sum(dblQty) BalanceForward
+		 FROM tblICInventoryTransaction it
+		 JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23,33, 44)
+		 JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND isnull(il.strDescription, '') <> 'In-Transit' AND il.intLocationId IN (
 					SELECT intCompanyLocationId
 					FROM tblSMCompanyLocation
 					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 					)
-			WHERE intCommodityId = @intCommodityId AND convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(i.strType, '') <> 'Other Charge'
-			AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-			) InventoryBalanceCarryForward
+		 WHERE intCommodityId = @intCommodityId AND convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(i.strType, '') <> 'Other Charge'
+		 AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end) InventoryBalanceCarryForward
 	FROM (
-		SELECT dblInQty dblUnpaidIn
+		SELECT 
+			dblInQty dblUnpaidIn
 			,dblOutQty dblUnpaidOut
 		FROM (
-			SELECT DISTINCT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
+			SELECT DISTINCT 
+				CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
 				,dblUnitCost dblUnitCost1
 				,ir.intInventoryReceiptItemId
 				,i.strItemNo
 				,isnull(bd.dblQtyReceived, 0) dblInQty
-				,(
-					bd.dblTotal - isnull((
+				,(bd.dblTotal - isnull((
 							SELECT CASE WHEN sum(pd.dblPayment) - max(dblTotal) = 0 THEN bd.dblTotal ELSE sum(pd.dblPayment) END
 							FROM tblAPPaymentDetail pd
 							WHERE pd.intBillId = b.intBillId AND intConcurrencyId <> 0
@@ -74,7 +77,8 @@ FROM (
 	
 	UNION
 	
-	SELECT sum(dblGrossUnits) AS dblUnpaidBalance
+	SELECT 
+		sum(dblGrossUnits) AS dblUnpaidBalance
 		,NULL InventoryBalanceCarryForward
 	FROM tblICInventoryReceiptItem ir
 	JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ir.intInventoryReceiptId AND ysnPosted = 1
@@ -88,7 +92,9 @@ FROM (
 	JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge' AND i.intCommodityId = @intCommodityId
 		AND ir.intSubLocationId =  case when isnull(@intLocationId,0)=0 then ir.intSubLocationId else @intLocationId end 
+
 	) t3
+
 
 INSERT INTO @tblResult (
 	strItemNo
@@ -96,6 +102,7 @@ INSERT INTO @tblResult (
 	,dblUnpaidIn
 	,dblUnpaidOut
 	,dblUnpaidBalance
+	,dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,intReceiptId
@@ -105,6 +112,7 @@ SELECT strItemNo
 	,dblUnpaidIn
 	,dblUnpaidIn - dblUnpaidOut dblUnpaidOut
 	,dblUnpaidOut dblUnpaidBalance
+	,dblUnpaidIn -  dblUnpaidOut as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,intReceiptId
@@ -186,6 +194,7 @@ SELECT i.strItemNo
 	,dblGrossUnits AS dblUnpaidIn
 	,0 AS dblUnpaidOut
 	,dblGrossUnits AS dblUnpaidBalance
+	,dblGrossUnits as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,ir.intInventoryReceiptId
@@ -201,7 +210,9 @@ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110)) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 	AND ir.intSubLocationId = case when isnull(@intLocationId,0)=0 then ir.intSubLocationId else @intLocationId end 
-ORDER BY dtmDate
+
+
+
 
 SELECT convert(INT, ROW_NUMBER() OVER (
 			ORDER BY dtmDate
@@ -211,6 +222,7 @@ SELECT convert(INT, ROW_NUMBER() OVER (
 	,dblUnpaidIn [dblUnpaidIN]
 	,dblUnpaidOut [dblUnpaidOut]
 	,dblUnpaidBalance [dblUnpaidBalance]
+	,dblPaidBalance
 	,InventoryBalanceCarryForward dblInventoryBalanceCarryForward
 	,strReceiptNumber
 	,intReceiptId
