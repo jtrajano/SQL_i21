@@ -12,6 +12,8 @@ BEGIN TRY
 	DECLARE @strExternalShipmentNumber NVARCHAR(100)
 	DECLARE @strFOBPoint NVARCHAR(50)
 	DECLARE @intSourceType INT
+	DECLARE @strInvoiceNo NVARCHAR(1000)
+	DECLARE @strMsg NVARCHAR(MAX)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
@@ -77,6 +79,25 @@ BEGIN TRY
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
+				IF EXISTS (
+						SELECT TOP 1 1
+						FROM tblLGLoad L
+						JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+						WHERE L.intLoadId = @intLoadId
+						)
+				BEGIN
+					SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
+					FROM tblLGLoad L
+					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+					WHERE L.intLoadId = @intLoadId
+
+					SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
+
+					RAISERROR (@strMsg,16,1);
+
+					RETURN 0;
+				END
+
 				EXEC uspLGPostInventoryShipment 
 						@ysnPost = @ysnPost
 					   ,@strTransactionId = @strLoadNumber
