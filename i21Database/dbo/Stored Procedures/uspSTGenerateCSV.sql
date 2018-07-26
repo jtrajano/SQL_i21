@@ -165,10 +165,15 @@ BEGIN
 		--// CHECK if stores has address
 		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strAddress = '' OR strAddress IS NULL))
 		BEGIN
-			SELECT @strStatusMsg = @strStatusMsg + ',' + strDescription FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strAddress = '' OR strAddress IS NULL)
+			SELECT @strStatusMsg = @strStatusMsg + strDescription + ', '
+			FROM tblSTStore 
+			WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strAddress = '' OR strAddress IS NULL)
+
+			SELECT @strStatusMsg = LEFT(@strStatusMsg, LEN(@strStatusMsg)-1)
+
 			SET @strCSVHeader = ''
 			SET @intVendorAccountNumber = 0
-			SET @strStatusMsg = @strStatusMsg + ' does not have address'
+			SET @strStatusMsg = 'Store ' + @strStatusMsg + ' does not have address'
 
 			RETURN
 		END
