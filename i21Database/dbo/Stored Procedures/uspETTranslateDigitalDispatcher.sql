@@ -215,7 +215,7 @@ BEGIN
        ,[strSourceId]  
        --,[intSourceId]  
        --,[strBillingBy]  
-       --,[dblPercentFull]  
+       ,[dblPercentFull]  
        --,[dblNewMeterReading]  
        --,[dblPreviousMeterReading]  
        --,[dblConversionFactor]  
@@ -311,7 +311,7 @@ BEGIN
        ,[strSourceId]    = @strInvoiceNumber  
        --,[intSourceId]    = @intImportDDToInvoiceId  
        --,[strBillingBy]    = @BillingBy  
-       --,[dblPercentFull]   = @PercentFull  
+       ,[dblPercentFull]   = @dblPercentFullAfterDelivery  
        --,[dblNewMeterReading]  = @NewMeterReading  
        --,[dblPreviousMeterReading] = @PreviousMeterReading  
        --,[dblConversionFactor]  = @ConversionFactor  
