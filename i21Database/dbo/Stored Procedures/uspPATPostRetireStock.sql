@@ -353,20 +353,22 @@ BEGIN
 		BEGIN
 			DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
 			DECLARE @intCustomerId AS INT;
-			DECLARE @dblFaceValue AS NUMERIC(18,6);
+			DECLARE @dblNoOfShares AS NUMERIC(18,6);
+			DECLARE @dblPARValue AS NUMERIC(18,6);
 			DECLARE @strVenderOrderNumber AS NVARCHAR(50);
 			DECLARE @apClearing AS INT;
 
 			SELECT 
 				@intCustomerId = tempCS.intCustomerPatronId,
-				@dblFaceValue = ROUND(tempCS.dblFaceValue,2),
+				@dblNoOfShares = ROUND(tempCS.dblSharesNo,2),
+				@dblPARValue = ROUND(tempCS.dblParValue,2),
 				@strVenderOrderNumber = tempCS.strCertificateNo,
 				@apClearing = ComPref.intAPClearingGLAccount
 			FROM #tempCustomerStock tempCS
 			CROSS APPLY tblPATCompanyPreference ComPref
 
 			INSERT INTO @voucherDetailNonInventory([intAccountId], [strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost])
-			VALUES(@apClearing, 'Patronage Retired Stock', 1, 0, @dblFaceValue);
+			VALUES(@apClearing, 'Patronage Retired Stock', @dblPARValue, 0, @dblNoOfShares);
 
 			EXEC [dbo].[uspAPCreateBillData]
 				@userId	= @intUserId
