@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspGRCreateGLEntries]
+﻿CREATE PROCEDURE [dbo].[uspGRCreateGLEntries]
 	 @strTransactionType AS NVARCHAR(100) --'Storage Settlement'
 	,@strType AS NVARCHAR(40)			  --'1.Inventory 2.OtherCharges '
 	,@intSettleStorageId INT
