@@ -370,6 +370,7 @@ BEGIN
 				<> 0 
 		)
 		AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
+		AND Detail.dblPhysicalCount IS NOT NULL
 
 	-----------------------------------
 	--  Call the costing routine 
