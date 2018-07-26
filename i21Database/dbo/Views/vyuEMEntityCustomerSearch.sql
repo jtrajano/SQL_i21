@@ -4,6 +4,7 @@ SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId
 	, strCustomerNumber		= entityToCustomer.strEntityNo
 	, strName				= entityToCustomer.strName
+	, strAccountNumber		= ISNULL(CUSTOMER.strAccountNumber,'')
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
 	, intSalespersonId		= CUSTOMER.intSalespersonId
