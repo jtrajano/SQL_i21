@@ -108,6 +108,10 @@ BEGIN
 				[strCouponDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 		)
 
+
+
+		DECLARE @Delimiter AS NVARCHAR(5)
+
 		-- 0 = PM Morris
 		IF(@intCsvFormat = 0)
 			BEGIN
@@ -118,7 +122,7 @@ BEGIN
 														 )
 				DELETE FROM @tblTempPMM
 				INSERT INTO @tblTempPMM
-				SELECT @intVendorAccountNumber intRCN
+				SELECT DISTINCT @intVendorAccountNumber intRCN
 								, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 								, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
@@ -190,7 +194,7 @@ BEGIN
 															ELSE 0
 														 END)) as dblFinalSalesPrice
 
-								--Optional Fields
+								-- Optional Fields
 								, NULL AS intStoreTelephone
 								, '' AS strStoreContactName
 								, '' strStoreContactEmail
@@ -201,11 +205,11 @@ BEGIN
 				(
 					SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
+							WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
 						WHERE TRR.rn = 1
-						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
@@ -243,13 +247,15 @@ BEGIN
 		ELSE IF(@intCsvFormat = 1)
 			BEGIN
 				
+				SET @Delimiter = ','
+
 				DELETE FROM @tblTempRJR
 				INSERT INTO @tblTempRJR
-				SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, ',', '') END) as strOutletName
+				SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 								, ST.intStoreNo as intOutletNumber
-								, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), ',', '') as strOutletAddressOne
+								, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 								, '' as strOutletAddressTwo
-								, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, ',', '') END as strOutletCity
+								, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, @Delimiter, '') END as strOutletCity
 								, UPPER(LEFT(ST.strState, 2)) as strOutletState
 								,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
 								, CONVERT(NVARCHAR, dtmDate, 120) as strTransactionDateTime
@@ -353,38 +359,34 @@ BEGIN
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								, '' as strCouponDescription
-				FROM 
-				(   
-					SELECT * FROM
+					FROM 
 					(   
-					    SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
-						FROM tblSTTranslogRebates
-						--SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
-						--FROM tblSTTranslogRebates
-						--WHERE ysnSubmitted = 0
-						--AND intStoreId IN (SELECT DISTINCT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-						--AND CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
-					) TRR 
-					WHERE TRR.rn = 1
-					AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
-				) TR
-				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
-					AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-				LEFT JOIN
+						SELECT * FROM
+						(   
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							FROM tblSTTranslogRebates
+						) TRR 
+						WHERE TRR.rn = 1		
+						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+					) TR
+					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
+						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+					LEFT JOIN
 					(
 						SELECT DISTINCT [intID] 
 						FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
 						GROUP BY [intID]
 					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
-				WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+					WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
-				-- SELECT * FROM @tblTempRJR RJ
+				--SELECT * FROM @tblTempRJR RJ
+				
 				DELETE FROM @tempTable
 				INSERT INTO @tempTable
-				SELECT
-				     CAST(CONVERT(DATE, RJ.strTransactionDateTime, 120) AS DATE) AS dtmDate
-					 , CONVERT(VARCHAR, CONVERT(TIME, RJ.strTransactionDateTime, 120), 108) AS dtmTime
+				SELECT 
+				      CAST(CONVERT(DATE, RJ.strTransactionDateTime, 120) AS DATE) AS dtmDate
+					, CONVERT(VARCHAR, CONVERT(TIME, RJ.strTransactionDateTime, 120), 108) AS dtmTime
 				    , RJ.strOutletName AS strStoreName
 					, CAST(RJ.strMarketBasketTransactionId AS INT) AS intTermMsgSN
 					, RJ.intQuantity AS dblQty
@@ -393,6 +395,8 @@ BEGIN
 					, RJ.strUpcCode AS strUpc
 					, RJ.strUpcDescription AS strDescription
 				FROM @tblTempRJR RJ
+
+				DELETE FROM @tblTempRJR
 			END
 
 		--INSERT INTO @tempTable

@@ -219,7 +219,7 @@ BEGIN
 
 
 				INSERT INTO @tblTempPMM
-				SELECT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
+				SELECT DISTINCT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
 								--, replace(convert(NVARCHAR, DATEADD(DAY, (DATEDIFF(DAY, @NextDayID, @dtmBeginningDate) / 7) * 7 + 7, @NextDayID), 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
@@ -312,11 +312,11 @@ BEGIN
 					SELECT * FROM
 						(   
 							--SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn  ST-680
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
+							WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
-						WHERE TRR.rn = 1
-						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
+						WHERE TRR.rn = 1	
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
@@ -364,7 +364,7 @@ BEGIN
 								, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, @Delimiter, '') END as strOutletCity
 								, UPPER(LEFT(ST.strState, 2)) as strOutletState
 								,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
-								, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
+								, CONVERT(NVARCHAR, dtmDate, 120) as strTransactionDateTime
 								, CAST(intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
 								, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
 								, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
@@ -480,16 +480,11 @@ BEGIN
 					(   
 						SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
-							--SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
-							--FROM tblSTTranslogRebates
-							--WHERE ysnSubmitted = 0
-							--AND intStoreId IN (SELECT DISTINCT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-							--AND CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
-						WHERE TRR.rn = 1
-						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
+						WHERE TRR.rn = 1		
+						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
 					) TR
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
@@ -505,13 +500,13 @@ BEGIN
 
 					-- Check if has record
 					IF EXISTS(select * from @tblTempRJR)
-					BEGIN
-						SET @strStatusMsg = 'Success'
-					END
+						BEGIN
+							SET @strStatusMsg = 'Success'
+						END
 					ELSE
-					BEGIN
-						SET @strStatusMsg = 'No record found'
-					END
+						BEGIN
+							SET @strStatusMsg = 'No record found'
+						END
 			END
 			--END tblSTstgRebatesRJReynolds
 		END
