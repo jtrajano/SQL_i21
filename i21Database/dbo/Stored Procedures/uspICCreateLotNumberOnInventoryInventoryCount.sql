@@ -105,6 +105,7 @@ BEGIN
 			OR ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) <> 0 
 		)
 		AND Item.strLotTracking <> 'No'
+		AND Detail.dblPhysicalCount IS NOT NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
