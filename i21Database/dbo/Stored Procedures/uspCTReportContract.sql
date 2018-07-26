@@ -346,7 +346,7 @@ BEGIN TRY
 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
-			,strHersheyCaption						= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtConfirmation+':- ' + CH.strContractNumber
+			,strHersheyCaption						= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtConfirmation+': ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
 			,strAtlasDeclaration					= @rtWeConfirmHaving			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' '+@rtBoughtFrom+' '   ELSE ' '+@rtSoldTo+' ' END + @rtYouAsFollows + ':'
 			,strPurchaseOrder						= TP.strContractType + ' '+@rtOrder+':- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
@@ -523,9 +523,9 @@ BEGIN TRY
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,
 							CL.strLocationName,
-							'Loading ' + CD.strLoadingPointType		AS	srtLoadingPoint,
+							'Loading: ' + CD.strLoadingPointType		AS	srtLoadingPoint,
 							LP.strCity								AS	strLoadingPointName,
-							'Destination ' + CD.strLoadingPointType AS	srtDestinationPoint,
+							'Destination: ' + CD.strLoadingPointType AS	srtDestinationPoint,
 							DP.strCity								AS	strDestinationPointName,
 							TT.strName								AS	strShipper,
 							CY.strCurrency,

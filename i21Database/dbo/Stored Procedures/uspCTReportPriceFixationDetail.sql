@@ -75,14 +75,16 @@ BEGIN TRY
 			isnull(rtrt.strTranslation,MA.strFutMarketName) AS strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) AS [dblNoOfLots],
-			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
+			dbo.fnCTChangeNumericScale(PD.dblFutures,2) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
 			PD.strNotes,
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPriceDesc,
 			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots,
 			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) + ' '+@Lotsfixed+' ' + 
 			isnull(rtrt.strTranslation,MA.strFutMarketName) +  ' '  + case when MO.dtmFutureMonthsDate is null then '' else isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)),DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) end + ' '+@at+' ' + 
-			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + isnull(rtrt2.strTranslation,CM.strUnitMeasure)	AS strGABPrice
-				
+			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + isnull(rtrt2.strTranslation,CM.strUnitMeasure)	AS strGABPrice,
+			CD.dblRatio,
+			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + QM.strUnitMeasure AS strQtyWithUOM
+
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId	
@@ -94,7 +96,9 @@ BEGIN TRY
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	PD.intFutureMonthId		LEFT	
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId		LEFT	
-	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId
+	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		LEFT
+	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=	CD.intItemUOMId			LEFT
+	JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId			
 
 	left join tblSMScreen				rts on rts.strNamespace = 'RiskManagement.view.FuturesMarket'
 	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = MA.intFutureMarketId

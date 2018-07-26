@@ -30,7 +30,6 @@ BEGIN TRY
 			@IntNoOFUniFormItemUOM		INT,
 			@IntNoOFUniFormNetWeightUOM INT,
 			@intContractHeaderId		INT,
-			@strBasisComponent			NVARCHAR(MAX),
 			@intContractDetailId		INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -87,6 +86,11 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrLanguageId'
 
+	IF ISNULL(@intLaguageId,0) = 0
+	BEGIN
+		SELECT @intLaguageId = intLanguageId FROM tblSMLanguage WHERE strLanguage = 'English'
+	END
+
 	SELECT  @intContractHeaderId= intContractHeaderId,@intContractDetailId = intContractDetailId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
 	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intUnitMeasureId)  FROM tblCTContractDetail  WHERE intContractHeaderId= @intContractHeaderId
 	SELECT  @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT U.intUnitMeasureId)  FROM tblCTContractDetail D
@@ -128,15 +132,6 @@ BEGIN TRY
 	declare @Lotstobefixed nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Lots to be fixed'),'Lots to be fixed');
 	declare @bags nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bags'),'bags');
 
-	IF ISNULL(@intContractDetailId,0) > 0
-	BEGIN
-
-		SELECT	@strBasisComponent = COALESCE(@strBasisComponent + ', ', '') + strItemNo + ' ' + dbo.fnRemoveTrailingZeroes(dblRate) + ' ' + strCurrency + '/' + strUOM
-		FROM	vyuCTContractCostView 
-		WHERE	ysnBasis = 1 
-		AND		intContractDetailId = @intContractDetailId
-	END
-
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
 			CH.strContractNumber,
@@ -155,10 +150,10 @@ BEGIN TRY
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
-			strTotal = dbo.fnRemoveTrailingZeroes(PF.dblPriceWORollArb) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),
-			strDifferential = dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),
+			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice =	dbo.fnRemoveTrailingZeroes(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
@@ -199,7 +194,7 @@ BEGIN TRY
 			strPeriodWithPosition = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END,
 			strLotsFixedLabel = CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE @Lotstobefixed + ' :' END,
 			intLotsUnFixed = LTRIM(FLOOR((PF.dblTotalLots-PF.dblLotsFixed))),
-			dblLotsUnFixed = dbo.fnRemoveTrailingZeroes(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0)),
+			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),2),
 			strTotalDesc = LTRIM(CAST(ROUND(PF.dblPriceWORollArb,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strDifferentialDesc = LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,			
 			strFXFinalPriceLabelDesc = CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE @FinalPrice + ' :' END,
@@ -225,14 +220,21 @@ BEGIN TRY
 			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference,
 			ISNULL(@intReportLogoHeight,0) intReportLogoHeight,
 			ISNULL(@intReportLogoWidth,0) intReportLogoWidth,
-			@strBasisComponent AS strBasisComponent,
-			CD.strERPPONumber
+			dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY')  AS strBasisComponent,
+			CD.strERPPONumber,
+			CD.dblRatio,
+			CD.strContractCompanyName,
+			CD.strContractPrintSignOff
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(
-				SELECT	ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractDetailId ASC) intRowNum,* 
-				FROM	tblCTContractDetail			CD	
+				SELECT	ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractDetailId ASC) intRowNum,
+				CD.* ,
+				CL.strContractCompanyName,
+				CL.strContractPrintSignOff
+				FROM	tblCTContractDetail		CD	
+				JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId
 
 			)							CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
 											AND	CD.intContractDetailId			=	CASE	WHEN	PF.intContractDetailId IS NOT NULL 
