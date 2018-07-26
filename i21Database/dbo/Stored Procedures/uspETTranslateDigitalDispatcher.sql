@@ -251,7 +251,7 @@ BEGIN
         ,[intItemId]    = @intItemId  
         ,[strType] = 'Tank Delivery'  
        --,[strTransactionType]  = 'Tank Delivery'  
-       ,[ysnRecomputeTax]   = 1  
+		,[ysnRecomputeTax] = (CASE WHEN @strTaxGroup = '' THEN 0 ELSE 1 END) --IET-321
        ,[intInvoiceId]    = NULL  
        ,[intCompanyLocationId]  = ISNULL(@intLocationId,0)  
        ,[dtmDate]     = @dtmInvoiceDate  
