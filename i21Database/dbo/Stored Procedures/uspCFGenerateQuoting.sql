@@ -120,7 +120,8 @@ BEGIN
 	icItem.strItemNo, 
 	icItem.strDescription
 	FROM tblCFNetwork as cfNetwork 
-	INNER JOIN tblCFSite as cfSite ON cfNetwork.intNetworkId = cfSite.intNetworkId
+	INNER JOIN 
+	(SELECT * FROM tblCFSite WHERE strSiteType != ''Extended Remote'') AS cfSite ON cfNetwork.intNetworkId = cfSite.intNetworkId
 	INNER JOIN tblCFItem as cfItem ON cfNetwork.intNetworkId = cfItem.intNetworkId
 	INNER JOIN tblICItem as icItem ON cfItem.intARItemId = icItem.intItemId
 	INNER JOIN tblCFItemCategory as cfItemCat ON icItem.intCategoryId = cfItemCat.intCategoryId' + ' ' 
