@@ -1880,6 +1880,8 @@ Print N'End fixing CRM opportunity Sales Person';
 
 exec('update tblSMCustomTab set intScreenId = (select top 1 intScreenId from tblSMScreen where strScreenName = ''Campaign'' and strModule = ''CRM'' and strNamespace = ''CRM.view.Campaign'') where intScreenId = (select top 1 intScreenId from tblSMScreen where strScreenName = ''Campaign'' and strModule = ''Help Desk'' and strNamespace = ''HelpDesk.view.Campaign'')');
 
+exec dbo.uspCRMProcessOpportunityCompetitor 0;
+
 GO
 	PRINT N'End splitting CRM and Help Desk data..'
 GO
