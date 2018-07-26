@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspGRCreateGLEntries]
+﻿ALTER PROCEDURE [dbo].[uspGRCreateGLEntries]
 	 @strTransactionType AS NVARCHAR(100) --'Storage Settlement'
 	,@strType AS NVARCHAR(40)			  --'1.Inventory 2.OtherCharges '
 	,@intSettleStorageId INT
@@ -73,12 +73,13 @@ BEGIN
 	
 	--Freight
 	SELECT 
-	  @intFreightItemId			= SCSetup.intFreightItemId
-	, @intHaulerId				= SCTicket.intHaulerId 
-	, @dblFreightRate			= SCTicket.dblFreightRate
-	, @ysnDeductFreightFarmer   = SCTicket.ysnFarmerPaysFreight 
-	, @ysnDeductFeesCusVen		= SCTicket.ysnCusVenPaysFees
-	, @intContractCostId		= SCTicket.intContractCostId
+		 @intFreightItemId			= SCSetup.intFreightItemId
+		,@intHaulerId				= SCTicket.intHaulerId 
+		,@dblFreightRate			= SCTicket.dblFreightRate
+		,@ysnDeductFreightFarmer	= SCTicket.ysnFarmerPaysFreight 
+		,@ysnDeductFeesCusVen		= SCTicket.ysnCusVenPaysFees
+		,@intContractCostId			= SCTicket.intContractCostId
+
 	FROM tblSCScaleSetup SCSetup 
 	LEFT JOIN tblSCTicket SCTicket 
 		ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
@@ -265,26 +266,28 @@ BEGIN
 		,[intEntityVendorId]				= @intEntityVendorId	
 		,[intCurrencyId]  					= @intCurrencyId
 		,[intCostCurrencyId]  				= @intCurrencyId
-		,[intChargeId]						= ReceiptCharge.intChargeId
+		,[intChargeId]						= RC.intChargeId
 		,[intForexRateTypeId]				= NULL
 		,[dblForexRate]						= NULL
-		,[ysnInventoryCost]					= ReceiptCharge.ysnInventoryCost
-		,[strCostMethod]					= ReceiptCharge.strCostMethod
-		,[dblRate]							= ReceiptCharge.dblRate
-		,[intOtherChargeEntityVendorId]		= ReceiptCharge.intEntityVendorId
-		,[dblAmount]						= ReceiptCharge.dblAmount
+		,[ysnInventoryCost]					= RC.ysnInventoryCost
+		,[strCostMethod]					= RC.strCostMethod
+		,[dblRate]							= RC.dblRate
+		,[intOtherChargeEntityVendorId]		= RC.intEntityVendorId
+		,[dblAmount]						= RC.dblAmount
 		,[intContractDetailId]				= NULL
-		,[ysnAccrue]						= ReceiptCharge.ysnAccrue
-		,[ysnPrice]							= ReceiptCharge.ysnPrice
+		,[ysnAccrue]						= CASE WHEN RIAC.ysnAccrue = 1 THEN 0 END
+		,[ysnPrice]							= RIAC.ysnPrice
 		,[intTicketDiscountId]				= NULL
 		,[intContractCostId]				= NULL
-		,[dblUnits]							= ReceiptCharge.dblQuantity
-	FROM tblICInventoryReceiptCharge ReceiptCharge
+		,[dblUnits]							= RC.dblQuantity
+	FROM tblICInventoryReceiptCharge RC
     JOIN tblICItem Item 
-		ON Item.intItemId = ReceiptCharge.intChargeId
+		ON Item.intItemId = RC.intChargeId
     JOIN tblGRStorageHistory SH 
-		ON SH.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId 
+		ON SH.intInventoryReceiptId = RC.intInventoryReceiptId 
 			AND SH.strType='FROM Scale'
+	JOIN tblICInventoryReceiptItemAllocatedCharge  RIAC
+		ON RIAC.intInventoryReceiptChargeId = RC.intChargeId
     JOIN tblGRSettleStorageTicket SST 
 		ON SST.intCustomerStorageId = SH.intCustomerStorageId 
 			AND SST.dblUnits > 0
@@ -292,27 +295,10 @@ BEGIN
 		ON SS.intSettleStorageId = SST.intSettleStorageId 
     JOIN tblSCTicket SC 
 		ON SC.intTicketId = SH.intTicketId
-    JOIN tblGRCustomerStorage CS 
-		ON CS.intCustomerStorageId = SST.intCustomerStorageId
-    JOIN tblICCommodityUnitMeasure CU 
-		ON CU.intCommodityId = CS.intCommodityId 
-			AND CU.ysnStockUnit = 1
     JOIN tblSCScaleSetup ScaleSetup 
 		ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
-			AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
-    WHERE SST.intSettleStorageId = @intSettleStorageId
-    AND 
-    (
-        (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0)
-        OR
-        (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
-        OR
-        (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
-        OR
-        (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
-        OR
-        (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
-    )
+			AND ScaleSetup.intFreightItemId = RC.[intChargeId]
+	WHERE SST.intSettleStorageId = @intSettleStorageId	
 
     UNION
 
