@@ -1271,9 +1271,9 @@ FROM
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
-		,[intAccountId]								=	A.intAccountId
-		,[strAccountId]								=	A.strAccountId
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = A.intAccountId)
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	A.strName
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
@@ -1341,6 +1341,8 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
+	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	A.intItemId			AND 
+													ItemLoc.intLocationId	=	A.intLocationId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON A.intEntityVendorId = EL.intEntityId AND D1.intShipFromId = EL.intEntityLocationId
 	LEFT JOIN dbo.tblAPVendorSpecialTax VST ON VST.intEntityVendorId = A.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId  FROM tblSMUserRoleCompanyLocationPermission)

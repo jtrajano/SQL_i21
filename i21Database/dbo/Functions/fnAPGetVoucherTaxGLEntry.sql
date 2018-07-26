@@ -13,7 +13,7 @@ RETURNS TABLE AS RETURN
 		,CAST((D.dblTax) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL
+		,CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
