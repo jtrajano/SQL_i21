@@ -1,13 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
 	@voucherIds NVARCHAR(MAX)
+	,@selectDue BIT = NULL
 	,@datePaid DATETIME = GETDATE
 	,@tempDiscount DECIMAL(18,6) = 0
 	,@tempInterest DECIMAL(18,6) = 0
 	,@tempPayment DECIMAL(18,6) = 0
 	,@tempWithheld DECIMAL(18,6) = 0
 	,@readyForPayment BIT = 0
-	,@haveNegativePayment BIT = 0
 	,@tempPaymentInfo NVARCHAR(MAX) = NULL
+	,@negativePayment NVARCHAR(MAX) = NULL OUTPUT
 	,@newPayment DECIMAL(18,2) = 0 OUTPUT
 	,@newWithheld DECIMAL(18,2) = 0 OUTPUT
 	,@newPaymentInfo NVARCHAR(MAX) = NULL OUTPUT
@@ -34,6 +35,9 @@ BEGIN
 	INSERT INTO @ids
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
+	IF OBJECT_ID('tempdb..#tmpNegativePayment') IS NOT NULL DROP TABLE #tmpNegativePayment
+	CREATE TABLE #tmpNegativePayment(intBillId INT);
+
 	--REMOVE INVALID VOUCHERS
 	DELETE A
 	FROM @ids A
@@ -53,22 +57,51 @@ BEGIN
 	IF (SELECT COUNT(*) FROM @ids) > 1
 	BEGIN
 		--MULTIPLE UPDATE
-		UPDATE voucher
-			SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
-				,@amountDue = voucher.dblAmountDue
-				,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
-												CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
-											ELSE 0 END
-				,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
-				,voucher.dblTempWithheld = @updatedWithheld
-				,voucher.ysnReadyForPayment = 1
-		FROM tblAPBill voucher
-		INNER JOIN @ids ids ON voucher.intBillId = ids.intId
-		INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
-		INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
-		WHERE voucher.ysnPosted = 1
-		AND voucher.ysnPaid = 0
-		AND voucher.dblTotal != 0
+		IF @selectDue IS NULL
+		BEGIN
+			UPDATE voucher
+				SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
+					,@amountDue = voucher.dblAmountDue
+					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
+													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
+												ELSE 0 END
+					,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
+					,voucher.dblTempWithheld = @updatedWithheld
+					,voucher.ysnReadyForPayment = 1
+			FROM tblAPBill voucher
+			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
+			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
+			INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+			WHERE voucher.ysnPosted = 1
+			AND voucher.ysnPaid = 0
+			AND voucher.dblTotal != 0
+		END
+		ELSE
+		BEGIN
+			UPDATE voucher
+				SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
+					,@amountDue = voucher.dblAmountDue
+					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
+													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
+												ELSE 0 END
+					,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
+					,voucher.dblTempWithheld = @updatedWithheld
+					,voucher.ysnReadyForPayment = CASE WHEN @selectDue = 1
+														THEN 
+															CASE WHEN @datePaid >= dbo.fnGetDueDateBasedOnTerm(voucher.dtmDate, voucher.intTermsId)
+															THEN 1
+															ELSE 0
+															END
+														ELSE 0
+													END
+			FROM tblAPBill voucher
+			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
+			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
+			INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+			WHERE voucher.ysnPosted = 1
+			AND voucher.ysnPaid = 0
+			AND voucher.dblTotal != 0
+		END
 
 		SET @recordsUpdated = @@ROWCOUNT;
 	END
@@ -136,14 +169,18 @@ BEGIN
 	END
 
 	--CHECK IF THERE ARE NEGATIVE PAYMENT
-	IF EXISTS(
-		SELECT 
-			TOP 1 1
-		FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
-		WHERE dblAmountPaid < 0)
-	BEGIN
-		SET @haveNegativePayment = 0;
-	END
+	-- INSERT INTO #tmpNegativePayment
+	-- SELECT 
+	-- 	payVouchers.intBillId
+	-- FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
+	-- WHERE dblTempPayment < 0
+
+	-- SELECT @negativePayment	=	STUFF((
+	-- 									SELECT ',' + CAST(vouchers.intBillId AS NVARCHAR)
+	-- 									FROM #tmpNegativePayment vouchers
+	-- 									FOR XML PATH('')),1,1,''
+	-- 								)
+
 
 	IF @transCount = 0 COMMIT TRANSACTION
 	END TRY

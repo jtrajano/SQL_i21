@@ -17,9 +17,13 @@ RETURNS TABLE AS RETURN
 		,forPay.strBillId
 		,forPay.dblTotal
 		,forPay.dblDiscount
-		,dblTempDiscount =  dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+		,dblTempDiscount =  CASE WHEN voucher.intTransactionType = 1 
+							THEN dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+							ELSE 0 END
 		,forPay.dblInterest 
-		,dblTempInterest = dbo.fnGetInterestBasedOnTerm(voucher.dblTotal, voucher.dtmDate, @datePaid, voucher.intTermsId)
+		,dblTempInterest = CASE WHEN voucher.intTransactionType = 1 
+								THEN dbo.fnGetInterestBasedOnTerm(voucher.dblTotal, voucher.dtmDate, @datePaid, voucher.intTermsId)
+								ELSE 0 END
 		,forPay.dblAmountDue
 		,forPay.dblPayment
 		,forPay.dblTempPayment

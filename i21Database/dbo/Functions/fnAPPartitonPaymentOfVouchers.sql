@@ -28,8 +28,10 @@ RETURNS TABLE AS RETURN
 		,voucher.intPayToAddressId
 		,voucher.intEntityVendorId
 		,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
-		,SUM(ISNULL(voucher.dblTempPayment, 0)) OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId)
-		,SUM(ISNULL(voucher.dblTempWithheld, 0)) OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId)
+		,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
+				OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
+		,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
+				OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempWithheld
 		,voucher.strTempPaymentInfo
 	FROM tblAPBill voucher
 	INNER JOIN @voucherIds ids ON voucher.intBillId = ids.intId
@@ -46,8 +48,10 @@ RETURNS TABLE AS RETURN
 		,voucher.intPayToAddressId
 		,voucher.intEntityVendorId
 		,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
-		,SUM(ISNULL(voucher.dblTempPayment, 0)) OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId)
-		,SUM(ISNULL(voucher.dblTempWithheld, 0)) OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId)
+		,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
+				OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
+		,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
+				OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempWithheld
 		,voucher.strTempPaymentInfo
 	FROM tblAPBill voucher
 	INNER JOIN @voucherIds ids ON voucher.intBillId = ids.intId
