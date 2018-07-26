@@ -210,6 +210,7 @@ BEGIN
 							WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
 						WHERE TRR.rn = 1
+						AND TRR.ysnSubmitted = 0
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
@@ -368,6 +369,7 @@ BEGIN
 						) TRR 
 						WHERE TRR.rn = 1		
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+						AND TRR.ysnSubmitted = 0
 					) TR
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
