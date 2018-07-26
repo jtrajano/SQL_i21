@@ -14,15 +14,18 @@
 	   DECLARE @sql NVARCHAR(MAX) = N'';
 	   DECLARE @insertSQL NVARCHAR(MAX) = '';
 
-	    SET @insertSQL = N'INSERT INTO #ListOfArticles
-		SELECT DISTINCT Tab.strTableName FROM [tblSMReplicationConfiguration] AS Con
-		INNER JOIN [tblSMReplicationConfigurationTable] AS ConTab
-		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
-		INNER JOIN [tblSMReplicationTable] AS Tab
-		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		AND strType = ''Parent''
-		OR strTableName like ''%tblSC%''
-		ORDER BY strTableName '
+	 --   SET @insertSQL = N'INSERT INTO #ListOfArticles
+		--SELECT DISTINCT Tab.strTableName FROM [tblSMReplicationConfiguration] AS Con
+		--INNER JOIN [tblSMReplicationConfigurationTable] AS ConTab
+		--ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
+		--INNER JOIN [tblSMReplicationTable] AS Tab
+		--ON ConTab.intReplicationTableId = Tab.intReplicationTableId
+		--AND strType = ''Parent''
+		--OR strTableName like ''%tblSC%''
+		--ORDER BY strTableName '
+
+			SET @insertSQL = N'INSERT INTO #ListOfArticles
+				SELECT strTableName FROM tblSMDisconReplicationArticle ORDER BY strTableName '
 
 	
 		EXECUTE sp_executesql @insertSQL;

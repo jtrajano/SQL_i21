@@ -74,6 +74,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
 :r .\SM\DefaultData\35_Control.sql
 :r .\SM\DefaultData\36_Control_Persmission.sql
+:r .\SM\DefaultData\TruncateReplicationTables.sql
 :r .\SM\DefaultData\37_ReplicationConfiguration.sql
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql

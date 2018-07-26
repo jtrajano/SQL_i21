@@ -4,8 +4,8 @@
 	-- Parent
 
 	/* System Manager */
-			DECLARE @ListTables TABLE(strTableName VARCHAR(100));
-			DECLARE @TableName nvarchar(50);
+			DECLARE @ListTables TABLE(strTableName NVARCHAR(MAX));
+			DECLARE @TableName nvarchar(MAX);
 
 			INSERT INTO @ListTables 
 			VALUES 
@@ -349,7 +349,7 @@
 			--RM Brokerage Accounts
 			('tblRKBrokerageAccount'),
 			('tblRKTradersbyBrokersAccountMapping'),
-			('tblRKBrokerageCommission	'),
+			('tblRKBrokerageCommission'),
 
 			--RM Futures Broker
 			--('tblEMEntity'), Inculed in Entity

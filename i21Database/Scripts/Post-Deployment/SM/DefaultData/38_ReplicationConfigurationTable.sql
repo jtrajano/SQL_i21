@@ -4,7 +4,7 @@
 
 
 
-DECLARE @ListOfScreenTables TABLE(id int IDENTITY(1,1) PRIMARY KEY, strArticle VARCHAR(max), strScreen VARCHAR(max), strModule VARCHAR(100));
+DECLARE @ListOfScreenTables TABLE(id int IDENTITY(1,1) PRIMARY KEY, strArticle NVARCHAR(max), strScreen NVARCHAR(max), strModule NVARCHAR(MAX));
 
 
 INSERT INTO @ListOfScreenTables
@@ -58,7 +58,7 @@ VALUES
 	('tblEMEntityMobileNumber', 'Entities', 'Entity Management'),
 	('tblEMEntityNote', 'Entities', 'Entity Management'),
 	('tblEMEntityPasswordHistory', 'Entities', 'Entity Management'),
-	('tblEMEntityPhoneNumber', 'EnEntitiestity', 'Entity Management'),
+	('tblEMEntityPhoneNumber', 'Entities', 'Entity Management'),
 	('tblEMEntityPortalMenu', 'Entities', 'Entity Management'),
 	('tblEMEntityPortalPermission', 'Entities', 'Entity Management'),
 	('tblEMEntityPreferences', 'Entities', 'Entity Management'),
@@ -603,13 +603,13 @@ VALUES
 --##   INCO/Ship Term ***
 --##-----------------------------------------------------------------------------------------------
 
-		('tblCTContractBasis', 'INCO and Ship Term', 'Contract Management'),
+		('tblCTContractBasis', 'INCO/Ship Term', 'Contract Management'),
 
 ---------------------------------------------------------------------------------------------------
 --##   Weight/Grades ***
 --##-----------------------------------------------------------------------------------------------
 
-		('tblCTWeightGrade', 'Weight and Grades', 'Contract Management'),
+		('tblCTWeightGrade', 'Weight/Grades', 'Contract Management'),
 
 ---------------------------------------------------------------------------------------------------
  
@@ -802,7 +802,6 @@ VALUES
 --########################		
 --##  Manufacturing  ##---------------------------------------------------------------------------
 --########################
-	('tblMFAttribute', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),			
 	('tblMFBlendValidation', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFBuyingGroup', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFCompanyPreference', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
@@ -831,17 +830,13 @@ VALUES
 	('tblMFManufacturingProcess', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFManufacturingProcessAttribute', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFManufacturingProcessMachine', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
-	('tblMFManufacturingProcessRunDuration', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
-	('tblMFMeasurement', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFNutrient', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
-	('tblMFOneLinePrint', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFOrderDirection', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFPackType', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFPackTypeDetail', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFParentLotNumberPattern', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFPattern', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFPatternByCategory', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
-	('tblMFPatternCode', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFPatternDetail', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFReasonCode', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFReasonCodeDetail', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
@@ -858,7 +853,6 @@ VALUES
 	('tblMFReportCategory', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFReportCategoryByCustomer', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFReportLabel', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
-	('tblMFReportLidlUCCPalletLabel', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFScheduleChangeoverFactor', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFScheduleChangeoverFactorDetail', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFScheduleConstraint', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
@@ -980,13 +974,13 @@ VALUES
 --##   IC Inventory Shipments
 --##-----------------------------------------------------------------------------------------------
 
-		('tblICInventoryShipment', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentCharge', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentChargePerItem', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentChargeTax', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentItem', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentItemAllocatedCharge', 'Inventory.view.InventoryShipment', 'Inventory'),
-		('tblICInventoryShipmentItemLot', 'Inventory.view.InventoryShipment', 'Inventory'),
+		('tblICInventoryShipment', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentCharge', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentChargePerItem', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentChargeTax', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentItem', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentItemAllocatedCharge', 'Inventory Shipments', 'Inventory'),
+		('tblICInventoryShipmentItemLot', 'Inventory Shipments', 'Inventory'),
 
 
 ---------------------------------------------------------------------------------------------------
@@ -1180,81 +1174,65 @@ VALUES
 
 --##------------------------------------------------------------------------------------------------
 
-
-	   		('tblMFAttribute', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFBlendValidation', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFBuyingGroup', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFCompanyPreference', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFDepartment', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFHaldheldUserMenuItemMap', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFHandheldMenuItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFHolidayCalendar', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFInventoryShipmentRestrictionType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemChangeMap', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemContamination', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemContaminationDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemGradeDiff', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemGroup', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemMachine', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemOwner', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemSubstitution', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemSubstitutionDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemSubstitutionRecipe', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFItemSubstitutionRecipeDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFLotStatusException', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFMachine', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFMachineMeasurement', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFMachinePackType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingCell', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingCellPackType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingProcess', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingProcessAttribute', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingProcessMachine', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFManufacturingProcessRunDuration', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFMeasurement', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFNutrient', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFOneLinePrint', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFOrderDirection', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPackType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPackTypeDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFParentLotNumberPattern', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPattern', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPatternByCategory', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPatternCode', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFPatternDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReasonCode', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReasonCodeDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipe', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeAlertLog', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeCategory', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeGuide', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeGuideNutrient', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeItemStage', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeStage', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeSubstituteItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFRecipeSubstituteItemStage', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReportCategory', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReportCategoryByCustomer', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReportLabel', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFReportLidlUCCPalletLabel', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleChangeoverFactor', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleChangeoverFactorDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleConstraint', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleConstraintDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleGroup', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleGroupDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFScheduleRule', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFShift', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFShiftBreakType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFShiftDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFStorageLocationRestrictionTypeLotStatus', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFUserPrinterMap', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFUserRoleEventMap', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFYield', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
-			('tblMFYieldDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, Work Order Schedule', 'Manufacturing'),  
+			('tblMFBlendDemand', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFBlendProductionOutputDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFBlendRequirement', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFBlendRequirementRule', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFBudget', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFBudgetLog', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFCustomFieldValue', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFDowntime', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFDowntimeMachines', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFForecastItemValue', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFInventoryAdjustment', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFItemDemand', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFItemOwnerDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFLotInventory', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFLotSnapshot', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFLotSnapshotDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFLotTareWeight', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFOrderDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFOrderHeader', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFOrderManifest', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFOrderManifestLabel', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'), 
+			('tblMFPickForWOStaging', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFPickList', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFPickListDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFProcessCycleCount', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFProcessCycleCountMachine', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFProcessCycleCountSession', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFProductionSummary', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFSchedule', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleCalendar', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleCalendarDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleCalendarMachineDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduledMaintenance', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduledMaintenanceDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleMachineDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleWorkOrder', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFScheduleWorkOrderDetail', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFShiftActivity', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFShiftActivityMachines', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFStageWorkOrder', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFTask', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWastage', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrder', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderConsumedLot', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderInputLot', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderInputParentLot', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderProducedLot', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderProducedLotTransaction', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderProductSpecification', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipe', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeCategory', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeComputation', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeComputationMethod', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeComputationType', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
+			('tblMFWorkOrderRecipeSubstituteItem', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing'),
 			('tblMFPatternSequence', 'Blend production, Process production, FG Production, Bag off, Work Order, Production calendar, and Work Order Schedule', 'Manufacturing') 
-			
+		
 
 	
 -----------------------------------------------------------------------------------------------------
@@ -1269,9 +1247,9 @@ VALUES
 				@intScreenId int,
 				@intReplicationTableId int,
 				@intReplicationConfigurationId int,
-				@table varchar(100),
-				@screen varchar(100),
-				@module varchar(100);
+				@table NVARCHAR(MAX),
+				@screen NVARCHAR(MAX),
+				@module NVARCHAR(MAX);
 
 
 		WHILE  (SELECT TOP 1 count(*) FROM @ListOfScreenTables) != 0

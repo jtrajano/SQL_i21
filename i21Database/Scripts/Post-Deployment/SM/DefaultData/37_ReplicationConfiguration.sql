@@ -680,10 +680,10 @@ VALUES
 				@intScreenId int,
 				@intReplicationTableId int,
 				@intReplicationConfigurationId int,
-				@table varchar(100),
-				@strScreen varchar(100),
-				@strType varchar(100),
-				@module varchar(100);
+				@table NVARCHAR(MAX),
+				@strScreen NVARCHAR(MAX),
+				@strType NVARCHAR(MAX),
+				@module NVARCHAR(MAX);
 
 
 		WHILE  (SELECT TOP 1 count(*) FROM @ListOfScreenTables) != 0

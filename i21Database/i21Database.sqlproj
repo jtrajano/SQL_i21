@@ -6834,6 +6834,7 @@
     <Build Include="dbo\Views\vyuCFCustomerReportMessage.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityCompetitor.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMProcessOpportunityCompetitor.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\TruncateReplicationTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
