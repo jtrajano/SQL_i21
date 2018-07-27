@@ -550,14 +550,9 @@ BEGIN
 			VALUES (@EntityId, ''Vendor'', 0)
 		END
 		
-		IF EXISTS (select TOP 1 1 from tblEMEntityLocation where strLocationName = @strLocationName)
-		BEGIN 
-			DECLARE @error NVARCHAR(1000) = NULL;
-			SET @error =  ''Throw message: Vendor Location is already existing.'';
-
-			RAISERROR(@error, 16, 1);
-			RETURN;
-		END
+		--insert into tblEMEntityLocation if no duplicate
+		IF NOT EXISTS (select TOP 1 1 from tblEMEntityLocation where strLocationName = @strLocationName)
+		BEGIN
 
 		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
 		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
@@ -674,7 +669,7 @@ BEGIN
 	 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
 	 where ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
-	  
+	 END 
 	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
 	 
 	 
