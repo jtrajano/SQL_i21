@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
+﻿ALTER PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
 	@dtmDateFrom				DATETIME = NULL,
 	@dtmDateTo					DATETIME = NULL,
 	@strSalesperson				NVARCHAR(100) = NULL,
@@ -158,6 +158,11 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
+IF(OBJECT_ID('tempdb..#PROVISIONALINVOICES') IS NOT NULL)
+BEGIN
+    DROP TABLE #PROVISIONALINVOICES
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -215,10 +220,21 @@ INNER JOIN (SELECT intPaymentId
 ) APP ON APPD.intPaymentId = APP.intPaymentId
 WHERE intInvoiceId IS NOT NULL
 
+--#PROVISIONALINVOICES
+SELECT intInvoiceId            = PROVI.intInvoiceId
+     , dblInvoiceTotal         = PROVI.dblInvoiceTotal
+INTO #PROVISIONALINVOICES
+FROM dbo.tblARInvoice PROVI
+WHERE PROVI.ysnPosted = 1
+  AND PROVI.strType = 'Provisional'
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PROVI.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+
 --#POSTEDINVOICES
 SELECT I.intInvoiceId
 	 , I.intPaymentId
 	 , I.intEntityCustomerId
+	 , I.intOriginalInvoiceId
+     , I.intSourceId
 	 , I.dtmPostDate
 	 , I.dtmDueDate
 	 , I.strTransactionType
@@ -420,7 +436,10 @@ SELECT I.intInvoiceId
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) END
+     , dblAvailableCredit   = CASE WHEN I.strType = 'CF Tran' THEN 0
+								WHEN ISNULL(I.intSourceId, 0) = 2 AND ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN ISNULL(I.dblAmountDue, 0) + ISNULL(PD.dblPayment, 0)
+								ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) 
+                              END
 	 , dblPrepayments		= 0
 	 , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
@@ -454,7 +473,7 @@ WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepaym
 UNION ALL
             
 SELECT I.intInvoiceId
-    , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
+    , dblAmountPaid         = CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) + ISNULL(PROVI.dblInvoiceTotal, 0) END
     , dblInvoiceTotal		= 0
     , dblAmountDue			= 0
     , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
@@ -483,6 +502,7 @@ LEFT JOIN (
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
+LEFT JOIN #PROVISIONALINVOICES PROVI ON I.intOriginalInvoiceId = PROVI.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 
 UNION ALL
