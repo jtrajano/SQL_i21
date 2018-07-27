@@ -226,9 +226,13 @@ BEGIN TRY
 			IF NOT EXISTS (
 						SELECT 1
 						FROM @StorageTicketInfoByFIFO
-						WHERE [intCustomerStorageId] = @intCustomerStorageId AND [strItemType] = 'Storage Charge'
+						WHERE [intCustomerStorageId] = @intCustomerStorageId 
+							AND [strItemType] = 'Storage Charge'
+							AND [intItemId] = @intStorageChargeItemId						
 						)
 				BEGIN
+					DELETE FROM @StorageTicketInfoByFIFO WHERE [intItemId] = @intStorageChargeItemId
+					
 					INSERT INTO @StorageTicketInfoByFIFO 
 					(
 						[intCustomerStorageId]

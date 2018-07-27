@@ -86,12 +86,13 @@ END
 -- Delete any existing "Storage Charge" from the shipment charge table. 
 BEGIN 
 	DELETE	shipmentCharge 
-	FROM	tblICInventoryShipmentCharge shipmentCharge INNER JOIN tblICItem i
-				ON shipmentCharge.intChargeId = i.intItemId
-			INNER JOIN @StorageItems si
-				ON si.intInventoryShipmentItemId = shipmentCharge.intInventoryShipmentId
+	FROM	tblICInventoryShipmentCharge shipmentCharge 
+	INNER JOIN tblICItem i
+		ON shipmentCharge.intChargeId = i.intItemId
+	INNER JOIN @StorageItems si
+		ON si.intInventoryShipmentItemId = shipmentCharge.intInventoryShipmentId
 	WHERE	i.strCostType = 'Storage Charge'
-			and i.strType = 'Other Charge'
+			AND i.strType = 'Other Charge'
 END 
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @StorageItems) 
@@ -126,6 +127,7 @@ BEGIN
 			,@intInventoryShipmentId AS INT 
 			,@intInventoryShipmentItemId AS INT 
 			,@intCompanyLocationId AS INT 
+			,@intStorageChargeLinkId AS INT
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @StorageItems)
 	BEGIN 
@@ -144,6 +146,12 @@ BEGIN
 				,@intEntityCustomerId = intEntityCustomerId
 				,@intCompanyLocationId = intLocationId
 		FROM	@StorageItems storageItem 
+
+		--get the first id for charge link (storage)
+		IF @intStorageChargeLinkId IS NULL
+		BEGIN
+			SELECT @intStorageChargeLinkId = @intId
+		END
 
 		-- Call the Grain sp. 
 		BEGIN 
@@ -198,6 +206,8 @@ BEGIN
 			,[ysnAccrue] 
 			,[intEntityVendorId] 
 			,[ysnPrice] 
+			,[strAllocatePriceBy]
+			,[strChargesLink]			
 		)
 		SELECT 
 			[intInventoryShipmentId]	= grainCharge.intInventoryShipmentId
@@ -210,9 +220,12 @@ BEGIN
 			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance + ISNULL(grainCharge.dblFlatFee,0)
 			,[ysnAccrue]				= charge.ysnAccrue
 			,[intEntityVendorId]		= grainCharge.intEntityVendorId -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a vendor id. So I assume all storage charges are meant to increase the receivable from shipment customer. 
-			,[ysnPrice]					= charge.ysnPrice
-		FROM @StorageTicketInfoByFIFO grainCharge INNER JOIN tblICItem charge
-				ON grainCharge.intItemId = charge.intItemId
+			,[ysnPrice]					= 1 --storage fee is always charged to the Vendor
+			,[strAllocatePriceBy]		= 'Unit'
+			,[strChargesLink]			= 'CL-' + CAST(@intStorageChargeLinkId AS nvarchar(MAX))
+		FROM @StorageTicketInfoByFIFO grainCharge 
+		INNER JOIN tblICItem charge
+			ON grainCharge.intItemId = charge.intItemId
 		WHERE grainCharge.[strItemType] ='Storage Charge' 
 
 	END 
