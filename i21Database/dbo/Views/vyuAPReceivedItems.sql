@@ -675,8 +675,8 @@ FROM
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
-		,[strRateType]								=	NULL
-		,[intCurrencyExchangeRateTypeId]			=	NULL
+		,[strRateType]								=	rtype.strDescription
+		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -761,6 +761,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
+	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0 
 	AND CC.ysnPrice = 1
@@ -798,8 +799,8 @@ FROM
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
-		,[strRateType]								=	NULL
-		,[intCurrencyExchangeRateTypeId]			=	NULL
+		,[strRateType]								=	rtype.strDescription
+		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -885,6 +886,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
+	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0
 	UNION ALL
@@ -922,8 +924,8 @@ FROM
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,ISNULL(CC.dblFX,1)) END
-		,[strRateType]								=	NULL
-		,[intCurrencyExchangeRateTypeId]			=	NULL
+		,[strRateType]								=	rtype.strDescription
+		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -1008,6 +1010,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
+	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0 
 	AND ISNULL(CC.strCostStatus,'Open') = 'Open'
@@ -1046,8 +1049,8 @@ FROM
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
-		,[strRateType]								=	NULL
-		,[intCurrencyExchangeRateTypeId]			=	NULL
+		,[strRateType]								=	rtype.strDescription
+		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -1133,6 +1136,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
+	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0
 	
