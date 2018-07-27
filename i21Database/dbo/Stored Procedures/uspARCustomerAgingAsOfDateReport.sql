@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
+﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
 	@dtmDateFrom				DATETIME = NULL,
 	@dtmDateTo					DATETIME = NULL,
 	@strSalesperson				NVARCHAR(100) = NULL,
