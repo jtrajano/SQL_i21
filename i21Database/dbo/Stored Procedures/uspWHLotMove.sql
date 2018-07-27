@@ -52,6 +52,11 @@ BEGIN TRY
 		,@intInventoryTransactionType INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+		,@ysnAllowMultipleLots INT
+		,@ysnAllowMultipleItems INT
+		,@ysnCPMergeOnMove BIT
+		,@ysnMergeOnMove BIT
+		,@ItemsToReserve1 AS dbo.ItemReservationTableType
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
@@ -326,6 +331,75 @@ BEGIN TRY
 		END
 	END
 
+	IF @ysnAllowMultipleLots = 0
+		AND @ysnAllowMultipleItems = 0
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND (
+						dblQty > 0
+						OR dblWeight > 0
+						)
+				)
+		BEGIN
+			RAISERROR (
+					'The storage location is already used by another lot .'
+					,16
+					,1
+					)
+		END
+	END
+	ELSE IF @ysnAllowMultipleLots = 0
+		AND @ysnAllowMultipleItems = 1
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intItemId = @intItemId
+					AND (
+						dblQty > 0
+						OR dblWeight > 0
+						)
+				)
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by other lot of item ' + @strItemNumber + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+	END
+	ELSE IF @ysnAllowMultipleLots = 1
+		AND @ysnAllowMultipleItems = 0
+	BEGIN
+		IF EXISTS (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intItemId <> @intItemId
+					AND dblQty > 0
+				)
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by another item.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+	END
+
+	DECLARE @tblICStockReservation TABLE (
+		intTransactionId INT
+		,intInventoryTransactionType INT
+		)
+
 	BEGIN TRANSACTION
 
 	IF @blnInventoryMove = 1
@@ -334,16 +408,21 @@ BEGIN TRY
 			FROM tblICStockReservation
 			WHERE intLotId = @intLotId
 				AND ysnPosted = 0
-				AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
+				--AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
 			)
+		AND @blnIsPartialMove = 0
 	BEGIN
-		SELECT @intTransactionId = intTransactionId
-			,@intInventoryTransactionType = intInventoryTransactionType
+		INSERT INTO @tblICStockReservation (
+			intTransactionId
+			,intInventoryTransactionType
+			)
+		SELECT DISTINCT intTransactionId
+			,intInventoryTransactionType
 		FROM tblICStockReservation
 		WHERE intLotId = @intLotId
 			AND ysnPosted = 0
-			AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
 
+		--AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
 		INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
@@ -356,23 +435,37 @@ BEGIN TRY
 			,strTransactionId
 			,intTransactionTypeId
 			)
-		SELECT intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblQty
-			,intTransactionId
-			,strTransactionId
-			,intInventoryTransactionType
-		FROM tblICStockReservation
-		WHERE intTransactionId = @intTransactionId
-			AND intInventoryTransactionType = @intInventoryTransactionType
+		SELECT SR.intItemId
+			,SR.intItemLocationId
+			,SR.intItemUOMId
+			,SR.intLotId
+			,SR.intSubLocationId
+			,SR.intStorageLocationId
+			,SR.dblQty
+			,SR.intTransactionId
+			,SR.strTransactionId
+			,SR.intInventoryTransactionType
+		FROM tblICStockReservation SR
+		JOIN @tblICStockReservation SR1 ON SR1.intTransactionId = SR.intTransactionId
+			AND SR1.intInventoryTransactionType = SR.intInventoryTransactionType
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
-			,@intTransactionId
-			,@intInventoryTransactionType
+		SELECT @intTransactionId = MIN(intTransactionId)
+		FROM @tblICStockReservation
+
+		WHILE @intTransactionId IS NOT NULL
+		BEGIN
+			SELECT @intInventoryTransactionType = intInventoryTransactionType
+			FROM @tblICStockReservation
+			WHERE intTransactionId = @intTransactionId
+
+			EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
+				,@intTransactionId
+				,@intInventoryTransactionType
+
+			SELECT @intTransactionId = MIN(intTransactionId)
+			FROM @tblICStockReservation
+			WHERE intTransactionId > @intTransactionId
+		END
 	END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
@@ -398,7 +491,11 @@ BEGIN TRY
 		AND intStorageLocationId = @intNewStorageLocationId
 
 	IF @blnInventoryMove = 1
-		AND @intTransactionId IS NOT NULL
+		AND EXISTS (
+			SELECT *
+			FROM @tblICStockReservation
+			)
+		AND @blnIsPartialMove = 0
 	BEGIN
 		UPDATE @ItemsToReserve
 		SET intLotId = @intNewLotId
@@ -406,9 +503,56 @@ BEGIN TRY
 			,intSubLocationId = @intNewSubLocationId
 		WHERE intLotId = @intLotId
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intTransactionId
-			,@intInventoryTransactionType
+		SELECT @intTransactionId = NULL
+
+		SELECT @intTransactionId = MIN(intTransactionId)
+		FROM @tblICStockReservation
+
+		WHILE @intTransactionId IS NOT NULL
+		BEGIN
+			SELECT @intInventoryTransactionType = NULL
+
+			SELECT @intInventoryTransactionType = intInventoryTransactionType
+			FROM @tblICStockReservation
+			WHERE intTransactionId = @intTransactionId
+
+			DELETE
+			FROM @ItemsToReserve1
+
+			INSERT INTO @ItemsToReserve1 (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId
+				,dblQty
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				)
+			SELECT intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId
+				,dblQty
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+			FROM @ItemsToReserve
+			WHERE intTransactionId = @intTransactionId
+				AND intTransactionTypeId = @intInventoryTransactionType
+
+			EXEC dbo.uspICCreateStockReservation @ItemsToReserve1
+				,@intTransactionId
+				,@intInventoryTransactionType
+
+			SELECT @intTransactionId = MIN(intTransactionId)
+			FROM @tblICStockReservation
+			WHERE intTransactionId > @intTransactionId
+		END
 	END
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate

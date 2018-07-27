@@ -33,6 +33,10 @@ BEGIN TRY
 		,@dblOtherCharges DECIMAL(38, 24)
 		,@dblProduceQty NUMERIC(38, 20)
 		,@dtmCurrentDateTime DATETIME
+						,@ysnCostEnabled BIT
+
+	SELECT TOP 1 @ysnCostEnabled=ysnCostEnabled
+				FROM tblMFCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -236,7 +240,7 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT TOP 1 1
 				FROM @adjustedEntries
-				)
+				)and @ysnCostEnabled=1
 		BEGIN
 			DECLARE @intReturnValue AS INT
 

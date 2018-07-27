@@ -521,6 +521,7 @@ BEGIN TRY
 			FROM tblMFWorkOrderProducedLotTransaction PL
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
+			and intTransactionTypeId =25
 
 			--AND PL.dblQuantity < 0
 			DELETE
