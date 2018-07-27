@@ -867,5 +867,104 @@ BEGIN
         AND P.[intTransactionDetailId] IS NULL
     OPTION(recompile)
 
+
+        DECLARE @InvoiceIdsForChecking TABLE (
+			intInvoiceId int PRIMARY KEY,
+			UNIQUE (intInvoiceId)
+		);
+
+		INSERT INTO @InvoiceIdsForChecking(intInvoiceId)
+		SELECT DISTINCT
+			PD.intInvoiceId 
+		FROM
+			tblARPaymentDetail PD 
+		INNER JOIN
+			@Payments P
+				ON PD.intPaymentId = P.intTransactionId
+		WHERE
+			PD.dblPayment <> 0
+		GROUP BY
+			PD.intInvoiceId
+		HAVING
+			COUNT(PD.intInvoiceId) > 1
+				
+		WHILE(EXISTS(SELECT TOP 1 NULL FROM @InvoiceIdsForChecking))
+		BEGIN
+			DECLARE @InvID INT			
+					,@InvoicePayment NUMERIC(18,6) = 0
+					
+			SELECT TOP 1 @InvID = intInvoiceId FROM @InvoiceIdsForChecking
+				
+			DECLARE @InvoicePaymentDetail TABLE(
+				intPaymentId INT,
+				intInvoiceId INT,
+				dblInvoiceTotal NUMERIC(18,6),
+				dblAmountDue NUMERIC(18,6),
+				dblPayment NUMERIC(18,6),
+				intPaymentDetailId INT,
+				strBatchId nvarchar(100),
+				strInvoiceNumber nvarchar(100)
+			);
+				
+			INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, intPaymentDetailId, strBatchId, strInvoiceNumber)
+			SELECT distinct
+                A.intPaymentId
+				,C.intInvoiceId
+				,C.dblInvoiceTotal
+				,C.dblAmountDue
+				,B.dblPayment
+				,B.intPaymentDetailId
+				,P.strBatchId
+				,C.strInvoiceNumber
+			FROM
+				tblARPayment A
+			INNER JOIN
+				tblARPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+			INNER JOIN
+				tblARInvoice C
+					ON B.intInvoiceId = C.intInvoiceId
+			INNER JOIN
+				@Payments P
+					ON A.intPaymentId = P.intTransactionId
+			WHERE
+				C.intInvoiceId = @InvID
+			
+					
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
+			BEGIN
+				DECLARE @PayID INT
+						,@AmountDue NUMERIC(18,6) = 0
+				SELECT TOP 1 @PayID = intPaymentId, @AmountDue = dblAmountDue, @InvoicePayment = @InvoicePayment + dblPayment FROM @InvoicePaymentDetail ORDER BY intPaymentId
+				
+				IF @AmountDue < @InvoicePayment
+				BEGIN
+                        INSERT INTO @returntable
+                        ([intTransactionId]
+                        ,[strTransactionId]
+                        ,[strTransactionType]
+                        ,[intTransactionDetailId]
+                        ,[strBatchId]
+                        ,[strError])
+						SELECT   
+                        [intTransactionId]         = P.intPaymentId
+                        ,[strTransactionId]         = A.strRecordNumber
+                        ,[strTransactionType]       = @TransType
+                        ,[intTransactionDetailId]   = P.intPaymentDetailId
+                        ,[strBatchId]               = P.[strBatchId]                         
+                        ,[strError]                 = 'Payment on ' + P.strInvoiceNumber COLLATE Latin1_General_CI_AS + ' is over the transaction''s amount due' 
+						FROM
+							tblARPayment A
+						INNER JOIN
+							@InvoicePaymentDetail P
+								ON A.intPaymentId = P.intPaymentId
+						WHERE A.intPaymentId = @PayID
+					END									
+					DELETE FROM @InvoicePaymentDetail WHERE intPaymentId = @PayID	
+				END
+				DELETE FROM @InvoiceIdsForChecking WHERE intInvoiceId = @InvID							
+		END
+
+
 	RETURN
 END
