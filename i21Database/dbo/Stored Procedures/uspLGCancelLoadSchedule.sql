@@ -8,7 +8,8 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intPurchaseSale INT
 	DECLARE @intMinLoadDetailId INT
-	DECLARE @intContractDetailId INT
+	DECLARE @intPContractDetailId INT
+	DECLARE @intSContractDetailId INT
 	DECLARE @dblQuantityToUpdate NUMERIC(18, 6)
 	DECLARE @dblAvailableContractQty NUMERIC(18, 6)
 	DECLARE @dblContractSIQty NUMERIC(18, 6)
@@ -18,7 +19,8 @@ BEGIN TRY
 	DECLARE @strAuditLogActionType NVARCHAR(MAX)
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
-								 ,intContractDetailId INT
+								 ,intPContractDetailId INT
+								 ,intSContractDetailId INT
 								 ,dblLoadDetailQuantity NUMERIC(18, 6))
 
 	SELECT @intPurchaseSale = intPurchaseSale
@@ -27,11 +29,8 @@ BEGIN TRY
 
 	INSERT INTO @tblLoadDetail
 	SELECT intLoadDetailId
-		,CASE 
-			WHEN @intPurchaseSale = 1
-				THEN intPContractDetailId
-			ELSE intSContractDetailId
-			END
+		,intPContractDetailId
+		,intSContractDetailId
 		,dblQuantity
 	FROM tblLGLoadDetail
 	WHERE intLoadId = @intLoadId
@@ -49,23 +48,37 @@ BEGIN TRY
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
-				SET @intContractDetailId = NULL
+				SET @intPContractDetailId = NULL
+				SET @intSContractDetailId = NULL
 				SET @dblQuantityToUpdate = NULL
 				SET @intExternalId = NULL
 				SET @strScreenName = NULL
 
-				SELECT @intContractDetailId = intContractDetailId
+				SELECT @intPContractDetailId = intPContractDetailId
+					,@intSContractDetailId = intSContractDetailId
 					,@dblQuantityToUpdate = - dblLoadDetailQuantity
 					,@intExternalId = @intMinLoadDetailId
 					,@strScreenName = 'Load Schedule'
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-					,@dblQuantityToUpdate = @dblQuantityToUpdate
-					,@intUserId = @intEntityUserSecurityId
-					,@intExternalId = @intExternalId
-					,@strScreenName = @strScreenName
+				IF (ISNULL(@intPContractDetailId,0) > 0)
+				BEGIN 
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+						,@intExternalId = @intExternalId
+						,@strScreenName = @strScreenName
+				END
+
+				IF (ISNULL(@intSContractDetailId,0) > 0)
+				BEGIN 
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+						,@intExternalId = @intExternalId
+						,@strScreenName = @strScreenName
+				END
 
 				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLoadDetail
@@ -111,23 +124,37 @@ BEGIN TRY
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
-				SET @intContractDetailId = NULL
+				SET @intPContractDetailId = NULL
+				SET @intSContractDetailId = NULL
 				SET @dblQuantityToUpdate = NULL
 				SET @intExternalId = NULL
 				SET @strScreenName = NULL
 
-				SELECT @intContractDetailId = intContractDetailId
+				SELECT @intPContractDetailId = intPContractDetailId
+					,@intSContractDetailId = intSContractDetailId
 					,@dblQuantityToUpdate = dblLoadDetailQuantity
 					,@intExternalId = @intMinLoadDetailId
 					,@strScreenName = 'Load Schedule'
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-					,@dblQuantityToUpdate = @dblQuantityToUpdate
-					,@intUserId = @intEntityUserSecurityId
-					,@intExternalId = @intExternalId
-					,@strScreenName = @strScreenName
+				IF (ISNULL(@intPContractDetailId,0) > 0)
+				BEGIN 
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+						,@intExternalId = @intExternalId
+						,@strScreenName = @strScreenName
+				END
+
+				IF (ISNULL(@intSContractDetailId,0) > 0)
+				BEGIN 
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+						,@intExternalId = @intExternalId
+						,@strScreenName = @strScreenName
+				END
 
 				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLoadDetail
@@ -184,21 +211,33 @@ BEGIN TRY
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
-				SET @intContractDetailId = NULL
+				SET @intPContractDetailId = NULL
+				SET @intSContractDetailId = NULL
 				SET @dblQuantityToUpdate = NULL
 				SET @intExternalId = NULL
 				SET @strScreenName = NULL
 
-				SELECT @intContractDetailId = intContractDetailId
+				SELECT @intPContractDetailId = intPContractDetailId
+					,@intSContractDetailId = intSContractDetailId
 					,@dblQuantityToUpdate = - dblLoadDetailQuantity
 					,@intExternalId = @intMinLoadDetailId
 					,@strScreenName = 'Load Schedule'
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
-					,@dblQuantityToUpdate = @dblQuantityToUpdate
-					,@intUserId = @intEntityUserSecurityId
+				IF (ISNULL(@intPContractDetailId,0) > 0)
+				BEGIN
+					EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intPContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+				END
+
+				IF (ISNULL(@intSContractDetailId,0) > 0)
+				BEGIN
+					EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intSContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+				END
 
 				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLoadDetail
@@ -221,31 +260,43 @@ BEGIN TRY
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
-				SET @intContractDetailId = NULL
+				SET @intPContractDetailId = NULL
+				SET @intSContractDetailId = NULL
 				SET @dblQuantityToUpdate = NULL
 				SET @dblAvailableContractQty = NULL
 
-				SELECT @intContractDetailId = intContractDetailId
+				SELECT @intPContractDetailId = intPContractDetailId
+					,@intSContractDetailId = intSContractDetailId
 					,@dblQuantityToUpdate = dblLoadDetailQuantity
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
 				SELECT @dblContractSIQty = ISNULL(SUM(LD.dblQuantity),0) FROM tblLGLoadDetail LD
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-				WHERE intPContractDetailId = @intContractDetailId AND ISNULL(L.ysnCancelled,0) = 0 
+				WHERE intPContractDetailId = @intPContractDetailId AND ISNULL(L.ysnCancelled,0) = 0 
 
 				SELECT @dblAvailableContractQty = dblQuantity - ISNULL(@dblContractSIQty, 0)
 				FROM tblCTContractDetail
-				WHERE intContractDetailId = @intContractDetailId
+				WHERE intContractDetailId = @intPContractDetailId
 
 				IF @dblAvailableContractQty<=0
 				BEGIN
-					RAISERROR('Adequate qty is not there for the contract. Cannot reverse cancel.',16,1)
+					RAISERROR('Adequate qty is not there for the purchase contract. Cannot reverse cancel.',16,1)
 				END
-
-				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
-					,@dblQuantityToUpdate = @dblQuantityToUpdate
-					,@intUserId = @intEntityUserSecurityId
+				
+				IF(ISNULL(@intPContractDetailId,0) > 0 )
+				BEGIN
+					EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intPContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+				END
+				
+				IF(ISNULL(@intSContractDetailId,0) > 0 )
+				BEGIN
+					EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intSContractDetailId
+						,@dblQuantityToUpdate = @dblQuantityToUpdate
+						,@intUserId = @intEntityUserSecurityId
+				END
 
 				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLoadDetail
