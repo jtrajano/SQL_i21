@@ -6379,6 +6379,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherPaymentDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfoOfForPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateAndPostPaymentFromVouchers.sql" />
+    <Build Include="dbo\Functions\fnAPPartitonPaymentOfVouchers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
