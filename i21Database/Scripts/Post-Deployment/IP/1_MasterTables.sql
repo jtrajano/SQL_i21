@@ -238,3 +238,19 @@ BEGIN
     VALUES(15,'Web API Endpoint')
 END
 GO
+IF EXISTS (
+		SELECT *
+		FROM tblIPCompanyPreference
+		)
+BEGIN
+	UPDATE tblIPCompanyPreference
+	SET strCommonDataFolderPath = NULL
+END
+ELSE
+BEGIN
+	INSERT INTO tblIPCompanyPreference (strCommonDataFolderPath)
+	SELECT NULL
+END
+GO
+
+
