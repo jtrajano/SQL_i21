@@ -36,6 +36,10 @@ BEGIN TRY
 		,@STARTING_NUMBER_BATCH AS INT = 3
 		,@dblOtherCharges DECIMAL(38, 24)
 		,@dblProduceQty NUMERIC(38, 20)
+		,@ysnCostEnabled BIT
+
+	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
+	FROM tblMFCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -240,6 +244,7 @@ BEGIN TRY
 				SELECT TOP 1 1
 				FROM @adjustedEntries
 				)
+			AND @ysnCostEnabled = 1
 		BEGIN
 			DECLARE @intReturnValue AS INT
 
@@ -535,10 +540,10 @@ BEGIN TRY
 				)
 			SELECT intItemId = l.intItemId
 				,intItemLocationId = l.intItemLocationId
-				,intItemUOMId = cl.intItemUOMId 
+				,intItemUOMId = cl.intItemUOMId
 				,dtmDate = @dtmCurrentDateTime
 				,dblQty = cl.dblQuantity
-				,dblUOMQty = l.dblWeightPerQty 
+				,dblUOMQty = l.dblWeightPerQty
 				,dblCost = l.dblLastCost
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
@@ -728,4 +733,6 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-Go
+GO
+
+

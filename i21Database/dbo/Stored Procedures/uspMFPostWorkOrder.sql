@@ -527,6 +527,7 @@ BEGIN TRY
 			LEFT JOIN tblMFWorkOrderProducedLot WP ON WP.intBatchId = PL.intBatchId
 				AND WP.intWorkOrderId = PL.intWorkOrderId
 			WHERE PL.intWorkOrderId = @intWorkOrderId
+			and intTransactionTypeId =25
 
 			DELETE
 			FROM @ItemsForPost

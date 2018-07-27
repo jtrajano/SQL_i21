@@ -48,27 +48,29 @@ BEGIN
 		,@dblTareWeight NUMERIC(38, 20)
 		,@ysnPickAllowed BIT
 		,@ysnSendEDIOnRepost BIT
-		,@intWorkOrderId int
-		,@intManufacturingProcessId int
+		,@intWorkOrderId INT
+		,@intManufacturingProcessId INT
 		,@ysnLotNumberUniqueByItem BIT
+		,@ysnIRCorrection BIT
+	DECLARE @tblICLot TABLE (intLotId INT)
 
-		SELECT @strLifeTimeType = strLifeTimeType
-			,@intLifeTime = intLifeTime
-			,@intCategoryId = intCategoryId
-			,@strLotTracking = strLotTracking
-			,@ysnRequireCustomerApproval = ysnRequireCustomerApproval
-			,@intLotDueDays=dblCaseWeight
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
+	SELECT @strLifeTimeType = strLifeTimeType
+		,@intLifeTime = intLifeTime
+		,@intCategoryId = intCategoryId
+		,@strLotTracking = strLotTracking
+		,@ysnRequireCustomerApproval = ysnRequireCustomerApproval
+		,@intLotDueDays = dblCaseWeight
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
 		,@intDamagedStatusId = intDamagedStatusId
-		,@intLotDueDays = IsNULL(@intLotDueDays,intLotDueDays)
+		,@intLotDueDays = IsNULL(@intLotDueDays, intLotDueDays)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
-		,@ysnSendEDIOnRepost=ysnSendEDIOnRepost
-		,@ysnLotNumberUniqueByItem=ysnLotNumberUniqueByItem
+		,@ysnSendEDIOnRepost = ysnSendEDIOnRepost
+		,@ysnLotNumberUniqueByItem = ysnLotNumberUniqueByItem
 	FROM tblMFCompanyPreference
 
 	SELECT @strLotNumber = strLotNumber
@@ -78,16 +80,14 @@ BEGIN
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	If @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1
-	Begin
-
-
-		If @strLifeTimeType = 'Months'
-		Begin
+	IF @intSplitFromLotId IS NULL
+		AND @ysnLifeTimeByEndOfMonth = 1
+	BEGIN
+		IF @strLifeTimeType = 'Months'
+		BEGIN
 			SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, GetDate())) + 1, 0))
-		End
-
-	End
+		END
+	END
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -99,8 +99,6 @@ BEGIN
 	IF @strParentLotNumber IS NULL
 		OR @strParentLotNumber = ''
 	BEGIN
-
-
 		IF @intShiftId IS NULL
 		BEGIN
 			SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
@@ -130,17 +128,19 @@ BEGIN
 	FROM tblICParentLot
 	WHERE strParentLotNumber = @strParentLotNumber
 
-	SELECT @strLotNumber=strLotNumber
+	SELECT @strLotNumber = strLotNumber
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
 	IF EXISTS (
 			SELECT 1
 			FROM tblICLot
-			WHERE strLotNumber=@strLotNumber and intItemId<>@intItemId
-			and dblQty>0
-			and intLocationId=@intLocationId
-			) and @ysnLotNumberUniqueByItem=1
+			WHERE strLotNumber = @strLotNumber
+				AND intItemId <> @intItemId
+				AND dblQty > 0
+				AND intLocationId = @intLocationId
+			)
+		AND @ysnLotNumberUniqueByItem = 1
 	BEGIN
 		RAISERROR (
 				'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
@@ -182,8 +182,6 @@ BEGIN
 		IF Len(@strLotCode) = 5
 		BEGIN
 			SELECT @dtmManufacturedDate = DATEADD(day, CAST(RIGHT(@strLotCode, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@strLotCode, 2) + '0101', 112))
-
-
 
 			IF @strLifeTimeType = 'Years'
 				SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmManufacturedDate)
@@ -236,8 +234,15 @@ BEGIN
 				ELSE dtmManufacturedDate
 				END
 			,dtmExpiryDate = CASE 
-				WHEN (@ysnPickByLotCode = 1
-					AND Len(@strLotCode) = 5) or (@strLifeTimeType = 'Months' and @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1)
+				WHEN (
+						@ysnPickByLotCode = 1
+						AND Len(@strLotCode) = 5
+						)
+					OR (
+						@strLifeTimeType = 'Months'
+						AND @intSplitFromLotId IS NULL
+						AND @ysnLifeTimeByEndOfMonth = 1
+						)
 					THEN @dtmExpiryDate
 				ELSE dtmExpiryDate
 				END
@@ -254,22 +259,24 @@ BEGIN
 				ELSE dtmManufacturedDate
 				END
 			,dtmExpiryDate = CASE 
-				WHEN (@ysnPickByLotCode = 1
-					AND Len(@strLotCode) = 5) or (@strLifeTimeType = 'Months' and @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1)
+				WHEN (
+						@ysnPickByLotCode = 1
+						AND Len(@strLotCode) = 5
+						)
+					OR (
+						@strLifeTimeType = 'Months'
+						AND @intSplitFromLotId IS NULL
+						AND @ysnLifeTimeByEndOfMonth = 1
+						)
 					THEN @dtmExpiryDate
 				ELSE dtmExpiryDate
 				END
 		WHERE intLotId = @intLotId
 	END
 
-
-
-
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
 	BEGIN
-
-
 		IF @intDamagedStatusId IS NOT NULL
 			AND NOT EXISTS (
 				SELECT *
@@ -300,9 +307,9 @@ BEGIN
 			,@dtmReceiptDate = dtmReceiptDate
 			,@dblTareWeight = dblTareWeight
 			,@dtmDueDate = dtmDueDate
-			,@ysnPickAllowed=ysnPickAllowed
-			,@intWorkOrderId=intWorkOrderId
-			,@intManufacturingProcessId=intManufacturingProcessId
+			,@ysnPickAllowed = ysnPickAllowed
+			,@intWorkOrderId = intWorkOrderId
+			,@intManufacturingProcessId = intManufacturingProcessId
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -310,8 +317,6 @@ BEGIN
 		BEGIN
 			SELECT @dtmDueDate = DateAdd(dd, @intLotDueDays, @dtmCurrentDateTime)
 		END
-
-
 
 		SELECT @intInventoryReceiptId = intInventoryReceiptId
 		FROM tblICInventoryReceipt
@@ -391,23 +396,43 @@ BEGIN
 			,@dtmCurrentDateTime
 			,@dblTareWeight
 			,@dtmDueDate
-			,IsNULL(@ysnPickAllowed,1)
+			,IsNULL(@ysnPickAllowed, 1)
 			,@intWorkOrderId
 			,@intManufacturingProcessId
 	END
 	ELSE
 	BEGIN
-		SELECT TOP 1 @strVendorRefNo = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strVendorRefNo else R.strVendorRefNo End
-			,@strWarehouseRefNo = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strWarehouseRefNo else R.strWarehouseRefNo End
-			,@strReceiptNumber = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strReceiptNumber else R.strReceiptNumber End
-			,@dtmReceiptDate = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.dtmReceiptDate else R.dtmReceiptDate End
-		FROM tblMFLotInventory LI
-		JOIN tblICLot L ON L.intLotId = LI.intLotId
-		JOIN tblICInventoryReceiptItemLot RL on RL.intLotId=L.intLotId
-		JOIN tblICInventoryReceiptItem RI on RI.intInventoryReceiptItemId=RL.intInventoryReceiptItemId
-		JOIN tblICInventoryReceipt R on R.intInventoryReceiptId=RI.intInventoryReceiptId
-		WHERE L.strLotNumber = @strLotNumber
-		ORDER BY R.intInventoryReceiptId DESC
+		IF EXISTS (
+				SELECT *
+				FROM tblICInventoryReceiptItemLot
+				WHERE intLotId = @intLotId
+				)
+		BEGIN
+			SELECT TOP 1 @strVendorRefNo = R.strVendorRefNo
+				,@strWarehouseRefNo = R.strWarehouseRefNo
+				,@strReceiptNumber = R.strReceiptNumber
+				,@dtmReceiptDate = R.dtmReceiptDate
+			FROM tblMFLotInventory LI
+			JOIN tblICLot L ON L.intLotId = LI.intLotId
+			JOIN tblICInventoryReceiptItemLot RL ON RL.intLotId = L.intLotId
+			JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
+			JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			WHERE L.strLotNumber = @strLotNumber
+			ORDER BY R.intInventoryReceiptId DESC
+
+			SELECT @ysnIRCorrection = 1
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @strVendorRefNo = LI.strVendorRefNo
+				,@strWarehouseRefNo = LI.strWarehouseRefNo
+				,@strReceiptNumber = LI.strReceiptNumber
+				,@dtmReceiptDate = LI.dtmReceiptDate
+			FROM tblMFLotInventory LI
+			WHERE LI.intLotId = @intLotId
+
+			SELECT @ysnIRCorrection = 0
+		END
 
 		SELECT @strTransactionId = strTransactionId
 		FROM tblICLot
@@ -452,34 +477,62 @@ BEGIN
 				ELSE NULL
 				END
 
-		UPDATE tblMFLotInventory
-		SET strVendorRefNo = @strVendorRefNo
-			,strWarehouseRefNo = @strWarehouseRefNo
-			,strReceiptNumber = @strReceiptNumber
-			,dtmReceiptDate = @dtmReceiptDate
-			,intBondStatusId = CASE 
-				WHEN @strTransactionId LIKE 'IR-%'
-					THEN (
-							CASE 
-								WHEN @ysnBonded = 1
-									THEN @intBondStatusId
-								ELSE NULL
-								END
-							)
-				ELSE intBondStatusId
-				END
-			,dtmLastMoveDate = @dtmCurrentDateTime
-		WHERE intLotId = @intLotId
+		DELETE
+		FROM tblMFLotTareWeight
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+		IF @ysnIRCorrection = 0
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET strVendorRefNo = @strVendorRefNo
+				,strWarehouseRefNo = @strWarehouseRefNo
+				,strReceiptNumber = @strReceiptNumber
+				,dtmReceiptDate = @dtmReceiptDate
+				,intBondStatusId = CASE 
+					WHEN @strTransactionId LIKE 'IR-%'
+						THEN (
+								CASE 
+									WHEN @ysnBonded = 1
+										THEN @intBondStatusId
+									ELSE NULL
+									END
+								)
+					ELSE intBondStatusId
+					END
+			WHERE intLotId = @intLotId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblICLot
+			SELECT intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+
+			UPDATE tblMFLotInventory
+			SET strVendorRefNo = @strVendorRefNo
+				,strWarehouseRefNo = @strWarehouseRefNo
+				,strReceiptNumber = @strReceiptNumber
+				,dtmReceiptDate = @dtmReceiptDate
+				,intBondStatusId = CASE 
+					WHEN @strTransactionId LIKE 'IR-%'
+						THEN (
+								CASE 
+									WHEN @ysnBonded = 1
+										THEN @intBondStatusId
+									ELSE NULL
+									END
+								)
+					ELSE intBondStatusId
+					END
+			FROM tblMFLotInventory LI
+			JOIN @tblICLot L ON LI.intLotId = L.intLotId
+		END
 	END
 
-	DELETE
-	FROM tblMFLotTareWeight
-	WHERE intInventoryReceiptId = @intInventoryReceiptId
-
-	IF @ysnSendEDIOnRepost=1
+	IF @ysnSendEDIOnRepost = 1
 	BEGIN
-		Update tblMFEDI944
-		Set ysnStatus=0
+		UPDATE tblMFEDI944
+		SET ysnStatus = 0
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 	END
 END

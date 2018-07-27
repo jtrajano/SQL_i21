@@ -228,7 +228,7 @@ BEGIN
 				END
 			)
 		,intStatusId = @intStatusId
-		,intStorageLocationId = @intStorageLocationId
+		,intStorageLocationId = Case When intItemId = @intItemId and intStorageLocationId is null Then @intStorageLocationId Else intStorageLocationId End
 		,intActualShiftId = @intBusinessShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
 
