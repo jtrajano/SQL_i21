@@ -80,6 +80,7 @@ BEGIN TRY
 		,@ysnConsumptionByRatio BIT
 		,@intStageLocationId int
 		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@strInstantConsumption NVARCHAR(50)
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -117,6 +118,12 @@ BEGIN TRY
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strInstantConsumption = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 20--Is Instant Consumption
 
 	INSERT INTO @tblMFWorkOrderInputLot (strLotNumber)
 	SELECT L.strLotNumber
@@ -1829,7 +1836,7 @@ BEGIN TRY
 			END
 		END
 
-		IF EXISTS (
+		IF @strInstantConsumption='True' and EXISTS (
 				SELECT SUM(dblQty)
 				FROM @tblLot
 				HAVING SUM(dblQty) < (
