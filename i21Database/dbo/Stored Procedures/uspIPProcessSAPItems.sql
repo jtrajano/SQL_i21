@@ -1,279 +1,620 @@
-﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems]
-@strSessionId NVARCHAR(50)='',
-@strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT,
-@intNoOfRowsAffected INT=0 OUT
+﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems] @strSessionId NVARCHAR(50) = ''
+	,@strInfo1 NVARCHAR(MAX) = '' OUT
+	,@strInfo2 NVARCHAR(MAX) = '' OUT
+	,@intNoOfRowsAffected INT = 0 OUT
 AS
 BEGIN TRY
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+	DECLARE @intMinItem INT
+	DECLARE @strItemNo NVARCHAR(50)
+	DECLARE @strItemType NVARCHAR(50)
+	DECLARE @strSKUItemNo NVARCHAR(50)
+	DECLARE @intCommodityId INT
+	DECLARE @intCategoryId INT
+	DECLARE @strCommodity NVARCHAR(50)
+	DECLARE @intItemId INT
+	DECLARE @strStockUOM NVARCHAR(50)
+	DECLARE @ErrMsg NVARCHAR(max)
+	DECLARE @ysnDeleted BIT
+	DECLARE @intStageItemId INT
+	DECLARE @intNewStageItemId INT
+	DECLARE @strDescription NVARCHAR(250)
+	DECLARE @strJson NVARCHAR(Max)
+	DECLARE @dtmDate DATETIME
+	DECLARE @intUserId INT
+	DECLARE @strUserName NVARCHAR(100)
+	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 
-Declare @intMinItem INT
-Declare @strItemNo nvarchar(50)
-Declare @strItemType nvarchar(50)
-Declare @strSKUItemNo nvarchar(50)
-Declare @intCommodityId int
-Declare @intCategoryId int
-Declare @strCommodity nvarchar(50)
-Declare @intItemId int
-Declare @strStockUOM nvarchar(50)
-Declare @ErrMsg nvarchar(max)
-Declare @ysnDeleted bit
-Declare @intStageItemId int
-Declare @intNewStageItemId int
-Declare @strDescription NVARCHAR(250)
-Declare @strJson NVARCHAR(Max)
-Declare @dtmDate DateTime
-Declare @intUserId Int
-Declare @strUserName NVARCHAR(100)
-Declare @strFinalErrMsg NVARCHAR(MAX)=''
+	IF ISNULL(@strSessionId, '') = ''
+		SELECT @intMinItem = MIN(intStageItemId)
+		FROM tblIPItemStage
+	ELSE IF @strSessionId = 'ProcessOneByOne'
+		SELECT @intMinItem = MIN(intStageItemId)
+		FROM tblIPItemStage
+	ELSE
+		SELECT @intMinItem = MIN(intStageItemId)
+		FROM tblIPItemStage
+		WHERE strSessionId = @strSessionId
 
-If ISNULL(@strSessionId,'')=''
-	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
-Else If @strSessionId='ProcessOneByOne'
-	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
-Else
-	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where strSessionId=@strSessionId
+	WHILE (@intMinItem IS NOT NULL)
+	BEGIN
+		BEGIN TRY
+			SET @intNoOfRowsAffected = 1
+			SET @intItemId = NULL
+			SET @intCategoryId = NULL
+			SET @intCommodityId = NULL
+			SET @strCommodity = NULL
+			SET @strItemNo = NULL
+			SET @strItemType = NULL
+			SET @strSKUItemNo = NULL
+			SET @strStockUOM = NULL
+			SET @strDescription = NULL
+			SET @ysnDeleted = 0
 
-While(@intMinItem is not null)
-Begin
-Begin Try
+			SELECT @intStageItemId = intStageItemId
+				,@strItemNo = strItemNo
+				,@strItemType = strItemType
+				,@strSKUItemNo = strSKUItemNo
+				,@strStockUOM = strStockUOM
+				,@ysnDeleted = ISNULL(ysnDeleted, 0)
+				,@strDescription = strDescription
+			FROM tblIPItemStage
+			WHERE intStageItemId = @intMinItem
 
-Set @intNoOfRowsAffected=1
-Set @intItemId=NULL
-Set @intCategoryId=NULL
-Set @intCommodityId=NULL
-Set @strCommodity=NULL
-Set @strItemNo=NULL
-Set @strItemType=NULL
-Set @strSKUItemNo=NULL
-Set @strStockUOM=NULL
-Set @strDescription=NULL
-Set @ysnDeleted=0
+			SET @strInfo1 = ISNULL(@strItemNo, '')
+			SET @strInfo2 = ISNULL(@strItemType, '')
 
-Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
-@strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
+			SELECT @intCategoryId = intCategoryId
+			FROM tblICCategory
+			WHERE strCategoryCode = @strItemType
 
-Set @strInfo1=ISNULL(@strItemNo,'')
-Set @strInfo2=ISNULL(@strItemType,'')
+			IF @strItemType = 'ZMPN' --Contract Item
+				SELECT TOP 1 @intItemId = intItemId
+				FROM tblICItem
+				WHERE strItemNo = @strSKUItemNo
+			ELSE
+				SELECT TOP 1 @intItemId = intItemId
+				FROM tblICItem
+				WHERE strItemNo = @strItemNo
 
-Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
+			IF @strItemType = 'ZCOM'
+			BEGIN
+				IF ISNULL(@intCategoryId, 0) = 0
+					RAISERROR (
+							'Category not found.'
+							,16
+							,1
+							)
 
-If @strItemType='ZMPN' --Contract Item
-Select TOP 1 @intItemId=intItemId From tblICItem Where strItemNo=@strSKUItemNo
-Else
-Select TOP 1 @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
+				IF EXISTS (
+						SELECT 1
+						WHERE RIGHT(@strItemNo, 8) LIKE '496%'
+						)
+					SELECT @strCommodity = 'Coffee'
 
-If @strItemType='ZCOM'
-Begin
-	If ISNULL(@intCategoryId,0)=0
-		RaisError('Category not found.',16,1)
+				IF EXISTS (
+						SELECT 1
+						WHERE RIGHT(@strItemNo, 8) LIKE '491%'
+						)
+					SELECT @strCommodity = 'Tea'
 
-	If Exists (Select 1 where RIGHT(@strItemNo,8) like '496%')
-		Select @strCommodity='Coffee'
+				SELECT @intCommodityId = intCommodityId
+				FROM tblICCommodity
+				WHERE strCommodityCode = @strCommodity
 
-	If Exists (Select 1 where RIGHT(@strItemNo,8) like '491%')
-		Select @strCommodity='Tea'
+				IF ISNULL(@intCommodityId, 0) = 0
+					RAISERROR (
+							'Commodity not found.'
+							,16
+							,1
+							)
+			END
 
-	Select @intCommodityId=intCommodityId From tblICCommodity Where strCommodityCode=@strCommodity
+			BEGIN TRAN
 
-	If ISNULL(@intCommodityId,0)=0
-		RaisError('Commodity not found.',16,1)
-End
+			IF @ysnDeleted = 1
+				AND @strItemType <> 'ZMPN'
+			BEGIN
+				UPDATE tblICItem
+				SET strStatus = 'Discontinued'
+				WHERE intItemId = @intItemId
 
-Begin Tran
+				GOTO MOVE_TO_ARCHIVE
+			END
 
-If @ysnDeleted=1 AND @strItemType<>'ZMPN'
-Begin
-	Update tblICItem Set strStatus='Discontinued' Where intItemId=@intItemId
+			IF @strItemType = 'ZMPN' --Contract Item
+			BEGIN
+				IF ISNULL(@intItemId, 0) = 0
+				BEGIN
+					SET @ErrMsg = 'ZCOM item ' + @strSKUItemNo + ' not found.'
 
-	GOTO MOVE_TO_ARCHIVE
-End
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
 
-If @strItemType='ZMPN' --Contract Item
-Begin
-	If ISNULL(@intItemId,0)=0
-		Begin
-			Set @ErrMsg='ZCOM item ' + @strSKUItemNo + ' not found.'
-			RaisError(@ErrMsg,16,1)
-		End
+				IF @ysnDeleted = 1
+					DELETE
+					FROM tblICItemContract
+					WHERE intItemId = @intItemId
+						AND strContractItemNo = @strItemNo
+				ELSE
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblICItemContract
+							WHERE intItemId = @intItemId
+								AND strContractItemNo = @strItemNo
+							) --Add
+					BEGIN
+						INSERT INTO tblICItemContract (
+							intItemId
+							,strContractItemNo
+							,strContractItemName
+							,intItemLocationId
+							)
+						SELECT @intItemId
+							,@strItemNo
+							,@strDescription
+							,intItemLocationId
+						FROM tblICItemLocation
+						WHERE intItemId = @intItemId
+					END
+					ELSE
+					BEGIN --Update
+						UPDATE tblICItemContract
+						SET strContractItemName = @strDescription
+						WHERE intItemId = @intItemId
+							AND strContractItemNo = @strItemNo
+					END
+				END
 
-	If @ysnDeleted=1
-		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo
-	Else
-	Begin
-		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo) --Add
-		Begin
-			Insert Into tblICItemContract(intItemId,strContractItemNo,strContractItemName,intItemLocationId)
-			Select @intItemId,@strItemNo,@strDescription,intItemLocationId 
-			From tblICItemLocation Where intItemId=@intItemId
-		End
-		Else
-		Begin --Update
-			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo
-		End
-	End
-	GOTO MOVE_TO_ARCHIVE
-End
-Else
-Begin --Inventory Item
-If ISNULL(@intItemId,0)=0 --Create
-Begin
-	If Not Exists (Select 1 From tblIPItemUOMStage Where intStageItemId=@intStageItemId)
-	RaisError('UOM is required.',16,1)
+				GOTO MOVE_TO_ARCHIVE
+			END
+			ELSE
+			BEGIN --Inventory Item
+				IF ISNULL(@intItemId, 0) = 0 --Create
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblIPItemUOMStage
+							WHERE intStageItemId = @intStageItemId
+							)
+						RAISERROR (
+								'UOM is required.'
+								,16
+								,1
+								)
 
-	Insert Into tblICItem(strItemNo,strDescription,strShortName,strType,strLotTracking,strInventoryTracking,intCategoryId,intCommodityId,strStatus,intLifeTime)
-	Select strItemNo,strDescription,LEFT(strDescription,50),'Inventory','Yes - Manual/Serial Number','Lot Level',@intCategoryId,@intCommodityId,'Active',0
-	From tblIPItemStage Where strItemNo=@strItemNo AND intStageItemId=@intStageItemId
+					INSERT INTO tblICItem (
+						strItemNo
+						,strDescription
+						,strShortName
+						,strType
+						,strLotTracking
+						,strInventoryTracking
+						,intCategoryId
+						,intCommodityId
+						,strStatus
+						,intLifeTime
+						)
+					SELECT strItemNo
+						,strDescription
+						,LEFT(strDescription, 50)
+						,'Inventory'
+						,'Yes - Manual/Serial Number'
+						,'Lot Level'
+						,@intCategoryId
+						,@intCommodityId
+						,'Active'
+						,0
+					FROM tblIPItemStage
+					WHERE strItemNo = @strItemNo
+						AND intStageItemId = @intStageItemId
 
-	Select @intItemId=SCOPE_IDENTITY()
+					SELECT @intItemId = SCOPE_IDENTITY()
 
-	Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
-	Select @intItemId,um.intUnitMeasureId,iu.dblNumerator/iu.dblDenominator,CASE When iu.strUOM=@strStockUOM THEN 1 ELSE 0 End,1,1  
-	From tblIPItemUOMStage iu 
-	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
-	Join tblICUnitMeasure um on su.stri21UOM=um.strSymbol
-	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId
+					INSERT INTO tblICItemUOM (
+						intItemId
+						,intUnitMeasureId
+						,dblUnitQty
+						,ysnStockUnit
+						,ysnAllowPurchase
+						,ysnAllowSale
+						)
+					SELECT @intItemId
+						,um.intUnitMeasureId
+						,iu.dblNumerator / iu.dblDenominator
+						,CASE 
+							WHEN iu.strUOM = @strStockUOM
+								THEN 1
+							ELSE 0
+							END
+						,1
+						,1
+					FROM tblIPItemUOMStage iu
+					JOIN tblIPSAPUOM su ON iu.strUOM = su.strSAPUOM
+					JOIN tblICUnitMeasure um ON su.stri21UOM = um.strSymbol
+					WHERE strItemNo = @strItemNo
+						AND iu.intStageItemId = @intStageItemId
 
-	--if stock uom is KG then add TO as one of the uom
-	If (Select UPPER(strSymbol) From tblICUnitMeasure Where UPPER(strUnitMeasure) = UPPER(dbo.fnIPConvertSAPUOMToi21(@strStockUOM)))='KG'
-	Begin
-		If Not Exists (Select 1 From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemId=@intItemId AND um.strSymbol='TO')
-			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
-			Select TOP 1 @intItemId,intUnitMeasureId,1000,0,1,1 From tblICUnitMeasure Where strSymbol='TO'
+					--if stock uom is KG then add TO as one of the uom
+					IF (
+							SELECT UPPER(strSymbol)
+							FROM tblICUnitMeasure
+							WHERE UPPER(strUnitMeasure) = UPPER(dbo.fnIPConvertSAPUOMToi21(@strStockUOM))
+							) = 'KG'
+					BEGIN
+						IF NOT EXISTS (
+								SELECT 1
+								FROM tblICItemUOM iu
+								JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+								WHERE iu.intItemId = @intItemId
+									AND um.strSymbol = 'TO'
+								)
+							INSERT INTO tblICItemUOM (
+								intItemId
+								,intUnitMeasureId
+								,dblUnitQty
+								,ysnStockUnit
+								,ysnAllowPurchase
+								,ysnAllowSale
+								)
+							SELECT TOP 1 @intItemId
+								,intUnitMeasureId
+								,1000
+								,0
+								,1
+								,1
+							FROM tblICUnitMeasure
+							WHERE strSymbol = 'TO'
 
-		--Add 70/69/60/50/65 Kg Bags for coffee
-		If (Select UPPER(strCommodityCode) From tblICCommodity Where intCommodityId=@intCommodityId)='COFFEE'
-			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
-			Select @intItemId,intUnitMeasureId,SUBSTRING(strUnitMeasure,1,2),0,1,1 From tblICUnitMeasure 
-			Where  UPPER(strUnitMeasure) like '%KG BAG%' AND ISNUMERIC(SUBSTRING(strUnitMeasure,1,2))=1
-	End
+						--Add 70/69/60/50/65 Kg Bags for coffee
+						IF (
+								SELECT UPPER(strCommodityCode)
+								FROM tblICCommodity
+								WHERE intCommodityId = @intCommodityId
+								) = 'COFFEE'
+							INSERT INTO tblICItemUOM (
+								intItemId
+								,intUnitMeasureId
+								,dblUnitQty
+								,ysnStockUnit
+								,ysnAllowPurchase
+								,ysnAllowSale
+								)
+							SELECT @intItemId
+								,intUnitMeasureId
+								,SUBSTRING(strUnitMeasure, 1, 2)
+								,0
+								,1
+								,1
+							FROM tblICUnitMeasure
+							WHERE UPPER(strUnitMeasure) LIKE '%KG BAG%'
+								AND ISNUMERIC(SUBSTRING(strUnitMeasure, 1, 2)) = 1
+					END
 
-	Insert Into tblICItemLocation(intItemId,intLocationId,intCostingMethod,intAllowNegativeInventory)
-	Select @intItemId,cl.intCompanyLocationId,1,3
-	From tblSMCompanyLocation cl
+					INSERT INTO tblICItemLocation (
+						intItemId
+						,intLocationId
+						,intCostingMethod
+						,intAllowNegativeInventory
+						)
+					SELECT @intItemId
+						,cl.intCompanyLocationId
+						,1
+						,3
+					FROM tblSMCompanyLocation cl
 
-	Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
-	Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
-	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId
-	where s.intStageItemId=@intStageItemId AND il.intItemId=@intItemId
+					INSERT INTO tblICItemSubLocation (
+						intItemLocationId
+						,intSubLocationId
+						)
+					SELECT il.intItemLocationId
+						,sl.intCompanyLocationSubLocationId
+					FROM tblIPItemSubLocationStage s
+					JOIN tblSMCompanyLocationSubLocation sl ON s.strSubLocation = sl.strSubLocationName
+					JOIN tblICItemLocation il ON sl.intCompanyLocationId = il.intLocationId
+					WHERE s.intStageItemId = @intStageItemId
+						AND il.intItemId = @intItemId
 
-	--Add Audit Trail Record
-	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intItemId) + '","keyValue":' + CONVERT(VARCHAR,@intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
-	
-	Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated) From tblIPItemStage Where intStageItemId=@intStageItemId
-	If @dtmDate is null
-		Set @dtmDate =  GETUTCDATE()
+					--Add Audit Trail Record
+					SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intItemId) + '","keyValue":' + CONVERT(VARCHAR, @intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 
-	Select @strUserName=strCreatedUserName From tblIPItemStage Where intStageItemId=@intStageItemId
-	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'
+					SELECT @dtmDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated)
+					FROM tblIPItemStage
+					WHERE intStageItemId = @intStageItemId
 
-	Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
-	Values('Created','Inventory.view.Item',@intItemId,'','',@strJson,@dtmDate,@intUserId,1)
-End
-Else
-Begin --Update
-	Update i  Set i.strDescription=si.strDescription,i.strShortName=LEFT(si.strDescription,50) 
-	From tblICItem i Join tblIPItemStage si on i.strItemNo=si.strItemNo 
-	Where intItemId=@intItemId AND si.intStageItemId=@intStageItemId AND si.strDescription <> '/'
+					IF @dtmDate IS NULL
+						SET @dtmDate = GETUTCDATE()
 
-	Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
-	Select @intItemId,um.intUnitMeasureId,iu.dblNumerator/iu.dblDenominator,CASE When iu.strUOM=@strStockUOM THEN 1 ELSE 0 End,1,1  
-	From tblIPItemUOMStage iu 
-	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
-	Join tblICUnitMeasure um on su.stri21UOM=um.strSymbol
-	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId AND 
-	um.intUnitMeasureId NOT IN (Select intUnitMeasureId From tblICItemUOM Where intItemId=@intItemId)
+					SELECT @strUserName = strCreatedUserName
+					FROM tblIPItemStage
+					WHERE intStageItemId = @intStageItemId
 
-	Update iu Set iu.dblUnitQty=st.dblNumerator/st.dblDenominator 
-	From tblICItemUOM iu 
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblIPSAPUOM su on um.strSymbol=su.stri21UOM
-	Join tblIPItemUOMStage st on st.strUOM=su.strSAPUOM
-	Where intItemId=@intItemId AND st.intStageItemId=@intStageItemId
+					SELECT @intUserId = e.intEntityId
+					FROM tblEMEntity e
+					JOIN tblEMEntityType et ON e.intEntityId = et.intEntityId
+					WHERE e.strExternalERPId = @strUserName
+						AND et.strType = 'User'
 
-	--add new sublocations
-	Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
-	Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
-	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId AND il.intItemId=@intItemId
-	where s.intStageItemId=@intStageItemId AND 
-	sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl 
-	Join tblICItemLocation il on isl.intItemLocationId=il.intItemLocationId Where il.intItemId=@intItemId)
+					INSERT INTO tblSMAuditLog (
+						strActionType
+						,strTransactionType
+						,strRecordNo
+						,strDescription
+						,strRoute
+						,strJsonData
+						,dtmDate
+						,intEntityId
+						,intConcurrencyId
+						)
+					VALUES (
+						'Created'
+						,'Inventory.view.Item'
+						,@intItemId
+						,''
+						,''
+						,@strJson
+						,@dtmDate
+						,@intUserId
+						,1
+						)
+				END
+				ELSE
+				BEGIN --Update
+					UPDATE i
+					SET i.strDescription = si.strDescription
+						,i.strShortName = LEFT(si.strDescription, 50)
+					FROM tblICItem i
+					JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
+					WHERE intItemId = @intItemId
+						AND si.intStageItemId = @intStageItemId
+						AND si.strDescription <> '/'
 
-	--Delete the SubLocation if it is marked for deletion
-	Delete From tblICItemSubLocation
-	Where intItemLocationId in (Select intItemLocationId From tblICItemLocation Where intItemId=@intItemId) AND 
-	intSubLocationId IN (Select sl.intCompanyLocationSubLocationId 
-	From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation 
-	Where s.intStageItemId=@intStageItemId AND ISNULL(s.ysnDeleted,0)=1)
-End
-End
+					INSERT INTO tblICItemUOM (
+						intItemId
+						,intUnitMeasureId
+						,dblUnitQty
+						,ysnStockUnit
+						,ysnAllowPurchase
+						,ysnAllowSale
+						)
+					SELECT @intItemId
+						,um.intUnitMeasureId
+						,iu.dblNumerator / iu.dblDenominator
+						,CASE 
+							WHEN iu.strUOM = @strStockUOM
+								THEN 1
+							ELSE 0
+							END
+						,1
+						,1
+					FROM tblIPItemUOMStage iu
+					JOIN tblIPSAPUOM su ON iu.strUOM = su.strSAPUOM
+					JOIN tblICUnitMeasure um ON su.stri21UOM = um.strSymbol
+					WHERE strItemNo = @strItemNo
+						AND iu.intStageItemId = @intStageItemId
+						AND um.intUnitMeasureId NOT IN (
+							SELECT intUnitMeasureId
+							FROM tblICItemUOM
+							WHERE intItemId = @intItemId
+							)
 
-	MOVE_TO_ARCHIVE:
+					UPDATE iu
+					SET iu.dblUnitQty = st.dblNumerator / st.dblDenominator
+					FROM tblICItemUOM iu
+					JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+					JOIN tblIPSAPUOM su ON um.strSymbol = su.stri21UOM
+					JOIN tblIPItemUOMStage st ON st.strUOM = su.strSAPUOM
+					WHERE intItemId = @intItemId
+						AND st.intStageItemId = @intStageItemId
 
-	--Move to Archive
-	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId
-	From tblIPItemStage Where intStageItemId=@intStageItemId
+					--add new sublocations
+					INSERT INTO tblICItemSubLocation (
+						intItemLocationId
+						,intSubLocationId
+						)
+					SELECT il.intItemLocationId
+						,sl.intCompanyLocationSubLocationId
+					FROM tblIPItemSubLocationStage s
+					JOIN tblSMCompanyLocationSubLocation sl ON s.strSubLocation = sl.strSubLocationName
+					JOIN tblICItemLocation il ON sl.intCompanyLocationId = il.intLocationId
+						AND il.intItemId = @intItemId
+					WHERE s.intStageItemId = @intStageItemId
+						AND sl.intCompanyLocationSubLocationId NOT IN (
+							SELECT isl.intSubLocationId
+							FROM tblICItemSubLocation isl
+							JOIN tblICItemLocation il ON isl.intItemLocationId = il.intItemLocationId
+							WHERE il.intItemId = @intItemId
+							)
 
-	Select @intNewStageItemId=SCOPE_IDENTITY()
+					--Delete the SubLocation if it is marked for deletion
+					DELETE
+					FROM tblICItemSubLocation
+					WHERE intItemLocationId IN (
+							SELECT intItemLocationId
+							FROM tblICItemLocation
+							WHERE intItemId = @intItemId
+							)
+						AND intSubLocationId IN (
+							SELECT sl.intCompanyLocationSubLocationId
+							FROM tblSMCompanyLocationSubLocation sl
+							JOIN tblIPItemSubLocationStage s ON sl.strSubLocationName = s.strSubLocation
+							WHERE s.intStageItemId = @intStageItemId
+								AND ISNULL(s.ysnDeleted, 0) = 1
+							)
+				END
+			END
 
-	Insert Into tblIPItemUOMArchive(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
-	Select @intNewStageItemId,@strItemNo,strUOM,dblNumerator,dblDenominator
-	From tblIPItemUOMStage Where intStageItemId=@intStageItemId
+			MOVE_TO_ARCHIVE:
 
-	Insert Into tblIPItemSubLocationArchive(intStageItemId,strItemNo,strSubLocation,ysnDeleted)
-	Select @intNewStageItemId,@strItemNo,strSubLocation,ysnDeleted
-	From tblIPItemSubLocationStage Where intStageItemId=@intStageItemId
+			--Move to Archive
+			INSERT INTO tblIPItemArchive (
+				strItemNo
+				,dtmCreated
+				,strCreatedUserName
+				,dtmLastModified
+				,strLastModifiedUserName
+				,ysnDeleted
+				,strItemType
+				,strStockUOM
+				,strSKUItemNo
+				,strDescription
+				,strSessionId
+				)
+			SELECT strItemNo
+				,dtmCreated
+				,strCreatedUserName
+				,dtmLastModified
+				,strLastModifiedUserName
+				,ysnDeleted
+				,strItemType
+				,strStockUOM
+				,strSKUItemNo
+				,strDescription
+				,strSessionId
+			FROM tblIPItemStage
+			WHERE intStageItemId = @intStageItemId
 
-	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
+			SELECT @intNewStageItemId = SCOPE_IDENTITY()
 
-	Commit Tran
+			INSERT INTO tblIPItemUOMArchive (
+				intStageItemId
+				,strItemNo
+				,strUOM
+				,dblNumerator
+				,dblDenominator
+				)
+			SELECT @intNewStageItemId
+				,@strItemNo
+				,strUOM
+				,dblNumerator
+				,dblDenominator
+			FROM tblIPItemUOMStage
+			WHERE intStageItemId = @intStageItemId
 
-END TRY
+			INSERT INTO tblIPItemSubLocationArchive (
+				intStageItemId
+				,strItemNo
+				,strSubLocation
+				,ysnDeleted
+				)
+			SELECT @intNewStageItemId
+				,@strItemNo
+				,strSubLocation
+				,ysnDeleted
+			FROM tblIPItemSubLocationStage
+			WHERE intStageItemId = @intStageItemId
 
-BEGIN CATCH
-	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
+			DELETE
+			FROM tblIPItemStage
+			WHERE intStageItemId = @intStageItemId
 
-	SET @ErrMsg = ERROR_MESSAGE()
-	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+			COMMIT TRAN
+		END TRY
 
-	--Move to Error
-	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus,strSessionId)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed',strSessionId
-	From tblIPItemStage Where intStageItemId=@intStageItemId
+		BEGIN CATCH
+			IF XACT_STATE() != 0
+				AND @@TRANCOUNT > 0
+				ROLLBACK TRANSACTION
 
-	Select @intNewStageItemId=SCOPE_IDENTITY()
+			SET @ErrMsg = ERROR_MESSAGE()
+			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
-	Insert Into tblIPItemUOMError(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
-	Select @intNewStageItemId,@strItemNo,strUOM,dblNumerator,dblDenominator
-	From tblIPItemUOMStage Where intStageItemId=@intStageItemId
+			--Move to Error
+			INSERT INTO tblIPItemError (
+				strItemNo
+				,dtmCreated
+				,strCreatedUserName
+				,dtmLastModified
+				,strLastModifiedUserName
+				,ysnDeleted
+				,strItemType
+				,strStockUOM
+				,strSKUItemNo
+				,strDescription
+				,strErrorMessage
+				,strImportStatus
+				,strSessionId
+				)
+			SELECT strItemNo
+				,dtmCreated
+				,strCreatedUserName
+				,dtmLastModified
+				,strLastModifiedUserName
+				,ysnDeleted
+				,strItemType
+				,strStockUOM
+				,strSKUItemNo
+				,strDescription
+				,@ErrMsg
+				,'Failed'
+				,strSessionId
+			FROM tblIPItemStage
+			WHERE intStageItemId = @intStageItemId
 
-	Insert Into tblIPItemSubLocationError(intStageItemId,strItemNo,strSubLocation,ysnDeleted)
-	Select @intNewStageItemId,@strItemNo,strSubLocation,ysnDeleted
-	From tblIPItemSubLocationStage Where intStageItemId=@intStageItemId
+			SELECT @intNewStageItemId = SCOPE_IDENTITY()
 
-	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
-END CATCH
+			INSERT INTO tblIPItemUOMError (
+				intStageItemId
+				,strItemNo
+				,strUOM
+				,dblNumerator
+				,dblDenominator
+				)
+			SELECT @intNewStageItemId
+				,@strItemNo
+				,strUOM
+				,dblNumerator
+				,dblDenominator
+			FROM tblIPItemUOMStage
+			WHERE intStageItemId = @intStageItemId
 
-	If ISNULL(@strSessionId,'')=''
-		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
-	Else If @strSessionId='ProcessOneByOne'
-		Select @intMinItem=NULL
-	Else
-		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
-End
+			INSERT INTO tblIPItemSubLocationError (
+				intStageItemId
+				,strItemNo
+				,strSubLocation
+				,ysnDeleted
+				)
+			SELECT @intNewStageItemId
+				,@strItemNo
+				,strSubLocation
+				,ysnDeleted
+			FROM tblIPItemSubLocationStage
+			WHERE intStageItemId = @intStageItemId
 
-If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
+			DELETE
+			FROM tblIPItemStage
+			WHERE intStageItemId = @intStageItemId
+		END CATCH
 
+		IF ISNULL(@strSessionId, '') = ''
+			SELECT @intMinItem = MIN(intStageItemId)
+			FROM tblIPItemStage
+			WHERE intStageItemId > @intMinItem
+		ELSE IF @strSessionId = 'ProcessOneByOne'
+			SELECT @intMinItem = NULL
+		ELSE
+			SELECT @intMinItem = MIN(intStageItemId)
+			FROM tblIPItemStage
+			WHERE intStageItemId > @intMinItem
+				AND strSessionId = @strSessionId
+	END
+
+	IF ISNULL(@strFinalErrMsg, '') <> ''
+		RAISERROR (
+				@strFinalErrMsg
+				,16
+				,1
+				)
 END TRY
 
 BEGIN CATCH
