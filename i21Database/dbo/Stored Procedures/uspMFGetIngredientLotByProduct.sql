@@ -155,6 +155,7 @@ BEGIN
 					ELSE L.dblQty
 					END
 				) - IsNULL(SR.dblWeight, 0) > 0
+				AND LI.ysnPickAllowed = 1
 		
 		UNION
 		
@@ -354,6 +355,7 @@ BEGIN
 				SELECT Item Collate Latin1_General_CI_AS
 				FROM [dbo].[fnSplitString](@strLotId, ',')
 				)
+				AND LI.ysnPickAllowed = 1
 		
 		UNION
 		

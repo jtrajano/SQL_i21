@@ -18,9 +18,9 @@ BEGIN
 		,@strBlendAttributeValue NVARCHAR(MAX)
 		,@dtmCurrentDateTime DATETIME
 		,@strPackagingCategory NVARCHAR(50)
-		,@strTargetItemNo nvarchar(50)
-		,@strWorkOrderNo nvarchar(50)
-		,@intItemId int
+		,@strTargetItemNo NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intItemId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -28,12 +28,18 @@ BEGIN
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Category for Ingredient Demand Report'
 
-	Select @strBlendAttributeValue=''
+	SELECT @strBlendAttributeValue = ''
 
-	SELECT @strBlendAttributeValue =@strBlendAttributeValue+ strAttributeValue+','
+	SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intBlendAttributeId
 		AND strAttributeValue <> ''
+
+	if @strBlendAttributeValue=''
+	Begin
+		Select @strBlendAttributeValue=@strBlendAttributeValue+ strCategoryCode + ','
+		from tblICCategory
+	End
 
 	SELECT @strPackagingCategory = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -157,10 +163,15 @@ BEGIN
 	WHERE [fieldname] = 'WorkOrderNo'
 
 	IF @strWorkOrderNo <> ''
-		OR @strWorkOrderNo IS not NULL
+		OR @strWorkOrderNo IS NOT NULL
 	BEGIN
-		Select @intItemId=intItemId from tblMFWorkOrder Where strWorkOrderNo=@strWorkOrderNo
-		SELECT @strTargetItemNo = strItemNo from tblICItem Where intItemId=@intItemId
+		SELECT @intItemId = intItemId
+		FROM tblMFWorkOrder
+		WHERE strWorkOrderNo = @strWorkOrderNo
+
+		SELECT @strTargetItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intItemId
 	END
 
 	SELECT @strCompanyLocationName = [from]
@@ -241,6 +252,7 @@ BEGIN
 		intItemId INT
 		,strItemNo NVARCHAR(50) collate Latin1_General_CI_AS
 		,strDescription NVARCHAR(100) collate Latin1_General_CI_AS
+		,intItemUOMId INT
 		)
 
 	SELECT @strShowShrtgWithAvlblUnblendedTea = 'No'
@@ -292,178 +304,215 @@ BEGIN
 	BEGIN
 		SELECT @intStartedStatusId = 10
 	END
-	if @strTargetItemNo <>''
-	Begin
+
+	IF @strTargetItemNo <> ''
+	BEGIN
 		IF @strItemNo <> ''
-		AND @strItemGroupName <> ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT DISTINCT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
-		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
-		JOIN tblICItem P on P.intItemId=R.intItemId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			AND @strItemGroupName <> ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			AND I.strItemNo LIKE @strItemNo + '%'
-			And P.strItemNo like @strTargetItemNo 
-			--AND strItemGroupName LIKE @strItemGroupName + '%'
-	END
-	ELSE IF @strItemNo = ''
-		AND @strItemGroupName <> ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT DISTINCT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
-		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
-		JOIN tblICItem P on P.intItemId=R.intItemId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			SELECT DISTINCT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				AND R.ysnActive = 1
+			JOIN tblICItem P ON P.intItemId = R.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				AND I.strItemNo LIKE @strItemNo + '%'
+				AND P.strItemNo LIKE @strTargetItemNo
+				--AND strItemGroupName LIKE @strItemGroupName + '%'
+		END
+		ELSE IF @strItemNo = ''
+			AND @strItemGroupName <> ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			--AND strItemGroupName LIKE @strItemGroupName + '%'
-		And P.strItemNo like @strTargetItemNo 
-	END
-	ELSE IF @strItemNo <> ''
-		AND @strItemGroupName = ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT DISTINCT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
-		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
-		JOIN tblICItem P on P.intItemId=R.intItemId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			SELECT DISTINCT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				AND R.ysnActive = 1
+			JOIN tblICItem P ON P.intItemId = R.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				--AND strItemGroupName LIKE @strItemGroupName + '%'
+				AND P.strItemNo LIKE @strTargetItemNo
+		END
+		ELSE IF @strItemNo <> ''
+			AND @strItemGroupName = ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			AND I.strItemNo LIKE @strItemNo + '%'
-		And P.strItemNo like @strTargetItemNo 
+			SELECT DISTINCT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				AND R.ysnActive = 1
+			JOIN tblICItem P ON P.intItemId = R.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				AND I.strItemNo LIKE @strItemNo + '%'
+				AND P.strItemNo LIKE @strTargetItemNo
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
+				)
+			SELECT DISTINCT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				AND R.ysnActive = 1
+			JOIN tblICItem P ON P.intItemId = R.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				AND P.strItemNo LIKE @strTargetItemNo
+		END
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT DISTINCT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
-		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
-		JOIN tblICItem P on P.intItemId=R.intItemId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
-		And P.strItemNo like @strTargetItemNo 
-	END
-	end
-	else
-	Begin
 		IF @strItemNo <> ''
-		AND @strItemGroupName <> ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			AND @strItemGroupName <> ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			AND strItemNo LIKE @strItemNo + '%'
-			--AND strItemGroupName LIKE @strItemGroupName + '%'
-	END
-	ELSE IF @strItemNo = ''
-		AND @strItemGroupName <> ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			SELECT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				AND strItemNo LIKE @strItemNo + '%'
+				--AND strItemGroupName LIKE @strItemGroupName + '%'
+		END
+		ELSE IF @strItemNo = ''
+			AND @strItemGroupName <> ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			--AND strItemGroupName LIKE @strItemGroupName + '%'
-	END
-	ELSE IF @strItemNo <> ''
-		AND @strItemGroupName = ''
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			SELECT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				--AND strItemGroupName LIKE @strItemGroupName + '%'
+		END
+		ELSE IF @strItemNo <> ''
+			AND @strItemGroupName = ''
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
-			AND strItemNo LIKE @strItemNo + '%'
-	END
-	ELSE
-	BEGIN
-		INSERT INTO @tblICItem (
-			intItemId
-			,strItemNo
-			,strDescription
-			)
-		SELECT I.intItemId
-			,I.strItemNo
-			,I.strDescription
-		FROM tblICItem I
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			SELECT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+				AND strItemNo LIKE @strItemNo + '%'
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblICItem (
+				intItemId
+				,strItemNo
+				,strDescription
+				,intItemUOMId
 				)
+			SELECT I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,IU.intItemUOMId
+			FROM tblICItem I
+			JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+		END
 	END
-	End
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 
@@ -520,7 +569,7 @@ BEGIN
 				,I.strDescription
 				,CL.intCompanyLocationId
 				,CL.strLocationName
-				,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, RI.dblCalculatedQuantity * SWD.dblPlannedQty))
 				,'' AS strName
 				,CD.dtmCalendarDate
 				,'' strWorkInstruction
@@ -547,7 +596,8 @@ BEGIN
 			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 			WHERE S.intLocationId = @intCompanyLocationId
 				AND S.ysnStandard = 1
-				AND CD.dtmCalendarDate >= @dtmCurrentDate and CD.dtmCalendarDate <= @dtmCalendarDate
+				AND CD.dtmCalendarDate >= @dtmCurrentDate
+				AND CD.dtmCalendarDate <= @dtmCalendarDate
 				AND SW.intStatusId IN (
 					@intOpenStatusId
 					,@intFrozenStatusId
@@ -600,8 +650,8 @@ BEGIN
 				,CL.strLocationName
 				,CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
-						THEN CAST(CEILING(SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)) AS NUMERIC(38, 20))
-					ELSE SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)
+						THEN Convert(decimal(38,20),Ceiling(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)))))
+					ELSE SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)))
 					END
 				,'' AS strName
 				,W.dtmPlannedDate
@@ -623,10 +673,11 @@ BEGIN
 			JOIN @tblICItem I ON I.intItemId = II.intItemId
 			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 			WHERE W.intLocationId = @intCompanyLocationId
-			AND W.dtmPlannedDate >= @dtmCurrentDate
+				AND W.dtmPlannedDate >= @dtmCurrentDate
 				AND W.dtmPlannedDate <= @dtmCalendarDate
-				AND W.intStatusId IN (1,
-					@intOpenStatusId
+				AND W.intStatusId IN (
+					1
+					,@intOpenStatusId
 					,@intFrozenStatusId
 					,@intPausedStatusId
 					,@intReleaseStatusId
@@ -673,7 +724,7 @@ BEGIN
 				,I.strDescription
 				,InvS.intShipFromLocationId
 				,CL.strLocationName
-				,SUM(InvI.dblQuantity)
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(InvI.intItemUOMId, I.intItemUOMId, InvI.dblQuantity))
 				,'' AS strName
 				,InvS.dtmShipDate
 				,'' strWorkInstruction
@@ -681,10 +732,9 @@ BEGIN
 				,0
 			FROM tblICInventoryShipment InvS
 			JOIN tblICInventoryShipmentItem InvI ON InvI.intInventoryShipmentId = InvS.intInventoryShipmentId
-			JOIN dbo.tblICItem I ON I.intItemId = InvI.intItemId
+			JOIN @tblICItem I ON I.intItemId = InvI.intItemId
 			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = InvS.intShipFromLocationId
 			WHERE InvS.ysnPosted = 0
-				AND I.strType = 'Raw Material'
 				AND InvS.dtmShipDate >= @dtmCurrentDate
 				AND InvS.dtmShipDate <= @dtmCalendarDate
 			GROUP BY InvS.strShipmentNumber
@@ -793,11 +843,11 @@ BEGIN
 	INSERT INTO @tblMFQtyOnHand
 	SELECT L.intLocationId AS intCompanyLocationId
 		,I.intItemId
-		,SUM(CASE 
-				WHEN L.intWeightUOMId IS NULL
-					THEN L.dblQty
-				ELSE L.dblWeight
-				END) AS dblWeight
+		,SUm(dbo.fnMFConvertQuantityToTargetItemUOM(IsNULL(L.intWeightUOMId, L.intItemUOMId), I.intItemUOMId, CASE 
+					WHEN L.intWeightUOMId IS NULL
+						THEN L.dblQty
+					ELSE L.dblWeight
+					END)) AS dblWeight
 	FROM @tblICItem I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
@@ -825,7 +875,7 @@ BEGIN
 	INSERT INTO @tblMFQtyInProduction
 	SELECT W.intLocationId AS intCompanyLocationId
 		,I.intItemId
-		,Sum(W.dblQuantity) AS dblWeight
+		,Sum(dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, I.intItemUOMId, W.dblQuantity)) AS dblWeight
 	FROM @tblICItem I
 	JOIN dbo.tblMFWorkOrder W ON I.intItemId = W.intItemId
 		AND W.intStatusId IN (
@@ -840,13 +890,14 @@ BEGIN
 	INSERT INTO @tblMFQtyInProduction
 	SELECT R.intLocationId
 		,RI.intItemId
-		,SUM(CASE 
-				WHEN RI.intWeightUOMId IS NULL
-					THEN RI.dblOpenReceive
-				ELSE RI.dblNet
-				END)
+		,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(IsNULL(RI.intWeightUOMId, RI.intUnitMeasureId), I.intItemUOMId, CASE 
+					WHEN RI.intWeightUOMId IS NULL
+						THEN RI.dblOpenReceive
+					ELSE RI.dblNet
+					END))
 	FROM dbo.tblICInventoryReceiptItem RI
 	JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	JOIN @tblICItem I ON I.intItemId = RI.intItemId
 	WHERE R.ysnPosted = 0
 	GROUP BY R.intLocationId
 		,RI.intItemId
@@ -907,7 +958,11 @@ BEGIN
 		,dtmPlannedDate
 		,strComments
 		,'Total'
-		,(Select SUM( WIP1.dblItemRequired) from @tblMFWIPItem WIP1 Where WIP1.intItemId=WIP.intItemId)
+		,(
+			SELECT SUM(WIP1.dblItemRequired)
+			FROM @tblMFWIPItem WIP1
+			WHERE WIP1.intItemId = WIP.intItemId
+			)
 		,1
 	FROM @tblMFWIPItem WIP
 	GROUP BY strCellName
@@ -1169,7 +1224,7 @@ BEGIN
 		,dtmPlannedDateTime
 		,intCompanyLocationId
 		,strCompanyLocationName
-		,ROUND(dblItemRequired, 1) AS dblItemRequired
+		,ROUND(dblItemRequired, 6) AS dblItemRequired
 		,strOwner
 		,dtmPlannedDate
 		,strComments
