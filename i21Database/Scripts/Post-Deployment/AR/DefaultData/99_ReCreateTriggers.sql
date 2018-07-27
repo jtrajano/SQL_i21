@@ -62,6 +62,9 @@ BEGIN
 	SELECT @ysnPostedNew = ysnPosted FROM inserted
 	DECLARE @currentStatus AS VARCHAR(MAX)
 	SELECT @currentStatus = ISNULL(intCurrentStatus, 0) FROM inserted
+
+	SET @ysnPosted = ISNULL(@ysnPosted,0)
+	SET @ysnPostedNew = ISNULL(@ysnPostedNew,0)
 	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR @currentStatus = 5)
 	BEGIN
 		UPDATE p
@@ -124,7 +127,9 @@ BEGIN
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
 	SELECT @ysnPosted = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId AND P.intCurrentStatus <> 5
 	SELECT @ysnPostedNew = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId
-		
+
+	SET @ysnPosted = ISNULL(@ysnPosted,0)
+	SET @ysnPostedNew = ISNULL(@ysnPostedNew,0)		
 	IF(@ysnPosted = 1 and @ysnPostedNew != 0)
 		RAISERROR('Cannot update detail of posted payment',16,1)
 	ELSE

@@ -16,6 +16,6 @@ SELECT
 	,dtmCreated           = UnPriced.dtmCreated
 	,ysnPosted            = UnPriced.ysnPosted
 FROM tblGRUnPriced UnPriced
-JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = UnPriced.intCompanyLocationId
-JOIN tblICItem Item ON Item.intItemId = UnPriced.intItemId
-JOIN tblSMUserSecurity Entity ON Entity.intEntityId = UnPriced.intCreatedUserId
+JOIN tblSMCompanyLocation L		ON L.intCompanyLocationId = UnPriced.intCompanyLocationId
+JOIN tblICItem Item				ON Item.intItemId		  = UnPriced.intItemId
+JOIN tblSMUserSecurity Entity	ON Entity.intEntityId     = UnPriced.intCreatedUserId

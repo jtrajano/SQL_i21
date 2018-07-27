@@ -46,13 +46,15 @@ INSERT INTO @GLAccounts (
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
-		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Inventory_In_Transit) 
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(Query.intInTransitSourceLocationId, Query.intItemLocationId), @AccountCategory_Auto_Variance) 
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId, intItemLocationId, intTransactionTypeId, intInTransitSourceLocationId
+					intItemId
+					, intItemLocationId = ISNULL(intInTransitSourceLocationId, intItemLocationId)
+					, intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction t 
 			WHERE	t.strBatchId = @strBatchId
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
@@ -239,7 +241,7 @@ AS
 (
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,t.dblQty
@@ -282,8 +284,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId 
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -354,8 +356,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId 
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -429,8 +431,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId 
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -497,8 +499,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId 
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

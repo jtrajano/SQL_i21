@@ -29,7 +29,7 @@ BEGIN
 	FROM dbo.fnGetGLEntriesErrors(@GLEntries) Errors
 
 	INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
-			SELECT @strBatchId AS strBatchId,A.intTransactionId AS intTransactionId,A.strTransactionId as strTransactionId, B.strText AS strDescription,
+			SELECT DISTINCT @strBatchId AS strBatchId,A.intTransactionId AS intTransactionId,A.strTransactionId as strTransactionId, B.strText AS strDescription,
 			GETDATE() AS dtmDate,@intEntityId,A.strTransactionType
 			FROM @GLEntries A  JOIN @FoundErrors B ON A.strTransactionId = B.strTransactionId
 	
@@ -57,6 +57,7 @@ BEGIN
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -92,6 +93,7 @@ BEGIN
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])

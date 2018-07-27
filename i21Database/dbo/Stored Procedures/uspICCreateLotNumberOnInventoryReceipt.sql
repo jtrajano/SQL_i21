@@ -40,6 +40,8 @@ BEGIN
 	DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(38,20)
 	DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
 	DECLARE @ReceiptItemNet  AS NUMERIC(38,20)
+	DECLARE @intInventoryReceiptItemId AS INT 
+	DECLARE @OnePackedQtyInItemUOM AS NUMERIC(38,20)
 
 	DECLARE @CleanWgtCount AS INT = 0
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
@@ -77,6 +79,7 @@ BEGIN
 	-- Check if the Item Receipt Open Receive matches with the total Quantity from the Lots
 	SET @strItemNo = NULL 
 	SET @intItemId = NULL 
+	SET @intInventoryReceiptItemId = NULL 
 
 	SELECT	TOP 1 
 			@strItemNo					= Item.strItemNo
@@ -85,6 +88,7 @@ BEGIN
 			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
 			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
+			,@intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -110,6 +114,59 @@ BEGIN
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
+
+	-- If Lot Qty is more than the Item Qty, then check if the item is a weight type and all lots are 'packed' uoms. 
+	IF (
+		@intInventoryReceiptItemId IS NOT NULL 
+		AND @LotQtyInItemUOM > @OpenReceiveQty
+	)
+	BEGIN 
+		SET @OnePackedQtyInItemUOM = NULL 
+		SELECT	@OnePackedQtyInItemUOM = 
+					dbo.fnCalculateQtyBetweenUOM(
+						lotPackedUOM.intLotItemUOMId
+						,ri.intUnitMeasureId
+						,1
+					)
+		FROM	tblICInventoryReceiptItem ri INNER JOIN tblICItemUOM iu
+					ON ri.intUnitMeasureId = iu.intItemUOMId
+				INNER JOIN tblICUnitMeasure u
+					ON u.intUnitMeasureId = iu.intUnitMeasureId 
+				OUTER APPLY (
+					-- select returns isInvalid = 1 if any of the lots are not in 'packed' uom.
+					SELECT	TOP 1 
+							isInvalid = CAST(1 AS BIT) 
+					FROM	tblICInventoryReceiptItemLot ril INNER JOIN tblICItemUOM iuLot
+								ON ril.intItemUnitMeasureId = iuLot.intItemUOMId
+							INNER JOIN tblICUnitMeasure uLot
+								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
+					WHERE	ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+							AND uLot.strUnitType NOT IN ('Packed')
+				) lotUOMs
+				OUTER APPLY (
+					SELECT	TOP 1 
+							intLotItemUOMId = iuLot.intItemUOMId
+					FROM	tblICInventoryReceiptItemLot ril INNER JOIN tblICItemUOM iuLot
+								ON ril.intItemUnitMeasureId = iuLot.intItemUOMId
+							INNER JOIN tblICUnitMeasure uLot
+								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
+					WHERE	ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+							AND uLot.strUnitType IN ('Packed')
+					ORDER BY ril.intInventoryReceiptItemLotId DESC 
+				) lotPackedUOM
+		WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
+				AND u.strUnitType IN ('Weight')
+				AND lotUOMs.isInvalid IS NULL 
+
+		-- Compute if there is an extra pack qty. 
+		-- and the extra pack qty can hold the loose weight qty. 
+		-- If true, then set the itemId as null so that validation will not fire. 
+		IF ISNULL(@OnePackedQtyInItemUOM, 0) <> 0 
+		BEGIN 
+			SELECT	@intItemId = NULL 
+			WHERE	@OnePackedQtyInItemUOM % (@LotQtyInItemUOM - @OpenReceiveQty) = 0 
+		END 	
+	END 
 			
 	IF @intItemId IS NOT NULL 
 	BEGIN 

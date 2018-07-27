@@ -73,7 +73,7 @@ AS
 	INSERT INTO tblEMEntityToContact( 
 		intEntityId,	intEntityContactId,		intEntityLocationId,	ysnDefaultContact,	ysnPortalAccess,	intConcurrencyId)
 	SELECT 
-		@EntityNewId,	@EntityNewContactId,	@EntityLocationId,		1				,	0				,	1
+		@EntityNewId,	@EntityNewContactId,	@EntityNewLocationId,		1				,	0				,	1
 
 	INSERT INTO tblEMEntityType(	intEntityId,	strType,	intConcurrencyId)
 	SELECT							@EntityNewId,	'Vendor',	1

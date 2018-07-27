@@ -515,7 +515,7 @@ BEGIN
 	SELECT 
 		@NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
-		dblAmountPercent,
+		dblAmountPercent = ISNULL(dblAmountPercent,0.00),
 		0.00,
 		0.00,
 		strPricingMethod,
@@ -526,6 +526,38 @@ BEGIN
 		intSort 
 	FROM tblICItemPricing
 	WHERE intItemId = @ItemId
+
+
+	-- INSERT Item Locations that are missing in tblICItemPricing
+	INSERT INTO tblICItemPricing(
+		intItemId,
+		intItemLocationId,
+		dblAmountPercent,
+		dblSalePrice,
+		dblMSRPPrice,
+		strPricingMethod,
+		dblLastCost,
+		dblStandardCost,
+		dblAverageCost,
+		dblEndMonthCost,
+		intSort
+	)
+	SELECT
+		ItemLoc.intItemId,
+		ItemLoc.intItemLocationId,
+		0.00,
+		0.00,
+		0.00,
+		'None',
+		0.00,
+		0.00,
+		0.00,
+		0.00,
+		ItemPric.intSort
+	FROM tblICItemLocation ItemLoc
+	LEFT JOIN tblICItemPricing ItemPric
+		ON ItemPric.intItemId = ItemLoc.intItemId AND ItemPric.intItemLocationId = ItemLoc.intItemLocationId
+	WHERE ItemLoc.intItemId = @NewItemId AND ItemPric.intItemPricingId IS NULL AND ItemLoc.intLocationId IS NOT NULL
 	-------------------------------------------
 	-- End duplication of Item Pricing table --
 	-------------------------------------------

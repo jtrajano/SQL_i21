@@ -17,6 +17,7 @@ SET @ZeroDecimal = 0.000000
 UPDATE ARIDT
 SET
 	 ARIDT.[dblRate]			= ISNULL(ARIDT.[dblRate], @ZeroDecimal)
+	,ARIDT.[dblBaseRate]		= ISNULL(ARIDT.[dblBaseRate], ISNULL(ARIDT.[dblRate], @ZeroDecimal))
 	,ARIDT.[dblTax]				= ISNULL(ARIDT.[dblTax], @ZeroDecimal)
 	,ARIDT.[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,ARIDT.[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())

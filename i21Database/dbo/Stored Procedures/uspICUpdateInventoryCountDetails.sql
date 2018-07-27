@@ -37,6 +37,7 @@ BEGIN
 		, strLotNo
 		, strLotAlias
 		, dblSystemCount
+		, dblWeightQty
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
@@ -48,54 +49,100 @@ BEGIN
 		, intSort
 		, dblPhysicalCount
 	)
-	SELECT * 
-	FROM (
-		SELECT 
-			  intInventoryCountId = @intInventoryCountId
-			, intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intParentLotId
-			, strParentLotNumber
-			, strParentLotAlias
+	SELECT 	intInventoryCountId = @intInventoryCountId
+			, Item.intItemId
+			, ItemLocation.intItemLocationId
+			, Lot.intSubLocationId
+			, Lot.intStorageLocationId
+			, Lot.intParentLotId
+			, ParentLot.strParentLotNumber
+			, ParentLot.strParentLotAlias
 			, intLotId
 			, strLotNumber
 			, strLotAlias
-			, dblSystemCount = SUM(dblOnHand)
-			, dblLastCost = MAX(dblLastCost)
-			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
-			, intItemUOMId
-			, intWeightUOMId
+			, dblSystemCount = ISNULL(dblQty, 0)
+			, dblWeightQty = Lot.dblWeight
+			, dblLastCost = 
+				-- Convert the last cost from Stock UOM to Lot's Pack UOM. 
+				dbo.fnCalculateCostBetweenUOM(
+					StockUOM.intItemUOMId
+					, Lot.intItemUOMId
+					, Lot.dblLastCost
+				) 
+			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
+			, Lot.intItemUOMId
+			, Lot.intWeightUOMId
 			, ysnRecount = 0
 			, ysnFetched = 1
 			, intEntityUserSecurityId = @intEntityUserSecurityId
 			, intConcurrencyId = 1
 			, intSort = 1
 			, dblPhysicalCount = NULL
-		FROM vyuICGetItemStockSummaryByLot
-		WHERE (intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
-			AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
-			AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
-			AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-			AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-			AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
-			AND strLotTracking <> 'No'				
-			AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 --AND dtmDate	<= @AsOfDate
-		GROUP BY intItemId,
-				intItemLocationId,
-				intSubLocationId,
-				intStorageLocationId,
-				intParentLotId,
-				intLotId,
-				strLotNumber,
-				strLotAlias,
-				strParentLotNumber,
-				strParentLotAlias,
-				intItemUOMId,
-				intWeightUOMId
-	) query
-	WHERE ((dblSystemCount > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+	FROM	tblICLot Lot INNER JOIN tblICItem Item 
+				ON Item.intItemId = Lot.intItemId
+			INNER JOIN tblICItemLocation ItemLocation 
+				ON ItemLocation.intItemLocationId = Lot.intItemLocationId
+			INNER JOIN tblICItemUOM StockUOM
+				ON StockUOM.intItemId = Item.intItemId
+				AND StockUOM.ysnStockUnit = 1
+			LEFT JOIN tblICParentLot ParentLot 
+				ON ParentLot.intParentLotId = Lot.intParentLotId
+	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
+		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
+		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
+		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
+		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
+		AND Item.strLotTracking <> 'No'
+		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+	--FROM (
+	--	SELECT 
+	--		  intInventoryCountId = @intInventoryCountId
+	--		, intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId
+	--		, intStorageLocationId
+	--		, intParentLotId
+	--		, strParentLotNumber
+	--		, strParentLotAlias
+	--		, intLotId
+	--		, strLotNumber
+	--		, strLotAlias
+	--		, dblSystemCount = SUM(dblLotQty)
+	--		, dblWeightQty = SUM(dblLotWeight)
+	--		, dblLastCost = MAX(dblLastCost)
+	--		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
+	--		, intItemUOMId
+	--		, intWeightUOMId
+	--		, ysnRecount = 0
+	--		, ysnFetched = 1
+	--		, intEntityUserSecurityId = @intEntityUserSecurityId
+	--		, intConcurrencyId = 1
+	--		, intSort = 1
+	--		, dblPhysicalCount = NULL
+	--	FROM vyuICGetItemStockSummaryByLot
+	--	WHERE (intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
+	--		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
+	--		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
+	--		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+	--		AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
+	--		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
+	--		AND strLotTracking <> 'No'				
+	--		--AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 --AND dtmDate	<= @AsOfDate
+	--	GROUP BY intItemId,
+	--			intItemLocationId,
+	--			intSubLocationId,
+	--			intStorageLocationId,
+	--			intParentLotId,
+	--			intLotId,
+	--			strLotNumber,
+	--			strLotAlias,
+	--			strParentLotNumber,
+	--			strParentLotAlias,
+	--			intItemUOMId,
+	--			intWeightUOMId
+	--) query
+	--WHERE ((dblSystemCount > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 
 END
 ELSE
@@ -124,10 +171,16 @@ BEGIN
 		, intSubLocationId = COALESCE(stock.intSubLocationId, il.intSubLocationId)
 		, intStorageLocationId = COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
 		, intLotId = NULL
-		, dblSystemCount = dblOnHand-- SUM(COALESCE(stock.dblOnHand, 0.00))
-		, dblLastCost = COALESCE(stock.dblLastCost, p.dblLastCost)
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, uom.intItemUOMId ASC) AS NVARCHAR(50))
-		, intItemUOMId = COALESCE(stock.intItemUOMId, uom.intItemUOMId)
+		, dblSystemCount = ISNULL(dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
+		, dblLastCost =  
+			-- Convert the last cost from Stock UOM to stock.intItemUOMId
+			dbo.fnCalculateCostBetweenUOM(
+				stockUOM.intItemUOMId
+				, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+				, COALESCE(stock.dblLastCost, p.dblLastCost)
+			)
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, ysnRecount = 0
 		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId
@@ -137,25 +190,28 @@ BEGIN
 	FROM tblICItemLocation il
 		INNER JOIN tblICItemPricing p ON p.intItemLocationId = il.intItemLocationId
 			AND p.intItemId = il.intItemId
-		INNER JOIN tblICItemUOM uom ON uom.intItemId = il.intItemId
-			AND uom.ysnStockUnit = 1
+		INNER JOIN tblICItemUOM stockUOM 
+			ON stockUOM.intItemId = il.intItemId
+			AND stockUOM.ysnStockUnit = 1
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
-		LEFT JOIN (SELECT	intItemId,
-							intItemUOMId,
-							intItemLocationId,
-							intSubLocationId,
-							intStorageLocationId,
-							dblOnHand =  SUM(COALESCE(dblOnHand, 0.00)),
-							dblLastCost = MAX(dblLastCost)
-					FROM vyuICGetItemStockSummary
-					WHERE dtmDate <= @AsOfDate
-					GROUP BY intItemId,
-							intItemUOMId,
-							intItemLocationId,
-							intSubLocationId,
-							intStorageLocationId
-			) stock ON stock.intItemId = i.intItemId
-			AND uom.intItemUOMId = stock.intItemUOMId
+		LEFT JOIN (
+			SELECT	intItemId
+					,intItemUOMId
+					,intItemLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
+					,dblLastCost = MAX(dblLastCost)
+			FROM	vyuICGetItemStockSummary
+			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+			GROUP BY 
+					intItemId,
+					intItemUOMId,
+					intItemLocationId,
+					intSubLocationId,
+					intStorageLocationId
+		) stock ON stock.intItemId = i.intItemId
+			AND stockUOM.intItemUOMId = stock.intItemUOMId
 			AND stock.intItemLocationId = il.intItemLocationId
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))

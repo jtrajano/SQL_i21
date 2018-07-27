@@ -1,7 +1,6 @@
 ﻿IF EXISTS (SELECT TOP 1 1 FROM sys.procedures WHERE name = 'uspGRImportStorageTicket')
 	DROP PROCEDURE uspGRImportStorageTicket
 GO
-
 CREATE PROCEDURE uspGRImportStorageTicket 
 	 @Checking BIT = 0
 	,@UserId INT = 0
@@ -23,122 +22,122 @@ BEGIN
 						
 			END
 
-			DECLARE @intCustomerStorageId INT
-			DECLARE @intConcurrencyId INT
-			DECLARE @strSourceType NVARCHAR(30)
-			DECLARE @strDiscountChargeType NVARCHAR(30)
+			DECLARE @intCustomerStorageId		   INT
+			DECLARE @intConcurrencyId			   INT
+			DECLARE @strSourceType				   NVARCHAR(30)
+			DECLARE @strDiscountChargeType		   NVARCHAR(30)
+												   
+			DECLARE @dblGradeReading1			   DECIMAL(24,10)
+			DECLARE @dblGradeReading2			   DECIMAL(24,10)
+			DECLARE @dblGradeReading3			   DECIMAL(24,10)
+			DECLARE @dblGradeReading4			   DECIMAL(24,10)
+			DECLARE @dblGradeReading5			   DECIMAL(24,10)
+			DECLARE @dblGradeReading6			   DECIMAL(24,10)
+			DECLARE @dblGradeReading7			   DECIMAL(24,10)
+			DECLARE @dblGradeReading8			   DECIMAL(24,10)
+			DECLARE @dblGradeReading9			   DECIMAL(24,10)
+			DECLARE @dblGradeReading10			   DECIMAL(24,10)
+			DECLARE @dblGradeReading11			   DECIMAL(24,10)
+			DECLARE @dblGradeReading12			   DECIMAL(24,10)
+												   
+			DECLARE @strCalcMethod1				   NVARCHAR(30)
+			DECLARE @strCalcMethod2				   NVARCHAR(30)
+			DECLARE @strCalcMethod3				   NVARCHAR(30)
+			DECLARE @strCalcMethod4				   NVARCHAR(30)
+			DECLARE @strCalcMethod5				   NVARCHAR(30)
+			DECLARE @strCalcMethod6				   NVARCHAR(30)
+			DECLARE @strCalcMethod7				   NVARCHAR(30)
+			DECLARE @strCalcMethod8				   NVARCHAR(30)
+			DECLARE @strCalcMethod9				   NVARCHAR(30)
+			DECLARE @strCalcMethod10			   NVARCHAR(30)
+			DECLARE @strCalcMethod11			   NVARCHAR(30)
+			DECLARE @strCalcMethod12			   NVARCHAR(30)
+												   
+			DECLARE @strShrinkWhat1				   NVARCHAR(30)
+			DECLARE @strShrinkWhat2				   NVARCHAR(30)
+			DECLARE @strShrinkWhat3				   NVARCHAR(30)
+			DECLARE @strShrinkWhat4				   NVARCHAR(30)
+			DECLARE @strShrinkWhat5				   NVARCHAR(30)
+			DECLARE @strShrinkWhat6				   NVARCHAR(30)
+			DECLARE @strShrinkWhat7				   NVARCHAR(30)
+			DECLARE @strShrinkWhat8				   NVARCHAR(30)
+			DECLARE @strShrinkWhat9				   NVARCHAR(30)
+			DECLARE @strShrinkWhat10			   NVARCHAR(30)
+			DECLARE @strShrinkWhat11			   NVARCHAR(30)
+			DECLARE @strShrinkWhat12			   NVARCHAR(30)
+												   
+			DECLARE @dblShrinkPercent1			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent2			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent3			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent4			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent5			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent6			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent7			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent8			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent9			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent10			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent11			   DECIMAL(24,10)
+			DECLARE @dblShrinkPercent12			   DECIMAL(24,10)
+												   
+			DECLARE @dblDiscountAmount1			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount2			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount3			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount4			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount5			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount6			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount7			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount8			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount9			   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount10		   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount11		   DECIMAL(24,10)
+			DECLARE @dblDiscountAmount12		   DECIMAL(24,10)
+												   
+			DECLARE @dblDiscountPaid1			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid2			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid3			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid4			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid5			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid6			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid7			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid8			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid9			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid10			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid11			   DECIMAL(24,10)
+			DECLARE @dblDiscountPaid12			   DECIMAL(24,10)
 			
-			DECLARE @dblGradeReading1 DECIMAL(24,10)
-			DECLARE @dblGradeReading2 DECIMAL(24,10)
-			DECLARE @dblGradeReading3 DECIMAL(24,10)
-			DECLARE @dblGradeReading4 DECIMAL(24,10)
-			DECLARE @dblGradeReading5 DECIMAL(24,10)
-			DECLARE @dblGradeReading6 DECIMAL(24,10)
-			DECLARE @dblGradeReading7 DECIMAL(24,10)
-			DECLARE @dblGradeReading8 DECIMAL(24,10)
-			DECLARE @dblGradeReading9 DECIMAL(24,10)
-			DECLARE @dblGradeReading10 DECIMAL(24,10)
-			DECLARE @dblGradeReading11 DECIMAL(24,10)
-			DECLARE @dblGradeReading12 DECIMAL(24,10)
+			DECLARE @intDiscountScheduleCodeId1    INT
+			DECLARE @intDiscountScheduleCodeId2    INT
+			DECLARE @intDiscountScheduleCodeId3    INT
+			DECLARE @intDiscountScheduleCodeId4    INT
+			DECLARE @intDiscountScheduleCodeId5    INT
+			DECLARE @intDiscountScheduleCodeId6    INT
+			DECLARE @intDiscountScheduleCodeId7    INT
+			DECLARE @intDiscountScheduleCodeId8    INT
+			DECLARE @intDiscountScheduleCodeId9    INT
+			DECLARE @intDiscountScheduleCodeId10   INT
+			DECLARE @intDiscountScheduleCodeId11   INT
+			DECLARE @intDiscountScheduleCodeId12   INT
 			
-			DECLARE @strCalcMethod1  NVARCHAR(30)
-			DECLARE @strCalcMethod2  NVARCHAR(30)
-			DECLARE @strCalcMethod3  NVARCHAR(30)
-			DECLARE @strCalcMethod4  NVARCHAR(30)
-			DECLARE @strCalcMethod5  NVARCHAR(30)
-			DECLARE @strCalcMethod6  NVARCHAR(30)
-			DECLARE @strCalcMethod7  NVARCHAR(30)
-			DECLARE @strCalcMethod8  NVARCHAR(30)
-			DECLARE @strCalcMethod9  NVARCHAR(30)
-			DECLARE @strCalcMethod10  NVARCHAR(30)
-			DECLARE @strCalcMethod11  NVARCHAR(30)
-			DECLARE @strCalcMethod12  NVARCHAR(30)
+			DECLARE @strDiscountCode1			   NVARCHAR(10)
+			DECLARE @strDiscountCode2			   NVARCHAR(10)
+			DECLARE @strDiscountCode3			   NVARCHAR(10)
+			DECLARE @strDiscountCode4			   NVARCHAR(10)
+			DECLARE @strDiscountCode5			   NVARCHAR(10)
+			DECLARE @strDiscountCode6			   NVARCHAR(10)
+			DECLARE @strDiscountCode7			   NVARCHAR(10)
+			DECLARE @strDiscountCode8			   NVARCHAR(10)
+			DECLARE @strDiscountCode9			   NVARCHAR(10)
+			DECLARE @strDiscountCode10			   NVARCHAR(10)
+			DECLARE @strDiscountCode11			   NVARCHAR(10)
+			DECLARE @strDiscountCode12			   NVARCHAR(10)
 			
-			DECLARE @strShrinkWhat1    NVARCHAR(30)
-			DECLARE @strShrinkWhat2    NVARCHAR(30)
-			DECLARE @strShrinkWhat3    NVARCHAR(30)
-			DECLARE @strShrinkWhat4    NVARCHAR(30)
-			DECLARE @strShrinkWhat5    NVARCHAR(30)
-			DECLARE @strShrinkWhat6    NVARCHAR(30)
-			DECLARE @strShrinkWhat7    NVARCHAR(30)
-			DECLARE @strShrinkWhat8    NVARCHAR(30)
-			DECLARE @strShrinkWhat9    NVARCHAR(30)
-			DECLARE @strShrinkWhat10    NVARCHAR(30)
-			DECLARE @strShrinkWhat11    NVARCHAR(30)
-			DECLARE @strShrinkWhat12    NVARCHAR(30)
-			
-			DECLARE @dblShrinkPercent1 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent2 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent3 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent4 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent5 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent6 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent7 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent8 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent9 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent10 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent11 DECIMAL(24,10)
-			DECLARE @dblShrinkPercent12 DECIMAL(24,10)
-			
-			DECLARE @dblDiscountAmount1 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount2 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount3 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount4 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount5 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount6 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount7 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount8 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount9 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount10 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount11 DECIMAL(24,10)
-			DECLARE @dblDiscountAmount12 DECIMAL(24,10)
-			
-			DECLARE @dblDiscountPaid1 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid2 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid3 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid4 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid5 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid6 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid7 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid8 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid9 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid10 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid11 DECIMAL(24,10)
-			DECLARE @dblDiscountPaid12 DECIMAL(24,10)
-			
-			DECLARE @intDiscountScheduleCodeId1 INT
-			DECLARE @intDiscountScheduleCodeId2 INT
-			DECLARE @intDiscountScheduleCodeId3 INT
-			DECLARE @intDiscountScheduleCodeId4 INT
-			DECLARE @intDiscountScheduleCodeId5 INT
-			DECLARE @intDiscountScheduleCodeId6 INT
-			DECLARE @intDiscountScheduleCodeId7 INT
-			DECLARE @intDiscountScheduleCodeId8 INT
-			DECLARE @intDiscountScheduleCodeId9 INT
-			DECLARE @intDiscountScheduleCodeId10 INT
-			DECLARE @intDiscountScheduleCodeId11 INT
-			DECLARE @intDiscountScheduleCodeId12 INT
-			
-			DECLARE @strDiscountCode1  NVARCHAR(10)
-			DECLARE @strDiscountCode2  NVARCHAR(10)
-			DECLARE @strDiscountCode3  NVARCHAR(10)
-			DECLARE @strDiscountCode4  NVARCHAR(10)
-			DECLARE @strDiscountCode5  NVARCHAR(10)
-			DECLARE @strDiscountCode6  NVARCHAR(10)
-			DECLARE @strDiscountCode7  NVARCHAR(10)
-			DECLARE @strDiscountCode8  NVARCHAR(10)
-			DECLARE @strDiscountCode9  NVARCHAR(10)
-			DECLARE @strDiscountCode10  NVARCHAR(10)
-			DECLARE @strDiscountCode11  NVARCHAR(10)
-			DECLARE @strDiscountCode12  NVARCHAR(10)
-			
-			DECLARE @ysnGraderAutoEntry BIT
-			DECLARE @dtmDiscountPaidDate DateTime
-			DECLARE @strCurrency   NVARCHAR(30)
-			DECLARE @strCommodityCode   NVARCHAR(30)
-			DECLARE @intStorageTypeId INT
-			DECLARE @strStorageTypeCode   NVARCHAR(30)
-			DECLARE @strDiscountDescription   NVARCHAR(30)
+			DECLARE @ysnGraderAutoEntry			   BIT
+			DECLARE @dtmDiscountPaidDate		   DateTime
+			DECLARE @strCurrency				   NVARCHAR(30)
+			DECLARE @strCommodityCode			   NVARCHAR(30)
+			DECLARE @intStorageTypeId			   INT
+			DECLARE @strStorageTypeCode			   NVARCHAR(30)
+			DECLARE @strDiscountDescription		   NVARCHAR(30)
 			
 			SET @intConcurrencyId = 1
 			SET @strSourceType ='Storage'
@@ -149,14 +148,14 @@ BEGIN
 
 			DECLARE @tblDiscountCode AS TABLE
 			(
-			   intDiscountScheduleCodeId INT
-			  ,intShrinkCalculationOptionId INT
-			  ,strCurrency NVARCHAR(50) COLLATE Latin1_General_CS_AS 
-			  ,strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CS_AS
-			  ,intStorageTypeId INT 
-			  ,strStorageTypeCode NVARCHAR(50) COLLATE Latin1_General_CS_AS  
-			  ,strShortName NVARCHAR(50) COLLATE Latin1_General_CS_AS
-			  ,strDiscountDescription  NVARCHAR(50) COLLATE Latin1_General_CS_AS
+			   intDiscountScheduleCodeId	 INT
+			  ,intShrinkCalculationOptionId  INT
+			  ,strCurrency					 NVARCHAR(50) COLLATE Latin1_General_CS_AS 
+			  ,strCommodityCode				 NVARCHAR(50) COLLATE Latin1_General_CS_AS
+			  ,intStorageTypeId				 INT 
+			  ,strStorageTypeCode			 NVARCHAR(50) COLLATE Latin1_General_CS_AS  
+			  ,strShortName					 NVARCHAR(50) COLLATE Latin1_General_CS_AS
+			  ,strDiscountDescription		 NVARCHAR(50) COLLATE Latin1_General_CS_AS
 			)
 			INSERT INTO @tblDiscountCode
 			(
@@ -227,56 +226,66 @@ BEGIN
 				  ,intUnitMeasureId
 				)
 				SELECT
-				  a.A4GLIdentity
-				  ,1 AS intConcurrencyId
-				 ,b.intEntityId
-				 ,Com.intCommodityId AS intCommodityId
-				 ,St.intStorageScheduleTypeId AS intStorageTypeId
-				 ,Sr.intStorageScheduleRuleId AS intStorageScheduleId
-				 ,L.intCompanyLocationId AS intCompanyLocationId
-				 ,a.A4GLIdentity AS intTicketId
-				 ,a.gastr_disc_schd_no AS intDiscountScheduleId
-				 ,a.gastr_orig_un AS dblOriginalBalance
-				 ,a.gastr_un_bal  AS dblOpenBalance
-				 ,Convert(Date,CAST(a.gastr_dlvry_rev_dt AS Nvarchar)) AS dtmDeliveryDate
-				 ,a.gastr_dpa_or_rcpt_no AS strDPARecieptNumber
-				 ,a.gastr_un_stor_due AS dblStorageDue
-				 ,a.gastr_un_stor_pd AS dblStoragePaid
-				 ,a.gastr_un_ins_rt AS dblInsuranceRate
-				 ,LTRIM(RTRIM(a.gastr_origin_state)) AS strOriginState
-				,LTRIM(RTRIM(a.gastr_ins_state)) AS strInsuranceState
-				,a.gastr_fees_due AS dblFeesDue
-				,a.gastr_fees_pd AS dblFeesPaid
-				,a.gastr_un_frt_rt AS dblFreightDueRate
-				,0 AS ysnPrinted
-				,a.gastr_currency_rt AS dblCurrencyRate
-				,LTRIM(RTRIM(a.gastr_tic_comment)) AS strDiscountComment
-				,a.gastr_un_disc_due AS dblDiscountsDue
-				,a.gastr_un_disc_pd AS dblDiscountsPaid
-				,LTRIM(RTRIM(a.gastr_cus_ref_no )) AS strCustomerReference
-				,Cur.intCurrencyID  AS intCurrencyId
-				,LTRIM(RTRIM(a.gastr_tic_no)) AS strStorageTicketNumber
-				,(SELECT TOP 1 intItemId FROM tblICItem WHERE strType='Inventory' AND strItemNo Like 
-																									 CASE 
-																									      WHEN a.gastr_com_cd='B' THEN 'B%'
-																										  WHEN a.gastr_com_cd='C' THEN 'C%'
-																										  WHEN a.gastr_com_cd='H' THEN 'H%'
-																										  WHEN a.gastr_com_cd='M' THEN 'M%'
-																										  WHEN a.gastr_com_cd='S' THEN 'S%'
-																										  WHEN a.gastr_com_cd='W' THEN 'W%'
-																									 END			
-																									 ) AS intItemId
-				,NULL AS intCompanyLocationSubLocationId
-				,bin.intStorageLocationId AS intStorageLocationId
-				,(SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol=UOM.gacom_un_desc COLLATE  Latin1_General_CS_AS) AS intUnitMeasureId
+				  intCustomerStorageId			  = a.A4GLIdentity
+				 ,intConcurrencyId				  = 1
+				 ,intEntityId					  = t.intEntityId
+				 ,intCommodityId				  = Com.intCommodityId
+				 ,intStorageTypeId				  = St.intStorageScheduleTypeId
+				 ,intStorageScheduleId			  = Sr.intStorageScheduleRuleId
+				 ,intCompanyLocationId			  = L.intCompanyLocationId 
+				 ,intTicketId					  = a.A4GLIdentity
+				 ,intDiscountScheduleId			  = a.gastr_disc_schd_no
+				 ,dblOriginalBalance			  = a.gastr_orig_un
+				 ,dblOpenBalance				  = a.gastr_un_bal   
+				 ,dtmDeliveryDate				  = Convert(Date,CAST(a.gastr_dlvry_rev_dt AS Nvarchar))  
+				 ,strDPARecieptNumber			  = a.gastr_dpa_or_rcpt_no  
+				 ,dblStorageDue					  = a.gastr_un_stor_due
+				 ,dblStoragePaid				  = a.gastr_un_stor_pd
+				 ,dblInsuranceRate				  = a.gastr_un_ins_rt
+				 ,strOriginState				  = LTRIM(RTRIM(a.gastr_origin_state))
+				 ,strInsuranceState				  = LTRIM(RTRIM(a.gastr_ins_state))
+				 ,dblFeesDue					  = a.gastr_fees_due  
+				 ,dblFeesPaid					  = a.gastr_fees_pd  
+				 ,dblFreightDueRate				  = a.gastr_un_frt_rt 
+				 ,ysnPrinted					  = 0 
+				 ,dblCurrencyRate				  = a.gastr_currency_rt
+				 ,strDiscountComment			  = LTRIM(RTRIM(a.gastr_tic_comment))
+				 ,dblDiscountsDue				  = a.gastr_un_disc_due
+				 ,dblDiscountsPaid				  = a.gastr_un_disc_pd
+				 ,strCustomerReference			  = LTRIM(RTRIM(a.gastr_cus_ref_no ))
+				 ,intCurrencyId					  = Cur.intCurrencyID
+				 ,strStorageTicketNumber		  = LTRIM(RTRIM(a.gastr_tic_no))
+				 ,intItemId						  = (SELECT TOP 1 intItemId FROM tblICItem WHERE strType='Inventory' AND strItemNo Like 
+																																 CASE 
+																																      WHEN a.gastr_com_cd='B' THEN 'B%'
+																																	  WHEN a.gastr_com_cd='C' THEN 'C%'
+																																	  WHEN a.gastr_com_cd='H' THEN 'H%'
+																																	  WHEN a.gastr_com_cd='M' THEN 'M%'
+																																	  WHEN a.gastr_com_cd='S' THEN 'S%'
+																																	  WHEN a.gastr_com_cd='W' THEN 'W%'
+																																 END			
+																																 ) 
+				,intCompanyLocationSubLocationId = NULL 
+				,intStorageLocationId			 = bin.intStorageLocationId
+				,intUnitMeasureId				 = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol=UOM.gacom_un_desc COLLATE  Latin1_General_CS_AS)
 				FROM gastrmst a
-				JOIN tblEMEntity b ON b.strName=a.gastr_cus_no   COLLATE  Latin1_General_CS_AS
-				JOIN tblEMEntityType ET ON ET.intEntityId=b.intEntityId AND ET.strType='Vendor'
-				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
+				JOIN (
+					SELECT * FROM 
+					(
+						SELECT	EY.intEntityId,EY.strName,EY.strEntityNo,ET.strType,ROW_NUMBER() OVER (PARTITION BY strEntityNo,ET.strType ORDER BY EY.intEntityId) intRowNum
+						FROM	tblEMEntity EY
+						JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId
+						 WHERE  ET.strType IN('Vendor','Customer') AND ISNULL(EY.strEntityNo,'')<>'' --AND EY.ysnActive =1
+					) t  WHERE intRowNum = 1
+
+				)   t ON LTRIM(RTRIM(t.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(a.gastr_cus_no))
+				AND t.strType = 'Vendor'
+				JOIN tblICCommodity Com ON Com.strCommodityCode=LTRIM(RTRIM(a.gastr_com_cd)) COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+									          AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
 				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS
-				JOIN tblGRDiscountSchedule DSch ON DSch.strDiscountDescription=a.gastr_disc_schd_no AND DSch.intCommodityId=Com.intCommodityId
+				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS
 				JOIN gacommst UOM ON UOM.gacom_com_cd=a.gastr_com_cd
 				LEFT JOIN tblICStorageLocation bin ON bin.strName=a.gastr_bin_no COLLATE  Latin1_General_CS_AS
@@ -284,63 +293,144 @@ BEGIN
 				
 				UNION 
 				SELECT
-				  a.A4GLIdentity
-				  ,1 AS intConcurrencyId
-				 ,b.intEntityId
-				 ,Com.intCommodityId AS intCommodityId
-				 --,St.intStorageScheduleTypeId AS intStorageTypeId
-				 ,(SELECT intStorageScheduleTypeId FROM tblGRStorageType WHERE ysnCustomerStorage=1 AND strStorageTypeCode=LTRIM(a.gastr_stor_type)+' O') AS intStorageTypeId
-				 ,Sr.intStorageScheduleRuleId AS intStorageScheduleId
-				 ,L.intCompanyLocationId AS intCompanyLocationId
-				 ,a.A4GLIdentity AS intTicketId
-				 ,a.gastr_disc_schd_no AS intDiscountScheduleId
-				 ,a.gastr_orig_un AS dblOriginalBalance
-				 ,a.gastr_un_bal  AS dblOpenBalance
-				 ,Convert(Date,CAST(a.gastr_dlvry_rev_dt AS Nvarchar)) AS dtmDeliveryDate
-				 ,a.gastr_dpa_or_rcpt_no AS strDPARecieptNumber
-				 ,a.gastr_un_stor_due AS dblStorageDue
-				 ,a.gastr_un_stor_pd AS dblStoragePaid
-				 ,a.gastr_un_ins_rt AS dblInsuranceRate
-				 ,LTRIM(RTRIM(a.gastr_origin_state)) AS strOriginState
-				,LTRIM(RTRIM(a.gastr_ins_state)) AS strInsuranceState
-				,a.gastr_fees_due AS dblFeesDue
-				,a.gastr_fees_pd AS dblFeesPaid
-				,a.gastr_un_frt_rt AS dblFreightDueRate
-				,0 AS ysnPrinted
-				,a.gastr_currency_rt AS dblCurrencyRate
-				,LTRIM(RTRIM(a.gastr_tic_comment)) AS strDiscountComment
-				,a.gastr_un_disc_due AS dblDiscountsDue
-				,a.gastr_un_disc_pd AS dblDiscountsPaid
-				,LTRIM(RTRIM(a.gastr_cus_ref_no )) AS strCustomerReference
-				,Cur.intCurrencyID  AS intCurrencyId
-				,LTRIM(RTRIM(a.gastr_tic_no)) AS strStorageTicketNumber
-				,(SELECT TOP 1 intItemId FROM tblICItem WHERE strType='Inventory' AND strItemNo Like 
-																									 CASE 
-																									      WHEN a.gastr_com_cd='B' THEN 'B%'
-																										  WHEN a.gastr_com_cd='C' THEN 'Corn%'
-																										  WHEN a.gastr_com_cd='H' THEN 'H%'
-																										  WHEN a.gastr_com_cd='M' THEN 'M%'
-																										  WHEN a.gastr_com_cd='S' THEN 'S%'
-																										  WHEN a.gastr_com_cd='W' THEN 'W%'
-																									 END			
-																									 ) AS intItemId
-				,NULL AS intCompanyLocationSubLocationId
-				,bin.intStorageLocationId AS intStorageLocationId
+				  intCustomerStorageId	 =  a.A4GLIdentity
+				 ,intConcurrencyId	     = 1 
+				 ,intEntityId		     = t.intEntityId
+				 ,intCommodityId		 = Com.intCommodityId
+				 ,intStorageTypeId		 = (SELECT intStorageScheduleTypeId FROM tblGRStorageType WHERE ysnCustomerStorage=1 AND strStorageTypeCode=LTRIM(a.gastr_stor_type)+' O')
+				 ,intStorageScheduleId	 = Sr.intStorageScheduleRuleId
+				 ,intCompanyLocationId	 = L.intCompanyLocationId 
+				 ,intTicketId			 = a.A4GLIdentity 
+				 ,intDiscountScheduleId  = a.gastr_disc_schd_no
+				 ,dblOriginalBalance	 = a.gastr_orig_un
+				 ,dblOpenBalance		 = a.gastr_un_bal  
+				 ,dtmDeliveryDate		 = Convert(Date,CAST(a.gastr_dlvry_rev_dt AS Nvarchar)) 
+				 ,strDPARecieptNumber	 = a.gastr_dpa_or_rcpt_no 
+				 ,dblStorageDue			 = a.gastr_un_stor_due 
+				 ,dblStoragePaid		 = a.gastr_un_stor_pd
+				 ,dblInsuranceRate		 = a.gastr_un_ins_rt
+				 ,strOriginState		 = LTRIM(RTRIM(a.gastr_origin_state))
+				 ,strInsuranceState		 = LTRIM(RTRIM(a.gastr_ins_state))
+				 ,dblFeesDue			 = a.gastr_fees_due
+				 ,dblFeesPaid			 = a.gastr_fees_pd
+				 ,dblFreightDueRate		 = a.gastr_un_frt_rt	
+				 ,ysnPrinted			 = 0 
+				 ,dblCurrencyRate		 = a.gastr_currency_rt
+				 ,strDiscountComment	 = LTRIM(RTRIM(a.gastr_tic_comment))
+				 ,dblDiscountsDue		 = a.gastr_un_disc_due
+				 ,dblDiscountsPaid		 = a.gastr_un_disc_pd
+				 ,strCustomerReference	 = LTRIM(RTRIM(a.gastr_cus_ref_no ))
+				 ,intCurrencyId			 = Cur.intCurrencyID
+				 ,strStorageTicketNumber = LTRIM(RTRIM(a.gastr_tic_no))
+				,intItemId				 = (SELECT TOP 1 intItemId FROM tblICItem WHERE strType='Inventory' AND strItemNo Like 
+																															 CASE 
+																															      WHEN a.gastr_com_cd='B' THEN 'B%'
+																															 	  WHEN a.gastr_com_cd='C' THEN 'Corn%'
+																															 	  WHEN a.gastr_com_cd='H' THEN 'H%'
+																															 	  WHEN a.gastr_com_cd='M' THEN 'M%'
+																															 	  WHEN a.gastr_com_cd='S' THEN 'S%'
+																															 	  WHEN a.gastr_com_cd='W' THEN 'W%'
+																															 END			
+																															 ) 
+				,intCompanyLocationSubLocationId = NULL
+				,intStorageLocationId			 = bin.intStorageLocationId
 				,(SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol=UOM.gacom_un_desc COLLATE  Latin1_General_CS_AS) AS intUnitMeasureId
 				FROM gastrmst a
-				JOIN tblEMEntity b ON b.strName=a.gastr_cus_no   COLLATE  Latin1_General_CS_AS
-				JOIN tblEMEntityType ET ON ET.intEntityId=b.intEntityId AND ET.strType='Customer'
+				JOIN (
+					SELECT * FROM 
+					(
+						SELECT	EY.intEntityId,EY.strName,EY.strEntityNo,ET.strType,ROW_NUMBER() OVER (PARTITION BY strEntityNo,ET.strType ORDER BY EY.intEntityId) intRowNum
+						FROM	tblEMEntity EY
+						JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId
+						 WHERE  ET.strType IN('Vendor','Customer') AND ISNULL(EY.strEntityNo,'')<>'' --AND EY.ysnActive =1
+					) t  WHERE intRowNum = 1
+
+				)   t ON LTRIM(RTRIM(t.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(a.gastr_cus_no))
+				AND t.strType = 'Customer'
 				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
 				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
-				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS
-				JOIN tblGRDiscountSchedule DSch ON DSch.strDiscountDescription=a.gastr_disc_schd_no AND DSch.intCommodityId=Com.intCommodityId
+												  AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
+				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
+				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
 				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
 				JOIN gacommst UOM ON UOM.gacom_com_cd=a.gastr_com_cd
 				LEFT JOIN tblICStorageLocation bin ON bin.strName=a.gastr_bin_no COLLATE  Latin1_General_CS_AS
 				WHERE a.gastr_un_bal >0  AND a.gastr_pur_sls_ind='S' 
-			
+				
+				UNION 
+				SELECT
+				  intCustomerStorageId	 =  a.A4GLIdentity
+				 ,intConcurrencyId	     = 1 
+				 ,intEntityId		     = t.intEntityId
+				 ,intCommodityId		 = Com.intCommodityId
+				 ,intStorageTypeId		 = (SELECT intStorageScheduleTypeId FROM tblGRStorageType WHERE ysnCustomerStorage=1 AND strStorageTypeCode=LTRIM(a.gastr_stor_type)+' O')
+				 ,intStorageScheduleId	 = Sr.intStorageScheduleRuleId
+				 ,intCompanyLocationId	 = L.intCompanyLocationId 
+				 ,intTicketId			 = a.A4GLIdentity 
+				 ,intDiscountScheduleId  = a.gastr_disc_schd_no
+				 ,dblOriginalBalance	 = a.gastr_orig_un
+				 ,dblOpenBalance		 = a.gastr_un_bal  
+				 ,dtmDeliveryDate		 = Convert(Date,CAST(a.gastr_dlvry_rev_dt AS Nvarchar)) 
+				 ,strDPARecieptNumber	 = a.gastr_dpa_or_rcpt_no 
+				 ,dblStorageDue			 = a.gastr_un_stor_due 
+				 ,dblStoragePaid		 = a.gastr_un_stor_pd
+				 ,dblInsuranceRate		 = a.gastr_un_ins_rt
+				 ,strOriginState		 = LTRIM(RTRIM(a.gastr_origin_state))
+				 ,strInsuranceState		 = LTRIM(RTRIM(a.gastr_ins_state))
+				 ,dblFeesDue			 = a.gastr_fees_due
+				 ,dblFeesPaid			 = a.gastr_fees_pd
+				 ,dblFreightDueRate		 = a.gastr_un_frt_rt	
+				 ,ysnPrinted			 = 0 
+				 ,dblCurrencyRate		 = a.gastr_currency_rt
+				 ,strDiscountComment	 = LTRIM(RTRIM(a.gastr_tic_comment))
+				 ,dblDiscountsDue		 = a.gastr_un_disc_due
+				 ,dblDiscountsPaid		 = a.gastr_un_disc_pd
+				 ,strCustomerReference	 = LTRIM(RTRIM(a.gastr_cus_ref_no ))
+				 ,intCurrencyId			 = Cur.intCurrencyID
+				 ,strStorageTicketNumber = LTRIM(RTRIM(a.gastr_tic_no))
+				,intItemId				 = (SELECT TOP 1 intItemId FROM tblICItem WHERE strType='Inventory' AND strItemNo Like 
+																															 CASE 
+																															      WHEN a.gastr_com_cd='B' THEN 'B%'
+																															 	  WHEN a.gastr_com_cd='C' THEN 'Corn%'
+																															 	  WHEN a.gastr_com_cd='H' THEN 'H%'
+																															 	  WHEN a.gastr_com_cd='M' THEN 'M%'
+																															 	  WHEN a.gastr_com_cd='S' THEN 'S%'
+																															 	  WHEN a.gastr_com_cd='W' THEN 'W%'
+																															 END			
+																															 ) 
+				,intCompanyLocationSubLocationId = NULL
+				,intStorageLocationId			 = bin.intStorageLocationId
+				,(SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol=UOM.gacom_un_desc COLLATE  Latin1_General_CS_AS) AS intUnitMeasureId
+				FROM gastrmst a
+				JOIN (
+					SELECT * FROM 
+					(
+						SELECT	EY.intEntityId,EY.strName,EY.strEntityNo,ET.strType,ROW_NUMBER() OVER (PARTITION BY strEntityNo,ET.strType ORDER BY EY.intEntityId) intRowNum
+						FROM	tblEMEntity EY
+						JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId
+						 WHERE  ET.strType IN('Vendor','Customer') AND ISNULL(EY.strEntityNo,'')<>'' --AND EY.ysnActive =1
+					) t  WHERE intRowNum = 1
+
+				)   t ON LTRIM(RTRIM(t.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(a.gastr_cus_no))
+				AND t.strType = CASE  WHEN a.gastr_pur_sls_ind='P' THEN 'Vendor' ELSE 'Customer' END
+				JOIN tblICCommodity Com ON Com.strCommodityCode=a.gastr_com_cd COLLATE  Latin1_General_CS_AS
+				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=a.gastr_stor_type
+				JOIN tblGRStorageScheduleRule Sr ON Sr.intStorageType=St.intStorageScheduleTypeId AND Sr.intCommodity=Com.intCommodityId
+												AND SUBSTRING(Sr.strScheduleId,0,CHARINDEX('/',Sr.strScheduleId))=a.gastr_stor_schd_no
+				JOIN tblSMCompanyLocation L ON L.strLocationNumber=LTRIM(RTRIM(a.gastr_loc_no)) COLLATE  Latin1_General_CS_AS				
+				JOIN	tblGRDiscountSchedule	DSch ON DSch.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(a.gastr_disc_schd_no))='0' THEN Com.strDescription +' Discount' ELSE LTRIM(RTRIM(a.gastr_disc_schd_no)) END AND DSch.intCommodityId = Com.intCommodityId
+				JOIN tblSMCurrency Cur ON Cur.strCurrency=a.gastr_currency COLLATE  Latin1_General_CS_AS 
+				JOIN gacommst UOM ON UOM.gacom_com_cd = a.gastr_com_cd
+				JOIN  gastlmst GT ON GT.gastl_cus_no = a.gastr_cus_no		AND 
+									 GT.gastl_com_cd = a.gastr_com_cd		AND
+									 GT.gastl_tic_no = a.gastr_tic_no		AND
+									 GT.gastl_rec_type = a.gastr_stor_type
+				LEFT JOIN tblICStorageLocation bin ON bin.strName=a.gastr_bin_no COLLATE  Latin1_General_CS_AS
+				WHERE a.gastr_un_bal = 0  AND GT.gastl_pd_yn <> 'Y' 
+
 			SET IDENTITY_INSERT [dbo].[tblGRCustomerStorage] OFF
+
 
 		--Quality Discount Data
 		SELECT @intCustomerStorageId = MIN(intCustomerStorageId) FROM tblGRCustomerStorage
@@ -687,7 +777,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId1
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,1
@@ -739,7 +829,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId2
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,2
@@ -792,7 +882,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId3
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,3
@@ -844,7 +934,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId4
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,4
@@ -896,7 +986,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId5
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,5
@@ -948,7 +1038,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId6
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,6
@@ -1000,7 +1090,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId7
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,7
@@ -1052,7 +1142,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId8
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,8
@@ -1104,7 +1194,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId9
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,9
@@ -1156,7 +1246,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId10
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,10
@@ -1208,7 +1298,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId11
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,11
@@ -1260,7 +1350,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId12
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,12

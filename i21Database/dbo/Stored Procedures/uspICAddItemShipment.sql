@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspICAddItemShipment]
 	@Items ShipmentStagingTable READONLY,
 	@Charges ShipmentChargeStagingTable READONLY,
 	@Lots ShipmentItemLotStagingTable READONLY,
+	@LotsOnly ShipmentItemLotsOnlyStagingTable READONLY,
 	@intUserId INT
 AS
 
@@ -33,6 +34,46 @@ DECLARE
 	@CurrentShipmentId INT
 
 DECLARE @intResult INT 
+
+-- If there is data on @LotsOnly, it will only insert lot records to an existing shipment transaction. 
+IF EXISTS (SELECT TOP 1 1 FROM @LotsOnly)
+BEGIN 
+	INSERT INTO tblICInventoryShipmentItemLot(
+		intInventoryShipmentItemId
+		, intLotId
+		, dblQuantityShipped
+		, dblGrossWeight
+		, dblTareWeight
+		, dblWeightPerQty
+		, strWarehouseCargoNumber
+		, intConcurrencyId
+	)
+	SELECT 
+		lots.intInventoryShipmentItemId
+		, lots.intLotId
+		, lots.dblQuantityShipped
+		, lots.dblGrossWeight
+		, lots.dblTareWeight
+		, lots.dblWeightPerQty
+		, lots.strWarehouseCargoNumber
+		, intConcurrencyId = 1
+	FROM	
+		@LotsOnly lots INNER JOIN tblICInventoryShipment s 
+			ON s.intInventoryShipmentId = lots.intInventoryShipmentId
+		INNER JOIN tblICInventoryShipmentItem si 
+			ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			AND si.intInventoryShipmentItemId = lots.intInventoryShipmentItemId
+		INNER JOIN tblICLot l
+			ON l.intLotId = lots.intLotId 
+		INNER JOIN tblICItem i 
+			ON i.intItemId = si.intItemId
+			AND i.intItemId = l.intItemId 
+	WHERE 
+		i.strLotTracking <> 'No'
+		AND s.ysnPosted = 0 
+
+	GOTO _Exit;
+END 
 	
 IF NOT EXISTS (SELECT TOP 1 1 FROM @Items)
 	GOTO _Exit;

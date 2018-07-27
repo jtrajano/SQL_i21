@@ -34,6 +34,7 @@ UPDATE
 	tblARInvoiceDetailTax
 SET
 	 [dblRate]				= ISNULL([dblRate], @ZeroDecimal)
+	,[dblBaseRate]			= ISNULL([dblBaseRate], ISNULL([dblRate], @ZeroDecimal))
 	,[dblTax]				= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
@@ -195,7 +196,17 @@ WHERE
 UPDATE
 	ARID
 SET
-	ARID.[dblBaseTotal]		= [dbo].fnRoundBanker(ARID.[dblTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	ARID.[dblBaseTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
+							ELSE
+								(	
+									CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0)
+										THEN
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblBaseUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblBaseUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+										ELSE
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())											
+									END							
+								  )
+							END)
 	
 FROM
 	tblARInvoiceDetail ARID

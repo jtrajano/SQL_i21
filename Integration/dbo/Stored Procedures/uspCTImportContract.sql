@@ -298,7 +298,7 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 			SELECT	TY.intContractTypeId,
 					C.intEntityId,
 					(select intCommodityId from tblICCommodity CM 
-					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) 'intCommodityId',
+					where CM.strCommodityCode = 'Pt') 'intCommodityId',
 					ptcnt_cnt_no AS strContractNumber,
 					CONVERT(DATETIME, LEFT(ptcnt_cnt_rev_dt,8)) dtmContractDate,		
 					PT.intPricingTypeId,
@@ -306,9 +306,13 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					where LTRIM(RtRIM(P.strContractPlan)) collate Latin1_General_CI_AS = CT.ptcnt_cnt_plan) as intContractPlanId,
 					(SELECT   sum(ptcnt_un_orig) FROM ptcntmst WHERE ptcnt_due_rev_dt !< (SELECT pt3cf_business_rev_dt FROM ptctlmst WHERE ptctl_key = 3) 
 						AND ptcnt_cnt_no = CT.ptcnt_cnt_no GROUP BY ptcnt_cus_no, ptcnt_cnt_no, ptcnt_cnt_rev_dt HAVING SUM(ptcnt_un_bal) > 0)  AS dblQuantity,		
-					(select top 1 intCommodityUnitMeasureId 
-					from tblICCommodityUnitMeasure UM join tblICCommodity CM on CM.intCommodityId = UM.intCommodityId
-					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) AS intCommodityUOMId,
+					(select intCommodityUnitMeasureId 
+						from tblICCommodityUnitMeasure UM join tblICCommodity CM on CM.intCommodityId = UM.intCommodityId
+						join tblICItem i on CM.intCommodityId = i.intCommodityId
+						join tblICItemUOM iu on i.intItemId = iu.intItemId and iu.ysnStockUnit = 1
+						join tblICUnitMeasure um1 on um1.intUnitMeasureId = iu.intUnitMeasureId
+						join tblICUnitMeasure um2 on um2.intUnitMeasureId = UM.intUnitMeasureId and um1.strUnitMeasure = um2.strUnitMeasure
+						where i.strItemNo collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) AS intCommodityUOMId,
 					null intContractTextId,
 					1 AS ysnSigned,
 					1 AS ysnPrinted,		
@@ -397,6 +401,7 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId = CH.intCommodityUOMId
 		JOIN	tblICItem			IM	ON	LTRIM(RtRIM(IM.strItemNo)) collate Latin1_General_CI_AS = LTRIM(RTRIM(CT.ptcnt_itm_or_cls))
 		left JOIN	tblICItemUOM		IU	ON	IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = CU.intUnitMeasureId AND CH.intContractHeaderId > @MaxContractId
+		where ptcnt_un_bal > 0 AND ptcnt_itm_or_cls <> '*'
 
 END
 
@@ -435,15 +440,19 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 			SELECT	TY.intContractTypeId,
 					C.intEntityId,
 					(select intCommodityId from tblICCommodity CM 
-					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.agcnt_itm_or_cls) 'intCommodityId',
+					where CM.strCommodityCode = 'Ag') 'intCommodityId',
 					LTRIM(RtRIM(agcnt_cnt_no))+'_'+CAST(agcnt_line_no AS CHAR (3))AS strContractNumber,
 					CONVERT(DATETIME, LEFT(agcnt_cnt_rev_dt,8)) dtmContractDate,		
 					PT.intPricingTypeId,
 					NULL as intContractPlanId,
 					agcnt_un_orig AS dblQuantity,		
-					(select top 1 intCommodityUnitMeasureId 
-					from tblICCommodityUnitMeasure UM join tblICCommodity CM on CM.intCommodityId = UM.intCommodityId
-					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.agcnt_itm_or_cls) AS intCommodityUOMId,
+					(select intCommodityUnitMeasureId 
+						from tblICCommodityUnitMeasure UM join tblICCommodity CM on CM.intCommodityId = UM.intCommodityId
+						join tblICItem i on CM.intCommodityId = i.intCommodityId
+						join tblICItemUOM iu on i.intItemId = iu.intItemId and iu.ysnStockUnit = 1
+						join tblICUnitMeasure um1 on um1.intUnitMeasureId = iu.intUnitMeasureId
+						join tblICUnitMeasure um2 on um2.intUnitMeasureId = UM.intUnitMeasureId and um1.strUnitMeasure = um2.strUnitMeasure
+						where i.strItemNo collate Latin1_General_CI_AS = CT.agcnt_itm_or_cls) AS intCommodityUOMId,
 					null intContractTextId,
 					1 AS ysnSigned,
 					1 AS ysnPrinted,		
@@ -526,6 +535,8 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId = CH.intCommodityUOMId
 		JOIN	tblICItem			IM	ON	LTRIM(RtRIM(IM.strItemNo)) collate Latin1_General_CI_AS = LTRIM(RTRIM(CT.agcnt_itm_or_cls))
 		left JOIN	tblICItemUOM		IU	ON	IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = CU.intUnitMeasureId  AND CH.intContractHeaderId > @MaxContractId
+		where agcnt_un_bal > 0 AND agcnt_itm_or_cls <> '*'
 END
+
 
 GO

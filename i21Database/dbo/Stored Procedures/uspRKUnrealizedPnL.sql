@@ -4,6 +4,10 @@
 	,@intCommodityId INT = NULL
 	,@ysnExpired BIT
 	,@intFutureMarketId INT = NULL
+	,@intEntityId int = null		
+	,@intBrokerageAccountId INT = NULL
+	,@intFutureMonthId INT = NULL
+	,@strBuySell nvarchar(10)=NULL
 AS  
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
@@ -76,17 +80,17 @@ SELECT  intFutOptTransactionId,
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
- --JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId     
- --JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
- --JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId = 1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT JOIN tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
+	AND ot.intEntityId= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
+	AND ot.intBrokerageAccountId= CASE WHEN ISNULL(@intBrokerageAccountId,0)=0 then ot.intBrokerageAccountId else @intBrokerageAccountId end
+	AND ot.intFutureMonthId= CASE WHEN ISNULL(@intFutureMonthId,0)=0 then ot.intFutureMonthId else @intFutureMonthId end
+	AND ot.strBuySell= CASE WHEN ISNULL(@strBuySell,'0')= '0'  then ot.strBuySell else @strBuySell end
 	AND convert(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) BETWEEN @dtmFromDate AND @dtmToDate
 	AND isnull(ysnExpired,0) = case when isnull(@ysnExpired,'false')= 'true' then isnull(ysnExpired,0) else @ysnExpired end
 	AND ot.intInstrumentTypeId =1
   )t1)t1 
 )t1 where (dblLong<>0 or dblShort <>0) 
 ORDER BY RowNum ASC
-

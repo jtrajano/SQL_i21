@@ -136,8 +136,12 @@ INSERT INTO tblICBackupDetailInventoryTransaction(
 	, strDescription
 	, intFobPointId
 	, ysnNoGLPosting
+	, intForexRateTypeId
+	, dblForexRate
+	, strActualCostId
 	, intCreatedUserId
-	, intCreatedEntityId)
+	, intCreatedEntityId
+)
 SELECT
 	  intBackupId						= @intBackupId
 	, intIdentityId						= tr.intInventoryTransactionId
@@ -171,6 +175,9 @@ SELECT
 	, strDescription					= tr.strDescription					
 	, intFobPointId						= tr.intFobPointId						
 	, ysnNoGLPosting					= tr.ysnNoGLPosting					
+	, intForexRateTypeId				= tr.intForexRateTypeId
+	, dblForexRate						= tr.dblForexRate
+	, strActualCostId					= tr.strActualCostId
 	, intCreatedUserId					= tr.intCreatedUserId					
 	, intCreatedEntityId				= tr.intCreatedEntityId				
 FROM tblICInventoryTransaction tr
@@ -240,7 +247,10 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage(
 	, intCostingMethod					
 	, dtmCreated						
 	, intCreatedUserId					
-	, intCreatedEntityId)
+	, intCreatedEntityId
+	, intForexRateTypeId
+	, dblForexRate
+)
 SELECT
 	  intBackupId						= @intBackupId
 	, intIdentityId						= t.intInventoryTransactionStorageId
@@ -273,4 +283,6 @@ SELECT
 	, dtmCreated						= t.dtmCreated						
 	, intCreatedUserId					= t.intCreatedUserId					
 	, intCreatedEntityId				= t.intCreatedEntityId
+	, intForexRateTypeId				= t.intForexRateTypeId
+	, dblForexRate						= t.dblForexRate
 FROM tblICInventoryTransactionStorage t

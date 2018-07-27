@@ -1352,6 +1352,7 @@ BEGIN TRY
 				)
 			OR @strOrderType = 'WO PROD STAGING'
 			)
+		AND @intTransactionId IS NOT NULL
 	BEGIN
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId

@@ -15,10 +15,9 @@ GO
 IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMImportBankAccountsFromOrigin')
 	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN 
-	DROP PROCEDURE uspCMImportBankAccountsFromOrigin
 
 	EXEC('
-		CREATE PROCEDURE [dbo].[uspCMImportBankAccountsFromOrigin]
+		ALTER PROCEDURE [dbo].[uspCMImportBankAccountsFromOrigin]
 		AS
 
 		-- Bank Account Types:
@@ -96,7 +95,7 @@ BEGIN
 				,strFax					= ''''
 				,strWebsite				= ''''	
 				,strEmail				= ''''
-				,strRTN					= (SELECT TOP 1 ISNULL(CAST(A.apcbk_transit_route AS NVARCHAR(12)), '''') FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+				,strRTN					= ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), '''') 
 				,intCreatedUserId		= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
 				,dtmCreated				= GETDATE()
 				,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
@@ -108,6 +107,15 @@ BEGIN
 					WHERE apcbk_bnk_no IS NULL 
 					AND NOT EXISTS (SELECT TOP 1 1 FROM ssbnkmst where ssbnk_name = apcbk_desc) 
 				) QUERY
+		OUTER APPLY(
+			SELECT TOP 1 CAST(A.apcbk_transit_route AS nvarchar(20)) Text
+			FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc
+		)RoutingNumber
+		OUTER APPLY (
+			SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 10))) + 
+			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 10) Value
+		)LeadingZero
+
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)
 
 		UNION SELECT 
@@ -122,7 +130,7 @@ BEGIN
 				,strFax					= ''''
 				,strWebsite				= ''''	
 				,strEmail				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_email_addr,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
-				,strRTN					= (SELECT TOP 1 ISNULL(CAST(ssbnk_transit_route AS NVARCHAR(12)), '''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strRTN					= ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), '''')
 				,intCreatedUserId		= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
 				,dtmCreated				= GETDATE()
 				,intLastModifiedUserId	= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
@@ -131,6 +139,14 @@ BEGIN
 		FROM(
 				SELECT DISTINCT ssbnk_name FROM ssbnkmst
 			) Q
+		OUTER APPLY(
+			SELECT TOP 1 CAST(ssbnk_transit_route AS nvarchar(20)) Text
+			FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name
+		)RoutingNumber
+		OUTER APPLY (
+			SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
+			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15) Value
+		)LeadingZero
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS)
 
 		-- Insert new record in tblCMBankAccount
@@ -196,7 +212,7 @@ BEGIN
 				,intBankAccountType					= @DEPOSIT_ACCOUNT
 				,strContact							= ''''
 				,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '''') COLLATE Latin1_General_CI_AS
-				,strRTN								= ISNULL(i.apcbk_transit_route, '''') 
+				,strRTN								= ISNULL(LeadingZero.Value, '''') 
 				,strAddress							= ''''
 				,strZipCode							= ''''
 				,strCity							= ''''
@@ -235,6 +251,13 @@ BEGIN
 				,intConcurrencyId					= 1
 				,strCbkNo							= i.apcbk_no	
 		FROM	apcbkmst i
+		OUTER APPLY(
+			SELECT CAST(i.apcbk_transit_route AS nvarchar(20)) Text
+		)RoutingNumber
+		OUTER APPLY(
+			SELECT REPLICATE(''0'',  9 -  LEN(substring(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
+			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'',RoutingNumber.Text), 15) Value
+		)LeadingZero
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)
 	')
 END 

@@ -1058,6 +1058,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[strTaxableByOtherTaxes]
 									,[strCalculationMethod]
 									,[dblRate]
+									,[dblBaseRate]
 									,[dblExemptionPercent]
 									,[intSalesTaxAccountId]
 									,[dblTax]
@@ -1078,6 +1079,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[strTaxableByOtherTaxes]
 									,[strCalculationMethod]
 									,[dblRate]
+									,ISNULL([dblBaseRate], [dblRate])
 									,[dblExemptionPercent]
 									,[intSalesTaxAccountId]
 									,[dblTax]

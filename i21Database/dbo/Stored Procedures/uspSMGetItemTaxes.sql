@@ -1,20 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGetItemTaxes]
-	 @ItemId					INT				= NULL
-	,@LocationId				INT
-	,@TransactionDate			DATETIME
-	,@TransactionType			NVARCHAR(20) -- Purchase/Sale
-	,@EntityId					INT				= NULL
-	,@TaxGroupId				INT				= NULL
-	,@BillShipToLocationId		INT				= NULL
-	,@IncludeExemptedCodes		BIT				= NULL
-	,@SiteId					INT				= NULL
-	,@FreightTermId				INT				= NULL
-	,@CardId					INT				= NULL
-	,@VehicleId					INT				= NULL
-	,@DisregardExemptionSetup	BIT				= 0
-	,@CFSiteId					INT				= NULL
-	,@IsDeliver					BIT				= NULL
-	,@UOMId						INT				= NULL
+	 @ItemId						INT				= NULL
+	,@LocationId					INT
+	,@TransactionDate				DATETIME
+	,@TransactionType				NVARCHAR(20) -- Purchase/Sale
+	,@EntityId						INT				= NULL
+	,@TaxGroupId					INT				= NULL
+	,@BillShipToLocationId			INT				= NULL
+	,@IncludeExemptedCodes			BIT				= NULL
+	,@SiteId						INT				= NULL
+	,@FreightTermId					INT				= NULL
+	,@CardId						INT				= NULL
+	,@VehicleId						INT				= NULL
+	,@DisregardExemptionSetup		BIT				= 0
+	,@CFSiteId						INT				= NULL
+	,@IsDeliver						BIT				= NULL
+	,@UOMId							INT				= NULL
+	,@CurrencyId					INT				= NULL
+	,@CurrencyExchangeRateTypeId	INT				= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 AS
 
 BEGIN
@@ -40,6 +43,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblTax]
 				,[dblAdjustedTax]
 				,[intTaxAccountId]				AS [intSalesTaxAccountId]
@@ -52,7 +56,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL, @CardId, @VehicleId, @DisregardExemptionSetup, NULL, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL, @CardId, @VehicleId, @DisregardExemptionSetup, NULL, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 					
 			RETURN 1
 		END
@@ -68,6 +72,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblBaseRate]
 				,[dblTax]
 				,[dblAdjustedTax]
 				,[intTaxAccountId]
@@ -80,7 +85,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, @UOMId)
+				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 					
 			RETURN 1
 		END

@@ -912,39 +912,37 @@ END CATCH
 DECLARE @AddDetailError NVARCHAR(MAX) = NULL
 BEGIN TRY
 	DELETE FROM tblARInvoiceDetailTax
-	WHERE 
-		EXISTS(	SELECT
-					NULL
-				FROM
-					tblARInvoiceDetail ARID 
-				INNER JOIN @InvoiceEntries ITG 
-					ON ARID.[intInvoiceId] = ITG.[intInvoiceId] 
-				INNER JOIN @IntegrationLog IL 
-					ON ITG.[intInvoiceId] = IL.[intInvoiceId] 
-				WHERE
-					ARID.[intInvoiceId] = IL.[intInvoiceId]
-					AND IL.[ysnSuccess] = 1
-					AND ISNULL(ITG.[ysnResetDetails], 0) = 1
-			)
-		OR
-		EXISTS(
-			SELECT 
-				ITG.intInvoiceId, ITG.strType, ITG.strTransactionType, CFT.intTransactionId, ARID.strDocumentNumber, ARIDT.intInvoiceDetailTaxId 							
-			FROM
-				tblARInvoiceDetail ARID 
-			INNER JOIN @InvoiceEntries ITG 
-				ON ARID.[intInvoiceId] = ITG.[intInvoiceId] 
-			INNER JOIN @IntegrationLog IL 
-				ON ITG.[intInvoiceId] = IL.[intInvoiceId] 			
-			LEFT JOIN 
-				(SELECT intInvoiceDetailId, intInvoiceDetailTaxId FROM tblARInvoiceDetailTax) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
-			INNER JOIN 
-				(SELECT intTransactionId, strTransactionId FROM tblCFTransaction ) CFT ON ARID.strDocumentNumber = CFT.strTransactionId
-			LEFT JOIN 
-				(SELECT intTransactionId FROM tblCFTransactionTax) CFTT ON CFT.intTransactionId = CFTT.intTransactionId
-			WHERE 
-				ITG.strType = 'CF Tran'	
-			)
+	WHERE intInvoiceDetailId IN (
+		SELECT ARID.intInvoiceDetailId
+		FROM
+			tblARInvoiceDetail ARID 
+		INNER JOIN @InvoiceEntries ITG 
+			ON ARID.[intInvoiceId] = ITG.[intInvoiceId] 
+		INNER JOIN @IntegrationLog IL 
+			ON ITG.[intInvoiceId] = IL.[intInvoiceId] 
+		WHERE
+			ARID.[intInvoiceId] = IL.[intInvoiceId]
+			AND IL.[ysnSuccess] = 1
+			AND ISNULL(ITG.[ysnResetDetails], 0) = 1
+			
+		UNION ALL
+		
+		SELECT ARID.intInvoiceDetailId 							
+		FROM
+			tblARInvoiceDetail ARID 
+		INNER JOIN @InvoiceEntries ITG 
+			ON ARID.[intInvoiceId] = ITG.[intInvoiceId] 
+		INNER JOIN @IntegrationLog IL 
+			ON ITG.[intInvoiceId] = IL.[intInvoiceId] 			
+		LEFT JOIN 
+			(SELECT intInvoiceDetailId, intInvoiceDetailTaxId FROM tblARInvoiceDetailTax) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
+		INNER JOIN 
+			(SELECT intTransactionId, strTransactionId FROM tblCFTransaction ) CFT ON ARID.strDocumentNumber = CFT.strTransactionId
+		LEFT JOIN 
+			(SELECT intTransactionId FROM tblCFTransactionTax) CFTT ON CFT.intTransactionId = CFTT.intTransactionId
+		WHERE 
+			ITG.strType = 'CF Tran'	
+	)
 
 	DELETE FROM tblARInvoiceDetail 
 	WHERE 

@@ -10,39 +10,40 @@ BEGIN TRY
 	
 	 
 
-	DECLARE @strCompanyName			NVARCHAR(500),
-			@strAddress				NVARCHAR(500),
-			@strCounty				NVARCHAR(500),
-			@strCity				NVARCHAR(500),
-			@strState				NVARCHAR(500),
-			@strZip					NVARCHAR(500),
-			@strCountry				NVARCHAR(500),
-			@intContractHeaderId	INT,
-			@xmlDocumentId			INT,
-			@strContractDocuments	NVARCHAR(MAX),
-			@strContractConditions	NVARCHAR(MAX),
-			@intScreenId			INT,
-			@intTransactionId       INT,
-			@strApprovalText		NVARCHAR(MAX),
-			@FirstApprovalId		INT,
-			@SecondApprovalId       INT,
-			@FirstApprovalSign      VARBINARY(MAX),
-			@SecondApprovalSign     VARBINARY(MAX),
-			@IsFullApproved         BIT = 0,
-			@ysnFairtrade			BIT = 0,
-			@ysnFeedOnApproval		BIT = 0,
-			@strCommodityCode		NVARCHAR(MAX),
-			@dtmApproved			DATETIME,
-			@ysnPrinted				BIT,
+	DECLARE @strCompanyName				NVARCHAR(500),
+			@strAddress					NVARCHAR(500),
+			@strCounty					NVARCHAR(500),
+			@strCity					NVARCHAR(500),
+			@strState					NVARCHAR(500),
+			@strZip						NVARCHAR(500),
+			@strCountry					NVARCHAR(500),
+			@intContractHeaderId		INT,
+			@xmlDocumentId				INT,
+			@strContractDocuments		NVARCHAR(MAX),
+			@strContractConditions		NVARCHAR(MAX),
+			@intScreenId				INT,
+			@intTransactionId			INT,
+			@strApprovalText			NVARCHAR(MAX),
+			@FirstApprovalId			INT,
+			@SecondApprovalId			INT,
+			@FirstApprovalSign			VARBINARY(MAX),
+			@SecondApprovalSign			VARBINARY(MAX),
+			@IsFullApproved				BIT = 0,
+			@ysnFairtrade				BIT = 0,
+			@ysnFeedOnApproval			BIT = 0,
+			@strCommodityCode			NVARCHAR(MAX),
+			@dtmApproved				DATETIME,
+			@ysnPrinted					BIT,
 
-			@intLastApprovedContractId INT,
-			@intPrevApprovedContractId INT,
-			@strAmendedColumns		NVARCHAR(MAX),
-			@intContractDetailId	INT,
-			@TotalAtlasLots			INT,
-			@strSequenceHistoryId	     NVARCHAR(MAX),
-			@strDetailAmendedColumns	 NVARCHAR(MAX),
-			@intApproverGroupId		INT
+			@intLastApprovedContractId	INT,
+			@intPrevApprovedContractId	INT,
+			@strAmendedColumns			NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@TotalAtlasLots				INT,
+			@TotalLots					INT,
+			@strSequenceHistoryId	    NVARCHAR(MAX),
+			@strDetailAmendedColumns	NVARCHAR(MAX),
+			@intApproverGroupId			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -229,15 +230,17 @@ BEGIN TRY
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
 	
-	SELECT @TotalAtlasLots= CASE 
-								 WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize) < 1 THEN 1
-								 ELSE ROUND(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize),0)
-							END
-							FROM tblCTContractDetail CD
-							JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
-							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
-							WHERE CD.intContractHeaderId = @intContractHeaderId
-	 
+	SELECT	@TotalAtlasLots	=	CASE 
+									WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize) < 1 THEN 1
+									ELSE ROUND(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize),0)
+								END,
+			@TotalLots		=	SUM(CD.dblNoOfLots)
+
+	FROM	tblCTContractDetail CD
+	JOIN	tblICItemUOM		UOM ON	UOM.intItemUOMId		=	CD.intItemUOMId
+	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
+	WHERE	CD.intContractHeaderId = @intContractHeaderId
+		
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' Contract' 
@@ -337,6 +340,7 @@ BEGIN TRY
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
 			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalAtlasLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 													  ELSE 
 													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'

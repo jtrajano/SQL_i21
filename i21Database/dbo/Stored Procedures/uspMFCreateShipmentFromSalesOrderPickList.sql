@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateShipmentFromSalesOrderPickList]
-	@intSalesOrderId int,
-	@intUserId int,
-	@intInventoryShipmentId int=0 OUT
+﻿CREATE PROCEDURE [dbo].[uspMFCreateShipmentFromSalesOrderPickList] @intSalesOrderId INT
+	,@intUserId INT
+	,@intInventoryShipmentId INT = 0 OUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -10,121 +9,267 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @InitTranCount AS INT
-DECLARE @Savepoint as VARCHAR(MAX)
+DECLARE @Savepoint AS VARCHAR(MAX)
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('uspMFCreateShipmentFromSalesOrderPickList' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-Declare @ErrMsg nvarchar(max)
-Declare @intMinPickListDetail INT
-Declare @intPickListId INT
-Declare @intLotId INT
-Declare @dblShipQty NUMERIC(38,20)
-Declare @intInventoryShipmentItemId INT
-Declare @intItemId INT
-Declare @intMinSalesOrderItem INT
-Declare @dblReqQty NUMERIC(38,20)
-Declare @strItemNo nvarchar(50)
-Declare @dblSelQty NUMERIC(38,20)
-Declare @strUOM nvarchar(50)
-Declare @intItemUOMId int
-
+DECLARE @ErrMsg NVARCHAR(max)
+DECLARE @intMinPickListDetail INT
+DECLARE @intPickListId INT
+DECLARE @intLotId INT
+DECLARE @dblShipQty NUMERIC(38, 20)
+DECLARE @intInventoryShipmentItemId INT
+DECLARE @intItemId INT
+DECLARE @intMinSalesOrderItem INT
+DECLARE @dblReqQty NUMERIC(38, 20)
+DECLARE @strItemNo NVARCHAR(50)
+DECLARE @dblSelQty NUMERIC(38, 20)
+DECLARE @strUOM NVARCHAR(50)
+DECLARE @intItemUOMId INT
+	,@dblWeightPerQty NUMERIC(38, 20)
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,intItemId INT
-	,dblQty NUMERIC(38,20)
-	,intItemUOMId int
-	,strLotTracking nvarchar(50)
+	,dblQty NUMERIC(38, 20)
+	,intItemUOMId INT
+	,strLotTracking NVARCHAR(50)
 	)
+DECLARE @Items ShipmentStagingTable
+	,@Charges ShipmentChargeStagingTable
+	,@Lots ShipmentItemLotStagingTable
+DECLARE @lotsOnly ShipmentItemLotsOnlyStagingTable
 
-	Select TOP 1 @intPickListId=intPickListId From tblMFPickList Where intSalesOrderId=@intSalesOrderId
-	
-	If ISNULL(@intPickListId,0)=0
-		RaisError('Please save the pick list before shipping.',16,1)
+SELECT TOP 1 @intPickListId = intPickListId
+FROM tblMFPickList
+WHERE intSalesOrderId = @intSalesOrderId
 
-	If Exists (Select 1 From tblICInventoryShipment sh Join tblICInventoryShipmentItem sd on sh.intInventoryShipmentId=sd.intInventoryShipmentId 
-		Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
-		BEGIN
-			RaisError('Shipment is already created for the sales order.',16,1)
-			RETURN;
-		END
+IF ISNULL(@intPickListId, 0) = 0
+	RAISERROR (
+			'Please save the pick list before shipping.'
+			,16
+			,1
+			)
 
-	If (Select ISNULL(intFreightTermId,0) From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=0
-		RaisError('Please enter freight term in Sales Order before shipping.',16,1)
+IF EXISTS (
+		SELECT 1
+		FROM tblICInventoryShipment sh
+		JOIN tblICInventoryShipmentItem sd ON sh.intInventoryShipmentId = sd.intInventoryShipmentId
+		WHERE sh.intOrderType = 2
+			AND sd.intOrderId = @intSalesOrderId
+		)
+BEGIN
+	RAISERROR (
+			'Shipment is already created for the sales order.'
+			,16
+			,1
+			)
 
-Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId)
-Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
-Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId,sd.intItemUOMId
+	RETURN;
+END
 
-Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem
+IF (
+		SELECT ISNULL(intFreightTermId, 0)
+		FROM tblSOSalesOrder
+		WHERE intSalesOrderId = @intSalesOrderId
+		) = 0
+	RAISERROR (
+			'Please enter freight term in Sales Order before shipping.'
+			,16
+			,1
+			)
 
-While @intMinSalesOrderItem is not null
-Begin
-	Select @intItemId=intItemId,@dblReqQty=dblQty,@intItemUOMId=intItemUOMId From @tblInputItem Where intRowNo=@intMinSalesOrderItem
-	Select @strItemNo=strItemNo From tblICItem Where intItemId=@intItemId
+INSERT INTO @tblInputItem (
+	intItemId
+	,dblQty
+	,intItemUOMId
+	)
+SELECT sd.intItemId
+	,SUM(sd.dblQtyOrdered)
+	,sd.intItemUOMId
+FROM tblSOSalesOrderDetail sd
+JOIN tblICItem i ON sd.intItemId = i.intItemId
+WHERE intSalesOrderId = @intSalesOrderId
+	AND i.strType NOT IN (
+		'Comment'
+		,'Other Charge'
+		)
+GROUP BY sd.intItemId
+	,sd.intItemUOMId
 
-	If NOT Exists(Select 1 From tblMFPickListDetail Where intPickListId=@intPickListId AND intItemId=@intItemId)
-	Begin
-		Set @ErrMsg='Item ' + @strItemNo + ' is not selected in the pick list.'
-		RaisError(@ErrMsg,16,1)
-	End
+SELECT @intMinSalesOrderItem = MIN(intRowNo)
+FROM @tblInputItem
 
-	Select @dblSelQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId AND intItemId=@intItemId
-	Select @strUOM=um.strUnitMeasure From tblICUnitMeasure um Join tblICItemUOM iu on um.intUnitMeasureId=iu.intUnitMeasureId 
-	Where iu.intItemUOMId = @intItemUOMId
+WHILE @intMinSalesOrderItem IS NOT NULL
+BEGIN
+	SELECT @intItemId = intItemId
+		,@dblReqQty = dblQty
+		,@intItemUOMId = intItemUOMId
+	FROM @tblInputItem
+	WHERE intRowNo = @intMinSalesOrderItem
 
-	If @dblSelQty < @dblReqQty
-	Begin
-		Set @ErrMsg='Item ' + @strItemNo + ' is required ' + dbo.fnRemoveTrailingZeroes(@dblReqQty) + ' ' + @strUOM + ' but selected ' + dbo.fnRemoveTrailingZeroes(@dblSelQty) + ' ' + @strUOM + '.'
-		RaisError(@ErrMsg,16,1)
-	End
+	SELECT @strItemNo = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @intItemId
 
-	Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem Where intRowNo>@intMinSalesOrderItem
-End
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblMFPickListDetail
+			WHERE intPickListId = @intPickListId
+				AND intItemId = @intItemId
+			)
+	BEGIN
+		SET @ErrMsg = 'Item ' + @strItemNo + ' is not selected in the pick list.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
+
+	SELECT @dblSelQty = SUM(dblQuantity)
+	FROM tblMFPickListDetail
+	WHERE intPickListId = @intPickListId
+		AND intItemId = @intItemId
+
+	SELECT @strUOM = um.strUnitMeasure
+	FROM tblICUnitMeasure um
+	JOIN tblICItemUOM iu ON um.intUnitMeasureId = iu.intUnitMeasureId
+	WHERE iu.intItemUOMId = @intItemUOMId
+
+	IF @dblSelQty < @dblReqQty
+	BEGIN
+		SET @ErrMsg = 'Item ' + @strItemNo + ' is required ' + dbo.fnRemoveTrailingZeroes(@dblReqQty) + ' ' + @strUOM + ' but selected ' + dbo.fnRemoveTrailingZeroes(@dblSelQty) + ' ' + @strUOM + '.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
+
+	SELECT @intMinSalesOrderItem = MIN(intRowNo)
+	FROM @tblInputItem
+	WHERE intRowNo > @intMinSalesOrderItem
+END
 
 BEGIN TRY
-BEGIN TRANSACTION
-	--Create Shipment Header and Line	
-	Exec uspSOProcessToItemShipment @intSalesOrderId,@intUserId,0,@intInventoryShipmentId OUT
+	BEGIN TRANSACTION
 
-	Select @intMinPickListDetail=MIN(intPickListDetailId) From tblMFPickListDetail Where intPickListId=@intPickListId AND ISNULL(intLotId,0)>0
+	--Create Shipment Header and Line	
+	EXEC uspSOProcessToItemShipment @intSalesOrderId
+		,@intUserId
+		,0
+		,@intInventoryShipmentId OUT
+
+	SELECT @intMinPickListDetail = MIN(intPickListDetailId)
+	FROM tblMFPickListDetail
+	WHERE intPickListId = @intPickListId
+		AND ISNULL(intLotId, 0) > 0
 
 	--Add Shipment Lot
-	While @intMinPickListDetail is not null
-	Begin
-		Select @intLotId=intLotId,@dblShipQty=dblPickQuantity,@intItemId=intItemId From tblMFPickListDetail Where intPickListDetailId=@intMinPickListDetail
+	WHILE @intMinPickListDetail IS NOT NULL
+	BEGIN
+		SELECT @dblWeightPerQty = NULL
+			,@intInventoryShipmentItemId = NULL
 
-		Select TOP 1 @intInventoryShipmentItemId=intInventoryShipmentItemId From tblICInventoryShipmentItem Where intInventoryShipmentId=@intInventoryShipmentId AND intItemId=@intItemId
+		SELECT @intLotId = intLotId
+			,@dblShipQty = dblPickQuantity
+			,@intItemId = intItemId
+		FROM tblMFPickListDetail
+		WHERE intPickListDetailId = @intMinPickListDetail
 
-		INSERT INTO tblICInventoryShipmentItemLot(intInventoryShipmentItemId, intLotId, dblQuantityShipped, dblGrossWeight, dblTareWeight)
-		VALUES (@intInventoryShipmentItemId, @intLotId, @dblShipQty, 0, 0)
+		SELECT @dblWeightPerQty = dblWeightPerQty
+		FROM tblICLot
+		WHERE intLotId = @intLotId
 
-		Select @intMinPickListDetail=MIN(intPickListDetailId) From tblMFPickListDetail Where intPickListId=@intPickListId AND ISNULL(intLotId,0)>0 
-		AND intPickListDetailId>@intMinPickListDetail
-	End
+		SELECT TOP 1 @intInventoryShipmentItemId = intInventoryShipmentItemId
+		FROM tblICInventoryShipmentItem
+		WHERE intInventoryShipmentId = @intInventoryShipmentId
+			AND intItemId = @intItemId
+
+		--INSERT INTO tblICInventoryShipmentItemLot (
+		--	intInventoryShipmentItemId
+		--	,intLotId
+		--	,dblQuantityShipped
+		--	,dblGrossWeight
+		--	,dblTareWeight
+		--	)
+		--VALUES (
+		--	@intInventoryShipmentItemId
+		--	,@intLotId
+		--	,@dblShipQty
+		--	,0
+		--	,0
+		--	)
+		DELETE
+		FROM @lotsOnly
+
+		INSERT INTO @lotsOnly (
+			intInventoryShipmentId
+			,intInventoryShipmentItemId
+			-- Lot Details 
+			,intLotId
+			,dblQuantityShipped
+			,dblGrossWeight
+			,dblTareWeight
+			,dblWeightPerQty
+			,strWarehouseCargoNumber
+			)
+		SELECT intInventoryShipmentId = @intInventoryShipmentId
+			,intInventoryShipmentItemId = @intInventoryShipmentItemId
+			-- Lot Details 
+			,intLotId = @intLotId
+			,dblQuantityShipped = @dblShipQty
+			,dblGrossWeight = @dblShipQty * @dblWeightPerQty
+			,dblTareWeight = 0
+			,dblWeightPerQty = @dblWeightPerQty
+			,strWarehouseCargoNumber = ''
+
+		EXEC dbo.uspICAddItemShipment @Items = @Items
+			,@Charges = @Charges
+			,@Lots = @Lots
+			,@LotsOnly = @lotsOnly
+			,@intUserId = 1
+
+		SELECT @intMinPickListDetail = MIN(intPickListDetailId)
+		FROM tblMFPickListDetail
+		WHERE intPickListId = @intPickListId
+			AND ISNULL(intLotId, 0) > 0
+			AND intPickListDetailId > @intMinPickListDetail
+	END
 
 	--Remove reservation against pick list
-	UPDATE	tblICStockReservation SET ysnPosted = 1 WHERE intTransactionId = @intPickListId AND intInventoryTransactionType = 34
+	UPDATE tblICStockReservation
+	SET ysnPosted = 1
+	WHERE intTransactionId = @intPickListId
+		AND intInventoryTransactionType = 34
 
 	--Reserve against shipment
 	EXEC uspICReserveStockForInventoryShipment @intInventoryShipmentId
-COMMIT TRANSACTION
 
-End Try
-BEGIN CATCH  
- --IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
- --SET @ErrMsg = ERROR_MESSAGE()  
- --RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
-IF @InitTranCount = 0
-	IF (XACT_STATE()) <> 0
-		ROLLBACK TRANSACTION 
-	ELSE
-	IF (XACT_STATE()) <> 0
-		ROLLBACK TRANSACTION @Savepoint
-	ELSE
-		ROLLBACK TRANSACTION
+	COMMIT TRANSACTION
+END TRY
 
-	SET @ErrMsg = ERROR_MESSAGE()  
-	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
-  
-END CATCH  
+BEGIN CATCH
+	--IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
+	--SET @ErrMsg = ERROR_MESSAGE()  
+	--RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
+	IF @InitTranCount = 0
+		IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION
+		ELSE IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION @Savepoint
+		ELSE
+			ROLLBACK TRANSACTION
+
+	SET @ErrMsg = ERROR_MESSAGE()
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
+END CATCH

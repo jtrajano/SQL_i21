@@ -79,8 +79,9 @@ BEGIN
 		----------------------------------------------------------------------------------------------
 		-- Bagged vs Weight. 
 		----------------------------------------------------------------------------------------------
-		-- 1. If Costing Lot table is using a weight UOM, then convert the UOM and Qty to weight. 
-		-- 2. Otherwise, keep the same Qty and UOM. 
+		-- 1. If the "bagged" qty is a whole number, do not convert it to the weight uom. 
+		-- 2. If Lot Cost bucket is using the weight UOM, then convert the UOM and Qty to weight. 
+		-- 3. Otherwise, keep the same Qty and UOM. 
 		BEGIN 
 			SET @dblReduceQty = ISNULL(@dblQty, 0) 
 
@@ -95,7 +96,13 @@ BEGIN
 						AND Lot.intWeightUOMId IS NOT NULL 
 						AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 						AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0 
-			)			 
+						AND (
+							Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intItemUOMId = @intItemUOMId
+							AND ROUND((@dblQty % 1), 6) <> 0 -- Check if bagged qty is a whole number.
+						)
+			)
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
 				-- Compute the Qty if it has weights. 
@@ -234,10 +241,10 @@ BEGIN
 	ELSE IF (ISNULL(@dblQty, 0) > 0)
 	BEGIN 
 
-		----------------------------------------------------------------------------------------------
+		-------------------------------------------------------------------------------------------------
 		-- Bagged vs Weight. 
-		----------------------------------------------------------------------------------------------
-		-- 1. If Costing Lot table is using a weight UOM, then convert the UOM and Qty to weight. 
+		-------------------------------------------------------------------------------------------------
+		-- 1. If Costing Lot table is using a weight UOM, then convert the Qty, UOM, and Cost weight UOM. 
 		-- 2. Otherwise, keep the same Qty, Cost, and UOM Id. 
 		BEGIN 
 			SET @dblAddQty = ISNULL(@dblQty, 0) 
@@ -251,30 +258,21 @@ BEGIN
 						AND Lot.intWeightUOMId IS NOT NULL 
 			)			 
 			BEGIN 
-				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
-				-- and also compute the Qty if it has weights. 
+				-- Retrieve the correct Lot's UOM
+				-- Compute the new Add Qty
+				-- and Recompute the Cost. Convert it to the Lot's Weight UOM. 
 				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
-						,@intItemUOMId = Lot.intWeightUOMId 				
+						,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblCost)
+						,@intItemUOMId = Lot.intWeightUOMId
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 
 				SET @dblAddQty = ISNULL(@dblAddQty, 0)
 
-				---- Get the unit cost. 
-				--SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
-
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
-
-				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)
-				FROM	tblICItemUOM StockUOM
-				WHERE	StockUOM.intItemId = @intItemId 
-						AND StockUOM.ysnStockUnit = 1
-
-				---- Adjust the cost to the new UOM
-				--SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
 			END 
 		END 
 						

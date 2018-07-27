@@ -130,7 +130,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,ysnIncludeExemptedCodes
 		,intFreightTermId
 		,ysnExcludeCheckOff
-		,intItemUOMId) Taxes
+		,intItemUOMId
+		,NULL
+		,NULL
+		,NULL) Taxes
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A

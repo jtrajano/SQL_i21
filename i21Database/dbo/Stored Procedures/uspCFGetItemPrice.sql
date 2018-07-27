@@ -1531,7 +1531,7 @@ DECLARE @cfPriceProfile TABLE
 END
 
 
-IF(@CFPricingOut != 'Price Profile' AND ISNULL(@intLinkedProfileId,0) > 0)
+IF(@CFPricingOut != 'Price Profile' AND ISNULL(@intLinkedProfileId,0) > 0 AND ISNULL(@ysnGlobalProfile,0) = 0)
 BEGIN
 	SET @ysnGlobalProfile = 1
 	GOTO GLOBALPROFILE

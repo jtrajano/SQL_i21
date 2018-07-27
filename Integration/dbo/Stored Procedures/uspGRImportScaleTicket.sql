@@ -19,6 +19,13 @@ BEGIN
 			SELECT @Total = 0
 		ELSE
 			SELECT @Total = COUNT(1) FROM gasctmst 
+			WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
+			AND   ISNULL(gasct_open_close_ind,'') <> 'C'
+			AND   gasct_tic_type IN('I','O')
+			
+			SELECT @Total = @Total + COUNT(1) FROM gastlmst GT 
+			WHERE GT.gastl_pd_yn <> 'Y' 
+			AND GT.gastl_rec_type IN('C','M','1','2','3','4','5','6','7','8') 
 				
 		RETURN @Total
 
@@ -32,27 +39,32 @@ BEGIN
 	DECLARE @CustomerId AS Id
 
 	INSERT INTO @CustomerId
-	SELECT DISTINCT CUS.intEntityId
-	FROM gasctmst
-	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gasct_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-	WHERE gasct_in_out_ind = 'I'
-		AND NOT EXISTS (
-			SELECT *
-			FROM tblAPVendor
-			WHERE strVendorId = CUS.strCustomerNumber
-			)
+	
+	SELECT DISTINCT intEntityId 
+	FROM
+	(
+		SELECT DISTINCT CUS.intEntityId
+		FROM gasctmst
+		JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gasct_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE gasct_in_out_ind = 'I'
+			AND NOT EXISTS (SELECT * FROM tblAPVendor WHERE strVendorId = CUS.strCustomerNumber)
 
-	UNION ALL
+		UNION ALL
 
-	SELECT DISTINCT CUS.intEntityId
-	FROM gastlmst
-	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-	WHERE gastl_pur_sls_ind = 'P'
-		AND NOT EXISTS (
-			SELECT *
-			FROM tblAPVendor
-			WHERE strVendorId = CUS.strCustomerNumber
-			)
+		SELECT DISTINCT CUS.intEntityId
+		FROM gastlmst
+		JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE gastl_pur_sls_ind = 'P'
+			AND NOT EXISTS (SELECT * FROM tblAPVendor WHERE strVendorId = CUS.strCustomerNumber)
+
+		UNION ALL
+
+		SELECT DISTINCT CUS.intEntityId
+		FROM gastrmst
+		JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastr_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE gastr_pur_sls_ind = 'P'
+			AND NOT EXISTS (SELECT * FROM tblAPVendor WHERE strVendorId = CUS.strCustomerNumber)
+    )t
 
 	EXEC uspEMConvertCustomerToVendor @CustomerId
 		,@UserId
@@ -136,7 +148,6 @@ BEGIN
 	,strFarmNumber
 	,strFieldNumber
 	,strDiscountComment
-	,strCommodityCode
 	,intCommodityId
 	,intDiscountId
 	,intContractId
@@ -234,7 +245,6 @@ BEGIN
 	,strFarmNumber			   = NULL
 	,strFieldNumber			   = NULL
 	,strDiscountComment		   = LTRIM(RTRIM(gasct_tic_comment))
-	,strCommodityCode		   = LTRIM(RTRIM(gasct_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
 	,intContractId			   = [Contract].intContractDetailId
@@ -284,9 +294,9 @@ BEGIN
 					  ,CD.intContractSeq
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId =CH.intContractHeaderId
-			  ) [Contract] ON [Contract].strContractNumber = LTRIM(RTRIM(GT.gasct_cnt_no)) collate Latin1_General_CI_AS 
+			  ) [Contract] ON LEFT([Contract].strContractNumber,8) = LTRIM(RTRIM(GT.gasct_cnt_no)) collate Latin1_General_CI_AS 
 			  			  AND [Contract].intContractSeq	 = gasct_cnt_seq 
-			  			  AND [Contract].intEntityId		 = t.intEntityId
+			  			  AND [Contract].intEntityId	 = t.intEntityId
 			  			  AND [Contract].intCommodityId	 = CO.intCommodityId
 			  			  AND [Contract].intContractTypeId = CASE WHEN GT.gasct_tic_type = 'I' THEN 1 ELSE 2 END
 

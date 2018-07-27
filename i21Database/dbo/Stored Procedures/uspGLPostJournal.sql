@@ -153,6 +153,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -201,6 +202,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
@@ -251,6 +253,7 @@ ELSE
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -281,6 +284,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			

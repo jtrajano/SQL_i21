@@ -194,13 +194,13 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Return Payment is not allowed.'
+        ,[strError]                 = 'Return Payment is not allowed for non-ACH Payment Method.'
 	FROM
 		@Payments P
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NULL
-        AND P.[strPaymentMethod] = 'ACH'
+        AND P.[strPaymentMethod] <> 'ACH'
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 
@@ -363,15 +363,17 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.'
+        ,[strError]                 = CASE WHEN ISNULL(P.intCurrencyExchangeRateTypeId, 0) = 0 THEN 'Base amounts are not equal. This needs data fix.' ELSE 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.' END
 	FROM
 		@Payments P
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblTransactionInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseTransactionDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]), @ZeroDecimal) <> @ZeroDecimal
         AND ISNULL(P.[intGainLossAccount],0) = 0
+		AND P.[strTransactionType] <> 'Claim'
+		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
+        AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
 
     UNION
 
@@ -775,28 +777,28 @@ BEGIN
 
     UNION
 
-    --Payment with applied Prepayment
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'You cannot unpost payment with applied prepaids.'
-	FROM
-		@Payments P
-    INNER JOIN (SELECT [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [intInvoiceId] FROM tblARPrepaidAndCredit) ARPC
-        ON  P.[intInvoiceId] = ARPC.[intPrepaymentId]
-        AND ARPC.[ysnApplied] = 1
-        AND ARPC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
-    INNER JOIN (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
-        ON  ARPC.[intInvoiceId] = ARI.[intInvoiceId]
-        AND ARI.[ysnPosted] = 1
-    WHERE
-            P.[ysnPost] = 0
-        AND P.[intTransactionDetailId] IS NULL
+    -- --Payment with applied Prepayment
+	-- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'You cannot unpost payment with applied prepaids.'
+	-- FROM
+	-- 	@Payments P
+    -- INNER JOIN (SELECT [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [intInvoiceId] FROM tblARPrepaidAndCredit) ARPC
+    --     ON  P.[intInvoiceId] = ARPC.[intPrepaymentId]
+    --     AND ARPC.[ysnApplied] = 1
+    --     AND ARPC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+    -- INNER JOIN (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
+    --     ON  ARPC.[intInvoiceId] = ARI.[intInvoiceId]
+    --     AND ARI.[ysnPosted] = 1
+    -- WHERE
+    --         P.[ysnPost] = 0
+    --     AND P.[intTransactionDetailId] IS NULL
 
-    UNION
+    -- UNION
 
     --Payment with associated Overpayment
 	SELECT
@@ -844,6 +846,105 @@ BEGIN
             P.[ysnPost] = 0
         AND P.[intTransactionDetailId] IS NULL
     OPTION(recompile)
+
+
+        DECLARE @InvoiceIdsForChecking TABLE (
+			intInvoiceId int PRIMARY KEY,
+			UNIQUE (intInvoiceId)
+		);
+
+		INSERT INTO @InvoiceIdsForChecking(intInvoiceId)
+		SELECT DISTINCT
+			PD.intInvoiceId 
+		FROM
+			tblARPaymentDetail PD 
+		INNER JOIN
+			@Payments P
+				ON PD.intPaymentId = P.intTransactionId
+		WHERE
+			PD.dblPayment <> 0
+		GROUP BY
+			PD.intInvoiceId
+		HAVING
+			COUNT(PD.intInvoiceId) > 1
+				
+		WHILE(EXISTS(SELECT TOP 1 NULL FROM @InvoiceIdsForChecking))
+		BEGIN
+			DECLARE @InvID INT			
+					,@InvoicePayment NUMERIC(18,6) = 0
+					
+			SELECT TOP 1 @InvID = intInvoiceId FROM @InvoiceIdsForChecking
+				
+			DECLARE @InvoicePaymentDetail TABLE(
+				intPaymentId INT,
+				intInvoiceId INT,
+				dblInvoiceTotal NUMERIC(18,6),
+				dblAmountDue NUMERIC(18,6),
+				dblPayment NUMERIC(18,6),
+				intPaymentDetailId INT,
+				strBatchId nvarchar(100),
+				strInvoiceNumber nvarchar(100)
+			);
+				
+			INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, intPaymentDetailId, strBatchId, strInvoiceNumber)
+			SELECT distinct
+                A.intPaymentId
+				,C.intInvoiceId
+				,C.dblInvoiceTotal
+				,C.dblAmountDue
+				,B.dblPayment
+				,B.intPaymentDetailId
+				,P.strBatchId
+				,C.strInvoiceNumber
+			FROM
+				tblARPayment A
+			INNER JOIN
+				tblARPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+			INNER JOIN
+				tblARInvoice C
+					ON B.intInvoiceId = C.intInvoiceId
+			INNER JOIN
+				@Payments P
+					ON A.intPaymentId = P.intTransactionId
+			WHERE
+				C.intInvoiceId = @InvID
+			
+					
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
+			BEGIN
+				DECLARE @PayID INT
+						,@AmountDue NUMERIC(18,6) = 0
+				SELECT TOP 1 @PayID = intPaymentId, @AmountDue = dblAmountDue, @InvoicePayment = @InvoicePayment + dblPayment FROM @InvoicePaymentDetail ORDER BY intPaymentId
+				
+				IF @AmountDue < @InvoicePayment
+				BEGIN
+                        INSERT INTO @returntable
+                        ([intTransactionId]
+                        ,[strTransactionId]
+                        ,[strTransactionType]
+                        ,[intTransactionDetailId]
+                        ,[strBatchId]
+                        ,[strError])
+						SELECT   
+                        [intTransactionId]         = P.intPaymentId
+                        ,[strTransactionId]         = A.strRecordNumber
+                        ,[strTransactionType]       = @TransType
+                        ,[intTransactionDetailId]   = P.intPaymentDetailId
+                        ,[strBatchId]               = P.[strBatchId]                         
+                        ,[strError]                 = 'Payment on ' + P.strInvoiceNumber COLLATE Latin1_General_CI_AS + ' is over the transaction''s amount due' 
+						FROM
+							tblARPayment A
+						INNER JOIN
+							@InvoicePaymentDetail P
+								ON A.intPaymentId = P.intPaymentId
+						WHERE A.intPaymentId = @PayID
+					END									
+					DELETE FROM @InvoicePaymentDetail WHERE intPaymentId = @PayID	
+				END
+				DELETE FROM @InvoiceIdsForChecking WHERE intInvoiceId = @InvID							
+		END
+
 
 	RETURN
 END

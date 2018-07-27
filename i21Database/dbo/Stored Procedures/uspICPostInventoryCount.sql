@@ -206,6 +206,7 @@ BEGIN
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryInventoryCount 
 			@intTransactionId
 			,@intEntityUserSecurityId
+			,@ysnPost
 
 	IF @intCreateUpdateLotError <> 0 GOTO With_Rollback_Exit;
 END
@@ -259,18 +260,70 @@ BEGIN
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
+			,dblForexRate
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId) --CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ItemLot.intItemUOMId END
+			,intItemUOMId			= 
+					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							Detail.intItemUOMId
+						ELSE 
+							ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+					END 
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END
-									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
-									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
-			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
-									--dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
-			,0
+			,dblQty					= 
+					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
+
+						WHEN Detail.intWeightUOMId IS NULL THEN 
+							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
+						ELSE 
+							ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0)
+					END
+			,dblUOMQty				= 
+					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							ItemUOM.dblUnitQty
+
+						WHEN Detail.intWeightUOMId IS NULL THEN 
+							ItemUOM.dblUnitQty
+						ELSE 
+							WeightUOM.dblUnitQty
+					END
+			,dblCost				= 
+					COALESCE
+						(
+						Detail.dblLastCost
+						, dbo.fnCalculateCostBetweenUOM(
+							StockUOM.intItemUOMId
+							,CASE 
+								-- If Physical count is a whole number, use it. 
+								WHEN Item.strLotTracking <> 'No' 
+									 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+									 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+								THEN 
+									Detail.intItemUOMId
+								ELSE 
+									ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+							END
+							,  ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)
+						)
+					)
+			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
 			,dblExchangeRate		= 1
@@ -281,10 +334,14 @@ BEGIN
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
-	FROM dbo.tblICInventoryCount Header
-		INNER JOIN dbo.tblICInventoryCountDetail Detail ON Header.intInventoryCountId = Detail.intInventoryCountId
+			,dblForexRate			= 1
+	FROM 
+		dbo.tblICInventoryCount Header
+		INNER JOIN dbo.tblICInventoryCountDetail Detail 
+			ON Header.intInventoryCountId = Detail.intInventoryCountId
 			AND Detail.ysnRecount = 0
-		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
+		INNER JOIN dbo.tblICItemLocation ItemLocation 
+			ON ItemLocation.intLocationId = Header.intLocationId 
 			AND ItemLocation.intItemId = Detail.intItemId
 		LEFT JOIN dbo.tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
@@ -314,6 +371,7 @@ BEGIN
 		)
 		AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
 		AND Detail.dblPhysicalCount IS NOT NULL
+
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------

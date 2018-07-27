@@ -2,16 +2,15 @@
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
-SET ANSI_PADDING ON
-SET ANSI_WARNINGS ON
-SET ARITHABORT ON
-SET CONCAT_NULL_YIELDS_NULL ON
-SET NUMERIC_ROUNDABORT OFF
-SET QUOTED_IDENTIFIER ON  
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dtmBillDate DATETIME = NULL;
+DECLARE @dtmPostDate DATETIME = NULL;
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @total NUMERIC(18,6), @amountDue NUMERIC(18,6), @amountPad NUMERIC(18,6);
@@ -66,21 +65,22 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmDatePaid';
 SELECT @dtmBillDate = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'; 
+SELECT @dtmPostDate = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmPostDate';
 IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate'
 
 IF @dtmBillDate IS NOT NULL
 BEGIN	
@@ -95,6 +95,20 @@ BEGIN
 END
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'
 
+
+IF @dtmPostDate IS NOT NULL
+BEGIN	
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,PostDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmPostDate, 110) + ''''
+	END
+    ELSE 
+	BEGIN 
+		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,PostDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmPostDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+	END  
+END
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'PostDate'
+DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table

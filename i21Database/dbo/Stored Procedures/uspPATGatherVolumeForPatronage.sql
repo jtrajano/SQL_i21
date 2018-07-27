@@ -88,56 +88,28 @@ SET ANSI_WARNINGS OFF
 	ELSE IF(@type = 2) -- SALE / DIRECT OUT
 	BEGIN
 		INSERT INTO @patronageVolumeStaging
-		SELECT		ARID.intInvoiceDetailId,
+		SELECT	ARID.intInvoiceDetailId,
 					ARI.intInvoiceId,
 					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, ARI.dtmDate), 0),
 					FY.intFiscalYearId,
 					intCustomerPatronId = ARI.intEntityCustomerId,
 					IC.intItemId,
-					IC.intPatronageCategoryId,
+					PC.intPatronageCategoryId,
 					PC.strPurchaseSale,
 					PC.strUnitAmount,
 					ARID.dblQtyShipped,
 					ARID.dblPrice,
 					UOM.dblUnitQty,
-					ysnDirectCategory = 0
-			FROM tblARInvoice ARI
-			INNER JOIN tblARInvoiceDetail ARID
-					ON ARID.intInvoiceId = ARI.intInvoiceId
-			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityId = ARI.intEntityCustomerId AND ARC.strStockStatus != ''
-			INNER JOIN tblICItem IC
-				ON IC.intItemId = ARID.intItemId
-			INNER JOIN tblICItemUOM UOM
-				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
-			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
-			CROSS APPLY tblGLFiscalYear FY
-			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-			AND IC.intPatronageCategoryId IS NOT NULL
-			UNION 
-			SELECT	ARID.intInvoiceDetailId,
-					ARI.intInvoiceId,
-					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, ARI.dtmDate), 0),
-					FY.intFiscalYearId,
-					intCustomerPatronId = ARI.intEntityCustomerId,
-					IC.intItemId,
-					IC.intPatronageCategoryDirectId,
-					PC.strPurchaseSale,
-					PC.strUnitAmount,
-					ARID.dblQtyShipped,
-					ARID.dblPrice,
-					UOM.dblUnitQty,
-					ysnDirectCategory = 1
+					ysnDirectCategory = CAST((CASE WHEN ISItem.intSourceId IS NOT NULL THEN 1 ELSE 0 END) AS BIT)
 			FROM tblARInvoice ARI
 			INNER JOIN tblARInvoiceDetail ARID
 				ON ARID.intInvoiceId = ARI.intInvoiceId
-			INNER JOIN tblICInventoryShipmentItem ISItem
-				ON ISItem.intInventoryShipmentItemId = ARID.intInventoryShipmentItemId
-			INNER JOIN tblICInventoryShipment InvShip
-				ON InvShip.intInventoryShipmentId = ISItem.intInventoryShipmentId AND InvShip.intSourceType = 1
-			INNER JOIN tblSCTicket SC
-				ON SC.intTicketId = ISItem.intSourceId AND SC.intTicketTypeId = 9
+			LEFT JOIN (
+				tblICInventoryShipmentItem ISItem INNER JOIN tblICInventoryShipment InvShip
+					ON InvShip.intInventoryShipmentId = ISItem.intInventoryShipmentId AND InvShip.intSourceType = 1
+				INNER JOIN tblSCTicket SC
+					ON SC.intTicketId = ISItem.intSourceId AND SC.intTicketTypeId = 9
+				) ON ISItem.intInventoryShipmentItemId = ARID.intInventoryShipmentItemId
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityId = ARI.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
@@ -145,21 +117,13 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
 			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_SALE
+				ON PC.intPatronageCategoryId = (CASE WHEN ISItem.intSourceId IS NOT NULL THEN IC.intPatronageCategoryDirectId ELSE IC.intPatronageCategoryId END) AND PC.strPurchaseSale = @TYPE_SALE
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-			AND IC.intPatronageCategoryDirectId IS NOT NULL
+			AND (IC.intPatronageCategoryDirectId IS NOT NULL OR IC.intPatronageCategoryId IS NOT NULL)
 	END
 	-----====== END - Build Patronage Staging Table ======-----
 	
-	-----====== BEGIN - Filter Customer Volume with Direct Sale ======-----
-	IF EXISTS(SELECT COUNT(*) FROM @patronageVolumeStaging GROUP BY intTransactionDetailId HAVING COUNT(intTransactionDetailId) > 1)
-	BEGIN
-		DELETE FROM @patronageVolumeStaging WHERE intTransactionDetailId IN 
-			(SELECT intTransactionDetailId FROM @patronageVolumeStaging GROUP BY intTransactionDetailId, strPurchaseSale HAVING COUNT(intTransactionDetailId) > 1) AND ysnDirectCategory <> 1;
-	END
-	-----====== END - Filter Customer Volume with Direct Sale ======-----
-	SELECT * FROM @patronageVolumeStaging;
 	-----====== BEGIN - Count Eligible Customer Volume ======-----
 	SELECT @totalRecords = COUNT(*) FROM @patronageVolumeStaging;
 	IF (@totalRecords = 0)

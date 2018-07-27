@@ -17,6 +17,7 @@ DECLARE @intReturnValue AS INT = 0;
 DECLARE @intItemId AS INT
 		,@dtmRebuildDate AS DATETIME = GETDATE() 
 		,@intFobPointId AS INT 
+		,@intEntityId AS INT 
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 
@@ -689,7 +690,7 @@ BEGIN
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
 									'Cost of Goods'
-								WHEN @strTransactionForm = 'Invoice' THEN 
+								WHEN @strTransactionForm IN ('Invoice', 'Credit Memo') THEN 
 									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
 									CASE	WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 1) THEN 
@@ -704,6 +705,8 @@ BEGIN
 								ELSE 
 									NULL 
 						END
+
+			SET @intEntityId = NULL 
 
 			SELECT	@strTransactionType = strName  
 			FROM	tblICInventoryTransactionType 
@@ -1656,6 +1659,12 @@ BEGIN
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 						AND ItemLocation.intLocationId IS NOT NULL
+
+				-- Get the Customer Entity Id 
+				SELECT	@intEntityId = intEntityCustomerId 
+				FROM	tblICInventoryShipment s
+				WHERE	s.intInventoryShipmentId = @intTransactionId
+						AND s.strShipmentNumber = @strTransactionId
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1821,8 +1830,14 @@ BEGIN
 				END 	
 			END
 			 				
-			-- Repost 'Invoice'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Invoice')) OR @strTransactionId LIKE 'SI%'
+			-- Repost 'Invoice' and 'Credit Memo'
+			ELSE IF EXISTS (
+				SELECT	1 
+				FROM	tblICInventoryTransactionType 
+				WHERE	intTransactionTypeId = @intTransactionTypeId 
+						AND strName IN ('Invoice', 'Credit Memo')
+				) 
+				OR @strTransactionId LIKE 'SI%'
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -1968,7 +1983,7 @@ BEGIN
 						
 				IF @intReturnId <> 0 
 				BEGIN 
-					--PRINT 'Error found in uspICCreateGLEntries - Invoice'
+					--PRINT 'Error found in uspICCreateGLEntries - Invoice/Credit Memo'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
@@ -2028,63 +2043,66 @@ BEGIN
 							AND t.strTransactionId = t.strTransactionId
 							AND t.ysnIsUnposted = 0 
 							AND t.dblQty > 0 
-				WHERE	t.intFobPointId = @FOB_DESTINATION
-						AND i.strInvoiceNumber = @strTransactionId
+				WHERE	--t.intFobPointId = @FOB_DESTINATION
+						i.strInvoiceNumber = @strTransactionId
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
-				EXEC dbo.uspICRepostInTransitCosting
-					@ItemsForInTransitCosting
-					,@strBatchId
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-
-				SET @intReturnId = NULL 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]					
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm] 
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]
-						,[dblDebitReport]
-						,[dblCreditForeign]
-						,[dblCreditReport]
-						,[dblReportingRate]
-						,[dblForeignRate]
-				)
-				EXEC @intReturnId = dbo.uspICCreateGLEntriesForInTransitCosting 
-					@strBatchId
-					,@strAccountToCounterInventory 
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,@intItemId -- This is only used when rebuilding the stocks. 
-					,@strTransactionId -- This is only used when rebuilding the stocks. 
-
-				IF @intReturnId <> 0 
+				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
-					--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Invoice'
-					GOTO _EXIT_WITH_ERROR
+					EXEC dbo.uspICRepostInTransitCosting
+						@ItemsForInTransitCosting
+						,@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+
+					SET @intReturnId = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+					)
+					EXEC @intReturnId = dbo.uspICCreateGLEntriesForInTransitCosting 
+						@strBatchId
+						,@strAccountToCounterInventory 
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@intItemId -- This is only used when rebuilding the stocks. 
+						,@strTransactionId -- This is only used when rebuilding the stocks. 
+
+					IF @intReturnId <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Invoice'
+						GOTO _EXIT_WITH_ERROR
+					END 
 				END 
 			END	
 			
@@ -2246,6 +2264,12 @@ BEGIN
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
+
+				-- Get the Vendor Entity Id 
+				SELECT	@intEntityId = intEntityVendorId
+				FROM	tblICInventoryReceipt r
+				WHERE	r.intInventoryReceiptId = @intTransactionId
+						AND r.strReceiptNumber = @strTransactionId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -2689,8 +2713,14 @@ BEGIN
 			DECLARE @intReturnCode AS INT = 0;
 
 			-- Set ysnRebuild = 1 to tell GL that the GL entries are from stock rebuild. 
-			UPDATE @GLEntries
-			SET ysnRebuild = 1
+			UPDATE	@GLEntries
+			SET		ysnRebuild = 1
+
+			-- Update the entity id
+			UPDATE	@GLEntries
+			SET		intEntityId = @intEntityId
+			WHERE	intEntityId IS NULL 
+					AND @intEntityId IS NOT NULL 
 
 			EXEC @intReturnCode = dbo.uspGLBookEntries 
 				@GLEntries

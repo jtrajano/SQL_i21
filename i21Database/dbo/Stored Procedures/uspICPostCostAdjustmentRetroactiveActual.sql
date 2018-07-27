@@ -391,6 +391,7 @@ BEGIN
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 
+			SET @EscalateInventoryTransactionTypeId = NULL
 			EXEC [uspICPostCostAdjustmentEscalate]
 				@dtmDate 
 				,@t_intItemId 
@@ -572,6 +573,7 @@ BEGIN
 		,@intForexRateTypeId					= NULL
 		,@dblForexRate							= 1
 		,@strDescription						= @strDescription	
+		,@strActualCostId						= @strActualCostId
 
 		UPDATE	tblICInventoryTransaction 
 		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 

@@ -1,17 +1,20 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTaxComputationForVendor]
 (
-	 @ItemId				INT
-	,@VendorId				INT
-	,@TransactionDate		DATETIME
-	,@ItemCost				NUMERIC(38,20)
-	,@Quantity				NUMERIC(38,20)
-	,@TaxGroupId			INT
-	,@CompanyLocationId		INT
-	,@VendorLocationId		INT
-	,@IncludeExemptedCodes	BIT
-	,@FreightTermId			INT
-	,@ExcludeCheckOff		BIT
-	,@ItemUOMId				INT = NULL
+	 @ItemId						INT
+	,@VendorId						INT
+	,@TransactionDate				DATETIME
+	,@ItemCost						NUMERIC(38,20)
+	,@Quantity						NUMERIC(38,20)
+	,@TaxGroupId					INT
+	,@CompanyLocationId				INT
+	,@VendorLocationId				INT
+	,@IncludeExemptedCodes			BIT
+	,@FreightTermId					INT
+	,@ExcludeCheckOff				BIT
+	,@ItemUOMId						INT				= NULL
+	,@CurrencyId					INT				= NULL
+	,@CurrencyExchangeRateTypeId	INT				= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -23,6 +26,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblBaseRate]					NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[ysnSeparateOnInvoice]			BIT DEFAULT 0
@@ -52,6 +56,7 @@ BEGIN
 			,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 			,[strCalculationMethod]			NVARCHAR(30)
 			,[dblRate]						NUMERIC(18,6)
+			,[dblBaseRate]					NUMERIC(18,6)
 			,[dblTax]						NUMERIC(18,6)
 			,[dblAdjustedTax]				NUMERIC(18,6)
 			,[intTaxAccountId]				INT
@@ -79,6 +84,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -100,6 +106,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -112,7 +119,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes, @ItemUOMId)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 												
 			
 	-- Calculate Item Tax
@@ -287,6 +294,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
@@ -308,6 +316,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
