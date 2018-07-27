@@ -121,8 +121,8 @@ BEGIN TRY
 			SELECT MATNR
 				,MEINS
 			FROM OPENXML(@idoc, 'MATMAS/IDOC/E1MARAM', 2) WITH (
-					MATNR NVARCHAR(50) '../MATNR'
-					,MEINS NVARCHAR(50) '../MATNR'
+					MATNR NVARCHAR(50)
+					,MEINS NVARCHAR(50)
 					)
 
 			-- Item no data manipulation
