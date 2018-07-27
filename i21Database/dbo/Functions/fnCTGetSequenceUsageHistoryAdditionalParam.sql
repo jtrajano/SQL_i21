@@ -132,6 +132,15 @@ BEGIN
 		WHERE	CA.intAdjustmentId	=	@intExternalId
 	END
 	
+	ELSE IF @strScreenName = 'Import'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	intImportBalanceId,
+				@strNumber						=	LTRIM(intSession),
+				@strHeaderIdColumn				=	'intImportBalanceId'
+		FROM	tblCTImportBalance CA
+		WHERE	CA.intImportBalanceId	=	@intExternalId
+	END
+
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN
 		SELECT TOP 1 @strNumber = strNumber FROM tblCTSequenceUsageHistory WHERE strScreenName = @strScreenName AND intExternalId = @intExternalId

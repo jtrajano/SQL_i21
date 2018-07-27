@@ -19,7 +19,8 @@ BEGIN TRY
 			 @intContractSeq		INT,
 			 @strERPPONumber		NVARCHAR(100),
 			 @strERPItemNumber		NVARCHAR(100),
-			 @dlERPQty				NUMERIC(18,6)
+			 @dlERPQty				NUMERIC(18,6),
+			 @dblBalance			NUMERIC(18,6)
 				
 	UPDATE	IM
 	SET		strContractNumber		=	LTRIM(strContractNumber),
@@ -61,19 +62,20 @@ BEGIN TRY
 
     IF @intContractDetailId IS NULL
     BEGIN
-	   SET @ErrMsg = 'UOM not mentioned for ERP No: ' + ISNULL(@strERPPONumber,'') + ' and line item: ' + ISNULL(@strERPItemNumber,'') + '.'
+	   SET @ErrMsg = 'UOM not mentioned for Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + '.'
 	   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
     END
 
     IF @intUnitMeasureId IS NULL
     BEGIN
-	   SET @ErrMsg = 'UOM ' + ISNULL(@strUOM,'') + ' does not exist for ERP No: ' + ISNULL(@strERPPONumber,'') + ' and line item: ' + ISNULL(@strERPItemNumber,'') + '.'
+	   SET @ErrMsg = 'UOM ' + ISNULL(@strUOM,'') + ' does not exist for Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + '.'
 	   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
     END
 
     SELECT  @dblQuantity		=	dblQuantity,
 			@dblReceivedQty		=	ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,@intUnitMeasureId,intUnitMeasureId,@dblReceivedQty),0),
-			@dblOpenQty			=	ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,@intUnitMeasureId,intUnitMeasureId,@dblOpenQty),0)
+			@dblOpenQty			=	ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,@intUnitMeasureId,intUnitMeasureId,@dblOpenQty),0),
+			@dblBalance			=	dblBalance
     FROM	tblCTContractDetail
     WHERE	intContractDetailId = @intContractDetailId
 
@@ -82,6 +84,14 @@ BEGIN TRY
 	   SET @ErrMsg = 'Supplied quantity does not match with current quantity.'
 	   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
     END 
+
+	IF @dblBalance = @dblOpenQty
+	BEGIN
+		SET @ErrMsg = 'Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + ' is skipped due to same open quantity.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+	END
+
+	SELECT @dblReceivedQty = @dblQuantity - ABS(@dblReceivedQty - @dblBalance)
 
     EXEC	uspCTUpdateSequenceBalance 
 			@intContractDetailId	=	@intContractDetailId,

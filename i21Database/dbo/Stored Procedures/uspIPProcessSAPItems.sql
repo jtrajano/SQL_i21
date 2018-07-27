@@ -29,6 +29,22 @@ BEGIN TRY
 	DECLARE @intUserId INT
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
+		,@strCustomerCode NVARCHAR(50)
+		,@strProductType NVARCHAR(50)
+
+	SELECT @strCustomerCode = strCustomerCode
+	FROM tblIPCompanyPreference
+
+	IF IsNULL(@strCustomerCode, '') = ''
+	BEGIN
+		RAISERROR (
+				'Customer code cannot be blank.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	IF ISNULL(@strSessionId, '') = ''
 		SELECT @intMinItem = MIN(intStageItemId)
@@ -56,6 +72,8 @@ BEGIN TRY
 			SET @strDescription = NULL
 			SET @ysnDeleted = 0
 
+			SELECT @strProductType = NULL
+
 			SELECT @intStageItemId = intStageItemId
 				,@strItemNo = strItemNo
 				,@strItemType = strItemType
@@ -63,6 +81,7 @@ BEGIN TRY
 				,@strStockUOM = strStockUOM
 				,@ysnDeleted = ISNULL(ysnDeleted, 0)
 				,@strDescription = strDescription
+				,@strProductType = strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intMinItem
 
@@ -113,6 +132,14 @@ BEGIN TRY
 							,16
 							,1
 							)
+			END
+
+			IF @strCustomerCode = 'HE'
+			BEGIN
+				SELECT @intCommodityId = intCommodityId
+				FROM tblICCommodityAttribute
+				WHERE strType = 'ProductType'
+					AND strDescription = @strProductType
 			END
 
 			BEGIN TRAN
@@ -251,6 +278,7 @@ BEGIN TRY
 							FROM tblICUnitMeasure
 							WHERE UPPER(strUnitMeasure) = UPPER(dbo.fnIPConvertSAPUOMToi21(@strStockUOM))
 							) = 'KG'
+						AND @strCustomerCode = 'JDE'
 					BEGIN
 						IF NOT EXISTS (
 								SELECT 1
@@ -370,14 +398,27 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN --Update
-					UPDATE i
-					SET i.strDescription = si.strDescription
-						,i.strShortName = LEFT(si.strDescription, 50)
-					FROM tblICItem i
-					JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
-					WHERE intItemId = @intItemId
-						AND si.intStageItemId = @intStageItemId
-						AND si.strDescription <> '/'
+					IF @strCustomerCode = 'JDE'
+					BEGIN
+						UPDATE i
+						SET i.strDescription = si.strDescription
+							,i.strShortName = LEFT(si.strDescription, 50)
+						FROM tblICItem i
+						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
+						WHERE intItemId = @intItemId
+							AND si.intStageItemId = @intStageItemId
+							AND si.strDescription <> '/'
+					END
+					ELSE
+					BEGIN
+						UPDATE i
+						SET i.strDescription = si.strDescription
+							,i.strShortName = LEFT(si.strDescription, 50)
+						FROM tblICItem i
+						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
+						WHERE intItemId = @intItemId
+							AND si.intStageItemId = @intStageItemId
+					END
 
 					INSERT INTO tblICItemUOM (
 						intItemId
