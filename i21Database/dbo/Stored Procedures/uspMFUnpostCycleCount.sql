@@ -37,9 +37,11 @@ BEGIN TRY
 		,@dblOtherCharges DECIMAL(38, 24)
 		,@dblProduceQty NUMERIC(38, 20)
 		,@ysnCostEnabled BIT
+		,@intWOItemUOMId int
+		,@intUnitMeasureId int
 
-	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
-	FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCostEnabled=ysnCostEnabled
+		FROM tblMFCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -54,8 +56,13 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
 		,@intLocationId = intLocationId
+		,@intWOItemUOMId=intItemUOMId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+			Select @intUnitMeasureId=intUnitMeasureId
+	From tblICItemUOM
+	Where intItemUOMId=@intWOItemUOMId
 
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -63,8 +70,9 @@ BEGIN TRY
 		AND intAttributeId = 20 --Is Instant Consumption
 		AND intLocationId = @intLocationId
 
-	SELECT @dblProduceQty = SUM(dblQuantity)
+	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
 	FROM dbo.tblMFWorkOrderProducedLot WP
+	Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.intItemId IN (
@@ -194,10 +202,10 @@ BEGIN TRY
 			,[dblQty] = PL.dblQuantity
 			,[dblUOMQty] = 1
 			,[intCostUOMId] = PL.intItemUOMId
-			,[dblNewCost] = CASE 
+					,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost * PL.dblQuantity
-				ELSE ((@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity)
+					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)
+				ELSE ((@dblNewCost * RI.dblPercentage / 100/SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)) Over(Partition By PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity))
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
@@ -219,6 +227,7 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
+		Left JOIN dbo.tblICItemUOM IU on IU.intItemId=PL.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 		JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
