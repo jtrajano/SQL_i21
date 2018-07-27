@@ -23,6 +23,8 @@ SELECT
 	,IC.intCommodityId
 	,GR.strDiscountId
 	
+	,(SELECT COUNT(intTicketId) FROM tblSCTicket SCT WHERE SCT.intDeliverySheetId = SCD.intDeliverySheetId AND SCT.strTicketStatus = 'H') as dblTotalTickets
+
 FROM tblSCDeliverySheet SCD 
 LEFT JOIN tblEMEntity EM ON SCD.intEntityId = EM.intEntityId
 LEFT JOIN tblSMCompanyLocation SM ON SCD.intCompanyLocationId = SM.intCompanyLocationId
