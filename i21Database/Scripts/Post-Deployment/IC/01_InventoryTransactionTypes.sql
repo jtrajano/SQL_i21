@@ -214,6 +214,10 @@ USING	(
 		SELECT id = 51
 				,name = 'Sales Return'
 				,form = NULL 
+		UNION ALL
+		SELECT id = 52
+				,name = 'Credit Note'
+				,form = 'Credit Note'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
