@@ -40,8 +40,8 @@ SELECT TOP 100 PERCENT * FROM (
                     ((ISNULL(basisFutures.dblPrice, 0) 
                         + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
                         * (ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                    - ISNULL(discounts.dblAmount,0)
-                    - ISNULL(charges.dblAmount, 0)
+                    + ISNULL(discounts.dblAmount,0)
+                    + ISNULL(charges.dblAmount, 0)
                     + ISNULL(taxes.dblTax,0.00)) 
                     * (ISNULL(basisCommodity.dblPercentage,0.00) / 100))
                     - ISNULL(priorAdvances.dblPriorAdvance,0.00) AS DECIMAL(18,2)) END AS dblAmountToAdvance
