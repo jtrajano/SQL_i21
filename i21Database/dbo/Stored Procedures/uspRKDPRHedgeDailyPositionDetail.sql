@@ -1218,7 +1218,7 @@ BEGIN
 			SELECT distinct c.strCommodityCode,strUnitMeasure,strType,sum(dblTotal) dblTotal,c.intCommodityId
 			FROM @Final f 
 			join tblICCommodity c on c.intCommodityId= f.intCommodityId
-			where dblTotal <> 0 and strType in('Basis Risk','Price Risk','Avail for Spot Sale')
+			where dblTotal <> 0 
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId
 END
 ELSE IF(@strByType = 'ByLocation')
@@ -1226,7 +1226,7 @@ BEGIN
 			SELECT distinct c.strCommodityCode,strUnitMeasure,strType,sum(dblTotal) dblTotal,c.intCommodityId,strLocationName
 			FROM @Final f 
 			JOIN tblICCommodity c on c.intCommodityId= f.intCommodityId
-			WHERE dblTotal <> 0 and strType in('Basis Risk','Price Risk','Avail for Spot Sale')
+			WHERE dblTotal <> 0
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId,strLocationName
 END
 ELSE 
