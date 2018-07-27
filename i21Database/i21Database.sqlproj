@@ -6835,6 +6835,11 @@
     <Build Include="dbo\Tables\tblCRMOpportunityCompetitor.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMProcessOpportunityCompetitor.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\TruncateReplicationTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPItems_HE.sql" />
+    <Build Include="dbo\Tables\tblIPIDOCXMLArchive.sql" />
+    <Build Include="dbo\Tables\tblIPIDOCXMLError.sql" />
+    <Build Include="dbo\Tables\tblIPIDOCXMLStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageIDOCXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

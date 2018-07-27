@@ -83,5 +83,6 @@
 	,[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemArchive_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 	,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemArchive_dtmTransactionDate] DEFAULT((getdate()))
+	,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT [PK_tblIPItemArchive_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )
