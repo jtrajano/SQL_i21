@@ -69,12 +69,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_UpdatePortalMenus.sql
 :r .\SM\1810_UpdateTransactionsApprovalFor.sql
 :r .\SM\DefaultData\33_InterCompanyTransactionType.sql
-:r .\SM\DefaultData\34_ReplicationTable.sql
 :r .\SM\1810_Reset_Hours_Terms.sql
 :r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
 :r .\SM\DefaultData\35_Control.sql
 :r .\SM\DefaultData\36_Control_Persmission.sql
 :r .\SM\DefaultData\TruncateReplicationTables.sql
+:r .\SM\DefaultData\34_ReplicationTable.sql
 :r .\SM\DefaultData\37_ReplicationConfiguration.sql
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
