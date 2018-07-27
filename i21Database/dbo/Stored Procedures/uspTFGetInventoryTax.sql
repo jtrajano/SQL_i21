@@ -672,8 +672,8 @@ BEGIN TRY
 				, strTransportationMode
 				, strVendorName
 				, strTransporterName
-				, strVendorFEIN
-				, strTransporterFEIN
+				, REPLACE(strVendorFEIN, '-', '')
+				, REPLACE(strTransporterFEIN, '-', '')
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
@@ -685,7 +685,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, REPLACE(strHeaderFederalTaxID, '-', '')
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -693,7 +693,7 @@ BEGIN TRY
 				, strDestinationCity
 				, strDestinationCounty
 				, @CompanyName
-				, @CompanyEIN
+				, REPLACE(@CompanyEIN, '-', '')
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType
