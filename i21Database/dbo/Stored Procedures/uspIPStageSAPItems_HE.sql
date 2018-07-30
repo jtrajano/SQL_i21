@@ -123,7 +123,8 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'MATMAS/IDOC/E1MARAM', 2) WITH (
 					MATNR NVARCHAR(50)
 					,MEINS NVARCHAR(50)
-					)
+					) x
+			WHERE ISNULL(x.MEINS, '') <> ''
 
 			-- Item no data manipulation
 			UPDATE @tblItem
