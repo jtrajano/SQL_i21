@@ -542,16 +542,16 @@ FROM (
 		 , intShipmentItemUOMId				= ICISC.intCostUOMId
 		 , intWeightUOMId					= NULL
 		 , dblWeight						= NULL
-		 , dblQtyShipped					= (CASE WHEN ICISC.strCostMethod = 'Amount' THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
+		 , dblQtyShipped					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblQtyOrdered					= 0 
-		 , dblShipmentQuantity				= (CASE WHEN ICISC.strCostMethod = 'Amount' THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblShipmentQtyShippedTotal		= (CASE WHEN ICISC.strCostMethod = 'Amount' THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod = 'Amount' THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblPriceUOMQuantity				= (CASE WHEN ICISC.strCostMethod = 'Amount' THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
+		 , dblShipmentQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
+		 , dblShipmentQtyShippedTotal		= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
+		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
+		 , dblPriceUOMQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblDiscount						= 0 
-		 , dblPrice							= CAST((CASE WHEN ICISC.strCostMethod = 'Amount' THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
-		 , dblUnitPrice						= CAST((CASE WHEN ICISC.strCostMethod = 'Amount' THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= CAST((CASE WHEN ICISC.strCostMethod = 'Amount' THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
+		 , dblPrice							= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
