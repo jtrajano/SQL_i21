@@ -187,8 +187,6 @@
 			('tblGLCompanyPreferenceOption'), --19 init only
 			('tblGLCurrentFiscalYear'), --20
 			('tblGLDeletedAccount'), --21
-			('tblGLFiscalYear'), --(exclude ysnStatus, intConcurrency columns)
-			('tblGLFiscalYearPeriod'), --(exclude all ysn* and intConcurrencyId columns)
 			('tblGLAccountAdjustmentLog'), --24
 
 

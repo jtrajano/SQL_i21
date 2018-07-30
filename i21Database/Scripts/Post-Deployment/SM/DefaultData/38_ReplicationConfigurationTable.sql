@@ -346,10 +346,7 @@ VALUES
 		('tblGLCOATemplate', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLCOATemplateDetail', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLCompanyPreferenceOption', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
-		('tblGLCurrentFiscalYear', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLDeletedAccount', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
-		('tblGLFiscalYear', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
-		('tblGLFiscalYearPeriod', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLAccountAdjustmentLog', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLDeletedAccount', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 
