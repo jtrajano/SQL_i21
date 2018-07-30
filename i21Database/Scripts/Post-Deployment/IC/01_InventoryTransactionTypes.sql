@@ -190,6 +190,10 @@ USING	(
 		SELECT id = 45
 				,name = 'Credit Memo'
 				,form = 'Credit Memo'
+        UNION ALL
+        SELECT id = 46
+                    ,name = 'Outbound Shipment'
+                    ,form = 'Outbound Shipment'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
