@@ -211,8 +211,7 @@ FROM tblSCTicket st
 	JOIN tblICItem i on i.intItemId=st.intItemId
 	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
 	JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
-WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-	AND i.intCommodityId= @intCommodityId
+WHERE i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
 	AND  st.intProcessingLocationId  IN (
@@ -254,8 +253,7 @@ SELECT
 	st.strTicketNumber AS ticketNumber 
 FROM tblSCTicket st
 	JOIN tblICItem i on i.intItemId=st.intItemId
-WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-	AND i.intCommodityId= @intCommodityId
+WHERE  i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 	AND st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
 	AND  st.intProcessingLocationId  IN (
