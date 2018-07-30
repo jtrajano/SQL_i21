@@ -52,6 +52,7 @@ BEGIN TRY
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId 
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
+	AND   CS.dblOpenBalance > 0
 	ORDER BY CS.intCustomerStorageId
 	
 	INSERT INTO [dbo].[tblGRStorageStatement]
@@ -100,6 +101,7 @@ BEGIN TRY
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
+	AND   CS.dblOpenBalance > 0
 	ORDER BY CS.intCustomerStorageId
 
 	;WITH CTE as
