@@ -171,10 +171,14 @@ BEGIN TRY
 				intStageItemId
 				,strItemNo
 				,strUOM
+				,dblNumerator
+				,dblDenominator
 				)
 			SELECT I.intStageItemId
 				,I.strItemNo
 				,IU.strUOM
+				,1
+				,1
 			FROM @tblItemUOM IU
 			JOIN tblIPItemStage I ON IU.strItemNo = I.strItemNo
 
