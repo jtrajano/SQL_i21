@@ -325,3 +325,10 @@ GO
 		UPDATE tblSMCompanyPreference SET ysnLegacyIntegration = 0
 	END
 GO
+	PRINT N'ENABLE/DISABLE MENUS WHEN INTEGRATION IS ON/OFF'
+
+	UPDATE rm SET ysnAvailable = (SELECT COUNT(*) FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1)
+	FROM tblSMUserRoleMenu rm
+	INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID
+	WHERE strMenuName IN ('Import', 'Import Vouchers from Origin') AND strModuleName = 'Accounts Payable'
+GO
