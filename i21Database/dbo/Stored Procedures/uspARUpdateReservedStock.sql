@@ -51,19 +51,35 @@ BEGIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
+		(SELECT [intItemId], [strType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
+			ON ARID.[intItemId] = ICI.[intItemId]
+	INNER JOIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 	LEFT OUTER JOIN
-		(SELECT [intItemId], [intLocationId], [intItemLocationId] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
+		(SELECT [intItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
+	WHERE 
+		ISNULL(@FromPosting, 0 ) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ARI.strType NOT IN ('Transport Delivery')
 		AND ARID.[intInventoryShipmentItemId] IS NULL
 		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
+		AND (
+				(
+					ICI.[strType] <> 'Finished Good'
+					OR
+					(ICI.[strType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+				)
+			OR 
+				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				
+			)
+		
 
 	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
 	IF (ISNULL(@FromPosting, 0 ) = 0)
@@ -96,6 +112,22 @@ BEGIN
 	END
 
 	IF ISNULL(@FromPosting, 0 ) = 1
+		AND EXISTS	(
+					SELECT NULL 
+					FROM
+						tblARInvoice ARI
+					INNER JOIN
+						tblARInvoiceDetail ARID
+							ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+					INNER JOIN
+						tblICStockReservation ICSR
+							ON ARI.[intInvoiceId] = ICSR.[intTransactionId] 
+							AND ARI.[strInvoiceNumber] = ICSR.[strTransactionId]
+							AND ARID.[intItemId] = ICSR.[intItemId]
+					WHERE
+						ARI.[intInvoiceId] = @InvoiceId
+						AND ICSR.[ysnPosted] = 0
+					)
 		EXEC [dbo].[uspICPostStockReservation]
 			 @intTransactionId		= @InvoiceId
 			,@intTransactionTypeId	= @TransactionTypeId
