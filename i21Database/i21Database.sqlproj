@@ -6380,6 +6380,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfoOfForPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateAndPostPaymentFromVouchers.sql" />
     <Build Include="dbo\Functions\fnAPPartitonPaymentOfVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipmentOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

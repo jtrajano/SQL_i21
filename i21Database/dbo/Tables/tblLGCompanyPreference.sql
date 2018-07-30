@@ -54,6 +54,9 @@
 [ysnFullHeaderLogo] BIT,
 [ysnContainerNoUnique] BIT,
 [ysnPrintLogo] BIT,
+[ysnEnableAccrualsForInbound] BIT,
+[ysnEnableAccrualsForDropShip] BIT,
+[ysnEnableAccrualsForOutbound] BIT,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
