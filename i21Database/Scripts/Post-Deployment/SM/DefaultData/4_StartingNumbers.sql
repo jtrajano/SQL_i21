@@ -50,6 +50,9 @@ GO
 	DELETE FROM tblSMStartingNumber
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Delivery Orders'
 
+	DELETE FROM tblSMStartingNumber
+	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Credit Note'
+
 GO
 	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO
@@ -1186,15 +1189,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Prepayment Reversal')
 
-	UNION ALL
-	SELECT	 [intStartingNumberId]	= 123
-			,[strTransactionType]	= N'Credit Note'
-			,[strPrefix]			= N'CN-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Accounts Receivable'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Note')
+	--UNION ALL
+	--SELECT	 [intStartingNumberId]	= 123
+	--		,[strTransactionType]	= N'Credit Note'
+	--		,[strPrefix]			= N'CN-'
+	--		,[intNumber]			= 1
+	--		,[strModule]			= 'Accounts Receivable'
+	--		,[ysnEnable]			= 1
+	--		,[intConcurrencyId]		= 1
+	--WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Note')
 
 	UNION ALL
 	SELECT	 [intStartingNumberId]	= 124
