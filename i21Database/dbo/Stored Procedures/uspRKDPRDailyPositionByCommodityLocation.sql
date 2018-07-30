@@ -17,10 +17,10 @@ DECLARE @FinalTable AS TABLE (
 )
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId,strLocationName)
-exec uspRKDPRHedgeDailyPositionDetail  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'
+exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId,strLocationName)
-exec uspRKDPRInvDailyPositionDetail  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'
+exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'
 
 select  CONVERT(int,ROW_NUMBER() OVER(ORDER BY strCommodityCode ASC)) AS intRowNum,* from(
 SELECT distinct strCommodityCode,strUnitMeasure,intCommodityId,f.strLocationName,l.intCompanyLocationId intLocationId,
