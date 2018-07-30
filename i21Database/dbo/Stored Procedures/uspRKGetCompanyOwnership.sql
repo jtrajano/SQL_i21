@@ -110,8 +110,8 @@ INSERT INTO @tblResult (
 SELECT strItemNo
 	,dtmDate
 	,dblUnpaidIn
-	,dblUnpaidIn - dblUnpaidOut dblUnpaidOut
-	,dblUnpaidOut dblUnpaidBalance
+	,dblUnpaidOut
+	,dblUnpaidIn - dblUnpaidOut as dblUnpaidBalance
 	,dblUnpaidIn -  dblUnpaidOut as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
@@ -210,6 +210,48 @@ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110)) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 	AND ir.intSubLocationId = case when isnull(@intLocationId,0)=0 then ir.intSubLocationId else @intLocationId end 
+
+UNION 
+SELECT
+ strItemNo
+	, dtmDate
+	,0 AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,0 AS dblUnpaidBalance
+	,dblInQty as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryShipmentItemId
+FROM (
+	SELECT 
+		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+		,SI.dblUnitPrice dblUnitCost1
+		,SI.intInventoryShipmentItemId
+		,I.strItemNo
+		,ABS(isnull(SI.dblQuantity, 0)) * -1 dblInQty
+		,0 AS dblOutQty
+		,ST.strDistributionOption
+		,S.strShipmentNumber AS strReceiptNumber
+		,S.intInventoryShipmentId AS intReceiptId
+		--,Inv.strInvoiceNumber AS strReceiptNumber
+		--,Inv.intInvoiceId AS intReceiptId
+	FROM vyuSCTicketView ST
+	INNER JOIN tblICInventoryShipmentItem SI ON ST.intTicketId = SI.intSourceId
+	INNER JOIN tblICInventoryShipment S ON S.intInventoryShipmentId = SI.intInventoryShipmentId
+	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+	--LEFT JOIN tblARInvoiceDetail ID ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
+	--LEFT JOIN tblARInvoice Inv ON ID.intInvoiceId = Inv.intInvoiceId
+	WHERE ST.strTicketStatus = 'C'
+	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND ST.intCommodityId = @intCommodityId 
+	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+	AND ST.intTicketLocationId = case when isnull(@intLocationId,0)=0 then ST.intTicketLocationId else @intLocationId end 
+	AND ST.intTicketLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+)t
 
 
 

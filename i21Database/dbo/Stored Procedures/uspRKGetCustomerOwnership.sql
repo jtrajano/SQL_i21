@@ -21,32 +21,32 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
  into #tempCustomer 
  FROM (
    SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2))dblOut,round(sum(dblInQty),2)-sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2)) dblNet,intStorageScheduleTypeId FROM(		
-		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,gs.intStorageScheduleTypeId  
-			,(select sum(SH.dblUnits) from tblGRStorageHistory SH
-				JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-				JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
-				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = ST1.intSettleStorageId 
-				WHERE strType='Settlement' 
-				AND  ysnPosted=1 and CS.intTicketId=st.intTicketId and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
-										= convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110)) 	dblSettleUnit																										
-		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId 								
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
-		WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
-		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-		AND i.intCommodityId= @intCommodityId
-		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C'
-		AND  st.intProcessingLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END
-											)
-		AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+		--SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
+		--																						CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,gs.intStorageScheduleTypeId  
+		--	,(select sum(SH.dblUnits) from tblGRStorageHistory SH
+		--		JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		--		JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
+		--		JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = ST1.intSettleStorageId 
+		--		WHERE strType='Settlement' 
+		--		AND  ysnPosted=1 and CS.intTicketId=st.intTicketId and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
+		--								= convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110)) 	dblSettleUnit																										
+		--FROM tblSCTicket st
+		--JOIN tblICItem i on i.intItemId=st.intItemId 								
+		--JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
+		--WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+		-- convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		--AND i.intCommodityId= @intCommodityId
+		--and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		--and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C'
+		--AND  st.intProcessingLocationId  IN (
+		--											SELECT intCompanyLocationId FROM tblSMCompanyLocation
+		--											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+		--											WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+		--											ELSE isnull(ysnLicensed, 0) END
+		--									)
+		--AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 
-		UNION ALL --Delivery Sheet
+		--UNION ALL --Delivery Sheet
 			SELECT
 				CONVERT(VARCHAR(10),DS.dtmDeliverySheetDate,110) dtmDate
 				,strStorageTypeDescription
@@ -81,7 +81,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.strTicketStatus = 'H'
 				AND DS.ysnPost = 0
 
-		UNION ALL --Delivery
+		UNION ALL --Distributed Delivery Sheet
 			SELECT 
 				dtmDate 
 				,strStorageTypeDescription
@@ -93,8 +93,8 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				SELECT
 					CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
 					,strStorageTypeDescription
-					,sum(dblOpenBalance)  dblInQty
-					,0 dblOutQty
+					,sum(dblOpenBalance) + (sum(dblOriginalBalance) - sum(dblOpenBalance)) dblInQty
+					,sum(dblOriginalBalance) - sum(dblOpenBalance) dblOutQty --This will give you the value of transfered qty
 					,GCS.intStorageTypeId  
 					,0	dblSettleUnit	
 					,intDeliverySheetId	
@@ -158,7 +158,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 				,'On Hold' as strStorageTypeDescription
 				,CASE WHEN strInOutFlag='I' THEN dblNetUnits   ELSE 0 END dblInQty
-				,CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END dblOutQty, st.intStorageScheduleTypeId  
+				,CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END dblOutQty, st.intStorageScheduleTypeId
 				,NULL dblSettleUnit			
 			FROM tblSCTicket st
 				JOIN tblICItem i on i.intItemId=st.intItemId
@@ -175,7 +175,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
 
-			UNION ALL --Transfer Storage
+			UNION ALL --Direct Scale and Transfer Storage
 			SELECT
 				CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
 				,strStorageTypeDescription
