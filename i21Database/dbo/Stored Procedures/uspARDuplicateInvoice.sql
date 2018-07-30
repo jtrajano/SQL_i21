@@ -360,7 +360,7 @@ IF @IsCancel = 0
 --	END
 
 IF @IsCancel = 1
-	SET @TransactionType = 'Credit Note'
+	SET @TransactionType = 'Credit Memo'
 
 BEGIN TRY
 	EXEC [dbo].[uspARCreateCustomerInvoice]

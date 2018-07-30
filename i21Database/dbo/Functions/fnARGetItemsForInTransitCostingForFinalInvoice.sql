@@ -120,7 +120,7 @@ WHERE
 	AND ARI.[intSourceId] IS NOT NULL
 	AND ARI.[intOriginalInvoiceId] <> 0
 	AND ARI.[intSourceId] = 2
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND NOT (ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 UNION ALL
 
@@ -183,7 +183,7 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND NOT (ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 										
 	RETURN
 END

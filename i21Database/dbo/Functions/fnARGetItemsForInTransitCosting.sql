@@ -119,7 +119,7 @@ WHERE
 		OR
 			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
 		)
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND NOT (ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 
 UNION ALL
@@ -182,7 +182,7 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL 
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
-	AND NOT (ARI.[strTransactionType] = 'Credit Note' AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND NOT (ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
 UNION ALL
 -- FOR Credit Note Reversal
@@ -228,7 +228,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND [ysnIsUnposted] = 0			 
 WHERE
-	ARI.[strTransactionType] = 'Credit Note' 
+	ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note')
 	AND ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARI.[intOriginalInvoiceId] IS NOT NULL 
@@ -268,7 +268,7 @@ INNER JOIN
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
 	 FROM @Invoices INV
 	 WHERE
-		INV.[strTransactionType] = 'Credit Note'
+		INV.[strTransactionType] IN ('Credit Memo', 'Credit Note')
 		AND INV.[intOriginalInvoiceId] IS NOT NULL 
 		AND INV.[intOriginalInvoiceId] <> 0
 			) ARI 
