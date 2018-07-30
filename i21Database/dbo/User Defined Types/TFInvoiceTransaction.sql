@@ -62,6 +62,6 @@
 	[intTransactionNumberId] INT NULL,
 	[ysnDiversion] BIT NULL,
 	[strContactName] NVARCHAR(50) NULL,
-	[strEmail] NVARCHAR(50) NULL
+	[strEmail] NVARCHAR(100) NULL
 )
 GO

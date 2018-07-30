@@ -47,12 +47,15 @@
 	[strCustomerAccountStatusCode] NVARCHAR(50) NULL,
 	[strCustomerStreetAddress] NVARCHAR(50) NULL,
 	[strCustomerZipCode] NVARCHAR(50) NULL,
+	[strCustomerName] NVARCHAR(50) NULL,
+	[strCustomerFederalTaxId] NVARCHAR(50) NULL,
 	[strReportingComponentNote] NVARCHAR(50) NULL,
 	[strDiversionNumber] NVARCHAR(50) NULL,
 	[strDiversionOriginalDestinationState] NVARCHAR(50) NULL,
 	[strTransactionType] NVARCHAR(50) NULL,
 	[intTransactionNumberId] INT NULL,
 	[strVendorLicenseNumber] NVARCHAR(50) NULL,
-	[strContactName] NVARCHAR(100) NULL
+	[strContactName] NVARCHAR(100) NULL,
+	[strEmail] NVARCHAR(100) NULL
 )
 GO

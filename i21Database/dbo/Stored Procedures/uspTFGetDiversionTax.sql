@@ -159,7 +159,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, ysnDiversion
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -196,12 +197,12 @@ BEGIN TRY
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
@@ -218,7 +219,8 @@ BEGIN TRY
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 					, ysnDiversion = tblTRLoadHeader.ysnDiversion
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -246,6 +248,7 @@ BEGIN TRY
 						LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE tblARInvoice.ysnPosted = 1 
 					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -336,7 +339,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, ysnDiversion
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -373,12 +377,12 @@ BEGIN TRY
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
@@ -395,7 +399,8 @@ BEGIN TRY
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 					, ysnDiversion = tblTRLoadHeader.ysnDiversion
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -422,6 +427,7 @@ BEGIN TRY
 						LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE tblARInvoice.ysnPosted = 1 
 					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -514,7 +520,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, ysnDiversion
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -551,12 +558,12 @@ BEGIN TRY
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
@@ -573,7 +580,8 @@ BEGIN TRY
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 					, ysnDiversion = tblTRLoadHeader.ysnDiversion
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -601,6 +609,7 @@ BEGIN TRY
 						LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE tblARInvoice.ysnPosted = 1 
 					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -691,7 +700,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, ysnDiversion
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -728,12 +738,12 @@ BEGIN TRY
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
@@ -750,7 +760,8 @@ BEGIN TRY
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 					, ysnDiversion = tblTRLoadHeader.ysnDiversion
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -777,6 +788,7 @@ BEGIN TRY
 						LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE tblARInvoice.ysnPosted = 1 
 					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -957,7 +969,8 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -1020,6 +1033,7 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
+				, strEmail
 			FROM @tmpInvoiceTransaction Trans
 		END
 		

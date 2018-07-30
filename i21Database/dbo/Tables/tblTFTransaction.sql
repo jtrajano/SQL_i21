@@ -28,6 +28,7 @@
 	[strZipCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTelephoneNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strContactName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[strEmail] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strShipVia] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strTransporterName] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportationMode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

@@ -20,9 +20,6 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @CompanyName NVARCHAR(250) = NULL
-		, @CompanyEIN NVARCHAR(100) = NULL
-
 	-- USER DEFINED TABLES
 	DECLARE @TFTransaction TFTransaction
 	DECLARE @tmpInventoryReceiptDetail TFInventoryReceiptDetailTransaction
@@ -43,8 +40,6 @@ BEGIN TRY
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 
 	DELETE @tmpRC where intReportingComponentId = ''
-
-	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpRC)
 	BEGIN
@@ -151,13 +146,16 @@ BEGIN TRY
 				, strCustomerAccountStatusCode
 				, strCustomerStreetAddress
 				, strCustomerZipCode
+				, strCustomerName
+				, strCustomerFederalTaxId
 				, strReportingComponentNote
 				, strDiversionNumber
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
 				, strVendorLicenseNumber
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -187,14 +185,14 @@ BEGIN TRY
 					, Transporter.strName AS strTransporterName
 					, Vendor.strFederalTaxId AS strVendorFEIN
 					, Transporter.strFederalTaxId AS strTransporterFEIN
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = @CompanyEIN
+					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -212,13 +210,16 @@ BEGIN TRY
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
 					, strCustomerZipCode = NULL
+					, tblSMCompanySetup.strCompanyName AS strCustomerName
+					, tblSMCompanySetup.strEin AS strCustomerFederalTaxId
 					, strReportingComponentNote = tblTFReportingComponent.strNote
 					, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
 					, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
 					, tblTRSupplyPoint.strFuelDealerId1
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -258,6 +259,7 @@ BEGIN TRY
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = DistributionDetail.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -338,13 +340,16 @@ BEGIN TRY
 				, strCustomerAccountStatusCode
 				, strCustomerStreetAddress
 				, strCustomerZipCode
+				, strCustomerName
+				, strCustomerFederalTaxId
 				, strReportingComponentNote
 				, strDiversionNumber
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
 				, strVendorLicenseNumber
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -372,14 +377,14 @@ BEGIN TRY
 					, Transporter.strName AS strTransporterName
 					, Vendor.strFederalTaxId AS strVendorFEIN
 					, Transporter.strFederalTaxId AS strTransporterFEIN
-					, tblSMCompanySetup.strCompanyName
-					, tblSMCompanySetup.strAddress
-					, tblSMCompanySetup.strCity
-					, tblSMCompanySetup.strState
-					, tblSMCompanySetup.strZip
-					, tblSMCompanySetup.strPhone
+					, tblTFCompanyPreference.strCompanyName
+					, tblTFCompanyPreference.strTaxAddress
+					, tblTFCompanyPreference.strCity
+					, tblTFCompanyPreference.strState
+					, tblTFCompanyPreference.strZipCode
+					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = @CompanyEIN
+					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -397,13 +402,16 @@ BEGIN TRY
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
 					, strCustomerZipCode = NULL
+					, tblSMCompanySetup.strCompanyName AS strCustomerName
+					, tblSMCompanySetup.strEin AS strCustomerFederalTaxId
 					, strReportingComponentNote = tblTFReportingComponent.strNote
 					, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
 					, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
 					, tblTRSupplyPoint.strFuelDealerId1
-					, strContactName = tblSMCompanySetup.strContactName
+					, strContactName = tblTFCompanyPreference.strContactName
+					, strEmail = tblTFCompanyPreference.strContactEmail
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -443,6 +451,7 @@ BEGIN TRY
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = DistributionDetail.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblTFCompanyPreference
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -647,7 +656,8 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, dblQtyShipped
-				, strContactName)
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -692,8 +702,8 @@ BEGIN TRY
 				, strDestinationState
 				, strDestinationCity
 				, strDestinationCounty
-				, @CompanyName
-				, REPLACE(@CompanyEIN, '-', '')
+				, strCustomerName
+				, REPLACE(strCustomerFederalTaxId, '-', '')
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType
@@ -710,6 +720,7 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, CONVERT(DECIMAL(18), dblGross)
 				, strContactName
+				, strEmail
 			FROM @TFTransaction Trans
 		END
 

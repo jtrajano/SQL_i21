@@ -81,6 +81,7 @@ SELECT Trans.intTransactionId
 	, Exception.intExceptionId
 	, ysnDeleted = ISNULL(Exception.ysnDeleted, 0)
 	, Exception.strReason
+	, strEmail = Trans.strEmail
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
@@ -172,6 +173,7 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.intExceptionId
 	, ysnDeleted = ISNULL(Exception.ysnDeleted, 0)
 	, Exception.strReason
+	, strEmail = NULL
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeId
