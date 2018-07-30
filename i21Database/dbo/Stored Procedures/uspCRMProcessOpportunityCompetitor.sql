@@ -21,10 +21,14 @@ SET ANSI_WARNINGS OFF
 	DECLARE @queryResultOpportunityCompetitor CURSOR;
 	declare @intOpportunityCompetitorId int;
 	declare @strCompetitorEntityId nvarchar(50);
+	declare @strCurrentSolutionId nvarchar(50);
 
 	declare @queryResultCompetitorItem cursor;
+	declare @queryResultCurrentSolutionItem cursor;
 	declare @ItemCompetitor nvarchar(50);
+	declare @ItemCurrentSolution nvarchar(50);
 	declare @intItemCompetitor int;
+	declare @intItemCurrentSolution int;
 	declare @returnStatus nvarchar(50) = 'success';
 
 	begin transaction;
@@ -35,6 +39,7 @@ SET ANSI_WARNINGS OFF
 			select
 				intOpportunityId
 				,strCompetitorEntityId = ltrim(rtrim(strCompetitorEntityId))
+				,strCurrentSolutionId = ltrim(rtrim(strCurrentSolutionId))
 			from
 				tblCRMOpportunity
 			where
@@ -49,6 +54,7 @@ SET ANSI_WARNINGS OFF
 		INTO
 			@intOpportunityCompetitorId
 			,@strCompetitorEntityId
+			,@strCurrentSolutionId
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -110,12 +116,70 @@ SET ANSI_WARNINGS OFF
 			DEALLOCATE @queryResultCompetitorItem
 			/*---------------------------------------------------------------*/
 
+			/*---------------------------------------------------------------*/
+			SET @queryResultCurrentSolutionItem = CURSOR FOR
+
+				select
+					Item
+				from
+					dbo.fnSplitString(@strCurrentSolutionId, ',')
+
+			OPEN @queryResultCurrentSolutionItem
+			FETCH NEXT
+			FROM
+				@queryResultCurrentSolutionItem
+			INTO
+				@ItemCurrentSolution
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+
+		
+				begin try
+					set @intItemCurrentSolution = convert(int, @ItemCurrentSolution);
+				end try
+				begin catch
+					set @intItemCurrentSolution = 0;
+				end catch
+
+				if (@intItemCurrentSolution <> 0)
+				begin
+					IF NOT EXISTS (select * from tblCRMOpportunityCompetitor where intOpportunityId = @intOpportunityCompetitorId and intEntityId = @intItemCurrentSolution and strReferenceType = 'Solution')
+					begin
+						IF EXISTS (select * from tblEMEntity where intEntityId = @intItemCurrentSolution)
+						begin
+							INSERT INTO [dbo].[tblCRMOpportunityCompetitor]
+									   ([intOpportunityId]
+									   ,[intEntityId]
+									   ,[strReferenceType]
+									   ,[intConcurrencyId])
+								 VALUES
+									   (@intOpportunityCompetitorId
+									   ,@intItemCurrentSolution
+									   ,'Solution'
+									   ,1)
+						end
+					end
+				end
+
+				FETCH NEXT
+				FROM
+					@queryResultCurrentSolutionItem
+				INTO
+					@ItemCurrentSolution
+			END
+
+			CLOSE @queryResultCurrentSolutionItem
+			DEALLOCATE @queryResultCurrentSolutionItem
+			/*---------------------------------------------------------------*/
+
 			FETCH NEXT
 			FROM
 				@queryResultOpportunityCompetitor
 			INTO
 			@intOpportunityCompetitorId
 			,@strCompetitorEntityId
+			,@strCurrentSolutionId
 		END
 
 		CLOSE @queryResultOpportunityCompetitor

@@ -6,7 +6,7 @@
 	[strReferenceType] nvarchar(50) COLLATE Latin1_General_CI_AS not null default 'Competitor',
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMOpportunityCompetitor_intOpportunityCompetitorId] PRIMARY KEY CLUSTERED ([intOpportunityCompetitorId] ASC),
-	CONSTRAINT [UQ_tblCRMOpportunityCompetitor_intOpportunityId_intEnityId] UNIQUE ([intOpportunityId],[intEntityId]),
+	CONSTRAINT [UQ_tblCRMOpportunityCompetitor_intOpportunityId_intEnityId_strReferenceType] UNIQUE ([intOpportunityId],[intEntityId],[strReferenceType]),
     CONSTRAINT [FK_tblCRMOpportunityCompetitor_tblCRMOpportunity_intOpportunityId] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]) on delete cascade,
 	CONSTRAINT [FK_tblCRMOpportunityCompetitor_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
