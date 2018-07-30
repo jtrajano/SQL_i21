@@ -6842,6 +6842,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageIDOCXML.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRSubHedgePositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRSubInvPositionByCommodity.sql" />
+    <Build Include="dbo\Views\vyuARGetItemStockPOS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
