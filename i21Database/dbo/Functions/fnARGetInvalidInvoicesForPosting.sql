@@ -1250,7 +1250,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
+			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of component - ' + ARIA.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of component - ' + ARIA.[strItemNo] + ' was not specified.' END
 		FROM vyuARGetItemComponents ARIC
 		INNER JOIN tblARInvoiceDetail ARID
 				ON ARIC.[intItemId] = ARID.[intItemId]
