@@ -173,7 +173,9 @@ BEGIN
 		--AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, DATEADD(day, 7, @dtmDate), 101)
 		--ORDER BY dtmDate ASC
 		--)
-
+		
+		SET @networkCost = NULL
+		SET @effectiveDate = NULL
 
 		SELECT TOP 1 
 		 @networkCost = ISNULL(dblTransferCost,0)
