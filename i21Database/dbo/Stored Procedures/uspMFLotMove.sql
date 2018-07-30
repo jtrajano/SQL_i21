@@ -167,10 +167,8 @@ BEGIN TRY
 				SELECT intLotId
 				FROM tblICLot
 				WHERE intStorageLocationId = @intNewStorageLocationId
-					AND (
-						dblQty > 0
-						OR dblWeight > 0
-						)
+					AND dblQty > 0 
+					and intItemId <> @intItemId
 				)
 		BEGIN
 			RAISERROR (
