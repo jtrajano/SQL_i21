@@ -8,7 +8,7 @@ BEGIN TRY
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	--SET ANSI_WARNINGS OFF
 
 	DECLARE @intMinItem INT
 	DECLARE @strItemNo NVARCHAR(50)
@@ -31,6 +31,7 @@ BEGIN TRY
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 		,@strCustomerCode NVARCHAR(50)
 		,@strProductType NVARCHAR(50)
+		,@intCommodityAttributeId int
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -56,6 +57,29 @@ BEGIN TRY
 		SELECT @intMinItem = MIN(intStageItemId)
 		FROM tblIPItemStage
 		WHERE strSessionId = @strSessionId
+
+	SELECT @strInfo1 = ''
+
+	SELECT @strInfo2 = ''
+
+	SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ', '
+	FROM tblIPItemStage
+
+	IF Len(@strInfo1) > 0
+	BEGIN
+		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
+	END
+
+	SELECT @strInfo2 = @strInfo2 + ISNULL(strItemType, '') + ', '
+	FROM (
+		SELECT DISTINCT strItemType
+		FROM tblIPItemStage
+		) AS DT
+
+	IF Len(@strInfo2) > 0
+	BEGIN
+		SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
+	END
 
 	WHILE (@intMinItem IS NOT NULL)
 	BEGIN
@@ -84,9 +108,6 @@ BEGIN TRY
 				,@strProductType = strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intMinItem
-
-			SET @strInfo1 = ISNULL(@strItemNo, '')
-			SET @strInfo2 = ISNULL(@strItemType, '')
 
 			SELECT @intCategoryId = intCategoryId
 			FROM tblICCategory
@@ -136,7 +157,7 @@ BEGIN TRY
 
 			IF @strCustomerCode = 'HE'
 			BEGIN
-				SELECT @intCommodityId = intCommodityId
+				SELECT @intCommodityAttributeId=intCommodityAttributeId, @intCommodityId = intCommodityId
 				FROM tblICCommodityAttribute
 				WHERE strType = 'ProductType'
 					AND strDescription = @strProductType
@@ -231,6 +252,7 @@ BEGIN TRY
 						,intCommodityId
 						,strStatus
 						,intLifeTime
+						,intProductTypeId
 						)
 					SELECT strItemNo
 						,strDescription
@@ -242,6 +264,7 @@ BEGIN TRY
 						,@intCommodityId
 						,'Active'
 						,0
+						,@intCommodityAttributeId
 					FROM tblIPItemStage
 					WHERE strItemNo = @strItemNo
 						AND intStageItemId = @intStageItemId
@@ -414,6 +437,7 @@ BEGIN TRY
 						UPDATE i
 						SET i.strDescription = si.strDescription
 							,i.strShortName = LEFT(si.strDescription, 50)
+							,intProductTypeId=@intCommodityAttributeId 
 						FROM tblICItem i
 						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
 						WHERE intItemId = @intItemId
@@ -510,6 +534,7 @@ BEGIN TRY
 				,strSKUItemNo
 				,strDescription
 				,strSessionId
+				,strProductType
 				)
 			SELECT strItemNo
 				,dtmCreated
@@ -522,6 +547,7 @@ BEGIN TRY
 				,strSKUItemNo
 				,strDescription
 				,strSessionId
+				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
@@ -585,6 +611,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,strProductType
 				)
 			SELECT strItemNo
 				,dtmCreated
@@ -599,6 +626,7 @@ BEGIN TRY
 				,@ErrMsg
 				,'Failed'
 				,strSessionId
+				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 

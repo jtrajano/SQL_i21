@@ -40,6 +40,21 @@ BEGIN TRY
 	DECLARE @ysnDeleted BIT
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 	DECLARE @tblEntityContactIdOutput TABLE (intEntityId INT)
+	Declare @strCustomerCode nvarchar(50)
+
+	SELECT @strCustomerCode = strCustomerCode
+	FROM tblIPCompanyPreference
+
+	IF IsNULL(@strCustomerCode, '') = ''
+	BEGIN
+		RAISERROR (
+				'Customer code cannot be blank.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	IF ISNULL(@strSessionId, '') = ''
 		SELECT @intMinVendor = MIN(intStageEntityId)
@@ -108,7 +123,7 @@ BEGIN TRY
 			FROM tblSMCurrency
 			WHERE strCurrency = @strCurrency
 
-			IF ISNULL(@strAccountNo, '') = ''
+			IF ISNULL(@strAccountNo, '') = '' and @strCustomerCode='JDE'
 				RAISERROR (
 						'Account No is required.'
 						,16
@@ -162,7 +177,7 @@ BEGIN TRY
 						SELECT ISNULL(strAccountNo, '')
 						FROM tblIPEntityStage
 						WHERE intStageEntityId = @intStageEntityId
-						) = ''
+						) = '' and @strCustomerCode='JDE'
 					RAISERROR (
 							'Account No is required.'
 							,16
@@ -173,7 +188,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblIPEntityContactStage
 						WHERE intStageEntityId = @intStageEntityId
-						)
+						)and @strCustomerCode='JDE'
 					RAISERROR (
 							'Contact Name is required.'
 							,16
@@ -184,7 +199,7 @@ BEGIN TRY
 						SELECT TOP 1 ISNULL(strFirstName, '')
 						FROM tblIPEntityContactStage
 						WHERE intStageEntityId = @intStageEntityId
-						) = ''
+						) = ''and @strCustomerCode='JDE'
 					RAISERROR (
 							'Contact Name is required.'
 							,16
