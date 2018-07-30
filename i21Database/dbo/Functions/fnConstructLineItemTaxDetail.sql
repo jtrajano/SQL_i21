@@ -339,7 +339,8 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 0
-				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnTaxExempt] = 0
+				-- AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffUnitTax = SUM(@Quantity * [dblRate])
@@ -348,7 +349,8 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND [ysnCheckoffTax] = 1
-				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnTaxExempt] = 0
+				-- AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 				
 			SET @TotalUnitTax = ((ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)) + ISNULL(@TaxableByOtherUnitTax, @ZeroDecimal))
@@ -360,7 +362,8 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 0
-				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnTaxExempt] = 0
+				-- AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				
 			SELECT
 				@CheckOffRate = SUM([dblRate])
@@ -369,7 +372,8 @@ BEGIN
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 1
-				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnTaxExempt] = 0
+				-- AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 				AND @ExcludeCheckOff = 0
 
 			DELETE FROM @TaxableByOtherTaxUnit
