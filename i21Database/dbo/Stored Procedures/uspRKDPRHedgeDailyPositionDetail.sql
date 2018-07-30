@@ -555,7 +555,7 @@ JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 join tblSCTicket t on t.intTicketId=gh.intTicketId
-WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and strTicketStatus <> 'V'
+WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V'
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmDistributionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 and a.intCommodityId in (select intCommodity from @Commodity)
 
@@ -624,7 +624,7 @@ SELECT 	s.dblQuantity  dblTotal,
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId  
 	LEFT JOIN tblSCTicket t on s.strSourceNumber=t.strTicketNumber		   		  
 	WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
-			and isnull(t.strDistributionOption,'') <> 'DP' and strTicketStatus <> 'V'
+			and isnull(t.strDistributionOption,'') <> 'DP' and isnull(strTicketStatus,'') <> 'V'
 				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -648,8 +648,8 @@ DECLARE @tempCollateral TABLE (
 	    intCommodityId int,
 	    intUnitMeasureId int,
 	    intCompanyLocationId int,
-		intContractTypeId int
-		,intLocationId int,
+		intContractTypeId int,
+		intLocationId int,
 		intEntityId int
 		)
 
@@ -820,7 +820,7 @@ BEGIN
 	INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
-	WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId  and strTicketStatus <> 'V'
+	WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V'
 	AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate))t 
 	WHERE  intCompanyLocationId  IN (
@@ -956,7 +956,7 @@ BEGIN
 				LEFT JOIN tblSCTicket t on tr.strTicketNumber=t.strTicketNumber
 				LEFT JOIN tblEMEntity e on t.intEntityId=e.intEntityId 
 				WHERE 
-				c.intCommodityId = @intCommodityId  and strTicketStatus <> 'V' and
+				c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate)
 				and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -990,7 +990,7 @@ BEGIN
 			FROM vyuARInvoiceTransactionHistory c		
 			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
 				LEFT JOIN tblEMEntity e on s.intEntityId=e.intEntityId 
-			WHERE c.intCommodityId = @intCommodityId and strTicketStatus <> 'V'
+			WHERE c.intCommodityId = @intCommodityId and isnull(strTicketStatus,'') <> 'V'
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 				 and ysnPost is not null
@@ -1120,7 +1120,7 @@ BEGIN
 				WHERE 
 				c.intCommodityId = @intCommodityId  and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-				and t.intEntityId =@intVendorId and strTicketStatus <> 'V'
+				and t.intEntityId =@intVendorId and isnull(strTicketStatus,'') <> 'V'
 				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 			
 			)t where dblTotal<>0
 						
@@ -1151,7 +1151,7 @@ BEGIN
 			WHERE c.intCommodityId = @intCommodityId and e.intEntityId =@intVendorId
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-				 and ysnPost is not null and strTicketStatus <> 'V'				
+				 and ysnPost is not null and isnull(strTicketStatus,'') <> 'V'				
 			) a 
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,

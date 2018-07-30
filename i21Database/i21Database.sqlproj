@@ -6840,6 +6840,8 @@
     <Build Include="dbo\Tables\tblIPIDOCXMLError.sql" />
     <Build Include="dbo\Tables\tblIPIDOCXMLStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageIDOCXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRSubHedgePositionByCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRSubInvPositionByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
