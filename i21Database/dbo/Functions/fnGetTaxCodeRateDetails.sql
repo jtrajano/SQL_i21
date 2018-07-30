@@ -115,7 +115,7 @@ BEGIN
 		 (CASE 
 			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL) THEN 4
 			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND SMTCR.[intUnitMeasureId] IS NULL THEN 3
-			WHEN SMTCR.[strCalculationMethod] <> 'Unit' THEN 2
+			WHEN SMTCR.[strCalculationMethod] <> 'Unit' THEN 6
 			ELSE 1
 		 END) DESC
 		,SMTCR.[dtmEffectiveDate] DESC
