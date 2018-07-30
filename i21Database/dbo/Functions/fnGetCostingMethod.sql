@@ -11,7 +11,8 @@ BEGIN
 
 	SELECT	@LotCost = intCostingMethodId
 	FROM	dbo.tblICCostingMethod
-	WHERE	strCostingMethod = 'LOT COST'
+	WHERE	strCostingMethod = 'LOT'
+
 
 	DECLARE @costingMethod AS INT
 
