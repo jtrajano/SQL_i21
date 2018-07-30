@@ -55,7 +55,8 @@ BEGIN TRY
 		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 		JOIN tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+		LEFT JOIN tblEMEntity AS E ON E.intEntityId = S.intEntityId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -63,6 +64,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strParentLotNumber]', 'PL.strParentLotNumber')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strPartyName]', 'E.strName')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
@@ -100,6 +102,7 @@ BEGIN TRY
 			,PL.intParentLotId AS intLotId
 			,PL.strParentLotNumber
 			,LS.strSecondaryStatus AS strLotStatus
+			,E.strName AS strPartyName
 			,L.strLotAlias
 			,S.strSampleNumber
 			,B.strBook
@@ -138,7 +141,8 @@ BEGIN TRY
 	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+		LEFT JOIN tblEMEntity AS E ON E.intEntityId = S.intEntityId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -146,6 +150,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strParentLotNumber]', 'PL.strParentLotNumber')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strPartyName]', 'E.strName')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
 		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
@@ -161,6 +166,7 @@ BEGIN TRY
 			,PL.intParentLotId
 			,PL.strParentLotNumber
 			,LS.strSecondaryStatus
+			,E.strName
 			,L.strLotAlias
 			,S.strSampleNumber
 			,B.strBook
@@ -175,7 +181,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strParentLotNumber'
-	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strBook,strSubBook,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
+	SET @strColumnsList = @strColumnsList + ',strLotStatus,strPartyName,strLotAlias,strSampleNumber,strBook,strSubBook,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
 	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -186,6 +192,7 @@ BEGIN TRY
 	,intLotId  
 	,strParentLotNumber
 	,strLotStatus
+	,strPartyName
 	,strLotAlias
 	,strSampleNumber
 	,strBook
@@ -208,6 +215,7 @@ BEGIN TRY
 			,intLotId
 			,strParentLotNumber
 			,strLotStatus
+			,strPartyName
 			,strLotAlias
 			,strSampleNumber
 			,strBook
