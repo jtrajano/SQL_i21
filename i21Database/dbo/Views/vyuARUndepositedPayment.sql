@@ -5,7 +5,7 @@ SELECT
 	,[intSourceTransactionId]	= A.[intPaymentId] 
 	,[dtmDate]					= A.[dtmDatePaid]
 	,[strName]					= E.[strName] 
-	,[dblAmount]				= A.[dblAmountPaid]
+	,[dblAmount]				= CASE WHEN (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('Prepay')) THEN A.[dblAmountPaid]*-1 ELSE A.[dblAmountPaid] END
 	,[strSourceSystem]			= 'AR'
 	,[intBankAccountId]			= A.[intBankAccountId]
 	,[intLocationId]			= A.[intLocationId] 
@@ -34,7 +34,7 @@ WHERE
 	AND (A.ysnImportedFromOrigin <> 1 AND A.ysnImportedAsPosted <> 1)
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
-	AND (ISNULL(A.dblAmountPaid, 0) > 0 OR (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod = 'ACH'))
+	AND (ISNULL(A.dblAmountPaid, 0) > 0 OR (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('ACH','Prepay')))
 	
 UNION ALL	
 	
