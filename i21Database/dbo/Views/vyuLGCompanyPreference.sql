@@ -200,6 +200,9 @@ SELECT CP.intCompanyPreferenceId
 	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
 	,CP.ysnFullHeaderLogo
 	,CP.ysnContainerNoUnique
+	,CP.ysnEnableAccrualsForInbound
+	,CP.ysnEnableAccrualsForOutbound
+	,CP.ysnEnableAccrualsForDropShip
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
