@@ -165,9 +165,6 @@ BEGIN
 			OUTER APPLY (
 				SELECT intEmailSetupCount = COUNT(*) 
 				FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
-				WHERE CC.intCustomerEntityId = C.intEntityId 
-					AND ISNULL(CC.strEmail, '') <> '' 
-					AND CC.strEmailDistributionOption LIKE '%Letter%'
 			) EMAILSETUP
 			WHERE C.ysnActive = 1
 		END	
@@ -200,8 +197,6 @@ BEGIN
 
 	IF @ysnEmailOnly = 1
 		DELETE FROM @SelectedCustomer WHERE ysnHasEmailSetup = 0
-	ELSE
-		DELETE FROM @SelectedCustomer WHERE ysnHasEmailSetup = 1
 
 	INSERT INTO @OriginalMsgInHTMLTable
 	SELECT CONVERT(VARCHAR(MAX), @blb) 
