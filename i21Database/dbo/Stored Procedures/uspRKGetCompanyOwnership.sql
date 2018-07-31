@@ -140,7 +140,7 @@ FROM (
 	
 		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 			AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
-		AND ir.intSourceType = 5
+		AND ir.intSourceType = 5 AND gs.strStorageTypeCode <> 'OS'
 		) t
 
 		UNION --Direct from Scale
@@ -183,7 +183,7 @@ FROM (
 				,i.strItemNo
 				,isnull(bd.dblQtyReceived, 0) dblInQty
 				,(bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
-				,st.strDistributionOption
+				,gs.strStorageTypeCode strDistributionOption
 				,b.strBillId AS strReceiptNumber
 				,b.intBillId AS intReceiptId
 			FROM tblAPBill b
@@ -195,8 +195,8 @@ FROM (
 			INNER JOIN tblGRSettleStorage gr ON gr.intBillId = b.intBillId
 			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
 			INNER JOIN tblGRCustomerStorage grs ON  grt.intCustomerStorageId = grs.intCustomerStorageId
+			INNER JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=grs.intStorageTypeId 
 			LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
-			LEFT JOIN vyuSCTicketView st ON st.intTicketId = grs.intTicketId
 			WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 				AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
 			) t
