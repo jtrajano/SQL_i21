@@ -218,7 +218,8 @@ SELECT
 										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 									END
 		,dblNet						= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN 
+											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight) END
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= CNT.intFreightTermId
