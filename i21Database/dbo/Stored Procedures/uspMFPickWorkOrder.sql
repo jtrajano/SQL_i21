@@ -681,9 +681,9 @@ BEGIN TRY
 
 		INSERT INTO @tblMFWorkOrderInputItem
 		SELECT DISTINCT I.intItemId
-			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId)
 			,I.intItemUOMId
-			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
+			,(SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intMainItemId)) * 100
 			,I.intMainItemId
 		FROM @tblICItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
