@@ -20,6 +20,10 @@ SELECT L.strLoadNumber
 	,IU.intItemUOMId
 	,UM.strUnitMeasure
 	,LC.strMarks
+	,L.dtmScheduledDate
+	,L.dtmPostedDate
+	,E.intEntityId
+	,E.strName AS strEntityName
 	,'Inbound' AS strShipmentType
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -28,6 +32,7 @@ JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = LD.intItemId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CASE WHEN LD.intPSubLocationId IS NULL THEN CD.intSubLocationId ELSE LD.intPSubLocationId END
@@ -58,6 +63,10 @@ SELECT L.strLoadNumber
 	,IU.intItemUOMId
 	,UM.strUnitMeasure
 	,LC.strMarks
+	,L.dtmScheduledDate
+	,L.dtmPostedDate
+	,E.intEntityId
+	,E.strName AS strEntityName
 	,'Outbound' AS strShipmentType
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -66,6 +75,7 @@ JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = LD.intItemId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+JOIN tblEMEntity E ON E.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CASE WHEN LD.intSSubLocationId IS NULL THEN CD.intSubLocationId ELSE LD.intSSubLocationId END
