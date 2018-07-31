@@ -219,7 +219,7 @@ BEGIN
 					))
 			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemStockUOM S ON I.intItemId = S.intItemId
-			AND S.intStorageLocationId = @intStorageLocationId
+			AND IsNULL(S.intStorageLocationId,0) = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
 					WHEN @intInputItemId = 0
@@ -432,7 +432,7 @@ BEGIN
 			AND R.intWorkOrderId = @intWorkOrderId
 
 		JOIN dbo.tblICItemStockUOM S ON I.intItemId = S.intItemId
-			AND S.intStorageLocationId = @intStorageLocationId
+			AND IsNULL(S.intStorageLocationId,0) = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
 					WHEN @intInputItemId = 0
