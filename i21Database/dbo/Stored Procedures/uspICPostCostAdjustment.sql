@@ -18,6 +18,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@ysnPost AS BIT = 1
+	,@ysnUpdateItemCostAndPrice AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -320,6 +321,7 @@ BEGIN
 			,@intInTransitSourceLocationId 
 			,@ysnPost
 			,@intOtherChargeItemId 
+			,@ysnUpdateItemCostAndPrice
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -361,6 +363,7 @@ BEGIN
 			,@intInTransitSourceLocationId 
 			,@ysnPost
 			,@intOtherChargeItemId 
+			,@ysnUpdateItemCostAndPrice
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -402,6 +405,7 @@ BEGIN
 			,@intInTransitSourceLocationId 
 			,@ysnPost
 			,@intOtherChargeItemId 
+			,@ysnUpdateItemCostAndPrice
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -443,6 +447,7 @@ BEGIN
 			,@intInTransitSourceLocationId 
 			,@ysnPost
 			,@intOtherChargeItemId 
+			,@ysnUpdateItemCostAndPrice
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -485,6 +490,7 @@ BEGIN
 			,@strActualCostId 
 			,@ysnPost
 			,@intOtherChargeItemId 
+			,@ysnUpdateItemCostAndPrice
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
