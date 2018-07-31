@@ -27,6 +27,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveFIFO]
 	,@intInTransitSourceLocationId AS INT = NULL  
 	,@ysnPost AS BIT = 1 
 	,@intOtherChargeItemId AS INT = NULL
+	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -582,3 +583,57 @@ BEGIN
 	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 END 
+
+-- Update the last cost and standard cost. 
+BEGIN 
+	IF @ysnUpdateItemCostAndPrice = 1 AND @CostBucketId IS NOT NULL 
+	BEGIN 
+		UPDATE	p
+		SET		p.dblAverageCost = 
+						ISNULL(
+							dbo.fnRecalculateAverageCost(p.intItemId, p.intItemLocationId)
+							, p.dblAverageCost
+						) 
+				,p.dblLastCost = dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
+				,p.dblStandardCost = 
+					CASE 
+						WHEN ISNULL(p.dblStandardCost, 0) = 0 THEN 
+							dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
+						ELSE 
+							p.dblStandardCost 
+					END 
+				,p.ysnIsPendingUpdate = 
+						CASE	WHEN p.ysnIsPendingUpdate = 1 THEN 1
+								WHEN 
+									p.dblLastCost <> dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost) 
+									OR dblStandardCost <> (
+											CASE 
+												WHEN ISNULL(p.dblStandardCost, 0) = 0 THEN 
+													dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
+												ELSE 
+													p.dblStandardCost 
+											END 
+										)
+									THEN 
+									1 										
+								ELSE 
+									0
+						END
+		FROM	tblICItemPricing p INNER JOIN tblICInventoryFIFO cb
+					ON p.intItemId = cb.intItemId
+					AND p.intItemLocationId = cb.intItemLocationId
+				INNER JOIN tblICItemUOM stockUOM
+					ON stockUOM.intItemId = p.intItemId
+					AND stockUOM.ysnStockUnit = 1
+		WHERE	cb.intInventoryFIFOId = @CostBucketId
+				AND cb.dblStockIn <> 0 
+				AND cb.intItemId = @intItemId 
+				AND cb.intItemLocationId = @intItemLocationId
+				AND ISNULL(cb.dblCost, 0) <> 0
+	END 
+
+	-- Update the Item Pricing
+	EXEC uspICUpdateItemPricing
+		@intItemId
+		,@intItemLocationId
+END
