@@ -6386,6 +6386,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostReturnCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipmentOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

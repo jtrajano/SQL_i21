@@ -29,6 +29,7 @@
 [intDebitNoteReportFormat] INT NULL,
 [intCreditNoteReportFormat] INT NULL,
 [intOrganicDeclarationReportFormat] INT NULL,
+[intBOLReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
