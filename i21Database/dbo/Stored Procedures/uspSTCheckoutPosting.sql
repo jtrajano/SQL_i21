@@ -2436,6 +2436,59 @@ BEGIN
 
 						IF(@ysnSuccess = CAST(1 AS BIT))
 							BEGIN
+								-----------------------------------------------------------------------
+								------------------- START DELETE Invoice  -----------------------------
+								-----------------------------------------------------------------------
+								DECLARE @tblInvoiceIds TABLE ([intInvoiceId] INT NULL)
+
+								-- Insert to temp table
+								INSERT INTO @tblInvoiceIds(intInvoiceId)
+								SELECT CAST(intID AS INT) AS intInvoiceId 
+								FROM [dbo].[fnGetRowsFromDelimitedValues](@strCurrentAllInvoiceIdList) ORDER BY [intID] ASC
+
+								DECLARE @intCurrentInvoiceLoop AS INT
+
+								IF EXISTS(SELECT intInvoiceId FROM @tblInvoiceIds)
+									BEGIN
+										-- Update tblSTCheckoutHeader
+										UPDATE tblSTCheckoutHeader
+										SET intInvoiceId = NULL, strAllInvoiceIdList = NULL
+										WHERE intCheckoutId = @intCheckoutId
+
+										-- Update tblSTCheckoutCustomerCharges
+										UPDATE tblSTCheckoutCustomerCharges
+										SET intCustomerChargesInvoiceId = NULL
+										WHERE intCheckoutId = @intCheckoutId
+									END
+								
+
+								WHILE EXISTS (SELECT TOP (1) 1 FROM @tblInvoiceIds)
+									BEGIN
+										SELECT TOP 1 @intCurrentInvoiceLoop = CAST(intInvoiceId AS INT)
+										FROM @tblInvoiceIds
+
+										-- DELETE Invoice
+										BEGIN TRY	
+											EXEC [dbo].[uspARDeleteInvoice]
+													@InvoiceId	= @intCurrentInvoiceLoop,
+													@UserId		= @intCurrentUserId
+										END TRY
+										BEGIN CATCH
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Deleting Invoice Error: ' + ERROR_MESSAGE()
+
+											-- ROLLBACK
+											GOTO ExitWithRollback
+											RETURN
+
+										END CATCH
+
+										DELETE TOP (1) FROM @tblInvoiceIds
+									END
+								-----------------------------------------------------------------------
+								-------------------- END DELETE Invoice -------------------------------
+								-----------------------------------------------------------------------
 
 								SET @ysnInvoiceStatus = 0
 								-----------------------------------------------------------------------
@@ -2458,6 +2511,9 @@ BEGIN
 											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
 											SET @ysnSuccess = CAST(0 AS BIT)
 											SET @strStatusMsg = 'Unpost Mark Up/Down error: ' + ERROR_MESSAGE()
+
+											-- ROLLBACK
+											GOTO ExitWithRollback
 											RETURN
 
 										END CATCH
