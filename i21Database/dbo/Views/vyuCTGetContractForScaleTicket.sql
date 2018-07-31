@@ -8,7 +8,8 @@ AS
 			CD.dtmStartDate,				
 			CD.intItemId,																			
 			CD.dtmEndDate,																										
-			CD.dblBasis,																				
+			CD.dblBasis,
+			CD.dblBalance,																				
 			CD.dblCashPrice,																						
 			CD.intContractStatusId,																			
 			IM.strItemNo,										
@@ -36,7 +37,8 @@ AS
 			CH.strContractNumber,
 			CH.ysnUnlimitedQuantity,
 			CD.intContractSeq,
-			CD.intPricingTypeId
+			CD.intPricingTypeId,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0))			AS	dblBalanceInItemStockUOM
 																												
 	FROM	tblCTContractDetail				CD	CROSS																						
 	JOIN	tblCTCompanyPreference			CP																									
