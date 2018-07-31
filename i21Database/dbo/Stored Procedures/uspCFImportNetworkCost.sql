@@ -33,7 +33,7 @@ BEGIN
 		,ysnProcessed = 0
 	INTO #tmpStagingTable
 	FROM tblCFNetworkCostStaging
-	WHERE @strGUID = @strGUID
+	WHERE strGUID = @strGUID
 
 	SELECT @intTotalRead = COUNT(1) FROM #tmpStagingTable
 
