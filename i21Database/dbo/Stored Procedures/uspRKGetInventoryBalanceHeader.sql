@@ -199,7 +199,7 @@ FROM(
 			,dblSalesInTransit
 		FROM(
 			SELECT 
-				 dtmDate 
+				 DateData dtmDate 
 				,[Receive In]
 				,tranDSInQty
 				,[Ship Out]
@@ -214,7 +214,7 @@ FROM(
 				,[Paid Balance]
 				,T1.dblSalesInTransit
 			FROM @tblConsolidatedResult T1
-			--FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
+			FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
 		)t 
 	)t1
 )t2 ORDER BY dtmDate
