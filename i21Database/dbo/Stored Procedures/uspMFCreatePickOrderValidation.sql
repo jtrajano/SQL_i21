@@ -610,7 +610,7 @@ BEGIN TRY
 				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 				WHERE S.intItemId = @intItemId
 					AND IL.intLocationId = @intLocationId
-					AND S.intStorageLocationId NOT IN (
+					AND IsNULL(S.intStorageLocationId,-1) NOT IN (
 						SELECT intStageLocationId
 						FROM @tblMFStageLocation
 						)
@@ -726,7 +726,7 @@ BEGIN TRY
 						JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 						WHERE S.intItemId = @intItemId
 							AND IL.intLocationId = @intLocationId
-							AND S.intStorageLocationId NOT IN (
+							AND IsNULL(S.intStorageLocationId,-1) NOT IN (
 								SELECT intStageLocationId
 								FROM @tblMFStageLocation
 								)
