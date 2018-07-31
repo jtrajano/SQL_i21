@@ -656,4 +656,19 @@ BEGIN
   UPDATE tblCTContractCost SET strCostStatus = 'Open' WHERE strCostStatus IS NULL
 END
 GO
+
+IF NOT EXISTS(SELECT * FROM tblCTComponentMap)
+BEGIN
+	INSERT INTO tblCTComponentMap(strComponent)
+	SELECT 'Component1' UNION 
+	SELECT 'Component2' UNION 
+	SELECT 'Component3' UNION 
+	SELECT 'Component4' UNION 
+	SELECT 'Component5' UNION 
+	SELECT 'Component6' UNION 
+	SELECT 'Component7' UNION 
+	SELECT 'Component8' UNION 
+	SELECT 'Component9'  
+	ORDER BY 1
+END
 PRINT('Contract 1_MasterTables End')

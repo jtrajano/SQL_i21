@@ -6844,6 +6844,10 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRSubInvPositionByCommodity.sql" />
     <Build Include="dbo\Views\vyuARGetItemStockPOS.sql" />
     <Build Include="dbo\Views\vyuAPSalesForPayables.sql" />
+    <Build Include="dbo\Tables\tblCTImportAOP.sql" />
+    <Build Include="dbo\Tables\tblCTComponentMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportAOP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessImportAOP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
