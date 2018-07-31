@@ -121,6 +121,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strElevatorReceiptNumber,
 	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
 	SC.intSalesOrderId,
+	SC.intDeliverySheetId,
+	SC.dtmTransactionDateTime,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
 	SC.strDistributionOption = 'LOD' THEN 'Load' WHEN
