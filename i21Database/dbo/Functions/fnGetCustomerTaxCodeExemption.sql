@@ -251,7 +251,16 @@ BEGIN
 		AND (ISNULL(TE.[intTaxCodeId], 0) = 0 OR TE.[intTaxCodeId] = @TaxCodeId)
 		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)	
 		AND (ISNULL(TE.[intSiteNumber], 0) = 0 OR TE.[intSiteNumber] = @SiteNumberId)
-		AND ((ISNULL(TE.[intVehicleId], 0) = 0 OR TE.[intVehicleId] = @VehicleId) OR (ISNULL(TE.[intCardId], 0) = 0 OR TE.[intCardId] = @CardId))
+		AND (
+				(ISNULL(TE.[intCardId], 0) <> 0 AND ISNULL(TE.[intVehicleId], 0) <> 0 AND TE.[intCardId] = @CardId AND TE.[intVehicleId] = @VehicleId)
+				OR
+				(ISNULL(TE.[intCardId], 0) = 0 AND ISNULL(TE.[intVehicleId], 0) <> 0 AND TE.[intVehicleId] = @VehicleId)
+				OR
+				(ISNULL(TE.[intVehicleId], 0) = 0 AND ISNULL(TE.[intCardId], 0) <> 0 AND TE.[intCardId] = @CardId)
+				OR
+				(ISNULL(TE.[intCardId], 0) = 0 AND ISNULL(TE.[intVehicleId], 0) = 0)
+
+			)
 		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (TE.[strState] = @State AND @State = @TaxState) OR LEN(LTRIM(RTRIM(ISNULL(@State,'')))) <= 0 )
 		--AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
 	ORDER BY
