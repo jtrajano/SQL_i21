@@ -6843,6 +6843,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRSubHedgePositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRSubInvPositionByCommodity.sql" />
     <Build Include="dbo\Views\vyuARGetItemStockPOS.sql" />
+    <Build Include="dbo\Views\vyuAPSalesForPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

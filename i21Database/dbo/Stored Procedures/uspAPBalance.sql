@@ -60,6 +60,16 @@ SELECT * FROM (
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+		UNION ALL
+		SELECT
+			A.intInvoiceId
+			,A.intAccountId
+			,D.strAccountId
+			,CAST((SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+		FROM vyuAPSalesForPayables A
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		WHERE D.strAccountCategory = 'AP Account' --there are old data where cash refund have been posted to non AP account
+		GROUP BY A.intInvoiceId, A.intAccountId, D.strAccountId
 	) SubQuery
 	GROUP BY 
 	strAccountId
