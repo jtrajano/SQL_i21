@@ -509,7 +509,8 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
  UNION ALL SELECT intTaxCriteriaId = 395, strTaxCategory = 'MI Excise Tax Gasoline', strState = 'MI', strFormCode = '4004', strScheduleCode = '7B', strType = 'Jet Fuel', strCriteria = '<> 0', intMasterId = 22301
  UNION ALL SELECT intTaxCriteriaId = 396, strTaxCategory = 'MI Excise Tax Gasoline', strState = 'MI', strFormCode = '3791', strScheduleCode = '1', strType = 'Ethanol Blends (E70 - E99)', strCriteria = '<> 0', intMasterId = 22255
  UNION ALL SELECT intTaxCriteriaId = 397, strTaxCategory = 'MI Excise Tax Diesel Clear', strState = 'MI', strFormCode = '3992', strScheduleCode = '1', strType = 'Undyed Diesel', strCriteria = '<> 0', intMasterId = 22287
- 
+ UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MI Excise Tax Propane', strState = 'MI', strFormCode = '5494', strScheduleCode = 'LPG', strType = 'Propane', strCriteria = '<> 0', intMasterId = 22355
+
 
 EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 

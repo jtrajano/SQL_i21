@@ -92,6 +92,7 @@ SELECT intTaxCategoryId = 58, strState = 'MI', strTaxCategory = 'MI Excise Tax G
 UNION ALL SELECT intTaxCategoryId = 59, strState = 'MI', strTaxCategory = 'MI Excise Tax Diesel Clear', intMasterId = 2210
 UNION ALL SELECT intTaxCategoryId = 60, strState = 'MI', strTaxCategory = 'MI Inspection Fee', intMasterId = 2211
 UNION ALL SELECT intTaxCategoryId = 61, strState = 'MI', strTaxCategory = 'MI Excise Tax Diesel Dyed', intMasterId = 222058
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MI', strTaxCategory = 'MI Excise Tax Propane', intMasterId = 222059	
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MI', @TaxCategories = @TaxCategoryMI
 
