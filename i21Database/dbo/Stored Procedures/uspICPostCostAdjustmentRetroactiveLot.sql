@@ -165,6 +165,7 @@ BEGIN
 			,@CostBucketOriginalStockIn AS NUMERIC(38, 20)
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
+			,@CostBucketDate AS DATETIME 
 
 	--SELECT	TOP 1 
 	--		@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -181,6 +182,7 @@ BEGIN
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
 			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
+			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -191,15 +193,23 @@ BEGIN
 		
 	-- Validate the cost bucket
 	BEGIN 
+		SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
+		FROM	tblICItem 
+		WHERE	intItemId = @intItemId
+
 		IF @CostBucketId IS NULL
 		BEGIN 
-			SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
-			FROM	tblICItem 
-			WHERE	intItemId = @intItemId
-
 			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.
 			EXEC uspICRaiseError 80062, @strItemNo, @strSourceTransactionId;  
 			RETURN -80062;
+		END
+
+		-- Check if cost adjustment date is earlier than the cost bucket date. 
+		IF dbo.fnDateLessThan(@dtmDate, @CostBucketDate) = 1
+		BEGIN 
+			-- 'Cost adjustment cannot continue. Cost adjustment for {Item} cannot be earlier than {Cost Bucket Date}.'
+			EXEC uspICRaiseError 80219, @strItemNo, @CostBucketDate;  
+			RETURN -80219;
 		END
 	END 
 
