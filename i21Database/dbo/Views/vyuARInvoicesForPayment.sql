@@ -13,6 +13,8 @@ SELECT
 	,[intEntityCustomerId]				= ARIFP.[intEntityCustomerId]	
 	,[strCustomerName]					= ARIFP.[strCustomerName]
 	,[strCustomerNumber]				= ARIFP.[strCustomerNumber]
+	,[strAccountNumber]					= ARIFP.[strAccountNumber]
+	,[strAddress]						= ARIFP.[strAddress]
 	,[intAccountId]						= ARIFP.[intAccountId]
 	,[intCurrencyId]					= ARIFP.[intCurrencyId]	
 	,[dtmDate]							= ARIFP.[dtmDate]
@@ -61,8 +63,7 @@ SELECT
 										  END
 	,[ysnACHActive]						=  ISNULL(ysnACHActive, 0)
 	,[dblInvoiceDiscountAvailable]		= ARIFP.[dblInvoiceDiscountAvailable]
-FROM
-	(
+FROM (
 		SELECT 
 			 [intTransactionId]					= ARI.[intInvoiceId]
 			,[strTransactionNumber]				= ARI.[strInvoiceNumber]
@@ -75,6 +76,8 @@ FROM
 			,[intEntityCustomerId]				= ARI.[intEntityCustomerId]
 			,[strCustomerName]					= CE.strName
 			,[strCustomerNumber]				= ARC.[strCustomerNumber]
+			,[strAccountNumber]					= ARC.[strAccountNumber]
+			,[strAddress]						= EL.[strAddress]
 			,[intCompanyLocationId]				= ARI.[intCompanyLocationId]
 			,[intAccountId]						= ARI.[intAccountId]
 			,[intCurrencyId]					= ARI.[intCurrencyId]	
@@ -115,77 +118,59 @@ FROM
 			,[dblCurrencyExchangeRate]			= ISNULL(ARI.[dblCurrencyExchangeRate], FX.[dblCurrencyExchangeRate])
 			,[ysnACHActive]						= EFT.[ysnActive]
 			,[dblInvoiceDiscountAvailable]		= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
-		FROM
-			[tblARInvoice] ARI
-		INNER JOIN
-			(SELECT 
-				strCustomerNumber,
-				[intEntityId],
-				intPaymentMethodId
-			 FROM 
-				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId] 
-		INNER JOIN
-			(SELECT	
-				intEntityId,
-				strName
-			 FROM
-				dbo.tblEMEntity) AS CE ON ARC.[intEntityId] = CE.intEntityId 
-		LEFT OUTER JOIN
-			(SELECT 
-				intPaymentMethodID,
-				strPaymentMethod
-			 FROM
-				dbo.tblSMPaymentMethod) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
-		LEFT OUTER JOIN 
-			(
-			SELECT
-				 [intInvoiceId]
-				,[strInvoiceReportNumber]
-			FROM
-				tblCFTransaction
-			) CFT 
-				ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
-		LEFT JOIN
-			(
-				SELECT
-					intEntityId,
-					ysnActive
-				FROM
-					tblEMEntityEFTInformation
-			) EFT ON CE.intEntityId = EFT.intEntityId
-		LEFT JOIN
-			(
-			SELECT
-				 B.[intInvoiceId]
-				,A.[intCurrencyExchangeRateTypeId]
-				,A.[intCurrencyExchangeRateId]
-				,A.[dblCurrencyExchangeRate]
-				,SM.[strCurrencyExchangeRateType]
-			FROM
-				tblARInvoiceDetail A
-			INNER JOIN
-				(
-				SELECT
-					 [intInvoicedetailId]	= MIN([intInvoiceDetailId])
-					,[intInvoiceId]			= [intInvoiceId]
-				FROM
-					tblARInvoiceDetail
-				GROUP BY
-					[intInvoiceId]
-				) B
-					ON A.[intInvoiceDetailId] = B.[intInvoicedetailId]
-			INNER JOIN
-				(
-				SELECT
-					 [intCurrencyExchangeRateTypeId]
-					,[strCurrencyExchangeRateType]
-				FROM
-					tblSMCurrencyExchangeRateType
-				) SM
-					ON A.[intCurrencyExchangeRateTypeId] = SM.[intCurrencyExchangeRateTypeId]
-			) FX
-				ON ARI.[intInvoiceId] = FX.[intInvoiceId]			
-				
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+				 , strCustomerNumber
+				 , intPaymentMethodId
+				 , strAccountNumber
+			 FROM dbo.tblARCustomer WITH (NOLOCK)
+		) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
+		INNER JOIN (
+			SELECT intEntityId
+				 , strAddress
+			FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+			WHERE ysnDefaultLocation = 1
+		) AS EL ON ARC.intEntityId = EL.intEntityId
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+		) AS CE ON ARC.[intEntityId] = CE.intEntityId 
+		LEFT OUTER JOIN (
+			SELECT intPaymentMethodID
+				 , strPaymentMethod
+			FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+		) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
+		LEFT OUTER JOIN (
+			SELECT intInvoiceId
+				 , strInvoiceReportNumber
+			FROM dbo.tblCFTransaction WITH (NOLOCK)
+		) CFT ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
+		LEFT JOIN (
+			SELECT intEntityId
+				 , ysnActive
+			FROM dbo.tblEMEntityEFTInformation WITH (NOLOCK)
+		) EFT ON CE.intEntityId = EFT.intEntityId
+		LEFT JOIN (
+			SELECT B.[intInvoiceId]
+				 , A.[intCurrencyExchangeRateTypeId]
+				 , A.[intCurrencyExchangeRateId]
+				 , A.[dblCurrencyExchangeRate]
+				 , SM.[strCurrencyExchangeRateType]
+			FROM dbo.tblARInvoiceDetail A WITH (NOLOCK)
+			INNER JOIN (
+				SELECT [intInvoicedetailId]	= MIN([intInvoiceDetailId])
+					 , [intInvoiceId]		= [intInvoiceId]
+				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+				GROUP BY intInvoiceId
+			) B ON A.[intInvoiceDetailId] = B.[intInvoicedetailId]
+			INNER JOIN (
+				SELECT intCurrencyExchangeRateTypeId
+					 , strCurrencyExchangeRateType
+				FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
+			) SM ON A.[intCurrencyExchangeRateTypeId] = SM.[intCurrencyExchangeRateTypeId]
+		) FX ON ARI.[intInvoiceId] = FX.[intInvoiceId]				
 		OUTER APPLY (
 			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 			FROM (
@@ -217,15 +202,13 @@ FROM
 				FOR XML PATH ('')
 			) INV (strCustomerReference)
 		) CUSTOMERREFERENCES
-		WHERE
-			ARI.[ysnPosted] = 1
+		WHERE ARI.[ysnPosted] = 1
 			AND ysnCancelled = 0			
 			AND strTransactionType != 'Credit Note'
 			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
 		UNION ALL
-
 
 		SELECT 
 			 [intTransactionId]					= APB.[intTransactionId]
@@ -239,6 +222,8 @@ FROM
 			,[intEntityCustomerId]				= APB.[intEntityCustomerId]
 			,[strCustomerName]					= APB.[strCustomerName]
 			,[strCustomerNumber]				= APB.[strCustomerNumber]
+			,[strAccountNumber]					= ARC.[strAccountNumber]
+			,[strAddress]						= EL.[strAddress]
 			,[intCompanyLocationId]				= APB.[intCompanyLocationId]
 			,[intAccountId]						= APB.[intAccountId]
 			,[intCurrencyId]					= APB.[intCurrencyId]
@@ -274,32 +259,33 @@ FROM
 			,[dblCurrencyExchangeRate]			= APB.[dblCurrencyExchangeRate]
 			,[ysnACHActive]						= APB.[ysnACHActive]
 			,[dblInvoiceDiscountAvailable]		= APB.[dblInvoiceDiscountAvailable]
-		FROM
-			[vyuAPVouchersForARPayment] APB
-			
+		FROM [vyuAPVouchersForARPayment] APB
+		INNER JOIN (
+			SELECT intEntityId
+				 , strAccountNumber
+			 FROM dbo.tblARCustomer WITH (NOLOCK)
+		) AS ARC ON APB.intEntityCustomerId = ARC.intEntityId
+		INNER JOIN (
+			SELECT intEntityId
+				 , strAddress
+			FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+			WHERE ysnDefaultLocation = 1
+		) AS EL ON APB.intEntityCustomerId = EL.intEntityId
 	) ARIFP
-LEFT OUTER JOIN 
-	(
-	SELECT
-		 [intTermID]
-		,[strTerm]
-		,[strType]
-		,[intDiscountDay]
-		,[dtmDiscountDate]
-		,[dblDiscountEP] 
-		,[intBalanceDue]
-		,[dtmDueDate]
-		,[dblAPR]
-	FROM
-		tblSMTerm
-	) SMT
-		ON ARIFP.[intTermId] = SMT.[intTermID]
-LEFT OUTER JOIN 
-	(
-	SELECT
-		 [intCompanyLocationId]
-		,[strLocationName]
-	FROM
-		tblSMCompanyLocation
-	) SMCL
-		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN (
+	SELECT intTermID
+		 , strTerm
+		 , strType
+		 , intDiscountDay
+		 , dtmDiscountDate
+		 , dblDiscountEP
+		 , intBalanceDue
+		 , dtmDueDate
+		 , dblAPR
+	FROM dbo.tblSMTerm WITH (NOLOCK)
+) SMT ON ARIFP.intTermId = SMT.intTermID
+LEFT OUTER JOIN (
+	SELECT intCompanyLocationId
+		 , strLocationName
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
