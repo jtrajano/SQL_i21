@@ -162,7 +162,7 @@ BEGIN
                 dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
                    ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId 
                 FROM @tblGetOpenContractDetail cd
-                WHERE cd.intContractTypeId in(1,2) AND cd.intPricingTypeId IN (1,2,3) and 
+                WHERE cd.intContractTypeId in(1,2) and 
                                 cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
                 AND cd.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN cd.intCompanyLocationId ELSE @intLocationId END)t
                                 WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -886,7 +886,7 @@ BEGIN
                 dbo.fnCTConvertQuantityToTargetCommodityUOM(CD.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) AS dblTotal
                                 ,CD.intUnitMeasureId,@intCommodityId as intCommodityId,intCompanyLocationId
                 FROM @tblGetOpenContractDetail CD
-                WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and CD.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
+                WHERE intContractTypeId in(1,2)  and CD.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
                 AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
                 AND intEntityId= @intVendorId) t 
                 WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
