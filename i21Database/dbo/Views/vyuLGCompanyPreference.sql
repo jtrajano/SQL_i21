@@ -148,6 +148,13 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 2
 			THEN ''
 		END strOrganicDeclarationReportFormat
+	,CP.intBOLReportFormat
+	,CASE CP.intBOLReportFormat
+		WHEN 1
+			THEN 'BOL Report Format - 1'
+		WHEN 2
+			THEN ''
+		END strBOLReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
