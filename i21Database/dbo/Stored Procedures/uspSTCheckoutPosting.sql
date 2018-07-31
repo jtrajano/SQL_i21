@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspSTCheckoutPosting]
+﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId INT,
 	@intCheckoutId INT,
 	@strDirection NVARCHAR(50),
