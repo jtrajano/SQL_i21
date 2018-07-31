@@ -113,7 +113,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContra
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-	WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and CD.intCommodityId =@intCommodityId
+	WHERE intContractTypeId in(1,2)  and CD.intCommodityId =@intCommodityId
 	AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 	 and  CD.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then CD.intEntityId else @intVendorId end 
 

@@ -280,7 +280,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+'HTA' END AS strType
+		,ct.strContractType+' '+strPricingType AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM tblCTContractDetail CDT
@@ -294,11 +294,11 @@ WITH Pricing AS
 															END
 														) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
-	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId =3
+	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId not in (1,2)
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
     AND CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
-) t 
+) t
