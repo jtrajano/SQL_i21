@@ -279,6 +279,7 @@ BEGIN
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
 		WHERE Shipment.intLoadId = @intInventoryShipmentId
 		)
+
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate]
 		,[strBatchId]
