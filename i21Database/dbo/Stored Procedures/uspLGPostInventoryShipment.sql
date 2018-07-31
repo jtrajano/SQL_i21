@@ -13,9 +13,9 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'Outbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 -- Constants  
-DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 46
 DECLARE @ysnRecap AS INT = 0
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ENABLE_ACCRUALS_FOR_OUTBOUND BIT = 0
@@ -630,10 +630,6 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
@@ -1153,10 +1149,6 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
@@ -1196,7 +1188,7 @@ SELECT LD.intItemId
 		END
 	,LD.intLoadId
 	,CAST(L.strLoadNumber AS VARCHAR(100))
-	,5
+	,@INVENTORY_SHIPMENT_TYPE
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId
