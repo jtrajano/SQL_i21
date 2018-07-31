@@ -40,7 +40,8 @@ BEGIN TRY
 	DECLARE @ysnDeleted BIT
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 	DECLARE @tblEntityContactIdOutput TABLE (intEntityId INT)
-	Declare @strCustomerCode nvarchar(50)
+	DECLARE @strCustomerCode NVARCHAR(50)
+	DECLARE @strState NVARCHAR(MAX)
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -69,6 +70,26 @@ BEGIN TRY
 		FROM tblIPEntityStage
 		WHERE strEntityType = 'Vendor'
 			AND strSessionId = @strSessionId
+
+	SELECT @strInfo1 = ''
+
+	SELECT @strInfo2 = ''
+
+	SELECT @strInfo1 = @strInfo1 + ISNULL(strAccountNo, '') + ', '
+	FROM tblIPEntityStage
+
+	IF Len(@strInfo1) > 0
+	BEGIN
+		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
+	END
+
+	SELECT @strInfo2 = @strInfo2 + ISNULL(strName, '') + ', '
+	FROM tblIPEntityStage
+
+	IF Len(@strInfo2) > 0
+	BEGIN
+		SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
+	END
 
 	WHILE (@intMinVendor IS NOT NULL)
 	BEGIN
@@ -108,9 +129,8 @@ BEGIN TRY
 			WHERE strEntityType = 'Vendor'
 				AND intStageEntityId = @intMinVendor
 
-			SET @strInfo1 = ISNULL(@strAccountNo, '')
-			SET @strInfo2 = ISNULL(@strVendorName, '')
-
+			--SET @strInfo1 = ISNULL(@strAccountNo, '')
+			--SET @strInfo2 = ISNULL(@strVendorName, '')
 			SELECT @intEntityId = [intEntityId]
 			FROM tblAPVendor
 			WHERE strVendorAccountNum = @strAccountNo
@@ -123,7 +143,7 @@ BEGIN TRY
 			FROM tblSMCurrency
 			WHERE strCurrency = @strCurrency
 
-			IF ISNULL(@strAccountNo, '') = '' and @strCustomerCode='JDE'
+			IF ISNULL(@strAccountNo, '') = ''
 				RAISERROR (
 						'Account No is required.'
 						,16
@@ -131,6 +151,25 @@ BEGIN TRY
 						)
 
 			BEGIN TRAN
+
+			IF @strCustomerCode = 'JDE'
+				BEGIN
+					SELECT @intCountryId = c.intCountryID
+						,@strCountry = c.strCountry
+						,@strState = strState
+					FROM tblIPEntityStage e
+					JOIN tblSMCountry c ON e.strCountry = c.strISOCode
+					WHERE intStageEntityId = @intStageEntityId
+				END
+				ELSE
+				BEGIN
+					SELECT @intCountryId = c.intCountryID
+						,@strCountry = c.strCountry
+						,@strState = strState
+					FROM tblIPEntityStage e
+					JOIN tblSMCountry c ON e.strCountry = c.strCountry
+					WHERE intStageEntityId = @intStageEntityId
+				END
 
 			IF ISNULL(@intEntityId, 0) = 0 --Create
 			BEGIN
@@ -177,7 +216,7 @@ BEGIN TRY
 						SELECT ISNULL(strAccountNo, '')
 						FROM tblIPEntityStage
 						WHERE intStageEntityId = @intStageEntityId
-						) = '' and @strCustomerCode='JDE'
+						) = ''
 					RAISERROR (
 							'Account No is required.'
 							,16
@@ -188,7 +227,8 @@ BEGIN TRY
 						SELECT 1
 						FROM tblIPEntityContactStage
 						WHERE intStageEntityId = @intStageEntityId
-						)and @strCustomerCode='JDE'
+						)
+					AND @strCustomerCode = 'JDE'
 					RAISERROR (
 							'Contact Name is required.'
 							,16
@@ -199,18 +239,13 @@ BEGIN TRY
 						SELECT TOP 1 ISNULL(strFirstName, '')
 						FROM tblIPEntityContactStage
 						WHERE intStageEntityId = @intStageEntityId
-						) = ''and @strCustomerCode='JDE'
+						) = ''
+					AND @strCustomerCode = 'JDE'
 					RAISERROR (
 							'Contact Name is required.'
 							,16
 							,1
 							)
-
-				SELECT @intCountryId = c.intCountryID
-					,@strCountry = c.strCountry
-				FROM tblIPEntityStage e
-				JOIN tblSMCountry c ON e.strCountry = c.strISOCode
-				WHERE intStageEntityId = @intStageEntityId
 
 				EXEC uspSMGetStartingNumber 43
 					,@strEntityNo OUT
@@ -254,6 +289,8 @@ BEGIN TRY
 					,intTermsId
 					,ysnDefaultLocation
 					,ysnActive
+					,strState
+					,strCheckPayeeName
 					)
 				SELECT @intEntityId
 					,LEFT(strCity, 50)
@@ -264,6 +301,8 @@ BEGIN TRY
 					,@intTermId
 					,1
 					,1
+					,@strState
+					,LEFT(strCity, 50)
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
@@ -463,6 +502,7 @@ BEGIN TRY
 					,@strZipCode = strZipCode
 					,@strTaxNo = strTaxNo
 					,@strFLOId = strFLOId
+					,@strState = strState
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
@@ -505,15 +545,17 @@ BEGIN TRY
 					UPDATE tblEMEntityLocation
 					SET strLocationName = @strCity
 						,strCity = @strCity
+						,strCheckPayeeName = Left(@strCity, 50)
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strCountry, '/') <> '/'
 					UPDATE tblEMEntityLocation
-					SET strCountry = (
-							SELECT TOP 1 strCountry
-							FROM tblSMCountry
-							WHERE strISOCode = @strCountry
-							)
+					SET strCountry = @strCountry
+					WHERE intEntityLocationId = @intEntityLocationId
+
+				IF ISNULL(@strState, '/') <> '/'
+					UPDATE tblEMEntityLocation
+					SET strState = @strState
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strZipCode, '/') <> '/'
