@@ -519,6 +519,8 @@ BEGIN TRY
 			EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
 				,@strBatchId
 				,@userId
+				,1
+				,1
 
 			IF @intReturnValue <> 0
 			BEGIN
