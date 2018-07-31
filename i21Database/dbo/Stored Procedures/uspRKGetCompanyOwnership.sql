@@ -52,12 +52,7 @@ FROM (
 				,ir.intInventoryReceiptItemId
 				,i.strItemNo
 				,isnull(bd.dblQtyReceived, 0) dblInQty
-				,(bd.dblTotal - isnull((
-							SELECT CASE WHEN sum(pd.dblPayment) - max(dblTotal) = 0 THEN bd.dblTotal ELSE sum(pd.dblPayment) END
-							FROM tblAPPaymentDetail pd
-							WHERE pd.intBillId = b.intBillId AND intConcurrencyId <> 0
-							), 0)
-					) / CASE WHEN isnull(bd.dblCost, 0) = 0 THEN 1 ELSE dblCost END AS dblOutQty
+				,(bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
 				,strDistributionOption
 				,b.strBillId AS strReceiptNumber
 				,b.intBillId AS intReceiptId
@@ -117,23 +112,17 @@ SELECT strItemNo
 	,strReceiptNumber
 	,intReceiptId
 FROM (
-	SELECT *
+	SELECT * --From Delivery Sheet
 		,round(dblInQty, 2) dblUnpaidIn
 		,round(dblOutQty, 2) dblUnpaidOut
 	FROM (
 		SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
 			,dblUnitCost dblUnitCost1
-			,ir.intInventoryReceiptItemId
+			,iri.intInventoryReceiptItemId
 			,i.strItemNo
 			,isnull(bd.dblQtyReceived, 0) dblInQty
-			,(
-				bd.dblTotal - isnull((
-						SELECT CASE WHEN sum(pd.dblPayment) - max(dblTotal) = 0 THEN bd.dblTotal ELSE sum(pd.dblPayment) END
-						FROM tblAPPaymentDetail pd
-						WHERE pd.intBillId = b.intBillId AND intConcurrencyId <> 0
-						), 0)
-				) / CASE WHEN isnull(bd.dblCost, 0) = 0 THEN 1 ELSE dblCost END AS dblOutQty
-			,strDistributionOption
+			,(bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
+			,gs.strStorageTypeCode strDistributionOption
 			,b.strBillId AS strReceiptNumber
 			,b.intBillId AS intReceiptId
 		FROM tblAPBill b
@@ -142,15 +131,48 @@ FROM (
 				FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 				)
-		INNER JOIN tblICInventoryReceiptItem ir ON bd.intInventoryReceiptItemId = ir.intInventoryReceiptItemId
-		LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
-		LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
+		INNER JOIN tblICInventoryReceiptItem iri ON bd.intInventoryReceiptItemId = iri.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt ir ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = bd.intItemId
+		INNER JOIN tblSCDeliverySheet ds ON ds.intDeliverySheetId = iri.intSourceId
+		INNER JOIN tblSCDeliverySheetSplit dss ON ds.intDeliverySheetId = dss.intDeliverySheetId
+		INNER JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=dss.intStorageScheduleTypeId 
+	
 		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 			AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
+		AND ir.intSourceType = 5
 		) t
 
-		UNION
-		
+		UNION --Direct from Scale
+		SELECT *
+		,round(dblInQty, 2) dblUnpaidIn
+		,round(dblOutQty, 2) dblUnpaidOut
+	FROM (
+		SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
+			,dblUnitCost dblUnitCost1
+			,iri.intInventoryReceiptItemId
+			,i.strItemNo
+			,isnull(bd.dblQtyReceived, 0) dblInQty
+			,(bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
+			,st.strDistributionOption
+			,b.strBillId AS strReceiptNumber
+			,b.intBillId AS intReceiptId
+		FROM tblAPBill b
+		JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (
+				SELECT intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+				)
+		INNER JOIN tblICInventoryReceiptItem iri ON bd.intInventoryReceiptItemId = iri.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt ir ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = bd.intItemId
+		INNER JOIN vyuSCTicketView st ON st.intTicketId = iri.intSourceId
+		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
+			AND b.intShipToId = case when isnull(@intLocationId,0)=0 then b.intShipToId else @intLocationId end 
+		AND ir.intSourceType = 1
+		) t
+
+		UNION --From Settle Storage
 		SELECT *
 			,round(dblInQty, 2) dblUnpaidIn
 			,round(dblOutQty, 2) dblUnpaidOut
@@ -160,13 +182,7 @@ FROM (
 				,'' as intInventoryReceiptItemId--ir.intInventoryReceiptItemId
 				,i.strItemNo
 				,isnull(bd.dblQtyReceived, 0) dblInQty
-				,(
-					bd.dblTotal - isnull((
-							SELECT CASE WHEN sum(pd.dblPayment) - max(dblTotal) = 0 THEN bd.dblTotal ELSE sum(pd.dblPayment) END
-							FROM tblAPPaymentDetail pd
-							WHERE pd.intBillId = b.intBillId AND intConcurrencyId <> 0
-							), 0)
-					) / CASE WHEN isnull(bd.dblCost, 0) = 0 THEN 1 ELSE dblCost END AS dblOutQty
+				,(bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
 				,st.strDistributionOption
 				,b.strBillId AS strReceiptNumber
 				,b.intBillId AS intReceiptId
@@ -212,7 +228,7 @@ WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN co
 	AND ir.intSubLocationId = case when isnull(@intLocationId,0)=0 then ir.intSubLocationId else @intLocationId end 
 
 UNION 
-SELECT
+SELECT --IS decressing the Unpaid Balance and Company Owned
  strItemNo
 	, dtmDate
 	,0 AS dblUnpaidIn
