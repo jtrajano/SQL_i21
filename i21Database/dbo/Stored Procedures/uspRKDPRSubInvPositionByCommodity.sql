@@ -894,8 +894,7 @@ BEGIN
 
 			SELECT c.strCommodityCode,strUnitMeasure,strSeqHeader,sum(dblTotal) dblTotal,f.intCommodityId,strLocationName
 			FROM @FinalTable f
-			join tblICCommodity c on c.intCommodityId= f.intCommodityId
-			where  strSeqHeader in('Company Titled Stock','In-House') and isnull(dblTotal,0) <>0 
+			join tblICCommodity c on c.intCommodityId= f.intCommodityId			
 			GROUP BY c.strCommodityCode,strUnitMeasure,strSeqHeader,f.intCommodityId,strLocationName
 END
 ELSE
@@ -903,7 +902,6 @@ IF(@strByType='ByCommodity')
 BEGIN
 			SELECT c.strCommodityCode,strUnitMeasure,strSeqHeader,SUM(dblTotal) dblTotal,f.intCommodityId
 			FROM @FinalTable f
-						join tblICCommodity c on c.intCommodityId= f.intCommodityId
-			where dblTotal <> 0 and strSeqHeader in('Company Titled Stock','In-House')  and isnull(dblTotal,0) <>0
+				join tblICCommodity c on c.intCommodityId= f.intCommodityId
 			GROUP BY c.strCommodityCode,strUnitMeasure,strSeqHeader,f.intCommodityId 
 END
