@@ -3905,6 +3905,53 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'LNG', strState = 'OH', strStatus = 'Exclude', intMasterId = 35600
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Propane', strState = 'OH', strStatus = 'Exclude', intMasterId = 35601
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Other', strState = 'OH', strStatus = 'Exclude', intMasterId = 35602
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35603
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35604
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35605
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35606
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35607
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35608
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35609
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35610
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35611
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35612
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35613
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35614
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35615
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35616
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35617
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35618
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35619
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35620
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35621
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35622
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35623
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35624
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35625
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35626
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35627
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35628
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35629
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35630
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35631
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35632
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35633
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35634
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35635
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35636
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35637
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35638
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35639
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35640
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35641
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35642
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35643
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35644
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35645
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35646
+    UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35647
+
+
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
