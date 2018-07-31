@@ -929,6 +929,7 @@ BEGIN
 					ON A.intPaymentId = P.intTransactionId
 			WHERE
 				C.intInvoiceId = @InvID
+                AND @Post = 1
 			
 					
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
