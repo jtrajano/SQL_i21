@@ -1,11 +1,13 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
+﻿ALTER PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId INT,
 	@intCheckoutId INT,
 	@strDirection NVARCHAR(50),
+	@ysnRecap BIT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT,
 	@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
 	@ysnInvoiceStatus BIT OUTPUT,
-	@ysnCustomerChargesInvoiceStatus BIT OUTPUT
+	@ysnCustomerChargesInvoiceStatus BIT OUTPUT,
+	@strBatchIdForNewPostRecap NVARCHAR(1000) OUTPUT
 AS
 BEGIN
 
@@ -24,6 +26,7 @@ BEGIN
 		SET @ysnInvoiceStatus = 0
 		SET @ysnCustomerChargesInvoiceStatus = 0
 		SET @strNewCheckoutStatus = ''
+		SET @strBatchIdForNewPostRecap = ''
 
 		DECLARE @LineItems AS LineItemTaxDetailStagingTable -- Dummy Table
 
@@ -56,6 +59,7 @@ BEGIN
 		DECLARE @intShipViaId INT = (SELECT TOP 1 1 intShipViaId FROM tblEMEntityLocation WHERE intEntityId = @intEntityCustomerId AND intShipViaId IS NOT NULL)
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		DECLARE @LineItemTaxEntries AS LineItemTaxDetailStagingTable
+		DECLARE @GLEntries AS RecapTableType 
 		DECLARE @ysnPost BIT = NULL
 		-- DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
 
@@ -314,6 +318,7 @@ BEGIN
 										,[intTransactionId]
 										,[intEntityId]
 										,[ysnResetDetails]
+										,[ysnRecap] -- RECAP
 										,[ysnPost]
 										,[intInvoiceDetailId]
 										,[intItemId]
@@ -407,6 +412,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	  END
+										,[ysnRecap]					= @ysnRecap
 										,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 										,[intInvoiceDetailId]		= NULL
 										,[intItemId]				= I.intItemId
@@ -539,6 +545,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -632,6 +639,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -757,6 +765,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -850,6 +859,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1009,6 +1019,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -1102,6 +1113,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1222,6 +1234,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -1315,6 +1328,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1435,6 +1449,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -1528,6 +1543,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1648,6 +1664,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -1741,6 +1758,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1861,6 +1879,7 @@ BEGIN
 											,[intTransactionId]
 											,[intEntityId]
 											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
 											,[ysnPost]
 											,[intInvoiceDetailId]
 											,[intItemId]
@@ -1954,6 +1973,7 @@ BEGIN
 																				THEN CAST(0 AS BIT)
 																			ELSE CAST(1 AS BIT)
 																	      END
+											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -2073,6 +2093,7 @@ BEGIN
 															,[intTransactionId]
 															,[intEntityId]
 															,[ysnResetDetails]
+															,[ysnRecap] -- RECAP
 															,[ysnPost]
 															,[intInvoiceDetailId]
 															,[intItemId]
@@ -2166,6 +2187,7 @@ BEGIN
 																								THEN CAST(0 AS BIT)
 																							ELSE CAST(1 AS BIT)
 																						  END
+															,[ysnRecap]					= @ysnRecap
 															,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 															,[intInvoiceDetailId]		= NULL
 															,[intItemId]				= I.intItemId
@@ -2243,7 +2265,6 @@ BEGIN
 				----------------------------------------------------------------------
 				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
 				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
-
 				
 
 				-- Filter dblPrice should not be 0 and null
@@ -2288,16 +2309,187 @@ BEGIN
 									-- CLEAR
 									SET @CreatedIvoices = ''
 
+									--DECLARE @strCreateGuidBatch AS NVARCHAR(100) = NULL
+									--IF(@ysnRecap = CAST(1 AS BIT))
+									--	BEGIN
+									--		-- SET @strCreateGuidBatch = NEWID();
+
+									--		EXEC dbo.uspSMGetStartingNumber 3, @strCreateGuidBatch OUT
+
+									--		DELETE FROM tblGLPostRecap
+									--		WHERE strBatchId = @strCreateGuidBatch
+									--	END
+									
+
 									BEGIN TRY
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
-													@InvoiceEntries	 = @EntriesForInvoice
-													,@LineItemTaxEntries = @LineItemTaxEntries
-													,@UserId			 = @intCurrentUserId
-		 											,@GroupingOption	 = 11
-													,@RaiseError		 = 1
-													,@ErrorMessage		 = @ErrorMessage OUTPUT
-													,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+													@InvoiceEntries				= @EntriesForInvoice
+													,@LineItemTaxEntries		= @LineItemTaxEntries
+													,@UserId					= @intCurrentUserId
+		 											,@GroupingOption			= 11
+													,@RaiseError				= 1
+													--,@BatchId					= @strCreateGuidBatch
+													,@ErrorMessage				= @ErrorMessage OUTPUT
+													,@CreatedIvoices			= @CreatedIvoices OUTPUT
+													,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
+										
+										-- Check if Recap
+										IF(@ysnRecap = CAST(1 AS BIT))
+											BEGIN
+												IF(@strBatchIdForNewPostRecap IS NOT NULL)
+													BEGIN
+														--DECLARE @intCount AS INT = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+
+														-- GET POST PREVIEW on GL Entries
+														INSERT INTO @GLEntries (
+																			[dtmDate] 
+																			,[strBatchId]
+																			,[intAccountId]
+																			,[dblDebit]
+																			,[dblCredit]
+																			,[dblDebitUnit]
+																			,[dblCreditUnit]
+																			,[strDescription]
+																			,[strCode]
+																			,[strReference]
+																			,[intCurrencyId]
+																			,[dblExchangeRate]
+																			,[dtmDateEntered]
+																			,[dtmTransactionDate]
+																			,[strJournalLineDescription]
+																			,[intJournalLineNo]
+																			,[ysnIsUnposted]
+																			,[intUserId]
+																			,[intEntityId]
+																			,[strTransactionId]
+																			,[intTransactionId]
+																			,[strTransactionType]
+																			,[strTransactionForm]
+																			,[strModuleName]
+																			,[intConcurrencyId]
+																			,[dblDebitForeign]	
+																			--,[dblDebitReport]	
+																			,[dblCreditForeign]	
+																			--,[dblCreditReport]	
+																			--,[dblReportingRate]	
+																			--,[dblForeignRate]
+																			,[strRateType]
+																	)
+																SELECT [dtmDate] 
+																			,[strBatchId]
+																			,[intAccountId]
+																			,[dblDebit]
+																			,[dblCredit]
+																			,[dblDebitUnit]
+																			,[dblCreditUnit]
+																			,[strDescription]
+																			,[strCode]
+																			,[strReference]
+																			,[intCurrencyId]
+																			,[dblExchangeRate]
+																			,[dtmDateEntered]
+																			,[dtmTransactionDate]
+																			,[strJournalLineDescription]
+																			,[intJournalLineNo]
+																			,[ysnIsUnposted]
+																			,[intUserId]
+																			,[intEntityId]
+																			,[strTransactionId]
+																			,[intTransactionId]
+																			,[strTransactionType]
+																			,[strTransactionForm]
+																			,[strModuleName]
+																			,[intConcurrencyId]
+																			,[dblDebitForeign]	
+																			--,[dblDebitReport]	
+																			,[dblCreditForeign]	
+																			--,[dblCreditReport]	
+																			--,[dblReportingRate]	
+																			--,[dblForeignRate]
+																			,[strRateType]
+																	FROM tblGLPostRecap
+																	WHERE strBatchId = @strBatchIdForNewPostRecap
+
+														ROLLBACK TRANSACTION 
+
+														BEGIN TRANSACTION
+															EXEC dbo.uspGLPostRecap 
+																	@GLEntries
+																	,@intCurrentUserId
+
+															--INSERT INTO tblGLPostRecap(
+															--					[dtmDate] 
+															--					,[strBatchId]
+															--					,[intAccountId]
+															--					,[dblDebit]
+															--					,[dblCredit]
+															--					,[dblDebitUnit]
+															--					,[dblCreditUnit]
+															--					,[strDescription]
+															--					,[strCode]
+															--					,[strReference]
+															--					,[intCurrencyId]
+															--					,[dblExchangeRate]
+															--					,[dtmDateEntered]
+															--					,[dtmTransactionDate]
+															--					,[strJournalLineDescription]
+															--					,[intJournalLineNo]
+															--					,[ysnIsUnposted]
+															--					,[intUserId]
+															--					,[intEntityId]
+															--					,[strTransactionId]
+															--					,[intTransactionId]
+															--					,[strTransactionType]
+															--					,[strTransactionForm]
+															--					,[strModuleName]
+															--					,[intConcurrencyId]
+															--					,[dblDebitForeign]	
+															--					--,[dblDebitReport]	
+															--					,[dblCreditForeign]	
+															--					--,[dblCreditReport]	
+															--					--,[dblReportingRate]	
+															--					--,[dblForeignRate]
+															--					,[strRateType]
+															--			)
+															--			SELECT [dtmDate] 
+															--				,[strBatchId]
+															--				,[intAccountId]
+															--				,[dblDebit]
+															--				,[dblCredit]
+															--				,[dblDebitUnit]
+															--				,[dblCreditUnit]
+															--				,[strDescription]
+															--				,[strCode]
+															--				,[strReference]
+															--				,[intCurrencyId]
+															--				,[dblExchangeRate]
+															--				,[dtmDateEntered]
+															--				,[dtmTransactionDate]
+															--				,[strJournalLineDescription]
+															--				,[intJournalLineNo]
+															--				,[ysnIsUnposted]
+															--				,[intUserId]
+															--				,[intEntityId]
+															--				,[strTransactionId]
+															--				,[intTransactionId]
+															--				,[strTransactionType]
+															--				,[strTransactionForm]
+															--				,[strModuleName]
+															--				,[intConcurrencyId]
+															--				,[dblDebitForeign]	
+															--				--,[dblDebitReport]	
+															--				,[dblCreditForeign]	
+															--				--,[dblCreditReport]
+															--				--,[dblReportingRate]	
+															--				--,[dblForeignRate]
+															--				,[strRateType]
+															--			FROM @GLEntries
+
+														GOTO ExitWithCommit
+
+													END
+											END
 									END TRY
 
 									BEGIN CATCH
