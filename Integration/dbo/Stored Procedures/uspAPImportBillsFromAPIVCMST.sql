@@ -139,6 +139,7 @@ BEGIN
 					[intShipToId]			=	@userLocation,
 					[intShipFromId]			=	loc.intEntityLocationId,
 					[intPayToAddressId]		=	loc.intEntityLocationId,
+					[intShipFromEntityId]	=	loc.intEntityLocationId,
 					[A4GLIdentity]			=	A.[A4GLIdentity]
 				FROM apivcmst A
 					LEFT JOIN apcbkmst B
@@ -198,6 +199,7 @@ BEGIN
 				[intShipToId],
 				[intShipFromId],
 				[intPayToAddressId],
+				[intShipFromEntityId],
 				[intCurrencyId],
 				[ysnOrigin]
 			)
@@ -225,6 +227,7 @@ BEGIN
 				[intShipToId],
 				[intShipFromId],
 				[intPayToAddressId],
+				[intShipFromEntityId],
 				[intCurrencyId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId
