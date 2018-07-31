@@ -77,7 +77,7 @@ SELECT	DISTINCT
 				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
-WHERE ((dblReceiptQty - dblVoucherQty)) != 0 --AND bill.ysnPosted = 0
+WHERE ((ABS(dblReceiptQty) - ABS(dblVoucherQty))) != 0 --HANDLE RETURN AND RECEIPT TRANSACTION
 AND receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 
 UNION ALL 
