@@ -278,6 +278,7 @@
 
 			--AR Customers
 			('tblARCustomer'),
+			('tblARAccountStatus'),
 			('tblARCustomerAccountStatus'),
 			('tblARCustomerApplicatorLicense'),
 			('tblARCustomerBudget '),

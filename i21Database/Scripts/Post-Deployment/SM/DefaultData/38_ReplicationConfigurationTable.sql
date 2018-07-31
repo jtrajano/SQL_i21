@@ -100,6 +100,7 @@ VALUES
 	('tblSMCompanySetup', 'Company Configuration, Currency, Country and Terms', 'System Manager'),
 	('tblSMMultiCurrency', 'Company Configuration, Currency, Country and Terms', 'System Manager'),
 	('tblSMPricingLevel', 'Company Configuration, Currency, Country and Terms', 'System Manager'),
+	('tblSMLicenseType', 'Company Configuration, Currency, Country and Terms', 'System Manager'),
 ---------------------------------------------------------------------------------------------------
 
 --##   SM Language >> not exist in strNamespace in tblSMScreen
@@ -507,6 +508,8 @@ VALUES
 --##-----------------------------------------------------------------------------------------------
 
 		('tblEMEntity ', 'Customer', 'Sales'),
+		('tblARAccountStatus', 'Customer', 'Sales'),
+		('tblTRSupplyPoint','Customer','Sales'),
 		('tblARCustomer', 'Customer', 'Sales'),
 		('tblARCustomerAccountStatus', 'Customer', 'Sales'),
 		('tblARCustomerApplicatorLicense', 'Customer', 'Sales'),

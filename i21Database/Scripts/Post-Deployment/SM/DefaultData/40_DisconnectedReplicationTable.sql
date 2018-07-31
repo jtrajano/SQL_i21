@@ -7,6 +7,9 @@ PRINT N'DISCONNECTED REPLICATION TABLE '
 		INSERT INTO tblSMDisconReplicationArticle (strTableName)
 		
 			VALUES
+				('tblTRSupplyPoint'),
+				('tblARAccountStatus'),
+				('tblSMLicenseType'),
 				('tblDBPanelOwner'),
 				('tblEMContactDetail'),
 				('tblEMContactDetailType'),
