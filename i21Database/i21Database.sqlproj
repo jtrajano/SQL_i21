@@ -6848,6 +6848,7 @@
     <Build Include="dbo\Tables\tblCTComponentMap.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessImportAOP.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPVendors_HE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
