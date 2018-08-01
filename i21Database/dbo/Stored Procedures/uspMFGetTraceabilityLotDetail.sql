@@ -30,7 +30,8 @@ Begin
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber 
 		--and intLotId in (Select intLotId From tblICInventoryReceiptItemLot)
-		and strLotNumber in (Select b.strLotNumber From tblICInventoryReceiptItemLot a join tblICLot b on a.intLotId=b.intLotId))) t
+		--and strLotNumber in (Select b.strLotNumber From tblICInventoryReceiptItemLot a join tblICLot b on a.intLotId=b.intLotId)
+		)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1

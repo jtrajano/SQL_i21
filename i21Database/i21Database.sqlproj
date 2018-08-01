@@ -6380,6 +6380,9 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfoOfForPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateAndPostPaymentFromVouchers.sql" />
     <Build Include="dbo\Functions\fnAPPartitonPaymentOfVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityOutboundShipmentDetail.sql" />
+    <Build Include="uspMFGetTraceabilityOutboundShipmentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromOutboundShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
