@@ -46,8 +46,9 @@ EXEC dbo.[uspSOUpdateItemComponent] @intSalesOrderId, 1
 EXEC dbo.[uspSOUpdateContractOnSalesOrder] @intSalesOrderId, @ysnForDelete, @intUserId
 
 DECLARE @Ids AS Id
+DECLARE @ItemAccounts AS [InvoiceItemAccount]
 INSERT INTO @Ids(intId) SELECT @intSalesOrderId
-EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 2
+EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @ItemAccounts = @ItemAccounts, @TransactionType	= 2
 
 --IF @ysnForDelete = 1 OR @ysnForUnship = 1
 --	BEGIN

@@ -1,8 +1,9 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetInvalidInvoicesForPosting]
 (
-	 @Invoices	[dbo].[InvoicePostingTable] Readonly
-	,@Post		BIT	= 0
-	,@Recap		BIT = 0
+     @Invoices      [dbo].[InvoicePostingTable] Readonly
+    ,@ItemAccounts  [dbo].[InvoiceItemAccount]  Readonly
+    ,@Post          BIT	= 0
+    ,@Recap         BIT = 0
 )
 RETURNS @returntable TABLE
 (
@@ -297,7 +298,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I	
 		INNER JOIN dbo.tblARInvoiceDetail ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
-		LEFT OUTER JOIN dbo.vyuARGetItemAccount  IST
+		LEFT OUTER JOIN @ItemAccounts  IST
 				ON ARID.[intItemId] = IST.[intItemId] 
 				AND I.[intCompanyLocationId] = IST.[intLocationId] 
 		LEFT OUTER JOIN dbo.tblICItem  IT
@@ -716,7 +717,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN tblICItem  ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount Acct
+		LEFT OUTER JOIN @ItemAccounts Acct
 				ON I.[intCompanyLocationId] = Acct.[intLocationId]
 				AND ARID.[intItemId] = Acct.[intItemId] 		
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -924,7 +925,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount Acct
+		LEFT OUTER JOIN @ItemAccounts Acct
 				ON I.[intCompanyLocationId] = Acct.[intLocationId] 
 				AND ARID.[intItemId] = Acct.[intItemId]
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -958,7 +959,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount Acct
+		LEFT OUTER JOIN @ItemAccounts Acct
 				ON I.[intCompanyLocationId] = Acct.[intLocationId]
 				AND ARID.[intItemId] = Acct.[intItemId]
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -992,7 +993,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount Acct
+		LEFT OUTER JOIN @ItemAccounts Acct
 				ON I.[intCompanyLocationId] = Acct.[intLocationId] 
 				AND ARID.[intItemId] = Acct.[intItemId] 		 	
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -1024,7 +1025,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount Acct
+		LEFT OUTER JOIN @ItemAccounts Acct
 				ON I.[intCompanyLocationId] = Acct.[intLocationId] 
 				AND ARID.[intItemId] = Acct.[intItemId] 	
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -1129,7 +1130,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARID.[intItemId] = ICI.[intItemId] 
 		INNER JOIN tblICItemUOM ItemUOM 
 				ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
-		LEFT OUTER JOIN vyuARGetItemAccount IST
+		LEFT OUTER JOIN @ItemAccounts IST
 				ON ARID.[intItemId] = IST.[intItemId] 
 				AND I.[intCompanyLocationId] = IST.[intLocationId] 			
 		INNER JOIN tblICInventoryShipmentItem ISD
@@ -1175,7 +1176,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN vyuARGetItemAccount IST
+		LEFT OUTER JOIN @ItemAccounts IST
 				ON ARID.[intItemId] = IST.[intItemId] 
 				AND I.[intCompanyLocationId] = IST.[intLocationId] 							
 		INNER JOIN tblICInventoryShipmentItem  ISD
@@ -1220,7 +1221,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]	
 		INNER JOIN tblICItem ICI
 				ON ARID.[intItemId] = ICI.[intItemId] 
-		LEFT OUTER JOIN vyuARGetItemAccount ARIA
+		LEFT OUTER JOIN @ItemAccounts ARIA
 				ON ARID.[intItemId] = ARIA.[intItemId] 
 				AND I.[intCompanyLocationId] = ARIA.[intLocationId] 
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -1259,7 +1260,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]		
 		INNER JOIN tblICItem ICI
 				ON ARIC.[intComponentItemId] = ICI.[intItemId]
-		LEFT OUTER JOIN  vyuARGetItemAccount ARIA
+		LEFT OUTER JOIN  @ItemAccounts ARIA
 				ON ARIC.[intItemId] = ARIA.[intItemId] 
 				AND I.[intCompanyLocationId] = ARIA.[intLocationId] 	
 		LEFT OUTER JOIN  tblGLAccount  GLA
@@ -1297,7 +1298,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]
 		INNER JOIN tblICItem  ICI
 				ON ARID.[intItemId] = ICI.[intItemId] 
-		LEFT OUTER JOIN vyuARGetItemAccount ARIA
+		LEFT OUTER JOIN @ItemAccounts ARIA
 				ON ARID.[intItemId] = ARIA.[intItemId] 
 				AND I.[intCompanyLocationId] = ARIA.[intLocationId] 
 		LEFT OUTER JOIN tblGLAccount GLA
@@ -1338,7 +1339,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARIC.[intComponentItemId] = ICI.[intItemId]
 		LEFT OUTER JOIN tblICItemUOM ICIUOM
 				ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
-		LEFT OUTER JOIN vyuARGetItemAccount ARIA
+		LEFT OUTER JOIN @ItemAccounts ARIA
 				ON ARID.[intItemId] = ARIA.[intItemId] 
 				AND I.[intCompanyLocationId] = ARIA.[intLocationId]
 		LEFT OUTER JOIN tblGLAccount GLA

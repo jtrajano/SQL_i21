@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateTransactionAccounts]
-	@Ids				Id	READONLY
-	,@TransactionType	INT	= 1
+     @Ids               Id                          READONLY
+    ,@ItemAccounts      [dbo].[InvoiceItemAccount]  Readonly
+    ,@TransactionType   INT	= 1
+						
 AS
 BEGIN
 
@@ -138,7 +140,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 			SELECT TOP 1 intSalesAccountId
 					   , intCOGSAccountId
 					   , intInventoryAccountId
-			FROM vyuARGetItemAccount IST 
+			FROM @ItemAccounts IST 
 			WHERE IST.intItemId = ARID.intItemId
 			  AND IST.intLocationId = ARID.intCompanyLocationId
 		) IST
@@ -178,7 +180,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		INNER JOIN #ITEMS ICI ON ARID.intItemId = ICI.intItemId
 		OUTER APPLY (
 			SELECT TOP 1 intGeneralAccountId
-			FROM vyuARGetItemAccount IST 
+			FROM @ItemAccounts IST 
 			WHERE IST.intItemId = ARID.intItemId
 			  AND IST.intLocationId = ARID.intCompanyLocationId
 		) IST
@@ -193,7 +195,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		INNER JOIN #ITEMS ICI ON ARID.intItemId = ICI.intItemId
 		OUTER APPLY (
 			SELECT TOP 1 intMaintenanceSalesAccountId
-			FROM vyuARGetItemAccount IST 
+			FROM @ItemAccounts IST 
 			WHERE IST.intItemId = ARID.intItemId
 			  AND IST.intLocationId = ARID.intCompanyLocationId
 		) IST
@@ -212,7 +214,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		INNER JOIN #COMPANYLOCATIONS CL ON ARI.intCompanyLocationId = CL.intCompanyLocationId
 		OUTER APPLY (
 			SELECT TOP 1 intSalesAccountId
-			FROM vyuARGetItemAccount IST 
+			FROM @ItemAccounts IST 
 			WHERE IST.intItemId = ARID.intItemId
 			  AND IST.intLocationId = ARID.intCompanyLocationId
 		) IST
@@ -225,7 +227,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		INNER JOIN #INVOICEDETAILS ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
 		OUTER APPLY (
 			SELECT TOP 1 intSalesAccountId
-			FROM vyuARGetItemAccount IST 
+			FROM @ItemAccounts IST 
 			WHERE IST.intItemId = ARID.intItemId
 			  AND IST.intLocationId = ARID.intCompanyLocationId
 		) IST

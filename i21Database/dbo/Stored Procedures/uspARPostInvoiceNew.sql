@@ -705,7 +705,100 @@ BEGIN
 	EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @UserId, 1, @Post
 		
 	DELETE FROM @TempInvoiceIds WHERE id = @InvoiceId1
-END		
+END
+
+DECLARE @ItemAccounts AS [InvoiceItemAccount]
+INSERT INTO @ItemAccounts
+	([intItemId]
+	,[strItemNo]
+	,[strType]
+	,[intLocationId]
+	,[intCOGSAccountId]
+	,[intSalesAccountId]
+	,[intInventoryAccountId]
+	,[intInventoryInTransitAccountId]
+	,[intGeneralAccountId]
+	,[intOtherChargeIncomeAccountId]
+	,[intAccountId]
+	,[intDiscountAccountId]
+	,[intMaintenanceSalesAccountId])
+SELECT
+     ARIA.[intItemId]
+    ,ARIA.[strItemNo]
+    ,ARIA.[strType]
+    ,ARIA.[intLocationId]
+    ,ARIA.[intCOGSAccountId]
+    ,ARIA.[intSalesAccountId]
+    ,ARIA.[intInventoryAccountId]
+    ,ARIA.[intInventoryInTransitAccountId]
+    ,ARIA.[intGeneralAccountId]
+    ,ARIA.[intOtherChargeIncomeAccountId]
+    ,ARIA.[intAccountId]
+    ,ARIA.[intDiscountAccountId]
+    ,ARIA.[intMaintenanceSalesAccountId]
+FROM
+	(
+	SELECT DISTINCT
+		ARID.[intItemId]
+		,ARI.[intCompanyLocationId]
+	FROM
+		tblARInvoiceDetail ARID
+	INNER JOIN
+		@PostInvoiceData ARI
+			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	) INV
+INNER JOIN
+    vyuARGetItemAccount ARIA
+        ON INV.[intItemId] = ARIA.[intItemId]
+		AND INV.[intCompanyLocationId] = ARIA.[intLocationId]
+
+INSERT INTO @ItemAccounts
+	([intItemId]
+	,[strItemNo]
+	,[strType]
+	,[intLocationId]
+	,[intCOGSAccountId]
+	,[intSalesAccountId]
+	,[intInventoryAccountId]
+	,[intInventoryInTransitAccountId]
+	,[intGeneralAccountId]
+	,[intOtherChargeIncomeAccountId]
+	,[intAccountId]
+	,[intDiscountAccountId]
+	,[intMaintenanceSalesAccountId])
+SELECT
+     ARIA.[intItemId]
+    ,ARIA.[strItemNo]
+    ,ARIA.[strType]
+    ,ARIA.[intLocationId]
+    ,ARIA.[intCOGSAccountId]
+    ,ARIA.[intSalesAccountId]
+    ,ARIA.[intInventoryAccountId]
+    ,ARIA.[intInventoryInTransitAccountId]
+    ,ARIA.[intGeneralAccountId]
+    ,ARIA.[intOtherChargeIncomeAccountId]
+    ,ARIA.[intAccountId]
+    ,ARIA.[intDiscountAccountId]
+    ,ARIA.[intMaintenanceSalesAccountId]
+FROM
+	(
+	SELECT DISTINCT
+		ARIC.[intComponentItemId]
+		,ARI.[intCompanyLocationId]
+	FROM
+		vyuARGetItemComponents ARIC
+	INNER JOIN tblARInvoiceDetail ARID
+			ON ARIC.[intItemId] = ARID.[intItemId]
+	INNER JOIN
+		@PostInvoiceData ARI
+			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	WHERE
+		NOT EXISTS(SELECT NULL FROM @ItemAccounts IA WHERE ARIC.[intComponentItemId] = IA.[intItemId] AND ARI.[intCompanyLocationId] = IA.[intLocationId])
+	) INV
+INNER JOIN
+    vyuARGetItemAccount ARIA
+        ON INV.[intComponentItemId] = ARIA.[intItemId]
+		AND INV.[intCompanyLocationId] = ARIA.[intLocationId]
 
 INSERT INTO @InvalidInvoiceData(
 	 [intInvoiceId]
@@ -724,7 +817,7 @@ SELECT
 	,[strBatchId]			= IID.[strBatchId]
 	,[strPostingError]		= IID.[strPostingError]
 FROM 
-	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @Post, @Recap) AS IID
+	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @ItemAccounts, @Post, @Recap) AS IID
 		
 SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
@@ -1191,6 +1284,7 @@ IF @Post = 1
 
 			EXEC	dbo.[uspARUpdateTransactionAccounts]  
 						 @Ids				= @Ids
+						,@ItemAccounts		= @ItemAccounts
 						,@TransactionType	= 1
 		END TRY
 		BEGIN CATCH
