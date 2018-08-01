@@ -153,7 +153,7 @@ BEGIN TRY
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
 		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
-		SELECT	@intItemId, 1, 0, ABS(@dblAmount)
+		SELECT	NULL, 1, 0, ABS(@dblAmount)
 	   
 		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
 
@@ -169,7 +169,8 @@ BEGIN TRY
 
 		SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
 		SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
-		UPDATE tblAPBill	  SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
+		UPDATE tblAPBill		SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
+		UPDATE tblAPBillDetail	SET dblQtyOrdered = 0, intLocationId = @intCompanyLocationId WHERE intBillId = @intBillInvoiceId
 	   
     END
 
