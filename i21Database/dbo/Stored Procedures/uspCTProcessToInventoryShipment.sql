@@ -120,7 +120,8 @@ AS
 				ysnAccrue,
 				intEntityVendorId,
 				ysnPrice,
-				strChargesLink
+				strChargesLink,
+				intContractDetailId
 		) 
 		
 		SELECT	intOrderType			=	1,
@@ -141,7 +142,8 @@ AS
 				ysnAccrue				=	CC.ysnAccrue,
 				intEntityVendorId		=	CC.intVendorId,
 				ysnPrice				=	CC.ysnPrice,
-				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq)
+				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
+				intContractDetailId		=	CC.intContractDetailId
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
