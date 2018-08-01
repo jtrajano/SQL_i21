@@ -31,6 +31,7 @@ BEGIN
 		DECLARE @LineItems AS LineItemTaxDetailStagingTable -- Dummy Table
 
 		DECLARE @ysnUpdateCheckoutStatus BIT = 1
+		DECLARE @strCreateGuidBatch AS NVARCHAR(200)
 
 		DECLARE @intEntityCustomerId INT
 		DECLARE @intCompanyLocationId INT
@@ -2309,18 +2310,6 @@ BEGIN
 									-- CLEAR
 									SET @CreatedIvoices = ''
 
-									--DECLARE @strCreateGuidBatch AS NVARCHAR(100) = NULL
-									--IF(@ysnRecap = CAST(1 AS BIT))
-									--	BEGIN
-									--		-- SET @strCreateGuidBatch = NEWID();
-
-									--		EXEC dbo.uspSMGetStartingNumber 3, @strCreateGuidBatch OUT
-
-									--		DELETE FROM tblGLPostRecap
-									--		WHERE strBatchId = @strCreateGuidBatch
-									--	END
-									
-
 									BEGIN TRY
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
@@ -2341,153 +2330,91 @@ BEGIN
 													BEGIN
 														--DECLARE @intCount AS INT = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
 
-														-- GET POST PREVIEW on GL Entries
-														INSERT INTO @GLEntries (
-																			[dtmDate] 
-																			,[strBatchId]
-																			,[intAccountId]
-																			,[dblDebit]
-																			,[dblCredit]
-																			,[dblDebitUnit]
-																			,[dblCreditUnit]
-																			,[strDescription]
-																			,[strCode]
-																			,[strReference]
-																			,[intCurrencyId]
-																			,[dblExchangeRate]
-																			,[dtmDateEntered]
-																			,[dtmTransactionDate]
-																			,[strJournalLineDescription]
-																			,[intJournalLineNo]
-																			,[ysnIsUnposted]
-																			,[intUserId]
-																			,[intEntityId]
-																			,[strTransactionId]
-																			,[intTransactionId]
-																			,[strTransactionType]
-																			,[strTransactionForm]
-																			,[strModuleName]
-																			,[intConcurrencyId]
-																			,[dblDebitForeign]	
-																			--,[dblDebitReport]	
-																			,[dblCreditForeign]	
-																			--,[dblCreditReport]	
-																			--,[dblReportingRate]	
-																			--,[dblForeignRate]
-																			,[strRateType]
-																	)
-																SELECT [dtmDate] 
-																			,[strBatchId]
-																			,[intAccountId]
-																			,[dblDebit]
-																			,[dblCredit]
-																			,[dblDebitUnit]
-																			,[dblCreditUnit]
-																			,[strDescription]
-																			,[strCode]
-																			,[strReference]
-																			,[intCurrencyId]
-																			,[dblExchangeRate]
-																			,[dtmDateEntered]
-																			,[dtmTransactionDate]
-																			,[strJournalLineDescription]
-																			,[intJournalLineNo]
-																			,[ysnIsUnposted]
-																			,[intUserId]
-																			,[intEntityId]
-																			,[strTransactionId]
-																			,[intTransactionId]
-																			,[strTransactionType]
-																			,[strTransactionForm]
-																			,[strModuleName]
-																			,[intConcurrencyId]
-																			,[dblDebitForeign]	
-																			--,[dblDebitReport]	
-																			,[dblCreditForeign]	
-																			--,[dblCreditReport]	
-																			--,[dblReportingRate]	
-																			--,[dblForeignRate]
-																			,[strRateType]
-																	FROM tblGLPostRecap
-																	WHERE strBatchId = @strBatchIdForNewPostRecap
+														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+															BEGIN
+																SET @strCreateGuidBatch = NEWID();
 
-														ROLLBACK TRANSACTION 
+																-- GET POST PREVIEW on GL Entries
+																INSERT INTO @GLEntries (
+																					[dtmDate] 
+																					,[strBatchId]
+																					,[intAccountId]
+																					,[dblDebit]
+																					,[dblCredit]
+																					,[dblDebitUnit]
+																					,[dblCreditUnit]
+																					,[strDescription]
+																					,[strCode]
+																					,[strReference]
+																					,[intCurrencyId]
+																					,[dblExchangeRate]
+																					,[dtmDateEntered]
+																					,[dtmTransactionDate]
+																					,[strJournalLineDescription]
+																					,[intJournalLineNo]
+																					,[ysnIsUnposted]
+																					,[intUserId]
+																					,[intEntityId]
+																					,[strTransactionId]
+																					,[intTransactionId]
+																					,[strTransactionType]
+																					,[strTransactionForm]
+																					,[strModuleName]
+																					,[intConcurrencyId]
+																					,[dblDebitForeign]	
+																					--,[dblDebitReport]	
+																					,[dblCreditForeign]	
+																					--,[dblCreditReport]	
+																					--,[dblReportingRate]	
+																					--,[dblForeignRate]
+																					,[strRateType]
+																			)
+																		SELECT [dtmDate] 
+																					,[strBatchId] = @strCreateGuidBatch
+																					,[intAccountId]
+																					,[dblDebit]
+																					,[dblCredit]
+																					,[dblDebitUnit]
+																					,[dblCreditUnit]
+																					,[strDescription]
+																					,[strCode]
+																					,[strReference]
+																					,[intCurrencyId]
+																					,[dblExchangeRate]
+																					,[dtmDateEntered]
+																					,[dtmTransactionDate]
+																					,[strJournalLineDescription]
+																					,[intJournalLineNo]
+																					,[ysnIsUnposted]
+																					,[intUserId]
+																					,[intEntityId]
+																					,[strTransactionId]
+																					,[intTransactionId]
+																					,[strTransactionType]
+																					,[strTransactionForm]
+																					,[strModuleName]
+																					,[intConcurrencyId]
+																					,[dblDebitForeign]	
+																					--,[dblDebitReport]	
+																					,[dblCreditForeign]	
+																					--,[dblCreditReport]	
+																					--,[dblReportingRate]	
+																					--,[dblForeignRate]
+																					,[strRateType]
+																			FROM tblGLPostRecap
+																			WHERE strBatchId = @strBatchIdForNewPostRecap
 
-														BEGIN TRANSACTION
-															EXEC dbo.uspGLPostRecap 
-																	@GLEntries
-																	,@intCurrentUserId
+																ROLLBACK TRANSACTION 
 
-															--INSERT INTO tblGLPostRecap(
-															--					[dtmDate] 
-															--					,[strBatchId]
-															--					,[intAccountId]
-															--					,[dblDebit]
-															--					,[dblCredit]
-															--					,[dblDebitUnit]
-															--					,[dblCreditUnit]
-															--					,[strDescription]
-															--					,[strCode]
-															--					,[strReference]
-															--					,[intCurrencyId]
-															--					,[dblExchangeRate]
-															--					,[dtmDateEntered]
-															--					,[dtmTransactionDate]
-															--					,[strJournalLineDescription]
-															--					,[intJournalLineNo]
-															--					,[ysnIsUnposted]
-															--					,[intUserId]
-															--					,[intEntityId]
-															--					,[strTransactionId]
-															--					,[intTransactionId]
-															--					,[strTransactionType]
-															--					,[strTransactionForm]
-															--					,[strModuleName]
-															--					,[intConcurrencyId]
-															--					,[dblDebitForeign]	
-															--					--,[dblDebitReport]	
-															--					,[dblCreditForeign]	
-															--					--,[dblCreditReport]	
-															--					--,[dblReportingRate]	
-															--					--,[dblForeignRate]
-															--					,[strRateType]
-															--			)
-															--			SELECT [dtmDate] 
-															--				,[strBatchId]
-															--				,[intAccountId]
-															--				,[dblDebit]
-															--				,[dblCredit]
-															--				,[dblDebitUnit]
-															--				,[dblCreditUnit]
-															--				,[strDescription]
-															--				,[strCode]
-															--				,[strReference]
-															--				,[intCurrencyId]
-															--				,[dblExchangeRate]
-															--				,[dtmDateEntered]
-															--				,[dtmTransactionDate]
-															--				,[strJournalLineDescription]
-															--				,[intJournalLineNo]
-															--				,[ysnIsUnposted]
-															--				,[intUserId]
-															--				,[intEntityId]
-															--				,[strTransactionId]
-															--				,[intTransactionId]
-															--				,[strTransactionType]
-															--				,[strTransactionForm]
-															--				,[strModuleName]
-															--				,[intConcurrencyId]
-															--				,[dblDebitForeign]	
-															--				--,[dblDebitReport]	
-															--				,[dblCreditForeign]	
-															--				--,[dblCreditReport]
-															--				--,[dblReportingRate]	
-															--				--,[dblForeignRate]
-															--				,[strRateType]
-															--			FROM @GLEntries
+																BEGIN TRANSACTION
+																	EXEC dbo.uspGLPostRecap 
+																			@GLEntries
+																			,@intCurrentUserId
+																	
+																	SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
 
-														GOTO ExitWithCommit
-
+																GOTO ExitWithCommit
+															END
 													END
 											END
 									END TRY
@@ -2593,7 +2520,7 @@ BEGIN
 							EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
 											@post				= 0, -- 0 = UnPost
-											@recap				= 0,
+											@recap				= @ysnRecap,
 											@param				= @strCurrentAllInvoiceIdList,
 											@userId				= @intCurrentUserId,
 											@beginDate			= NULL,
@@ -2607,6 +2534,103 @@ BEGIN
 											@batchIdUsed		= @strBatchIdUsed OUTPUT,
 											@transType			= N'all',
 											@raiseError			= 1
+				
+										-- Check if Recap
+										IF(@ysnRecap = CAST(1 AS BIT))
+											BEGIN
+
+												IF(@strBatchIdUsed IS NOT NULL)
+													BEGIN
+														--DECLARE @intCount AS INT = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+
+														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdUsed)
+															BEGIN
+																SET @strCreateGuidBatch = NEWID();
+
+																-- GET POST PREVIEW on GL Entries
+																INSERT INTO @GLEntries (
+																					[dtmDate] 
+																					,[strBatchId]
+																					,[intAccountId]
+																					,[dblDebit]
+																					,[dblCredit]
+																					,[dblDebitUnit]
+																					,[dblCreditUnit]
+																					,[strDescription]
+																					,[strCode]
+																					,[strReference]
+																					,[intCurrencyId]
+																					,[dblExchangeRate]
+																					,[dtmDateEntered]
+																					,[dtmTransactionDate]
+																					,[strJournalLineDescription]
+																					,[intJournalLineNo]
+																					,[ysnIsUnposted]
+																					,[intUserId]
+																					,[intEntityId]
+																					,[strTransactionId]
+																					,[intTransactionId]
+																					,[strTransactionType]
+																					,[strTransactionForm]
+																					,[strModuleName]
+																					,[intConcurrencyId]
+																					,[dblDebitForeign]	
+																					--,[dblDebitReport]	
+																					,[dblCreditForeign]	
+																					--,[dblCreditReport]	
+																					--,[dblReportingRate]	
+																					--,[dblForeignRate]
+																					,[strRateType]
+																			)
+																		SELECT [dtmDate] 
+																					,[strBatchId] = @strCreateGuidBatch
+																					,[intAccountId]
+																					,[dblDebit]
+																					,[dblCredit]
+																					,[dblDebitUnit]
+																					,[dblCreditUnit]
+																					,[strDescription]
+																					,[strCode]
+																					,[strReference]
+																					,[intCurrencyId]
+																					,[dblExchangeRate]
+																					,[dtmDateEntered]
+																					,[dtmTransactionDate]
+																					,[strJournalLineDescription]
+																					,[intJournalLineNo]
+																					,[ysnIsUnposted]
+																					,[intUserId]
+																					,[intEntityId]
+																					,[strTransactionId]
+																					,[intTransactionId]
+																					,[strTransactionType]
+																					,[strTransactionForm]
+																					,[strModuleName]
+																					,[intConcurrencyId]
+																					,[dblDebitForeign]	
+																					--,[dblDebitReport]	
+																					,[dblCreditForeign]	
+																					--,[dblCreditReport]	
+																					--,[dblReportingRate]	
+																					--,[dblForeignRate]
+																					,[strRateType]
+																			FROM tblGLPostRecap
+																			WHERE strBatchId = @strBatchIdUsed
+
+																ROLLBACK TRANSACTION 
+
+																BEGIN TRANSACTION
+
+																	EXEC dbo.uspGLPostRecap 
+																			@GLEntries
+																			,@intCurrentUserId
+																	
+																	SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
+
+																GOTO ExitWithCommit
+															END
+													END
+											END
 						END TRY
 
 						BEGIN CATCH
