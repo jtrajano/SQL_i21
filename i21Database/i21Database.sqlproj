@@ -6369,6 +6369,9 @@
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityOutboundShipmentDetail.sql" />
+    <Build Include="uspMFGetTraceabilityOutboundShipmentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromOutboundShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
