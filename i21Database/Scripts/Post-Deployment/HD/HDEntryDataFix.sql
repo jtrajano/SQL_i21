@@ -597,7 +597,30 @@ GO
 	where
 		a.intCurrencyId is null
 		and b.intEntityId = a.intCustomerId
-		and c.intCurrencyID = b.intCurrencyId
+		and c.intCurrencyID = b.intCurrencyId;
+
+
+	update
+		d
+	set
+		d.dblNonBillableHours = c.dblNonBillableHours
+	from
+		tblHDTicket d,
+		(
+		select
+			a.intTicketId
+			,dblNonBillableHours = sum(b.intHours)
+		from
+			tblHDTicket a
+			,tblHDTicketHoursWorked b
+		where
+			b.intTicketId = a.intTicketId
+			and b.ysnBillable = convert(bit,0)
+		group by
+			a.intTicketId
+		) as c
+	where
+		c.intTicketId = d.intTicketId;
 
 GO
 	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';

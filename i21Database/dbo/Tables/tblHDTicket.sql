@@ -32,6 +32,7 @@
 	[dtmLastCommented] [datetime] NULL,
 	[dblQuotedHours] [numeric](18, 6) NULL,
 	[dblActualHours] [numeric](18, 6) NULL,
+	[dblNonBillableHours] [numeric](18, 6) NULL,
 	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCompany] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strOperatingSystem] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
