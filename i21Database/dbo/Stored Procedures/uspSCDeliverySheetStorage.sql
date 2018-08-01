@@ -289,7 +289,7 @@ BEGIN TRY
 		,[dblTotalWeightShrink]= 0 
 		,[dblOriginalBalance]= @dblNetUnits
 		,[dblOpenBalance]= @dblNetUnits
-		,[dtmDeliveryDate]= GETDATE()
+		,[dtmDeliveryDate]= SCD.dtmDeliverySheetDate
 		,[dtmZeroBalanceDate]= NULL
 		,[strDPARecieptNumber]= NULL
 		,[dtmLastStorageAccrueDate]= NULL 
@@ -355,7 +355,7 @@ BEGIN TRY
 		   ,NULL
 		   ,@intContractHeaderId
 		   ,@dblNetUnits
-		   ,dbo.fnRemoveTimeOnDate(GETDATE())
+		   ,dbo.fnRemoveTimeOnDate((SELECT dtmDeliverySheetDate FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId))
 		   ,0
 		   ,'Generated From Delivery Sheet'
 		   ,1
