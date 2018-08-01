@@ -41,6 +41,14 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTPriceCalculationType WHERE intPriceCalculationTypeId = 4)
+BEGIN
+	INSERT INTO tblCTPriceCalculationType
+	SELECT 4,'Basis',1	
+END
+GO
+
 --tblCTCostMethod
 GO
 IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE intCostMethodId = 1)
