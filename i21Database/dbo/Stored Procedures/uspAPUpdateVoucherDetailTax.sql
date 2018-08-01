@@ -167,10 +167,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SET A.intTaxGroupId = B.intTaxGroupId
 	FROM tblAPBillDetail A 
 	INNER JOIN @billDetailIds C ON A.intBillDetailId = C.intId
-	INNER JOIN tblAPBillDetailTax B ON A.intBillDetailId = B.intBillDetailId 
-	OUTER APPLY(
-		SELECT TOP 1 intShipToId FROM tblAPBill C WHERE C.intBillId = A.intBillId
-	) Bill
+	INNER JOIN tblAPBillDetailTax B ON A.intBillDetailId = B.intBillDetailId
 
 	INSERT INTO @voucherIds
 	SELECT DISTINCT
