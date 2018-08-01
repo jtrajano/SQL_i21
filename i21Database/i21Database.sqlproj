@@ -6849,6 +6849,9 @@
     <Build Include="dbo\Stored Procedures\uspCTImportAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessImportAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPVendors_HE.sql" />
+    <Build Include="dbo\Tables\tblHDRoughCountCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDRoughCountCapacity.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
