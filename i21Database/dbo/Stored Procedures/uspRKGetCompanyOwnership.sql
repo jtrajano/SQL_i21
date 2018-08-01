@@ -107,7 +107,7 @@ SELECT strItemNo
 	,dblUnpaidIn
 	,dblUnpaidOut
 	,dblUnpaidIn - dblUnpaidOut as dblUnpaidBalance
-	,dblUnpaidIn -  dblUnpaidOut as dblPaidBalance
+	,CASE WHEN ysnPaid = 0 AND dblUnpaidOut = 0 THEN 0 ELSE  dblUnpaidIn -  dblUnpaidOut END  as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,intReceiptId
@@ -125,6 +125,7 @@ FROM (
 			,gs.strStorageTypeCode strDistributionOption
 			,b.strBillId AS strReceiptNumber
 			,b.intBillId AS intReceiptId
+			,b.ysnPaid
 		FROM tblAPBill b
 		JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (
 				SELECT intCompanyLocationId
@@ -157,6 +158,7 @@ FROM (
 			,st.strDistributionOption
 			,b.strBillId AS strReceiptNumber
 			,b.intBillId AS intReceiptId
+			,b.ysnPaid
 		FROM tblAPBill b
 		JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (
 				SELECT intCompanyLocationId
@@ -186,6 +188,7 @@ FROM (
 				,gs.strStorageTypeCode strDistributionOption
 				,b.strBillId AS strReceiptNumber
 				,b.intBillId AS intReceiptId
+				,b.ysnPaid
 			FROM tblAPBill b
 			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (
 					SELECT intCompanyLocationId
@@ -275,7 +278,7 @@ FROM (
 SELECT convert(INT, ROW_NUMBER() OVER (
 			ORDER BY dtmDate
 			)) intRowNum
-	,dtmDate dtmDate
+	,ISNULL(dtmDate,'') dtmDate
 	,strDistributionOption [strDistribution]
 	,dblUnpaidIn [dblUnpaidIN]
 	,dblUnpaidOut [dblUnpaidOut]
@@ -285,6 +288,7 @@ SELECT convert(INT, ROW_NUMBER() OVER (
 	,strReceiptNumber
 	,intReceiptId
 FROM @tblResult T1
-WHERE ISNULL(T1.dtmDate ,'') <> '' AND ISNULL(T1.strReceiptNumber,'') <> ''
-ORDER BY dtmDate DESC
-	,strReceiptNumber DESC
+--WHERE ISNULL(T1.dtmDate ,'') <> '' AND ISNULL(T1.strReceiptNumber,'') <> ''
+ORDER BY intRowNum
+	,dtmDate DESC,
+	strReceiptNumber DESC

@@ -147,12 +147,12 @@ SELECT
 	,isnull(dblCountQty,0) as dblCount
 	,isnull(dblInvoiceQty,0) dblInvoiceQty
 	,isnull(a.BalanceForward,0)  BalanceForward
-	,isnull(a.BalanceForward,0) + isnull(b.InventoryBalanceCarryForward,0)
+	,isnull(b.InventoryBalanceCarryForward,0)
 	,isnull(b.dblUnpaidIn,0) [Unpaid In]
 	,isnull(b.dblUnpaidOut,0) [Unpaid Out]
 	,isnull(b.dblUnpaidBalance,0) as [Balance1]
 	,null [Unpaid Balance] 
-	,isnull(b.dblPaidBalance,0)
+	,isnull(b.dblPaidBalance,0) + isnull(b.InventoryBalanceCarryForward,0)
 	,a.dblSalesInTransit
 	,a.tranDSInQty
 FROM @tblFirstResult a
@@ -175,7 +175,7 @@ FROM(
 	,[Unpaid Out] dblUnpaidOut
 	,[Balance] dblBalance
 	,ISNULL([Paid Balance],0) [dblPaidBalance]
-	,isnull([Balance],0)  [dblTotalCompanyOwned]
+	, [dblTotalCompanyOwned]
 	,isnull(isnull([Unpaid In],0)-isnull([Unpaid Out],0),0) dblUnpaidBalance
 	,dblSalesInTransit
 	FROM (
@@ -189,7 +189,7 @@ FROM(
 			,dblInvoiceQty
 			,BalanceForward
 			,InventoryBalanceCarryForward
-			,(SELECT SUM(BalanceForward) + sum(tranDSInQty) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) AS [InventoryBalance]
+			,(SELECT SUM(BalanceForward) + sum(ISNULL(tranDSInQty,0)) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) AS [InventoryBalance]
 			,(CASE WHEN isnull([Unpaid In],0)=0 and isnull([Unpaid Out],0)=0 then
                            (SELECT top 1 Balance FROM @tblConsolidatedResult AS T2 WHERE Balance > 0 and isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900') order by isnull(T2.dtmDate,'01/01/1900') desc) 
 				ELSE [Balance] END) [Balance]
@@ -197,6 +197,7 @@ FROM(
 			,[Unpaid Out]
 			,[Paid Balance]
 			,dblSalesInTransit
+			,(SELECT sum([Paid Balance]) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900'))  [dblTotalCompanyOwned]
 		FROM(
 			SELECT 
 				 DateData dtmDate 
@@ -245,7 +246,7 @@ SELECT
 	,dblUnpaidOut
 	,dblBalance
 	,isnull(dblPaidBalance,0) dblPaidBalance
-	,isnull(dblPaidBalance,0) + dblTotalCompanyOwned dblTotalCompanyOwned 
+	,(ISNULL(dblBalance,0) + ISNULL(dblTotalCompanyOwned,0)) dblTotalCompanyOwned
 	,dblUnpaidBalance 
 FROM(
 	SELECT 
@@ -289,6 +290,5 @@ FROM(
 	FROM #final list
 	FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01')
 )t 
-WHERE ISNULL(dtmDate,'') <> '' 
+--WHERE ISNULL(dtmDate,'') <> ''
 ORDER BY dtmDate
-

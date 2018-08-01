@@ -35,7 +35,7 @@ SELECT
 INTO #temp
 FROM (
 	SELECT 
-		dtmDate
+		CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 		,(SELECT strShipmentNumber FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipmentNumber
 		,(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblQty) FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipQty
 		,(SELECT strReceiptNumber FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranReceiptNumber
@@ -107,7 +107,7 @@ WHERE  i.intCommodityId= @intCommodityId
 --		 AND r.ysnPosted = 1)a
 
 UNION all --IR came from Delivery Sheet
-SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit 
 		, dblInQty tranDSInQty from(
 select  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) dblInQty,r.strReceiptNumber  
@@ -131,7 +131,7 @@ WHERE  i.intCommodityId= @intCommodityId
 		 
 
 union 
-SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
 		,0.0 tranDSInQty from(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ELSE 0 END dblOutQty,r.strShipmentNumber  
@@ -154,7 +154,7 @@ WHERE  i.intCommodityId= @intCommodityId
 		and st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end)a
 
 union all--IS came from Delivery Sheet
-SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
 		,0.0 tranDSInQty from(
 SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
@@ -319,7 +319,7 @@ FROM(
 SELECT *
 FROM(
 	select 
-		dtmDate
+		ISNULL(dtmDate,'') dtmDate
 		,sum(tranShipQty) tranShipQty
 		,sum(tranRecQty) tranRecQty
 		,sum(dblAdjustmentQty) dblAdjustmentQty
