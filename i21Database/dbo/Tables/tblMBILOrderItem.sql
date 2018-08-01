@@ -1,22 +1,11 @@
 CREATE TABLE [dbo].[tblMBILOrderItem](
-	[intMBILOrderItemId]	INT				IDENTITY(1,1) NOT NULL,	
-	[intMBILOrderSiteId]	INT				NOT NULL,
+	[intOrderItemId]	INT				IDENTITY(1,1) NOT NULL,	
 	[intOrderId]			INT				NOT NULL,
-	[strOrderNumber]		NVARCHAR (30) COLLATE Latin1_General_CI_AS NULL,	
-	[strCustomerNumber]		NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
-	[intEntityId]			INT				NULL,
-	[intUserId]				INT				NULL,
-	[strUser]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[intSiteId]				INT				NULL,
-	[intSiteNumber]			INT				NULL,
-	[strSiteName]			NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId]				INT				NULL,
-	[strItemNo]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[strItemDescription]	NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
 	[intItemUOMId]			INT				NULL,
 	[dblQuantity]			NUMERIC (18, 6) NULL,
 	[dblPrice]				NUMERIC (18, 6) NULL,	
 	[intConcurrencyId]		INT				DEFAULT 1 NOT NULL,
-	CONSTRAINT [PK_tblMBILOrderItem] PRIMARY KEY CLUSTERED ([intMBILOrderItemId] ASC),
-	CONSTRAINT [FK_tblMBILOrderItem_tblMBILOrderSite] FOREIGN KEY([intMBILOrderSiteId]) REFERENCES [dbo].[tblMBILOrderSite] ([intMBILOrderSiteId]) ON DELETE CASCADE
+	CONSTRAINT [PK_tblMBILOrderItem] PRIMARY KEY CLUSTERED ([intOrderItemId] ASC), 
+    CONSTRAINT [FK_tblMBILOrderItem_tblMBILOrder] FOREIGN KEY ([intOrderId]) REFERENCES [tblMBILOrder]([intOrderId]) ON DELETE CASCADE
 )
