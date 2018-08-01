@@ -486,7 +486,6 @@ and isnull(strTicketStatus,'') <> 'V'
 
 SELECT 	strShipmentNumber ,
 		intInventoryShipmentId,
-		intContractHeaderId,
 		strContractNumber,
 		dblShipmentQty,
 		intCompanyLocationId,
@@ -499,7 +498,7 @@ SELECT 	strShipmentNumber ,
 		intCommodityUnitMeasureId as intUnitMeasureId
 		,intEntityId,strName as strCustomerReference into #tblGetSalesIntransitWOPickLot	
 FROM(
-				SELECT b.strShipmentNumber,d.intContractHeaderId,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,b.intInventoryShipmentId,
+				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,b.intInventoryShipmentId,
 				(SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) dblShipmentQty,
 				il.intLocationId intCompanyLocationId,
 				il.strDescription strLocationName,
@@ -695,13 +694,13 @@ BEGIN
 	strItemNo,dtmDelivarydate, strTicket,strCustomerReference,strCustomer, intFromCommodityUnitMeasureId,intCompanyLocationId,strTicketNumber,intTicketId  
 	FROM #tempDeliverySheet 
 
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
 	SELECT 1 AS intSeqId,'In-House',@strDescription
 	,'Sales In-Transit' AS [strType]
-	,-ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strShipmentNumber,intInventoryShipmentId ,strCustomerReference,intContractHeaderId,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId,intCompanyLocationId
+	,-ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strShipmentNumber,intInventoryShipmentId ,strCustomerReference,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId,intCompanyLocationId
 	FROM (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(i.intUnitMeasureId,@intCommodityUnitMeasureId,isnull(i.dblBalanceToInvoice, 0)) as ReserveQty,
-			i.strLocationName,i.strItemName,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,strCustomerReference,i.intCompanyLocationId
+			i.strLocationName,i.strItemName,strContractNumber,strShipmentNumber,intInventoryShipmentId,strCustomerReference,i.intCompanyLocationId
 			FROM #tblGetSalesIntransitWOPickLot i
 			WHERE i.intCommodityId = @intCommodityId
 			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end	
@@ -728,10 +727,10 @@ BEGIN
 								ELSE isnull(ysnLicensed, 0) END
 				)
 				
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
 	SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		,'Sales In-Transit' AS [strType]
-		,abs(dblTotal) dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
+		,abs(dblTotal) dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 	FROM (
 		SELECT * from @Final where strSeqHeader='In-House' and strType='Sales In-Transit')t 
 
@@ -916,13 +915,13 @@ IF (@ysnDisplayAllStorage=1)
 								,intInventoryReceiptId,strReceiptNumber
 	--
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
-						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intContractHeaderId,intInventoryShipmentId,strShipmentNumber)
+						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intInventoryShipmentId,strShipmentNumber)
 			select * from (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
-			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber,cd.intContractHeaderId
+			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber
 			,r.intInventoryShipmentId,strShipmentNumber strShipmentNumber1
 			FROM vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
@@ -961,9 +960,9 @@ IF (@ysnDisplayAllStorage=1)
 
 
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
-							intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber)
+							intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intInventoryShipmentId,strShipmentNumber)
 	select 15 intSeqId,'Company Titled Stock'strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
-						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber 
+						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intInventoryShipmentId,strShipmentNumber 
 	FROM @Final WHERE intSeqId = 14 and intCommodityId=@intCommodityId
 
 	If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
@@ -1250,7 +1249,7 @@ IF (@ysnDisplayAllStorage=1)
 			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Purchase Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0))
 			 AS dblTotal,@intCommodityId intCommodityId,cl.strLocationName,CT.strItemNo,strName,CT.strContractNumber strTicket,CT.dtmContractDate as dtmTicketDateTime ,
-			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,CT.intCompanyLocationId intCompanyLocationId,CT.strContractNumber,CT.intContractHeaderId
+			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,CT.intCompanyLocationId intCompanyLocationId,CT.strContractNumber,intContractHeaderId
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
@@ -1267,7 +1266,7 @@ IF (@ysnDisplayAllStorage=1)
 			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Purchase Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0)) AS dblTotal,
 			@intCommodityId intCommodityId,cl.strLocationName,cd.strItemNo,strName,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
-					strDistributionOption,@intCommodityUnitMeasureId AS intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,cd.strContractNumber,cd.intContractHeaderId
+					strDistributionOption,@intCommodityUnitMeasureId AS intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,cd.strContractNumber,intContractHeaderId
 			FROM vyuRKGetInventoryValuation v
 			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -1288,13 +1287,13 @@ IF (@ysnDisplayAllStorage=1)
 				) 
 
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strCustomer,strTicket,dtmTicketDateTime,strCustomerReference, 
-						strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strContractNumber,intContractHeaderId )
+						strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strContractNumber )
 			select * from (
 			SELECT 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sales Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strName,cd.strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
-			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,cd.strContractNumber,cd.intContractHeaderId
+			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,cd.strContractNumber 
 			FROM  vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
