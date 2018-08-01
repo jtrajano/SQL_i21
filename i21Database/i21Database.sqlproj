@@ -6852,6 +6852,7 @@
     <Build Include="dbo\Tables\tblHDRoughCountCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCountCapacity.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuSCProductionEvidenceReportByDeliverySheetView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
