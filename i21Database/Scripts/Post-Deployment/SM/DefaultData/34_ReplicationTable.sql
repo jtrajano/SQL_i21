@@ -678,6 +678,8 @@
 
             --GL
             ('tblGLDetail'),
+			('tblGLFiscalYear'),
+			('tblGLFiscalYearPeriod'),
 
             --Scale
             ('tblSCTicket'),

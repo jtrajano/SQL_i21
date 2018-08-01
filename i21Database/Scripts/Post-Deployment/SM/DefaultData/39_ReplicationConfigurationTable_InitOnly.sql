@@ -30,7 +30,14 @@ WHERE intReplicationConfigurationTableId in
 
 		'tblSMMasterMenu',
 
-		'tblSMContactMenu'
+		'tblSMContactMenu',
+
+		'tblGLFiscalYear',
+
+		'tblGLFiscalYearPeriod',
+
+		'tblGLCurrentFiscalYear'
+
 	)
 )
 
