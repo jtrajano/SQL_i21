@@ -13,11 +13,14 @@ BEGIN TRY
 			@intScreenId			INT,
 			@intContractScreenId	INT,
 			@intAmendmentScreenId	INT,
-			@strScreenName			NVARCHAR(100)
+			@strScreenName			NVARCHAR(100),
+			@ysnSendFeedOnPrice		BIT
 
-	SELECT	@intContractScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
-	SELECT	@intAmendmentScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments'
-	SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
+	SELECT	@intContractScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+	SELECT	@intAmendmentScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments'
+	SELECT  @intTransactionId		=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
+	SELECT	@ysnSendFeedOnPrice		=	ysnSendFeedOnPrice FROM tblCTCompanyPreference
+
 	IF EXISTS(SELECT * FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
 	BEGIN
 		SELECT @intScreenId = @intAmendmentScreenId
@@ -111,6 +114,7 @@ BEGIN TRY
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
 	AND		CD.intContractStatusId	NOT IN (2,5)
+	AND		CD.intPricingTypeId = CASE WHEN ISNULL(@ysnSendFeedOnPrice,0) = 1 THEN 1 ELSE CD.intPricingTypeId END
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
 
