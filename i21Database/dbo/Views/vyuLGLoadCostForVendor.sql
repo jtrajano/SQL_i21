@@ -76,3 +76,6 @@ AS
 			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],
 			 LC.[intCurrencyId],LD.intItemUOMId,LC.intItemUOMId,LD.dblGross,LD.dblTare,
 			 LD.dblNet, str1099Form, str1099Type,CU.strCurrency,UOM.strUnitMeasure,L.ysnPosted,LC.intLoadCostId,LC.strCostMethod
+			,LC.ysnAccrue
+			,LC.ysnPrice
+			,LC.ysnMTM
