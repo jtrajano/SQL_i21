@@ -118,6 +118,8 @@
 			('tblSMUserSecurityRequireApprovalFor'), --27
 			('tblSMUserSecurityScreenPermission'), --28
 
+			('tblSMLicenseType'),
+
 			--Common Info Cities
 			('tblSMCity'),
 
@@ -279,6 +281,7 @@
 			--AR Customers
 			('tblARCustomer'),
 			('tblARAccountStatus'),
+			('tblTRSupplyPoint'),
 			('tblARCustomerAccountStatus'),
 			('tblARCustomerApplicatorLicense'),
 			('tblARCustomerBudget '),
