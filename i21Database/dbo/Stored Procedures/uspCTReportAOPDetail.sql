@@ -32,6 +32,7 @@ BEGIN
 	(
 		 [intNeedPlanKey] INT IDENTITY(1, 1)		
 		,[strCommodityCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+		,[strLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 		,[strShortName] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
 		,[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
 		,[strProductType] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
@@ -132,9 +133,10 @@ BEGIN
 		
 		  SET @SqlInsert = 'IF NOT EXISTS(SELECT 1 FROM #tblCoffeeNeedPlan)
 							BEGIN
-								INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
+								INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
 								SELECT DISTINCT
 								CO.strCommodityCode,
+								CL.strLocationName,
 								IM.strShortName,
 								IM.strItemNo,
 								ProductType.strDescription AS strProductType,
@@ -151,7 +153,8 @@ BEGIN
 								JOIN	tblICItemUOM		VU	ON	VU.intItemUOMId		=	AD.intVolumeUOMId	LEFT
 								JOIN	tblICUnitMeasure	VM	ON	VM.intUnitMeasureId	=	VU.intUnitMeasureId	LEFT
 								JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId		=	AD.intWeightUOMId	LEFT
-								JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId
+								JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId LEFT
+								JOIN	tblSMCompanyLocation	CL  ON	CL.intCompanyLocationId	=	AD.intCompanyLocationId
 								LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId							
 								WHERE AD.dblCost >0 AND AD.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +'
 							END'
@@ -195,9 +198,10 @@ BEGIN
 	END
 
 		SET @SqlInsert=NULL
-		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
+		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
 							SELECT 
 							Item.strCommodity AS strCommodityCode
+							,null
 							,Item.strShortName
 							,Item.strItemNo
 							,ProductType.strDescription AS strProductType
@@ -210,7 +214,7 @@ BEGIN
 
 		--SELECT * FROM #tblCoffeeNeedPlan 
 
-		SET @SqlSelect ='SELECT [intNeedPlanKey],[strCommodityCode],[strShortName],[strItemNo],[strProductType],dbo.fnRemoveTrailingZeroes([dblVolume]) AS[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM]'
+		SET @SqlSelect ='SELECT [intNeedPlanKey],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],dbo.fnRemoveTrailingZeroes([dblVolume]) AS[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM]'
 
 		IF 	@FirstBasisItem  IS NOT NULL
 		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FirstBasisItem + ']) AS Column1'
