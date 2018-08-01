@@ -6652,7 +6652,6 @@
     <Build Include="dbo\Stored Procedures\uspMFSetLotDueDate.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetBestItemPrice.sql" />
     <Build Include="dbo\Tables\tblMBILOrderItem.sql" />
-    <Build Include="dbo\Tables\tblMBILOrderSite.sql" />
     <Build Include="dbo\Tables\tblMBILOrderTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILBuildOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
@@ -6881,6 +6880,16 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_HE.sql" />
     <Build Include="dbo\Views\vyuCFCustomerReportMessage.sql" />
     <Build Include="dbo\Views\vyuSMCompanyCreditCardMerchantInfo.sql" />
+    <Build Include="dbo\Tables\tblMBILOutOfGas.sql" />
+    <Build Include="dbo\Views\vyuMBILSite.sql" />
+    <Build Include="dbo\Views\vyuMBILOutOfGas.sql" />
+    <Build Include="dbo\Tables\tblMBILShift.sql" />
+    <Build Include="dbo\Views\vyuMBILShift.sql" />
+    <Build Include="dbo\Views\vyuMBILShiftTransaction.sql" />
+    <Build Include="dbo\Views\vyuMBILInvoice.sql" />
+    <Build Include="dbo\Views\vyuMBILPayment.sql" />
+    <Build Include="dbo\Views\vyuMBILOrder.sql" />
+    <Build Include="dbo\Views\vyuMBILDriver.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

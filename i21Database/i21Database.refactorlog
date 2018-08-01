@@ -6937,4 +6937,109 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[IX_tblTFReportingComponentProductCode_intMasterId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d1ac1c1e-d61a-4603-9e5f-849cd1349c83" ChangeDateTime="07/25/2018 07:45:24">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOutOfGas].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOutOfGas]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOutOfGasId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e0c5e188-f562-4cea-82c6-ecd7e031f991" ChangeDateTime="07/25/2018 07:46:38">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOutOfGas].[intSiteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOutOfGas]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="528204a1-773b-4c25-a59b-e7ad555e4a0a" ChangeDateTime="07/25/2018 07:47:39">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOutOfGas].[ysnLeakStatusTest]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOutOfGas]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnLeakTest" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d8ef77cb-05aa-4083-8445-5103bb11022e" ChangeDateTime="07/26/2018 02:38:56">
+    <Property Name="ElementName" Value="[dbo].[tblMBILShift].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILShift]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intShiftId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c1536c0b-4282-4e08-ab36-cbd45c48ed5e" ChangeDateTime="07/26/2018 02:42:10">
+    <Property Name="ElementName" Value="[dbo].[tblMBILShift].[dblGallonsDelievered]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILShift]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblFuelGallonsDelievered" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dc1a4bb5-f07e-4327-ba72-fad8b29939f6" ChangeDateTime="07/26/2018 07:56:43">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoice].[intMBILInvoiceId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="43cdfe9d-40f2-46e1-9e8b-e08afcac920f" ChangeDateTime="07/26/2018 08:49:41">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoice].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityCustomerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7dd19916-4123-4836-bd5e-3e500fcc3da2" ChangeDateTime="07/26/2018 09:15:35">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoice].[dblQuantity]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblTotal" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d64b2ab1-35b9-450a-990b-909d90a3cce6" ChangeDateTime="07/26/2018 10:06:18">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrder].[intMBILOrderId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7c13f85b-0794-4073-b7be-8ca07cc2e38b" ChangeDateTime="07/31/2018 05:47:11">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderItem].[intMBILOrderItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e535aa91-e472-45b0-a509-685f4ac67fdd" ChangeDateTime="07/31/2018 05:47:20">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderItem].[intMBILOrderSiteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderSiteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6f3d1fda-901e-4e35-b9d8-264372a62cf8" ChangeDateTime="07/31/2018 05:56:49">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderSite].[intMBILOrderSiteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderSiteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2465b47d-e292-43c3-8755-cbecbc05cff7" ChangeDateTime="07/31/2018 05:56:57">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderSite].[intMBILOrderId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8856d2d9-3239-4eb6-ad19-1768d5f99b65" ChangeDateTime="07/31/2018 06:05:25">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderTaxCode].[intMBILOrderItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderTaxCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="21c3c74b-0feb-4bfa-a30a-854d0827a95b" ChangeDateTime="07/31/2018 06:05:31">
+    <Property Name="ElementName" Value="[dbo].[tblMBILOrderTaxCode].[intMBILOrderTaxId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILOrderTaxCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOrderTaxId" />
+  </Operation>
 </Operations>
