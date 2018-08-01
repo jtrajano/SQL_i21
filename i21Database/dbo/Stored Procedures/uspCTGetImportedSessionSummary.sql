@@ -21,6 +21,18 @@ BEGIN TRY
 		UNION ALL
 		SELECT  LTRIM(@intSuccessCount) + ' of ' + LTRIM(@intTotalCount) + ' contracts imported successfully.' strErrorMsg,  NULL AS strContractNumber, NULL AS intContractSeq, 'Success' AS strImportStatus 
 	END
+	ELSE IF @strType = 'AOP'
+	BEGIN
+		SELECT	@intTotalCount = COUNT(1) FROM tblCTImportAOP WHERE intSession = @intSession
+		SELECT	@intSuccessCount = COUNT(1) FROM tblCTImportAOP WHERE intSession = @intSession AND strErrorMsg IS NULL
+
+		SELECT  strErrorMsg,  strYear strContractNumber, 1 intContractSeq, 'Fail' AS strImportStatus 
+		FROM	tblCTImportAOP 
+		WHERE	strErrorMsg IS NOT NULL
+		AND		intSession = @intSession
+		UNION ALL
+		SELECT  LTRIM(@intSuccessCount) + ' of ' + LTRIM(@intTotalCount) + ' AOP imported successfully.' strErrorMsg,  NULL AS strContractNumber, NULL AS intContractSeq, 'Success' AS strImportStatus 
+	END
 	ELSE
 	BEGIN
 		SELECT	@intTotalCount = COUNT(1) FROM tblCTImportBalance WHERE intSession = @intSession
