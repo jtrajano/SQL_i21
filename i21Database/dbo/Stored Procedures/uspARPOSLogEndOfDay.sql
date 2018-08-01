@@ -32,9 +32,6 @@ AS
 				RETURN;
 			END
 		end
-		
-
-
 
 		--UPDATE ENDING BALANCE AND LOG
 		UPDATE POSLOG
@@ -133,7 +130,6 @@ AS
 				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
 				WHERE intCompanyLocationId = @intCompanyLocationId
 
-				
 
 				DELETE FROM @BankTransaction
 				DELETE FROM @BankTransactionDetail
@@ -224,31 +220,6 @@ AS
 							, [dblCredit]			= ISNULL(@dblCashOverShort, 0)
 							, [intEntityId]			= @intEntityCustomerId						
 					END
-
-				EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries			= @BankTransaction
-												 	 	 , @BankTransactionDetailEntries	= @BankTransactionDetail
-												 		 , @intTransactionId				= @intNewTransactionId OUT
-
-				IF ISNULL(@intNewTransactionId, 0) <> 0
-					BEGIN
-						UPDATE tblARPOSLog
-						SET intBankDepositId = @intNewTransactionId
-						WHERE intPOSLogId = @intPOSLogId
-
-						IF ISNULL((SELECT dblAmount FROM dbo.tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId), 0) <> 0
-							BEGIN
-								EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
-															, @ysnRecap			= 0
-															, @strTransactionId = @strTransactionId
-															, @strBatchId		= NULL
-															, @intUserId		= @intUserId
-															, @intEntityId		= @intEntityCustomerId
-															, @isSuccessful		= @ysnSuccess OUT
-															, @message_id		= @intMessageId OUT
-							END
-					END
-
-				
 
 				DELETE FROM #CASHPAYMENTS 
 				WHERE intBankAccountId 		= @intBankAccountId 
