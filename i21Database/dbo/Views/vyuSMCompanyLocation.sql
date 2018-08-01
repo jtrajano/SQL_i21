@@ -249,6 +249,13 @@ SELECT compLoc.intCompanyLocationId
 ,ISNULL(sanitizationStagingUnit.[strName], '') as strSanitizationStagingUnit
 ,ISNULL(sanitizationStorageUnit.[strName], '') as strSanitizationStorageUnit
 ,ISNULL(taxGroup.[strTaxGroup], '') as strTaxGroup
+,compLoc.ysnEnableCreditCardProcessing
+,compLoc.strMerchantId
+,compLoc.strMerchantPassword
+,compLoc.strPaymentServer
+,compLoc.strCreditCardProcessingType
+,compLoc.strPaymentExternalLink
+,compLoc.strPaymentPortal
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblCMBankAccount bankAccount ON compLoc.intCashAccount = bankAccount.intGLAccountId

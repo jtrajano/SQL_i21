@@ -205,6 +205,15 @@
 	[ysnYieldAdjustmentAllowed] BIT NULL DEFAULT (0), 
 	[ysnPrintInvTagOnReceivingComplete] BIT NULL DEFAULT (0), 
 	---------------------------------------------------------------------
+	/* Credit Card Processing */
+	[ysnEnableCreditCardProcessing] BIT NOT NULL DEFAULT 0, 
+	[strMerchantId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strMerchantPassword] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strPaymentServer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
+	[strCreditCardProcessingType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,  
+	[strPaymentExternalLink] NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,  
+	[strPaymentPortal] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,  
+	------------------------------------------------------------------------------
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [AK_tblSMCompanyLocation_strLocationName] UNIQUE ([strLocationName]), 
     CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_BlendProductionDockDoorUnit] FOREIGN KEY ([intBlendProductionDockDoorUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
@@ -1154,6 +1163,69 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMCompanyLocation',
     @level2type = N'COLUMN',
     @level2name = N'dblWithholdPercent'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable Credit Card Processing',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableCreditCardProcessing'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Merchant Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strMerchantId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Merchant Password',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strMerchantPassword'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Payment Server',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strPaymentServer'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Credit Card Processing Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strCreditCardProcessingType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Payment External Link',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strPaymentExternalLink'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Payment Portal',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strPaymentPortal'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Check',
