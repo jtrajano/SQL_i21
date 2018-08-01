@@ -467,6 +467,37 @@ BEGIN
 			FROM vyuARServiceChargeInvoiceReport SC WITH(NOLOCK)
 			INNER JOIN @SelectedCustomer C ON SC.intEntityCustomerId = C.intEntityCustomerId
 		END
+	ELSE
+		BEGIN
+			INSERT INTO #TransactionLetterDetail (	
+				  intEntityCustomerId
+				, strInvoiceNumber
+				, dtmDate
+				, dbl10Days
+				, dbl30Days
+				, dbl60Days
+				, dbl90Days
+				, dbl120Days
+				, dbl121Days
+				, dblAmount
+				, dtmDueDate
+				, strTerm
+			)
+			SELECT SC.intEntityCustomerId
+				, NULL
+				, NULL							 
+				, 0	dbl10Days		 
+				, 0	dbl30Days		 
+				, 0	dbl60Days		  
+				, 0 dbl90Days			 
+				, 0 dbl120Days			 
+				, 0	dbl121Days		
+				, 0 dblTotalDue
+				, NULL
+				, C.strTerm
+			FROM @SelectedCustomer SC
+			INNER JOIN dbo.vyuARCustomerSearch C ON SC.intEntityCustomerId = C.intEntityCustomerId
+		END
 
 	INSERT INTO @temp_SelectedCustomer
 	SELECT * FROM @SelectedCustomer
