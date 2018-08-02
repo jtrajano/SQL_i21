@@ -91,7 +91,7 @@ BEGIN TRY
 		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 	END
 
-	SELECT @dblReceivedQty = @dblQuantity - ABS(@dblReceivedQty - @dblBalance)
+	SELECT @dblReceivedQty =  @dblReceivedQty - ABS(@dblQuantity  - @dblBalance)
 
     EXEC	uspCTUpdateSequenceBalance 
 			@intContractDetailId	=	@intContractDetailId,

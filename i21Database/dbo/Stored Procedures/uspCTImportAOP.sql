@@ -56,41 +56,55 @@ BEGIN TRY
 						  AND A.dtmToDate	  =	  B.dtmToDate
     WHERE	ISNULL(ysnImported,0)	=	0
 
-	SELECT	@strYear			 = AO.strYear,
-			@dtmFromDate		 = AO.dtmFromDate,
-			@dtmToDate		 = AO.dtmToDate,
-			@strBook			 = AO.strBook,
-			@strSubBook		 = AO.strSubBook,
-			@strCommodity		 = AO.strCommodity,
-			@strCompanyLocation = AO.strCompanyLocation,
-			@strItem			 = AO.strItem,
-			@dblVolume		 = AO.dblVolume,
-			@strVolumeUOM		 = AO.strVolumeUOM,
-			@strCurrency		 = AO.strCurrency,
-			@strWeightUOM		 = AO.strWeightUOM,
-			@strPriceUOM		 = AO.strPriceUOM,
-			@dblComponent1	 = AO.dblComponent1,
-			@dblComponent2	 = AO.dblComponent2,
-			@dblComponent3	 = AO.dblComponent3,
-			@dblComponent4	 = AO.dblComponent4,
-			@dblComponent5	 = AO.dblComponent5,
-			@dblComponent6	 = AO.dblComponent6,
-			@dblComponent7	 = AO.dblComponent7,
-			@dblComponent8	 = AO.dblComponent8,
-			@dblComponent9	 = AO.dblComponent9,
-			@dblComponent10	 = AO.dblComponent10,
+	UPDATE	B 
+	SET		B.dblComponent1 = ISNULL(dblComponent1,0),
+			B.dblComponent2 = ISNULL(B.dblComponent2,0),
+			B.dblComponent3 = ISNULL(B.dblComponent3,0),
+			B.dblComponent4 = ISNULL(B.dblComponent4,0),
+			B.dblComponent5 = ISNULL(B.dblComponent5,0),
+			B.dblComponent6 = ISNULL(B.dblComponent6,0),
+			B.dblComponent7 = ISNULL(B.dblComponent7,0),
+			B.dblComponent8 = ISNULL(B.dblComponent8,0),
+			B.dblComponent9 = ISNULL(B.dblComponent9,0),
+			B.dblComponent10 = ISNULL(B.dblComponent10,0)
+	FROM	tblCTImportAOP B
+	WHERE   intImportAOPId  = @intExternalId
 
-			@intBookId		 = BK.intBookId,
-			@intSubBookId		 = SB.intSubBookId,
-			@intCommodityId	 = CO.intCommodityId,
-			@intCompanyLocationId=CL.intCompanyLocationId,
-			@intItemId		 = IM.intItemId,
-			@intVolumeUOMId	 = VM.intItemUOMId,
-			@intCurrencyId	 = CY.intCurrencyID,
-			@intWeightUOMId	 = WM.intItemUOMId,
-			@intPriceUOMId	 = PM.intItemUOMId,
+	SELECT	@strYear			=	AO.strYear,
+			@dtmFromDate		=	AO.dtmFromDate,
+			@dtmToDate			=	AO.dtmToDate,
+			@strBook			=	AO.strBook,
+			@strSubBook			=	AO.strSubBook,
+			@strCommodity		=	AO.strCommodity,
+			@strCompanyLocation =	AO.strCompanyLocation,
+			@strItem			=	AO.strItem,
+			@dblVolume			=	AO.dblVolume,
+			@strVolumeUOM		=	AO.strVolumeUOM,
+			@strCurrency		=	AO.strCurrency,
+			@strWeightUOM		=	AO.strWeightUOM,
+			@strPriceUOM		=	AO.strPriceUOM,
+			@dblComponent1		=	AO.dblComponent1,
+			@dblComponent2		=	AO.dblComponent2,
+			@dblComponent3		=	AO.dblComponent3,
+			@dblComponent4		=	AO.dblComponent4,
+			@dblComponent5		=	AO.dblComponent5,
+			@dblComponent6		=	AO.dblComponent6,
+			@dblComponent7		=	AO.dblComponent7,
+			@dblComponent8		=	AO.dblComponent8,
+			@dblComponent9		=	AO.dblComponent9,
+			@dblComponent10		=	AO.dblComponent10,
 
-			@intAOPId		 =	intAOPId
+			@intBookId			=	BK.intBookId,
+			@intSubBookId		=	SB.intSubBookId,
+			@intCommodityId		=	CO.intCommodityId,
+			@intCompanyLocationId=	CL.intCompanyLocationId,
+			@intItemId			=	IM.intItemId,
+			@intVolumeUOMId		=	VM.intItemUOMId,
+			@intCurrencyId		=	CY.intCurrencyID,
+			@intWeightUOMId		=	WM.intItemUOMId,
+			@intPriceUOMId		=	PM.intItemUOMId,
+
+			@intAOPId			=	intAOPId
 
 	FROM		 tblCTImportAOP			AO
 	LEFT JOIN	 tblICCommodity			CO  ON  CO.strCommodityCode =		AO.strCommodity
@@ -123,7 +137,7 @@ BEGIN TRY
     ) unpvt
     JOIN tblCTComponentMap M ON M.strComponent = REPLACE(unpvt.strComponent,'dbl','') COLLATE Latin1_General_CI_AS
     LEFT JOIN tblCTAOPDetail D ON D.intBasisItemId = M.intItemId AND D.intAOPId = ISNULL(unpvt.intAOPId,0) AND D.intItemId = @intItemId
-    WHERE intImportAOPId	 = @intExternalId
+    WHERE intImportAOPId	 = @intExternalId AND M.intItemId IS NOT NULL
 
     IF @intAOPId IS NULL
     BEGIN
