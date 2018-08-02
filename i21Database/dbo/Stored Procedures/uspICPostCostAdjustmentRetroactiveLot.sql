@@ -500,7 +500,7 @@ BEGIN
 		-- Check if there is a transaction where the cost change needs escalation. 
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
-			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+			SET @EscalateCostAdjustment = (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 
 			SET @EscalateInventoryTransactionTypeId = NULL
 			EXEC [uspICPostCostAdjustmentEscalate]
@@ -654,44 +654,48 @@ BEGIN
 	WHERE	i.intItemId = @intItemId
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
-	EXEC [uspICPostInventoryTransaction]
-		@intItemId								= @intItemId
-		,@intItemLocationId						= @intItemLocationId
-		,@intItemUOMId							= @intItemUOMId
-		,@intSubLocationId						= @intSubLocationId
-		,@intStorageLocationId					= @intStorageLocationId
-		,@dtmDate								= @dtmDate
-		,@dblQty								= 0
-		,@dblUOMQty								= 0
-		,@dblCost								= 0
-		,@dblValue								= @CurrentCostAdjustment
-		,@dblSalesPrice							= 0
-		,@intCurrencyId							= NULL 
-		,@intTransactionId						= @intTransactionId
-		,@intTransactionDetailId				= @intTransactionDetailId
-		,@strTransactionId						= @strTransactionId
-		,@strBatchId							= @strBatchId
-		,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
-		,@intLotId								= NULL  
-		,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
-		,@intRelatedTransactionId				= @intSourceTransactionId
-		,@strRelatedTransactionId				= @strSourceTransactionId
-		,@strTransactionForm					= @strTransactionForm
-		,@intEntityUserSecurityId				= @intEntityUserSecurityId
-		,@intCostingMethod						= @LOTCOST -- TODO: Double check the costing method. Make sure it matches with the SP. 
-		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-		,@intFobPointId							= @intFobPointId 
-		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-		,@intForexRateTypeId					= NULL
-		,@dblForexRate							= 1
-		,@strDescription						= @strDescription	
+	IF ISNULL(@CurrentCostAdjustment, 0) <> 0
+	BEGIN 
+		EXEC [uspICPostInventoryTransaction]
+			@intItemId								= @intItemId
+			,@intItemLocationId						= @intItemLocationId
+			,@intItemUOMId							= @intItemUOMId
+			,@intSubLocationId						= @intSubLocationId
+			,@intStorageLocationId					= @intStorageLocationId
+			,@dtmDate								= @dtmDate
+			,@dblQty								= 0
+			,@dblUOMQty								= 0
+			,@dblCost								= 0
+			,@dblValue								= @CurrentCostAdjustment
+			,@dblSalesPrice							= 0
+			,@intCurrencyId							= NULL 
+			,@intTransactionId						= @intTransactionId
+			,@intTransactionDetailId				= @intTransactionDetailId
+			,@strTransactionId						= @strTransactionId
+			,@strBatchId							= @strBatchId
+			,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
+			,@intLotId								= NULL  
+			,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+			,@intRelatedTransactionId				= @intSourceTransactionId
+			,@strRelatedTransactionId				= @strSourceTransactionId
+			,@strTransactionForm					= @strTransactionForm
+			,@intEntityUserSecurityId				= @intEntityUserSecurityId
+			,@intCostingMethod						= @LOTCOST -- TODO: Double check the costing method. Make sure it matches with the SP. 
+			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+			,@intFobPointId							= @intFobPointId 
+			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription	
 
-		UPDATE	tblICInventoryTransaction 
-		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-		WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+			UPDATE	tblICInventoryTransaction 
+			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+	END 
 END 
 
 -- Update the log with correct inventory transaction id
+IF @InventoryTransactionIdentityId IS NOT NULL 
 BEGIN 
 	UPDATE	tblICInventoryLotCostAdjustmentLog 
 	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
