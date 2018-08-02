@@ -484,6 +484,24 @@ BEGIN TRY
 		-- Diversion
 		UPDATE @tmpInvoiceTransaction SET dblQtyShipped = (dblQtyShipped * -1), dblGross = (dblGross * -1), dblNet = (dblNet * -1), dblBillQty = (dblBillQty * -1) WHERE ysnDiversion = 1 AND strFormCode = 'SF-900' AND strScheduleCode = '11' AND (strDiversionOriginalDestinationState = 'IN' AND strDestinationState <> 'IN')
 
+		-- MFT-1219 - To Distinct the Account Status Code
+		DECLARE @tmpInvoiceDetailUniqueAccountStatusCode TABLE(intId INT, intInvoiceDetailId INT)
+		
+		INSERT INTO @tmpInvoiceDetailUniqueAccountStatusCode
+			SELECT MIN(intId) intId, intInvoiceDetailId FROM @tmpInvoiceTransaction 
+			GROUP BY intInvoiceDetailId HAVING (COUNT(intInvoiceDetailId) > 1)
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetailUniqueAccountStatusCode)
+		BEGIN
+			DECLARE @intIdUASC NVARCHAR(30) = NULL, @intDetailInvoiceUASC INT = NULL
+
+			SELECT TOP 1 @intIdUASC = intId, @intDetailInvoiceUASC = intInvoiceDetailId FROM @tmpInvoiceDetailUniqueAccountStatusCode
+
+			DELETE FROM @tmpInvoiceTransaction WHERE intId <> @intIdUASC AND intInvoiceDetailId = @intDetailInvoiceUASC
+
+			DELETE FROM @tmpInvoiceDetailUniqueAccountStatusCode WHERE intId = @intIdUASC AND intInvoiceDetailId = @intDetailInvoiceUASC
+		END
+
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
