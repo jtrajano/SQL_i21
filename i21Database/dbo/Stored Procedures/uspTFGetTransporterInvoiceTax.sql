@@ -484,6 +484,24 @@ BEGIN TRY
 				) Transactions
 		END
 		
+		-- MFT-1219 - To Distinct the Account Status Code
+		DECLARE @tmpInvoiceDetailUniqueAccountStatusCode TABLE(intId INT, intInvoiceDetailId INT)
+		
+		INSERT INTO @tmpInvoiceDetailUniqueAccountStatusCode
+			SELECT MIN(intId) intId, intInvoiceDetailId FROM @tmpInvoiceTransaction 
+			GROUP BY intInvoiceDetailId HAVING (COUNT(intInvoiceDetailId) > 1)
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetailUniqueAccountStatusCode)
+		BEGIN
+			DECLARE @intIdUASC NVARCHAR(30) = NULL, @intDetailInvoiceUASC INT = NULL
+
+			SELECT TOP 1 @intIdUASC = intId, @intDetailInvoiceUASC = intInvoiceDetailId FROM @tmpInvoiceDetailUniqueAccountStatusCode
+
+			DELETE FROM @tmpInvoiceTransaction WHERE intId <> @intIdUASC AND intInvoiceDetailId = @intDetailInvoiceUASC
+
+			DELETE FROM @tmpInvoiceDetailUniqueAccountStatusCode WHERE intId = @intIdUASC AND intInvoiceDetailId = @intDetailInvoiceUASC
+		END
+
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
