@@ -6359,6 +6359,7 @@
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_RefreshMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
