@@ -220,7 +220,32 @@ IF(ISNULL(@Post,0)) = 1
 				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 		WHERE
 			ARC.[ysnActive] = 0
+		
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+		--Inactive Customer
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Customer - ' + ARC.strCustomerNumber + ' credit limit is blank! Only Cash Sale transaction is allowed.'
+		FROM 
+			@Invoices I	
+		INNER JOIN dbo.tblARCustomer  ARC
+				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
+		WHERE
+			ARC.dblCreditLimit is null and I.[strTransactionType] != 'Cash'
 			
+
 		INSERT INTO @returntable(
 			 [intInvoiceId]
 			,[strInvoiceNumber]
