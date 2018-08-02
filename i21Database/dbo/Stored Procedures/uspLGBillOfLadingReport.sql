@@ -211,6 +211,7 @@ BEGIN TRY
 				,Load.strMVessel
 				,Load.strMarks
 				,Load.strTrailerNo3 AS strSealNumber
+				,Load.strComments AS strDeliveryInstruction
 				,ISNULL('', '') AS strCustomCustomerPO
 				,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 				,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
