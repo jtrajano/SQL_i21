@@ -6862,6 +6862,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionOpenFutureByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionContractDetail.sql" />
+    <Build Include="dbo\Views\vyuARPOSReceiptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
