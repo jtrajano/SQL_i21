@@ -327,7 +327,10 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightR
 			,[strChargesLink]
 		)
 		SELECT	
-		[intEntityVendorId]					= RE.intEntityVendorId
+		[intEntityVendorId]					= CASE 
+												WHEN @ysnDeductFeesCusVen = 1 THEN NULL
+                                                WHEN @ysnDeductFeesCusVen = 0 THEN RE.intEntityVendorId
+											END
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
 		,[intLocationId]					= RE.intLocationId
@@ -348,11 +351,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightR
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
-												WHEN IC.strCostMethod = 'Amount' THEN 
-												CASE
-													WHEN RE.ysnIsStorage = 1 THEN 0
-													WHEN RE.ysnIsStorage = 0 THEN (RE.dblQty / SCD.dblNet * SC.dblTicketFees)
-												END
+												WHEN IC.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SCD.dblNet) * SC.dblTicketFees, 2)
 											END
 		,[intContractHeaderId]				= RE.intContractHeaderId
 		,[intContractDetailId]				= RE.intContractDetailId
