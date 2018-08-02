@@ -34,7 +34,7 @@ BEGIN
 		,@intItemId = Item.intItemId
 	FROM dbo.tblLGLoad LOAD
 	INNER JOIN dbo.tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
-	INNER JOIN dbo.tblLGLoadCost OtherCharge ON LOAD.intLoadId = OtherCharge.intLoadId
+	INNER JOIN dbo.tblLGLoadCost OtherCharge ON LOAD.intLoadId = OtherCharge.intLoadId AND OtherCharge.strEntityType = 'Vendor'
 	INNER JOIN tblICItem Item ON Item.intItemId = OtherCharge.intItemId
 	LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = LoadDetail.intSCompanyLocationId
 		AND ItemLocation.intItemId = Item.intItemId
@@ -61,7 +61,7 @@ BEGIN
 		,@intItemId = Item.intItemId
 	FROM dbo.tblLGLoad LOAD
 	INNER JOIN dbo.tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
-	INNER JOIN dbo.tblLGLoadCost OtherCharge ON LOAD.intLoadId = OtherCharge.intLoadId
+	INNER JOIN dbo.tblLGLoadCost OtherCharge ON LOAD.intLoadId = OtherCharge.intLoadId AND OtherCharge.strEntityType = 'Vendor'
 	INNER JOIN tblICItem Item ON Item.intItemId = OtherCharge.intItemId
 	WHERE OtherCharge.ysnAccrue = 1
 		AND OtherCharge.intVendorId IS NULL
@@ -110,7 +110,7 @@ BEGIN
 			,ItemLocation.intItemLocationId
 		FROM dbo.tblLGLoad LOAD
 		INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
-		INNER JOIN dbo.tblLGLoadCost OtherCharges ON LOAD.intLoadId = OtherCharges.intLoadId
+		INNER JOIN dbo.tblLGLoadCost OtherCharges ON LOAD.intLoadId = OtherCharges.intLoadId AND OtherCharge.strEntityType = 'Vendor'
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = OtherCharges.intItemId
 			AND ItemLocation.intLocationId = LoadDetail.intSCompanyLocationId
 		WHERE OtherCharges.intLoadId = @intInventoryShipmentId
@@ -270,7 +270,7 @@ BEGIN
 			,intEntityId = 1
 		FROM dbo.tblLGLoad Shipment
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
-		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId
+		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId AND OtherCharge.strEntityType = 'Vendor'
 		INNER JOIN tblICItem Charge ON Charge.intItemId = ShipmentCharges.intItemId
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
 			AND ItemLocation.intLocationId = ShipmentItem.intSCompanyLocationId
