@@ -419,10 +419,30 @@ Begin
 
 				-- Lot Ship
 				If @strType='L'
+				Begin
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 					Exec uspMFGetTraceabilityLotShipDetail @intId,@ysnParentLot
 
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,strCustomer
+						,strType
+						)
+					EXEC uspMFGetTraceabilityLotOutboundShipDetail @intId
+						,@ysnParentLot
+				End
 				-- Sales Order & Invoice from Shipment
 				If @strType='S'
 					Begin
@@ -493,6 +513,25 @@ Begin
 		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 		Exec uspMFGetTraceabilityLotShipDetail @intLotId,@ysnParentLot
+
+		INSERT INTO @tblNodeData (
+			strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,strCustomer
+			,strType
+			)
+		EXEC uspMFGetTraceabilityLotOutboundShipDetail @intLotId
+			,@ysnParentLot
 
 		--Generate RecordId for all the Shipments (include multiple shipments)
 		UPDATE t
