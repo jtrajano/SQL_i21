@@ -12,6 +12,8 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @vouchers AS TABLE(strBillId NVARCHAR(50));
+DECLARE @voucherIds NVARCHAR(MAX);
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPRemoveVoucherPayable';
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -19,7 +21,40 @@ ELSE SAVE TRAN @SavePoint
 
 IF EXISTS(SELECT TOP 1 1 FROM @voucherPayable)
 BEGIN
-	PRINT 'test';
+
+	--Validate, there should be no voucher created
+	INSERT INTO @vouchers
+	SELECT TOP 10
+		A.strBillId
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	INNER JOIN @voucherPayable C
+		ON C.intPurchaseDetailId = B.intPurchaseDetailId
+		AND C.intContractDetailId = B.intContractDetailId
+		AND C.intScaleTicketId = B.intScaleTicketId
+		AND C.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+		AND C.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+		AND C.intLoadShipmentDetailId = B.intLoadShipmentDetailId
+		AND C.intEntityVendorId = A.intEntityVendorId
+	
+	IF EXISTS(SELECT 1 FROM @vouchers)
+	BEGIN
+		SELECT @voucherIds = COALESCE(@voucherIds + ',', '') +  strBillId
+		FROM @vouchers
+		SET @voucherIds = 'Unable to delete payable. Voucher(s) ' + @voucherIds + ' have been created.';
+		RAISERROR(@voucherIds, 16, 1);
+		RETURN;
+	END
+
+	DELETE A
+	FROM tblAPVoucherPayable A
+	INNER JOIN @voucherPayable B ON A.intEntityVendorId = B.intEntityVendorId
+	AND A.intPurchaseDetailId = B.intPurchaseDetailId
+	AND A.intContractDetailId = B.intContractDetailId
+	AND A.intScaleTicketId = B.intScaleTicketId
+	AND A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	AND A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+	AND A.intLoadShipmentDetailId = B.intLoadShipmentDetailId
 END
 
 IF @transCount = 0
