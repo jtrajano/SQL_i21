@@ -15,7 +15,7 @@
 			,dblFifthWeek
 			,dblSixthWeek
 			,dblSeventhWeek
-			,dtmPlanDate
+			,dtmPlanDate = getdate()
 			,strFilterKey
 		from
 		(
@@ -33,10 +33,9 @@
 			,dblFifthWeek
 			,dblSixthWeek
 			,dblSeventhWeek
-			,dtmPlanDate
+			,dtmPlanDate = getdate()
 			,strFilterKey
 		from tblHDRoughCountCapacity
-		) as rawResult
 		where 
 			dblFirstWeek is not null
 			or dblSecondWeek is not null
@@ -45,3 +44,4 @@
 			or dblFifthWeek is not null
 			or dblSixthWeek is not null
 			or dblSeventhWeek is not null
+		) as rawResult
