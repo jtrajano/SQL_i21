@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId	   INT,
-    @intContractDetailId	   INT = NULL
+    @intContractDetailId	   INT = NULL,
+	@strComment				   NVARCHAR(100) = NULL
 AS	   
 
 BEGIN TRY
@@ -136,7 +137,12 @@ BEGIN TRY
 			,intPositionId		
 			,intPriceItemUOMId   
 			,intTermId			
-			,intWeightId		
+			,intWeightId
+			,intBookId
+			,intSubBookId
+			,dblRatio
+			,strBook
+			,strSubBook		
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
@@ -146,15 +152,19 @@ BEGIN TRY
 			,dtmStartDate,					dtmEndDate,						CD.dblQuantity,						dblBalance,					CD.dblFutures
 			,dblBasis
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
+					WHEN    @strComment = 'Pricing Delete' THEN 0 
 					ELSE	ISNULL(PF.dblLotsFixed,0)
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN    @strComment = 'Pricing Delete' THEN CD.dblNoOfLots 
 					ELSE	CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0) 
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity 
+					WHEN    @strComment = 'Pricing Delete' THEN 0 
 					ELSE	ISNULL(FD.dblQuantity,0) 
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN    @strComment = 'Pricing Delete' THEN CD.dblQuantity
 					ELSE	CD.dblQuantity - ISNULL(FD.dblQuantity,0)
 			 END
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
@@ -173,6 +183,11 @@ BEGIN TRY
 			,intPriceItemUOMId    = CD.intPriceItemUOMId
 			,intTermId			  = CH.intTermId
 			,intWeightId		  = CH.intWeightId
+			,intBookId			  = CD.intBookId
+			,intSubBookId		  = CD.intSubBookId
+			,dblRatio			  = CD.dblRatio
+			,strBook			  = BK.strBook
+			,strSubBook			  = SB.strSubBook
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
@@ -181,7 +196,9 @@ BEGIN TRY
 		JOIN	tblCTPricingType		    PT  ON  PT.intPricingTypeId		=	CD.intPricingTypeId
 		JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
 												AND QU.intUnitMeasureId		=	CD.intUnitMeasureId	        
- LEFT   JOIN	 tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId
+ LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId
+ LEFT	JOIN	tblCTBook					BK	ON BK.intBookId				=	CD.intBookId
+ LEFT	JOIN	tblCTSubBook				SB	ON SB.intSubBookId			=	CD.intSubBookId
  LEFT   JOIN	 (
 					SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
 					FROM	   tblCTPriceFixationDetail

@@ -17,6 +17,8 @@
     intDtlQtyInCommodityUOMId INT,
     intDtlQtyUnitMeasureId	  INT,
     intCurrencyExchangeRateId INT,
+	intBookId				  INT,
+	intSubBookId			  INT,	
 
     dtmStartDate			  DATETIME,
     dtmEndDate				  DATETIME,
@@ -31,6 +33,7 @@
     dblQtyPriced			  NUMERIC(18,6),
     dblQtyUnpriced			  NUMERIC(18,6),
     dblFinalPrice			  NUMERIC(18,6),
+	dblRatio				  NUMERIC(18,6),
 
     dtmFXValidFrom			  DATETIME,
     dtmFXValidTo			  DATETIME,
@@ -44,6 +47,8 @@
     strPricingType			  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     strPricingStatus		  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     strCurrencypair			  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strBook					  NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strSubBook			      NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	
 	intContractBasisId       INT,
 	intGradeId				 INT,
@@ -54,7 +59,7 @@
 	intWeightId				 INT,
 	intUserId				 INT,
 	strAmendmentComment		 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
-    intConcurrencyId		  INT,
+    intConcurrencyId		 INT,
 
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC),
     CONSTRAINT [FK_tblCTSequenceHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES [tblCTContractDetail](intContractDetailId) ON DELETE CASCADE
