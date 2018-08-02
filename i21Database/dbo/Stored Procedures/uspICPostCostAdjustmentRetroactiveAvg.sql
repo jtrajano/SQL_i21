@@ -437,8 +437,16 @@ BEGIN
 		--				@OriginalAverageCost
 		--	END 
 
-		SELECT	@OriginalAverageCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblCost)
-		FROM	tblICInventoryTransaction t LEFT JOIN tblICItemUOM stockUOM
+		SELECT	@OriginalAverageCost = 
+					ISNULL(
+						dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
+						,@OriginalAverageCost
+					)
+		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOOut cbOut 
+					ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+				INNER JOIN tblICInventoryFIFO cb
+					ON cb.intInventoryFIFOId = cbOut.intInventoryFIFOId
+				INNER JOIN tblICItemUOM stockUOM
 					ON t.intItemId = t.intItemId
 					AND stockUOM.ysnStockUnit = 1
 		WHERE	t.intInventoryTransactionId = @t_intInventoryTransactionId
