@@ -421,21 +421,28 @@ BEGIN
 			END 
 
 		-- Calculate the Original Average Cost 
-		SET @OriginalAverageCost = 
-			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
-						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
-					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
-						CASE 
-							WHEN @t_intTransactionId = @intSourceTransactionId
-							AND @t_intTransactionDetailId = @intSourceTransactionDetailId
-							AND @t_strTransactionId = @strSourceTransactionId THEN 
-								@CostBucketOriginalCost 
-							ELSE 
-								@t_dblCost
-						END 
-					ELSE 
-						@OriginalAverageCost
-			END 
+		--SET @OriginalAverageCost = 
+		--	CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+		--				@OriginalRunningValue / (@RunningQty + @t_dblQty) 
+		--			WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
+		--				CASE 
+		--					WHEN @t_intTransactionId = @intSourceTransactionId
+		--					AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+		--					AND @t_strTransactionId = @strSourceTransactionId THEN 
+		--						@CostBucketOriginalCost 
+		--					ELSE 
+		--						@t_dblCost
+		--				END 
+		--			ELSE 
+		--				@OriginalAverageCost
+		--	END 
+
+		SELECT	@OriginalAverageCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblCost)
+		FROM	tblICInventoryTransaction t LEFT JOIN tblICItemUOM stockUOM
+					ON t.intItemId = t.intItemId
+					AND stockUOM.ysnStockUnit = 1
+		WHERE	t.intInventoryTransactionId = @t_intInventoryTransactionId
+				AND @t_dblQty < 0 
 
 		-- Calculate the New Average Cost 
 		SET @NewAverageCost = 
