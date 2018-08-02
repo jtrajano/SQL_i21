@@ -992,6 +992,7 @@ BEGIN
 				,[intTransactionId]
 				,[strTransactionId]
 				,[intTransactionTypeId]
+				,[intFOBPointId]
 			)
 			SELECT	[intItemId]				= d.intItemId
 					,[intItemLocationId]	= itemLocation.intItemLocationId
@@ -1003,6 +1004,7 @@ BEGIN
 					,[intTransactionId]		= h.intInventoryTransferId
 					,[strTransactionId]		= h.strTransferNo
 					,[intTransactionTypeId] = 12 -- Inventory Transfer
+					,[intFOBPointId]		= @FOB_DESTINATION
 			FROM dbo.tblICInventoryTransfer h
 				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
 				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
@@ -1029,6 +1031,7 @@ BEGIN
 				,[intTransactionId]
 				,[strTransactionId]
 				,[intTransactionTypeId]
+				,[intFOBPointId]
 			)
 			SELECT	[intItemId]				= d.intItemId
 					,[intItemLocationId]	= itemLocation.intItemLocationId
@@ -1040,6 +1043,7 @@ BEGIN
 					,[intTransactionId]		= h.intInventoryTransferId
 					,[strTransactionId]		= h.strTransferNo
 					,[intTransactionTypeId] = 12 -- Inventory Transfer
+					,[intFOBPointId]		= @FOB_DESTINATION
 			FROM dbo.tblICInventoryTransfer h
 				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
 				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
