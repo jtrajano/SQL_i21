@@ -102,6 +102,6 @@ FROM (
 	FROM vyuCTContractCostView CCV
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CCV.intContractHeaderId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-	JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+	JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId AND ET.strType = 'Customer'
 	WHERE ysnPrice = 1
 	) tbl
