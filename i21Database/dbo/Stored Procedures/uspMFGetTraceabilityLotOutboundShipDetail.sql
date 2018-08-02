@@ -21,7 +21,7 @@ IF @ysnParentLot = 0
 		,um.strUnitMeasure AS strUOM
 		,l.dtmScheduledDate AS dtmTransactionDate
 		,c.strName
-		,'S' AS strType
+		,'OS' AS strType
 	FROM tblLGLoadDetailLot ldl
 	JOIN tblLGLoadDetail ld ON ldl.intLoadDetailId = ld.intLoadDetailId
 	JOIN tblLGLoad l ON l.intLoadId = ld.intLoadId
@@ -52,7 +52,7 @@ IF @ysnParentLot = 1
 		,um.strUnitMeasure AS strUOM
 		,l.dtmScheduledDate AS dtmTransactionDate
 		,c.strName
-		,'S' AS strType
+		,'OS' AS strType
 	FROM tblLGLoadDetailLot ldl
 	JOIN tblLGLoadDetail ld ON ldl.intLoadDetailId = ld.intLoadDetailId
 	JOIN tblLGLoad l ON l.intLoadId = ld.intLoadId

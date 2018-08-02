@@ -1715,12 +1715,12 @@ BEGIN
 			UPDATE @tblNodeData
 			SET intRecordId = 2
 				,intParentId = 1
-			WHERE strType = 'S'
+			WHERE strType = 'OS'
 		ELSE
 			UPDATE @tblNodeData
 			SET intRecordId = 1
 				,intParentId = 0
-			WHERE strType = 'S'
+			WHERE strType = 'OS'
 
 		--Lots From Shipment
 		INSERT INTO @tblNodeData (
@@ -2376,7 +2376,7 @@ SELECT intRecordId AS [key]
 					END
 		WHEN strType = 'R'
 			THEN './resources/images/graphics/traceability-receipt.png'
-		WHEN strType = 'S'
+		WHEN strType = 'S' or strType = 'OS'
 			THEN './resources/images/graphics/traceability-shipment.png'
 		WHEN strType = 'C'
 			THEN './resources/images/graphics/contract.png'
