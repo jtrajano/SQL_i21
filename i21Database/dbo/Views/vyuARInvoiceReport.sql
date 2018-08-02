@@ -10,6 +10,13 @@ SELECT intInvoiceId				= INV.intInvoiceId
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END
+	 , strCompanyInfo			= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
+									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
+									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
+											THEN ''
+								  END  + CHAR(10) + ISNULL(COMPANY.strEmail,'')   + CHAR(10) + ISNULL(COMPANY.strPhone,'')
 	 , strCompanyPhoneNumber	= COMPANY.strPhone
 	 , strCompanyEmail			= COMPANY.strEmail
 	 , strType					= ISNULL(INV.strType, 'Standard')
