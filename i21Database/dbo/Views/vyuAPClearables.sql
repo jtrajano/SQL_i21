@@ -189,7 +189,7 @@ SELECT DISTINCT
 	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(-ReceiptCharge.dblQuantity,-1)
-	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(-ReceiptCharge.dblQuantityBilled,-1) ELSE 0 END 
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(-ReceiptCharge.dblQuantityPriced,-1) ELSE 0 END 
 	, dblQtyToVoucher = -(ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
 	, dblAmountToVoucher = -(CASE WHEN ReceiptCharge.dblQuantityBilled = 0 AND strCostMethod = 'Per Unit'  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
 								  WHEN Bill.dblQtyReceived <> 0  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  (ISNULL(Bill.dblDetailTotal,0)) AS DECIMAL (18,2)) 
@@ -234,7 +234,7 @@ LEFT JOIN vyuAPVendor Vendor
 WHERE Receipt.ysnPosted = 1 
 	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
-	  AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
+	  AND (-ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityPriced, 0)) != 0
 	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL  
 --QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES 
