@@ -37,3 +37,11 @@
 			,strFilterKey
 		from tblHDRoughCountCapacity
 		) as rawResult
+		where 
+			dblFirstWeek is not null
+			or dblSecondWeek is not null
+			or dblThirdWeek is not null
+			or dblForthWeek is not null
+			or dblFifthWeek is not null
+			or dblSixthWeek is not null
+			or dblSeventhWeek is not null
