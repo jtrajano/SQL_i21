@@ -144,6 +144,7 @@ SELECT
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
 	intPurchaseSale	= LG.intPurchaseSale,
+    strReceiptNumber = POS.strReceiptNumber,
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
@@ -225,9 +226,9 @@ LEFT JOIN (
 		 , intPurchaseSale
 	FROM dbo.tblLGLoad WITH (NOLOCK)
 ) LG ON INV.intLoadId = LG.intLoadId
-
-
-		                                      
-
-
-
+LEFT JOIN (
+    SELECT intInvoiceId
+         , strReceiptNumber
+    FROM dbo.tblARPOS WITH (NOLOCK)
+) POS ON INV.intInvoiceId = POS.intInvoiceId 
+     AND INV.strType = 'POS'
