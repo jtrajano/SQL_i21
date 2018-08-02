@@ -529,8 +529,8 @@ FROM (
 		 , intLotId							= NULL
 		 , strLoadNumber					= NULL
 		 , intRecipeItemId					= NULL
-		 , intContractHeaderId				= NULL
-		 , intContractDetailId				= NULL
+		 , intContractHeaderId				= ICISC.intContractId
+		 , intContractDetailId				= ICISC.intContractDetailId
 		 , intCompanyLocationId				= ICIS.intShipFromLocationId
 		 , intShipToLocationId				= ICIS.intShipToLocationId
 		 , intFreightTermId					= ICIS.intFreightTermId
