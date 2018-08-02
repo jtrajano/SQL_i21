@@ -635,6 +635,112 @@ Begin
 		Update @tblNodeData Set @intRecCounter = intRecordId = @intRecCounter + 1 ,intParentId=(CASE WHEN @ysnInvoiceExist=1 THEN 2 ELSE 1 END),strType='L' Where intParentId is null
 	End
 
+	--Outbound Shipment
+	IF @intObjectTypeId = 8
+	BEGIN
+		DECLARE @ysnInvoiceExist1 BIT = 0
+
+		--Invoice if exists
+		INSERT INTO @tblNodeData (
+			strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,strCustomer
+			,strType
+			)
+		EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intLotId
+
+		IF EXISTS (
+				SELECT 1
+				FROM @tblNodeData
+				WHERE strType = 'IN'
+				)
+			SET @ysnInvoiceExist1 = 1
+
+		IF @ysnInvoiceExist1 = 1
+			UPDATE @tblNodeData
+			SET intRecordId = 1
+				,intParentId = 0
+
+		--Ship
+		INSERT INTO @tblNodeData (
+			strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,strCustomer
+			,strType
+			)
+		EXEC uspMFGetTraceabilityOutboundShipmentDetail @intLotId
+
+		IF @ysnInvoiceExist1 = 1
+			UPDATE @tblNodeData
+			SET intRecordId = 2
+				,intParentId = 1
+			WHERE strType = 'S'
+		ELSE
+			UPDATE @tblNodeData
+			SET intRecordId = 1
+				,intParentId = 0
+			WHERE strType = 'S'
+
+		--Lots From Shipment
+		INSERT INTO @tblNodeData (
+			strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,intParentLotId
+			,strType
+			,intImageTypeId
+			)
+		EXEC uspMFGetTraceabilityOutboundShipmentLots @intLotId
+			,@ysnParentLot
+
+		--Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+		DECLARE @intRecCounter1 INT = CASE 
+				WHEN @ysnInvoiceExist1 = 1
+					THEN 2
+				ELSE 1
+				END
+
+		UPDATE @tblNodeData
+		SET @intRecCounter1 = intRecordId = @intRecCounter1 + 1
+			,intParentId = (
+				CASE 
+					WHEN @ysnInvoiceExist1 = 1
+						THEN 2
+					ELSE 1
+					END
+				)
+			,strType = 'L'
+		WHERE intParentId IS NULL
+	END
 	-- Sales Order from Shipment if exists
 	If Exists (Select 1 From @tblNodeData Where strType='S')
 		Begin
@@ -663,7 +769,7 @@ Begin
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
 	--Shipment
-	If @intObjectTypeId = 7
+	If @intObjectTypeId = 7 or @intObjectTypeId = 8
 	Begin
 		--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
 		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
