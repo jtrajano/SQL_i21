@@ -38,6 +38,7 @@ BEGIN TRY
 			,'' AS 'strSealNumber'
 			,'' AS 'strCustomCustomerPO'
 			,'' AS 'intPalletsCount'
+			,'' AS 'strTruckNo'
 
 		RETURN
 	END
@@ -159,7 +160,8 @@ BEGIN TRY
 				,'' AS strOrderNumber
 				,strCustomerPO = Load.strCustomerReference
 				,Load.dtmScheduledDate
-				--,ShipVia.strShipVia
+				,Via.strName AS strShipVia
+				,Load.strTruckNo
 				,Load.strComments
 				,FreightTerm.strFreightTerm
 				,Item.strItemNo
@@ -205,9 +207,10 @@ BEGIN TRY
 				,ParentLot.strParentLotNumber
 				,Entity.strName AS strCustomerName
 				,strShipFromLocation = CL.strLocationName
-				--,Shipment.strReferenceNumber
+				,Load.strExternalLoadNumber AS strReferenceNumber
 				,Load.strMVessel
 				,Load.strMarks
+				,Load.strTrailerNo3 AS strSealNumber
 				,ISNULL('', '') AS strCustomCustomerPO
 				,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 				,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
@@ -225,6 +228,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
+			LEFT JOIN	tblEMEntity Via ON Via.intEntityId = Load.intHaulerEntityId
 			--LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Load.intFreightTermId
 				AND Load.intPurchaseSale = 2 -- 'Outbound Order'
