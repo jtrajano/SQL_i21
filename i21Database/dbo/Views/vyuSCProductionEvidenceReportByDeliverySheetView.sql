@@ -4,9 +4,13 @@ SELECT
 	SCD.intDeliverySheetId
 	,SCD.strDeliverySheetNumber
 	,SCD.dtmDeliverySheetDate
+	,SCD.dtmDeliverySheetDate AS dtmReceiptDate
 	,SCD.intCompanyLocationId
 	,SCD.intEntityId
 	,SCD.strCountyProducer
+	,SCD.dblGross
+	,SCD.dblShrink
+	,SCD.dblNet
 	,EMEntity.strName
 	,EMLocation.strAddress
 	,EMLocation.strCity
@@ -16,16 +20,15 @@ SELECT
 	,EMSplit.strSplitNumber
 	
 	,IC.strCommodityCode
+	,IC.strItemNo
+	,UOM.strUnitMeasure AS strItemUOM
 	
 	,EMHauler.strName AS strHaulerName
 
 	,QM.strDiscountCode
 	,QM.dblGradeReading
 	
-	,ReceiptItem.intInventoryReceiptId
-	,ReceiptItem.strReceiptNumber
-	,ReceiptItem.dtmReceiptDate
-	,ReceiptItem.strDistributionType
+	,(CASE WHEN SCD.intSplitId > 0 THEN 'Split' ELSE GR.strStorageTypeCode END) AS strDistributionType
 
 	,SMCompanyLoc.strLocationName
 	,tblSMCompanySetup.strCompanyName
@@ -33,7 +36,7 @@ SELECT
 	,tblSMCompanySetup.strCompanyPhone
 	,tblSMCompanySetup.strCompanyCity
 	,tblSMCompanySetup.strCompanyCountry
-	,CompanyPref.intCurrencyDecimal
+	,CompanyPref.intCurrencyDecimal as intDecimalPrecision
 FROM tblSCDeliverySheet SCD
 INNER JOIN (
 	SELECT ICI.intItemId
@@ -43,52 +46,13 @@ INNER JOIN (
 	FROM tblICItem ICI 
 	INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = ICI.intCommodityId
 ) IC ON IC.intItemId = SCD.intItemId
-INNER JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
-INNER JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCDS.intEntityId
+INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = IC.intItemId AND ItemUOM.ysnStockUOM = 1
+INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+INNER JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCD.intEntityId
 INNER JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = SCD.intEntityId AND EMLocation.ysnDefaultLocation = 1
 INNER JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCD.intSplitId
 INNER JOIN tblSMCompanyLocation SMCompanyLoc on SMCompanyLoc.intCompanyLocationId = SCD.intCompanyLocationId
 INNER JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SCD.intDiscountId
-INNER JOIN (
-	SELECT 
-	IRI.intInventoryReceiptItemId
-	,IRI.intInventoryReceiptId
-	,IR.strReceiptNumber
-	,IR.dtmReceiptDate
-	,SCD.intDeliverySheetId
-	,(
-		CASE 
-			WHEN CTD.intContractDetailId > 0 AND CTD.intPricingTypeId != 5 THEN -2
-			WHEN ISNULL(CTD.intContractDetailId,0) = 0 AND IRI.intOwnershipType = 1 THEN -3
-			ELSE GRT.intStorageScheduleTypeId 
-		END
-	) AS intStorageScheduleTypeId
-	,(
-		CASE 
-			WHEN CTD.intContractDetailId > 0 AND CTD.intPricingTypeId != 5 THEN 'CNT'
-			WHEN ISNULL(CTD.intContractDetailId,0) = 0 AND IRI.intOwnershipType = 1 THEN 'SPT'
-			ELSE GRT.strStorageTypeCode 
-		END
-	) AS strDistributionCode
-	,(
-		CASE 
-			WHEN CTD.intContractDetailId > 0 AND CTD.intPricingTypeId != 5 THEN 'Contract'
-			WHEN ISNULL(CTD.intContractDetailId,0) = 0 AND IRI.intOwnershipType = 1 THEN 'Spot Sale'
-			ELSE GRT.strStorageTypeDescription 
-		END
-	) AS strDistributionType
-	,CTD.intContractDetailId
-	,CTD.intPricingTypeId 
-	,GRS.intCustomerStorageId
-	,IR.intEntityVendorId
-	from tblICInventoryReceiptItem IRI 
-	LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-	LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = IRI.intSourceId
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = IRI.intLineNo
-	LEFT JOIN tblGRCustomerStorage GRS ON GRS.intDeliverySheetId = SCD.intDeliverySheetId AND GRS.intEntityId = IR.intEntityVendorId
-	LEFT JOIN tblGRStorageType GRT ON GRT.intStorageScheduleTypeId = GRS.intStorageTypeId
-	WHERE IR.intSourceType = 5
-) ReceiptItem ON ReceiptItem.intDeliverySheetId = SCD.intDeliverySheetId AND ReceiptItem.intEntityVendorId = SCDS.intEntityId
 INNER JOIN (
 	 SELECT 
 		GR.intDiscountScheduleCodeId
@@ -109,6 +73,13 @@ INNER JOIN (
 		LEFT JOIN tblQMTicketDiscount QM on QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		WHERE QM.strSourceType = 'Delivery Sheet' AND GR.ysnDryingDiscount = 1
 ) QM ON QM.intTicketFileId = SCD.intDeliverySheetId 
+LEFT JOIN (
+	SELECT SCDS.intDeliverySheetId
+		,SCDS.intEntityId 
+		,GR.strStorageTypeCode 
+	FROM tblSCDeliverySheetSplit SCDS
+	INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId
+) GR ON GR.intDeliverySheetId = SCD.intDeliverySheetId AND GR.intEntityId = SCD.intEntityId
 LEFT JOIN (
 	SELECT TOP 1
 		SC.intDeliverySheetId
