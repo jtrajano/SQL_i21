@@ -25,7 +25,7 @@ SELECT 'Ship' AS strTransactionName
 	,@strUOM AS strUOM
 	,l.dtmScheduledDate  AS dtmTransactionDate
 	,c.strName
-	,'S' AS strType
+	,'OS' AS strType
 FROM tblLGLoad l
 LEFT JOIN vyuARCustomer c ON l.intEntityId = c.[intEntityId]
 WHERE l.intLoadId = @intLoadId

@@ -73,7 +73,7 @@ SELECT DISTINCT intLoadId AS intId
 	,0 AS intItemId
 	,0 AS intLocationId
 FROM tblLGLoad
-
+Where intPurchaseSale=2
 UNION
 
 SELECT DISTINCT intLotId AS intId
