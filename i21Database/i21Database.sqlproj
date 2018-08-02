@@ -6372,6 +6372,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityOutboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromOutboundShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityOutboundShipmentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

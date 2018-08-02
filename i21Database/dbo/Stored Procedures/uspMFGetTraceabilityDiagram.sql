@@ -919,6 +919,7 @@ BEGIN
 
 			-- Lot Ship
 			IF @strType = 'L'
+			begin
 				INSERT INTO @tblData (
 					strTransactionName
 					,intLotId
@@ -937,6 +938,26 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityLotShipDetail @intId
 					,@ysnParentLot
+
+					INSERT INTO @tblData (
+					strTransactionName
+					,intLotId
+					,strLotNumber
+					,strLotAlias
+					,intItemId
+					,strItemNo
+					,strItemDesc
+					,intCategoryId
+					,strCategoryCode
+					,dblQuantity
+					,strUOM
+					,dtmTransactionDate
+					,strCustomer
+					,strType
+					)
+				EXEC uspMFGetTraceabilityLotOutboundShipDetail @intId
+					,@ysnParentLot
+				End
 
 			-- Sales Order & Invoice from Shipment
 			IF @strType = 'S'
@@ -1217,6 +1238,25 @@ BEGIN
 			,strType
 			)
 		EXEC uspMFGetTraceabilityLotShipDetail @intLotId
+			,@ysnParentLot
+
+			INSERT INTO @tblNodeData (
+			strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,strCustomer
+			,strType
+			)
+		EXEC uspMFGetTraceabilityLotOutboundShipDetail @intLotId
 			,@ysnParentLot
 
 		--Generate RecordId for all the Shipments (include multiple shipments)
