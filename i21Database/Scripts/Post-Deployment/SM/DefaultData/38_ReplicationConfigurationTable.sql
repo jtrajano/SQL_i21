@@ -34,6 +34,8 @@ VALUES
 --##   Entity Terminals
 --##   Entity User Profile
 --##-----------------------------------------------------------------------------------------------
+	--recently added
+	('tblHDTicketType', 'Entities', 'Entity Management'),
 
 	('tblEMContactDetail', 'Entities', 'Entity Management'),			
 	('tblEMContactDetailType ', 'Entities', 'Entity Management'),
@@ -202,6 +204,8 @@ VALUES
 	('Approval List', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	--tblEM*
 	('tblSMApproverGroup', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	--signature
+	('tblSMSignature', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 
 ---------------------------------------------------------------------------------------------------
 
@@ -349,8 +353,9 @@ VALUES
 		('tblGLCompanyPreferenceOption', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLDeletedAccount', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLAccountAdjustmentLog', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
-		('tblGLDeletedAccount', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
-
+		('tblGLCurrentFiscalYear', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
+		('tblGLFiscalYear', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
+		('tblGLFiscalYearPeriod', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLAccountSystem', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLAccountReallocation', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
 		('tblGLAccountTemplate', 'Account Groups, Account Structure, Chart of Accounts, Fiscal Year, Segment Account and Account Range', 'General Ledger'),
@@ -912,6 +917,7 @@ VALUES
 		('tblCTPriceContract', 'Contracts', 'Contract Management'),
 		('tblCTPriceFixation', 'Contracts', 'Contract Management'),
 		('tblCTPriceFixationDetail', 'Contracts', 'Contract Management'),
+		('tblGRStorageType', 'Contracts', 'Contract Management'),
 
 ---------------------------------------------------------------------------------------------------
 		

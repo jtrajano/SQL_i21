@@ -10,6 +10,12 @@
 			INSERT INTO @ListTables 
 			VALUES 
 
+			--recently added
+			('tblHDTicketType'),
+			('tblSMApprovalList'),
+			('tblSMSignature'),
+			
+
 			--Parent To Sub
 				--Entity
 			--Entity
@@ -458,6 +464,7 @@
 			('tblGRDiscountSchedule'),
 			('tblGRDiscountScheduleCode'),
 			('tblGRDiscountScheduleLine'),
+			('tblGRStorageType'),
 			
 			
 
