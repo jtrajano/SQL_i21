@@ -54,11 +54,12 @@ SELECT	@CREDIT_MEMO_INVOICE_TYPE = intTransactionTypeId
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	strName = 'Credit Memo'
 
-DECLARE	@AVERAGECOST AS INT	= 1
+DECLARE	@AVERAGECOST 	AS INT	= 1
+      , @CATEGORYCOST 	AS INT 	= 6
 		--,@FIFO AS INT		= 2
 		--,@LIFO AS INT		= 3
 		--,@LOTCOST AS INT	= 4
-		--,@ACTUALCOST AS INT	= 5
+		--,@ACTUALCOST AS INT	= 5		
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000			
@@ -142,7 +143,7 @@ SELECT
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= IST.[intCategoryId]
-	,[dblAdjustRetailValue]		= NULL
+	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [intItemUOMId], [intLoadDetailId], [dblTotal], [ysnBlended],
 			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId], [intTicketId]
@@ -225,7 +226,7 @@ SELECT
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= IST.[intCategoryId]
-	,[dblAdjustRetailValue]		= NULL
+	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
