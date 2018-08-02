@@ -47,7 +47,7 @@ BEGIN TRY
 	DECLARE @xmlDocumentId INT
 	DECLARE @strShipmentNo NVARCHAR(100)
 	DECLARE @strCustomCustomerPO NVARCHAR(50)
-	DECLARE @intInventoryShipmentId INT
+	DECLARE @intLoadId INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -89,9 +89,9 @@ BEGIN TRY
 
 	IF @strShipmentNo IS NOT NULL
 	BEGIN
-		SELECT @intInventoryShipmentId = intInventoryShipmentId
-		FROM tblICInventoryShipment
-		WHERE strShipmentNumber = @strShipmentNo
+		SELECT @intLoadId = intLoadId
+		FROM tblLGLoad
+		WHERE strLoadNumber = @strShipmentNo
 
 		-- Taking 'Customer PO No' value from custom tab
 		SELECT @strCustomCustomerPO = FV.strValue
@@ -102,13 +102,13 @@ BEGIN TRY
 		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
 		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = @intInventoryShipmentId
+		WHERE T.intRecordId = @intLoadId
 
 		SELECT *
 			,COUNT(1) OVER () AS intPalletsCount
 		FROM (
-			SELECT Shipment.intInventoryShipmentId
-				,Shipment.strShipmentNumber
+			SELECT Load.intLoadId
+				,Load.strLoadNumber
 				,LTRIM(RTRIM(CASE 
 							WHEN ISNULL(CL.strAddress, '') = ''
 								THEN ''
@@ -155,27 +155,27 @@ BEGIN TRY
 								THEN ''
 							ELSE EL.strCountry
 							END)) AS strShipToAddress
-				,Shipment.strBOLNumber
+				,Load.strBLNumber
 				,'' AS strOrderNumber
-				,strCustomerPO = SO.strPONumber
-				,Shipment.dtmShipDate
-				,ShipVia.strShipVia
-				,Shipment.strDeliveryInstruction
+				,strCustomerPO = Load.strCustomerReference
+				,Load.dtmScheduledDate
+				--,ShipVia.strShipVia
+				,Load.strComments
 				,FreightTerm.strFreightTerm
 				,Item.strItemNo
 				,strItemDescription = Item.strDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0)) AS dblQty
+				,ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) AS dblQty
 				,ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure) AS strUOM
 				,(
 					CASE 
 						WHEN LUOM.strUnitMeasure <> ISNULL(WUOM.strUnitMeasure, '')
-							THEN (ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0)) * Item.dblWeight)
-						ELSE ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0))
+							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * Item.dblWeight)
+						ELSE ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0))
 						END
 					) AS dblNetWeight
-				,SUM(ISNULL(ShipmentItemLot.dblGrossWeight, 0) - ISNULL(ShipmentItemLot.dblTareWeight, 0)) OVER () AS dblTotalWeight
+				,SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER () AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = 0
 				,strCompanyName = (
 					SELECT TOP 1 strCompanyName
@@ -205,35 +205,36 @@ BEGIN TRY
 				,ParentLot.strParentLotNumber
 				,Entity.strName AS strCustomerName
 				,strShipFromLocation = CL.strLocationName
-				,Shipment.strReferenceNumber
-				,Shipment.strVessel
-				,Shipment.strSealNumber
-				,ISNULL(@strCustomCustomerPO, '') AS strCustomCustomerPO
-			FROM tblICInventoryShipment Shipment
-			JOIN tblICInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
-			JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
-			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-			JOIN tblICInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-			JOIN tblICLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
-			JOIN tblICItemUOM ItemUOM1 ON ItemUOM1.intItemUOMId = Lot.intItemUOMId
-			JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = ItemUOM1.intUnitMeasureId
-			JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
+				--,Shipment.strReferenceNumber
+				,Load.strMVessel
+				,Load.strMarks
+				,ISNULL('', '') AS strCustomCustomerPO
+				,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+				,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+			FROM tblLGLoad Load
+			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
+			LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
+			LEFT JOIN tblICItem Item ON Item.intItemId = LoadDetail.intItemId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
+			LEFT JOIN tblICItemUOM ItemUOM1 ON ItemUOM1.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = ItemUOM1.intUnitMeasureId
+			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
 			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Item.intWeightUOMId
-			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Shipment.intShipFromLocationId
-			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Shipment.intShipToLocationId
-			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Shipment.intEntityCustomerId
-			LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
-			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
-			LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId
-				AND Shipment.intOrderType = 2 -- 'Sales Order'
+			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
+			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
+			--LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
+			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Load.intFreightTermId
+				AND Load.intPurchaseSale = 2 -- 'Outbound Order'
 			) AS a
-		WHERE strShipmentNumber = @strShipmentNo
+		WHERE strLoadNumber =  @strShipmentNo
 	END
 END TRY
 
 BEGIN CATCH
-	SET @strErrMsg = 'uspMFBillOfLadingReport - ' + ERROR_MESSAGE()
+	SET @strErrMsg = 'uspLGBillOfLadingReport - ' + ERROR_MESSAGE()
 
 	RAISERROR (@strErrMsg,18,1,'WITH NOWAIT')
 END CATCH
