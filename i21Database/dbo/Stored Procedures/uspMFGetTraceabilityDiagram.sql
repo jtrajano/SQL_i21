@@ -733,12 +733,12 @@ Begin
 			UPDATE @tblNodeData
 			SET intRecordId = 2
 				,intParentId = 1
-			WHERE strType = 'S'
+			WHERE strType = 'OS'
 		ELSE
 			UPDATE @tblNodeData
 			SET intRecordId = 1
 				,intParentId = 0
-			WHERE strType = 'S'
+			WHERE strType = 'OS'
 
 		--Lots From Shipment
 		INSERT INTO @tblNodeData (
@@ -964,7 +964,7 @@ End
 		Case When n.intAttributeTypeId=3 Then './resources/images/graphics/traceability-packaging.png' 
 		Else './resources/images/graphics/traceability-wip-process.png' End
 	When n.strType='R' Then './resources/images/graphics/traceability-receipt.png'
-	When n.strType='S' Then './resources/images/graphics/traceability-shipment.png'
+	When n.strType in ('S','OS') Then './resources/images/graphics/traceability-shipment.png'
 	When n.strType='C' Then './resources/images/graphics/contract.png'
 	When n.strType='IS' Then './resources/images/graphics/traceability-shipment.png'
 	When n.strType='CN' Then './resources/images/graphics/container.png'
