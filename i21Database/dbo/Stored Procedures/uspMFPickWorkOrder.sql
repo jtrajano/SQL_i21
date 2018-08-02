@@ -237,7 +237,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 116 --Cycle Count based on Recipe Tolerance
+		AND intAttributeId = 117 --Cycle Count based on Recipe Tolerance
 
 	if IsNULL(@strCycleCountbasedonRecipeTolerance,'')='' 
 	Begin

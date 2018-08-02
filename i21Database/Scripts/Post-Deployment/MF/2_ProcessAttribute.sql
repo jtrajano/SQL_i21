@@ -2431,7 +2431,7 @@ GO
 IF NOT EXISTS (
         SELECT *
         FROM dbo.tblMFAttribute
-        WHERE intAttributeId = 116
+        WHERE intAttributeId = 117
         )
 BEGIN
     INSERT INTO tblMFAttribute (
@@ -2442,7 +2442,7 @@ BEGIN
         ,ysnMultiSelect
         ,strSQL
         )
-    SELECT 116
+    SELECT 117
         ,'Cycle Count based on Recipe Tolerance'
         ,5
         ,5

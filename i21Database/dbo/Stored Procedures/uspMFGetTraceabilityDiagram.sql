@@ -1617,7 +1617,7 @@ BEGIN
 	END
 
 	--Outbound Shipment
-	IF @intObjectTypeId = 7
+	IF @intObjectTypeId = 8
 	BEGIN
 		DECLARE @ysnInvoiceExist1 BIT = 0
 
