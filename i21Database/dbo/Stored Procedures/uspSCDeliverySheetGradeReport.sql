@@ -57,8 +57,23 @@ BEGIN TRY
 	SELECT @intDeliverySheetId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intDeliverySheetId'
-
-	EXEC uspSCDeliverySheetGrade @intDeliverySheetId
+	IF NOT EXISTS(SELECT TOP 1 intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketFileId = @intDeliverySheetId AND strSourceType = 'Delivery Sheet')
+	BEGIN
+		EXEC uspSCDeliverySheetGrade @intDeliverySheetId
+	END
+	ELSE
+	BEGIN
+		SELECT QM.intTicketFileId AS intDeliverySheetId
+		,IC.strItemNo AS Item
+		,QM.dblGradeReading AS Amount
+		,QM.dblDiscountAmount AS DiscountAmount
+		,intDecimalPrecision = (SELECT TOP 1 intCurrencyDecimal FROM tblSMCompanyPreference)
+		FROM tblQMTicketDiscount QM
+		INNER JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+		INNER JOIN tblICItem IC ON  IC.intItemId = GR.intItemId
+		WHERE QM.intTicketFileId = @intDeliverySheetId 
+		AND strSourceType = 'Delivery Sheet'
+	END
 END TRY
 
 BEGIN CATCH
