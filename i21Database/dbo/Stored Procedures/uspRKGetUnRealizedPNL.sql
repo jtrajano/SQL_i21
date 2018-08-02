@@ -1086,7 +1086,8 @@ BEGIN TRY
 												,CD.intFutureMarketUnitMeasureId
 												,CD.intPriceUnitMeasureId
 												,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,ISNULL(SP.dblSettlementPrice,0))
-												)
+		 										)
+		/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
 
    ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
 	FROM @tblUnRealizedPNL CD
@@ -1155,12 +1156,12 @@ BEGIN TRY
 								  END
 	
 	UPDATE 	UnRealizedPNL
-	SET UnRealizedPNL.dblPAndLinMarketUOM   = dbo.fnGRConvertQuantityToTargetItemUOM(intItemId,intQuantityUnitMeasureId,intFutureMarketUnitMeasureId,ISNULL(dblProfitOrLossValue,0)) 
-											/ CASE 
-													WHEN ISNULL(dblProfitOrLossValue,0) = 0 THEN 1 
-													ELSE ABS(dblProfitOrLossValue) /  
-													(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END) 
-											  END
+	SET UnRealizedPNL.dblPAndLinMarketUOM   = ABS(UnRealizedPNL.dblProfitOrLossValue) / 
+												CASE WHEN ABS(UnRealizedPNL.dblProfitOrLossValue) = 0 THEN 1
+												ELSE
+													dbo.fnGRConvertQuantityToTargetItemUOM(UnRealizedPNL.intItemId,UnRealizedPNL.intQuantityUnitMeasureId,UnRealizedPNL.intFutureMarketUnitMeasureId,ISNULL(UnRealizedPNL.dblQuantity,0)) 
+												END
+												* (CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END)
     
 	 FROM @tblUnRealizedPNL UnRealizedPNL
 	 JOIN tblSMCurrency Currency ON Currency.intCurrencyID = UnRealizedPNL.intMarketCurrencyId
