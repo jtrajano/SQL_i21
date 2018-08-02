@@ -6854,6 +6854,7 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuSCProductionEvidenceReportByDeliverySheetView.sql" />
     <Build Include="dbo\User Defined Types\InvoiceItemAccount.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOSDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
