@@ -523,6 +523,8 @@ IF EXISTS (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @Sales
 		SET @InvoiceComment = ISNULL(@InvoiceComment, '') + ' ' + ISNULL(@SalesOrderComment, '')
 	END
 
+SET @RaiseError = 1
+
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
