@@ -1,42 +1,66 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityLotShipDetail]
-	@intLotId int,
-	@ysnParentLot bit=0
+﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityLotShipDetail] @intLotId INT
+	,@ysnParentLot BIT = 0
 AS
+DECLARE @strLotNumber NVARCHAR(50)
 
-Declare @strLotNumber nvarchar(50)
+SELECT @strLotNumber = strLotNumber
+FROM tblICLot
+WHERE intLotId = @intLotId
 
-Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+IF @ysnParentLot = 0
+	SELECT 'Ship' AS strTransactionName
+		,sh.intInventoryShipmentId
+		,sh.strShipmentNumber
+		,'' AS strLotAlias
+		,i.intItemId
+		,i.strItemNo
+		,i.strDescription
+		,mt.intCategoryId
+		,mt.strCategoryCode
+		,shl.dblQuantityShipped AS dblQuantity
+		,um.strUnitMeasure AS strUOM
+		,sh.dtmShipDate AS dtmTransactionDate
+		,c.strName
+		,'S' AS strType
+	FROM tblICInventoryShipmentItemLot shl
+	JOIN tblICInventoryShipmentItem shi ON shl.intInventoryShipmentItemId = shi.intInventoryShipmentItemId
+	JOIN tblICInventoryShipment sh ON sh.intInventoryShipmentId = shi.intInventoryShipmentId
+	JOIN tblICLot l ON shl.intLotId = l.intLotId
+	JOIN tblICItem i ON l.intItemId = i.intItemId
+	JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+	JOIN tblICItemUOM iu ON shi.intItemUOMId = iu.intItemUOMId
+	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+	LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
+	WHERE shl.intLotId IN (
+			SELECT intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+			)
+	ORDER BY sh.intInventoryShipmentId
 
-	If @ysnParentLot=0
-		Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
-		mt.intCategoryId,mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
-		um.strUnitMeasure AS strUOM,
-		sh.dtmShipDate AS dtmTransactionDate,c.strName ,'S' AS strType
-		from tblICInventoryShipmentItemLot shl 
-		Join tblICInventoryShipmentItem shi on shl.intInventoryShipmentItemId=shi.intInventoryShipmentItemId
-		Join tblICInventoryShipment sh on sh.intInventoryShipmentId=shi.intInventoryShipmentId  
-		Join tblICLot l on shl.intLotId=l.intLotId
-		Join tblICItem i on l.intItemId=i.intItemId
-		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-		Join tblICItemUOM iu on shi.intItemUOMId=iu.intItemUOMId
-		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId]
-		Where shl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
-		Order by sh.intInventoryShipmentId
-
-	If @ysnParentLot=1
-		Select DISTINCT 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
-		mt.intCategoryId,mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
-		um.strUnitMeasure AS strUOM,
-		sh.dtmShipDate AS dtmTransactionDate,c.strName ,'S' AS strType
-		from tblICInventoryShipmentItemLot shl 
-		Join tblICInventoryShipmentItem shi on shl.intInventoryShipmentItemId=shi.intInventoryShipmentItemId
-		Join tblICInventoryShipment sh on sh.intInventoryShipmentId=shi.intInventoryShipmentId  
-		Join tblICLot l on shl.intLotId=l.intLotId
-		Join tblICItem i on l.intItemId=i.intItemId
-		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-		Join tblICItemUOM iu on shi.intItemUOMId=iu.intItemUOMId
-		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId]
-		Where l.intParentLotId=@intLotId
-		Order by sh.intInventoryShipmentId
+IF @ysnParentLot = 1
+	SELECT DISTINCT 'Ship' AS strTransactionName
+		,sh.intInventoryShipmentId
+		,sh.strShipmentNumber
+		,'' AS strLotAlias
+		,i.intItemId
+		,i.strItemNo
+		,i.strDescription
+		,mt.intCategoryId
+		,mt.strCategoryCode
+		,shl.dblQuantityShipped AS dblQuantity
+		,um.strUnitMeasure AS strUOM
+		,sh.dtmShipDate AS dtmTransactionDate
+		,c.strName
+		,'S' AS strType
+	FROM tblICInventoryShipmentItemLot shl
+	JOIN tblICInventoryShipmentItem shi ON shl.intInventoryShipmentItemId = shi.intInventoryShipmentItemId
+	JOIN tblICInventoryShipment sh ON sh.intInventoryShipmentId = shi.intInventoryShipmentId
+	JOIN tblICLot l ON shl.intLotId = l.intLotId
+	JOIN tblICItem i ON l.intItemId = i.intItemId
+	JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+	JOIN tblICItemUOM iu ON shi.intItemUOMId = iu.intItemUOMId
+	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+	LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
+	WHERE l.intParentLotId = @intLotId
+	ORDER BY sh.intInventoryShipmentId

@@ -83,6 +83,7 @@ BEGIN TRY
 		,@intRecipeTypeId int
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@strInstantConsumption NVARCHAR(50)
+		,@strCycleCountbasedonRecipeTolerance NVARCHAR(50)
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -235,6 +236,22 @@ BEGIN TRY
 	Select @strPackagingCategory=strCategoryCode 
 	from tblICCategory
 	Where intCategoryId =@intPMCategoryId
+
+	If @intPMCategoryId is null
+	Begin
+		Select @intPMCategoryId=0,@strPackagingCategory=''
+	End
+
+	SELECT @strCycleCountbasedonRecipeTolerance = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 116 --Cycle Count based on Recipe Tolerance
+
+	if IsNULL(@strCycleCountbasedonRecipeTolerance,'')='' 
+	Begin
+		Select @strCycleCountbasedonRecipeTolerance='False'
+	End
 
 	IF @intTransactionCount = 0
 		BEGIN TRAN
@@ -1923,7 +1940,7 @@ BEGIN TRY
 			END
 		END
 
-		IF @strInstantConsumption='True' and EXISTS (
+		IF (@strCycleCountbasedonRecipeTolerance='True' or @strInstantConsumption ='True') and EXISTS (
 				SELECT SUM(dblQty)
 				FROM @tblLot
 				HAVING SUM(dblQty) < (
@@ -2343,7 +2360,7 @@ BEGIN TRY
 						,0
 						,0
 						,0
-						,@dblQty
+						,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId,@intRecipeItemUOMId, @dblQty)
 						,0
 						,0
 						,0
@@ -2362,8 +2379,7 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty
-						,intStageLocationId = @intStageLocationId
+					SET dblConsumedQuantity = dblConsumedQuantity + [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId,@intRecipeItemUOMId, @dblQty),intStageLocationId=@intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
 						AND IsNULL(intMachineId, 0) = CASE 

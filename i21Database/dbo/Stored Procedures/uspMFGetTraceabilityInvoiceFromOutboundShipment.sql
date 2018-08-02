@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityInvoiceFromShipment] @intShipmentId INT
+﻿CREATE PROCEDURE uspMFGetTraceabilityInvoiceFromOutboundShipment @intLoadId INT
 AS
 SET NOCOUNT ON;
 
@@ -18,11 +18,11 @@ SELECT DISTINCT 'Invoice' AS strTransactionName
 	,'IN' AS strType
 FROM tblARInvoice iv
 JOIN tblARInvoiceDetail ivd ON iv.intInvoiceId = ivd.intInvoiceId
-JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentItemId = ivd.intInventoryShipmentItemId
-JOIN tblICInventoryShipment sh ON sh.intInventoryShipmentId = si.intInventoryShipmentId
-JOIN tblICItem i ON si.intItemId = i.intItemId
+JOIN tblLGLoadDetail lg ON lg.intLoadDetailId = ivd.intLoadDetailId
+JOIN tblLGLoad l ON l.intLoadId = lg.intLoadId
+JOIN tblICItem i ON lg.intItemId = i.intItemId
 JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 LEFT JOIN tblICItemUOM iu ON ivd.intItemUOMId = iu.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 LEFT JOIN vyuARCustomer c ON iv.intEntityCustomerId = c.[intEntityId]
-WHERE sh.intInventoryShipmentId = @intShipmentId
+WHERE l.intLoadId = @intLoadId
