@@ -3071,35 +3071,35 @@ BEGIN
 		,GETDATE()
 		)
 END
-GO
-IF NOT EXISTS (
-		SELECT 1
-		FROM tblMFAttributeDefaultValue
-		WHERE intAttributeId = 116
-			AND intAttributeTypeId = 5
-		)
-BEGIN
-	INSERT INTO tblMFAttributeDefaultValue (
-		intConcurrencyId
-		,intAttributeId
-		,intAttributeTypeId
-		,strAttributeDefaultValue
-		,strAttributeDisplayValue
-		,intCreatedUserId
-		,dtmCreated
-		,intLastModifiedUserId
-		,dtmLastModified
-		)
-	VALUES (
-		1
-		,116
-		,5
-		,'False'
-		,'False'
-		,1
-		,GETDATE()
-		,1
-		,GETDATE()
-		)
-END
+--GO
+--IF NOT EXISTS (
+--		SELECT 1
+--		FROM tblMFAttributeDefaultValue
+--		WHERE intAttributeId = 116
+--			AND intAttributeTypeId = 5
+--		)
+--BEGIN
+--	INSERT INTO tblMFAttributeDefaultValue (
+--		intConcurrencyId
+--		,intAttributeId
+--		,intAttributeTypeId
+--		,strAttributeDefaultValue
+--		,strAttributeDisplayValue
+--		,intCreatedUserId
+--		,dtmCreated
+--		,intLastModifiedUserId
+--		,dtmLastModified
+--		)
+--	VALUES (
+--		1
+--		,116
+--		,5
+--		,'False'
+--		,'False'
+--		,1
+--		,GETDATE()
+--		,1
+--		,GETDATE()
+--		)
+--END
 
