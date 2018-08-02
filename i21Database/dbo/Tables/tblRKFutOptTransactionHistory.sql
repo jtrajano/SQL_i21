@@ -29,6 +29,9 @@
 	[strInternalTradeNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocationName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[dblContractSize] [numeric](18, 6) NULL,
+	[intBookId] [int] NULL,
+	[intSubBookId] [int] NULL,
+	[ysnMonthExpired] [bit] NULL,
 	[strUserName] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strAction] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblRKFutOptTransactionHistory_intFutOptTransactionHistoryId] PRIMARY KEY CLUSTERED (intFutOptTransactionHistoryId ASC)

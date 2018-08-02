@@ -44,6 +44,9 @@ BEGIN TRY
            ,strOldBuySell
            ,strNewBuySell
            ,dtmTransactionDate
+		   ,intBookId
+		   ,intSubBookId
+		   ,ysnMonthExpired
            ,strUserName
 		   ,strAction)
 		SELECT 
@@ -79,6 +82,9 @@ BEGIN TRY
 			,NULL
 			,T.strBuySell
 			,GETDATE()
+			,intBookId
+			,intSubBookId
+			,ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = T.intFutureMonthId)
 			,strUserName = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intUserId)
 			,'DELETE'
 		FROM 
@@ -123,6 +129,9 @@ BEGIN TRY
            ,strOldBuySell
            ,strNewBuySell
            ,dtmTransactionDate
+		   ,intBookId
+		   ,intSubBookId
+		   ,ysnMonthExpired
            ,strUserName
 		   ,strAction)
 		SELECT 
@@ -158,6 +167,9 @@ BEGIN TRY
 			,NULL
 			,T.strBuySell
 			,GETDATE()
+			,intBookId
+			,intSubBookId
+			,ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = T.intFutureMonthId)
 			,strUserName = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intUserId)
 			,@action
 		FROM 

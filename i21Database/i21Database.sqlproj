@@ -6860,6 +6860,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityOutboundShipmentLots.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepAddSnapshotArticle.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionOpenFutureByDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
