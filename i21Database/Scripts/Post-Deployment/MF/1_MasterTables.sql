@@ -3534,3 +3534,7 @@ UPDATE tblMFRecipeItem
 SET dblCalculatedQuantity = dblQuantity
 WHERE intRecipeItemTypeId = 2 AND dblCalculatedQuantity = 0
 GO
+UPDATE tblMFCompanyPreference
+SET ysnWorkOrderPlannedDateByBusinessDate = 1
+Where ysnWorkOrderPlannedDateByBusinessDate IS NULL
+GO

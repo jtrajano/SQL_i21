@@ -12,6 +12,10 @@ BEGIN
 		,@dtmCurrentDate DATETIME
 		,@intEndOffset INT
 		,@dtmShiftEndTime DATETIME
+		,@ysnWorkOrderPlannedDateByBusinessDate BIT
+
+	SELECT @ysnWorkOrderPlannedDateByBusinessDate = ysnWorkOrderPlannedDateByBusinessDate
+	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDate = Getdate()
 
@@ -58,6 +62,11 @@ BEGIN
 			,0 AS intMachineId
 			,'' AS strMachineName
 			,0 AS intSubLocationId
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmPlannedDate
 	END
 	ELSE
 	BEGIN
@@ -75,6 +84,11 @@ BEGIN
 			,ISNULL(M.intMachineId, 0) AS intMachineId
 			,ISNULL(M.strName, '') AS strMachineName
 			,ISNULL(M.intSubLocationId, 0) AS intSubLocationId
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmPlannedDate
 		FROM dbo.tblMFManufacturingProcess P
 		LEFT JOIN tblMFManufacturingProcessMachine PM ON P.intManufacturingProcessId = PM.intManufacturingProcessId
 			AND PM.ysnDefault = 1
