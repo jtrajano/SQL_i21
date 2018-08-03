@@ -6375,6 +6375,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostReturnCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
