@@ -294,7 +294,7 @@ BEGIN
 		BEGIN
 			SET @strTransactionType = 'Foreign Sale'
 			SET @dblOriginalGrossPrice = @dblTransferCost
-			--SET @intCustomerId = @intForeignCustomerId
+			SET @intCustomerId = @intForeignCustomerId
 		END
 		--ELSE IF (@intBuyingHost = @strParticipantNo AND @intSellingHost != @strParticipantNo)
 		ELSE IF (@intMatchBuyingHost > 0 AND @intMatchSellingHost = 0)
@@ -1279,6 +1279,7 @@ BEGIN
 			,[dtmInvoiceDate]
 			,[strInvoiceReportNumber]
 			,[ysnOnHold]
+			,[intCustomerId]
 		)
 		VALUES
 		(
@@ -1327,6 +1328,7 @@ BEGIN
 			,@dtmInvoiceDate
 			,@strInvoiceReportNumber
 			,@ysnOnHold
+			,@intCustomerId
 		)			
 	
 		DECLARE @Pk	INT		
