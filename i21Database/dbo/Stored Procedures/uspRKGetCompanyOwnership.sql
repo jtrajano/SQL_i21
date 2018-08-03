@@ -273,7 +273,51 @@ FROM (
 	AND SI.intOwnershipType = 1
 )t
 
+UNION 
+SELECT --IR decressing the Unpaid Balance and Company Owned
+ strItemNo
+	, dtmDate
+	,dblInQty AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,dblInQty AS dblUnpaidBalance
+	,0 as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryReceiptItemId
+FROM (
+	SELECT 
+		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+		,RI.dblUnitCost dblUnitCost1
+		,RI.intInventoryReceiptItemId
+		,I.strItemNo
+		,isnull(RI.dblNet, 0) dblInQty
+		,0 AS dblOutQty
+		,ST.strDistributionOption
+		,R.strReceiptNumber AS strReceiptNumber
+		,R.intInventoryReceiptId AS intReceiptId
+		--,Inv.strInvoiceNumber AS strReceiptNumber
+		--,Inv.intInvoiceId AS intReceiptId
+	FROM vyuSCTicketView ST
+	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+	WHERE ST.strTicketStatus = 'C'
+	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND ST.intCommodityId = @intCommodityId 
+	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+	AND ST.intTicketLocationId = case when isnull(@intLocationId,0)=0 then ST.intTicketLocationId else @intLocationId end 
+	AND ST.intTicketLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+	AND RI.intOwnershipType = 1
+	--AND ST.strDistributionOption IN ('DP','CNT')
+	AND RI.dblBillQty = 0
+	AND RI.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM tblAPBillDetail WHERE intInventoryReceiptItemId IS NOT NULL)
+	
 
+)t
 
 
 SELECT convert(INT, ROW_NUMBER() OVER (

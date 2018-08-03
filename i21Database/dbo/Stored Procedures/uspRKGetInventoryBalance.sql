@@ -63,7 +63,7 @@ FROM (
 	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and strTransactionId not like'%IS%'
 	and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
-UNION 
+UNION --Direct From Scale
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
 		,0.0 tranDSInQty from(
@@ -82,7 +82,8 @@ FROM tblSCTicket st
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)a
+		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+		 and r.intSourceType = 1)a
 
 --UNION ALL--Spot
 --SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
@@ -223,7 +224,7 @@ WHERE i.intCommodityId= @intCommodityId
 	
 
 UNION ALL --On Hold without Delivery Sheet
-select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
+select dtmDate,'' tranShipmentNumber,abs(isnull(tranShipQty,0)) * -1 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit,0.0 tranDSInQty 
 from(
 SELECT
