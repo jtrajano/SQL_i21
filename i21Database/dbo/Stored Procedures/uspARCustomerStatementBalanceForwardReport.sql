@@ -299,6 +299,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateL
 										  , @strCustomerName = @strCustomerNameLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
+										  , @ysnFromBalanceForward = 1
 
 INSERT INTO @temp_balanceforward_table
 SELECT strCustomerName
