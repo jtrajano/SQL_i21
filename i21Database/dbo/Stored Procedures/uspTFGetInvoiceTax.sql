@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspTFGetInvoiceTax]
+﻿ CREATE PROCEDURE [dbo].[uspTFGetInvoiceTax]
 	@Guid NVARCHAR(50)
 	, @ReportingComponentId NVARCHAR(MAX)
 	, @DateFrom DATETIME

@@ -14,5 +14,11 @@ CREATE TABLE [dbo].[tblMBILInvoice](
 	[intTermId] INT NULL,
 	[ysnPosted]	BIT DEFAULT ((0)) NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
-	CONSTRAINT [PK_tblMBILInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC)
+	CONSTRAINT [PK_tblMBILInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC), 
+    CONSTRAINT [FK_tblMBILInvoice_tblMBILOrder] FOREIGN KEY ([intOrderId]) REFERENCES [tblMBILOrder]([intOrderId]), 
+    CONSTRAINT [FK_tblMBILInvoice_tblEMEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblEMEntity]([intEntityId]), 
+    CONSTRAINT [FK_tblMBILInvoice_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblMBILInvoice_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
+    CONSTRAINT [FK_tblMBILInvoice_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId]), 
+    CONSTRAINT [FK_tblMBILInvoice_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
 )

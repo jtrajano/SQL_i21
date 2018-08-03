@@ -7042,4 +7042,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intOrderTaxId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="45db3daf-03b9-4953-b788-b762fc98a4f1" ChangeDateTime="08/02/2018 08:05:50">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceItem].[intMBILInvoiceItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="427d1ecd-3e1d-49cb-bcd8-61f480dd2b34" ChangeDateTime="08/02/2018 09:57:27">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceSite].[intMBILInvoiceSiteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceSiteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="aa01c143-a584-4f5e-b947-e890637758bd" ChangeDateTime="08/02/2018 09:57:35">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceSite].[intMBILInvoiceId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0f473a04-74a1-48d1-b4b1-756e6bb0cd52" ChangeDateTime="08/02/2018 10:04:38">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceItem].[intMBILInvoiceSiteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceSiteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7cd2b928-b636-448f-b762-d079de0c525a" ChangeDateTime="08/02/2018 10:07:45">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceTaxCode].[intMBILInvoiceTaxId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceTaxCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceTaxId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dc8e88a5-c0d4-439d-b24b-92fdd15d4def" ChangeDateTime="08/02/2018 10:07:59">
+    <Property Name="ElementName" Value="[dbo].[tblMBILInvoiceTaxCode].[intMBILInvoiceItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILInvoiceTaxCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceItemId" />
+  </Operation>
 </Operations>

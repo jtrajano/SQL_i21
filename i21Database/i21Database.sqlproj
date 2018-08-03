@@ -6836,6 +6836,11 @@
     <Build Include="dbo\Views\vyuMBILPayment.sql" />
     <Build Include="dbo\Views\vyuMBILOrder.sql" />
     <Build Include="dbo\Views\vyuMBILDriver.sql" />
+    <Build Include="dbo\Views\vyuMBILOrderItem.sql" />
+    <Build Include="dbo\Views\vyuMBILOrderTaxCode.sql" />
+    <Build Include="dbo\Views\vyuMBILInvoiceSite.sql" />
+    <Build Include="dbo\Views\vyuMBILInvoiceItem.sql" />
+    <Build Include="dbo\Views\vyuMBILInvoiceTaxCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
