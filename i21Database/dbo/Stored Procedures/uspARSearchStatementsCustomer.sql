@@ -1,16 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchStatementsCustomer]
 (
-	 @strStatementFormat	NVARCHAR(50)  
-	,@strAsOfDate			NVARCHAR(50) 
-	,@strTransactionDate	NVARCHAR(50) 
-	,@strCompanyLocation	NVARCHAR(100) = NULL
-	,@strAccountCode		NVARCHAR(50) = NULL
-	,@ysnDetailedFormat		BIT	= 0
-	,@ysnIncludeBudget		BIT = 0
-	,@ysnPrintCreditBalance BIT = 1
-	,@ysnPrintOnlyPastDue	BIT = 0
-	,@ysnPrintZeroBalance	BIT = 0
-	,@intEntityUserId		INT = NULL
+	 @strStatementFormat		NVARCHAR(50)  
+	,@strAsOfDate				NVARCHAR(50) 
+	,@strTransactionDate		NVARCHAR(50) 
+	,@strCompanyLocation		NVARCHAR(100) = NULL
+	,@strAccountCode			NVARCHAR(50) = NULL
+	,@ysnDetailedFormat			BIT	= 0
+	,@ysnIncludeBudget			BIT = 0
+	,@ysnPrintCreditBalance 	BIT = 1
+	,@ysnPrintOnlyPastDue		BIT = 0
+	,@ysnPrintZeroBalance		BIT = 0
+	,@ysnIncludeWriteOffPayment	BIT = 0
+	,@intEntityUserId			INT = NULL
 )
 AS
 
@@ -18,17 +19,20 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
 	  , @ysnPrintCreditBalanceLocal	AS BIT				= 1
+	  , @ysnIncludeWriteOffLocal	AS BIT				= 0
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
 SET @ysnPrintCreditBalanceLocal	= ISNULL(@ysnPrintCreditBalance, 1)
+SET @ysnIncludeWriteOffLocal	= ISNULL(@ysnIncludeWriteOffPayment, 0)
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 			= @dtmAsOfDate
-										, @strCompanyLocation 	= @strCompanyLocation
-										, @intEntityUserId 		= @intEntityUserId
-										, @ysnIncludeCredits	= @ysnPrintCreditBalanceLocal
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
+										, @strCompanyLocation 			= @strCompanyLocation
+										, @intEntityUserId 				= @intEntityUserId
+										, @ysnIncludeCredits			= @ysnPrintCreditBalanceLocal
+										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
