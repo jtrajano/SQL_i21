@@ -886,6 +886,12 @@ BEGIN
 	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
 	VALUES('ArrivalForm',10,1)
 END
+ELSE
+BEGIN
+	UPDATE tblQMReportNameMapping SET strCOAReportName = 'CertificateOfAnalysisReport'
+	WHERE intControlPointId = 10
+		AND ISNULL(strCOAReportName, '') = ''
+END
 GO
 
 /*

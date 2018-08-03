@@ -1,6 +1,7 @@
 ﻿CREATE TABLE dbo.tblQMReportNameMapping (
 	intReportNameMappingId INT NOT NULL IDENTITY
 	,strReportName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,strCOAReportName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,intControlPointId INT NOT NULL
 	,intConcurrencyId INT NULL CONSTRAINT DF_tblQMReportNameMapping_intConcurrencyId DEFAULT 0
 
