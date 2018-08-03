@@ -1,17 +1,18 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchStatementsCustomer]
 (
-	 @strStatementFormat	NVARCHAR(50)  
-	,@strAsOfDate			NVARCHAR(50) 
-	,@strTransactionDate	NVARCHAR(50) 
-	,@strCompanyLocation	NVARCHAR(100) = NULL
-	,@strAccountCode		NVARCHAR(50) = NULL
-	,@ysnDetailedFormat		BIT	= 0
-	,@ysnIncludeBudget		BIT = 0
-	,@ysnPrintCreditBalance BIT = 1
-	,@ysnPrintOnlyPastDue	BIT = 0
-	,@ysnPrintZeroBalance	BIT = 0
-	,@intEntityUserId		INT = NULL 
-	,@strAsOfDateFrom		NVARCHAR(50) = ''
+	 @strStatementFormat			NVARCHAR(50)  
+	,@strAsOfDate					NVARCHAR(50) 
+	,@strTransactionDate			NVARCHAR(50) 
+	,@strCompanyLocation			NVARCHAR(100) = NULL
+	,@strAccountCode				NVARCHAR(50) = NULL
+	,@ysnDetailedFormat				BIT	= 0
+	,@ysnIncludeBudget				BIT = 0
+	,@ysnPrintCreditBalance 		BIT = 1
+	,@ysnPrintOnlyPastDue			BIT = 0
+	,@ysnPrintZeroBalance			BIT = 0
+	,@ysnIncludeWriteOffPayment    	BIT = 0
+	,@intEntityUserId				INT = NULL 
+	,@strAsOfDateFrom				NVARCHAR(50) = ''
 )
 AS
 
@@ -21,12 +22,14 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDateFrom			AS DATETIME			= NULL
 	  , @ysnDetailedFormatLocal		AS BIT				= 0
 	  , @ysnPrintCreditBalanceLocal AS BIT				= 1
+	  , @ysnIncludeWriteOffLocal    AS BIT              = 0
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @ysnDetailedFormatLocal		= ISNULL(@ysnDetailedFormat, 0)
 SET @ysnPrintCreditBalanceLocal = ISNULL(@ysnPrintCreditBalance, 1)
+SET @ysnIncludeWriteOffLocal    = ISNULL(@ysnIncludeWriteOffPayment, 0)
 
 IF @strAsOfDateFrom <> ''
 	SET @dtmAsOfDateFrom		= ISNULL(CONVERT(DATETIME, @strAsOfDateFrom), GETDATE())
@@ -38,11 +41,12 @@ BEGIN
 	set @dtmAsOfDate = dateadd(SECOND,-1,dateadd(day,1, @dtmAsOfDate))
 END
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 			= @dtmAsOfDate
-										, @strCompanyLocation 	= @strCompanyLocation
-										, @intEntityUserId 		= @intEntityUserId
-										, @dtmDateFrom 			= @dtmAsOfDateFrom
-										, @ysnIncludeCredits 	= @ysnPrintCreditBalanceLocal
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
+										, @strCompanyLocation 			= @strCompanyLocation
+										, @intEntityUserId 				= @intEntityUserId
+										, @dtmDateFrom 					= @dtmAsOfDateFrom
+										, @ysnIncludeCredits 			= @ysnPrintCreditBalanceLocal
+                                        , @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
