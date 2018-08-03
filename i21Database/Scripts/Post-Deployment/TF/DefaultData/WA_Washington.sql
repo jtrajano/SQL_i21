@@ -198,8 +198,8 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Diesel Clear', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '10F', strType = 'Special Fuel', strCriteria = '= 0', intMasterId = 47437
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Diesel Clear', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '10G', strType = 'Special Fuel', strCriteria = '= 0', intMasterId = 47438
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Diesel Clear', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '13X', strType = 'Special Fuel', strCriteria = '= 0', intMasterId = 47439
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Gasoline', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '3Sales', strType = 'Motor Fuel', strCriteria = '= 0', intMasterId = 47440
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Diesel Clear', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '3Sales', strType = 'Special Fuel', strCriteria = '= 0', intMasterId = 47441
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Gasoline', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '3Sales', strType = 'Motor Fuel', strCriteria = '<> 0', intMasterId = 47440
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Diesel Clear', strState = 'WA', strFormCode = 'Supplier', strScheduleCode = '3Sales', strType = 'Special Fuel', strCriteria = '<> 0', intMasterId = 47441
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
