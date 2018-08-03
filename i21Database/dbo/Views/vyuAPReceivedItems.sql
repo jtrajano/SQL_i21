@@ -1203,9 +1203,9 @@ FROM
 		,[strCostUOM]								=	A.strPriceUOM
 		,[strgrossNetUOM]							=	NULL
 		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
-		,[dblWeightUnitQty]							=	ISNULL(ItemWeightUOM.dblUnitQty,1)
-		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
-		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
+		,[dblWeightUnitQty]							=	1
+		,[dblCostUnitQty]							=	1
+		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	A.intCurrencyId
 		,[strCurrency]								=	C.strCurrency
 		,[intCostCurrencyId]						=	A.intCurrencyId
