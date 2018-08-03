@@ -1527,13 +1527,18 @@ IF @Post = 1
 					,[dblForeignRate]
 					,[strRateType]
 				)
-				EXEC	dbo.uspARBatchPostCosting  
-						@ItemsForPost  
-						,@BatchId  
-						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-						,@UserEntityID
-						,DEFAULT  -- Default is NULL. Used to override the GL description. 
-						,DEFAULT  -- Options are 'Aggregrate' and'Detailed'. Default is 'Detailed'.
+				--EXEC dbo.uspARBatchPostCosting  
+				--  @ItemsForPost  
+				--  ,@BatchId  
+				--  ,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				--  ,@UserEntityID
+				--  ,DEFAULT  -- Default is NULL. Used to override the GL description. 
+				--  ,DEFAULT  -- Options are 'Aggregrate' and'Detailed'. Default is 'Detailed'.
+				EXEC dbo.uspICPostCosting  
+				   @ItemsForPost  
+				   ,@BatchId  
+				   ,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				   ,@UserEntityID
 
 				DELETE FROM ICIT
 				FROM
