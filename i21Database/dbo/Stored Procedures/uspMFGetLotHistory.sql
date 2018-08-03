@@ -119,14 +119,28 @@ BEGIN
 			ELSE itt.strName
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
-		,CONVERT(NUMERIC(38, 20), (Case When ilt.intItemUOMId=IsNULL(l.intWeightUOMId, l.intItemUOMId) then  ilt.dblQty else ilt.dblQty*l.dblWeightPerQty End)) AS dblTransactionWeight
+		,CONVERT(NUMERIC(38, 20), (
+				CASE 
+					WHEN ilt.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+						THEN ilt.dblQty
+					ELSE ilt.dblQty * l.dblWeightPerQty
+					END
+				)) AS dblTransactionWeight
 		,uwm.strUnitMeasure AS strTransactionWeightUOM
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
-		,CONVERT(NUMERIC(38, 20), (Case When ilt.intItemUOMId=IsNULL(l.intWeightUOMId, l.intItemUOMId) then  ilt.dblQty / (CASE 
-				WHEN l.dblWeightPerQty = 0
-					THEN 1
-				ELSE l.dblWeightPerQty
-				END) Else ilt.dblQty End)) AS dblTransactionQty
+		,CONVERT(NUMERIC(38, 20), (
+				CASE 
+					WHEN ilt.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+						THEN ilt.dblQty / (
+								CASE 
+									WHEN l.dblWeightPerQty = 0
+										THEN 1
+									ELSE l.dblWeightPerQty
+									END
+								)
+					ELSE ilt.dblQty
+					END
+				)) AS dblTransactionQty
 		,um.strUnitMeasure AS strTransactionQtyUOM
 		,CASE 
 			WHEN ilt.intTransactionTypeId IN (
@@ -391,14 +405,28 @@ BEGIN
 				ELSE itt.strName
 				END AS strTransaction
 			,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
-			,CONVERT(NUMERIC(38, 20), (Case When ilt.intItemUOMId=IsNULL(l.intWeightUOMId, l.intItemUOMId) then  ilt.dblQty else ilt.dblQty*l.dblWeightPerQty End)) AS dblTransactionWeight
+			,CONVERT(NUMERIC(38, 20), (
+					CASE 
+						WHEN ilt.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+							THEN ilt.dblQty
+						ELSE ilt.dblQty * l.dblWeightPerQty
+						END
+					)) AS dblTransactionWeight
 			,uwm.strUnitMeasure AS strTransactionWeightUOM
 			,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
-			,CONVERT(NUMERIC(38, 20), (Case When ilt.intItemUOMId=IsNULL(l.intWeightUOMId, l.intItemUOMId) then  ilt.dblQty / (CASE 
-				WHEN l.dblWeightPerQty = 0
-					THEN 1
-				ELSE l.dblWeightPerQty
-				END) Else ilt.dblQty End)) AS dblTransactionQty
+			,CONVERT(NUMERIC(38, 20), (
+					CASE 
+						WHEN ilt.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+							THEN ilt.dblQty / (
+									CASE 
+										WHEN l.dblWeightPerQty = 0
+											THEN 1
+										ELSE l.dblWeightPerQty
+										END
+									)
+						ELSE ilt.dblQty
+						END
+					)) AS dblTransactionQty
 			,um.strUnitMeasure AS strTransactionQtyUOM
 			,CASE 
 				WHEN ilt.intTransactionTypeId IN (
