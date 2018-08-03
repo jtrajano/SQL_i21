@@ -77,6 +77,38 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
+			-- MFT-1228
+			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
+			BEGIN
+				-- Include all CF Trans for schedule 5CRD and 6CRD 
+				DELETE tblTFTransaction WHERE intTransactionId IN (
+					SELECT Trans.intTransactionId
+					FROM tblTFTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.uniqTransactionGuid = @Guid
+					AND Trans.intTransactionId IS NOT NULL
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strTransactionType <> 'CF Trans'
+				)
+			END
+			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
+			BEGIN
+				-- Exclude all non CF Trans for schedule 5BLK and 6BLK
+				DELETE tblTFTransaction WHERE intTransactionId IN (
+					SELECT Trans.intTransactionId
+					FROM tblTFTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.uniqTransactionGuid = @Guid
+					AND Trans.intTransactionId IS NOT NULL
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strTransactionType = 'CF Trans'
+				)
+			END
+
 			INSERT INTO tblTFTransactionDynamicOR(
 				intTransactionId
 				, strOriginAltFacilityNumber
