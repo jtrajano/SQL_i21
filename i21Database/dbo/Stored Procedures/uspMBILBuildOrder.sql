@@ -9,6 +9,29 @@ SET NOCOUNT ON
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
 DELETE tblMBILOrder WHERE intDriverId = @intDriverId
 
+SELECT intDispatchId = Dispatch.intDispatchID
+	, strOrderNumber = Dispatch.strOrderNumber
+	, strOrderStatus = Dispatch.strWillCallStatus
+	, dtmRequestedDate = Dispatch.dtmRequestedDate
+	, intItemId = Item.intItemId
+	, ItemUOM.intItemUOMId
+	, intEntityId = Site.intCustomerID
+	, intSiteId = Site.intSiteID
+	, intContractDetailId = Dispatch.intContractId
+	, dblQuantity = CASE WHEN ISNULL(Dispatch.dblMinimumQuantity,0) = 0 THEN Dispatch.dblQuantity ELSE Dispatch.dblMinimumQuantity END
+	, Dispatch.dblPrice
+	, intTermId = Dispatch.intDeliveryTermID
+	, strComments = Dispatch.strComments
+	, intDriverId = Dispatch.intDriverID
+	, intRouteId = K.intRouteId
+	, intStopNumber = L.intSequence
+INTO #Dispatch
+FROM tblTMDispatch Dispatch
+INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
+LEFT JOIN tblLGRoute K ON Dispatch.intRouteId = K.intRouteId
+LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispatchID = L.intDispatchID
+LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
@@ -16,55 +39,40 @@ INSERT INTO tblMBILOrder(intDispatchId
 	, strOrderStatus
 	, dtmRequestedDate
 	, intEntityId
-	, intSiteId
-	, intContractDetailId
 	, intTermId
 	, strComments
 	, intDriverId
 	, intRouteId
 	, intStopNumber)
-SELECT * FROM (
-	SELECT intDispatchId = Dispatch.intDispatchID
-		, strOrderNumber = Dispatch.strOrderNumber
-		, strOrderStatus = Dispatch.strWillCallStatus
-		, dtmRequestedDate = Dispatch.dtmRequestedDate
-		, intEntityId = Site.intCustomerID
-		, intSiteId = Site.intSiteID
-		, intContractDetailId = Dispatch.intContractId
-		, intTermId = Dispatch.intDeliveryTermID
-		, strComments = Dispatch.strComments
-		, intDriverId = Dispatch.intDriverID
-		, intRouteId = K.intRouteId
-		, intStopNumber = L.intSequence
-	FROM tblTMDispatch Dispatch
-	INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
-	LEFT JOIN tblLGRoute K ON Dispatch.intRouteId = K.intRouteId
-	LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispatchID = L.intDispatchID
-) tblTMOrder
-WHERE tblTMOrder.intDriverId = @intDriverId AND tblTMOrder.strOrderStatus = 'Open'
-
-
--- ++++++ CREATE ORDER's SITE LIST ++++++ --
-INSERT INTO tblMBILOrderSite(intOrderId, intSiteId)
-SELECT [intOrderId], [intSiteId]
-FROM vyuMBILOrder
+SELECT DISTINCT intDispatchId
+	, strOrderNumber
+	, strOrderStatus
+	, dtmRequestedDate
+	, intEntityId
+	, intTermId
+	, strComments
+	, intDriverId
+	, intRouteId
+	, intStopNumber
+FROM #Dispatch
 WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
-
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
+	, intSiteId
 	, intItemId
 	, intItemUOMId
 	, dblQuantity
 	, dblPrice)
-SELECT [Order].intOrderId
-	, [Order].intItemId
-	, ItemUOM.intItemUOMId	
-	, [Order].[dblQuantity]
-	, [Order].[dblPrice]
-FROM vyuMBILOrder [Order]
-LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = [Order].intItemId AND ItemUOM.ysnStockUnit = 1
-WHERE B.intDriverId = @intDriverId
+SELECT [Order].intOrderId	
+	, #Dispatch.intSiteId
+	, #Dispatch.intItemId
+	, #Dispatch.intItemUOMId	
+	, #Dispatch.[dblQuantity]
+	, #Dispatch.[dblPrice]
+FROM #Dispatch
+LEFT JOIN vyuMBILOrder [Order] ON #Dispatch.intDispatchId = [Order].intDispatchId
+WHERE [Order].intDriverId = @intDriverId
 
 
 -- ++++++ ITEM TAX CODE PROCESS ++++++ --

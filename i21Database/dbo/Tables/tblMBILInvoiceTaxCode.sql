@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[tblMBILInvoiceTaxCode](
-	 [intMBILInvoiceTaxId]			INT				IDENTITY(1,1) NOT NULL
-	,[intMBILInvoiceItemId]			INT				NOT NULL
+	 [intInvoiceTaxId]			INT				IDENTITY(1,1) NOT NULL
+	,[intInvoiceItemId]			INT				NOT NULL
 	,[intItemId]					INT				NOT NULL
 	,[intTransactionDetailTaxId]	INT
 	,[intInvoiceDetailId]			INT
@@ -27,6 +27,6 @@ CREATE TABLE [dbo].[tblMBILInvoiceTaxCode](
 	,[intUnitMeasureId]				INT
 	,[strUnitMeasure]				NVARCHAR(MAX)
 	,[intConcurrencyId]				INT				DEFAULT 1 NOT NULL
-	CONSTRAINT [PK_tblMBILInvoiceTaxCode] PRIMARY KEY CLUSTERED ([intMBILInvoiceTaxId] ASC),
-	CONSTRAINT [FK_tblMBILInvoiceTaxCode_tblMBILInvoiceItem] FOREIGN KEY([intMBILInvoiceItemId]) REFERENCES [dbo].[tblMBILInvoiceItem] ([intMBILInvoiceItemId]) ON DELETE CASCADE
+	CONSTRAINT [PK_tblMBILInvoiceTaxCode] PRIMARY KEY CLUSTERED ([intInvoiceTaxId] ASC),
+	CONSTRAINT [FK_tblMBILInvoiceTaxCode_tblMBILInvoiceItem] FOREIGN KEY([intInvoiceItemId]) REFERENCES [dbo].[tblMBILInvoiceItem] ([intInvoiceItemId]) ON DELETE CASCADE
 )

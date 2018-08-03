@@ -5,16 +5,15 @@
 	[strOrderStatus] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
 	[dtmRequestedDate] DATETIME NULL,
 	[intEntityId] INT NULL,
-	[intSiteId] INT NULL,
-	[intItemId] INT NULL,
-	[dblQuantity] NUMERIC (18, 6) NULL,
-	[dblPrice] NUMERIC (18, 6) NULL,
-	[intContractDetailId] INT NULL,
 	[intTermId] INT NULL,
 	[strComments] NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
 	[intDriverId] INT				NULL,
 	[intRouteId] INT NULL,
 	[intStopNumber] INT	NULL,
-	[intConcurrencyId] INT DEFAULT 1 NOT NULL,
-	CONSTRAINT [PK_tblMBILOrder] PRIMARY KEY CLUSTERED ([intOrderId] ASC)
+	[intConcurrencyId] INT DEFAULT ((1)) NOT NULL,
+	CONSTRAINT [PK_tblMBILOrder] PRIMARY KEY CLUSTERED ([intOrderId] ASC), 
+    CONSTRAINT [FK_tblMBILOrder_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]), 
+    CONSTRAINT [FK_tblMBILOrder_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
+    CONSTRAINT [FK_tblMBILOrder_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
+    CONSTRAINT [FK_tblMBILOrder_tblTMRoute] FOREIGN KEY ([intRouteId]) REFERENCES [tblTMRoute]([intRouteId])
 )
