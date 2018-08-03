@@ -8,8 +8,8 @@ BEGIN TRY
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	--SET ANSI_WARNINGS OFF
 
+	--SET ANSI_WARNINGS OFF
 	DECLARE @intMinItem INT
 	DECLARE @strItemNo NVARCHAR(50)
 	DECLARE @strItemType NVARCHAR(50)
@@ -31,7 +31,7 @@ BEGIN TRY
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 		,@strCustomerCode NVARCHAR(50)
 		,@strProductType NVARCHAR(50)
-		,@intCommodityAttributeId int
+		,@intCommodityAttributeId INT
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -157,7 +157,30 @@ BEGIN TRY
 
 			IF @strCustomerCode = 'HE'
 			BEGIN
-				SELECT @intCommodityAttributeId=intCommodityAttributeId, @intCommodityId = intCommodityId
+				IF EXISTS (
+						SELECT iu.strUOM
+							,iu.strUOM
+						FROM tblIPItemUOMStage iu
+						WHERE NOT EXISTS (
+								SELECT *
+								FROM tblIPSAPUOM su
+								WHERE su.strSAPUOM = iu.strUOM
+								)
+							AND NOT EXISTS (
+								SELECT *
+								FROM tblICUnitMeasure um
+								WHERE um.strSymbol = iu.strUOM
+								)
+							AND iu.intStageItemId = @intStageItemId
+						)
+					RAISERROR (
+							'UOM not found.'
+							,16
+							,1
+							)
+
+				SELECT @intCommodityAttributeId = intCommodityAttributeId
+					,@intCommodityId = intCommodityId
 				FROM tblICCommodityAttribute
 				WHERE strType = 'ProductType'
 					AND strDescription = @strProductType
@@ -227,7 +250,27 @@ BEGIN TRY
 				GOTO MOVE_TO_ARCHIVE
 			END
 			ELSE
-			BEGIN --Inventory Item
+			BEGIN
+				INSERT INTO tblIPSAPUOM (
+					strSAPUOM
+					,stri21UOM
+					)
+				SELECT iu.strUOM
+					,iu.strUOM
+				FROM tblIPItemUOMStage iu
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblIPSAPUOM su
+						WHERE su.strSAPUOM = iu.strUOM
+						)
+					AND EXISTS (
+						SELECT *
+						FROM tblICUnitMeasure um
+						WHERE um.strSymbol = iu.strUOM
+						)
+					AND iu.intStageItemId = @intStageItemId
+
+				--Inventory Item
 				IF ISNULL(@intItemId, 0) = 0 --Create
 				BEGIN
 					IF NOT EXISTS (
@@ -437,7 +480,7 @@ BEGIN TRY
 						UPDATE i
 						SET i.strDescription = si.strDescription
 							,i.strShortName = LEFT(si.strDescription, 50)
-							,intProductTypeId=@intCommodityAttributeId 
+							,intProductTypeId = @intCommodityAttributeId
 						FROM tblICItem i
 						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
 						WHERE intItemId = @intItemId
