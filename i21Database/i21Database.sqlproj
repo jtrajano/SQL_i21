@@ -6865,6 +6865,8 @@
     <Build Include="dbo\Views\vyuARPOSReceiptReport.sql" />
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostReturnCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetXmlNamespace.sql" />
+    <Build Include="dbo\Tables\tblSTStoreAppUploadHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
