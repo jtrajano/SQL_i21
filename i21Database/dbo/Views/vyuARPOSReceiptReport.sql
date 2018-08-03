@@ -3,6 +3,7 @@ AS
 SELECT intPOSId				= POS.intPOSId
 	 , strItemNo			= POSD.strItemNo
 	 , strCustomerName		= CUSTOMER.strName
+	 , strCustomerAddress   = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strAddress, CUSTOMER.strCity, CUSTOMER.strState, CUSTOMER.strZipCode, NULL, NULL, NULL)
 	 , strItemDescription	= POSD.strItemDescription
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
 	 , dblQuantity			= POSD.dblQuantity
@@ -53,7 +54,11 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , strName
-	FROM dbo.tblEMEntity WITH (NOLOCK)
+		 , strAddress
+		 , strCity
+		 , strState
+		 , strZipCode
+	FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 ) CUSTOMER ON POS.intEntityCustomerId = CUSTOMER.intEntityId 
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
