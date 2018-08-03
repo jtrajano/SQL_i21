@@ -110,7 +110,6 @@ INSERT INTO @EntriesForInvoice(
 	,[dblSubCurrencyRate]
 	,[intSalesAccountId]
 	,[strPONumber]
-	,[intDocumentMaintenanceId]
 )
 SELECT
 	 [strTransactionType]					= @strTransactionType
@@ -123,7 +122,7 @@ SELECT
 	,[intCurrencyId]						= POS.intCurrencyId
 	,[dtmDate]								= POS.dtmDate
 	,[dtmShipDate]							= POS.dtmDate
-	,[strComments]							= POS.strReceiptNumber
+	,[strComments]							= POS.strComment
 	,[intEntityId]							= POS.intEntityUserId
 	,[ysnPost]								= 1
 	,[intItemId]							= DETAILS.intItemId
@@ -141,7 +140,6 @@ SELECT
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= NULL
 	,[strPONumber]							= POS.strPONumber
-	,[intDocumentMaintenanceId]				= POS.intDocumentMaintenanceId
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
 WHERE POS.intPOSId = @intPOSId
@@ -159,7 +157,7 @@ SELECT TOP 1
 	,[intCurrencyId]						= POS.intCurrencyId
 	,[dtmDate]								= POS.dtmDate
 	,[dtmShipDate]							= POS.dtmDate
-	,[strComments]							= POS.strReceiptNumber
+	,[strComments]							= POS.strComment
 	,[intEntityId]							= POS.intEntityUserId
 	,[ysnPost]								= 1
 	,[intItemId]							= NULL
@@ -177,7 +175,6 @@ SELECT TOP 1
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
 	,[strPONumber]							= POS.strPONumber
-	,[intDocumentMaintenanceId]				= POS.intDocumentMaintenanceId
 FROM tblARPOS POS
 OUTER APPLY (
 	SELECT TOP 1 intDiscountAccountId 
