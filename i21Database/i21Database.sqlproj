@@ -6388,6 +6388,8 @@
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

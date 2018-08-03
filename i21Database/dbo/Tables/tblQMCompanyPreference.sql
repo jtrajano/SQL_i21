@@ -14,6 +14,7 @@
 	ysnEnableSampleTypeByUserRole BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableSampleTypeByUserRole] DEFAULT 0,
 	ysnShowSampleFromAllLocation BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnShowSampleFromAllLocation] DEFAULT 0,
 	ysnValidateMultipleValuesInTestResult BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnValidateMultipleValuesInTestResult] DEFAULT 0,
+	strTestReportComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strSampleImportDateTimeFormat NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
     CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
