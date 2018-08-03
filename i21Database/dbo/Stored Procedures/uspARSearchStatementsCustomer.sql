@@ -17,15 +17,18 @@ AS
 DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
+	  , @ysnPrintCreditBalanceLocal	AS BIT				= 1
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
+SET @ysnPrintCreditBalanceLocal	= ISNULL(@ysnPrintCreditBalance, 1)
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
-										, @strCompanyLocation = @strCompanyLocation
-										, @intEntityUserId = @intEntityUserId
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 			= @dtmAsOfDate
+										, @strCompanyLocation 	= @strCompanyLocation
+										, @intEntityUserId 		= @intEntityUserId
+										, @ysnIncludeCredits	= @ysnPrintCreditBalanceLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
