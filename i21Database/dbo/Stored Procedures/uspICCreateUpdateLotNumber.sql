@@ -69,6 +69,7 @@ DECLARE
 	,@intItemUOMId				AS INT 
 	,@dblWeight					AS NUMERIC(38,20)
 	,@intWeightUOMId			AS INT
+	,@strUnitType				AS NVARCHAR(50)
 	,@dtmExpiryDate				AS DATETIME
 	,@dtmManufacturedDate		AS DATETIME
 	,@intOriginId				AS INT
@@ -295,6 +296,9 @@ BEGIN
 
 	-- Get the type of lot (if manual or serialized)
 	SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+
+	-- Get the Item UOM Unit Type
+	SELECT @strUnitType = dbo.fnGetItemUnitType(@intItemUOMId);
 
 	-- Get the company location id
 	SELECT	@intLocationId = intLocationId
@@ -597,6 +601,7 @@ BEGIN
 		AND ISNULL(@dblQty, 0) <> 0 
 		AND @intItemUOMId <> @intWeightUOMId
 		AND @dblQty % 1 <> 0 
+		AND @strUnitType NOT IN ('Weight','Volume') -- do not convert if Item UOM is Unit Type Weight/Volume
 	BEGIN 
 		SET @intItemUOMId = @intWeightUOMId
 		SET	@dblQty = @dblWeight
