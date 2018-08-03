@@ -114,7 +114,14 @@ DECLARE @BANK_DEPOSIT INT = 1
 		
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmStatementDate IS NOT NULL
-	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
+	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)	
+	
+	
+DECLARE @lastDateReconciled date
+	  SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+		WHERE intBankAccountId = @intBankAccountId
+		ORDER BY dtmDateReconciled DESC
+	
 	
 -- SANITIZE THE BANK ACCOUNT ID
 --SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
@@ -125,7 +132,12 @@ IF @dtmStatementDate IS NOT NULL
 SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmStatementDate = @dtmStatementDate
 		,strCbkNo = BankAccnt.strCbkNo
-		,ysnClr = BankTrans.ysnClr
+		--,ysnClr = BankTrans.ysnClr
+
+		,ysnClr = CASE WHEN (@lastDateReconciled >= @dtmStatementDate AND BankTrans.dtmDateReconciled IS NULL AND ysnClr = 1 ) OR (dtmDateReconciled >= @dtmStatementDate ) 
+				  THEN 0 
+				  ELSE BankTrans.ysnClr
+				  END
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
