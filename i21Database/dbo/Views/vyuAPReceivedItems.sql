@@ -45,7 +45,7 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[intTermId]				=	A.intTermsId
-		,[strContractNumber]		=	G1.strContractNumber
+		,[strContractNumber]		=	CAST(G1.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
@@ -362,7 +362,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
-	,[strContractNumber]		=	F1.strContractNumber
+	,[strContractNumber]		=	CAST(F1.strContractNumber AS NVARCHAR(100))
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
@@ -520,7 +520,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
@@ -647,7 +647,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -760,7 +760,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -875,7 +875,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -988,7 +988,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -1092,7 +1092,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intPContractDetailId
@@ -1186,7 +1186,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	L.strBLNumber
 		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
 		,[intContractDetailId]						=	NULL -- A.intPContractDetailId
@@ -1284,7 +1284,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
