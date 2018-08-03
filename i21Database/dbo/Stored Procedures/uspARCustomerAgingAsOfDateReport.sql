@@ -11,7 +11,8 @@
 	@ysnIncludeWriteOffPayment	BIT = 0,
 	@strCustomerName			NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode		NVARCHAR(100) = NULL,
-	@strCustomerIds				NVARCHAR(MAX) = NULL	
+	@strCustomerIds				NVARCHAR(MAX) = NULL,
+	@ysnFromBalanceForward		bit = 0
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -251,7 +252,7 @@ INNER JOIN (
 ) C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND @dtmDateToLocal < (SELECT CONVERT(DATETIME, CAST(I.dtmForgiveDate AS DATE)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR (I.strType <> 'Service Charge'))
+	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 and @dtmDateToLocal < (SELECT CONVERT(DATETIME, CAST(I.dtmForgiveDate AS DATE))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR (I.strType <> 'Service Charge'))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
