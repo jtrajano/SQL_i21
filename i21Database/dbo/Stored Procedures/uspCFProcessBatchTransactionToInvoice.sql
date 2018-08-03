@@ -8,7 +8,7 @@
 	 ,@ErrorMessage			NVARCHAR(250)  = NULL	OUTPUT
 	 ,@CreatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
 	 ,@UpdatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
-
+	 
 
 AS	
 
@@ -171,7 +171,7 @@ SELECT * FROM #tmpForeignTransactionId
 				SELECT
 					[intId]						= TI.RecordKey
 					,[strTransactionType]		= (case
-												when (cfTrans.dblQuantity < 0 OR cfTransPrice.dblCalculatedAmount < 0)  then 'Credit Memo'
+												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
 											  end)
 					,[strSourceTransaction]					= 'CF Tran'
@@ -223,7 +223,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
 					,[dblQtyShipped]						= ABS(cfTrans.dblQuantity) 
 					,[dblDiscount]							= 0
-					,[dblPrice]								= ABS(cfTransPrice.dblCalculatedAmount)
+					,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
 					,[ysnRefreshPrice]						= 0
 					,[strMaintenanceType]					= ''
 					,[strFrequency]							= ''
@@ -304,11 +304,11 @@ SELECT * FROM #tmpForeignTransactionId
 							AS cfSiteItem
 				ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
 				AND cfSiteItem.intItemId = cfTrans.intProductId
-				INNER JOIN (SELECT * 
-							FROM tblCFTransactionPrice
-							WHERE strTransactionPriceId = 'Net Price')
-							AS cfTransPrice
-				ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
+				--INNER JOIN (SELECT * 
+				--			FROM tblCFTransactionPrice
+				--			WHERE strTransactionPriceId = 'Net Price')
+				--			AS cfTransPrice
+				--ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
 				LEFT OUTER JOIN
 	tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
