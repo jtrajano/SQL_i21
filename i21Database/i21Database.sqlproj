@@ -6383,6 +6383,7 @@
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
+    <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
