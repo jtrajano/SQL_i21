@@ -24,8 +24,7 @@ AS
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
 		  , @dblMinFinanceSC    NUMERIC(18, 6) = 0
-		  , @ysnChargeonCharge	BIT = 1
-		  , @strCustomerIds		NVARCHAR(MAX) = NULL
+		  , @ysnChargeonCharge	BIT = 1		  
 
 	SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1) FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
@@ -88,44 +87,74 @@ AS
 	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 	IF (@calculation = 'By Customer Balance')
 		BEGIN
-			SELECT @strCustomerIds = LEFT(intEntityId, LEN(intEntityId) - 1)
-			FROM (
-				SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
-				FROM #tmpCustomers WITH(NOLOCK)	
-				FOR XML PATH ('')
-			) C (intEntityId)
-			
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate
-														  , @ysnInclude120Days = 0
-														  , @strCustomerIds = @strCustomerIds
-														  , @intEntityUserId = @intEntityUserId
+			DECLARE @tblCustomersByBalance TABLE (intEntityCustomerId INT)
+			DECLARE @tblServiceCharges TABLE (intServiceChargeId INT, intGracePeriod INT)
 
-			IF ISNULL(@ysnChargeonCharge, 1) = 0
-				DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+			--GET DISTINCT SERVICE CHARGE TO APPLY GRACE PERIOD
+			INSERT INTO @tblServiceCharges (intServiceChargeId, intGracePeriod)
+			SELECT SC.intServiceChargeId, SC.intGracePeriod
+			FROM #tmpCustomers C
+			INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+			GROUP BY SC.intServiceChargeId, SC.intGracePeriod
 
-			IF (DATEPART(dd, @asOfDate) = 31)
-				DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+			WHILE EXISTS (SELECT TOP 1 NULL FROM @tblServiceCharges)
+				BEGIN
+					DECLARE @intSCtoCompute 		INT = NULL
+						  , @intGracePeriod 		INT = 0
+						  , @strCustomerIds			NVARCHAR(MAX) = NULL
 
-			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+					DELETE FROM @tblCustomersByBalance
 
-			--PROCESS BY AGING BALANCE	
-			INSERT INTO @tblComputedBalances (
-				  intEntityId
-				, dblTotalAR
-			)
-			SELECT intEntityId	= AGING.intEntityCustomerId
-				 , dblTotalAR   = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
-			FROM tblARCustomerAgingStagingTable AGING
-			INNER JOIN #tmpCustomers TC ON AGING.intEntityCustomerId = TC.intEntityId
-			INNER JOIN (
-				SELECT intEntityId
-				FROM dbo.tblARCustomer WITH (NOLOCK)		
-				WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-			) C ON C.intEntityId = AGING.intEntityCustomerId	
-			WHERE AGING.intEntityUserId = @intEntityUserId 
-			  AND AGING.strAgingType = 'Detail'	
-			GROUP BY AGING.intEntityCustomerId
-			HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
+					SELECT TOP 1 @intSCtoCompute = intServiceChargeId
+							   , @intGracePeriod = intGracePeriod
+					FROM @tblServiceCharges
+
+					INSERT INTO @tblCustomersByBalance (intEntityCustomerId)
+					SELECT DISTINCT intEntityId FROM #tmpCustomers WHERE intServiceChargeId = @intSCtoCompute
+
+					SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+					FROM (
+						SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+						FROM @tblCustomersByBalance
+						FOR XML PATH ('')
+					) C (intEntityCustomerId)
+
+					--GET AGING DETAIL ADDING THE GRACE PERIOD 
+					EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate
+														  	 	  , @ysnInclude120Days = 0
+														  		  , @strCustomerIds = @strCustomerIds
+														  		  , @intEntityUserId = @intEntityUserId
+																  , @intGracePeriod	= @intGracePeriod
+
+					IF ISNULL(@ysnChargeonCharge, 1) = 0
+						DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+
+					IF (DATEPART(dd, @asOfDate) = 31)
+						DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+
+					DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+
+					--PROCESS BY AGING BALANCE	
+					INSERT INTO @tblComputedBalances (
+						intEntityId
+						, dblTotalAR
+					)
+					SELECT intEntityId	= AGING.intEntityCustomerId
+						, dblTotalAR   = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+					FROM tblARCustomerAgingStagingTable AGING
+					INNER JOIN #tmpCustomers TC ON AGING.intEntityCustomerId = TC.intEntityId
+					INNER JOIN (
+						SELECT intEntityId
+						FROM dbo.tblARCustomer WITH (NOLOCK)		
+						WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
+					) C ON C.intEntityId = AGING.intEntityCustomerId	
+					WHERE AGING.intEntityUserId = @intEntityUserId 
+					AND AGING.strAgingType = 'Detail'	
+					GROUP BY AGING.intEntityCustomerId
+					HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
+
+					DELETE FROM @tblServiceCharges WHERE intServiceChargeId = @intSCtoCompute
+				END
 		END
 
 	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
