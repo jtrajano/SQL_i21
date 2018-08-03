@@ -107,7 +107,7 @@ SELECT strItemNo
 	,dblUnpaidIn
 	,dblUnpaidOut
 	,dblUnpaidIn - dblUnpaidOut as dblUnpaidBalance
-	,CASE WHEN ysnPaid = 0 AND dblUnpaidOut = 0 THEN 0 ELSE  dblUnpaidIn -  dblUnpaidOut END  as dblPaidBalance
+	,CASE WHEN ysnPaid = 0 AND dblUnpaidOut = 0 THEN 0 ELSE  dblUnpaidOut END  as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,intReceiptId
@@ -270,6 +270,7 @@ FROM (
 			FROM tblSMCompanyLocation
 			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 			)
+	AND SI.intOwnershipType = 1
 )t
 
 

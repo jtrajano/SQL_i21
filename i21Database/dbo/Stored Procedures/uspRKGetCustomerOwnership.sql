@@ -179,8 +179,8 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 			SELECT
 				CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
 				,strStorageTypeDescription
-				,dblOpenBalance * (GCS.dblSplitPercent/100)   dblInQty
-				,0 dblOutQty
+				,dblOriginalBalance * (GCS.dblSplitPercent/100)   dblInQty
+				,(dblOriginalBalance - dblOpenBalance) * (GCS.dblSplitPercent/100)   dblOutQty
 				,GCS.intStorageTypeId  
 				,0	dblSettleUnit		
 			FROM  vyuGRStorageSearchView GCS

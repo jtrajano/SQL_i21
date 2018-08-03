@@ -195,7 +195,7 @@ FROM(
 				ELSE [Balance] END) [Balance]
 			,[Unpaid In]
 			,[Unpaid Out]
-			,[Paid Balance]
+			,(SELECT sum([Paid Balance]) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900'))[Paid Balance] 
 			,dblSalesInTransit
 			,(SELECT sum([Paid Balance]) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900'))  [dblTotalCompanyOwned]
 		FROM(
