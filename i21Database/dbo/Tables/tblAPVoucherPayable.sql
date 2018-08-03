@@ -3,8 +3,9 @@
 	[intVoucherPayableId]			INT NOT NULL PRIMARY KEY IDENTITY, 
     [intEntityVendorId]				INT,
 	[strVendorId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strName]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intLocationId]					INT NULL,
-	[strLocationName] 				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strLocationName] 				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]					INT NULL,
 	[strCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate]						DATETIME,
@@ -15,16 +16,22 @@
 	[intContractHeaderId]			INT NULL,
 	[intContractDetailId]			INT NULL,
 	[intContractSeqId]				INT NULL,
-	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intContractCostId]				INT NULL,
+	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intScaleTicketId]				INT NULL,
 	[strScaleTicketNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intInventoryReceiptItemId]		INT NULL,
 	[intInventoryReceiptChargeId]	INT NULL,
+	[intInventoryShipmentItemId]	INT NULL,
+	[intInventoryShipmentChargeId]	INT NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intItemId]						INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
+	[strTaxGroup]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intStorageLocationId]			INT NULL,
+	[strStorageLocationName]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strMiscDescription]			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[dblOrderQty]					DECIMAL(18,6),	
 	[dblOrderUnitQty]				DECIMAL(38,20),	
@@ -45,6 +52,9 @@
 	[intCostCurrencyId]				INT NULL,
 	[strCostCurrency]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblTax]						DECIMAL(18,2),
+	[dblDiscount]					DECIMAL(18,2),
+	[intCurrencyExchangeRateTypeId]	INT NULL,
+	[strRateType]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblExchangeRate]				DECIMAL(38,20) DEFAULT(1),
 	[ysnSubCurrency]				INT NULL,
 	[intSubCurrencyCents]			INT NULL,
@@ -61,11 +71,20 @@
 	[int1099Category]				INT NULL,
 	[str1099Type]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
+	[ysnReturn]						BIT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
-    ON [dbo].[tblAPVoucherPayable]([intEntityVendorId, intPurchaseDetailId, intContractDetailId, intScaleTicketId, intInventoryReceiptChargeId, intInventoryReceiptItemId, intLoadShipmentDetailId] ASC);
+    ON [dbo].[tblAPVoucherPayable](intEntityVendorId
+								,intPurchaseDetailId
+								,intContractDetailId
+								,intScaleTicketId
+								,intInventoryReceiptChargeId
+								,intInventoryReceiptItemId
+								,intInventoryShipmentItemId
+								,intInventoryShipmentChargeId
+								,intLoadShipmentDetailId ASC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
 --     ON [dbo].[tblAPVoucherPayable]([intPurchaseDetailId] ASC);

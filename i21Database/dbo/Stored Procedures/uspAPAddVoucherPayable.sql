@@ -19,6 +19,25 @@ ELSE SAVE TRAN @SavePoint
 
 IF EXISTS(SELECT TOP 1 1 FROM @voucherPayable)
 BEGIN
+	--Make sure it has not been added yet
+	IF EXISTS(
+		SELECT TOP 1 1
+		FROM tblAPVoucherPayable A
+		INNER JOIN @voucherPayable C
+			ON C.intPurchaseDetailId = A.intPurchaseDetailId
+			AND C.intContractDetailId = A.intContractDetailId
+			AND C.intScaleTicketId = A.intScaleTicketId
+			AND C.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+			AND C.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+			AND C.intInventoryShipmentItemId = A.intInventoryShipmentItemId
+			AND C.intInventoryShipmentChargeId = A.intInventoryShipmentChargeId
+			AND C.intLoadShipmentDetailId = A.intLoadShipmentDetailId
+			AND C.intEntityVendorId = A.intEntityVendorId)
+	BEGIN
+		RAISERROR('Payable already added.', 16, 1);
+		RETURN;
+	END
+	
 	INSERT INTO tblAPVoucherPayable(
 		[intEntityVendorId]				
 		,[strVendorId]					
@@ -40,6 +59,8 @@ BEGIN
 		,[strScaleTicketNumber]			
 		,[intInventoryReceiptItemId]		
 		,[intInventoryReceiptChargeId]	
+		,[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intItemId]						
@@ -64,7 +85,9 @@ BEGIN
 		,[strWeightUOM]					
 		,[intCostCurrencyId]				
 		,[strCostCurrency]				
-		,[dblTax]						
+		,[dblTax]		
+		,[intCurrencyExchangeRateTypeId]
+		,[strRateType]					
 		,[dblExchangeRate]						
 		,[ysnSubCurrency]				
 		,[intSubCurrencyCents]			
@@ -102,6 +125,8 @@ BEGIN
 		,[strScaleTicketNumber]				=	A.strScaleTicketNumber
 		,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptChargeId
+		,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
+		,[intInventoryShipmentChargeId]		=	A.intInventoryShipmentChargeId
 		,[intLoadShipmentId]				=	A.intLoadShipmentId
 		,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 		,[intItemId]						=	A.intItemId
@@ -127,6 +152,8 @@ BEGIN
 		,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
 		,[strCostCurrency]					=	CASE WHEN A.intCostCurrencyId > 0 THEN A.strCostCurrency ELSE A.strCurrency END --ISNULL(costCur.strCurrency, tranCur.strCurrency)
 		,[dblTax]							=	0
+		,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
+		,[strRateType]						=	A.strRateType
 		,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 		,[ysnSubCurrency]					=	A.ysnSubCurrency
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents

@@ -6854,6 +6854,7 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuSCProductionEvidenceReportByDeliverySheetView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateStagingPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
