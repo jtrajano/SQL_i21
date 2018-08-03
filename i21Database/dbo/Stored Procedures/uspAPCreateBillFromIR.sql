@@ -442,7 +442,7 @@ BEGIN
 				[strVendorOrderNumber] 	=	A.strVendorRefNo,
 				[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
 				[intShipViaId]			=	A.intShipViaId,
-				[intShipFromId]			=	NULLIF(A.intShipFromId,0),
+				[intShipFromId]			=	CASE WHEN (@intProducerId > 0) THEN NULLIF(Terms.intShipFromId,0) ELSE NULLIF(A.intShipFromId,0) END,
 				[intShipToId]			=	A.intLocationId,
 				[dtmDate] 				=	GETDATE(),
 				[dtmDateCreated] 		=	GETDATE(),
@@ -467,7 +467,7 @@ BEGIN
 			OUTER APPLY 
 			(
 				SELECT 
-					C.intTermsId, B.intBillToId
+					C.intTermsId, B.intBillToId, intShipFromId
 				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 				WHERE B.intEntityVendorId = @vendorId
 			) Terms
