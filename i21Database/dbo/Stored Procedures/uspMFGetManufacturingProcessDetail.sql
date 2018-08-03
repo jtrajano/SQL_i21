@@ -53,7 +53,11 @@ BEGIN
 			,'' strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@dtmBusinessDate AS dtmBusinessDate
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,@strShiftName AS strShiftName
 			,@intEndOffset AS intEndOffset
@@ -62,11 +66,6 @@ BEGIN
 			,0 AS intMachineId
 			,'' AS strMachineName
 			,0 AS intSubLocationId
-			,CASE 
-				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
-					THEN @dtmBusinessDate
-				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
-				END AS dtmPlannedDate
 	END
 	ELSE
 	BEGIN
@@ -75,7 +74,11 @@ BEGIN
 			,P.strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@dtmBusinessDate AS dtmBusinessDate
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,@strShiftName AS strShiftName
 			,@intEndOffset AS intEndOffset
@@ -84,11 +87,6 @@ BEGIN
 			,ISNULL(M.intMachineId, 0) AS intMachineId
 			,ISNULL(M.strName, '') AS strMachineName
 			,ISNULL(M.intSubLocationId, 0) AS intSubLocationId
-			,CASE 
-				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
-					THEN @dtmBusinessDate
-				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
-				END AS dtmPlannedDate
 		FROM dbo.tblMFManufacturingProcess P
 		LEFT JOIN tblMFManufacturingProcessMachine PM ON P.intManufacturingProcessId = PM.intManufacturingProcessId
 			AND PM.ysnDefault = 1
