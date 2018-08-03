@@ -10,7 +10,8 @@
 	@ysnInclude120Days		BIT = 0,
 	@strCustomerIds			NVARCHAR(MAX) = NULL,
 	@intEntityUserId		INT = NULL,
-	@ysnPaidInvoice			BIT = NULL
+	@ysnPaidInvoice			BIT = NULL,
+	@intGracePeriod			INT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -30,7 +31,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strAccountStatusCodeLocal	NVARCHAR(100) = NULL,
 		@intSalespersonId			INT = NULL,
 		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL,
-		@intEntityUserIdLocal		INT = NULL
+		@intEntityUserIdLocal		INT = NULL,
+		@intGracePeriodLocal		INT = 0
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -49,6 +51,7 @@ SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
 SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
+SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -172,21 +175,21 @@ FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD
 GROUP BY PD.intInvoiceId
 
 --#POSTEDINVOICES
-SELECT I.intInvoiceId
-	 , I.intPaymentId
-	 , I.intEntityCustomerId
-	 , I.intCompanyLocationId
-	 , I.dtmPostDate
-	 , I.dtmDueDate
-	 , I.dtmDate
-	 , I.strTransactionType
-	 , I.strType
-	 , I.dblInvoiceTotal
-	 , I.dblAmountDue
-	 , I.dblDiscount
-	 , I.dblInterest
-	 , I.strBOLNumber
-	 , I.strInvoiceNumber
+SELECT intInvoiceId			= I.intInvoiceId
+	 , intPaymentId			= I.intPaymentId
+	 , intEntityCustomerId	= I.intEntityCustomerId
+	 , intCompanyLocationId	= I.intCompanyLocationId
+	 , dtmPostDate			= I.dtmPostDate
+	 , dtmDueDate			= DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate)
+	 , dtmDate				= I.dtmDate
+	 , strTransactionType	= I.strTransactionType
+	 , strType				= I.strType
+	 , dblInvoiceTotal		= I.dblInvoiceTotal
+	 , dblAmountDue			= I.dblAmountDue
+	 , dblDiscount			= I.dblDiscount
+	 , dblInterest			= I.dblInterest
+	 , strBOLNumber			= I.strBOLNumber
+	 , strInvoiceNumber		= I.strInvoiceNumber
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
