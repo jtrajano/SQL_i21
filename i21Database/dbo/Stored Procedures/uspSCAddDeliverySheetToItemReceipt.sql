@@ -216,6 +216,11 @@ FROM tblSCScaleSetup SCSetup
 LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightRate != 0
 
+SELECT DISTINCT @ysnDeductFeesCusVen = SCTicket.ysnCusVenPaysFees
+FROM tblSCScaleSetup SCSetup 
+LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
+WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND dblTicketFees != 0
+
 		--FOR DISCOUNT CHARGES
 		INSERT INTO @OtherCharges
 		(
@@ -327,10 +332,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND SCTicket.dblFreightR
 			,[strChargesLink]
 		)
 		SELECT	
-		[intEntityVendorId]					= CASE 
-												WHEN @ysnDeductFeesCusVen = 1 THEN NULL
-                                                WHEN @ysnDeductFeesCusVen = 0 THEN RE.intEntityVendorId
-											END
+		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
 		,[intLocationId]					= RE.intLocationId
