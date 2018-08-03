@@ -6864,6 +6864,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Views\vyuARPOSReceiptReport.sql" />
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostReturnCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

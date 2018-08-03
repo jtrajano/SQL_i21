@@ -2425,13 +2425,31 @@ BEGIN
 				FROM	tblICInventoryReceipt r
 				WHERE	r.intInventoryReceiptId = @intTransactionId
 						AND r.strReceiptNumber = @strTransactionId
+				IF @strTransactionType = 'Inventory Receipt'
+				BEGIN 
+					EXEC dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@ItemsToPost
+				END 
+				ELSE IF @strTransactionType = 'Inventory Return'
+				BEGIN 
+					DELETE	tblICInventoryReturned
+					FROM	tblICInventoryReturned
+					WHERE	strBatchId = @strBatchId
 
-				EXEC dbo.uspICRepostCosting
-					@strBatchId
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,@ItemsToPost
+					UPDATE @ItemsToPost
+					SET dblQty = -dblQty 
+
+					EXEC dbo.uspICRepostReturnCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@ItemsToPost
+				END
 
 				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strTransactionId AND strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER)
 				BEGIN 
