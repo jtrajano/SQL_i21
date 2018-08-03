@@ -917,7 +917,7 @@ VALUES
 		('tblCTPriceContract', 'Contracts', 'Contract Management'),
 		('tblCTPriceFixation', 'Contracts', 'Contract Management'),
 		('tblCTPriceFixationDetail', 'Contracts', 'Contract Management'),
-		('tblGRStorageType', 'Contracts', 'Contract Management'),
+		
 
 ---------------------------------------------------------------------------------------------------
 		
