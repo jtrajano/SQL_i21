@@ -2,6 +2,7 @@
 	AS
 	
 	select 
+		tax_exemption.intCustomerTaxingTaxExceptionId,
 		tax_exemption.intEntityCustomerId,
 		cus_location.strLocationName,
 		item.strItemNo,
@@ -16,7 +17,11 @@
 		tax_exemption.dblPartialTax,		
 		ent.strName,
 		ent.strEntityNo,
-		intWarehouseId = isnull(eloc.intWarehouseId, -99)
+		intWarehouseId = isnull(eloc.intWarehouseId, -99),
+		strCardNumber = cf.strCardNumber,
+		strCardDescription = cf.strCardDescription,
+		strVehicleNumber =  vf.strVehicleNumber,
+		strVehicleDescription = vf.strVehicleDescription 
 
 	from tblARCustomerTaxingTaxException tax_exemption
 		inner join tblEMEntity ent
@@ -34,3 +39,9 @@
 			on tax_code.intTaxCodeId = tax_exemption.intTaxCodeId
 		left join tblSMTaxClass tax_class
 			on tax_class.intTaxClassId = tax_exemption.intTaxClassId
+		left join tblCFCard cf
+			on tax_exemption.intCardId = cf.intCardId
+		left join tblCFVehicle vf
+			on tax_exemption.intVehicleId = vf.intVehicleId
+
+		
