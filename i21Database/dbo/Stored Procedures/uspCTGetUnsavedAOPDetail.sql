@@ -18,7 +18,7 @@ BEGIN TRY
 			(SELECT TOP 1 intVolumeUOMId FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intVolumeUOMId,
 			(SELECT TOP 1 intCurrencyId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intCurrencyId,
 			(SELECT TOP 1 intWeightUOMId FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intWeightUOMId,
-			--(SELECT TOP 1 intPriceUOMId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intPriceUOMId,
+			(SELECT TOP 1 intPriceUOMId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intPriceUOMId,
 			BI.strItemNo AS strBasisItemNo,
 			CO.strCommodityCode,
 			IM.strItemNo,

@@ -20,7 +20,9 @@ BEGIN TRY
 			 @strERPPONumber		NVARCHAR(100),
 			 @strERPItemNumber		NVARCHAR(100),
 			 @dlERPQty				NUMERIC(18,6),
-			 @dblBalance			NUMERIC(18,6)
+			 @dblBalance			NUMERIC(18,6),
+			 @strDetailERPPONumber	NVARCHAR(100),
+			 @strDetailERPItemNumber NVARCHAR(100)
 				
 	UPDATE	IM
 	SET		strContractNumber		=	LTRIM(strContractNumber),
@@ -75,7 +77,9 @@ BEGIN TRY
     SELECT  @dblQuantity		=	dblQuantity,
 			@dblReceivedQty		=	ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,@intUnitMeasureId,intUnitMeasureId,@dblReceivedQty),0),
 			@dblOpenQty			=	ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,@intUnitMeasureId,intUnitMeasureId,@dblOpenQty),0),
-			@dblBalance			=	dblBalance
+			@dblBalance			=	dblBalance,
+			@strDetailERPPONumber=	ISNULL(strERPPONumber,''),
+			@strDetailERPItemNumber	=	ISNULL(strERPItemNumber,'')
     FROM	tblCTContractDetail
     WHERE	intContractDetailId = @intContractDetailId
 
@@ -89,6 +93,18 @@ BEGIN TRY
 	BEGIN
 		SET @ErrMsg = 'Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + ' is skipped due to same open quantity.'
 		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+	END
+
+	IF @strERPPONumber <> LTRIM(RTRIM(ISNULL(@strDetailERPPONumber,'')))
+	BEGIN
+		SET @ErrMsg = 'No matching ERP PO number('+ ISNULL(@strDetailERPPONumber,'') +') is available for Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + '.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+	END
+
+	IF @strERPItemNumber <> LTRIM(RTRIM(ISNULL(@strDetailERPItemNumber,'')))
+	BEGIN
+		SET @ErrMsg = 'No matching ERP Item number('+ ISNULL(@strDetailERPItemNumber,'') +') is available for Contract ' + ISNULL(@strContractNumber,'') + ' and Sequence ' + ISNULL(LTRIM(@intContractSeq),'') + '.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')         
 	END
 
 	SELECT @dblReceivedQty =  @dblReceivedQty - ABS(@dblQuantity  - @dblBalance)

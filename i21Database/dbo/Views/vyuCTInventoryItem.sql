@@ -21,7 +21,8 @@ AS
 			PG.strName	AS	strPurchasingGroup,
 			IM.strCostType,
 			CR.dblEstimatedYieldRate,
-			IM.ysnInventoryCost
+			IM.ysnInventoryCost,
+			IM.ysnBasisContract
 
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT

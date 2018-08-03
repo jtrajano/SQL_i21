@@ -139,39 +139,49 @@ BEGIN TRY
     LEFT JOIN tblCTAOPDetail D ON D.intBasisItemId = M.intItemId AND D.intAOPId = ISNULL(unpvt.intAOPId,0) AND D.intItemId = @intItemId
     WHERE intImportAOPId	 = @intExternalId AND M.intItemId IS NOT NULL
 
+	IF @strYear IS NULL
+	BEGIN
+		SET @ErrMsg = 'Year is missing.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @dblVolume IS NULL
+	BEGIN
+		SET @ErrMsg = 'Volume is missing.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strVolumeUOM IS NULL
+	BEGIN
+		SET @ErrMsg = 'Volume UOM is missing.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strCurrency IS NULL
+	BEGIN
+		SET @ErrMsg = 'Currency is missing.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strPriceUOM IS NULL OR @intPriceUOMId IS NULL
+	BEGIN
+		SET @ErrMsg = 'Price UOM is missing.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strItem IS NULL OR @intItemId IS NULL
+	BEGIN
+		SET @ErrMsg = 'Item is missing from csv or in i21.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strCompanyLocation IS NULL OR @intCompanyLocationId IS NULL
+	BEGIN
+		SET @ErrMsg = 'Location is missing from csv or in i21.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+	IF @strCommodity IS NULL OR @intCommodityId IS NULL
+	BEGIN
+		SET @ErrMsg = 'Commodity is missing from csv or in i21.'
+		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	END
+
     IF @intAOPId IS NULL
     BEGIN
-	   IF @strYear IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Year is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-	   IF @dblVolume IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Volume is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-	   IF @strVolumeUOM IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Volume UOM is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-	   IF @strCurrency IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Currency is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-	   IF @strWeightUOM IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Weight UOM is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-	   IF @strItem IS NULL
-	   BEGIN
-		  SET @ErrMsg = 'Item is missing.'
-		  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-	   END
-
 
 	   INSERT INTO tblCTAOP(strYear,dtmFromDate,dtmToDate,intBookId,intSubBookId,intConcurrencyId)
 	   SELECT @strYear,@dtmFromDate,@dtmToDate,@intBookId,@intSubBookId,1
