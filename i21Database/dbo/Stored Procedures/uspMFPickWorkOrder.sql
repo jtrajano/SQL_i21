@@ -1941,19 +1941,9 @@ BEGIN TRY
 		END
 
 		IF (@strCycleCountbasedonRecipeTolerance='True' or @strInstantConsumption ='True') and EXISTS (
-				SELECT SUM(dblQty)
-				FROM @tblLot
-				HAVING SUM(dblQty) < (
-						CASE 
-							WHEN (
-									SELECT Count(*)
-									FROM @tblLot
-									WHERE ysnSubstituteItem = 1
-									) >= 1
-								THEN @dblLowerToleranceReqQty
-							ELSE [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
-							END
-						)
+				SELECT SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty))
+				FROM @tblLot L
+				HAVING SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty)) < @dblLowerToleranceReqQty
 				)
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
@@ -1964,8 +1954,7 @@ BEGIN TRY
 					,@strLotUnitMeasure NVARCHAR(50)
 					,@intLotItemUOMId INT
 
-				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
-					,@intLotItemUOMId = MIN(intItemUOMId)
+				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty)))
 				FROM @tblLot
 
 				SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
@@ -1982,21 +1971,13 @@ BEGIN TRY
 				FROM dbo.tblICUnitMeasure
 				WHERE intUnitMeasureId = @intUnitMeasureId
 
-				SELECT @intLotUnitMeasureId = intUnitMeasureId
-				FROM dbo.tblICItemUOM
-				WHERE intItemUOMId = @intLotItemUOMId
-
-				SELECT @strLotUnitMeasure = ' ' + strUnitMeasure
-				FROM dbo.tblICUnitMeasure
-				WHERE intUnitMeasureId = @intLotUnitMeasureId
-
 				RAISERROR (
 						'Item %s is having %s%s quantity which is less than the required quantity %s%s.'
 						,11
 						,1
 						,@strItemNo
 						,@strQty
-						,@strLotUnitMeasure
+						,@strUnitMeasure
 						,@strReqQty
 						,@strUnitMeasure
 						)
