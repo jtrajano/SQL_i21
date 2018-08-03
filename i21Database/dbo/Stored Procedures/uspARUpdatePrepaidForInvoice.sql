@@ -123,7 +123,7 @@ BEGIN TRY
 			SELECT TOP 1 intInvoiceDetailId 
 			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 			WHERE ID.intInvoiceId = I.intInvoiceId 
-			 AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
+			--  AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
 		) AS ID 
 		WHERE I.strTransactionType = 'Customer Prepayment'
 			AND I.ysnPosted = 1
