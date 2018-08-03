@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuEMETExportCustomer]
-	AS 
+AS 
 	
 	SELECT       
 		Entity.intEntityId  
@@ -33,7 +33,7 @@
 		,tax = case when Cus.ysnApplyPrepaidTax = 1 then 'P' 
 				when Cus.ysnApplySalesTax = 1 then 'Y'
 				else 'N' END
-
+			
  	FROM tblEMEntity AS Entity  
 		INNER JOIN tblEMEntityType as EntType
 			ON Entity.intEntityId = EntType.intEntityId and EntType.strType = 'Customer'
@@ -43,7 +43,7 @@
 		LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1  
 		LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId  
 		LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
-		LEFT JOIN tblSMTerm as SMTerm ON SMTerm.intTermID = Loc.intTermsId
+		LEFT JOIN tblSMTerm as SMTerm ON  Cus.intTermsId = SMTerm.intTermID 
 		LEFT JOIN tblARAccountStatus AS AcctStat ON AcctStat.intAccountStatusId = Cus.intAccountStatusId
 		LEFT JOIN tblEMEntityPhoneNumber AS EMPhone ON CusToCon.intEntityContactId = EMPhone.intEntityId
 		LEFT JOIN tblSMTaxCode TaxCode on Cus.intTaxCodeId = TaxCode.intTaxCodeId 
