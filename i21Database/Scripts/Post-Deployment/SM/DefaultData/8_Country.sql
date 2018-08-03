@@ -109,6 +109,7 @@ GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Myanmar') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Myanmar', N'95', NULL, 1) END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Namibia') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Namibia', N'264', NULL, 1) END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Nepal') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Nepal', N'977', NULL, 1) END
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Netherlands') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Netherlands', N'31', NULL, 1) END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'New Zealand') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'New Zealand', N'64', NULL, 1) END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Nicaragua') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Nicaragua', N'505', NULL, 1) END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCountry where strCountry = N'Niger') BEGIN INSERT [dbo].[tblSMCountry] ([strCountry], [strCountryCode], [intSort], [intConcurrencyId]) VALUES (N'Niger', N'227', NULL, 1) END
