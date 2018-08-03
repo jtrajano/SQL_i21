@@ -20,11 +20,13 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
 	  , @dtmAsOfDateFrom			AS DATETIME			= NULL
 	  , @ysnDetailedFormatLocal		AS BIT				= 0
+	  , @ysnPrintCreditBalanceLocal AS BIT				= 1
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @ysnDetailedFormatLocal		= ISNULL(@ysnDetailedFormat, 0)
+SET @ysnPrintCreditBalanceLocal = ISNULL(@ysnPrintCreditBalance, 1)
 
 IF @strAsOfDateFrom <> ''
 	SET @dtmAsOfDateFrom		= ISNULL(CONVERT(DATETIME, @strAsOfDateFrom), GETDATE())
@@ -36,10 +38,11 @@ BEGIN
 	set @dtmAsOfDate = dateadd(SECOND,-1,dateadd(day,1, @dtmAsOfDate))
 END
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
-										, @strCompanyLocation = @strCompanyLocation
-										, @intEntityUserId = @intEntityUserId
-										, @dtmDateFrom = @dtmAsOfDateFrom
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 			= @dtmAsOfDate
+										, @strCompanyLocation 	= @strCompanyLocation
+										, @intEntityUserId 		= @intEntityUserId
+										, @dtmDateFrom 			= @dtmAsOfDateFrom
+										, @ysnIncludeCredits 	= @ysnPrintCreditBalanceLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
