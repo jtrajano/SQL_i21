@@ -50,13 +50,20 @@ GO
 --DELETE @tblCFTempSiteGroupPriceAdjustment
 
 
+SELECT DISTINCT 
+	intSiteGroupId
+	,dtmStartEffectiveDate 
+INTO #tmptblCFSiteGroupPriceAdjustment
+FROM tblCFSiteGroupPriceAdjustment
+
+
 INSERT INTO tblCFSiteGroupPriceAdjustmentHeader(
 intSiteGroupId
 ,dtmEffectiveDate)
 SELECT
 	intSiteGroupId = A.intSiteGroupId
 	,dtmEffectiveDate  = A.dtmStartEffectiveDate
-FROM tblCFSiteGroupPriceAdjustment A
+FROM #tmptblCFSiteGroupPriceAdjustment A
 WHERE NOT EXISTS(SELECT TOP 1 1
 				FROM tblCFSiteGroupPriceAdjustmentHeader
 				WHERE intSiteGroupId = A.intSiteGroupId
