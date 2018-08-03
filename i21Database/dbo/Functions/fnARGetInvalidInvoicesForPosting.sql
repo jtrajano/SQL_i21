@@ -183,6 +183,35 @@ IF(ISNULL(@Post,0)) = 1
 			,[intItemId]
 			,[strBatchId]
 			,[strPostingError])
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+			,[intItemId]			= I.[intItemId] 
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= CASE WHEN I.[strTransactionType] = 'Invoice ' THEN 'You cannot post an ' + I.[strTransactionType] + ' with zero amount.' ELSE 'You cannot post a ' + I.[strTransactionType] + ' with zero amount.' END
+		FROM 
+			@Invoices I					
+		WHERE
+			I.[dblInvoiceTotal] = @ZeroDecimal
+			AND EXISTS (
+				SELECT a.intItemId FROM tblARInvoiceDetail  a join tblICItem  b on a.intItemId = b.intItemId where intInvoiceId = I.[intInvoiceId] and b.strType = 'Comment'
+			)
+			AND NOT EXISTS(
+				SELECT a.intItemId FROM tblARInvoiceDetail  a join tblICItem  b on a.intItemId = b.intItemId where intInvoiceId = I.[intInvoiceId] and b.strType <> 'Comment')		
+
+		
+
+
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
 		--zero amount
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
