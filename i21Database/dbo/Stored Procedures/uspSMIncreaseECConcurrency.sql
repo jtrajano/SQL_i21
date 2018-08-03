@@ -53,15 +53,15 @@ BEGIN
 				SELECT DISTINCT intEntityId
 				FROM
 				(
-					SELECT intEntityId FROM tblSMUserSecurity WHERE intUserRoleID = @id
+					SELECT intEntityId FROM tblSMUserSecurity WHERE intUserRoleID = 1
 					UNION ALL
 					SELECT a.intEntityId FROM tblSMUserSecurity a
 					INNER JOIN tblSMUserRoleSubRole b ON a.intUserRoleID = b.intUserRoleId
-					WHERE b.intSubRoleId = @id
+					WHERE b.intSubRoleId = 1
 					UNION ALL
 					SELECT a.intEntityId FROM tblSMUserSecurity a
 					INNER JOIN tblSMUserSecurityCompanyLocationRolePermission b ON a.intUserRoleID = b.intUserRoleId
-					WHERE b.intUserRoleId = @id
+					WHERE b.intUserRoleId = 1
 				) tbl
 			)
 		END
