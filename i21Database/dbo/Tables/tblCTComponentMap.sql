@@ -5,7 +5,6 @@
 	intItemId		    INT,
 
 	CONSTRAINT [PK_tblCTComponentMap_intComponentMapId] PRIMARY KEY CLUSTERED (intComponentMapId ASC),
-	CONSTRAINT [UQ_tblCTComponentMap_intItemId] UNIQUE (intItemId), 
 	CONSTRAINT [UQ_tblCTComponentMap_strComponent] UNIQUE (strComponent), 
 	CONSTRAINT [FK_tblCTComponentMap_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
