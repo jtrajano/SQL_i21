@@ -19,7 +19,7 @@ BEGIN
 		EXEC ('
 			ALTER TABLE tblICItemLocation
 			WITH NOCHECK ADD CONSTRAINT CK_ItemLocation_IS_NOT_USED
-			CHECK (dbo.fnICCheckItemLocationIdIsNotUsed([intItemLocationId], [intLocationId]) = 1),
+			CHECK (dbo.fnICCheckItemLocationIdIsNotUsed([intItemLocationId], [intLocationId]) = 1)
 		')
 	END
 END
