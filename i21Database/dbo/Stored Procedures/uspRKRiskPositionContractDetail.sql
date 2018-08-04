@@ -35,7 +35,7 @@ dtmContractDate	,
 strEntityName	,
 strCustomerContract	,
 intFutureMarketId	,
-intFutureMonthId	,intItemUOMId,0 as intBookId,0 as intSubBookId,dblQuantity,isnull(dblBalance,0)*isnull(dblRatio ,0) dblRatioQty,dblNoOfLot,dtmHistoryCreated,intHeaderPricingTypeId
+intFutureMonthId,intItemUOMId,intBookId as intBookId,intSubBookId as intSubBookId,dblQuantity,isnull(dblBalance,0)*isnull(dblRatio ,0) dblRatioQty,dblNoOfLot,dtmHistoryCreated,intHeaderPricingTypeId
 FROM
 (
 select * 
@@ -68,8 +68,8 @@ FROM (
 		,e.strName strEntityName
 		,'' strCustomerContract
 		,h.intFutureMarketId
-		,h.intFutureMonthId,strPricingStatus,h.intItemUOMId,0 as intBookId,0 as intSubBookId,h.dblQuantity,dblLotsPriced dblNoOfLot,
-		ch.intPricingTypeId as intHeaderPricingTypeId,(select dblRatio from tblCTContractDetail where intContractDetailId=h.intContractDetailId) dblRatio
+		,h.intFutureMonthId,strPricingStatus,h.intItemUOMId,h.intBookId as intBookId,h.intSubBookId as intSubBookId,h.dblQuantity,dblLotsPriced dblNoOfLot,
+		ch.intPricingTypeId as intHeaderPricingTypeId,dblRatio dblRatio
 	FROM tblCTSequenceHistory h
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
@@ -115,9 +115,9 @@ FROM (
 		,'' strCustomerContract
 		,h.intFutureMarketId
 		,h.intFutureMonthId
-		,strPricingStatus,h.intItemUOMId,0 as intBookId,0 as intSubBookId,h.dblQuantity,
+		,strPricingStatus,h.intItemUOMId,h.intBookId as intBookId,h.intSubBookId as intSubBookId,h.dblQuantity,
 		dblLotsUnpriced dblNoOfLot,
-		ch.intPricingTypeId as intHeaderPricingTypeId,(select dblRatio from tblCTContractDetail where intContractDetailId=h.intContractDetailId) dblRatio
+		ch.intPricingTypeId as intHeaderPricingTypeId,dblRatio dblRatio
 	FROM tblCTSequenceHistory h
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
@@ -167,9 +167,9 @@ FROM (
 		,'' strCustomerContract
 		,h.intFutureMarketId
 		,h.intFutureMonthId 
-		,strPricingStatus,intItemUOMId,0 as intBookId,0 as intSubBookId,h.dblQuantity
+		,strPricingStatus,intItemUOMId,h.intBookId as intBookId,h.intSubBookId as intSubBookId,h.dblQuantity
 		,dblLotsPriced dblNoOfLot
-		,ch.intPricingTypeId as intHeaderPricingTypeId,(select dblRatio from tblCTContractDetail where intContractDetailId=h.intContractDetailId) dblRatio
+		,ch.intPricingTypeId as intHeaderPricingTypeId,dblRatio dblRatio
 	FROM tblCTSequenceHistory h
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId

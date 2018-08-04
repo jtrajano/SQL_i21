@@ -81,10 +81,46 @@ DECLARE @RollCost as Table (
 DECLARE @dtmCurrentDate datetime 
 SET @dtmCurrentDate = getdate()
 
-INSERT INTO @RollCost(strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strTradeNo,intFutOptTransactionHeaderId)
-SELECT strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strInternalTradeNo,intFutOptTransactionHeaderId 
-FROM  vyuRKRollCost where intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId and intLocationId=@intCompanyLocationId
+DECLARE @strCommodityCode NVARCHAR(max)
+DECLARE @strFutureMarket NVARCHAR(max)
+DECLARE @strLocationName NVARCHAR(max)
 
+SELECT @strCommodityCode = strCommodityCode FROM tblICCommodity WHERE intCommodityId = @intCommodityId
+SELECT @strFutureMarket = strFutMarketName FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
+SELECT @strLocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+
+INSERT INTO @RollCost(strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strTradeNo,intFutOptTransactionHeaderId)
+SELECT DISTINCT @strFutureMarket,@strCommodityCode,strFutureMonth,@intFutureMarketId,@intCommodityId, intOpenContract,dblPrice,dblWtAvgOpenLongPosition,strInternalTradeNo,intFutOptTransactionHeaderId   FROM (
+SELECT ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC) intRowNum,*  
+FROM(
+SELECT DISTINCT intFutOptTransactionId, (intNoOfContract - isnull(intOpenContract, 0)) intOpenContract, (intNoOfContract - isnull(intOpenContract, 0))*dblPrice dblWtAvgOpenLongPosition,
+										strInternalTradeNo,strFutureMonth,dblPrice, strLocationName,intFutOptTransactionHeaderId,dtmTransactionDate
+
+FROM (
+	SELECT intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strInternalTradeNo,strFutureMonth,dblPrice,intFutOptTransactionHeaderId,strLocationName
+			,dtmTransactionDate
+			,(
+			SELECT SUM(mf.dblMatchQty)
+			FROM tblRKMatchDerivativesHistory mf
+			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
+					and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+			) intOpenContract
+	FROM (
+		SELECT ROW_NUMBER() OVER (
+				PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC
+				) intRowNum, ot.intFutOptTransactionId, ot.intNewNoOfContract intNoOfContract,strFutureMonth,dblPrice,strInternalTradeNo,intFutOptTransactionHeaderId
+				,strLocationName,dtmTransactionDate
+		FROM tblRKFutOptTransactionHistory ot
+		WHERE ot.strNewBuySell = 'Buy' AND isnull(ot.strInstrumentType, '') = 'Futures' AND convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) 
+				AND ot.strCommodity = CASE WHEN isnull(@strCommodityCode, '') = '' THEN ot.strCommodity ELSE @strCommodityCode END
+				AND ot.strFutureMarket = CASE WHEN isnull(@strFutureMarket, '') = '' THEN ot.strFutureMarket ELSE @strFutureMarket END
+				AND ot.strLocationName = CASE WHEN isnull(@strLocationName, '') = '' THEN ot.strLocationName ELSE @strLocationName END
+				AND ot.intBookId = CASE WHEN isnull(@intBookId, '') = '' THEN ot.intBookId ELSE @intBookId END
+				AND ot.intSubBookId = CASE WHEN isnull(@intSubBookId, '') = '' THEN ot.intSubBookId ELSE @intSubBookId END
+		) t
+	WHERE t.intRowNum = 1
+	GROUP BY intFutOptTransactionId,strInternalTradeNo,strFutureMonth,intFutOptTransactionHeaderId,dblPrice,strLocationName,dtmTransactionDate
+	)t)t2 )t3 WHERE t3.intRowNum = 1
 
 --To Purchase Value
      DECLARE @DemandFinal1 as Table (  
@@ -441,7 +477,7 @@ insert into @tblGetOpenFutureByDate (intFutOptTransactionId, intOpenContract,str
 	strLocationName,dblContractSize,strFutureMarket
 ,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId,
 intBookId,intSubBookId,ysnMonthExpired,strStatus)
-exec uspRKRiskPositionOpenFutureByDate @intCommodityId= @intCommodityId,@intFutureMarketId=@intFutureMarketId,@dtmToDate=@dtmToDate
+exec uspRKRiskPositionOpenFutureByDate @intCommodityId= @intCommodityId,@intFutureMarketId=@intFutureMarketId,@dtmToDate=@dtmToDate,@intBookId=@intBookId,@intSubBookId=@intSubBookId
 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
@@ -616,7 +652,6 @@ SELECT
 dblNoOfContract as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
 dblQuantity,7,intContractHeaderId,intFutOptTransactionHeaderId  FROM @ListFinal WHERE intRowNumber in(2)
 
-
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, dblNoOfLot,  dblQuantity,intOrderByHeading)
 SELECT 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,'Net Position',sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),9 intOrderByHeading  
 FROM(
@@ -649,7 +684,7 @@ SELECT DISTINCT 'Futures Required' as Selection,'5.Avg Long Price' as PriceStatu
   ft.strFutureMonth, 'Avg Long Price' as strAccountNumber,
    dblWtAvgOpenLongPosition as dblNoOfContract,dblNoOfLot,dblQuantity*dblNoOfLot dblQuantity,strTradeNo,intFutOptTransactionHeaderId
 FROM @RollCost ft
-WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId
+WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId and isnull(dblNoOfLot,0)<>0
  and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth))t  
  
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
