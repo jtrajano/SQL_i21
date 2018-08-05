@@ -481,44 +481,34 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber,intContractHeaderId)
-			SELECT * FROM (
-			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Pur Basis Deliveries' strType,
-			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal,
-			CT.intCommodityId,cl.strLocationName,CT.strItemNo,CT.strContractNumber strTicket,CT.dtmContractDate as dtmTicketDateTime ,
-			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,@intCommodityUnitMeasureId as intCommodityUnitMeasureId,
-			CT.intCompanyLocationId,strPickLotNumber,CT.strContractNumber,intContractHeaderId
-			FROM tblLGDeliveryPickDetail Del
-			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
-			INNER JOIN tblLGPickLotHeader PH on PH.intPickLotHeaderId=PLDetail.intPickLotHeaderId
-			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN @tblGetOpenContractDetail CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
-			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
-			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
-			WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = @intCommodityId 
-			AND CT.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then CT.intCompanyLocationId   else @intLocationId end
-
-			UNION ALL
-			
-			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Pur Basis Deliveries' strType,
-			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblReceived, 0))  AS dblTotal,
-			st.intCommodityId,cl.strLocationName,cd.strItemNo,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
-					strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,strReceiptNumber,cd.strContractNumber,intContractHeaderId
-			FROM tblICInventoryReceipt r
-			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
-			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
-			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
-			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
-			WHERE cd.intCommodityId = @intCommodityId AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			and st.strTicketStatus <> 'V'
-			)t	WHERE  intCompanyLocationId  IN (
-				SELECT intCompanyLocationId FROM tblSMCompanyLocation
-				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-								ELSE isnull(ysnLicensed, 0) END
-				) 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber)
+	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,intCommodityId,strItemNo,
+				dblTotal,strContractNumber, intFromCommodityUnitMeasureId,intContractHeaderId,strLocationName)		
+			 
+	select 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Pur Basis Deliveries' strType,
+				@intCommodityId, strItemNo,dblTotal,strContractNumber,@intCommodityUnitMeasureId,intContractHeaderId,strLocationName from(
+				select sum(dblTotal) dblTotal,intCommodityId ,intCompanyLocationId,strContractNumber,strItemNo,intContractHeaderId,strLocationName from(
+				SELECT 	CD.intContractDetailId, 
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) > 0 THEN
+				CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) ELSE 0  END) dblTotal ,l.intCompanyLocationId,CH.intCommodityId,
+				strItemNo,strContractNumber,CH.intContractHeaderId,l.strLocationName
+				FROM tblCTContractDetail CD
+				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
+				join tblICItem i on i.intItemId=CD.intItemId
+				join tblSMCompanyLocation l on l.intCompanyLocationId=CD.intCompanyLocationId
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId 
+				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
+				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
+								FROM	   tblCTPriceFixationDetail
+								GROUP   BY  intPriceFixationId)
+													FD  ON  FD.intPriceFixationId	  =	 PF.intPriceFixationId
+				where CH.intCommodityId=@intCommodityId and CD.intCompanyLocationId=case when isnull(@intLocationId,0)=0 then   CD.intCompanyLocationId else @intLocationId end  )t 
+				 group by intCommodityId ,intCompanyLocationId,strContractNumber,strItemNo,intContractHeaderId,strLocationName)t1
+				where dblTotal<>0 AND intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+                    WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+                    WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+                    ELSE isnull(ysnLicensed, 0) END
+                    )
+			INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,strContractNumber)
 			select * from (
 			SELECT 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
