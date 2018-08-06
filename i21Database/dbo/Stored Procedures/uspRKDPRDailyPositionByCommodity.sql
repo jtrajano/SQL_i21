@@ -267,22 +267,24 @@ SELECT DISTINCT c.intCommodityId
 			) t where dblTotal >0 
 			)t1
 		) AS dblGrainBalance
-	 
-	,   (select sum(dblPurBasisQty) from(
-				select sum(dblPurBasisQty) dblPurBasisQty,intCommodityId ,intCompanyLocationId,strContractNumber from(
-				SELECT CD.intContractDetailId,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,CASE WHEN CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) > 0 THEN
-				CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) ELSE 0  END) dblPurBasisQty ,intCompanyLocationId,CH.intCommodityId,strContractNumber
-				FROM tblCTContractDetail CD
-				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
-				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId
-				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
-				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
-								FROM	   tblCTPriceFixationDetail
-								GROUP   BY  intPriceFixationId)
-													FD  ON  FD.intPriceFixationId	  =	 PF.intPriceFixationId
-				where CH.intCommodityId=c.intCommodityId and CD.intCompanyLocationId=cl.intCompanyLocationId  )t  group by intCommodityId ,intCompanyLocationId,strContractNumber)t1
-				where dblPurBasisQty<>0 ) 
-				as PurBasisDelivary
+	
+	,(SELECT sum(ISNULL(dblTotal,0)) dblTotal FROM 
+			(			
+			SELECT distinct ri.intInventoryReceiptItemId,
+			dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, 
+			isnull(ri.dblReceived, 0)) AS dblTotal
+			FROM tblICInventoryReceipt r
+			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
+									AND  st.intProcessingLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+						ELSE isnull(ysnLicensed, 0) END
+						)
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 			
+			WHERE cd.intCommodityId = c.intCommodityId  and st.strTicketStatus <> 'V'
+			AND st.intProcessingLocationId  =cl.intCompanyLocationId)t)
+			 as PurBasisDelivary
 	,(
 		SELECT sum(dblTotal)
 		FROM (
