@@ -224,9 +224,9 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= NULL
+    ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= IST.[intCategoryId]
-	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
+	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblQtyShipped] * ARID.[dblPrice] ELSE NULL END
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
@@ -244,7 +244,7 @@ LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
 		ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
 LEFT OUTER JOIN
-	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost, [intCategoryId] FROM vyuICGetItemStock WITH (NOLOCK)) IST
+	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost, [intCategoryId], ysnRetailValuation FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARIC.[intComponentItemId] = IST.[intItemId]
 		AND ARI.[intCompanyLocationId] = IST.[intLocationId]	
 LEFT OUTER JOIN
