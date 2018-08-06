@@ -30,7 +30,7 @@ FROM dbo.tblICInventoryReceipt IR
 JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 JOIN dbo.tblICInventoryReceiptItemLot IRL ON IRL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 JOIN dbo.tblEMEntity E ON E.intEntityId = IR.intEntityVendorId
-JOIN dbo.tblEMEntity E1 ON E1.intEntityId = IR.intReceiverId
+Left JOIN dbo.tblEMEntity E1 ON E1.intEntityId = IR.intReceiverId
 JOIN dbo.tblICItem I ON I.intItemId = IRI.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

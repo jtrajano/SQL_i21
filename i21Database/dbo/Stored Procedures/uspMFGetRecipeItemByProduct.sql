@@ -12,6 +12,9 @@ BEGIN
 		,@intManufacturingProcessId INT
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPMCategoryId INT
+		,@dblCalculatedQuantity decimal(24,10)
+		,@intItemUOMId int
+		,@intUnitMeasureId int
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -157,12 +160,30 @@ BEGIN
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 46 --Packaging Category
 
+		Select @intItemUOMId=intItemUOMId 
+		from tblMFWorkOrderRecipe
+		Where intWorkOrderId =@intWorkOrderId
+
+		Select @intUnitMeasureId=intUnitMeasureId 
+		From tblICItemUOM 
+		Where intItemUOMId=@intItemUOMId 
+
+		Select @dblCalculatedQuantity=SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId ,IU.intItemUOMId,RI.dblCalculatedQuantity))
+		from tblMFWorkOrderRecipeItem RI
+		JOIN tblICItemUOM IU on IU.intItemId=RI.intItemId and IU.intUnitMeasureId=@intUnitMeasureId 
+		Where RI.intWorkOrderId =@intWorkOrderId and RI.intRecipeItemTypeId =2 and RI.ysnConsumptionRequired =1 and RI.intItemId <>@intItemId 
+
+		If @dblCalculatedQuantity is null
+		Begin
+			Select @dblCalculatedQuantity=0
+		End
+
 		SELECT I.strItemNo
 			,I.strDescription
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
-				ELSE (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity
+					THEN CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
 				END AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
@@ -170,13 +191,13 @@ BEGIN
 			,ri.dblLowerTolerance
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity)
+					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
 				END AS dblCalculatedUpperTolerance
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity)
+					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
 				END AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
@@ -237,8 +258,8 @@ BEGIN
 			,I.strDescription
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
-				ELSE (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity
+					THEN CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
 				END AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
@@ -246,13 +267,13 @@ BEGIN
 			,ri.dblLowerTolerance
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity)
+					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
 				END AS dblCalculatedUpperTolerance
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity)
+					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
 				END AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
