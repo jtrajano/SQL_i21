@@ -21,28 +21,24 @@
 
 
 			--Create Query for adding articles
-					SELECT @sql += N'exec sp_addarticle '
-					+ N'@publication = '''+@publication+N''','
-					+ N'@article = '''+ strArticle + N''','
-					+ N'@source_owner = ''dbo'', '
-					+ N'@source_object = ''' + strArticle + N''', '	
-					+ N'@type = ''logbased'', ' 
-					+ N'@description = '''', ' 
-					+ N'@creation_script = '''', '
-					+ N'@pre_creation_cmd = ''truncate'',  ' 
-					+ N'@schema_option = 0x000000000803509F, '
-					+ N'@identityrangemanagementoption = ''manual'', '							
-					+ N'@destination_table = ''' + strArticle + N''', '	
-					+ N'@destination_owner = ''dbo'', ' 
-					+ N'@force_invalidate_snapshot = 1, ' 
-					+ N'@status = 24, '
-					+ N'@vertical_partition = ''false'', '
-					+ N'@ins_cmd = ''CALL [sp_MSins_dbo'+strArticle+N']'', ' 
-					+ N'@del_cmd = ''CALL [sp_MSdel_dbo'+strArticle+N']'',  ' 
-					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'	
+						SELECT @sql += N'exec sp_addarticle '
+			+ N'@publication = '''+@publication+N''','
+			+ N'@article = '''+ strArticle + N''','
+			+ N'@source_owner = ''dbo'', '
+			+ N'@source_object = ''' + strArticle + N''', '	
+			+ N'@type = ''logbased'', ' 
+			+ N'@description = null, ' 
+			+ N'@creation_script = null, '
+			+ N'@pre_creation_cmd = ''truncate'',  ' 
+			+ N'@schema_option = 0x000000000803509, '
+			+ N'@identityrangemanagementoption = ''manual'', '							
+			+ N'@destination_table = ''' + strArticle + N''', '	
+			+ N'@destination_owner = ''dbo'',' 		
+			+ N'@vertical_partition = ''false''' 											
+			FROM 	@ListOfArticles 
 		
 											
-					FROM @ListOfArticles; 
+				
 
 				--Executed Created Query
 				exec @result = sp_executesql @sql;
