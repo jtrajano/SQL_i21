@@ -170,13 +170,16 @@ AS SELECT
 		ELSE IC.strItemNo
 	END) AS strItemNumber
 	,IC.strDescription AS strItemDescription
+	,IC.strPickListComments
 	,ICC.strCommodityCode
 	,ICC.strDescription AS strCommodityDescription
 	,ICCA.strDescription AS strGrade
 	,tblICInventoryReceipt.intInventoryReceiptId
 	,tblICInventoryReceipt.strReceiptNumber
-	,vyuICGetInventoryShipmentItem.intInventoryShipmentId
-	,vyuICGetInventoryShipmentItem.strShipmentNumber
+	,tblICInventoryShipment.intInventoryShipmentId
+	,tblICInventoryShipment.strShipmentNumber
+	,ICLot.strLotNumber
+
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
@@ -198,7 +201,7 @@ AS SELECT
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
-  LEFT JOIN vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem on vyuICGetInventoryShipmentItem.intSourceId = SC.intTicketId
+  LEFT JOIN tblICInventoryShipment tblICInventoryShipment on tblICInventoryShipment.intInventoryShipmentId = SC.intInventoryShipmentId
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
@@ -209,6 +212,7 @@ AS SELECT
   LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
+  LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
