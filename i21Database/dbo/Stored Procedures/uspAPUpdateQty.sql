@@ -24,7 +24,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	UPDATE  dtl
 	SET 
 		dtl.[dblQtyOrdered]	 = CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN ROUND(B.dblOrderQty,2) ELSE ISNULL(dtl.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)) END
-		,dtl.[dblQtyReceived] = CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN ROUND(B.dblOrderQty,2) ELSE ISNULL(dtl.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)) END
 	from tblAPBillDetail dtl
 		INNER JOIN tblICInventoryReceiptItem B
 			ON dtl.intInventoryReceiptItemId = B.intInventoryReceiptItemId
