@@ -1841,6 +1841,7 @@ BEGIN
 		,[intTransactionId]
 		,[strTransactionId]
 		,[intTransactionTypeId]
+		,[intFOBPointId]
 	)
 	SELECT	[intItemId]				= ri.intItemId
 			,[intItemLocationId]	= il.intItemLocationId
@@ -1903,6 +1904,7 @@ BEGIN
 			,[intTransactionId]		= r.intInventoryReceiptId
 			,[strTransactionId]		= r.strReceiptNumber
 			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+			,[intFOBPointId]		= @FOB_DESTINATION
 	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN dbo.tblICItemLocation il 
@@ -1923,7 +1925,8 @@ BEGIN
 			,[dblQty]
 			,[intTransactionId]
 			,[strTransactionId]
-			,[intTransactionTypeId]	
+			,[intTransactionTypeId]
+			,[intFOBPointId]
 	)
 	SELECT	[intItemId]				= ri.intItemId
 			,[intItemLocationId]	= il.intItemLocationId
@@ -1986,6 +1989,7 @@ BEGIN
 			,[intTransactionId]		= r.intInventoryReceiptId
 			,[strTransactionId]		= r.strReceiptNumber
 			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+			,[intFOBPointId]		= @FOB_DESTINATION
 	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN dbo.tblICItemLocation il 
