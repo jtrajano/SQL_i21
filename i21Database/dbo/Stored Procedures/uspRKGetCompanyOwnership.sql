@@ -229,6 +229,7 @@ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110)) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
 	AND ir.intSubLocationId = case when isnull(@intLocationId,0)=0 then ir.intSubLocationId else @intLocationId end 
+	AND st.strDistributionOption NOT IN ('DP','CNT')
 
 UNION 
 SELECT --IS decressing the Unpaid Balance and Company Owned
@@ -312,9 +313,11 @@ FROM (
 			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 			)
 	AND RI.intOwnershipType = 1
-	--AND ST.strDistributionOption IN ('DP','CNT')
+	AND ST.strDistributionOption IN ('DP','CNT')
 	AND RI.dblBillQty = 0
-	AND RI.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM tblAPBillDetail WHERE intInventoryReceiptItemId IS NOT NULL)
+	AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
+			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
+			INNER JOIN vyuSCGetScaleDistribution sc ON  grt.intCustomerStorageId = sc.intCustomerStorageId)
 	
 
 )t
