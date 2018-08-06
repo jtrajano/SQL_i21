@@ -82,6 +82,7 @@ DECLARE  @dblCostValue AS NUMERIC(38,20)
 		,@dblRetailValue AS NUMERIC(38,20)
 		,@dblAverageMargin AS NUMERIC(38,20)
 		,@dblValue AS NUMERIC(38,20)
+		,@dblGrossMarginPct AS Numeric(38,20);
 
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
@@ -93,6 +94,23 @@ IF @dblAdjustRetailValue IS NULL AND ISNULL(@dblQty, 0) = 0
 BEGIN 
 	RETURN;
 END 
+
+
+-- Do Sales Adjustments for Category Retail 
+IF @AdjustTypeCategorySales = @intTransactionTypeId --AND (@dblUnitRetail IS NOT NULL OR @dblSalesPrice)
+BEGIN
+	SET @dblAdjustRetailValue = dbo.fnMultiply(@dblQty, ISNULL(@dblUnitRetail,@dblSalesPrice));
+
+	-- Compute Cost based from AverageMargin
+	SET @dblCostValue = @dblAdjustRetailValue - dbo.fnMultiply(@dblAdjustRetailValue, dbo.fnICGetCategoryAverageMargin(@intCategoryId,@intItemLocationId));
+	SET @dblCost = ABS(@dblCostValue);
+	SET @dblValue = @dblCostValue;
+	
+	-- Set Default Values for Inventory Transaction table
+	SET @dblQty = 0;
+	SET @dblUOMQty = 0;
+	SET @dblRetailValue = @dblAdjustRetailValue;
+END
 
 -- If Qty is known. Do it here. 
 -- It will update the Total Cost Value and Total Retail Value using the supplied item cost and retail price. 
@@ -109,10 +127,7 @@ BEGIN
 	IF @dblQty < 0 
 	BEGIN 
 		-- Get the Average Margin from the Category Pricing. 
-		SELECT	@dblAverageMargin = ISNULL(CategoryPricing.dblAverageMargin, 0)
-		FROM	tblICCategoryPricing CategoryPricing 
-		WHERE	CategoryPricing.intCategoryId = @intCategoryId
-				AND CategoryPricing.intItemLocationId = @intItemLocationId
+		SELECT	@dblAverageMargin = dbo.fnICGetCategoryAverageMargin(@intCategoryId,@intItemLocationId);
 
 		-- Get the retail price from the Item Pricing > Sales Price 
 		-- and Compute the cost from the Sales Price. 
@@ -152,10 +167,10 @@ END
 
 -- If Qty is unknown and it will only adjust the retail value, then do it here. 
 -- It will compute the cost using the Average Margin. 
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 
+IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 AND @intTransactionTypeId != @AdjustTypeCategorySales
 BEGIN 
 	-- Compute the Cost Value 
-	SELECT	@dblCostValue = 
+	SET	@dblCostValue = 
 				CASE 
 					-- Do not compute the cost value if it a Mark Up or Mark Down. 
 					WHEN @intTransactionTypeId IN (@AdjustTypeCategoryMarkupOrMarkDown) THEN 
@@ -165,12 +180,9 @@ BEGIN
 					-- (Retail Value) - ((Retail Value) x (Average Margin))
 						ISNULL(@dblAdjustRetailValue, 0)
 						- (
-							ISNULL(@dblAdjustRetailValue, 0) * ISNULL(dblAverageMargin, 0)
+							ISNULL(@dblAdjustRetailValue, 0) * ISNULL(dbo.fnICGetCategoryAverageMargin(@intCategoryId,@intItemLocationId), 0)
 						)
 				END 
-	FROM	tblICCategoryPricing CategoryPricing 
-	WHERE	CategoryPricing.intCategoryId = @intCategoryId
-			AND CategoryPricing.intItemLocationId = @intItemLocationId
 
 	SET @dblValue = @dblCostValue
 	SET @dblRetailValue = @dblAdjustRetailValue

@@ -6871,6 +6871,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
+    <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
