@@ -24,7 +24,7 @@ DECLARE @ConvertYear int
 
 SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 
-IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI')
+IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI' OR ISNULL(@strDateTimeFormat,'') = '')
 SELECT @ConvertYear=101
 ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')
 SELECT @ConvertYear=103
