@@ -26,6 +26,7 @@ SELECT DISTINCT CT.strContractType
 	,CD.intBookId
 	,CD.intSubBookId
 	,(isnull(CD.dblQuantity,0) -  isnull(CD.dblInvoicedQty,0) )* isnull(CD.dblRatio,0) dblRatioQty
+	,dtmContractDate dtmTransactionDate
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId not in(2,3)
 JOIN tblRKFuturesMonth FM on FM.intFutureMonthId=CD.intFutureMonthId
