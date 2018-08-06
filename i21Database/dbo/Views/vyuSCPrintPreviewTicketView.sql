@@ -143,6 +143,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		ELSE tblICStorageLocation.strDescription
 	END) AS strDescription,
 	tblGRStorageScheduleRule.strScheduleId,
+	ICLot.strLotNumber,
 	tblICInventoryReceipt.intInventoryReceiptId,
 	tblICInventoryReceipt.strReceiptNumber,
 	vyuICGetInventoryShipmentItem.intInventoryShipmentId,
@@ -184,6 +185,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
+  LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   OUTER APPLY(
 	SELECT 
 		strSalesOrderNumber,
