@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPassportMSM]
-@intCheckoutId INT,
-@strStatusMsg NVARCHAR(250) OUTPUT,
-@intCountRows INT OUTPUT
+	@intCheckoutId INT,
+	@strStatusMsg NVARCHAR(250) OUTPUT,
+	@intCountRows INT OUTPUT
 AS
 BEGIN
 
@@ -78,59 +78,59 @@ BEGIN
               --     Where intRegisterMop = chk.MiscellaneousSummarySubCodeModifier
               --)
 
-				---- Most probably this is not nessesary because sales tax totals is already preloaded
-              IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
-              BEGIN
-                           DECLARE @tbl TABLE
-                           (
-                                  intCnt INT,
-                                  intAccountId INT,
-                                  strAccountId nvarchar(100),
-                                  intItemId INT,
-                                  strItemNo NVARCHAR(100),
-                                  strItemDescription NVARCHAR(100)
-                           )
-                           INSERT INTO @tbl
-                           EXEC uspSTGetSalesTaxTotalsPreload @intStoreId
-                           INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
-                           (
-                                  intCheckoutId
-                                  , strTaxNo
-                                  , dblTotalTax
-                                  , dblTaxableSales
-                                  , dblTaxExemptSales
-                                  , intSalesTaxAccount
-                                  , intConcurrencyId
-                           )
-                           SELECT
-                                  @intCheckoutId
-                                  , intCnt
-                                  , NULL
-                                  , NULL
-                                  , NULL
-                                  , intAccountId
-                                  , 0
-                           FROM @tbl
-              END
+				------ Most probably this is not nessesary because sales tax totals is already preloaded
+    --          IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
+    --          BEGIN
+    --                       DECLARE @tbl TABLE
+    --                       (
+    --                              intCnt INT,
+    --                              intAccountId INT,
+    --                              strAccountId nvarchar(100),
+    --                              intItemId INT,
+    --                              strItemNo NVARCHAR(100),
+    --                              strItemDescription NVARCHAR(100)
+    --                       )
+    --                       INSERT INTO @tbl
+    --                       EXEC uspSTGetSalesTaxTotalsPreload @intStoreId
+    --                       INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
+    --                       (
+    --                              intCheckoutId
+    --                              , strTaxNo
+    --                              , dblTotalTax
+    --                              , dblTaxableSales
+    --                              , dblTaxExemptSales
+    --                              , intSalesTaxAccount
+    --                              , intConcurrencyId
+    --                       )
+    --                       SELECT
+    --                              @intCheckoutId
+    --                              , intCnt
+    --                              , NULL
+    --                              , NULL
+    --                              , NULL
+    --                              , intAccountId
+    --                              , 0
+    --                       FROM @tbl
+    --          END
       
           
-              UPDATE STT
-              SET dblTaxableSales =  (
-                                        SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
-                                        FROM #tempCheckoutInsert
-                                        WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
-                                        AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
-                                        AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-                                     ) 
-              , dblTotalTax = (
-                                 SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
-                                 FROM #tempCheckoutInsert
-                                 WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
-                                 AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
-                                 AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-                              ) 
-              FROM dbo.tblSTCheckoutSalesTaxTotals STT
-              WHERE STT.intCheckoutId = @intCheckoutId
+    --          UPDATE STT
+    --          SET dblTaxableSales =  (
+    --                                    SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
+    --                                    FROM #tempCheckoutInsert
+    --                                    WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
+    --                                    AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
+    --                                    AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+    --                                 ) 
+    --          , dblTotalTax = (
+    --                             SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
+    --                             FROM #tempCheckoutInsert
+    --                             WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
+    --                             AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
+    --                             AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+    --                          ) 
+    --          FROM dbo.tblSTCheckoutSalesTaxTotals STT
+    --          WHERE STT.intCheckoutId = @intCheckoutId
 
     --          -- Difference between Passport and Radiant
     --          -- 1. Passport does not have 'TenderTransactionsCount' tag in MSM register file
