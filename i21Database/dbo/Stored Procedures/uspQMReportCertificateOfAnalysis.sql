@@ -13,6 +13,8 @@ BEGIN TRY
 	DECLARE @strCheckPayeeName NVARCHAR(50)
 	DECLARE @UserSign VARBINARY(MAX)
 	DECLARE @intSampleId INT
+	Declare @ysnShowItemDescriptionOnly BIT
+	DECLARE @strTestReportComments NVARCHAR(max)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -80,7 +82,11 @@ BEGIN TRY
 			WHERE strName = @strUserName
 			)
 
-	SELECT strItemNo + '-' + I.strDescription AS strItemNo
+	Select @ysnShowItemDescriptionOnly=ysnShowItemDescriptionOnly
+			,@strTestReportComments = ISNULL(strTestReportComments, '')
+	from tblQMCompanyPreference
+
+	SELECT Case When @ysnShowItemDescriptionOnly=1 Then I.strDescription Else strItemNo + '-' + I.strDescription End AS strItemNo
 		,strLoadNumber
 		,CONVERT(VARCHAR(8), dtmScheduledDate, 1) AS [dtmScheduledDate]
 		,(CL.strLocationName + CHAR(13) + CHAR(10) + CL.strAddress + CHAR(13) + CHAR(10) + CL.strCity + ',  ' + strStateProvince + '  ' + strZipPostalCode) AS strShipperAddress --- + CHAR(13) + CHAR(10) + 'Phone : ' + CL.strPhone
@@ -93,21 +99,28 @@ BEGIN TRY
 		,S.strComment
 		,S.strRefNo
 		,@strCheckPayeeName strCheckPayeeName
-		,PL.strParentLotNumber
-		,SUM(LDL.dblLotQuantity) dblLotQuantity
+		,L1.strLotNumber
+		,Convert(Decimal(24,2),SUM(LDL.dblLotQuantity)) dblLotQuantity
 		,UM.strUnitMeasure
-		,Rtrim(Ltrim(PL.strParentLotNumber + ' ' + '(' + convert(NVARCHAR(50), SUM(LDL.dblLotQuantity)) + ' ' + UM.strUnitMeasure + ')')) AS [LotDetails]
+		,Rtrim(Ltrim(L1.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(LDL.dblLotQuantity))) + ' ' + UM.strUnitMeasure + ')')) AS [LotDetails]
 		,@UserSign AS UserSignature
+		,(
+			CASE 
+				WHEN ISNULL(PRD.strNote, '') = ''
+					THEN @strTestReportComments
+				ELSE PRD.strNote
+				END
+			) AS strNote
 	FROM tblQMSample S
 	INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 	INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 	INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 	INNER JOIN tblQMTest T ON T.intTestId = TR.intTestId
+	INNER JOIN tblQMProduct PRD ON PRD.intProductId = TR.intProductId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot L1 ON L1.intLotId = LDL.intLotId
-	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L1.intParentLotId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LDL.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
@@ -122,7 +135,7 @@ BEGIN TRY
 		,CL.strCity
 		,strStateProvince
 		,strZipPostalCode
-		,+ CL.strPhone
+		,CL.strPhone
 		,E.strName
 		,EL.strLocationName
 		,EL.strAddress
@@ -135,9 +148,10 @@ BEGIN TRY
 		,S.strComment
 		,S.strRefNo
 		,EL.strCheckPayeeName
-		,PL.strParentLotNumber
+		,L1.strLotNumber
 		,UM.strUnitMeasure
 		,CL.strLocationName
+		,PRD.strNote
 END TRY
 
 BEGIN CATCH
