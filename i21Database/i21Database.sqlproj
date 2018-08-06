@@ -6390,6 +6390,7 @@
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
+    <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
