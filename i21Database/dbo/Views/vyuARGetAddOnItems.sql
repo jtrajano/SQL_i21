@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARGetAddOnItems]
 AS 
-SELECT intItemId			= ITEMADDON.intItemId
+SELECT intItemAddOnId		= ITEMADDON.intItemAddOnId
+	 , intItemId			= ITEMADDON.intItemId
      , intComponentItemId	= ITEMADDON.intAddOnItemId
 	 , intItemUnitMeasureId	= ITEMADDON.intItemUOMId
 	 , intUnitMeasureId		= ITEMUOM.intUnitMeasureId
