@@ -13,15 +13,6 @@ BEGIN
 		');
 
 	END
-	-- Add the Check Constraints in tblICItemLocation
-	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemLocation_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemLocation', 'U'))
-	BEGIN
-		EXEC ('
-			ALTER TABLE tblICItemLocation
-			WITH NOCHECK ADD CONSTRAINT CK_ItemLocation_IS_NOT_USED
-			CHECK (dbo.fnICCheckItemLocationIdIsNotUsed([intItemLocationId], [intLocationId]) = 1)
-		')
-	END
 END
 
 PRINT N'END - IC Data Fix for 18.3. #7'
