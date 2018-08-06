@@ -110,9 +110,9 @@ BEGIN TRY
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L1.intParentLotId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LDL.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	LEFT JOIN tblEMEntity E ON E.intEntityId = L.intEntityId
-	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = L.intEntityLocationId
-	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intCompanyLocationId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
+	LEFT JOIN tblEMEntity E ON EL.intEntityId = E.intEntityId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intSCompanyLocationId
 	WHERE S.intSampleId = @intSampleId
 	GROUP BY strItemNo
 		,I.strDescription
