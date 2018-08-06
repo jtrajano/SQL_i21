@@ -86,7 +86,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-		CONSTRAINT [CK_ItemLocation_IS_NOT_USED] CHECK (dbo.fnICCheckItemLocationIdIsNotUsed([intItemLocationId], [intLocationId]) = 1),
 		CONSTRAINT [AK_tblICItemLocation] UNIQUE ([intItemId], [intLocationId])
 	)
 	GO
