@@ -212,7 +212,7 @@ FROM	tblICInventoryReceipt Receipt
 
 			WHERE	ri.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND ri.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-					AND ct.intPricingTypeId != 2
+					--AND ct.intPricingTypeId != 2
 		) receiptAndVoucheredItems
 		OUTER APPLY (
 			SELECT	TOP 1 
