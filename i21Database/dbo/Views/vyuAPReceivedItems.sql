@@ -642,6 +642,8 @@ FROM
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 	UNION ALL
+
+	--PRICE CONTRACT COST
 	SELECT
 	DISTINCT  
 		[intEntityVendorId]							=	CC.intVendorId
@@ -674,7 +676,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
+		,[dblRate]									=	ISNULL(rate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -755,18 +757,23 @@ FROM
 	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
-	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
-	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
+	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId)  
+	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId  AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
+	OUTER APPLY (
+		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
+		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
+		ORDER BY G1.dtmValidFromDate DESC
+	) rate
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	--AND ysnBilled = 0 
 	AND CC.ysnPrice = 1
 	UNION ALL
 
+	--NON BASIS CONTRACT COST
 	SELECT
 	DISTINCT  
 		 [intEntityVendorId]						=	CH.intEntityId
@@ -798,7 +805,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
+		,[dblRate]									=	ISNULL(rate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -881,16 +888,21 @@ FROM
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
-	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
+	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
+	OUTER APPLY (
+		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
+		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
+		ORDER BY G1.dtmValidFromDate DESC
+	) rate
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	--AND ysnBilled = 0
 	UNION ALL
 
+	--NON BASIS OPEN CONTRACT COST
 	SELECT
 	DISTINCT  
 		[intEntityVendorId]							=	CC.intVendorId
@@ -923,7 +935,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,ISNULL(CC.dblFX,1)) END
+		,[dblRate]									=	ISNULL(rate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -1011,8 +1023,12 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
+	OUTER APPLY (
+		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
+		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
+		ORDER BY G1.dtmValidFromDate DESC
+	) rate
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	--AND ysnBilled = 0 
 	AND ISNULL(CC.strCostStatus,'Open') = 'Open'
 	
 	UNION ALL
@@ -1048,7 +1064,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
+		,[dblRate]									=	ISNULL(rate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -1134,9 +1150,14 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
-	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
+	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
+	OUTER APPLY (
+		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
+		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
+		ORDER BY G1.dtmValidFromDate DESC
+	) rate
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0
 	
