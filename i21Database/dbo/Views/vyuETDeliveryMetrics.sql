@@ -6,7 +6,7 @@
 	,dblGallonsDelivered
 	,dblTotalFuelSales
 	,intTotalInvoice
-	,strDriverNumber COLLATE Latin1_General_CI_AS  AS strDriverNumber 
+	,A.strDriverNumber COLLATE Latin1_General_CI_AS  AS strDriverNumber 
 	,strTruckNumber
 	,strShiftNumber
 	,dtmShiftBeginDate
@@ -18,3 +18,6 @@
 	FROM tblETDeliveryMetrics A
 	LEFT JOIN tblEMEntity B ON A.strDriverNumber = RIGHT(RTRIM(LTRIM(B.strEntityNo)), 3)
 	LEFT JOIN [tblEMEntityLocation] C ON B.intEntityId = C.intEntityId
+	INNER JOIN tblARSalesperson D ON B.intEntityId = D.intEntityId
+	WHERE D.strType = 'Driver'
+	
