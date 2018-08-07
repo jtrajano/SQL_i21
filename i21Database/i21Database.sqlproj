@@ -6873,6 +6873,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
     <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
     <Build Include="dbo\Tables\tblARPOSDrawer.sql" />
+    <Build Include="dbo\Views\vyuHDTicketParticipant.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

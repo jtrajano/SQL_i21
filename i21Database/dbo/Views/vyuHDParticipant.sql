@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDParticipant]
 	AS
-		select
+		select distinct
 			intId = vyuEMEntityContact2.intEntityContactId
 			,intEntityId = vyuEMEntityContact2.intEntityId
 			,strName = vyuEMEntityContact2.strName
@@ -10,27 +10,9 @@
 			,strPhone = vyuEMEntityContact2.strPhone
 			,strMobile = vyuEMEntityContact2.strMobile
 			,strType = vyuEMEntityContact2.strContactType
+			,strEntityName = vyuEMEntityContact2.strEntityName
 		from
 			vyuEMEntityContact2
 		where
-			ysnDefaultContact = convert(bit,1)
-			and strName is not null
-
-	/*
-	select
-		intId = (case when result.ysnPortalAccess = 1 then result.intEntityContactId else result.intEntityId end)
-		,intEntityId = (case when result.ysnPortalAccess = 1 then result.intEntityContactId else result.intEntityId end)
-		,strName = (case when result.ysnPortalAccess = 1 then result.strEmail else (select top 1 tblEMEntityCredential.strUserName from tblEMEntityCredential where tblEMEntityCredential.intEntityId = result.intEntityId) end)
-		,strFullName = result.strName
-		,result.strEmail
-		,ysnDisabled = (case when result.ysnActive = 1 then 0 else 1 end)
-		,result.strPhone
-		,result.strMobile
-		,strType = (case when result.ysnPortalAccess = 1 then 'Contact' else 'User' end)
-	from
-	(
-	select * from vyuEMEntityContact where [User] = 1 and ysnPortalAccess = 0
-	union all
-	select * from vyuEMEntityContact where [User] <> 1 and ysnPortalAccess = 1
-	) as result
-	*/
+			vyuEMEntityContact2.strName is not null
+			and ltrim(rtrim(vyuEMEntityContact2.strName)) <> ''

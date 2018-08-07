@@ -622,6 +622,19 @@ GO
 	where
 		c.intTicketId = d.intTicketId;
 
+
+	update
+		a
+	set
+		a.intEntityContactId = b.intEntityContactId
+	from
+		tblHDTicketParticipant a
+		,tblEMEntityToContact b
+	where
+		a.intEntityContactId is null
+		and b.intEntityId = a.intEntityId
+		and b.ysnDefaultContact = convert(bit,1)
+
 GO
 	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
 GO
