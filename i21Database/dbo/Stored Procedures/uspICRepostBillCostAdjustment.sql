@@ -343,7 +343,8 @@ BEGIN
 			)
 			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 				@strBatchId = @strBatchId
-				,@intEntityUserSecurityId = @intEntityUserSecurityId		
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@strTransactionId = @strBillId
 		END 
 	END
 END 
