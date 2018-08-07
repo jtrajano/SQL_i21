@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderTranslog]
-@intCheckoutId Int,
-@strStatusMsg NVARCHAR(250) OUTPUT,
-@intCountRows int OUTPUT
+	@intCheckoutId Int,
+	@strStatusMsg NVARCHAR(250) OUTPUT,
+	@intCountRows int OUTPUT
 AS
 BEGIN
 	Begin Try
@@ -52,6 +52,7 @@ BEGIN
 			-------------------------------------------END GET Department
 
 
+
 			-- Check if department exist in XML file
 			IF NOT EXISTS(SELECT COUNT(c.termMsgSN) FROM #tempCheckoutInsert c 
 			              WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
@@ -61,6 +62,7 @@ BEGIN
 				SET @strStatusMsg = 'Store department does not exists in register file'
 				RETURN
 			END
+
 
 
 			-- Check if has records
@@ -73,9 +75,9 @@ BEGIN
 					(
 						SELECT c.termMsgSN as termMsgSN
 						FROM #tempCheckoutInsert c
-						--WHERE c.trlDept = 'CIGARETTES' 
 						WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
 						AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+						AND c.date != ''
 						GROUP BY c.termMsgSN
 					) x ON x.termMsgSN = chk.termMsgSN
 					WHERE NOT EXISTS
@@ -90,6 +92,7 @@ BEGIN
 							AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
 							AND TR.intStoreNumber = chk.storeNumber
 					)
+					AND chk.date != ''
 				END
 			ELSE
 				BEGIN
@@ -97,10 +100,13 @@ BEGIN
 					FROM #tempCheckoutInsert c 
 					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
 					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+					AND c.date != ''
 					GROUP BY c.termMsgSN
 				END
 
 			--PRINT 'Rows count: ' + Cast(@intCountRows as nvarchar(50))
+
+
 
 			IF(@intCountRows > 0)
 			BEGIN
@@ -412,6 +418,7 @@ BEGIN
 					--WHERE c.trlDept = 'CIGARETTES' 
 					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments)
 					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+					AND c.date != ''
 					GROUP BY c.termMsgSN
 				) x ON x.termMsgSN = chk.termMsgSN
 				WHERE NOT EXISTS
