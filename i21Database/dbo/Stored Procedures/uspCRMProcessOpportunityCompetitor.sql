@@ -43,9 +43,11 @@ SET ANSI_WARNINGS OFF
 			from
 				tblCRMOpportunity
 			where
-				strCompetitorEntityId is not null
-				and ltrim(rtrim(strCompetitorEntityId)) <> ''
-				and intOpportunityId = (case when @intOpportunityId > 0 then @intOpportunityId else intOpportunityId end)
+				intOpportunityId = (case when @intOpportunityId > 0 then @intOpportunityId else intOpportunityId end)
+
+				--strCompetitorEntityId is not null
+				--and ltrim(rtrim(strCompetitorEntityId)) <> ''
+				--and intOpportunityId = (case when @intOpportunityId > 0 then @intOpportunityId else intOpportunityId end)
 
 		OPEN @queryResultOpportunityCompetitor
 		FETCH NEXT
