@@ -60,11 +60,16 @@ BEGIN
 	ELSE
 		BEGIN			
 			UPDATE ID 
-			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
-											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ID.ysnAddonParent <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
-											WHEN ID.ysnAddonParent = 0 AND ISNULL(ITEM.ysnUseWeighScales, 0) = 1  THEN (CASE WHEN ISNULL(ParentAddon.intInvoiceDetailId,0) = 0 THEN ISNULL(ParentAddon.dblQtyShipped,ID.dblQtyOrdered)  ELSE dbo.fnRoundBanker((@dblNetWeight * (ISNULL(ParentAddon.dblQtyShipped,ID.dblQtyOrdered) / @dblTotalOrderedQty)) * ISNULL(AddOnQty.dblQuantity,0), 2)  END) --FOR SCALE ITEMS ELSE ID.dblQtyShipped END)
-											ELSE ISNULL(ParentAddon.dblQtyShipped,ID.dblQtyOrdered)--REGULAR ITEMS
-										END
+			SET ID.dblQtyShipped	= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
+											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ISNULL(ID.ysnAddonParent,1) <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
+											WHEN ISNULL(ID.ysnAddonParent,0) = 0 THEN (CASE WHEN ParentAddon.dblQtyShipped IS NOT NULL THEN 
+												(CASE WHEN ISNULL(ParentAddon.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) --FOR CONTRACT ITEMS
+													WHEN ISNULL(AddonItemParent.ysnUseWeighScales, 0) = 1  and ISNULL(ParentAddon.ysnAddonParent,1) <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2)
+													ELSE ParentAddon.dblQtyShipped END
+												)											
+											 * AddOnQty.dblQuantity ELSE ParentAddon.dblQtyOrdered * AddOnQty.dblQuantity END) --FOR SCALE ITEMS ELSE ID.dblQtyShipped END)
+									 ELSE ID.dblQtyShipped --REGULAR ITEMS
+									 END
 				, ID.intTicketId		= @intTicketId
 			FROM tblARInvoiceDetail ID
 			INNER JOIN (
