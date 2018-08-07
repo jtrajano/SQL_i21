@@ -553,12 +553,12 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 											WHEN @IsSourceTransaction = 1 AND @t_intLocationId IS NOT NULL THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
-											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
-												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
 									END 
@@ -579,7 +579,7 @@ BEGIN
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
-												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 
@@ -654,7 +654,7 @@ BEGIN
 	WHERE	i.intItemId = @intItemId
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
-	IF ISNULL(@CurrentCostAdjustment, 0) <> 0
+	--IF ISNULL(@CurrentCostAdjustment, 0) <> 0
 	BEGIN 
 		EXEC [uspICPostInventoryTransaction]
 			@intItemId								= @intItemId
