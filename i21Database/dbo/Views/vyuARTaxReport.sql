@@ -37,7 +37,6 @@ FROM (
 		 , intCurrencyId			= I.intCurrencyId
 		 , intCompanyLocationId		= I.intCompanyLocationId
 		 , intShipToLocationId		= I.intShipToLocationId
-		 --, TAXDETAIL.*
 		 , TAXDETAIL.intTaxCodeId
 		 , TAXDETAIL.intInvoiceId
 		 , TAXDETAIL.intInvoiceDetailId
@@ -46,25 +45,41 @@ FROM (
 		 , TAXDETAIL.intTaxGroupId
 		 , TAXDETAIL.strCalculationMethod
 		 , TAXDETAIL.dblRate
-		 , TAXDETAIL.dblUnitPrice
-		 , TAXDETAIL.dblQtyShipped
+		 , dblUnitPrice				= TAXDETAIL.dblUnitPrice * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		 , dblQtyShipped			= TAXDETAIL.dblQtyShipped * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 		 , TAXDETAIL.dblAdjustedTax
 		 , TAXDETAIL.dblTax
 		 , TAXDETAIL.dblTotalAdjustedTax
 		 , TAXDETAIL.dblTotalTax
 		 , TAXDETAIL.ysnTaxExempt
-		 , dblTaxDifference = (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-		 , dblTaxAmount     = TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-		 , dblNonTaxable    = CASE WHEN I.dblTax = 0 THEN I.dblInvoiceTotal ELSE (CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType) END
-		 , dblTaxable       = CASE WHEN I.dblTax = 0 THEN 0 ELSE (CASE WHEN TAXDETAIL.dblAdjustedTax <> 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType) END
-		 , dblTotalSales =  CASE WHEN I.dblTax = 0 THEN I.dblInvoiceTotal ELSE  (
-							(CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END)
-							+
-							(CASE WHEN TAXDETAIL.dblAdjustedTax <> 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END)
-						   )
-						   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType) END
-		, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)	
-
+		 , dblTaxDifference 		= (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		 , dblTaxAmount     		= TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		 , dblNonTaxable    		= (CASE WHEN I.dblTax = 0 
+		 								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(NULLIF(TAXTOTAL.intTaxCodeCount, 0), 1.000000)
+										ELSE (CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 
+												   THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(NULLIF(TAXTOTAL.intTaxCodeCount, 0), 1.000000) 
+												   ELSE 0.000000 
+											  END) 
+									   END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		 , dblTaxable       		= (CASE WHEN I.dblTax = 0 
+		 								THEN 0 
+										ELSE (CASE WHEN TAXDETAIL.dblAdjustedTax <> 0.000000 
+												   THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) 
+												   ELSE 0.000000 
+											  END) 
+									  END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		 , dblTotalSales 			= (CASE WHEN I.dblTax = 0 
+		 								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(NULLIF(TAXTOTAL.intTaxCodeCount, 0), 1.000000)
+										ELSE ((CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 
+												    THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(NULLIF(TAXTOTAL.intTaxCodeCount, 0), 1.000000) 
+													ELSE 0.000000 
+											   END) +
+											  (CASE WHEN TAXDETAIL.dblAdjustedTax <> 0.000000 
+											  		THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) 
+													ELSE 0.000000 
+											   END))
+									  END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+		, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN (
 		SELECT DISTINCT TC.intTaxCodeId
@@ -82,8 +97,6 @@ FROM (
 					  , dblTotalAdjustedTax		= SUM(IDT.dblAdjustedTax)
 					  , dblTotalTax				= SUM(IDT.dblTax)
 					  , IDT.ysnTaxExempt
-
-
 				FROM dbo.tblSMTaxCode TC WITH (NOLOCK)
 				LEFT OUTER JOIN (
 					SELECT intInvoiceDetailId
@@ -121,85 +134,13 @@ FROM (
 	) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId
 	LEFT OUTER JOIN (
 		SELECT intInvoiceDetailId
-			 , dblTotalAdjustedTax	= SUM(CASE WHEN ysnTaxExempt = 1 THEN 0 ELSE dblAdjustedTax END)
-			 , dblTotalTax			= SUM(dblTax)
+			 , dblTotalAdjustedTax	= SUM(dblAdjustedTax)
 			 , intTaxCodeCount		= COUNT(intInvoiceDetailTaxId)
 		FROM tblARInvoiceDetailTax WITH (NOLOCK)
+		WHERE ysnTaxExempt = 0
 		GROUP BY intInvoiceDetailId
 	) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
 	WHERE I.ysnPosted = 1 
-	/*  AND I.dblTax <> 0
-
-	UNION ALL
-
-	SELECT DISTINCT I.intEntityCustomerId
-		 , I.strInvoiceNumber
-		 , I.dtmDate
-		 , intCurrencyId			= I.intCurrencyId
-		 , intCompanyLocationId		= I.intCompanyLocationId
-		 , intShipToLocationId		= I.intShipToLocationId
-		 --, TAXDETAIL.*
-		 , TAXDETAIL.intTaxCodeId
-		 , TAXDETAIL.intInvoiceId
-		 , TAXDETAIL.intInvoiceDetailId
-		 , TAXDETAIL.intItemId
-		 , TAXDETAIL.intItemUOMId
-		 , TAXDETAIL.intTaxGroupId
-		 , TAXDETAIL.strCalculationMethod
-		 , TAXDETAIL.dblRate
-		 , TAXDETAIL.dblUnitPrice
-		 , TAXDETAIL.dblQtyShipped
-		 , TAXDETAIL.dblAdjustedTax
-		 , TAXDETAIL.dblTax
-		 , TAXDETAIL.dblTotalAdjustedTax
-		 , TAXDETAIL.dblTotalTax
-		 , TAXDETAIL.ysnTaxExempt
-		 , dblTaxDifference			= (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-		 , dblTaxAmount				= TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-		 , dblNonTaxable			= I.dblInvoiceTotal
-		 , dblTaxable				= 0.000000
-		 , dblTotalSales			= I.dblInvoiceTotal
-		 , dblTaxCollected			= ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	INNER JOIN
-		(
-		SELECT
-			 [intInvoiceDetailTaxId]	= MIN(ARIDT.[intInvoiceDetailTaxId])
-			,[intInvoiceId]				= ARID.[intInvoiceId]
-		FROM
-			tblARInvoiceDetailTax ARIDT
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-		GROUP BY
-			ARID.[intInvoiceId]
-		) IMIN
-			ON IMIN.[intInvoiceId] = I.[intInvoiceId]
-	INNER JOIN (
-		SELECT			ARIDT.intTaxCodeId
-					  , ARID.intInvoiceId
-					  , ARID.intInvoiceDetailId
-					  , ARID.intItemId
-					  , ARID.intItemUOMId
-					  , ARID.intTaxGroupId
-					  , ARIDT.strCalculationMethod
-					  , dblRate					= 0
-					  , dblUnitPrice			= 0
-					  , dblQtyShipped			= ARID.dblQtyShipped
-					  , dblAdjustedTax	 		= 0	 				 
-					  , dblTax					= 0
-					  , dblTotalAdjustedTax		= 0
-					  , dblTotalTax				= 0
-					  , ysnTaxExempt
-					  , ARIDT.[intInvoiceDetailTaxId]
-		FROM
-		tblARInvoiceDetailTax ARIDT
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-	) TAXDETAIL ON IMIN.[intInvoiceDetailTaxId] = TAXDETAIL.[intInvoiceDetailTaxId]	
-	WHERE I.ysnPosted = 1 
-	  AND I.dblTax = 0*/
 ) TAXES
 LEFT OUTER JOIN (
 	SELECT intTaxGroupId
