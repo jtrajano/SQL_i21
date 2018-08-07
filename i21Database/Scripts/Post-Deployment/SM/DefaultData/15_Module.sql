@@ -1219,7 +1219,17 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		117,
 		   [strPrefix]						=		N'BB'
-
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Mobile Billing')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
+	SELECT [intModuleId]					=		118,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Mobile Billing',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		118,
+		   [strPrefix]						=		N'MD'
+	
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
