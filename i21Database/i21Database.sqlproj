@@ -6878,6 +6878,7 @@
     <Build Include="dbo\Tables\tblSMCompanyLocationPOSDrawer.sql" />
     <Build Include="dbo\Views\vyuARPOSReceiptPaymentReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_HE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
