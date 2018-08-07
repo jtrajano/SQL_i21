@@ -90,7 +90,7 @@ BEGIN TRY
 					AND Trans.uniqTransactionGuid = @Guid
 					AND Trans.intTransactionId IS NOT NULL
 					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strTransactionType <> 'CF Trans'
+					AND Invoice.strType <> 'CF Tran'
 				)
 			END
 			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
@@ -105,7 +105,7 @@ BEGIN TRY
 					AND Trans.uniqTransactionGuid = @Guid
 					AND Trans.intTransactionId IS NOT NULL
 					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strTransactionType = 'CF Trans'
+					AND Invoice.strType = 'CF Tran'
 				)
 			END
 
