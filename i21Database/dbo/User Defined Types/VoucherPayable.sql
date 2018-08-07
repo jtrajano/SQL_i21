@@ -1,6 +1,5 @@
 ﻿CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 (
-	[intVoucherPayableId]			INT NOT NULL PRIMARY KEY IDENTITY, 
     [intEntityVendorId]				INT,
 	-- [strVendorId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intLocationId]					INT NULL,

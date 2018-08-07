@@ -7,7 +7,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+--SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
@@ -24,15 +24,15 @@ BEGIN
 		SELECT TOP 1 1
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable C
-			ON C.intPurchaseDetailId = A.intPurchaseDetailId
-			AND C.intContractDetailId = A.intContractDetailId
-			AND C.intScaleTicketId = A.intScaleTicketId
-			AND C.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-			AND C.intInventoryReceiptItemId = A.intInventoryReceiptItemId
-			AND C.intInventoryShipmentItemId = A.intInventoryShipmentItemId
-			AND C.intInventoryShipmentChargeId = A.intInventoryShipmentChargeId
-			AND C.intLoadShipmentDetailId = A.intLoadShipmentDetailId
-			AND C.intEntityVendorId = A.intEntityVendorId)
+			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
+			AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
+			AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
+			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
+			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
+			AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
+			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
+			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1))
 	BEGIN
 		RAISERROR('Payable already added.', 16, 1);
 		RETURN;
@@ -106,23 +106,23 @@ BEGIN
 	)
 	SELECT
 		[intEntityVendorId]					=	A.intEntityVendorId
-		,[strVendorId]						=	A.strVendorId
-		,[strName]							=	A.strName
+		,[strVendorId]						=	vendor.strVendorId
+		,[strName]							=	entity.strName
 		,[intLocationId]					=	A.intLocationId
-		,[strLocationName] 					=	A.strLocationName
+		,[strLocationName] 					=	loc.strLocationName
 		,[intCurrencyId]					=	A.intCurrencyId
-		,[strCurrency]						=	A.strCurrency
+		,[strCurrency]						=	tranCur.strCurrency
 		,[dtmDate]							=	A.dtmDate
 		,[strReference]						=	A.strReference
 		,[strSourceNumber]					=	A.strSourceNumber
-		,[intPurchaseDetailId]				=	A.intPurchaseDetailId
-		,[strPurchaseOrderNumber]			=	A.strPurchaseOrderNumber
+		,[intPurchaseDetailId]				=	ISNULL(A.intPurchaseDetailId,1)
+		,[strPurchaseOrderNumber]			=	po.strPurchaseOrderNumber
 		,[intContractHeaderId]				=	A.intContractHeaderId
 		,[intContractDetailId]				=	A.intContractDetailId
 		,[intContractSeqId]					=	A.intContractSeqId
-		,[strContractNumber]				=	A.strContractNumber
+		,[strContractNumber]				=	ctDetail.strContractNumber
 		,[intScaleTicketId]					=	A.intScaleTicketId
-		,[strScaleTicketNumber]				=	A.strScaleTicketNumber
+		,[strScaleTicketNumber]				=	ticket.strScaleTicketNumber
 		,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptChargeId
 		,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
@@ -130,40 +130,40 @@ BEGIN
 		,[intLoadShipmentId]				=	A.intLoadShipmentId
 		,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 		,[intItemId]						=	A.intItemId
-		,[strItemNo]						=	A.strItemNo--item.strItemNo
+		,[strItemNo]						=	item.strItemNo
 		,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 		,[strMiscDescription]				=	A.strMiscDescription
 		,[dblOrderQty]						=	A.dblOrderQty
 		,[dblOrderUnitQty]					=	A.dblOrderUnitQty
 		,[intOrderUOMId]					=	A.intOrderUOMId
-		,[strOrderUOM]						=	A.strOrderUOM--orderQtyUOM.strUnitMeasure
+		,[strOrderUOM]						=	orderQtyUOM.strUnitMeasure
 		,[dblQuantityToBill]				=	A.dblQuantityToBill
 		,[dblQtyToBillUnitQty]				=	A.dblQtyToBillUnitQty
 		,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
-		,[strQtyToBillUOM]					=	A.strQtyToBillUOM--qtyUOM.strUnitMeasure
+		,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
 		,[dblCost]							=	A.dblCost
 		,[dblCostUnitQty]					=	A.dblCostUnitQty
 		,[intCostUOMId]						=	A.intCostUOMId
-		,[strCostUOM]						=	A.strCostUOM--costUOM.strUnitMeasure
+		,[strCostUOM]						=	costUOM.strUnitMeasure
 		,[dblNetWeight]						=	A.dblNetWeight
 		,[dblWeightUnitQty]					=	A.dblWeightUnitQty
 		,[intWeightUOMId]					=	A.intWeightUOMId
-		,[strWeightUOM]						=	A.strWeightUOM--weightUOM.strUnitMeasure
+		,[strWeightUOM]						=	weightUOM.strUnitMeasure
 		,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
-		,[strCostCurrency]					=	CASE WHEN A.intCostCurrencyId > 0 THEN A.strCostCurrency ELSE A.strCurrency END --ISNULL(costCur.strCurrency, tranCur.strCurrency)
+		,[strCostCurrency]					=	ISNULL(costCur.strCurrency, tranCur.strCurrency)
 		,[dblTax]							=	0
 		,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
-		,[strRateType]						=	A.strRateType
+		,[strRateType]						=	exRates.strRateType
 		,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 		,[ysnSubCurrency]					=	A.ysnSubCurrency
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents
 		,[intAccountId]						=	A.intAccountId
-		,[strAccountId]						=	A.strAccountId--accnt.strAccountId
-		,[strAccountDesc]					=	A.strAccountDesc--accnt.strDescription
+		,[strAccountId]						=	accnt.strAccountId
+		,[strAccountDesc]					=	accnt.strDescription
 		,[intShipViaId]						=	A.intShipViaId
-		,[strShipVia]						=	A.strShipVia--shipVia.strShipVia
+		,[strShipVia]						=	shipVia.strShipVia
 		,[intTermId]						=	A.intTermId
-		,[strTerm]							=	A.strTerm--term.strTerm
+		,[strTerm]							=	term.strTerm
 		,[strBillOfLading]					=	A.strBillOfLading
 		,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 															AND A.intItemId > 0
@@ -196,22 +196,28 @@ BEGIN
 	FROM @voucherPayable A
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		 ON A.intEntityVendorId = vendor.intEntityId
-	-- INNER JOIN vyuGLAccountDetail accnt ON A.intAccountId = accnt.intAccountId
+	INNER JOIN vyuGLAccountDetail accnt ON A.intAccountId = accnt.intAccountId
+	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = A.intLocationId
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
-	-- LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
-	-- LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
-	-- LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
-	-- LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
-	-- LEFT JOIN tblICItemUOM itemWeightUOM ON itemWeightUOM.intItemUOMId = A.intWeightUOMId
-	-- LEFT JOIN tblICUnitMeasure weightUOM ON weightUOM.intUnitMeasureId = itemWeightUOM.intUnitMeasureId
-	-- LEFT JOIN tblICItemUOM itemCostUOM ON itemCostUOM.intItemUOMId = A.intCostUOMId
-	-- LEFT JOIN tblICUnitMeasure costUOM ON costUOM.intUnitMeasureId = itemCostUOM.intUnitMeasureId
-	-- LEFT JOIN tblICItemUOM itemQtyUOM ON itemQtyUOM.intItemUOMId = A.intQtyToBillUOMId
-	-- LEFT JOIN tblICUnitMeasure qtyUOM ON qtyUOM.intUnitMeasureId = itemQtyUOM.intUnitMeasureId
-	-- LEFT JOIN tblICItemUOM itemOrderQtyUOM ON itemOrderQtyUOM.intItemUOMId = A.intQtyToBillUOMId
-	-- LEFT JOIN tblICUnitMeasure orderQtyUOM ON orderQtyUOM.intUnitMeasureId = itemOrderQtyUOM.intUnitMeasureId
+	LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
+	LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
+	LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
+	LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
+	LEFT JOIN tblSMCurrencyExchangeRateType exRates ON A.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICItemUOM itemWeightUOM ON itemWeightUOM.intItemUOMId = A.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure weightUOM ON weightUOM.intUnitMeasureId = itemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM itemCostUOM ON itemCostUOM.intItemUOMId = A.intCostUOMId
+	LEFT JOIN tblICUnitMeasure costUOM ON costUOM.intUnitMeasureId = itemCostUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM itemQtyUOM ON itemQtyUOM.intItemUOMId = A.intQtyToBillUOMId
+	LEFT JOIN tblICUnitMeasure qtyUOM ON qtyUOM.intUnitMeasureId = itemQtyUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM itemOrderQtyUOM ON itemOrderQtyUOM.intItemUOMId = A.intQtyToBillUOMId
+	LEFT JOIN tblICUnitMeasure orderQtyUOM ON orderQtyUOM.intUnitMeasureId = itemOrderQtyUOM.intUnitMeasureId
+	LEFT JOIN (tblPOPurchase po INNER JOIN tblPOPurchaseDetail poDetail ON po.intPurchaseId = poDetail.intPurchaseId)
+		ON poDetail.intPurchaseDetailId = A.intPurchaseDetailId
+	LEFT JOIN vyuCTContractDetail ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+	LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intTicketId
 END
 
 IF @transCount = 0

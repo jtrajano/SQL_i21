@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPRemoveVoucherPayable]
 	@voucherPayable AS VoucherPayable READONLY,
 	@throwError BIT = 0,
-	@error NVARCHAR(MAX)
+	@error NVARCHAR(MAX) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+--SET XACT_ABORT ON turn off automatically rollback if error occurs, we handle the rollback manually
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
@@ -20,7 +20,6 @@ DECLARE @vouchers AS TABLE(
 	,intScaleTicketId INT NULL
 	,intInventoryReceiptChargeId INT NULL
 	,intInventoryReceiptItemId INT NULL
-	,intInventoryShipmentItemId INT NULL
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
 	);
@@ -31,7 +30,6 @@ DECLARE @payablesDeleted AS TABLE(
 	,intScaleTicketId INT NULL
 	,intInventoryReceiptChargeId INT NULL
 	,intInventoryReceiptItemId INT NULL
-	,intInventoryShipmentItemId INT NULL
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
 	);
@@ -48,7 +46,7 @@ BEGIN
 
 	SELECT @recordCountToDelete = COUNT(*) FROM @voucherPayable
 
-	--Validate, there should be no voucher created
+	--Validate, there should be no voucher created, top 10 only to limit the display on the client
 	INSERT INTO @vouchers
 	SELECT TOP 10
 		A.strBillId
@@ -58,19 +56,19 @@ BEGIN
 		,B.intScaleTicketId
 		,B.intInventoryReceiptChargeId
 		,B.intInventoryReceiptItemId
+		,B.intInventoryShipmentChargeId
 		,B.intLoadDetailId
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherPayable C
-		ON C.intPurchaseDetailId = B.intPurchaseDetailId
-		AND C.intContractDetailId = B.intContractDetailId
-		AND C.intScaleTicketId = B.intScaleTicketId
-		AND C.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-		AND C.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-		AND C.intLoadShipmentDetailId = B.intLoadDetailId
-		AND C.intInventoryShipmentItemId = B.intInventoryShipmentItemId
-		AND C.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
-		AND C.intEntityVendorId = A.intEntityVendorId
+		ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+		AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+		AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+		AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+		AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+		AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadDetailId,1)
+		AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+		AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
 	
 	IF EXISTS(SELECT 1 FROM @vouchers)
 	BEGIN
@@ -82,18 +80,18 @@ BEGIN
 			,deleted.intScaleTicketId
 			,deleted.intInventoryReceiptChargeId
 			,deleted.intInventoryReceiptItemId
+			,deleted.intInventoryShipmentChargeId
 			,deleted.intLoadShipmentDetailId
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
-		INNER JOIN @vouchers B ON A.intEntityVendorId = B.intEntityVendorId
-			AND A.intPurchaseDetailId = B.intPurchaseDetailId
-			AND A.intContractDetailId = B.intContractDetailId
-			AND A.intScaleTicketId = B.intScaleTicketId
-			AND A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-			AND A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-			AND A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
-			AND A.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
-			AND A.intLoadShipmentDetailId = B.intLoadShipmentDetailId
+		INNER JOIN @vouchers B ON ISNULL(A.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
+			AND ISNULL(A.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(A.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(A.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(A.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(A.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			AND ISNULL(A.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			AND ISNULL(A.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
 		WHERE A.dblQuantityToBill = 0
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;
@@ -101,15 +99,14 @@ BEGIN
 		--REMOVE FROM @vouchers the deleted
 		DELETE A
 		FROM @vouchers A
-		INNER JOIN @payablesDeleted B ON A.intEntityVendorId = B.intEntityVendorId
-			AND A.intPurchaseDetailId = B.intPurchaseDetailId
-			AND A.intContractDetailId = B.intContractDetailId
-			AND A.intScaleTicketId = B.intScaleTicketId
-			AND A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-			AND A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-			AND A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
-			AND A.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
-			AND A.intLoadShipmentDetailId = B.intLoadShipmentDetailId
+		INNER JOIN @payablesDeleted B ON ISNULL(A.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
+			AND ISNULL(A.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(A.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(A.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(A.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(A.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			AND ISNULL(A.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			AND ISNULL(A.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
 	END
 
 	--IF THERE IS STILL VOUCHERS TO DELETE, MEANS IT IS NOT VALID AS THERE ARE VOUCHERS CREATED AND THERE STILL REMAINING QTY TO BILL
@@ -126,22 +123,22 @@ BEGIN
 		--NO VOUCHER CREATED
 		DELETE A
 		FROM tblAPVoucherPayable A
-		INNER JOIN @voucherPayable B ON A.intEntityVendorId = B.intEntityVendorId
-			AND A.intPurchaseDetailId = B.intPurchaseDetailId
-			AND A.intContractDetailId = B.intContractDetailId
-			AND A.intScaleTicketId = B.intScaleTicketId
-			AND A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-			AND A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-			AND A.intLoadShipmentDetailId = B.intLoadShipmentDetailId
-		LEFT JOIN @vouchers C ON A.intEntityVendorId = C.intEntityVendorId
-			AND A.intPurchaseDetailId = C.intPurchaseDetailId
-			AND A.intContractDetailId = C.intContractDetailId
-			AND A.intScaleTicketId = C.intScaleTicketId
-			AND A.intInventoryReceiptChargeId = C.intInventoryReceiptChargeId
-			AND A.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-			AND A.intInventoryShipmentItemId = C.intInventoryShipmentItemId
-			AND A.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId
-			AND A.intLoadShipmentDetailId = C.intLoadShipmentDetailId
+		INNER JOIN @voucherPayable B ON ISNULL(A.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
+			AND ISNULL(A.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(A.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(A.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(A.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(A.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			AND ISNULL(A.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			AND ISNULL(A.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,1) = ISNULL(C.intEntityVendorId,1)
+			AND ISNULL(A.intPurchaseDetailId,1) = ISNULL(C.intPurchaseDetailId,1)
+			AND ISNULL(A.intContractDetailId,1) = ISNULL(C.intContractDetailId,1)
+			AND ISNULL(A.intScaleTicketId,1) = ISNULL(C.intScaleTicketId,1)
+			AND ISNULL(A.intInventoryReceiptChargeId,1) = ISNULL(C.intInventoryReceiptChargeId,1)
+			AND ISNULL(A.intInventoryReceiptItemId,1) = ISNULL(C.intInventoryReceiptItemId,1)
+			AND ISNULL(A.intInventoryShipmentChargeId,1) = ISNULL(C.intInventoryShipmentChargeId,1)
+			AND ISNULL(A.intLoadShipmentDetailId,1) = ISNULL(C.intLoadShipmentDetailId,1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;

@@ -6855,6 +6855,8 @@
     <Build Include="dbo\Views\vyuSCProductionEvidenceReportByDeliverySheetView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateStagingPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayableQty.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
