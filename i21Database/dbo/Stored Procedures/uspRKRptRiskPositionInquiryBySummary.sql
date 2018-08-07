@@ -71,6 +71,27 @@ declare @strBookH nvarchar(100)
 declare @strSubBookH nvarchar(100)
 
 
+IF (ISNULL(@xmlParam ,'') = '')
+	BEGIN
+		SELECT 0 intRowNumber,
+			'' strGroup,
+			'' Selection,
+			'' PriceStatus,
+			'' strFutureMonth,
+			'' strAccountNumber,
+			0.0 dblNoOfContract,
+			0.0 Rank,
+			'' strCommodityCode,
+			'' strFutureMarket,
+			'' strFutureMonth1,
+			'' strUnitMeasure,
+			'' strLocation,
+			'' strBook,
+			'' strSubBook,
+			'' dtmPositionAsOf
+	END
+
+
 select top 1 @strCommodityCodeH = strCommodityCode from tblICCommodity where intCommodityId=@intCommodityId
 select top 1 @strFutureMarketH = strFutMarketName from tblRKFutureMarket where intFutureMarketId=@intFutureMarketId
 select top 1 @strFutureMonthH = strFutureMonth from tblRKFuturesMonth where intFutureMonthId=@intFutureMonthId
@@ -754,40 +775,27 @@ SELECT
 dblNoOfContract as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
 dblQuantity,7,intContractHeaderId,intFutOptTransactionHeaderId  FROM @ListFinal WHERE intRowNumber in(2)
 
-INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
-TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
-SELECT
-9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,@strParamFutureMonth strFutureMonth,strAccountNumber,  
--abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth = 'Previous'
+INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, dblNoOfLot,  dblQuantity,intOrderByHeading)
+SELECT 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,'Net Position',sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),9 intOrderByHeading  
+FROM(
+SELECT @strParamFutureMonth strFutureMonth,strAccountNumber, -abs(dblQuantity) as dblNoOfContract,dblNoOfLot, dblQuantity  FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth = 'Previous'
 
-INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
-TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
-SELECT
-9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,strAccountNumber,  
--abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth <> 'Previous'
+UNION ALL
 
-INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
-TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
-SELECT
-9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,@strParamFutureMonth,strAccountNumber,  
-abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth = 'Previous'
+SELECT strFutureMonth,strAccountNumber, -abs(dblQuantity) as dblNoOfContract,dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth <> 'Previous'
 
-UNION
+UNION ALL
 
-SELECT
-9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,strAccountNumber,  
-dblQuantity as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(2) 
+SELECT @strParamFutureMonth,strAccountNumber, abs(dblQuantity) as dblNoOfContract,dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth = 'Previous'
 
-UNION
+UNION ALL
 
-SELECT
-9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,strAccountNumber,  
--abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth <> 'Previous' 
+SELECT strFutureMonth,strAccountNumber,dblQuantity as dblNoOfContract,dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(2) 
+
+UNION ALL
+
+SELECT strFutureMonth,strAccountNumber,-abs(dblQuantity) as dblNoOfContract,dblNoOfLot,dblQuantity FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth <> 'Previous' 
+)t group by strFutureMonth
 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
@@ -937,7 +945,7 @@ if @strReportName='Outright Coverage'
    CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY NULL ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook 
+   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook,@dtmPositionAsOf dtmPositionAsOf 
   FROM #temp1  where strGroup='1.Outright Coverage' and dblNoOfContract <>0
 ELSE IF @strReportName='Futures Required'
 		SELECT  intRowNumber ,	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
@@ -945,7 +953,7 @@ ELSE IF @strReportName='Futures Required'
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-	,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook 
+	,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
 		  FROM #temp1  where strGroup='2.Futures Required' and dblNoOfContract <>0
 ELSE
 		SELECT  intRowNumber ,	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
@@ -953,8 +961,6 @@ ELSE
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-		   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook 
+		   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
 		  FROM #temp1 where dblNoOfContract <>0
 END
-
-
