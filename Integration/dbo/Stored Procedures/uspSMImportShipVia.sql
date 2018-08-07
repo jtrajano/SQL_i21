@@ -65,8 +65,8 @@ BEGIN
 					ELSE
 						RTRIM(LTRIM(ISNULL(AG.[sscar_name], AG.[sscar_key])))
 				  END)				AS [strShipVia]
-		,AG.[sscar_name]			AS [strShippingService]
-		,AG.[sscar_name]			AS [strName]
+		,ISNULL(AG.[sscar_name], AG.[sscar_key])			AS [strShippingService]
+		,ISNULL(AG.[sscar_name], AG.[sscar_key])			AS [strName]
 		,AG.[sscar_addr]			AS [strAddress]
 		,AG.[sscar_city]			AS [strCity]
 		,AG.[sscar_state]			AS [strState]
@@ -95,7 +95,7 @@ BEGIN
 			tblSMTransportationMode B
 				ON LTRIM(RTRIM(B.strCode)) COLLATE Latin1_General_CI_AS  = LTRIM(RTRIM(AG.sscar_trans_mode)) COLLATE Latin1_General_CI_AS										
 	WHERE
-		SV.[strShipViaOriginKey] IS NULL		
+		SV.[strShipViaOriginKey] IS NULL AND AG.sscar_key is not null		
 
 	declare @CurKey nvarchar(10)
 
