@@ -6874,6 +6874,7 @@
     <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
     <Build Include="dbo\Tables\tblARPOSDrawer.sql" />
     <Build Include="dbo\Views\vyuHDTicketParticipant.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTStoreAppValidateStoreAndRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
