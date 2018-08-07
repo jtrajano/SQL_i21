@@ -21,7 +21,8 @@ BEGIN
 	
 	
 	DECLARE @tblNetworkSiteItem TABLE (
-		 intNetworkId		   INT
+		intId				   INT
+		,intNetworkId		   INT
 		,strNetwork			   NVARCHAR(max)
 		,intSiteId			   INT
 		,strSiteNumber		   NVARCHAR(max)
@@ -105,7 +106,8 @@ BEGIN
 	END
 
 	DECLARE @q  NVARCHAR(MAX) = ''
-	SET @q = 'SELECT
+	SET @q = 'SELECT 
+	ROW_NUMBER() OVER(ORDER BY cfSite.intSiteId DESC),
 	cfNetwork.intNetworkId, 
 	strNetwork , 
 	cfSite.intSiteId, 
@@ -151,6 +153,49 @@ BEGIN
 	DECLARE @networkCost	NUMERIC(18,6)
 	DECLARE @effectiveDate	DATETIME
 	DECLARE @pk				INT
+
+
+	--FOR LOCAL SITE EXCLUDE ITEM THAT IS NOT PART OF INVENTORY--
+	--JIRA CF-1820--
+	DECLARE @tblCFLocalSiteItem TABLE
+	(
+		 intSite INT
+		,intLocationId INT
+		,intItemId INT
+	)
+
+	INSERT INTO @tblCFLocalSiteItem
+	(
+		intSite,
+		intLocationId,
+		intItemId
+	)
+	SELECT 
+	cfSite.intSiteId
+	,icLoc.intLocationId
+	,icItem.intItemId
+	FROM tblICItem as icItem
+	INNER JOIN tblICItemLocation as icLoc
+	ON icItem.intItemId = icLoc.intItemId
+	INNER JOIN tblCFSite as cfSite
+	ON  cfSite.intARLocationId = icLoc.intLocationId
+	WHERE cfSite.strSiteType = 'Local/Network'
+	ORDER BY cfSite.intSiteId
+
+	--SELECT '@tblNetworkSiteItem',* FROM @tblNetworkSiteItem
+	--SELECT '@tblCFLocalSiteItem',* FROM @tblCFLocalSiteItem
+
+	DELETE FROM @tblNetworkSiteItem WHERE intId NOT IN (
+	SELECT intId FROM @tblNetworkSiteItem AS records
+	INNER JOIN @tblCFLocalSiteItem AS localItems
+	ON records.intARItemId = localItems.intItemId
+	AND records.intSiteId = localItems.intSite)
+	AND strSiteType = 'Local/Network'
+
+	
+	--JIRA CF-1820--
+	---------------------------------------------
+
 
 	
 
@@ -216,6 +261,7 @@ BEGIN
 		DECLARE @dblOutGrossTaxCalculatedAmount	    NUMERIC(18,6)
 		DECLARE @strOutPriceBasis					NVARCHAR(MAX)
 		DECLARE @dtmOutPriceIndexDate				DATETIME
+		DECLARE @ysnHavePriceIndex					BIT
 
 
 		SELECT TOP 1 
@@ -236,10 +282,26 @@ BEGIN
 		SELECT	@dblOutTaxCalculatedAmount = ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM tblCFTransactionTaxType
 
 
-		IF((ISNULL(@networkCost,0) != 0 OR LOWER(ISNULL(@strOutPriceBasis,'')) IN ('local index cost','local index retail','local index fixed')) AND @dblOutNetTaxCalculatedAmount > 0)
+		IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('local index cost','local index retail','local index fixed'))
 		BEGIN
+			SET @ysnHavePriceIndex = 1
+		END
+		ELSE
+		BEGIN
+			SET @ysnHavePriceIndex = 0
+		END
 
-			IF(LOWER(@strOutPriceBasis) = 'local index fixed' OR LOWER(@strOutPriceBasis) = 'local index retail' OR LOWER(@strOutPriceBasis) = 'local index cost' )
+		IF(@loopSiteType = 'Local/Network' AND ISNULL(@ysnHavePriceIndex,0) = 0)
+		BEGIN
+			--FOR LOCAL SITE EXCLUDE ITEM THAT DOESNT HAVE PRICE INDEX--
+			--JIRA CF-1820--
+			print 'skip'	
+		END
+		ELSE IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND @dblOutNetTaxCalculatedAmount > 0)
+		BEGIN
+			
+
+			IF(ISNULL(@ysnHavePriceIndex,0) = 1)
 			BEGIN
 				IF(@dtmOutPriceIndexDate IS NOT NULL)
 				BEGIN
