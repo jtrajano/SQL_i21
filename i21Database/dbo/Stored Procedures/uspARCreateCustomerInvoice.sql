@@ -322,6 +322,8 @@ IF @CurrencyId IS NOT NULL
 ELSE
 	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurrency](@EntityCustomerId)
 
+IF @TransactionType = 'Credit Memo'
+	SET @ImpactInventory = 1
 
 IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)
 	BEGIN		
