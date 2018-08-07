@@ -6391,6 +6391,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

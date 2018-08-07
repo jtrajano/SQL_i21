@@ -331,4 +331,5 @@ EXEC dbo.uspICCreateGLEntriesOnCostAdjustment
 	,NULL 
 	,0
 	,@AccountCategory_Cost_Adjustment 
+	,@strTransactionId 
 ;

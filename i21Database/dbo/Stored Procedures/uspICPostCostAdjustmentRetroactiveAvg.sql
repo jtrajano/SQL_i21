@@ -285,11 +285,13 @@ BEGIN
 	SELECT	@OriginalRunningValue = SUM (
 				ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0) 
 			) 
-	FROM	tblICInventoryTransaction t 
+	FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
+				ON t.intCostingMethod = c.intCostingMethodId 
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
+			AND c.strCostingMethod <> 'ACTUAL COST'
 	SET @OriginalRunningValue = ISNULL(@OriginalRunningValue, 0)
 	SET @NewRunningValue = @OriginalRunningValue
 
@@ -299,13 +301,15 @@ BEGIN
 				ELSE 
 					(
 						SELECT	TOP 1 
-								dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockItemUOMId, t.dblCost) 								
-						FROM	tblICInventoryTransaction t 
+								dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockItemUOMId, t.dblCost)
+						FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
+									ON t.intCostingMethod = c.intCostingMethodId 
 						WHERE	t.intItemId = @intItemId
 								AND t.intItemLocationId = @intItemLocationId
 								AND ISNULL(t.ysnIsUnposted, 0) = 0 
 								AND t.intInventoryTransactionId < @InventoryTransactionStartId
 								AND t.dblQty < 0 
+								AND c.strCostingMethod <> 'ACTUAL COST'
 						ORDER BY 
 							t.intInventoryTransactionId DESC 
 					)
@@ -421,21 +425,36 @@ BEGIN
 			END 
 
 		-- Calculate the Original Average Cost 
-		SET @OriginalAverageCost = 
-			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
-						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
-					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
-						CASE 
-							WHEN @t_intTransactionId = @intSourceTransactionId
-							AND @t_intTransactionDetailId = @intSourceTransactionDetailId
-							AND @t_strTransactionId = @strSourceTransactionId THEN 
-								@CostBucketOriginalCost 
-							ELSE 
-								@t_dblCost
-						END 
-					ELSE 
-						@OriginalAverageCost
-			END 
+		--SET @OriginalAverageCost = 
+		--	CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+		--				@OriginalRunningValue / (@RunningQty + @t_dblQty) 
+		--			WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
+		--				CASE 
+		--					WHEN @t_intTransactionId = @intSourceTransactionId
+		--					AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+		--					AND @t_strTransactionId = @strSourceTransactionId THEN 
+		--						@CostBucketOriginalCost 
+		--					ELSE 
+		--						@t_dblCost
+		--				END 
+		--			ELSE 
+		--				@OriginalAverageCost
+		--	END 
+
+		--SELECT	@OriginalAverageCost = 
+		--			ISNULL(
+		--				dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
+		--				,@OriginalAverageCost
+		--			)
+		--FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOOut cbOut 
+		--			ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+		--		INNER JOIN tblICInventoryFIFO cb
+		--			ON cb.intInventoryFIFOId = cbOut.intInventoryFIFOId
+		--		INNER JOIN tblICItemUOM stockUOM
+		--			ON t.intItemId = t.intItemId
+		--			AND stockUOM.ysnStockUnit = 1
+		--WHERE	t.intInventoryTransactionId = @t_intInventoryTransactionId
+		--		AND @t_dblQty < 0 
 
 		-- Calculate the New Average Cost 
 		SET @NewAverageCost = 
@@ -543,12 +562,12 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
-											WHEN @t_intTransactionTypeId = @InventoryTransactionStartId AND @t_intLocationId IS NOT NULL THEN 
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
+											WHEN @t_intInventoryTransactionId = @InventoryTransactionStartId AND @t_intLocationId IS NOT NULL THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
-											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
-												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
 									END 
@@ -569,7 +588,7 @@ BEGIN
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
-												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 
@@ -649,7 +668,7 @@ BEGIN
 
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
-	IF ISNULL(@CurrentValue, 0) <> 0
+	--IF ISNULL(@CurrentValue, 0) <> 0
 	BEGIN 
 		EXEC [uspICPostInventoryTransaction]
 			@intItemId								= @intItemId
