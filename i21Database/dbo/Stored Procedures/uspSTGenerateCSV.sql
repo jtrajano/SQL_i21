@@ -297,13 +297,21 @@ BEGIN
 								, '' as strMFGDealNameTHREE
 								, NULL as dblMFGDealDiscountAmountTHREE
 
-								, ((TR.dblTrlLineTot) - (CASE 
-															WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-																THEN TR.dblTrlMatchLineTrlPromoAmount
-															WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
-																THEN TR.dblTrpAmt
-															ELSE 0
-														 END)) as dblFinalSalesPrice
+								--, ((TR.dblTrlLineTot) - (CASE 
+								--							WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+								--								THEN TR.dblTrlMatchLineTrlPromoAmount
+								--							WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
+								--								THEN TR.dblTrpAmt
+								--							ELSE 0
+								--						 END)) as dblFinalSalesPrice
+								-- PRICE
+								, CASE 
+									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+									WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+									ELSE dblTrlUnitPrice 
+								  END as dblFinalSalesPrice
 
 								--Optional Fields
 								, NULL AS intStoreTelephone
@@ -379,8 +387,8 @@ BEGIN
 								, CASE 
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
-										THEN (dblTrlUnitPrice - (dblTrlMatchLineTrlPromoAmount / dblTrlQty))
+									WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
 									ELSE dblTrlUnitPrice 
 								  END as dblPrice
 								--dblTrlUnitPrice as dblPrice
@@ -400,8 +408,8 @@ BEGIN
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 										THEN 'Y' -- 2 Can Deal
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-										THEN 'Y' 
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+									--	THEN 'Y' 
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN 'Y'
 									ELSE 'N' 	
@@ -409,7 +417,7 @@ BEGIN
 
 								  -- Multi-Pack Discount
 								, CASE 
-									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
+									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 										THEN 'Y' -- 2 Can Deal
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
@@ -419,7 +427,7 @@ BEGIN
 									ELSE 'N' 
 								  END as strOutletMultipackFlag
 								, CASE 
-									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 										THEN 2
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
@@ -429,7 +437,7 @@ BEGIN
 								    ELSE 0 
 								  END as intOutletMultipackQuantity
 								, CASE 
-									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
+									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 											THEN TR.dblTrlMatchLineTrlPromoAmount
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
@@ -449,8 +457,10 @@ BEGIN
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
 										THEN CRP.dblManufacturerDiscountAmount 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-										THEN dblTrlMatchLineTrlPromoAmount
+									--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
+									--	THEN 0 -- 2 Can Deal
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+									--	THEN dblTrlMatchLineTrlPromoAmount
 									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
 									ELSE 0 
 								  END as dblManufacturerDiscountAmount
@@ -468,8 +478,10 @@ BEGIN
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
 										THEN CRP.strManufacturerPromotionDescription 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-										THEN strTrlDesc
+									--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
+									--	THEN '' -- 2 Can Deal
+									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
+									--	THEN strTrlDesc
 									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
 									ELSE '' 
 								  END as strManufacturerPromotionDescription
