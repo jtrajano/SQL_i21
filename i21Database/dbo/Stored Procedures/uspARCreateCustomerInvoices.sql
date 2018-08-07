@@ -1000,7 +1000,7 @@ USING
 		,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 
 		,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
 		,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
-		,[ysnImpactInventory]			= ISNULL(ITG.[ysnImpactInventory],0)
+		,[ysnImpactInventory]			= CASE WHEN ITG.strTransactionType = 'Credit Memo' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 		,[dblSplitPercent]				= 1.000000		
 		,[ysnImportedFromOrigin]		= 0
 		,[ysnImportedAsPosted]			= 0
