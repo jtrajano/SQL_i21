@@ -70,16 +70,16 @@ BEGIN TRY
 	JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId = Sig.intSignatureId
 	WHERE Sig.intEntityId = (
 			SELECT TOP 1 intEntityId
-			FROM tblEMEntity
-			WHERE strName = @strUserName
+			FROM tblSMUserSecurity
+			WHERE strUserName = @strUserName
 			)
 
 	SELECT @strCheckPayeeName = strCheckPayeeName
 	FROM tblEMEntityLocation
 	WHERE intEntityId = (
 			SELECT TOP 1 intEntityId
-			FROM tblEMEntity
-			WHERE strName = @strUserName
+			FROM tblSMUserSecurity
+			WHERE strUserName = @strUserName
 			)
 
 	Select @ysnShowItemDescriptionOnly=ysnShowItemDescriptionOnly
