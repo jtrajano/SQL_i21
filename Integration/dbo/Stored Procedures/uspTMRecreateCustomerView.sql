@@ -368,7 +368,7 @@ BEGIN
 				,vwcus_cred_ga = 0.0
 				,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END
 				,vwcus_bus_loc_no = ''''
-				,vwcus_cred_limit = Cus.dblCreditLimit
+				,vwcus_cred_limit = ISNULL(Cus.dblCreditLimit,0.0)
 				,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
 				,vwcus_budget_amt_due  = ISNULL(CI.dblBudgetAmount,0.0)
 				,vwcus_cred_ppd  = CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
