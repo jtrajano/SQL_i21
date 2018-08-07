@@ -76,6 +76,33 @@ BEGIN TRY
 	SELECT TOP 1 @intContractDetailId = intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NOT NULL
 	SELECT TOP 1 @intItemId = intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NULL
 
+	DECLARE @RestrictedItems TABLE(intItemId INT)	
+
+	INSERT INTO @RestrictedItems(intItemId)
+	SELECT ID.intItemId FROM dbo.tblARInvoice I WITH (NOLOCK)
+	INNER JOIN (
+		SELECT * FROM dbo.tblARInvoiceDetail
+	)ID ON ID.intInvoiceId = I.intInvoiceId
+	INNER JOIN(
+		SELECT ID.intItemId FROM dbo.tblARInvoice I WITH (NOLOCK)
+		INNER JOIN(
+			SELECT * FROM dbo.tblARInvoiceDetail 
+		)ID ON ID.intInvoiceId = I.intInvoiceId
+		INNER JOIN (
+			SELECT intPaymentId 
+			FROM dbo.tblARPayment WITH (NOLOCK)
+			WHERE ysnPosted = 1
+		) AS P ON I.intPaymentId = P.intPaymentId
+		WHERE I.strTransactionType = 'Customer Prepayment'
+		AND I.intInvoiceId <> @InvoiceId
+		AND I.intEntityCustomerId = @EntityCustomerId
+		AND ID.intItemId IS NOT NULL
+		AND ID.ysnRestricted = 1
+	) RESTRICTEDITEM ON RESTRICTEDITEM.intItemId = ID.intItemId
+	WHERE I.intInvoiceId  = @InvoiceId
+	AND I.intEntityCustomerId = @EntityCustomerId
+	AND ID.intItemId IS NOT NULL
+
 	INSERT INTO tblARPrepaidAndCredit
 		([intInvoiceId]
 		,[intInvoiceDetailId]
@@ -112,19 +139,20 @@ BEGIN TRY
 		, intConcurrencyId					= 1
 	FROM (
 		SELECT I.intInvoiceId
-			 , ID.intInvoiceDetailId
+			 , DETAILS.intInvoiceDetailId
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intPaymentId 
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
 		) AS P ON I.intPaymentId = P.intPaymentId
-		CROSS APPLY (
-			SELECT TOP 1 intInvoiceDetailId 
+		INNER JOIN (
+			SELECT intInvoiceDetailId, intItemId, intInvoiceId 
 			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-			WHERE ID.intInvoiceId = I.intInvoiceId 
-			--  AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
-		) AS ID 
+			WHERE (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId)
+				OR(ID.ysnRestricted = 1 AND ID.intItemId IN (SELECT * FROM @RestrictedItems))
+			)
+		) AS DETAILS ON DETAILS.intInvoiceId = I.intInvoiceId
 		WHERE I.strTransactionType = 'Customer Prepayment'
 			AND I.ysnPosted = 1
 			AND I.ysnPaid = 0
