@@ -1151,7 +1151,6 @@ BEGIN
 				DELETE FROM #tmpPostBillData WHERE intBillId = @billIdReceived
 			END
 		END
-
 	END TRY
 	BEGIN CATCH
 		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()
@@ -1159,10 +1158,28 @@ BEGIN
 		GOTO Post_Rollback
 	END CATCH
 
-	DECLARE @voucherHistory AS Id
-	INSERT INTO @voucherHistory
+	DECLARE @voucherBillId AS Id;
+	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
-	EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherHistory, @post = @post
+
+	BEGIN TRY
+	--UPDATE VOUCHER PAYABLE STAGING QTY
+		EXEC uspAPUpdateVoucherPayableQty @voucherIds = @voucherBillId, @post = @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorUpdateVoucherPayable NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR('Error updating voucher staging data.', 16, 1);
+		GOTO Post_Rollback
+	END CATCH
+	
+	BEGIN TRY
+		EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherBillId, @post = @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorUpdateVoucherHistory NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR('Error updating voucher history.', 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 	--GOTO Audit_Log_Invoke
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -57,5 +57,6 @@
 	-- [strShipVia]					NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[intTermId]						INT NULL,
 	-- [strTerm]						NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
-	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
+	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	[ysnReturn]						BIT
 )

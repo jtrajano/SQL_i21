@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPAddVoucherPayable]
 	@voucherPayable AS VoucherPayable READONLY,
 	@throwError BIT = 0,
-	@error NVARCHAR(MAX)
+	@error NVARCHAR(MAX) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
