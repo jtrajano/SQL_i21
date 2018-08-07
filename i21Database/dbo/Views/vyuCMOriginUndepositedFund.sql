@@ -27,7 +27,7 @@ WITH C AS (
 			SUM(CASE WHEN ARPD.dblCurrencyExchangeRate > 0 
 				THEN ARPD.dblCurrencyExchangeRate
 				ELSE 1 END * ARPD.dblPayment )/
-			SUM(ARPD.dblPayment) 
+			NULLIF(SUM(ARPD.dblPayment), 0) 
 		FROM tblARPaymentDetail ARPD WHERE ARPD.intPaymentId = ARP.intPaymentId
 	)F
 	UNION
@@ -52,7 +52,7 @@ WITH C AS (
 			SUM(CASE WHEN ARID.dblCurrencyExchangeRate > 0 
 				THEN ARID.dblCurrencyExchangeRate
 				ELSE 1 END * ARID.dblTotal )/
-			SUM(ARID.dblTotal) 
+			NULLIF(SUM(ARID.dblTotal), 0)
 		FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId
 	)G
 )
