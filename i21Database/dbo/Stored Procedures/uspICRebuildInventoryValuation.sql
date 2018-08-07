@@ -812,7 +812,7 @@ BEGIN
 		-- Run the post routine. 
 		BEGIN 
 			--PRINT 'Posting ' + @strBatchId
-
+			
 			-- Setup the GL Description
 			SET @strGLDescription = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
@@ -1780,16 +1780,6 @@ BEGIN
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
-						--INNER JOIN tblICInventoryShipment shipment
-						--	ON ICTrans.strTransactionId = shipment.strShipmentNumber
-						--INNER JOIN tblICInventoryShipmentItem shipmentItem
-						--	ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
-						--	AND shipmentItem.intInventoryShipmentItemId = ICTrans.intTransactionDetailId
-						--	AND shipmentItem.intItemId = ICTrans.intItemId
-						--	AND shipmentItem.intItemId = ISNULL(@intItemId, shipmentItem.intItemId)
-						--LEFT JOIN tblICInventoryShipmentItemLot shipmentItemLot
-						--	ON shipmentItemLot.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId 
-						--	AND ISNULL(shipmentItemLot.intLotId, 0) = ICTrans.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -1857,7 +1847,7 @@ BEGIN
 					
 				IF @intReturnId <> 0 
 				BEGIN 
-					--PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
+					PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
@@ -1969,14 +1959,173 @@ BEGIN
 				END 	
 			END
 			 				
-			-- Repost 'Invoice' and 'Credit Memo'
+			-- Repost 'Credit Memo'
 			ELSE IF EXISTS (
 				SELECT	1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName IN ('Invoice', 'Credit Memo')
+						AND strName IN ('Credit Memo')
 				) 
-				OR @strTransactionId LIKE 'SI%'
+			BEGIN 
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 	
+						,intForexRateTypeId
+						,dblForexRate
+				)
+				SELECT 	RebuildInvTrans.intItemId  
+						,RebuildInvTrans.intItemLocationId 
+						,RebuildInvTrans.intItemUOMId  
+						,RebuildInvTrans.dtmDate  
+						,RebuildInvTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+						,dblCost  = CASE
+										WHEN RebuildInvTrans.dblQty < 0 THEN 
+											CASE	
+													WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+														dbo.fnGetItemAverageCost(
+															RebuildInvTrans.intItemId
+															, RebuildInvTrans.intItemLocationId
+															, RebuildInvTrans.intItemUOMId
+														) 
+													ELSE 
+														dbo.fnMultiply(
+															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+															,dblUOMQty
+														)
+											END 
+
+										-- When it is a credit memo:
+										WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
+											
+											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+														-- If using Average Costing, use Ave Cost.
+														dbo.fnGetItemAverageCost(
+															RebuildInvTrans.intItemId
+															, RebuildInvTrans.intItemLocationId
+															, RebuildInvTrans.intItemUOMId
+														) 
+													ELSE
+														-- Otherwise, get the last cost. 
+														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+											END 
+
+										ELSE 
+											RebuildInvTrans.dblCost
+									END 
+						,RebuildInvTrans.dblSalesPrice  
+						,RebuildInvTrans.intCurrencyId  
+						,RebuildInvTrans.dblExchangeRate  
+						,RebuildInvTrans.intTransactionId  
+						,RebuildInvTrans.intTransactionDetailId  
+						,RebuildInvTrans.strTransactionId  
+						,RebuildInvTrans.intTransactionTypeId  
+						,RebuildInvTrans.intLotId 
+						,RebuildInvTrans.intSubLocationId
+						,RebuildInvTrans.intStorageLocationId
+						,RebuildInvTrans.strActualCostId
+						,RebuildInvTrans.intForexRateTypeId
+						,RebuildInvTrans.dblForexRate
+
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation
+							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
+						LEFT JOIN dbo.tblARInvoice Invoice
+							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
+							AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuildInvTrans.intLotId 
+				WHERE	RebuildInvTrans.strBatchId = @strBatchId
+						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
+						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
+
+				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN 
+					EXEC dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@ItemsToPost
+
+					SET @intReturnId = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnId = dbo.uspICCreateGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId -- This is only used when rebuilding the stocks. 
+						,@strTransactionId -- This is only used when rebuilding the stocks. 
+
+					IF @intReturnId <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateGLEntries - Credit Memo'
+						GOTO _EXIT_WITH_ERROR
+					END
+				END						
+			END	
+
+			-- Repost 'Invoice' 
+			ELSE IF EXISTS (
+				SELECT	1 
+				FROM	tblICInventoryTransactionType 
+				WHERE	intTransactionTypeId = @intTransactionTypeId 
+						AND strName IN ('Invoice')
+				) 
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -2184,6 +2333,7 @@ BEGIN
 							AND t.dblQty > 0 
 				WHERE	--t.intFobPointId = @FOB_DESTINATION
 						i.strInvoiceNumber = @strTransactionId
+						AND t.intInTransitSourceLocationId IS NOT NULL 
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
@@ -2735,6 +2885,7 @@ BEGIN
 							'Cost Adjustment'
 							, 'Inventory Shipment'
 							, 'Invoice'
+							, 'Credit Memo'
 							, 'Inventory Receipt'
 							, 'Inventory Return'
 							, 'Inventory Transfer'
