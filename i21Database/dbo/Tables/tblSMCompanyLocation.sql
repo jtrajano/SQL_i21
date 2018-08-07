@@ -214,6 +214,10 @@
 	[strPaymentExternalLink] NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,  
 	[strPaymentPortal] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,  
 	------------------------------------------------------------------------------
+	/* POS Drawer */
+	[intPOSDrawerId] INT NULL,
+	[ysnAllowMultipleUser] BIT NOT NULL,
+	------------------------------------------------------------------------------
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [AK_tblSMCompanyLocation_strLocationName] UNIQUE ([strLocationName]), 
     CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_BlendProductionDockDoorUnit] FOREIGN KEY ([intBlendProductionDockDoorUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),

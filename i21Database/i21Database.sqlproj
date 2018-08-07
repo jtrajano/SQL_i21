@@ -6875,6 +6875,7 @@
     <Build Include="dbo\Tables\tblARPOSDrawer.sql" />
     <Build Include="dbo\Views\vyuHDTicketParticipant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTStoreAppValidateStoreAndRegister.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationPOSDrawer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
