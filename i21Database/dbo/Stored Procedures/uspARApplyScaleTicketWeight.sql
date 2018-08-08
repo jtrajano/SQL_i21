@@ -8,6 +8,7 @@
 AS
 BEGIN
 	DECLARE @dblTotalOrderedQty		NUMERIC(18, 6) = 0
+	DECLARE @dblContractMaxQty		NUMERIC(18,6) = 0
 
 	SELECT @dblTotalOrderedQty = SUM(ISNULL(SOD.dblQtyOrdered, 0))
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
@@ -60,10 +61,10 @@ BEGIN
 	ELSE
 		BEGIN			
 			UPDATE ID 
-			SET ID.dblQtyShipped	= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
+			SET ID.dblQtyShipped	= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN CASE WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ISNULL(ID.ysnAddonParent,1) <> 0 THEN CASE WHEN ( dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ID.dblQtyOrdered + (CTD.dblQuantity - CTD.dblScheduleQty)) THEN ID.dblQtyOrdered + (CTD.dblQuantity - CTD.dblScheduleQty) ELSE dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) END ELSE  ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) END--FOR CONTRACT ITEMS 
 											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ISNULL(ID.ysnAddonParent,1) <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
 											WHEN ISNULL(ID.ysnAddonParent,0) = 0 THEN (CASE WHEN ParentAddon.dblQtyShipped IS NOT NULL THEN 
-												(CASE WHEN ISNULL(ParentAddon.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) --FOR CONTRACT ITEMS
+												(CASE WHEN ISNULL(ParentAddon.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) THEN CASE WHEN ISNULL(AddonItemParent.ysnUseWeighScales, 0) = 1  and ISNULL(ParentAddon.ysnAddonParent,1) <> 0 THEN  CASE WHEN ( dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2) > ParentAddon.dblQtyOrdered + (parentCTD.dblQuantity - parentCTD.dblScheduleQty)) THEN ParentAddon.dblQtyOrdered + (parentCTD.dblQuantity - parentCTD.dblScheduleQty) ELSE dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2) END ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(ParentAddon.intItemUOMId, @intScaleUOMId, ParentAddon.dblQtyShipped), 0) END --FOR CONTRACT ITEMS
 													WHEN ISNULL(AddonItemParent.ysnUseWeighScales, 0) = 1  and ISNULL(ParentAddon.ysnAddonParent,1) <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty), 2)
 													ELSE ParentAddon.dblQtyShipped END
 												)											
@@ -88,6 +89,10 @@ BEGIN
 				ON AddonItemParent.intItemId = ParentAddon.intItemId
 			LEFT JOIN vyuARGetAddOnItems AddOnQty
 				ON (AddOnQty.intItemId = ParentAddon.intItemId AND AddOnQty.intComponentItemId = ID.intItemId) and AddOnQty.intCompanyLocationId = INVOICE.intCompanyLocationId
+			LEFT JOIN tblCTContractDetail CTD
+				ON CTD.intContractDetailId = ID.intContractDetailId
+			LEFT JOIN tblCTContractDetail parentCTD
+				ON parentCTD.intContractDetailId = ParentAddon.intContractDetailId
 			WHERE ID.intInvoiceId = @intNewInvoiceId
 	
 
@@ -97,21 +102,23 @@ BEGIN
 			END
 
 			--CONTRACTS EXCEEDED TO AVAILABLE
-			SELECT ID.intInvoiceDetailId
+			SELECT ID.intInvoiceDetailId, ID.intContractDetailId,ID.intContractHeaderId
 			INTO #CONTRACTLINEITEMS
 			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 			INNER JOIN dbo.tblICItem I ON ID.intItemId = I.intItemId AND I.ysnUseWeighScales = 1
+			LEFT JOIN tblCTContractDetail CTD
+				ON CTD.intContractDetailId = ID.intContractDetailId
 			WHERE ID.intInvoiceId = @intNewInvoiceId
-			  AND ISNULL(ID.intContractDetailId, 0) <> 0
-			  AND ISNULL(ID.ysnAddonParent, 1) = 1
-			  AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0)
+				AND ISNULL(ID.intContractDetailId, 0) <> 0
+				AND ISNULL(ID.ysnAddonParent, 1) = 1
+				AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(CTD.dblQuantity,dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2))
 			--Addon items
 			INSERT INTO #CONTRACTLINEITEMS
-			SELECT DISTINCT ID1.intInvoiceDetailId  FROM tblARInvoiceDetail ID
+			SELECT DISTINCT ID1.intInvoiceDetailId,ID1.intContractDetailId,ID1.intContractHeaderId  FROM tblARInvoiceDetail ID
 			INNER JOIN tblARInvoiceDetail ID1
 				ON ID1.intInvoiceId = ID.intInvoiceId AND ID1.strAddonDetailKey = ID.strAddonDetailKey AND ID1.ysnAddonParent <> 1
 			WHERE ID.intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM #CONTRACTLINEITEMS)
-
+			
 			WHILE EXISTS(SELECT TOP 1 NULL FROM #CONTRACTLINEITEMS)
 				BEGIN
 					DECLARE @ItemId						INT
@@ -196,6 +203,7 @@ BEGIN
 						,@ItemDestinationGradeId		INT				= NULL
 						,@ItemDestinationWeightId		INT				= NULL
 						,@intInvoiceDetailId			INT				= NULL
+						,@intItemUOMId					INT				= NULL
 
 					SELECT TOP 1 @intInvoiceDetailId = intInvoiceDetailId FROM #CONTRACTLINEITEMS ORDER BY intInvoiceDetailId
 
@@ -206,7 +214,7 @@ BEGIN
 						,@ItemIsBlended					= ysnBlended
 						,@ItemDocumentNumber			= strDocumentNumber
 						,@ItemDescription				= strItemDescription
-						,@ItemQtyShipped				= dbo.fnRoundBanker(@dblNetWeight * (dblQtyOrdered / @dblTotalOrderedQty), 2) - ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, @intScaleUOMId, dblQtyShipped), 0)
+						,@ItemQtyShipped				= CASE WHEN dbo.fnRoundBanker(@dblNetWeight * (dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, @intScaleUOMId, dblQtyShipped), 0) THEN dbo.fnRoundBanker(@dblNetWeight * (dblQtyOrdered / @dblTotalOrderedQty), 2) - ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, @intScaleUOMId, dblQtyShipped), 0) ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, @intScaleUOMId, dblQtyShipped), 0) -  dbo.fnRoundBanker(@dblNetWeight * (dblQtyOrdered / @dblTotalOrderedQty), 2) END
 						,@ItemOrderUOMId				= NULL
 						,@ItemPriceUOMId				= intPriceUOMId
 						,@ItemQtyOrdered				= 0.00000000
@@ -215,7 +223,7 @@ BEGIN
 						,@ItemTermDiscount				= dblItemTermDiscount
 						,@ItemTermDiscountBy			= strItemTermDiscountBy
 						,@ItemUnitPrice					= dblUnitPrice
-						,@ItemPrice						= 0
+						,@ItemPrice						= CASE WHEN intContractDetailId IS NOT NULL THEN 0 ELSE dblPrice END
 						,@ItemPricing					= strPricing
 						,@ItemVFDDocumentNumber			= strVFDDocumentNumber
 						,@ItemMaintenanceType			= strMaintenanceType
@@ -274,6 +282,7 @@ BEGIN
 						,@ItemStorageScheduleTypeId		= intStorageScheduleTypeId
 						,@ItemDestinationGradeId		= intDestinationGradeId
 						,@ItemDestinationWeightId		= intDestinationWeightId
+						,@intItemUOMId					= intItemUOMId
 					FROM tblARInvoiceDetail
 					WHERE intInvoiceDetailId = @intInvoiceDetailId
 					  AND intInvoiceId = @intNewInvoiceId
@@ -290,7 +299,7 @@ BEGIN
 						,@ItemOrderUOMId				= @ItemOrderUOMId
 						,@ItemPriceUOMId				= @ItemPriceUOMId
 						,@ItemQtyOrdered				= @ItemQtyOrdered
-						,@ItemUOMId						= @intScaleUOMId
+						,@ItemUOMId						= @intItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemUnitQuantity				= @ItemUnitQuantity
 						,@ItemDiscount					= @ItemDiscount
@@ -367,6 +376,8 @@ BEGIN
 
 			EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @UserId = @intUserId
 			EXEC dbo.uspARReComputeInvoiceTaxes @intNewInvoiceId
+			EXEC dbo.uspARUpdateContractOnInvoiceFromTicket @TransactionId = @intNewInvoiceId,@ForDelete = 0, @UserId = @intUserId
+			
 
 			UPDATE SO 
 			SET SO.strOrderStatus = CASE WHEN SOD.dblQtyShipped >= SOD.dblQtyOrdered THEN 'Closed' ELSE 'Short Closed' END

@@ -60,6 +60,11 @@ EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
 
+IF @ForDelete = 1
+BEGIN
+	EXEC dbo.uspARUpdateContractOnInvoiceFromTicket @TransactionId = @intInvoiceId,@ForDelete = 1, @UserId = @intUserId
+END
+
 DECLARE @InvoiceIds InvoiceId
 INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
 EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
