@@ -112,6 +112,9 @@ BEGIN TRY
 	DECLARE @intContractUOMId INT
 	DECLARE @dblCostUnitQty DECIMAL(24, 10)
 
+	--get the original value of Spot Units before settlement
+	DECLARE @origdblSpotUnits DECIMAL(24, 10) 
+
 	SET @dtmDate = GETDATE()
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -218,6 +221,7 @@ BEGIN TRY
 			,@IntCommodityId 				= intCommodityId
 			,@CommodityStockUomId 			= intCommodityStockUomId
 			,@intCashPriceUOMId 			= intItemUOMId
+			,@origdblSpotUnits				= dblSpotUnits
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
@@ -1232,7 +1236,7 @@ BEGIN TRY
 					,[intItemId]				= a.[intItemId]
 					,[intAccountId]				= NULL
 					,[dblQtyReceived]			= CASE 
-													WHEN @dblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
+													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
 												END
 					,[strMiscDescription]		= c.[strItemNo]
@@ -1240,11 +1244,11 @@ BEGIN TRY
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
 					,[intUnitOfMeasureId]		= CASE
-													WHEN @dblSpotUnits > 0 THEN @intCashPriceUOMId
+													WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId
 													ELSE b.intItemUOMId
 												END
 					,[intCostUOMId]				= CASE
-													WHEN @dblSpotUnits > 0 THEN @intCashPriceUOMId 
+													WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.intContractUOMId
 													ELSE b.intItemUOMId
 												END
@@ -1263,7 +1267,7 @@ BEGIN TRY
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
 						--AND b.intUnitMeasureId = @intUnitMeasureId
-						AND b.ysnStockUnit = 1
+						AND b.dblUnitQty = 1
 				JOIN tblICItem c 
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
