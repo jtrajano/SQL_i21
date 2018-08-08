@@ -313,7 +313,7 @@ FROM (
 			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 			)
 	AND RI.intOwnershipType = 1
-	AND ST.strDistributionOption IN ('DP','CNT')
+	AND ST.strDistributionOption IN ('DP','CNT', 'SPT')
 	AND RI.dblBillQty = 0
 	AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
 			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
