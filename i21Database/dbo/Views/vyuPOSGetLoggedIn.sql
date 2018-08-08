@@ -9,6 +9,8 @@
 	 ,intEntityUserId		= pos.intEntityUserId
 	 ,intPOSLogId			= pos.intPOSLogId
 	 ,intPOSLogOriginId		= pos.intPOSLogOriginId
+	 ,strPOSDrawerName      = DRAWER.strPOSDrawerName
+	 ,intCompanyLocationPOSDrawerId		= pos.intCompanyLocationPOSDrawerId
 	 ,intStoreId			= pos.intStoreId
 	 ,intStoreNo			= STORE.intStoreNo
 	 ,strStoreDescription	= STORE.strDescription
@@ -37,6 +39,12 @@ LEFT JOIN(
 	FROM
 		tblSMCompanyLocation
 ) LOC ON LOC.intCompanyLocationId = pos.intCompanyLocationId
+LEFT JOIN(
+	SELECT
+		intCompanyLocationPOSDrawerId,
+		strPOSDrawerName
+	FROM tblSMCompanyLocationPOSDrawer
+) DRAWER ON DRAWER.intCompanyLocationPOSDrawerId = pos.intCompanyLocationPOSDrawerId
 LEFT JOIN(
 	SELECT
 		intStoreId,

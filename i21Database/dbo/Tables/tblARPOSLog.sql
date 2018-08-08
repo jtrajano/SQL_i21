@@ -11,7 +11,9 @@
 	[intPOSLogOriginId]    INT             NULL,
     [intBankDepositId]     INT             NULL,
     [intConcurrencyId]     INT             NOT NULL,
+	[intCompanyLocationPOSDrawerId] INT    NULL,
     CONSTRAINT [PK_tblARPOSLog] PRIMARY KEY CLUSTERED ([intPOSLogId] ASC),
+	CONSTRAINT [FK_tblARPOSLog_tblSMCompanyLocationPOSDrawer] FOREIGN KEY ([intCompanyLocationPOSDrawerId]) REFERENCES [dbo].[tblSMCompanyLocationPOSDrawer] ([intCompanyLocationPOSDrawerId]),
     CONSTRAINT [FK_tblARPOSLog_tblCMBankTransaction] FOREIGN KEY ([intBankDepositId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]) 
 );
 
