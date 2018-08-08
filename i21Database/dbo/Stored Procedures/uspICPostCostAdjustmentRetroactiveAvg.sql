@@ -291,7 +291,7 @@ BEGIN
 			AND t.intItemLocationId = @intItemLocationId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
-			AND c.strCostingMethod <> 'ACTUAL COST'
+			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
 	SET @OriginalRunningValue = ISNULL(@OriginalRunningValue, 0)
 	SET @NewRunningValue = @OriginalRunningValue
 
@@ -658,14 +658,20 @@ BEGIN
 	-- Calculate the value to book. 
 	-- Formula: (New Running Value) - (Original Running Value)
 	SET @CurrentValue = NULL 
-	SELECT	@CurrentValue = 
-				ISNULL(@NewRunningValue, 0) 
-				- SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
-	FROM	tblICInventoryTransaction t 
-	WHERE	t.intItemId = @intItemId
-			AND t.intItemLocationId = @intItemLocationId
-			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+	--SELECT	@CurrentValue = 
+	--			ISNULL(@NewRunningValue, 0) 
+	--			- SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
+	--FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
+	--			ON t.intCostingMethod = c.intCostingMethodId 
+	--WHERE	t.intItemId = @intItemId
+	--		AND t.intItemLocationId = @intItemLocationId
+	--		AND ISNULL(t.ysnIsUnposted, 0) = 0 
+	--		AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
 
+	SELECT	@CurrentValue = SUM(ISNULL(dblValue, 0)) 
+	FROM	tblICInventoryFIFOCostAdjustmentLog	
+	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
 	--IF ISNULL(@CurrentValue, 0) <> 0
@@ -819,7 +825,9 @@ BEGIN
 			,[dblQty]								= 0
 			,[dblUOMQty]							= 0
 			,[dblCost]								= 0
-			,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+			,[dblValue]								= 
+					dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+					- dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
 			,[dblSalesPrice]						= 0
 			,[intCurrencyId]						= NULL
 			,[dblExchangeRate]						= 1 
@@ -840,7 +848,7 @@ BEGIN
 			,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
 														dbo.fnFormatMessage(
 														dbo.fnICGetErrorMessage(80078)
-														,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
+														,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)
 														,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
 														,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
 														,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
@@ -858,6 +866,6 @@ BEGIN
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 	WHERE	ItemPricing.intItemId = @intItemId
 			AND ItemPricing.intItemLocationId = @intItemLocationId			
-			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId), 2) <> 0
 
 END
