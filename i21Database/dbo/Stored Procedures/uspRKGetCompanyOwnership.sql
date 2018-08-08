@@ -322,6 +322,130 @@ FROM (
 
 )t
 
+UNION
+SELECT --Direct from Invoice
+ strItemNo
+	, dtmDate
+	,dblInQty AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,0 AS dblUnpaidBalance
+	,ABS(isnull(dblOutQty, 0)) * -1 as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryReceiptItemId
+FROM (
+SELECT
+	CONVERT(VARCHAR(10), I.dtmPostDate, 110) dtmDate
+	,0 dblUnitCost1
+	,I.intInvoiceId intInventoryReceiptItemId
+	,Itm.strItemNo
+	,0.0 dblInQty
+	,isnull(ID.dblQtyShipped, 0) AS dblOutQty
+	,'' strDistributionOption
+	,I.strInvoiceNumber AS strReceiptNumber
+	,I.intInvoiceId AS intReceiptId
+FROM 
+tblARInvoice I
+INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
+INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+WHERE I.ysnPosted = 1
+AND ID.intInventoryShipmentItemId IS NULL
+AND ID.strShipmentNumber = ''
+AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+AND C.intCommodityId = @intCommodityId 
+AND ID.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
+AND I.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
+AND I.intCompanyLocationId IN (
+		SELECT intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+		)
+)t
+
+UNION
+SELECT --Direct Inventory Shipment (This will show the Invoice Number once Shipment is invoiced)
+ strItemNo
+	, dtmDate
+	,0 AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,0 AS dblUnpaidBalance
+	,dblInQty as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryShipmentItemId
+FROM (
+	SELECT 
+		CONVERT(VARCHAR(10), S.dtmShipDate, 110) dtmDate
+		,SI.dblUnitPrice dblUnitCost1
+		,SI.intInventoryShipmentItemId
+		,Itm.strItemNo
+		,ABS(isnull(SI.dblQuantity, 0)) * -1 dblInQty
+		,0 AS dblOutQty
+		,'' strDistributionOption
+		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN I.strInvoiceNumber ELSE  S.strShipmentNumber END AS strReceiptNumber
+		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN I.intInvoiceId ELSE  S.intInventoryShipmentId END  AS intReceiptId
+	FROM tblICInventoryShipmentItem SI 
+	INNER JOIN tblICInventoryShipment S ON S.intInventoryShipmentId = SI.intInventoryShipmentId
+	INNER JOIN tblICItem Itm ON Itm.intItemId = SI.intItemId
+	INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+	LEFT JOIN tblARInvoiceDetail ID ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId AND ID.intInventoryShipmentItemId IS NOT NULL
+	LEFT JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	WHERE S.ysnPosted = 1
+	AND convert(DATETIME, CONVERT(VARCHAR(10), S.dtmShipDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND C.intCommodityId = @intCommodityId 
+	AND Itm.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN Itm.intItemId ELSE @intItemId END 
+	AND S.intShipFromLocationId = case when isnull(@intLocationId,0)=0 then S.intShipFromLocationId else @intLocationId end 
+	AND S.intShipFromLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+	AND SI.intOwnershipType = 1
+	AND S.intSourceType = 0
+)t
+
+UNION
+SELECT --Direct Inventory Receipt (This will show the Bill Number once Receipt is vouchered)
+	strItemNo
+	, dtmDate
+	,dblInQty AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,dblInQty AS dblUnpaidBalance
+	,0 as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryReceiptItemId
+FROM (
+	SELECT 
+		CONVERT(VARCHAR(10), R.dtmReceiptDate, 110) dtmDate
+		,RI.dblUnitCost dblUnitCost1
+		,RI.intInventoryReceiptItemId
+		,Itm.strItemNo
+		,isnull(RI.dblOpenReceive, 0) dblInQty
+		,0 AS dblOutQty
+		,'' strDistributionOption
+		,CASE WHEN BD.intInventoryReceiptItemId IS NOT NULL THEN B.strBillId ELSE  R.strReceiptNumber END AS strReceiptNumber
+		,CASE WHEN BD.intInventoryReceiptItemId IS NOT NULL THEN B.intBillId ELSE  R.intInventoryReceiptId END  AS intReceiptId
+	FROM tblICInventoryReceiptItem RI 
+	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	INNER JOIN tblICItem Itm ON Itm.intItemId = RI.intItemId
+	INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+	LEFT JOIN tblAPBillDetail BD ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD.intInventoryReceiptItemId IS NOT NULL
+	LEFT JOIN tblAPBill B ON BD.intBillId = B.intBillId
+	WHERE R.ysnPosted = 1
+	AND convert(DATETIME, CONVERT(VARCHAR(10), R.dtmReceiptDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND C.intCommodityId = @intCommodityId 
+	AND Itm.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN Itm.intItemId ELSE @intItemId END 
+	AND R.intLocationId = case when isnull(@intLocationId,0)=0 then R.intLocationId else @intLocationId end 
+	AND R.intLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+	AND RI.intOwnershipType = 1
+	AND R.intSourceType = 0
+)t
 
 SELECT convert(INT, ROW_NUMBER() OVER (
 			ORDER BY dtmDate

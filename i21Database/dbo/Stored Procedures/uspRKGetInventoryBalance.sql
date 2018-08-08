@@ -60,7 +60,7 @@ FROM (
 													ELSE isnull(ysnLicensed, 0) END)
 		and isnull(il.strDescription,'') <> 'In-Transit'
 	WHERE i.intCommodityId=@intCommodityId  
-	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and strTransactionId not like'%IS%'
+	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end --and strTransactionId not like'%IS%'
 	and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
 UNION --Direct From Scale
@@ -132,7 +132,8 @@ WHERE  i.intCommodityId= @intCommodityId
 		 
 
 union 
-SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+--Shipment against customer storage
+SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,'' tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
 		,0.0 tranDSInQty from(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ELSE 0 END dblOutQty,r.strShipmentNumber  
@@ -151,8 +152,30 @@ FROM tblSCTicket st
 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and gs.strOwnedPhysicalStock='Customer'
+		and gs.strOwnedPhysicalStock='Customer' and ri.intOwnershipType = 2
 		and st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end)a
+UNION
+--Shipment against company owned (this is to get the Sales In Transit)
+SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,'' tranShipmentNumber,0 tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
+		,0.0 tranDSInQty from(
+SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
+,ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0 
+	ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
+FROM tblICInventoryShipment r
+	JOIN tblICInventoryShipmentItem ri on ri.intInventoryShipmentId = r.intInventoryShipmentId
+		JOIN tblICItem i on i.intItemId=ri.intItemId 
+												AND  r.intShipFromLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		
+		JOIN tblICItemUOM u on ri.intItemId=u.intItemId and u.ysnStockUnit=1
+WHERE  i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and ri.intOwnershipType = 1
+		and r.intShipFromLocationId = case when isnull(@intLocationId,0)=0 then r.intShipFromLocationId  else @intLocationId end)a
 
 union all--IS came from Delivery Sheet
 SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
