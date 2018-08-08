@@ -6899,6 +6899,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementDetail.sql" />
     <Build Include="dbo\vyuAPRptCashRequirementDetail.sql" />
     <Build Include="dbo\Views\vyuSMLocationCreditCardMerchantInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateContractOnInvoiceFromTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
