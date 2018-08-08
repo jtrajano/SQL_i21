@@ -10,8 +10,8 @@ BEGIN
 
 	IF(@intLocationId IS NOT NULL
 		AND(
-			ISNULL((SELECT SUM([dbo].[fnMultiply](dblQty, dblUOMQty)) as AggregateQty FROM tblICInventoryTransaction WHERE intItemLocationId = @intItemLocationId 
-				AND ysnIsUnposted <> 1), 0) > 0
+			EXISTS(SELECT TOP 1 1 FROM tblICInventoryTransaction WHERE intItemLocationId = @intItemLocationId 
+				AND ysnIsUnposted <> 1)
 		)
 	)
 	BEGIN
