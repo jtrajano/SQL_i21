@@ -217,6 +217,8 @@
 	,SO.strSalesOrderNumber
 	,(CASE WHEN SO.intCompanyLocationId > 0 THEN SMC.strLocationName ELSE '' END) AS strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
+	,Basis.intBillId AS intBasisAdvancedId
+	,Basis.ysnRestricted AS ysnBasisAdvancedRestricted
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -285,3 +287,6 @@
 	) LGD on LGD.intLoadId = SCT.intLoadId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
+	LEFT JOIN (
+		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
+	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
