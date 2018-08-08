@@ -13,6 +13,7 @@
     [strCountry]				NVARCHAR (25)	COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCounty]					NVARCHAR (25)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnMatchTaxAddress]		BIT		NOT NULL	DEFAULT 1,
+	[ysnAddToCost]				BIT		NOT NULL	DEFAULT 0,
 	[intSalesTaxAccountId]		INT		NULL, 
     [intPurchaseTaxAccountId]	INT		NULL, 
 	[ysnExpenseAccountOverride]	BIT		NOT NULL	DEFAULT 0,
