@@ -25,6 +25,9 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, intDriverId = Dispatch.intDriverID
 	, intRouteId = K.intRouteId
 	, intStopNumber = L.intSequence
+	, Site.intTaxStateID	
+	, Customer.intShipToId	
+	, Site.intLocationId
 INTO #Dispatch
 FROM tblTMDispatch Dispatch
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
@@ -32,6 +35,7 @@ LEFT JOIN tblLGRoute K ON Dispatch.intRouteId = K.intRouteId
 LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispatchID = L.intDispatchID
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
+LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = Site.intCustomerID
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
@@ -43,7 +47,10 @@ INSERT INTO tblMBILOrder(intDispatchId
 	, strComments
 	, intDriverId
 	, intRouteId
-	, intStopNumber)
+	, intStopNumber
+	, intTaxStateId
+	, intShipToId
+	, intLocationId)
 SELECT DISTINCT intDispatchId
 	, strOrderNumber
 	, strOrderStatus
@@ -54,6 +61,9 @@ SELECT DISTINCT intDispatchId
 	, intDriverId
 	, intRouteId
 	, intStopNumber
+	, intTaxStateID
+	, intShipToId
+	, intLocationId
 FROM #Dispatch
 WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
 
@@ -138,13 +148,13 @@ CREATE TABLE #tempOrderTaxCode (
 WHILE EXISTS(SELECT 1 FROM #tempDriverOrder)
 BEGIN
 	
-	SELECT TOP 1 @MBILOrderId					= [intMBILOrderItemId]
+	SELECT TOP 1 @MBILOrderId					= [intOrderItemId]
 				,@ItemId						= [intItemId]
 				,@LocationId					= [intLocationId]
 				,@CustomerId					= [intEntityId]
 				,@CustomerLocationId			= [intShipToId]
 				,@TransactionDate				= GETDATE()
-				,@TaxGroupId					= [intTaxStateID]
+				,@TaxGroupId					= [intTaxStateId]
 				,@SiteId						= [intSiteId]
 				,@FreightTermId					= NULL
 				,@CardId						= NULL
