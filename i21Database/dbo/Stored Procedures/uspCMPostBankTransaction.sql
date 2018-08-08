@@ -100,6 +100,7 @@ DECLARE
 	,@ysnBankAccountIdInactive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
+	,@ysnPOS AS BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType
@@ -122,6 +123,7 @@ SELECT	TOP 1
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
 		,@intCreatedEntityId = intEntityId
+		,@ysnPOS = ysnPOS
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -179,6 +181,14 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
 	RAISERROR('The transaction is already unposted.', 11, 1)
+	GOTO Post_Rollback
+END 
+
+-- Unposting a POS posted transaction is not allowed
+IF @ysnPost = 0 AND @ysnPOS = 1
+BEGIN 
+	-- The transaction is already unposted.
+	RAISERROR('POS transaction is not allowed to be unposted.', 11, 1)
 	GOTO Post_Rollback
 END 
 
