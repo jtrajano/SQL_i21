@@ -30,7 +30,6 @@ BEGIN TRY
 	AND tblTFProductCode.intTaxAuthorityId = @TaxAuthorityId
 	AND tblTFProductCode.strProductCode COLLATE Latin1_General_CI_AS = B.strProductCode COLLATE Latin1_General_CI_AS 
 	AND tblTFProductCode.strProductCodeGroup  COLLATE Latin1_General_CI_AS = B.strProductCodeGroup COLLATE Latin1_General_CI_AS
-	AND tblTFProductCode.strProductCodeGroup  COLLATE Latin1_General_CI_AS = B.strProductCodeGroup COLLATE Latin1_General_CI_AS
 
 	MERGE	
 	INTO	tblTFProductCode 
@@ -44,7 +43,8 @@ BEGIN TRY
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			strDescription			= SOURCE.strDescription
+			strProductCode			= SOURCE.strProductCode
+			,strDescription			= SOURCE.strDescription
 			, strProductCodeGroup	= SOURCE.strProductCodeGroup
 			, strNote				= SOURCE.strNote
 	WHEN NOT MATCHED BY TARGET THEN 
