@@ -6880,6 +6880,7 @@
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_HE.sql" />
     <Build Include="dbo\Views\vyuCFCustomerReportMessage.sql" />
+    <Build Include="dbo\Views\vyuSMCompanyCreditCardMerchantInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
