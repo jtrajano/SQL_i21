@@ -6378,6 +6378,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
