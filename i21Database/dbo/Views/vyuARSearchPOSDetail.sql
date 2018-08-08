@@ -32,6 +32,10 @@ SELECT intPOSId					= POS.intPOSId
 	 , dblTax					= POSDetail.dblTax
 	 , dblExtendedPrice			= POSDetail.dblExtendedPrice
 	 , ysnPaid					= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+
+	 , dtmPOSDate				= POS.dtmDate
+	 , strInvoiceNumber			= INV.strInvoiceNumber
+	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityCustomerId
@@ -46,6 +50,7 @@ INNER JOIN (
 		 , strBillToCountry
 		 , strBillToState
 		 , strBillToZipCode
+		 , strCustomerNumber
 	FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 ) CUSTOMER ON POS.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 INNER JOIN (
@@ -69,3 +74,6 @@ INNER JOIN (
 			dblExtendedPrice
 	FROM dbo.tblARPOSDetail
 ) POSDetail ON POS.intPOSId = POSDetail.intPOSId
+
+left join ( select intInvoiceId, strInvoiceNumber from tblARInvoice) INV
+	on INV.intInvoiceId = POS.intInvoiceId
