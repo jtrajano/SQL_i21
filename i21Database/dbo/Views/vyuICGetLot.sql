@@ -57,9 +57,9 @@ SELECT Lot.intLotId
 	, strGrade = Grade.strDescription
 	, Lot.dtmDateCreated
 	, Lot.intCreatedUserId
-	, Lot.intCreatedByUserId
 	, Lot.strWarehouseRefNo
 	, Lot.dtmDateModified
+	, Lot.intCreatedByUserId
 	, Lot.intModifiedByUserId
 	, Lot.intConcurrencyId
 FROM tblICLot Lot
