@@ -1343,7 +1343,8 @@ BEGIN
 		WHERE intInvoiceId = @NewInvoiceId
 	END
 
-	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId	
+	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+	EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 END
 
 --COMMIT TRANSACTION
