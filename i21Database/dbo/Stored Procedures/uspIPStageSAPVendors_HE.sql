@@ -87,7 +87,7 @@ BEGIN TRY
 				,LOEVM
 				,ZTERM
 				,WAERS
-			FROM OPENXML(@idoc, 'CREMAS/IDOC/E1LFA1M', 2) WITH (
+			FROM OPENXML(@idoc, 'CREMAS05/IDOC/E1LFA1M', 2) WITH (
 					NAME1 NVARCHAR(100)
 					,STRAS NVARCHAR(MAX)
 					,ORT01 NVARCHAR(MAX)
@@ -108,7 +108,7 @@ BEGIN TRY
 					FROM @tblVendor
 					)
 				RAISERROR (
-						'Xml tag (CREMAS/IDOC/E1LFA1M) not found.'
+						'Xml tag (CREMAS05/IDOC/E1LFA1M) not found.'
 						,16
 						,1
 						)
@@ -119,7 +119,7 @@ BEGIN TRY
 				)
 			SELECT LIFNR
 				,NAME1
-			FROM OPENXML(@idoc, 'CREMAS/IDOC/E1LFA1M', 2) WITH (
+			FROM OPENXML(@idoc, 'CREMAS05/IDOC/E1LFA1M', 2) WITH (
 					LIFNR NVARCHAR(50)
 					,NAME1 NVARCHAR(100)
 					) x
