@@ -504,6 +504,7 @@ FROM
 	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
+	AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
 	UNION ALL
 
 	--RECEIPT OTHER CHARGES
@@ -618,6 +619,7 @@ FROM
 		 AND ItemLoc.intLocationId = A.intLocationId
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -641,6 +643,7 @@ FROM
 	--) Qty
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
+		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
 	UNION ALL
 
 	--PRICE CONTRACT COST
