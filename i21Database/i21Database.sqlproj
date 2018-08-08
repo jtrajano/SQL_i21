@@ -6896,6 +6896,8 @@
     <Build Include="dbo\Views\vyuMBILInvoiceItem.sql" />
     <Build Include="dbo\Views\vyuMBILInvoiceTaxCode.sql" />
     <Build Include="dbo\Tables\tblMBILCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementDetail.sql" />
+    <Build Include="dbo\vyuAPRptCashRequirementDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
