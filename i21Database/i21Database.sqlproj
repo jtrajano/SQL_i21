@@ -6841,6 +6841,7 @@
     <Build Include="dbo\Views\vyuMBILInvoiceSite.sql" />
     <Build Include="dbo\Views\vyuMBILInvoiceItem.sql" />
     <Build Include="dbo\Views\vyuMBILInvoiceTaxCode.sql" />
+    <Build Include="dbo\Tables\tblMBILCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
