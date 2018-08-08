@@ -34,12 +34,12 @@ BEGIN TRY
 		,@strYieldCostValue NVARCHAR(50)
 		,@ysnPostGL BIT
 		,@dblOtherCharges DECIMAL(38, 24)
-		,@intWOItemUOMId int
-		,@intUnitMeasureId int
+		,@intWOItemUOMId INT
+		,@intUnitMeasureId INT
 		,@ysnCostEnabled BIT
 
-	SELECT TOP 1 @ysnCostEnabled=ysnCostEnabled
-				FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
+	FROM tblMFCompanyPreference
 
 	SELECT @ysnPostGL = 0
 
@@ -88,13 +88,13 @@ BEGIN TRY
 			,@intItemId = intItemId
 			,@intManufacturingCellId = intManufacturingCellId
 			,@intSubLocationId = intSubLocationId
-			,@intWOItemUOMId=intItemUOMId
+			,@intWOItemUOMId = intItemUOMId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		Select @intUnitMeasureId=intUnitMeasureId
-	From tblICItemUOM
-	Where intItemUOMId=@intWOItemUOMId
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intWOItemUOMId
 
 		SELECT @intYieldCostId = intAttributeId
 		FROM tblMFAttribute
@@ -183,12 +183,13 @@ BEGIN TRY
 
 			WHILE @intMachineId IS NOT NULL
 			BEGIN
-				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
-					,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId,WP.intItemUOMId))
-					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId,IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId),WP.dblPhysicalCount))
-					,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId))
+				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+					,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
+					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+					,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
 				FROM dbo.tblMFWorkOrderProducedLot WP
-				Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+					AND IU.intUnitMeasureId = @intUnitMeasureId
 				WHERE WP.intWorkOrderId = @intWorkOrderId
 					AND WP.ysnProductionReversed = 0
 					AND intMachineId = @intMachineId
@@ -220,10 +221,11 @@ BEGIN TRY
 							,@intItemUOMId = NULL
 							,@dblProduceQty1 = NULL
 
-						SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
-							,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId,WP.intItemUOMId))
+						SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+							,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
 						FROM dbo.tblMFWorkOrderProducedLot WP
-						Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+							AND IU.intUnitMeasureId = @intUnitMeasureId
 						WHERE WP.intWorkOrderId = @intWorkOrderId
 							AND WP.ysnProductionReversed = 0
 							AND ysnFillPartialPallet = 0
@@ -239,10 +241,11 @@ BEGIN TRY
 						IF @dblProduceQty IS NULL
 							SELECT @dblProduceQty = 0
 
-						SELECT @dblProduceQty1 =SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
-							,@intItemUOMId1 = MIN(IsNULL(IU.intItemUOMId,WP.intItemUOMId))
+						SELECT @dblProduceQty1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+							,@intItemUOMId1 = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
 						FROM dbo.tblMFWorkOrderProducedLot WP
-						Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+							AND IU.intUnitMeasureId = @intUnitMeasureId
 						WHERE WP.intWorkOrderId = @intWorkOrderId
 							AND WP.ysnProductionReversed = 0
 							AND ysnFillPartialPallet = 1
@@ -312,10 +315,11 @@ BEGIN TRY
 							,@intPhysicalItemUOMId = NULL
 							,@dblPhysicalCount1 = NULL
 
-						SELECT @dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId,IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId),WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId))
+						SELECT @dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+							,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
 						FROM dbo.tblMFWorkOrderProducedLot WP
-						Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+							AND IU.intUnitMeasureId = @intUnitMeasureId
 						WHERE WP.intWorkOrderId = @intWorkOrderId
 							AND WP.ysnProductionReversed = 0
 							AND ysnFillPartialPallet = 0
@@ -331,10 +335,11 @@ BEGIN TRY
 						IF @dblPhysicalCount IS NULL
 							SELECT @dblPhysicalCount = 0
 
-						SELECT @dblPhysicalCount1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId,IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId),WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId1 = MIN(IsNULL(IU.intItemUOMId,WP.intPhysicalItemUOMId))
+						SELECT @dblPhysicalCount1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+							,@intPhysicalItemUOMId1 = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
 						FROM dbo.tblMFWorkOrderProducedLot WP
-						Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+							AND IU.intUnitMeasureId = @intUnitMeasureId
 						WHERE WP.intWorkOrderId = @intWorkOrderId
 							AND WP.ysnProductionReversed = 0
 							AND ysnFillPartialPallet = 1
@@ -521,7 +526,7 @@ BEGIN TRY
 			FROM tblMFWorkOrderProducedLotTransaction PL
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
-			and intTransactionTypeId =25
+				AND intTransactionTypeId = 25
 
 			--AND PL.dblQuantity < 0
 			DELETE
@@ -726,7 +731,12 @@ BEGIN TRY
 			,intFobPointId
 			)
 		SELECT [intItemId] = PL.intItemId
-			,[intItemLocationId] = L.intItemLocationId
+			,[intItemLocationId] = isNULL(L.intItemLocationId, (
+					SELECT IL.intItemLocationId
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = PL.intItemId
+						AND IL.intLocationId = @intLocationId
+					))
 			,[intItemUOMId] = PL.intItemUOMId
 			,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
 			,[dblQty] = PL.dblQuantity
@@ -734,8 +744,8 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)
-				ELSE ((@dblNewCost * RI.dblPercentage / 100/SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)) Over(Partition By PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity))
+					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
+				ELSE ((@dblNewCost * RI.dblPercentage / 100 / SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)) OVER (PARTITION BY PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
@@ -757,8 +767,9 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-		Left JOIN dbo.tblICItemUOM IU on IU.intItemId=PL.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
-		JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+		LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
+			AND IU.intUnitMeasureId = @intUnitMeasureId
+		LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
 			AND RI.intRecipeItemTypeId = 2
@@ -782,7 +793,8 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT TOP 1 1
 				FROM @adjustedEntries
-				) and @ysnCostEnabled=1
+				)
+			AND @ysnCostEnabled = 1
 		BEGIN
 			DECLARE @intReturnValue AS INT
 
