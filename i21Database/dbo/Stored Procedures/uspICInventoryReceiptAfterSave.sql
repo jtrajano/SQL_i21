@@ -701,3 +701,12 @@ _Exit:
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBeforeSaveReceiptItems')) DROP TABLE #tmpBeforeSaveReceiptItems
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAfterSaveReceiptItems')) DROP TABLE #tmpAfterSaveReceiptItems
+
+-- Sync Lot Remarks
+UPDATE l
+SET l.strNotes = rl.strRemarks
+FROM tblICInventoryReceiptItemLot rl
+	INNER JOIN tblICLot l ON l.intLotId = rl.intLotId
+	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = rl.intInventoryReceiptItemId
+WHERE l.strNotes != rl.strRemarks
+	AND ri.intInventoryReceiptId = @ReceiptId
