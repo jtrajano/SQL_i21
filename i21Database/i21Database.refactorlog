@@ -7084,4 +7084,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInvoiceItemId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9ab6853e-91ac-4833-a42e-5037ed328be6" ChangeDateTime="08/03/2018 03:15:23">
+    <Property Name="ElementName" Value="[dbo].[tblMBILCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b724df05-933f-49a8-aa07-25a6b95f3937" ChangeDateTime="08/03/2018 03:31:21">
+    <Property Name="ElementName" Value="[dbo].[tblMBILCompanyPreference].[strDefaultSiteNO]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDefaultSiteNo" />
+  </Operation>
 </Operations>
