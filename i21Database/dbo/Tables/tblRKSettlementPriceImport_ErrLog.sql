@@ -2,7 +2,7 @@
 (
 	[intImportSettlementPriceErrLogId] INT IDENTITY(1,1) NOT NULL,
 	[intImportSettlementPriceId] INT ,
-	[dtmPriceDate] DATETIME NULL,
+	[dtmPriceDate] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strFutureMarket] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInstrumentType] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strFutureMonth] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,

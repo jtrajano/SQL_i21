@@ -12,6 +12,7 @@ DECLARE @dtmPriceDate1 nvarchar(50)
 	DECLARE @strSettlementDate nvarchar(50) = null
 	DECLARE @intFutureMarketId int = null
 	DECLARE @intFutureSettlementPriceId int = null
+	DECLARE @newlyCreatedIds nvarchar(max) = ''
 
 SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 
@@ -41,22 +42,6 @@ WHILE @mRowNumber > 0
 
 	SELECT @strMarket=strFutureMarket from #temp where intRowNum=@mRowNumber
 
-		IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(dtmPriceDate))) dtmPriceDate 
-							FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket)t) > 1							
-	BEGIN
-	 RAISERROR('Upload file should contain data for only one date/time combination.',16,1)
-	END
-	
-	SELECT  @dtmPriceDate1=(LTRIM(RTRIM(dtmPriceDate)))  FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
-
-	If 	EXISTS(SELECT * FROM tblRKFuturesSettlementPrice sp
-			JOIN tblRKFutureMarket fm on sp.intFutureMarketId=fm.intFutureMarketId 
-			WHERE fm.strFutMarketName= @strMarket
-			AND convert(datetime,dtmPriceDate,@ConvertYear)=convert(datetime,@dtmPriceDate1,@ConvertYear))
-			BEGIN
-			RAISERROR('A record already exists for this market and date/time.',16,1)
-			END
-
 	
 	SELECT @strMarket=ltrim(rtrim(strFutureMarket)),@strSettlementDate=CONVERT(DATETIME,dtmPriceDate,@ConvertYear) FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
 	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
@@ -71,6 +56,8 @@ WHILE @mRowNumber > 0
    VALUES(@intFutureMarketId,@strSettlementDate,1,@intCommodityMarketId,'Mark To Market')
 
 	SELECT @intFutureSettlementPriceId = scope_Identity()
+
+	SET @newlyCreatedIds = @newlyCreatedIds +  CAST(@intFutureSettlementPriceId as nvarchar(50)) + ','
 
 --Insert Futures Month settlement Price	
 	INSERT INTO tblRKFutSettlementPriceMarketMap (intConcurrencyId,intFutureSettlementPriceId,intFutureMonthId,dblLastSettle,dblLow,dblHigh,strComments)
@@ -93,10 +80,9 @@ END
 END
 
 COMMIT TRAN
-SELECT  intImportSettlementPriceErrLogId,intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,dblLow,
-		dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,strErrorMsg,intConcurrencyId FROM tblRKSettlementPriceImport_ErrLog
 
-DELETE FROM tblRKSettlementPriceImport
+--This will return the newly created Settlement Price
+SELECT FM.strFutMarketName AS Result1,SP.strPricingType AS Result2,SP.dtmPriceDate AS Result3 FROM tblRKFuturesSettlementPrice SP INNER JOIN tblRKFutureMarket FM ON SP.intFutureMarketId = FM.intFutureMarketId WHERE intFutureSettlementPriceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@newlyCreatedIds))
 
 
 END TRY
