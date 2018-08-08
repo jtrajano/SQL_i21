@@ -16,7 +16,7 @@
     [dtmLastModified]        DATETIME        NULL,
     [intConcurrencyId]       INT             DEFAULT 1 NOT NULL,
 	[intCurrencyId]            INT              NULL,
-    [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+    [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
     CONSTRAINT [PK_tblCMBankTransactionDetail] PRIMARY KEY CLUSTERED ([intTransactionDetailId] ASC),
     CONSTRAINT [FK_tblCMBankTransactiontblCMBankTransactionDetail] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]) ON DELETE CASCADE,

@@ -5,7 +5,7 @@
     [intBankAccountId]         INT              NOT NULL,
 
 	[intCurrencyId]            INT              NULL,
-    [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+    [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
 
     [dtmDate]                  DATETIME         NOT NULL,
