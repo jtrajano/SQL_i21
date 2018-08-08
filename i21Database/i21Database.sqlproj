@@ -6879,6 +6879,7 @@
     <Build Include="dbo\Views\vyuARPOSReceiptPaymentReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_HE.sql" />
+    <Build Include="dbo\Views\vyuCFCustomerReportMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
