@@ -90,7 +90,10 @@ SELECT *
 INTO #tempDriverOrder
 FROM (
 	SELECT A.*
-		,B.intOrderItemId
+		, B.intOrderItemId
+		, B.intItemId
+		, B.intItemUOMId
+		, B.intSiteId
 	FROM tblMBILOrder A
 	LEFT JOIN tblMBILOrderItem B ON A.intOrderId = B.intOrderId
 	WHERE A.intDriverId = @intDriverId) tblOrder
@@ -268,7 +271,7 @@ BEGIN
 			FROM #tempOrderTaxCode
 
 	DELETE #tempOrderTaxCode
-	DELETE #tempDriverOrder WHERE intMBILOrderItemId = @MBILOrderId
+	DELETE #tempDriverOrder WHERE intOrderItemId = @MBILOrderId
 END
 
 --=====================================================================================================================================

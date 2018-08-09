@@ -20,6 +20,7 @@ SELECT Invoice.intInvoiceId
 	, Invoice.strComments
 	, Invoice.dblTotal
 	, Invoice.intTermId
+	, Term.strTerm
 	, Invoice.ysnPosted
 	, Invoice.intConcurrencyId
 FROM tblMBILInvoice Invoice

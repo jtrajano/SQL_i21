@@ -28,5 +28,8 @@ SELECT  TaxCode.intOrderTaxId
 	, TaxCode.strNotes
 	, TaxCode.intUnitMeasureId
 	, TaxCode.strUnitMeasure
+	, OrderItem.intDriverId
+	, OrderItem.strDriverNo
+	, OrderItem.strDriverName
 FROM tblMBILOrderTaxCode TaxCode
-
+LEFT JOIN vyuMBILOrderItem OrderItem ON OrderItem.intOrderItemId = TaxCode.intOrderItemId
