@@ -30,6 +30,7 @@
 [intCreditNoteReportFormat] INT NULL,
 [intPreArrivalNotificationReportFormat] INT NULL,
 [intOrganicDeclarationReportFormat] INT NULL,
+[intBOLReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
@@ -59,6 +60,9 @@
 [ysnShowReportLangaugeSelection] [bit] NULL,
 [intReportLogoHeight] INT NULL,
 [intReportLogoWidth] INT NULL,
+[ysnEnableAccrualsForInbound] [bit] NULL, 
+[ysnEnableAccrualsForOutbound] [bit] NULL,
+[ysnEnableAccrualsForDropShip] [bit] NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
