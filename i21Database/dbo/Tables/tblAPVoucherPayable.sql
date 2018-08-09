@@ -84,7 +84,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								,intInventoryReceiptItemId
 								,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
-								,intLoadShipmentDetailId ASC);
+								,intLoadShipmentDetailId DESC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
 --     ON [dbo].[tblAPVoucherPayable]([intPurchaseDetailId] ASC);

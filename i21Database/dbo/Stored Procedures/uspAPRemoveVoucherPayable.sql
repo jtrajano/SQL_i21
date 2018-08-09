@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPRemoveVoucherPayable]
 	@voucherPayable AS VoucherPayable READONLY,
-	@throwError BIT = 0,
+	@throwError BIT = 1,
 	@error NVARCHAR(MAX) = NULL OUTPUT
 AS
 

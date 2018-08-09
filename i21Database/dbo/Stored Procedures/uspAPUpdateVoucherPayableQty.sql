@@ -110,7 +110,8 @@ ELSE SAVE TRAN @SavePoint
 			,[int1099Form]
 			,[int1099Category]				
 			,[str1099Form]					
-			,[str1099Type]					
+			,[str1099Type]				
+			,[ysnReturn]	
 		)
 		SELECT
 			[intEntityVendorId]					=	A.intEntityVendorId
@@ -130,7 +131,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intContractSeqId]					=	A.intContractSeqId
 			,[strContractNumber]				=	ctDetail.strContractNumber
 			,[intScaleTicketId]					=	A.intScaleTicketId
-			,[strScaleTicketNumber]				=	ticket.strScaleTicketNumber
+			,[strScaleTicketNumber]				=	ticket.strTicketNumber
 			,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 			,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptChargeId
 			,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
@@ -161,7 +162,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strCostCurrency]					=	ISNULL(costCur.strCurrency, tranCur.strCurrency)
 			,[dblTax]							=	0
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
-			,[strRateType]						=	exRates.strRateType
+			,[strRateType]						=	exRates.strCurrencyExchangeRateType
 			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 			,[ysnSubCurrency]					=	A.ysnSubCurrency
 			,[intSubCurrencyCents]				=	A.intSubCurrencyCents
@@ -201,6 +202,7 @@ ELSE SAVE TRAN @SavePoint
 																	AND patron.ysnStockStatusQualified = 1 
 																	THEN 'Per-unit retain allocations'
 													ELSE entity.str1099Type END
+			,[ysnReturn]						=	A.ysnReturn
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -224,8 +226,8 @@ ELSE SAVE TRAN @SavePoint
 		LEFT JOIN tblICUnitMeasure orderQtyUOM ON orderQtyUOM.intUnitMeasureId = itemOrderQtyUOM.intUnitMeasureId
 		LEFT JOIN (tblPOPurchase po INNER JOIN tblPOPurchaseDetail poDetail ON po.intPurchaseId = poDetail.intPurchaseId)
 			ON poDetail.intPurchaseDetailId = A.intPurchaseDetailId
-		LEFT JOIN vyuCTContractDetail ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
-		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intTicketId
+		LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 		RETURN;
 	END
 
@@ -234,18 +236,20 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE THE QTY BEFORE DELETING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
-			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQtyReceived) 
-										ELSE (B.dblQuantityToBill - C.dblQtyReceived) END
+			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
+										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
-		LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
+		INNER JOIN @voucherPayable C
+		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
 			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
 			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
 			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
 			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
-		WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 		--if post, remove if the available qty is 0
 		--back up to tblAPVoucherPayableCompleted
 		MERGE INTO tblAPVoucherPayableCompleted AS destination
@@ -324,15 +328,16 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intVoucherPayableId]
 				,C.intBillDetailId
 			FROM tblAPVoucherPayable B
-			LEFT JOIN tblAPBillDetail C
+			LEFT JOIN @voucherPayable C
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 				AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
 				AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
 				AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
 				AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-				AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+				--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
 				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
-			WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+			--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 			AND B.dblQuantityToBill = 0
 		) AS SourceData
 		ON (1=0)
@@ -568,10 +573,19 @@ ELSE SAVE TRAN @SavePoint
 				,D.[str1099Type]					
 				,D.[ysnReturn]		
 				,D.[intVoucherPayableId]			
-			FROM tblAPBillDetail A
-			INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-			INNER JOIN @voucherIds C ON B.intBillId = C.intId
-			INNER JOIN tblAPVoucherPayableCompleted D ON A.intBillDetailId = D.intBillDetailId
+			-- FROM tblAPBillDetail A
+			-- INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
+			FROM @voucherPayable B
+			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
+					ON ISNULL(D.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(D.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(D.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(D.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(D.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(D.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(D.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
@@ -728,10 +742,46 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY AFTER REINSERTING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
-			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQtyReceived) 
-										ELSE (B.dblQuantityToBill - C.dblQtyReceived) END
+			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
+										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
-		LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
+		INNER JOIN @voucherPayable C
+		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
+			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+	END
+	ELSE
+	BEGIN
+		--IF NOT VOUCHER POSTING, THE PROCEDURE WAS CALLED BY INTEGRATED MODULE, EDITED THE DATA
+		UPDATE B
+			SET B.dblQuantityToBill = C.dblQuantityToBill
+		FROM tblAPVoucherPayable B
+		INNER JOIN @voucherPayable C
+		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
+			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
+			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
+			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
+			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
+			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
+			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
+			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+
+		--VALIDATE
+		--QTY OF VOUCHER PAYABLE SHOULD NOT BE GREATER THAN THE QTY VOUCHERED
+		DECLARE @overQtyError NVARCHAR(1000);
+		SELECT TOP 1
+			@overQtyError = C2.strBillId
+		FROM tblAPBill C2 
+		INNER JOIN tblAPBillDetail C ON C.intBillId = C2.intBillId
+		INNER JOIN @voucherPayable B
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
 			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
@@ -739,7 +789,22 @@ ELSE SAVE TRAN @SavePoint
 			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
 			AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
 			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
-		WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+		GROUP BY C.intPurchaseDetailId
+		,C.intContractDetailId
+		,C.intScaleTicketId
+		,C.intInventoryReceiptChargeId
+		,C.intInventoryReceiptItemId
+		,C.intLoadDetailId
+		,C.intInventoryShipmentChargeId
+		,C2.strBillId
+		HAVING SUM(C.dblQtyReceived) > SUM(DISTINCT B.dblQuantityToBill)
+
+		IF @overQtyError IS NOT NULL
+		BEGIN
+			SET @overQtyError = 'Unable to update the payable quantity. Please check the quantity of vouchers created.'
+			RETURN;
+		END
+
 	END
 
 	IF @transCount = 0

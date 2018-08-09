@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreatePOVoucherPayable]
 (
-	@poIds AS Id READONLY
+	@poDetailIds AS Id READONLY
 )
 RETURNS TABLE AS RETURN
 (
@@ -52,10 +52,11 @@ RETURNS TABLE AS RETURN
 		,[ysnReturn]						=	0
 	FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
-	INNER JOIN @poIds ids ON A.intPurchaseId = ids.intId
+	INNER JOIN @poDetailIds ids ON B.intPurchaseDetailId = ids.intId
 	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
 	LEFT JOIN dbo.tblSMCurrency subCurrency ON subCurrency.intMainCurrencyId = A.intCurrencyId AND subCurrency.ysnSubCurrency = 1
 	LEFT JOIN tblCTContractDetail ctd ON B.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblICItemLocation itemLoc ON B.intItemId = itemLoc.intItemId AND itemLoc.intLocationId = A.intShipToId
+	WHERE dbo.fnIsStockTrackingItem(B.intItemId) = 0
 	
 )

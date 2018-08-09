@@ -20,7 +20,7 @@ ELSE SAVE TRAN @SavePoint
 IF EXISTS(SELECT TOP 1 1 FROM @voucherPayable)
 BEGIN
 	--Make sure it has not been added yet
-	IF EXISTS(
+	IF EXISTS( 
 		SELECT TOP 1 1
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable C
