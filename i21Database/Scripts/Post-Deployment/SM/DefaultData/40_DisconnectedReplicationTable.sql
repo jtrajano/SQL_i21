@@ -308,6 +308,8 @@ PRINT N'DISCONNECTED REPLICATION TABLE '
 				('tblSCLastScaleSetup'),
 				('tblSCUncompletedTicketAlert'),
 				('tblGRDiscountId'),
+				('tblGRStorageType'),
+				('tblGRStorageScheduleRule'),
 				('tblGRDiscountLocationUse'),
 				('tblGRDiscountCrossReference'),
 				('tblGRDiscountSchedule'),

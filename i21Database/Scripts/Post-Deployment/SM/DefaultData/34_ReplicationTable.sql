@@ -269,12 +269,14 @@
 			('tblICItemUOM'), --30
 			('tblICItemUPC'), --31
 			('tblICItemVendorXref'), --32
+			('tblICTag'), --33
+			('tblICBrand'), --34
 
 			--IC Inventory Storage Units
 			('tblICStorageUnitType'),
 			('tblICStorageLocation'),
 
-
+			('tblVRVendorSetup'),
 
 			--AP Vendors
 			('tblAPVendor'),
@@ -465,6 +467,7 @@
 			('tblGRDiscountScheduleCode'),
 			('tblGRDiscountScheduleLine'),
 			('tblGRStorageType'),
+			('tblGRStorageScheduleRule'),
 			
 			
 
@@ -650,6 +653,14 @@
             ('tblICLot'), --31
             ('tblICLotStatus'), --32
             ('tblICParentLot'), --33
+
+			--Manufacturer
+			('tblICManufacturer'),
+
+			--Patronage
+			('tblPATPatronageCategory'),
+			('tblPATRefundCategory'),
+			('tblPATRefundRateDetail'),
 
             --AP Vouchers
             ('tblAPBill'), --1

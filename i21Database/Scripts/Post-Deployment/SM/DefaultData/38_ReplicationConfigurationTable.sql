@@ -36,6 +36,9 @@ VALUES
 --##-----------------------------------------------------------------------------------------------
 	--recently added
 	('tblHDTicketType', 'Entities', 'Entity Management'),
+	('tblGRStorageType', 'Entities', 'Entity Management'),
+	
+
 
 	('tblEMContactDetail', 'Entities', 'Entity Management'),			
 	('tblEMContactDetailType ', 'Entities', 'Entity Management'),
@@ -192,6 +195,7 @@ VALUES
 	('tblSMScreen', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMApprovalList', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxCode', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	('tblSMTaxClass', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroup', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroupCode', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMTaxGroupCodeCategoryExemption', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
@@ -206,6 +210,8 @@ VALUES
 	('tblSMApproverGroup', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	--signature
 	('tblSMSignature', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	('tblSMApproverConfigurationApprovalFor', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	
 
 ---------------------------------------------------------------------------------------------------
 
@@ -421,7 +427,9 @@ VALUES
 		('tblICCommodityUnitMeasure', 'Commodities', 'Inventory'),
 		('tblICUnitMeasure', 'Commodities', 'Inventory'),
 		
-
+		('tblGRStorageScheduleRule', 'Commodities', 'Inventory'),
+		('tblGRDiscountId', 'Commodities', 'Inventory'),
+		
 				
 		
 ---------------------------------------------------------------------------------------------------
@@ -469,7 +477,21 @@ VALUES
 		('tblICItemSubstitutionDetail', 'Items', 'Inventory'),
 		('tblICItemUOM', 'Items', 'Inventory'),
 		('tblICItemUPC', 'Items', 'Inventory'),
+		('tblICTag', 'Items', 'Inventory'),
+		('tblICBrand', 'Items', 'Inventory'),
 		('tblICItemVendorXref', 'Items', 'Inventory'),
+		('tblICManufacturer', 'Items', 'Inventory'),
+		('tblPATPatronageCategory', 'Items', 'Inventory'),
+		('tblPATRefundCategory', 'Items', 'Inventory'),
+		('tblPATRefundRate', 'Items', 'Inventory'),
+		('tblPATRefundRateDetail', 'Items', 'Inventory'),
+		('tblVRVendorSetup', 'Items', 'Inventory'),
+		('tblPATRefundCustomer', 'Items', 'Inventory'),
+		('tblARMarketZone', 'Items', 'Inventory'),
+		('tblAPBill', 'Items', 'Inventory'),
+		
+		
+		
 
 ---------------------------------------------------------------------------------------------------
 
@@ -515,6 +537,7 @@ VALUES
 		('tblEMEntity ', 'Customer', 'Sales'),
 		('tblARAccountStatus', 'Customer', 'Sales'),
 		('tblTRSupplyPoint','Customer','Sales'),
+		('tblTFTerminalControlNumber','Customer','Sales'),
 		('tblARCustomer', 'Customer', 'Sales'),
 		('tblARCustomerAccountStatus', 'Customer', 'Sales'),
 		('tblARCustomerApplicatorLicense', 'Customer', 'Sales'),
@@ -873,6 +896,12 @@ VALUES
 	('tblMFUserRoleEventMap', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFYield', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
 	('tblMFYieldDetail', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	('tblMFSchedule', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	('tblMFScheduleCalendar', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	('tblMFScheduleWorkOrder', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	('tblMFWorkOrder', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	('tblMFBlendRequirement', 'Recipe, Machine, Manufacturing Process,Manufacturing Cell,Pack type, Shift, Schedule change over, and Schedule rule', 'Manufacturing'),
+	
 
 --##------------------------------------------------------------------------------------------------
 
