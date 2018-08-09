@@ -43,8 +43,7 @@ END
 
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
 										, @strCompanyLocation 			= @strCompanyLocation
-										, @intEntityUserId 				= @intEntityUserId
-										, @dtmDateFrom 					= @dtmAsOfDateFrom
+										, @intEntityUserId 				= @intEntityUserId										
 										, @ysnIncludeCredits 			= @ysnPrintCreditBalanceLocal
                                         , @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffLocal
 
