@@ -123,7 +123,7 @@ BEGIN
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
 		,E.strName
-	ORDER BY intContractHeaderId
+	ORDER BY CF.intContractHeaderId
 END
 ELSE
 BEGIN
@@ -157,7 +157,7 @@ BEGIN
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
 		,E.strName
-	ORDER BY intContractHeaderId
+	ORDER BY CF.intContractHeaderId
 END
 
 SELECT @intMinRowNo = Min(intRowNo)
