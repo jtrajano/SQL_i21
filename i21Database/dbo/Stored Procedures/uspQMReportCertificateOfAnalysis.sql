@@ -111,6 +111,7 @@ BEGIN TRY
 				ELSE PRD.strNote
 				END
 			) AS strNote
+		,TR.intSequenceNo
 	FROM tblQMSample S
 	INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 	INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
@@ -152,6 +153,8 @@ BEGIN TRY
 		,UM.strUnitMeasure
 		,CL.strLocationName
 		,PRD.strNote
+		,TR.intSequenceNo
+	ORDER BY TR.intSequenceNo
 END TRY
 
 BEGIN CATCH
