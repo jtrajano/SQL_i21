@@ -310,6 +310,8 @@ BEGIN
 										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
 									WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+									WHEN TR.strTrpPaycode IN ('COUPONS')
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
 									ELSE dblTrlUnitPrice 
 								  END as dblFinalSalesPrice
 
