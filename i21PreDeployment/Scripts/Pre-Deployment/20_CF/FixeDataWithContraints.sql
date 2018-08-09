@@ -1,4 +1,5 @@
-﻿IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFCard')
+﻿print 'start CF data fix - (pre deployment)'
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFCard')
 BEGIN
 	print 'begin updating card data'
 	
@@ -253,3 +254,26 @@ BEGIN
 	
 	print 'remove orphan transaction tax'
 END
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFAccountQuote')
+BEGIN
+	print 'remove tblCFAccountQuote'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFTransactionTax'AND COLUMN_NAME = 'intTaxCodeId')
+	BEGIN
+		IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblSMTaxCode'AND COLUMN_NAME = 'intTaxCodeId')
+		BEGIN
+			EXEC ('delete from tblCFTransactionTax where intTaxCodeId not in (SELECT intTaxCodeId FROM tblSMTaxCode)')
+		END
+	END
+	
+	print 'remove orphan transaction tax'
+END
+
+ --CF-1797
+IF EXISTS(SELECT 1 FROM sys.columns WHERE object_id = object_id('tblCFAccountQuote') AND name = 'intItem1')
+BEGIN
+    DELETE FROM tblCFAccountQuote
+END
+
+
+print 'end CF data fix - (pre deployment)'
