@@ -751,7 +751,12 @@ BEGIN TRY
 				,intFobPointId
 				)
 			SELECT [intItemId] = PL.intItemId
-				,[intItemLocationId] = L.intItemLocationId
+				,[intItemLocationId] = isNULL(L.intItemLocationId, (
+					SELECT IL.intItemLocationId
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = PL.intItemId
+						AND IL.intLocationId = @intLocationId
+					))
 				,[intItemUOMId] = PL.intItemUOMId
 				,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
 				,[dblQty] = PL.dblQuantity
@@ -784,7 +789,7 @@ BEGIN TRY
 			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
 					LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
 			AND IU.intUnitMeasureId = @intUnitMeasureId
-			JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+			LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 			--JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 				AND RI.intItemId = PL.intItemId
@@ -1112,7 +1117,12 @@ BEGIN TRY
 				,intFobPointId
 				)
 			SELECT [intItemId] = PL.intItemId
-				,[intItemLocationId] = L.intItemLocationId
+				,[intItemLocationId] = isNULL(L.intItemLocationId, (
+					SELECT IL.intItemLocationId
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = PL.intItemId
+						AND IL.intLocationId = @intLocationId
+					))
 				,[intItemUOMId] = PL.intItemUOMId
 				,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
 				,[dblQty] = PL.dblQuantity
@@ -1139,7 +1149,7 @@ BEGIN TRY
 				,intFobPointId = 2
 			FROM dbo.tblMFWorkOrderProducedLot PL
 			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-			JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+			LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 			--JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN @tblMFProductionSummary PS ON PS.intItemId = PL.intItemId
 			WHERE PL.intWorkOrderId = @intWorkOrderId

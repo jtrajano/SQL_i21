@@ -11,6 +11,7 @@
 	 ,intPOSLogOriginId		= pos.intPOSLogOriginId
 	 ,strPOSDrawerName      = DRAWER.strPOSDrawerName
 	 ,intCompanyLocationPOSDrawerId		= pos.intCompanyLocationPOSDrawerId
+	 ,ysnAllowMultipleUser  = DRAWER.ysnAllowMultipleUser
 	 ,intStoreId			= pos.intStoreId
 	 ,intStoreNo			= STORE.intStoreNo
 	 ,strStoreDescription	= STORE.strDescription
@@ -42,7 +43,8 @@ LEFT JOIN(
 LEFT JOIN(
 	SELECT
 		intCompanyLocationPOSDrawerId,
-		strPOSDrawerName
+		strPOSDrawerName,
+		ysnAllowMultipleUser
 	FROM tblSMCompanyLocationPOSDrawer
 ) DRAWER ON DRAWER.intCompanyLocationPOSDrawerId = pos.intCompanyLocationPOSDrawerId
 LEFT JOIN(
