@@ -125,7 +125,7 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity E ON EL.intEntityId = E.intEntityId
-	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intSCompanyLocationId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = ISNULL(LD.intSCompanyLocationId, S.intLocationId)
 	WHERE S.intSampleId = @intSampleId
 	GROUP BY strItemNo
 		,I.strDescription
