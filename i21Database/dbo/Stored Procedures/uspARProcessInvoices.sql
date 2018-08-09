@@ -853,7 +853,7 @@ BEGIN
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@ItemConversionAccountId		= [intConversionAccountId]
-					,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+					,@ItemCurrencyExchangeRateTypeId	= CASE WHEN ISNULL([intCurrencyExchangeRateTypeId],0) = 0 THEN NULL ELSE [intCurrencyExchangeRateTypeId] END
 					,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
 					,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
