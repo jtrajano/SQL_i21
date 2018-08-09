@@ -6903,6 +6903,7 @@
     <Build Include="dbo\Views\vyuAPBasisAdvanceTicket.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_HE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
