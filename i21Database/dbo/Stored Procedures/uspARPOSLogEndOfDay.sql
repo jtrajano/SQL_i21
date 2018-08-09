@@ -4,34 +4,48 @@
 AS
 	IF ISNULL(@intPOSLogId, NULL) > 0
 	BEGIN
-		DECLARE @intUserId						INT	= NULL
-			  , @intStartingNumberId			INT = NULL
-			  , @dblEndingBalance				NUMERIC(18, 6) = 0
-			  , @dblOpeningBalance				NUMERIC(18, 6) = 0
-			  , @dblCashReceipts				NUMERIC(18, 6) = 0
-			  , @dblCashOverShort				NUMERIC(18, 6) = 0
-			  , @dtmDateNow						DATETIME = GETDATE()
-			  , @strCompanyLocatioName			NVARCHAR(100)	= NULL
-			  , @STARTING_NUMBER_BANK_DEPOSIT	NVARCHAR(100) = 'Bank Deposit'
-			  , @hintCashOverAccountId			INT = NULL
-
-
-
-		if exists(select top 1 intPOSLogId from tblARPOS where intPOSLogId = @intPOSLogId)
-		begin
-			select @hintCashOverAccountId = intCashOverShort, @strCompanyLocatioName = strLocationName
-				from tblSMCompanyLocation 
-					where intCompanyLocationId in (select intCompanyLocationId 
-														from tblARPOS  
-															where intPOSLogId = @intPOSLogId)
-															
-			IF ISNULL(@hintCashOverAccountId, 0) = 0
+		DECLARE @BankTransaction				BankTransactionTable
+		DECLARE @BankTransactionDetail			BankTransactionDetailTable
+		DECLARE @intUserId						INT				= NULL
+			  , @intStartingNumberId			INT 			= (SELECT TOP 1 intStartingNumberId FROM dbo.tblSMStartingNumber WHERE strTransactionType = 'Bank Transaction')
+			  , @intCompanyLocationId			INT 			= NULL
+			  , @intCashOverAccountId			INT 			= NULL
+			  , @intBankAccountId				INT 			= NULL
+			  , @intMessageId					INT				= NULL
+			  , @intNewTransactionId			INT				= NULL
+			  , @intCurrencyId					INT				= (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+			  , @dblEndingBalance				NUMERIC(18, 6) 	= 0
+			  , @dblOpeningBalance				NUMERIC(18, 6) 	= 0
+			  , @dblCashReceipts				NUMERIC(18, 6) 	= 0
+			  , @dblCashOverShort				NUMERIC(18, 6) 	= 0
+			  , @dtmDateNow						DATETIME 		= GETDATE()
+			  , @strCompanyLocatioName			NVARCHAR(100) 	= NULL
+			  , @strTransactionId				NVARCHAR(100)	= NULL
+			  , @strCashOverAccountId			NVARCHAR(100)	= NULL
+			  , @ysnSuccess						BIT				= 0					  
+					  
+		--VALIDATE CASH OVER/SHORT GL ACCOUNT
+		IF EXISTS(SELECT TOP 1 intPOSLogId FROM tblARPOS WHERE intPOSLogId = @intPOSLogId)
 			BEGIN
-				DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
-				RAISERROR(@strErrorMsg, 16, 1)
-				RETURN;
+				SELECT @intCashOverAccountId 	= CL.intCashOverShort
+					 , @strCompanyLocatioName 	= CL.strLocationName
+					 , @strCashOverAccountId 	= GL.strDescription
+					 , @intUserId 				= POSLOG.intEntityUserId
+					 , @intBankAccountId		= BANK.intBankAccountId
+					 , @intCompanyLocationId	= CL.intCompanyLocationId
+				FROM tblSMCompanyLocation CL
+				INNER JOIN tblARPOSLog POSLOG ON CL.intCompanyLocationId = POSLOG.intCompanyLocationId
+				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
+				INNER JOIN tblCMBankAccount BANK ON CL.intCashAccount = BANK.intGLAccountId
+				WHERE POSLOG.intPOSLogId = @intPOSLogId
+																
+				IF ISNULL(@intCashOverAccountId, 0) = 0
+				BEGIN
+					DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
+					RAISERROR(@strErrorMsg, 16, 1)
+					RETURN;
+				END
 			END
-		end
 
 		--UPDATE ENDING BALANCE AND LOG
 		UPDATE POSLOG
@@ -54,15 +68,10 @@ AS
 		WHERE POSLOG.intPOSLogId = @intPOSLogId 
 		   OR POSLOG.intPOSLogOriginId = @intPOSLogId
 
-		SELECT TOP 1 @intUserId 		= POSLOG.intEntityUserId
-			       , @dblEndingBalance	= POSLOG.dblEndingBalance
+		SELECT TOP 1 @dblEndingBalance	= POSLOG.dblEndingBalance
 				   , @dblOpeningBalance	= POSLOG.dblOpeningBalance
 		FROM dbo.tblARPOSLog POSLOG
 		WHERE POSLOG.intPOSLogId = @intPOSLogId 
-
-		SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
-		FROM dbo.tblSMStartingNumber 
-		WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
 
 		IF ISNULL(@intUserId, 0) = 0
 		BEGIN
@@ -70,7 +79,7 @@ AS
 			RETURN;
 		END
 		
-		--CREATE CASH DEPOSITS
+		--GET ALL CASH PAYMENTS
 		IF(OBJECT_ID('tempdb..#CASHPAYMENTS') IS NOT NULL)
 		BEGIN
 			DROP TABLE #CASHPAYMENTS
@@ -82,62 +91,22 @@ AS
 		INNER JOIN dbo.tblARPOS POS WITH (NOLOCK)  ON POS.intPOSLogId = POSLOG.intPOSLogId
 		INNER JOIN (
 			SELECT intPOSId				= POSP.intPOSId
-				 , intPaymentId			= PAYMENT.intPaymentId
-				 , intCurrencyId		= PAYMENT.intCurrencyId
-				 , intAccountId			= PAYMENT.intAccountId
-				 , intBankAccountId		= PAYMENT.intBankAccountId
-				 , intEntityCustomerId	= PAYMENT.intEntityCustomerId
-				 , intCompanyLocationId	= PAYMENT.intLocationId
-				 , dtmDatePaid			= PAYMENT.dtmDatePaid
 				 , dblAmount			= PAYMENT.dblAmountPaid
-				 , strPaymentMethod		= POSP.strPaymentMethod
 			FROM dbo.tblARPOSPayment POSP WITH (NOLOCK)	
 			INNER JOIN dbo.tblARPayment PAYMENT WITH (NOLOCK) ON POSP.intPaymentId = PAYMENT.intPaymentId
-			WHERE ISNULL(POSP.strPaymentMethod, '') <> 'On Account'
-			  AND ISNULL(PAYMENT.intBankAccountId, 0) <> 0
+			WHERE ISNULL(POSP.strPaymentMethod, '') <> 'On Account'			  
 			  AND PAYMENT.ysnPosted = 1
 		) POSPAYMENT ON POSPAYMENT.intPOSId = POS.intPOSId
 		WHERE POSLOG.intPOSLogId = @intPOSLogId
 
 		SELECT @dblCashReceipts = SUM(dblAmount) FROM #CASHPAYMENTS
 
-		DELETE FROM #CASHPAYMENTS WHERE strPaymentMethod NOT IN ('Cash', 'Check')
+		--CREATE BANK TRANSACTION FOR CASH OVER/SHORT
+		SET @dblCashOverShort = (ISNULL(@dblEndingBalance, 0) - (ISNULL(@dblCashReceipts, 0) + ISNULL(@dblOpeningBalance, 0)))
 
-		WHILE EXISTS (SELECT TOP 1 NULL FROM #CASHPAYMENTS)
+		IF ISNULL(@dblCashOverShort, 0) <> 0 AND ISNULL(@intCashOverAccountId, 0) <> 0
 			BEGIN
-				DECLARE @BankTransaction				BankTransactionTable
-					  , @BankTransactionDetail			BankTransactionDetailTable
-					  , @intBankAccountId				INT 			= NULL
-					  , @intEntityCustomerId			INT				= NULL
-					  , @intCompanyLocationId			INT				= NULL
-					  , @intMessageId					INT				= NULL
-					  , @intNewTransactionId			INT				= NULL
-					  , @intCashOverAccountId			INT				= NULL
-					  , @intCurrencyId					INT				= NULL
-					  , @strTransactionId				NVARCHAR(100)	= NULL
-					  , @strCashOverAccountId			NVARCHAR(100)	= NULL
-					  , @ysnSuccess						BIT				= 0
-
-				SELECT TOP 1 @intBankAccountId 		= intBankAccountId
-					       , @intEntityCustomerId 	= intEntityCustomerId
-						   , @intCompanyLocationId	= intCompanyLocationId
-						   , @intCurrencyId			= intCurrencyId
-				FROM #CASHPAYMENTS
-
-				SELECT TOP 1 @intCashOverAccountId = CL.intCashOverShort
-					  	   , @strCashOverAccountId = GL.strDescription
-				FROM tblSMCompanyLocation CL
-				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
-				WHERE intCompanyLocationId = @intCompanyLocationId
-
-
-				DELETE FROM @BankTransaction
-				DELETE FROM @BankTransactionDetail
-
-				EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
-				--CREATE CASH OVER/SHORT
-				SET @dblCashOverShort = (ISNULL(@dblEndingBalance, 0) - (ISNULL(@dblCashReceipts, 0) + ISNULL(@dblOpeningBalance, 0)))
 
 				INSERT INTO @BankTransaction (
 					  [intBankAccountId]
@@ -150,18 +119,14 @@ AS
 					, [intCompanyLocationId]
 				)
 				SELECT 
-					 [intBankAccountId]				= @intBankAccountId
+					[intBankAccountId]				= @intBankAccountId
 					,[strTransactionId]				= @strTransactionId
 					,[intCurrencyId]				= @intCurrencyId
-					,[intBankTransactionTypeId]		= 1
+					,[intBankTransactionTypeId]		= 5
 					,[dtmDate]						= @dtmDateNow
-					,[dblAmount]					= SUM(CP.dblAmount) + ISNULL(@dblCashOverShort, 0)
+					,[dblAmount]					= @dblCashOverShort
 					,[strMemo]						= 'POS Bank Deposit - End of Day'
 					,[intCompanyLocationId]			= @intCompanyLocationId
-				FROM #CASHPAYMENTS CP
-				WHERE intBankAccountId  	= @intBankAccountId
-				  AND intCurrencyId			= @intCurrencyId
-				  AND intCompanyLocationId	= @intCompanyLocationId
 
 				INSERT INTO @BankTransactionDetail(
 					  [intTransactionId]
@@ -174,58 +139,43 @@ AS
 					, [intEntityId]
 				)
 				SELECT [intTransactionId]	= 0
-					, [intUndepositedFundId] = UF.intUndepositedFundId
+					, [intUndepositedFundId] = NULL
 					, [dtmDate]				= @dtmDateNow
-					, [intGLAccountId]		= PAYMENTS.intAccountId
-					, [strDescription]		= PAYMENTS.strDescription
-					, [dblDebit]			= 0.000000
-					, [dblCredit]			= ISNULL(PAYMENTS.dblAmount, 0)
-					, [intEntityId]			= PAYMENTS.intEntityCustomerId
-				FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
-				INNER JOIN (
-					SELECT P.*
-						 , GL.strDescription 
-					FROM #CASHPAYMENTS P
-					LEFT JOIN (
-						SELECT intAccountId
-							 , strDescription 
-						FROM dbo.tblGLAccount WITH (NOLOCK)
-					) GL ON GL.intAccountId = P.intAccountId
-					AND P.intBankAccountId  	= @intBankAccountId
-					AND P.intCurrencyId			= @intCurrencyId
-					AND P.intCompanyLocationId	= @intCompanyLocationId
-				) PAYMENTS ON UF.intSourceTransactionId = PAYMENTS.intPaymentId
-				WHERE UF.intBankAccountId 	= @intBankAccountId
-				  AND UF.intLocationId		= @intCompanyLocationId
-
-				IF ISNULL(@dblCashOverShort, 0) <> 0 AND ISNULL(@intCashOverAccountId, 0) <> 0
+					, [intGLAccountId]		= @intCashOverAccountId
+					, [strDescription]		= @strCashOverAccountId
+					, [dblDebit]			= CASE WHEN @dblCashOverShort < 0 THEN ABS(@dblCashOverShort) ELSE 0.000000 END
+					, [dblCredit]			= CASE WHEN @dblCashOverShort > 0 THEN ABS(@dblCashOverShort) ELSE 0.000000 END
+					, [intEntityId]			= @intUserId
+					
+				EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries   	 = @BankTransaction
+														 , @BankTransactionDetailEntries = @BankTransactionDetail
+														 , @intTransactionId    		 = @intNewTransactionId OUT
+			
+				IF ISNULL(@intNewTransactionId, 0) <> 0
 					BEGIN
+						UPDATE tblARPOSLog
+						SET intBankDepositId = @intNewTransactionId
+						WHERE intPOSLogId = @intPOSLogId
 
-						INSERT INTO @BankTransactionDetail(
-							  [intTransactionId]
-							, [intUndepositedFundId]
-							, [dtmDate]
-							, [intGLAccountId]
-							, [strDescription]
-							, [dblDebit]
-							, [dblCredit]
-							, [intEntityId]
-						)
-						SELECT [intTransactionId]	= 0
-							, [intUndepositedFundId] = NULL
-							, [dtmDate]				= @dtmDateNow
-							, [intGLAccountId]		= @intCashOverAccountId
-							, [strDescription]		= @strCashOverAccountId
-							, [dblDebit]			= 0.00000
-							, [dblCredit]			= ISNULL(@dblCashOverShort, 0)
-							, [intEntityId]			= @intEntityCustomerId						
+						--UPDATE BANK TRANSACTION FLAG FOR POS
+						UPDATE tblCMBankTransaction 
+						SET ysnPOS = 1 
+						WHERE intTransactionId = @intNewTransactionId
+					
+						--POST BANK TRANSACTION
+						IF ISNULL((SELECT dblAmount FROM dbo.tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId), 0) <> 0
+							BEGIN
+								EXEC dbo.uspCMPostBankTransaction @ysnPost   		= 1
+															, @ysnRecap   		= 0
+															, @strTransactionId = @strTransactionId
+															, @strBatchId  		= NULL
+															, @intUserId  		= @intUserId
+															, @intEntityId  	= @intUserId
+															, @isSuccessful  	= @ysnSuccess OUT
+															, @message_id  		= @intMessageId OUT
+							END
 					END
-
-				DELETE FROM #CASHPAYMENTS 
-				WHERE intBankAccountId 		= @intBankAccountId 
-				 AND intCurrencyId			= @intCurrencyId
-				 AND intCompanyLocationId	= @intCompanyLocationId
-			END		
+			END
 	END
 	ELSE
 	BEGIN

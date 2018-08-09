@@ -77,8 +77,8 @@ FROM (
 	SELECT intPOSLogId			= POSLOG.intPOSLogId
 		 , dblOpeningBalance	= POSLOG.dblOpeningBalance
 		 , dblEndingBalance		= POSLOG.dblEndingBalance
-		 , dblDebit				= CASE WHEN BTD.dblCredit < 0 THEN ABS(BTD.dblCredit) ELSE 0.000000 END
-		 , dblCredit			= CASE WHEN BTD.dblCredit > 0 THEN BTD.dblCredit ELSE 0.000000 END
+		 , dblDebit				= BTD.dblDebit
+		 , dblCredit			= BTD.dblCredit
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
@@ -87,21 +87,22 @@ FROM (
 		SELECT intTransactionId
 			 , intGLAccountId
 			 , dblCredit
-		FROM dbo.tblCMBankTransactionDetail WITH (NOLOCK)
-		WHERE intUndepositedFundId IS NULL
+			 , dblDebit
+		FROM dbo.tblCMBankTransactionDetail WITH (NOLOCK)		
 	) BTD ON POSLOG.intBankDepositId = BTD.intTransactionId
 	INNER JOIN (
 		SELECT intTransactionId
-				, strTransactionId
+			 , strTransactionId
 		FROM dbo.tblCMBankTransaction WITH (NOLOCK)
+		WHERE ysnPOS = 1
 	) BT ON BTD.intTransactionId = BT.intTransactionId
 	INNER JOIN (
 		SELECT DISTINCT 
-			   intAccountId
-			 , strAccountId
-			 , strAccountCategory
-			 , strDescription
+				  intAccountId
+				, strAccountId
+				, strAccountCategory
+				, strDescription
 		FROM dbo.vyuGLAccountDetail WITH (NOLOCK)
-		WHERE strAccountCategory = 'General'	
+		WHERE strAccountCategory = 'Cash Account'	
 	) GLA ON BTD.intGLAccountId = GLA.intAccountId
 ) GLSUMMARY
