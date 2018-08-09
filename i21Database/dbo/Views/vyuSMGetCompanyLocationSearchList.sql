@@ -221,13 +221,8 @@ SELECT compLoc.[intCompanyLocationId]
 ,ISNULL(interestAccountId.[strAccountId], '') as strstrerestAccountId
 ,ISNULL(prepaidAccountId.[strAccountId], '') as strPrepaidAccountId
 ,ISNULL(undepositedFundsId.[strAccountId], '') as strUndepositedFundsId
-,compLoc.ysnEnableCreditCardProcessing
 ,compLoc.strMerchantId
 ,compLoc.strMerchantPassword
-,compLoc.strPaymentServer
-,compLoc.strCreditCardProcessingType
-,compLoc.strPaymentExternalLink
-,compLoc.strPaymentPortal
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblGLAccount cash ON compLoc.intCashAccount = cash.intAccountId

@@ -1,4 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSMLocationCreditCardMerchantInfo]
-	AS SELECT        intCompanyLocationId, strPaymentServer, strMerchantId, dbo.fnAESDecryptASym(strMerchantPassword) AS strMerchantPassword,
-	strCreditCardProcessingType, ysnEnableCreditCardProcessing, strPaymentPortal, strPaymentExternalLink
-	FROM	dbo.tblSMCompanyLocation
+AS 
+SELECT intCompanyLocationId
+,strMerchantId
+,dbo.fnAESDecryptASym(strMerchantPassword) AS strMerchantPassword
+FROM
+tblSMCompanyLocation
