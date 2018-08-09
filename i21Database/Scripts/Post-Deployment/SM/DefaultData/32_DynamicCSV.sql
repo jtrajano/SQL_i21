@@ -479,12 +479,10 @@ UPDATE tblSMCSVDynamicImport SET
 		end
 		if @originationdate <> ''''
 		begin
-			begin try
+			if isdate(@originationdate) = 1
 				select @originationdated = cast(@originationdate as datetime)
-			end try
-			begin catch
-				set @originationdated = GETDATE()
-			end catch
+			else
+				set @originationdated = GETDATE()		
 		end
 		else
 			set @originationdated = GETDATE()
@@ -595,17 +593,19 @@ UPDATE tblSMCSVDynamicImport SET
 			set @ValidationMessage = @ValidationMessage + '', Credit Code (''+  @misccreditcode +'') does not exists. Use one in (Always Allow, Normal, Monitoring, Always Hold, Always Hold, Reject Orders).''
 			set @IsValid = 0
 		end
-
+		
 		if @miscbudgetbegindate <> ''''
 		begin
-			begin try
+			if(isdate(@miscbudgetbegindate) = 1)
 				select @miscbudgetbegindated = cast(@miscbudgetbegindate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Budget Begin Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Budget Begin Date('' + @miscbudgetbegindate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
+			end
 		end
+		
+
 		if @miscstatementformat <> '''' and @miscstatementformat not in (''Open Item'', ''Open Statement - Lazer'', ''Balance Forward'', ''Budget Reminder'', ''Payment Activity'', ''Running Balance'', ''Full Details - No Card Lock'', ''None'')               
 		begin
 			set @ValidationMessage = @ValidationMessage + '', Statement Format (''+  @miscstatementformat +'') does not exists. Use one in (Open Item, Open Statement - Lazer, Balance Forward, Budget Reminder, Payment Activity, Running Balance, Full Details - No Card Lock, None).''
@@ -624,16 +624,16 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end
 		
-		if @misclastservicecharge <> ''''
+		if @misclastservicecharge <> '''' 
 		begin
-			begin try
-				select @misclastservicecharged = cast(@misclastservicecharge as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Last Service Charge Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			if isdate(@misclastservicecharge) = 1
+				select @misclastservicecharged = cast(@misclastservicecharge as datetime)	
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Last Service Charge Date('' + @misclastservicecharge + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
-		end		
+			end
+		end	
 
 		if @miscupdatequote <> '''' and @miscupdatequote not in (''Yes'', ''No'', ''Deviation'')               
 		begin
@@ -781,15 +781,15 @@ UPDATE tblSMCSVDynamicImport SET
 		end
 		
 
-		if @grainlastdpissuedate <> ''''
+		if @grainlastdpissuedate <> '''' 
 		begin
-			begin try
+			if isdate(@grainlastdpissuedate) = 1
 				select @grainlastdpissuedated = cast(@grainlastdpissuedate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Last DP Issue Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Last DP Issue Date('' + @grainlastdpissuedate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
+			end			
 		end	
 
 
@@ -804,26 +804,27 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end
 		
-		if @patronagemembershipdate <> ''''
+		if @patronagemembershipdate <> '''' 
 		begin
-			begin try
-				select @patronagemembershipdated = cast(@patronagemembershipdate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Membership Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			if isdate(@patronagemembershipdate) = 1
+				select @patronagemembershipdated = cast(@patronagemembershipdate as datetime)			
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Membership Date('' + @patronagemembershipdate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
+			end
 		end	
-		if @patronagebirthdate <> ''''
+
+		if @patronagebirthdate <> '''' 
 		begin
-			begin try
+			if isdate(@patronagebirthdate) = 1
 				select @patronagebirthdated = cast(@patronagebirthdate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Birth Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Birth Date('' + @patronagebirthdate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
-		end					 
+			end		
+		end			 
 				
 		if @patronagestockstatus <> '''' and @patronagestockstatus not in (''Voting'', ''Non-Voting'', ''Producer'', ''Other'')               
 		begin
@@ -831,25 +832,26 @@ UPDATE tblSMCSVDynamicImport SET
 			set @IsValid = 0
 		end	
 
-		if @patronagedeceaseddate <> ''''
+		if @patronagedeceaseddate <> '''' 
 		begin
-			begin try
+			if isdate(@patronagedeceaseddate) = 1
 				select @patronagedeceaseddated = cast(@patronagedeceaseddate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Deceased Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Deceased Date('' + @patronagedeceaseddate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
+			end			
 		end	
-		if @patronagelastactivitydate <> ''''
+
+		if @patronagelastactivitydate <> '''' 
 		begin
-			begin try
+			if isdate(@patronagelastactivitydate) = 1
 				select @patronagelastactivitydated = cast(@patronagelastactivitydate as datetime)
-			end try
-			begin catch
-				SET @ValidationMessage	= @ValidationMessage + '',Last Activity Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+			else
+			begin
+				SET @ValidationMessage	= @ValidationMessage + '',Last Activity Date('' + @patronagelastactivitydate + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 				SET @IsValid = 0
-			end catch
+			end
 		end	
 		
 
@@ -1491,27 +1493,24 @@ UPDATE tblSMCSVDynamicImport SET
 
 	IF @BeginDateS <> ''''
 	BEGIN
-
-		BEGIN TRY
+		if isdate(@BeginDateS) = 1
 			SELECT @BeginDate = CAST(@BeginDateS AS DATETIME)
-		END TRY
-		BEGIN CATCH
-			SET @ValidationMessage	= @ValidationMessage + '',Begin Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+		else
+		begin
+			SET @ValidationMessage	= @ValidationMessage + '',Begin Date('' + @BeginDateS + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 			SET @IsValid = 0
-		END CATCH
+		end
 	END
 
-	IF @EndDateS <> ''''
-	BEGIN
-
-		BEGIN TRY
-			SELECT @EndDate = CAST(@EndDateS AS DATETIME)
-		END TRY
-		BEGIN CATCH
-			SET @ValidationMessage	= @ValidationMessage + '',End Date is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
+	IF @EndDateS <> '''' 
+	BEGIN		
+		if isdate(@EndDateS) = 1
+			SELECT @EndDate = CAST(@EndDateS AS DATETIME)				
+		else
+		begin
+			SET @ValidationMessage	= @ValidationMessage + '',End Date('' + @EndDateS + '') is invalid, please try Month/Day/Year Format e.g. 12/01/2015.''
 			SET @IsValid = 0
-
-		END CATCH
+		end
 	END
 
 	IF @BeginDate IS NOT NULL AND @EndDate IS NOT NULL AND @BeginDate > @EndDate

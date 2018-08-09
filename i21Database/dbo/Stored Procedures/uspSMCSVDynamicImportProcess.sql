@@ -64,9 +64,12 @@ BEGIN
 	DECLARE @ValidationMessageOut	NVARCHAR(MAX)
 	DECLARE @ParmDefinition			NVARCHAR(MAX)
 	SET @ParmDefinition = N'@ValidationMessage NVARCHAR(MAX) OUTPUT'
-
+	declare @c int 
+	set @c = 0
 	WHILE EXISTS(SELECT TOP 1 1 FROM @ImportData)
 	BEGIN
+		set @c = @c + 1
+		--print @c
 		SET @command = ''
 		SET @requiredValue = ''
 		SET @ResultMessage = ''
@@ -129,32 +132,44 @@ BEGIN
 				--BEGIN TRANSACTION --@TransactionId
 			--ELSE
 			--System.Data.Entity.TransactionalBehavior.
-			BEGIN TRANSACTION
+			--BEGIN TRANSACTION
 			BEGIN TRY
+	            declare @trancount int;
+				set @trancount = @@trancount;   
+				if @trancount = 0
+					begin transaction
+				else
+					save transaction @TransactionId;
+
 				--PRINT 
 				--SET @TransactionId = 'CUSTOMER_IMPORT' + CAST(NEWID() AS NVARCHAR(50))
 				--SAVE TRANSACTION @TransactionId
-
+				--select  @command
 				EXEC sp_executesql @command, @ParmDefinition, @ValidationMessage = @ValidationMessageOut OUTPUT
 
 				IF ISNULL(@ValidationMessageOut, '') <> ''
 				BEGIN
 					SET @ResultMessage = @ResultMessage + ' but with some invalid value : ' + @ValidationMessageOut
 				END
-				--IF @@TRANCOUNT = 0
-					COMMIT TRANSACTION-- @TransactionId
+
+				if @trancount = 0   
+					COMMIT TRANSACTION
+
 
 			END TRY
 			BEGIN CATCH
 				SET @ResultMessage = ERROR_MESSAGE()
-				--IF @@TRANCOUNT = 0
-				--	IF (XACT_STATE()) <> 0
-				--		ROLLBACK TRANSACTION
-				--ELSE
-				--	--IF @@TRANCOUNT = 0
-				--	--	ROLLBACK TRANSACTION 
-				--	IF (XACT_STATE()) <> 0
-						ROLLBACK TRANSACTION --@TransactionId
+				declare @error int, @message varchar(4000), @xstate int;
+				select @error = ERROR_NUMBER(),
+					@message = ERROR_MESSAGE(), 
+					@xstate = XACT_STATE();
+				if @xstate = -1
+					rollback;
+				if @xstate = 1 and @trancount = 0
+					rollback
+				if @xstate = 1 and @trancount > 0
+					rollback transaction @TransactionId;
+
 
 			END CATCH			
 			
@@ -179,4 +194,3 @@ BEGIN
 	--select * from tblSMCSVDynamicImportLogDetail
 	RETURN 0;
 END
-
