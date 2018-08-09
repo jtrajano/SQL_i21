@@ -39,6 +39,7 @@ RETURNS TABLE AS RETURN
 		,[intWeightUOMId]					=	B.intWeightUOMId
 		,[intCostCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(subCurrency.intCurrencyID,0) ELSE A.intCurrencyId END
 		,[dblTax]							=	B.dblTax
+		,[dblDiscount]						=	B.dblDiscount
 		,[intCurrencyExchangeRateTypeId]	=	B.intForexRateTypeId
 		,[dblExchangeRate]					=	B.dblForexRate
 		,[ysnSubCurrency]					=	B.ysnSubCurrency

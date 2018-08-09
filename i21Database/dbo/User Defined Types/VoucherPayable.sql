@@ -46,6 +46,7 @@
 	[intCostCurrencyId]				INT NULL,
 	-- [strCostCurrency]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblTax]						DECIMAL(18,2),
+	[dblDiscount]					DECIMAL(18,2),
 	[intCurrencyExchangeRateTypeId]	INT NULL,
 	[dblExchangeRate]				DECIMAL(18,6) DEFAULT(1),
 	[ysnSubCurrency]				INT NULL,
