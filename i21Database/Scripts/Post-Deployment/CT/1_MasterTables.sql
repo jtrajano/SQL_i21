@@ -667,16 +667,16 @@ GO
 
 IF NOT EXISTS(SELECT * FROM tblCTComponentMap)
 BEGIN
-	INSERT INTO tblCTComponentMap(strComponent)
-	SELECT 'Component1' UNION 
-	SELECT 'Component2' UNION 
-	SELECT 'Component3' UNION 
-	SELECT 'Component4' UNION 
-	SELECT 'Component5' UNION 
-	SELECT 'Component6' UNION 
-	SELECT 'Component7' UNION 
-	SELECT 'Component8' UNION 
-	SELECT 'Component9'  
+	INSERT INTO tblCTComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component1',1 UNION 
+	SELECT 'Component2',1 UNION 
+	SELECT 'Component3',1 UNION 
+	SELECT 'Component4',1 UNION 
+	SELECT 'Component5',1 UNION 
+	SELECT 'Component6',1 UNION 
+	SELECT 'Component7',1 UNION 
+	SELECT 'Component8',1 UNION 
+	SELECT 'Component9',1  
 	ORDER BY 1
 END
 PRINT('Contract 1_MasterTables End')
