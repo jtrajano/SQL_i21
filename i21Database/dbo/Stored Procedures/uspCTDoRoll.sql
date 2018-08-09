@@ -137,10 +137,10 @@ BEGIN TRY
 			SELECT 
 				    @OldEndDate			= dbo.fnRemoveTimeOnDate(Old.dtmEndDate)
 				   ,@NewEndDate			= dbo.fnRemoveTimeOnDate(New.dtmEndDate)
-				   ,@OldFutures			= Old.dblFutures
-				   ,@NewFutures			= New.dblFutures
-				   ,@OldBasis			= Old.dblBasis
-				   ,@NewBasis			= New.dblBasis
+				   ,@OldFutures			= ISNULL(Old.dblFutures,0)
+				   ,@NewFutures			= ISNULL(New.dblFutures,0)
+				   ,@OldBasis			= ISNULL(Old.dblBasis,0)
+				   ,@NewBasis			= ISNULL(New.dblBasis,0)
 				   ,@OldFutureMarketId	= Old.intFutureMarketId
 				   ,@OldFutureMarket	= Old.FutureMarket
 				   ,@NewFutureMarketId  = New.intFutureMarketId
@@ -274,7 +274,7 @@ BEGIN TRY
 												  IF RIGHT(@details,1) = ','
 												  SET @details = SUBSTRING(@details,0,LEN(@details))
 
-												  +'
+												  SET @details = @details +'
 												]
 										  }
 									   ],
