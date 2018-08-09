@@ -6904,6 +6904,7 @@
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_HE.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmailDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
