@@ -405,147 +405,41 @@ BEGIN
 			END
 			ELSE
 			BEGIN	
+					DECLARE @dblAmount NUMERIC(18,6)
+					(SELECT TOP 1 @dblAmount = ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 
-					IF NOT EXISTS(SELECT 1 FROM tblCFAccountQuote WHERE intSiteId = @loopSiteId AND intEntityCustomerId = @intCustomerId AND intEntityUserId = @intEntityUserId) 
-					BEGIN 
-						INSERT INTO tblCFAccountQuote
-						(
-							 intSiteId
-							,strSite
-							,strAddress
-							,strCity
-							,strState
-							,intEntityCustomerId
-							,dtmEffectiveDate
-							,intEntityUserId
-						)
-						SELECT
-							 intSiteId
-							,strSiteNumber 
-							,strSiteAddress
-							,strSiteCity
-							,strTaxState
-							,@intCustomerId
-							,@effectiveDate
-							,@intEntityUserId
-						FROM @tblNetworkSiteItem
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND intSiteId	 = @loopSiteId	
-						--AND intItemId	 = @loopItemId	
-						AND intARItemId	 = @loopARItemId	
-						AND strSiteType	 = @loopSiteType	
-					END
-
-					IF(@intItemSequence = 1)
-					BEGIN
-
-						UPDATE tblCFAccountQuote
-						SET
-						 intItem1 = tblnsi.intARItemId
-						,strItem1 = tblnsi.strProductNumber
-						FROM @tblNetworkSiteItem as tblnsi
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND tblnsi.intSiteId	 = @loopSiteId	
-						--AND tblnsi.intItemId	 = @loopItemId	
-						AND tblnsi.intARItemId	 = @loopARItemId	
-						AND tblnsi.strSiteType	 = @loopSiteType	
-
-						UPDATE tblCFAccountQuote
-						SET dblItem1Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-						WHERE intSiteId = @loopSiteId
-						AND intEntityCustomerId = @intCustomerId
-
-					END
-
-					IF(@intItemSequence = 2)
-					BEGIN
-
-						UPDATE tblCFAccountQuote
-						SET
-						 intItem2 = tblnsi.intARItemId
-						,strItem2 = tblnsi.strProductNumber
-						FROM @tblNetworkSiteItem as tblnsi
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND tblnsi.intSiteId	 = @loopSiteId	
-						--AND tblnsi.intItemId	 = @loopItemId	
-						AND tblnsi.intARItemId	 = @loopARItemId	
-						AND tblnsi.strSiteType	 = @loopSiteType	
-
-						UPDATE tblCFAccountQuote
-						SET dblItem2Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-						WHERE intSiteId = @loopSiteId
-						AND intEntityCustomerId = @intCustomerId
-
-					END
-
-					IF(@intItemSequence = 3)
-					BEGIN
-
-						UPDATE tblCFAccountQuote
-						SET
-						 intItem3 = tblnsi.intARItemId
-						,strItem3 = tblnsi.strProductNumber
-						FROM @tblNetworkSiteItem as tblnsi
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND tblnsi.intSiteId	 = @loopSiteId	
-						--AND tblnsi.intItemId	 = @loopItemId	
-						AND tblnsi.intARItemId	 = @loopARItemId	
-						AND tblnsi.strSiteType	 = @loopSiteType	
-
-						UPDATE tblCFAccountQuote
-						SET dblItem3Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-						WHERE intSiteId = @loopSiteId
-						AND intEntityCustomerId = @intCustomerId
-
-					END
-
-					IF(@intItemSequence = 4)
-					BEGIN
-
-						UPDATE tblCFAccountQuote
-						SET
-						 intItem4 = tblnsi.intARItemId
-						,strItem4 = tblnsi.strProductNumber
-						FROM @tblNetworkSiteItem as tblnsi
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND tblnsi.intSiteId	 = @loopSiteId	
-						--AND tblnsi.intItemId	 = @loopItemId	
-						AND tblnsi.intARItemId	 = @loopARItemId	
-						AND tblnsi.strSiteType	 = @loopSiteType	
-
-						UPDATE tblCFAccountQuote
-						SET dblItem4Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-						WHERE intSiteId = @loopSiteId
-						AND intEntityCustomerId = @intCustomerId
-
-					END
-
-					IF(@intItemSequence = 5)
-					BEGIN
-
-						UPDATE tblCFAccountQuote
-						SET
-						 intItem5 = tblnsi.intARItemId
-						,strItem5 = tblnsi.strProductNumber
-						FROM @tblNetworkSiteItem as tblnsi
-						WHERE 
-						intNetworkId	 = @loopNetworkId	
-						AND tblnsi.intSiteId	 = @loopSiteId	
-						--AND tblnsi.intItemId	 = @loopItemId	
-						AND tblnsi.intARItemId	 = @loopARItemId	
-						AND tblnsi.strSiteType	 = @loopSiteType	
-
-						UPDATE tblCFAccountQuote
-						SET dblItem5Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-						WHERE intSiteId = @loopSiteId
-						AND intEntityCustomerId = @intCustomerId
-
-					END
+					INSERT INTO tblCFAccountQuote
+					(
+						 intSiteId
+						,strSite
+						,strAddress
+						,strCity
+						,strState
+						,intEntityCustomerId
+						,intItem
+						,strItem
+						,dblItemPrice
+						,dtmEffectiveDate
+						,intEntityUserId
+					)
+					SELECT
+						 intSiteId
+						,strSiteNumber 
+						,strSiteAddress
+						,strSiteCity
+						,strTaxState
+						,@intCustomerId
+						,intARItemId
+						,strProductNumber
+						,@dblAmount
+						,@effectiveDate
+						,@intEntityUserId
+					FROM @tblNetworkSiteItem
+					WHERE 
+					intNetworkId	 = @loopNetworkId	
+					AND intSiteId	 = @loopSiteId	
+					AND intARItemId	 = @loopARItemId	
+					AND strSiteType	 = @loopSiteType	
 			END
 		END
 
