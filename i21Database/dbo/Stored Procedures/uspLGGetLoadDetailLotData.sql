@@ -21,14 +21,17 @@ BEGIN
 		,WUM.strUnitMeasure AS strWeightUOM
 		,LOT.strLotNumber
 		,Receipt.strWarehouseRefNo
+		,CLSL.strSubLocationName
+		,SL.strName AS strStorageLocation
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LOT.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN tblICItemUOM WU ON WU.intItemUOMId = LOT.intWeightUOMId
-	JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = L.intWeightUnitMeasureId
+	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId,IU.intUnitMeasureId)
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LOT.intSubLocationId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LOT.intStorageLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = LOT.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

@@ -82,7 +82,7 @@ SELECT Lot.intLotId
        , dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
        , LC.strContainerNumber
        , L.strBLNumber
-       , EY.strEntityName as strVendor
+       , EY.strName as strVendor 
        , L.strLoadNumber
        , L.dtmPostedDate
        , Receipt.strWarehouseRefNo
@@ -117,7 +117,8 @@ LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
-LEFT JOIN vyuCTEntity EY ON EY.intEntityId = CTHeader.intEntityId AND EY.strEntityType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId 
+LEFT JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId AND ET.strType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)  
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId

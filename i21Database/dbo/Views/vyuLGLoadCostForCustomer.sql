@@ -23,6 +23,7 @@ SELECT strTransactionType
 	,SUM(dblPrice) AS dblPrice
 	,SUM(dblShipmentUnitPrice) AS dblShipmentUnitPrice
 	,SUM(dblTotal) AS dblTotal
+	,intPriceItemUOMId
 	,intAccountId
 	,intCOGSAccountId
 	,intSalesAccountId
@@ -61,15 +62,17 @@ FROM (
 		,[dblPrice] = Sum(LC.dblAmount)
 		,[dblShipmentUnitPrice] = Sum(LC.dblAmount)
 		,[dblTotal] = Sum(LC.dblAmount)
+		,[intPriceItemUOMId] = LC.intItemUOMId
 		,[intAccountId] = ARIA.[intAccountId]
 		,[intCOGSAccountId] = ARIA.[intCOGSAccountId]
 		,[intSalesAccountId] = ARIA.[intSalesAccountId]
 		,[intInventoryAccountId] = ARIA.[intInventoryAccountId]
 		,[ysnPosted] = L.ysnPosted
 	FROM tblLGLoad L
-	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
+	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND strEntityType = 'Customer'
 	JOIN tblARCustomer ARC ON LC.intVendorId = ARC.[intEntityId]
 	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
+	JOIN tblEMEntityType EMT ON EMT.intEntityId = EME.intEntityId AND EMT.strType = 'Customer'
 	LEFT JOIN [tblSMCompanyLocation] SMCL ON SMCL.[intCompanyLocationId] = (
 			SELECT TOP 1 LD.intSCompanyLocationId
 			FROM tblLGLoadDetail LD
@@ -98,6 +101,7 @@ FROM (
 		,ARC.intEntityId
 		,SMCL.intCompanyLocationId
 		,LC.intItemUOMId
+		,LC.intItemUOMId
 	) tbl
 GROUP BY strTransactionType
 	,strTransactionNumber
@@ -117,3 +121,4 @@ GROUP BY strTransactionType
 	,intSalesAccountId
 	,intInventoryAccountId
 	,ysnPosted
+	,intPriceItemUOMId

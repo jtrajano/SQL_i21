@@ -260,7 +260,7 @@ BEGIN
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'Posting negative amount is not allowed.',
+			'Posting negative amount is not allowed. You may want to create a deposit instead.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId

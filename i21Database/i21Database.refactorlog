@@ -6853,6 +6853,20 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strMIOriginZip" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7c20c01e-8c11-4259-ac5a-9feb66a4ec78" ChangeDateTime="07/20/2018 05:59:09">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strMIOriginZip]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIOriginZipCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2673153c-ad54-4dfe-92a2-44e4a1d7fe4e" ChangeDateTime="07/20/2018 05:59:17">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strMIDestinationZip]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIDestinationZipCode" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="91f484f9-6aaf-4b22-8c8a-6d8815982a6d" ChangeDateTime="05/29/2018 05:52:31">
     <Property Name="ElementName" Value="[dbo].[tblSTHandheldScanner].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />

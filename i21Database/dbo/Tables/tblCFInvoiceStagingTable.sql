@@ -145,16 +145,21 @@
     CONSTRAINT [UserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
 
-
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceStagingTable_UserNameAndAccountId]
+    ON [dbo].[tblCFInvoiceStagingTable]([strUserId], [intAccountId] ASC);
 
 
 GO
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceStagingTable_ProductId]
+    ON [dbo].[tblCFInvoiceStagingTable]([intProductId] ASC);
 
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceStagingTable_CardId]
+    ON [dbo].[tblCFInvoiceStagingTable]([intCardId] ASC);
 
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceStagingTable_dtmTransactionDate]
+    ON [dbo].[tblCFInvoiceStagingTable]([dtmTransactionDate] ASC);
 
-
-
-
-
-
-
+GO

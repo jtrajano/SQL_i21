@@ -1064,11 +1064,11 @@ FROM (
 	     , intFreightTermId					= NULL
 	     , intItemId						= LC.intItemId
 	     , strItemDescription				= LC.strItemDescription
-	     , intItemUOMId						= NULL
-		 , intPriceUOMId					= NULL
-	     , intOrderUOMId					= NULL
+	     , intItemUOMId						= LC.intPriceItemUOMId
+		 , intPriceUOMId					= LC.intPriceItemUOMId
+	     , intOrderUOMId					= LC.intPriceItemUOMId
 	     , intShipmentItemUOMId				= NULL
-		 , intWeightUOMId					= NULL
+		 , intWeightUOMId					= LC.intPriceItemUOMId
 		 , dblWeight						= NULL
 	     , dblQtyShipped					= 1
 	     , dblQtyOrdered					= 1
@@ -1135,6 +1135,7 @@ FROM (
 		     , dblPrice
 		     , dblShipmentUnitPrice
 		     , dblTotal
+			 , intPriceItemUOMId
 		     , ysnPosted
 		FROM vyuLGLoadCostForCustomer WITH (NOLOCK) 
 		WHERE [ysnPosted] = 1

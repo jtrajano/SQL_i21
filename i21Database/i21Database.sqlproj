@@ -183,6 +183,7 @@
     <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
     <Folder Include="Scripts\Post-Deployment\CCR" />
+    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
   </ItemGroup>
@@ -6752,6 +6753,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
     <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
     <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
@@ -6769,7 +6771,6 @@
     <Build Include="dbo\Views\vyuCTUsedPriceUOM.sql" />
     <Build Include="dbo\Views\vyuARSearchPOS.sql" />
     <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Tables\tblRKMatchDerivativesHistoryForOption.sql" />
     <Build Include="dbo\Views\vyuSTStorePumpItem.sql" />
@@ -6903,6 +6904,30 @@
     <Build Include="dbo\Views\vyuAPBasisAdvanceTicket.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Views\vyuLGContractCostView.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\09_RemoveAfter18.3_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\05_FixDebitCreditUnits.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\08_Populate_Shipment_LineTotal.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\01_UpdateContractItemStatuses.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\02_Update_ActualCostId_On_InventoryTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\03_MigratePackedTypeToQuantityType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\04_AddStockUOM.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\06_CompanyPreferenceForOriginLastTask.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\07_Inventory_Constraints.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptItems.sql" />
+    <Build Include="dbo\Views\vyuAPBillForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPayVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTempData.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearVoucherTempData.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherPaymentDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfoOfForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateAndPostPaymentFromVouchers.sql" />
+    <Build Include="dbo\Functions\fnAPPartitonPaymentOfVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipmentOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
