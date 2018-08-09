@@ -307,53 +307,53 @@ BEGIN
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			AND Reversal.intTransactionTypeId  = @InventoryTransactionTypeId_CostAdjustment
-	UNION ALL  
-	SELECT	
-			dtmDate						= ItemTransactions.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccounts.intInventoryId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
-			,dblDebitUnit				= CreditUnit.Value
-			,dblCreditUnit				= DebitUnit.Value
-			,strDescription				= tblGLAccount.strDescription
-			,strCode					= 'ICA' 
-			,strReference				= '' 
-			,intCurrencyId				= ItemTransactions.intCurrencyId
-			,dblExchangeRate			= ItemTransactions.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= ItemTransactions.dtmDate
-			,strJournalLineDescription	= '' 
-			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
-			,strTransactionId			= ItemTransactions.strTransactionId
-			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= 'Cost Adjustment'
-			,strTransactionForm			= ItemTransactions.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= 0.00 
-			,dblDebitReport				= 0.00
-			,dblCreditForeign			= 0.00 
-			,dblCreditReport			= 0.00 
-			,dblReportingRate			= 0.00
-			,dblForeignRate				= 0.00 
-			,strRateType				= NULL 
-	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
-				ON ItemTransactions.intItemId = GLAccounts.intItemId
-				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
-				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
-			INNER JOIN dbo.tblGLAccount	
-				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblValue, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblValue, 0)) Credit
-			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
-			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
-	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_CostAdjustment
-			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
+	--UNION ALL  
+	--SELECT	
+	--		dtmDate						= ItemTransactions.dtmDate
+	--		,strBatchId					= @strBatchId
+	--		,intAccountId				= GLAccounts.intInventoryId
+	--		,dblDebit					= Credit.Value
+	--		,dblCredit					= Debit.Value
+	--		,dblDebitUnit				= CreditUnit.Value
+	--		,dblCreditUnit				= DebitUnit.Value
+	--		,strDescription				= tblGLAccount.strDescription
+	--		,strCode					= 'ICA' 
+	--		,strReference				= '' 
+	--		,intCurrencyId				= ItemTransactions.intCurrencyId
+	--		,dblExchangeRate			= ItemTransactions.dblExchangeRate
+	--		,dtmDateEntered				= GETDATE()
+	--		,dtmTransactionDate			= ItemTransactions.dtmDate
+	--		,strJournalLineDescription	= '' 
+	--		,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
+	--		,ysnIsUnposted				= 1
+	--		,intUserId					= NULL 
+	--		,intEntityId				= @intEntityUserSecurityId 
+	--		,strTransactionId			= ItemTransactions.strTransactionId
+	--		,intTransactionId			= ItemTransactions.intTransactionId
+	--		,strTransactionType			= 'Cost Adjustment'
+	--		,strTransactionForm			= ItemTransactions.strTransactionForm
+	--		,strModuleName				= @ModuleName
+	--		,intConcurrencyId			= 1
+	--		,dblDebitForeign			= 0.00 
+	--		,dblDebitReport				= 0.00
+	--		,dblCreditForeign			= 0.00 
+	--		,dblCreditReport			= 0.00 
+	--		,dblReportingRate			= 0.00
+	--		,dblForeignRate				= 0.00 
+	--		,strRateType				= NULL 
+	--FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+	--			ON ItemTransactions.intItemId = GLAccounts.intItemId
+	--			AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
+	--			AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
+	--		INNER JOIN dbo.tblGLAccount	
+	--			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+	--		CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblValue, 0)) Debit
+	--		CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblValue, 0)) Credit
+	--		CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+	--		CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
+	--WHERE	ItemTransactions.strBatchId = @strBatchId
+	--		AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_CostAdjustment
+	--		AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
 
 END
 ;
