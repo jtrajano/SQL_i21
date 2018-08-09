@@ -970,7 +970,7 @@ USING
 		,[dblPayment]					= @ZeroDecimal		
 		,[dblBasePayment]				= @ZeroDecimal		
 		,[intEntitySalespersonId]		= ISNULL(ITG.intEntitySalespersonId, ARC.[intSalespersonId])		
-		,[intFreightTermId]				= ISNULL(ITG.intFreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
+		,[intFreightTermId]				= ITG.intFreightTermId
 		,[intShipViaId]					= ISNULL(ITG.intShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = ITG.intPaymentMethodId)
 		,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
@@ -1048,11 +1048,11 @@ USING
 		) EL
 			ON ARC.[intEntityId] = EL.[intEntityId]
 	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
+		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
 			ON ISNULL(ITG.intShipToLocationId, 0) <> 0
 			AND ITG.intShipToLocationId = SL.[intEntityLocationId]
 	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
+		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
 			ON ARC.[intShipToId] = SL1.intEntityLocationId
 	LEFT OUTER JOIN
 		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL

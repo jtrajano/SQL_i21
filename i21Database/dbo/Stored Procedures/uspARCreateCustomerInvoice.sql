@@ -454,7 +454,7 @@ BEGIN TRY
 		
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intEntityContactId]			= @EntityContactId
-		,[intFreightTermId]				= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
+		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 		,[strInvoiceOriginId]			= @InvoiceOriginId
