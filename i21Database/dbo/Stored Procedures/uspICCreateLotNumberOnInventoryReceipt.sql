@@ -141,7 +141,7 @@ BEGIN
 							INNER JOIN tblICUnitMeasure uLot
 								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
 					WHERE	ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-							AND uLot.strUnitType NOT IN ('Packed')
+							AND uLot.strUnitType NOT IN ('Packed', 'Quantity')
 				) lotUOMs
 				OUTER APPLY (
 					SELECT	TOP 1 
@@ -151,7 +151,7 @@ BEGIN
 							INNER JOIN tblICUnitMeasure uLot
 								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
 					WHERE	ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-							AND uLot.strUnitType IN ('Packed')
+							AND uLot.strUnitType IN ('Packed', 'Quantity')
 					ORDER BY ril.intInventoryReceiptItemLotId DESC 
 				) lotPackedUOM
 		WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
