@@ -10,6 +10,7 @@
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
+    ,@CompanyLocationId				INT				= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -44,7 +45,7 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @ItemCategoryId = [intCategoryId] FROM tblICItem WHERE [intItemId] = @ItemId 
-	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @ShipFromLocationId
+	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId
 	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
 
 	-- IF (ISNULL(@UOMId,0) = 0)
