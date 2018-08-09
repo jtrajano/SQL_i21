@@ -477,12 +477,11 @@ BEGIN
 												, @dblQty 
 												, Lot.dblWeightPerQty
 											)
-						,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
+						--,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intItemLocationId = @intItemLocationId
 						AND Lot.intLotId = @intLotId
 						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
-
 
 				-- Recalculate the average cost from the inventory transaction table. 
 				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
