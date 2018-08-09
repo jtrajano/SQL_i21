@@ -16,6 +16,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
+		,@InTransitTableType AS InTransitTableType
 DECLARE @total AS INT
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @strTransactionId NVARCHAR(40) = NULL
@@ -340,7 +341,38 @@ END
 
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 	SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
-	EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
+	EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId, @intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
+
+	--REDUCE IN-TRANSIT INBOUND
+	INSERT INTO @InTransitTableType (
+		[intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[dblQty]
+		,[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+	)
+	SELECT DISTINCT
+		[intItemId]				= SC.intItemId
+		,[intItemLocationId]	= ICIL.intItemLocationId
+		,[intItemUOMId]			= SC.intItemUOMIdTo
+		,[intLotId]				= NULL
+		,[intSubLocationId]		= SC.intSubLocationId
+		,[intStorageLocationId]	= SC.intStorageLocationId
+		,[dblQty]				= (SCD.dblGross * -1)
+		,[intTransactionId]		= SCD.intDeliverySheetId
+		,[strTransactionId]		= SCD.strDeliverySheetNumber
+		,[intTransactionTypeId] = 1
+	FROM tblSCDeliverySheet SCD 
+	INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
+	INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SCD.intDeliverySheetId
+	WHERE  SC.intDeliverySheetId = @intDeliverySheetId
+	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransitTableType;
+
 	UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 1 WHERE intDeliverySheetId = @intDeliverySheetId;
 
 	-- VOUCHER INTEGRATION

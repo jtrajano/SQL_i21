@@ -6,6 +6,7 @@
 	,@strInOutFlag AS NVARCHAR(2)
 	,@ysnPost AS BIT
 	,@ysnDeliverySheet AS BIT = 0
+	,@intDeliverySheetId AS INT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -19,7 +20,12 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 DECLARE @ErrMsg	NVARCHAR(MAX)
-	,@InTransitTableType AS InTransitTableType;
+	,@InTransitTableType AS InTransitTableType
+	,@ItemsForInTransitCosting AS ItemInTransitCostingTableType
+	,@intLocationId INT
+	,@intTransactionId INT
+	,@strTransactionId NVARCHAR(40)
+	,@strBatchId NVARCHAR(40);
 
 BEGIN
 	IF @ysnDeliverySheet = 0
@@ -49,6 +55,45 @@ BEGIN
 		FROM	tblSCTicket SC 
 		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 		WHERE SC.intTicketId = @intTicketId
+
+		INSERT INTO @ItemsForInTransitCosting (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost]
+			,[intCurrencyId]  
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId]
+			,[strSourceTransactionId] 
+			,[intInTransitSourceLocationId] 
+			,[intTransactionTypeId]
+		)
+		SELECT
+			[intItemId]							= SC.intItemId
+			,[intItemLocationId]				= ICIL.intItemLocationId
+			,[intItemUOMId]						= SC.intItemUOMIdTo
+			,[dtmDate]							= SC.dtmTicketDateTime
+			,[dblQty]							= SC.dblNetUnits
+			,[dblUOMQty]						= SC.dblConvertedUOMQty
+			,[dblCost]							= 0
+			,[intCurrencyId]					= SC.intCurrencyId 
+			,[intTransactionId]					= SC.intTicketId
+			,[intTransactionDetailId]			= NULL
+			,[strTransactionId]					= SC.strTicketNumber
+			,[intSourceTransactionId]			= SC.intTicketId
+			,[intSourceTransactionDetailId]		= NULL
+			,[strSourceTransactionId]			= SC.strTicketNumber
+			,[intInTransitSourceLocationId]		= SC.intProcessingLocationId
+			,[intTransactionTypeId]				= 5
+		FROM vyuSCTicketScreenView SC 
+		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+		WHERE SC.intTicketId = @intTicketId
 	END
 	ELSE
 	BEGIN
@@ -69,21 +114,61 @@ BEGIN
 			,[strTransactionId]
 			,[intTransactionTypeId]
 		)
-		SELECT	DISTINCT
-				[intItemId]				= SC.intItemId
-				,[intItemLocationId]	= ICIL.intItemLocationId
-				,[intItemUOMId]			= SC.intItemUOMIdTo
-				,[intLotId]				= NULL
-				,[intSubLocationId]		= SC.intSubLocationId
-				,[intStorageLocationId]	= SC.intStorageLocationId
-				,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
-				,[intTransactionId]		= @intTicketId
-				,[strTransactionId]		= SC.strTicketNumber
-				,[intTransactionTypeId] = 1
-		FROM	tblSCDeliverySheet SCD 
+		SELECT DISTINCT
+			[intItemId]				= SC.intItemId
+			,[intItemLocationId]	= ICIL.intItemLocationId
+			,[intItemUOMId]			= SC.intItemUOMIdTo
+			,[intLotId]				= NULL
+			,[intSubLocationId]		= SC.intSubLocationId
+			,[intStorageLocationId]	= SC.intStorageLocationId
+			,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
+			,[intTransactionId]		= SCD.intDeliverySheetId
+			,[strTransactionId]		= SCD.strDeliverySheetNumber
+			,[intTransactionTypeId] = 1
+		FROM tblSCDeliverySheet SCD 
 		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
 		INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SCD.intDeliverySheetId
-		WHERE  SC.intDeliverySheetId = @intTicketId
+		WHERE  SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
+
+
+		INSERT INTO @ItemsForInTransitCosting (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost]
+			,[intCurrencyId]  
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId]
+			,[strSourceTransactionId] 
+			,[intInTransitSourceLocationId] 
+			,[intTransactionTypeId]
+		)
+		SELECT
+			[intItemId]							= SC.intItemId
+			,[intItemLocationId]				= ICIL.intItemLocationId
+			,[intItemUOMId]						= SC.intItemUOMIdTo
+			,[dtmDate]							= SC.dtmTicketDateTime
+			,[dblQty]							= SC.dblNetUnits
+			,[dblUOMQty]						= SC.dblConvertedUOMQty
+			,[dblCost]							= 0
+			,[intCurrencyId]					= SC.intCurrencyId 
+			,[intTransactionId]					= SC.intDeliverySheetId
+			,[intTransactionDetailId]			= NULL
+			,[strTransactionId]					= SC.strDeliverySheetNumber
+			,[intSourceTransactionId]			= SC.intDeliverySheetId
+			,[intSourceTransactionDetailId]		= NULL
+			,[strSourceTransactionId]			= SC.strDeliverySheetNumber
+			,[intInTransitSourceLocationId]		= SC.intProcessingLocationId
+			,[intTransactionTypeId]				= 5
+		FROM vyuSCTicketScreenView SC 
+		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+		WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
 	END
 END
 
@@ -98,9 +183,19 @@ BEGIN TRY
 				EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransitTableType;
 			END
 		
+		
+		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, @intLocationId   
+
+		IF ISNULL(@ysnPost , 0) = 1
+		BEGIN 
+			EXEC dbo.uspICPostInTransitCosting @ItemsForInTransitCosting, @strBatchId, NULL, @intUserId
+		END
+		
 		IF @ysnPost = 0
 		BEGIN
-			update tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+			SELECT @strTransactionId = strTransactionId, @intTransactionId = intTransactionId FROM @ItemsForInTransitCosting
+			EXEC dbo.uspICUnpostCosting @intTransactionId, @strTransactionId , @strBatchId, NULL, @intUserId
+			UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
 		END
 	END
 _Exit:
