@@ -495,7 +495,7 @@ FROM
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-									AND F1.intPricingTypeId NOT IN (2, 3, 4) --AP-4971
+									AND F1.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
 							THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
@@ -504,7 +504,6 @@ FROM
 	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
-	AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
 	UNION ALL
 
 	--RECEIPT OTHER CHARGES
