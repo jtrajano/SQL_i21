@@ -6931,6 +6931,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_HE.sql" />
     <Build Include="dbo\Tables\tblIPSAPLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePOSLog.sql" />
+    <Build Include="dbo\Views\vyuARPOSAvailableDrawer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
