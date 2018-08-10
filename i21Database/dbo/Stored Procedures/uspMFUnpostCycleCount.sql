@@ -193,7 +193,12 @@ BEGIN TRY
 			,intFobPointId
 			)
 		SELECT [intItemId] = PL.intItemId
-			,[intItemLocationId] = L.intItemLocationId
+			,[intItemLocationId] = isNULL(L.intItemLocationId, (
+					SELECT IL.intItemLocationId
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = PL.intItemId
+						AND IL.intLocationId = @intLocationId
+					))
 			,[intItemUOMId] = PL.intItemUOMId
 			,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
 			,[dblQty] = PL.dblQuantity
@@ -225,7 +230,7 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
 		Left JOIN dbo.tblICItemUOM IU on IU.intItemId=PL.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
-		JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+		Left JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
 			AND RI.intRecipeItemTypeId = 2
