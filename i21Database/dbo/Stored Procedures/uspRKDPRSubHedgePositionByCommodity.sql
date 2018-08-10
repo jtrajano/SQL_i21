@@ -594,7 +594,7 @@ DECLARE @tempCollateral TABLE (
 		strLocationName NVARCHAR(200),
 		strItemNo NVARCHAR(200),
 		strEntityName NVARCHAR(200),
-		intReceiptNo int,
+		intReceiptNo NVARCHAR(100),
 		intContractHeaderId int,	
 		strContractNumber NVARCHAR(200), 
 		dtmOpenDate datetime,
@@ -701,7 +701,7 @@ BEGIN
 				CASE WHEN isnull(intContractTypeId,1) = 2 then -dblRemainingQuantity else dblRemainingQuantity   end dblRemainingQuantity,
 					intContractHeaderId,strContractNumber,intUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intCollateralId			
 					FROM @tempCollateral c1									
-					WHERE c1.intLocationId= case when isnull(@intLocationId,0)=0 then c1.intLocationId else @intLocationId end)t 
+					WHERE c1.intLocationId= case when isnull(@intLocationId,0)=0 then c1.intLocationId else @intLocationId end and intCommodityId = @intCommodityId)t 
 	GROUP BY intCommodityId,intFromCommodityUnitMeasureId,intCommodityId,strLocationName	
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,strShipmentNumber,intInventoryShipmentId,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
