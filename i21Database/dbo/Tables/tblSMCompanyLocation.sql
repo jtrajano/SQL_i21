@@ -206,6 +206,7 @@
 	[ysnPrintInvTagOnReceivingComplete] BIT NULL DEFAULT (0), 
 	---------------------------------------------------------------------
 	/* Credit Card Processing */
+	[ysnEnableCreditCardProcessing] BIT NOT NULL DEFAULT 0, 
 	[strMerchantId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strMerchantPassword] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	------------------------------------------------------------------------------
@@ -1158,6 +1159,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMCompanyLocation',
     @level2type = N'COLUMN',
     @level2name = N'dblWithholdPercent'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable Credit Card Processing',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableCreditCardProcessing'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Merchant Id',

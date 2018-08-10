@@ -249,6 +249,7 @@ SELECT compLoc.intCompanyLocationId
 ,ISNULL(sanitizationStagingUnit.[strName], '') as strSanitizationStagingUnit
 ,ISNULL(sanitizationStorageUnit.[strName], '') as strSanitizationStorageUnit
 ,ISNULL(taxGroup.[strTaxGroup], '') as strTaxGroup
+,compLoc.ysnEnableCreditCardProcessing
 ,compLoc.strMerchantId
 ,compLoc.strMerchantPassword
 FROM tblSMCompanyLocation compLoc

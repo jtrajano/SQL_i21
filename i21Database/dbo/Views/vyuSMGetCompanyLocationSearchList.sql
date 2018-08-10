@@ -221,6 +221,7 @@ SELECT compLoc.[intCompanyLocationId]
 ,ISNULL(interestAccountId.[strAccountId], '') as strstrerestAccountId
 ,ISNULL(prepaidAccountId.[strAccountId], '') as strPrepaidAccountId
 ,ISNULL(undepositedFundsId.[strAccountId], '') as strUndepositedFundsId
+,compLoc.ysnEnableCreditCardProcessing
 ,compLoc.strMerchantId
 ,compLoc.strMerchantPassword
 FROM tblSMCompanyLocation compLoc
