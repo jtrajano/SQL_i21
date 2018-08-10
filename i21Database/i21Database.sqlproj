@@ -6930,6 +6930,7 @@
     <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_HE.sql" />
     <Build Include="dbo\Tables\tblIPSAPLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePOSLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
