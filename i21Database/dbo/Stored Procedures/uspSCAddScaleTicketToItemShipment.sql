@@ -37,36 +37,45 @@ DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
 		,@TRANSFER_ORDER AS INT = 3
 
--- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT 
-
-IF @ShipmentNumber IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
-	RETURN;
-END 
-
 DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
-		@intLotType INT;
+		@intLotType INT,
+		@intShipToId INT,
+		@intFreightTermId INT;
 
-SELECT	@intTicketItemUOMId = UM.intItemUOMId
+SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
-, @intContractDetailId = SC.intContractId
+, @intContractDetailId = SC.intContractId 
 , @intItemId = SC.intItemId
 , @splitDistribution = SC.strDistributionOption
 , @ticketStatus = SC.strTicketStatus
 , @intContractCostId = SC.intContractCostId
-FROM dbo.tblICItemUOM UM	
-JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+FROM vyuSCTicketScreenView SC
+WHERE SC.intTicketId = @intTicketId
 
 IF @ticketStatus = 'C'
 BEGIN
-	 --Raise the error:
-	RAISERROR('Ticket already completed', 16, 1);
+     --Raise the error:
+    RAISERROR('Ticket already completed', 16, 1);
+    RETURN;
+END
+
+SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId 
+FROM tblARCustomer AR
+LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+WHERE AR.intEntityId = @intEntityId
+
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+
+IF ISNULL(@intShipToId, 0) = 0
+BEGIN
+	RAISERROR('Customer is missing The "Ship To" information, To correct, click on customer link and fill up "Ship To" on the Customer tab', 11, 1);
+	RETURN;
+END
+
+IF ISNULL(@intFreightTermId, 0) = 0
+BEGIN
+	RAISERROR('Customer is missing The "Freight Terms" information, To correct, click on customer link and fill up "Freight Term" on the Location', 11, 1);
 	RETURN;
 END
 
@@ -137,9 +146,9 @@ BEGIN
 											END
 									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
-		,intShipToLocationId		= AR.intShipToId
+		,intShipToLocationId		= @intShipToId
 		,intShipViaId				= SC.intFreightCarrierId
-		,intFreightTermId			= (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
+		,intFreightTermId			= @intFreightTermId
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
 		,intForexRateTypeId			= NULL
@@ -249,7 +258,6 @@ BEGIN
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
