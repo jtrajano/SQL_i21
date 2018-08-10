@@ -67,6 +67,7 @@ BEGIN TRY
 		,@intControlPointId INT
 		,@intSampleTypeId INT
 		,@ysnAddQtyOnExistingLot BIT
+		,@strLotTracking nvarchar(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -129,6 +130,7 @@ BEGIN TRY
 	SELECT @strItemNo = strItemNo
 		,@strStatus = strStatus
 		,@CasesPerPallet = intLayerPerPallet * intUnitPerLayer
+		,@strLotTracking=strLotTracking 
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -267,6 +269,9 @@ BEGIN TRY
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
+	If @strLotTracking<>'No'
+	Begin
+
 	IF @ysnAllowMultipleLot = 0
 		AND @ysnAllowMultipleItem = 0
 	BEGIN
@@ -353,6 +358,7 @@ BEGIN TRY
 				,@strExistingStorageLocationName
 				)
 	END
+	End
 
 	IF @ysnSubLotAllowed = 1
 		AND @intExistingiItemId <> @intItemId
