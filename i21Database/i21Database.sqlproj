@@ -7043,6 +7043,7 @@
     <None Include="Scripts\Post-Deployment\SM\1830_ReIndexTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\1830_CreateReIndexMaintenancePlan.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
+    <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
