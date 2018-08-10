@@ -639,7 +639,7 @@ DECLARE @tempCollateral TABLE (
 		strLocationName NVARCHAR(200),
 		strItemNo NVARCHAR(200),
 		strEntityName NVARCHAR(200),
-		intReceiptNo int,
+		intReceiptNo NVARCHAR(100),
 		intContractHeaderId int,	
 		strContractNumber NVARCHAR(200), 
 		dtmOpenDate datetime,
