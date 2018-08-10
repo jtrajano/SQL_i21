@@ -598,7 +598,6 @@
     <Build Include="dbo\Views\vyuCMOriginUndepositedFund.sql" />
     <Build Include="dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql" />
     <Build Include="dbo\Functions\fnGetEntityIdFromUser.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateTransactionUser.sql" />
     <Build Include="dbo\Tables\tblHDTicketJIRAIssue.sql" />
