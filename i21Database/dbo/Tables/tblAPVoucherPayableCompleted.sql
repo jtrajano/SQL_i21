@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblAPVoucherPayable]
+﻿CREATE TABLE [dbo].[tblAPVoucherPayableCompleted]
 (
 	[intVoucherPayableId]			INT NOT NULL PRIMARY KEY IDENTITY, 
     [intEntityVendorId]				INT,
@@ -41,8 +41,8 @@
 	[dblQtyToBillUnitQty]			DECIMAL(38,20),	
 	[intQtyToBillUOMId]				INT NULL,
 	[strQtyToBillUOM]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	[dblCost]						DECIMAL(38,20) NOT NULL DEFAULT(0),
-	[dblCostUnitQty]				DECIMAL(38,20) NOT NULL DEFAULT(0),
+	[dblCost]						DECIMAL(38,20),
+	[dblCostUnitQty]				DECIMAL(38,20),
 	[intCostUOMId]					INT NULL,
 	[strCostUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblNetWeight]					DECIMAL(18,6),
@@ -51,8 +51,8 @@
 	[strWeightUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intCostCurrencyId]				INT NULL,
 	[strCostCurrency]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0),
-	[dblDiscount]					DECIMAL(18,2) NOT NULL DEFAULT(0),
+	[dblTax]						DECIMAL(18,2),
+	[dblDiscount]					DECIMAL(18,2),
 	[intCurrencyExchangeRateTypeId]	INT NULL,
 	[strRateType]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblExchangeRate]				DECIMAL(38,20) DEFAULT(1),
@@ -75,29 +75,14 @@
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
-CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
-    ON [dbo].[tblAPVoucherPayable](intEntityVendorId
+CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
+    ON [dbo].[tblAPVoucherPayableCompleted](intEntityVendorId
 								,intPurchaseDetailId
 								,intContractDetailId
 								,intScaleTicketId
 								,intInventoryReceiptChargeId
 								,intInventoryReceiptItemId
-								--,intInventoryShipmentItemId
+								,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
-								,intLoadShipmentDetailId DESC);
--- GO
--- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
---     ON [dbo].[tblAPVoucherPayable]([intPurchaseDetailId] ASC);
--- GO
--- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intContractDetailId]
---     ON [dbo].[tblAPVoucherPayable]([intContractDetailId] ASC);
--- GO
--- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intScaleTicketId]
---     ON [dbo].[tblAPVoucherPayable]([intScaleTicketId] ASC);
--- GO
--- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intInventoryReceiptChargeId]
---     ON [dbo].[tblAPVoucherPayable]([intInventoryReceiptChargeId] ASC);
--- GO
--- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intLoadShipmentDetailId]
---     ON [dbo].[tblAPVoucherPayable]([intLoadShipmentDetailId] ASC);
+								,intLoadShipmentDetailId ASC);
 GO

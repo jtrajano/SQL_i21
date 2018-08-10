@@ -1143,15 +1143,17 @@ BEGIN
 					AND A.[intPurchaseDetailId] > 0)
 		BEGIN
 			DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
+			DECLARE @miscItemId TABLE(intBillId INT);
+			INSERT INTO @miscItemId
+			SELECT intBillId FROM #tmpPostBillData
 			WHILE @countReceivedMisc != @totalRecords
 			BEGIN
 				SET @countReceivedMisc = @countReceivedMisc + 1;
-				SELECT TOP(1) @billIdReceived = intBillId FROM #tmpPostBillData
+				SELECT TOP(1) @billIdReceived = intBillId FROM @miscItemId
 				EXEC [uspPOReceivedMiscItem] @billIdReceived
-				DELETE FROM #tmpPostBillData WHERE intBillId = @billIdReceived
+				DELETE FROM @miscItemId WHERE intBillId = @billIdReceived
 			END
 		END
-
 	END TRY
 	BEGIN CATCH
 		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()
@@ -1159,10 +1161,31 @@ BEGIN
 		GOTO Post_Rollback
 	END CATCH
 
-	DECLARE @voucherHistory AS Id
-	INSERT INTO @voucherHistory
+	DECLARE @voucherBillId AS Id;
+	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
-	EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherHistory, @post = @post
+
+	BEGIN TRY
+	--UPDATE VOUCHER PAYABLE STAGING QTY
+		DECLARE @voucherPayables VoucherPayable
+		INSERT INTO @voucherPayables
+		SELECT * FROM dbo.fnAPGetVoucherPayableFromBill(@voucherBillId);
+		EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @post = @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorUpdateVoucherPayable NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR('Error updating voucher staging data.', 16, 1);
+		GOTO Post_Rollback
+	END CATCH
+	
+	BEGIN TRY
+		EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherBillId, @post = @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorUpdateVoucherHistory NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR('Error updating voucher history.', 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 	--GOTO Audit_Log_Invoke
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 

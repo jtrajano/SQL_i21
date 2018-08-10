@@ -1,0 +1,7 @@
+﻿GO
+IF NOT EXISTS(SELECT 1 FROM tblAPVoucherPayable)
+BEGIN
+	EXEC uspAPUpdateStagingPayable DEFAULT, DEFAULT
+END
+
+GO
