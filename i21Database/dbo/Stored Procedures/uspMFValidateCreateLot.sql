@@ -21,7 +21,7 @@
 	,@ysnLotAlias BIT = 0
 	,@strLotAlias NVARCHAR(50)
 	,@intProductionTypeId BIT = 3
-	,@ysnFillPartialPallet BIT=0
+	,@ysnFillPartialPallet BIT = 0
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -66,7 +66,7 @@ BEGIN TRY
 		,@dtmStartedDate DATETIME
 		,@intControlPointId INT
 		,@intSampleTypeId INT
-		,@ysnAddQtyOnExistingLot bit
+		,@ysnAddQtyOnExistingLot BIT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -83,18 +83,25 @@ BEGIN TRY
 				)
 	END
 
-	Select @ysnAddQtyOnExistingLot=ysnAddQtyOnExistingLot
-	from tblMFCompanyPreference 
+	SELECT @ysnAddQtyOnExistingLot = ysnAddQtyOnExistingLot
+	FROM tblMFCompanyPreference
 
-	If @ysnFillPartialPallet=0 and @ysnAddQtyOnExistingLot=0 and exists(Select *from dbo.tblICLot L JOIN dbo.tblMFWorkOrderProducedLot WP on L.intLotId=WP.intLotId Where strLotNumber =@strLotNumber and WP.ysnProductionReversed=0)
-	Begin
+	IF @ysnFillPartialPallet = 0
+		AND @ysnAddQtyOnExistingLot = 0
+		AND EXISTS (
+			SELECT *
+			FROM dbo.tblICLot L
+			JOIN dbo.tblMFWorkOrderProducedLot WP ON L.intLotId = WP.intLotId
+			WHERE strLotNumber = @strLotNumber
+				AND WP.ysnProductionReversed = 0
+			)
+	BEGIN
 		RAISERROR (
 				'Pallet Id already exists'
 				,11
 				,1
 				)
-	End
-
+	END
 
 	IF @dblQuantity <> @dblUnitCount
 		AND @intItemUOMId = @intItemUnitCountUOMId
@@ -268,6 +275,7 @@ BEGIN TRY
 				FROM tblICLot
 				WHERE intStorageLocationId = @intStorageLocationId
 					AND dblQty > 0
+					AND intItemId <> @intItemId
 				)
 		BEGIN
 			RAISERROR (
@@ -433,10 +441,11 @@ BEGIN TRY
 				WHERE RI.intWorkOrderId = @intWorkOrderId
 					AND RI.intRecipeItemTypeId = 2
 				)
-		BEGIN 
+		BEGIN
 			EXEC uspICRaiseError 80021;
+
 			RETURN;
-		END 
+		END
 
 		IF NOT EXISTS (
 				SELECT *

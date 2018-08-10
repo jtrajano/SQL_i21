@@ -600,7 +600,7 @@ BEGIN TRY
 						ON L.intCreatedEntityId = US.intEntityId
 					JOIN tblICLotStatus LS 
 						ON L.intLotStatusId = LS.intLotStatusId
-					JOIN tblICStorageLocation SL 
+					Left JOIN tblICStorageLocation SL 
 						ON L.intStorageLocationId=SL.intStorageLocationId
 			WHERE	L.intItemId = @intRawItemId
 					AND L.intLocationId = @intLocationId
@@ -612,7 +612,7 @@ BEGIN TRY
 							WHERE	intLotId=L.intLotId 
 									AND ISNULL(ysnPosted,0)=0
 						) >= .01
-					AND ISNULL(SL.ysnAllowConsume,0)=1 
+					AND ISNULL(SL.ysnAllowConsume,1)=1 
 			ORDER BY L.dtmDateCreated
 		END
 

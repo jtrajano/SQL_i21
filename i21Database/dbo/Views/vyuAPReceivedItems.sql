@@ -465,7 +465,7 @@ FROM
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-									AND F1.intPricingTypeId NOT IN (2, 3, 4) --AP-4971
+									AND F1.intPricingTypeId NOT IN (2, 3, 4, 5) --AP-4971
 							THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
@@ -576,6 +576,7 @@ FROM
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId		 
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -598,6 +599,7 @@ FROM
 	--) Qty
 	WHERE  
 		A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
+		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,3,4,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
 	UNION ALL
 	SELECT
 	DISTINCT  

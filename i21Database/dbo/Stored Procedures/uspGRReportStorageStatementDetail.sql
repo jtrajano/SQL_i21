@@ -8,16 +8,25 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strStorageType NVARCHAR(100)
-	DECLARE @dblThereAfterCharge NUMERIC(18,10)
+	DECLARE @ErrMsg					 NVARCHAR(MAX)
+	DECLARE @strStorageType			 NVARCHAR(100)
+	DECLARE @dblThereAfterCharge	 NUMERIC(18,10)
 	DECLARE @dtmTerminationOfReceipt DATETIME
-	DECLARE @strItemNo				NVARCHAR(100)
-	DECLARE @strLicenseNumber		NVARCHAR(100)
-	DECLARE @strPrefix              Nvarchar(100)
-	DECLARE @intNumber				INT
+	DECLARE @strItemNo				 NVARCHAR(100)
+	DECLARE @strLicenseNumber		 NVARCHAR(100)
+	DECLARE @strPrefix               Nvarchar(100)
+	DECLARE @intNumber				 INT
+	DECLARE @dtmEffectiveDate	     DATETIME
+	DECLARE @strItemStockUOM		 NVARCHAR(100)
+	DECLARE @strStorageRate			NVARCHAR(100)
+
+	SELECT @strItemStockUOM = UM.strUnitMeasure 
+	FROM tblICUnitMeasure UM
+	JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+	WHERE UOM.intItemId = @intItemId AND UOM.ysnStockUOM = 1 
 
 	SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId	
+	SELECT @dtmEffectiveDate = dtmEffectiveDate,@strStorageRate = strStorageRate  FROM tblGRStorageScheduleRule WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	SELECT @dblThereAfterCharge=ISNULL(dblStorageRate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Thereafter'
 	SELECT TOP 1 @dtmTerminationOfReceipt=ISNULL(dtmEndingDate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Date Range'
 	SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
@@ -39,7 +48,11 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(QM.dblGradeReading) AS dblDryingReading,
 			dbo.fnRemoveTrailingZeroes(ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,UOM.intUnitMeasureId, SC.dblNetUnits),3)) AS dblDryTonnes,
 			@strStorageType AS strStorageType,
-			dbo.fnRemoveTrailingZeroes(@dblThereAfterCharge) AS dblCharges,
+			CASE 
+				WHEN @dtmEffectiveDate IS NOT NULL THEN 'Start('+CONVERT(NVARCHAR,@dtmEffectiveDate,101)+'), $ '+dbo.fnRemoveTrailingZeroes(@dblThereAfterCharge)+' Per '+ @strItemStockUOM+' '+@strStorageRate 
+				ELSE '$ '+dbo.fnRemoveTrailingZeroes(@dblThereAfterCharge)+' Per '+ @strItemStockUOM+' '+@strStorageRate  
+		    END
+			AS dblCharges,
 			CONVERT(NVARCHAR,@dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt						 			
 	FROM	tblGRCustomerStorage CS
 	JOIN    tblICCommodity COM ON COM.intCommodityId=CS.intCommodityId
@@ -52,6 +65,7 @@ BEGIN TRY
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId 
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
+	AND   CS.dblOpenBalance > 0
 	ORDER BY CS.intCustomerStorageId
 	
 	INSERT INTO [dbo].[tblGRStorageStatement]
@@ -100,6 +114,7 @@ BEGIN TRY
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
+	AND   CS.dblOpenBalance > 0
 	ORDER BY CS.intCustomerStorageId
 
 	;WITH CTE as
@@ -109,7 +124,7 @@ BEGIN TRY
 	)
 	
 	UPDATE SST
-	SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15=0 THEN 0 ELSE 1 END)
+	SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15 = 0 THEN 0 ELSE 1 END)
 	FROM tblGRStorageStatement SST
 	JOIN CTE C ON C.intStorageStatementId=SST.intStorageStatementId
 

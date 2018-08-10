@@ -68,5 +68,6 @@
 	ysnCostEnabled BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnCostEnabled] DEFAULT 1,
 	ysnLotNumberUniqueByItem Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnLotNumberUniqueByItem] DEFAULT 1,
 	ysnMergeOnMove Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnMergeOnMove] DEFAULT 0,
+	ysnWorkOrderPlannedDateByBusinessDate BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnWorkOrderPlannedDateByBusinessDate] DEFAULT 1
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

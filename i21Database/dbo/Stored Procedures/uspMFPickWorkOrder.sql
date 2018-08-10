@@ -80,6 +80,8 @@ BEGIN TRY
 		,@ysnConsumptionByRatio BIT
 		,@intStageLocationId int
 		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@strInstantConsumption NVARCHAR(50)
+		,@strCycleCountbasedonRecipeTolerance NVARCHAR(50)
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -117,6 +119,12 @@ BEGIN TRY
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strInstantConsumption = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 20--Is Instant Consumption
 
 	INSERT INTO @tblMFWorkOrderInputLot (strLotNumber)
 	SELECT L.strLotNumber
@@ -223,6 +231,17 @@ BEGIN TRY
 	If @intPMCategoryId is null
 	Begin
 		Select @intPMCategoryId=0,@strPackagingCategory=''
+	End
+
+	SELECT @strCycleCountbasedonRecipeTolerance = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 117 --Cycle Count based on Recipe Tolerance
+
+	if IsNULL(@strCycleCountbasedonRecipeTolerance,'')='' 
+	Begin
+		Select @strCycleCountbasedonRecipeTolerance='False'
 	End
 
 	IF @intTransactionCount = 0
@@ -674,9 +693,9 @@ BEGIN TRY
 
 		INSERT INTO @tblMFWorkOrderInputItem
 		SELECT DISTINCT I.intItemId
-			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId)
 			,I.intItemUOMId
-			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
+			,(SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (PARTITION BY I.intMainItemId)) * 100
 			,I.intMainItemId
 		FROM @tblICItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
@@ -1829,20 +1848,10 @@ BEGIN TRY
 			END
 		END
 
-		IF EXISTS (
-				SELECT SUM(dblQty)
-				FROM @tblLot
-				HAVING SUM(dblQty) < (
-						CASE 
-							WHEN (
-									SELECT Count(*)
-									FROM @tblLot
-									WHERE ysnSubstituteItem = 1
-									) >= 1
-								THEN @dblLowerToleranceReqQty
-							ELSE [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
-							END
-						)
+		IF (@strCycleCountbasedonRecipeTolerance='True' or @strInstantConsumption ='True') and EXISTS (
+				SELECT SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty))
+				FROM @tblLot L
+				HAVING SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty)) < @dblLowerToleranceReqQty
 				)
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
@@ -1853,8 +1862,7 @@ BEGIN TRY
 					,@strLotUnitMeasure NVARCHAR(50)
 					,@intLotItemUOMId INT
 
-				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
-					,@intLotItemUOMId = MIN(intItemUOMId)
+				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM([dbo].[fnMFConvertQuantityToTargetItemUOM](intItemUOMId,@intRecipeItemUOMId,dblQty)))
 				FROM @tblLot
 
 				SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
@@ -1871,21 +1879,13 @@ BEGIN TRY
 				FROM dbo.tblICUnitMeasure
 				WHERE intUnitMeasureId = @intUnitMeasureId
 
-				SELECT @intLotUnitMeasureId = intUnitMeasureId
-				FROM dbo.tblICItemUOM
-				WHERE intItemUOMId = @intLotItemUOMId
-
-				SELECT @strLotUnitMeasure = ' ' + strUnitMeasure
-				FROM dbo.tblICUnitMeasure
-				WHERE intUnitMeasureId = @intLotUnitMeasureId
-
 				RAISERROR (
 						'Item %s is having %s%s quantity which is less than the required quantity %s%s.'
 						,11
 						,1
 						,@strItemNo
 						,@strQty
-						,@strLotUnitMeasure
+						,@strUnitMeasure
 						,@strReqQty
 						,@strUnitMeasure
 						)
@@ -2236,7 +2236,7 @@ BEGIN TRY
 						,0
 						,0
 						,0
-						,@dblQty
+						,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId,@intRecipeItemUOMId, @dblQty)
 						,0
 						,0
 						,0
@@ -2255,7 +2255,7 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty,intStageLocationId=@intStageLocationId
+					SET dblConsumedQuantity = dblConsumedQuantity + [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId,@intRecipeItemUOMId, @dblQty),intStageLocationId=@intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
 						AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end

@@ -155,6 +155,7 @@ BEGIN
 					ELSE L.dblQty
 					END
 				) - IsNULL(SR.dblWeight, 0) > 0
+				AND LI.ysnPickAllowed = 1
 		
 		UNION
 		
@@ -211,7 +212,7 @@ BEGIN
 				)
 			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemStockUOM S ON I.intItemId = S.intItemId
-			AND S.intStorageLocationId = @intStorageLocationId
+			AND IsNULL(S.intStorageLocationId,0) = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
 					WHEN @intInputItemId = 0
@@ -222,7 +223,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
 			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
@@ -354,6 +355,7 @@ BEGIN
 				SELECT Item Collate Latin1_General_CI_AS
 				FROM [dbo].[fnSplitString](@strLotId, ',')
 				)
+				AND LI.ysnPickAllowed = 1
 		
 		UNION
 		
@@ -409,7 +411,7 @@ BEGIN
 				)
 			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemStockUOM S ON I.intItemId = S.intItemId
-			AND S.intStorageLocationId = @intStorageLocationId
+			AND IsNULL(S.intStorageLocationId,0) = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
 					WHEN @intInputItemId = 0
@@ -420,7 +422,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+		Left JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
 			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId

@@ -519,6 +519,8 @@ BEGIN TRY
 			EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
 				,@strBatchId
 				,@userId
+				,1
+				,1
 
 			IF @intReturnValue <> 0
 			BEGIN
@@ -627,6 +629,25 @@ BEGIN TRY
 	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
 	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	WHERE SW.intWorkOrderId = @intWorkOrderId
+
+	DECLARE @intOrderHeaderId INT
+
+	SELECT @intOrderHeaderId = OH.intOrderHeaderId
+	FROM dbo.tblMFOrderHeader OH
+	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
+	WHERE SW.intWorkOrderId = @intWorkOrderId
+
+	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intWorkOrderId
+		,@intTransactionTypeId = 8
+		,@ysnPosted = 1
+
+	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intWorkOrderId
+		,@intTransactionTypeId = 9
+		,@ysnPosted = 1
+
+	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
+		,@intTransactionTypeId = 34
+		,@ysnPosted = 1
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

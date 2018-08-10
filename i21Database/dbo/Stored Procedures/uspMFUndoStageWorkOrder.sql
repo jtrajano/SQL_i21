@@ -239,6 +239,10 @@ BEGIN TRY
 			SELECT @intNewItemUOMId = @intItemUOMId
 		END
 
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intWorkOrderId
+			,@intInventoryTransactionType
+
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -318,10 +322,6 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strNewLotNumber
 		AND intStorageLocationId = @intNewStorageLocationId
-
-	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-		,@intWorkOrderId
-		,@intInventoryTransactionType
 
 	INSERT INTO @ItemsToReserve (
 		intItemId

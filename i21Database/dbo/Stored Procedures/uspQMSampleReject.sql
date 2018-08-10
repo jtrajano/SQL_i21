@@ -575,6 +575,7 @@ BEGIN TRY
 
 			IF @intCurrentLotStatusId <> @intLotStatusId
 				AND @intSampleControlPointId <> 14
+				AND IsNULL(@intLotStatusId, 0) <> 0
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
 					,@intNewLotStatusId = @intLotStatusId

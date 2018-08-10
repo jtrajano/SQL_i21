@@ -1084,7 +1084,7 @@ BEGIN TRY
 	BEGIN
 		INSERT INTO @tblMFWorkOrderInputLot
 		SELECT DISTINCT I.intItemId
-			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
 				PARTITION BY I.intItemId
 				,CASE 
 					WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
@@ -1094,14 +1094,14 @@ BEGIN TRY
 				)
 			,WI.intItemUOMId
 			,(
-				SUM(IsNULL(WI.dblQuantity, 0)) OVER (
+				SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
 					PARTITION BY I.intItemId
 					,CASE 
 						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
 							THEN NULL
 						ELSE WI.intMachineId
 						END
-					) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (
+					) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
 					PARTITION BY I.intMainItemId
 					,CASE 
 						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'

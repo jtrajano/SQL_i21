@@ -392,10 +392,12 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				DECLARE @RC int
     				DECLARE @Param nvarchar(max) =''SELECT intJournalId FROM tblGLJournal WHERE intJournalId = '' + CONVERT (VARCHAR(10), @intJournalId)
     				DECLARE @strBatchId nvarchar(100)
-					DECLARE @successfulCount int
+					DECLARE @successfulCount INT, @beforePosting INT
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
+    				SET @beforePosting = @successfulCount
 					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
-    				IF @successfulCount > 0
+
+    				IF  @successfulCount = 1 or @successfulCount - @beforePosting = 1
     				BEGIN
 						
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
@@ -449,7 +451,8 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				DEALLOCATE cursor_postdate
 
 				set @success = 1
-				SELECT @intErrorCount = COUNT(1) FROM @tblLog 
+				SELECT @intErrorCount = COUNT(1) FROM @tblLog
+				
 
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
