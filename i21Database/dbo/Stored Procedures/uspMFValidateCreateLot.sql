@@ -67,7 +67,11 @@ BEGIN TRY
 		,@intControlPointId INT
 		,@intSampleTypeId INT
 		,@ysnAddQtyOnExistingLot BIT
-		,@strLotTracking nvarchar(50)
+		,@strLotTracking NVARCHAR(50)
+		,@intCategoryId INT
+		,@strCategoryCode NVARCHAR(50)
+		,@strErrorMsg NVARCHAR(MAX)
+		,@strName NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -130,9 +134,41 @@ BEGIN TRY
 	SELECT @strItemNo = strItemNo
 		,@strStatus = strStatus
 		,@CasesPerPallet = intLayerPerPallet * intUnitPerLayer
-		,@strLotTracking=strLotTracking 
+		,@strLotTracking = strLotTracking
+		,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
+
+	IF EXISTS (
+			SELECT *
+			FROM tblICStorageLocationCategory
+			WHERE intStorageLocationId = @intStorageLocationId
+			)
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblICStorageLocationCategory
+				WHERE intStorageLocationId = @intStorageLocationId
+					AND intCategoryId = @intCategoryId
+				)
+		BEGIN
+			SELECT @strCategoryCode = strCategoryCode
+			FROM tblICCategory
+			WHERE intCategoryId = @intCategoryId
+
+			SELECT @strName = strName
+			FROM tblICStorageLocation
+			WHERE intStorageLocationId = @intStorageLocationId
+
+			SELECT @strErrorMsg = 'Item category ''' + @strCategoryCode + ''' is not allowed into the storage unit ''' + @strName +'''.'
+
+			RAISERROR (
+					@strErrorMsg
+					,11
+					,1
+					)
+		END
+	END
 
 	IF @strItemNo IS NULL
 	BEGIN
@@ -269,96 +305,95 @@ BEGIN TRY
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
-	If @strLotTracking<>'No'
-	Begin
-
-	IF @ysnAllowMultipleLot = 0
-		AND @ysnAllowMultipleItem = 0
+	IF @strLotTracking <> 'No'
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblICLot
-				WHERE intStorageLocationId = @intStorageLocationId
-					AND dblQty > 0
-					AND intItemId <> @intItemId
-				)
+		IF @ysnAllowMultipleLot = 0
+			AND @ysnAllowMultipleItem = 0
 		BEGIN
-			RAISERROR (
-					'The Storage Location is already used by other Lot.'
-					,11
-					,1
+			IF EXISTS (
+					SELECT 1
+					FROM tblICLot
+					WHERE intStorageLocationId = @intStorageLocationId
+						AND dblQty > 0
+						AND intItemId <> @intItemId
 					)
-		END
-	END
-	ELSE IF @ysnAllowMultipleLot = 0
-		AND @ysnAllowMultipleItem = 1
-		AND @ysnMergeOnMove = 0
-	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblICLot
-				WHERE intStorageLocationId = @intStorageLocationId
-					AND intItemId = @intItemId
-					AND dblQty > 0
-				)
-		BEGIN
-			RAISERROR (
-					'The Storage Location is already used by other Lot for the Item ''%s'''
-					,11
-					,1
-					,@strItemNo
-					)
-		END
-	END
-	ELSE IF @ysnAllowMultipleLot = 1
-		AND @ysnAllowMultipleItem = 0
-	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblICLot
-				WHERE intStorageLocationId = @intStorageLocationId
-					AND intItemId <> @intItemId
-					AND dblQty > 0
-				)
-		BEGIN
-			RAISERROR (
-					'The Storage Location is already used by other Item.'
-					,11
-					,1
-					)
-		END
-	END
-
-	SELECT @intLotId = intLotId
-	FROM tblICLot
-	WHERE strLotNumber = @strLotNumber
-		AND intStorageLocationId = CASE 
-			WHEN @ysnSubLotAllowed = 1
-				THEN @intStorageLocationId
-			ELSE intStorageLocationId
+			BEGIN
+				RAISERROR (
+						'The Storage Location is already used by other Lot.'
+						,11
+						,1
+						)
 			END
+		END
+		ELSE IF @ysnAllowMultipleLot = 0
+			AND @ysnAllowMultipleItem = 1
+			AND @ysnMergeOnMove = 0
+		BEGIN
+			IF EXISTS (
+					SELECT 1
+					FROM tblICLot
+					WHERE intStorageLocationId = @intStorageLocationId
+						AND intItemId = @intItemId
+						AND dblQty > 0
+					)
+			BEGIN
+				RAISERROR (
+						'The Storage Location is already used by other Lot for the Item ''%s'''
+						,11
+						,1
+						,@strItemNo
+						)
+			END
+		END
+		ELSE IF @ysnAllowMultipleLot = 1
+			AND @ysnAllowMultipleItem = 0
+		BEGIN
+			IF EXISTS (
+					SELECT 1
+					FROM tblICLot
+					WHERE intStorageLocationId = @intStorageLocationId
+						AND intItemId <> @intItemId
+						AND dblQty > 0
+					)
+			BEGIN
+				RAISERROR (
+						'The Storage Location is already used by other Item.'
+						,11
+						,1
+						)
+			END
+		END
 
-	SELECT @intExistingiItemId = intItemId
-		,@intExistingStorageLocationId = intStorageLocationId
-	FROM tblICLot
-	WHERE strLotNumber = @strLotNumber
+		SELECT @intLotId = intLotId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNumber
+			AND intStorageLocationId = CASE 
+				WHEN @ysnSubLotAllowed = 1
+					THEN @intStorageLocationId
+				ELSE intStorageLocationId
+				END
 
-	IF @intLotId IS NOT NULL
-		AND @ysnMergeOnMove = 0
-	BEGIN
-		SELECT @strExistingStorageLocationName = strName
-		FROM dbo.tblICStorageLocation
-		WHERE intStorageLocationId = @intExistingStorageLocationId
+		SELECT @intExistingiItemId = intItemId
+			,@intExistingStorageLocationId = intStorageLocationId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNumber
 
-		RAISERROR (
-				'LotID ''%s'' already exists in this storage location ''%s''.'
-				,11
-				,1
-				,@strLotNumber
-				,@strExistingStorageLocationName
-				)
+		IF @intLotId IS NOT NULL
+			AND @ysnMergeOnMove = 0
+		BEGIN
+			SELECT @strExistingStorageLocationName = strName
+			FROM dbo.tblICStorageLocation
+			WHERE intStorageLocationId = @intExistingStorageLocationId
+
+			RAISERROR (
+					'LotID ''%s'' already exists in this storage location ''%s''.'
+					,11
+					,1
+					,@strLotNumber
+					,@strExistingStorageLocationName
+					)
+		END
 	END
-	End
 
 	IF @ysnSubLotAllowed = 1
 		AND @intExistingiItemId <> @intItemId
