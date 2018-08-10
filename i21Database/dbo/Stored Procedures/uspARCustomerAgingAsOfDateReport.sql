@@ -12,7 +12,8 @@
 	@strCustomerName			NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode		NVARCHAR(100) = NULL,
 	@strCustomerIds				NVARCHAR(MAX) = NULL,
-	@ysnFromBalanceForward		bit = 0
+	@ysnFromBalanceForward		BIT = 0,
+	@dtmBalanceForwardDate		DATETIME = NULL
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -244,6 +245,8 @@ SELECT I.intInvoiceId
 	 , I.dblAmountDue
 	 , I.dblDiscount
 	 , I.dblInterest
+	 , I.ysnForgiven
+	 , I.dtmForgiveDate
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
@@ -252,7 +255,7 @@ INNER JOIN (
 ) C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 and @dtmDateToLocal < (SELECT CONVERT(DATETIME, CAST(I.dtmForgiveDate AS DATE))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR (I.strType <> 'Service Charge'))
+	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) )) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
@@ -279,6 +282,12 @@ WHERE ysnPosted = 1
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+--REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
+IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
+BEGIN
+	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
+END
 	
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
