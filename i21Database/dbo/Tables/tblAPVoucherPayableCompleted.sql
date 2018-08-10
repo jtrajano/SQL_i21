@@ -72,8 +72,7 @@
 	[str1099Type]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
-    [intConcurrencyId]				INT NOT NULL DEFAULT 0,
-	[intBillDetailId]				INT NOT NULL
+    [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
@@ -86,7 +85,4 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
 								,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
 								,intLoadShipmentDetailId ASC);
-GO
-CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_billDetail]
-    ON [dbo].[tblAPVoucherPayableCompleted](intBillDetailId DESC);
 GO

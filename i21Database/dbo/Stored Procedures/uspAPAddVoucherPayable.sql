@@ -86,6 +86,7 @@ BEGIN
 		,[intCostCurrencyId]				
 		,[strCostCurrency]				
 		,[dblTax]		
+		,[dblDiscount]
 		,[intCurrencyExchangeRateTypeId]
 		,[strRateType]					
 		,[dblExchangeRate]						
@@ -102,7 +103,8 @@ BEGIN
 		,[int1099Form]
 		,[int1099Category]				
 		,[str1099Form]					
-		,[str1099Type]					
+		,[str1099Type]							
+		,[ysnReturn]			
 	)
 	SELECT
 		[intEntityVendorId]					=	A.intEntityVendorId
@@ -122,7 +124,7 @@ BEGIN
 		,[intContractSeqId]					=	A.intContractSeqId
 		,[strContractNumber]				=	ctDetail.strContractNumber
 		,[intScaleTicketId]					=	A.intScaleTicketId
-		,[strScaleTicketNumber]				=	ticket.strScaleTicketNumber
+		,[strScaleTicketNumber]				=	ticket.strTicketNumber
 		,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptChargeId
 		,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
@@ -133,18 +135,26 @@ BEGIN
 		,[strItemNo]						=	item.strItemNo
 		,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 		,[strMiscDescription]				=	A.strMiscDescription
-		,[dblOrderQty]						=	A.dblOrderQty
-		,[dblOrderUnitQty]					=	A.dblOrderUnitQty
-		,[intOrderUOMId]					=	A.intOrderUOMId
-		,[strOrderUOM]						=	orderQtyUOM.strUnitMeasure
+		,[dblOrderQty]						=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.dblDetailQuantity
+												ELSE A.dblOrderQty END
+		,[dblOrderUnitQty]					=	CASE WHEN A.intContractDetailId > 0 THEN contractItemUOM.dblUnitQty
+												ELSE A.dblOrderUnitQty END
+		,[intOrderUOMId]					=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.intItemUOMId
+												ELSE A.intOrderUOMId END
+		,[strOrderUOM]						=	CASE WHEN A.intContractDetailId > 0 THEN contractUOM.strUnitMeasure
+												ELSE orderQtyUOM.strUnitMeasure END
 		,[dblQuantityToBill]				=	A.dblQuantityToBill
 		,[dblQtyToBillUnitQty]				=	A.dblQtyToBillUnitQty
 		,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 		,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
-		,[dblCost]							=	A.dblCost
-		,[dblCostUnitQty]					=	A.dblCostUnitQty
-		,[intCostUOMId]						=	A.intCostUOMId
-		,[strCostUOM]						=	costUOM.strUnitMeasure
+		,[dblCost]							=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.dblSeqPrice
+												ELSE A.dblCost END
+		,[dblCostUnitQty]					=	CASE WHEN A.intContractDetailId > 0 THEN contractItemCostUOM.dblUnitQty
+												ELSE A.dblCostUnitQty END
+		,[intCostUOMId]						=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.intPriceItemUOMId
+												ELSE A.intCostUOMId END
+		,[strCostUOM]						=	CASE WHEN A.intContractDetailId > 0 THEN contractCostUOM.strUnitMeasure
+												ELSE costUOM.strUnitMeasure END
 		,[dblNetWeight]						=	A.dblNetWeight
 		,[dblWeightUnitQty]					=	A.dblWeightUnitQty
 		,[intWeightUOMId]					=	A.intWeightUOMId
@@ -152,8 +162,9 @@ BEGIN
 		,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
 		,[strCostCurrency]					=	ISNULL(costCur.strCurrency, tranCur.strCurrency)
 		,[dblTax]							=	0
+		,[dblDiscount]						=	A.dblDiscount
 		,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
-		,[strRateType]						=	exRates.strRateType
+		,[strRateType]						=	exRates.strCurrencyExchangeRateType
 		,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 		,[ysnSubCurrency]					=	A.ysnSubCurrency
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents
@@ -193,6 +204,7 @@ BEGIN
 																AND patron.ysnStockStatusQualified = 1 
 																THEN 'Per-unit retain allocations'
 												ELSE entity.str1099Type END
+		,[ysnReturn]						=	A.ysnReturn
 	FROM @voucherPayable A
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		 ON A.intEntityVendorId = vendor.intEntityId
@@ -216,8 +228,12 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure orderQtyUOM ON orderQtyUOM.intUnitMeasureId = itemOrderQtyUOM.intUnitMeasureId
 	LEFT JOIN (tblPOPurchase po INNER JOIN tblPOPurchaseDetail poDetail ON po.intPurchaseId = poDetail.intPurchaseId)
 		ON poDetail.intPurchaseDetailId = A.intPurchaseDetailId
-	LEFT JOIN vyuCTContractDetail ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
-	LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intTicketId
+	LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+	LEFT JOIN tblICItemUOM contractItemUOM ON contractItemUOM.intItemUOMId = ctDetail.intItemUOMId
+	LEFT JOIN tblICUnitMeasure contractUOM ON contractUOM.intUnitMeasureId = contractItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
+	LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 END
 
 IF @transCount = 0

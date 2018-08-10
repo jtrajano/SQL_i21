@@ -6859,6 +6859,7 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
     <Build Include="dbo\Functions\fnAPCreatePOVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateVoucherPayable.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherPayableFromBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
