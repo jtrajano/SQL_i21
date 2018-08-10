@@ -72,12 +72,6 @@ AS
 				   , @dblOpeningBalance	= POSLOG.dblOpeningBalance
 		FROM dbo.tblARPOSLog POSLOG
 		WHERE POSLOG.intPOSLogId = @intPOSLogId 
-
-		IF ISNULL(@intUserId, 0) = 0
-		BEGIN
-			RAISERROR('User is required when creating Bank Deposits.', 16, 1)
-			RETURN;
-		END
 		
 		--GET ALL CASH PAYMENTS
 		IF(OBJECT_ID('tempdb..#CASHPAYMENTS') IS NOT NULL)
@@ -106,6 +100,13 @@ AS
 
 		IF ISNULL(@dblCashOverShort, 0) <> 0 AND ISNULL(@intCashOverAccountId, 0) <> 0
 			BEGIN
+
+				IF ISNULL(@intUserId, 0) = 0
+				BEGIN
+					RAISERROR('User is required when creating Bank Deposits.', 16, 1)
+					RETURN;
+				END
+
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
 
 				INSERT INTO @BankTransaction (
