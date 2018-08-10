@@ -99,4 +99,61 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
 	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1
+UNION ALL
+--APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
+SELECT
+	A.dtmDate
+	,A.intBillId
+	,A.strBillId
+	,B.dblAmountApplied * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+	,A.intAccountId
+	-- ,'DM transactions have been paid using Prepaid And Debit Tab' AS [Info]
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1
+UNION ALL 
+--APPLIED VOUCHER, (Payment have been made using prepaid and debit memos tab)
+SELECT
+	A.dtmDate
+	,A.intBillId
+	,A.strBillId
+	,B.dblAmountApplied
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+	,A.intAccountId
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+OUTER APPLY (
+	SELECT TOP 1
+		voucherDetail.dblRate
+	FROM tblAPBillDetail voucherDetail
+	WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied
+) voucherDetailApplied
+WHERE A.ysnPosted = 1 AND B.ysnApplied = 1
+GO
+
 
