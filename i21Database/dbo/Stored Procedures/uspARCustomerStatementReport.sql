@@ -65,7 +65,6 @@ DECLARE @temp_statement_table TABLE(
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
 	,[dblCreditLimit]				NUMERIC(18,6)
-	,[strAccountStatusCode]			NVARCHAR(50)	
 	,[strLocationName]				NVARCHAR(100)
 	,[strFullAddress]				NVARCHAR(MAX)
 	,[strStatementFooterComment]	NVARCHAR(MAX)	
@@ -178,7 +177,15 @@ ELSE
 END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
-	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strAccountStatusCode LIKE (%''' + @strAccountStatusCodeLocal + '''%)'
+	BEGIN
+		DELETE FROM #CUSTOMERS
+		WHERE intEntityCustomerId NOT IN (
+			SELECT DISTINCT intEntityCustomerId
+			FROM dbo.tblARCustomerAccountStatus CAS WITH (NOLOCK)
+			INNER JOIN tblARAccountStatus AAS WITH (NOLOCK) ON CAS.intAccountStatusId = AAS.intAccountStatusId
+			WHERE AAS.strAccountStatusCode = @strAccountStatusCodeLocal
+		)
+	END
 
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
@@ -238,7 +245,6 @@ FROM (
 		 , strName						= C.strName
 		 , strBOLNumber					= I.strBOLNumber
 		 , dblCreditLimit				= C.dblCreditLimit
-		 , strAccountStatusCode			= STATUSCODES.strAccountStatusCode
 		 , strLocationName				= CL.strLocationName
 		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
@@ -331,20 +337,6 @@ FROM (
 				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
 		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
-	OUTER APPLY (
-		SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-		FROM (
-			SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
-			FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intAccountStatusId
-						, strAccountStatusCode
-				FROM dbo.tblARAccountStatus WITH (NOLOCK)
-			) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-			WHERE CAS.intEntityCustomerId = C.intEntityId
-			FOR XML PATH ('''')
-		) SC (strAccountStatusCode)
-	) STATUSCODES
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''
@@ -375,8 +367,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strCustomerName ELSE ISNULL(CUST.strCheckPayeeName, C.strCustomerName) END
 				  , strName						= C.strCustomerName
 				  , strBOLNumber				= NULL
-				  , dblCreditLimit				= C.dblCreditLimit
-				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
+				  , dblCreditLimit				= C.dblCreditLimit				  
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -393,21 +384,7 @@ IF @ysnIncludeBudgetLocal = 1
 						 , strName
 						 , ysnStatementCreditLimit
 					FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
-				) CUST ON CB.intEntityCustomerId = CUST.intEntityCustomerId
-				OUTER APPLY (
-					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-					FROM (
-						SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
-						FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-						INNER JOIN (
-							SELECT intAccountStatusId
-								 , strAccountStatusCode
-							FROM dbo.tblARAccountStatus WITH (NOLOCK)
-						) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-						WHERE CAS.intEntityCustomerId = CB.intEntityCustomerId
-						FOR XML PATH ('''')
-					) SC (strAccountStatusCode)
-				) STATUSCODES
+				) CUST ON CB.intEntityCustomerId = CUST.intEntityCustomerId				
 			WHERE CB.dtmBudgetDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			  AND CB.dblAmountPaid < CB.dblBudgetAmount'
 		

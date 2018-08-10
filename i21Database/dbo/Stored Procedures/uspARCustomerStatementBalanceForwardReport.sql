@@ -119,7 +119,6 @@ DECLARE @temp_statement_table TABLE(
     ,[dblPayment]					NUMERIC(18,6)
     ,[dblBalance]					NUMERIC(18,6)	
     ,[strSalespersonName]			NVARCHAR(100)
-	,[strAccountStatusCode]			NVARCHAR(50)	
 	,[strLocationName]				NVARCHAR(100)
     ,[strFullAddress]				NVARCHAR(MAX)
 	,[strComment]					NVARCHAR(MAX)
@@ -236,7 +235,15 @@ ELSE
 	END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
-	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strAccountStatusCode LIKE (%''' + @strAccountStatusCodeLocal + '''%)'
+	BEGIN
+		DELETE FROM #CUSTOMERS
+		WHERE intEntityCustomerId NOT IN (
+			SELECT DISTINCT intEntityCustomerId
+			FROM dbo.tblARCustomerAccountStatus CAS WITH (NOLOCK)
+			INNER JOIN tblARAccountStatus AAS WITH (NOLOCK) ON CAS.intAccountStatusId = AAS.intAccountStatusId
+			WHERE AAS.strAccountStatusCode = @strAccountStatusCodeLocal
+		)
+	END
 
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
@@ -483,8 +490,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , dtmDatePaid			= ISNULL(TRANSACTIONS.dtmDatePaid, ''01/02/1900'')
 	  , dblPayment			= ISNULL(TRANSACTIONS.dblPayment, 0)
 	  , dblBalance			= TRANSACTIONS.dblBalance
-	  , strSalespersonName  = C.strSalesPersonName
-	  , strAccountStatusCode = STATUSCODES.strAccountStatusCode
+	  , strSalespersonName  = C.strSalesPersonName	  
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strComment			= TRANSACTIONS.strComment
@@ -588,20 +594,6 @@ FROM vyuARCustomerSearch C
 				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
-	OUTER APPLY (
-		SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-		FROM (
-			SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
-			FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intAccountStatusId
-					 , strAccountStatusCode
-				FROM dbo.tblARAccountStatus WITH (NOLOCK)
-			) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-			WHERE CAS.intEntityCustomerId = C.intEntityCustomerId
-			FOR XML PATH ('''')
-		) SC (strAccountStatusCode)
-	) STATUSCODES
 ) MainQuery'
 
 IF ISNULL(@filter, '') != ''
@@ -633,8 +625,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dtmDatePaid					= NULL
 				  , dblPayment					= dblAmountPaid
 				  , dblBalance					= dblBudgetAmount - dblAmountPaid
-				  , strSalespersonName			= NULL
-				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
+				  , strSalespersonName			= NULL				  
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -651,20 +642,6 @@ IF @ysnIncludeBudgetLocal = 1
 						 , ysnStatementCreditLimit
 					FROM dbo.tblARCustomer WITH (NOLOCK)
 				) CUST ON CB.intEntityCustomerId = CUST.intEntityId
-				OUTER APPLY (
-					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-					FROM (
-						SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
-						FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-						INNER JOIN (
-							SELECT intAccountStatusId
-								 , strAccountStatusCode
-							FROM dbo.tblARAccountStatus WITH (NOLOCK)
-						) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-						WHERE CAS.intEntityCustomerId = CB.intEntityCustomerId
-						FOR XML PATH ('''')
-					) SC (strAccountStatusCode)
-				) STATUSCODES    
             WHERE CB.dtmBudgetDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
               AND CB.dblAmountPaid < CB.dblBudgetAmount'
         
@@ -878,7 +855,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strTransactionType
 	, strPaymentInfo
 	, strSalespersonName
-	, strAccountStatusCode
 	, strLocationName
 	, strFullAddress
 	, strComment
@@ -921,7 +897,6 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strTransactionType		= MAINREPORT.strTransactionType
 	, strPaymentInfo			= MAINREPORT.strPaymentInfo
 	, strSalespersonName		= MAINREPORT.strSalespersonName
-	, strAccountStatusCode		= MAINREPORT.strAccountStatusCode
 	, strLocationName			= MAINREPORT.strLocationName
 	, strFullAddress			= MAINREPORT.strFullAddress
 	, strComment				= MAINREPORT.strComment
@@ -967,7 +942,6 @@ FROM (
 		 , dblPayment
 		 , dblBalance
 		 , strSalespersonName					= STATEMENTREPORT.strSalespersonName
-		 , strAccountStatusCode
 		 , strLocationName
 		 , strFullAddress
 		 , strComment							= STATEMENTREPORT.strComment
@@ -1000,7 +974,6 @@ FROM (
 		 , dblPayment
 		 , dblBalance
 		 , strSalespersonName					= STATEMENTREPORT.strSalespersonName
-		 , strAccountStatusCode
 		 , strLocationName   
 		 , strFullAddress
 		 , strComment							= STATEMENTREPORT.strComment
