@@ -464,16 +464,16 @@ BEGIN
 				--Header
 				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER SEGMENT="1">'
 				SET @strXmlHeaderStart += '<COMP_CODE>' + ISNULL(@strPurchasingGroup, '') + '</COMP_CODE>'
-				SET @strXmlHeaderStart += '<VENDOR>' + ISNULL(@strEntityNo, '') + '</VENDOR>'
 				SET @strXmlHeaderStart += '<DOC_TYPE>' + ISNULL('ZMK', '') + '</DOC_TYPE>'
 				SET @strXmlHeaderStart += '<CREAT_DATE>' + ISNULL(CONVERT(VARCHAR(10), @dtmContractDate, 112), '') + '</CREAT_DATE>'
+				SET @strXmlHeaderStart += '<VENDOR>' + ISNULL(@strEntityNo, '') + '</VENDOR>'
 				SET @strXmlHeaderStart += '<PURCH_ORG>' + ISNULL(@strSAPLocation, '') + '</PURCH_ORG>'
 				SET @strXmlHeaderStart += '<PUR_GROUP>' + ISNULL(@strSalesPerson, '') + '</PUR_GROUP>'
 				SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 				SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
+				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
 				SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
 				SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
-				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
 				SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
 			END
 		END
@@ -483,14 +483,14 @@ BEGIN
 		BEGIN
 			SET @strItemXml += '<E1BPMEOUTITEM SEGMENT="1">'
 			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</MATERIAL>'
+			SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
+			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 			SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
+			SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
 			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
 			SET @strItemXml += '<PRICE_UNIT>' + '1' + '</PRICE_UNIT>'
-			SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
-			SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
 			SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
-			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '</E1BPMEOUTITEM>'
 		END
 
@@ -508,9 +508,9 @@ BEGIN
 				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER SEGMENT="1">'
 				SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 				SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
+				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
 				SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
 				SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
-				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
 				SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
 			END
 		END
@@ -518,12 +518,12 @@ BEGIN
 		IF UPPER(@strRowState) <> 'ADDED'
 		BEGIN
 			SET @strItemXml += '<E1BPMEPOITEM SEGMENT="1">'
-			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
-			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
 
 			IF UPPER(@strRowState) = 'DELETE'
 				SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
+			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
+			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
 			SET @strItemXml += '</E1BPMEPOITEM>'
 		END
 
@@ -563,7 +563,7 @@ BEGIN
 					FROM @tblIPContractItem CI
 					WHERE CI.strContractItemNo = CF.strItemNo
 					)
-				Order by 1
+			ORDER BY 1
 
 			INSERT INTO @tblIPContractItem
 			SELECT @strContractItemNo
@@ -580,7 +580,7 @@ BEGIN
 	END
 
 	--Final Xml
-	SET @strXml = @strXmlHeaderStart + @strItemXml +  @strTextXml + @strXmlHeaderEnd
+	SET @strXml = @strXmlHeaderStart + @strItemXml + @strTextXml + @strXmlHeaderEnd
 
 	IF @ysnUpdateFeedStatusOnRead = 1
 	BEGIN
