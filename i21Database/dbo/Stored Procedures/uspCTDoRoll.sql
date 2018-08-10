@@ -184,7 +184,8 @@ BEGIN TRY
 												        "iconCls":"small-gear",
 												        "isField":true,
 												        "keyValue":'+LTRIM(@ContractDetailId)+',
-												        "associationKey":"tblCTContractDetails"
+												        "associationKey":"tblCTContractDetails",
+												        "changeDescription":"End Date"
 												     },'
 
 													 IF @OldFutures <> @NewFutures
