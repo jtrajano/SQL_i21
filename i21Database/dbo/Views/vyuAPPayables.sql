@@ -2,7 +2,7 @@
 	Note: Standard amount of void payment transaction is negative. The original transaction should be positive
 */
 CREATE VIEW vyuAPPayables
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS 
 SELECT 
 	A.dtmDate
