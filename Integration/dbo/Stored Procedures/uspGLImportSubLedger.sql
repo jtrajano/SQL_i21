@@ -452,7 +452,6 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
 				set @success = 1
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
-				SELECT @postCount = @successfulCount
 
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
