@@ -148,23 +148,15 @@ ELSE
 END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
-	BEGIN
-		SELECT 1
-		--OUTER APPLY (
-		--	SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-		--	FROM (
-		--		SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
-		--		FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-		--		INNER JOIN (
-		--			SELECT intAccountStatusId
-		--				 , strAccountStatusCode
-		--			FROM dbo.tblARAccountStatus WITH (NOLOCK)
-		--		) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-		--		WHERE CAS.intEntityCustomerId = C.intEntityCustomerId
-		--		FOR XML PATH ('')
-		--	) SC (strAccountStatusCode)
-		--) STATUSCODES
-	END
+    BEGIN
+        DELETE FROM #CUSTOMERS
+        WHERE intEntityCustomerId NOT IN (
+            SELECT DISTINCT intEntityCustomerId
+            FROM dbo.tblARCustomerAccountStatus CAS WITH (NOLOCK)
+            INNER JOIN tblARAccountStatus AAS WITH (NOLOCK) ON CAS.intAccountStatusId = AAS.intAccountStatusId
+            WHERE AAS.strAccountStatusCode = @strAccountStatusCodeLocal
+        )
+    END
 
 IF @ysnEmailOnly IS NOT NULL
 	BEGIN
