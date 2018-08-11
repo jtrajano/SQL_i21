@@ -434,7 +434,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @strBatchId = NULL
 			,@intBatchId = NULL
-			,@strWorkOrderNo = NULL
+			--,@strWorkOrderNo = NULL
 
 		SELECT @strBatchId = strBatchId
 			,@intBatchId = intBatchId
