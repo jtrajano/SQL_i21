@@ -6939,7 +6939,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayableQty.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
-    <Build Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
