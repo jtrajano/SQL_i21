@@ -12,7 +12,7 @@ BEGIN
 	DECLARE @intManufacturingProcessId INT
 		,@strDefaultConsumptionUOM NVARCHAR(50)
 		,@intRecipeTypeId INT
-		,@strAutoProduceBiProducts NVARCHAR(50)
+		--,@strAutoProduceBiProducts NVARCHAR(50)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intRecipeTypeId = intRecipeTypeId
@@ -28,17 +28,17 @@ BEGIN
 	IF ISNULL(@strDefaultConsumptionUOM, '') = ''
 		SELECT @strDefaultConsumptionUOM = '1'
 
-	SELECT @strAutoProduceBiProducts = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = 115
+	--SELECT @strAutoProduceBiProducts = strAttributeValue
+	--FROM tblMFManufacturingProcessAttribute
+	--WHERE intManufacturingProcessId = @intManufacturingProcessId
+	--	AND intLocationId = @intLocationId
+	--	AND intAttributeId = 115
 
-	IF @strAutoProduceBiProducts IS NULL
-		OR @strAutoProduceBiProducts = ''
-	BEGIN
-		SELECT @strAutoProduceBiProducts = 'False'
-	END
+	--IF @strAutoProduceBiProducts IS NULL
+	--	OR @strAutoProduceBiProducts = ''
+	--BEGIN
+	--	SELECT @strAutoProduceBiProducts = 'False'
+	--END
 
 	IF @intRecipeTypeId = 3
 	BEGIN
@@ -175,13 +175,13 @@ BEGIN
 					ELSE - 1
 					END
 				)
-			AND RI.ysnConsumptionRequired = (
-				CASE 
-					WHEN @strAutoProduceBiProducts = 'True' AND @intRecipeItemTypeId = 2
-						THEN 1
-					ELSE RI.ysnConsumptionRequired
-					END
-				)
+			--AND RI.ysnConsumptionRequired = (
+			--	CASE 
+			--		WHEN @strAutoProduceBiProducts = 'True' AND @intRecipeItemTypeId = 2
+			--			THEN 1
+			--		ELSE RI.ysnConsumptionRequired
+			--		END
+			--	)
 		ORDER BY I.strItemNo
 	END
 END

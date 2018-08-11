@@ -105,17 +105,17 @@ BEGIN TRY
 		,@intWorkOrderProducedLotParentId INT
 		,@intBiProductLotId INT
 		,@ysnCPMergeOnMove BIT
-
+		,@intTargetItemId int
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intId INT identity(1, 1)
 		,intItemId INT
 		,intItemUOMId INT
 		,dblQuantity NUMERIC(38, 20)
+		,ysnConsumptionRequired BIT
 		)
-		
 
-	SELECT TOP 1 @ysnCPMergeOnMove=ysnMergeOnMove
-				FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCPMergeOnMove = ysnMergeOnMove
+	FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -278,7 +278,7 @@ BEGIN TRY
 
 	IF @ysnAllowMultipleLot = 0
 		AND @ysnMergeOnMove = 1
-		and @ysnCPMergeOnMove=1
+		AND @ysnCPMergeOnMove = 1
 	BEGIN
 		SELECT @strOutputLotNumber = strLotNumber
 		FROM tblICLot
@@ -310,7 +310,10 @@ BEGIN TRY
 			@strOutputLotNumber = ''
 			OR @strOutputLotNumber IS NULL
 			)
-		AND (@strLotTracking = 'Yes - Manual' or  @strLotTracking ='Yes - Manual/Serial Number')
+		AND (
+			@strLotTracking = 'Yes - Manual'
+			OR @strLotTracking = 'Yes - Manual/Serial Number'
+			)
 	BEGIN
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
@@ -729,7 +732,7 @@ BEGIN TRY
 		SELECT @ysnPostProduction = 0
 	END
 
-	SELECT @intRecipeTypeId = intRecipeTypeId
+	SELECT @intRecipeTypeId = intRecipeTypeId,@intTargetItemId=intItemId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -1154,20 +1157,22 @@ BEGIN TRY
 				SELECT @strAutoProduceBiProducts = 'False'
 			END
 
-			IF @strAutoProduceBiProducts = 'True'
+			IF @strAutoProduceBiProducts = 'True' and @intTargetItemId=@intItemId
 			BEGIN
 				INSERT INTO @tblMFWorkOrderRecipeItem (
 					intItemId
 					,intItemUOMId
 					,dblQuantity
+					,ysnConsumptionRequired
 					)
 				SELECT intItemId
 					,intItemUOMId
 					,dblQuantity
+					,ysnConsumptionRequired
 				FROM tblMFWorkOrderRecipeItem
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intRecipeItemTypeId = 2
-					AND ysnConsumptionRequired = 0
+					AND intItemId <>@intTargetItemId
 
 				SELECT @dblQuantity = dblQuantity
 				FROM tblMFWorkOrderRecipeItem
@@ -1186,10 +1191,13 @@ BEGIN TRY
 						,@intBiProductItemUOMId = NULL
 						,@dblBiProductQuantity = NULL
 						,@strRetBatchId = NULL
+						,@ysnConsumptionRequired=NULL
+						,@ysnPostProduction=1
 
 					SELECT @intBiProductItemId = intItemId
 						,@intBiProductItemUOMId = intItemUOMId
 						,@dblBiProductQuantity = dblQuantity
+						,@ysnConsumptionRequired=ysnConsumptionRequired
 					FROM @tblMFWorkOrderRecipeItem
 					WHERE intId = @intId
 
@@ -1220,6 +1228,33 @@ BEGIN TRY
 
 					SELECT @dblBiProductQty = (@dblProduceQty / @dblQuantity) * @dblBiProductQuantity
 
+					IF @strInstantConsumption = 'True' and @ysnConsumptionRequired=1
+					BEGIN
+						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+							,@dblProduceQty = @dblBiProductQty
+							,@intProduceUOMId = @intBiProductItemUOMId
+							,@intBatchId = @intBatchId
+							,@intUserId = @intUserId
+							,@dblUnitQty = @dblUnitQty
+							,@ysnProducedQtyByWeight = 1
+							,@ysnFillPartialPallet = @ysnFillPartialPallet
+							,@dblProducePartialQty = 0
+							,@intMachineId = @intMachineId
+
+						EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+							,@dblProduceQty = @dblBiProductQty
+							,@intProduceUOMKey = @intBiProductItemUOMId
+							,@intUserId = @intUserId
+							,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+							,@strRetBatchId = @strRetBatchId OUTPUT
+							,@intBatchId = @intBatchId
+							,@ysnPostConsumption = @ysnPostConsumption
+							,@ysnRecap = @ysnRecap
+							,@dtmDate = @dtmPlannedDate
+
+							select @ysnPostProduction=0
+					END
+
 					EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
 						,@intItemId = @intBiProductItemId
 						,@dblProduceQty = @dblBiProductQty
@@ -1239,7 +1274,7 @@ BEGIN TRY
 						,@strReferenceNo = @strReferenceNo
 						,@intStatusId = @intStatusId
 						,@intLotId = @intBiProductLotId OUTPUT
-						,@ysnPostProduction = 1
+						,@ysnPostProduction = @ysnPostProduction
 						,@strLotAlias = @strLotAlias
 						,@intLocationId = @intLocationId
 						,@intMachineId = @intMachineId
