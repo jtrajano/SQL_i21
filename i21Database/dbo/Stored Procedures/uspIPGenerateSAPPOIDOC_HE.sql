@@ -517,14 +517,15 @@ BEGIN
 
 		IF UPPER(@strRowState) <> 'ADDED'
 		BEGIN
-			SET @strItemXml += '<E1BPMEPOITEM SEGMENT="1">'
+			SET @strItemXml += '<E1BPMEOUTITEM SEGMENT="1">'
 
 			IF UPPER(@strRowState) = 'DELETE'
 				SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
-			SET @strItemXml += '</E1BPMEPOITEM>'
+			SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
+			SET @strItemXml += '</E1BPMEOUTITEM>'
 		END
 
 		--Header End Xml
