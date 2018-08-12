@@ -3,7 +3,10 @@
        @dtmToDate DATETIME = NULL,
        @intCommodityId int = NULL,
        @intUnitMeasureId int = NULL,
-       @ysnVendorProducer bit = null
+       @ysnVendorProducer bit = null,
+	   	   @intBookId int = null,
+	   @intSubBookId int = null,
+	   @intAOPId int = null
 
 AS
 
@@ -38,7 +41,7 @@ SELECT DISTINCT tcd.intContractDetailId,
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 select CAST(ROW_NUMBER() OVER (ORDER BY strEntityName) AS INT) as intRowNum,strEntityName strName,strOrigin,strProductType,sum(dblQty) dblQty,sum(dblTotPurchased) dblTotPurchased,0 as intConcurrencyId,
-(sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100  as dblCompanySpend
+(sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100  as dblCompanySpend,strLocationName
 
   from(
 SELECT strName as strEntityName,		
@@ -68,7 +71,7 @@ SELECT strName as strEntityName,
 						(isnull(dblUnPriced,0))
 				end
 	 end AS dblTotPurchased
-	 , strOrigin,strProductType
+	 , strOrigin,strProductType,strLocationName
 FROM(
 SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
@@ -125,15 +128,20 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  as dblReturn,
 			  strOrigin,strProductType,
 			   dblRatio,
-			  dblBasis
+			  dblBasis,
+			  strLocationName
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
+join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
 JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
+and isnull(cd.intSubBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intSubBookId,0) else @intBookId end
+
 --and strName=@strEntityName
-)t)t1 group by strEntityName,strOrigin,strProductType
+)t)t1 group by strEntityName,strOrigin,strProductType,strLocationName
 
 END
 ELSE
@@ -141,7 +149,7 @@ ELSE
 BEGIN
 
 select CAST(ROW_NUMBER() OVER (ORDER BY strEntityName) AS INT) as intRowNum,strEntityName strName,strOrigin,strProductType,sum(dblQty) dblQty,sum(dblTotPurchased) dblTotPurchased,0 as intConcurrencyId,
-(sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100  as dblCompanySpend
+(sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100  as dblCompanySpend,strLocationName
 
   from(
 SELECT strName as strEntityName,		
@@ -170,7 +178,7 @@ SELECT strName as strEntityName,
 					else
 						(isnull(dblUnPriced,0))
 				end
-	 end AS dblTotPurchased  , strOrigin,strProductType
+	 end AS dblTotPurchased  , strOrigin,strProductType,strLocationName
 FROM(
 SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
@@ -228,14 +236,17 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  as dblReturn,
 			  strOrigin,strProductType,
 			  dblRatio,
-			  dblBasis
+			  dblBasis,strLocationName
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
+join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 							case when isnull(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId end end
 JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
+and isnull(cd.intSubBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intSubBookId,0) else @intBookId end
 --and strName=@strEntityName
-)t)t1 group by strEntityName,strOrigin,strProductType
+)t)t1 group by strEntityName,strOrigin,strProductType,strLocationName
 END
