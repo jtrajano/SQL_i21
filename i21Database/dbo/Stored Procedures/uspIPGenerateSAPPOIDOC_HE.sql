@@ -197,7 +197,7 @@ BEGIN
 			AND ISNULL(strFeedStatus, '') = ''
 		ORDER BY intContractFeedId
 
-		SELECT @strContractFeedIds = COALESCE(CONVERT(VARCHAR, @strContractFeedIds) + ',', '') + CONVERT(VARCHAR, intContractDetailId)
+		SELECT @strContractFeedIds = COALESCE(CONVERT(VARCHAR, @strContractFeedIds) + ',', '') + CONVERT(VARCHAR, intContractFeedId)
 		FROM tblCTContractFeed
 		WHERE intContractHeaderId = @intContractHeaderId
 			AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
