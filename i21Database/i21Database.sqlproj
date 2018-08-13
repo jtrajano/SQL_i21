@@ -6940,6 +6940,7 @@
     <Build Include="dbo\Stored Procedures\uspPOUpdateVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
     <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageUnitsByCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
