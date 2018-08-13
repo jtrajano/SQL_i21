@@ -120,7 +120,11 @@ BEGIN
 
 		-- Get the item's last cost when reducing stock. 
 		-- Except if doing vendor stock returns using Inventory Receipt/Return 
-		SELECT	@dblCost = ItemPricing.dblAverageCost 
+		SELECT	@dblCost = COALESCE(
+					NULLIF(ItemPricing.dblAverageCost, 0)
+					, NULLIF(ItemPricing.dblLastCost, 0)
+					, ItemPricing.dblStandardCost
+				)
 		FROM	tblICItemPricing ItemPricing 
 		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
 				AND ItemPricing.intItemId = @intItemId
