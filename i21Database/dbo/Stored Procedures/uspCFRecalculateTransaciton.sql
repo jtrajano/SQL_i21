@@ -6205,6 +6205,14 @@ BEGIN
 			,ysnInvalid				   = @ysnInvalid	
 			,dblQuantity			   = @dblQuantity
 			,intSiteGroupId			   = @intSiteGroupId
+			,dblCalculatedGrossPrice   = @dblCalculatedGrossPrice
+			,dblOriginalGrossPrice	   = @dblOriginalGrossPrice	
+			,dblCalculatedNetPrice	   = @dblCalculatedNetPrice	
+			,dblOriginalNetPrice	   = @dblOriginalNetPrice	
+			,dblCalculatedTotalPrice   = @dblCalculatedTotalPrice
+			,dblOriginalTotalPrice	   = @dblOriginalTotalPrice	
+			,dblMargin				   = @dblMargin
+			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
@@ -6245,25 +6253,13 @@ BEGIN
 
 			---------------------------------------------------------------------------
 
-			DECLARE @strNewPriceMethod AS NVARCHAR(MAX)
-			DECLARE @dblNewTotalAmount AS NUMERIC(18,6)
-
-			SELECT TOP 1
-			@strNewPriceMethod = cfTrans.strPriceMethod
-			,@dblNewTotalAmount = cfTransPrice.dblCalculatedAmount
-			FROM tblCFTransaction cfTrans
-			LEFT OUTER JOIN 
-			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM         dbo.tblCFTransactionPrice 
-			WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice 
-			ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
-			WHERE cfTrans.intTransactionId = @intTransactionId
-
 			UPDATE tblCFBatchRecalculateStagingTable 
-			SET strNewPriceMethod = @strNewPriceMethod 
-			,dblNewTotalAmount = @dblNewTotalAmount 
+			SET strNewPriceMethod = @strPriceMethod 
+			,dblNewTotalAmount = @dblCalculatedTotalPrice 
 			,strStatus = 'Done'
 			WHERE intTransactionId = @intTransactionId
+
+
 
 			COMMIT TRANSACTION
 
@@ -6404,31 +6400,15 @@ BEGIN
 
 				UPDATE tblCFTransaction 
 				SET 
-				 dblCalculatedGrossPrice   = selTrans.dblCalculatedGrossPrice
-				,dblCalculatedNetPrice	   = selTrans.dblCalculatedNetPrice
-				,dblCalculatedTotalPrice   = selTrans.dblCalculatedTotalPrice
-				,dblOriginalGrossPrice	   = selTrans.dblOriginalGrossPrice
-				,dblOriginalNetPrice	   = selTrans.dblOriginalNetPrice
-				,dblOriginalTotalPrice	   = selTrans.dblOriginalTotalPrice
-				FROM tblCFTransaction AS selTrans
-				WHERE selTrans.intTransactionId = @intTransactionId
+				dblCalculatedGrossPrice			=  @dblCalculatedGrossPrice
+				,dblOriginalGrossPrice			=  @dblOriginalGrossPrice	
+				,dblCalculatedNetPrice			=  @dblCalculatedNetPrice	
+				,dblOriginalNetPrice			=  @dblOriginalNetPrice	
+				,dblCalculatedTotalPrice		=  @dblCalculatedTotalPrice
+				,dblOriginalTotalPrice			=  @dblOriginalTotalPrice	
+				WHERE intTransactionId			=  @overfillId
 
 
-				--INSERT INTO tblCFTransactionPrice
-				--(
-				--	intTransactionId
-				--	,strTransactionPriceId
-				--	,dblOriginalAmount
-				--	,dblCalculatedAmount
-				--)
-				--SELECT 
-				--	@overfillId
-				--	,strTransactionPriceId
-				--	,dblOriginalAmount
-				--	,dblCalculatedAmount
-				--FROM
-				--tblCFTransactionPrice
-				--WHERE intTransactionId = @intTransactionId
 
 
 				INSERT INTO tblCFTransactionTax
