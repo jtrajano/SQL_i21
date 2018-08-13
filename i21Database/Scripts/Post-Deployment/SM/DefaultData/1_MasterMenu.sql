@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Requirement Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Payable'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Tickets from CSV' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Import' AND strModuleName = 'Help Desk'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4875,6 +4875,15 @@ ELSE
 DECLARE @HelpDeskReportParentMenuId INT
 SELECT @HelpDeskReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Import', N'Help Desk', @HelpDeskParentMenuId, N'Import', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 3 WHERE strMenuName = 'Import' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+
+DECLARE @HelpDeskImportParentMenuId INT
+SELECT @HelpDeskImportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Import' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */ 
 UPDATE tblSMMasterMenu SET intParentMenuID = @HelpDeskActivitiesParentMenuId WHERE intParentMenuID =  @HelpDeskParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @HelpDeskMaintenanceParentMenuId WHERE intParentMenuID =  @HelpDeskParentMenuId AND strCategory = 'Maintenance'
@@ -4953,6 +4962,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rough Cut
 	VALUES (N'Rough Cut Capacity', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Rough Cut Capacity', N'Report', N'Screen', N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport', N'small-menu-report', 0, 0, 0, 1, 2, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport' WHERE strMenuName = N'Rough Cut Capacity' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Tickets from CSV' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskImportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Import Tickets from CSV', N'Help Desk', @HelpDeskImportParentMenuId, N'Help Desk Import Tickets from CSV', N'Report', N'Screen', N'HelpDesk.view.ImportTicket', N'small-menu-import', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'HelpDesk.view.ImportTicket' WHERE strMenuName = N'Import Tickets from CSV' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskImportParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Help Desk Settings' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
