@@ -14,17 +14,19 @@ GO
 	ALTER TABLE tblSMUserSecurity CHECK CONSTRAINT FK_UserSecurity_UserRole
 	ALTER TABLE tblSMUserSecurityCompanyLocationRolePermission CHECK CONSTRAINT FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMUserRole
 GO
-	PRINT N'INSERT DEFAULT CONTACT ROLE'
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserRole WHERE strName = 'Help Desk') 
-		INSERT [dbo].[tblSMUserRole] ([strName], [strDescription], [strRoleType], [ysnAdmin]) VALUES (N'Help Desk', N'Default contact role.', 'Contact', 0)
-	ELSE
-		UPDATE [dbo].[tblSMUserRole] SET [strDescription] = N'Default contact role.' WHERE [strName] = 'Help Desk'
-GO
+--	PRINT N'INSERT DEFAULT CONTACT ROLE'
+--	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserRole WHERE strName = 'Help Desk') 
+--		INSERT [dbo].[tblSMUserRole] ([strName], [strDescription], [strRoleType], [ysnAdmin]) VALUES (N'Help Desk', N'Default contact role.', 'Contact', 0)
+--	ELSE
+--		UPDATE [dbo].[tblSMUserRole] SET [strDescription] = N'Default contact role.' WHERE [strName] = 'Help Desk'
+--GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserRole WHERE intUserRoleID = 999)
 	BEGIN
 		SET IDENTITY_INSERT [dbo].[tblSMUserRole] ON
-		INSERT [dbo].[tblSMUserRole] ([intUserRoleID], [strName], [strDescription], [strRoleType], [ysnAdmin]) VALUES (999, N'PORTAL DEFAULT', N'Do not alter this is record.', 'Portal Default', 1)
+		INSERT [dbo].[tblSMUserRole] ([intUserRoleID], [strName], [strDescription], [strRoleType], [ysnAdmin]) VALUES (999, N'Portal Admin', N'Do not alter this is record.', 'Portal Admin', 1)
 		SET IDENTITY_INSERT [dbo].[tblSMUserRole] OFF
+
+		EXEC uspSMUpdateUserRoleMenus 999, 1, 1
 	END
 GO
 	PRINT N'END INSERT DEFAULT USER ROLE'
