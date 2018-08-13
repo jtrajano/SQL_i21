@@ -7112,4 +7112,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strDefaultSiteNo" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="54a3004e-380e-4e73-99cc-454c79eb8ca6" ChangeDateTime="08/10/2018 07:22:00">
+    <Property Name="ElementName" Value="[dbo].[tblMBILPayment].[intCompanyLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILPayment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLocationId" />
+  </Operation>
 </Operations>
