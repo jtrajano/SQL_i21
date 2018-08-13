@@ -714,7 +714,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '735-1302', strScheduleCode = '8', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Include', intMasterId = 37537
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '735-1334M', strScheduleCode = '2', strType = '', strState = 'OR', strStatus = 'Include', intMasterId = 37560
 
-	--EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
+	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
 	EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
