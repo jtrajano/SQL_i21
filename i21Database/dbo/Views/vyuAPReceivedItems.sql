@@ -708,8 +708,8 @@ FROM
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
-		,[dblUnitQty]								=	ItemUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -837,8 +837,8 @@ FROM
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
-		,[dblUnitQty]								=	ItemUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -967,8 +967,8 @@ FROM
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
-		,[dblUnitQty]								=	ItemUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -1096,8 +1096,8 @@ FROM
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
-		,[dblUnitQty]								=	ItemUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
