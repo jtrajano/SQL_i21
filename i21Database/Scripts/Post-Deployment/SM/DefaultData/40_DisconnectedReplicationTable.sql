@@ -1,6 +1,12 @@
 
 PRINT N'DISCONNECTED REPLICATION TABLE '
 
+DELETE FROM tblSMDisconReplicationArticle
+DECLARE @sql nvarchar(max) = N'';
+SET @sql = N'DBCC CHECKIDENT(''tblSMDisconReplicationArticle'',RESEED, 0); ' 
+
+EXECUTE sp_executesql @sql;
+
 
  IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMDisconReplicationArticle )
 	BEGIN
