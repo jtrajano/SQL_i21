@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblMBILInvoice](
 	[intInvoiceId] INT IDENTITY NOT NULL,
 	[strInvoiceNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intOrderId] INT NOT NULL,
+	[intOrderId] INT NULL,
 	[intEntityCustomerId] INT NULL,
 	[intLocationId] INT NULL,
 	[strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
