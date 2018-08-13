@@ -229,16 +229,18 @@ BEGIN
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Earning to Temporary Table to Distribute Amounts
 	SELECT intTmpEarningId, intPaycheckEarningId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
-	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT
+	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT, @ysnAmountTempIsNegative BIT
 
 	--Distribute Amounts
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningAmount)
 	BEGIN
 		SELECT TOP 1 @dblAmountTempEarningFullAmount = dblAmount
+					,@ysnAmountTempIsNegative = CASE WHEN (dblAmount < 0) THEN 1 ELSE 0 END
 					,@intAmountTempPaycheckEarningId = intPaycheckEarningId
 		FROM #tmpEarningAmount
 
-		WHILE (@dblAmountTempEarningFullAmount <> 0)
+		WHILE ((@ysnAmountTempIsNegative = 1 AND @dblAmountTempEarningFullAmount < 0) 
+			OR (@ysnAmountTempIsNegative = 0 AND @dblAmountTempEarningFullAmount > 0))
 		BEGIN
 			SELECT TOP 1 @intAmountTempTmpEarningId = intTmpEarningId FROM #tmpEarningAmount 
 			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
@@ -279,8 +281,8 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-		,[dblDebit]					= CASE WHEN (SUM(E.dblAmount) > 0) THEN SUM(E.dblAmount) ELSE 0 END
-		,[dblCredit]				= CASE WHEN (SUM(E.dblAmount) < 0) THEN ABS(SUM(E.dblAmount)) ELSE 0 END
+		,[dblDebit]					= CASE WHEN (SUM(ISNULL(E.dblAmount, 0)) > 0) THEN SUM(ISNULL(E.dblAmount, 0)) ELSE 0 END
+		,[dblCredit]				= CASE WHEN (SUM(ISNULL(E.dblAmount, 0)) < 0) THEN ABS(SUM(ISNULL(E.dblAmount, 0))) ELSE 0 END
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -396,19 +398,22 @@ BEGIN
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Deduction to Temporary Table to Distribute Amounts
 	SELECT intTmpDeductionId, intTypeDeductionId, dblAmount INTO #tmpDeductionAmount FROM #tmpDeduction
-	DECLARE @intTypeDeductionId INT, @dblDeductionFullAmount NUMERIC(18, 6), @intTmpDeductionId INT
+	DECLARE @intTypeDeductionId INT, @dblDeductionFullAmount NUMERIC(18, 6), @intTmpDeductionId INT, @ysnDeductionIsNegative BIT
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDeductionAmount)
 	BEGIN
 		SELECT TOP 1 @dblDeductionFullAmount = dblAmount
+					,@ysnDeductionIsNegative = CASE WHEN (dblAmount < 0) THEN 1 ELSE 0 END
 					,@intTypeDeductionId = intTypeDeductionId
 		FROM #tmpDeductionAmount
 
-		WHILE (@dblDeductionFullAmount <> 0)
+		WHILE ((@ysnDeductionIsNegative = 1 AND @dblDeductionFullAmount < 0) 
+			OR (@ysnDeductionIsNegative = 0 AND @dblDeductionFullAmount > 0))
 		BEGIN
 			SELECT TOP 1 @intTmpDeductionId = intTmpDeductionId FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId
-
-			IF ((SELECT COUNT(1) FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId) = 1) 
+						
+			IF ((@ysnDeductionIsNegative = 1 AND (SELECT @dblDeductionFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpDeduction WHERE intTmpDeductionId = @intTmpDeductionId) > 0)
+					OR (@ysnDeductionIsNegative = 0 AND (SELECT @dblDeductionFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpDeduction WHERE intTmpDeductionId = @intTmpDeductionId) < 0))
 				BEGIN
 					UPDATE #tmpDeduction SET dblAmount = @dblDeductionFullAmount WHERE intTmpDeductionId = @intTmpDeductionId
 					SELECT @dblDeductionFullAmount = 0.000000
@@ -444,7 +449,7 @@ BEGIN
 		,[intGLAccountId]			= D.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
 		,[dblDebit]					= 0
-		,[dblCredit]				= SUM(D.dblAmount)
+		,[dblCredit]				= SUM(ISNULL(D.dblAmount, 0))
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -466,7 +471,7 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= D.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intExpenseAccountId)
-		,[dblDebit]					= SUM(D.dblAmount)
+		,[dblDebit]					= SUM(ISNULL(D.dblAmount, 0))
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
@@ -583,19 +588,22 @@ BEGIN
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Tax to Temporary Table to Distribute Amounts
 	SELECT intTmpTaxId, intTypeTaxId, dblAmount INTO #tmpTaxAmount FROM #tmpTax
-	DECLARE @intTypeTaxId INT, @dblTaxFullAmount NUMERIC(18, 6), @intTmpTaxId INT
+	DECLARE @intTypeTaxId INT, @dblTaxFullAmount NUMERIC(18, 6), @intTmpTaxId INT, @ysnTaxIsNegative BIT
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTaxAmount)
 	BEGIN
 		SELECT TOP 1 @dblTaxFullAmount = dblAmount
+					,@ysnTaxIsNegative = CASE WHEN (dblAmount < 0) THEN 1 ELSE 0 END
 					,@intTypeTaxId = intTypeTaxId
 		FROM #tmpTaxAmount
 
-		WHILE (@dblTaxFullAmount <> 0)
+		WHILE ((@ysnTaxIsNegative = 1 AND @dblTaxFullAmount < 0) 
+			OR (@ysnTaxIsNegative = 0 AND @dblTaxFullAmount > 0))
 		BEGIN
 			SELECT TOP 1 @intTmpTaxId = intTmpTaxId FROM #tmpTaxAmount WHERE intTypeTaxId = @intTypeTaxId
 
-			IF ((SELECT COUNT(1) FROM #tmpTaxAmount WHERE intTypeTaxId = @intTypeTaxId) = 1) 
+			IF ((@ysnTaxIsNegative = 1 AND (SELECT @dblTaxFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpTax WHERE intTmpTaxId = @intTmpTaxId) > 0)
+					OR (@ysnTaxIsNegative = 0 AND (SELECT @dblTaxFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpTax WHERE intTmpTaxId = @intTmpTaxId) < 0))
 				BEGIN
 					UPDATE #tmpTax SET dblAmount = @dblTaxFullAmount WHERE intTmpTaxId = @intTmpTaxId
 					SELECT @dblTaxFullAmount = 0.000000
@@ -631,7 +639,7 @@ BEGIN
 		,[intGLAccountId]			= T.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
 		,[dblDebit]					= 0
-		,[dblCredit]				= SUM(T.dblAmount)
+		,[dblCredit]				= SUM(ISNULL(T.dblAmount, 0))
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -653,7 +661,7 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= T.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intExpenseAccountId)
-		,[dblDebit]					= SUM(T.dblAmount)
+		,[dblDebit]					= SUM(ISNULL(T.dblAmount, 0))
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
