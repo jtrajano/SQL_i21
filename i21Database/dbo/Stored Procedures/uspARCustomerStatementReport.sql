@@ -122,7 +122,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
 				   , strCustomerNumber      = C.strCustomerNumber
 				   , strCustomerName        = EC.strName
-				   , strStatementFormat		= C.strStatementFormat
+				   , strStatementFormat		= ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item')
 				   , dblCreditLimit         = C.dblCreditLimit
 				   , dblARBalance           = C.dblARBalance        
 		FROM tblARCustomer C WITH (NOLOCK)
@@ -132,8 +132,8 @@ IF @strCustomerNumberLocal IS NOT NULL
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE strEntityNo = @strCustomerNumberLocal
 		) EC ON C.intEntityId = EC.intEntityId
-		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
-			AND C.strStatementFormat = @strStatementFormatLocal
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
+		  	AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
@@ -141,7 +141,7 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 		SELECT intEntityCustomerId  = C.intEntityId 
 		     , strCustomerNumber    = C.strCustomerNumber
 		     , strCustomerName      = EC.strName
-		     , strStatementFormat	= C.strStatementFormat
+		     , strStatementFormat	= ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item')
 		     , dblCreditLimit       = C.dblCreditLimit
 		     , dblARBalance         = C.dblARBalance        
 		FROM tblARCustomer C WITH (NOLOCK)
@@ -155,7 +155,7 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 			FROM dbo.tblEMEntity WITH (NOLOCK)			
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
-			AND C.strStatementFormat = @strStatementFormatLocal
+			AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 	END
 ELSE
 	BEGIN
@@ -163,7 +163,7 @@ ELSE
 		SELECT intEntityCustomerId  = C.intEntityId 
 			 , strCustomerNumber	= C.strCustomerNumber
 			 , strCustomerName      = EC.strName
-			 , strStatementFormat	= C.strStatementFormat
+			 , strStatementFormat	= ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item')
 			 , dblCreditLimit       = C.dblCreditLimit
 			 , dblARBalance         = C.dblARBalance
 		FROM tblARCustomer C WITH (NOLOCK)
@@ -174,7 +174,7 @@ ELSE
 			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
-			AND C.strStatementFormat = @strStatementFormatLocal
+			AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
@@ -649,4 +649,4 @@ INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intE
 UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
 WHERE intEntityUserId = @intEntityUserIdLocal
-  AND strStatementFormat = @strStatementFormatLocal
+  AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
