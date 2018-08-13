@@ -101,11 +101,11 @@ BEGIN
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
 		AND (
-			ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) <> 0 
-			OR ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) <> 0 
+			ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) > 0 
+			OR ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) > 0 
 		)
 		AND Item.strLotTracking <> 'No'
-		AND Detail.dblPhysicalCount IS NOT NULL
+		AND ISNULL(Detail.dblPhysicalCount, 0) > 0 
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
