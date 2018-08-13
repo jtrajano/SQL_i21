@@ -329,47 +329,50 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 					END
 
 				--INSERT INVOICE IN PAYMENT DETAIL
-				INSERT INTO tblARPaymentDetail
-					([intPaymentId]
-					,[intInvoiceId]
-					,[strTransactionNumber]
-					,[intTermId]
-					,[intAccountId]
-					,[dblInvoiceTotal]
-					,[dblBaseInvoiceTotal]
-					,[dblDiscount]
-					,[dblBaseDiscount]
-					,[dblDiscountAvailable]
-					,[dblBaseDiscountAvailable]
-					,[dblAmountDue]
-					,[dblBaseAmountDue]
-					,[dblPayment]
-					,[dblBasePayment]
-					,[dblCurrencyExchangeRate]
-					,[intConcurrencyId])
-				SELECT [intPaymentId]			= @intPaymentId
-					,[intInvoiceId]				= intInvoiceId
-					,[strTransactionNumber]		= strInvoiceNumber
-					,[intTermId]				= intTermId
-					,[intAccountId]				= intAccountId
-					,[dblInvoiceTotal]			= dblInvoiceTotal
-					,[dblBaseInvoiceTotal]		= dblBaseInvoiceTotal
-					,[dblDiscount]				= 0.00
-					,[dblBaseDiscount]			= 0.00
-					,[dblDiscountAvailable]		= dblDiscountAvailable
-					,[dblBaseDiscountAvailable] = dblBaseDiscountAvailable
-					,[dblAmountDue]				= @dblAmountDue
-					,[dblBaseAmountDue]			= @dblAmountDue
-					,[dblPayment]				= @dblPayment
-					,[dblBasePayment]			= @dblPayment
-					,[dblCurrencyExchangeRate]	= 1
-					,[intConcurrencyId]			= 1
-				FROM dbo.tblARInvoice
-				WHERE intInvoiceId = @intInvoiceId
+				IF ISNULL(@intPaymentId, 0) <> 0
+					BEGIN
+						INSERT INTO tblARPaymentDetail
+							([intPaymentId]
+							,[intInvoiceId]
+							,[strTransactionNumber]
+							,[intTermId]
+							,[intAccountId]
+							,[dblInvoiceTotal]
+							,[dblBaseInvoiceTotal]
+							,[dblDiscount]
+							,[dblBaseDiscount]
+							,[dblDiscountAvailable]
+							,[dblBaseDiscountAvailable]
+							,[dblAmountDue]
+							,[dblBaseAmountDue]
+							,[dblPayment]
+							,[dblBasePayment]
+							,[dblCurrencyExchangeRate]
+							,[intConcurrencyId])
+						SELECT [intPaymentId]			= @intPaymentId
+							,[intInvoiceId]				= intInvoiceId
+							,[strTransactionNumber]		= strInvoiceNumber
+							,[intTermId]				= intTermId
+							,[intAccountId]				= intAccountId
+							,[dblInvoiceTotal]			= dblInvoiceTotal
+							,[dblBaseInvoiceTotal]		= dblBaseInvoiceTotal
+							,[dblDiscount]				= 0.00
+							,[dblBaseDiscount]			= 0.00
+							,[dblDiscountAvailable]		= dblDiscountAvailable
+							,[dblBaseDiscountAvailable] = dblBaseDiscountAvailable
+							,[dblAmountDue]				= @dblAmountDue
+							,[dblBaseAmountDue]			= @dblAmountDue
+							,[dblPayment]				= @dblPayment
+							,[dblBasePayment]			= @dblPayment
+							,[dblCurrencyExchangeRate]	= 1
+							,[intConcurrencyId]			= 1
+						FROM dbo.tblARInvoice
+						WHERE intInvoiceId = @intInvoiceId
 
-				--INSERT PAYMENTS TO POST
-				INSERT INTO @tblPayments
-				SELECT @intPaymentId
+						--INSERT PAYMENTS TO POST
+						INSERT INTO @tblPayments
+						SELECT @intPaymentId
+					END
 
 				DELETE FROM @tblInvoices WHERE intInvoiceId = @intInvoiceId
 			END
