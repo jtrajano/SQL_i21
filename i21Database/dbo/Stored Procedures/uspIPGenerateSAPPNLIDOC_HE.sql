@@ -91,7 +91,7 @@ BEGIN
 		--Header
 		SET @strXml += '<E1BPACHE09 SEGMENT="1">'
 		SET @strXml += '<BLDAT>' + ISNULL(CONVERT(VARCHAR(10), @dtmMatchDate, 112), '') + '</BLDAT>'
-		SET @strXml += '<BLART>' + 'SA' + '</BLART>'
+		SET @strXml += '<BLART>' + 'ZA' + '</BLART>'
 		SET @strXml += '<BUKRS>' + ISNULL(@strSAPLocation, '') + '</BUKRS>'
 		SET @strXml += '<WAERS>' + ISNULL(@strCurrency, '') + '</WAERS>'
 		SET @strXml += '<BKTXT>' + '' + '</BKTXT>'
