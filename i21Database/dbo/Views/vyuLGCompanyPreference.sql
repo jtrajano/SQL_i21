@@ -164,6 +164,13 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 1
 			THEN 'Pre Arrival Notification Report Format - 1'
 		END strPreArrivalNotificationReportFormat
+	,CP.intBOLReportFormat
+	,CASE CP.intBOLReportFormat
+		WHEN 1
+			THEN 'BOL Report Format - 1'
+		WHEN 2
+			THEN ''
+		END strBOLReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
@@ -218,6 +225,9 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnContainerNoUnique
 	,CP.intReportLogoHeight
 	,CP.intReportLogoWidth
+	,CP.ysnEnableAccrualsForInbound
+	,CP.ysnEnableAccrualsForOutbound
+	,CP.ysnEnableAccrualsForDropShip
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
