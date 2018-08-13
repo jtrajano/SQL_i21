@@ -1301,11 +1301,11 @@ FROM
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	A.strCustomerName
-		,[strVendorId]								=	LTRIM(A.intEntityVendorId)
+		,[strVendorId]								=	LTRIM(D1.strVendorId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	''--A.strContractNumber
 		,[strBillOfLading]							=	L.strBLNumber
 		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
 		,[intContractDetailId]						=	NULL -- A.intPContractDetailId
