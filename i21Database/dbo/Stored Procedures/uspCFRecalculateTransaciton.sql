@@ -5890,8 +5890,9 @@ BEGIN
 	---------------------------------------------------
 
 	DECLARE @intItemLocation INT
+	DECLARE @intIssuUOM INT
 
-	SELECT TOP 1 @intItemLocation = intItemLocationId
+	SELECT TOP 1 @intItemLocation = intItemLocationId , @intIssuUOM = intIssueUOMId
 	FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @intLocationId
 
 	IF(ISNULL(@intItemLocation,0) = 0)
@@ -5900,6 +5901,15 @@ BEGIN
 		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Item does not have setup for specified site location.')
 		SET @ysnInvalid = 1
 	END
+
+	IF(ISNULL(@intIssuUOM,0) = 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid Item Location UOM')
+		SET @ysnInvalid = 1
+	END
+
+	
 
 	DECLARE @ysnVehicleRequire BIT = 0
 
@@ -5916,6 +5926,7 @@ BEGIN
 		ON c.intAccountId = a.intAccountId
 		WHERE intCardId = @intCardId
 	END
+
 
 	IF(@intProductId = 0 OR @intProductId IS NULL)
 	BEGIN
