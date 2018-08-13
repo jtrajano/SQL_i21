@@ -6941,6 +6941,7 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
     <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
     <Build Include="dbo\Views\vyuICGetStorageUnitsByCategory.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_Fix_GL_Account.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
