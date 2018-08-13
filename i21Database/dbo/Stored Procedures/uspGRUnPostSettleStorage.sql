@@ -307,7 +307,7 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN SH.dblUnits ELSE 0 END
+					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN - SH.dblUnits ELSE 0 END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= SH.dblPaidAmount
 					,dblSalesPrice				= 0.00
