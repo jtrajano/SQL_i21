@@ -26,7 +26,7 @@ SELECT	DISTINCT
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
-			,APBD.dblTotal 
+			,APBD.dblTotal + APBD.dblTax as dblTotal
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
@@ -104,7 +104,7 @@ SELECT	DISTINCT
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
-			,APBD.dblTotal 
+			,APBD.dblTotal + APBD.dblTax as dblTotal
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
