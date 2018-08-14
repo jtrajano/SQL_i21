@@ -3523,7 +3523,7 @@ SET ysnCostEnabled  =1
 WHERE ysnCostEnabled is NULL
 Go
 UPDATE dbo.tblMFCompanyPreference
-SET ysnLotNumberUniqueByItem =1
+SET ysnLotNumberUniqueByItem =0
 WHERE ysnLotNumberUniqueByItem is NULL
 Go
 UPDATE tblMFCompanyPreference
@@ -3537,4 +3537,8 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnWorkOrderPlannedDateByBusinessDate = 1
 Where ysnWorkOrderPlannedDateByBusinessDate IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnConcatenateParentLotonProduction =0
+Where ysnConcatenateParentLotonProduction IS NULL
 GO
