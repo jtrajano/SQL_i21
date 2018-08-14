@@ -72,7 +72,7 @@ BEGIN TRY
 			((Inventory.dblBeginInventory + ISNULL(trans.dblReceived, 0)) - Inventory.dblEndInventory) AS dblHandled,
 			Inventory.dtmBeginDate, 
 			Inventory.dtmEndDate
-		FROM dbo.vyuTFGetTaxAuthorityBeginEndInventory Inventory INNER JOIN @transaction trans ON trans.strProductCode = Inventory.strProductCode AND trans.strAltFacilityNumber = Inventory.strOregonFacilityNumber
+		FROM dbo.vyuTFGetTaxAuthorityBeginEndInventory Inventory LEFT JOIN @transaction trans ON trans.strProductCode = Inventory.strProductCode AND trans.strAltFacilityNumber = Inventory.strOregonFacilityNumber
 		WHERE Inventory.dtmBeginDate <= @dtmFrom AND Inventory.dtmEndDate >= @dtmTo	
 
 		DELETE @transaction
