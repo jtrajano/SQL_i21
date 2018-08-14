@@ -1915,12 +1915,14 @@ BEGIN
 						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
-				EXEC dbo.uspICRepostInTransitCosting
+				EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
 					,@strBatchId
 					,NULL 
 					,@intEntityUserSecurityId
 					,@strGLDescription
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
 				SET @intReturnValue = NULL 
 				INSERT INTO @GLEntries (
@@ -2353,12 +2355,14 @@ BEGIN
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
-					EXEC dbo.uspICRepostInTransitCosting
+					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
 						,@strBatchId
 						,@strAccountToCounterInventory
 						,@intEntityUserSecurityId
 						,@strGLDescription
+
+					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
@@ -3088,10 +3092,10 @@ GOTO _CLEAN_UP
 _EXIT_WITH_ERROR: 
 BEGIN 
 	SET @intReturnValue = ISNULL(@intReturnValue, -1); 
-	IF @strTransactionId IS NOT NULL 
-	BEGIN 
-		PRINT 'Failed in ' + @strTransactionId + '.'
-	END 
+	--IF @strTransactionId IS NOT NULL 
+	--BEGIN 
+	--	PRINT 'Failed in ' + @strTransactionId + '.'
+	--END 
 
 	GOTO _CLEAN_UP
 END
