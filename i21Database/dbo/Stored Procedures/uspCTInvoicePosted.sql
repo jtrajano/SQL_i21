@@ -134,7 +134,7 @@ BEGIN TRY
 		
 		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					
-		IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O'))
+		IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) OR (ISNULL(@intTicketTypeId, 0) = 2 AND (ISNULL(@intTicketType, 0) =1 AND ISNULL(@strInOutFlag, '') = 'O'))
 			BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
