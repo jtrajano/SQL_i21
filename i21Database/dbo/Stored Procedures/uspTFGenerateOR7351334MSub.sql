@@ -55,11 +55,10 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- Transaction
-		INSERT INTO @transaction (strFormCode, strScheduleCode, strProductCode, dblReceived )
-		SELECT strFormCode, strScheduleCode, strProductCode, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
-		FROM vyuTFGetTransaction
+		INSERT INTO @transaction (strFormCode, strScheduleCode, strProductCode, dblReceived, strAltFacilityNumber)
+		SELECT trans.strFormCode, trans.strScheduleCode, trans.strProductCode, dblReceived = ISNULL(trans.dblQtyShipped, 0.00), dynamicOR.strDestinationAltFacilityNumber
+		FROM vyuTFGetTransaction trans INNER JOIN tblTFTransactionDynamicOR dynamicOR ON dynamicOR.intTransactionId = trans.intTransactionId
 		WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '2'
-		GROUP BY strFormCode, strScheduleCode, strProductCode
 
 		-- Begin/End Inventory
 		INSERT INTO @Report 
@@ -73,7 +72,7 @@ BEGIN TRY
 			((Inventory.dblBeginInventory + ISNULL(trans.dblReceived, 0)) - Inventory.dblEndInventory) AS dblHandled,
 			Inventory.dtmBeginDate, 
 			Inventory.dtmEndDate
-		FROM dbo.vyuTFGetTaxAuthorityBeginEndInventory Inventory INNER JOIN @transaction trans ON Inventory.strProductCode = trans.strProductCode
+		FROM dbo.vyuTFGetTaxAuthorityBeginEndInventory Inventory INNER JOIN @transaction trans ON trans.strProductCode = Inventory.strProductCode AND trans.strAltFacilityNumber = Inventory.strOregonFacilityNumber
 		WHERE Inventory.dtmBeginDate <= @dtmFrom AND Inventory.dtmEndDate >= @dtmTo	
 
 		DELETE @transaction
