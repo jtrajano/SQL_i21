@@ -17,7 +17,7 @@
 	[dblTotalBillableAmount] [numeric](18,6) null,
 	[intCallsRated] [int] null,
 	[dblAverageRating] [numeric](18,6) null,
-	[intDaysOutstanding] [int] null,
+	[intDaysOutstanding] NUMERIC(18, 6) null,
 	[intConcurrencyId] [int] not null default 1,
 	CONSTRAINT [PK_tblHDCallDetail_intCallDetailId] PRIMARY KEY CLUSTERED ([intCallDetailId] ASC)
 )
