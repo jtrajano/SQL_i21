@@ -5238,18 +5238,46 @@ BEGIN
 
 		--UPDATE ORIGINAL TAX (FROM TAX GROUP) FOR TAXES THAT HAVE SPECIAL TAX RULE --
 
+		IF(ISNULL(@DevMode,0) = 1)
+		BEGIN
+			SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1
+
+			SELECT '@tblCFTaxCodeList',* from @tblCFTaxCodeList
+
+			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTaxZeroQuantity
+		END
+
 		SELECT @dblSpecialTaxZeroQty = SUM(ISNULL([dblOriginalTax],0))
 		FROM @tblCFTransactionTaxZeroQuantity
-		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) 
+		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1)  AND ISNULL(ysnInvalidSetup,0) = 0
+
+		IF(ISNULL(@DevMode,0) = 1)
+		BEGIN
+			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTax
+		END
 
 		SELECT @dblSpecialTax = SUM(ISNULL([dblOriginalTax],0))
 		FROM @tblCFTransactionTax
-		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1)
+		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) AND ISNULL(ysnInvalidSetup,0) = 0
+		
+		IF(ISNULL(@DevMode,0) = 1)
+		BEGIN
+			SELECT '@tblCFTransactionTax',* FROM @tblCFTransactionTax
+		END
 
 		UPDATE @tblCFTransactionTax SET 
 		[dblOriginalTax] = 0
-		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1)
+		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) AND ISNULL(ysnInvalidSetup,0) = 0
+
+		UPDATE @tblCFTransactionTaxZeroQuantity SET 
+		[dblOriginalTax] = 0
+		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) AND ISNULL(ysnInvalidSetup,0) = 0
 		--UPDATE ORIGINAL TAX FOR TAXES THAT HAVE SPECIAL TAX RULE --
+
+		IF(ISNULL(@DevMode,0) = 1)
+		BEGIN
+			SELECT '@@tblCFTransactionTax',* FROM @tblCFTransactionTax
+		END
 
 
 		---SPECIAL TAX RULE--
