@@ -10,12 +10,12 @@ BEGIN
 			DROP VIEW vyuCMOriginUndepositedFund
 	')
 
-	EXEC ('
-		CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
+	EXEC(
+		'CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
 		AS
-
-		SELECT	id = CAST( ROW_NUMBER() OVER( ORDER BY intUndepositedFundId ) AS INT) 
-				,uf.intUndepositedFundId
+		WITH C AS(
+		SELECT    id = CAST( ROW_NUMBER() OVER( ORDER BY intUndepositedFundId ) AS INT) 
+		     	,uf.intUndepositedFundId
 				,uf.intBankAccountId
 				,intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(gl.apegl_gl_acct)
 				,strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetGLAccountIdFromOriginToi21(gl.apegl_gl_acct))
@@ -42,35 +42,78 @@ BEGIN
 			id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
 			intUndepositedFundId	= CMUF.intUndepositedFundId, 
 			intBankAccountId		= CMUF.intBankAccountId, 
-			intGLAccountId			= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intAccountId ELSE ARI.intAccountId END,
-			strAccountDescription	= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = (CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intAccountId ELSE ARI.intAccountId END)),
+			intGLAccountId			= ARP.intAccountId,
+			strAccountDescription   = Account.strDescription,
 			dblAmount				= CMUF.dblAmount,
 			strName					= CMUF.strName, 
-			intEntityCustomerId		= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intEntityCustomerId ELSE ARI.intEntityCustomerId END,
+			intEntityCustomerId		= ARP.intEntityCustomerId,
 			dtmDate					= CMUF.dtmDate,
 			intCurrencyId			= ARP.intCurrencyId,
 			dblWeightRate			= F.dblWeightRate
 		FROM
 			tblCMUndepositedFund CMUF
-		LEFT OUTER JOIN
-			tblARPayment ARP
-				ON CMUF.intSourceTransactionId = ARP.intPaymentId
-				AND CMUF.strSourceTransactionId = ARP.strRecordNumber
-		LEFT OUTER JOIN
+		INNER JOIN
+		tblARPayment ARP
+			ON CMUF.intSourceTransactionId = ARP.intPaymentId
+			AND CMUF.strSourceTransactionId = ARP.strRecordNumber
+		OUTER APPLY(
+		SELECT dblWeightRate = 
+			SUM(CASE WHEN ARPD.dblCurrencyExchangeRate > 0 
+				THEN ARPD.dblCurrencyExchangeRate
+				ELSE 1 END * ARPD.dblPayment )/
+			NULLIF(SUM(ARPD.dblPayment), 0) 
+			FROM tblARPaymentDetail ARPD WHERE ARPD.intPaymentId = ARP.intPaymentId
+		)F
+		OUTER APPLY(
+			SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = ARP.intAccountId
+		)Account
+		UNION
+		SELECT
+		    id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
+			intUndepositedFundId	= CMUF.intUndepositedFundId, 
+			intBankAccountId		= CMUF.intBankAccountId, 
+			intGLAccountId			= ARI.intAccountId,
+			strAccountDescription   = Account.strDescription,
+			dblAmount				= CMUF.dblAmount,
+			strName					= CMUF.strName, 
+			intEntityCustomerId		= ARI.intEntityCustomerId,
+			dtmDate					= CMUF.dtmDate,
+			intCurrencyId			= ARI.intCurrencyId,
+			 dblWeightRate			= case when G.dblWeightRate is null then 1 else G.dblWeightRate end
+		FROM
+			tblCMUndepositedFund CMUF
+		INNER JOIN
 			tblARInvoice ARI
 				ON CMUF.intSourceTransactionId = ARI.intInvoiceId
-				AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber 
+				AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber
 		OUTER APPLY(
 			SELECT dblWeightRate = 
-				SUM(CASE WHEN dblCurrencyExchangeRate > 0 
-					THEN dblCurrencyExchangeRate
-					ELSE 1 END * dblPayment )/
-				SUM(dblPayment) 
-			FROM tblARPaymentDetail WHERE intPaymentId = ARP.intPaymentId
-		)F
+				SUM(CASE WHEN ARID.dblCurrencyExchangeRate > 0 
+					THEN ARID.dblCurrencyExchangeRate
+					ELSE 1 END * ARID.dblTotal )/
+				NULLIF(SUM(ARID.dblTotal), 0)
+			FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId
+		)G
+		OUTER APPLY(
+			SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = ARI.intAccountId
+		)Account
+		)
+		SELECT
+			id,
+			intUndepositedFundId,
+			intBankAccountId,
+			intGLAccountId,
+			strAccountDescription,
+			dblAmount,
+			strName,		
+			intEntityCustomerId,
+			dtmDate,			
+			intCurrencyId,
+			dblWeightRate
+			FROM C c
+		')
 
 
-	')
 END
 
 GO

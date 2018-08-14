@@ -7,6 +7,7 @@ CREATE VIEW vyuCMOriginUndepositedFund
 AS
 WITH C AS (
 	SELECT
+		id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
 		intUndepositedFundId	= CMUF.intUndepositedFundId, 
 		intBankAccountId		= CMUF.intBankAccountId, 
 		intGLAccountId			= ARP.intAccountId ,
@@ -32,6 +33,7 @@ WITH C AS (
 	)F
 	UNION
 	SELECT
+	    id						= CAST(ROW_NUMBER() OVER (ORDER BY CMUF.intUndepositedFundId) AS INT), 
 		intUndepositedFundId	= CMUF.intUndepositedFundId, 
 		intBankAccountId		= CMUF.intBankAccountId, 
 		intGLAccountId			= ARI.intAccountId,
@@ -57,6 +59,7 @@ WITH C AS (
 	)G
 )
 SELECT
+	id,
 	intUndepositedFundId,
 	intBankAccountId,
 	intGLAccountId,
