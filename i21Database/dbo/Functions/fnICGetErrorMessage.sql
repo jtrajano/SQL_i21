@@ -233,6 +233,7 @@ BEGIN
 		WHEN @msgId = 80217 THEN '%s is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency.'
 		WHEN @msgId = 80218 THEN 'Pricing type for %s is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
 		WHEN @msgId = 80219 THEN 'Cost adjustment cannot continue. Cost adjustment for %s cannot be earlier than %d.'
+		WHEN @msgId = 80220 THEN 'Unable to post %s for %s. Available stock of %s as of %d is below the transaction quantity %f.'
 	END 
 
 	RETURN @msg
