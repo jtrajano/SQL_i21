@@ -66,7 +66,8 @@
 	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1,
 	ysnIncludeConsumptionByLocationInPickOrder BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnIncludeConsumptionByLocationInPickOrder] DEFAULT 1,
 	ysnCostEnabled BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnCostEnabled] DEFAULT 1,
-	ysnLotNumberUniqueByItem Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnLotNumberUniqueByItem] DEFAULT 1,
+	ysnLotNumberUniqueByItem Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnLotNumberUniqueByItem] DEFAULT 0,
 	ysnMergeOnMove Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnMergeOnMove] DEFAULT 0,
+	ysnConcatenateParentLotonProduction BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnConcatenateParentLotonProduction] DEFAULT 0
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
