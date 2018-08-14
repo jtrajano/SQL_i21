@@ -99,9 +99,19 @@ BEGIN
 	BEGIN
 		IF EXISTS (SELECT intDeliverySheetId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId AND ysnPost = 1)
 		BEGIN 
-			RAISERROR('Undistribute the delivery sheet first to undistribute this ticket', 11, 1);
-			RETURN;
+			IF ISNULL(@ysnPost , 0) = 1
+			BEGIN
+				RAISERROR('Unable to distribute, Delivery Sheet already posted.', 11, 1);
+				RETURN;
+			END
+			ELSE 
+			BEGIN
+				RAISERROR('Undistribute the delivery sheet first to undistribute this ticket', 11, 1);
+				RETURN;
+			END
+			
 		END
+
 		INSERT INTO @InTransitTableType (
 			[intItemId]
 			,[intItemLocationId]
