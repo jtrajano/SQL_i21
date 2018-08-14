@@ -6393,7 +6393,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotOutboundShipDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1810_Fix_GL_Account.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
