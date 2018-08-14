@@ -1541,12 +1541,23 @@ IF(@CFPricingOut = 'Price Profile')
 BEGIN
 	DECLARE @dblPriceAdjustment NUMERIC(18,6)
 
+	--SELECT TOP 1 @dblPriceAdjustment = ISNULL(dblRate,0) 
+	--FROM tblCFSiteGroupPriceAdjustment ADJ
+	--WHERE intSiteGroupId = @CFSiteGroupId
+	--AND intARItemId = @CFItemId
+	--AND ISNULL(intPriceGroupId,0) = ISNULL(@CFPriceRuleGroup,0)
+	--AND dtmStartEffectiveDate <= @CFTransactionDate
+	--ORDER BY ADJ.dtmStartEffectiveDate DESC
+
+	
 	SELECT TOP 1 @dblPriceAdjustment = ISNULL(dblRate,0) 
 	FROM tblCFSiteGroupPriceAdjustment ADJ
-	WHERE intSiteGroupId = @CFSiteGroupId
+	INNER JOIN tblCFSiteGroupPriceAdjustmentHeader ADJH
+	ON ADJ.intSiteGroupPriceAdjustmentHeaderId = ADJH.intSiteGroupPriceAdjustmentHeaderId
+	WHERE ADJH.intSiteGroupId = @CFSiteGroupId
 	AND intARItemId = @CFItemId
 	AND ISNULL(intPriceGroupId,0) = ISNULL(@CFPriceRuleGroup,0)
-	AND dtmStartEffectiveDate <= @CFTransactionDate
+	AND ADJH.dtmEffectiveDate <= @CFTransactionDate
 	ORDER BY ADJ.dtmStartEffectiveDate DESC
 
 	SET @CFPriceOut = @CFPriceOut + ISNULL(@dblPriceAdjustment,0)
