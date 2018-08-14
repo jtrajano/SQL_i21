@@ -58,12 +58,10 @@ DECLARE @intReturnValue AS INT
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @returnValue AS INT 
-
-	EXEC @returnValue = dbo.uspICValidateCostingOnPost
+	EXEC @intReturnValue = dbo.uspICValidateCostingOnPost
 		@ItemsToValidate = @ItemsToPost
 
-	IF @returnValue < 0 RETURN -1;
+	IF @intReturnValue < 0 RETURN @intReturnValue;
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
