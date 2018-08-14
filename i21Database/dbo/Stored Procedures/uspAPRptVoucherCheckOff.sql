@@ -107,7 +107,7 @@ BEGIN
 		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,PostDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmPostDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'PostDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmPostDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
