@@ -79,7 +79,7 @@ BEGIN TRY
 
 	END
 
-	SELECT * FROM @Report
+	SELECT * FROM @Report ORDER BY strFacilityNumber ASC, strProductCode ASC
 
 END TRY
 BEGIN CATCH
