@@ -2,27 +2,27 @@
 	@Id nvarchar(100),
 	@Type NVARCHAR(50),
 	@UserId INT,
-	@Message NVARCHAR(100) OUTPUT
+	@Message NVARCHAR(100) OUTPUT,
+	@EntityId INT OUTPUT
 AS
 BEGIN
 	SET NOCOUNT ON
-	DECLARE @EntityId int
 	DECLARE @EntityContactId int
 	DECLARE @EntityLocationId int
 		
 	IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where strEntityNo = @Id)
-	begin	
+	BEGIN	
 		SET @Message = 'Entity No already exists.'		
 		RETURN 0
-	end
+	END
 	--Add validation for existing entity no
 	INSERT INTO tblEMEntity (strName, strContactNumber, strEntityNo)
-	select @Id,'', @Id
+	SELECT @Id,'', @Id
 
 	SET @EntityId = @@IDENTITY
 
 	INSERT INTO tblEMEntity (strName, strContactNumber)
-	select @Id,''
+	SELECT @Id,''
 
 	SET @EntityContactId = @@IDENTITY
 
@@ -35,11 +35,16 @@ BEGIN
 	INSERT INTO [tblEMEntityType](intEntityId, strType, intConcurrencyId)
 	SELECT @EntityId, @Type, 0
 
-	if @Type = 'Vendor'
-	begin
-		INSERT into tblAPVendor([intEntityId], strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
+	IF @Type = 'Vendor'
+	BEGIN
+		INSERT INTO tblAPVendor([intEntityId], strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
 		SELECT @EntityId, @Id, 0, 0, 0
-	end
+	END
+	ELSE IF @Type = 'Customer'
+	BEGIN
+		INSERT INTO tblARCustomer(intEntityId, strCustomerNumber, strType, dblARBalance)
+		SELECT @EntityId, @Id, 'Person', 0.00
+	END
 
 	EXEC uspSMAuditLog
         @keyValue = @EntityId,
