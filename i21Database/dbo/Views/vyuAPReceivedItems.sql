@@ -1305,7 +1305,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	''--A.strContractNumber
+		,[strContractNumber]                        =    CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	L.strBLNumber
 		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
 		,[intContractDetailId]						=	NULL -- A.intPContractDetailId
