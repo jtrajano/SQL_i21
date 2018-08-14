@@ -535,7 +535,7 @@ SELECT 4 intRowNumber,'1.Outright Coverage','Market coverage'  Selection,
 SELECT 4 intRowNumber,'1.Outright Coverage','Market coverage'  Selection,
        '3.Market coverage' PriceStatus,@strParamFutureMonth,'Market Coverage' strAccountNumber,  
     CONVERT(DOUBLE PRECISION,isnull(dblNoOfContract,0.0)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
-       dblQuantity,4,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal where intRowNumber in(1)  and strFutureMonth = 'Previous' 
+       dblQuantity,4,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal where intRowNumber in(1,2)  and strFutureMonth = 'Previous' 
 
 if (isnull(@intForecastWeeklyConsumption,0) <> 0)
 BEGIN
