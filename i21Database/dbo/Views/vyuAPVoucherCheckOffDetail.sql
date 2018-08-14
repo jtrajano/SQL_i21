@@ -25,6 +25,7 @@ SELECT	DISTINCT
 			,SC.strTicketNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
+			,Payment.dtmDatePaid
 			,APBD.dblTotal 
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
@@ -102,6 +103,7 @@ SELECT	DISTINCT
 			,SC.strTicketNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
+			,Payment.dtmDatePaid
 			,APBD.dblTotal 
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
@@ -137,10 +139,19 @@ FROM		dbo.tblAPBill APB
 				FROM tblEMEntity E1
 				WHERE E1.intEntityId = EC.intEntityContactId 
 			) vendor
+			OUTER APPLY(
+			SELECT TOP 1 
+						 B1.dtmDatePaid,
+						 B1.dblAmountPaid,
+						 B1.ysnPosted
+						 FROM dbo.tblAPPayment B1
+			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
+			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
+			WHERE B.intBillId = APB.intBillId 
+				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
+			ORDER BY dtmDatePaid DESC
+			)  Payment 
 WHERE  
 	  APB.ysnPosted = 1 
 	 AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-	 AND APBD.dblTax < 0		  
-GO
-
-
+	 AND APBD.dblTax < 0
