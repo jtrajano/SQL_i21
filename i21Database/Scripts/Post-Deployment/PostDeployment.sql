@@ -68,7 +68,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_Reset_Hours_Terms.sql
 :r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
-:r .\SM\1810_Fix_GL_Account.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
