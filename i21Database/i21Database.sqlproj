@@ -6941,7 +6941,6 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
     <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
     <Build Include="dbo\Views\vyuICGetStorageUnitsByCategory.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1810_Fix_GL_Account.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC_HE.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateCustomer.sql" />

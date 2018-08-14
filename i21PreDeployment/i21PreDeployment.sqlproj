@@ -348,4 +348,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1810_DeleteOldReportLabel.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1810_Fix_GL_Account.sql" />
+  </ItemGroup>
 </Project>
