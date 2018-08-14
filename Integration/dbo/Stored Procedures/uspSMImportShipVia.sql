@@ -132,48 +132,51 @@ BEGIN
 			set @EntityId = @@IDENTITY
 		END
 
-
-		INSERT INTO [tblSMShipVia]
-		(
-		[intEntityId]
-		,[strShipViaOriginKey]
-		,[strShipVia]
-		,[strShippingService]
-		,[strName]
-		,[strAddress]
-		,[strCity]
-		,[strState]
-		,[strZipCode]
-		,[strFederalId]
-		,[strTransporterLicense]
-		,[strMotorCarrierIFTA]
-		,[strTransportationMode]
-		,[strFreightBilledBy]
-		,[ysnCompanyOwnedCarrier]
-		,[ysnActive]
-		,[intSort]
-		,[intConcurrencyId])
-		select top 1
-		@EntityId  
-		,[strShipViaOriginKey]
-		,[strShipVia]
-		,[strShippingService]
-		,[strName]
-		,[strAddress]
-		,[strCity]
-		,[strState]
-		,[strZipCode]
-		,[strFederalId]
-		,[strTransporterLicense]
-		,[strMotorCarrierIFTA]
-		,[strTransportationMode]
-		,[strFreightBilledBy]
-		,[ysnCompanyOwnedCarrier]
-		,[ysnActive]
-		,[intSort]
-		,[intConcurrencyId]
-		from @ImportShipVia
-			where strShipViaOriginKey = @CurKey
+		if not exists(select top 1 1 from tblSMShipVia where intEntityId = @EntityId)
+		begin
+			INSERT INTO [tblSMShipVia]
+			(
+			[intEntityId]
+			,[strShipViaOriginKey]
+			,[strShipVia]
+			,[strShippingService]
+			,[strName]
+			,[strAddress]
+			,[strCity]
+			,[strState]
+			,[strZipCode]
+			,[strFederalId]
+			,[strTransporterLicense]
+			,[strMotorCarrierIFTA]
+			,[strTransportationMode]
+			,[strFreightBilledBy]
+			,[ysnCompanyOwnedCarrier]
+			,[ysnActive]
+			,[intSort]
+			,[intConcurrencyId])
+			select top 1
+			@EntityId  
+			,[strShipViaOriginKey]
+			,[strShipVia]
+			,[strShippingService]
+			,[strName]
+			,[strAddress]
+			,[strCity]
+			,[strState]
+			,[strZipCode]
+			,[strFederalId]
+			,[strTransporterLicense]
+			,[strMotorCarrierIFTA]
+			,[strTransportationMode]
+			,[strFreightBilledBy]
+			,[ysnCompanyOwnedCarrier]
+			,[ysnActive]
+			,[intSort]
+			,[intConcurrencyId]
+			from @ImportShipVia
+				where strShipViaOriginKey = @CurKey
+		end
+		
 
 
 		INSERT INTO tblEMEntity(strName, strContactNumber)
