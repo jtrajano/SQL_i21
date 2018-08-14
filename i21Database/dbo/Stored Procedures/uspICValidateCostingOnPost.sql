@@ -83,7 +83,7 @@ FROM	@ItemsToValidate Item
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
 	EXEC uspICRaiseError 80001;
-	RETURN -1
+	RETURN -80001
 END 
 
 -- Check for invalid location in the item-location setup.
@@ -106,14 +106,14 @@ BEGIN
 
 	-- 'Item Location is invalid or missing for {Item}.'
 	EXEC uspICRaiseError 80002, @strItemNo;
-	RETURN -1
+	RETURN -80002
 END 
 
 -- Check for invalid item UOM 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
 	EXEC uspICRaiseError 80048; 
-	RETURN -1
+	RETURN -80048
 END 
 
 -- Check for negative stock qty 
@@ -137,7 +137,7 @@ BEGIN
 
 	--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 	EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
-	RETURN -1
+	RETURN -80003
 END 
 
 -- Check for Missing Costing Method
@@ -153,7 +153,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
 	EXEC uspICRaiseError 80023, @strItemNo
-	RETURN -1
+	RETURN -80023
 END 
 
 -- Check for "Discontinued" status
@@ -169,7 +169,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	EXEC uspICRaiseError 80022, @strItemNo
-	RETURN -1
+	RETURN -80022
 END 
 
 -- Check for the missing Stock Unit UOM 
@@ -185,7 +185,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
 	EXEC uspICRaiseError 80049, @strItemNo;
-	RETURN -1
+	RETURN -80049
 END 
 
 -- Check for the locked Items
@@ -204,7 +204,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
 	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
-	RETURN -1
+	RETURN -80066
 END 
 
 /*
@@ -226,7 +226,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
 	EXEC uspICRaiseError 80094, @strItemNo, @strTransactionId;
-	RETURN -1
+	RETURN -80094
 END 
 
 /*
@@ -253,7 +253,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Trans Currency} to {Functional Currency}.'
 	EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
-	RETURN -1
+	RETURN -80162
 END 
 
 -- Check for negative cost. 
@@ -269,7 +269,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- '{Item} will have a negative cost. Negative cost is not allowed.'
 	EXEC uspICRaiseError 80196, @strItemNo
-	RETURN -1
+	RETURN -80196
 END 
 
 -- Check if system is trying to post stocks for bundle types
@@ -285,5 +285,5 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- '{Item} is a bundle type and it is not allowed to receive nor reduce stocks.'
 	EXEC uspICRaiseError 80202, @strItemNo
-	RETURN -1
+	RETURN -80202
 END 
