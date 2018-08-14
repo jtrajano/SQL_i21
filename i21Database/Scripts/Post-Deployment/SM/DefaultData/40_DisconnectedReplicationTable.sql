@@ -427,6 +427,9 @@ EXECUTE sp_executesql @sql;
 				('tblLGWeightClaim'),
 				('tblLGWeightClaimDetail'),
 				('tblICInventoryReceipt'),
+				('tblICManufacturer'),
+				('tblICTag'),
+				('tblICBrand'),
 				('tblICInventoryReceiptCharge'),
 				('tblICInventoryReceiptChargePerItem'),
 				('tblICInventoryReceiptChargeTax'),
@@ -584,7 +587,15 @@ EXECUTE sp_executesql @sql;
 				('tblSTHandheldScannerExportPricebook'),
 				('tblSTHandheldScanner'),
 				('tblSTHandheldScannerImportCount'),
-				('tblSTHandheldScannerImportReceipt')
+				('tblSTHandheldScannerImportReceipt'),
+				('tblPATRefundCustomer'),
+				('tblPATRefundRate'),
+				('tblPATPatronageCategory'),
+				('tblPATRefundCategory'),
+				('tblPATRefundRateDetail'),
+				('tblCCSiteDetail'),
+				('tblARMarketZone'),
+				('tblTFTerminalControlNumber')
 
 
 
