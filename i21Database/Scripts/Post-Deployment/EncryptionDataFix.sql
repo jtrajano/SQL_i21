@@ -4,11 +4,11 @@
 
 DECLARE @version int = SUBSTRING(CAST(SERVERPROPERTY('productversion') AS varchar), 1, CHARINDEX('.', CAST(SERVERPROPERTY('productversion') AS varchar)) - 1)
 
-IF EXISTS (SELECT TOP 1 1 FROM sysobjects WHERE id = object_id(N'[dbo].[uspCreateCertificate]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
-  AND NOT EXISTS (SELECT TOP 1 1 FROM sys.certificates WHERE name = 'iRelyi21Certificate')
-BEGIN
-  EXEC('[dbo].[uspCreateCertificate]')
-END
+-- IF EXISTS (SELECT TOP 1 1 FROM sysobjects WHERE id = object_id(N'[dbo].[uspCreateCertificate]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+--   AND NOT EXISTS (SELECT TOP 1 1 FROM sys.certificates WHERE name = 'iRelyi21Certificate')
+-- BEGIN
+--   EXEC('[dbo].[uspCreateCertificate]')
+-- END
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM sysobjects WHERE id = object_id(N'[dbo].[uspCreateCertificate]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
 BEGIN
@@ -164,7 +164,7 @@ BEGIN
         intBankId INT,
         strRTN VARBINARY(256)
       )
-	 
+
       PRINT(''*** Decrypting RTN (asymmetric) ***'')
       INSERT INTO @DecryptionTable
         SELECT intBankId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strRTN''''))'', ''varbinary(256)''))
