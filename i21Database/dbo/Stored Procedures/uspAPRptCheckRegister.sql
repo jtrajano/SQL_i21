@@ -89,7 +89,7 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmClearedDate';
+SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmClearDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 
 		'SELECT 
@@ -127,7 +127,7 @@ BEGIN
 	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmClearedDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmClearDate'
 
 IF @dtmDate IS NOT NULL
 BEGIN	
