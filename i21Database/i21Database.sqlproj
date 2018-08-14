@@ -6393,7 +6393,6 @@
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1810_Fix_GL_Account.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
