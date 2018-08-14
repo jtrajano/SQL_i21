@@ -70,7 +70,8 @@ SELECT
 	B.intChainAccountNumber,
 	B.intCsvFormat,
 	storeDescription = I.strDescription,
-	ysnTransportTerminal
+	ysnTransportTerminal,
+	strTerm = J.strTerm
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -94,3 +95,5 @@ FROM
 		ON B.intPaymentMethodId = H.intPaymentMethodID
 	LEFT JOIN dbo.tblSTStore I
 		ON I.intStoreId = B.intStoreStoreId
+	LEFT JOIN tblSMTerm J
+		ON B.intTermsId = J.intTermID
