@@ -288,6 +288,56 @@ BEGIN TRY
 			END
 		END
 
+		--Profit & Loss
+		IF @strMesssageType = 'FIDCCP02'
+		BEGIN
+			IF @strStatus IN (53) --Success
+			BEGIN
+				UPDATE tblRKStgMatchPnS
+				SET strStatus = 'Ack Rcvd'
+					,strMessage = 'Success'
+				WHERE intMatchNo = @strParam
+					AND ISNULL(strStatus, '') = 'Awt Ack'
+
+				INSERT INTO @tblMessage (
+					strMessageType
+					,strMessage
+					,strInfo1
+					,strInfo2
+					)
+				VALUES (
+					@strMesssageType
+					,'Success'
+					,@strRefNo
+					,@strParam
+					)
+			END
+
+			IF @strStatus NOT IN (53) --Error
+			BEGIN
+				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+				UPDATE tblRKStgMatchPnS
+				SET strStatus = 'Ack Rcvd'
+					,strMessage = @strMessage
+				WHERE intMatchNo = @strParam
+					AND ISNULL(strStatus, '') = 'Awt Ack'
+
+				INSERT INTO @tblMessage (
+					strMessageType
+					,strMessage
+					,strInfo1
+					,strInfo2
+					)
+				VALUES (
+					@strMesssageType
+					,@strMessage
+					,@strRefNo
+					,@strParam
+					)
+			END
+		END
+
 		SELECT @intMinRowNo = MIN(intRowNo)
 		FROM @tblAcknowledgement
 		WHERE intRowNo > @intMinRowNo
