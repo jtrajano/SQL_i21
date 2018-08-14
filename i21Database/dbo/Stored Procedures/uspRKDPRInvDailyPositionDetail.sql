@@ -654,7 +654,7 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 --=============================
 SELECT * into #tempOnHold  FROM (
 	SELECT  ROW_NUMBER() OVER (PARTITION BY t.intTicketId ORDER BY t.dtmTicketHistoryDate DESC) intSeqId,
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
+	(case when st.strInOutFlag = 'I' then dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0)) else abs(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))) * -1 end ) AS dblTotal,
 	strName strCustomer,st.strTicketNumber Ticket,dtmTicketDateTime dtmDeliveryDate,
 	cl.strLocationName,i1.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId,strTruckName,strDriverName,null [Storage Due], st.intProcessingLocationId intLocationId
 	,strCustomerReference,strDistributionOption,e.intEntityId,intDeliverySheetId,st.intTicketId,st.strTicketNumber
