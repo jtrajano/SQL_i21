@@ -75,6 +75,20 @@ DECLARE @tblHeader AS TABLE (
 --SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 --SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 --SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
+
+--if Exists(Select *
+--FROM tblCTContractFeed CF
+--	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+--		AND CH.ysnMaxPrice = 1
+--	WHERE ISNULL(strFeedStatus, '') = ''
+--		AND UPPER(strRowState) IN (
+--			'MODIFIED'
+--			,'DELETE'
+--			)
+--			)
+--Begin
+
+--End
 UPDATE CF
 SET strFeedStatus = 'IGNORE'
 FROM tblCTContractFeed CF
@@ -115,6 +129,7 @@ BEGIN
 		,E.strName
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		AND CH.ysnMaxPrice = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND Upper(strRowState) = 'ADDED'
@@ -124,6 +139,22 @@ BEGIN
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
 		,E.strName
+	
+	UNION
+	
+	SELECT DISTINCT CF.intContractHeaderId
+		,strCommodityCode
+		,intContractFeedId
+		,strSubLocation
+		,CH.ysnMaxPrice
+		,CH.strPrintableRemarks
+		,E.strName
+	FROM tblCTContractFeed CF
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		AND CH.ysnMaxPrice = 0
+	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND Upper(strRowState) = 'ADDED'
 	ORDER BY CF.intContractHeaderId
 END
 ELSE
@@ -146,6 +177,7 @@ BEGIN
 		,E.strName
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		AND CH.ysnMaxPrice = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND UPPER(strRowState) IN (
@@ -158,6 +190,25 @@ BEGIN
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
 		,E.strName
+	
+	UNION
+	
+	SELECT DISTINCT CF.intContractHeaderId
+		,strCommodityCode
+		,intContractFeedId
+		,strSubLocation
+		,CH.ysnMaxPrice
+		,CH.strPrintableRemarks
+		,E.strName
+	FROM tblCTContractFeed CF
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		AND CH.ysnMaxPrice = 0
+	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND UPPER(strRowState) IN (
+			'MODIFIED'
+			,'DELETE'
+			)
 	ORDER BY CF.intContractHeaderId
 END
 
@@ -209,17 +260,9 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT @intMinSeq = Min(intContractFeedId)
-		FROM tblCTContractFeed
-		WHERE intContractHeaderId = @intContractHeaderId
-			AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
-			AND ISNULL(strFeedStatus, '') = ''
+		SELECT @intMinSeq = @intContractFeedId
 
-		SELECT @strContractFeedIds = COALESCE(CONVERT(VARCHAR, @strContractFeedIds) + ',', '') + CONVERT(VARCHAR, intContractFeedId)
-		FROM tblCTContractFeed
-		WHERE intContractHeaderId = @intContractHeaderId
-			AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
-			AND ISNULL(strFeedStatus, '') = ''
+		SELECT @strContractFeedIds = @intContractFeedId
 
 		--Send Create Feed only Once
 		IF UPPER(@strRowState) = 'ADDED'
@@ -236,38 +279,7 @@ BEGIN
 				ORDER BY intContractFeedId
 				) = 'ADDED'
 			GOTO NEXT_PO
-				----Sub Location validation
-				--IF EXISTS (
-				--		SELECT 1
-				--		FROM tblCTContractFeed
-				--		WHERE intContractHeaderId = @intContractHeaderId
-				--			AND ISNULL(strFeedStatus, '') = ''
-				--			AND ISNULL(strSubLocation, '') = ''
-				--		)
-				--BEGIN
-				--	UPDATE tblCTContractFeed
-				--	SET strMessage = 'Sub Location is empty.'
-				--	WHERE intContractHeaderId = @intContractHeaderId
-				--		AND ISNULL(strFeedStatus, '') = ''
-				--		AND ISNULL(strSubLocation, '') = ''
-				--	GOTO NEXT_PO
-				--END
-				----Storage Location validation
-				--IF EXISTS (
-				--		SELECT 1
-				--		FROM tblCTContractFeed
-				--		WHERE intContractHeaderId = @intContractHeaderId
-				--			AND ISNULL(strFeedStatus, '') = ''
-				--			AND ISNULL(strStorageLocation, '') = ''
-				--		)
-				--BEGIN
-				--	UPDATE tblCTContractFeed
-				--	SET strMessage = 'Storage Location is empty.'
-				--	WHERE intContractHeaderId = @intContractHeaderId
-				--		AND ISNULL(strFeedStatus, '') = ''
-				--		AND ISNULL(strStorageLocation, '') = ''
-				--	GOTO NEXT_PO
-				--END
+				
 	END
 
 	--Donot generate Modified Idoc if PO No is not there
@@ -316,7 +328,7 @@ BEGIN
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
-				,@dblCashPrice = dblCashPrice
+				,@dblCashPrice = dblCashPrice*100
 				,@dblUnitCashPrice = dblUnitCashPrice
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = dtmStartDate
@@ -349,7 +361,7 @@ BEGIN
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
-				,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
+				,@dblCashPrice = SUM(dblCashPrice*100 * dblNetWeight) / SUM(dblNetWeight)
 				,@dblUnitCashPrice = SUM(dblUnitCashPrice * dblNetWeight) / SUM(dblNetWeight)
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = Min(dtmStartDate)
@@ -423,22 +435,6 @@ BEGIN
 			AND @ysnMaxPrice = 0
 			GOTO NEXT_PO
 
-		----Sub Location validation
-		--IF ISNULL(@strSubLocation, '') = ''
-		--BEGIN
-		--	UPDATE tblCTContractFeed
-		--	SET strMessage = 'Sub Location is empty.'
-		--	WHERE intContractFeedId = @intContractFeedId
-		--	GOTO NEXT_PO
-		--END
-		----Storage Location validation
-		--IF ISNULL(@strStorageLocation, '') = ''
-		--BEGIN
-		--	UPDATE tblCTContractFeed
-		--	SET strMessage = 'Storage Location is empty.'
-		--	WHERE intContractFeedId = @intContractFeedId
-		--	GOTO NEXT_PO
-		--END
 		SET @strSeq = ISNULL(@strSeq, '') + CONVERT(VARCHAR, @intContractSeq) + ','
 
 		--Convert price USC to USD
@@ -571,12 +567,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT @intMinSeq = Min(intContractFeedId)
-			FROM tblCTContractFeed
-			WHERE intContractFeedId > @intMinSeq
-				AND intContractHeaderId = @intContractHeaderId
-				AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
-				AND ISNULL(strFeedStatus, '') = ''
+			SELECT @intMinSeq = NULL
 		END
 	END
 
@@ -618,6 +609,10 @@ BEGIN
 	WHERE intRowNo > @intMinRowNo
 END --End Header Loop
 
-SELECT *
+SELECT IsNULL(strContractFeedIds,'0') as id
+		,IsNULL(strXml,'') as strXml
+		,IsNULL(strContractNo,'') as strInfo1
+		,IsNULL(strPONo,'') as strInfo2
+		,'' As strOnFailureCallbackSql
 FROM @tblOutput
 ORDER BY intRowNo

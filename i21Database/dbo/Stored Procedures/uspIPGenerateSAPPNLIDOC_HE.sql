@@ -81,24 +81,23 @@ BEGIN
 	WHERE intFutureMarketId = @intFutureMarketId
 
 	BEGIN
-		SET @strXml = '<ACC_DOCUMENT03>'
+		SET @strXml = '<FIDCCP02>'
 		SET @strXml += '<IDOC BEGIN="1">'
 		--IDOC Header
-		SET @strXml += '<EDI_DC40 SEGMENT="1">'
-		SET @strXml += @strIDOCHeader
-		SET @strXml += '</EDI_DC40>'
+		--SET @strXml += '<EDI_DC40 SEGMENT="1">'
+		--SET @strXml += @strIDOCHeader
+		--SET @strXml += '</EDI_DC40>'
 		--Set @strXml +=	'<ACC_DOCUMENT SEGMENT="1">'
 		--Header
-		SET @strXml += '<E1BPACHE09 SEGMENT="1">'
+		SET @strXml += '<E1FIKPF SEGMENT="1">'
 		SET @strXml += '<BLDAT>' + ISNULL(CONVERT(VARCHAR(10), @dtmMatchDate, 112), '') + '</BLDAT>'
 		SET @strXml += '<BLART>' + 'ZA' + '</BLART>'
 		SET @strXml += '<BUKRS>' + ISNULL(@strSAPLocation, '') + '</BUKRS>'
 		SET @strXml += '<WAERS>' + ISNULL(@strCurrency, '') + '</WAERS>'
 		SET @strXml += '<BKTXT>' + '' + '</BKTXT>'
 		SET @strXml += '<XBLNR>' + ISNULL(CONVERT(VARCHAR, @intMatchNo), '') + '-' + ISNULL(@strFutMarketName, '') + '</XBLNR>'
-		SET @strXml += '</E1BPACHE09>'
 		--GL account details (Broker account)
-		SET @strXml += '<E1BPACGL09 SEGMENT="1">'
+		SET @strXml += '<E1FISEG SEGMENT="1">'
 		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
 		SET @strXml += '<HKONT>' + '115501' + '</HKONT>'
 		SET @strXml += '<GSBER>' + '800' + '</GSBER>'
@@ -107,9 +106,9 @@ BEGIN
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblGrossPnL)), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + '' + '</SGTXT>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
-		SET @strXml += '</E1BPACGL09>'
+		SET @strXml += '</E1FISEG>'
 		--GL account details (TM account)
-		SET @strXml += '<E1BPACGL09 SEGMENT="1">'
+		SET @strXml += '<E1FISEG SEGMENT="1">'
 		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
 		SET @strXml += '<HKONT>' + '439282' + '</HKONT>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
@@ -118,9 +117,10 @@ BEGIN
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), - @dblGrossPnL)), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + '' + '</SGTXT>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
-		SET @strXml += '</E1BPACGL09>'
+		SET @strXml += '</E1FISEG>'
+		SET @strXml += '</E1FIKPF>'
 		SET @strXml += '</IDOC>'
-		SET @strXml += '</ACC_DOCUMENT03>'
+		SET @strXml += '</FIDCCP02>'
 
 		INSERT INTO @tblOutput (
 			strStgMatchPnSId
@@ -148,7 +148,11 @@ BEGIN
 	WHERE intStgMatchPnSId > @intMinStageId
 END
 
-SELECT *
+SELECT IsNULL(strStgMatchPnSId,'0') as id
+			,IsNULL(strXml,'') As strXml
+			,IsNULL(strMatchNo,'') as strInfo1
+		,''	AS strInfo2
+		,'' As strOnFailureCallbackSql
 FROM @tblOutput
 ORDER BY intRowNo
 
