@@ -90,7 +90,7 @@ BEGIN
 			,[intSourceTransactionDetailId]		= NULL
 			,[strSourceTransactionId]			= SC.strTicketNumber
 			,[intInTransitSourceLocationId]		= SC.intProcessingLocationId
-			,[intTransactionTypeId]				= 5
+			,[intTransactionTypeId]				= 52
 		FROM vyuSCTicketScreenView SC 
 		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 		WHERE SC.intTicketId = @intTicketId
@@ -175,7 +175,7 @@ BEGIN
 			,[intSourceTransactionDetailId]		= NULL
 			,[strSourceTransactionId]			= SC.strDeliverySheetNumber
 			,[intInTransitSourceLocationId]		= SC.intProcessingLocationId
-			,[intTransactionTypeId]				= 5
+			,[intTransactionTypeId]				= 53
 		FROM vyuSCTicketScreenView SC 
 		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 		WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
