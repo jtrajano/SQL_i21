@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Requirement Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Payable'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Balance' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Contract Management'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3022,11 +3022,17 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Closed Co
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'ContractManagement.view.Finalized' WHERE strMenuName = 'Closed Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Balance' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Contract Balance', N'Contract Management', @ContractManagementReportParentMenuId, N'Contract Balance', N'Report', N'Screen', N'ContractManagement.view.ContractBalance', N'small-menu-report', 1, 1, 0, 1, 3, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'ContractManagement.view.ContractBalance' WHERE strMenuName = 'Contract Balance' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Overview' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Overview', N'Contract Management', @ContractManagementReportParentMenuId, N'Overview', N'Report', N'Screen', N'ContractManagement.view.Overview?showSearch=true', N'small-menu-report', 1, 1, 0, 1, 3, 0)
+	VALUES (N'Overview', N'Contract Management', @ContractManagementReportParentMenuId, N'Overview', N'Report', N'Screen', N'ContractManagement.view.Overview?showSearch=true', N'small-menu-report', 1, 1, 0, 1, 4, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'ContractManagement.view.Overview?showSearch=true' WHERE strMenuName = 'Overview' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'ContractManagement.view.Overview?showSearch=true' WHERE strMenuName = 'Overview' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
