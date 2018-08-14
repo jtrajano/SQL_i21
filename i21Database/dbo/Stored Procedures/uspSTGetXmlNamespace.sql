@@ -4,6 +4,7 @@
 	, @strRegisterClass NVARCHAR(50) OUTPUT
 	, @strXmlNamespace NVARCHAR(50) OUTPUT
 	, @stri21FolderPath NVARCHAR(500) OUTPUT
+	, @strFileNamePattern NVARCHAR(500) OUTPUT
 	, @ysnSuccess BIT OUTPUT
 	, @strStatusMsg NVARCHAR(1000) OUTPUT
 AS
@@ -17,6 +18,7 @@ BEGIN TRY
 	SELECT @intStoreId = ST.intStoreId 
 		   , @strRegisterClass = R.strRegisterClass
 		   , @stri21FolderPath = REPLACE((R.strRegisterInboxPath + RFC.strFolderPath), '/', '\')
+		   , @strFileNamePattern = RFC.strFileNamePattern
 	FROM tblSTStore ST
 	JOIN tblSTRegister R
 		ON ST.intRegisterId = R.intRegisterId
