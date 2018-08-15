@@ -219,6 +219,22 @@ BEGIN
 			AND A.intTransactionType = 1
 			AND C.ysnPrice = 0
 
+		--Voucher date should not be greater than receipt date
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Voucher ' + A.strBillId + ' date should not be earlier than the date of item ' + D.strItemNo + ' when it was received.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			13
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
+			INNER JOIN tblICInventoryReceipt C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId
+			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND A.dtmDate < C2.dtmReceiptDate
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
