@@ -170,6 +170,7 @@ AS SELECT
 		ELSE IC.strItemNo
 	END) AS strItemNumber
 	,IC.strDescription AS strItemDescription
+	,IC.strPickListComments
 	,ICC.strCommodityCode
 	,ICC.strDescription AS strCommodityDescription
 	,ICCA.strDescription AS strGrade
