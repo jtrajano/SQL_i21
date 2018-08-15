@@ -17,15 +17,23 @@ BEGIN TRY
 	
 	DECLARE @Message NVARCHAR(MAX)
 		, @DefaultCustomerNo NVARCHAR(50)
-		, @CountNo INT
+		, @CountNo INT = 0
+		, @EntityNo NVARCHAR(50)
+
+	SELECT TOP 1 @DefaultCustomerNo = ISNULL(strDefaultCustomerNo, '') FROM tblMBILCompanyPreference
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE strEntityNo = @EntityNo)
+	BEGIN
+		SET @CountNo += 1
+		SET @EntityNo = @DefaultCustomerNo + CAST(@CountNo AS NVARCHAR(50))
+	END
 
 	EXEC uspEMCreateEntityById
-		@Id = @DefaultCustomerNo,
+		@Id = @EntityNo,
 		@Type = 'Customer',
 		@UserId = @UserId,
 		@Message = @Message OUTPUT,
 		@EntityId = @EntityId OUTPUT
-
 
 END TRY
 BEGIN CATCH

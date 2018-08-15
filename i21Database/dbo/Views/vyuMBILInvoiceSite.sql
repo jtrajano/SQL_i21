@@ -11,6 +11,7 @@ SELECT Invoice.*
 	, Site.strState
 	, Site.strZipCode
 	, Site.strCountry
+	, strSiteStatus = dbo.fnMBILGetInvoiceStatus(NULL, InvoiceSite.intSiteId)
 FROM tblMBILInvoiceSite InvoiceSite
 LEFT JOIN tblTMSite Site ON Site.intSiteID = InvoiceSite.intSiteId
 LEFT JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceSite.intInvoiceId

@@ -13,6 +13,7 @@ SELECT InvoiceSite.*
 	, InvoiceItem.intContractDetailId
 	, ContractHeader.strContractNumber
 	, ContractDetail.intContractSeq
+	, inti21InvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
 FROM tblMBILInvoiceItem InvoiceItem
 LEFT JOIN vyuMBILInvoiceSite InvoiceSite ON InvoiceSite.intInvoiceSiteId = InvoiceItem.intInvoiceSiteId
 LEFT JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
@@ -20,3 +21,4 @@ LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InvoiceItem.intItemUOMI
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = InvoiceItem.intContractDetailId
 LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+LEFT JOIN tblARInvoiceDetail i21InvoiceDetail ON i21InvoiceDetail.intInvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
