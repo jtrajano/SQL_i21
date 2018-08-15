@@ -7155,6 +7155,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCalculateCustomerRefunds.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmailDistribution.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1910_Set_Contact_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
