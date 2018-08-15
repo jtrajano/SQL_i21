@@ -39,16 +39,16 @@ with hourssm as (
 		a.intAgentEntityId
 		,a.intTicketId
 		,dblHours = sum(a.intHours)
-		,intDate = convert(int, convert(nvarchar(8), b.dtmDueDate, 112))
+		,intDate = convert(int, convert(nvarchar(8), a.dtmDate, 112))
 	from
 		tblHDTicketHoursWorked a, tblHDTicket b
 	where
-		convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) between @intDateFrom and @intDateTo
+		convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
 		and a.intTicketId = b.intTicketId
 	group by
 		a.intAgentEntityId
 		,a.intTicketId
-		,b.dtmDueDate
+		,a.dtmDate
 )
 
 INSERT INTO tblHDRoughCountCapacity
