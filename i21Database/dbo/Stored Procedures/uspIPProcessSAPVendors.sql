@@ -365,12 +365,14 @@ BEGIN TRY
 					strName
 					,strContactNumber
 					,ysnActive
+					,strEmail
 					)
 				OUTPUT inserted.intEntityId
 				INTO @tblEntityContactIdOutput
 				SELECT ISNULL([strFirstName], '') + ' ' + ISNULL([strLastName], '')
 					,ISNULL([strFirstName], '') + ' ' + ISNULL([strLastName], '')
 					,1
+					,strEmail
 				FROM tblIPEntityContactStage
 				WHERE intStageEntityId = @intStageEntityId
 
