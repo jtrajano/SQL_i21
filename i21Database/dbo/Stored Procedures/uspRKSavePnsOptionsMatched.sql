@@ -313,7 +313,7 @@ SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();
 		   WHEN (strBuySell = 'Sell' AND strOptionType= 'Put') THEN 'Buy' End  
 		   FROM tblRKFutOptTransaction Where intFutOptTransactionId=@NewFutOptTransactionId  
 
-	SELECT @intInternalTradeNo1 = Max(convert(int,REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H',''))) + 1  from tblRKFutOptTransaction
+	SELECT @intInternalTradeNo1 = Max(convert(numeric(24,10),REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H',''))) + 1  from tblRKFutOptTransaction
 	UPDATE tblSMStartingNumber set intNumber = @intInternalTradeNo1 where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
 	UPDATE tblRKFutOptTransaction  set strBuySell=@NewBuySell,strOptionType=null,intOptionMonthId=null Where intFutOptTransactionId = @NewFutOptTransactionId   
 	UPDATE tblRKOptionsPnSExercisedAssigned set intFutTransactionId= @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
