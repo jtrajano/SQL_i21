@@ -13,7 +13,6 @@
 			,strModule = m.strModule
 			,strPriority = prio.strPriority
 			,strAssignedTo = assEnt.strName
-			,intAssignedToEntityId = t.intAssignedToEntity
 			,t.dtmDueDate
 			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101)
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
