@@ -2,6 +2,9 @@
 AS
 SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strInvoiceNumber			= INVOICE.strInvoiceNumber
+	 , strTransactionType       = INVOICE.strTransactionType
+	 , strSourceType			= INVOICE.strType
+	 , strCFTransactionType     = CF.strTransactionType
 	 , dtmDate					= INVOICE.dtmDate
 	 , intCurrencyId			= INVOICE.intCurrencyId
 	 , intCompanyLocationId		= INVOICE.intCompanyLocationId
@@ -230,6 +233,13 @@ LEFT OUTER JOIN (
 		 , strDescription 
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) CURRENCY ON INVOICE.intCurrencyId = CURRENCY.intCurrencyID
+LEFT OUTER JOIN (
+	SELECT intInvoiceId
+		 , strTransactionType
+	FROM dbo.tblCFTransaction WITH (NOLOCK)
+	WHERE intInvoiceId IS NOT NULL
+) CF ON INVOICE.intInvoiceId = CF.intInvoiceId 
+    AND INVOICE.strType = 'CF Tran'
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
