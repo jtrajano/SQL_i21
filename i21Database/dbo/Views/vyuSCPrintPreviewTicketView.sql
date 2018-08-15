@@ -176,8 +176,8 @@ AS SELECT
 	,ICCA.strDescription AS strGrade
 	,tblICInventoryReceipt.intInventoryReceiptId
 	,tblICInventoryReceipt.strReceiptNumber
-	,vyuICGetInventoryShipmentItem.intInventoryShipmentId
-	,vyuICGetInventoryShipmentItem.strShipmentNumber
+	,tblICInventoryShipment.intInventoryShipmentId
+	,tblICInventoryShipment.strShipmentNumber
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
@@ -199,7 +199,7 @@ AS SELECT
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
-  LEFT JOIN vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem on vyuICGetInventoryShipmentItem.intSourceId = SC.intTicketId
+  LEFT JOIN tblICInventoryShipment tblICInventoryShipment on tblICInventoryShipment.intInventoryShipmentId = SC.intInventoryShipmentId
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
