@@ -131,7 +131,7 @@ SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributio
 		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
-round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='I' THEN st.dblNetUnits ELSE 0 END) ,6) dblInQty,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='I' THEN ri.dblOpenReceive ELSE 0 END) ,6) dblInQty,
 r.strReceiptNumber,
 		strDistributionOption ,r.intInventoryReceiptId
 FROM tblSCTicket st
@@ -229,7 +229,7 @@ SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributio
 		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
-round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END) ,6) dblOutQty,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='O' THEN ri.dblQuantity ELSE 0 END) ,6) dblOutQty,
 r.strShipmentNumber,
 		strDistributionOption ,r.intInventoryShipmentId
 FROM tblSCTicket st

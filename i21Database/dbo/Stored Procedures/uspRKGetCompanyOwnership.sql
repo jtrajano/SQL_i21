@@ -447,6 +447,63 @@ FROM (
 	AND R.intSourceType = 0
 )t
 
+UNION --DP with Settle Storage
+SELECT
+ strItemNo
+	, dtmDate
+	,dblInQty AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,dblInQty AS dblUnpaidBalance
+	,0 as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryReceiptItemId
+FROM (
+	SELECT 
+			CASE WHEN SS.intBillId IS NULL THEN CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) ELSE CONVERT(VARCHAR(10), SS.dtmCreated, 110) END dtmDate
+		,RI.dblUnitCost dblUnitCost1
+		,intCustomerStorageId as intInventoryReceiptItemId
+		,I.strItemNo
+		,CASE WHEN SS.intBillId IS NULL THEN isnull(RI.dblNet, 0) ELSE SS.dblOpenBalance END dblInQty
+		,0 AS dblOutQty
+		,ST.strDistributionOption
+		,CASE WHEN SS.strStorageTicketNumber IS NULL THEN R.strReceiptNumber ELSE  SS.strStorageTicketNumber END AS strReceiptNumber
+		,CASE WHEN SS.intCustomerStorageId IS NULL THEN R.intInventoryReceiptId ELSE SS.intCustomerStorageId END AS intReceiptId
+		--,Inv.strInvoiceNumber AS strReceiptNumber
+		--,Inv.intInvoiceId AS intReceiptId
+	FROM vyuSCTicketView ST
+	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+	CROSS APPLY (
+		select
+			dblSettleUnits,
+			gr.dtmCreated,
+			cs.intCustomerStorageId, 
+			cs.strStorageTicketNumber,
+			intBillId ,
+			cs.dblOpenBalance
+		from tblGRSettleStorage gr 
+			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
+			INNER JOIN vyuSCGetScaleDistribution sd ON  grt.intCustomerStorageId = sd.intCustomerStorageId
+			INNER JOIN tblGRCustomerStorage cs ON sd.intCustomerStorageId = cs.intCustomerStorageId
+		where sd.intInventoryReceiptItemId = RI.intInventoryReceiptItemId and intBillId IS NOT NULL
+	) SS
+	WHERE ST.strTicketStatus = 'C'
+	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND ST.intCommodityId = @intCommodityId 
+	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+	AND ST.intTicketLocationId = case when isnull(@intLocationId,0)=0 then ST.intTicketLocationId else @intLocationId end 
+	AND ST.intTicketLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+	AND RI.intOwnershipType = 1
+	AND ST.strDistributionOption = 'DP'
+	AND SS.dblOpenBalance <> 0
+) t
+
 SELECT convert(INT, ROW_NUMBER() OVER (
 			ORDER BY dtmDate
 			)) intRowNum
