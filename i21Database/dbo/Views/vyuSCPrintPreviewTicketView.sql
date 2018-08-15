@@ -164,7 +164,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		ELSE IC.strItemNo
 	END)
 	AS strItemNumber,
-	SO.strSalesOrderNumber
+	SO.strSalesOrderNumber,
+	IC.strPickListComments
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
