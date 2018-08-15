@@ -417,6 +417,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1740_Activate_Default_Contact.sql
 :r .\EM\1810_Set_Default_Language.sql
 :r .\EM\1810_Fix_Check_Payee_Name.sql
+:r .\EM\1910_Set_Contact_Location.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

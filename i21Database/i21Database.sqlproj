@@ -6948,6 +6948,7 @@
     <Build Include="dbo\Stored Procedures\uspMBILPostInvoice.sql" />
     <Build Include="dbo\Functions\fnMBILGetInvoiceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardSycnAuditLog.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1910_Set_Contact_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
