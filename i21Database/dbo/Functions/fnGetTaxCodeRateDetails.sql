@@ -26,8 +26,15 @@ BEGIN
 	IF ISNULL(@ExchangeRate, 0.000000) = 0.000000
 		SET @ExchangeRate = 1.000000
 
+	IF ISNULL(@CurrencyExchangeRateTypeId, 0) = 0
+	BEGIN
+	SELECT TOP 1 @CurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+		, @CurrencyExchangeRate   = dblCurrencyExchangeRate
+		FROM dbo.fnARGetDefaultForexRate(@TransactionDate, @CurrencyId, NULL)
+	END
+
 	SELECT TOP 1 @DefaultCurrencyId = [intDefaultCurrencyId] FROM tblSMCompanyPreference
-	IF @CurrencyExchangeRateTypeId IS NOT NULL AND ISNULL(@CurrencyExchangeRate, 0.000000) = 0.000000
+	IF @CurrencyExchangeRateTypeId IS NOT NULL AND ISNULL(@CurrencyExchangeRate, 0.000000) <> 1.000000
 		BEGIN
 			SET @ToBse = 1
 			SELECT TOP 1
