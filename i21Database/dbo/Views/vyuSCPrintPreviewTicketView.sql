@@ -145,8 +145,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblGRStorageScheduleRule.strScheduleId,
 	tblICInventoryReceipt.intInventoryReceiptId,
 	tblICInventoryReceipt.strReceiptNumber,
-	vyuICGetInventoryShipmentItem.intInventoryShipmentId,
-	vyuICGetInventoryShipmentItem.strShipmentNumber,
+	tblICInventoryShipment.intInventoryShipmentId,
+	tblICInventoryShipment.strShipmentNumber,
 	(SELECT strCompanyName FROM tblSMCompanySetup) AS strCompanyName,
 	(SELECT strAddress FROM tblSMCompanySetup) AS strAddress,
 	vyuEMSearchShipVia.strName AS strHaulerName,
@@ -179,7 +179,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
-  LEFT JOIN vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem on vyuICGetInventoryShipmentItem.intSourceId = SC.intTicketId
+  LEFT JOIN tblICInventoryShipment tblICInventoryShipment on tblICInventoryShipment.intInventoryShipmentId = SC.intInventoryShipmentId
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
