@@ -598,7 +598,9 @@ BEGIN
 	INSERT INTO @Ids
 	SELECT intBillId FROM #tmpPostBillData
 
-	INSERT INTO @GLEntries (
+	IF @recap = 0
+	BEGIN
+		INSERT INTO @GLEntries (
 		dtmDate						
 		,strBatchId					
 		,intAccountId				
@@ -673,7 +675,90 @@ BEGIN
 		,dblSourceUnitDebit
 		,intCommodityId
 		,intSourceLocationId	
-	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	--when unposting use same batch id as the original gl entry so we don't waste the batch id
+	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, NULL) 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId		
+			,intCurrencyExchangeRateTypeId		
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate		
+			,dblSourceUnitCredit
+			,dblSourceUnitDebit
+			,intCommodityId
+			,intSourceLocationId	
+		)
+		SELECT 
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId	
+			,intCurrencyExchangeRateTypeId			
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate
+			,dblSourceUnitCredit
+			,dblSourceUnitDebit
+			,intCommodityId
+			,intSourceLocationId	
+		FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	END
+
+	
 
 	--NEGATE THE COST
 	UPDATE @adjustedEntries
