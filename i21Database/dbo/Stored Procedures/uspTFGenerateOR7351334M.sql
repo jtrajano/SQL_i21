@@ -31,14 +31,17 @@ BEGIN TRY
 		, @Line_16 NUMERIC(18, 2) = 0
 		, @Line_17 NUMERIC(18, 2) = 0
 
-		, @TaxRate NUMERIC(18, 2) = 0
-		, @CreditRate NUMERIC(18,2) = 0
-		, @InterestRate NUMERIC(18,2) = 0
+		, @TaxRate NUMERIC(18, 8) = 0
+		, @CreditRate NUMERIC(18,8) = 0
+		, @InterestRate NUMERIC(18,8) = 0
 
 		, @dtmFrom DATE
 		, @dtmTo DATE
 		, @LicenseNumber NVARCHAR(50)
-
+		
+		, @strTaxRate NVARCHAR(20)
+		, @strCreditRate NVARCHAR(20)
+		, @strInterestRate NVARCHAR(20)
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN
@@ -78,11 +81,19 @@ BEGIN TRY
 		SELECT TOP 1 @LicenseNumber = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-LicenseNumber'
 		
 		SELECT @Line_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line5'
-		SELECT @TaxRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line7'
-		SELECT @CreditRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line8'
-		SELECT @InterestRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line13'
+		SELECT @strTaxRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line7'
+		SELECT @strCreditRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line8'
+		SELECT @strInterestRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line13'
+
+	    SELECT @Line_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line5'
+
+
 		SELECT @Line_16 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line16'
 		
+		SET @TaxRate = CONVERT(NUMERIC(18,8), @strTaxRate)
+		SET @CreditRate = CONVERT(NUMERIC(18,8), @strCreditRate)
+		SET @InterestRate = CONVERT(NUMERIC(18,8), @strInterestRate)
+
 		-- Transaction
 		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
@@ -145,9 +156,9 @@ BEGIN TRY
 		, Line_16 = @Line_16
 		, Line_17 = @Line_17
 
-		, TaxRate = @TaxRate
-		, CreditRate = @CreditRate
-		, InterestRate = @InterestRate
+		, strTaxRate = @strTaxRate
+		, strCreditRate = @strCreditRate
+		, strInterestRate = @strInterestRate
 
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
