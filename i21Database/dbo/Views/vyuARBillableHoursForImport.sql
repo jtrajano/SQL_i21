@@ -21,10 +21,10 @@ SELECT intEntityId					= C.[intEntityId]
 	 , intHours						= HW.[intHours]
 	 , dblPrice						= HW.[dblRate]
 	 , dblTotal						= HW.[intHours] * HW.[dblRate]
-	 , intCurrencyId				= HW.[intCurrencyId]
-	 , intCurrencyExchangeRateTypeId = HW.[intCurrencyExchangeRateTypeId]
+	 , intCurrencyId				= NULLIF(HW.[intCurrencyId], 0)
+	 , intCurrencyExchangeRateTypeId = NULLIF(HW.[intCurrencyExchangeRateTypeId], 0)
 	 , dblCurrencyExchangeRate		= CASE WHEN HW.[dblCurrencyRate] = 0 THEN 1.00 ELSE HW.[dblCurrencyRate] END
-	 , intSubCurrencyId				= HW.[intCurrencyId]
+	 , intSubCurrencyId				= NULLIF(HW.[intCurrencyId], 0)
 	 , dblSubCurrencyRate			= HW.[dblCurrencyRate]
 	 , intEntityWarehouseId			= EML.[intWarehouseId]
 FROM dbo.tblHDTicketHoursWorked HW WITH (NOLOCK)
