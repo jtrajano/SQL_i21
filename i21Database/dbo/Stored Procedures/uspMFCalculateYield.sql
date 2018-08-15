@@ -353,6 +353,7 @@ BEGIN TRY
 		,@intSubLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
 		,@intYieldItemUOMId INT
+		,@dblOnHand NUMERIC(38, 20)
 
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
@@ -388,34 +389,100 @@ BEGIN TRY
 
 		IF @strInventoryTracking = 'Item Level'
 		BEGIN
-			IF @dblYieldQuantity > 0
+			--IF @dblYieldQuantity > 0
+			--BEGIN
+			--	SELECT @dblYieldQuantity = - @dblYieldQuantity
+			--	SELECT @intSubLocationId = NULL
+			--	SELECT @intSubLocationId = intSubLocationId
+			--	FROM tblICStorageLocation
+			--	WHERE intStorageLocationId = @intStorageLocationId
+			--	EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+			--		-- Parameters for filtering:
+			--		@intItemId = @intItemId
+			--		,@dtmDate = @dtmCurrentDateTime
+			--		,@intLocationId = @intLocationId
+			--		,@intSubLocationId = @intSubLocationId
+			--		,@intStorageLocationId = @intStorageLocationId
+			--		,@strLotNumber = NULL
+			--		-- Parameters for the new values: 
+			--		,@dblAdjustByQuantity = @dblYieldQuantity
+			--		,@dblNewUnitCost = NULL
+			--		,@intItemUOMId = @intItemUOMId
+			--		-- Parameters used for linking or FK (foreign key) relationships
+			--		,@intSourceId = 1
+			--		,@intSourceTransactionTypeId = 8
+			--		,@intEntityUserSecurityId = @intUserId
+			--		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			--END
+			SELECT @intWeightUOMId = NULL
+				,@intSubLocationId = NULL
+				,@dblOnHand = NULL
+
+			SELECT @intWeightUOMId = S.intItemUOMId
+				,@intSubLocationId = S.intSubLocationId
+				,@dblOnHand = S.dblOnHand - S.dblUnitReserved
+			FROM dbo.tblICItemStockUOM S
+			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+				AND S.intItemId = @intItemId
+				AND S.dblOnHand - S.dblUnitReserved > 0
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+				AND IU.ysnStockUnit = 1
+			JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+			WHERE S.intItemId = @intItemId
+				AND IL.intLocationId = @intLocationId
+				AND S.intStorageLocationId = @intStorageLocationId
+			AND S.dblOnHand - S.dblUnitReserved > 0
+			IF @dblOnHand < dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
 			BEGIN
-				SELECT @dblYieldQuantity = - @dblYieldQuantity
+				SELECT @strItemNo = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @intItemId
 
-				SELECT @intSubLocationId = NULL
+				SELECT @strMsg = 'Unable to pick a lot/pallet to adjust the yield qty for the item ' + @strItemNo
 
-				SELECT @intSubLocationId = intSubLocationId
-				FROM tblICStorageLocation
-				WHERE intStorageLocationId = @intStorageLocationId
-
-				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-					-- Parameters for filtering:
-					@intItemId = @intItemId
-					,@dtmDate = @dtmCurrentDateTime
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = NULL
-					-- Parameters for the new values: 
-					,@dblAdjustByQuantity = @dblYieldQuantity
-					,@dblNewUnitCost = NULL
-					,@intItemUOMId = @intItemUOMId
-					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
-					,@intEntityUserSecurityId = @intUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+				RAISERROR (
+						@strMsg
+						,16
+						,1
+						)
 			END
+
+			SELECT @intShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
+					AND dtmShiftEndTime + intEndOffset
+
+			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+				intWorkOrderId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,intItemId
+				,intTransactionId
+				,intTransactionTypeId
+				,strTransactionType
+				,dtmTransactionDate
+				,intProcessId
+				,intShiftId
+				,intStorageLocationId
+				,intSubLocationId
+				)
+			SELECT @intWorkOrderId
+				,NULL
+				,dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
+				,@intWeightUOMId
+				,@intItemId
+				,@intInventoryAdjustmentId
+				,25
+				,'Cycle Count Adj'
+				,GetDate()
+				,@intManufacturingProcessId
+				,@intShiftId
+				,@intStorageLocationId
+				,@intSubLocationId
+
+			PRINT 'Call Adjust Qty procedure'
 		END
 		ELSE
 		BEGIN
@@ -596,7 +663,7 @@ BEGIN TRY
 				SELECT TOP 1 @strLotNumber = L.strLotNumber
 					,@intLotId = L.intLotId
 					,@intSubLocationId = L.intSubLocationId
-					,@intWeightUOMId = IsNULL(L.intWeightUOMId,L.intItemUOMId)
+					,@intWeightUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 					,@dblWeight = (
 						(
 							CASE 
@@ -665,7 +732,7 @@ BEGIN TRY
 					SELECT TOP 1 @strLotNumber = L.strLotNumber
 						,@intLotId = L.intLotId
 						,@intSubLocationId = L.intSubLocationId
-						,@intWeightUOMId = IsNULL(L.intWeightUOMId,L.intItemUOMId)
+						,@intWeightUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 						,@dblWeight = (
 							(
 								CASE 
@@ -733,7 +800,7 @@ BEGIN TRY
 						SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
 
 						IF @dblYieldQuantity < 0.0001
-									SELECT @dblYieldQuantity = 0
+							SELECT @dblYieldQuantity = 0
 					END
 				END
 
@@ -742,7 +809,7 @@ BEGIN TRY
 					SELECT TOP 1 @strLotNumber = L.strLotNumber
 						,@intLotId = L.intLotId
 						,@intSubLocationId = L.intSubLocationId
-						,@intWeightUOMId = IsNULL(L.intWeightUOMId,L.intItemUOMId)
+						,@intWeightUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 						,@dblWeight = (
 							(
 								CASE 
@@ -807,7 +874,7 @@ BEGIN TRY
 					SELECT TOP 1 @strLotNumber = L.strLotNumber
 						,@intLotId = L.intLotId
 						,@intSubLocationId = L.intSubLocationId
-						,@intWeightUOMId = IsNULL(L.intWeightUOMId,L.intItemUOMId)
+						,@intWeightUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 						,@dblWeight = (
 							(
 								CASE 
@@ -870,7 +937,7 @@ BEGIN TRY
 						SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
 
 						IF @dblYieldQuantity < 0.0001
-									SELECT @dblYieldQuantity = 0
+							SELECT @dblYieldQuantity = 0
 					END
 				END
 
