@@ -12,5 +12,7 @@
 	,intProcessId INT NULL
 	,intShiftId INT NULL
 	,intBatchId int
+	,intStorageLocationId int
+	,intSubLocationId int
 	,CONSTRAINT PK_tblMFWorkOrderProducedLotTransaction_intWorkOrderProducedLotTransactionId PRIMARY KEY (intWorkOrderProducedLotTransactionId)
 	)
