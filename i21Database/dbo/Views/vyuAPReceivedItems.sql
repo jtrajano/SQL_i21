@@ -383,7 +383,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
-	,[strContractNumber]		=	CAST(F1.strContractNumber AS NVARCHAR(100))
+	,[strContractNumber]		=	F1.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
@@ -552,7 +552,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
@@ -691,7 +691,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -820,7 +820,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -950,7 +950,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -1079,7 +1079,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -1201,7 +1201,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intPContractDetailId
@@ -1403,7 +1403,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
