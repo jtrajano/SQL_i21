@@ -69,6 +69,7 @@ BEGIN TRY
 		,@ysnYieldLoss BIT
 		,@intConsumedLotId INT
 		,@ItemsThatNeedLotId AS dbo.ItemLotTableType
+		,@dblOnHand NUMERIC(18, 6)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -466,34 +467,76 @@ BEGIN TRY
 
 			IF @strInventoryTracking = 'Item Level'
 			BEGIN
-				IF @dblYieldQuantity > 0
-				BEGIN
-					SELECT @dblYieldQuantity = - @dblYieldQuantity
+				SELECT @intWeightUOMId = NULL
+				,@intSubLocationId = NULL
+				,@dblOnHand = NULL
 
-					SELECT @intSubLocationId = NULL
+			SELECT @intWeightUOMId = S.intItemUOMId
+				,@intSubLocationId = S.intSubLocationId
+				,@dblOnHand = S.dblOnHand - S.dblUnitReserved
+			FROM dbo.tblICItemStockUOM S
+			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+				AND S.intItemId = @intItemId
+				AND S.dblOnHand - S.dblUnitReserved > 0
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+				AND IU.ysnStockUnit = 1
+			JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+			WHERE S.intItemId = @intItemId
+				AND IL.intLocationId = @intLocationId
+				AND S.intStorageLocationId = @intStorageLocationId
+				AND S.dblOnHand - S.dblUnitReserved > 0
 
-					SELECT @intSubLocationId = intSubLocationId
-					FROM tblICStorageLocation
-					WHERE intStorageLocationId = @intStorageLocationId
+			IF @dblOnHand < dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
+			BEGIN
+				SELECT @strItemNo = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @intItemId
 
-					EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-						-- Parameters for filtering:
-						@intItemId = @intItemId
-						,@dtmDate = @dtmCurrentDateTime
-						,@intLocationId = @intLocationId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@strLotNumber = NULL
-						-- Parameters for the new values: 
-						,@dblAdjustByQuantity = @dblYieldQuantity
-						,@dblNewUnitCost = NULL
-						,@intItemUOMId = @intItemUOMId
-						-- Parameters used for linking or FK (foreign key) relationships
-						,@intSourceId = 1
-						,@intSourceTransactionTypeId = 8
-						,@intEntityUserSecurityId = @intUserId
-						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				END
+				SELECT @strMsg = 'Unable to pick a lot/pallet to adjust the yield qty for the item ' + @strItemNo
+
+				RAISERROR (
+						@strMsg
+						,16
+						,1
+						)
+			END
+
+			SELECT @intShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
+					AND dtmShiftEndTime + intEndOffset
+
+			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+				intWorkOrderId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,intItemId
+				,intTransactionId
+				,intTransactionTypeId
+				,strTransactionType
+				,dtmTransactionDate
+				,intProcessId
+				,intShiftId
+				,intStorageLocationId
+				,intSubLocationId
+				)
+			SELECT @intWorkOrderId
+				,NULL
+				,dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
+				,@intWeightUOMId
+				,@intItemId
+				,@intInventoryAdjustmentId
+				,25
+				,'Cycle Count Adj'
+				,GetDate()
+				,@intManufacturingProcessId
+				,@intShiftId
+				,@intStorageLocationId
+				,@intSubLocationId
+
+			PRINT 'Call Adjust Qty procedure'
 			END
 			ELSE
 			BEGIN

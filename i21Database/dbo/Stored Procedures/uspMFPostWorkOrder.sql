@@ -519,11 +519,11 @@ BEGIN TRY
 				,@intUserId
 				,@intBusinessShiftId
 				,@dtmBusinessDate
-				,L.intStorageLocationId
-				,L.intSubLocationId
+				,IsNULL(L.intStorageLocationId, PL.intStorageLocationId)
+				,IsNULL(L.intSubLocationId, PL.intSubLocationId)
 				,IsNULL(WP.strBatchId, @strBatchId)
 			FROM tblMFWorkOrderProducedLotTransaction PL
-			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
+			LEFT JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			LEFT JOIN tblMFWorkOrderProducedLot WP ON WP.intBatchId = PL.intBatchId
 				AND WP.intWorkOrderId = PL.intWorkOrderId
 			WHERE PL.intWorkOrderId = @intWorkOrderId
@@ -554,13 +554,17 @@ BEGIN TRY
 				,intSourceTransactionId
 				,strSourceTransactionId
 				)
-			SELECT intItemId = l.intItemId
-				,intItemLocationId = l.intItemLocationId
+			SELECT intItemId = ISNULL(l.intItemId,cl.intItemId)
+				,intItemLocationId = IsNULL(l.intItemLocationId,IL.intItemLocationId)
 				,intItemUOMId = cl.intItemUOMId
 				,dtmDate = @dtmCurrentDateTime
 				,dblQty = (- cl.dblQuantity)
-				,dblUOMQty = l.dblWeightPerQty
-				,dblCost = l.dblLastCost
+				,dblUOMQty = ISNULL(l.dblWeightPerQty, ItemUOM.dblUnitQty)
+				,dblCost = IsNULL(l.dblLastCost, (
+						SELECT TOP 1 IP.dblLastCost
+						FROM tblICItemPricing IP
+						WHERE IP.intItemLocationId=IL.intItemLocationId
+						))
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
 				,dblExchangeRate = 1
@@ -569,14 +573,15 @@ BEGIN TRY
 				,strTransactionId = cl.strBatchId
 				,intTransactionTypeId = @INVENTORY_CONSUME
 				,intLotId = l.intLotId
-				,intSubLocationId = l.intSubLocationId
-				,intStorageLocationId = l.intStorageLocationId
+				,intSubLocationId = ISNULL(l.intSubLocationId, cl.intSubLocationId)
+				,intStorageLocationId = ISNULL(l.intStorageLocationId, cl.intStorageLocationId)
 				,intSourceTransactionId = @INVENTORY_CONSUME
 				,strSourceTransactionId = @strTransactionId
 			FROM dbo.tblMFWorkOrderConsumedLot cl
-			JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
-			JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+			JOIN dbo.tblICItemUOM ItemUOM ON ISNULL(l.intItemUOMId, cl.intItemUOMId) = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+			Left JOIN tblICItemLocation IL on IL.intItemId=cl.intItemId and IL.intLocationId=@intLocationId
 			WHERE cl.intWorkOrderId = @intWorkOrderId
 				AND intSequenceNo = 9999
 
