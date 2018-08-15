@@ -46,7 +46,7 @@ DECLARE @GetStandardQty AS TABLE(
 		dblStandardValue numeric(24,10),
 		dblPPV numeric(24,10),
 		dblPPVNew numeric(24,10),
-			strLocationName nvarchar(100)
+		strLocationName nvarchar(100)
 		)
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,

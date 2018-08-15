@@ -10,15 +10,6 @@
 	   @intAOPId int = null
 
 AS
---declare  @dtmFromDate DATETIME = '1900-01-01',
---       @dtmToDate DATETIME = '2018-08-10',
---       @intCommodityId int = 21,
---       @intUnitMeasureId int = 13,
---	   @strEntityName nvarchar(100) = 'A & A Commodity Traders',
---       @ysnVendorProducer bit = 'false',
---	   @intBookId int = 0,
---	   @intSubBookId int = 0,
---	   @intAOPId nvarchar(100)= 1
 
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
