@@ -24,8 +24,7 @@ BEGIN
 	FROM	[dbo].[tblICInventoryTransaction] A
 	WHERE	A.intItemId = @intItemId
 			AND A.intItemLocationId = @intItemLocationId
-			AND (A.strActualCostId IS NULL OR A.intCostingMethod = @AVERAGE_COST)
+			AND (A.strActualCostId IS NULL OR ISNULL(A.intCostingMethod, @AVERAGE_COST) = @AVERAGE_COST)
 
 	RETURN ISNULL(@totalItemValuation, 0)
 END
-GO
