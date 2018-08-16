@@ -330,6 +330,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1_MasterTables.sql
 :R .\CT\172To173.sql
 :R .\CT\174To181.sql
+:R .\CT\ExcelAndTableColumnMap.sql
+
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
 

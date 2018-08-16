@@ -6952,6 +6952,10 @@
     <Build Include="dbo\Tables\tblRKStgOptionMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateCertificate.sql" />
     <Build Include="dbo\User Defined Types\PatronIdTable.sql" />
+    <Build Include="dbo\Tables\tblCTExcelAndTableColumnMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidateContractCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessImportContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7135,6 +7139,7 @@
     <None Include="Scripts\Post-Deployment\SM\1830_ReIndexTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\1830_CreateReIndexMaintenancePlan.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
+    <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
