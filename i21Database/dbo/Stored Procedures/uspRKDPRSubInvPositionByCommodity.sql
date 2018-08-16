@@ -669,7 +669,7 @@ DECLARE @tempOnHold TABLE (
 insert into @tempOnHold(dblTotal,strCustomer,strLocationName,intCommodityId,intCommodityUnitMeasureId,intLocationId,intEntityId)
 SELECT  dblTotal,strCustomer,strLocationName,intCommodityId,intCommodityUnitMeasureId,intLocationId,intEntityId FROM (
 	SELECT  ROW_NUMBER() OVER (PARTITION BY t.intTicketId ORDER BY t.dtmTicketHistoryDate DESC) intSeqId,
-	st.dblNetUnits  AS dblTotal,strName strCustomer,cl.strLocationName, st.intCommodityId,intCommodityUnitMeasureId, 
+	case when st.strInOutFlag = 'I' then  st.dblNetUnits else abs(st.dblNetUnits) * -1 end  AS dblTotal,strName strCustomer,cl.strLocationName, st.intCommodityId,intCommodityUnitMeasureId, 
 	st.intProcessingLocationId intLocationId,e.intEntityId
 	FROM tblSCTicketHistory t
 	JOIN tblSCTicket st on t.intTicketId=st.intTicketId
