@@ -4,6 +4,7 @@ SELECT top 100 percent *,((isnull(dblSPrice,0)-isnull(dblLPrice,0))*intMatchQty*
 SELECT m.intMatchOptionsPnSId,convert(int,strTranNo) strTranNo,dtmMatchDate,intMatchQty,e.strName,b.strAccountNumber,t.strInternalTradeNo,scl.strLocationName,t.dblPrice as dblLPrice,
 	   fm.strFutMarketName,om.strOptionMonth,t.dblStrike,t.strOptionType,fm.dblContractSize
 	   ,strCommodityCode,t.dtmFilledDate as dtmMLTransactionDate,t.strInternalTradeNo as strMLInternalTradeNo,cb.strBook as strMLBook,csb.strSubBook as strMLSubBook,
+	   m.ysnPost,m.dtmPostDate,
 	   (SELECT TOP 1 dtmFilledDate FROM tblRKOptionsMatchPnS om
 	    JOIN tblRKFutOptTransaction t1 on m.intSFutOptTransactionId= t1.intFutOptTransactionId) as  dtmMSTransactionDate,
 	    (SELECT TOP 1 strInternalTradeNo FROM tblRKOptionsMatchPnS om
@@ -18,7 +19,7 @@ SELECT m.intMatchOptionsPnSId,convert(int,strTranNo) strTranNo,dtmMatchDate,intM
 	    JOIN tblRKFutOptTransaction t1 on m.intSFutOptTransactionId= t1.intFutOptTransactionId) as  dblSPrice
 		,c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,
 		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intLFutOptTransactionId) intLFutOptTransactionHeaderId,
-		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intSFutOptTransactionId) intSFutOptTransactionHeaderId
+		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intSFutOptTransactionId) intSFutOptTransactionHeaderId,intMatchNo
 FROM tblRKOptionsMatchPnS m
 join tblRKFutOptTransaction t on m.intLFutOptTransactionId= t.intFutOptTransactionId
 Join tblEMEntity e on e.intEntityId=t.intEntityId
