@@ -4,7 +4,7 @@ SELECT
 		a.intEntityId,   
 		b.strEntityNo, 
 		b.strName,
-		g.strPhone,  
+		strPhone = CASE WHEN ISNULL(g.strPhone, '') <> '' THEN g.strPhone ELSE EP.strPhone END,
 		e.strAddress,  
 		e.strCity,  
 		e.strState,  
@@ -78,3 +78,8 @@ SELECT
 				FROM    [tblEMEntityType]
 				WHERE   intEntityId = a.intEntityId
 		) ET
+		CROSS APPLY(
+			SELECT  TOP 1 intEntityId, strPhone
+				FROM    [tblEMEntityPhoneNumber]
+				WHERE   intEntityId = f.intEntityContactId
+		) EP
