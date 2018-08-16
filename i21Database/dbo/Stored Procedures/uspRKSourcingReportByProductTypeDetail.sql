@@ -91,7 +91,7 @@ SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContra
 				case when isnull(dblRatio,0) <> 0 then
 						((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) 
 					else
-						0
+						dblUnPricedSettlementPrice+dblBasis
 				end
           WHEN (isnull(dblFullyPriced,0)) <> 0  then 
 				case when isnull(dblRatio,0) <> 0 then
@@ -116,7 +116,7 @@ SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContra
 				case when isnull(dblRatio,0) <> 0 then
 						((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
 					else
-						0
+						dblUnPricedSettlementPrice+dblBasis
 				end
           WHEN (isnull(dblFullyPriced,0)) <> 0  then 
 				case when isnull(dblRatio,0) <> 0 then
@@ -229,7 +229,7 @@ SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContra
 				case when isnull(dblRatio,0) <> 0 then
 						((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) 
 					else
-						0
+						dblUnPricedSettlementPrice+dblBasis
 				end
           WHEN (isnull(dblFullyPriced,0)) <> 0  then 
 				case when isnull(dblRatio,0) <> 0 then
@@ -254,7 +254,7 @@ SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContra
 				case when isnull(dblRatio,0) <> 0 then
 						((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
 					else
-						0
+						dblUnPricedSettlementPrice+dblBasis
 				end
           WHEN (isnull(dblFullyPriced,0)) <> 0  then 
 				case when isnull(dblRatio,0) <> 0 then

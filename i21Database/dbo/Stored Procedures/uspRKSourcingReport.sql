@@ -9,18 +9,6 @@
 	   @intAOPId int = null
 
 AS 
---declare  @dtmFromDate DATETIME = '1900-01-01',
---       @dtmToDate DATETIME = '2018-08-10',
---       @intCommodityId int = 21,
---       @intUnitMeasureId int = 13,
---	   @strEntityName nvarchar(100) = 'A & A Commodity Traders',
---       @ysnVendorProducer bit = 'false',
---	   @intBookId int = 0,
---	   @intSubBookId int = 0,
---	   @intAOPId int= 1
---drop table #tempPartiallyPriced  
-
-
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
 		intContractDetailId int,
@@ -111,7 +99,7 @@ from (
 SELECT 
               strName as strName,        
               CONVERT(NUMERIC(16,6),isnull(dblQty,0)) as dblQty,            
-        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
+        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then dblUnPricedSettlementPrice+dblBasis
               WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased ,intCompanyLocationId                  
@@ -188,7 +176,7 @@ select CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName,su
 from (
 SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName as strName,       
               CONVERT(NUMERIC(16,6),isnull(dblQty,0)) as dblQty,            
-        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
+        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then dblUnPricedSettlementPrice+dblBasis
               WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased, 0 as intCuncorrencyId
