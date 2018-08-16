@@ -9,6 +9,7 @@
 	   @intAOPId int = null
 
 AS 
+
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
 		intContractDetailId int,
@@ -154,7 +155,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
                                    JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-                       as dblReturn,cd.intCompanyLocationId
+                       as dblReturn,cd.intCompanyLocationId,dblBasis
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
@@ -234,7 +235,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
                                    JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-                       as dblReturn,cd.intCompanyLocationId
+                       as dblReturn,cd.intCompanyLocationId,dblBasis
 
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
