@@ -6951,6 +6951,7 @@
     <Build Include="dbo\Stored Procedures\uspRKOptionPostMatchPnS.sql" />
     <Build Include="dbo\Tables\tblRKStgOptionMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateCertificate.sql" />
+    <Build Include="dbo\User Defined Types\PatronIdTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
