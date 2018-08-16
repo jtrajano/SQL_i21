@@ -180,7 +180,7 @@ BEGIN
 			@CostBucketId = cb.intInventoryActualCostId
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
-			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
+			,@CostBucketOriginalValue = dbo.fnMultiply(cb.dblStockIn, cb.dblCost)
 			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
@@ -385,6 +385,23 @@ BEGIN
 				RETURN -80196;
 			END 
 
+			-- Keep this code for debugging purposes. 
+			---- DEBUG -------------------------------------------------
+			--IF @strSourceTransactionId = 'IS-2318'
+			--BEGIN 
+			--	DECLARE @beforeUpdateCost AS NUMERIC(38, 20)
+			--			,@afterUpdateCost AS NUMERIC(38, 20)
+
+			--	BEGIN 
+			--		SELECT	@beforeUpdateCost = cb.dblCost
+			--		FROM	tblICInventoryActualCost cb
+			--		WHERE	cb.intItemId = @intItemId
+			--				AND cb.intInventoryActualCostId = @CostBucketId
+			--				AND cb.dblStockIn <> 0 
+			--	END 
+			--END
+			---- DEBUG -------------------------------------------------
+
 			UPDATE	cb
 			SET		cb.dblCost = 
 						dbo.fnDivide(
@@ -395,6 +412,29 @@ BEGIN
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryActualCostId = @CostBucketId
 					AND cb.dblStockIn <> 0 
+
+			-- Keep this code for debugging purposes. 
+			---- DEBUG -------------------------------------------------
+			--IF @strSourceTransactionId = 'IS-2318'
+			--BEGIN 
+			--	SELECT	@afterUpdateCost = cb.dblCost
+			--	FROM	tblICInventoryActualCost cb
+			--	WHERE	cb.intItemId = @intItemId
+			--			AND cb.intInventoryActualCostId = @CostBucketId
+			--			AND cb.dblStockIn <> 0 
+
+			--	SELECT	'Debug: updating of the cb cost.'
+			--			,[cost before update] = @beforeUpdateCost
+			--			,[cost after update] = @afterUpdateCost
+			--			,cb.* 
+			--	FROM	tblICInventoryActualCost cb
+			--	WHERE	cb.intItemId = @intItemId
+			--			AND cb.intInventoryActualCostId = @CostBucketId
+			--			AND cb.dblStockIn <> 0 
+			--			--AND @beforeUpdateCost <> @afterUpdateCost
+			--END 
+			---- DEBUG -------------------------------------------------
+
 		END
 
 		-- Check if there is a transaction where the cost change needs escalation. 
