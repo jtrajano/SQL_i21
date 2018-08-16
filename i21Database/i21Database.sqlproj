@@ -6950,6 +6950,7 @@
     <Build Include="dbo\Stored Procedures\uspCFCardSycnAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKOptionPostMatchPnS.sql" />
     <Build Include="dbo\Tables\tblRKStgOptionMatchPnS.sql" />
+    <Build Include="dbo\Stored Procedures\uspCreateCertificate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
