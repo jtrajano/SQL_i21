@@ -152,6 +152,49 @@ BEGIN
 	WHERE	intItemId = @intItemId
 			AND intItemUOMId = @intItemUOMId
 
+	-- Keep this code for debugging purposes. 
+	-- DEBUG ---------------------------------------------------------------------------------------------
+	--IF @intItemId = 1 --AND @intItemLocationId = 1
+	--BEGIN
+	--	DECLARE @onHand AS NUMERIC(38, 20)
+
+	--	SELECT	@onHand = s.dblOnHand 
+	--	FROM	tblICItemStockUOM s
+	--	WHERE	s.intItemId = @intItemId
+	--			AND s.intItemLocationId = @intItemLocationId
+	--			AND s.intItemUOMId = @intItemUOMId
+
+	--	DECLARE @debugMsg AS NVARCHAR(MAX) 
+	--			,@cm AS NVARCHAR(50)
+
+	--	SELECT @cm = 
+	--		CASE 
+	--			WHEN (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL) THEN 'AVG'
+	--			WHEN (@CostingMethod = @FIFO AND @strActualCostId IS NULL) THEN 'FIFO'
+	--			WHEN (@CostingMethod = @LIFO AND @strActualCostId IS NULL) THEN 'LIFO'
+	--			WHEN (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL) THEN 'LOT'
+	--			WHEN (@strActualCostId IS NOT NULL) THEN 'Actual Costing'
+	--		END 
+				
+
+	--	SET @debugMsg = dbo.fnICFormatErrorMessage(
+	--		'Debug: On-hand is %f. Qty in %s is %f. Cost is %f. Date is %d. Costing Method is %s.'
+	--		,@onHand
+	--		,@strTransactionId			
+	--		,@dblQty
+	--		,@dblCost
+	--		,@dtmDate
+	--		,@cm
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--	)
+
+	--	PRINT @debugMsg
+	--END 
+	-- DEBUG ---------------------------------------------------------------------------------------------
+
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
