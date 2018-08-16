@@ -44,7 +44,8 @@ AS
 					ELSE	0
 			END	dblCashPrice,
 			LP.strCity			AS	strLoadingPoint,
-			DL.strPackingDescription
+			DL.strPackingDescription,
+			PR.strName AS strProducer
 			
 	FROM	vyuCTContractSequence	CD
 	JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
@@ -76,4 +77,5 @@ AS
 	JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
 	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)LEFT
 	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId							LEFT
-	JOIN	tblSMCity	LP	ON	LP.intCityId			=	DL.intLoadingPortId			
+	JOIN	tblSMCity	LP	ON	LP.intCityId			=	DL.intLoadingPortId						LEFT
+	JOIN	tblEMEntity	PR	ON	PR.intEntityId	=	DL.intProducerId
