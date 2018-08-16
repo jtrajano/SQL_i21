@@ -18,7 +18,7 @@
 		,SMTerm.strTermCode as terms
 		,AcctStat.strAccountStatusCode AS chrStatusCode
 		,TaxCode.strCounty as county
-		,Cus.dblCreditLimit AS credit
+		,ISNULL(Cus.dblCreditLimit,0) AS credit
 		--,CASE WHEN Cus.ysnTaxExempt = 1 THEN 'Y' ELSE 'N' END AS tax
 
 		,CASE WHEN Cus.strCustomerNumber = '' THEN Entity.strEntityNo ELSE Cus.strCustomerNumber END AS cust_id
