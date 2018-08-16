@@ -72,13 +72,13 @@ BEGIN TRY
 			dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, 
 			strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, 
 			dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription, strRowState, dtmFeedCreated,
-			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId)
+			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId,strProducer)
 			SELECT	TOP 1 intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, 
 			strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, 
 			dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, 
 			strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, 
 			dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription,'Delete',GETDATE(),	
-			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId
+			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId,strProducer
 
 			FROM	tblCTContractFeed
 			WHERE	intContractDetailId = @intContractDetailId
