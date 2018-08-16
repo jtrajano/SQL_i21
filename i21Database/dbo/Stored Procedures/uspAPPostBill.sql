@@ -911,10 +911,20 @@ BEGIN
 			FROM #tmpPostBillData A
 			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
 			WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+			--DELETE data in @GLEntries so it will not add in computing the latest balance
 
+			--update the invalid and total records based on the result of posting to gl and its result
 			SET @failedPostValidation = @@ROWCOUNT;
 			SET @invalidCount = @invalidCount + @failedPostValidation;
 			SET @totalRecords = @totalRecords - @failedPostValidation;
+
+			DELETE A
+			FROM @GLEntries A
+			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId
+			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) C ON B.intBillId = C.intTransactionId
+			WHERE C.strDescription NOT LIKE '%success%' AND C.strBatchId = @batchId
+
+			SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData --update total records for the successfulCount
 
 			INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT 
