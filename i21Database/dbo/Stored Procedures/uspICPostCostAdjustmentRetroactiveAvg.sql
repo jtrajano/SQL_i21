@@ -275,10 +275,14 @@ BEGIN
 			) 
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemUOM iUOM
 				ON t.intItemUOMId = iUOM.intItemUOMId
+			LEFT JOIN tblICCostingMethod c
+				ON t.intCostingMethod = c.intCostingMethodId
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
+			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+
 	SET @RunningQty = ISNULL(@RunningQty, 0) 
 
 	-- Get the original running value. 
@@ -292,6 +296,7 @@ BEGIN
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+
 	SET @OriginalRunningValue = ISNULL(@OriginalRunningValue, 0)
 	SET @NewRunningValue = @OriginalRunningValue
 
@@ -308,12 +313,13 @@ BEGIN
 								AND t.intItemLocationId = @intItemLocationId
 								AND ISNULL(t.ysnIsUnposted, 0) = 0 
 								AND t.intInventoryTransactionId < @InventoryTransactionStartId
-								AND t.dblQty < 0 
-								AND c.strCostingMethod <> 'ACTUAL COST'
+								AND t.dblQty <> 0 
+								AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
 						ORDER BY 
 							t.intInventoryTransactionId DESC 
 					)
 		END 		
+
 	SET @OriginalAverageCost = ISNULL(@OriginalAverageCost, 0) 
 	SET @NewAverageCost = @OriginalAverageCost 		
 END 
@@ -326,8 +332,8 @@ BEGIN
 			,t.intItemId
 			,t.intItemLocationId
 			,t.intItemUOMId
-			,dblQty = ISNULL(-cbOut.dblQty, t.dblQty)
-			,t.dblCost
+			,dblQty = t.dblQty --ISNULL(-cbOut.dblQty, t.dblQty)
+			,dblCost = ISNULL(cb.dblCost, t.dblCost) 
 			,t.dblValue
 			,t.strTransactionId
 			,t.intTransactionId
@@ -341,17 +347,29 @@ BEGIN
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
-			LEFT JOIN tblICInventoryFIFOOut cbOut 
-				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-				AND cbOut.intRevalueFifoId IS NOT NULL 
-			LEFT JOIN tblICInventoryFIFO cb
-				ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
+			INNER JOIN tblICCostingMethod c
+				ON c.intCostingMethodId = t.intCostingMethod
 
+			LEFT JOIN tblICInventoryFIFO cb
+				ON cb.intItemId = t.intItemId
+				AND cb.intItemLocationId = t.intItemLocationId
+				AND cb.intItemUOMId = t.intItemUOMId
+				AND cb.strTransactionId = t.strTransactionId
+				AND cb.intTransactionId = t.intTransactionId
+				AND cb.intTransactionDetailId = t.intTransactionDetailId
+				AND cb.ysnIsUnposted = 0 
+			--LEFT JOIN tblICInventoryFIFOOut cbOut 
+			--	ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+			--	AND cbOut.intRevalueFifoId IS NOT NULL 
+			--LEFT JOIN tblICInventoryFIFO cb
+			--	ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
 			AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
+			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+
 	ORDER BY t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
@@ -387,7 +405,7 @@ BEGIN
 		SET @CurrentValue = ISNULL(@CurrentValue, 0) 
 
 		-- Calculate the current value 
-		SET @CurrentValue = @t_dblQty * @t_dblCost + @t_dblValue
+		SET @CurrentValue = ISNULL(@t_dblQty, 0) * ISNULL(@t_dblCost, 0) + ISNULL(@t_dblValue, 0)
 		
 		-- Calculate the New Running Value.
 		SET @OriginalRunningValue += 
@@ -395,10 +413,15 @@ BEGIN
 						@t_dblQty > 0 
 						AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostBucketOriginalValue 
-				
+
 					WHEN 
-						@t_dblQty < 0 AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 
-							@t_dblValue 				
+						@t_dblQty < 0  THEN 
+							dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
+							* @OriginalAverageCost
+				
+					--WHEN 
+					--	@t_dblQty < 0 AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 
+					--		@t_dblValue 				
 
 					ELSE 
 						@CurrentValue
@@ -424,37 +447,48 @@ BEGIN
 						@CurrentValue
 			END 
 
-		-- Calculate the Original Average Cost 
-		--SET @OriginalAverageCost = 
-		--	CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
-		--				@OriginalRunningValue / (@RunningQty + @t_dblQty) 
+		---- Keep this code for debugging purposes. 
+		--BEGIN 
+		--	SELECT 
+		--		'Debug how original avg cost is computed.'
+		--		,[@OriginalRunningValue] = @OriginalRunningValue
+		--		,[@RunningQty] = @RunningQty
+		--		,[@t_dblQty] = @t_dblQty 
+		--		,[@CostBucketOriginalCost] = @CostBucketOriginalCost
+		--		,[@OriginalAverageCost] = @OriginalAverageCost
+		--		,[@t_strTransactionId] = @t_strTransactionId
+		--		,CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+		--				1-- @OriginalRunningValue / (@RunningQty + @t_dblQty) 
 		--			WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
 		--				CASE 
 		--					WHEN @t_intTransactionId = @intSourceTransactionId
 		--					AND @t_intTransactionDetailId = @intSourceTransactionDetailId
 		--					AND @t_strTransactionId = @strSourceTransactionId THEN 
-		--						@CostBucketOriginalCost 
+		--						2 --@CostBucketOriginalCost 
 		--					ELSE 
-		--						@t_dblCost
+		--						3 -- @t_dblCost
 		--				END 
 		--			ELSE 
-		--				@OriginalAverageCost
-		--	END 
+		--				4 -- @OriginalAverageCost
+		--	END
+		--END 
 
-		--SELECT	@OriginalAverageCost = 
-		--			ISNULL(
-		--				dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost)
-		--				,@OriginalAverageCost
-		--			)
-		--FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOOut cbOut 
-		--			ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-		--		INNER JOIN tblICInventoryFIFO cb
-		--			ON cb.intInventoryFIFOId = cbOut.intInventoryFIFOId
-		--		INNER JOIN tblICItemUOM stockUOM
-		--			ON t.intItemId = t.intItemId
-		--			AND stockUOM.ysnStockUnit = 1
-		--WHERE	t.intInventoryTransactionId = @t_intInventoryTransactionId
-		--		AND @t_dblQty < 0 
+		-- Calculate the Original Average Cost 
+		SET @OriginalAverageCost = 
+			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
+					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
+						CASE 
+							WHEN @t_intTransactionId = @intSourceTransactionId
+							AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+							AND @t_strTransactionId = @strSourceTransactionId THEN 
+								@CostBucketOriginalCost 
+							ELSE 
+								@t_dblCost
+						END 
+					ELSE 
+						@OriginalAverageCost
+			END 
 
 		-- Calculate the New Average Cost 
 		SET @NewAverageCost = 
@@ -525,9 +559,30 @@ BEGIN
 				,@intTransactionDetailId 
 				,@strTransactionId 
 				,@EscalateInventoryTransactionTypeId OUTPUT 
-		END 
 
-		-- TODO: Escalate the negative stocks that does not have records in tblICInventoryFIFOOut.  
+
+			-- Keep this code for debugging purposes. 
+			--IF @EscalateInventoryTransactionTypeId IS NOT NULL 
+			--BEGIN 
+			--	DECLARE @debugMsg AS NVARCHAR(MAX) 
+
+			--	SET @debugMsg = dbo.fnICFormatErrorMessage(
+			--		'Debug: Escalate a value of %f for %s. New Avg cost is %f. Original Avg cost is %f. Qty is %f.'
+			--		,-@EscalateCostAdjustment
+			--		,@t_strTransactionId			
+			--		,@NewAverageCost
+			--		,@OriginalAverageCost
+			--		,@t_dblQty
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--	)
+
+			--	PRINT @debugMsg
+			--END 
+		END 
 
 		-- Log the cost adjustment 
 		BEGIN 
@@ -655,19 +710,8 @@ BEGIN
 	FROM	tblICItem i 
 	WHERE	i.intItemId = @intItemId
 
-	-- Calculate the value to book. 
-	-- Formula: (New Running Value) - (Original Running Value)
+	-- Calculate the value to book from the cost adjustment log. 
 	SET @CurrentValue = NULL 
-	--SELECT	@CurrentValue = 
-	--			ISNULL(@NewRunningValue, 0) 
-	--			- SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
-	--FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
-	--			ON t.intCostingMethod = c.intCostingMethodId 
-	--WHERE	t.intItemId = @intItemId
-	--		AND t.intItemLocationId = @intItemLocationId
-	--		AND ISNULL(t.ysnIsUnposted, 0) = 0 
-	--		AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
-
 	SELECT	@CurrentValue = SUM(ISNULL(dblValue, 0)) 
 	FROM	tblICInventoryFIFOCostAdjustmentLog	
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
