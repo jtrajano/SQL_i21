@@ -98,6 +98,9 @@ BEGIN TRY
 				,ysnCancelled = @ysnCancel
 			WHERE intLoadId = @intLoadId
 
+			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
+				,@ysnReserveStockForInventoryShipment = 0
+
 			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
 				,@strRowState = 'Delete'
 				,@intShipmentType = @intShipmentType
@@ -192,6 +195,10 @@ BEGIN TRY
 					,@strRowState = 'Added'
 					,@intShipmentType = @intShipmentType
 			END
+
+			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
+			,@ysnReserveStockForInventoryShipment = 1
+
 		END
 	END
 	ELSE IF (@intShipmentType = 2)
