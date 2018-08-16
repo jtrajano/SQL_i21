@@ -253,6 +253,12 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'Card Type', 0, 20, NULL, NULL, 4, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@PacPrideCSU, SCOPE_IDENTITY(), 12, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1, 2)
 	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'ChangedDate', 0, 11, NULL, 1, 2, N'YYMMDDHHMMSS', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@PacPrideCSU, SCOPE_IDENTITY(), 13, 1, NULL, NULL, NULL, NULL, 0, NULL, 1, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'ChangeTime', 0, 12, NULL, 1, 2, N'YYMMDDHHMMSS', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@PacPrideCSU, SCOPE_IDENTITY(), 14, 2, NULL, NULL, NULL, NULL, 0, NULL, 1, 1)
+
 END
 -----------Pac Pride CSU------------
 
