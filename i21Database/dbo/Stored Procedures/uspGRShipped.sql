@@ -215,7 +215,7 @@ BEGIN
 			,[intChargeId]				= grainCharge.intItemId
 			,[strCostMethod]			= charge.strCostMethod
 			,[dblRate]					= grainCharge.dblCharge
-			,[intCostUOMId]				= charge.intCostUOMId
+			,[intCostUOMId]				= ItemUOM.intItemUOMId
 			,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a currency id. Use the default functional currency. 
 			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance + ISNULL(grainCharge.dblFlatFee,0)
 			,[ysnAccrue]				= charge.ysnAccrue
@@ -226,7 +226,10 @@ BEGIN
 		FROM @StorageTicketInfoByFIFO grainCharge 
 		INNER JOIN tblICItem charge
 			ON grainCharge.intItemId = charge.intItemId
-		WHERE grainCharge.[strItemType] ='Storage Charge' 
+		INNER JOIN tblICItemUOM ItemUOM
+			ON ItemUOM.intUnitMeasureId = grainCharge.intUnitMeasureId
+				AND ItemUOM.intItemId = grainCharge.intItemId
+		WHERE grainCharge.[strItemType] ='Storage Charge'
 
 	END 
 END 
