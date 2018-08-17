@@ -293,7 +293,7 @@ WHERE  i.intCommodityId= @intCommodityId
 INSERT INTO @tblResultInventory (BalanceForward)
 SELECT sum(BalanceForward) BalanceForward 
 FROM(
-	select BalanceForward
+	select BalanceForward  + tranDSInQty as BalanceForward
 	from #temp
 	where  convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)  < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110)   
  )t
