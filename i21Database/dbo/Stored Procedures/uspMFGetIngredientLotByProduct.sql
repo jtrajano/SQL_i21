@@ -56,6 +56,8 @@ BEGIN
 			,IU.intUnitMeasureId
 			,L.dtmDateCreated
 			,L.strLotAlias
+			,PL.intParentLotId
+			,PL.strParentLotNumber
 			,SL.intStorageLocationId
 			,SL.strName
 			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
@@ -121,6 +123,7 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
+		JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
@@ -142,7 +145,7 @@ BEGIN
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
 		LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
 		WHERE LS.strPrimaryStatus = 'Active'
-			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
 			AND I.strStatus = 'Active'
 			AND L.strLotNumber LIKE @strLotNumber + '%'
@@ -176,6 +179,8 @@ BEGIN
 			,IU.intUnitMeasureId
 			,NULL AS dtmDateCreated
 			,NULL AS strLotAlias
+			,NULL AS intParentLotId
+			,NULL AS strParentLotNumber
 			,SL.intStorageLocationId
 			,SL.strName
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
@@ -262,6 +267,8 @@ BEGIN
 			,IU.intUnitMeasureId
 			,L.dtmDateCreated
 			,L.strLotAlias
+			,PL.intParentLotId
+			,PL.strParentLotNumber
 			,SL.intStorageLocationId
 			,SL.strName
 			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
@@ -325,6 +332,7 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
+		JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
@@ -347,7 +355,7 @@ BEGIN
 		LEFT JOIN vyuMFStockReservationByWorkOrder SR ON SR.intLotId = L.intLotId
 			AND SR.intWorkOrderId <> R.intWorkOrderId
 		WHERE LS.strPrimaryStatus = 'Active'
-			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
 			AND I.strStatus = 'Active'
 			AND L.strLotNumber LIKE @strLotNumber + '%'
@@ -385,6 +393,8 @@ BEGIN
 			,IU.intUnitMeasureId
 			,NULL AS dtmDateCreated
 			,NULL strLotAlias
+			,NULL AS intParentLotId
+			,NULL AS strParentLotNumber
 			,SL.intStorageLocationId
 			,SL.strName
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
