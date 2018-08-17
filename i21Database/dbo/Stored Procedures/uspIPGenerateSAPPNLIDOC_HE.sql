@@ -139,7 +139,7 @@ BEGIN
 	IF @ysnUpdateFeedStatusOnRead = 1
 	BEGIN
 		UPDATE tblRKStgMatchPnS
-		SET strStatus = 'Awt Ack'
+		SET strStatus = 'Awt Ack',strReferenceNo=ISNULL(CONVERT(VARCHAR, @intMatchNo), '') + '-' + ISNULL(@strFutMarketName, '') 
 		WHERE intStgMatchPnSId = @intMinStageId
 	END
 
