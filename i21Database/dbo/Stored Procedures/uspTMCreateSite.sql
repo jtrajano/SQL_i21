@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspMBILCreateSite]
-	@UserId INT,
-	@SiteId INT OUTPUT
+﻿CREATE PROCEDURE [dbo].[uspTMCreateSite]
+	@TMSite TMSite READONLY,
+	@UserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,20 +15,12 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @Message NVARCHAR(MAX)
-		, @DefaultSiteNo NVARCHAR(50)
-		, @CountNo INT = 0
-		, @SiteNo NVARCHAR(50)
+	DECLARE @test NVARCHAR(MAX)
+	--Create TM Customer record
 
-	SELECT TOP 1 @DefaultSiteNo = ISNULL(strDefaultSiteNo, '') FROM tblMBILCompanyPreference
+	-- Create TM Site
 
-	WHILE EXISTS(SELECT TOP 1 1 FROM tblTMSite WHERE strDescription = @SiteNo)
-	BEGIN
-		SET @CountNo += 1
-		SET @SiteNo = @DefaultSiteNo + CAST(@CountNo AS NVARCHAR(50))
-	END
-
-	--INSERT INTO 
+	-- Create tm device?
 
 END TRY
 BEGIN CATCH

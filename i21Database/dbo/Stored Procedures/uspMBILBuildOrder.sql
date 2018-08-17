@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspMBILBuildOrder]
-	@intDriverId		AS INT
+	@intShiftId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,7 +7,7 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
-DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+DELETE tblMBILOrder WHERE intShiftId = @intShiftId
 
 SELECT intDispatchId = Dispatch.intDispatchID
 	, strOrderNumber = Dispatch.strOrderNumber
@@ -28,6 +28,7 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, Site.intTaxStateID	
 	, Customer.intShipToId	
 	, Site.intLocationId
+	, intShiftId = @intShiftId
 INTO #Dispatch
 FROM tblTMDispatch Dispatch
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID

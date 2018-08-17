@@ -6695,7 +6695,6 @@
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
     <Build Include="dbo\Tables\tblMBILInvoice.sql" />
     <Build Include="dbo\Tables\tblMBILInvoiceItem.sql" />
-    <Build Include="dbo\Tables\tblMBILInvoiceSite.sql" />
     <Build Include="dbo\Tables\tblMBILInvoiceTaxCode.sql" />
     <Build Include="dbo\Views\vyuCTScheduledSequence.sql" />
     <Build Include="dbo\Tables\tblRKCurrencyExposure.sql" />
@@ -6893,7 +6892,6 @@
     <Build Include="dbo\Views\vyuMBILDriver.sql" />
     <Build Include="dbo\Views\vyuMBILOrderItem.sql" />
     <Build Include="dbo\Views\vyuMBILOrderTaxCode.sql" />
-    <Build Include="dbo\Views\vyuMBILInvoiceSite.sql" />
     <Build Include="dbo\Views\vyuMBILInvoiceItem.sql" />
     <Build Include="dbo\Views\vyuMBILInvoiceTaxCode.sql" />
     <Build Include="dbo\Tables\tblMBILCompanyPreference.sql" />
@@ -6958,6 +6956,7 @@
     <Build Include="dbo\Stored Procedures\uspCTImportContract.sql" />
     <Build Include="dbo\Views\vyuARPOSLog.sql" />
     <Build Include="dbo\Views\vyuSTStoreAppRegistered.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7143,6 +7142,7 @@
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
+    <Build Include="dbo\User Defined Types\TMSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
