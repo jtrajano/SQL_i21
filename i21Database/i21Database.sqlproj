@@ -6957,6 +6957,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessImportContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportContract.sql" />
     <Build Include="dbo\Views\vyuARPOSLog.sql" />
+    <Build Include="dbo\Views\vyuSTStoreAppRegistered.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
