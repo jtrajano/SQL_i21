@@ -59,7 +59,7 @@
     END
     '
     --SELECT @query
-    EXEC sp_executesql @query
+    EXEC sp_executesql @Query
 
  END TRY
 BEGIN CATCH
