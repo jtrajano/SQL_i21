@@ -572,7 +572,7 @@ DECLARE @invQty TABLE (
 		,strTicketStatus NVARCHAR(200)
 		)
 INSERT INTO @invQty
-SELECT distinct	s.dblQuantity  dblTotal,
+SELECT s.dblQuantity  dblTotal,
 	t.strTicketNumber Ticket,s.strLocationName,s.strItemNo,i.intCommodityId intCommodityId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,
 	s.intLocationId intLocationId,strTransactionId,strTransactionType,i.intItemId,t.strDistributionOption,strTicketStatus	FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
@@ -650,10 +650,26 @@ BEGIN
 if isnull(@intVendorId,0) = 0
 BEGIN
 
+	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId)
+	SELECT * FROM 
+	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],'Physical Contract' strContractType,strLocationName,
+		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
+	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
+	FROM @tblGetOpenContractDetail cd
+	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId =@intCommodityId
+	AND cd.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN cd.intCompanyLocationId ELSE @intLocationId END)t
+		WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+								ELSE isnull(ysnLicensed, 0) END
+				)
+
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
-	SELECT DISTINCT @strCommodityCode,'Price Risk' [strType],'Inventory' strContractType,(isnull(dblTotal,0)) dblTotal,intItemId,strItemNo,
-					intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
-			FROM @invQty where intCommodityId=@intCommodityId and isnull(strDistributionOption,'') <> 'DP' and isnull(strTicketStatus,'') <> 'V'
+	SELECT DISTINCT @strCommodityCode,'Price Risk' [strType],'Inventory' strContractType,sum(dblTotal) dblTotal,intItemId,strItemNo,
+					intFromCommodityUnitMeasureId,intCommodityId,strLocationName  
+			FROM @invQty where intCommodityId=@intCommodityId 
+			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
 
 				
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intInventoryReceiptId,strReceiptNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
@@ -778,7 +794,7 @@ BEGIN
 		GROUP BY strType,strCommodityCode,intContractHeaderId,strContractNumber,strContractType,strLocationName,strContractEndMonth,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId
 	
 
-	 INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
+		 INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	 SELECT strCommodityCode,'Avail for Spot Sale' strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency 
 	 from @tempFinal  where strType='Basis Risk' and intCommodityId=@intCommodityId
 
@@ -787,7 +803,7 @@ BEGIN
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,'Avail for Spot Sale' [strType], strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,-(cd.dblBalance)) AS dblTotal
-	   ,cd.intUnitMeasureId,intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
+	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and cd.intCommodityId=@intCommodityId
 					 and cd.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end)t

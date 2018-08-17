@@ -557,7 +557,7 @@ DECLARE @invQty TABLE (
 		,strTicketStatus NVARCHAR(200)
 		)
 INSERT INTO @invQty
-SELECT distinct s.dblQuantity  dblTotal,
+SELECT s.dblQuantity  dblTotal,
 	t.strTicketNumber Ticket,s.strLocationName,s.strItemNo,i.intCommodityId intCommodityId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,
 	s.intLocationId intLocationId,strTransactionId,strTransactionType,i.intItemId, t.strDistributionOption,strTicketStatus	FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
