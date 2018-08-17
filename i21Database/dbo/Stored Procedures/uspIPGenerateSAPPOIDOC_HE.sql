@@ -72,8 +72,8 @@ DECLARE @tblHeader AS TABLE (
 	,strSalesPerson NVARCHAR(100)
 	)
 
---SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
---SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
+SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
+SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 --SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
 IF EXISTS (
 		SELECT *
@@ -398,21 +398,21 @@ BEGIN
 
 		SELECT @strContractFeedIds = @intContractFeedId
 
-		--Send Create Feed only Once
-		IF UPPER(@strRowState) = 'ADDED'
-			AND (
-				SELECT TOP 1 UPPER(strRowState)
-				FROM tblCTContractFeed
-				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractFeedId < (
-						SELECT MIN(intContractFeedId)
-						FROM tblCTContractFeed
-						WHERE intContractHeaderId = @intContractHeaderId
-							AND ISNULL(strFeedStatus, '') = ''
-						)
-				ORDER BY intContractFeedId
-				) = 'ADDED'
-			GOTO NEXT_PO
+		----Send Create Feed only Once
+		--IF UPPER(@strRowState) = 'ADDED'
+		--	AND (
+		--		SELECT TOP 1 UPPER(strRowState)
+		--		FROM tblCTContractFeed
+		--		WHERE intContractHeaderId = @intContractHeaderId
+		--			AND intContractFeedId < (
+		--				SELECT MIN(intContractFeedId)
+		--				FROM tblCTContractFeed
+		--				WHERE intContractHeaderId = @intContractHeaderId
+		--					AND ISNULL(strFeedStatus, '') = ''
+		--				)
+		--		ORDER BY intContractFeedId
+		--		) = 'ADDED'
+		--	GOTO NEXT_PO
 	END
 
 	--Donot generate Modified Idoc if PO No is not there
@@ -642,14 +642,14 @@ BEGIN
 			IF UPPER(@strRowState) = 'ADDED'
 			BEGIN
 				SET @strXmlHeaderStart = '<PURCONTRACT_CREATE01>'
-				SET @strXmlHeaderStart += '<IDOC BEGIN="1">'
+				SET @strXmlHeaderStart += '<IDOC>'
 				--IDOC Header
-				SET @strXmlHeaderStart += '<EDI_DC40 SEGMENT="1">'
-				--SET @strXmlHeaderStart += @strPOCreateIDOCHeader
+				SET @strXmlHeaderStart += '<EDI_DC40>'
+				SET @strXmlHeaderStart += @strPOCreateIDOCHeader
 				SET @strXmlHeaderStart += '</EDI_DC40>'
-				SET @strXmlHeaderStart += '<E1PURCONTRACT_CREATE SEGMENT="1">'
+				SET @strXmlHeaderStart += '<E1PURCONTRACT_CREATE>'
 				--Header
-				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER SEGMENT="1">'
+				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER>'
 				SET @strXmlHeaderStart += '<COMP_CODE>' + ISNULL(@strPurchasingGroup, '') + '</COMP_CODE>'
 				SET @strXmlHeaderStart += '<DOC_TYPE>' + ISNULL('ZMK', '') + '</DOC_TYPE>'
 				SET @strXmlHeaderStart += '<CREAT_DATE>' + ISNULL(CONVERT(VARCHAR(10), @dtmContractDate, 112), '') + '</CREAT_DATE>'
@@ -668,7 +668,7 @@ BEGIN
 		--Item
 		IF UPPER(@strRowState) = 'ADDED'
 		BEGIN
-			SET @strItemXml += '<E1BPMEOUTITEM SEGMENT="1">'
+			SET @strItemXml += '<E1BPMEOUTITEM>'
 			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</MATERIAL>'
 			SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
@@ -686,13 +686,13 @@ BEGIN
 			IF UPPER(@strRowState) <> 'ADDED'
 			BEGIN
 				SET @strXmlHeaderStart = '<PURCONTRACT_CHANGE01>'
-				SET @strXmlHeaderStart += '<IDOC BEGIN="1">'
+				SET @strXmlHeaderStart += '<IDOC>'
 				--IDOC Header
-				SET @strXmlHeaderStart += '<EDI_DC40 SEGMENT="1">'
-				--SET @strXmlHeaderStart += @strPOUpdateIDOCHeader
+				SET @strXmlHeaderStart += '<EDI_DC40>'
+				SET @strXmlHeaderStart += @strPOUpdateIDOCHeader
 				SET @strXmlHeaderStart += '</EDI_DC40>'
-				SET @strXmlHeaderStart += '<E1PURCONTRACT_CHANGE  SEGMENT="1">'
-				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER SEGMENT="1">'
+				SET @strXmlHeaderStart += '<E1PURCONTRACT_CHANGE>'
+				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER>'
 				SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 				SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
 				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
@@ -704,7 +704,7 @@ BEGIN
 
 		IF UPPER(@strRowState) <> 'ADDED'
 		BEGIN
-			SET @strItemXml += '<E1BPMEOUTITEM SEGMENT="1">'
+			SET @strItemXml += '<E1BPMEOUTITEM>'
 
 			IF NOT EXISTS (
 					SELECT *
@@ -721,14 +721,7 @@ BEGIN
 
 			END
 
-			IF NOT EXISTS (
-					SELECT *
-					FROM tblCTContractFeed
-					WHERE intContractFeedId = @intContractFeedId
-						AND IsNULL(strFeedStatus, '') = ''
-						AND UPPER(strRowState) = 'MODIFIED'
-					)
-				AND @ysnMaxPrice = 0
+			IF @ysnMaxPrice = 0
 			BEGIN
 				IF UPPER(@strRowState) = 'DELETE'
 				BEGIN

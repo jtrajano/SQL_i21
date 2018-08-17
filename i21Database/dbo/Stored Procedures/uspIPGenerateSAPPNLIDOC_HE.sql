@@ -82,14 +82,14 @@ BEGIN
 
 	BEGIN
 		SET @strXml = '<FIDCCP02>'
-		SET @strXml += '<IDOC BEGIN="1">'
+		SET @strXml += '<IDOC>'
 		--IDOC Header
-		--SET @strXml += '<EDI_DC40 SEGMENT="1">'
-		--SET @strXml += @strIDOCHeader
-		--SET @strXml += '</EDI_DC40>'
+		SET @strXml += '<EDI_DC40>'
+		SET @strXml += @strIDOCHeader
+		SET @strXml += '</EDI_DC40>'
 		--Set @strXml +=	'<ACC_DOCUMENT SEGMENT="1">'
 		--Header
-		SET @strXml += '<E1FIKPF SEGMENT="1">'
+		SET @strXml += '<E1FIKPF>'
 		SET @strXml += '<BLDAT>' + ISNULL(CONVERT(VARCHAR(10), @dtmMatchDate, 112), '') + '</BLDAT>'
 		SET @strXml += '<BLART>' + 'ZA' + '</BLART>'
 		SET @strXml += '<BUKRS>' + ISNULL(@strSAPLocation, '') + '</BUKRS>'
@@ -97,7 +97,7 @@ BEGIN
 		SET @strXml += '<BKTXT>' + '' + '</BKTXT>'
 		SET @strXml += '<XBLNR>' + ISNULL(CONVERT(VARCHAR, @intMatchNo), '') + '-' + ISNULL(@strFutMarketName, '') + '</XBLNR>'
 		--GL account details (Broker account)
-		SET @strXml += '<E1FISEG SEGMENT="1">'
+		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
 		SET @strXml += '<HKONT>' + '115501' + '</HKONT>'
 		SET @strXml += '<GSBER>' + '800' + '</GSBER>'
@@ -108,7 +108,7 @@ BEGIN
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '</E1FISEG>'
 		--GL account details (TM account)
-		SET @strXml += '<E1FISEG SEGMENT="1">'
+		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
 		SET @strXml += '<HKONT>' + '439282' + '</HKONT>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
