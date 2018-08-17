@@ -23,7 +23,8 @@ AS
 BEGIN
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @ysnDisplayAllStorage bit
-select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
+DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit
+SELECT @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) ,@ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0) from tblRKCompanyPreference
 
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -573,7 +574,7 @@ SELECT distinct s.dblQuantity  dblTotal,
 				) 
 
 
---select * from @invQty where intCommodityId = 18 order by strTransactionId
+--select * from @invQty where intCommodityId = 2019 order by strTransactionId
 --========================
 -- DELIVERY SHEET
 --========================
@@ -722,6 +723,7 @@ BEGIN
 		,intCommodityId
 		,intFromCommodityUnitMeasureId
 		,intCompanyLocationId
+		,strDistributionOption
 	)
 	SELECT 
 		intSeqId
@@ -732,6 +734,7 @@ BEGIN
 		,intCommodityId
 		,intFromCommodityUnitMeasureId
 		,intCompanyLocationId 
+		,strDistributionOption
 	FROM(
 		select  
 			1 as intSeqId
@@ -744,8 +747,9 @@ BEGIN
 			,intCommodityId
 			,intFromCommodityUnitMeasureId
 			,intLocationId intCompanyLocationId
+			,strDistributionOption
 		from @invQty 
-		where intCommodityId =@intCommodityId and isnull(strDistributionOption,'') <> 'DP' and isnull(strTicketStatus,0) <> 'V' 
+		where intCommodityId =@intCommodityId  and isnull(strTicketStatus,0) <> 'V' 
 	)t
 	--group by intSeqId,strSeqHeader,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 	
@@ -785,6 +789,7 @@ BEGIN
 		join tblEMEntity e on e.intEntityId= s.intEntityId
 		where intCommodityId =@intCommodityId 
 			and intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
+			and ysnDPOwnedType <> 1 and strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 			and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -874,9 +879,10 @@ BEGIN
 	select intSeqId,strSeqHeader,strType,sum(dblTotal) dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from (
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM @Final 
-	where strSeqHeader='In-House' and strType='Receipt' and intCommodityId =@intCommodityId)t
+	where strSeqHeader='In-House' and strType='Receipt' and intCommodityId =@intCommodityId
+	and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END --Need to changes this checking in reference RM-1805
+	)t
 	group by intSeqId,strSeqHeader,strType,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
-
 
 
 -- Company Title with Collateral
@@ -928,7 +934,7 @@ BEGIN
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					,ch.intCompanyLocationId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 					FROM @tblGetStorageDetailByDate ch
-					WHERE ch.intCommodityId  =@intCommodityId	AND ysnDPOwnedType = 1
+					WHERE ch.intCommodityId  =@intCommodityId	AND ysnDPOwnedType = 1 and strOwnedPhysicalStock <> 'Company' 
 						AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 					)t 	WHERE intCompanyLocationId  IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation

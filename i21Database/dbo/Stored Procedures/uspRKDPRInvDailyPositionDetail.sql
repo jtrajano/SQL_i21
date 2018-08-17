@@ -18,7 +18,8 @@ AS
 BEGIN
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @ysnDisplayAllStorage bit
-select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
+DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit
+SELECT @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) ,@ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0) from tblRKCompanyPreference
 
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -638,7 +639,7 @@ SELECT * into #tempCollateral FROM (
 --=============================
 SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblQuantity ,0)))  dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
 	,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
-	,null [Storage Due],s.intLocationId intLocationId, intTransactionId, strTransactionId,strTransactionType,i.intItemId  into #invQty
+	,null [Storage Due],s.intLocationId intLocationId, intTransactionId, strTransactionId,strTransactionType,i.intItemId,t.strDistributionOption  into #invQty
 	FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	--Join tblICItemLocaiton il on  il.intItemLocationId
@@ -648,7 +649,7 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0 
 			AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end and isnull(strTicketStatus,'') <> 'V'
 			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate) 
-			and isnull(t.strDistributionOption,'') <> 'DP'
+			--and isnull(t.strDistributionOption,'') <> 'DP'
 			and ysnInTransit = 0
 			and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -689,14 +690,13 @@ IF ISNULL(@intVendorId,0) = 0
 BEGIN
 
 	--IR
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber, intInventoryReceiptId)
-	select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId from(
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber, intInventoryReceiptId, strDistributionOption)
+	select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId,strDistributionOption from(
 	SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],isnull(dblTotal,0) dblTotal,strLocationName,intItemId,strItemNo,
-			@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId, strTransactionId, intTransactionId
+			@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId, strTransactionId, intTransactionId, strDistributionOption
 	FROM #invQty where intCommodityId=@intCommodityId and strTransactionType = 'Inventory Receipt')t
-	group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strTransactionId,intTransactionId
+	group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strTransactionId,intTransactionId,strDistributionOption
 	
-
 	--IS
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strShipmentNumber, intInventoryShipmentId)
 	select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId from(
@@ -730,13 +730,14 @@ BEGIN
 	JOIN tblEMEntity e on e.intEntityId= s.intEntityId
 	WHERE 
 	intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
+	and ysnDPOwnedType <> 1 and strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 	and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END
 						)--)t 
 	--GROUP BY intSeqId,strSeqHeader,strCommodityCode,strType,strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
-	
+
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,[Storage Due],intCompanyLocationId)
 	SELECT intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId, intCommodityUnitMeasureId intFromCommodityUnitMeasureId,[Storage Due],intCompanyLocationId from(
 	SELECT distinct  1 intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'On-Hold' strType, dblTotal dblTotal, strCustomer,intTicketId,strTicketNumber, dtmDeliveryDate,strLocationName,
@@ -1021,6 +1022,8 @@ IF (@ysnDisplayAllStorage=1)
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber,strShipmentNumber,intInventoryReceiptId,intInventoryShipmentId )
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber,strShipmentNumber,intInventoryReceiptId,intInventoryShipmentId 
 	FROM @Final where strSeqHeader='In-House' and strType='Receipt' and intCommodityId=@intCommodityId
+	and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END --Need to changes this checking in reference RM-1805
+
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strLocationName)
 	select * from (
@@ -1078,7 +1081,8 @@ IF (@ysnDisplayAllStorage=1)
 					FROM #tblGetStorageDetailByDate ch
 					WHERE 
 					
-					ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
+					ch.intCommodityId  = @intCommodityId	
+					AND ysnDPOwnedType = 1 and strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 						AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 					)t 	WHERE intCompanyLocationId  IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation
