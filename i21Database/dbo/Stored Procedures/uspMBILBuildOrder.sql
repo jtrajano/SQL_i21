@@ -66,7 +66,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
+WHERE intShiftId = @intShiftId AND strOrderStatus = 'Open'
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
@@ -83,7 +83,7 @@ SELECT [Order].intOrderId
 	, #Dispatch.[dblPrice]
 FROM #Dispatch
 LEFT JOIN vyuMBILOrder [Order] ON #Dispatch.intDispatchId = [Order].intDispatchId
-WHERE [Order].intDriverId = @intDriverId
+WHERE [Order].intShiftId = @intShiftId
 
 
 -- ++++++ ITEM TAX CODE PROCESS ++++++ --
@@ -97,7 +97,7 @@ FROM (
 		, B.intSiteId
 	FROM tblMBILOrder A
 	LEFT JOIN tblMBILOrderItem B ON A.intOrderId = B.intOrderId
-	WHERE A.intDriverId = @intDriverId) tblOrder
+	WHERE A.intShiftId = @intShiftId) tblOrder
 
 
 DECLARE  @MBILOrderId					INT				= NULL
