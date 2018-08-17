@@ -178,6 +178,8 @@ AS SELECT
 	,tblICInventoryReceipt.strReceiptNumber
 	,tblICInventoryShipment.intInventoryShipmentId
 	,tblICInventoryShipment.strShipmentNumber
+	,ICLot.strLotNumber
+
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
@@ -210,6 +212,7 @@ AS SELECT
   LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
+  LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
