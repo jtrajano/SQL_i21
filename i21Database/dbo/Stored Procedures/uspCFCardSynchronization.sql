@@ -67,7 +67,26 @@ BEGIN
 			(SELECT TOP 1 intAccountId
 			FROM @tblCFNumericAccount
 			WHERE CAST(strAccountNumber AS BIGINT) = CAST(@strAccountNumber AS BIGINT))
-				
+
+			DELETE FROM @tblCFNumericAccount
+			IF(ISNULL(@intAccountId,0) = 0)
+			BEGIN
+				INSERT INTO @tblCFNumericAccount(
+				 intAccountId		
+				,strAccountNumber	
+				)
+				SELECT 
+					 intAccountId			
+					,strNetworkAccountId	
+				FROM tblCFNetworkAccount 
+				WHERE strNetworkAccountId not like '%[^0-9]%' and strNetworkAccountId != ''
+
+				SET @intAccountId =
+				(SELECT TOP 1 intAccountId
+				FROM @tblCFNumericAccount
+				WHERE CAST(strAccountNumber AS BIGINT) = CAST(@strAccountNumber AS BIGINT))
+
+			END
 		END
 		ELSE
 		BEGIN
@@ -85,6 +104,26 @@ BEGIN
 			(SELECT TOP 1 intAccountId
 			FROM @tblCFCharAccount
 			WHERE strAccountNumber = @strAccountNumber)
+
+			DELETE FROM @tblCFCharAccount
+			IF(ISNULL(@intAccountId,0) = 0)
+			BEGIN
+				INSERT INTO @tblCFCharAccount(
+					intAccountId		
+					,strAccountNumber	
+				)
+					SELECT 
+					 intAccountId			
+					,strNetworkAccountId	
+				FROM tblCFNetworkAccount 
+				WHERE strNetworkAccountId like '%[^0-9]%' and strNetworkAccountId != ''
+
+				SET @intAccountId =
+				(SELECT TOP 1 intAccountId
+				FROM @tblCFCharAccount
+				WHERE strAccountNumber = @strAccountNumber)
+
+			END
 
 		END
 	END
@@ -192,11 +231,20 @@ BEGIN
 	--VALIDATE TYPE--
 
 
-	
+	DECLARE @ysnCardExist BIT = 0
+	DECLARE @intCardAccountId INT = 0
+
 	IF(@intSycnType = 1)
 	BEGIN
 	--CHECK IF CARD EXIST--
 		SET @strErrorRecordId = 'card - ' + @strCardNumber
+
+		SELECT  @intCardAccountId = intAccountId FROM tblCFCard where strCardNumber = @strCardNumber
+		IF(ISNULL(@intCardAccountId,0) != 0)
+		BEGIN
+			SET @ysnCardExist = 1
+		END
+
 		IF((SELECT COUNT(*) FROM tblCFCard where strCardNumber = @strCardNumber AND intAccountId = @intAccountId) = 0)
 		BEGIN
 			SET @strAction = 'addcard'
@@ -292,6 +340,35 @@ BEGIN
 	----------------------VALIDATIONS-----------------------
 	IF(@intSycnType = 1)
 	BEGIN
+
+		IF(ISNULL(@ysnCardExist,0) = 1)
+		BEGIN
+			DECLARE @strCardExistError NVARCHAR(MAX)
+			DECLARE @strCardCustomer NVARCHAR(MAX)
+			
+			SELECT TOP 1 @strCardCustomer = strCustomerNumber FROM vyuCFAccountCustomer WHERE intAccountId = @intCardAccountId
+
+			IF(@intAccountId != @intCardAccountId)
+			BEGIN
+				SET @strCardExistError = 'Card ' + @strCardNumber + ' already exists for another Customer ' + @strCardCustomer + ' and cannot be added/changed'
+				INSERT INTO tblCFCSULog
+				(
+					 strAccountNumber
+					,strCardNumber
+					,strMessage
+					,strRecordId
+					,dtmUpdateDate
+				)
+				SELECT 
+					 @strAccountNumber
+					,@strCardNumber
+					,@strCardExistError as strMessage
+					,@strErrorRecordId
+					,@dtmImportDate
+
+				RETURN
+			END
+		END
 
 		DECLARE @ysnCardStatus BIT = 0
 		IF(ISNULL(@strCardStatus,'') != '')
