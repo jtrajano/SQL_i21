@@ -74,17 +74,17 @@ BEGIN TRY
 		,REFERENCE
 		,TRACKINGNO
 		,ITEM
-	FROM OPENXML(@idoc, 'IDOC/ALEAUD', 2) WITH (
+	FROM OPENXML(@idoc, 'ZE1PRTOB/IDOC/E1ADHDR', 2) WITH (
 			MESTYP_LNG NVARCHAR(50)
-			,[STATUS] NVARCHAR(50)
-			,STACOD NVARCHAR(50)
-			,STATXT NVARCHAR(50)
-			,STATYP NVARCHAR(50)
-			,STAPA2_LNG NVARCHAR(50)
-			,STAPA1_LNG NVARCHAR(50)
-			,REFERENCE NVARCHAR(50)
-			,TRACKINGNO NVARCHAR(50)
-			,ITEM NVARCHAR(50)
+			,[STATUS] NVARCHAR(50) 'E1STATE/STATUS'
+			,STACOD NVARCHAR(50) 'E1STATE/STACOD'
+			,STATXT NVARCHAR(50) 'E1STATE/STATXT'
+			,STATYP NVARCHAR(50) 'E1STATE/STATYP'
+			,STAPA2_LNG NVARCHAR(50) 'E1STATE/STAPA2_LNG'
+			,STAPA1_LNG NVARCHAR(50) 'E1STATE/STAPA1_LNG'
+			,REFERENCE NVARCHAR(50) 'E1STATE/E1PRTOB/ZE1PRTGL/REFERENCE'
+			,TRACKINGNO NVARCHAR(50) 'E1STATE/E1PRTOB/ZE1PRTGL/TRACKINGNO'
+			,ITEM NVARCHAR(50) 'E1STATE/E1PRTOB/ZE1PRTGL/ITEM'
 			)
 
 	--delete records if tracking no is not a number
@@ -296,7 +296,7 @@ BEGIN TRY
 				UPDATE tblRKStgMatchPnS
 				SET strStatus = 'Ack Rcvd'
 					,strMessage = 'Success'
-				WHERE intMatchNo = @strParam
+				WHERE strReferenceNo = @strRefNo
 					AND ISNULL(strStatus, '') = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
@@ -320,7 +320,7 @@ BEGIN TRY
 				UPDATE tblRKStgMatchPnS
 				SET strStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
-				WHERE intMatchNo = @strParam
+				WHERE strReferenceNo = @strRefNo
 					AND ISNULL(strStatus, '') = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
@@ -352,6 +352,9 @@ END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
+
+	IF @idoc <> 0
+		EXEC sp_xml_removedocument @idoc
 
 	RAISERROR (
 			@ErrMsg

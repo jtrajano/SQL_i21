@@ -752,7 +752,7 @@ BEGIN
 
 			IF UPPER(@strRowState) <> 'ADDED'
 			BEGIN
-				SET @strXmlHeaderEnd += '</E1PURCONTRACT_CHANGE >'
+				SET @strXmlHeaderEnd += '</E1PURCONTRACT_CHANGE>'
 				SET @strXmlHeaderEnd += '</IDOC>'
 				SET @strXmlHeaderEnd += '</PURCONTRACT_CHANGE01>'
 			END
