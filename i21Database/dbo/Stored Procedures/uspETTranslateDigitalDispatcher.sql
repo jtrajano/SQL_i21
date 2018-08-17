@@ -346,6 +346,13 @@ BEGIN
        --,[strItemDescription]  = @ItemDescription  
        --,[dblDiscount]    = @DiscountPercentage  
      
+		/**GPS**/    
+	IF(@dblLatitude <> 0 AND @dblLongitude <> 0 AND ISNULL(@intSiteId,0) <> 0) 
+	BEGIN
+		INSERT INTO @GPSTable
+		SELECT @intSiteId, @dblLatitude,  @dblLongitude 
+	END
+
    --Delete   
    DELETE FROM #tmpDDToInvoice WHERE intImportDDToInvoiceId = @intImportDDToInvoiceId    
  END  
