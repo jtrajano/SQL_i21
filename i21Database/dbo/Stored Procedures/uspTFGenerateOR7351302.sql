@@ -131,6 +131,7 @@ BEGIN TRY
 		, @ReceiptDiesel_5 NUMERIC(18, 6) = 0
 		, @ReceiptDiesel_6 NUMERIC(18, 6) = 0
 
+		, @DisbursementDiesel_7 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_8 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_9 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_10 NUMERIC(18, 6) = 0
@@ -292,11 +293,12 @@ BEGIN TRY
 		SET @DisbursementEthanol_12 = @DisbursementEthanol_8 + @DisbursementEthanol_9 + @DisbursementEthanol_10 + @DisbursementEthanol_11
 		
 		-- Disbursement Diesel
+		SELECT @DisbursementDiesel_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5LO' AND strType = 'Biodiesel - Undyed'
 		SELECT @DisbursementDiesel_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Diesel - Undyed'
-		SET @DisbursementDiesel_12 = @DisbursementDiesel_8 + @DisbursementDiesel_9 + @DisbursementDiesel_10 + @DisbursementDiesel_11
+		SET @DisbursementDiesel_12 = @DisbursementDiesel_7 + @DisbursementDiesel_8 + @DisbursementDiesel_9 + @DisbursementDiesel_10 + @DisbursementDiesel_11
 
 		-- Dealer 
 		SET @DealerGasoline_2 = @ReceiptGasoline_6
@@ -457,6 +459,7 @@ BEGIN TRY
 		, ReceiptDiesel_5 = @ReceiptDiesel_5
 		, ReceiptDiesel_6 = @ReceiptDiesel_6
 
+		, DisbursementDiesel_7 = @DisbursementDiesel_7
 		, DisbursementDiesel_8 = @DisbursementDiesel_8
 		, DisbursementDiesel_9 = @DisbursementDiesel_9
 		, DisbursementDiesel_10 = @DisbursementDiesel_10
