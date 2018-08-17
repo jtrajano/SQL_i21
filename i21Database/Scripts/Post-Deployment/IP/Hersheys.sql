@@ -1,0 +1,81 @@
+﻿Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPIDOCTag
+		WHERE strMessageType = 'PROFIT AND LOSS'
+		)
+BEGIN
+	INSERT INTO tblIPSAPIDOCTag
+	SELECT 'PROFIT AND LOSS'
+		,'EDI_DC40'
+		,'TABNAM'
+		,'EDI_DC40'
+END
+Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPIDOCTag
+		WHERE strMessageType = 'PO CREATE'
+		)
+BEGIN
+	INSERT INTO tblIPSAPIDOCTag
+	SELECT 'PO CREATE'
+		,'EDI_DC40'
+		,'TABNAM'
+		,'EDI_DC40'
+END
+Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPIDOCTag
+		WHERE strMessageType = 'PO UPDATE'
+		)
+BEGIN
+	INSERT INTO tblIPSAPIDOCTag
+	SELECT 'PO UPDATE'
+		,'EDI_DC40'
+		,'TABNAM'
+		,'EDI_DC40'
+END
+
+GO
+
+UPDATE tblIPCompanyPreference
+SET strCommonDataFolderPath = 'E:\i21Integration\'
+WHERE IsNULL(strCommonDataFolderPath, '') = ''
+GO
+
+UPDATE tblIPCompanyPreference
+SET strCustomerCode = 'HE'
+WHERE IsNULL(strCustomerCode, '') = ''
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPUOM
+		WHERE strSAPUOM = 'KG'
+		)
+	INSERT INTO tblIPSAPUOM
+	SELECT 'KG'
+		,'KG'
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPUOM
+		WHERE strSAPUOM = 'KG'
+		)
+	INSERT INTO tblIPSAPUOM
+	SELECT 'LB'
+		,'LB'
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPUOM
+		WHERE strSAPUOM = 'KG'
+		)
+	INSERT INTO tblIPSAPUOM
+	SELECT 'TO'
+		,'TO'
+Go
+
