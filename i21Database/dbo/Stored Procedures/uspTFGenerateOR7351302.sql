@@ -228,21 +228,21 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- Receipt Gasoline
-		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Gasoline'
+		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Gasoline' OR strType = 'Gasoline (Exports to WA)')
 		SELECT @ReceiptGasoline_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Gasoline'
 		SELECT @ReceiptGasoline_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Gasoline'
 		SELECT @ReceiptGasoline_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Gasoline'
 		SET @ReceiptGasoline_6 = @ReceiptGasoline_1 + @ReceiptGasoline_2 + @ReceiptGasoline_3 + @ReceiptGasoline_4 + @ReceiptGasoline_5
 
 		-- Receipt Aviation
-		SELECT @ReceiptAviation_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Aviation Gasoline'
+		SELECT @ReceiptAviation_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Aviation Gasoline' OR strType = 'Aviation (Exports to WA)')
 		SELECT @ReceiptAviation_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Aviation Gasoline'
 		SELECT @ReceiptAviation_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Aviation Gasoline'
 		SELECT @ReceiptAviation_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Aviation Gasoline'
 		SET @ReceiptAviation_6 = @ReceiptAviation_1 + @ReceiptAviation_2 + @ReceiptAviation_3 + @ReceiptAviation_4 + @ReceiptAviation_5
 
 		-- Receipt Jet
-		SELECT @ReceiptJet_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Jet Fuel'
+		SELECT @ReceiptJet_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Jet Fuel' OR strType = 'Jet Fuel (Exports to WA)')
 		SELECT @ReceiptJet_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Jet Fuel'
 		SELECT @ReceiptJet_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Jet Fuel'
 		SELECT @ReceiptJet_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Jet Fuel'
