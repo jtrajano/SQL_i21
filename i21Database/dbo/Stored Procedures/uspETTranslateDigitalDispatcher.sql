@@ -42,6 +42,9 @@ BEGIN
    
 
  DECLARE @intLocation INT
+ DECLARE @dblLatitude NUMERIC(18, 6)
+ DECLARE @dblLongitude NUMERIC(18, 6)
+
  --DECLARE @TransactionType      NVARCHAR(25)  
  --DECLARE @intTermCode       INT  
  --DECLARE @strErrorMessage      NVARCHAR(MAX)   
@@ -69,6 +72,8 @@ BEGIN
  FROM @StagingTable  
    
  DECLARE @EntriesForInvoice AS InvoiceStagingTable  
+ DECLARE @GPSTable TMGPSUpdateByIdTable
+
   
  ---Loop through the unique customer invoice date  
  WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDDToInvoice)   
@@ -100,6 +105,8 @@ BEGIN
     ,@strDetailType      = '' --strDetailType not in use as of this writing  
     ,@strContractNumber     = '' --strContractNumber no contract  
     ,@intContractSequence    = NULL --intContractSequence  
+	,@dblLatitude = dblLatitude
+	,@dblLongitude = dblLongitude
    FROM #tmpDDToInvoice  
    --ORDER BY intLineItem ASC  
   
@@ -362,6 +369,22 @@ BEGIN
  -------------------------------------------------------------------------------------------------------------------------------------------------------  
  --INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )  
   
+	/**GPS**/
+	DECLARE @GPSTableARInvoiceDetail AS TMGPSUpdateByIdTable 
+	/** get only all sucessful invoicedetails**/
+  
+	INSERT INTO @GPSTableARInvoiceDetail 
+	SELECT ARD.intSiteId, GPS.dblLatitude , GPS.dblLongitude FROM tblARInvoiceIntegrationLogDetail IL
+	INNER JOIN tblARInvoiceDetail ARD ON IL.intInvoiceDetailId = ARD.intInvoiceDetailId 
+	INNER JOIN @GPSTable GPS ON ARD.intSiteId = GPS.intSiteId
+	WHERE IL.intIntegrationLogId = @LogId AND IL.intInvoiceDetailId IS NOT NULL AND ysnSuccess = 1
+	AND ISNULL(ARD.intSiteId,0) <> 0  
+
+	IF @@rowcount > 0
+	BEGIN
+	Exec uspTMUpdateSiteGPSById @GPSTableARInvoiceDetail
+	END
+	/**END GPS**/
 
   SELECT * FROM ( SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber    
 		 ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber    
