@@ -1322,11 +1322,13 @@ BEGIN
 				--Get ShipmentId to find if invoice exists
 				IF @intId IS NULL
 					SELECT TOP 1 @intId = intLotId
-					FROM @tblNodeData
+					FROM @tblNodeData 
+					Where strType = 'S'
+					Order by 1 
 				ELSE
 					SELECT TOP 1 @intId = intLotId
 					FROM @tblNodeData
-					WHERE intLotId <> @intId
+					WHERE intLotId > @intId and strType = 'S'
 
 				--Invoice
 				INSERT INTO @tblData (
@@ -1893,13 +1895,7 @@ BEGIN
 			,intParentLotId
 			,strType
 			)
-		SELECT TOP 1 intRecordId - (
-				CASE 
-					WHEN @intNoOfShipRecord > 0
-						THEN (@intNoOfShipRecord - 1)
-					ELSE 0
-					END
-				)
+		SELECT intRecordId 
 			,intParentId
 			,strTransactionName
 			,intLotId
@@ -1916,7 +1912,7 @@ BEGIN
 			,intParentLotId
 			,strType
 		FROM @tblNodeData
-		WHERE strType NOT IN ('SO')
+		WHERE strType NOT IN ('SO','IN','S')
 		ORDER BY intRecordId DESC
 
 		SET @intRowCount = 1
