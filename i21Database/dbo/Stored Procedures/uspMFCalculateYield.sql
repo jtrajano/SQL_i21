@@ -432,7 +432,7 @@ BEGIN TRY
 				AND IL.intLocationId = @intLocationId
 				AND S.intStorageLocationId = @intStorageLocationId
 			AND S.dblOnHand - S.dblUnitReserved > 0
-			IF @dblOnHand < dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
+			IF IsNULL(@dblOnHand,0)=0 or IsNULL(@dblOnHand,0) < IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity),0)
 			BEGIN
 				SELECT @strItemNo = strItemNo
 				FROM tblICItem
