@@ -559,10 +559,15 @@ Begin
 			-- Invoice from Shipment
 			Begin
 				--Get ShipmentId to find if invoice exists
-				If @intId is null
-					Select TOP 1 @intId=intLotId From @tblNodeData
-				Else
-					Select TOP 1 @intId=intLotId From @tblNodeData Where intLotId<>@intId
+				IF @intId IS NULL
+					SELECT TOP 1 @intId = intLotId
+					FROM @tblNodeData 
+					Where strType = 'S'
+					Order by 1 
+				ELSE
+					SELECT TOP 1 @intId = intLotId
+					FROM @tblNodeData
+					WHERE intLotId > @intId and strType = 'S'
 
 				--Invoice
 				Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -821,10 +826,43 @@ Begin
 	Else
 	Begin
 		--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
-		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
-		Select TOP 1 intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Where strType not in ('SO') Order By intRecordId Desc
+		INSERT INTO @tblTemp (
+			intRecordId
+			,intParentId
+			,strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,intParentLotId
+			,strType
+			)
+		SELECT intRecordId 
+			,intParentId
+			,strTransactionName
+			,intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
+			,strItemNo
+			,strItemDesc
+			,intCategoryId
+			,strCategoryCode
+			,dblQuantity
+			,strUOM
+			,dtmTransactionDate
+			,intParentLotId
+			,strType
+		FROM @tblNodeData
+		WHERE strType NOT IN ('SO','IN','S')
+		ORDER BY intRecordId DESC
 
 		Set @intRowCount=1
 	End
