@@ -14,6 +14,8 @@
        [strAccountNumber] nvarchar(100)  COLLATE Latin1_General_CI_AS NOT NULL,
        [dblGrossPnL] NUMERIC(18, 6) NULL,
        [dtmPostingDate] DATETIME,        
-	   [strUserName] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL
+	   [strUserName] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL,
+	   strReferenceNo nvarchar(MAX) COLLATE Latin1_General_CI_AS  NULL,
+	   strStatus nvarchar(50),
     CONSTRAINT [PK_tblRKStgOptionMatchPnS_intStgOptionMatchPnSId] PRIMARY KEY (intStgOptionMatchPnSId)  
 )

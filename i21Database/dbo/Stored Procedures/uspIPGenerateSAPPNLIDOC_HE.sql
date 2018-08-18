@@ -1,16 +1,11 @@
 ﻿CREATE PROCEDURE uspIPGenerateSAPPNLIDOC_HE (@ysnUpdateFeedStatusOnRead BIT = 0)
 AS
 DECLARE @intStgMatchPnSId INT
-	,@intMatchFuturesPSHeaderId INT
 	,@intMatchNo INT
 	,@dtmMatchDate DATETIME
 	,@strCurrency NVARCHAR(50)
 	,@dblMatchQty NUMERIC(18, 6)
-	,@dblCommission NUMERIC(18, 6)
-	,@dblNetPnL NUMERIC(18, 6)
 	,@dblGrossPnL NUMERIC(18, 6)
-	,@strBrokerName NVARCHAR(50)
-	,@strBrokerAccount NVARCHAR(50)
 	,@dtmPostingDate DATETIME
 	,@strUserName NVARCHAR(50)
 	,@strStatus NVARCHAR(50)
@@ -21,11 +16,12 @@ DECLARE @intStgMatchPnSId INT
 	,@strCompCode NVARCHAR(100)
 	,@strCostCenter NVARCHAR(100)
 	,@strGLAccount NVARCHAR(100)
-	,@intCompanyLocationId INT
 	,@strLocationName NVARCHAR(50)
 	,@strSAPLocation NVARCHAR(50)
-	,@intFutureMarketId INT
 	,@strFutMarketName NVARCHAR(30)
+	,@intRecordId INT
+	,@ysnFuture BIT
+	,@strReferenceNo NVARCHAR(MAX)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strStgMatchPnSId NVARCHAR(MAX)
@@ -42,43 +38,86 @@ SELECT @strCostCenter = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'COSTCEN
 
 SELECT @strGLAccount = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'GL_ACCOUNT')
 
-SELECT @intMinStageId = Min(intStgMatchPnSId)
-FROM tblRKStgMatchPnS
+DECLARE @tblRKStgMatchPnS TABLE (
+	intRecordId INT Identity(1, 1)
+	,intStgMatchPnSId INT
+	,intMatchNo INT
+	,dtmMatchDate DATETIME
+	,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dblGrossPnL NUMERIC(18, 6)
+	,dtmPostingDate DATETIME
+	,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strReferenceNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,ysnFuture BIT
+	)
+
+INSERT INTO @tblRKStgMatchPnS (
+	intStgMatchPnSId
+	,intMatchNo
+	,dtmMatchDate
+	,strCurrency
+	,dblGrossPnL
+	,dtmPostingDate
+	,strLocationName
+	,strReferenceNo
+	,ysnFuture
+	)
+SELECT S.intStgMatchPnSId
+	,S.intMatchNo
+	,S.dtmMatchDate
+	,S.strCurrency
+	,S.dblGrossPnL
+	,S.dtmPostingDate
+	,L.strLocationName
+	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + '-' + ISNULL(strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
+	,1
+FROM tblRKStgMatchPnS S
+JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = S.intFutureMarketId
+JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = S.intCompanyLocationId
+WHERE ISNULL(S.strStatus, '') = ''
+
+INSERT INTO @tblRKStgMatchPnS (
+	intStgMatchPnSId
+	,intMatchNo
+	,dtmMatchDate
+	,strCurrency
+	,dblGrossPnL
+	,dtmPostingDate
+	,strLocationName
+	,strReferenceNo
+	,ysnFuture
+	)
+SELECT intStgOptionMatchPnSId
+	,intMatchNo
+	,dtmMatchDate
+	,strCurrency
+	,dblGrossPnL
+	,dtmPostingDate
+	,strLocationName
+	,ISNULL(CONVERT(VARCHAR, intMatchNo), '') + '-' + ISNULL(CONVERT(VARCHAR, strBook), '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
+	,0
+FROM tblRKStgOptionMatchPnS
 WHERE ISNULL(strStatus, '') = ''
 
-WHILE (@intMinStageId IS NOT NULL)
+SELECT @intRecordId = Min(intRecordId)
+FROM @tblRKStgMatchPnS
+
+WHILE (@intRecordId IS NOT NULL)
 BEGIN
 	SELECT @intStgMatchPnSId = intStgMatchPnSId
-		,@intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
 		,@intMatchNo = intMatchNo
 		,@dtmMatchDate = dtmMatchDate
 		,@strCurrency = strCurrency
-		,@dblMatchQty = dblMatchQty
-		,@dblCommission = dblCommission
-		,@dblNetPnL = dblNetPnL
 		,@dblGrossPnL = dblGrossPnL
-		,@strBrokerName = strBrokerName
-		,@strBrokerAccount = strBrokerAccount
 		,@dtmPostingDate = dtmPostingDate
-		,@strStatus = strStatus
-		,@strMessage = strMessage
-		,@strUserName = strUserName
-		,@intCompanyLocationId = intCompanyLocationId
-		,@intFutureMarketId = intFutureMarketId
-	FROM tblRKStgMatchPnS
-	WHERE intStgMatchPnSId = @intMinStageId
-
-	SELECT @strLocationName = strLocationName
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intCompanyLocationId
+		,@strLocationName = strLocationName
+		,@strReferenceNo = strReferenceNo
+	FROM @tblRKStgMatchPnS
+	WHERE intRecordId = @intRecordId
 
 	SELECT @strSAPLocation = strSAPLocation
 	FROM tblIPSAPLocation
 	WHERE stri21Location = @strLocationName
-
-	SELECT @strFutMarketName = strFutMarketName
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @intFutureMarketId
 
 	BEGIN
 		SET @strXml = '<FIDCCP02>'
@@ -95,7 +134,7 @@ BEGIN
 		SET @strXml += '<BUKRS>' + ISNULL(@strSAPLocation, '') + '</BUKRS>'
 		SET @strXml += '<WAERS>' + ISNULL(@strCurrency, '') + '</WAERS>'
 		SET @strXml += '<BKTXT>' + '' + '</BKTXT>'
-		SET @strXml += '<XBLNR>' + ISNULL(CONVERT(VARCHAR, @intMatchNo), '') + '-' + ISNULL(@strFutMarketName, '') + '</XBLNR>'
+		SET @strXml += '<XBLNR>' + ISNULL(@strReferenceNo, '') + '</XBLNR>'
 		--GL account details (Broker account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
@@ -129,7 +168,7 @@ BEGIN
 			,strMatchNo
 			)
 		VALUES (
-			@intMinStageId
+			@intStgMatchPnSId
 			,'CREATE'
 			,@strXml
 			,@intMatchNo
@@ -138,21 +177,31 @@ BEGIN
 
 	IF @ysnUpdateFeedStatusOnRead = 1
 	BEGIN
-		UPDATE tblRKStgMatchPnS
-		SET strStatus = 'Awt Ack',strReferenceNo=ISNULL(CONVERT(VARCHAR, @intMatchNo), '') + '-' + ISNULL(@strFutMarketName, '') 
-		WHERE intStgMatchPnSId = @intMinStageId
+		IF @ysnFuture = 1
+		BEGIN
+			UPDATE tblRKStgMatchPnS
+			SET strStatus = 'Awt Ack'
+				,strReferenceNo = @strReferenceNo
+			WHERE intStgMatchPnSId = @intStgMatchPnSId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblRKStgOptionMatchPnS
+			SET strStatus = 'Awt Ack'
+				,strReferenceNo = @strReferenceNo
+			WHERE intStgOptionMatchPnSId = @intStgMatchPnSId
+		END
 	END
 
-	SELECT @intMinStageId = Min(intStgMatchPnSId)
-	FROM tblRKStgMatchPnS
-	WHERE intStgMatchPnSId > @intMinStageId
+	SELECT @intRecordId = Min(intRecordId)
+	FROM @tblRKStgMatchPnS
+	WHERE intRecordId > @intRecordId
 END
 
-SELECT IsNULL(strStgMatchPnSId,'0') as id
-			,IsNULL(strXml,'') As strXml
-			,IsNULL(strMatchNo,'') as strInfo1
-		,''	AS strInfo2
-		,'' As strOnFailureCallbackSql
+SELECT IsNULL(strStgMatchPnSId, '0') AS id
+	,IsNULL(strXml, '') AS strXml
+	,IsNULL(strMatchNo, '') AS strInfo1
+	,'' AS strInfo2
+	,'' AS strOnFailureCallbackSql
 FROM @tblOutput
 ORDER BY intRowNo
-
