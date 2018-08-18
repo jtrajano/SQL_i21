@@ -6957,6 +6957,11 @@
     <Build Include="dbo\Views\vyuARPOSLog.sql" />
     <Build Include="dbo\Views\vyuSTStoreAppRegistered.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateSite.sql" />
+    <None Include="Scripts\Post-Deployment\ST\16_FileFieldMapping_Passport_TLM_340.sql" />
+    <None Include="Scripts\Post-Deployment\ST\17_FileFieldMapping_Passport_FGM_340.sql" />
+    <None Include="Scripts\Post-Deployment\ST\18_FileFieldMapping_Passport_ISM_340.sql" />
+    <None Include="Scripts\Post-Deployment\ST\19_FileFieldMapping_Passport_MCM_340.sql" />
+    <None Include="Scripts\Post-Deployment\ST\20_FileFieldMapping_Passport_MSM_340.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
