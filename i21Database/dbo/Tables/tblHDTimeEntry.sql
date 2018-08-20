@@ -2,6 +2,8 @@
 (
 	[intTimeEntryId] [int] IDENTITY(1,1) NOT NULL,
 	[intEntityId] [int] NULL,
+	[dtmDateFrom] [datetime] NULL,
+	[dtmDateTo] [datetime] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTimeEntry_intTimeEntryId] PRIMARY KEY CLUSTERED ([intTimeEntryId] ASC),
 	CONSTRAINT [FK_tblHDTimeEntry_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
