@@ -81,43 +81,53 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.strTicketStatus = 'H'
 				AND DS.ysnPost = 0
 
-		UNION ALL --Distributed Delivery Sheet
-			SELECT 
-				dtmDate 
-				,strStorageTypeDescription
-				,dblInQty
-				,dblOutQty
-				,intStorageTypeId
-				,dblSettleUnit
-			FROM (
-				SELECT
-					CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
-					,strStorageTypeDescription
-					,sum(dblOpenBalance) + (sum(dblOriginalBalance) - sum(dblOpenBalance)) dblInQty
-					,sum(dblOriginalBalance) - sum(dblOpenBalance) dblOutQty --This will give you the value of transfered qty
-					,GCS.intStorageTypeId  
-					,0	dblSettleUnit	
-					,intDeliverySheetId	
-				FROM  vyuGRStorageSearchView GCS
-				WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
-					 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-					AND GCS.intCommodityId= @intCommodityId
-					and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
-					and  GCS.intStorageTypeId > 0 
-					AND  GCS.intCompanyLocationId  IN (
-																SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																ELSE isnull(ysnLicensed, 0) END)
+		UNION ALL --Storages
+		SELECT
+			dtmDate
+			,strStorageTypeDescription
+			,SUM(dblInQty) as dblInQty
+			,SUM(dblOutQty) as dblOutQty
+			,intStorageScheduleTypeId as intStorageTypeId
+			,0 as dblSettleUnit
+		FROM (
+		select 
+			CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+			,S.strStorageTypeDescription
+			,CASE WHEN strType = 'From Delivery Sheet' 
+					OR strType = 'From Scale'  
+					OR strType = 'From Transfer'  THEN
+				dblUnits
+				ELSE 0 END AS dblInQty
+			,CASE WHEN strType = 'Reduced By Inventory Shipment' 
+					OR strType = 'Settlement' 
+					OR strType = 'Transfer'  THEN
+				ABS(dblUnits)
+				ELSE 0 END AS dblOutQty
+			,S.intStorageScheduleTypeId
+
+		from 
+		tblGRCustomerStorage CS
+		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+
+		WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+								convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+							AND CS.intCommodityId= @intCommodityId
+							and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+							AND  CS.intCompanyLocationId  IN (
+																		SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																		WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																		ELSE isnull(ysnLicensed, 0) END)
 				
-					AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
-					ANd GCS.intDeliverySheetId IS NOT NULL
-					GROUP BY 
-						CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110)
-						,strStorageTypeDescription
-						,intStorageTypeId
-						,intDeliverySheetId
-			) a
+							AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+
+		)t
+		GROUP BY
+			dtmDate
+			,strStorageTypeDescription
+			,intStorageScheduleTypeId
+		
 
 		--UNION ALL --Delivery Sheet with IR
 		--	SELECT DISTINCT
@@ -175,34 +185,34 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
 
-			UNION ALL --Direct Scale and Transfer Storage
-			SELECT
-				CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
-				,strStorageTypeDescription
-				,dblOriginalBalance * (GCS.dblSplitPercent/100)   dblInQty
-				,(dblOriginalBalance - dblOpenBalance) * (GCS.dblSplitPercent/100)   dblOutQty
-				,GCS.intStorageTypeId  
-				,0	dblSettleUnit		
-			FROM  vyuGRStorageSearchView GCS
+			--UNION ALL --Direct Scale and Transfer Storage
+			--SELECT
+			--	CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
+			--	,strStorageTypeDescription
+			--	,dblOriginalBalance * (GCS.dblSplitPercent/100)   dblInQty
+			--	,(dblOriginalBalance - dblOpenBalance) * (GCS.dblSplitPercent/100)   dblOutQty
+			--	,GCS.intStorageTypeId  
+			--	,0	dblSettleUnit		
+			--FROM  vyuGRStorageSearchView GCS
 			
-				--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND GCS.intCommodityId= @intCommodityId
-				and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
-				and  GCS.intStorageTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
-				AND  GCS.intCompanyLocationId  IN (
-															SELECT intCompanyLocationId FROM tblSMCompanyLocation
-															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-															ELSE isnull(ysnLicensed, 0) END)
+			--	--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
+			--WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
+			--	 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			--	AND GCS.intCommodityId= @intCommodityId
+			--	and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
+			--	and  GCS.intStorageTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
+			--	AND  GCS.intCompanyLocationId  IN (
+			--												SELECT intCompanyLocationId FROM tblSMCompanyLocation
+			--												WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+			--												WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+			--												ELSE isnull(ysnLicensed, 0) END)
 				
-				AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
-				ANd GCS.intDeliverySheetId IS NULL
+			--	AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
+			--	ANd GCS.intDeliverySheetId IS NULL
 
 			
 
-		  )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
+		 )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
 ) t1
 
 IF (@ysnDisplayAllStorage=1)
