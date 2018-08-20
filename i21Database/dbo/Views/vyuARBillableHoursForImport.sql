@@ -54,7 +54,8 @@ LEFT JOIN (
 		 , intWarehouseId
 	FROM tblEMEntityLocation EL WITH (NOLOCK)
 	INNER JOIN tblSMCompanyLocation CLL ON EL.intWarehouseId = CLL.intCompanyLocationId
-	WHERE ysnDefaultLocation = 1 AND CLL.ysnActive = 1
+	WHERE ysnDefaultLocation = 1 
+	  AND CLL.ysnLocationActive = 1
 ) EML ON E.[intEntityId] = EML.[intEntityId]
 INNER JOIN (
 	SELECT intEntityId
