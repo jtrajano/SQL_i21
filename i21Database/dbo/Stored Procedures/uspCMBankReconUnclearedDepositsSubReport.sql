@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspCMBankReconUnclearedDepositsSubReport
+﻿CREATE PROCEDURE [dbo].[uspCMBankReconUnclearedDepositsSubReport]
 	@intBankAccountId AS INT
 	,@dtmStatementDate AS DATETIME
 AS
@@ -112,12 +112,17 @@ DECLARE @BANK_DEPOSIT INT = 1
 		
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmStatementDate IS NOT NULL
-	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
+	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
+
+DECLARE @lastDateReconciled datetime
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+	WHERE intBankAccountId = @intBankAccountId
+	ORDER BY dtmDateReconciled DESC
 	
-DECLARE @lastDateReconciled date
-	  SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
-		WHERE intBankAccountId = @intBankAccountId
-		ORDER BY dtmDateReconciled DESC
+	SELECT @lastDateReconciled = DATEADD(SECOND, -1, DATEADD(DAY,1,@lastDateReconciled))
+
+DECLARE @filterDate DATETIME
+	SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))
 
                 
 -- SANITIZE THE BANK ACCOUNT ID
@@ -125,14 +130,14 @@ DECLARE @lastDateReconciled date
 --SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
 --IF @intBankAccountIdFrom > @intBankAccountIdTo
 --	SET @intBankAccountIdTo = @intBankAccountIdFrom
-		
+;WITH R AS(	
 SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmStatementDate = @dtmStatementDate
 		,strCbkNo = BankAccnt.strCbkNo
-		,ysnClr = CASE WHEN (@lastDateReconciled >= @dtmStatementDate AND BankTrans.dtmDateReconciled IS NULL AND ysnClr = 1 ) OR (dtmDateReconciled >= @dtmStatementDate ) 
-				  THEN 0 
-				  ELSE BankTrans.ysnClr
-				  END
+		,ysnClr = CASE WHEN (@lastDateReconciled >= @filterDate  AND BankTrans.dtmDateReconciled IS NULL AND BankTrans.ysnClr =1)
+			OR BankTrans.dtmDateReconciled > @filterDate THEN 0
+			ELSE BankTrans.ysnClr 
+			END
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
@@ -152,18 +157,15 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 WHERE	BankTrans.ysnPosted = 1
 		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0
-		AND	1 =	CASE	
-					WHEN BankTrans.ysnClr = 0 THEN 
-						CASE WHEN CAST(FLOOR(CAST(BankTrans.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME) THEN 1 ELSE 0 END
-					WHEN BankTrans.ysnClr = 1 THEN 
-						CASE	WHEN	CAST(FLOOR(CAST(BankTrans.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME) 
-										AND CAST(FLOOR(CAST(ISNULL(BankTrans.dtmDateReconciled, BankTrans.dtmDate) AS FLOAT)) AS DATETIME) > CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME) 
-								THEN 1 ELSE 0 
-						END
-				END
+		AND BankTrans.dtmDate <= ISNULL(@filterDate, BankTrans.dtmDate)
+		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate, BankTrans.dtmDateReconciled)
 		AND (
 			-- Filter for all the bank deposits and credits:
 			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( BankTrans.dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
 		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0
+)
+SELECT * FROM R WHERE ysnClr = 0
+GO
+
