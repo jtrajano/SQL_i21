@@ -16,7 +16,7 @@ SELECT
     ,dblDiscount            = ISNULL(PD.dblDiscount, 0)
 	,P.ysnPosted
 	,strPaymentType			= 'Payment'
-	,strInvoices			= INVOICES.strInvoiceNumber
+	,strInvoices			= TRANSACTIONS.strTransactionId
 	,P.intLocationId 
 	,CL.strLocationName
 	,dtmBatchDate			= P.dtmBatchDate
@@ -94,18 +94,33 @@ LEFT OUTER JOIN (SELECT intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
 	ON ARP.intPaymentId = P.intPaymentId
 OUTER APPLY (
-	SELECT strInvoiceNumber = LEFT(strInvoiceNumber, LEN(strInvoiceNumber) - 1)
+	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1)
 	FROM (
-		SELECT CAST(I.strInvoiceNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoice I WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-			WHERE intPaymentId = P.intPaymentId
-		) DETAILS ON I.intInvoiceId = DETAILS.intInvoiceId
+		SELECT CAST(T.strTransactionId AS VARCHAR(200))  + ', '
+		FROM (
+			SELECT strTransactionId = strInvoiceNumber
+			FROM dbo.tblARInvoice I WITH(NOLOCK)
+			INNER JOIN (
+				SELECT intInvoiceId
+				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
+				WHERE intPaymentId = P.intPaymentId
+				  AND intInvoiceId IS NOT NULL
+			) ARDETAILS ON I.intInvoiceId = ARDETAILS.intInvoiceId
+
+			UNION ALL
+
+			SELECT strTransactionId = strBillId
+			FROM dbo.tblAPBill BILL WITH(NOLOCK)
+			INNER JOIN (
+				SELECT intBillId
+				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
+				WHERE intPaymentId = P.intPaymentId
+				  AND intBillId IS NOT NULL
+			) BILLDETAILS ON BILL.intBillId = BILLDETAILS.intBillId
+		) T		
 		FOR XML PATH ('')
-	) INV (strInvoiceNumber)
-) INVOICES
+	) TRANS (strTransactionId)
+) TRANSACTIONS
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 	FROM (
