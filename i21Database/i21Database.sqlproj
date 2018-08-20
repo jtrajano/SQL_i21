@@ -6962,6 +6962,7 @@
     <None Include="Scripts\Post-Deployment\ST\18_FileFieldMapping_Passport_ISM_340.sql" />
     <None Include="Scripts\Post-Deployment\ST\19_FileFieldMapping_Passport_MCM_340.sql" />
     <None Include="Scripts\Post-Deployment\ST\20_FileFieldMapping_Passport_MSM_340.sql" />
+    <Build Include="dbo\Tables\tblICItemUomUpc.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
