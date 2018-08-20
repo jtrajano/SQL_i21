@@ -152,24 +152,12 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @strCustomerCode = 'JDE'
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strISOCode
-					WHERE intStageEntityId = @intStageEntityId
-				END
-				ELSE
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strCountry
-					WHERE intStageEntityId = @intStageEntityId
-				END
+			SELECT @intCountryId = c.intCountryID
+				,@strCountry = c.strCountry
+				,@strState = strState
+			FROM tblIPEntityStage e
+			JOIN tblSMCountry c ON e.strCountry = c.strISOCode
+			WHERE intStageEntityId = @intStageEntityId
 
 			IF ISNULL(@intEntityId, 0) = 0 --Create
 			BEGIN

@@ -461,8 +461,8 @@ BEGIN
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
-				,@dblCashPrice = dblCashPrice * 100
-				,@dblUnitCashPrice = dblUnitCashPrice
+				,@dblCashPrice = dblCashPrice 
+				,@dblUnitCashPrice = dblUnitCashPrice* 100
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = dtmStartDate
 				,@dtmEndDate = dtmEndDate
@@ -503,8 +503,8 @@ BEGIN
 						FROM tblICUnitMeasure
 						WHERE strUnitMeasure = strNetWeightUOM
 						)
-					,@dblCashPrice = SUM(dblCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
-					,@dblUnitCashPrice = SUM(dblUnitCashPrice * dblNetWeight) / SUM(dblNetWeight)
+					,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
+					,@dblUnitCashPrice = SUM(dblUnitCashPrice  * 100* dblNetWeight) / SUM(dblNetWeight)
 					,@dtmContractDate = dtmContractDate
 					,@dtmStartDate = Min(dtmStartDate)
 					,@dtmEndDate = MAX(dtmEndDate)
@@ -551,8 +551,8 @@ BEGIN
 						FROM tblICUnitMeasure
 						WHERE strUnitMeasure = strNetWeightUOM
 						)
-					,@dblCashPrice = SUM(dblCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
-					,@dblUnitCashPrice = SUM(dblUnitCashPrice * dblNetWeight) / SUM(dblNetWeight)
+					,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
+					,@dblUnitCashPrice = SUM(dblUnitCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
 					,@dtmContractDate = dtmContractDate
 					,@dtmStartDate = Min(dtmStartDate)
 					,@dtmEndDate = MAX(dtmEndDate)
@@ -634,6 +634,7 @@ BEGIN
 			SET @strCurrency = 'USD'
 			SET @dblBasis = ISNULL(@dblBasis, 0) / 100
 			SET @dblCashPrice = ISNULL(@dblCashPrice, 0) / 100
+			SET @dblUnitCashPrice = ISNULL(@dblUnitCashPrice, 0) / 100
 		END
 
 		--Header Start Xml
@@ -669,13 +670,13 @@ BEGIN
 		IF UPPER(@strRowState) = 'ADDED'
 		BEGIN
 			SET @strItemXml += '<E1BPMEOUTITEM>'
-			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</MATERIAL>'
+			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo,'-',''), '')) + '</MATERIAL>'
 			SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 			SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
 			SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
-			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
+			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 			SET @strItemXml += '<PRICE_UNIT>' + '1' + '</PRICE_UNIT>'
 			SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 			SET @strItemXml += '</E1BPMEOUTITEM>'
@@ -731,7 +732,7 @@ BEGIN
 
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
-			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblCashPrice)), '0.00') + '</NET_PRICE>'
+			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 			SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 			SET @strItemXml += '</E1BPMEOUTITEM>'
 		END
