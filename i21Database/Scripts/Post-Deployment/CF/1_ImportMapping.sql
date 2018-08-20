@@ -71,6 +71,51 @@ END
 -----------Voyager-------------
 
 
+--Petrovend CSV--
+
+DECLARE @petrovendCSVImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Petrovend CSV') =  0)
+BEGIN
+
+INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Petrovend CSV', N'Delimiter', N'Comma', NULL, NULL, 0, 3)
+SET @petrovendCSVImportHeader = SCOPE_IDENTITY();
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'VehicleNumber', NULL, 0, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 1, NULL, NULL, N'tblCFVehicle', N'strVehicleNumber', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'CardNumber', NULL, 1, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 2, NULL, NULL, N'tblCFCard', N'strCardNumber', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'TransactionDate', NULL, 2, NULL, 1, 3, N'YYYYMMDDHH:MM', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 3, 1, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'TransactionTime', NULL, 3, NULL, 1, 3, N'YYYYMMDDHH:MM', NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 4, 2, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'Pump', NULL, 5, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 5, NULL, NULL, N'tblCFTransaction', N'dblOriginalPumpPrice', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'SiteNumber', NULL, 6, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 6, NULL, NULL, N'tblCFSite', N'strSiteNumber', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'ProductNumber', NULL, 8, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 7, NULL, NULL, N'tblCFItem', N'strProductNumber', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'Quantity', 0, 9, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 8, NULL, NULL, N'tblCFTransaction', N'dblQuantity', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'Price', NULL, 10, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 9, NULL, NULL, N'tblCFTransaction', N'dblOriginalGrossPrice', NULL, NULL, NULL, 0, 1)
+
+INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@petrovendCSVImportHeader, N'Odometer', NULL, 11, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@petrovendCSVImportHeader, SCOPE_IDENTITY(), 10, NULL, NULL, N'tblCFTransaction', N'intOdometer', NULL, NULL, NULL, 0, 1)
+
+END
+
+--Petrovend CSV--
+
+
+
 ------------WEX14-----------
 DECLARE @WEX14ImportHeader INT
 IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'WEX-14') =  0)
