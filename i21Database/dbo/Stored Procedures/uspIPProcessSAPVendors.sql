@@ -256,11 +256,13 @@ BEGIN TRY
 					,strEntityNo
 					,ysnActive
 					,strContactNumber
+					,strExternalERPId
 					)
 				SELECT strName
 					,@strEntityNo
 					,1
 					,''
+					,strAccountNo
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 

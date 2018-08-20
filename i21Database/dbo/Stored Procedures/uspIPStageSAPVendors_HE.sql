@@ -127,7 +127,7 @@ BEGIN TRY
 
 			-- Vendor Name data manipulation
 			UPDATE @tblVendor
-			SET strName = strAccountNo + ' - ' + strName
+			SET strName = dbo.fnRemoveTrailingZeroes(strAccountNo) + ' - ' + strName
 
 			--Add to Staging tables
 			INSERT INTO tblIPEntityStage (
