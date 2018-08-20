@@ -10,6 +10,7 @@
 	@intBookId INT = NULL,
 	@intSubBookId INT = NULL
 AS
+
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
@@ -23,8 +24,8 @@ DECLARE @UnRelaized AS TABLE (
 	strFutureMonth NVARCHAR(100),
 	dtmTradeDate DATETIME,
 	strInternalTradeNo NVARCHAR(100),
-	strName NVARCHAR(100),
-	strAccountNumber NVARCHAR(100),
+	strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strBook NVARCHAR(100),
 	strSubBook NVARCHAR(100),
 	strSalespersonId NVARCHAR(100),
@@ -74,8 +75,8 @@ DECLARE @Relaized AS TABLE (
 	strFutureMonth NVARCHAR(100),
 	intMatchNo INT,
 	dtmMatchDate DATETIME,
-	strName NVARCHAR(100),
-	strAccountNumber NVARCHAR(100),
+	strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strCommodityCode NVARCHAR(100),
 	strLocationName NVARCHAR(100),
 	dblNetPL NUMERIC(24, 10),
@@ -185,8 +186,35 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@intSubBookId = @intSubBookId
 
 BEGIN
-	SELECT *,
-		dblUnrealized + dblRealized AS dblTotal into #temp
+
+
+DECLARE @Summary AS TABLE (
+			intFutureMarketId int,
+			intFutureMonthId int,
+			strFutMarketName nvarchar(100),
+			strFutureMonth nvarchar(100),
+			intLongContracts NUMERIC(24, 10),
+			dblLongAvgPrice NUMERIC(24, 10),
+			intShortContracts NUMERIC(24, 10),
+			dblShortAvgPrice NUMERIC(24, 10),
+			intNet NUMERIC(24, 10),
+			dblUnrealized NUMERIC(24, 10),
+			dblClosing NUMERIC(24, 10),
+			dblFutCommission NUMERIC(24, 10),
+			dblPrice NUMERIC(24, 10),
+			dblRealized NUMERIC(24, 10),
+			dblVariationMargin NUMERIC(24, 10),
+			strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+			strAccountNumber VARCHAR(100) COLLATE Latin1_General_CI_AS,
+			strBook  nvarchar(100),
+			strSubBook  nvarchar(100),
+			dblTotal NUMERIC(24, 10)	
+	)
+	insert into @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,intNet,
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,strBook ,strSubBook ,dblTotal)
+	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0.0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0.0) intShortContracts  ,dblShortAvgPrice ,isnull(intNet,0.0) intNet,
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,strBook ,strSubBook ,
+		dblUnrealized + dblRealized AS dblTotal
 	FROM (
 		SELECT intFutureMarketId,
 			intFutureMonthId,
@@ -284,7 +312,7 @@ BEGIN
 					ELSE dblContractMargin END end) as dblInitialMargin
 		FROM(
 		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((intNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
-		dblPerFutureContract from #temp t 
+		dblPerFutureContract from @Summary t 
 		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
