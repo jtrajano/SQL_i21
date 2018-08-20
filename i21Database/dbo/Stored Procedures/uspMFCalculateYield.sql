@@ -453,6 +453,7 @@ BEGIN TRY
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
+		And F.dblYieldQuantity<0
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
