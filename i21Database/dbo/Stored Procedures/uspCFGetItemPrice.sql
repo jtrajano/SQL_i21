@@ -1558,7 +1558,7 @@ BEGIN
 	AND intARItemId = @CFItemId
 	AND ISNULL(intPriceGroupId,0) = ISNULL(@CFPriceRuleGroup,0)
 	AND ADJH.dtmEffectiveDate <= @CFTransactionDate
-	ORDER BY ADJ.dtmStartEffectiveDate DESC
+	ORDER BY ADJH.dtmEffectiveDate DESC
 
 	SET @CFPriceOut = @CFPriceOut + ISNULL(@dblPriceAdjustment,0)
 	SET @CFAdjustmentRate = @dblPriceAdjustment
