@@ -186,7 +186,7 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 
 BEGIN
 	SELECT *,
-		dblUnrealized + dblRealized AS dblTotal
+		dblUnrealized + dblRealized AS dblTotal into #temp
 	FROM (
 		SELECT intFutureMarketId,
 			intFutureMonthId,
@@ -207,7 +207,7 @@ BEGIN
 					WHERE t.intFutureMarketId = r.intFutureMarketId AND t.intFutureMonthId = r.intFutureMonthId
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
-			isnull(SUM(dblInitialMargin), 0) AS dblInitialMargin,	strName,
+			strName,
 			strAccountNumber,
 			strBook,
 			strSubBook
@@ -229,8 +229,7 @@ BEGIN
 				dblClosing AS dblClosing,
 				dblPrice,
 				NetPnL,
-				dblVariationMargin,
-				dblInitialMargin,
+				dblVariationMargin,				
 				strName,
 				strAccountNumber,
 				strBook,
@@ -256,8 +255,7 @@ BEGIN
 				dblClosing AS dblClosing,
 				dblPrice,
 				NetPnL,
-				dblVariationMargin,
-				dblInitialMargin,
+				dblVariationMargin,				
 				t.strName,
 				t.strAccountNumber,
 				strBook,
@@ -278,4 +276,17 @@ BEGIN
 			strBook,
 			strSubBook
 		) t
+
+
+	SELECT *, -abs(case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*intNet else 		
+		CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
+					WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
+					ELSE dblContractMargin END end) as dblInitialMargin
+		FROM(
+		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((intNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
+		dblPerFutureContract from #temp t 
+		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
+		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
+		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
+		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1
 END
