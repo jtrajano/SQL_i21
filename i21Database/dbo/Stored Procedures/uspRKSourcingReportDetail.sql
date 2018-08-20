@@ -430,7 +430,7 @@ select t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) db
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0)else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end 
 							) dblStandardPrice
-							,cost.dblRate dblPPVBasis, (isnull(dblFuturesPrice,dblSettlementPrice)*t.dblRatio)+isnull(cost.dblRate,0) as  dblNewPPVPrice,strLocationName
+							,cost.dblRate dblPPVBasis, (isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0) as  dblNewPPVPrice,strLocationName
  from @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
 join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
