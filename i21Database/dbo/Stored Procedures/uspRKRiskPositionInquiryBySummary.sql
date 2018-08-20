@@ -16,10 +16,6 @@ AS
 DECLARE @dtmToDate DATETIME
 SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 
---IF ISNULL(@intForecastWeeklyConsumptionUOMId,0)=0
---BEGIN
---SET @intForecastWeeklyConsumption = 1
---END
 If isnull(@intForecastWeeklyConsumptionUOMId,0) = 0
 BEGIN
 set @intForecastWeeklyConsumptionUOMId = @intUOMId
@@ -88,7 +84,8 @@ FROM  vyuRKRollCost
 WHERE intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId 
 				    and isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
        and isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
-and intLocationId=@intCompanyLocationId and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
+and isnull(intLocationId,0) =case when isnull(@intCompanyLocationId ,0)=0 then isnull(intLocationId,0) else @intCompanyLocationId  end
+and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
 
 --To Purchase Value
      DECLARE @DemandFinal1 as Table (  
@@ -518,8 +515,7 @@ JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intF
 JOIN tblEMEntity e on e.intEntityId=ft.intEntityId 
 JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ft.intCommodityId and um.intUnitMeasureId=mar.intUnitMeasureId
 WHERE  ft.intCommodityId=@intCommodityId AND ft.intFutureMarketId=@intFutureMarketId   
-AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end 
-AND dtmFutureMonthsDate >= @dtmFutureMonthsDate    
+AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end  
 AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
