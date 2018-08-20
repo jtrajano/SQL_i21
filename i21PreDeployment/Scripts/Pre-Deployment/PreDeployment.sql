@@ -160,6 +160,7 @@
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
+:r .\15_GR\1830_FixDeliverySheetSplit.sql
 
 --HD
 :r .\16_HD\Drop_Constraint.sql
