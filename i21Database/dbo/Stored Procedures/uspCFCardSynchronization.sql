@@ -277,6 +277,28 @@ BEGIN
 			IF(ISNUMERIC(@strVehicleNumber) = 1)
 			BEGIN
 
+				IF(CAST(@strVehicleNumber AS BIGINT) = 0)
+				BEGIN
+					print 'Invalid vehicle number'
+					INSERT INTO tblCFCSULog
+						(
+							 strAccountNumber
+							,strCardNumber
+							,strMessage
+							,strRecordId
+							,dtmUpdateDate
+
+						)
+						SELECT 
+							 @strAccountNumber
+							,@strCardNumber
+							,'Invalid vehicle number ' + @strVehicleNumber  as strMessage
+							,@strErrorRecordId
+							,@dtmImportDate
+
+					RETURN
+				END
+
 				--INT VEHICLE NUMBER--
 				INSERT INTO @tblCFNumericVehicle(
 						intVehicleId			
