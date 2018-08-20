@@ -99,12 +99,15 @@ INNER JOIN
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN 
-	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
+	(SELECT ISH.[intInventoryShipmentId], ISD.[intInventoryShipmentItemId], ISH.[strShipmentNumber] FROM tblICInventoryShipmentItem ISD WITH (NOLOCK) INNER JOIN tblICInventoryShipment ISH ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
 INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] AND [ysnIsUnposted] = 0			 
+		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] 
+		AND ICISI.[strShipmentNumber] = ICIT.[strTransactionId] 
+		AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] 
+		AND [ysnIsUnposted] = 0			 
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
