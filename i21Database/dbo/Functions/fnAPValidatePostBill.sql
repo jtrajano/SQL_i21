@@ -222,7 +222,7 @@ BEGIN
 		--Voucher date should not be greater than receipt date
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
-			'Voucher ' + A.strBillId + ' date should not be earlier than the date of item ' + D.strItemNo + ' when it was received.',
+			'Voucher date should not be earlier than ' + C2.strReceiptNumber + ' for item ' + D.strItemNo + '.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
