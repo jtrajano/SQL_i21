@@ -134,6 +134,7 @@ EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @reversedPost BIT = ~@post
 IF (ISNULL(@recap, 0) = 0 AND @repost = 0)
 BEGIN
 
@@ -154,12 +155,17 @@ BEGIN
 		,intTransactionId
 		,23
 	FROM dbo.fnPATValidateAssociatedTransaction(@billIds, 4, @transactionType)
-
+	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1)
 	BEGIN
-		DECLARE @reversedPost BIT = ~@post
-		EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @reversedPost
+		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
+		--undo updating of transactions for those invalid only
+		SELECT 
+			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
+		FROM #tmpInvalidBillData
+		WHERE intErrorKey = 1
+		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
 END
@@ -169,8 +175,11 @@ BEGIN
 	--VALIDATIONS
 	INSERT INTO #tmpInvalidBillData 
 	SELECT * FROM fnAPValidateRecapBill(@billIds, @post)
+	--undo updating of transactions for all if recap
+	EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @reversedPost
 	
 END
+
 
 DECLARE @totalInvalid INT = 0
 DECLARE @postResult TABLE(id INT)
