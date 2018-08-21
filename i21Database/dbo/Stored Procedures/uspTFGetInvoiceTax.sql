@@ -29,7 +29,7 @@ BEGIN TRY
 		DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 	END
 
-	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+	--DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 		
 	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -41,8 +41,16 @@ BEGIN TRY
 	BEGIN
 
 		DECLARE @RCId INT = NULL
+		, @FormCode NVARCHAR(50) = NULL
+		, @ScheduleCode NVARCHAR(50) = NULL
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
+
+		SELECT TOP 1 @FormCode = strFormCode
+			, @ScheduleCode = strScheduleCode
+		FROM tblTFReportingComponent
+		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
+		WHERE intReportingComponentId = @RCId
 
 		-- GET RECORDS WITH TAX CRITERIA
 		INSERT INTO @tmpInvoiceDetail 
@@ -762,6 +770,34 @@ BEGIN TRY
 				AND ((tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Location') OR 
 					(tblTRLoadReceipt.strOrigin IS NULL OR tblTRLoadDistributionHeader.strDestination IS NULL))
 		) tblTransactions
+
+		-- MFT-1228
+		IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
+		BEGIN
+			-- Include all CF Trans for schedule 5CRD and 6CRD 
+			DELETE @tmpInvoiceTransaction WHERE intId IN (
+				SELECT Trans.intId
+				FROM @tmpInvoiceTransaction Trans
+				LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+				WHERE Trans.strTransactionType = 'Invoice'
+				AND Trans.intReportingComponentId = @RCId
+				AND Invoice.strType <> 'CF Tran'
+			)
+		END
+		ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
+		BEGIN
+			-- Exclude all non CF Trans for schedule 5BLK and 6BLK
+			DELETE @tmpInvoiceTransaction WHERE intId IN (
+				SELECT Trans.intId
+				FROM @tmpInvoiceTransaction Trans
+				LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+				WHERE Trans.strTransactionType = 'Invoice'
+				AND Trans.intReportingComponentId = @RCId
+				AND Invoice.strType = 'CF Tran'
+			)
+		END
 	
 		IF (@ReportingComponentId <> '')
 		BEGIN

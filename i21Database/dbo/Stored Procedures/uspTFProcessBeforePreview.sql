@@ -77,37 +77,6 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
-			-- MFT-1228
-			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
-			BEGIN
-				-- Include all CF Trans for schedule 5CRD and 6CRD 
-				DELETE tblTFTransaction WHERE intTransactionId IN (
-					SELECT Trans.intTransactionId
-					FROM tblTFTransaction Trans
-					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
-					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-					WHERE Trans.strTransactionType = 'Invoice'
-					AND Trans.uniqTransactionGuid = @Guid
-					AND Trans.intTransactionId IS NOT NULL
-					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strType <> 'CF Tran'
-				)
-			END
-			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
-			BEGIN
-				-- Exclude all non CF Trans for schedule 5BLK and 6BLK
-				DELETE tblTFTransaction WHERE intTransactionId IN (
-					SELECT Trans.intTransactionId
-					FROM tblTFTransaction Trans
-					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
-					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-					WHERE Trans.strTransactionType = 'Invoice'
-					AND Trans.uniqTransactionGuid = @Guid
-					AND Trans.intTransactionId IS NOT NULL
-					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strType = 'CF Tran'
-				)
-			END
 
 			INSERT INTO tblTFTransactionDynamicOR(
 				intTransactionId
@@ -136,7 +105,7 @@ BEGIN TRY
 				, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Destination.strOregonFacilityNumber ELSE NULL END
 				, [strAltDocumentNumber] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFCard.strCardNumber ELSE NULL END
 				, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN TaxException.strExceptionReason ELSE NULL END
-				, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
+				, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5BLK', '6BLK', '5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
 			FROM vyuTFGetTransaction Trans
 			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
