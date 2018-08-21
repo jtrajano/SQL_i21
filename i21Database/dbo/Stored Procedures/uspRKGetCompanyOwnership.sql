@@ -1,6 +1,6 @@
 ﻿CREATE PROC [dbo].[uspRKGetCompanyOwnership] 
-	 @dtmFromTransactionDate DATETIME = NULL
-	,@dtmToTransactionDate DATETIME = NULL
+	 @dtmFromTransactionDate DATE = NULL
+	,@dtmToTransactionDate DATE = NULL
 	,@intCommodityId INT = NULL
 	,@intItemId INT = NULL
 	,@strPositionIncludes NVARCHAR(100) = NULL

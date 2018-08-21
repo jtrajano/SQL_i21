@@ -1,6 +1,6 @@
 ﻿CREATE PROC [dbo].[uspRKGetGrainInventory]
-		@dtmFromTransactionDate datetime = null,
-		@dtmToTransactionDate datetime = null,
+		@dtmFromTransactionDate date = null,
+		@dtmToTransactionDate date = null,
 		@intCommodityId int =  null,
 		@intItemId int= null,
 		@strPositionIncludes nvarchar(100) = NULL,
