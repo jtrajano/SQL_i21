@@ -671,7 +671,85 @@ BEGIN
 			FROM @invQty where intCommodityId=@intCommodityId 
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
 
-				
+	--Net Hedge Derivative Entry (Futures and Options)
+	-- Hedge
+	INSERT INTO @tempFinal (strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
+							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot,strCurrency)		
+	
+	SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,'Price Risk','Future' strContractType,strLocationName, strFutureMonth,
+	HedgedQty,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,@intCommodityId intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,
+	strInstrumentType,dblNoOfLot,strCurrency
+	FROM (
+		SELECT distinct t.strCommodityCode,strInternalTradeNo,t.intFutOptTransactionHeaderId,th.intCommodityId,dtmFutureMonthsDate,
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,  
+		intOpenContract	 * 	 t.dblContractSize) AS HedgedQty,
+		l.strLocationName,left(t.strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth,m.intUnitMeasureId,
+		t.strBroker + '-' + t.strBrokerAccount strAccountNumber,strNewBuySell as strTranType,ba.intBrokerageAccountId,
+		'Future' as strInstrumentType,
+		intOpenContract dblNoOfLot ,cu.strCurrency
+		FROM @tblGetOpenFutureByDate t
+		JOIN tblICCommodity th on th.strCommodityCode=t.strCommodityCode
+		join tblSMCompanyLocation l on l.strLocationName=t.strLocationName
+		join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
+		join tblSMCurrency cu on cu.intCurrencyID=m.intCurrencyId
+		LEFT join tblRKBrokerageAccount ba on ba.strAccountNumber=t.strBrokerAccount
+			INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Futures'
+		JOIN tblICCommodityUnitMeasure cuc1 on cuc1.intCommodityId=@intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId	
+		INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+		WHERE th.intCommodityId = @intCommodityId
+			AND l.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end	
+			and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									ELSE isnull(ysnLicensed, 0) END
+									)		
+		) t	
+		
+--	-- Option Net Hedge
+	INSERT INTO @tempFinal (strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
+							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,strCurrency)	
+		SELECT DISTINCT t.strCommodityCode,t.strInternalTradeNo,intFutOptTransactionHeaderId,'Price Risk','Option',t.strLocationName,
+				 LEFT(t.strFutureMonth,4) +  '20'+convert(nvarchar(2),fm.intYear) strFutureMonth, 				
+				intOpenContract * isnull((
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND t.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,th.intCommodityId,				
+		e.strName + '-' + strAccountNumber AS strAccountNumber, 		
+		strNewBuySell AS TranType, 
+		intOpenContract AS dblNoOfLot, 
+		isnull((SELECT TOP 1 dblDelta
+		FROM tblRKFuturesSettlementPrice sp
+		INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+		WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
+		AND t.dblStrike = mm.dblStrike
+		ORDER BY dtmPriceDate DESC
+		),0) AS dblDelta,
+		ba.intBrokerageAccountId, 'Option' as strInstrumentType,strCurrency
+	FROM @tblGetOpenFutureByDate t
+	join tblICCommodity th on th.strCommodityCode=t.strCommodityCode
+	join tblSMCompanyLocation l on l.strLocationName=t.strLocationName 
+	join tblRKFutureMarket m on m.strFutMarketName=t.strFutureMarket
+		join tblSMCurrency cu on cu.intCurrencyID=m.intCurrencyId
+	join tblRKOptionsMonth om on om.strOptionMonth=t.strOptionMonth
+	INNER JOIN tblRKBrokerageAccount ba ON t.strBrokerAccount = ba.strAccountNumber
+	INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Options'
+	INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE th.intCommodityId = @intCommodityId  
+	AND intCompanyLocationId = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end 
+	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned) 
+	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+	and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									ELSE isnull(ysnLicensed, 0) END
+									)
+
+
+
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intInventoryReceiptId,strReceiptNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT @strCommodityCode,'Price Risk' [strType],'PurBasisDelivary' strContractType,-sum(dblTotal),intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
 	FROM (

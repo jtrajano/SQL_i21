@@ -807,7 +807,14 @@ BEGIN
 					intFromCommodityUnitMeasureId,intCommodityId,strLocationName  
 			FROM @invQty where intCommodityId=@intCommodityId 
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
-						 
+		
+	--Net Hedge Derivative Entry (Futures and Options)
+    INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
+    SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
+    FROM @tempFinal
+    WHERE intCommodityId=@intCommodityId 
+        AND strType = 'Net Hedge'
+				 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intInventoryReceiptId,strReceiptNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT @strCommodityCode,'Price Risk' [strType],'PurBasisDelivary' strContractType,-sum(dblTotal),intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
 	FROM (
