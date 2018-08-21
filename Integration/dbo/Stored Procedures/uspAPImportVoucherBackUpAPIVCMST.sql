@@ -150,6 +150,9 @@ BEGIN
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
 		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
 	FROM apivcmst A
+	INNER JOIN aphglmst B --join to make sure import only those have details
+		ON A.apivc_ivc_no = B.aphgl_ivc_no 
+		AND A.apivc_vnd_no = B.aphgl_vnd_no
 	OUTER APPLY (
 		SELECT 
 			G.A4GLIdentity
@@ -235,6 +238,9 @@ BEGIN
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
 		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
 	FROM apivcmst A
+	INNER JOIN aphglmst B --join to make sure import only those have details
+		ON A.apivc_ivc_no = B.aphgl_ivc_no 
+		AND A.apivc_vnd_no = B.aphgl_vnd_no
 	OUTER APPLY (
 		SELECT 
 			G.A4GLIdentity
