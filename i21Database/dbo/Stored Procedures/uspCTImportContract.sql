@@ -28,6 +28,19 @@ BEGIN TRY
 			  @SelColumn				    NVARCHAR(100),
 			  @ErrMsg					    NVARCHAR(MAX)
 
+			 DECLARE @tblCTExcelAndTableColumnMap TABLE
+			 (
+				intExcelAndTableColumnMapId INT,
+				strTableName				NVARCHAR(100),
+				strExcelColumnName			NVARCHAR(100),
+				strTableCoulmnName			NVARCHAR(100),
+				strRefTable					NVARCHAR(100),
+				strRefTableIdCol			NVARCHAR(100),
+				strRefCoulumnToCmpr			NVARCHAR(100),
+				strJoinType					NVARCHAR(100),
+				strSpecialJoin				NVARCHAR(MAX)
+			 )
+
   --  SELECT @Query = '
   --  IF NOT EXISTS(SELECT *FROM sysobjects SO Inner Join syscolumns SC ON SO.id=SC.id WHERE SO.type=''U'' AND SO.name='''+@TableFromImport+''' and SC.name=''intConcurrencyId'')	
   --  BEGIN	
@@ -44,7 +57,13 @@ BEGIN TRY
 
     SELECT @Query = 'SELECT DISTINCT * INTO #tempExcelContractHeader FROM ' + @TableFromImport + ' EX '
 
-    SELECT @intExcelAndTableColumnMapId = MIN(intExcelAndTableColumnMapId) FROM tblCTExcelAndTableColumnMap WHERE strTableName = @TableToImport
+	INSERT INTO @tblCTExcelAndTableColumnMap
+	SELECT T.* FROM 
+	tblCTExcelAndTableColumnMap T
+	JOIN (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TableFromImport) H ON H.COLUMN_NAME = T.strExcelColumnName
+	WHERE T.strTableName = @TableToImport
+
+    SELECT @intExcelAndTableColumnMapId = MIN(intExcelAndTableColumnMapId) FROM @tblCTExcelAndTableColumnMap WHERE strTableName = @TableToImport
     WHILE ISNULL(@intExcelAndTableColumnMapId,0) > 0
     BEGIN
 	   SELECT    @strExcelColumnName	=	strExcelColumnName 
@@ -54,7 +73,7 @@ BEGIN TRY
 				,@strRefCoulumnToCmpr	=	strRefCoulumnToCmpr
 				,@strJoinType			=	strJoinType
 				,@strSpecialJoin		=	strSpecialJoin
-	   FROM		tblCTExcelAndTableColumnMap
+	   FROM		@tblCTExcelAndTableColumnMap
 	   WHERE	intExcelAndTableColumnMapId	=   @intExcelAndTableColumnMapId
 	   
 	   SELECT	 @strJoinType = CASE WHEN ISNULL(@strJoinType,'') <> '' THEN 'LEFT JOIN' ELSE @strJoinType END -- To trigger proper validation
@@ -94,7 +113,7 @@ BEGIN TRY
 	   SELECT  @SelectList += CASE WHEN @SelectList = '' THEN @SelColumn  ELSE ', ' + @SelColumn  END
 
 
-	   SELECT @intExcelAndTableColumnMapId = MIN(intExcelAndTableColumnMapId) FROM tblCTExcelAndTableColumnMap WHERE strTableName = @TableToImport AND intExcelAndTableColumnMapId > @intExcelAndTableColumnMapId
+	   SELECT @intExcelAndTableColumnMapId = MIN(intExcelAndTableColumnMapId) FROM @tblCTExcelAndTableColumnMap WHERE strTableName = @TableToImport AND intExcelAndTableColumnMapId > @intExcelAndTableColumnMapId
     END
 
 
