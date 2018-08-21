@@ -6968,6 +6968,8 @@
     <None Include="Scripts\Post-Deployment\ST\21_FileFieldMapping_Passport_CBT.sql" />
     <None Include="Scripts\Post-Deployment\ST\22_FileFieldMapping_Passport_ITT.sql" />
     <Build Include="dbo\Tables\tblSTstgPassportPricebookITT33.sql" />
+    <None Include="Scripts\Post-Deployment\ST\23_FileFieldMapping_Passport_ILT.sql" />
+    <Build Include="dbo\Tables\tblSTstgPassportPricebookItemListILT33.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

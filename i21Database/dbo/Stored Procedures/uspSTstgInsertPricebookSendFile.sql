@@ -212,7 +212,7 @@ BEGIN
 							JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
 							JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 							JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
-							--WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
+							WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
 
 							
 						END
