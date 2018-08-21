@@ -2,7 +2,7 @@
 AS 
 SELECT intInvoiceId			= I.intInvoiceId
 	 , dblInvoiceTotal		= I.dblInvoiceTotal
-	 , dblAmountDue			= I.dblAmountDue - I.dblDiscountAvailable
+	 , dblAmountDue			= CASE WHEN I.ysnPaid = 0 THEN I.dblAmountDue - I.dblDiscountAvailable ELSE I.dblAmountDue END
 	 , dblDiscount			= I.dblDiscountAvailable
 	 , dtmDueDate			= I.dtmDueDate
 	 , intPaymentId			= PAYMENTS.intPaymentId
