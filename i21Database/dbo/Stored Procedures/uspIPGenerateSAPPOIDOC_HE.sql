@@ -52,6 +52,7 @@ DECLARE @intMinSeq INT
 	,@intLocationId INT
 	,@strLocationName NVARCHAR(50)
 	,@strSAPLocation NVARCHAR(50)
+	,@strERPItemNumber nvarchar(100)
 DECLARE @tblIPContractItem TABLE (strContractItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -232,6 +233,7 @@ WHERE CH.ysnSubstituteItem = 0
 UPDATE CF
 SET strERPPONumber = CD.strERPPONumber
 	,strRowState = 'MODIFIED'
+	,strERPItemNumber=CD.strERPItemNumber
 FROM tblCTContractFeed CF
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CD.intSubLocationId
@@ -260,7 +262,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CH.ysnMaxPrice = 1
@@ -272,7 +274,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	
 	UNION
 	
@@ -282,7 +284,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CH.ysnMaxPrice = 0
@@ -308,7 +310,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CH.ysnMaxPrice = 1
@@ -323,7 +325,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	
 	UNION
 	
@@ -333,7 +335,7 @@ BEGIN
 		,strSubLocation
 		,CH.ysnMaxPrice
 		,CH.strPrintableRemarks
-		,E.strName
+		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CH.ysnMaxPrice = 0
@@ -452,6 +454,7 @@ BEGIN
 				,@strPurchasingGroup = strPurchasingGroup
 				,@strContractNumber = strContractNumber
 				,@strERPPONumber = strERPPONumber
+				,@strERPItemNumber=strERPItemNumber
 				,@intContractSeq = intContractSeq
 				,@strItemNo = strItemNo
 				,@strStorageLocation = strStorageLocation
@@ -494,6 +497,7 @@ BEGIN
 					,@strPurchasingGroup = strPurchasingGroup
 					,@strContractNumber = strContractNumber
 					,@strERPPONumber = strERPPONumber
+					,@strERPItemNumber=strERPItemNumber
 					,@intContractSeq = Min(intContractSeq)
 					,@strItemNo = strItemNo
 					,@strStorageLocation = strStorageLocation
@@ -525,6 +529,7 @@ BEGIN
 					,strPurchasingGroup
 					,strContractNumber
 					,strERPPONumber
+					,strERPItemNumber
 					,strItemNo
 					,strStorageLocation
 					,strNetWeightUOM
@@ -542,6 +547,7 @@ BEGIN
 					,@strPurchasingGroup = strPurchasingGroup
 					,@strContractNumber = strContractNumber
 					,@strERPPONumber = strERPPONumber
+					,@strERPItemNumber=strERPItemNumber
 					,@intContractSeq = Min(intContractSeq)
 					,@strItemNo = strItemNo
 					,@strStorageLocation = strStorageLocation
@@ -572,6 +578,7 @@ BEGIN
 					,strPurchasingGroup
 					,strContractNumber
 					,strERPPONumber
+					,strERPItemNumber
 					,strItemNo
 					,strStorageLocation
 					,strNetWeightUOM
@@ -693,7 +700,9 @@ BEGIN
 				SET @strXmlHeaderStart += @strPOUpdateIDOCHeader
 				SET @strXmlHeaderStart += '</EDI_DC40>'
 				SET @strXmlHeaderStart += '<E1PURCONTRACT_CHANGE>'
+				SET @strXmlHeaderStart += '<PURCHASINGDOCUMENT>' + ISNULL(@strERPPONumber, '') + '</PURCHASINGDOCUMENT>'
 				SET @strXmlHeaderStart += '<E1BPMEOUTHEADER>'
+				SET @strXmlHeaderStart += '<NUMBER>' + ISNULL(@strERPPONumber, '') + '</NUMBER>'
 				SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 				SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
 				SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
@@ -729,12 +738,15 @@ BEGIN
 					SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
 				END
 			END
-
+			SET @strItemXml += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strERPItemNumber, '')) + '</ITEM_NO>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 			SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 			SET @strItemXml += '</E1BPMEOUTITEM>'
+			SET @strItemXml += '<E1BPMEOUTITEMX>'
+			SET @strItemXml += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strERPItemNumber, '')) + '</ITEM_NO>'
+			SET @strItemXml += '</E1BPMEOUTITEMX>'
 		END
 
 		--Header End Xml
