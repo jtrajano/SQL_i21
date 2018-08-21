@@ -444,6 +444,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\18_FileFieldMapping_Passport_ISM_340.sql
 :r .\ST\19_FileFieldMapping_Passport_MCM_340.sql
 :r .\ST\20_FileFieldMapping_Passport_MSM_340.sql
+:r .\ST\21_FileFieldMapping_Passport_CBT.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
