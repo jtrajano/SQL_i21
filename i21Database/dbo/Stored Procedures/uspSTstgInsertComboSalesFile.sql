@@ -33,7 +33,7 @@ BEGIN
 		BEGIN
 				SET @strGenerateXML = ''
 				SET @intImportFileHeaderId = 0
-				SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File'
+				SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File (CBT)'
 
 				RETURN
 		END
