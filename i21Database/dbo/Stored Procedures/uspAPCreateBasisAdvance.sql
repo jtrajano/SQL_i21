@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateBasisAdvance]
     @userId INT,
-    @createdBasisAdvance NVARCHAR(MAX) OUTPUT
+    @createdBasisAdvance NVARCHAR(MAX) OUTPUT,
+    @totalInvalid INT = 0 OUTPUT,
+    @batchIdUsed NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,6 +16,9 @@ BEGIN TRY
 DECLARE @billId INT;
 DECLARE @billRecordNumber NVARCHAR(50);
 DECLARE @voucherIds AS Id;
+DECLARE @postBatchId NVARCHAR(40);
+DECLARE @postFailedCount INT = 0;
+DECLARE @postSuccess BIT = 0;
 
 DECLARE @functionalCurrency INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference);
 DECLARE @rateType INT;
@@ -383,6 +388,21 @@ SELECT @createdBasisAdvance = COALESCE(@createdBasisAdvance + ',', '') +  CONVER
 FROM #tmpVoucherCreated
 ORDER BY intBillId
 
+EXEC uspAPPostVoucherPrepay 
+    @post = 1,
+    @param = @createdBasisAdvance,
+    @userId = @userId,
+    @recap = 0,
+    @invalidCount = @postFailedCount OUT,
+    @success = @postSuccess OUT,
+    @batchIdUsed = @postBatchId OUT
+
+IF @postFailedCount > 0
+BEGIN 
+    SET @totalInvalid = @postFailedCount;
+    --if there is failed posting, return the batch to use in displaying the result.
+    SET @batchIdUsed = @postBatchId;    
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 
