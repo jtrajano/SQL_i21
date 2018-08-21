@@ -371,7 +371,7 @@ FROM (
 	SELECT dtmTransactionDate,intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, (
 			SELECT SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
-			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
+			WHERE intFutOptTransactionId = mf.intSFutOptTransactionId
 					and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 			) intOpenContract
 	FROM (
@@ -419,7 +419,7 @@ FROM (
 	SELECT dtmTransactionDate,intFutOptTransactionId, sum(intNoOfContract) intNoOfContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, (
 				SELECT isnull(SUM(mf.intMatchQty),0)
 			FROM tblRKMatchDerivativesHistoryForOption mf
-			WHERE  mf.intLFutOptTransactionId=intFutOptTransactionId
+			WHERE  mf.intSFutOptTransactionId=intFutOptTransactionId
 				and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 		 ) intOpenContract
 	FROM (
