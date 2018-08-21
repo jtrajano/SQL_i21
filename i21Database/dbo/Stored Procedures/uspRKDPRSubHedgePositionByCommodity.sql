@@ -583,8 +583,8 @@ SELECT s.dblQuantity  dblTotal,
 				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
-				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
@@ -625,8 +625,8 @@ SELECT *  FROM (
 		WHERE c.intCommodityId in (select intCommodity from @Commodity)
 								 AND convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 									AND  c.intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
 		) a where   a.intRowNum =1
@@ -660,8 +660,8 @@ BEGIN
 	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId =@intCommodityId
 	AND cd.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN cd.intCompanyLocationId ELSE @intLocationId END)t
 		WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
 
@@ -699,8 +699,8 @@ BEGIN
 		WHERE th.intCommodityId = @intCommodityId
 			AND l.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end	
 			and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)		
 		) t	
@@ -743,8 +743,8 @@ BEGIN
 	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned) 
 	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 	and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
 
@@ -767,8 +767,8 @@ BEGIN
 	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate))t 
 	WHERE  intCompanyLocationId  IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
-		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
 	
@@ -783,8 +783,8 @@ BEGIN
 				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end 
 				)t	
 				WHERE  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
 				 group by strCommodityCode,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intContractTypeId,strCurrency	
 
@@ -810,8 +810,8 @@ BEGIN
 		  INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
 		  INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractTypeId = 2 and cd.intContractStatusId <> 3 
 		  		  					AND  cd.intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
 		  WHERE cd.intCommodityId = @intCommodityId AND 
@@ -831,8 +831,8 @@ BEGIN
 						AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 					)t 	WHERE intCompanyLocationId  IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation
-								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				) group by intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 	
@@ -852,8 +852,8 @@ BEGIN
 						AND CH.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CH.intCompanyLocationId else @intLocationId end	
 				 )t WHERE intCompanyLocationId IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation
-								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-												WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+												WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 				) group by intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 
 	END			
@@ -886,8 +886,8 @@ BEGIN
 	WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and cd.intCommodityId=@intCommodityId
 					 and cd.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end)t
 		WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)	
 	 
@@ -931,8 +931,8 @@ BEGIN
 	AND intEntityId= @intVendorId
 	)t
 	WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)		
 	
