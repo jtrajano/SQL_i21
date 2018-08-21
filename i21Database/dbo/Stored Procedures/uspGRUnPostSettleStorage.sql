@@ -29,7 +29,6 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
-	DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -239,225 +238,62 @@ BEGIN TRY
 				DELETE 
 				FROM @GLEntries
 
-				INSERT INTO @ItemsToStorage 
-				(
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intSubLocationId
-					,intStorageLocationId
-					,ysnIsStorage
+				INSERT INTO @GLEntries 
+			    (
+					 [dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
 				)
-				SELECT 
-					 intItemId					= @ItemId
-					,intItemLocationId			= @ItemLocationId
-					,intItemUOMId				= @intInventoryItemStockUOMId
-					,dtmDate					= GETDATE()
-					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN SH.dblUnits ELSE 0 END
-					,dblUOMQty					= @dblUOMQty
-					,dblCost					= SH.dblPaidAmount
-					,dblSalesPrice				= 0.00
-					,intCurrencyId				= @intCurrencyId
-					,dblExchangeRate			= 1
-					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageId
-					,strTransactionId			= @TicketNo
-					,intTransactionTypeId		= 44
-					,intSubLocationId			= CS.intCompanyLocationSubLocationId
-					,intStorageLocationId		= CS.intStorageLocationId
-					,ysnIsStorage				= 1
-				FROM tblGRStorageHistory SH
-				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				WHERE SH.intSettleStorageId = @intSettleStorageId
+				 EXEC	
+				 @intReturnValue = dbo.uspICUnpostCosting
+				 @intSettleStorageId
+				,@TicketNo
+				,@strBatchId
+				,@UserId
+				,0
 
-				INSERT INTO @ItemsToPost 
-				(
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intSubLocationId
-					,intStorageLocationId
-					,ysnIsStorage
-				)
-				SELECT 
-					 intItemId					= @ItemId
-					,intItemLocationId			= @ItemLocationId
-					,intItemUOMId				= @intInventoryItemStockUOMId
-					,dtmDate					= GETDATE()
-					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN - SH.dblUnits ELSE 0 END
-					,dblUOMQty					= @dblUOMQty
-					,dblCost					= SH.dblPaidAmount
-					,dblSalesPrice				= 0.00
-					,intCurrencyId				= @intCurrencyId
-					,dblExchangeRate			= 1
-					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageId
-					,strTransactionId			= @TicketNo
-					,intTransactionTypeId		= 44
-					,intSubLocationId			= CS.intCompanyLocationSubLocationId
-					,intStorageLocationId		= CS.intStorageLocationId
-					,ysnIsStorage = 0
-				FROM tblGRStorageHistory SH
-				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				WHERE SH.intSettleStorageId = @intSettleStorageId
+				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
-				BEGIN
-					EXEC uspICPostStorage 
-						 @ItemsToStorage
-						,@strBatchId
-						,@UserId
+		-- Unpost storage stocks. 
+				 EXEC	
+				 @intReturnValue = dbo.uspICUnpostStorage
+				 @intSettleStorageId
+				,@TicketNo
+				,@strBatchId
+				,@UserId
+				,0
+		
+				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
-					IF @@ERROR <> 0
-						GOTO SettleStorage_Exit;
-				END
-
-				BEGIN
-				
-				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
-				FROM tblGRCustomerStorage CS 
-				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId
-				WHERE SST.intSettleStorageId = @intSettleStorageId
-				
-				IF @strOwnedPhysicalStock ='Customer' 
-			    BEGIN
-					
-					INSERT INTO @GLEntries 
-					(
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-					)
-					EXEC	@intReturnValue = dbo.uspICPostCosting  
-							@ItemsToPost  
-							,@strBatchId  
-							,'AP Clearing'
-							,@UserId
-					
-					IF @intReturnValue < 0
-						GOTO SettleStorage_Exit;
-					
-					UPDATE @GLEntries 
-					SET dblDebit = CASE WHEN dblCredit > 0 THEN dblCredit ELSE 0 END
-					,dblCredit   = CASE WHEN dblDebit > 0  THEN dblDebit ELSE 0 END
-
-						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-						BEGIN 
-								EXEC dbo.uspGLBookEntries @GLEntries, 0 
-						END
-							
-							DELETE FROM @GLEntries
-							
-							INSERT INTO @GLEntries 
-							(
-							 [dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-						)
-						EXEC uspGRCreateGLEntries 
-							 'Storage Settlement'
-							,'OtherCharges'
-							,@intSettleStorageId
-							,@strBatchId
-							,@UserId
-							,0
-						
-						UPDATE @GLEntries 
-						SET dblDebit = dblCredit
-						,dblCredit   = dblDebit
-						
-						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-						BEGIN 
-									EXEC dbo.uspGLBookEntries @GLEntries, 0 
-						END
-					
-					END
-
-					IF @@ERROR <> 0
-						GOTO SettleStorage_Exit;
-				END
 			END
 
 			--4. Deleting History
