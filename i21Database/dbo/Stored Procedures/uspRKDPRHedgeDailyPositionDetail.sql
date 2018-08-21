@@ -964,7 +964,7 @@ BEGIN
 									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									) 			
-			)t 
+			)t  where dblTotal <> 0
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
 		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
@@ -1000,7 +1000,7 @@ BEGIN
 									ELSE isnull(ysnLicensed, 0) END
 									)
 				
-			) a 
+			) a where dblUnitCost <> 0
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency)
@@ -1074,7 +1074,7 @@ BEGIN
 	WHERE t.intCommodityId= @intCommodityId and strType in( 'Net Payable  ($)','Net Receivable  ($)')
 
 END
-ELSE
+ELSE--==================== Specific Customer/Vendor =================================================
 BEGIN
 
 	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strSubType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId)
@@ -1152,8 +1152,9 @@ BEGIN
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 				 and ysnPost is not null and isnull(strTicketStatus,'') <> 'V'				
-			) a 
-			
+			) a where dblUnitCost <> 0
+
+		
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId)
 
