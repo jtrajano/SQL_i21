@@ -613,7 +613,11 @@ BEGIN
 		
 		BEGIN TRY 
 		BEGIN TRANSACTION
+			DECLARE @intNetworkCardType  NVARCHAR(MAX)
 			DECLARE @intAddCardIdentity INT
+
+			SELECT TOP 1 @intNetworkCardType = intCardTypeId FROM tblCFCardType WHERE intNetworkId = @intNetworkId AND strCSUCardType = @strCardType
+
 			DELETE FROM tblCFTempCSUAuditLog
 
 			INSERT INTO tblCFCard
@@ -632,6 +636,7 @@ BEGIN
 				,ysnCardForOwnUse				
 				,ysnIgnoreCardTransaction		
 				,ysnCardLocked		
+				,intCardTypeId
 			)
 			SELECT
 				 @intAccountId
@@ -648,6 +653,7 @@ BEGIN
 				,0		
 				,0		
 				,0
+				,@intNetworkCardType
 
 
 			SET @intAddCardIdentity = SCOPE_IDENTITY()
