@@ -194,13 +194,13 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Return Payment is not allowed for non-ACH Payment Method.'
+        ,[strError]                 = 'Return Payment is not allowed for non-ACH and CF Invoice Payment Methods.'
 	FROM
 		@Payments P
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NULL
-        AND P.[strPaymentMethod] <> 'ACH'
+        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice')
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 

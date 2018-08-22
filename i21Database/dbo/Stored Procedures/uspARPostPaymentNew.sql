@@ -528,7 +528,7 @@ SET @BatchIdUsed = @BatchId
 				INSERT INTO
 					@ARPaymentInvalidData
 				SELECT
-					'Return Payment is not allowed.'
+					'Return Payment is not allowed for non-ACH and CF Invoice Payment Methods.'
 					,'Receivable'
 					,ARP.[strRecordNumber]
 					,@BatchId
@@ -543,6 +543,7 @@ SET @BatchIdUsed = @BatchId
 						ON ARP.[intPaymentId] = PPD.[intPaymentId]				
 				WHERE
 					(ARP.[dblAmountPaid]) < @ZeroDecimal
+					AND ARP.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice')
 					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = ARPD.[intInvoiceId] AND ARPD.[dblPayment] > 0 AND [strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment'))
 
 				--Fiscal Year
