@@ -474,7 +474,10 @@ BEGIN TRY
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
-					,dblUnits             = SST.dblUnits
+					,dblUnits             = CASE
+												WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits
+												ELSE SST.dblUnits
+											END
 					,dblCashPrice         = CS.dblFeesDue
 					,intItemId            = IC.intItemId
 					,intItemType          = 4
