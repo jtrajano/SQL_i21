@@ -173,6 +173,8 @@ select
 	,intReopenCalls
 	,intStartDate
 	,intEndDate
+	,dtmStartDate
+	,dtmEndDate
 	,strFilterKey
 	,intRequestedByEntityId
 	,intCreatedDate
@@ -198,6 +200,8 @@ select distinct
 		,intReopenCalls = isnull((select sum(intReopenCalls) from reopenCalls where intEntityId = b.intEntityId and intTicketTypeId = a.intTicketTypeId and intTicketPriorityId = a.intTicketPriorityId and dtmDate between @DateFrom and @DateTo),0)
 		,intStartDate = @DateFrom
 		,intEndDate = @DateTo
+		,dtmStartDate = Convert(DATETIME, LEFT(@DateFrom, 8))
+		,dtmEndDate = Convert(DATETIME, LEFT(@DateTo, 8))
 		,strFilterKey = @strIdentifier
 		,intRequestedByEntityId = 0
 		,intCreatedDate = convert(int, convert(nvarchar(8), getdate(), 112))
