@@ -109,7 +109,7 @@ BEGIN
 						JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId
 						JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
 						WHERE R.intRegisterId = @Register 
-						AND ST.intStoreId = @StoreLocation 
+						AND ST.intStoreId = @StoreId
 						AND PSL.strPromoType = 'M'
 						AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId	
 
