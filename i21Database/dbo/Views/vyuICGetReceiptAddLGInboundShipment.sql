@@ -76,6 +76,7 @@ FROM (
 		, strMarkings               = LogisticsView.strMarks
 		, Item.strBundleType 
 		, intContractSeq 			= LogisticsView.intPContractSeq
+		, strLotCondition			= ICPreference.strLotCondition
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
 			LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
@@ -117,6 +118,10 @@ FROM (
 				,ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
 				,LogisticsView.dtmScheduledDate
 			) defaultForexRate 
+			OUTER APPLY (
+				SELECT	TOP 1 *
+				FROM	 tblICCompanyPreference			
+			) ICPreference
 
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
