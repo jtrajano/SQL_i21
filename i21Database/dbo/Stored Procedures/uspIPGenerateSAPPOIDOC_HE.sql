@@ -52,7 +52,7 @@ DECLARE @intMinSeq INT
 	,@intLocationId INT
 	,@strLocationName NVARCHAR(50)
 	,@strSAPLocation NVARCHAR(50)
-	,@strERPItemNumber nvarchar(100)
+	,@strERPItemNumber NVARCHAR(100)
 DECLARE @tblIPContractItem TABLE (strContractItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -74,7 +74,9 @@ DECLARE @tblHeader AS TABLE (
 	)
 
 SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
+
 SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
+
 --SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
 IF EXISTS (
 		SELECT *
@@ -113,6 +115,11 @@ BEGIN
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
+			)
+		AND EXISTS (
+			SELECT *
+			FROM tblCTContractDetail CD
+			WHERE CD.intContractHeaderId = CH.intContractHeaderId
 			)
 
 	INSERT INTO @tblCTFinalContractFeed (
@@ -228,12 +235,12 @@ UPDATE CF
 SET strFeedStatus = 'IGNORE'
 FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-WHERE IsNULL(CH.ysnSubstituteItem,0) = 0
+WHERE IsNULL(CH.ysnSubstituteItem, 0) = 0
 
 UPDATE CF
 SET strERPPONumber = CD.strERPPONumber
 	,strRowState = 'MODIFIED'
-	,strERPItemNumber=CD.strERPItemNumber
+	,strERPItemNumber = CD.strERPItemNumber
 FROM tblCTContractFeed CF
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CD.intSubLocationId
@@ -260,19 +267,19 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice,0) = 1
+		AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND Upper(strRowState) = 'ADDED'
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	
@@ -282,12 +289,12 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice,0) = 0
+		AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND Upper(strRowState) = 'ADDED'
@@ -308,12 +315,12 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice,0) = 1
+		AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND UPPER(strRowState) IN (
@@ -323,7 +330,7 @@ BEGIN
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	
@@ -333,12 +340,12 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice,0)
+		,IsNULL(CH.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice,0) = 0
+		AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND UPPER(strRowState) IN (
@@ -399,22 +406,21 @@ BEGIN
 		SELECT @intMinSeq = @intContractFeedId
 
 		SELECT @strContractFeedIds = @intContractFeedId
-
-		----Send Create Feed only Once
-		--IF UPPER(@strRowState) = 'ADDED'
-		--	AND (
-		--		SELECT TOP 1 UPPER(strRowState)
-		--		FROM tblCTContractFeed
-		--		WHERE intContractHeaderId = @intContractHeaderId
-		--			AND intContractFeedId < (
-		--				SELECT MIN(intContractFeedId)
-		--				FROM tblCTContractFeed
-		--				WHERE intContractHeaderId = @intContractHeaderId
-		--					AND ISNULL(strFeedStatus, '') = ''
-		--				)
-		--		ORDER BY intContractFeedId
-		--		) = 'ADDED'
-		--	GOTO NEXT_PO
+			----Send Create Feed only Once
+			--IF UPPER(@strRowState) = 'ADDED'
+			--	AND (
+			--		SELECT TOP 1 UPPER(strRowState)
+			--		FROM tblCTContractFeed
+			--		WHERE intContractHeaderId = @intContractHeaderId
+			--			AND intContractFeedId < (
+			--				SELECT MIN(intContractFeedId)
+			--				FROM tblCTContractFeed
+			--				WHERE intContractHeaderId = @intContractHeaderId
+			--					AND ISNULL(strFeedStatus, '') = ''
+			--				)
+			--		ORDER BY intContractFeedId
+			--		) = 'ADDED'
+			--	GOTO NEXT_PO
 	END
 
 	--Donot generate Modified Idoc if PO No is not there
@@ -454,7 +460,7 @@ BEGIN
 				,@strPurchasingGroup = strPurchasingGroup
 				,@strContractNumber = strContractNumber
 				,@strERPPONumber = strERPPONumber
-				,@strERPItemNumber=strERPItemNumber
+				,@strERPItemNumber = strERPItemNumber
 				,@intContractSeq = intContractSeq
 				,@strItemNo = strItemNo
 				,@strStorageLocation = strStorageLocation
@@ -464,8 +470,8 @@ BEGIN
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
-				,@dblCashPrice = dblCashPrice 
-				,@dblUnitCashPrice = dblUnitCashPrice* 100
+				,@dblCashPrice = dblCashPrice
+				,@dblUnitCashPrice = dblUnitCashPrice * 100
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = dtmStartDate
 				,@dtmEndDate = dtmEndDate
@@ -497,7 +503,7 @@ BEGIN
 					,@strPurchasingGroup = strPurchasingGroup
 					,@strContractNumber = strContractNumber
 					,@strERPPONumber = strERPPONumber
-					,@strERPItemNumber=strERPItemNumber
+					,@strERPItemNumber = strERPItemNumber
 					,@intContractSeq = Min(intContractSeq)
 					,@strItemNo = strItemNo
 					,@strStorageLocation = strStorageLocation
@@ -508,7 +514,7 @@ BEGIN
 						WHERE strUnitMeasure = strNetWeightUOM
 						)
 					,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
-					,@dblUnitCashPrice = SUM(dblUnitCashPrice  * 100* dblNetWeight) / SUM(dblNetWeight)
+					,@dblUnitCashPrice = SUM(dblUnitCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
 					,@dtmContractDate = dtmContractDate
 					,@dtmStartDate = Min(dtmStartDate)
 					,@dtmEndDate = MAX(dtmEndDate)
@@ -547,7 +553,7 @@ BEGIN
 					,@strPurchasingGroup = strPurchasingGroup
 					,@strContractNumber = strContractNumber
 					,@strERPPONumber = strERPPONumber
-					,@strERPItemNumber=strERPItemNumber
+					,@strERPItemNumber = strERPItemNumber
 					,@intContractSeq = Min(intContractSeq)
 					,@strItemNo = strItemNo
 					,@strStorageLocation = strStorageLocation
@@ -677,7 +683,7 @@ BEGIN
 		IF UPPER(@strRowState) = 'ADDED'
 		BEGIN
 			SET @strItemXml += '<E1BPMEOUTITEM>'
-			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo,'-',''), '')) + '</MATERIAL>'
+			SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo, '-', ''), '')) + '</MATERIAL>'
 			SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
 			SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
@@ -726,9 +732,7 @@ BEGIN
 					)
 				AND @ysnMaxPrice = 1
 			BEGIN
-
-					SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
-
+				SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
 			END
 
 			IF @ysnMaxPrice = 0
@@ -738,6 +742,7 @@ BEGIN
 					SET @strItemXml += '<DELETE_IND>' + 'L' + '</DELETE_IND>'
 				END
 			END
+
 			SET @strItemXml += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strERPItemNumber, '')) + '</ITEM_NO>'
 			SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 			SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
