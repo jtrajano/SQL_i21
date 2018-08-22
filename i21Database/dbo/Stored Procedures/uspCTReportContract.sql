@@ -26,6 +26,8 @@ BEGIN TRY
 			@strApprovalText			NVARCHAR(MAX),
 			@FirstApprovalId			INT,
 			@SecondApprovalId			INT,
+			@FirstApprovalFullName		NVARCHAR(MAX),
+			@SecondApprovalFullName		NVARCHAR(MAX),
 			@FirstApprovalSign			VARBINARY(MAX),
 			@SecondApprovalSign			VARBINARY(MAX),
 			@IsFullApproved				BIT = 0,
@@ -130,6 +132,9 @@ BEGIN TRY
 								FROM tblSMSignature Sig 
 								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
 								WHERE Sig.intEntityId=@SecondApprovalId
+	
+	SELECT @FirstApprovalFullName  = strName FROM tblEMEntity WHERE intEntityId = @FirstApprovalId
+	SELECT @SecondApprovalFullName = strName FROM tblEMEntity WHERE intEntityId = @SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -335,6 +340,8 @@ BEGIN TRY
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalFullName					= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalFullName ELSE NULL END
+			,SecondApprovalFullName					= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalFullName ELSE NULL END
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:'  ELSE NULL END
 			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN 'Pricing :'		ELSE NULL END
