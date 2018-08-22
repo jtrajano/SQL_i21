@@ -136,6 +136,7 @@ BEGIN
 		SET @strXml += '<WAERS>' + ISNULL(@strCurrency, '') + '</WAERS>'
 		--GL account details (Broker account)
 		SET @strXml += '<E1FISEG>'
+		SET @strXml += '<BUZEI>' + '001' + '</BUZEI>'
 		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '800' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
@@ -147,6 +148,7 @@ BEGIN
 		SET @strXml += '</E1FISEG>'
 		--GL account details (TM account)
 		SET @strXml += '<E1FISEG>'
+		SET @strXml += '<BUZEI>' + '002' + '</BUZEI>'
 		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
