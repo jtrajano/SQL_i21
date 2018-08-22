@@ -65,13 +65,13 @@ BEGIN TRY
 	FROM	vyuCTContractSequence 
 	WHERE   intContractDetailId = @intSourceDetailId
 
-	SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))
+	--SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))
 	
-	WHILE	ISNULL(@intLoadId,0) > 0
-	BEGIN
-		EXEC	uspLGCancelLoadSchedule	@intLoadId, 1, @intCreatedById
-		SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE (intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))) AND intLoadId > @intLoadId
-	END
+	--WHILE	ISNULL(@intLoadId,0) > 0
+	--BEGIN
+	--	EXEC	uspLGCancelLoadSchedule	@intLoadId, 1, @intCreatedById
+	--	SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE (intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))) AND intLoadId > @intLoadId
+	--END
 	
 	EXEC uspAPUnrestrictContractPrepay  @intSourceDetailId
 	IF ISNULL(@intWashoutDetailId,0) > 0
