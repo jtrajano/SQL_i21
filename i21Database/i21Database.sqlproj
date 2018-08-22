@@ -6454,7 +6454,6 @@
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
     <Build Include="dbo\Views\vyuSTFuelSummaryReport.sql" />
-    <Build Include="vyuAPYearMISC.sql" />
     <Build Include="dbo\Views\vyuAPYear1099B.sql" />
     <Build Include="dbo\Views\vyuAPYearPATR.sql" />
     <Build Include="dbo\Views\vyuAPYearDIV.sql" />
@@ -6971,6 +6970,8 @@
     <Build Include="dbo\Tables\tblSTstgPassportPricebookITT33.sql" />
     <None Include="Scripts\Post-Deployment\ST\23_FileFieldMapping_Passport_ILT.sql" />
     <Build Include="dbo\Tables\tblSTstgPassportPricebookItemListILT33.sql" />
+    <Build Include="dbo\Views\vyuAPYearMISC.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
