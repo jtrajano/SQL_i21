@@ -228,7 +228,7 @@ UPDATE CF
 SET strFeedStatus = 'IGNORE'
 FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-WHERE CH.ysnSubstituteItem = 0
+WHERE IsNULL(CH.ysnSubstituteItem,0) = 0
 
 UPDATE CF
 SET strERPPONumber = CD.strERPPONumber
@@ -260,19 +260,19 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND CH.ysnMaxPrice = 1
+		AND IsNULL(CH.ysnMaxPrice,0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND Upper(strRowState) = 'ADDED'
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	
@@ -282,12 +282,12 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND CH.ysnMaxPrice = 0
+		AND IsNULL(CH.ysnMaxPrice,0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND Upper(strRowState) = 'ADDED'
@@ -308,12 +308,12 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND CH.ysnMaxPrice = 1
+		AND IsNULL(CH.ysnMaxPrice,0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND UPPER(strRowState) IN (
@@ -323,7 +323,7 @@ BEGIN
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	
@@ -333,12 +333,12 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,CH.ysnMaxPrice
+		,IsNULL(CH.ysnMaxPrice,0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND CH.ysnMaxPrice = 0
+		AND IsNULL(CH.ysnMaxPrice,0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND UPPER(strRowState) IN (
@@ -362,7 +362,7 @@ BEGIN
 
 	SELECT @strSalesPerson = ''
 
-	SELECT @ysnMaxPrice = NULL
+	SELECT @ysnMaxPrice = 0
 
 	SELECT @intContractHeaderId = intContractHeaderId
 		,@strSubLocation = strSubLocation
