@@ -433,13 +433,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 											WHEN @ysnDeductFeesCusVen = 1 THEN 0
                                             WHEN @ysnDeductFeesCusVen = 0 THEN 1
 										END
-	,[ysnPrice]							= @ysnDeductFeesCusVen
+	,[ysnPrice]							= @ysnDeductFeesCusVen 
 	,[strChargesLink]					= RE.strChargesLink
 	FROM @ReceiptStagingTable RE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 	INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
-	WHERE RE.intSourceId = @intTicketId AND SC.dblTicketFees > 0
+	WHERE RE.intSourceId = @intTicketId AND SC.dblTicketFees > 0 AND RE.ysnIsStorage = 0
 
 IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
