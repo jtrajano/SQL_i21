@@ -69,7 +69,7 @@ SELECT S.intStgMatchPnSId
 	,S.dblGrossPnL
 	,S.dtmPostingDate
 	,L.strLocationName
-	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + '-' + ISNULL(strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
+	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') +  ISNULL('-' +strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
 	,1
 FROM tblRKStgMatchPnS S
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = S.intFutureMarketId
@@ -94,7 +94,7 @@ SELECT intStgOptionMatchPnSId
 	,dblGrossPnL
 	,dtmPostingDate
 	,strLocationName
-	,ISNULL(CONVERT(VARCHAR, intMatchNo), '') + '-' + ISNULL(CONVERT(VARCHAR, strBook), '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
+	,ISNULL(CONVERT(VARCHAR, intMatchNo), '')  + ISNULL('-'+strBook, '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
 	,0
 FROM tblRKStgOptionMatchPnS
 WHERE ISNULL(strStatus, '') = ''
