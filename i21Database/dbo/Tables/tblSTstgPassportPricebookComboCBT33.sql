@@ -18,5 +18,6 @@
 	[StartTime] TIME(0) NULL,
 	[StopDate] DATETIME NULL,
 	[StopTime] TIME(0) NULL,
+	[strUniqueGuid]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblSTstgPassportPricebookComboCBT33] PRIMARY KEY ([intComboSalesFile])  
 )

@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Outbound'
        ,[strXMLInitiater] = '<?xml version="1.0"?>'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 27
+       ,[intConcurrencyId] = 30
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Passport Pricebook Combo - CBT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,27)
+      ('Passport Pricebook Combo - CBT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,30)
 END
 --END CHECK HEADER
 
@@ -451,7 +451,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,16,5,'ComboList','tblSTstgPassportPricebookComboCBT33',NULL,'Header',9,NULL,1,1)
+      (@intImportFileHeaderId,NULL,16,5,'ComboList','tblSTstgPassportPricebookComboCBT33',NULL,'Header',9,NULL,1,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -468,7 +468,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 3
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -586,7 +586,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,21,2,'StartDate','tblSTstgPassportPricebookComboCBT33','StartDate',NULL,16,NULL,1,1)
+      (@intImportFileHeaderId,NULL,21,6,'StartDate','tblSTstgPassportPricebookComboCBT33','StartDate',NULL,9,NULL,1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 21 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -595,15 +595,15 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 21
-       ,[intPosition] = 2
+       ,[intPosition] = 6
        ,[strXMLTag] = 'StartDate'
        ,[strTable] = 'tblSTstgPassportPricebookComboCBT33'
        ,[strColumnName] = 'StartDate'
        ,[strDataType] = NULL
-       ,[intLength] = 16
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -613,7 +613,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,22,3,'StartTime','tblSTstgPassportPricebookComboCBT33','StartTime',NULL,16,NULL,1,1)
+      (@intImportFileHeaderId,NULL,22,7,'StartTime','tblSTstgPassportPricebookComboCBT33','StartTime',NULL,9,NULL,1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 22 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -622,15 +622,15 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 22
-       ,[intPosition] = 3
+       ,[intPosition] = 7
        ,[strXMLTag] = 'StartTime'
        ,[strTable] = 'tblSTstgPassportPricebookComboCBT33'
        ,[strColumnName] = 'StartTime'
        ,[strDataType] = NULL
-       ,[intLength] = 16
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -640,7 +640,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,23,4,'StopDate','tblSTstgPassportPricebookComboCBT33','StopDate',NULL,16,NULL,1,1)
+      (@intImportFileHeaderId,NULL,23,8,'StopDate','tblSTstgPassportPricebookComboCBT33','StopDate',NULL,9,NULL,1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 23 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -649,15 +649,15 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 23
-       ,[intPosition] = 4
+       ,[intPosition] = 8
        ,[strXMLTag] = 'StopDate'
        ,[strTable] = 'tblSTstgPassportPricebookComboCBT33'
        ,[strColumnName] = 'StopDate'
        ,[strDataType] = NULL
-       ,[intLength] = 16
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -667,7 +667,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,24,5,'StopTime','tblSTstgPassportPricebookComboCBT33','StopTime',NULL,16,NULL,1,1)
+      (@intImportFileHeaderId,NULL,24,9,'StopTime','tblSTstgPassportPricebookComboCBT33','StopTime',NULL,9,NULL,1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 24 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -676,15 +676,15 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 24
-       ,[intPosition] = 5
+       ,[intPosition] = 9
        ,[strXMLTag] = 'StopTime'
        ,[strTable] = 'tblSTstgPassportPricebookComboCBT33'
        ,[strColumnName] = 'StopTime'
        ,[strDataType] = NULL
-       ,[intLength] = 16
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 

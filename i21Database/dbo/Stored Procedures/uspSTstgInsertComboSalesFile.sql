@@ -8,7 +8,7 @@
 	, @strResult NVARCHAR(1000) OUTPUT
 AS
 BEGIN
-	
+
 	DECLARE @strFilePrefix AS NVARCHAR(10) = 'CBT'
 
 	DECLARE @strRegister NVARCHAR(200)
@@ -37,7 +37,6 @@ BEGIN
 
 				RETURN
 		END
-
 	--IF EXISTS(SELECT IFH.intImportFileHeaderId 
 	--				  FROM dbo.tblSMImportFileHeader IFH
 	--				  JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
@@ -72,9 +71,15 @@ BEGIN
 	-- PASSPORT
 	IF(@strRegisterClass = 'PASSPORT')
 		BEGIN
+			-- Create Unique Identifier
+			-- Handles multiple Update of registers by different Stores
+			DECLARE @strUniqueGuid AS NVARCHAR(50) = NEWID()
+
+			-- Table and Condition
+			DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookComboCBT33~strUniqueGuid=''' + @strUniqueGuid + ''''
+
 			IF(@dblXmlVersion = 3.40)
-				BEGIN
-					
+				BEGIN					
 					INSERT INTO tblSTstgPassportPricebookComboCBT33
 					(
 						[StoreLocationID], 
@@ -93,7 +98,8 @@ BEGIN
 						[StartDate],
 						[StartTime],
 						[StopDate],
-						[StopTime] 
+						[StopTime],
+						[strUniqueGuid]
 					)
 					SELECT DISTINCT
 						ST.intStoreNo AS [StoreLocationID]
@@ -119,25 +125,43 @@ BEGIN
 						, CONVERT(varchar, CAST('0:00:01' AS TIME), 108) AS [StartTime]
 						, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) AS [StopDate]
 						, CONVERT(varchar, CAST('23:59:59' AS TIME), 108) AS [StopTime] 
-					from tblICItem I
-					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId 
-					JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
-					JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
-					JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
-					JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
-					JOIN tblSTPromotionItemList PIL ON PIL.intPromoItemListId = PSLD.intPromoItemListId
-					JOIN tblSTPromotionItemListDetail PILD ON PILD.intPromoItemListId = PIL.intPromoItemListId
-					JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PILD.intItemUOMId 
-					JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-					WHERE R.intRegisterId = @Register  AND ST.intStoreId = @StoreLocation AND PSL.strPromoType = 'C'
+						, @strUniqueGuid AS [strUniqueGuid]
+					FROM tblICItem I
+					JOIN tblICItemLocation IL 
+						ON IL.intItemId = I.intItemId
+					JOIN tblSMCompanyLocation L 
+						ON L.intCompanyLocationId = IL.intLocationId 
+					JOIN tblSTStore ST 
+						ON ST.intCompanyLocationId = L.intCompanyLocationId 
+					JOIN tblSTRegister R 
+						ON R.intStoreId = ST.intStoreId
+					JOIN tblSTPromotionSalesList PSL 
+						ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
+					JOIN tblSTPromotionSalesListDetail PSLD 
+						ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+					JOIN tblSTPromotionItemList PIL 
+						ON PIL.intPromoItemListId = PSLD.intPromoItemListId
+					JOIN tblSTPromotionItemListDetail PILD 
+						ON PILD.intPromoItemListId = PIL.intPromoItemListId
+					JOIN tblICItemUOM IUOM 
+						ON IUOM.intItemUOMId = PILD.intItemUOMId 
+					JOIN tblICUnitMeasure IUM 
+						ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+					WHERE R.intRegisterId = @Register  
+					AND ST.intStoreId = @StoreLocation 
+					AND PSL.strPromoType = 'C'
 					AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
 
-					--Generate XML for the pricebook data availavle in staging table
-					EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPassportPricebookComboCBT33~intComboSalesFile > 0', 0, @strGenerateXML OUTPUT
+					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookComboCBT33)
+						BEGIN
+							--Generate XML for the pricebook data availavle in staging table
+							EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGenerateXML OUTPUT
 
-					--Once XML is generated delete the data from pricebook staging table.
-					DELETE FROM tblSTstgPassportPricebookComboCBT33
+							--Once XML is generated delete the data from pricebook staging table.
+							DELETE FROM tblSTstgPassportPricebookComboCBT33
+							WHERE strUniqueGuid = @strUniqueGuid
+						END
+					
 				END
 		END
 	-- RADIANT

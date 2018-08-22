@@ -10,5 +10,6 @@
     [ItemListDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
     [POSCodeFormatFormat] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [POSCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[strUniqueGuid]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblSTstgPassportPricebookItemListILT33] PRIMARY KEY ([intPromotionItemListSend])
 )

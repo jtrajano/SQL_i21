@@ -50,6 +50,13 @@ BEGIN
 		BEGIN
 			IF(@dblXmlVersion = 3.40)
 				BEGIN
+					-- Create Unique Identifier
+					-- Handles multiple Update of registers by different Stores
+					DECLARE @strUniqueGuid AS NVARCHAR(50) = NEWID()
+
+					-- Table and Condition
+					DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookItemListILT33~strUniqueGuid=''' + @strUniqueGuid + ''''
+
 					INSERT INTO tblSTstgPassportPricebookItemListILT33
 					(
 						[StoreLocationID] , 
@@ -60,7 +67,8 @@ BEGIN
 						[ItemListID], 
 						[ItemListDescription], 
 						[POSCodeFormatFormat], 
-						[POSCode]
+						[POSCode],
+						[strUniqueGuid]
 					)
 					SELECT DISTINCT
 					    ST.intStoreNo AS [StoreLocationID]
@@ -89,7 +97,8 @@ BEGIN
 							WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
 								THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 							ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
-						END [POSCode]
+						END [POSCode],
+						@strUniqueGuid AS [strUniqueGuid]
 					FROM tblICItem I
 					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 					JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
@@ -103,11 +112,15 @@ BEGIN
 					WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
 					AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 
-					--Generate XML for the pricebook data availavle in staging table
-					Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPassportPricebookItemListILT33~intPromotionItemListSend > 0', 0, @strGenerateXML OUTPUT
+					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookItemListILT33)
+						BEGIN
+							-- Generate XML for the pricebook data availavle in staging table
+							Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGenerateXML OUTPUT
 
-					--Once XML is generated delete the data from pricebook  staging table.
-					DELETE FROM [tblSTstgPassportPricebookItemListILT33]	
+							--Once XML is generated delete the data from pricebook  staging table.
+							DELETE FROM dbo.tblSTstgPassportPricebookItemListILT33
+							WHERE strUniqueGuid = @strUniqueGuid
+						END
 				END
 		END
 	ELSE IF(@strRegisterClass = 'RADIANT')

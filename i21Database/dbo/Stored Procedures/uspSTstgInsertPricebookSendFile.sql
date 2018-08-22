@@ -105,6 +105,13 @@ BEGIN
 	-- PASSPORT
 	IF(@strRegisterClass = 'PASSPORT')
 		BEGIN
+			-- Create Unique Identifier
+			-- Handles multiple Update of registers by different Stores
+			DECLARE @strUniqueGuid AS NVARCHAR(50) = NEWID()
+
+			-- Table and Condition
+			DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookITT33~strUniqueGuid=''' + @strUniqueGuid + ''''
+
 			IF(@dblXmlVersion = 3.40)
 				BEGIN
 					--Insert data into Procebook staging table	
@@ -133,7 +140,8 @@ BEGIN
 								[PriceMethodCode],
 								[ReceiptDescription],
 								[FoodStampableFlg],
-								[QuantityRequiredFlg]
+								[QuantityRequiredFlg],
+								[strUniqueGuid]
 							)
 							SELECT DISTINCT
 								ST.intStoreNo AS [StoreLocationID], 
@@ -198,7 +206,8 @@ BEGIN
 								0 AS [PriceMethodCode],
 								IL.strDescription AS [ReceiptDescription],
 								IL.ysnFoodStampable AS [FoodStampableFlg],
-								IL.ysnQuantityRequired AS [QuantityRequiredFlg]
+								IL.ysnQuantityRequired AS [QuantityRequiredFlg],
+								@strUniqueGuid AS [strUniqueGuid]
 							FROM tblICItem I
 							JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 							JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
@@ -214,7 +223,6 @@ BEGIN
 							JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 							WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
 
-							
 						END
 					ELSE IF(@ExportEntirePricebookFile = 0)
 						BEGIN
@@ -241,7 +249,8 @@ BEGIN
 								[PriceMethodCode],
 								[ReceiptDescription],
 								[FoodStampableFlg],
-								[QuantityRequiredFlg]
+								[QuantityRequiredFlg],
+								[strUniqueGuid]
 							)
 							SELECT DISTINCT
 								ST.intStoreNo AS [StoreLocationID], 
@@ -306,7 +315,8 @@ BEGIN
 								0 AS [PriceMethodCode],
 								IL.strDescription AS [ReceiptDescription],
 								IL.ysnFoodStampable AS [FoodStampableFlg],
-								IL.ysnQuantityRequired AS [QuantityRequiredFlg]
+								IL.ysnQuantityRequired AS [QuantityRequiredFlg],
+								@strUniqueGuid AS [strUniqueGuid]
 							FROM tblICItem I
 							JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 							JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
@@ -328,10 +338,11 @@ BEGIN
 					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookITT33)
 						BEGIN
 							-- Generate XML for the pricebook data availavle in staging table
-							Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPassportPricebookITT33~intPricebookSendFile > 0', 0, @strGenerateXML OUTPUT
+							Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGenerateXML OUTPUT
 
 							--Once XML is generated delete the data from pricebook  staging table.
 							DELETE FROM dbo.tblSTstgPassportPricebookITT33
+							WHERE strUniqueGuid = @strUniqueGuid
 						END
 				END
 		END

@@ -23,5 +23,6 @@
 	[ReceiptDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[FoodStampableFlg] BIT NULL,
 	[QuantityRequiredFlg] BIT NULL,
+	[strUniqueGuid]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblSTstgPassportPricebookITT33] PRIMARY KEY ([intPricebookSendFile])  
 )
