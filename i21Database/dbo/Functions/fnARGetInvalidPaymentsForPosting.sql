@@ -867,6 +867,7 @@ BEGIN
 			PD.intInvoiceId
 		HAVING
 			COUNT(PD.intInvoiceId) > 1
+            AND @Post = 1
 				
 		WHILE(EXISTS(SELECT TOP 1 NULL FROM @InvoiceIdsForChecking))
 		BEGIN
