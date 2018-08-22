@@ -299,6 +299,12 @@ BEGIN TRY
 				WHERE strReferenceNo = @strRefNo
 					AND ISNULL(strStatus, '') = 'Awt Ack'
 
+				UPDATE tblRKStgOptionMatchPnS
+				SET strStatus = 'Ack Rcvd'
+					,strMessage = 'Success'
+				WHERE strReferenceNo = @strRefNo
+					AND ISNULL(strStatus, '') = 'Awt Ack'
+
 				INSERT INTO @tblMessage (
 					strMessageType
 					,strMessage
@@ -318,6 +324,12 @@ BEGIN TRY
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 				UPDATE tblRKStgMatchPnS
+				SET strStatus = 'Ack Rcvd'
+					,strMessage = @strMessage
+				WHERE strReferenceNo = @strRefNo
+					AND ISNULL(strStatus, '') = 'Awt Ack'
+
+				UPDATE tblRKStgOptionMatchPnS
 				SET strStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
 				WHERE strReferenceNo = @strRefNo

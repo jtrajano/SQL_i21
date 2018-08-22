@@ -17,5 +17,6 @@
 	   [strUserName] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL,
 	   strReferenceNo nvarchar(MAX) COLLATE Latin1_General_CI_AS  NULL,
 	   strStatus nvarchar(50),
+	   [strMessage] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
     CONSTRAINT [PK_tblRKStgOptionMatchPnS_intStgOptionMatchPnSId] PRIMARY KEY (intStgOptionMatchPnSId)  
 )
