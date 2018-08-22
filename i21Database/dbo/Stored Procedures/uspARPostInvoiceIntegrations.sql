@@ -36,8 +36,10 @@ BEGIN
 END
 
 --Contracts 
-EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
-
+IF(NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intTicketId IS NOT NULL and intInvoiceId = @intTransactionId))
+BEGIN
+	EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
+END
 --Prepaids
 
 --EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @intTransactionId, @ysnPost
