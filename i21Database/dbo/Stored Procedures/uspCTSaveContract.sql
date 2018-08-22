@@ -163,7 +163,7 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
 		END
 
-		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8)
+		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
 			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)  WHERE intContractDetailId = @intContractDetailId
 			
