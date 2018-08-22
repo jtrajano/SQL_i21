@@ -370,7 +370,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId AND dblTicketFees != 0
 		) SC
 		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
-		WHERE RE.intSourceId = @intDeliverySheetId AND SC.dblTicketFees > 0
+		WHERE RE.intSourceId = @intDeliverySheetId AND SC.dblTicketFees > 0 AND RE.ysnIsStorage = 0
 
 IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
@@ -458,7 +458,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			,[intContractHeaderId]				= RE.intContractHeaderId
 			,[intContractDetailId]				= RE.intContractDetailId
 			,[ysnAccrue]						= ISNULL(ContractCost.ysnAccrue, @ysnAccrue)
-			,[ysnPrice]							= ISNULL(ContractCost.ysnPrice, @ysnPrice)
+			,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ISNULL(ContractCost.ysnPrice, @ysnPrice) ELSE 0 END
 			,[strChargesLink]					= RE.strChargesLink
 			FROM @ReceiptStagingTable RE 
 			INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = RE.intSourceId
@@ -524,7 +524,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 		,[intContractHeaderId]				= RE.intContractHeaderId
 		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= ContractCost.ysnAccrue
-		,[ysnPrice]							= ContractCost.ysnPrice
+		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
 		FROM tblCTContractCost ContractCost
 		LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
