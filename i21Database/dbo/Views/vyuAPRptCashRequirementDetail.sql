@@ -5,6 +5,7 @@ SELECT * FROM
 (
 SELECT DISTINCT
 	 strVendorName = E.strName 
+	,Item.strDescription
 	,CH.strContractNumber
 	,strTicketNumber =
 		(CASE 
@@ -44,13 +45,7 @@ SELECT DISTINCT
 	,IR.strReceiptNumber
 	,APB.intBillId
 	,APB.strBillId
-	,strFarmField = (CASE WHEN IR.intSourceType = 4 THEN
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = V.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblGRCustomerStorage GR 
-			INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId 
-			WHERE intCustomerStorageId = IRI.intSourceId))
-		ELSE
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = V.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblSCTicket SC WHERE intTicketId = IRI.intSourceId))
-		END)
+	,strFarmField = EML.strLocationName
 	,APB.dtmDueDate
 	,IR.dtmCreated
 	,dblNetWeight = (CASE WHEN APBD.intInventoryReceiptChargeId > 0 THEN APBD.dblQtyReceived ELSE  APBD.dblNetWeight END)
@@ -104,6 +99,8 @@ SELECT DISTINCT
 		ON IR.intInventoryReceiptId = SD.intInventoryReceiptItemId
 	LEFT JOIN tblSCTicket SC 
 		ON SC.intTicketId = IRI.intSourceId
+	LEFT JOIN tblEMEntityLocation EML
+		ON V.intEntityId = EML.intEntityId and strLocationType = 'Farm'
 	OUTER APPLY (
 				SELECT 
 					SUM(dblTotal) AS dblTotal,
