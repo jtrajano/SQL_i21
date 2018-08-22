@@ -188,24 +188,6 @@ BEGIN
 
     UNION
 
-    --Return Payment not allowed
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Return Payment is not allowed.'
-	FROM
-		@Payments P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NULL
-        AND P.[strPaymentMethod] = 'ACH'
-        AND P.[ysnInvoicePrepayment] = 0
-        AND P.[dblAmountPaid] < @ZeroDecimal
-
-    UNION
     --Negative Payment is not allowed.
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -213,13 +195,13 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Negative Payment is not allowed.'
+        ,[strError]                 = 'Return Payment is not allowed for non-ACH and CF Invoice Payment Methods.'
 	FROM
 		@Payments P
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NULL
-        AND P.[strPaymentMethod] <> 'ACH'
+        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice')
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 
