@@ -6453,7 +6453,6 @@
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
     <Build Include="dbo\Views\vyuSTFuelSummaryReport.sql" />
-    <Build Include="vyuAPYearMISC.sql" />
     <Build Include="dbo\Views\vyuAPYear1099B.sql" />
     <Build Include="dbo\Views\vyuAPYearPATR.sql" />
     <Build Include="dbo\Views\vyuAPYearDIV.sql" />
@@ -6941,6 +6940,7 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableCompleted.sql" />
     <None Include="Scripts\Post-Deployment\AP\VoucherPayableDefaultData.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateCertificate.sql" />
+    <Build Include="dbo\Views\vyuAPYearMISC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7124,6 +7124,7 @@
     <None Include="Scripts\Post-Deployment\SM\1830_ReIndexTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\1830_CreateReIndexMaintenancePlan.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

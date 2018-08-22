@@ -59,7 +59,7 @@ SELECT	DISTINCT
 						,dblOpenQty
 						,strContainerNumber
 						,dblUnitCost
-				FROM	vyuICGetInventoryReceiptVoucherItems items
+				FROM	[vyuAPGetInventoryClearingReceiptVoucherItems] items
 				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
 			OUTER APPLY (
