@@ -29,7 +29,7 @@ DECLARE @strRiskView nvarchar(200)
 DECLARE @strFutureMonth  nvarchar(15) ,@dblForecastWeeklyConsumption numeric(24,10)
 declare @strParamFutureMonth nvarchar(12)  
 SELECT @dblContractSize= convert(int,dblContractSize) FROM tblRKFutureMarket WHERE intFutureMarketId=@intFutureMarketId  
-SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate,@strParamFutureMonth=strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId=@intFutureMonthId  
+SELECT TOP 1 @dtmFutureMonthsDate=CONVERT(DATETIME,'01 '+strFutureMonth),@strParamFutureMonth=strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId=@intFutureMonthId  
 
 SELECT TOP 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUOMId  
 DECLARE @intoldUnitMeasureId int 
@@ -272,7 +272,7 @@ SELECT fm.strFutureMonth
        ,cv.intCommodityId
        ,cv.intCompanyLocationId
        ,cv.intFutureMarketId
-       ,dtmFutureMonthsDate
+       ,CONVERT(DATETIME,'01 '+cv.strFutureMonth) dtmFutureMonthsDate
        ,ysnExpired
        ,isnull(pl.ysnDeltaHedge, 0) ysnDeltaHedge
        ,intContractStatusId
