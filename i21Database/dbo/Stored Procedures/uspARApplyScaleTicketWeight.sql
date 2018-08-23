@@ -137,8 +137,6 @@ BEGIN
 				ON VCT.intContractHeaderId = CCD.intContractHeaderId AND VCT.intContractDetailId = CCD.intContractDetailId
 			WHERE intInvoiceId = @intNewInvoiceId AND VCT.dblAvailableQty = 0
 
-			SELECT * FROM vyuCTCustomerContract WHERE intContractHeaderId = 8
-
 			CREATE TABLE #CONTRACTLINEITEMS(
 				Id INT IDENTITY(1,1),
 				intInvoiceDetailId INT,
@@ -182,9 +180,6 @@ BEGIN
 					IF((SELECT @_dblShipQty - @_overageQty) = 0)
 					BEGIN
 						SET @_dblShipQty = 0;
-						UPDATE #SEQUENCEAVAILABLE
-						SET dblAvailableQty = dblAvailableQty - @_overageQty
-						WHERE intContractSeq = @_intContractSeq AND intContractHeaderId = @_intContractHeaderIdA AND intContractDetailId = @_intContractDetailIdA
 
 						INSERT INTO #CONTRACTLINEITEMS
 						SELECT @_intInvoiceDetailId intInvoiceDetailId,@_intContractDetailIdA intContractDetailId,@_intContractHeaderIdA intContractHeaderId,@_overageQty dblShippedQty 
@@ -194,9 +189,6 @@ BEGIN
 					ELSE
 						BEGIN
 							SET @_dblShipQty = @_dblShipQty - @_dblAvailableQty;
-							UPDATE #SEQUENCEAVAILABLE
-							SET dblAvailableQty = dblAvailableQty - @_overageQty
-							WHERE intContractSeq = @_intContractSeq AND intContractHeaderId = @_intContractHeaderIdA AND intContractDetailId = @_intContractDetailIdA
 
 							INSERT INTO #CONTRACTLINEITEMS
 							SELECT @_intInvoiceDetailId intInvoiceDetailId,@_intContractDetailIdA intContractDetailId,@_intContractHeaderIdA intContractHeaderId,@_overageQty dblShippedQty 
@@ -215,6 +207,9 @@ BEGIN
 			END
 			CLOSE OverageInvoiceLines
 			DEALLOCATE OverageInvoiceLines
+
+			INSERT INTO #CONTRACTLINEITEMS
+			SELECT intInvoiceDetailId,NULL,NULL,dblShipQty FROM #OVERAGEINVOICELINE
 
 			INSERT INTO #CONTRACTLINEITEMS
 			SELECT DISTINCT ID1.intInvoiceDetailId,ID1.intContractDetailId,ID1.intContractHeaderId,CAST(0 AS NUMERIC(18,6)) as dblShippedQty  FROM tblARInvoiceDetail ID
