@@ -140,7 +140,7 @@ BEGIN
 		SET @strXml += '<BLDAT>' + ISNULL(CONVERT(VARCHAR(10), @dtmMatchDate, 112), '') + '</BLDAT>'
 		SET @strXml += '<XBLNR>' + ISNULL(@strReferenceNo, '') + '</XBLNR>'
 		SET @strXml += '<BKTXT>' + '' + '</BKTXT>'
-		SET @strXml += '<WAERS>' + ISNULL(@strCurrency, '') + '</WAERS>'
+		SET @strXml += '<WAERS>' + ISNULL('USD', '') + '</WAERS>'
 		--GL account details (Broker account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BUZEI>' + '001' + '</BUZEI>'
