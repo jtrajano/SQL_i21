@@ -283,6 +283,11 @@ BEGIN TRY
 
 				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
+				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+				BEGIN 
+							EXEC dbo.uspGLBookEntries @GLEntries, 0 
+				END
+
 		-- Unpost storage stocks. 
 				 EXEC	
 				 @intReturnValue = dbo.uspICUnpostStorage
@@ -293,6 +298,60 @@ BEGIN TRY
 				,0
 		
 				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
+
+				DELETE FROM @GLEntries
+					
+					INSERT INTO @GLEntries 
+					(
+					 [dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+				)
+				EXEC uspGRCreateGLEntries 
+					 'Storage Settlement'
+					,'OtherCharges'
+					,@intSettleStorageId
+					,@strBatchId
+					,@UserId
+					,0
+						
+				UPDATE @GLEntries 
+				SET dblDebit = dblCredit
+				,dblCredit   = dblDebit
+						
+				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+				BEGIN 
+							EXEC dbo.uspGLBookEntries @GLEntries, 0 
+				END
 
 			END
 
