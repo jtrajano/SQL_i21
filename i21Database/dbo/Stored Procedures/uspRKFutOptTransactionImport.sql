@@ -54,14 +54,23 @@ INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransac
 									dtmFilledDate,intBookId,intSubBookId,dtmCreateDateTime)
 
 SELECT 1,* FROM #temp 
+
+
 END
 select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 
 UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
 COMMIT TRAN
-SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime FROM tblRKFutOptTransactionImport_ErrLog
+--SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+--		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+--		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime FROM tblRKFutOptTransactionImport_ErrLog
+
+--This will return the newly created Derivative Entry
+SELECT DE.strInternalTradeNo AS Result1,DE.strBrokerTradeNo AS Result2,DE.dtmFilledDate AS Result3 
+FROM tblRKFutOptTransaction DE 
+WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+
+
 DELETE FROM tblRKFutOptTransactionImport
 
 END TRY
