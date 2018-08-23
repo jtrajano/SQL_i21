@@ -112,7 +112,7 @@ BEGIN TRY
 		SELECT @Line_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5CRD'
 		SELECT @Line_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5FLT'
 
-		SET @Line_6 = @Line_2 + @Line_3 + @Line_4 + @Line_5
+		SET @Line_6 = @Line_2 + CONVERT(NUMERIC(18), @Line_3) + @Line_4 + @Line_5
 
 		SET @Line_7 = @Line_6 * @TaxRate
 

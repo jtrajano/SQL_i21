@@ -43,11 +43,13 @@ BEGIN TRY
 		DECLARE @RCId INT = NULL
 		, @FormCode NVARCHAR(50) = NULL
 		, @ScheduleCode NVARCHAR(50) = NULL
+		, @TaxAuthorityCode NVARCHAR(50) = NULL
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
 		SELECT TOP 1 @FormCode = strFormCode
 			, @ScheduleCode = strScheduleCode
+			, @TaxAuthorityCode = strTaxAuthorityCode
 		FROM tblTFReportingComponent
 		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 		WHERE intReportingComponentId = @RCId
@@ -784,33 +786,36 @@ BEGIN TRY
 		) tblTransactions
 
 		-- MFT-1228
-		IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
+		IF(@TaxAuthorityCode = 'OR')
 		BEGIN
-			-- Include all CF Trans for schedule 5CRD and 6CRD 
-			DELETE @tmpInvoiceTransaction WHERE intId IN (
-				SELECT Trans.intId
-				FROM @tmpInvoiceTransaction Trans
-				LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
-				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-				WHERE Trans.strTransactionType = 'Invoice'
-				AND Trans.intReportingComponentId = @RCId
-				AND Invoice.strType <> 'CF Tran'
-			)
+			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
+			BEGIN
+				-- Include all CF Trans for schedule 5CRD and 6CRD 
+				DELETE @tmpInvoiceTransaction WHERE intId IN (
+					SELECT Trans.intId
+					FROM @tmpInvoiceTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strType <> 'CF Tran'
+				)
+			END
+			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
+			BEGIN
+				-- Exclude all non CF Trans for schedule 5BLK and 6BLK
+				DELETE @tmpInvoiceTransaction WHERE intId IN (
+					SELECT Trans.intId
+					FROM @tmpInvoiceTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strType = 'CF Tran'
+				)
+			END
 		END
-		ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
-		BEGIN
-			-- Exclude all non CF Trans for schedule 5BLK and 6BLK
-			DELETE @tmpInvoiceTransaction WHERE intId IN (
-				SELECT Trans.intId
-				FROM @tmpInvoiceTransaction Trans
-				LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
-				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-				WHERE Trans.strTransactionType = 'Invoice'
-				AND Trans.intReportingComponentId = @RCId
-				AND Invoice.strType = 'CF Tran'
-			)
-		END
-	
+
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
@@ -881,10 +886,10 @@ BEGIN TRY
 					ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
 					WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
 				, intItemId
-				, CONVERT(DECIMAL(18), dblQtyShipped)
-				, CONVERT(DECIMAL(18), dblGross)
-				, CONVERT(DECIMAL(18), dblNet)
-				, CONVERT(DECIMAL(18), dblBillQty)
+				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblQtyShipped) ELSE CONVERT(DECIMAL(18), dblQtyShipped) END
+				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblGross) ELSE CONVERT(DECIMAL(18), dblGross) END
+				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblNet) ELSE CONVERT(DECIMAL(18), dblNet) END
+				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblBillQty) ELSE CONVERT(DECIMAL(18), dblBillQty) END
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
