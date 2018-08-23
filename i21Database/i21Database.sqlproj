@@ -6974,6 +6974,8 @@
     <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
     <None Include="Scripts\Post-Deployment\ST\24_FileFieldMapping_Passport_MMT.sql" />
     <Build Include="dbo\Tables\tblSTstgPassportPricebookMixMatchMMT33.sql" />
+    <Build Include="dbo\Tables\tblSMTruck.sql" />
+    <Build Include="dbo\Tables\tblSMTruckDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
