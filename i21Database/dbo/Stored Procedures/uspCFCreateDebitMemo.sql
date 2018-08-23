@@ -587,24 +587,25 @@ BEGIN
 		,[dblItemTermDiscount]
 		,[strDocumentNumber]
 		FROM @EntriesForInvoice
-
-
 		
 
-		--SELECT intSalesAccountId,intCompanyLocationId,intEntityId,dblPrice,dblQtyShipped,* FROM @EntriesForInvoice
-		--SELECT intSalesAccountId,intCompanyLocationId,intEntityId,dblPrice,dblQtyShipped,* FROM @InvoiceEntriesTEMP
+
+		UPDATE @InvoiceEntriesTEMP 
+		SET 
+			 strTransactionType	= CASE WHEN groupedData.dblGroupedPrice > 0 THEN 'Debit Memo' ELSE 'Credit Memo' END
+			,dblPrice = CASE WHEN groupedData.dblGroupedPrice > 0 THEN dblPrice ELSE dblPrice * -1 END
+		FROM 
+			( 
+				SELECT intEntityCustomerId AS intGroupedEntityCustomerId, strSourceId AS strGroupedSource, SUM(dblPrice) AS dblGroupedPrice FROM @InvoiceEntriesTEMP
+				GROUP BY intEntityCustomerId, strSourceId 
+			) AS groupedData
+		WHERE intEntityCustomerId = groupedData.intGroupedEntityCustomerId
+		AND strSourceId = groupedData.strGroupedSource
 
 
-		
-		--SELECT dblPrice,dblQtyShipped,* FROM @InvoiceEntriesTEMP
-
-		----------CREATE DEBIT MEMOS------------
-
-		SELECT * FROM @InvoiceEntriesTEMP
 
 		DECLARE @LogId INT
 
-		--select * from @InvoiceEntriesTEMP
 
 		SET @executedLine = 7
 		EXEC [dbo].[uspARProcessInvoicesByBatch]
@@ -616,17 +617,6 @@ BEGIN
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@LogId				= @LogId OUTPUT
 
-		
-		--EXEC [dbo].[uspARProcessInvoices]
-		-- @InvoiceEntries	 = @InvoiceEntriesTEMP
-		--,@LineItemTaxEntries = @TaxDetails
-		--,@UserId			= 1
-		--,@GroupingOption	= 11
-		--,@RaiseError		= 1
-		--,@ErrorMessage		= @ErrorMessage		OUTPUT
-		--,@CreatedIvoices	= @CreatedIvoices	OUTPUT
-		--,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
-		----------------------------------------
 
 		
 		SET @executedLine = 8
