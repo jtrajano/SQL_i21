@@ -283,6 +283,8 @@ BEGIN TRY
 			,0
 			,@strTransferNo
 			,@intUserId;
+
+		SELECT @dblAdjustByQuantity = - @dblNewWeight
 	END
 
 	UPDATE tblMFWorkOrderInputLot
