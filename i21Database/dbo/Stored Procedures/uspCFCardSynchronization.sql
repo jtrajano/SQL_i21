@@ -599,6 +599,61 @@ BEGIN
 		END
 
 	END
+	ELSE
+	BEGIN
+	DECLARE @ysnVehicleStatus BIT = 0
+		IF(ISNULL(@strCardStatus,'') != '')
+		BEGIN
+			IF(@strCardStatus = 'V')
+			BEGIN
+				SET @ysnVehicleStatus = 1
+			END
+			ELSE IF(@strCardStatus = 'I')
+			BEGIN
+				SET @ysnVehicleStatus = 0
+			END
+			ELSE
+			BEGIN
+				print 'Invalid vehicle status'
+				INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strVehicleNumber
+					,'Invalid vehicle status' as strMessage
+					,@strErrorRecordId
+					,@dtmImportDate
+				RETURN
+			END
+		END
+		ELSE
+		BEGIN
+			print 'Invalid vehicle status'
+		INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strVehicleNumber
+				,'Invalid vehicle status' as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+			RETURN
+		END
+	END
 	----------------------VALIDATIONS-----------------------
 
 
@@ -981,11 +1036,13 @@ BEGIN
  				 intAccountId
 				,strVehicleNumber
 				,strVehicleDescription
+				,ysnActive
 			)
 			SELECT
 				 @intAccountId
 				,@strVehicleNumber
 				,@strLabel
+				,@ysnVehicleStatus
 
 			SET @intAddVehicleIdentity = SCOPE_IDENTITY()
 
@@ -1168,11 +1225,13 @@ BEGIN
 		UPDATE tblCFTempCSUVehicle SET 
 		 strVehicleNumber		= @strVehicleNumber
 		,strVehicleDescription	= @strLabel
+		,ysnActive				= @ysnVehicleStatus
 		WHERE intVehicleId = @intVehicleId
 
 		UPDATE tblCFVehicle SET 
 		 strVehicleNumber		= @strVehicleNumber
 		,strVehicleDescription	= @strLabel
+		,ysnActive				= @ysnVehicleStatus
 		WHERE intVehicleId = @intVehicleId
 
 		INSERT INTO tblCFCSUAuditLog
