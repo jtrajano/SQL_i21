@@ -194,7 +194,7 @@ BEGIN
 		,intStorageScheduleTypeId	= CASE
 									  WHEN LI.ysnIsStorage = 0 THEN  
 										CASE 
-											WHEN ISNULL(SC.intStorageScheduleTypeId,0) > 0 THEN SC.intStorageScheduleTypeId
+											WHEN ISNULL(LI.intTransactionDetailId, 0) > 0 THEN LI.intStorageScheduleTypeId
 											ELSE NULL
 										END
 									  WHEN LI.ysnIsStorage = 1 THEN 
