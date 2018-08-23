@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @intReceiptId INT
 	DECLARE @strContractSeq NVARCHAR(50)
 	DECLARE @intLoadStgId INT
+		,@ysnMaxPrice BIT
 
 	SET @strXml = REPLACE(@strXml, 'utf-8' COLLATE Latin1_General_CI_AS, 'utf-16' COLLATE Latin1_General_CI_AS)
 
@@ -115,6 +116,7 @@ BEGIN TRY
 		IF @strMesssageType = 'PURCONTRACT_CREATE01'
 		BEGIN
 			SELECT @intContractHeaderId = intContractHeaderId
+				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
@@ -136,7 +138,13 @@ BEGIN TRY
 						,strERPItemNumber = @strPOItemNo
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intContractHeaderId = @intContractHeaderId
-						AND intContractDetailId = @strTrackingNo
+						AND intContractDetailId = (
+							CASE 
+								WHEN ISNULL(@ysnMaxPrice, 0) = 0
+									THEN @strTrackingNo
+								ELSE intContractDetailId
+								END
+							)
 
 					UPDATE tblCTContractHeader
 					SET intConcurrencyId = intConcurrencyId + 1
@@ -150,7 +158,13 @@ BEGIN TRY
 					,strERPPONumber = @strParam
 					,strERPItemNumber = @strPOItemNo
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = @strTrackingNo
+					AND intContractDetailId = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractDetailId
+							END
+						)
 					AND ISNULL(strFeedStatus, '') IN (
 						'Awt Ack'
 						,'Ack Rcvd'
@@ -161,16 +175,14 @@ BEGIN TRY
 				SET strERPPONumber = @strParam
 					,strERPItemNumber = @strPOItemNo
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = @strTrackingNo
+					AND intContractDetailId = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractDetailId
+							END
+						)
 					AND ISNULL(strFeedStatus, '') = ''
-
-				--update po details in shipping instruction/advice staging table
-				UPDATE sld
-				SET sld.strExternalPONumber = @strParam
-					,sld.strExternalPOItemNumber = @strPOItemNo
-				FROM tblLGLoadDetailStg sld
-				JOIN tblLGLoadDetail ld ON sld.intLoadDetailId = ld.intLoadDetailId
-				WHERE ld.intPContractDetailId = @strTrackingNo
 
 				INSERT INTO @tblMessage (
 					strMessageType
@@ -216,6 +228,7 @@ BEGIN TRY
 		IF @strMesssageType = 'PURCONTRACT_CHANGE01'
 		BEGIN
 			SELECT @intContractHeaderId = intContractHeaderId
+				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
@@ -236,13 +249,25 @@ BEGIN TRY
 						,strERPItemNumber = @strPOItemNo
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intContractHeaderId = @intContractHeaderId
-						AND intContractDetailId = @strTrackingNo
+						AND intContractDetailId = (
+							CASE 
+								WHEN ISNULL(@ysnMaxPrice, 0) = 0
+									THEN @strTrackingNo
+								ELSE intContractDetailId
+								END
+							)
 
 				UPDATE tblCTContractFeed
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = 'Success'
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = @strTrackingNo
+					AND intContractDetailId = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractDetailId
+							END
+						)
 					AND strFeedStatus IN (
 						'Awt Ack'
 						,'Ack Rcvd'
@@ -289,7 +314,7 @@ BEGIN TRY
 		END
 
 		--Profit & Loss
-		IF @strMesssageType = 'FIDCCP02'
+		IF @strMesssageType = 'FIDCC2'
 		BEGIN
 			IF @strStatus IN (53) --Success
 			BEGIN
