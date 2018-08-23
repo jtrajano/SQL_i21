@@ -65,6 +65,7 @@
 	[strAllowExemptionsOnExtAndRetailTrans]		NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnCaptiveSite]							BIT			   NULL, 
     [ysnPetrovendDualCard]						BIT            NULL,
+	[strOregonFacilityNumber]					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFSiteLocation] PRIMARY KEY CLUSTERED ([intSiteId] ASC),
     CONSTRAINT [FK_tblCFSite_tblARCustomer] FOREIGN KEY ([intCashCustomerID]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFSite_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
