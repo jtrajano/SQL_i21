@@ -289,14 +289,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN 
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
 																END
 														ELSE 
 															CASE 
-																WHEN @strDiscountChargeType = "Percent" THEN dblDiscountAmount * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblDiscountAmount * 100 
 																ELSE dblDiscountAmount
 															END
 													END
@@ -304,14 +304,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
 																END
 														ELSE 
 															CASE
-																WHEN @strDiscountChargeType = "Percent" THEN dblShrink * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
 																ELSE dblShrink
 															END
 													END
@@ -353,14 +353,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  
 															THEN 
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) * 100
 																	ELSE 
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
 																END
 														ELSE 
 															CASE 
-																WHEN @strDiscountChargeType = "Percent" THEN dblDiscountAmount * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblDiscountAmount * 100 
 																ELSE dblDiscountAmount 
 															END
 													END
@@ -368,13 +368,13 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  
 															THEN 
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100 
 																	ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
 																END
 														ELSE 
 															CASE
-																WHEN @strDiscountChargeType = "Percent" THEN dblShrink * 100
+																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100
 																ELSE dblShrink 
 															END
 													END
@@ -403,14 +403,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN 
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
 																END
 														ELSE 
 															CASE 
-																WHEN @strDiscountChargeType = "Percent" THEN dblDiscountAmount * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblDiscountAmount * 100 
 																ELSE dblDiscountAmount
 															END
 													END
@@ -418,14 +418,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
 																END
 														ELSE 
 															CASE
-																WHEN @strDiscountChargeType = "Percent" THEN dblShrink * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
 																ELSE dblShrink
 															END
 													END
@@ -467,14 +467,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN 
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
 																END
 														ELSE 
 															CASE 
-																WHEN @strDiscountChargeType = "Percent" THEN dblDiscountAmount * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblDiscountAmount * 100 
 																ELSE dblDiscountAmount
 															END
 													END
@@ -482,14 +482,14 @@ BEGIN TRY
 														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
 															THEN
 																CASE
-																	WHEN @strDiscountChargeType = "Percent"
+																	WHEN @strDiscountChargeType = 'Percent'
 																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
 																	ELSE
 																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
 																END
 														ELSE 
 															CASE
-																WHEN @strDiscountChargeType = "Percent" THEN dblShrink * 100 
+																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
 																ELSE dblShrink
 															END
 													END
