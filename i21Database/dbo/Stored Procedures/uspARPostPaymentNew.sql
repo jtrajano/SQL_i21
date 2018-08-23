@@ -528,7 +528,7 @@ SET @BatchIdUsed = @BatchId
 				INSERT INTO
 					@ARPaymentInvalidData
 				SELECT
-					'Return Payment is not allowed for non-ACH and CF Invoice Payment Methods.'
+					'Return Payment is not allowed for non-ACH Payment Method.'
 					,'Receivable'
 					,ARP.[strRecordNumber]
 					,@BatchId
