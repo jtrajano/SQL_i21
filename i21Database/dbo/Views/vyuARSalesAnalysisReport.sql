@@ -94,7 +94,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 												THEN ISNULL(NONSO.dblCost, 0)
-											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 --AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 												THEN NONLOTTED.dblCost
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 												THEN LOTTED.dblCost
@@ -169,7 +169,7 @@ FROM
 					ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= NONLOTTED.intItemId
 					AND ARID.intItemUOMId				= NONLOTTED.intItemUOMId
-					AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
+					AND ((ARID.intSalesOrderDetailId IS NOT NULL AND ARID.intSalesOrderDetailId	= NONLOTTED.intLineNo) OR ARID.intSalesOrderDetailId IS NULL)
 		LEFT OUTER JOIN (
 			SELECT ICISI.intInventoryShipmentItemId
 				 , ICISI.intLineNo
