@@ -4,9 +4,12 @@ SELECT
 		 intPOSLogId					=	POSLog.intPOSLogId
 		,intEntityId					=	POSLog.intEntityUserId
 		,intCompanyLocationId			=	POSLog.intCompanyLocationId
+		,intCashOverShort				=	LOC.intCashOverShort
 		,intCompanyLocationPOSDrawerId	=	POSLog.intCompanyLocationPOSDrawerId
 		,intStoreId						=	POSLog.intStoreId
 		,intPOSLogOriginId				=	POSLog.intPOSLogOriginId
+		,dblOpeningBalance				=	POSLog.dblOpeningBalance
+		,dblEndingBalance				=	POSLog.dblEndingBalance
 		,strUsername					=	ENTITY.strUserName
 		,strLocationName				=	LOC.strLocationName
 		,strPOSDrawerName				=	DRAWER.strPOSDrawerName
@@ -19,6 +22,7 @@ INNER JOIN (
 	SELECT
 		intCompanyLocationId
 		,strLocationName
+		,intCashOverShort
 	FROM tblSMCompanyLocation WITH (NOLOCK)
  ) LOC ON POSLog.intCompanyLocationId = LOC.intCompanyLocationId
 LEFT JOIN(
