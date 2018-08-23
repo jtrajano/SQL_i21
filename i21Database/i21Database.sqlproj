@@ -6977,6 +6977,7 @@
     <Build Include="dbo\Tables\tblSMTruck.sql" />
     <Build Include="dbo\Tables\tblSMTruckDetail.sql" />
     <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
+    <Build Include="dbo\Views\vyuARPOSOpenDrawers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
