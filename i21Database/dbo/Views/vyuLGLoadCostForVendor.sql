@@ -30,7 +30,7 @@ AS
 				ELSE ICI.[strDescription]
 				END
 			,[intShipmentItemUOMId] = LD.[intItemUOMId]
-			,[dblPrice] = SUM(LC.dblAmount)
+			,[dblPrice] = SUM(LC.dblRate)
 			,[dblShipmentUnitPrice] = LC.dblRate
 			,[dblTotal] = SUM(LC.dblAmount)
 			,[intAccountId] = ARIA.[intAccountId]
