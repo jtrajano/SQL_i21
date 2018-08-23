@@ -6947,6 +6947,7 @@
     <Build Include="dbo\Stored Procedures\uspMBILCreateCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateSite.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
+    <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

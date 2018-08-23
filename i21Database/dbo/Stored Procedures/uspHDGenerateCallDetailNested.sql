@@ -158,9 +158,36 @@ billedhours as
 		,d.intTicketPriorityId
 		,d.strPriority
 )
+insert into tblHDCallDetailNested
+(
+	intEntityId
+	,strName
+	,strFirstName
+	,intTicketTypeId
+	,strType
+	,intTicketPriorityId
+	,strPriority
+	,intClosedCalls
+	,intOpenCalls
+	,intTotalCalls
+	,intReopenCalls
+	,intStartDate
+	,intEndDate
+	,dtmStartDate
+	,dtmEndDate
+	,strFilterKey
+	,intRequestedByEntityId
+	,intCreatedDate
+	,intTotalBilledHours
+	,dblTotalBillableAmount
+	,intCallsRated
+	,dblAverageRating
+	,intDaysOutstanding
+	,dtmCreatedDate
+	,intConcurrencyId
+)
 select
-	intId = convert(int,ROW_NUMBER() over (order by intEntityId))
-	,intEntityId
+	intEntityId
 	,strName
 	,strFirstName
 	,intTicketTypeId
@@ -181,6 +208,7 @@ select
 	,intCallsRated
 	,dblAverageRating
 	,intDaysOutstanding
+	,dtmCreatedDate
 	,intConcurrencyId
 from
 (
@@ -206,6 +234,7 @@ select distinct
 		,intCallsRated = null
 		,dblAverageRating = null
 		,intDaysOutstanding = null
+		,dtmCreatedDate = getdate()
 		,intConcurrencyId = 1
 from
 		tblHDTicket a
@@ -214,7 +243,7 @@ from
 		,tblHDTicketPriority d
 where
 		a.intAssignedToEntity is not null
-		and a.intAssignedToEntity = @EntityId
+		and a.intAssignedToEntity = (case when @EntityId = 0 then a.intAssignedToEntity else @EntityId end)
 		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and c.intTicketTypeId = a.intTicketTypeId
@@ -223,5 +252,7 @@ where
 ) as result
 order by
 		strName
+
+select @strIdentifier;
 
 END
