@@ -101,7 +101,7 @@ BEGIN TRY
 			UNION ALL
 
 			SELECT Trans.intTransactionId
-				, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK') THEN Origin.strOregonFacilityNumber WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFSite.strSiteAddress ELSE NULL END
+				, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK') THEN Origin.strOregonFacilityNumber WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFSite.strOregonFacilityNumber ELSE NULL END
 				, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Destination.strOregonFacilityNumber ELSE NULL END
 				, [strAltDocumentNumber] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFCard.strCardNumber ELSE NULL END
 				, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFVehicle.strVehicleDescription ELSE NULL END
