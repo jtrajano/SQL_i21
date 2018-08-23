@@ -9,6 +9,7 @@
 	   @intSubBookId int = null,
 	   @intAOPId int = null,
 	   @strLocationName nvarchar(250)= null
+
 AS
 
 if @strEntityName = '-1'
@@ -33,6 +34,7 @@ DECLARE @GetStandardQty AS TABLE(
 		dblPrice numeric(24,10),
 		dblTotPurchased numeric(24,10),
 		intCompanyLocationId int
+		,dblOriginalBalanceQty  numeric(24,10)
 		)
 
 
@@ -40,9 +42,9 @@ DECLARE @GetStandardQty AS TABLE(
 BEGIN
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,intCompanyLocationId)
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,intCompanyLocationId,dblOriginalBalanceQty)
 select CAST(ROW_NUMBER() OVER (ORDER BY strEntityName) AS INT) as intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblOriginalBalanceQty*dblPrice dblTotPurchased,intCompanyLocationId
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblOriginalBalanceQty*dblPrice dblTotPurchased,intCompanyLocationId,dblOriginalBalanceQty
 from(
 SELECT intContractDetailId,
 		strName as strEntityName,
@@ -225,8 +227,8 @@ select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContra
 							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType from(
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,(dblStandardPrice-dblPrice)*dblBalanceQty dblPPV,
-(dblStandardPrice-dblNewPPVPrice)*dblBalanceQty dblPPVNew,strPricingType,strItemNo,strProductType
+							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,(dblStandardPrice-dblPrice)*dblOriginalBalanceQty dblPPV,
+(dblStandardPrice-dblNewPPVPrice)*dblOriginalBalanceQty dblPPVNew,strPricingType,strItemNo,strProductType
 FROM(
 select t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
  (SELECT sum(dblCost) from tblCTAOP a

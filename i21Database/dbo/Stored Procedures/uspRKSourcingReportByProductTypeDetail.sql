@@ -38,14 +38,15 @@ DECLARE @GetStandardQty AS TABLE(
 	    strOrigin nvarchar(100),
 		strProductType nvarchar(100),
 		intCompanyLocationId int
+		,dblOriginalBalanceQty  numeric(24,10)
 		)
 		
 BEGIN
 
 INSERT INTO @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType,cd.intCompanyLocationId)
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType,cd.intCompanyLocationId,dblOriginalBalanceQty)
 select CAST(ROW_NUMBER() OVER (ORDER BY strEntityName) AS INT) as intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblOriginalBalanceQty*dblPrice dblTotPurchased, strOrigin,strProductType,intCompanyLocationId
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblOriginalBalanceQty*dblPrice dblTotPurchased, strOrigin,strProductType,intCompanyLocationId,dblOriginalBalanceQty
 from(
 SELECT intContractDetailId,
 		strName as strEntityName,
@@ -232,8 +233,9 @@ SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContra
 							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo from(
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,(dblStandardPrice-dblPrice)*dblBalanceQty dblPPV,
-(dblStandardPrice-dblNewPPVPrice)*dblBalanceQty dblPPVNew,strOrigin,strProductType,strPricingType,strItemNo
+							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,
+							(dblStandardPrice-dblPrice)*dblOriginalBalanceQty dblPPV,
+(dblStandardPrice-dblNewPPVPrice)*dblOriginalBalanceQty dblPPVNew,strOrigin,strProductType,strPricingType,strItemNo
 FROM(
 SELECT t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
  (SELECT sum(dblCost) from tblCTAOP a
