@@ -206,14 +206,12 @@ DECLARE @Summary AS TABLE (
 			dblVariationMargin NUMERIC(24, 10),
 			strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 			strAccountNumber VARCHAR(100) COLLATE Latin1_General_CI_AS,
-			strBook  nvarchar(100),
-			strSubBook  nvarchar(100),
 			dblTotal NUMERIC(24, 10)	
 	)
 	insert into @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,intNet,
-					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,strBook ,strSubBook ,dblTotal)
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal)
 	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0.0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0.0) intShortContracts  ,dblShortAvgPrice ,isnull(intNet,0.0) intNet,
-					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,strBook ,strSubBook ,
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,
 		dblUnrealized + dblRealized AS dblTotal
 	FROM (
 		SELECT intFutureMarketId,
@@ -236,9 +234,7 @@ DECLARE @Summary AS TABLE (
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
 			strName,
-			strAccountNumber,
-			strBook,
-			strSubBook
+			strAccountNumber
 		FROM (
 			SELECT GrossPnL,
 				LongWaitedPrice,
@@ -259,9 +255,7 @@ DECLARE @Summary AS TABLE (
 				NetPnL,
 				dblVariationMargin,				
 				strName,
-				strAccountNumber,
-				strBook,
-				strSubBook
+				strAccountNumber
 			FROM @UnRelaized
 			
 			UNION
@@ -285,9 +279,7 @@ DECLARE @Summary AS TABLE (
 				NetPnL,
 				dblVariationMargin,				
 				t.strName,
-				t.strAccountNumber,
-				strBook,
-				strSubBook
+				t.strAccountNumber
 			FROM @Relaized t
 			LEFT JOIN @UnRelaized p ON t.intFutureMarketId = p.intFutureMarketId AND t.intFutureMonthId = p.intFutureMonthId
 			WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END AND t.intFutureMarketId = CASE WHEN isnull(@intFutureMarketId, 0) = 0 THEN t.intFutureMarketId ELSE @intFutureMarketId END AND t.intFutureMonthId NOT IN (
@@ -300,13 +292,50 @@ DECLARE @Summary AS TABLE (
 			strFutMarketName,
 			strFutureMonth,
 			strName,
-			strAccountNumber,
-			strBook,
-			strSubBook
+			strAccountNumber
 		) t
 
 
-	SELECT *, -abs(case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*intNet else 		
+		select intFutureMarketId,
+			intFutureMonthId,
+			strFutMarketName,
+			strFutureMonth,
+			sum(intLongContracts) intLongContracts,
+			sum(dblLongAvgPrice) dblLongAvgPrice,
+			sum(intShortContracts) intShortContracts,
+			sum(dblShortAvgPrice) dblShortAvgPrice,
+			sum(intNet) intNet,
+			sum(dblUnrealized) dblUnrealized,
+			sum(dblClosing) dblClosing,
+			sum(dblFutCommission) dblFutCommission,
+			sum(dblPrice) dblPrice,
+			sum(dblRealized) dblRealized,
+			sum(dblVariationMargin) dblVariationMargin,
+			strName ,
+			'' strAccountNumber,
+			sum(dblTotal) dblTotal,
+			sum(dblInitialMargin) dblInitialMargin,
+			'' strBook,
+			'' strSubBook
+			 from(
+	SELECT intFutureMarketId,
+			intFutureMonthId,
+			strFutMarketName,
+			strFutureMonth,
+			intLongContracts,
+			dblLongAvgPrice,
+			intShortContracts,
+			dblShortAvgPrice,
+			intNet,
+			dblUnrealized,
+			dblClosing,
+			dblFutCommission,
+			dblPrice,
+			dblRealized,
+			dblVariationMargin,
+			strName ,
+			strAccountNumber,
+			dblTotal, (case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*intNet else 		
 		CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 					WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 					ELSE dblContractMargin END end) as dblInitialMargin
@@ -316,5 +345,8 @@ DECLARE @Summary AS TABLE (
 		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
-		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1
-END
+		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
+		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName
+		END
+
+	
