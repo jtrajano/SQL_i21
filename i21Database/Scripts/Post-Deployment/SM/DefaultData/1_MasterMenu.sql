@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trucks' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager'))	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Details' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Help Desk'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4951,23 +4951,29 @@ ELSE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ticket Types' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'HelpDesk.view.TicketType' WHERE strMenuName = N'Ticket Types' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rough Cut Capacity' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Rough Cut Capacity', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Rough Cut Capacity', N'Report', N'Screen', N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport' WHERE strMenuName = N'Rough Cut Capacity' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Details' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Ticket Details', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Ticket Details', N'Report', N'Screen', N'HelpDesk.view.CallDetailsReportNested?showSearch=true&searchCommand=CallDetailsReportNested', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'HelpDesk.view.CallDetailsReportNested?showSearch=true&searchCommand=CallDetailsReportNested' WHERE strMenuName = N'Ticket Details' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Ticket Summary', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Ticket Summary', N'Report', N'Screen', N'HelpDesk.view.CallDetailsReport?showSearch=true&searchCommand=CallDetailsReport', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Ticket Summary', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Ticket Summary', N'Report', N'Screen', N'HelpDesk.view.CallDetailsReport?showSearch=true&searchCommand=CallDetailsReport', N'small-menu-report', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'HelpDesk.view.CallDetailsReport?showSearch=true&searchCommand=CallDetailsReport' WHERE strMenuName = N'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'HelpDesk.view.CallDetailsReport?showSearch=true&searchCommand=CallDetailsReport' WHERE strMenuName = N'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time / Hours' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Time / Hours', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Time / Hours', N'Report', N'Screen', N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Time / Hours', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Time / Hours', N'Report', N'Screen', N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport', N'small-menu-report', 0, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport' WHERE strMenuName = N'Time / Hours' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rough Cut Capacity' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Rough Cut Capacity', N'Help Desk', @HelpDeskReportParentMenuId, N'Help Desk Rough Cut Capacity', N'Report', N'Screen', N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport', N'small-menu-report', 0, 0, 0, 1, 2, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'HelpDesk.view.RoughCutCapacityReport?showSearch=true&searchCommand=RoughCutCapacityReport' WHERE strMenuName = N'Rough Cut Capacity' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strIcon = N'small-menu-report', strCommand = N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport' WHERE strMenuName = N'Time / Hours' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Help Desk Settings' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
