@@ -10,10 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-
-
--- Get the details from the invoice 
-
 DECLARE @ErrMsg AS NVARCHAR(MAX)
 BEGIN TRY
 		IF(OBJECT_ID('tempdb..#tempContractInvoice') IS NOT NULL)
@@ -21,14 +17,22 @@ BEGIN TRY
 			DROP TABLE #tempContractInvoice
 		END
 
-		SELECT intInvoiceDetailId,intTicketId,CASE WHEN ARID.dblQtyShipped > ARID.dblQtyOrdered THEN ARID.dblQtyShipped - ARID.dblQtyOrdered ELSE ARID.dblQtyShipped END as dblQtyShipped,ARID.intContractDetailId,ARI.intInvoiceId,SOD.intSalesOrderId,SOD.intSalesOrderDetailId INTO #tempContractInvoice FROM tblARInvoice ARI
+		SELECT intInvoiceDetailId,intTicketId,CASE WHEN ARID.dblQtyShipped > ARID.dblQtyOrdered THEN ARID.dblQtyShipped - ARID.dblQtyOrdered ELSE ARID.dblQtyShipped END as dblQtyShipped,ARID.intContractDetailId,ARI.intInvoiceId,SOD.intSalesOrderId,SOD.intSalesOrderDetailId 
+		INTO #tempContractInvoice FROM tblARInvoice ARI
 		INNER JOIN tblARInvoiceDetail ARID
 			ON ARID.intInvoiceId = ARI.intInvoiceId
 		INNER JOIN tblSOSalesOrderDetail SOD
 			ON SOD.intSalesOrderDetailId = ARID.intSalesOrderDetailId
 		WHERE ARID.intInvoiceId = @TransactionId AND ARID.intContractDetailId IS NOT NULL AND intTicketId IS NOT NULL AND ARID.intContractDetailId = SOD.intContractDetailId
 		AND ARID.dblQtyShipped <> SOD.dblQtyOrdered
-			
+
+
+		UPDATE TCI
+		SET TCI.dblQtyShipped = CASE WHEN TCI.dblQtyShipped < ARID.dblQtyOrdered THEN (ARID.dblQtyOrdered - TCI.dblQtyShipped) * -1 ELSE TCI.dblQtyShipped END
+		FROM #tempContractInvoice TCI
+		INNER JOIN tblARInvoiceDetail ARID
+			ON TCI.intInvoiceDetailId = ARID.intInvoiceDetailId
+
 		DECLARE UpdateContract CURSOR
 		FOR SELECT intInvoiceDetailId,intTicketId,dblQtyShipped,intContractDetailId,intInvoiceId,intSalesOrderId,intSalesOrderDetailId FROM #tempContractInvoice 
 		OPEN UpdateContract
