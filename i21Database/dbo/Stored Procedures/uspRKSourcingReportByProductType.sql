@@ -49,12 +49,14 @@ DECLARE @GetStandardQty AS TABLE(
 		dblStandardValue numeric(24,10),
 		dblPPV numeric(24,10),
 		dblPPVNew numeric(24,10),
-		strLocationName nvarchar(100)
+		strLocationName nvarchar(100),
+		strPricingType  nvarchar(100),
+		strItemNo  nvarchar(100)
 		)
 
 INSERT INTO @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,dblNoOfLots,dblFuturesPrice,
 							dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType,	dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew)
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo)
 
 EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate,
        @dtmToDate = @dtmToDate,
@@ -75,3 +77,4 @@ SELECT strEntityName strName,strLocationName,strOrigin,strProductType,sum(dblBal
 (sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100 dblCompanySpend,sum(dblStandardQty) dblStandardQty
 FROM @GetStandardQty
 GROUP BY strEntityName,strEntityName,strLocationName,strOrigin,strProductType)t
+

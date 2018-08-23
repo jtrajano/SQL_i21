@@ -35,12 +35,15 @@ DECLARE @GetStandardQty AS TABLE(
 		dblStandardValue numeric(24,10),
 		dblPPV numeric(24,10),
 		dblPPVNew numeric(24,10),
-		strLocationName nvarchar(100)
+		strLocationName nvarchar(100),
+		strPricingType nvarchar(100),
+		strItemNo nvarchar(100),
+		strProductType nvarchar(100)
 		)
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew)
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType)
 
 exec [uspRKSourcingReportDetail] @dtmFromDate = @dtmFromDate,
        @dtmToDate = @dtmToDate,

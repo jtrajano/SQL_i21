@@ -9,8 +9,12 @@
 	   @intSubBookId int = null,
 	   @intAOPId int = null,
 	   @strLocationName nvarchar(250)= null
-
 AS
+
+if @strEntityName = '-1'
+set @strEntityName = NULL
+ if @strLocationName = '-1'
+set @strLocationName = NULL
 
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
@@ -210,31 +214,33 @@ JOIN tblEMEntity e on e.intEntityId=
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
 and strName=case when isnull(@strEntityName,'') = '' then strName else @strEntityName end
 and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
-and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(cd.intSubBookId,0) else @intBookId end
-and isnull(cl.strLocationName,'')= case when isnull(@strLocationName,0)='' then isnull(cl.strLocationName,'') else @strLocationName end
+and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(cd.intSubBookId,0) else @intSubBookId end
+and isnull(cl.strLocationName,'')= case when isnull(@strLocationName,'')='' then isnull(cl.strLocationName,'') else @strLocationName end
 )t)t1
 END
 
 
 select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew from(
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType from(
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
 							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,(dblStandardPrice-dblPrice)*dblBalanceQty dblPPV,
-(dblStandardPrice-dblNewPPVPrice)*dblBalanceQty dblPPVNew
+(dblStandardPrice-dblNewPPVPrice)*dblBalanceQty dblPPVNew,strPricingType,strItemNo,strProductType
 FROM(
 select t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
  (SELECT sum(dblCost) from tblCTAOP a
  join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
 							and b.intItemId=cd.intItemId
 							and b.intCommodityId=ic.intCommodityId
-							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0)else @intBookId end
-							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end 
+							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
+							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
 							) dblStandardPrice
 							,isnull(cost.dblRate,t.dblBasis) dblPPVBasis, (isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0) as  dblNewPPVPrice,strLocationName
+							,strPricingType,strItemNo,ca.strDescription strProductType
  from @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
+join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
 join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICItem ic ON ic.intItemId = cd.intItemId
 LEFT JOIN(select intContractDetailId,SUM(dblRate) dblRate FROM tblCTContractCost where ysnBasis=1 and intItemId not in(
