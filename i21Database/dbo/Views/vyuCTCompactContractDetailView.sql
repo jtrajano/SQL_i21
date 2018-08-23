@@ -14,9 +14,9 @@ AS
 			,PT.strPricingType
 			,CD.intContractSeq
 			,ISNULL(CD.dblQuantityPerLoad, 0) AS dblQuantityPerLoad
-	FROM	tblCTContractDetail				CD	
+	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
-	LEFT JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
+	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
 	LEFT JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId					
 	LEFT JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				
 	LEFT JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			
