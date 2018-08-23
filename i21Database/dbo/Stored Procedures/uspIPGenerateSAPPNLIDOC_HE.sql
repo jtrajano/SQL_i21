@@ -119,6 +119,7 @@ BEGIN
 		,@dtmPostingDate = dtmPostingDate
 		,@strLocationName = strLocationName
 		,@strReferenceNo = strReferenceNo
+		,@ysnFuture=ysnFuture
 	FROM @tblRKStgMatchPnS
 	WHERE intRecordId = @intRecordId
 
