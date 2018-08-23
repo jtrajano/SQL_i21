@@ -50,6 +50,11 @@ DECLARE @tblRKStgMatchPnS TABLE (
 	,strReferenceNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,ysnFuture BIT
 	)
+DECLARE @intToCurrencyId INT
+
+SELECT @intToCurrencyId = intCurrencyID
+FROM tblSMCurrency
+WHERE strCurrency = 'USD'
 
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId
@@ -66,14 +71,15 @@ SELECT S.intStgMatchPnSId
 	,S.intMatchNo
 	,S.dtmMatchDate
 	,S.strCurrency
-	,S.dblGrossPnL
+	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblGrossPnL, 0)
 	,S.dtmPostingDate
 	,L.strLocationName
-	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') +  ISNULL('-' +strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
+	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
 	,1
 FROM tblRKStgMatchPnS S
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = S.intFutureMarketId
 JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = S.intCompanyLocationId
+JOIN tblSMCurrency C ON C.strCurrency = S.strCurrency
 WHERE ISNULL(S.strStatus, '') = ''
 
 INSERT INTO @tblRKStgMatchPnS (
@@ -90,13 +96,14 @@ INSERT INTO @tblRKStgMatchPnS (
 SELECT intStgOptionMatchPnSId
 	,intMatchNo
 	,dtmMatchDate
-	,strCurrency
-	,dblGrossPnL
+	,PS.strCurrency
+	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, PS.dblGrossPnL, 0)
 	,dtmPostingDate
 	,strLocationName
-	,ISNULL(CONVERT(VARCHAR, intMatchNo), '')  + ISNULL('-'+strBook, '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
+	,ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
 	,0
-FROM tblRKStgOptionMatchPnS
+FROM tblRKStgOptionMatchPnS PS
+JOIN tblSMCurrency C ON C.strCurrency = PS.strCurrency
 WHERE ISNULL(strStatus, '') = ''
 
 SELECT @intRecordId = Min(intRecordId)
@@ -152,7 +159,7 @@ BEGIN
 		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
-		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2),  ABS(@dblGrossPnL))), '') + '</WRBTR>'
+		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + '' + '</SGTXT>'
 		SET @strXml += '<KOSTL>' + '9012' + '</KOSTL>'
 		SET @strXml += '<HKONT>' + '439282' + '</HKONT>'
