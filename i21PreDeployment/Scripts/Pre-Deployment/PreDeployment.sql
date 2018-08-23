@@ -152,6 +152,8 @@
 :r .\12_EM\16_CleanCustomerProductVersion.sql
 :r .\12_EM\20_CleanCustomerSpecialPrice.sql
 :r .\12_EM\21_CleanAPBillMissingContact.sql
+
+:r .\12_EM\22_DeleteDuplicateEntityType.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

@@ -354,4 +354,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\15_GR\1830_FixDeliverySheetSplit.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\22_DeleteDuplicateEntityType.sql" />
+  </ItemGroup>
 </Project>
