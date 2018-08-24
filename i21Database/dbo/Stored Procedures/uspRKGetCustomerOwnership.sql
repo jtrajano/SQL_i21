@@ -102,6 +102,8 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 					OR strType = 'Settlement' 
 					OR strType = 'Transfer'  THEN
 				ABS(dblUnits)
+				WHEN  strType = 'Reverse Settlement'  THEN
+					ABS(dblUnits) * -1
 				ELSE 0 END AS dblOutQty
 			,S.intStorageScheduleTypeId
 
