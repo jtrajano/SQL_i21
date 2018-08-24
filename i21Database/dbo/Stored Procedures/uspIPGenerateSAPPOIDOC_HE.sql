@@ -178,6 +178,7 @@ BEGIN
 		,strERPBatchNumber
 		,strLoadingPoint
 		,strPackingDescription
+		,strLocationName
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -226,6 +227,7 @@ BEGIN
 		,strERPBatchNumber
 		,strLoadingPoint
 		,strPackingDescription
+		,strLocationName 
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
@@ -236,6 +238,17 @@ SET strFeedStatus = 'IGNORE'
 FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 WHERE IsNULL(CH.ysnSubstituteItem, 0) = 0
+	AND ISNULL(strFeedStatus, '') = ''
+
+UPDATE tblCTContractFeed
+SET strFeedStatus = 'IGNORE'
+WHERE EXISTS (
+		SELECT *
+		FROM tblIPSAPLocation L
+		WHERE L.stri21Location = tblCTContractFeed.strLocationName
+			AND IsNULL(L.ysnEnabledERPFeed, 1) = 0
+		)
+	AND ISNULL(strFeedStatus, '') = ''
 
 UPDATE CF
 SET strERPPONumber = CD.strERPPONumber
@@ -481,6 +494,7 @@ BEGIN
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = strPriceUOM
 					)
+				,@strLocationName = strLocationName
 			FROM tblCTContractFeed
 			WHERE intContractFeedId = @intMinSeq
 		END
@@ -524,6 +538,7 @@ BEGIN
 						FROM tblICUnitMeasure
 						WHERE strUnitMeasure = strPriceUOM
 						)
+					,@strLocationName = strLocationName
 				FROM tblCTContractFeed
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND strItemNo = @strContractItemNo
@@ -542,6 +557,7 @@ BEGIN
 					,dtmContractDate
 					,strCurrency
 					,strPriceUOM
+					,strLocationName
 			END
 			ELSE
 			BEGIN
@@ -574,6 +590,7 @@ BEGIN
 						FROM tblICUnitMeasure
 						WHERE strUnitMeasure = strPriceUOM
 						)
+					,@strLocationName = strLocationName
 				FROM tblCTContractFeed
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND strItemNo = @strContractItemNo
@@ -591,16 +608,9 @@ BEGIN
 					,dtmContractDate
 					,strCurrency
 					,strPriceUOM
+					,strLocationName
 			END
 		END
-
-		SELECT @intLocationId = intCompanyLocationId
-		FROM tblCTContractDetail
-		WHERE intContractDetailId = @intContractDetailId
-
-		SELECT @strLocationName = strLocationName
-		FROM tblSMCompanyLocation
-		WHERE intCompanyLocationId = @intLocationId
 
 		SELECT @strSAPLocation = strSAPLocation
 		FROM tblIPSAPLocation
