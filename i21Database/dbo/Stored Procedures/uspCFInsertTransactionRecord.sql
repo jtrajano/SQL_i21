@@ -1087,7 +1087,8 @@ BEGIN
 	------------------------------------------------------------
 
 
-
+	SELECT TOP 1 @ysnOnHold  = ISNULL(ysnIgnoreCardTransaction,0) 
+	FROM tblCFCard WHERE intCardId = @intCardId
 
 
 	------------------------------------------------------------
@@ -1298,6 +1299,7 @@ BEGIN
 			,[strInvoiceReportNumber]
 			,[ysnOnHold]
 			,[intCustomerId]
+			,[intImportCardId]
 		)
 		VALUES
 		(
@@ -1347,6 +1349,7 @@ BEGIN
 			,@strInvoiceReportNumber
 			,@ysnOnHold
 			,@intCustomerId
+			,@intCardId
 		)			
 	
 		DECLARE @Pk	INT		
