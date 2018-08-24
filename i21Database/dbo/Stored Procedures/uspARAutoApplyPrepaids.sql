@@ -152,6 +152,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 							,[dblOverpayment]
 							,[dblBaseOverpayment]
 							,[dblBalance]
+							,[dblExchangeRate]
 							,[strRecordNumber]
 							,[strPaymentInfo]
 							,[strNotes]
@@ -177,6 +178,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 							,[dblOverpayment]				= 0.000000
 							,[dblBaseOverpayment]			= 0.000000
 							,[dblBalance]					= 0.000000
+							,[dblExchangeRate]				= 1.000000
 							,[strRecordNumber]				= NULL
 							,[strPaymentInfo]				= NULL
 							,[strNotes]						= 'Auto Apply Prepaids'
