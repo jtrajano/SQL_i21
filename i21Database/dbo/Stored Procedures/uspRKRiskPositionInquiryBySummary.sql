@@ -538,7 +538,7 @@ BEGIN
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 SELECT
-5 intRowNumber,'1.Outright Coverage','Market Coverage' Selection,'4.Market Coverage(Weeks)' PriceStatus,strFutureMonth,strAccountNumber,  
+5 intRowNumber,'1.Outright Coverage','Market Coverage' Selection,'4.Market Coverage(Weeks)' PriceStatus,strFutureMonth,'Market Coverage(Weeks)' strAccountNumber,  
     case when isnull(@dblForecastWeeklyConsumption,0)=0 then 0 else 
 	CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))/@dblForecastWeeklyConsumption end as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,5,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(4)

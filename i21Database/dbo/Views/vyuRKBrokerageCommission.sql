@@ -33,7 +33,7 @@ SELECT
 	,BC.dblPerFutureContract
 FROM tblRKBrokerageCommission BC
 INNER JOIN tblRKFutureMarket FM ON BC.intFutureMarketId = FM.intFutureMarketId
-LEFT JOIN vyuRKCommodityMarketMap CMM ON BC.intCommodityMarketId = CMM.intCommodityMarketId
+JOIN vyuRKCommodityMarketMap CMM ON BC.intCommodityMarketId = CMM.intCommodityMarketId
 LEFT JOIN tblSMCurrency FutCur ON BC.intFutCurrencyId = FutCur.intCurrencyID
 LEFT JOIN tblSMCurrency OptCur ON BC.intFutCurrencyId = OptCur.intCurrencyID
 OUTER APPLY (
