@@ -121,11 +121,11 @@ BEGIN TRY
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
-	,intFutureMarketId       = CD.intFutureMarketId
+	,intFutureMarketId      = CD.intFutureMarketId
 	,intFutureMonthId       = CD.intFutureMonthId
 	,strFutureMonth			= MO.strFutureMonth
-	,dblCashPrice			= CD.dblCashPrice
-	,dblQuantity			= CD.dblQuantity
+	,dblCashPrice			= ISNULL(CD.dblCashPrice,0)
+	,dblQuantity			= ISNULL(CD.dblQuantity,0)
 	,dblAvailableQty		= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
 	,dblAmount				= (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)) * CD.dblCashPrice
 
