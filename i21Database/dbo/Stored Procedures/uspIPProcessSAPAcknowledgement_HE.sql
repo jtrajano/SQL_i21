@@ -24,7 +24,6 @@ BEGIN TRY
 	DECLARE @intMinRowNo INT
 	DECLARE @intLoadId INT
 	DECLARE @intReceiptId INT
-	DECLARE @strContractSeq NVARCHAR(50)
 	DECLARE @intLoadStgId INT
 		,@ysnMaxPrice BIT
 
@@ -96,7 +95,6 @@ BEGIN TRY
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
 		SELECT @intContractHeaderId = NULL
-			,@strContractSeq = ''
 			,@strMessage = ''
 
 		SELECT @strMesssageType = strMesssageType
@@ -113,7 +111,7 @@ BEGIN TRY
 		WHERE intRowNo = @intMinRowNo
 
 		--PO Create
-		IF @strMesssageType = 'PURCONTRACT_CREATE01'
+		IF @strMesssageType = 'PURCONTRACT_CREATE'
 		BEGIN
 			SELECT @intContractHeaderId = intContractHeaderId
 				,@ysnMaxPrice = ysnMaxPrice
@@ -121,16 +119,13 @@ BEGIN TRY
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
 
-			SELECT @strContractSeq = CONVERT(VARCHAR, intContractSeq)
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @strTrackingNo
-
 			IF @strStatus IN (53) --Success
 			BEGIN
 				IF (
 						SELECT ISNULL(strERPPONumber, '')
 						FROM tblCTContractDetail
-						WHERE intContractDetailId = @strTrackingNo
+						WHERE intContractHeaderId = @intContractHeaderId
+							AND intContractSeq = @strTrackingNo
 						) <> @strParam
 				BEGIN
 					UPDATE tblCTContractDetail
@@ -138,11 +133,11 @@ BEGIN TRY
 						,strERPItemNumber = @strPOItemNo
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intContractHeaderId = @intContractHeaderId
-						AND intContractDetailId = (
+						AND intContractSeq = (
 							CASE 
 								WHEN ISNULL(@ysnMaxPrice, 0) = 0
 									THEN @strTrackingNo
-								ELSE intContractDetailId
+								ELSE intContractSeq
 								END
 							)
 
@@ -158,11 +153,11 @@ BEGIN TRY
 					,strERPPONumber = @strParam
 					,strERPItemNumber = @strPOItemNo
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = (
+					AND intContractSeq = (
 						CASE 
 							WHEN ISNULL(@ysnMaxPrice, 0) = 0
 								THEN @strTrackingNo
-							ELSE intContractDetailId
+							ELSE intContractSeq
 							END
 						)
 					AND ISNULL(strFeedStatus, '') IN (
@@ -175,11 +170,11 @@ BEGIN TRY
 				SET strERPPONumber = @strParam
 					,strERPItemNumber = @strPOItemNo
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = (
+					AND intContractSeq = (
 						CASE 
 							WHEN ISNULL(@ysnMaxPrice, 0) = 0
 								THEN @strTrackingNo
-							ELSE intContractDetailId
+							ELSE intContractSeq
 							END
 						)
 					AND ISNULL(strFeedStatus, '') = ''
@@ -193,7 +188,7 @@ BEGIN TRY
 				VALUES (
 					@strMesssageType
 					,'Success'
-					,@strRefNo + ' / ' + ISNULL(@strContractSeq, '')
+					,@strRefNo + ' / ' + ISNULL(@strTrackingNo, '')
 					,@strParam
 					)
 			END
@@ -206,7 +201,7 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = @strTrackingNo
+					AND intContractSeq = @strTrackingNo
 					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
@@ -218,14 +213,14 @@ BEGIN TRY
 				VALUES (
 					@strMesssageType
 					,@strMessage
-					,@strRefNo + ' / ' + ISNULL(@strContractSeq, '')
+					,@strRefNo + ' / ' + ISNULL(@strTrackingNo, '')
 					,@strParam
 					)
 			END
 		END
 
 		--PO Update
-		IF @strMesssageType = 'PURCONTRACT_CHANGE01'
+		IF @strMesssageType = 'PURCONTRACT_CHANGE'
 		BEGIN
 			SELECT @intContractHeaderId = intContractHeaderId
 				,@ysnMaxPrice = ysnMaxPrice
@@ -233,27 +228,24 @@ BEGIN TRY
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
 
-			SELECT @strContractSeq = CONVERT(VARCHAR, intContractSeq)
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @strTrackingNo
-
 			IF @strStatus IN (53) --Success
 			BEGIN
 				IF (
 						SELECT ISNULL(strERPPONumber, '')
 						FROM tblCTContractDetail
-						WHERE intContractDetailId = @strTrackingNo
+						WHERE intContractHeaderId = @intContractHeaderId
+							AND intContractSeq = @strTrackingNo
 						) <> @strParam
 					UPDATE tblCTContractDetail
 					SET strERPPONumber = @strParam
 						,strERPItemNumber = @strPOItemNo
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intContractHeaderId = @intContractHeaderId
-						AND intContractDetailId = (
+						AND intContractSeq = (
 							CASE 
 								WHEN ISNULL(@ysnMaxPrice, 0) = 0
 									THEN @strTrackingNo
-								ELSE intContractDetailId
+								ELSE intContractSeq
 								END
 							)
 
@@ -261,11 +253,11 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = 'Success'
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = (
+					AND intContractSeq = (
 						CASE 
 							WHEN ISNULL(@ysnMaxPrice, 0) = 0
 								THEN @strTrackingNo
-							ELSE intContractDetailId
+							ELSE intContractSeq
 							END
 						)
 					AND strFeedStatus IN (
@@ -282,7 +274,7 @@ BEGIN TRY
 				VALUES (
 					@strMesssageType
 					,'Success'
-					,@strRefNo + ' / ' + ISNULL(@strContractSeq, '')
+					,@strRefNo + ' / ' + ISNULL(@strTrackingNo, '')
 					,@strParam
 					)
 			END
@@ -295,7 +287,7 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = @strTrackingNo
+					AND intContractSeq = @strTrackingNo
 					AND strFeedStatus = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
@@ -307,7 +299,7 @@ BEGIN TRY
 				VALUES (
 					@strMesssageType
 					,@strMessage
-					,@strRefNo + ' / ' + ISNULL(@strContractSeq, '')
+					,@strRefNo + ' / ' + ISNULL(@strTrackingNo, '')
 					,@strParam
 					)
 			END
