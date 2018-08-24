@@ -42,8 +42,6 @@ BEGIN TRY
 		,[dtmDate] = InvoiceItem.dtmInvoiceDate
 		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
 		,[intEntitySalespersonId] = InvoiceItem.intDriverId
-		--,[intFreightTermId]						INT												NULL		-- Freight Term Id
-		--,[intShipViaId]							INT												NULL		-- Entity Id of ShipVia
 		,[strMobileBillingShiftNo] = InvoiceItem.intShiftNumber
 		,[strComments] = InvoiceItem.strComments
 		,[intEntityId] = InvoiceItem.intEntityCustomerId
@@ -60,7 +58,6 @@ BEGIN TRY
 		,[dblPrice] = InvoiceItem.dblPrice
 		,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
 		,[ysnRefreshPrice] = 0
-		--,[intTaxGroupId]						INT												NULL		-- Key Value from tblSMTaxGroup (Taxes)
 		,[ysnRecomputeTax] = 1
 		,[intContractDetailId] = InvoiceItem.intContractDetailId
 		,[intSiteId] = InvoiceItem.intSiteId
@@ -76,6 +73,40 @@ BEGIN TRY
 			,@CreatedIvoices	= @CreatedInvoices OUTPUT
 			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
+	DECLARE @i21Invoice INT
+
+	IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
+	BEGIN
+		
+		SELECT Item INTO #tmpCreated FROM [fnSplitStringWithTrim](@CreatedInvoices,',')
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCreated)
+		BEGIN
+			SELECT TOP 1 @i21Invoice = CAST(Item AS INT) FROM #tmpCreated
+
+			UPDATE tblMBILInvoice
+			SET inti21InvoiceId = @i21Invoice
+				, ysnPosted = @Post
+			WHERE intInvoiceId = @InvoiceId
+
+			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
+		END
+	END
+
+	IF (@UpdatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
+	BEGIN
+		SELECT Item INTO #tmpUpdated FROM [fnSplitStringWithTrim](@UpdatedInvoices,',')
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUpdated)
+		BEGIN
+			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
+
+			UPDATE tblMBILInvoice
+			SET inti21InvoiceId = @i21Invoice
+				, ysnPosted = @Post
+			WHERE intInvoiceId = @InvoiceId
+
+			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
+		END
+	END
 
 END TRY
 BEGIN CATCH

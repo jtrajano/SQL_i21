@@ -1,4 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMBILCreateSite]
+	@EntityCustomerId INT,
+	@ItemId INT,
+	@LocationId INT,
+	@DriverId INT,
 	@UserId INT,
 	@SiteId INT OUTPUT
 AS
@@ -19,6 +23,8 @@ BEGIN TRY
 		, @DefaultSiteNo NVARCHAR(50)
 		, @CountNo INT = 0
 		, @SiteNo NVARCHAR(50)
+		, @SiteNumber INT = 0
+		, @TMCustomerId INT
 
 	SELECT TOP 1 @DefaultSiteNo = ISNULL(strDefaultSiteNo, '') FROM tblMBILCompanyPreference
 
@@ -28,7 +34,32 @@ BEGIN TRY
 		SET @SiteNo = @DefaultSiteNo + CAST(@CountNo AS NVARCHAR(50))
 	END
 
-	--INSERT INTO 
+	SELECT TOP 1 @TMCustomerId = intCustomerID, @SiteNumber = intCurrentSiteNumber FROM tblTMCustomer WHERE intCustomerNumber = @EntityCustomerId
+
+	IF (ISNULL(@TMCustomerId, 0) = 0)
+	BEGIN
+		INSERT INTO tblTMCustomer(intCurrentSiteNumber, intCustomerNumber, intConcurrencyId)
+		VALUES (1, @EntityCustomerId, 1)
+
+		SET @TMCustomerId = SCOPE_IDENTITY()
+		SET @SiteNumber = 1
+
+	END
+
+	INSERT INTO tblTMSite(intProduct
+		, intCustomerID
+		, intLocationId
+		, intSiteNumber
+		, intDriverID
+		, strDescription)
+	SELECT @ItemId
+		, @TMCustomerId
+		, @LocationId
+		, @SiteNumber
+		, @DriverId
+		, @SiteNo
+
+	SET @SiteId = SCOPE_IDENTITY()
 
 END TRY
 BEGIN CATCH
