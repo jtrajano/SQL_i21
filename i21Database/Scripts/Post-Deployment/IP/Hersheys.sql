@@ -371,3 +371,10 @@ UPDATE tblSMCountry
 SET strISOCode = 'US'
 WHERE strCountry = 'United States'
 Go
+UPDATE tblIPSAPLocation
+SET ysnEnabledERPFeed = 0
+WHERE stri21Location NOT IN (
+		'130-US'
+		,'130-Coman'
+		)
+Go
