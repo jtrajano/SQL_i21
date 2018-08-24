@@ -379,7 +379,7 @@ END
 
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,  dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
+		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,  dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog  ORDER BY intFutOptTransactionErrLogId
 --		WHERE isnull(strName,'') <> '' and isnull(strFutMarketName,'') <> '' and isnull(strInstrumentType,'') <> ''
 --AND isnull(strAccountNumber,'') <> '' and isnull(strCommodityCode,'') <> '' and isnull(strLocationName,'') <> '' and isnull(strSalespersonId,'') <> ''
 
