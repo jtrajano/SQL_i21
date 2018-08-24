@@ -80,6 +80,7 @@ SELECT
     ,dblTotalSST = ISNULL(SSTTaxes_1.dblTaxCalculatedAmount, 0) 
     ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
 	,strItemCategory = cfItem.strCategoryCode           
+	,cfDuplicateUnpostedTransaction.intTotalDuplicateUnposted
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
@@ -176,6 +177,10 @@ LEFT OUTER JOIN (SELECT intTransactionId,
                         AND ( strTaxClass <> 'SST' ) 
                 GROUP  BY intTransactionId) AS LCTaxes_1 
     ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
+	OUTER APPLY (
+		SELECT COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0
+	) AS cfDuplicateUnpostedTransaction
+
 
 
 
