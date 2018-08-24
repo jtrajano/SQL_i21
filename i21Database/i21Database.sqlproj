@@ -6980,6 +6980,7 @@
     <Build Include="dbo\Views\vyuARInvoiceMCPReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMCPReport.sql" />
     <Build Include="dbo\Tables\tblARPOSEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceMainReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

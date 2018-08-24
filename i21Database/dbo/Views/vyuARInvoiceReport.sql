@@ -105,6 +105,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
+	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

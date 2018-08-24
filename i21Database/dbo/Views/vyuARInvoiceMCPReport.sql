@@ -32,6 +32,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strComments				= dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	 , strItemComments          = ITEMCOMMENTS.strItemComments
 	 , strOrigin				= ''
+	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
