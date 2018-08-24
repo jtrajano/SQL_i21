@@ -71,7 +71,7 @@ AS
 			SB.strSubLocationName,
 			BK.strBook,
 			SK.strSubBook,
-
+			PG.strName AS strPurchasingGroup,
 			--Required by other modules
 		
 			IM.strLotTracking,				
@@ -134,6 +134,7 @@ AS
 	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	EO.intCountryID				LEFT
 	JOIN	tblSMCountry					IG	ON	IG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	LEFT
+	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId		LEFT
 	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'				LEFT
 	JOIN	(
