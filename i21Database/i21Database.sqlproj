@@ -6981,6 +6981,10 @@
     <Build Include="dbo\Views\vyuARTaxDetailMCPReport.sql" />
     <Build Include="dbo\Tables\tblARPOSEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMainReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationAddSubscriptionForRemote.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationPullSubscription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationMainConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplRemoteConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
