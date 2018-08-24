@@ -6979,6 +6979,7 @@
     <Build Include="dbo\Views\vyuARPOSOpenDrawers.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMCPReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMCPReport.sql" />
+    <Build Include="dbo\Tables\tblARPOSEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
