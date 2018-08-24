@@ -14,6 +14,8 @@
 	[strReportGroupName]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceReportName]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strCreditMemoReportName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strTankDeliveryInvoiceFormat]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strTransportsInvoiceFormat]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConversionAccountId]		INT NULL,
 	[ysnLineItemAccountUpdate]		BIT NULL DEFAULT 0,
 	[ysnImpactForProvisional]		BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnImpactForProvisional] DEFAULT ((0)),
