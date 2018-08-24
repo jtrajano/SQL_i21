@@ -28,6 +28,12 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Detail.dblValue
 	, Detail.dblVariance
 	, Detail.dblGainLoss
+	, Detail.dtmDateModified
+	, Detail.dtmDateCreated
+	, Detail.intModifiedByUserId
+	, Detail.intCreatedByUserId
+	, Detail.intCompanyId
+	, Detail.intConcurrencyId
 FROM tblICStorageMeasurementReadingConversion Detail
 LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementReadingId = Detail.intStorageMeasurementReadingId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId

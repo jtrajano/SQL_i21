@@ -3,7 +3,9 @@
 	[intStorageMeasurementReadingId] INT NOT NULL IDENTITY, 
     [intLocationId] INT NOT NULL, 
     [dtmDate] DATETIME NOT NULL DEFAULT (GETDATE()), 
+	[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strReadingNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[ysnPosted] BIT NULL DEFAULT ((0)),
     [intSort] INT NULL, 
 	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)),
@@ -42,6 +44,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICStorageMeasurementReading',
     @level2type = N'COLUMN',
     @level2name = N'dtmDate'
+	GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICStorageMeasurementReading',
+    @level2type = N'COLUMN',
+    @level2name = N'strDescription'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Reading Number',
@@ -51,6 +62,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICStorageMeasurementReading',
     @level2type = N'COLUMN',
     @level2name = N'strReadingNo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Posted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICStorageMeasurementReading',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPosted'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',

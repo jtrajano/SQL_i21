@@ -222,6 +222,10 @@ USING	(
 		SELECT id = 53
 				,name = 'Delivery Sheet'
 				,form = 'Delivery Sheet'
+		UNION ALL
+		SELECT id = 54
+				,name = 'Storage Measurement Reading'
+				,form = 'Storage Measurement Reading'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
