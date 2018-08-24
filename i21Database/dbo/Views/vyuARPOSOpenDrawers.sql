@@ -4,7 +4,7 @@
 			intCompanyLocationPOSDrawerId	=	POSLOG.intCompanyLocationPOSDrawerId,
 			strPOSDrawerName				=	DRAWER.strPOSDrawerName,
 			dblOpeningBalance				=	POSLOG.dblOpeningBalance,
-			dblEndingBalance				=	SUM(ISNULL(dblEndingBalance,0))
+			dblEndingBalance				=	SUM(ISNULL(dblEndingBalance,0)) + POSLOG.dblOpeningBalance
 
 	FROM tblARPOSLog POSLOG
 	LEFT JOIN (
