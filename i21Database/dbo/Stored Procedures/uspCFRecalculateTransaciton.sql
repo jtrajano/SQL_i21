@@ -69,6 +69,8 @@
 ,@CustomerId						INT				= 0
 ,@DevMode							BIT				= 0
 ,@ItemId							INT				= 0
+,@QuoteTaxExemption					BIT				= 1
+,@ProcessType						NVARCHAR(MAX)   = 'invoice'
 	
 AS
 
@@ -306,6 +308,7 @@ BEGIN
 ELSE
 BEGIN
 		SET @intCustomerId = @CustomerId
+		SELECT TOP 1 @intPriceRuleGroup = intPriceRuleGroup FROM tblCFAccount WHERE intCustomerId = @CustomerId
 	END
 
 	--GET @ysnActive CUSTOMER--
@@ -957,36 +960,50 @@ BEGIN
 	DECLARE @intLoopTaxClassID				INT
 	DECLARE @DisregardExemptionSetup		BIT
 
-	DECLARE @ysnApplyTaxExemption		BIT = 1
+	DECLARE @ysnDisregardTaxExemption		BIT = 1
 	DECLARE @strSiteApplyExemption		NVARCHAR(5)
 	DECLARE @strNetworkApplyExemption	NVARCHAR(5)
 
 
 	SELECT TOP 1 @strSiteApplyExemption		= strAllowExemptionsOnExtAndRetailTrans FROM tblCFSite	  WHERE intSiteId	 = @intSiteId
 	SELECT TOP 1 @strNetworkApplyExemption	= strAllowExemptionsOnExtAndRetailTrans FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
-
-	IF(LOWER(@strTransactionType) = 'extended remote')
+	
+	IF(ISNULL(@ProcessType,'invoice') = 'invoice')
 	BEGIN
-		IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+		IF(LOWER(@strTransactionType) = 'extended remote')
 		BEGIN
-			SET @ysnApplyTaxExemption = 0
+			IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+			BEGIN
+				SET @ysnDisregardTaxExemption = 0
+			END
+			ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+			BEGIN
+				SET @ysnDisregardTaxExemption = 0
+			END
+			ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
+			BEGIN
+				SET @ysnDisregardTaxExemption = 1
+			END
+			ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
+			BEGIN
+				SET @ysnDisregardTaxExemption = 1
+			END
 		END
-		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+		ELSE
 		BEGIN
-			SET @ysnApplyTaxExemption = 0
-		END
-		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
-		BEGIN
-			SET @ysnApplyTaxExemption = 1
-		END
-		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
-		BEGIN
-			SET @ysnApplyTaxExemption = 1
+			SET @ysnDisregardTaxExemption = 0
 		END
 	END
 	ELSE
 	BEGIN
-		SET @ysnApplyTaxExemption = 0
+		IF(ISNULL(@QuoteTaxExemption,0) = 1)
+		BEGIN
+			SET @ysnDisregardTaxExemption = 0
+		END
+		ELSE
+		BEGIN
+			SET @ysnDisregardTaxExemption = 1
+		END
 	END
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
@@ -1255,7 +1272,7 @@ BEGIN
 				END
 
 
-				IF(ISNULL(@ysnApplyTaxExemption,0) = 1)
+				IF(ISNULL(@ysnDisregardTaxExemption,0) = 1)
 				BEGIN
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
 				END
@@ -1443,7 +1460,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					,@intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -1504,7 +1521,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					,@intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -1649,7 +1666,7 @@ BEGIN
 			BEGIN
 
 
-				IF(ISNULL(@ysnApplyTaxExemption,0) = 1)
+				IF(ISNULL(@ysnDisregardTaxExemption,0) = 1)
 				BEGIN
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
 				END
@@ -1894,7 +1911,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,@ysnDisregardTaxExemption --@DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
@@ -1955,7 +1972,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,@ysnDisregardTaxExemption --@DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
@@ -2475,7 +2492,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -2536,7 +2553,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -2546,7 +2563,7 @@ BEGIN
 					,NULL	--@@CurrencyExchangeRate										 
 				)
 				
-					IF(ISNULL(@ysnApplyTaxExemption,0) = 0)
+					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
 						INSERT INTO @tblCFCalculatedTaxExempt	
                         (
@@ -3052,7 +3069,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId	
 					,@intSiteId
@@ -3113,7 +3130,7 @@ BEGIN
                             ,@companyConfigFreightTermId
                             ,@intCardId		
                             ,@intVehicleId
-                            ,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+                            ,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
                             ,0
                             , @intItemUOMId	--intItemUOMId	
                             ,@intSiteId
@@ -3123,7 +3140,7 @@ BEGIN
                             ,NULL	--@@CurrencyExchangeRate										 
                         )
 				
-					IF(ISNULL(@ysnApplyTaxExemption,0) = 0)
+					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
 						INSERT INTO @tblCFCalculatedTaxExempt	
 						(
@@ -3492,7 +3509,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,@ysnDisregardTaxExemption --@DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -3553,7 +3570,7 @@ BEGIN
                             ,@companyConfigFreightTermId
                             ,@intCardId		
                             ,@intVehicleId
-                            ,@ysnApplyTaxExemption --@DisregardExemptionSetup
+                            ,@ysnDisregardTaxExemption --@DisregardExemptionSetup
                             ,0
                             , @intItemUOMId	--intItemUOMId
                             ,@intSiteId
@@ -3563,7 +3580,7 @@ BEGIN
                             ,NULL	--@@CurrencyExchangeRate								 
                         ) 
 					
-					IF(ISNULL(@ysnApplyTaxExemption,0) = 0)
+					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
 						INSERT INTO @tblCFCalculatedTaxExempt	
 						(
@@ -4024,7 +4041,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
@@ -4085,7 +4102,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
@@ -4469,7 +4486,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption-- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption-- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -4530,7 +4547,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption-- @DisregardExemptionSetup
+					,@ysnDisregardTaxExemption-- @DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -4540,7 +4557,7 @@ BEGIN
 					,NULL	--@@CurrencyExchangeRate									 
 				)
 				
-					IF(ISNULL(@ysnApplyTaxExemption,0) = 0)
+					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
                         INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
                         (
@@ -4847,7 +4864,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,@ysnDisregardTaxExemption --@DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -4908,7 +4925,7 @@ BEGIN
 					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
-					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,@ysnDisregardTaxExemption --@DisregardExemptionSetup
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
@@ -4918,7 +4935,7 @@ BEGIN
 					,NULL	--@@CurrencyExchangeRate									 
 				)
 
-					IF(ISNULL(@ysnApplyTaxExemption,0) = 0)
+					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
 						INSERT INTO @tblCFCalculatedTaxExempt	
 						(
