@@ -6987,6 +6987,7 @@
     <Build Include="dbo\Stored Procedures\uspSMReplRemoteConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicatonDropPublication.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
+    <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
