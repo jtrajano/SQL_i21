@@ -196,6 +196,10 @@ BEGIN
 	--JIRA CF-1820--
 	---------------------------------------------
 
+	DECLARE @ysnApplyTaxExemption BIT
+	DECLARE @intPriceRuleGroup BIT
+	SELECT TOP 1 @ysnApplyTaxExemption = ysnQuoteTaxExempt FROM tblCFAccount WHERE intCustomerId = @intCustomerId
+	
 
 	
 
@@ -231,27 +235,28 @@ BEGIN
 		AND intItemId = @loopARItemId
 		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
 		ORDER BY dtmDate DESC
-
 		
 
-			EXEC dbo.uspCFRecalculateTransaciton 
-			@CustomerId = @intCustomerId,
-			@ProductId=0,
-			@SiteId=@loopSiteId,
-			@NetworkId=@loopNetworkId,
-			@TransactionDate=@dtmDate,
-			@TransactionType=@loopSiteType,
-			---------STATIC VALUE----------
-			@TransactionId=0,
-			@CreditCardUsed=0,
-			@PumpId=0,
-			@VehicleId=0,
-			@CardId=0,
-			@Quantity=1,
-			@OriginalPrice=@networkCost, -- NETWORK COST
-			@TransferCost=@networkCost,	-- NETWORK COST
-			@IsImporting = 1,
-			@ItemId = @loopARItemId
+		EXEC dbo.uspCFRecalculateTransaciton 
+		@CustomerId = @intCustomerId,
+		@ProductId=0,
+		@SiteId=@loopSiteId,
+		@NetworkId=@loopNetworkId,
+		@TransactionDate=@dtmDate,
+		@TransactionType=@loopSiteType,
+		---------STATIC VALUE----------
+		@TransactionId=0,
+		@CreditCardUsed=0,
+		@PumpId=0,
+		@VehicleId=0,
+		@CardId=0,
+		@Quantity=1,
+		@OriginalPrice=@networkCost, -- NETWORK COST
+		@TransferCost=@networkCost,	-- NETWORK COST
+		@IsImporting = 1,
+		@ItemId = @loopARItemId,
+		@QuoteTaxExemption = @ysnApplyTaxExemption,
+		@ProcessType	= 'quote'
 
 
 		DECLARE @dblOutPriceProfileRate				NUMERIC(18,6)
