@@ -1,94 +1,254 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityWorkOrderDetail]
-	@intLotId int,
-	@intDirectionId int,
-	@ysnParentLot bit=0
+﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityWorkOrderDetail] @intLotId INT
+	,@intDirectionId INT
+	,@ysnParentLot BIT = 0
 AS
-
 SET NOCOUNT ON;
 
-Declare @strLotNumber nvarchar(50)
+DECLARE @strLotNumber NVARCHAR(50)
 
-Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+SELECT @strLotNumber = strLotNumber
+FROM tblICLot
+WHERE intLotId = @intLotId
 
-IF @intDirectionId=1
-	Begin
-	If @ysnParentLot=0
-		Select 'Consume' AS strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,
-		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
-		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.strProcessName,'W' AS strType,t.intAttributeTypeId
-		FROM (  
-		Select DISTINCT 'Consume' AS strTransactionName,wi.intLotId,w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
-		mt.intCategoryId,mt.strCategoryCode,w.dblQuantity,um.strUnitMeasure AS strUOM,
-		wi.dtmCreated AS dtmTransactionDate,ps.strProcessName,ps.intAttributeTypeId
-		from tblMFWorkOrder w 
-		Join tblMFWorkOrderConsumedLot wi on w.intWorkOrderId=wi.intWorkOrderId
-		Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
-		Join tblICItem i on w.intItemId=i.intItemId
-		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
-		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
-		group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
-		t.intLotId,t.strProcessName,t.intAttributeTypeId
+IF @intDirectionId = 1
+BEGIN
+	IF @ysnParentLot = 0
+		SELECT 'Consume' AS strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,SUM(t.dblQuantity) AS dblQuantity
+			,MAX(t.strUOM) AS strUOM
+			,MAX(t.dtmTransactionDate) AS dtmTransactionDate
+			,t.strProcessName
+			,'W' AS strType
+			,t.intAttributeTypeId
+			,''
+			,dblWOQty
+		FROM (
+			SELECT DISTINCT 'Consume' AS strTransactionName
+				,wi.intLotId
+				,w.intWorkOrderId
+				,w.strWorkOrderNo
+				,i.intItemId
+				,i.strItemNo
+				,i.strDescription
+				,mt.intCategoryId
+				,mt.strCategoryCode
+				,w.dblQuantity
+				,um.strUnitMeasure AS strUOM
+				,wi.dtmCreated AS dtmTransactionDate
+				,ps.strProcessName
+				,ps.intAttributeTypeId
+				,w.dblQuantity AS dblWOQty
+			FROM tblMFWorkOrder w
+			JOIN tblMFWorkOrderConsumedLot wi ON w.intWorkOrderId = wi.intWorkOrderId
+			JOIN tblMFManufacturingProcess ps ON ps.intManufacturingProcessId = w.intManufacturingProcessId
+			JOIN tblICItem i ON w.intItemId = i.intItemId
+			JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
+			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+			WHERE wi.intLotId IN (
+					SELECT intLotId
+					FROM tblICLot
+					WHERE strLotNumber = @strLotNumber
+					)
+			) t
+		GROUP BY t.strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,t.intLotId
+			,t.strProcessName
+			,t.intAttributeTypeId
+			,t.dblWOQty
 
-	If @ysnParentLot=1
-		Select 'Consume' AS strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,
-		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
-		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.strProcessName,'W' AS strType,t.intAttributeTypeId
-		FROM (  
-		Select DISTINCT 'Consume' AS strTransactionName,l.intParentLotId AS intLotId,w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
-		mt.intCategoryId,mt.strCategoryCode,w.dblQuantity,um.strUnitMeasure AS strUOM,
-		wi.dtmCreated AS dtmTransactionDate,ps.strProcessName,ps.intAttributeTypeId
-		from tblMFWorkOrder w 
-		Join tblMFWorkOrderConsumedLot wi on w.intWorkOrderId=wi.intWorkOrderId
-		Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
-		Join tblICItem i on w.intItemId=i.intItemId
-		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
-		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Join tblICLot l on wi.intLotId=l.intLotId
-		Where l.intParentLotId=@intLotId) t
-		group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
-		t.intLotId,t.strProcessName,t.intAttributeTypeId
-	End
+	IF @ysnParentLot = 1
+		SELECT 'Consume' AS strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,SUM(t.dblQuantity) AS dblQuantity
+			,MAX(t.strUOM) AS strUOM
+			,MAX(t.dtmTransactionDate) AS dtmTransactionDate
+			,t.strProcessName
+			,'W' AS strType
+			,t.intAttributeTypeId
+			,''
+			,dblWOQty
+		FROM (
+			SELECT DISTINCT 'Consume' AS strTransactionName
+				,l.intParentLotId AS intLotId
+				,w.intWorkOrderId
+				,w.strWorkOrderNo
+				,i.intItemId
+				,i.strItemNo
+				,i.strDescription
+				,mt.intCategoryId
+				,mt.strCategoryCode
+				,w.dblQuantity
+				,um.strUnitMeasure AS strUOM
+				,wi.dtmCreated AS dtmTransactionDate
+				,ps.strProcessName
+				,ps.intAttributeTypeId
+				,w.dblQuantity AS dblWOQty
+			FROM tblMFWorkOrder w
+			JOIN tblMFWorkOrderConsumedLot wi ON w.intWorkOrderId = wi.intWorkOrderId
+			JOIN tblMFManufacturingProcess ps ON ps.intManufacturingProcessId = w.intManufacturingProcessId
+			JOIN tblICItem i ON w.intItemId = i.intItemId
+			JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
+			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+			JOIN tblICLot l ON wi.intLotId = l.intLotId
+			WHERE l.intParentLotId = @intLotId
+			) t
+		GROUP BY t.strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,t.intLotId
+			,t.strProcessName
+			,t.intAttributeTypeId
+			,t.dblWOQty
+END
 ELSE
-	Begin
-		If @ysnParentLot=0
-			Select 'Produce' AS strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,
-			t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
-			MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.strProcessName,'W' AS strType,t.intAttributeTypeId
-			FROM (  
-			Select DISTINCT 'Produce' AS strTransactionName,wi.intLotId,w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
-			mt.intCategoryId,mt.strCategoryCode,w.dblQuantity,um.strUnitMeasure AS strUOM,
-			wi.dtmCreated AS dtmTransactionDate,ps.strProcessName,ps.intAttributeTypeId
-			from tblMFWorkOrder w 
-			Join tblMFWorkOrderProducedLot wi on w.intWorkOrderId=wi.intWorkOrderId
-			Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
-			Join tblICItem i on w.intItemId=i.intItemId
-			Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-			Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
-			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(wi.ysnProductionReversed,0)=0) t
-			group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
-			t.intLotId,t.strProcessName,t.intAttributeTypeId
+BEGIN
+	IF @ysnParentLot = 0
+		SELECT 'Produce' AS strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,SUM(t.dblQuantity) AS dblQuantity
+			,MAX(t.strUOM) AS strUOM
+			,MAX(t.dtmTransactionDate) AS dtmTransactionDate
+			,t.strProcessName
+			,'W' AS strType
+			,t.intAttributeTypeId
+			,'Produce ' + Ltrim(Convert(DECIMAL(24, 2), SUM(t.dblQuantity))) + Ltrim(MAX(t.strProducedUnitMeasure))
+			,dblWOQty
+		FROM (
+			SELECT DISTINCT 'Produce' AS strTransactionName
+				,wi.intLotId
+				,w.intWorkOrderId
+				,w.strWorkOrderNo
+				,i.intItemId
+				,i.strItemNo
+				,i.strDescription
+				,mt.intCategoryId
+				,mt.strCategoryCode
+				,wi.dblQuantity
+				,um.strUnitMeasure AS strUOM
+				,wi.dtmCreated AS dtmTransactionDate
+				,ps.strProcessName
+				,ps.intAttributeTypeId
+				,w.dblQuantity AS dblWOQty
+				,um1.strUnitMeasure as strProducedUnitMeasure
+			FROM tblMFWorkOrder w
+			JOIN tblMFWorkOrderProducedLot wi ON w.intWorkOrderId = wi.intWorkOrderId
+			JOIN tblMFManufacturingProcess ps ON ps.intManufacturingProcessId = w.intManufacturingProcessId
+			JOIN tblICItem i ON w.intItemId = i.intItemId
+			JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
+			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+						JOIN tblICItemUOM iu1 ON wi.intItemUOMId = iu1.intItemUOMId
+			JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
+			WHERE wi.intLotId IN (
+					SELECT intLotId
+					FROM tblICLot
+					WHERE strLotNumber = @strLotNumber
+					)
+				AND ISNULL(wi.ysnProductionReversed, 0) = 0
+			) t
+		GROUP BY t.strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,t.intLotId
+			,t.strProcessName
+			,t.intAttributeTypeId
+			,t.dblWOQty
 
-		If @ysnParentLot=1
-			Select 'Produce' AS strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,
-			t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
-			MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.strProcessName,'W' AS strType,t.intAttributeTypeId
-			FROM (  
-			Select DISTINCT 'Produce' AS strTransactionName,l.intParentLotId AS intLotId,w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
-			mt.intCategoryId,mt.strCategoryCode,w.dblQuantity,um.strUnitMeasure AS strUOM,
-			wi.dtmCreated AS dtmTransactionDate,ps.strProcessName,ps.intAttributeTypeId
-			from tblMFWorkOrder w 
-			Join tblMFWorkOrderProducedLot wi on w.intWorkOrderId=wi.intWorkOrderId
-			Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
-			Join tblICItem i on w.intItemId=i.intItemId
-			Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
-			Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
-			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Join tblICLot l on wi.intLotId=l.intLotId
-			Where l.intParentLotId=@intLotId AND ISNULL(wi.ysnProductionReversed,0)=0) t
-			group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
-			t.intLotId,t.strProcessName,t.intAttributeTypeId
-	End
+	IF @ysnParentLot = 1
+		SELECT 'Produce' AS strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,SUM(t.dblQuantity) AS dblQuantity
+			,MAX(t.strUOM) AS strUOM
+			,MAX(t.dtmTransactionDate) AS dtmTransactionDate
+			,t.strProcessName
+			,'W' AS strType
+			,t.intAttributeTypeId
+			,'Produce ' + Ltrim(Convert(DECIMAL(24, 2), SUM(t.dblQuantity))) + Ltrim(MAX(t.strProducedUnitMeasure))
+			,dblWOQty
+		FROM (
+			SELECT DISTINCT 'Produce' AS strTransactionName
+				,l.intParentLotId AS intLotId
+				,w.intWorkOrderId
+				,w.strWorkOrderNo
+				,i.intItemId
+				,i.strItemNo
+				,i.strDescription
+				,mt.intCategoryId
+				,mt.strCategoryCode
+				,w.dblQuantity
+				,um.strUnitMeasure AS strUOM
+				,wi.dtmCreated AS dtmTransactionDate
+				,ps.strProcessName
+				,ps.intAttributeTypeId
+				,w.dblQuantity AS dblWOQty
+				,um1.strUnitMeasure as strProducedUnitMeasure
+			FROM tblMFWorkOrder w
+			JOIN tblMFWorkOrderProducedLot wi ON w.intWorkOrderId = wi.intWorkOrderId
+			JOIN tblMFManufacturingProcess ps ON ps.intManufacturingProcessId = w.intManufacturingProcessId
+			JOIN tblICItem i ON w.intItemId = i.intItemId
+			JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
+			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
+			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+			JOIN tblICItemUOM iu1 ON wi.intItemUOMId = iu1.intItemUOMId
+			JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
+			JOIN tblICLot l ON wi.intLotId = l.intLotId
+			WHERE l.intParentLotId = @intLotId
+				AND ISNULL(wi.ysnProductionReversed, 0) = 0
+			) t
+		GROUP BY t.strTransactionName
+			,t.intWorkOrderId
+			,t.strWorkOrderNo
+			,t.intItemId
+			,t.strItemNo
+			,t.strDescription
+			,t.intCategoryId
+			,t.strCategoryCode
+			,t.intLotId
+			,t.strProcessName
+			,t.intAttributeTypeId
+			,t.dblWOQty
+END
