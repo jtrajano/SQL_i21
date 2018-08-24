@@ -67,6 +67,7 @@ SELECT
 	,cfTransaction.dblMargin 
 	,cfTransaction.dtmInvoiceDate
 	,cfTransaction.strInvoiceReportNumber
+	,cfTransaction.ysnDuplicate
 	,cfSite.strSiteGroup
 	,cfTransaction.strPriceProfileId
 	,cfCard.strPriceGroup
