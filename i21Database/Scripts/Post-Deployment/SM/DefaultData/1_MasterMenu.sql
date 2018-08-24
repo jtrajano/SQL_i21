@@ -5786,6 +5786,63 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AN
 	VALUES (N'Setup', N'Buybacks', @BuybacksMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Buybacks.view.BuybackSetup?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.BuybackSetup?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId
+
+/* MOBILE BILLING */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mobile Billing' AND strModuleName = 'Mobile Billing' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Mobile Billing', N'Mobile Billing', 0, N'Mobile Billing', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 34, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 34 WHERE strMenuName = 'Mobile Billing' AND strModuleName = 'Mobile Billing' AND intParentMenuID = 0
+
+DECLARE @MobileBillingParentMenuId INT
+SELECT @MobileBillingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Mobile Billing' AND strModuleName = 'Mobile Billing' AND intParentMenuID = 0
+
+/* CATEGORY FOLDERS */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Mobile Billing', @MobileBillingParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Activities' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId
+
+DECLARE @MobileBillingActivitiesParentMenuId INT
+SELECT @MobileBillingActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Mobile Billing', @MobileBillingParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId
+
+DECLARE @MobileBillingMaintenanceParentMenuId INT
+SELECT @MobileBillingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingParentMenuId
+
+/* ADD TO RESPECTIVE CATEGORY */ 
+UPDATE tblSMMasterMenu SET intParentMenuID = @MobileBillingActivitiesParentMenuId WHERE intParentMenuID =  @MobileBillingParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @MobileBillingMaintenanceParentMenuId WHERE intParentMenuID =  @MobileBillingParentMenuId AND strCategory = 'Maintenance'
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Shifts' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Shifts', N'Mobile Billing', @MobileBillingActivitiesParentMenuId, N'Shifts', N'Activity', N'Screen', N'MobileBilling.view.Shift?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'MobileBilling.view.Shift?showSearch=true' WHERE strMenuName = 'Shifts' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoices' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Invoices', N'Mobile Billing', @MobileBillingActivitiesParentMenuId, N'Invoices', N'Activity', N'Screen', N'MobileBilling.view.Invoice?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'MobileBilling.view.Invoice?showSearch=true' WHERE strMenuName = 'Invoices' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payments' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Payments', N'Mobile Billing', @MobileBillingActivitiesParentMenuId, N'Payments', N'Activity', N'Screen', N'MobileBilling.view.Payment?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'MobileBilling.view.Payment?showSearch=true' WHERE strMenuName = 'Payments' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trucks' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Trucks', N'Mobile Billing', @MobileBillingMaintenanceParentMenuId, N'Trucks', N'Maintenance', N'Screen', N'i21.view.Truck?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'i21.view.Truck?showSearch=true' WHERE strMenuName = 'Trucks' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
