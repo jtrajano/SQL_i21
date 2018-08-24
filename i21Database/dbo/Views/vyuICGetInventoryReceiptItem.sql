@@ -73,6 +73,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Receipt.intCurrencyId
 	, Receipt.strCurrency 
 	, Item.ysnLotWeightsRequired
+	, ReceiptItemSource.intContractSeq
+	, ReceiptItemSource.strERPPONumber
+	, ReceiptItemSource.strERPItemNumber
+	, ReceiptItemSource.strOrigin
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
