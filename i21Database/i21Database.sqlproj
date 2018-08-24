@@ -6885,7 +6885,6 @@
     <Build Include="dbo\Views\vyuMBILOutOfGas.sql" />
     <Build Include="dbo\Tables\tblMBILShift.sql" />
     <Build Include="dbo\Views\vyuMBILShift.sql" />
-    <Build Include="dbo\Views\vyuMBILShiftTransaction.sql" />
     <Build Include="dbo\Views\vyuMBILInvoice.sql" />
     <Build Include="dbo\Views\vyuMBILPayment.sql" />
     <Build Include="dbo\Views\vyuMBILOrder.sql" />
