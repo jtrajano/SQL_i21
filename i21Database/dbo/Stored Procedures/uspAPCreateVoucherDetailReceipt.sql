@@ -204,7 +204,7 @@ SELECT
 	[strBundleDescription]			=	itemBundle.strDescription,
 	[dblBundleTotal]				=	ISNULL(A.dblBundleTotal,0),
 	[intUnitOfMeasureId]			=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
-											THEN contractDetail.intUnitMeasureId
+											THEN contractDetail.intItemUOMId
 											ELSE B.intUnitMeasureId END,
 	[dblUnitQty]					=	ISNULL(contractDetail.dblUnitQty, ABS(ISNULL(ItemUOM.dblUnitQty,0)))
 FROM @voucherDetailReceipt A
