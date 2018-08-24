@@ -13,11 +13,12 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'Outbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 -- Constants  
-DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 46
 DECLARE @ysnRecap AS INT = 0
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
+DECLARE @ENABLE_ACCRUALS_FOR_OUTBOUND BIT = 0
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 	,@OWNERSHIP_TYPE_OWN AS INT = 1
 	,@OWNERSHIP_TYPE_STORAGE AS INT = 2
@@ -36,6 +37,9 @@ DECLARE @LotType_Manual AS INT = 1
 DECLARE @GLEntries AS RecapTableType
 	,@intReturnValue AS INT
 DECLARE @dummyGLEntries AS RecapTableType
+
+SELECT @ENABLE_ACCRUALS_FOR_OUTBOUND = ysnEnableAccrualsForOutbound 
+FROM tblLGCompanyPreference
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)
@@ -198,6 +202,53 @@ SAVE TRAN @TransactionName
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INVENTORY_SHIPMENT_TYPE
+			,@ysnPost
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			
+	END 
+
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType
 	DECLARE @StorageItemsForPost AS ItemCostingTableType
@@ -579,10 +630,6 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
@@ -791,6 +838,53 @@ BEGIN
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
+	END
+
+		-- Unpost the Other Charges
+	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INVENTORY_SHIPMENT_TYPE
+			,@ysnPost
+				
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
 	IF @strFOBPoint = 'Destination'
@@ -1055,10 +1149,6 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
@@ -1098,7 +1188,7 @@ SELECT LD.intItemId
 		END
 	,LD.intLoadId
 	,CAST(L.strLoadNumber AS VARCHAR(100))
-	,5
+	,@INVENTORY_SHIPMENT_TYPE
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId

@@ -45,7 +45,7 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[intTermId]				=	A.intTermsId
-		,[strContractNumber]		=	G1.strContractNumber
+		,[strContractNumber]		=	CAST(G1.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
@@ -362,7 +362,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
-	,[strContractNumber]		=	F1.strContractNumber
+	,[strContractNumber]		=	CAST(F1.strContractNumber AS NVARCHAR(100))
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
@@ -520,7 +520,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
@@ -649,7 +649,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -762,7 +762,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -877,7 +877,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -990,7 +990,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CH.strContractNumber
+		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -1094,7 +1094,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intPContractDetailId
@@ -1150,6 +1150,103 @@ FROM
 		WHERE BD.intItemId = A.intItemId AND Item.strType <> 'Other Charge') AND A.dtmPostedDate IS NOT NULL 
 	
 	UNION ALL
+	-- OTHER CHARGES ACCRUAL
+	SELECT
+		[intEntityVendorId]							=	A.intEntityVendorId
+		,[dtmDate]									=	L.dtmPostedDate
+		,[strReference]								=	''
+		,[strSourceNumber]							=	LTRIM(A.strLoadNumber)
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	A.intItemId
+		,[strMiscDescription]						=	A.strItemDescription
+		,[strItemNo]								=	A.strItemNo
+		,[strDescription]							=	A.strItemDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	1--LD.dblQuantity
+		,[dblPOOpenReceive]							=	0
+		,[dblOpenReceive]							=	1--LD.dblQuantity
+		,[dblQuantityToBill]						=	1--LD.dblQuantity
+		,[dblQuantityBilled]						=	0
+		,[intLineNo]								=	A.intLoadDetailId
+		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptChargeId]				=	NULL
+		,[intContractChargeId]						=	NULL
+		,[dblUnitCost]								=	ISNULL(A.dblPrice,0)
+		,[dblDiscount]								=	0
+		,[dblTax]									=	0
+		,[dblRate]									=	1
+		,[strRateType]								=	NULL
+		,[intCurrencyExchangeRateTypeId]			=	NULL
+		,[ysnSubCurrency]							=	CASE WHEN ISNULL((CASE WHEN C.ysnSubCurrency > 0 THEN C.intCent ELSE 1 END),0) > 0 THEN 1 ELSE 0 END --A.ysnSubCurrency
+		,[intSubCurrencyCents]						=	ISNULL((CASE WHEN C.ysnSubCurrency > 0 THEN C.intCent ELSE 1 END),0)
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strName]									=	A.strCustomerName
+		,[strVendorId]								=	LTRIM(A.intEntityVendorId)
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[intTermId]								=	NULL
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strBillOfLading]							=	L.strBLNumber
+		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
+		,[intContractDetailId]						=	NULL -- A.intPContractDetailId
+		,[intContractSequence]						=	A.intContractSeq
+		,[intScaleTicketId]							=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intShipmentId]							=	A.intLoadId
+		,[intShipmentContractQtyId]					=	A.intLoadDetailId
+		,[intUnitMeasureId]							=	A.intItemUOMId
+		,[strUOM]									=	UOM.strUnitMeasure
+		,[intWeightUOMId]							=	A.intWeightItemUOMId
+		,[intCostUOMId]								=	A.intPriceItemUOMId
+		,[dblNetWeight]								=	ISNULL(1,0)      
+		,[strCostUOM]								=	A.strPriceUOM
+		,[strgrossNetUOM]							=	NULL
+		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
+		,[dblWeightUnitQty]							=	1
+		,[dblCostUnitQty]							=	1
+		,[dblUnitQty]								=	1
+		,[intCurrencyId]							=	A.intCurrencyId
+		,[strCurrency]								=	C.strCurrency
+		,[intCostCurrencyId]						=	A.intCurrencyId
+		,[strCostCurrency]							=	A.strCurrency
+		,[strVendorLocation]						=	NULL
+		,[str1099Form]								=	D2.str1099Form			 
+		,[str1099Type]								=	D2.str1099Type 
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
+		,[dblClaimAmount]							=	0.00
+		,[intLocationId]							=	A.intCompanyLocationId
+		,[strReceiptLocation]						=	(SELECT strLocationName FROM dbo.tblSMCompanyLocation CL WHERE CL.intCompanyLocationId = A.intCompanyLocationId)
+		,[intInventoryShipmentItemId]				=   NULL
+		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	NULL
+		,[ysnReturn]								=	CAST(0 AS BIT)
+		,[strTaxGroup]								=	NULL
+	FROM vyuLGLoadCostForVendor A
+	JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
+	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightItemUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
+	WHERE A.intLoadDetailId NOT IN 
+		(SELECT IsNull(BD.intLoadDetailId, 0) 
+			FROM tblAPBillDetail BD 
+		JOIN tblICItem Item ON Item.intItemId = BD.intItemId
+		WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1) AND ISNULL(L.ysnPosted,0) = 1
+   
+	UNION ALL
 
 	--SHIPMENT OTHER CHARGES
 	SELECT DISTINCT
@@ -1189,7 +1286,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	A.strContractNumber
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId

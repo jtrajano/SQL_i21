@@ -17,6 +17,7 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @defaultCurrency INT;
 DECLARE @rateType INT;
+DECLARE @ids AS Id;
 DECLARE @error NVARCHAR(250);
 DECLARE @paymentCreated NVARCHAR(MAX);
 DECLARE @batchIdUsed NVARCHAR(50);
@@ -32,6 +33,26 @@ DECLARE @postingError NVARCHAR(200);
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
+
+IF OBJECT_ID('tempdb..#tmpVouchersForPay') IS NOT NULL DROP TABLE #tmpVouchersForPay
+CREATE TABLE #tmpVouchersForPay(intBillId INT, intPaymentId INT, dblAmountPaid DECIMAL(18,2));
+
+INSERT INTO @ids
+SELECT intID FROM #tmpBillsId
+
+INSERT INTO #tmpVouchersForPay
+SELECT
+	intBillId
+	,intPaymentId
+	,dblTempPayment
+FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
+WHERE dblTempPayment < 0
+
+IF NOT EXISTS(SELECT 1 FROM #tmpVouchersForPay)
+BEGIN
+	RAISERROR('No negative payment transaction to process.', 16, 1);
+	RETURN;
+END
 
 SELECT TOP 1 @defaultCurrency = intDefaultCurrencyId FROM tblSMCompanyPreference
 SELECT TOP 1 @rateType = intAccountsReceivableRateTypeId FROM tblSMMultiCurrency
@@ -87,7 +108,7 @@ INSERT INTO @paymentDetail(
 	,[ysnFromAP]
 )
 SELECT
-	[intId]								=	A.intBillId
+	[intId]								=	payVouchers.intPaymentId
 	,[strSourceTransaction]				=	'Voucher'
 	,[intSourceId]						=	A.intBillId
 	,[strSourceId]						=	A.strBillId
@@ -103,7 +124,7 @@ SELECT
 	,[intAccountId]						=	@bankGLAccount
 	,[intBankAccountId]					=	@bankAccountId
 	,[intWriteOffAccountId]				=	NULL
-	,[dblAmountPaid]					=	CAST(A.dblAmountDue - A.dblDiscount + A.dblInterest AS DECIMAL(18,2))
+	,[dblAmountPaid]					=	payVouchers.dblAmountPaid
 	,[strPaymentOriginalId]				=	NULL
 	,[ysnUseOriginalIdAsPaymentNumber]	=	0
 	,[ysnApplytoBudget]					=	0
@@ -124,7 +145,7 @@ SELECT
 	,[dblDiscount]						=	0
 	,[dblDiscountAvailable]				=	0
 	,[dblInterest]						=	0
-	,[dblPayment]						=	CAST(A.dblAmountDue - A.dblDiscount + A.dblInterest AS DECIMAL(18,2))
+	,[dblPayment]						=	A.dblTempPayment
 	,[strInvoiceReportNumber]			=	NULL
 	,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 	,[intCurrencyExchangeRateId]		=	NULL
@@ -132,6 +153,7 @@ SELECT
 	,[ysnAllowOverpayment]				=	0
 	,[ysnFromAP]						=	1
 FROM tblAPBill A
+INNER JOIN #tmpVouchersForPay payVouchers ON A.intBillId = payVouchers.intBillId
 INNER JOIN tblSMCompanyLocation B ON A.intShipToId = B.intCompanyLocationId
 OUTER APPLY (
 	SELECT TOP 1
@@ -143,7 +165,6 @@ OUTER APPLY (
 	AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
 	ORDER BY exchangeRateDetail.dtmValidFromDate DESC
 ) rateInfo
-WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 
 IF @transCount = 0 BEGIN TRANSACTION
 

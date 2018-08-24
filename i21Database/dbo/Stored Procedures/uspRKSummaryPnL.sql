@@ -4,6 +4,10 @@
 	,@intCommodityId INT = NULL
 	,@ysnExpired BIT
 	,@intFutureMarketId INT = NULL
+	,@intEntityId int = null
+	,@intBrokerageAccountId INT = NULL
+	,@intFutureMonthId INT = NULL
+	,@strBuySell nvarchar(10)=NULL
 AS
 
 
@@ -93,13 +97,13 @@ INSERT INTO @UnRelaized(RowNum, MonthOrder,intFutOptTransactionId ,GrossPnL ,dbl
 ,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 ,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,intOriginalQty ,intFutOptTransactionHeaderId 
 ,intCommodityId ,ysnExpired ,dblVariationMargin ,dblInitialMargin ,LongWaitedPrice,ShortWaitedPrice
 )
-EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId 
+EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell
 
 INSERT INTO @Relaized(RowNum,MonthOrder,dblNetPL,dblGrossPL,intMatchFuturesPSHeaderId ,intMatchFuturesPSDetailId ,intFutOptTransactionId ,intLFutOptTransactionId ,
 intSFutOptTransactionId ,dblMatchQty,dtmLTransDate ,dtmSTransDate ,dblLPrice,dblSPrice,strLBrokerTradeNo,strSBrokerTradeNo,dblContractSize,dblFutCommission,
 strFutMarketName,strFutureMonth,intMatchNo ,dtmMatchDate ,strName,strAccountNumber,strCommodityCode,strLocationName,intFutureMarketId ,intCommodityId ,ysnExpired,intFutureMonthId 
 )
-EXEC uspRKRealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId 
+EXEC uspRKRealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell
 
 
 BEGIN
@@ -172,7 +176,8 @@ BEGIN
 					,dblInitialMargin
 				FROM @Relaized t
 				LEFT JOIN @UnRelaized p ON t.intFutureMarketId = p.intFutureMarketId AND t.intFutureMonthId = p.intFutureMonthId
-				WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END AND t.intFutureMarketId = CASE WHEN isnull(@intFutureMarketId, 0) = 0 THEN t.intFutureMarketId ELSE @intFutureMarketId END AND t.intFutureMonthId NOT IN (
+				WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END 
+				AND t.intFutureMarketId = CASE WHEN isnull(@intFutureMarketId, 0) = 0 THEN t.intFutureMarketId ELSE @intFutureMarketId END AND t.intFutureMonthId NOT IN (
 						SELECT intFutureMonthId
 						FROM @UnRelaized						
 						) 

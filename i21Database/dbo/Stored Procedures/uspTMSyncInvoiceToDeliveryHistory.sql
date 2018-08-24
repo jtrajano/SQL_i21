@@ -164,6 +164,7 @@ BEGIN
 		BEGIN
 			PRINT 'Service'
 			---------- Create Service Event with the Event Automation
+			SELECT TOP 1 @strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 			INSERT INTO tblTMEvent(
 				dtmDate
 				,intEventTypeID

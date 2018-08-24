@@ -114,16 +114,20 @@ BEGIN
    --Get Customer Entity Id  
    SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)  
   
-   --TM - Get Site Id  
-   -------------------------------------------------------------------------------------------------------------------------------------------------  
-   SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID  
-              WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))  
-     
    --Get Tax Group Id  
    SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)  
   
    --Get Item id  
    SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)  
+
+   	/*Tank Management */
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/
+	SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+												WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
+
+	IF(@dblPercentFullAfterDelivery = 0 AND @dblQuantity > 0)
+	SET @dblPercentFullAfterDelivery = (SELECT TOP 1 dblDefaultFull FROM tblICItem WHERE intItemId = @intItemId)
+    /*------------------------------------------------------------------------------------------------------------------------------------------------- */
   
     --Invoice Number  
    SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '') 
@@ -211,7 +215,7 @@ BEGIN
        ,[strSourceId]  
        --,[intSourceId]  
        --,[strBillingBy]  
-       --,[dblPercentFull]  
+       ,[dblPercentFull]  
        --,[dblNewMeterReading]  
        --,[dblPreviousMeterReading]  
        --,[dblConversionFactor]  
@@ -253,7 +257,7 @@ BEGIN
         ,[intItemId]    = @intItemId  
         ,[strType] = 'Tank Delivery'  
        --,[strTransactionType]  = 'Tank Delivery'  
-       ,[ysnRecomputeTax]   = 1  
+       ,[ysnRecomputeTax] = (CASE WHEN @strTaxGroup = '' THEN 0 ELSE 1 END) --IET-321
        ,[intInvoiceId]    = NULL  
        ,[intCompanyLocationId]  = ISNULL(@intLocationId,0)  
        ,[dtmDate]     = @dtmInvoiceDate  
@@ -307,7 +311,7 @@ BEGIN
        ,[strSourceId]    = @strInvoiceNumber  
        --,[intSourceId]    = @intImportDDToInvoiceId  
        --,[strBillingBy]    = @BillingBy  
-       --,[dblPercentFull]   = @PercentFull  
+       ,[dblPercentFull]   = @dblPercentFullAfterDelivery  
        --,[dblNewMeterReading]  = @NewMeterReading  
        --,[dblPreviousMeterReading] = @PreviousMeterReading  
        --,[dblConversionFactor]  = @ConversionFactor  
