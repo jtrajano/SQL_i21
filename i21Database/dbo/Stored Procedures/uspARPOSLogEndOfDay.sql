@@ -71,7 +71,7 @@ AS
 		WHERE intCompanyLocationPOSDrawerId = @intCompanyLocationPOSDrawerId
 			AND ysnLoggedIn = 1
 
-		SELECT TOP 1 @dblOpeningBalance	= POSLOG.dblOpeningBalance
+		--SELECT TOP 1 @dblOpeningBalance	= POSLOG.dblOpeningBalance
 		
 		--GET ALL CASH PAYMENTS
 		IF(OBJECT_ID('tempdb..#CASHPAYMENTS') IS NOT NULL)
