@@ -119,14 +119,6 @@ SELECT TOP 100 PERCENT * FROM (
 		) chargesAmount
     ) charges
     OUTER APPLY (
-        SELECT
-            SUM(itemTax.dblTax) AS dblTax
-        FROM tblICInventoryReceiptItem receiptDetail
-        INNER JOIN tblICInventoryReceiptItemTax itemTax ON receiptDetail.intInventoryReceiptItemId = itemTax.intInventoryReceiptItemId
-        WHERE receiptDetail.intInventoryReceiptId = receipt.intInventoryReceiptId
-        GROUP BY receiptDetail.intInventoryReceiptId
-    ) taxes
-    OUTER APPLY (
 		SELECT 
 			SUM(voucherDetail.dblTotal + voucherDetail.dblTax) AS dblPriorAdvance,
 			SUBSTRING(
@@ -175,6 +167,28 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
     LEFT JOIN tblAPBasisAdvanceStaging staging ON staging.intContractDetailId = ctd.intContractDetailId
                                     AND staging.intTicketId = ticket.intTicketId
+     OUTER APPLY (
+        SELECT
+            SUM(taxData.dblTax) AS dblTax
+        FROM dbo.fnGetItemTaxComputationForVendor(
+            receiptItem.intItemId
+            ,receipt.intEntityVendorId
+            ,receipt.dtmReceiptDate
+            ,(ISNULL(basisFutures.dblPrice, 0) 
+                    + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0))
+            ,ISNULL(receiptItem.dblOpenReceive,0)
+            ,receiptItem.intTaxGroupId
+            ,receipt.intLocationId
+            ,receipt.intShipFromId
+            ,1
+            ,receipt.intFreightTermId
+            ,0
+            ,CASE WHEN receiptItem.intWeightUOMId > 0 THEN receiptItem.intWeightUOMId ELSE receiptItem.intUnitMeasureId END
+            ,receipt.intCurrencyId
+            ,receiptItem.intForexRateTypeId
+            ,receiptItem.dblForexRate
+        ) taxData
+    ) taxes
     WHERE ctd.intPricingTypeId = 2
 ) basisAdvance
 ORDER BY intTicketId DESC
