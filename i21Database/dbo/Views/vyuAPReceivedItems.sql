@@ -358,7 +358,11 @@ FROM
 	,[dblOrderQty]				=	B.dblOpenReceive
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive
-	,[dblQuantityToBill]		=	(B.dblOpenReceive - B.dblBillQty)
+	,[dblQuantityToBill]		=	CAST (CASE WHEN CD.intContractDetailId > 0  
+											THEN dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
+																						THEN B.intWeightUOMId ELSE B.intUnitMeasureId END),
+														 CD.intItemUOMId, (B.dblOpenReceive - B.dblBillQty)) 
+									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,2)) 
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
@@ -642,7 +646,8 @@ FROM
 	--) Qty
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
+		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2))  --EXLCUDE ALL BASIS
+		AND CH.intEntityId != A.intEntityVendorId AND CH.intPricingTypeId = 5--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	UNION ALL
 
 	--PRICE CONTRACT COST
