@@ -11,12 +11,12 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strTruckDriver			= DRIVER.strName
 	 , intBillToLocationId		= INV.intBillToLocationId
 	 , intShipToLocationId		= INV.intShipToLocationId
-	 , strBillToLocationName	= INV.strBillToLocationName
-	 , strShipToLocationName	= INV.strShipToLocationName
-	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillToLocationName	= BILLTO.strEntityNo
+	 , strShipToLocationName	= SHIPTO.strEntityNo
+	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strShipToAddress			= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
-										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 								  END
 	 , strSource				= INV.strType
 	 , intTermId				= INV.intTermId
@@ -31,7 +31,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
 	 , strComments				= dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	 , strItemComments          = ITEMCOMMENTS.strItemComments
-	 , strOrigin				= ''
+	 , strOrigin				= REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 LEFT JOIN (
@@ -89,6 +89,18 @@ LEFT JOIN (
 		 , strName
 	FROM tblEMEntity WITH (NOLOCK) 
 ) DRIVER ON INV.intTruckDriverId = DRIVER.intEntityId
+LEFT JOIN (
+	SELECT intEntityLocationId	= EL.intEntityLocationId
+		 , strEntityNo			= EM.strEntityNo
+	FROM tblEMEntityLocation EL WITH (NOLOCK)
+	INNER JOIN dbo.tblEMEntity EM ON EL.intEntityId = EM.intEntityId
+) BILLTO ON INV.intBillToLocationId = BILLTO.intEntityLocationId
+LEFT JOIN (
+	SELECT intEntityLocationId	= EL.intEntityLocationId
+		 , strEntityNo			= EM.strEntityNo
+	FROM tblEMEntityLocation EL WITH (NOLOCK)
+	INNER JOIN dbo.tblEMEntity EM ON EL.intEntityId = EM.intEntityId
+) SHIPTO ON INV.intShipToLocationId = SHIPTO.intEntityLocationId
 LEFT JOIN (
 	SELECT intTermID
 		 , strTerm
