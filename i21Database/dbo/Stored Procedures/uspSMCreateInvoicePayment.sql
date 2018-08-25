@@ -93,7 +93,7 @@ BEGIN
 	,GETDATE()
 	,11 --For Credit Card
 	,@strCreditCardNumber --Payment Method
-	,@strCreditCardNumber --Check weather we can use the payment method cc number
+	,NULL
 	,'' --Notes
 	,Inv.intAccountId
 	,NULL --Bank Account

@@ -551,7 +551,6 @@ BEGIN
 		END
 		
 		--insert into tblEMEntityLocation if no duplicate
-		IF NOT EXISTS (select TOP 1 1 from tblEMEntityLocation where strLocationName = @strLocationName)
 		BEGIN
 
 		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])

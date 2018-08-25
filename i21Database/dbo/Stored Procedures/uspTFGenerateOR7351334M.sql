@@ -25,20 +25,23 @@ BEGIN TRY
 		, @Line_10 NUMERIC(18, 6) = 0
 		, @Line_11 NUMERIC(18, 2) = 0
 		, @Line_12 NUMERIC(18, 2) = 0
-		, @Line_13 NUMERIC(18, 2) = 0
+		--, @Line_13 NUMERIC(18, 8) = 0
 		, @Line_14 NUMERIC(18, 2) = 0
 		, @Line_15 NUMERIC(18, 2) = 0
 		, @Line_16 NUMERIC(18, 2) = 0
 		, @Line_17 NUMERIC(18, 2) = 0
 
-		, @TaxRate NUMERIC(18, 2) = 0
-		, @CreditRate NUMERIC(18,2) = 0
-		, @InterestRate NUMERIC(18,2) = 0
+		, @TaxRate NUMERIC(18, 8) = 0
+		, @CreditRate NUMERIC(18,8) = 0
+		, @InterestRate NUMERIC(18,8) = 0
 
 		, @dtmFrom DATE
 		, @dtmTo DATE
 		, @LicenseNumber NVARCHAR(50)
-
+		
+		, @strTaxRate NVARCHAR(20)
+		, @strCreditRate NVARCHAR(20)
+		, @strInterestRate NVARCHAR(20)
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN
@@ -78,11 +81,18 @@ BEGIN TRY
 		SELECT TOP 1 @LicenseNumber = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-LicenseNumber'
 		
 		SELECT @Line_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line5'
-		SELECT @TaxRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line7'
-		SELECT @CreditRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line8'
-		SELECT @InterestRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line13'
+		SELECT @strTaxRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line7'
+		SELECT @strCreditRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line8'
+		SELECT @strInterestRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN '0' ELSE strConfiguration END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line13'
+
+	    SELECT @Line_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line5'
+
 		SELECT @Line_16 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line16'
 		
+		SET @TaxRate = CONVERT(NUMERIC(18,8), @strTaxRate)
+		SET @CreditRate = CONVERT(NUMERIC(18,8), @strCreditRate)
+		SET @InterestRate = CONVERT(NUMERIC(18,8), @strInterestRate)
+
 		-- Transaction
 		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
@@ -102,13 +112,13 @@ BEGIN TRY
 		SELECT @Line_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5CRD'
 		SELECT @Line_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5FLT'
 
-		SET @Line_6 = @Line_2 + @Line_3 + @Line_4 + @Line_5
+		SET @Line_6 = @Line_2 + CONVERT(NUMERIC(18), @Line_3) + @Line_4 + @Line_5
 
 		SET @Line_7 = @Line_6 * @TaxRate
 
 		SET @Line_8 = @Line_7 * @CreditRate
 
-		SET @Line_9 = @Line_8 - @Line_7
+		SET @Line_9 = @Line_7 - @Line_8
 
 		SELECT @Line_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5BLK'
 
@@ -116,14 +126,11 @@ BEGIN TRY
 
 		SET @Line_12 = @Line_9 + @Line_11
 
-		SET @Line_13 = @Line_12 * @InterestRate
-
 		SET @Line_14 = @Line_12 * 0.1
 
-		SET @Line_15 = @Line_12 + @Line_13 + @Line_14
+		SET @Line_15 = @Line_12 + @InterestRate + @Line_14
 
 		SET @Line_17 = @Line_15 + @Line_16
-
 
 	END
 
@@ -139,15 +146,15 @@ BEGIN TRY
 		, Line_10 = @Line_10
 		, Line_11 = @Line_11
 		, Line_12 = @Line_12
-		, Line_13 = @Line_13
+		--, Line_13 = @Line_13
 		, Line_14 = @Line_14
 		, Line_15 = @Line_15
 		, Line_16 = @Line_16
 		, Line_17 = @Line_17
 
-		, TaxRate = @TaxRate
-		, CreditRate = @CreditRate
-		, InterestRate = @InterestRate
+		, strTaxRate = @strTaxRate
+		, strCreditRate = @strCreditRate
+		, strInterestRate = @strInterestRate
 
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo

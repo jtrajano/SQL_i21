@@ -4,5 +4,6 @@
 	strScheduleCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strType NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strProductCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	dblReceived NUMERIC(18, 6)
+	dblReceived NUMERIC(18, 6),
+	strAltFacilityNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )

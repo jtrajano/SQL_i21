@@ -4,6 +4,6 @@
 SELECT Entity.intEntityId
 	, strDriverNo = Entity.strEntityNo
 	, strDriverName = Entity.strName
-FROM tblEMEntityType EntityType
-LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = EntityType.intEntityId
-WHERE EntityType.strType = 'Trucker'
+FROM tblARSalesperson SalesPerson
+LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = SalesPerson.intEntityId
+WHERE SalesPerson.strType = 'Driver'

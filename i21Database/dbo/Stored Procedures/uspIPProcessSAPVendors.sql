@@ -152,24 +152,12 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @strCustomerCode = 'JDE'
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strISOCode
-					WHERE intStageEntityId = @intStageEntityId
-				END
-				ELSE
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strCountry
-					WHERE intStageEntityId = @intStageEntityId
-				END
+			SELECT @intCountryId = c.intCountryID
+				,@strCountry = c.strCountry
+				,@strState = strState
+			FROM tblIPEntityStage e
+			JOIN tblSMCountry c ON e.strCountry = c.strISOCode
+			WHERE intStageEntityId = @intStageEntityId
 
 			IF ISNULL(@intEntityId, 0) = 0 --Create
 			BEGIN
@@ -256,11 +244,13 @@ BEGIN TRY
 					,strEntityNo
 					,ysnActive
 					,strContactNumber
+					,strExternalERPId
 					)
 				SELECT strName
 					,@strEntityNo
 					,1
 					,''
+					,strAccountNo
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
@@ -365,12 +355,14 @@ BEGIN TRY
 					strName
 					,strContactNumber
 					,ysnActive
+					,strEmail
 					)
 				OUTPUT inserted.intEntityId
 				INTO @tblEntityContactIdOutput
 				SELECT ISNULL([strFirstName], '') + ' ' + ISNULL([strLastName], '')
 					,ISNULL([strFirstName], '') + ' ' + ISNULL([strLastName], '')
 					,1
+					,strEmail
 				FROM tblIPEntityContactStage
 				WHERE intStageEntityId = @intStageEntityId
 

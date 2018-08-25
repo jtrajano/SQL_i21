@@ -90,7 +90,7 @@ BEGIN TRY
 					END
 				END
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
-				FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 			END
 		END
 

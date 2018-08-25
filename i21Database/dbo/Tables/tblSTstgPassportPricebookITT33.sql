@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblSTstgPassportPricebookITT33]
+(
+	[intPricebookSendFile] INT NOT NULL IDENTITY,
+	[StoreLocationID] INT NULL, 
+    [VendorName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [VendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [TableActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [RecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[RecordActionEffectiveDate] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [ITTDetailRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [POSCodeFormatFormat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [POSCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [POSCodeModifier] INT NULL,
+    [ActiveFlagValue] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
+	[InventoryValuePrice]  NUMERIC(18, 2) NULL,
+	[MerchandiseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[RegularSellPrice] NUMERIC(18, 2) NULL DEFAULT 0, 
+	[Description] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[PaymentSystemsProductCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[SellingUnits] NUMERIC(18, 2) NULL,
+	[TaxStrategyID] INT NULL,
+	[PriceMethodCode] INT NULL,
+	[ReceiptDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[FoodStampableFlg] BIT NULL,
+	[QuantityRequiredFlg] BIT NULL,
+	[strUniqueGuid]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [PK_tblSTstgPassportPricebookITT33] PRIMARY KEY ([intPricebookSendFile])  
+)

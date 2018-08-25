@@ -6,7 +6,7 @@ SELECT Payment.intPaymentId
 	, Payment.intEntityCustomerId
 	, strCustomerNo = Customer.strEntityNo
 	, strCustomerName = Customer.strName
-	, intLocationId = Payment.intCompanyLocationId
+	, Payment.intLocationId
 	, Location.strLocationName
 	, Payment.intEntityDriverId
 	, Driver.strDriverNo
@@ -22,6 +22,6 @@ SELECT Payment.intPaymentId
 	, Payment.intConcurrencyId
 FROM tblMBILPayment Payment
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Payment.intEntityCustomerId
-LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Payment.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Payment.intLocationId
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Payment.intEntityDriverId
 LEFT JOIN tblMBILShift Shift ON Shift.intShiftId = Payment.intShiftId

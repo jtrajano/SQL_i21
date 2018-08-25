@@ -1,6 +1,12 @@
 
 PRINT N'DISCONNECTED REPLICATION TABLE '
 
+DELETE FROM tblSMDisconReplicationArticle
+DECLARE @sql nvarchar(max) = N'';
+SET @sql = N'DBCC CHECKIDENT(''tblSMDisconReplicationArticle'',RESEED, 0); ' 
+
+EXECUTE sp_executesql @sql;
+
 
  IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMDisconReplicationArticle )
 	BEGIN
@@ -421,6 +427,9 @@ PRINT N'DISCONNECTED REPLICATION TABLE '
 				('tblLGWeightClaim'),
 				('tblLGWeightClaimDetail'),
 				('tblICInventoryReceipt'),
+				('tblICManufacturer'),
+				('tblICTag'),
+				('tblICBrand'),
 				('tblICInventoryReceiptCharge'),
 				('tblICInventoryReceiptChargePerItem'),
 				('tblICInventoryReceiptChargeTax'),
@@ -578,7 +587,15 @@ PRINT N'DISCONNECTED REPLICATION TABLE '
 				('tblSTHandheldScannerExportPricebook'),
 				('tblSTHandheldScanner'),
 				('tblSTHandheldScannerImportCount'),
-				('tblSTHandheldScannerImportReceipt')
+				('tblSTHandheldScannerImportReceipt'),
+				('tblPATRefundCustomer'),
+				('tblPATRefundRate'),
+				('tblPATPatronageCategory'),
+				('tblPATRefundCategory'),
+				('tblPATRefundRateDetail'),
+				('tblCCSiteDetail'),
+				('tblARMarketZone'),
+				('tblTFTerminalControlNumber')
 
 
 

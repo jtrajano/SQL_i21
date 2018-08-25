@@ -45,7 +45,7 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[intTermId]				=	A.intTermsId
-		,[strContractNumber]		=	G1.strContractNumber
+		,[strContractNumber]		=	CAST(G1.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
@@ -355,10 +355,14 @@ FROM
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
 	,[intPurchaseTaxGroupId]	=	NULL
-	,[dblOrderQty]				=	B.dblOpenReceive
+	,[dblOrderQty]				=	CASE WHEN CD.intContractDetailId > 0 THEN ROUND(CD.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive
-	,[dblQuantityToBill]		=	(B.dblOpenReceive - B.dblBillQty)
+	,[dblQuantityToBill]		=	CAST (CASE WHEN CD.intContractDetailId > 0  
+											THEN dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
+																						THEN B.intWeightUOMId ELSE B.intUnitMeasureId END),
+														 CD.intItemUOMId, (B.dblOpenReceive - B.dblBillQty)) 
+									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,2)) 
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
@@ -392,8 +396,8 @@ FROM
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
 	,[intLoadDetailId]			=	NULL
-  	,[intUnitMeasureId]			=	B.intUnitMeasureId
-	,[strUOM]					=	UOM.strUnitMeasure
+  	,[intUnitMeasureId]			=	CASE WHEN CD.intContractDetailId > 0 THEN CD.intItemUOMId ELSE B.intUnitMeasureId END 
+	,[strUOM]					=	CASE WHEN CD.intContractDetailId > 0 THEN ctUOM.strUnitMeasure ELSE UOM.strUnitMeasure END
 	,[intWeightUOMId]			=	B.intWeightUOMId
 	,[intCostUOMId]				=	B.intCostUOMId
 	,[dblNetWeight]				=	CAST(CASE WHEN B.intWeightUOMId > 0 THEN  
@@ -477,6 +481,8 @@ FROM
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 	LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
+	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -642,7 +648,8 @@ FROM
 	--) Qty
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
+		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2))  --EXLCUDE ALL BASIS
+		AND CH.intEntityId != A.intEntityVendorId AND CH.intPricingTypeId = 5--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	UNION ALL
 
 	--PRICE CONTRACT COST
@@ -1305,7 +1312,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]                        =    CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	L.strBLNumber
 		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
 		,[intContractDetailId]						=	NULL -- A.intPContractDetailId

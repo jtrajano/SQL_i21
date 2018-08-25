@@ -28,7 +28,8 @@ AS
 		,intContactRank = ISNULL(contact.intEntityRank,1)
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
-		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId)
+		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,0))
+		,strJiraKeyDisplay = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,1))
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
 		,proj.strProjectName

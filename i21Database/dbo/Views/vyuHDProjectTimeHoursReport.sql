@@ -11,9 +11,9 @@
 			group by a.intProjectId
 		)
 		select
-					result.intProjectId
+					intProjectId = convert(nvarchar(20),result.intProjectId)
 					,result.strProjectName
-					,result.intCustomerId
+					,intCustomerId = convert(nvarchar(20),result.intCustomerId)
 					,result.strCustomerName
 					,intEstimatedHours = estimatedhours.intEstimatedHours
 					,intHours = sum(result.intHours)

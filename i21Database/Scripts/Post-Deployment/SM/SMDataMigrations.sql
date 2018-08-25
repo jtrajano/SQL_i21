@@ -42,15 +42,14 @@ GO
 
 GO
 	-- Reset Demo User Roles and permissions
-
 	DECLARE @AdminId INT
 	DECLARE @UserId INT
 
 	SELECT TOP 1 @AdminId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMIN'
-	--SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
+	SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
 
 	EXEC uspSMUpdateUserRoleMenus @AdminId
-	--EXEC uspSMUpdateUserRoleMenus @UserId
+	EXEC uspSMUpdateUserRoleMenus @UserId
 
 	UPDATE tblSMUserRoleMenu
 	SET ysnVisible = 1

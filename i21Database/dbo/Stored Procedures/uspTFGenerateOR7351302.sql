@@ -131,6 +131,7 @@ BEGIN TRY
 		, @ReceiptDiesel_5 NUMERIC(18, 6) = 0
 		, @ReceiptDiesel_6 NUMERIC(18, 6) = 0
 
+		, @DisbursementDiesel_7 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_8 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_9 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_10 NUMERIC(18, 6) = 0
@@ -228,21 +229,21 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- Receipt Gasoline
-		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Gasoline'
+		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Gasoline' OR strType = 'Gasoline (Exports to WA)')
 		SELECT @ReceiptGasoline_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Gasoline'
 		SELECT @ReceiptGasoline_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Gasoline'
 		SELECT @ReceiptGasoline_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Gasoline'
 		SET @ReceiptGasoline_6 = @ReceiptGasoline_1 + @ReceiptGasoline_2 + @ReceiptGasoline_3 + @ReceiptGasoline_4 + @ReceiptGasoline_5
 
 		-- Receipt Aviation
-		SELECT @ReceiptAviation_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Aviation Gasoline'
+		SELECT @ReceiptAviation_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Aviation Gasoline' OR strType = 'Aviation (Exports to WA)')
 		SELECT @ReceiptAviation_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Aviation Gasoline'
 		SELECT @ReceiptAviation_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Aviation Gasoline'
 		SELECT @ReceiptAviation_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Aviation Gasoline'
 		SET @ReceiptAviation_6 = @ReceiptAviation_1 + @ReceiptAviation_2 + @ReceiptAviation_3 + @ReceiptAviation_4 + @ReceiptAviation_5
 
 		-- Receipt Jet
-		SELECT @ReceiptJet_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Jet Fuel'
+		SELECT @ReceiptJet_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND (strType = 'Jet Fuel' OR strType = 'Jet Fuel (Exports to WA)')
 		SELECT @ReceiptJet_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Jet Fuel'
 		SELECT @ReceiptJet_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Jet Fuel'
 		SELECT @ReceiptJet_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Jet Fuel'
@@ -292,11 +293,12 @@ BEGIN TRY
 		SET @DisbursementEthanol_12 = @DisbursementEthanol_8 + @DisbursementEthanol_9 + @DisbursementEthanol_10 + @DisbursementEthanol_11
 		
 		-- Disbursement Diesel
+		SELECT @DisbursementDiesel_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5LO' AND strType = 'Biodiesel - Undyed'
 		SELECT @DisbursementDiesel_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Diesel - Undyed'
-		SET @DisbursementDiesel_12 = @DisbursementDiesel_8 + @DisbursementDiesel_9 + @DisbursementDiesel_10 + @DisbursementDiesel_11
+		SET @DisbursementDiesel_12 = @DisbursementDiesel_7 + @DisbursementDiesel_8 + @DisbursementDiesel_9 + @DisbursementDiesel_10 + @DisbursementDiesel_11
 
 		-- Dealer 
 		SET @DealerGasoline_2 = @ReceiptGasoline_6
@@ -311,11 +313,11 @@ BEGIN TRY
 		SET @DealerEthanol_3 = @DisbursementEthanol_12
 		SET @DealerDiesel_3 = @DisbursementDiesel_12
 
-		SET @DealerGasoline_6 = @DealerGasoline_1 + @DealerGasoline_2 + @DealerGasoline_3 + @DealerGasoline_4 + @DealerGasoline_5
-		SET @DealerAviation_6 = @DealerAviation_1 + @DealerAviation_2 + @DealerAviation_3 + @DealerAviation_4 + @DealerAviation_5
-		SET @DealerJet_6 = @DealerJet_1 + @DealerJet_2 + @DealerJet_3 + @DealerJet_4 + @DealerJet_5
-		SET @DealerEthanol_6 = @DealerEthanol_1 + @DealerEthanol_2 + @DealerEthanol_3 + @DealerEthanol_4 + @DealerEthanol_5
-		SET @DealerDiesel_6 = @DealerDiesel_1 + @DealerDiesel_2 + @DealerDiesel_3 + @DealerDiesel_4 + @DealerDiesel_5
+		SELECT @DealerGasoline_6 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line6Gasoline'
+		SELECT @DealerAviation_6 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line6AviationGas'
+		SELECT @DealerJet_6 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line6JetJet'
+		SELECT @DealerEthanol_6 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line6Ethanol'
+		SELECT @DealerDiesel_6 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line6Diesel'
 
 		SET @DealerGasoline_7 = @DisbursementGasoline_7
 		SET @DealerAviation_7 = @DisbursementAviation_7
@@ -457,6 +459,7 @@ BEGIN TRY
 		, ReceiptDiesel_5 = @ReceiptDiesel_5
 		, ReceiptDiesel_6 = @ReceiptDiesel_6
 
+		, DisbursementDiesel_7 = @DisbursementDiesel_7
 		, DisbursementDiesel_8 = @DisbursementDiesel_8
 		, DisbursementDiesel_9 = @DisbursementDiesel_9
 		, DisbursementDiesel_10 = @DisbursementDiesel_10

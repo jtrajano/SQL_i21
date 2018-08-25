@@ -53,6 +53,7 @@ BEGIN
 		,@ysnProducedQtyByUnitCount BIT
 		,@strPickLot NVARCHAR(50)
 		,@ysnLotWeightsRequired BIT
+		,@ysnConcatenateParentLotonProduction BIT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -309,6 +310,9 @@ BEGIN
 	FROM dbo.tblMFManufacturingProcess
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
+	SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount,@ysnConcatenateParentLotonProduction=ysnConcatenateParentLotonProduction
+		FROM tblMFCompanyPreference
+
 	IF @intAttributeTypeId = 2
 		OR @ysnPostProduction = 1
 	BEGIN
@@ -317,7 +321,7 @@ BEGIN
 				FROM tblICLot L
 				WHERE L.strLotNumber = @strLotNumber
 					AND L.dblQty > 0
-				)
+				) and @ysnConcatenateParentLotonProduction=1
 		BEGIN
 			SELECT @intParentLotId1 = intParentLotId
 			FROM tblICLot

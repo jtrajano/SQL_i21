@@ -368,7 +368,7 @@ BEGIN
 			CROSS APPLY tblPATCompanyPreference ComPref
 
 			INSERT INTO @voucherDetailNonInventory([intAccountId], [strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost])
-			VALUES(@apClearing, 'Patronage Retired Stock', @dblPARValue, 0, @dblNoOfShares);
+			VALUES(@apClearing, 'Patronage Retired Stock', @dblNoOfShares, 0, @dblPARValue);
 
 			EXEC [dbo].[uspAPCreateBillData]
 				@userId	= @intUserId

@@ -8,6 +8,20 @@
 			,strTicketNumber
 			,intCustomerEntityId
 			,strCustomerName
+			,dblPlanFirstWeek
+			,dblPlanSecondWeek
+			,dblPlanThirdWeek
+			,dblPlanForthWeek
+			,dblPlanFifthWeek
+			,dblPlanSixthWeek
+			,dblPlanSeventhWeek
+			,dblEstimateFirstWeek
+			,dblEstimateSecondWeek
+			,dblEstimateThirdWeek
+			,dblEstimateForthWeek
+			,dblEstimateFifthWeek
+			,dblEstimateSixthWeek
+			,dblEstimateSeventhWeek
 			,dblFirstWeek
 			,dblSecondWeek
 			,dblThirdWeek
@@ -26,6 +40,20 @@
 			,strTicketNumber
 			,intCustomerEntityId
 			,strCustomerName
+			,dblPlanFirstWeek
+			,dblPlanSecondWeek
+			,dblPlanThirdWeek
+			,dblPlanForthWeek
+			,dblPlanFifthWeek
+			,dblPlanSixthWeek
+			,dblPlanSeventhWeek
+			,dblEstimateFirstWeek
+			,dblEstimateSecondWeek
+			,dblEstimateThirdWeek
+			,dblEstimateForthWeek
+			,dblEstimateFifthWeek
+			,dblEstimateSixthWeek
+			,dblEstimateSeventhWeek
 			,dblFirstWeek
 			,dblSecondWeek
 			,dblThirdWeek
@@ -37,7 +65,21 @@
 			,strFilterKey
 		from tblHDRoughCountCapacity
 		where 
-			dblFirstWeek is not null
+			dblPlanFirstWeek is not null
+			or dblPlanSecondWeek is not null
+			or dblPlanThirdWeek is not null
+			or dblPlanForthWeek is not null
+			or dblPlanFifthWeek is not null
+			or dblPlanSixthWeek is not null
+			or dblPlanSeventhWeek is not null
+			or dblEstimateFirstWeek is not null
+			or dblEstimateSecondWeek is not null
+			or dblEstimateThirdWeek is not null
+			or dblEstimateForthWeek is not null
+			or dblEstimateFifthWeek is not null
+			or dblEstimateSixthWeek is not null
+			or dblEstimateSeventhWeek is not null
+			or dblFirstWeek is not null
 			or dblSecondWeek is not null
 			or dblThirdWeek is not null
 			or dblForthWeek is not null

@@ -136,7 +136,7 @@ SELECT
 	[intStoreLocationId]		=	@userLocation,
 	[intShipFromId]				=	loc.intEntityLocationId,
 	[intPayToAddressId]			=	loc.intEntityLocationId,
-	[intShipFromEntityId]		=	loc.intEntityLocationId,
+	[intShipFromEntityId]		=	D.intEntityId,
 	[strShipFromAddress]		=	loc.strAddress,
 	[strShipFromCity]			=	loc.strCity,
 	[strShipFromCountry]		=	loc.strCountry,

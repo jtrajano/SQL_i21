@@ -20,7 +20,7 @@ AS
 			,[strContractNumber] = NULL --CH.strContractNumber
 			,[intContractDetailId] = NULL --ISNULL(CD.[intContractDetailId], LD.[intPContractDetailId])
 			,[intContractSeq] = NULL --CD.[intContractSeq]
-			,[intCompanyLocationId] = LD.intSCompanyLocationId
+			,[intCompanyLocationId] = LD.intPCompanyLocationId--LD.intSCompanyLocationId
 			,[strLocationName] = SMCL.[strLocationName]
 			,[intItemId] = ICI.[intItemId]
 			,[strItemNo] = ICI.[strItemNo]
@@ -30,7 +30,7 @@ AS
 				ELSE ICI.[strDescription]
 				END
 			,[intShipmentItemUOMId] = LD.[intItemUOMId]
-			,[dblPrice] = SUM(LC.dblAmount)
+			,[dblPrice] = SUM(LC.dblRate)
 			,[dblShipmentUnitPrice] = LC.dblRate
 			,[dblTotal] = SUM(LC.dblAmount)
 			,[intAccountId] = ARIA.[intAccountId]
@@ -59,18 +59,18 @@ AS
 	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LC.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
-	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
+	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intPCompanyLocationId = SMCL.[intCompanyLocationId]
 	LEFT JOIN tblICItem ICI ON LC.intItemId = ICI.intItemId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intCurrencyId
 	LEFT JOIN vyuARGetItemAccount ARIA ON LD.[intItemId] = ARIA.[intItemId]
-		AND LD.intSCompanyLocationId = ARIA.[intLocationId]
+		AND LD.intPCompanyLocationId = ARIA.[intLocationId]
 	LEFT JOIN tblARInvoiceDetail ARID ON LD.intLoadDetailId = ARID.[intInventoryShipmentItemId]
 		GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],
 			 L.dtmScheduledDate,L.intLoadId,SMCL.[strLocationName],ICI.strItemNo,
 			 ICI.strDescription,
 			 LD.intPContractDetailId,LD.intItemUOMId,
 			 ARC.[intCurrencyId],LC.intVendorId,
-			 LD.intSCompanyLocationId,ICI.intItemId,
+			 LD.intPCompanyLocationId,ICI.intItemId,
 			 LD.dblQuantity,
 			 LC.dblRate,LD.[intWeightItemUOMId],ARIA.[intAccountId],
 			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],

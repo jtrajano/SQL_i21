@@ -1199,6 +1199,7 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit
+/*
 UNION ALL
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1247,7 +1248,7 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit
-
+*/
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit Inventory (Reduce Inventory from Shipment)
   Debit		... In-Transit 

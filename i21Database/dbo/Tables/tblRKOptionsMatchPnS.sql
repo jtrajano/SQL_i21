@@ -9,7 +9,9 @@ CREATE TABLE [dbo].[tblRKOptionsMatchPnS]
 	[intLFutOptTransactionId] INT NOT NULL,
 	[intSFutOptTransactionId] INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
-
+	[ysnPost] BIT  NULL,
+	[dtmPostDate] DATETIME NULL,
+	[intMatchNo] INT NULL,
     CONSTRAINT [PK_tblRKOptionsMatchPnS_intMatchOptionsPnSId] PRIMARY KEY (intMatchOptionsPnSId), 
 	CONSTRAINT [FK_tblRKOptionsMatchPnS_tblRKOptionsMatchPnSHeader_intOptionsMatchPnSHeaderId] FOREIGN KEY ([intOptionsMatchPnSHeaderId]) REFERENCES [tblRKOptionsMatchPnSHeader]([intOptionsMatchPnSHeaderId]),	
     CONSTRAINT [FK_tblRKOptionsMatchPnS_tblRKFutOptTransaction_intLFutOptTransactionId] FOREIGN KEY ([intLFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId]),

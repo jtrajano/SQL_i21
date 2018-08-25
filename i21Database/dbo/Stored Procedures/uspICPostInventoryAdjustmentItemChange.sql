@@ -42,6 +42,8 @@ BEGIN
 	DECLARE @strItemNo AS NVARCHAR(50)
 	DECLARE @strLotNumber AS NVARCHAR(50)
 	DECLARE @intLotId AS INT 
+	DECLARE @intLocationId AS INT
+	DECLARE @strLocationName AS NVARCHAR(50)
 
 	BEGIN 
 		SELECT TOP 1 
@@ -174,6 +176,40 @@ BEGIN
 		BEGIN
 			-- --'The new Item Location is invalid or missing for %s.'
 			EXEC uspICRaiseError 80083, @strItemNo;
+			RETURN -1
+		END
+	END 
+
+	---------------------------------------------------------
+	-- Validate if the new pricing location is valid
+	---------------------------------------------------------
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+				,@intLocationId = ItemPricing.intItemLocationId
+				,@strLocationName = CompLoc.strLocationName
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Detail.intItemId
+				LEFT JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = Item.intItemId
+					AND ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
+				LEFT JOIN dbo.tblSMCompanyLocation CompLoc
+					ON CompLoc.intCompanyLocationId = ItemLocation.intLocationId
+				LEFT JOIN dbo.tblICItemPricing ItemPricing
+					ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ItemPricing.intItemLocationId IS NULL 
+				
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			-- 'Unable to Post. Cost is missing for %s for %s'
+			EXEC uspICRaiseError 80221, @strItemNo, @strLocationName;
 			RETURN -1
 		END
 	END 

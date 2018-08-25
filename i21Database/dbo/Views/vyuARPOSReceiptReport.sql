@@ -22,6 +22,8 @@ SELECT intPOSId				= POS.intPOSId
 	 , strUserName			= USERNAME.strUserName
 	 , strLocation			= LOCATION.strLocationName
 	 , strStore				= ISNULL(STORE.strDescription, '') 
+	 , strPONumber			= POS.strPONumber
+	 , strComment			= POS.strComment
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN dbo.tblARPOSDetail POSD ON POS.intPOSId = POSD.intPOSId
 INNER JOIN (

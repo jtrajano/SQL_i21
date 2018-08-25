@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspMBILBuildOrder]
-	@intDriverId		AS INT
+	@intShiftId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,7 +7,7 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
-DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+DELETE tblMBILOrder WHERE intShiftId = @intShiftId
 
 SELECT intDispatchId = Dispatch.intDispatchID
 	, strOrderNumber = Dispatch.strOrderNumber
@@ -28,6 +28,7 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, Site.intTaxStateID	
 	, Customer.intShipToId	
 	, Site.intLocationId
+	, intShiftId = @intShiftId
 INTO #Dispatch
 FROM tblTMDispatch Dispatch
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
@@ -65,7 +66,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
+WHERE intShiftId = @intShiftId AND strOrderStatus = 'Open'
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
@@ -82,7 +83,7 @@ SELECT [Order].intOrderId
 	, #Dispatch.[dblPrice]
 FROM #Dispatch
 LEFT JOIN vyuMBILOrder [Order] ON #Dispatch.intDispatchId = [Order].intDispatchId
-WHERE [Order].intDriverId = @intDriverId
+WHERE [Order].intShiftId = @intShiftId
 
 
 -- ++++++ ITEM TAX CODE PROCESS ++++++ --
@@ -96,7 +97,7 @@ FROM (
 		, B.intSiteId
 	FROM tblMBILOrder A
 	LEFT JOIN tblMBILOrderItem B ON A.intOrderId = B.intOrderId
-	WHERE A.intDriverId = @intDriverId) tblOrder
+	WHERE A.intShiftId = @intShiftId) tblOrder
 
 
 DECLARE  @MBILOrderId					INT				= NULL

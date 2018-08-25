@@ -10,7 +10,7 @@ SELECT
 	, CustomerSite.intSiteNumber
 	, CustomerSite.strSerialNumber
 	, CustomerSite.dblTankCapacity
-	, CustomerSite.strDescription
+	, CustomerSite.strDeviceDescription
 	, OOG.ysnLeakTest
 	, OOG.dblPressureReading
 	, OOG.dblMinutesHeld

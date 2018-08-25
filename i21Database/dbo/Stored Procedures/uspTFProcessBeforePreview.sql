@@ -77,37 +77,6 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
-			-- MFT-1228
-			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
-			BEGIN
-				-- Include all CF Trans for schedule 5CRD and 6CRD 
-				DELETE tblTFTransaction WHERE intTransactionId IN (
-					SELECT Trans.intTransactionId
-					FROM tblTFTransaction Trans
-					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
-					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-					WHERE Trans.strTransactionType = 'Invoice'
-					AND Trans.uniqTransactionGuid = @Guid
-					AND Trans.intTransactionId IS NOT NULL
-					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strType <> 'CF Tran'
-				)
-			END
-			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
-			BEGIN
-				-- Exclude all non CF Trans for schedule 5BLK and 6BLK
-				DELETE tblTFTransaction WHERE intTransactionId IN (
-					SELECT Trans.intTransactionId
-					FROM tblTFTransaction Trans
-					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
-					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-					WHERE Trans.strTransactionType = 'Invoice'
-					AND Trans.uniqTransactionGuid = @Guid
-					AND Trans.intTransactionId IS NOT NULL
-					AND Trans.intReportingComponentId = @RCId
-					AND Invoice.strType = 'CF Tran'
-				)
-			END
 
 			INSERT INTO tblTFTransactionDynamicOR(
 				intTransactionId
@@ -132,11 +101,11 @@ BEGIN TRY
 			UNION ALL
 
 			SELECT Trans.intTransactionId
-				, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Origin.strOregonFacilityNumber ELSE NULL END
+				, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK') THEN Origin.strOregonFacilityNumber WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFSite.strOregonFacilityNumber ELSE NULL END
 				, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Destination.strOregonFacilityNumber ELSE NULL END
 				, [strAltDocumentNumber] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFCard.strCardNumber ELSE NULL END
-				, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN TaxException.strExceptionReason ELSE NULL END
-				, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
+				, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFVehicle.strVehicleDescription ELSE NULL END
+				, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5BLK', '6BLK', '5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
 			FROM vyuTFGetTransaction Trans
 			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
@@ -144,8 +113,10 @@ BEGIN TRY
 			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
 			LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 				LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
+					LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFCard.intDefaultFixVehicleNumber
+				LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
 			--LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
-			LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
+			--LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
 			WHERE Trans.strTransactionType = 'Invoice'
 			AND Trans.uniqTransactionGuid = @Guid
 			AND Trans.intTransactionId IS NOT NULL

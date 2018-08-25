@@ -190,7 +190,7 @@ DECLARE @ysnIncludeInventoryHedge BIT
 DECLARE @strFutureMonth  nvarchar(15) ,@dblForecastWeeklyConsumption numeric(24,10)
 declare @strParamFutureMonth nvarchar(12)  
 SELECT @dblContractSize= convert(int,dblContractSize) FROM tblRKFutureMarket WHERE intFutureMarketId=@intFutureMarketId  
-SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate,@strParamFutureMonth=strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId=@intFutureMonthId  
+SELECT TOP 1 @dtmFutureMonthsDate=CONVERT(DATETIME,'01 '+strFutureMonth),@strParamFutureMonth=strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId=@intFutureMonthId  
 
 SELECT TOP 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUOMId  
 DECLARE @intoldUnitMeasureId int 
@@ -245,7 +245,8 @@ FROM  vyuRKRollCost
 WHERE intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId 
 				    and isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
        and isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
-and intLocationId=@intCompanyLocationId and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
+and isnull(intLocationId,0) =case when isnull(@intCompanyLocationId ,0)=0 then isnull(intLocationId,0) else @intCompanyLocationId  end
+ and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
 
 --To Purchase Value
      DECLARE @DemandFinal1 as Table (  
@@ -432,7 +433,7 @@ SELECT fm.strFutureMonth
        ,cv.intCommodityId
        ,cv.intCompanyLocationId
        ,cv.intFutureMarketId
-       ,dtmFutureMonthsDate
+       ,CONVERT(DATETIME,'01 '+cv.strFutureMonth) dtmFutureMonthsDate
        ,ysnExpired
        ,isnull(pl.ysnDeltaHedge, 0) ysnDeltaHedge
        ,intContractStatusId
@@ -675,11 +676,10 @@ JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intF
 JOIN tblEMEntity e on e.intEntityId=ft.intEntityId 
 JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ft.intCommodityId and um.intUnitMeasureId=mar.intUnitMeasureId
 WHERE  ft.intCommodityId=@intCommodityId AND ft.intFutureMarketId=@intFutureMarketId   
-AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end 
-AND dtmFutureMonthsDate >= @dtmFutureMonthsDate    
+AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end  
 AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
-and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= @dtmToDate
+and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) <= @dtmToDate
 )t 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
@@ -699,7 +699,7 @@ BEGIN
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 SELECT
-5 intRowNumber,'1.Outright Coverage','Market Coverage' Selection,'4.Market Coverage(Weeks)' PriceStatus,strFutureMonth,strAccountNumber,  
+5 intRowNumber,'1.Outright Coverage','Market Coverage' Selection,'4.Market Coverage(Weeks)' PriceStatus,strFutureMonth,'Market Coverage(Weeks)' strAccountNumber,  
     case when isnull(@dblForecastWeeklyConsumption,0)=0 then 0 else 
 	CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))/@dblForecastWeeklyConsumption end as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,5,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(4)

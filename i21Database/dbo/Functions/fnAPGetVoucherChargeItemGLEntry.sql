@@ -8,7 +8,10 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,B.strMiscDescription
 		,CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
-					ELSE (CASE WHEN A.intEntityVendorId = D.intEntityVendorId AND D.ysnPrice = 1 
+		--if charge entity vendor and voucher vendor is the same, meaning the charge added on voucher is for third party
+		--meaning, we don't need to reverse the sign of the amount
+					ELSE (CASE WHEN A.intEntityVendorId != ISNULL(NULLIF(D.intEntityVendorId,0), A.intEntityVendorId) AND 
+							D.ysnPrice = 1 
 							THEN D.dblAmount * -1 
 								ELSE D.dblAmount
 							END)
@@ -17,7 +20,8 @@ RETURNS TABLE AS RETURN
 			* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
 						ELSE 1 END AS DECIMAL(18,2)) AS dblTotal
 		,CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
-					ELSE (CASE WHEN A.intEntityVendorId = D.intEntityVendorId AND D.ysnPrice = 1 
+					ELSE (CASE WHEN A.intEntityVendorId != ISNULL(NULLIF(D.intEntityVendorId,0), A.intEntityVendorId) AND 
+									D.ysnPrice = 1 
 							THEN D.dblAmount * -1 
 								ELSE D.dblAmount
 							END)

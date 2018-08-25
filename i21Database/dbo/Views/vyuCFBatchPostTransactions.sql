@@ -8,6 +8,10 @@ SELECT   cfNetwork.ysnPostForeignSales,cfTrans.strTransactionType as strTransTyp
                          cfTrans.dblCalculatedTotalPrice AS dblAmount, cfTrans.intTransactionId,
                              (SELECT   TOP (1) intEntityId
                                 FROM         dbo.tblEMEntity) AS intEntityId
+        ,intCustomerEntityId = cfCardAccount.intCustomerId
+		,intARLocationId = cfSiteItem.intARLocationId
+		,strEntityName = ent.strName
+		,strLocationName = compLoc.strLocationNumber
 FROM         dbo.tblCFTransaction AS cfTrans 
 INNER JOIN	 dbo.tblCFNetwork AS cfNetwork ON cfTrans.intNetworkId = cfNetwork.intNetworkId 
 LEFT JOIN	(SELECT   icfCards.intCardId, icfAccount.intAccountId, icfAccount.intSalesPersonId, icfAccount.intCustomerId, icfAccount.intTermsCode, icfCards.strCardNumber
@@ -38,6 +42,10 @@ LEFT OUTER JOIN
        --                         WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
 								 LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
+LEFT JOIN tblEMEntity ent
+	ON ent.intEntityId = cfCardAccount.intCustomerId
+LEFT JOIN tblSMCompanyLocation compLoc
+	ON compLoc.intCompanyLocationId = cfSiteItem.intARLocationId
 WHERE     (ISNULL(cfTrans.ysnPosted,0) = 0) 
 AND		(ISNULL(cfTrans.ysnInvalid,0) = 0) 
 AND		(ISNULL(cfTrans.ysnOnHold,0) = 0)

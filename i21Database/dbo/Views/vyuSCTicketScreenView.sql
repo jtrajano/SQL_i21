@@ -174,6 +174,9 @@
 	 AS BIT) AS ysnHasCommodityGrade
 	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
 	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
+	 ,ICCategory.intCategoryId
+	 ,ICCategory.strCategoryCode
+	 ,ICCategory.strDescription AS strCategoryDescription
 
 	,SCSetup.strStationShortDescription
 	,SCSetup.strWeightDescription
@@ -242,6 +245,7 @@
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
 	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
+	LEFT JOIN tblICCategory ICCategory on ICCategory.intCategoryId = ICItem.intCategoryId
 
 	LEFT JOIN tblGRStorageType GRStorage on GRStorage.intStorageScheduleTypeId = SCT.intStorageScheduleTypeId 
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId

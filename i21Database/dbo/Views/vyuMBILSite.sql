@@ -5,10 +5,16 @@ SELECT Customer.intEntityId
 	, Customer.strCustomerNumber
 	, Entity.strName
 	, intSiteId = Site.intSiteID
+	, strSiteDescription = Site.strDescription
 	, Site.intSiteNumber
+	, Site.strSiteAddress
+	, Site.strCity
+	, Site.strState
+	, Site.strZipCode
+	, Site.strCountry
 	, SiteDevice.strSerialNumber
 	, SiteDevice.dblTankCapacity
-	, SiteDevice.strDescription
+	, strDeviceDescription = SiteDevice.strDescription
 FROM tblTMSite Site
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = Site.intSiteID
 LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Customer.intEntityId
