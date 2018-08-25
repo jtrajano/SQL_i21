@@ -6950,6 +6950,7 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationMainConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplRemoteConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
