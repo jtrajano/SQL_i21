@@ -114,6 +114,11 @@ EXEC [dbo].[uspPATGatherVolumeForPatronage]
 	,@post				= @ysnPost
 	,@type				= 2
 	,@successfulCount	= @successfulCount OUTPUT
+-- Update CT - Sequence Balance
+EXEC [uspARInvoiceUpdateSequenceBalance] 
+	 @post = @ysnPost,
+	 @TransactionId = @intTransactionId,
+	 @UserId = @intUserId
 
 --Audit Log          
 EXEC dbo.uspSMAuditLog 
