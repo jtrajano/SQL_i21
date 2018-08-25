@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[tblARPOSEndOfDay]
+(
+	[intPOSEndOfDayId] INT NOT NULL PRIMARY KEY IDENTITY,
+	[strEODNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblFinalEndingBalance] NUMERIC(18,6) NULL,
+	[intPOSLogId] INT NOT NULL,
+	[intEntityId] INT NOT NULL,
+	[intConcurrencyId] INT NOT NULL DEFAULT 1,
+	CONSTRAINT [FK_tblARPOSEndOfDay_tblARPOSLog] FOREIGN KEY (intPOSLogId) REFERENCES tblARPOSLog(intPOSLogId),
+	CONSTRAINT [FK_tblARPOSEndOfDay_tblEMEntity] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId)
+)

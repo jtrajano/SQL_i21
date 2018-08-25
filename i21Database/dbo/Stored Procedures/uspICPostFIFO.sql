@@ -81,9 +81,12 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0) 
 
-		-- Get the item's last cost when reducing stock. 
+		-- Get the item's last cost when reducing stock or standard cost. 
 		-- Except if doing vendor stock returns using Inventory Receipt/Return 
-		SELECT	@dblCost = ItemPricing.dblLastCost
+		SELECT	@dblCost = COALESCE(
+					NULLIF(ItemPricing.dblLastCost, 0)
+					, ItemPricing.dblStandardCost
+				)
 		FROM	tblICItemPricing ItemPricing 
 		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
 				AND ItemPricing.intItemId = @intItemId

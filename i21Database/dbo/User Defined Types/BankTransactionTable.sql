@@ -38,6 +38,7 @@
     [intLastModifiedUserId]    INT              NULL,
     [dtmLastModified]          DATETIME         NULL,
 	[ysnDelete]				   BIT              NULL,
+    [ysnPOS]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 )

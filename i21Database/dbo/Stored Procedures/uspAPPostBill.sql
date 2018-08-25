@@ -134,6 +134,7 @@ EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @reversedPost BIT = ~@post
 IF (ISNULL(@recap, 0) = 0 AND @repost = 0)
 BEGIN
 
@@ -154,12 +155,17 @@ BEGIN
 		,intTransactionId
 		,23
 	FROM dbo.fnPATValidateAssociatedTransaction(@billIds, 4, @transactionType)
-
+	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1)
 	BEGIN
-		DECLARE @reversedPost BIT = ~@post
-		EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @reversedPost
+		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
+		--undo updating of transactions for those invalid only
+		SELECT 
+			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
+		FROM #tmpInvalidBillData
+		WHERE intErrorKey = 1
+		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
 END
@@ -169,8 +175,11 @@ BEGIN
 	--VALIDATIONS
 	INSERT INTO #tmpInvalidBillData 
 	SELECT * FROM fnAPValidateRecapBill(@billIds, @post)
+	--undo updating of transactions for all if recap
+	EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @reversedPost
 	
 END
+
 
 DECLARE @totalInvalid INT = 0
 DECLARE @postResult TABLE(id INT)
@@ -598,7 +607,9 @@ BEGIN
 	INSERT INTO @Ids
 	SELECT intBillId FROM #tmpPostBillData
 
-	INSERT INTO @GLEntries (
+	IF @recap = 0
+	BEGIN
+		INSERT INTO @GLEntries (
 		dtmDate						
 		,strBatchId					
 		,intAccountId				
@@ -673,7 +684,90 @@ BEGIN
 		,dblSourceUnitDebit
 		,intCommodityId
 		,intSourceLocationId	
-	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	--when unposting use same batch id as the original gl entry so we don't waste the batch id
+	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, NULL) 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId		
+			,intCurrencyExchangeRateTypeId		
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate		
+			,dblSourceUnitCredit
+			,dblSourceUnitDebit
+			,intCommodityId
+			,intSourceLocationId	
+		)
+		SELECT 
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId	
+			,intCurrencyExchangeRateTypeId			
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate
+			,dblSourceUnitCredit
+			,dblSourceUnitDebit
+			,intCommodityId
+			,intSourceLocationId	
+		FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	END
+
+	
 
 	--NEGATE THE COST
 	UPDATE @adjustedEntries
@@ -826,10 +920,20 @@ BEGIN
 			FROM #tmpPostBillData A
 			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
 			WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+			--DELETE data in @GLEntries so it will not add in computing the latest balance
 
+			--update the invalid and total records based on the result of posting to gl and its result
 			SET @failedPostValidation = @@ROWCOUNT;
 			SET @invalidCount = @invalidCount + @failedPostValidation;
 			SET @totalRecords = @totalRecords - @failedPostValidation;
+
+			DELETE A
+			FROM @GLEntries A
+			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId
+			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) C ON B.intBillId = C.intTransactionId
+			WHERE C.strDescription NOT LIKE '%success%' AND C.strBatchId = @batchId
+
+			SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData --update total records for the successfulCount
 
 			INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT 

@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSLogEndOfDay]
-	@intPOSLogId 			AS INT,
-	@dblNewEndingBalance	AS NUMERIC(18, 6) = 0
+	@dblNewEndingBalance	AS NUMERIC(18, 6) = 0,
+	@intCompanyLocationPOSDrawerId AS INT,
+	@intEntityId AS INT
 AS
-	IF ISNULL(@intPOSLogId, NULL) > 0
+	IF ISNULL(@intCompanyLocationPOSDrawerId, NULL) > 0
 	BEGIN
 		DECLARE @BankTransaction				BankTransactionTable
 		DECLARE @BankTransactionDetail			BankTransactionDetailTable
@@ -22,23 +23,33 @@ AS
 			  , @strCompanyLocatioName			NVARCHAR(100) 	= NULL
 			  , @strTransactionId				NVARCHAR(100)	= NULL
 			  , @strCashOverAccountId			NVARCHAR(100)	= NULL
-			  , @ysnSuccess						BIT				= 0					  
+			  , @ysnSuccess						BIT				= 0	
+			  , @currentEndingBalance			INT				= 0
+			  , @strEODNo						NVARCHAR(20)	= NULL
+			  , @intPOSLogId					INT				= (SELECT intPOSLogId FROM tblARPOSLog WHERE intCompanyLocationPOSDrawerId = @intCompanyLocationPOSDrawerId AND ysnLoggedIn = 1 AND intPOSLogOriginId IS NULL)				  
 					  
+		--Get POS EOD starting number
+		SELECT	@strEODNo = (strPrefix + CAST(intNumber AS NVARCHAR(10)))
+		FROM tblSMStartingNumber
+		WHERE strTransactionType = 'POS End of Day'
+
 		--VALIDATE CASH OVER/SHORT GL ACCOUNT
-		IF EXISTS(SELECT TOP 1 intPOSLogId FROM tblARPOS WHERE intPOSLogId = @intPOSLogId)
+		IF EXISTS(SELECT TOP 1 intPOSLogId FROM tblARPOSLog WHERE intCompanyLocationPOSDrawerId = @intCompanyLocationPOSDrawerId AND ysnLoggedIn = 1)
 			BEGIN
-				SELECT @intCashOverAccountId 	= CL.intCashOverShort
-					 , @strCompanyLocatioName 	= CL.strLocationName
-					 , @strCashOverAccountId 	= GL.strDescription
-					 , @intUserId 				= POSLOG.intEntityUserId
-					 , @intBankAccountId		= BANK.intBankAccountId
-					 , @intCompanyLocationId	= CL.intCompanyLocationId
-				FROM tblSMCompanyLocation CL
-				INNER JOIN tblARPOSLog POSLOG ON CL.intCompanyLocationId = POSLOG.intCompanyLocationId
-				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
-				INNER JOIN tblCMBankAccount BANK ON CL.intCashAccount = BANK.intGLAccountId
-				WHERE POSLOG.intPOSLogId = @intPOSLogId
-																
+				SELECT
+						@intCashOverAccountId 	= LOC.intCashOverShort,
+						@strCompanyLocatioName 	= LOC.strLocationName,
+						@strCashOverAccountId 	= GL.strDescription,
+						@intBankAccountId		= BANK.intBankAccountId,
+						@intCompanyLocationId	= LOC.intCompanyLocationId,
+						@currentEndingBalance   = OD.dblEndingBalance
+				FROM  tblSMCompanyLocation LOC
+				LEFT JOIN tblSMCompanyLocationPOSDrawer DRAWER ON LOC.intCompanyLocationId = DRAWER.intCompanyLocationId
+				INNER JOIN vyuARPOSOpenDrawers OD ON DRAWER.intCompanyLocationPOSDrawerId = OD.intCompanyLocationPOSDrawerId
+				INNER JOIN tblGLAccount GL ON LOC.intCashOverShort = GL.intAccountId
+				INNER JOIN tblCMBankAccount BANK ON LOC.intCashAccount = BANK.intGLAccountId
+				WHERE OD.intCompanyLocationPOSDrawerId = @intCompanyLocationPOSDrawerId
+														
 				IF ISNULL(@intCashOverAccountId, 0) = 0
 				BEGIN
 					DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
@@ -47,29 +58,20 @@ AS
 				END
 			END
 
-		--UPDATE ENDING BALANCE AND LOG
-		UPDATE POSLOG
-		SET dblEndingBalance 	= CASE WHEN ISNULL(POSLOG.dblOpeningBalance, 0) +  ISNULL(POS.dblTotalAmount, 0) <> ISNULL(@dblNewEndingBalance, 0) THEN ISNULL(@dblNewEndingBalance, 0) ELSE ISNULL(POSLOG.dblOpeningBalance, 0) + ISNULL(POS.dblTotalAmount, 0) END
-		  , dtmLogout 			= @dtmDateNow
-		  , ysnLoggedIn 		= 0
-		FROM tblARPOSLog POSLOG
-		OUTER APPLY (
-			SELECT dblTotalAmount = SUM(PP.dblAmount)
-			FROM tblARPOS P
-			INNER JOIN (
-				SELECT intPOSId
-					 , dblAmount
-				FROM tblARPOSPayment
-				WHERE ISNULL(strPaymentMethod, '') <> 'On Account'
-			) PP ON P.intPOSId = PP.intPOSId
-			WHERE P.intPOSLogId = POSLOG.intPOSLogId
-			GROUP BY P.intPOSLogId
-		) POS
-		WHERE POSLOG.intPOSLogId = @intPOSLogId 
-		   OR POSLOG.intPOSLogOriginId = @intPOSLogId
+			
+		--CREATE EOD ENTRY
+		INSERT INTO tblARPOSEndOfDay(strEODNo, intPOSLogId, dblFinalEndingBalance, intEntityId)
+		VALUES(@strEODNo, @intPOSLogId, @dblNewEndingBalance, @intEntityId)
 
-		SELECT TOP 1 @dblEndingBalance	= POSLOG.dblEndingBalance
-				   , @dblOpeningBalance	= POSLOG.dblOpeningBalance
+		--UPDATE POSLOG
+		--CLOSE THE DRAWER
+		UPDATE tblARPOSLog
+		SET dtmLogout 			= @dtmDateNow
+		  , ysnLoggedIn 		= 0
+		WHERE intCompanyLocationPOSDrawerId = @intCompanyLocationPOSDrawerId
+			AND ysnLoggedIn = 1
+			
+		SELECT TOP 1 @dblOpeningBalance	= POSLOG.dblOpeningBalance
 		FROM dbo.tblARPOSLog POSLOG
 		WHERE POSLOG.intPOSLogId = @intPOSLogId 
 		
@@ -96,7 +98,7 @@ AS
 		SELECT @dblCashReceipts = SUM(dblAmount) FROM #CASHPAYMENTS
 
 		--CREATE BANK TRANSACTION FOR CASH OVER/SHORT
-		SET @dblCashOverShort = (ISNULL(@dblEndingBalance, 0) - (ISNULL(@dblCashReceipts, 0) + ISNULL(@dblOpeningBalance, 0)))
+		SET @dblCashOverShort = (ISNULL(@dblNewEndingBalance, 0) - (ISNULL(@dblCashReceipts, 0) + ISNULL(@dblOpeningBalance, 0)))
 
 		IF ISNULL(@dblCashOverShort, 0) <> 0 AND ISNULL(@intCashOverAccountId, 0) <> 0
 			BEGIN
@@ -156,7 +158,7 @@ AS
 					BEGIN
 						UPDATE tblARPOSLog
 						SET intBankDepositId = @intNewTransactionId
-						WHERE intPOSLogId = @intPOSLogId
+						WHERE intPOSLogId = @intPOSLogId OR intPOSLogOriginId = @intPOSLogId
 
 						--UPDATE BANK TRANSACTION FLAG FOR POS
 						UPDATE tblCMBankTransaction 

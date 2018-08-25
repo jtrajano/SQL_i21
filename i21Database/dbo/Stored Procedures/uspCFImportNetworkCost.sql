@@ -233,7 +233,7 @@ BEGIN
 
 	------UPDATE Existing
 	UPDATE tblCFNetworkCost
-	SET dblTransferCost = A.dblTransferCost
+	SET dblTransferCost = A.dblTransferCost + A.dblTaxesPerUnit
 		,dblTaxesPerUnit = A.dblTaxesPerUnit
 	FROM  #tmpNoSiteItemIssue A
 	WHERE tblCFNetworkCost.dtmDate = A.dtmDate 
@@ -265,7 +265,7 @@ BEGIN
 		intSiteId = A.intSiteId
 		,dtmDate = A.dtmDate
 		,intItemId = A.intItemId
-		,dblTransferCost = A.dblTransferCost
+		,dblTransferCost = A.dblTransferCost + A.dblTaxesPerUnit
 		,dblTaxesPerUnit  = A.dblTaxesPerUnit
 		,intNetworkId = @intNetworkId
 	FROM #tmpNoSiteItemIssue A

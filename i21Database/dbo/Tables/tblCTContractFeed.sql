@@ -48,6 +48,11 @@
 	dtmFeedCreated			DATETIME,
 	ysnMailSent				BIT DEFAULT 0,
 	strPackingDescription	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-			
+	ysnMaxPrice				BIT,
+	ysnSubstituteItem		BIT,
+	strLocationName 		NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	strSalesperson			NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	strSalespersonExternalERPId NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+		
 	CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC) 
 )

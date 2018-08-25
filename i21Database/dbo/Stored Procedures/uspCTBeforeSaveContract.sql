@@ -67,9 +67,19 @@ BEGIN TRY
 				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
 			END
 
-			INSERT	INTO tblCTContractFeed (intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription, strRowState, dtmFeedCreated)
-			SELECT	TOP 1 intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription,
-					'Delete',GETDATE()
+			INSERT	INTO tblCTContractFeed (intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, 
+			strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, 
+			dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, 
+			strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, 
+			dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription, strRowState, dtmFeedCreated,
+			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId)
+			SELECT	TOP 1 intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, 
+			strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, 
+			dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, 
+			strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, 
+			dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strLoadingPoint, strPackingDescription,'Delete',GETDATE(),	
+			ysnMaxPrice,ysnSubstituteItem,strLocationName,strSalesperson,strSalespersonExternalERPId
+
 			FROM	tblCTContractFeed
 			WHERE	intContractDetailId = @intContractDetailId
 			ORDER BY intContractFeedId DESC			

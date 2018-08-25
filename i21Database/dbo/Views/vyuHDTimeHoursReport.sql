@@ -2,12 +2,12 @@
 	AS
 		select
 			a.intTicketHoursWorkedId
-			,b.intTicketId
+			,intTicketId = convert(nvarchar(20),b.intTicketId)
 			,b.strTicketNumber
 			,b.strSubject
-			,d.intProjectId
+			,intProjectId = convert(nvarchar(20),d.intProjectId)
 			,d.strProjectName
-			,intCustomerId = f.intEntityId
+			,intCustomerId = convert(nvarchar(20),f.intEntityId)
 			,strCustomerName = f.strName
 			,k.strModule
 			,a.dtmDate

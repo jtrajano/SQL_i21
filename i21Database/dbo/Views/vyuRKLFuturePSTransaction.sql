@@ -26,7 +26,14 @@ SELECT intSelectedInstrumentTypeId,
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize												
-      ,ot.dblCommission as dblFutCommission
+      ,dblFutCommission = ISNULL((select TOP 1  
+	  (case when bc.intFuturesRateType = 2 then 0    
+	   else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end   
+	  end) as dblFutCommission  
+	  from tblRKBrokerageCommission bc  
+	  LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId  
+	  where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
+	   and  ot.dtmTransactionDate between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) * -1
 	  ,ot.intBrokerageCommissionId
 	  ,dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId,
@@ -92,7 +99,3 @@ LEFT JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ot.[intCurrencyExchange
 where intSelectedInstrumentTypeId=2 AND ot.intInstrumentTypeId = 3 and isnull(ysnLiquidation,0) = 0 
 )t)t1 --WHERE dblBalanceLot > 0 
 Order by dtmCreateDateTime Asc, dblPrice desc
-
-
-
-

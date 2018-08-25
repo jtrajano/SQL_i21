@@ -40,6 +40,8 @@ DECLARE @intId AS INT
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
 
+		,@intReturnValue AS INT 
+
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -148,7 +150,7 @@ BEGIN
 	-- LOT 
 	IF @intLotId IS NOT NULL 
 	BEGIN 
-		EXEC dbo.uspICPostLotInTransit
+		EXEC @intReturnValue = dbo.uspICPostLotInTransit
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -172,12 +174,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- ACTUAL COST 
 	ELSE 
 	BEGIN 
-		EXEC dbo.uspICPostActualCostInTransit
+		EXEC @intReturnValue = dbo.uspICPostActualCostInTransit
 			@strSourceTransactionId -- @strActualCostId 
 			,@intItemId 
 			,@intItemLocationId 
@@ -201,6 +205,8 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -234,8 +240,74 @@ END;
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
+_TerminateLoop:
+
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @intReturnValue < 0 
+BEGIN 
+	
+	DECLARE @msg AS NVARCHAR(1000)
+			,@strItemNo AS NVARCHAR(50)
+			,@TransactionTotal AS NUMERIC(18, 16)
+
+	SELECT	@strItemNo = strItemNo
+	FROM	tblICItem i
+	WHERE	i.intItemId = @intItemId
+
+	SELECT	@TransactionTotal = ROUND(SUM(t.dblQty), 6)
+	FROM	tblICInventoryTransaction t LEFT JOIN tblICLot l
+				ON t.intLotId = l.intLotId
+	WHERE	t.intItemId = @intItemId 			
+			AND t.intItemLocationId = @intItemLocationId
+			AND t.intInTransitSourceLocationId = @intInTransitSourceLocationId
+			AND t.intItemUOMId = @intItemUOMId
+			AND (@intLotId IS NULL OR t.intLotId = @intLotId) 
+			AND (@strSourceTransactionId IS NULL or t.strActualCostId = @strSourceTransactionId) 
+			AND ISNULL(t.dblQty, 0) <> 0
+
+	-- Unable to post <Transaction No> for <Item>. Available stock of <Stock> as of <transaction date> is below the transaction quantity <Qty>. Negative stock is not allowed.
+	SELECT @msg = dbo.fnICFormatErrorMessage (
+				80220
+				,@strTransactionId
+				,@strItemNo
+				,CASE 
+					WHEN @TransactionTotal = 0 THEN 'zero' 
+					ELSE  
+						CAST(
+							dbo.fnICFormatErrorMessage (
+								'%f'
+								,@TransactionTotal
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+							)
+							AS NVARCHAR(50)
+						)
+				END 
+				,@dtmDate
+				,ABS(@dblQty)
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+			)
+
+	PRINT @msg
+END 
+
+IF @intReturnValue < 0 
+BEGIN 
+	RETURN @intReturnValue;
+END 
 
 ---------------------------------------------------------------------------------------
 -- Make sure valuation is zero if stock is going to be zero. 

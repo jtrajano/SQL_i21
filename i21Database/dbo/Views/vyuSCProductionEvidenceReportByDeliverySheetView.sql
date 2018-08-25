@@ -46,14 +46,14 @@ INNER JOIN (
 	FROM tblICItem ICI 
 	INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = ICI.intCommodityId
 ) IC ON IC.intItemId = SCD.intItemId
-INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = IC.intItemId AND ItemUOM.ysnStockUOM = 1
+INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = IC.intItemId AND ItemUOM.ysnStockUnit = 1
 INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 INNER JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCD.intEntityId
 INNER JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = SCD.intEntityId AND EMLocation.ysnDefaultLocation = 1
-INNER JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCD.intSplitId
-INNER JOIN tblSMCompanyLocation SMCompanyLoc on SMCompanyLoc.intCompanyLocationId = SCD.intCompanyLocationId
-INNER JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SCD.intDiscountId
-INNER JOIN (
+LEFT JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCD.intSplitId
+LEFT JOIN tblSMCompanyLocation SMCompanyLoc on SMCompanyLoc.intCompanyLocationId = SCD.intCompanyLocationId
+LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SCD.intDiscountId
+LEFT JOIN (
 	 SELECT 
 		GR.intDiscountScheduleCodeId
 		, GR.intItemId

@@ -159,7 +159,9 @@ BEGIN TRY
 							   JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
 							   JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 							   JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
-						WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @intRegisterId AND ST.intStoreId = @intStoreId
+						WHERE I.ysnFuelItem = 0 
+						AND R.intRegisterId = @intRegisterId 
+						AND ST.intStoreId = @intStoreId
 						AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems) 
 					) as t
 			) t1
@@ -415,8 +417,44 @@ BEGIN TRY
 
 
 	-- Insert to tblSTUpdateRegisterHistory
-	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate, intUpdatedByUserId)
-    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDateUTC, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDateUTC, @intCurrentUserId)
+	INSERT INTO tblSTUpdateRegisterHistory 
+	(
+		intStoreId
+		, intRegisterId
+		, ysnPricebookFile
+		, ysnPromotionItemList
+		, ysnPromotionSalesList
+		, dtmBeginningChangeDate
+		, dtmEndingChangeDate
+		, strCategoryCode
+		, ysnExportEntirePricebookFile
+		, intBeginningPromoItemListId
+		, intEndingPromoItemListId
+		, strPromoCode
+		, intBeginningPromoSalesId
+		, intEndingPromoSalesId
+		, dtmBuildFileThruEndingDate
+		, intUpdatedByUserId
+	)
+    VALUES 
+	(
+		@intStoreId
+		, @intRegisterId
+		, @ysnPricebookFile
+		, @ysnPromotionItemList
+		, @ysnPromotionSalesList
+		, @dtmBeginningChangeDateUTC
+		, @dtmEndingChangeDateUTC
+		, @strCategoryCode
+		, @ysnExportEntirePricebookFile
+		, @intBeginningPromoItemListId
+		, @intEndingPromoItemListId
+		, @strPromoCode
+		, @intBeginningPromoSalesId
+		, @intEndingPromoSalesId
+		, @dtmBuildFileThruEndingDateUTC
+		, @intCurrentUserId
+	)
 
 
 	-- Send query to server side 

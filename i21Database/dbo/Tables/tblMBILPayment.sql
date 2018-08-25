@@ -5,7 +5,7 @@
 	strPaymentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intEntityCustomerId INT NOT NULL, 
 	intEntityDriverId INT NOT NULL,
-	intCompanyLocationId INT NOT NULL,
+	[intLocationId] INT NOT NULL,
 	dtmDatePaid DATETIME NULL,
 	strMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strCheckNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -15,7 +15,7 @@
 	intConcurrencyId INT DEFAULT((1)) NULL,
 	CONSTRAINT [PK_tblMBILPayment] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
 	CONSTRAINT [FK_tblMBILPayment_tblEMEntity_Customer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblMBILPayment_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+	CONSTRAINT [FK_tblMBILPayment_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblMBILPayment_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId]), 
     CONSTRAINT [FK_tblMBILPayment_tblEMEntity_Driver] FOREIGN KEY ([intEntityDriverId]) REFERENCES [tblEMEntity]([intEntityId]),
 );

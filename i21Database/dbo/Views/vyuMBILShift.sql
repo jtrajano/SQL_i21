@@ -11,6 +11,7 @@ SELECT Shift.intShiftId
 	, Shift.intShiftNumber
 	, Shift.dtmStartTime
 	, Shift.dtmEndTime
+	, Shift.intTruckId
 	, strTruckName = Truck.strData
 	, Shift.intStartOdometer
 	, Shift.intEndOdometer

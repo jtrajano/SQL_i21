@@ -127,6 +127,25 @@ rating as
 ),
 daysoutstanding as
 (
+
+	select intEntityId, intDaysOutstanding = sum(intDaysOutstanding) / count(intEntityId) from
+	(
+	select distinct
+		intEntityId = a.intAssignedToEntity
+		,intDaysOutstanding = convert(numeric(18,6),datediff(hour,a.dtmCreated,a.dtmCompleted)) / convert(numeric(18,6),24.000000)
+	from
+		tblHDTicket a
+	where
+		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
+		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
+		and a.dtmCreated is not null
+		and a.dtmCompleted is not null
+		--and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
+	)as rawResult
+	group by intEntityId
+
+	/*
 	select distinct
 		intEntityId = a.intAssignedToEntity
 		,intDaysOutstanding = datediff(day,a.dtmCreated,a.dtmCompleted)
@@ -135,10 +154,28 @@ daysoutstanding as
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		--and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
-		--and a.dtmCreated is not null
-		--and a.dtmCompleted is not null
 		and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
+	*/
+),
+daysopen as
+(
+
+	select intEntityId, intDaysOpen = sum(intDaysOpen) / count(intEntityId) from
+	(
+	select distinct
+		intEntityId = a.intAssignedToEntity
+		,intDaysOpen = convert(numeric(18,6),datediff(hour,a.dtmCreated,getdate())) / convert(numeric(18,6),24.000000)
+	from
+		tblHDTicket a
+	where
+		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
+		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
+		and a.dtmCreated is not null
+		and a.dtmCompleted is null
+		--and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
+	)as rawResult
+	group by intEntityId
 )
 
 INSERT INTO tblHDCallDetail
@@ -160,6 +197,7 @@ INSERT INTO tblHDCallDetail
 		   ,intCallsRated
 		   ,dblAverageRating
 		   ,intDaysOutstanding
+		   ,intDaysOpen
            ,intConcurrencyId
 		   )
 		select distinct
@@ -179,7 +217,8 @@ INSERT INTO tblHDCallDetail
 				,dblTotalBillableAmount = isnull((select dblTotalBillableAmount from billedhours where intEntityId = b.intEntityId),0.00)
 				,intCallsRated = isnull((select intCallsRated from rating where intEntityId = b.intEntityId),0)
 				,dblAverageRating = isnull((select isnull(dblAverageRating,0.00) from rating where intEntityId = b.intEntityId),0.00)
-				,intDaysOutstanding = isnull((select intDaysOutstanding from daysoutstanding where intEntityId = b.intEntityId),0)
+				,intDaysOutstanding = isnull((select intDaysOutstanding from daysoutstanding where intEntityId = b.intEntityId),0.00)
+				,intDaysOpen = isnull((select intDaysOpen from daysopen where intEntityId = b.intEntityId),0.00)
 				,intConcurrencyId = 1
 		from
 				(
@@ -216,6 +255,7 @@ INSERT INTO tblHDCallDetail
 		,intCallsRated
 		,dblAverageRating
 		,intDaysOutstanding
+		,intDaysOpen
 		,intConcurrencyId
 	from
 	(
@@ -237,6 +277,7 @@ INSERT INTO tblHDCallDetail
 			,intCallsRated
 			,dblAverageRating
 			,intDaysOutstanding
+			,intDaysOpen
 			,intConcurrencyId
 		from 
 			tblHDCallDetail

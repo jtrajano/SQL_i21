@@ -528,6 +528,64 @@ FROM(
 				)
 	)a
 
+	UNION ALL --Storage Transfer
+	SELECT dtmDate,strDistributionOption,strDistributionOption strShipDistributionOption,
+			'' as strAdjDistributionOption,
+			'' as strCountDistributionOption,
+			strTransferTicket tranShipmentNumber,
+			dblOutQty tranShipQty,
+			strTransferTicket tranReceiptNumber,
+			dblInQty tranRecQty,
+			'' tranAdjNumber,
+			0.0 dblAdjustmentQty,
+			'' tranCountNumber,
+			0.0 dblCountQty,
+			'' tranInvoiceNumber,
+			0.0 dblInvoiceQty,
+			intStorageHistoryId intInventoryReceiptId,
+			intStorageHistoryId intInventoryShipmentId,
+			null intInventoryAdjustmentId,
+			null intInventoryCountId,
+			null intInvoiceId,
+			null intDeliverySheetId,
+			'' AS deliverySheetNumber,
+			null intTicketId,
+			'' AS ticketNumber    
+	FROM(
+
+		select 
+				CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+				,S.strStorageTypeCode strDistributionOption
+				,CASE WHEN strType = 'From Transfer'  THEN
+					dblUnits
+					ELSE 0 END AS dblInQty
+				,CASE WHEN strType = 'Transfer'  THEN
+					ABS(dblUnits)
+					ELSE 0 END AS dblOutQty
+				,S.intStorageScheduleTypeId
+				,SH.intStorageHistoryId
+				,SH.strTransferTicket
+
+			from 
+			tblGRCustomerStorage CS
+			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+
+			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+								AND CS.intCommodityId= @intCommodityId
+								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+								AND  CS.intCompanyLocationId  IN (
+																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																			ELSE isnull(ysnLicensed, 0) END)
+				
+								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+								AND strType IN ('From Transfer','Transfer')
+	) a
+
+
  )t
 
  select  convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* from(

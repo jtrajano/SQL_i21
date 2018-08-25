@@ -2,27 +2,48 @@
 	@Id nvarchar(100),
 	@Type NVARCHAR(50),
 	@UserId INT,
-	@Message NVARCHAR(100) OUTPUT
+	@Message NVARCHAR(100) OUTPUT,
+	@EntityId INT OUTPUT
 AS
 BEGIN
 	SET NOCOUNT ON
-	DECLARE @EntityId int
 	DECLARE @EntityContactId int
 	DECLARE @EntityLocationId int
-		
+
+	-- Parameter Validations ------------------------------------------
 	IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where strEntityNo = @Id)
-	begin	
+	BEGIN	
 		SET @Message = 'Entity No already exists.'		
 		RETURN 0
-	end
-	--Add validation for existing entity no
+	END
+
+	IF ISNULL(@Id, '') = ''
+	BEGIN
+		SET @Message = 'Entity No cannot be empty.'
+		RETURN 0
+	END
+
+	IF ISNULL(@Type, '') = ''
+	BEGIN
+		SET @Message = 'Entity Type cannot be empty.'
+		RETURN 0
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity where intEntityId = @UserId)
+	BEGIN
+		SET @Message = 'User Id is not existing.'
+		RETURN 0
+	END
+	---------------------------------------------------------------------
+
+	-- Insert records ---------------------------------------------------
 	INSERT INTO tblEMEntity (strName, strContactNumber, strEntityNo)
-	select @Id,'', @Id
+	SELECT @Id,'', @Id
 
 	SET @EntityId = @@IDENTITY
 
 	INSERT INTO tblEMEntity (strName, strContactNumber)
-	select @Id,''
+	SELECT @Id,''
 
 	SET @EntityContactId = @@IDENTITY
 
@@ -34,19 +55,36 @@ BEGIN
 
 	INSERT INTO [tblEMEntityType](intEntityId, strType, intConcurrencyId)
 	SELECT @EntityId, @Type, 0
+	----------------------------------------------------------------------
+	
+	-- Insert record in the specific table and set the screen name -------
+	DECLARE @screen NVARCHAR(100)
+	SET @screen = 'EntityManagement.view.EntityDirect'
 
-	if @Type = 'Vendor'
-	begin
-		INSERT into tblAPVendor([intEntityId], strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
+	IF @Type = 'Vendor'
+	BEGIN
+		INSERT INTO tblAPVendor([intEntityId], strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
 		SELECT @EntityId, @Id, 0, 0, 0
-	end
 
+		SET @screen = 'AccountsPayable.view.EntityVendor'
+	END
+	ELSE IF @Type = 'Customer'
+	BEGIN
+		DECLARE @termId INT
+		SELECT @termId = intDefaultTermId FROM tblSMCompanyPreference
+
+		INSERT INTO tblARCustomer(intEntityId, strCustomerNumber, strType, dblARBalance, intTermsId)
+		SELECT @EntityId, @Id, 'Person', 0.00, @termId
+
+		SET @screen = 'AccountsReceivable.view.EntityCustomer'
+	END
+	----------------------------------------------------------------------
+
+	-- Add to audit log --------------------------------------------------
 	EXEC uspSMAuditLog
         @keyValue = @EntityId,
-        @screenName = 'EntityManagement.view.Entity',
+        @screenName = @screen,
         @entityId = @UserId,
         @actionType = 'Created'
-
+	----------------------------------------------------------------------
 END
-
-go

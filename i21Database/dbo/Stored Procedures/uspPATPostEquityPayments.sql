@@ -29,6 +29,13 @@ DECLARE @dateToday AS DATETIME = GETDATE();
 DECLARE @batchId NVARCHAR(40);
 
 
+IF EXISTS(SELECT 1 FROM tblPATCompanyPreference WHERE intAPClearingGLAccount IS NULL)
+BEGIN
+	SET @error = 'Please setup AP Clearing account from Patronage Setup Screen.';
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
+END
+
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 	
@@ -91,7 +98,7 @@ IF(@batchId IS NULL)
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmPaymentDate), 0),
 			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
-			[dblDebit]						=	ROUND(C.dblEquityPay,2),
+			[dblDebit]						=	SUM(ROUND(C.dblEquityPay,2)),
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
@@ -126,13 +133,14 @@ IF(@batchId IS NULL)
 		INNER JOIN tblPATRefundRate D ON
 			D.intRefundTypeId = C.intRefundTypeId
 		WHERE	A.intEquityPayId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intEquityPayId)) AND C.strEquityType = 'Undistributed' AND C.dblEquityPay <> 0
+		GROUP BY D.intUndistributedEquityId, A.dtmPaymentDate, A.strPaymentNumber, A.intEquityPayId
 		UNION ALL
 		--Allocated Reserve
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmPaymentDate), 0),
 			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intAllocatedReserveId,
-			[dblDebit]						=	ROUND(C.dblEquityPay,2),
+			[dblDebit]						=	SUM(ROUND(C.dblEquityPay,2)),
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
@@ -141,7 +149,7 @@ IF(@batchId IS NULL)
 			[strReference]					=	A.strPaymentNumber,
 			[intCurrencyId]					=	1,
 			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
+			[dtmTransactionDate]			=	A.dtmPaymentDate,
 			[strJournalLineDescription]		=	'Reserve Equity',
 			[intJournalLineNo]				=	1,
 			[ysnIsUnposted]					=	0,
@@ -167,6 +175,7 @@ IF(@batchId IS NULL)
 		INNER JOIN tblPATRefundRate D ON
 			D.intRefundTypeId = C.intRefundTypeId
 		WHERE	A.intEquityPayId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intEquityPayId)) AND C.strEquityType = 'Reserve' AND C.dblEquityPay <> 0
+		GROUP BY D.intAllocatedReserveId, A.dtmPaymentDate, A.strPaymentNumber, A.intEquityPayId
 		UNION ALL
 		--AP Clearing
 		SELECT	
@@ -174,7 +183,7 @@ IF(@batchId IS NULL)
 			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	0,
-			[dblCredit]						=	ROUND(C.dblEquityPay,2),
+			[dblCredit]						=	SUM(ROUND(C.dblEquityPay,2)),
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
 			[strDescription]				=	'AP Clearing',
@@ -207,6 +216,7 @@ IF(@batchId IS NULL)
 			C.intEquityPaySummaryId = B.intEquityPaySummaryId
 		CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intEquityPayId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intEquityPayId))
+		GROUP BY A.dtmPaymentDate, ComPref.intAPClearingGLAccount, A.strPaymentNumber, A.intEquityPayId
 	END
 	ELSE
 	BEGIN
@@ -288,7 +298,6 @@ IF(@batchId IS NULL)
 	
 	---------------- BEGIN - BOOK GL ----------------
 	BEGIN TRY
-		SELECT * FROM @GLEntries
 		EXEC uspGLBookEntries @GLEntries, @ysnPosted
 	END TRY
 	BEGIN CATCH

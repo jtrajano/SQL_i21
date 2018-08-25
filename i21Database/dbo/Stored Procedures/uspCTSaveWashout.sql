@@ -16,6 +16,7 @@ BEGIN TRY
 			,@dblWTBasis			NUMERIC(18,6)
 			,@dblWTCashPrice		NUMERIC(18,6)
 			,@strNumber				NVARCHAR(80)
+			,@strMiscComment		NVARCHAR(150)
 			,@strXML				NVARCHAR(MAX) 
 			,@intContractTypeId		INT 
 			,@strCondition			NVARCHAR(MAX)
@@ -166,11 +167,17 @@ BEGIN TRY
 				@billId					=   @intBillInvoiceId OUTPUT
 
 		SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId	   
-
-		SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
-		SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
+		SET @strMiscComment = ''
+		SELECT @strNumber = 'Washout, contracts ' + strContractNumber, 
+				@strMiscComment =  'Washout net difference - Original Contract ' + strContractNumber
+			FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
+		SELECT @strNumber = @strNumber + ' and ' + strContractNumber ,
+				@strMiscComment =  @strMiscComment + ' and Washout Contract ' + strContractNumber
+			FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
 		UPDATE tblAPBill		SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
-		UPDATE tblAPBillDetail	SET dblQtyOrdered = 0, intLocationId = @intCompanyLocationId WHERE intBillId = @intBillInvoiceId
+		UPDATE tblAPBillDetail	SET dblQtyOrdered = 0, intLocationId = @intCompanyLocationId,
+			strMiscDescription = @strMiscComment
+			WHERE intBillId = @intBillInvoiceId
 	   
     END
 

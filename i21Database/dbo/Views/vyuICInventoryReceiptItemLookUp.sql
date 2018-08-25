@@ -234,6 +234,9 @@ SELECT	ReceiptItem.intInventoryReceiptId
 				ELSE NULL
 				END
 			)
+		,dblLotTotalGross = ISNULL(receiptLot.dblLotTotalGross, 0)
+		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
+		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -281,6 +284,15 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
 					AND Receipt.strReceiptType = 'Inventory Return'
 		) rtn
+		OUTER APPLY (
+			SELECT	ril.intInventoryReceiptItemId
+					,dblLotTotalGross = SUM(ISNULL(ril.dblGrossWeight, 0))
+					,dblLotTotalTare = SUM(ISNULL(ril.dblTareWeight, 0))
+					,dblLotTotalNet =  SUM(ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0))
+			FROM	tblICInventoryReceiptItemLot ril						
+			WHERE	ril.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			GROUP BY ril.intInventoryReceiptItemId
+		) receiptLot
 
 		-- Integrations with the other modules: 
 		-- 1. Purchase Order

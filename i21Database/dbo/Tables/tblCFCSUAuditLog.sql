@@ -2,6 +2,8 @@
     [intId]            INT             IDENTITY (1, 1) NOT NULL,
     [strSessionId]     NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
     [intPK]            INT             NULL,
+	[intNetworkId]	   INT			   NULL,
+	[strNetwork]	   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strType]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strTableName]     NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldName]     NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,

@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMBILOrder](
 	[intOrderId] INT IDENTITY(1,1) NOT NULL,
 	[intDispatchId] INT NULL,
+	[intShiftId] INT NULL,
 	[strOrderNumber] NVARCHAR (30) COLLATE Latin1_General_CI_AS NULL,
 	[strOrderStatus] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
 	[dtmRequestedDate] DATETIME NULL,
@@ -18,5 +19,6 @@
     CONSTRAINT [FK_tblMBILOrder_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblMBILOrder_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
     CONSTRAINT [FK_tblMBILOrder_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
-    CONSTRAINT [FK_tblMBILOrder_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [tblLGRoute]([intRouteId])
+    CONSTRAINT [FK_tblMBILOrder_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [tblLGRoute]([intRouteId]),
+	CONSTRAINT [FK_tblMBILOrder_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId])
 )
