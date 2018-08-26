@@ -10,7 +10,8 @@
 	   @intBookId int = null,
 	   @intSubBookId int = null,
 	   @intAOPId nvarchar(100)= null,
-	   @strLocationName nvarchar(250)= null
+	   @strLocationName nvarchar(250)= null,
+	   @intCurrencyId int = null
 
 AS
 

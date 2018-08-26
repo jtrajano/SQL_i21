@@ -8,7 +8,8 @@
 	   @intBookId int = null,
 	   @intSubBookId int = null,
 	   @intAOPId int = null,
-	   @strLocationName nvarchar(250)= null
+	   @strLocationName nvarchar(250)= null,
+	   @intCurrencyId int = null
 
 AS
 
@@ -238,7 +239,7 @@ select t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) db
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
 							) dblStandardPrice
 							,isnull(cost.dblRate,t.dblBasis) dblPPVBasis, (isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0) as  dblNewPPVPrice,strLocationName
-							,strPricingType,strItemNo,ca.strDescription strProductType
+							,strPricingType,strItemNo,ca.strDescription strProductType,intCurrencyId
  from @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
 join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
