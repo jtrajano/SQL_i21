@@ -213,14 +213,13 @@ JOIN tblEMEntity e on e.intEntityId=
 						ELSE
 						CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 						CASE WHEN ISNULL(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId END END END
-WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+WHERE isnull(cd.dtmM2MDate,getdate()) BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
 and strName=case when isnull(@strEntityName,'') = '' then strName else @strEntityName end
 and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
 and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(cd.intSubBookId,0) else @intSubBookId end
 and isnull(cl.strLocationName,'')= case when isnull(@strLocationName,'')='' then isnull(cl.strLocationName,'') else @strLocationName end
 )t)t1
 END
-
 
 select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,

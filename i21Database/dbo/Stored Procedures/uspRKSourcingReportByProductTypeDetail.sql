@@ -217,7 +217,7 @@ JOIN tblEMEntity e on e.intEntityId=CASE WHEN ISNULL(@ysnVendorProducer,0)=0 the
 						CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 						CASE WHEN ISNULL(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId END END END
 JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
-WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+WHERE isnull(cd.dtmM2MDate,getdate()) BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
 AND isnull(strName,'') = case when isnull(@strEntityName ,'')= '' then isnull(strName,'') else @strEntityName  end
 AND isnull(strOrigin,'')= case when isnull(@strOrigin,'')= '' then isnull(strOrigin,'') else @strOrigin end
 AND isnull(strProductType,'')=case when isnull(@strProductType,'')='' then isnull(strProductType,'') else @strProductType end
@@ -226,7 +226,6 @@ and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(c
 and isnull(l.strLocationName,'')= case when isnull(@strLocationName,'')='' then isnull(l.strLocationName,'') else @strLocationName end
 )t)t1
 END
-
 
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType, dblStandardRatio,dblStandardQty,intItemId,
