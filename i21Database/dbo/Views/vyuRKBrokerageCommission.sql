@@ -32,8 +32,8 @@ SELECT
 	,BC.dblAAFees
 	,BC.dblPerFutureContract
 FROM tblRKBrokerageCommission BC
-INNER JOIN tblRKFutureMarket FM ON BC.intFutureMarketId = FM.intFutureMarketId
 JOIN vyuRKCommodityMarketMap CMM ON BC.intCommodityMarketId = CMM.intCommodityMarketId
+INNER JOIN tblRKFutureMarket FM ON BC.intFutureMarketId = FM.intFutureMarketId
 LEFT JOIN tblSMCurrency FutCur ON BC.intFutCurrencyId = FutCur.intCurrencyID
 LEFT JOIN tblSMCurrency OptCur ON BC.intFutCurrencyId = OptCur.intCurrencyID
 OUTER APPLY (
