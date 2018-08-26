@@ -5,7 +5,7 @@ SELECT DISTINCT CT.strContractType
 	,isnull(CD.dblQuantity,0) -  isnull(CD.dblInvoicedQty,0) AS dblDetailQuantity
 	,CH.strContractNumber
 	,CD.intContractSeq
-	,CD.dtmStartDate
+	,isnull(CD.dtmM2MDate,getdate())  dtmStartDate
 	,EY.strName strEntityName
 	,CD.dblNoOfLots
 	,CH.intContractHeaderId
@@ -26,11 +26,11 @@ SELECT DISTINCT CT.strContractType
 	,CD.intBookId
 	,CD.intSubBookId
 	,(isnull(CD.dblQuantity,0) -  isnull(CD.dblInvoicedQty,0) )* isnull(CD.dblRatio,0) dblRatioQty
-	,dtmContractDate dtmTransactionDate
+	,isnull(CD.dtmM2MDate,getdate()) dtmTransactionDate
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId not in(2,3)
 JOIN tblRKFuturesMonth FM on FM.intFutureMonthId=CD.intFutureMonthId
 JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId 
-WHERE CD.dblQuantity > isnull(CD.dblInvoicedQty,0) 
+WHERE CD.dblQuantity > isnull(CD.dblInvoicedQty,0)
