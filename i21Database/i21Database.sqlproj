@@ -6395,6 +6395,7 @@
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_SetKeepSearchOpen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
