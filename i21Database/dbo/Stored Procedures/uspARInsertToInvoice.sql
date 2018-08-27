@@ -1271,8 +1271,9 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
 				UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
-
-				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
+				
+				EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice',@raiseError = 1
 			END
 
 		SET @NewInvoiceId = ISNULL(@NewInvoiceId, @SoftwareInvoiceId)
