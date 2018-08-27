@@ -173,8 +173,10 @@ BEGIN
 		,[strAccountDesc]					=	accnt.strDescription
 		,[intShipViaId]						=	A.intShipViaId
 		,[strShipVia]						=	shipVia.strShipVia
-		,[intTermId]						=	A.intTermId
-		,[strTerm]							=	term.strTerm
+		,[intTermId]						=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.intTermID
+													ELSE A.intTermId END
+		,[strTerm]							=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.strTerm
+													ELSE term.strTerm END
 		,[strBillOfLading]					=	A.strBillOfLading
 		,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 															AND A.intItemId > 0
@@ -234,6 +236,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
+	LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
 END
 
 IF @transCount = 0
