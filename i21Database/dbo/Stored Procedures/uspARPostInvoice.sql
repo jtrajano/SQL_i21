@@ -1944,8 +1944,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE A.dblBaseInvoiceTotal END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseInvoiceTotal ELSE @ZeroDecimal END
+				,dblDebit					= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN @ZeroDecimal ELSE A.dblBaseInvoiceTotal END
+				,dblCredit					= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN A.dblBaseInvoiceTotal ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal																				
 				,strDescription				= P.[strDescription]
@@ -1966,10 +1966,10 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE A.dblInvoiceTotal END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE A.dblInvoiceTotal END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal ELSE @ZeroDecimal END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal ELSE @ZeroDecimal END
+				,[dblDebitForeign]			= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN @ZeroDecimal ELSE A.dblInvoiceTotal END
+				,[dblDebitReport]			= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN @ZeroDecimal ELSE A.dblInvoiceTotal END
+				,[dblCreditForeign]			= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN A.dblInvoiceTotal ELSE @ZeroDecimal END
+				,[dblCreditReport]			= CASE WHEN (A.strTransactionType IN ('Invoice', 'Cash') AND A.intSourceId <> 2 AND A.intOriginalInvoiceId IS NULL) OR (A.strTransactionType = 'Credit Memo' AND A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL) THEN A.dblInvoiceTotal ELSE @ZeroDecimal END
 				,[dblReportingRate]			= A.dblCurrencyExchangeRate
 				,[dblForeignRate]			= A.dblCurrencyExchangeRate
 				,[strRateType]				= ''
