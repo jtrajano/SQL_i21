@@ -1,6 +1,5 @@
 ﻿--EXEC uspQMSampleCreateBySystem 4356,38,4886,1,1
-CREATE PROCEDURE uspQMSampleCreateBySystem
-	@intWorkOrderId INT
+CREATE PROCEDURE uspQMSampleCreateBySystem @intWorkOrderId INT
 	,@intItemId INT
 	,@intOutputLotId INT
 	,@intLocationId INT
@@ -32,7 +31,7 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT
 	DECLARE @dtmCurrentDateTime DATETIME = GETDATE()
 	DECLARE @dtmCurrentDate DATETIME = CONVERT(DATE, GETDATE())
-			,@ysnAdjustInventoryQtyBySampleQty BIT
+		,@ysnAdjustInventoryQtyBySampleQty BIT
 
 	-- If no output sample created
 	IF NOT EXISTS (
@@ -74,7 +73,8 @@ BEGIN TRY
 	IF @intProductId IS NULL
 		RETURN;
 
-	SELECT @intSampleTypeId = ST.intSampleTypeId,@ysnAdjustInventoryQtyBySampleQty=ST.ysnAdjustInventoryQtyBySampleQty
+	SELECT @intSampleTypeId = ST.intSampleTypeId
+		,@ysnAdjustInventoryQtyBySampleQty = ST.ysnAdjustInventoryQtyBySampleQty
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intControlPointId = PC.intControlPointId
 		AND PC.intProductId = @intProductId
@@ -331,16 +331,25 @@ BEGIN TRY
 						WHEN ISNUMERIC(PPV.dblMinValue) = 1
 							AND ISNUMERIC(PPV.dblMaxValue) = 1
 							THEN CASE 
-									WHEN SR.dblPropertyValue > PPV.dblMinValue
-										AND SR.dblPropertyValue < PPV.dblMaxValue
-										THEN 'Passed'
-									WHEN SR.dblPropertyValue < PPV.dblMinValue
-										OR SR.dblPropertyValue > PPV.dblMaxValue
-										THEN 'Failed'
-									WHEN SR.dblPropertyValue = PPV.dblMinValue
-										OR SR.dblPropertyValue = PPV.dblMaxValue
-										THEN 'Marginal'
-									ELSE ''
+									WHEN (PPV.dblMaxValue - PPV.dblMinValue <= 1)
+										THEN CASE 
+												WHEN SR.dblPropertyValue >= PPV.dblMinValue
+													OR SR.dblPropertyValue <= PPV.dblMaxValue
+													THEN 'Passed'
+												ELSE 'Failed'
+												END
+									ELSE CASE 
+											WHEN SR.dblPropertyValue > PPV.dblMinValue
+												AND SR.dblPropertyValue < PPV.dblMaxValue
+												THEN 'Passed'
+											WHEN SR.dblPropertyValue < PPV.dblMinValue
+												OR SR.dblPropertyValue > PPV.dblMaxValue
+												THEN 'Failed'
+											WHEN SR.dblPropertyValue = PPV.dblMinValue
+												OR SR.dblPropertyValue = PPV.dblMaxValue
+												THEN 'Marginal'
+											ELSE ''
+											END
 									END
 						ELSE ''
 						END
