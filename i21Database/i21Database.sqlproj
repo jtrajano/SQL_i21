@@ -6992,6 +6992,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSCreateNegativeCashReceipts.sql" />
+    <Build Include="vyuEMSearchEntityBroker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
