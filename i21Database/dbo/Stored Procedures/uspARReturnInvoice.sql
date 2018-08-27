@@ -415,10 +415,12 @@ WHERE intInvoiceId = @InvoiceId
 DECLARE @creditMemoIntId AS NVARCHAR(10)
 	   ,@creditMemoStrType VARCHAR(5)
 	   ,@creditMemoStrTransactionType VARCHAR(20)
+	   ,@intCompanyLocationId AS INT
 
 SELECT @creditMemoStrType = strType
 	  ,@creditMemoStrTransactionType = strTransactionType
 	  ,@creditMemoIntId = CAST(@NewInvoiceId AS NVARCHAR(10))
+	  ,@intCompanyLocationId = intCompanyLocationId
 FROM @EntriesForInvoice
 
 IF(@creditMemoStrType = 'POS' AND @creditMemoStrTransactionType = 'Credit Memo')
@@ -436,8 +438,8 @@ BEGIN
 
 	IF(@posStrPayment != 'On Account')
 	BEGIN
-		--create cash refund
-			EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @intUserId = @UserId, @strErrorMessage = @ErrorMessage  OUTPUT
+		--create negative cash receipt
+			EXEC uspARPOSCreateNegativeCashReceipts @intInvoiceId = @creditMemoIntId, @intUserId = @UserId, @intCompanyLocationId = @intCompanyLocationId, @strErrorMessage = @ErrorMessage  OUTPUT
 	END
 	
 	IF(@ErrorMessage IS NULL)
