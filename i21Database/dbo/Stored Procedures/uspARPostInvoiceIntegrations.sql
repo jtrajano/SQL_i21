@@ -443,8 +443,9 @@ BEGIN
 		
         -- Update CT - Sequence Balance
         EXEC [uspARInvoiceUpdateSequenceBalance] 
-              @post = 1
+              @post          = 1
              ,@TransactionId = @InvoiceIDP
+             ,@UserId        = @UserId
 
 		--Committed QUatities
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
@@ -934,8 +935,9 @@ BEGIN
 		
         -- Update CT - Sequence Balance
         EXEC [uspARInvoiceUpdateSequenceBalance] 
-              @post = 0
+              @post          = 0
              ,@TransactionId = @InvoiceIDU
+             ,@UserId        = @UserId
 
 
 
@@ -1145,6 +1147,7 @@ WHERE
 	AND	ID.[intInventoryShipmentChargeId] IS NULL
 	AND	ID.strTransactionType <> 'Credit Memo'
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
+    AND ID.[intTicketId] IS NOT NULL
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
