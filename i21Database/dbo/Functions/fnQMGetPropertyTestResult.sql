@@ -28,17 +28,28 @@ BEGIN
 			IF @dblMinValue IS NOT NULL
 				AND @dblMaxValue IS NOT NULL
 			BEGIN
-				IF @strPropertyValue > @dblMinValue
-					AND @strPropertyValue < @dblMaxValue
-					SELECT @strResult = 'Passed'
-				ELSE IF @strPropertyValue < @dblMinValue
-					OR @strPropertyValue > @dblMaxValue
-					SELECT @strResult = 'Failed'
-				ELSE IF @strPropertyValue = @dblMinValue
-					OR @strPropertyValue = @dblMaxValue
-					SELECT @strResult = 'Marginal'
+				IF (@dblMaxValue - @dblMinValue <= 1)
+				BEGIN
+					IF @strPropertyValue >= @dblMinValue
+						AND @strPropertyValue <= @dblMaxValue
+						SELECT @strResult = 'Passed'
+					ELSE
+						SELECT @strResult = 'Failed'
+				END
 				ELSE
-					SELECT @strResult = ''
+				BEGIN
+					IF @strPropertyValue > @dblMinValue
+						AND @strPropertyValue < @dblMaxValue
+						SELECT @strResult = 'Passed'
+					ELSE IF @strPropertyValue < @dblMinValue
+						OR @strPropertyValue > @dblMaxValue
+						SELECT @strResult = 'Failed'
+					ELSE IF @strPropertyValue = @dblMinValue
+						OR @strPropertyValue = @dblMaxValue
+						SELECT @strResult = 'Marginal'
+					ELSE
+						SELECT @strResult = ''
+				END
 			END
 			ELSE
 				SELECT @strResult = ''
