@@ -1345,6 +1345,7 @@ BEGIN
 	WHERE
 		I.[ysnPost] = 1
 		AND I.[dblTotal] <> @ZeroDecimal
+        AND I.[intInventoryShipmentItemId] IS NULL
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
 		AND ISNULL(I.[intItemId], 0) <> 0
 		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
@@ -1405,6 +1406,7 @@ BEGIN
 	WHERE
 		I.[ysnPost] = 1
 		AND I.[dblTotal] <> @ZeroDecimal
+        AND I.[intInventoryShipmentItemId] IS NULL
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
 		AND ISNULL(I.[intItemId],0) <> 0
 		AND ISNULL(ARIC.[intComponentItemId],0) <> 0
