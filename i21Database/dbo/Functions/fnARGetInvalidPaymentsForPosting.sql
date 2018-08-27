@@ -201,7 +201,7 @@ BEGIN
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NULL
-        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice')
+        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice', 'Cash')
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 

@@ -32,8 +32,8 @@ BEGIN
 			,@dblInvoiceTotal		NUMERIC(18,6)
 			
 
---select credit memo created
-	SELECT
+--select credit memo created & set values to variables
+	SELECT TOP 1
 		 @intAccountId				= intAccountId
 		,@intEntityCustomerId		= intEntityCustomerId
 		,@intCurrencyId				= intCurrencyId
@@ -133,7 +133,7 @@ VALUES
 	,@intTermId					--intTermId
 	,@dblInvoiceTotal			--dblInvoiceTotal
 	,@dblInvoiceTotal			--dblBaseInvoiceTotal
-	,@dblAmountPaid * -1			--dblAmountId
+	,@dblAmountPaid * -1		--dblAmountId
 )
 DECLARE @COUNT INT
 SELECT COUNT(*) 
@@ -143,7 +143,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	SET @strErrorMessage = 'There is no Invoice to be returned'
+	SET @strErrorMessage = 'Error processing  return of ' + @strInvoiceNumber
 	RAISERROR(@strErrorMessage, 16, 1) 
 	RETURN 0;
 END
