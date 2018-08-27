@@ -6560,6 +6560,7 @@
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
