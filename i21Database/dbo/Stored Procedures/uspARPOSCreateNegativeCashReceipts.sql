@@ -3,8 +3,8 @@
 	, @intUserId			INT
 	, @intCompanyLocationId INT
 	, @intNewTransactionId	INT			  = NULL OUTPUT
-	, @strErrorMessage		NVARCHAR(MAX) = NULL OUTPUT										--SELECT * FROM vyuARInvoicesForPaymentIntegration WHERE strTransactionType = 'Credit Memo'
-AS																							--EXEC uspARPOSCreateNegativeCashReceipts @intInvoiceId = 810, @intUserId = 1, @intCompanyLocationId = 2
+	, @strErrorMessage		NVARCHAR(MAX) = NULL OUTPUT
+AS
 BEGIN
 
 	DECLARE @EntriesForPayment		PaymentIntegrationStagingTable
