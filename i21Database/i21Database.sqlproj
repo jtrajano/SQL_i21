@@ -6994,6 +6994,23 @@
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
     <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
+    <Build Include="dbo\Functions\fnARGenerateGLEntriesForInvoices.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceDetailsForPosting.sql" />
+    <Build Include="dbo\Functions\fnARGetItemAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspARBookInvoiceGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateGLEntriesForInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvalidPostInvoiceData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceAccountForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceDetailForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateItemsForCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateItemsForInTransitCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateItemsForStorageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostItemResevation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
