@@ -17,6 +17,8 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@accrueLicense		AS BIT				= 0
 	,@raiseError		AS BIT				= 0
+
+ WITH RECOMPILE
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -310,7 +312,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
-    ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
+    ,[intInvoiceDetailId]                   INT             NOT NULL
     ,[intItemId]                            INT             NULL
     ,[strItemNo]                            NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[strItemType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
@@ -387,7 +389,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[strOptionType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
-    ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL)
+    ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,PRIMARY KEY CLUSTERED ([intInvoiceDetailId], [intInvoiceId]))
 --DECLARE @PostProvisionalData AS [InvoicePostingTable]
 
 EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
