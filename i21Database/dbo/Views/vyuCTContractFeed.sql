@@ -78,7 +78,7 @@ AS
 						) t
 						WHERE intRowNum = 1
 				) AP ON AP.intRecordId = CD.intContractHeaderId											
-		JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
+	LEFT JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
 		JOIN	tblEMEntity	SE	ON	SE.intEntityId	=	CH.intSalespersonId
    LEFT JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)
    LEFT JOIN	tblAPVendor	VE	ON	VE.intEntityId	=	CH.intEntityId							

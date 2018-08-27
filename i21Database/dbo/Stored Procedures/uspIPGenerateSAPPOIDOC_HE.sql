@@ -240,6 +240,13 @@ JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 WHERE IsNULL(CH.ysnSubstituteItem, 0) = 0
 	AND ISNULL(strFeedStatus, '') = ''
 
+UPDATE CF
+SET strFeedStatus = ''
+FROM tblCTContractFeed CF
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+WHERE IsNULL(CH.ysnSubstituteItem, 0) = 1
+	AND ISNULL(strFeedStatus, '') = 'IGNORE'
+
 UPDATE tblCTContractFeed
 SET strFeedStatus = 'IGNORE'
 WHERE EXISTS (

@@ -77,7 +77,7 @@ SELECT S.intStgMatchPnSId
 	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblGrossPnL, 0)
 	,S.dtmPostingDate
 	,L.strLocationName
-	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
+	,Left('F-'+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, ''),16) AS strReference
 	,1
 	,ISNULL(S.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '')  
 FROM tblRKStgMatchPnS S
@@ -105,7 +105,7 @@ SELECT intStgOptionMatchPnSId
 	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, PS.dblGrossPnL, 0)
 	,dtmPostingDate
 	,strLocationName
-	,ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
+	,Left('O-'+ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, ''),16) AS strReference
 	,0
 	,ISNULL(PS.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, PS.intMatchNo), '') 
 FROM tblRKStgOptionMatchPnS PS
