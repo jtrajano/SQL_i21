@@ -6994,6 +6994,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
     <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
+    <Build Include="vyuEMSearchEntityBroker.sql" />
     <Build Include="dbo\Functions\fnARGenerateGLEntriesForInvoices.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceDetailsForPosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemAccounts.sql" />
