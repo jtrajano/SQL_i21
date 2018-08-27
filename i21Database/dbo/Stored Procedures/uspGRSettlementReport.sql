@@ -326,7 +326,7 @@ BEGIN
 													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 											END
 		,dblDockage							= ROUND(SC.dblShrink,3)		 
-		,dblCost							= BillDtl.dblCost
+		,dblCost							= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
@@ -528,7 +528,7 @@ BEGIN
 		-- 											ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		-- 									END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
-		,dblCost							= BillDtl.dblCost
+		,dblCost							= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
@@ -725,7 +725,7 @@ BEGIN
 		-- 											ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		-- 									END
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
-		,dblCost							= BillDtl.dblCost
+		,dblCost							= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
@@ -1027,7 +1027,7 @@ BEGIN
 													ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 											  END
 				,dblDockage					= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
-				,dblCost					= BillDtl.dblCost
+				,dblCost					= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 				,Net						= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 				,strUnitMeasure				= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					= BillDtl.dblTotal
@@ -1227,7 +1227,7 @@ BEGIN
 				-- 									ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				-- 							  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
-				,dblCost					 = BillDtl.dblCost
+				,dblCost					 = [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 				,strUnitMeasure				 = ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					 = BillDtl.dblTotal
@@ -1429,7 +1429,7 @@ BEGIN
 				-- 									ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				-- 							  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
-				,dblCost					 = BillDtl.dblCost
+				,dblCost					 = [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
 				,strUnitMeasure				 = ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					 = BillDtl.dblTotal
