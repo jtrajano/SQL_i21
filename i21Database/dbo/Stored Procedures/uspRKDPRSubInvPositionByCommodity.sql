@@ -813,7 +813,7 @@ BEGIN
 	
 		-- Delivery sheet
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT DISTINCT 1,'In-House', strType, 
+	SELECT  1,'In-House', strType, 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(intFromCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblTotal) dblTotal,
 		  strLocationName,intCommodityId, intFromCommodityUnitMeasureId,intCompanyLocationId  
 	FROM @tempDeliverySheet where intCommodityId =@intCommodityId
