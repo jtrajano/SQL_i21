@@ -6397,7 +6397,8 @@
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />  
+</ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
