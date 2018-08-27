@@ -313,6 +313,14 @@ FROM (
 				WHERE IU.intItemId = CD.intItemId
 					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
 				), AD.intSeqPriceUOMId, 1)
+		,CH.intContractBasisId
+		,CB.strContractBasis
+		,CD.strERPPONumber
+		,CD.strERPItemNumber
+		,(SELECT CLSL.strSubLocationName
+		  FROM tblLGLoadWarehouse LW
+		  JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
+		  WHERE LW.intLoadId = LOAD.intLoadId) strSublocation
 	FROM tblLGLoad LOAD
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = LOAD.intLoadId
@@ -327,6 +335,7 @@ FROM (
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId

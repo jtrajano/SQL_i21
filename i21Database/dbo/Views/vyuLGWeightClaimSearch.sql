@@ -50,7 +50,15 @@ SELECT
 	CONI.strContractItemName,
 	OG.strCountry AS strOrigin,
 	BILL.strBillId,
-	BILL.intBillId
+	BILL.intBillId,
+	CH.intContractBasisId,
+	CB.strContractBasis,
+	CD.strERPPONumber,
+	CD.strERPItemNumber,
+	(SELECT CLSL.strSubLocationName
+			FROM tblLGLoadWarehouse LW
+			JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
+			WHERE LW.intLoadId = Load.intLoadId) strSublocation
 
 
 FROM tblLGWeightClaim WC
@@ -65,6 +73,7 @@ JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
