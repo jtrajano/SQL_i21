@@ -50,6 +50,55 @@ BEGIN TRY
 			strItemNo,
 			strOtherCurrency
 	FROM	(
+
+				SELECT	BD.intItemId,
+						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
+								ELSE CAST(NULL AS NUMERIC(18, 6)) 
+						END		AS dblValueInCCCurrency,
+						CASE	WHEN BD.intWeightUOMId IS NOT NULL
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblNetWeight) 
+								ELSE NULL 
+						END
+						dblQuantity,
+						BD.intWeightUOMId AS intQuantityUOMId ,
+						@intCleanCostCurrencyId intCCCurrencyId,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18, 6))
+								ELSE	BD.dblTotal 
+						END		AS		dblValueInOtherCurrency,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
+								ELSE	BL.intCurrencyId 
+						END		AS		intOtherCurrencyId,
+						CAST(NULL AS NUMERIC(18, 6))  AS dblFX,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
+								ELSE	CAST(1 AS BIT)
+						END		AS		ysnValueEnable,
+						CAST(0 AS BIT)	AS ysnQuantityEnable,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
+								ELSE	CAST(0 AS BIT)
+						END		AS		ysnOtherCurrencyEnable,
+						IM.strItemNo,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
+								ELSE	CU.strCurrency 
+						END		AS		strOtherCurrency
+
+
+				FROM	tblAPBillDetail				BD
+				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
+				JOIN    tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId
+				JOIN    tblICInventoryReceipt		IR	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
+														AND IR.intSourceType				=	2 
+														AND IR.strReceiptType				=	'Purchase Contract'
+				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId      
+		LEFT	JOIN	tblICItemUOM                IU  ON  IU.intItemUOMId					=   BD.intWeightUOMId    
+		LEFT	JOIN	tblSMCurrency               CU  ON  CU.intCurrencyID				=   BL.intCurrencyId
+
+				WHERE	RI.intSourceId			=	@intShipmentId 
+				AND		BL.intTransactionType	=	1 
+				AND		BD.intLoadDetailId		IS	NULL 
+				AND		BD.intBillDetailId		NOT IN (SELECT ISNULL(intBillDetailApplied, 0 ) FROM tblAPAppliedPrepaidAndDebit)
+				
+				UNION ALL
+
 				SELECT	BD.intItemId,
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18, 6)) 
