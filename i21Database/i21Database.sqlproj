@@ -7010,6 +7010,7 @@
     <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
