@@ -35,7 +35,7 @@ SELECT @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) ,@ysnIncludeDPPurch
 	IF(@strByType='ByCommodity')
 	BEGIN
 		INSERT INTO @Commodity(intCommodity)
-		SELECT intCommodityId from tblICCommodity where isnull(ysnExchangeTraded,0)=1
+		SELECT intCommodityId from tblICCommodity 
 	END
 	ELSE
 	BEGIN
