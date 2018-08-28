@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSMReplicationDropPublication]
+﻿CREATE PROCEDURE [dbo].[uspSMReplicatonDropPublication]
   @publicationName nvarchar(50)
  AS
  BEGIN
