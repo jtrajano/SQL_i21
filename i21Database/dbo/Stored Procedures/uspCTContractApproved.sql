@@ -114,7 +114,7 @@ BEGIN TRY
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
 	AND		CD.intContractStatusId	NOT IN (2,5)
-	AND		CD.intPricingTypeId = CASE WHEN ISNULL(@ysnSendFeedOnPrice,0) = 1 THEN 1 ELSE CD.intPricingTypeId END
+	AND		CD.intPricingTypeId IN (SELECT CASE WHEN ISNULL(@ysnSendFeedOnPrice,0) = 1 THEN Item  ELSE CD.intPricingTypeId END FROM dbo.fnSplitString('1,6',','))
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
 
