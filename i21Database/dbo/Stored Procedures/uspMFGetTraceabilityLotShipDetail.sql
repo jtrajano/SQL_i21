@@ -17,7 +17,7 @@ IF @ysnParentLot = 0
 		,i.strDescription
 		,mt.intCategoryId
 		,mt.strCategoryCode
-		,shl.dblQuantityShipped AS dblQuantity
+		,SUM(shl.dblQuantityShipped) AS dblQuantity
 		,um.strUnitMeasure AS strUOM
 		,sh.dtmShipDate AS dtmTransactionDate
 		,c.strName
@@ -36,6 +36,17 @@ IF @ysnParentLot = 0
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNumber
 			)
+	group by 
+		sh.intInventoryShipmentId
+		,sh.strShipmentNumber
+		,i.intItemId
+		,i.strItemNo
+		,i.strDescription
+		,mt.intCategoryId
+		,mt.strCategoryCode
+		,um.strUnitMeasure 
+		,sh.dtmShipDate 
+		,c.strName
 	ORDER BY sh.intInventoryShipmentId
 
 IF @ysnParentLot = 1
@@ -48,7 +59,7 @@ IF @ysnParentLot = 1
 		,i.strDescription
 		,mt.intCategoryId
 		,mt.strCategoryCode
-		,shl.dblQuantityShipped AS dblQuantity
+		,SUM(shl.dblQuantityShipped) AS dblQuantity
 		,um.strUnitMeasure AS strUOM
 		,sh.dtmShipDate AS dtmTransactionDate
 		,c.strName
@@ -63,4 +74,15 @@ IF @ysnParentLot = 1
 	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 	LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
 	WHERE l.intParentLotId = @intLotId
+	group by 
+		sh.intInventoryShipmentId
+		,sh.strShipmentNumber
+		,i.intItemId
+		,i.strItemNo
+		,i.strDescription
+		,mt.intCategoryId
+		,mt.strCategoryCode
+		,um.strUnitMeasure 
+		,sh.dtmShipDate 
+		,c.strName
 	ORDER BY sh.intInventoryShipmentId

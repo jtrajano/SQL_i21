@@ -74,13 +74,13 @@ BEGIN
 			,i.strDescription
 			,mt.intCategoryId
 			,mt.strCategoryCode
-			,ABS(IA.dblQty) AS dblQuantity
+			,SUM(ABS(IA.dblQty)) AS dblQuantity
 			,um.strUnitMeasure AS strUOM
 			,l.dtmDateCreated AS dtmTransactionDate
 			,l.intParentLotId
 			,'L'
 			,2 AS intImageTypeId
-			,'Merge In ' + Ltrim(Convert(DECIMAL(24, 2), ABS(IA.dblQty))) + um.strUnitMeasure
+			,'Merge In ' + Ltrim(Convert(DECIMAL(24, 2), SUM(ABS(IA.dblQty)))) + um.strUnitMeasure
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
@@ -88,7 +88,18 @@ BEGIN
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intDestinationLotId = @intLotId
-		
+		Group by l.intLotId
+			,l.strLotNumber
+			,l.strLotAlias
+			,l.intItemId
+			,i.strItemNo
+			,i.strDescription
+			,mt.intCategoryId
+			,mt.strCategoryCode
+			,um.strUnitMeasure 
+			,l.dtmDateCreated
+			,l.intParentLotId
+
 		UNION
 		
 		SELECT 'Merge' AS strTransactionName
@@ -100,13 +111,13 @@ BEGIN
 			,i.strDescription
 			,mt.intCategoryId
 			,mt.strCategoryCode
-			,IA.dblQty AS dblQuantity
+			,SUM(IA.dblQty) AS dblQuantity
 			,um.strUnitMeasure AS strUOM
 			,l.dtmDateCreated AS dtmTransactionDate
 			,l.intParentLotId
 			,'L'
 			,2 AS intImageTypeId
-			,'Merge Out ' + Ltrim(Convert(DECIMAL(24, 2), IA.dblQty)) + um.strUnitMeasure
+			,'Merge Out ' + Ltrim(Convert(DECIMAL(24, 2), SUM(IA.dblQty))) + um.strUnitMeasure
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
@@ -114,6 +125,19 @@ BEGIN
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intSourceLotId = @intLotId
+		group by 
+		l.intLotId
+			,l.strLotNumber
+			,l.strLotAlias
+			,l.intItemId
+			,i.strItemNo
+			,i.strDescription
+			,mt.intCategoryId
+			,mt.strCategoryCode
+
+			,um.strUnitMeasure 
+			,l.dtmDateCreated 
+			,l.intParentLotId
 
 	IF @ysnParentLot = 1
 		SELECT 'Merge' AS strTransactionName
