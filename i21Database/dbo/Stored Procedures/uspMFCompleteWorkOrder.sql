@@ -93,8 +93,8 @@ BEGIN TRY
 		,@intAttributeTypeId INT
 		,@ysnCPMergeOnMove BIT
 
-	SELECT TOP 1 @ysnCPMergeOnMove=ysnMergeOnMove
-				FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCPMergeOnMove = ysnMergeOnMove
+	FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -256,7 +256,7 @@ BEGIN TRY
 
 	IF @ysnAllowMultipleLot = 0
 		AND @ysnMergeOnMove = 1
-		and @ysnCPMergeOnMove=1
+		AND @ysnCPMergeOnMove = 1
 	BEGIN
 		SELECT @strOutputLotNumber = strLotNumber
 		FROM tblICLot
@@ -288,8 +288,28 @@ BEGIN TRY
 			@strOutputLotNumber = ''
 			OR @strOutputLotNumber IS NULL
 			)
-		AND (@strLotTracking = 'Yes - Manual' or  @strLotTracking ='Yes - Manual/Serial Number')
+		AND (
+			@strLotTracking = 'Yes - Manual'
+			OR @strLotTracking = 'Yes - Manual/Serial Number'
+			)
 	BEGIN
+		IF @strParentLotNumber IS NULL
+			OR @strParentLotNumber = ''
+		BEGIN
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = @intManufacturingCellId
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 78
+				,@ysnProposed = 0
+				,@strPatternString = @strParentLotNumber OUTPUT
+				,@intShiftId = @intPlannedShiftId
+				,@dtmDate = @dtmPlannedDate
+		END
+
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
@@ -304,6 +324,7 @@ BEGIN TRY
 			,@strPatternString = @strOutputLotNumber OUTPUT
 			,@intShiftId = @intPlannedShiftId
 			,@dtmDate = @dtmPlannedDate
+			,@strParentLotNumber = @strParentLotNumber
 	END
 
 	IF EXISTS (
@@ -894,7 +915,7 @@ BEGIN TRY
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@intSpecialPalletLotId = @intSpecialPalletLotId
 					,@ysnRecap = @ysnRecap
-					,@intLotStatusId=@intLotStatusId
+					,@intLotStatusId = @intLotStatusId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -972,7 +993,7 @@ BEGIN TRY
 				,@ysnFillPartialPallet = @ysnFillPartialPallet
 				,@intSpecialPalletLotId = @intSpecialPalletLotId
 				,@ysnRecap = @ysnRecap
-				,@intLotStatusId=@intLotStatusId
+				,@intLotStatusId = @intLotStatusId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (
