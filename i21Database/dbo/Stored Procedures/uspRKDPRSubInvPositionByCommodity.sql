@@ -773,7 +773,7 @@ BEGIN
 		,intCommodityId
 		,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM(
-		select distinct 
+		select 
 			'In-House' strSeqHeader
 			,[Storage Type] AS [strType]
 			,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance)  dblTotal
