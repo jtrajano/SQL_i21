@@ -7014,6 +7014,7 @@
     <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutErrorLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutErrorLogPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
