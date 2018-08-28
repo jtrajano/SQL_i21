@@ -214,7 +214,8 @@ Begin
 				-- From Lot to WorkOrders
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId			,strText
+					,dblWOQty)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
 				-- WorkOrder Output details

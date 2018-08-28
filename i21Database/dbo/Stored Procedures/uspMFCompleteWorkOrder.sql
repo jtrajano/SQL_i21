@@ -315,6 +315,23 @@ BEGIN TRY
 			OR @strLotTracking = 'Yes - Manual/Serial Number'
 			)
 	BEGIN
+		IF @strParentLotNumber IS NULL
+			OR @strParentLotNumber = ''
+		BEGIN
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = @intManufacturingCellId
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 78
+				,@ysnProposed = 0
+				,@strPatternString = @strParentLotNumber OUTPUT
+				,@intShiftId = @intPlannedShiftId
+				,@dtmDate = @dtmPlannedDate
+		END
+
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
@@ -329,6 +346,7 @@ BEGIN TRY
 			,@strPatternString = @strOutputLotNumber OUTPUT
 			,@intShiftId = @intPlannedShiftId
 			,@dtmDate = @dtmPlannedDate
+			,@strParentLotNumber = @strParentLotNumber
 	END
 
 	IF EXISTS (
