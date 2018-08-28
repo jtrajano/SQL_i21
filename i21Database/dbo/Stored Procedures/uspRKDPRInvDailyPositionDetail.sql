@@ -730,7 +730,7 @@ SELECT * into #tempOnHold  FROM (
 	--From Storages
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,intInventoryReceiptId,intInventoryShipmentId,strReceiptNumber,strShipmentNumber,strDistributionOption)
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
-	SELECT distinct 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
+	SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
 	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
@@ -806,7 +806,7 @@ SELECT * into #tempOnHold  FROM (
 	--==========================
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strCustomer,intTicketId,strTicketNumber,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,intInventoryReceiptId,intInventoryShipmentId,strReceiptNumber,strShipmentNumber)
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
-	SELECT distinct 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
+	SELECT 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
 	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
