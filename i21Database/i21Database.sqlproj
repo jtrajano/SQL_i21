@@ -6984,14 +6984,15 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationAddSubscriptionForRemote.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationPullSubscription.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationMainConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplRemoteConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicatonDropPublication.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationRemoteConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPublication.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
     <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
