@@ -7012,7 +7012,6 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1810_SetKeepSearchOpen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
