@@ -526,8 +526,11 @@ SELECT 	strShipmentNumber ,
 		intCommodityUnitMeasureId as intUnitMeasureId
 		,intEntityId,strName as strCustomerReference into #tblGetSalesIntransitWOPickLot	
 FROM(
-				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,b.intInventoryShipmentId,
-				(SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) dblShipmentQty,
+				SELECT distinct b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,b.intInventoryShipmentId,
+				SUM(it.dblQty) dblShipmentQty,
+				ISNULL((SELECT  SUM(ad.dblQtyShipped) FROM tblARInvoice ia
+				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
+				WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1 and ysnPaid = 1),0)  as dblInvoiceQty,
 				b.intShipFromLocationId intCompanyLocationId,
 				l.strLocationName strLocationName,
 				d.intContractDetailId,
@@ -536,9 +539,6 @@ FROM(
 				i.strItemNo as strContractItemName,
 				ium.intCommodityUnitMeasureId,
 				b.intEntityCustomerId as intEntityId,
-				(SELECT  SUM(ad.dblQtyShipped) FROM tblARInvoice ia
-				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
-				WHERE ad.strDocumentNumber=it.strTransactionId and ysnPosted=1 ) dblInvoiceQty,
 					e.strName
 		FROM tblICInventoryTransaction it
 		JOIN tblICInventoryShipment b on b.strShipmentNumber=it.strTransactionId  
@@ -549,10 +549,11 @@ FROM(
 		JOIN tblICItemLocation il ON it.intItemId = i.intItemId and it.intItemLocationId=il.intItemLocationId and il.strDescription='In-Transit'		
 		JOIN tblEMEntity e on b.intEntityCustomerId=e.intEntityId
 		JOIN tblSMCompanyLocation l on b.intShipFromLocationId = l.intCompanyLocationId
-		LEFT JOIN tblCTContractDetail d on d.intContractDetailId=c.intLineNo		
-		LEFT JOIN tblCTContractHeader d1 on d1.intContractHeaderId=d.intContractHeaderId
+		JOIN tblCTContractDetail d on d.intContractDetailId=c.intLineNo		
+		JOIN tblCTContractHeader d1 on d1.intContractHeaderId=d.intContractHeaderId
 		WHERE i.intCommodityId = @intCommodityId and convert(DATETIME, CONVERT(VARCHAR(10), it.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 		and isnull(b.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(b.intEntityId,0) else @intVendorId end
+		group by b.strShipmentNumber, strContractNumber, intContractSeq,b.intInventoryShipmentId,c.intInventoryShipmentItemId, intShipFromLocationId,strLocationName, d.intContractDetailId,i.intCommodityId,iuom.intItemUOMId, i.strItemNo, ium.intCommodityUnitMeasureId,b.intEntityCustomerId,strName
 	)t
 
 --==================
