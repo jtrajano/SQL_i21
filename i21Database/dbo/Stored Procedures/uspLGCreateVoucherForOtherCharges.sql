@@ -137,8 +137,8 @@ BEGIN TRY
 		,CD.intContractDetailId
 		,V.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = CASE V.strCostMethod WHEN 'Amount' THEN 1 ELSE LD.dblQuantity END
-		,dblCost = V.dblPrice
+		,dblQtyReceived = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+		,dblCost = ISNULL(V.dblPrice,V.dblTotal)
 		,V.intPriceItemUOMId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
@@ -173,11 +173,12 @@ BEGIN TRY
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
 		,V.intPriceItemUOMId
-		,V.strCostMethod
-		,LD.dblQuantity
 		,ItemUOM.dblUnitQty
 		,CostUOM.dblUnitQty
+		,LD.dblQuantity
+		,V.strCostMethod
 		,V.dblPrice
+		,V.dblTotal
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
