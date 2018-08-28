@@ -1335,6 +1335,7 @@ BEGIN
 						,@intItemUOMId	--intItemUOMId
 						,@intSiteId
 						,0		--@IsDeliver
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate
@@ -1396,6 +1397,7 @@ BEGIN
 						,@intItemUOMId	--intItemUOMId
 						,@intSiteId
 						,0		--@IsDeliver
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate
@@ -1465,6 +1467,7 @@ BEGIN
 					,@intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate
@@ -1526,6 +1529,7 @@ BEGIN
 					,@intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate
@@ -1591,6 +1595,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -1652,6 +1657,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -1727,6 +1733,7 @@ BEGIN
                         , @intItemUOMId	--intItemUOMId			
                         ,@intSiteId
                         ,0		--@IsDeliver	
+						,0      --@IsCFQuote
                         ,NULL --@CurrencyId
                         ,NULL -- @CurrencyExchangeRateTypeId
                         ,NULL -- @@CurrencyExchangeRate											 
@@ -1786,6 +1793,7 @@ BEGIN
 						, @intItemUOMId	--intItemUOMId			
 						,@intSiteId
 						,0		--@IsDeliver	
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate									 
@@ -1847,6 +1855,7 @@ BEGIN
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
 						,0		--@IsDeliver	
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate									 
@@ -1915,7 +1924,8 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
-					,0		--@IsDeliver									 
+					,0		--@IsDeliver	
+					,0      --@IsCFQuote								 
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate	
@@ -1977,6 +1987,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate								 
@@ -2042,6 +2053,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -2103,6 +2115,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -2374,6 +2387,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -2435,6 +2449,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -2497,6 +2512,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -2558,6 +2574,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -2622,6 +2639,7 @@ BEGIN
                             , @intItemUOMId	--intItemUOMId		
                             ,@intSiteId
                             ,0		--@IsDeliver		
+							,0      --@IsCFQuote
                             ,NULL	--@CurrencyId
                             ,NULL	--@@CurrencyExchangeRateTypeId
                             ,NULL	--@@CurrencyExchangeRate									 
@@ -2683,6 +2701,7 @@ BEGIN
                             , @intItemUOMId	--intItemUOMId		
                             ,@intSiteId
                             ,0		--@IsDeliver	
+							,0      --@IsCFQuote
                             ,NULL	--@CurrencyId
                             ,NULL	--@@CurrencyExchangeRateTypeId
                             ,NULL	--@@CurrencyExchangeRate									 
@@ -2753,6 +2772,7 @@ BEGIN
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
 						,0		--@IsDeliver		
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate									 
@@ -2814,6 +2834,7 @@ BEGIN
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
 						,0		--@IsDeliver	
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate									 
@@ -2889,6 +2910,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -2950,6 +2972,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -3012,6 +3035,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -3073,7 +3097,8 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId	
 					,@intSiteId
-					,0		--@IsDeliver		
+					,0		--@IsDeliver	
+					,0      --@IsCFQuote	
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -3134,7 +3159,8 @@ BEGIN
                             ,0
                             , @intItemUOMId	--intItemUOMId	
                             ,@intSiteId
-                            ,0		--@IsDeliver		
+                            ,0		--@IsDeliver	
+							,0      --@IsCFQuote	
                             ,NULL	--@CurrencyId
                             ,NULL	--@@CurrencyExchangeRateTypeId
                             ,NULL	--@@CurrencyExchangeRate										 
@@ -3197,6 +3223,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId	
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate																 
@@ -3256,6 +3283,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId	
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate																 
@@ -3329,6 +3357,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -3390,6 +3419,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -3452,6 +3482,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver		
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate							 
@@ -3514,6 +3545,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate								 
@@ -3575,6 +3607,7 @@ BEGIN
                             , @intItemUOMId	--intItemUOMId
                             ,@intSiteId
                             ,0		--@IsDeliver	
+							,0      --@IsCFQuote
                             ,NULL	--@CurrencyId
                             ,NULL	--@@CurrencyExchangeRateTypeId
                             ,NULL	--@@CurrencyExchangeRate								 
@@ -3637,6 +3670,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate														 
@@ -3696,6 +3730,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate														 
@@ -3922,6 +3957,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -3983,6 +4019,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -4046,6 +4083,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4107,6 +4145,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4170,6 +4209,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4231,6 +4271,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4307,6 +4348,7 @@ BEGIN
 						, @intItemUOMId	--intItemUOMId
 						,@intSiteId
 						,0		--@IsDeliver	
+						,0      --@IsCFQuote
 						,NULL	--@CurrencyId
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate											 
@@ -4368,6 +4410,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -4429,6 +4472,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -4491,6 +4535,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate										 
@@ -4552,6 +4597,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4614,6 +4660,7 @@ BEGIN
                             , @intItemUOMId	--intItemUOMId
                             ,@intSiteId
                             ,0		--@IsDeliver	
+							,0      --@IsCFQuote
                             ,NULL --@CurrencyId
                             ,NULL -- @CurrencyExchangeRateTypeId
                             ,NULL -- @@CurrencyExchangeRate															 
@@ -4673,6 +4720,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate															 
@@ -4746,6 +4794,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -4807,6 +4856,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
@@ -4869,6 +4919,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4930,6 +4981,7 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
 					,0		--@IsDeliver	
+					,0      --@IsCFQuote
 					,NULL	--@CurrencyId
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate									 
@@ -4992,6 +5044,7 @@ BEGIN
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
 							,0		--@IsDeliver	
+							,0      --@IsCFQuote
 							,NULL --@CurrencyId
 							,NULL -- @CurrencyExchangeRateTypeId
 							,NULL -- @@CurrencyExchangeRate															 
@@ -5051,6 +5104,7 @@ BEGIN
                             , @intItemUOMId	--intItemUOMId
                             ,@intSiteId
                             ,0		--@IsDeliver	
+							,0      --@IsCFQuote
                             ,NULL --@CurrencyId
                             ,NULL -- @CurrencyExchangeRateTypeId
                             ,NULL -- @@CurrencyExchangeRate															 

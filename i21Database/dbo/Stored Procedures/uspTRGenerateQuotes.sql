@@ -272,6 +272,7 @@ BEGIN TRY
 					, NULL	--intItemUOMId
 					, NULL  --@CFSiteId
 					, 0		--@IsDeliver
+					, 0     --@IsCFQuote
 					,NULL --@CurrencyId
 					,NULL -- @CurrencyExchangeRateTypeId
 					,NULL -- @@CurrencyExchangeRate	

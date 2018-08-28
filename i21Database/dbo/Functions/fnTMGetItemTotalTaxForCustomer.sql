@@ -46,6 +46,7 @@ BEGIN
 											,0
 											,NULL
 											,1
+											,0
 											,@intItemUOMId	-- intItemUOMId
 											,NULL
 											,NULL

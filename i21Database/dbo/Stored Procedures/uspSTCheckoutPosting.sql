@@ -268,6 +268,7 @@ BEGIN
 																			, UOM.intItemUOMId
 																			,NULL									--@CFSiteId
 																			,0										--@IsDeliver
+																			,0                                      --@IsCFQuote
 																			,NULL
 																			,NULL
 																			,NULL

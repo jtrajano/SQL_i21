@@ -72,6 +72,7 @@ CROSS APPLY
 		,NULL
 		,NULL
 		,1
+		,0
 		,NULL
 		,NULL
 		,NULL

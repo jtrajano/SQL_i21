@@ -212,6 +212,7 @@ BEGIN
 			,NULL	--@FreightTermId
 			,NULL	--@CFSiteId
 			,1		--@IsDeliver
+			,0      --@IsCFQuote
 			) E
 	WHERE cfNetwork.intNetworkId = @intNetworkId
 
