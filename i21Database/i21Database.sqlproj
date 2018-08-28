@@ -6993,6 +6993,7 @@
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
+    <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

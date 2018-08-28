@@ -8,7 +8,8 @@
 	   @intBookId int = null,
 	   @intSubBookId int = null,
 	   @intAOPId int = null,
-	   @strLocationName nvarchar(250)= null
+	   @strLocationName nvarchar(250)= null,
+	   @intCurrencyId int = null
 
 AS
 
@@ -42,9 +43,10 @@ DECLARE @GetStandardQty AS TABLE(
 BEGIN
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,intCompanyLocationId,dblOriginalBalanceQty)
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,intCompanyLocationId,dblOriginalBalanceQty)
 select CAST(ROW_NUMBER() OVER (ORDER BY strEntityName) AS INT) as intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblOriginalBalanceQty*dblPrice dblTotPurchased,intCompanyLocationId,dblOriginalBalanceQty
+							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,
+							dblPrice, intCompanyLocationId,dblOriginalBalanceQty
 from(
 SELECT intContractDetailId,
 		strName as strEntityName,
@@ -213,7 +215,7 @@ JOIN tblEMEntity e on e.intEntityId=
 						ELSE
 						CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 						CASE WHEN ISNULL(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId END END END
-WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+WHERE isnull(cd.dtmM2MDate,getdate()) BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
 and strName=case when isnull(@strEntityName,'') = '' then strName else @strEntityName end
 and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
 and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(cd.intSubBookId,0) else @intSubBookId end
@@ -221,30 +223,123 @@ and isnull(cl.strLocationName,'')= case when isnull(@strLocationName,'')='' then
 )t)t1
 END
 
+declare @ysnSubCurrency int
+select @ysnSubCurrency=ysnSubCurrency from tblSMCurrency where intCurrencyID=@intCurrencyId
 
 select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
 							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType from(
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
-							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
+							dblNoOfLots, dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,	dblPrice,
+							dblOriginalBalanceQty*dblPrice dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
 							dblStandardPrice,dblPPVBasis,dblNewPPVPrice,strLocationName,(dblBalanceQty*isnull(t.dblRatio,1))*isnull(dblStandardPrice,0) dblStandardValue,(dblStandardPrice-dblPrice)*dblOriginalBalanceQty dblPPV,
 (dblStandardPrice-dblNewPPVPrice)*dblOriginalBalanceQty dblPPVNew,strPricingType,strItemNo,strProductType
 FROM(
-select t.*, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
- (SELECT sum(dblCost) from tblCTAOP a
- join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
+select intRowNum,
+t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
+							t.dblNoOfLots,
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null)
+							end
+							dblFuturesPrice,
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblSettlementPrice,0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblSettlementPrice,0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblSettlementPrice,0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblSettlementPrice,0),null)
+							end
+							dblSettlementPrice,
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null)
+							end dblBasis,
+							t.dblRatio,
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)
+							end
+							dblPrice,t.intCompanyLocationId,dblOriginalBalanceQty
+, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
+
+case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull((SELECT sum(dblCost) from tblCTAOP a
+							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
 							and b.intItemId=cd.intItemId
 							and b.intCommodityId=ic.intCommodityId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							) dblStandardPrice
-							,isnull(cost.dblRate,t.dblBasis) dblPPVBasis, (isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0) as  dblNewPPVPrice,strLocationName
-							,strPricingType,strItemNo,ca.strDescription strProductType
+							),0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull((SELECT sum(dblCost) from tblCTAOP a
+							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
+							and b.intItemId=cd.intItemId
+							and b.intCommodityId=ic.intCommodityId
+							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
+							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
+							),0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull((SELECT sum(dblCost) from tblCTAOP a
+							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
+							and b.intItemId=cd.intItemId
+							and b.intCommodityId=ic.intCommodityId
+							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
+							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
+							),0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull((SELECT sum(dblCost) from tblCTAOP a
+							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
+							and b.intItemId=cd.intItemId
+							and b.intCommodityId=ic.intCommodityId
+							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
+							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
+							),0),null)
+							end	  dblStandardPrice
+							,case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cost.dblRate,t.dblBasis),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cost.dblRate,t.dblBasis),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cost.dblRate,t.dblBasis),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cost.dblRate,t.dblBasis),null)
+							end	dblPPVBasis,
+							
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,(isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0),null)*100
+							when ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,(isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0),null)*100/100
+							when ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,(isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0),null)*100 
+							else
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,(isnull(dblFuturesPrice,dblSettlementPrice)* isnull(t.dblRatio,1))+isnull(cost.dblRate,0),null)
+							end	  dblNewPPVPrice,
+							strLocationName	,strPricingType,strItemNo,ca.strDescription strProductType,intCurrencyId,ysnSubCurrency
+
  from @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
 join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
 join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICItem ic ON ic.intItemId = cd.intItemId
+join tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
 LEFT JOIN(select intContractDetailId,SUM(dblRate) dblRate FROM tblCTContractCost where ysnBasis=1 and intItemId not in(
 		 SELECT isnull(intItemId,0) from tblCTComponentMap where ysnExcludeFromPPV=1) Group by intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
 LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId

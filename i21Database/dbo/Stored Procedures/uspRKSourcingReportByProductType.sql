@@ -6,7 +6,8 @@
        @ysnVendorProducer bit = null,
 	   	   @intBookId int = null,
 	   @intSubBookId int = null,
-	   @intAOPId int = null
+	   @intAOPId int = null,
+	   @intCurrencyId int = null
 
 AS
 
@@ -69,7 +70,8 @@ EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate,
 	   @intBookId = @intBookId,
 	   @intSubBookId  = @intSubBookId,
 	   @intAOPId= @intAOPId,
-	   @strLocationName=''
+	   @strLocationName='',
+	   @intCurrencyId=@intCurrencyId
 
 
 select  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,1 as intConcurrencyId,* from(
@@ -77,4 +79,3 @@ SELECT strEntityName strName,strLocationName,strOrigin,strProductType,sum(dblBal
 (sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100 dblCompanySpend,sum(dblStandardQty) dblStandardQty
 FROM @GetStandardQty
 GROUP BY strEntityName,strEntityName,strLocationName,strOrigin,strProductType)t
-
