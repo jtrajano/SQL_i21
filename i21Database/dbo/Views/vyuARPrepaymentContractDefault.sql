@@ -16,6 +16,7 @@ SELECT
 	,[intCurrencyId]			= CustCon.[intCurrencyId]
 	,[strCurrency]				= CustCon.[strSubCurrency]
 	,[intCompanyLocationId]		= CustCon.[intCompanyLocationId]
+	,[strCompanyLocationName]	= DLOC.[strLocationName]
 	,[intItemId]				= CustCon.[intItemId]
 	,[strItemNo]				= CustCon.[strItemNo]
 	,[strItemDescription]		= CustCon.[strItemDescription]
@@ -67,6 +68,8 @@ SELECT
 FROM [vyuCTCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.[intEntityId]
 LEFT OUTER JOIN tblSMTerm SMT ON CustCon.[intTermId] = SMT.[intTermID]
+left join (select intCompanyLocationId, strLocationName from tblSMCompanyLocation)
+	DLOC on CustCon.intCompanyLocationId = DLOC.intCompanyLocationId
 WHERE CustCon.intCurrencyId = (SELECT TOP 1 ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID) [intCurrencyID]
 								FROM tblCTContractDetail CTD 
 									INNER JOIN tblSMCurrency SMC
