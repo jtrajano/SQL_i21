@@ -416,7 +416,7 @@ BEGIN TRY
 				--Add Audit Trail Record
 				SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intEntityId) + '","keyValue":' + CONVERT(VARCHAR, @intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
 
-				SELECT @dtmDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated)
+				SELECT @dtmDate = DATEADD(ss, DATEDIFF(ss, GETDATE(), GETUTCDATE()), dtmCreated)
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
