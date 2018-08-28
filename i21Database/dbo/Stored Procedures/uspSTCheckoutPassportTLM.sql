@@ -10,6 +10,11 @@ BEGIN
        
 	   BEGIN TRY
               
+			  DECLARE @intStoreId int
+              SELECT @intStoreId = intStoreId
+              FROM dbo.tblSTCheckoutHeader
+              WHERE intCheckoutId = @intCheckoutId
+
 			  -------------------------------------------------------------------------------------------- 
 			  -- Create Save Point. 
 			  --------------------------------------------------------------------------------------------   
@@ -29,6 +34,48 @@ BEGIN
 			  -- END Create Save Point. 
 			  --------------------------------------------------------------------------------------------
 
+
+
+			  -- ================================================================================================================== 
+				-- Get Error logs. Check Register XML that is not configured in i21
+				-- Compare <TaxLevelID> tag of (RegisterXML) and (Common Info --> Tax COdes --> Store Tax No.) and (Store --> Tax Totals --> Tax COde)
+				-- ------------------------------------------------------------------------------------------------------------------ 
+				INSERT INTO tblSTCheckoutErrorLogs 
+				(
+					strErrorMessage 
+					, strRegisterTag
+					, strRegisterTagValue
+					, intCheckoutId
+					, intConcurrencyId
+				)
+				SELECT DISTINCT
+					'Missing Tax Level ID' as strErrorMessage
+					, 'TaxLevelID' as strRegisterTag
+					, ISNULL(Chk.TaxLevelID, '') AS strRegisterTagValue
+					, @intCheckoutId
+					, 1
+				FROM #tempCheckoutInsert Chk
+				WHERE ISNULL(Chk.TaxLevelID, '') NOT IN
+				(
+					SELECT DISTINCT 
+						tbl.strXmlRegisterTaxLevelID
+					FROM
+					(
+						SELECT DISTINCT
+							Chk.TaxLevelID AS strXmlRegisterTaxLevelID
+						FROM #tempCheckoutInsert Chk
+						JOIN tblSTCheckoutSalesTaxTotals STT
+							ON ISNULL(Chk.TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+						WHERE STT.intCheckoutId = @intCheckoutId 
+					) AS tbl
+				)
+				-- ------------------------------------------------------------------------------------------------------------------  
+				-- END Get Error logs. Check Register XML that is not configured in i21.  
+				-- ==================================================================================================================
+
+
+
+
 			 -- -- OLD
 			 -- UPDATE  dbo.tblSTCheckoutSalesTaxTotals 
 			 -- SET dblTotalTax = chk.TaxCollectedAmount,
@@ -37,12 +84,9 @@ BEGIN
 			 -- FROM #tempCheckoutInsert chk
 			 -- WHERE intCheckoutId = @intCheckoutId AND chk.TaxCollectedAmount <> 0 AND intTaxNo = 1
 
-			  DECLARE @intStoreId int
-              SELECT @intStoreId = intStoreId
-              FROM dbo.tblSTCheckoutHeader
-              WHERE intCheckoutId = @intCheckoutId
+			  
 
-			  ---- Most probably this is not nessesary because sales tax totals is already preloaded
+			  ---- Most probably this is not neccesary because sales tax totals is already preloaded
               IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
               BEGIN
                            DECLARE @tbl TABLE
