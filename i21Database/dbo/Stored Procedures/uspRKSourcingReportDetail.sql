@@ -18,6 +18,9 @@ set @strEntityName = NULL
  if @strLocationName = '-1'
 set @strLocationName = NULL
 
+declare @strCurrency nvarchar(100)
+select @strCurrency=strCurrency from tblSMCurrency where intCurrencyID=@intCurrencyId
+
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
 		intContractDetailId int,
@@ -228,7 +231,9 @@ select @ysnSubCurrency=ysnSubCurrency from tblSMCurrency where intCurrencyID=@in
 
 select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType from(
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType
+							,@strCurrency strCurrency 
+FROM(
 SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots, dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,	dblPrice,
 							dblOriginalBalanceQty*dblPrice dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
