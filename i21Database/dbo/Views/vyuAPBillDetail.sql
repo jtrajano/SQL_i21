@@ -12,6 +12,7 @@ SELECT
 		 WHEN 7 THEN 'Invalid Type'
 		 WHEN 9 THEN '1099 Adjustment'
 		 WHEN 11 THEN 'Claim'
+		 WHEN 12 THEN 'Prepayment Reversal'
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 ELSE 'Invalid Type'
