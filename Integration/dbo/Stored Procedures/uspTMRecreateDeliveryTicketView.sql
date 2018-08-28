@@ -168,6 +168,7 @@ BEGIN
 																	,0
 																	,NULL
 																	,1
+																	,0
 																	,NULL --intItemUOMId
 																	,NULL
 																	,NULL

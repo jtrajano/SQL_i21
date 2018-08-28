@@ -18,6 +18,7 @@
 	,@FreightTermId				INT
 	,@CFSiteId					INT
 	,@IsDeliver					BIT
+	,@IsCFQuote					BIT
 )
 RETURNS @returntable TABLE
 (
@@ -45,7 +46,7 @@ BEGIN
 		,@TaxExempt			= TED.[ysnTaxExempt] 
 		,@InvalidSetup		= TED.[ysnInvalidSetup]  
 	FROM
-		[dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, @TaxGroupId, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver) TED
+		[dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, @TaxGroupId, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote) TED
 	
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
