@@ -41,7 +41,7 @@ RETURNS TABLE AS RETURN
 		,[dblTax]							=	B.dblTax
 		,[dblDiscount]						=	B.dblDiscount
 		,[intCurrencyExchangeRateTypeId]	=	B.intForexRateTypeId
-		,[dblExchangeRate]					=	B.dblForexRate
+		,[dblExchangeRate]					=	ISNULL(B.dblForexRate, 1)
 		,[ysnSubCurrency]					=	B.ysnSubCurrency
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents
 		,[intAccountId]						=	CASE WHEN B.intItemId IS NULL THEN B.intAccountId
