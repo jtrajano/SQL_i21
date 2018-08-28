@@ -35,6 +35,7 @@ WHERE
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
 	AND (ISNULL(A.dblAmountPaid, 0) > 0 OR (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('ACH','Prepay'))) OR SMPM.strPaymentMethod = 'Refund'
+	OR A.strNotes = 'POS Return'
 	
 UNION ALL	
 	

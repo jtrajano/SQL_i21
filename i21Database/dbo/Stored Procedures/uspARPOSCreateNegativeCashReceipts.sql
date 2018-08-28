@@ -20,6 +20,7 @@ BEGIN
 			,@intCurrencyId			INT
 
 			,@intAccountId			INT
+			,@intBankAccountId		INT
 			,@strInvoiceNumber		NVARCHAR(50)
 			,@ysnPosted				BIT
 			,@strTransactionType	NVARCHAR(50)
@@ -32,23 +33,73 @@ BEGIN
 			,@dblInvoiceTotal		NUMERIC(18,6)
 			
 
---select credit memo created & set values to variables
-	SELECT TOP 1
-		 @intAccountId				= intAccountId
-		,@intEntityCustomerId		= intEntityCustomerId
-		,@intCurrencyId				= intCurrencyId
-		,@strInvoiceNumber			= strTransactionNumber
-		,@strTransactionType		= strTransactionType
-		,@dblAmountPaid				= dblInvoiceTotal
-		,@dblDiscount				= dblDiscount
-		,@dblBaseDiscount			= dblBaseDiscount
-		,@dblDiscountAvailable		= dblDiscountAvailable
-		,@dblBaseDiscountAvailable	= dblBaseDiscountAvailable
-		,@ysnPosted					= ysnPosted
-		,@intTermId					= intTermId
-		,@dblInvoiceTotal			= dblInvoiceTotal
-	FROM vyuARInvoicesForPaymentIntegration
-	WHERE intInvoiceId = @intInvoiceId
+			INSERT INTO @EntriesForPayment (
+				 intId
+				,strSourceTransaction
+				,intSourceId
+				,strSourceId
+				,intEntityCustomerId
+				,intCompanyLocationId
+				,intCurrencyId
+				,dtmDatePaid
+				,intPaymentMethodId
+				,strPaymentMethod
+				,dblAmountPaid
+				,intEntityId
+				,intInvoiceId
+				,strTransactionType
+				,strTransactionNumber
+				,intTermId
+				,intInvoiceAccountId
+				,dblInvoiceTotal
+				,dblBaseInvoiceTotal
+				,dblPayment
+				,strInvoiceReportNumber
+				,intCurrencyExchangeRateTypeId
+				,intCurrencyExchangeRateId
+				,dblCurrencyExchangeRate
+				,ysnPost
+				,intBankAccountId
+				,strNotes
+			)
+			SELECT intId						= IFP.intInvoiceId
+			    ,strSourceTransaction			= 'Direct'
+				,intSourceId					= IFP.intInvoiceId
+				,strSourceId					= IFP.strInvoiceNumber
+				,intEntityCustomerId			= IFP.intEntityCustomerId
+				,intCompanyLocationId			= IFP.intCompanyLocationId
+				,intCurrencyId					= IFP.intCurrencyId
+				,dtmDatePaid					= GETDATE()
+				,intPaymentMethodId				= 10
+				,strPaymentMethod				= 'Cash'
+				,dblAmountPaid					= IFP.dblInvoiceTotal * -1
+				,intEntityId					= @intUserId
+				,intInvoiceId					= IFP.intInvoiceId
+				,strTransactionType				= IFP.strTransactionType
+				,strTransactionNumber			= IFP.strInvoiceNumber
+				,intTermId						= IFP.intTermId
+				,intInvoiceAccountId			= IFP.intAccountId
+				,dblInvoiceTotal				= IFP.dblInvoiceTotal * -1
+				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * -1
+				,dblPayment						= IFP.dblInvoiceTotal * -1
+				,strInvoiceReportNumber			= IFP.strInvoiceNumber
+				,intCurrencyExchangeRateTypeId	= IFP.intCurrencyExchangeRateTypeId
+				,intCurrencyExchangeRateId		= IFP.intCurrencyExchangeRateId
+				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
+				,1
+				,intBankAccountId				= BA.intBankAccountId
+				,strNotes						= @strNotes
+			FROM vyuARInvoicesForPaymentIntegration IFP
+			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			WHERE IFP.intInvoiceId = @intInvoiceId
+
+			SELECT
+				@strTransactionType = strTransactionType
+				,@ysnPosted			= ysnPost
+				,@intAccountId		= intInvoiceAccountId
+				,@intBankAccountId	= intBankAccountId
+			FROM @EntriesForPayment
 
 --VALIDATIONS
 IF ISNULL(@intUserId, 0) = 0
@@ -80,66 +131,18 @@ IF ISNULL(@intAccountId, 0) = 0
 	END
 END
 
-INSERT INTO @EntriesForPayment
-(
-	 intId
-	,strReceivePaymentType
-	,strSourceId
-	,strSourceTransaction
-	,intEntityCustomerId
-	,intCompanyLocationId
-	,intCurrencyId
-	,dtmDatePaid
-	,intPaymentMethodId
-	,strPaymentMethod
-	,dblAmountPaid
-	,strNotes
-	,intAccountId
-	,ysnPost
-	,dblDiscount
-	,dblBaseDiscount
-	,dblDiscountAvailable
-	,dblBaseDiscountAvailable
-	,intInvoiceId
-	,intEntityId
 
-	,intTermId
-	,dblInvoiceTotal
-	,dblBaseInvoiceTotal
-	,dblPayment
-)
-VALUES
-(
-	@intInvoiceId				--intId
-	,@strReceivePaymentType		--strReceivePaymentType
-	,@strInvoiceNumber			--strSourceId
-	,'Invoice'					--strSourceTransaction
-	,@intEntityCustomerId		--intEntityCustomerId
-	,@intCompanyLocationId		--intCompanyLocationId
-	,@intCurrencyId				--intCurrencyId
-	,GETDATE()					--dtmDatePaid
-	,@intPaymentMethodId		--intPaymentMethodId
-	,'Cash'						--strPaymentMethod
-	,@dblAmountPaid * -1		--dblAmountPaid
-	,@strNotes					--strNotes
-	,@intAccountId				--intAccountId
-	,1							--ysnPost
-	,@dblDiscount				--dblDiscount
-	,@dblBaseDiscount			--dblBaseDiscount
-	,@dblDiscountAvailable		--dblDiscountAvailable
-	,@dblBaseDiscountAvailable	--dblBaseDiscountAvailable
-	,@intInvoiceId				--intInvoiceId
-	,@intUserId					--intEntityId
-	,@intTermId					--intTermId
-	,@dblInvoiceTotal			--dblInvoiceTotal
-	,@dblInvoiceTotal			--dblBaseInvoiceTotal
-	,@dblAmountPaid * -1		--dblAmountId
-)
-DECLARE @COUNT INT
-SELECT COUNT(*) 
 IF((SELECT TOP 1 1 FROM @EntriesForPayment) = 1)
 BEGIN
-	EXEC uspARProcessPayments @PaymentEntries = @EntriesForPayment, @UserId = @intUserId,@GroupingOption =11, @RaiseError = 1, @ErrorMessage = @strErrorMessage OUT
+	EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
+											, @UserId			= 1
+											, @GroupingOption	= 5
+											, @RaiseError		= 1
+											, @ErrorMessage		= @strErrorMessage OUTPUT
+
+	--Refresh tblCMUndepositedFunds
+	--Insert negative cash receipt to tblCMUndepositedFund
+	EXEC uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId = @intBankAccountId, @intUserId = @intUserId
 END
 ELSE
 BEGIN
