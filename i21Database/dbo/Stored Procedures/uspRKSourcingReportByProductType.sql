@@ -11,18 +11,6 @@
 
 AS
 
-DECLARE @QtyByVendor AS TABLE(
-		intRowNum int,	
-		strName nvarchar(max),	
-		strOrigin nvarchar(max),	
-		strProductType nvarchar(max),	
-		dblQty numeric(24,10),
-		dblTotPurchased numeric(24,10),
-		intConcurrencyId int,
-		dblCompanySpend numeric(24,10),
-		intCompanyLocationId int	 					
-		)
-
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
 		intContractDetailId int,
@@ -52,12 +40,13 @@ DECLARE @GetStandardQty AS TABLE(
 		dblPPVNew numeric(24,10),
 		strLocationName nvarchar(100),
 		strPricingType  nvarchar(100),
-		strItemNo  nvarchar(100)
+		strItemNo  nvarchar(100),
+		strCurrency nvarchar(100)
 		)
 
 INSERT INTO @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,dblNoOfLots,dblFuturesPrice,
 							dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType,	dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo)
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strCurrency)
 
 EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate,
        @dtmToDate = @dtmToDate,
