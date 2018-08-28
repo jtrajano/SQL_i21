@@ -7122,6 +7122,7 @@
     <Build Include="dbo\Views\vyuHDTimeEntryTimeOffNotification.sql" />
     <Build Include="dbo\Views\vyuHDProjectTicketJIra.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3992.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI4004.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
