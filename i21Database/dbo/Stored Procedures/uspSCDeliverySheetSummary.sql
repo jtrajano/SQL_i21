@@ -37,7 +37,8 @@ DECLARE @intEntityId INT
 		,@currencyDecimal INT
 		,@intDeliverySheetSplitId INT
 		,@ysnPost BIT
-		,@curDate DATE;
+		,@curDate DATE
+		,@splitCounter INT;
 
 IF OBJECT_ID (N'tempdb.dbo.#tblSCDeliverySheetSummary') IS NOT NULL
    DROP TABLE #temp
@@ -94,11 +95,13 @@ WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 IF @remainingUnits = 0
 	SET @remainingUnits = @ticketTotalUnitQty;
 
+SELECT @splitCounter = COUNT(intEntityId) FROM tblSCDeliverySheetSplit where intDeliverySheetId = @intDeliverySheetId
+
 --FOR ticket splits
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 
-SELECT SCDS.intEntityId,EM.strName,SCDS.dblSplitPercent,SCDS.intStorageScheduleTypeId,SCD.dblNet, SCD.intItemId, SCD.ysnPost, SCDS.intDeliverySheetSplitId
+SELECT SCDS.intEntityId, EM.strName, SCDS.dblSplitPercent, SCDS.intStorageScheduleTypeId, SCD.dblNet, SCD.intItemId, SCD.ysnPost, SCDS.intDeliverySheetSplitId
 FROM tblSCDeliverySheet SCD
 LEFT JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
 LEFT JOIN tblEMEntity EM ON EM.intEntityId = SCDS.intEntityId
@@ -119,7 +122,7 @@ BEGIN
 		IF @NetUnits = 0
 			SET @NetUnits = @ticketTotalUnitQty;
 		SET @tmpUnits = ROUND((@NetUnits * @SplitAverage) / 100, @currencyDecimal);
-		IF @remainingUnits < @tmpUnits
+		IF @remainingUnits > @tmpUnits AND @splitCounter = @counter
 			SET @tmpUnits = @remainingUnits;
 
 		--For priced contract
