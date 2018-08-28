@@ -17,7 +17,7 @@ AS
 						THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
 						ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 				END						AS bkdelu,
-				TM.strTermCode			AS bkterm,
+				LEFT(ISNULL(TM.strTermCode,''),2) AS bkterm,
 			
 				null					AS bkdelt,
 				'N'						AS chrTaxable,
