@@ -125,6 +125,8 @@ Declare @tblData AS table
 	strCustomer nvarchar(200),
 	intAttributeTypeId int Default 0,
 	intImageTypeId int Default 0
+	,strText NVARCHAR(MAX)
+	,dblWOQty NUMERIC(18, 6)
 )
 
 Declare @tblNodeData AS table
@@ -158,7 +160,7 @@ Declare @tblLinkData AS table
 	intToRecordId int,
 	strTransactionName nvarchar(50)
 )
-
+DECLARE @tblMFExlude AS TABLE (intId INT)
 --Forward
 DIR_FORWARD:
 If @intDirectionId=1
@@ -334,7 +336,8 @@ Begin
 				-- From Lot to WorkOrders
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId				,strText
+					,dblWOQty)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
 				-- WorkOrder Input details
@@ -342,6 +345,34 @@ Begin
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId,@ysnParentLot
+
+				IF @strType = 'L'
+				Begin
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,intParentLotId
+						,strType
+						,intImageTypeId
+						,strText
+						)
+					EXEC uspMFGetTraceabilityLotMergeDetail @intId
+						,@intDirectionId
+						,@ysnParentLot
+
+					INSERT INTO @tblMFExlude SELECT intLotId from @tblData WHERE strTransactionName = 'Merge' 
+
+				End
 			
 				-- Lot Split
 				If @strType='L'
@@ -356,7 +387,10 @@ Begin
 					Exec uspMFGetTraceabilityLotReceiptDetail @intId,@ysnParentLot
 
 
-				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL        
+				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL   
+				
+				INSERT INTO @tblMFExlude
+			SELECT @intId     
 
 			FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType      
 			END
@@ -378,6 +412,13 @@ Begin
 		From @tblTemp
 
 		DELETE FROM @tblData
+
+		DELETE
+		FROM @tblTemp
+		WHERE intLotId IN (
+				SELECT intId
+				FROM @tblMFExlude
+				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblTemp     
 
