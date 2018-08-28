@@ -157,6 +157,40 @@ WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
+UNION ALL --PREPAYMENT REVERSAL
+SELECT
+	A.dtmDate	
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblTotal
+	, CAST(A.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountDue
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0
+	, dblPrepaidAmount = 0   
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, EC.strClass
+	, 2
+FROM dbo.tblAPBill A
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
+OUTER APPLY (
+	SELECT TOP 1
+		bd.dblRate
+	FROM tblAPBillDetail bd
+	WHERE bd.intBillId = A.intBillId
+) prepaidDetail	
+WHERE A.intTransactionType IN (12) AND A.ysnPosted = 1
+AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
+)
 UNION ALL
 --OFFSET VENDOR PREPAYMENT TRANSACTION
 SELECT 
