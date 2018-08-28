@@ -660,6 +660,7 @@ BEGIN
 
 	---------------------DEFAULTS---------------------
 	SET @dtmImportDate = Convert(varchar(30),@strImportDate,102)
+	DECLARE @intNetworkCardType  NVARCHAR(MAX)
 	
 	---------------------DEFAULTS---------------------
 
@@ -668,7 +669,6 @@ BEGIN
 		
 		BEGIN TRY 
 		BEGIN TRANSACTION
-			DECLARE @intNetworkCardType  NVARCHAR(MAX)
 			DECLARE @intAddCardIdentity INT
 
 			SELECT TOP 1 @intNetworkCardType = intCardTypeId FROM tblCFCardType WHERE intNetworkId = @intNetworkId AND strCSUCardType = @strCardType
@@ -859,6 +859,8 @@ BEGIN
 		BEGIN TRY 
 		BEGIN TRANSACTION
 
+			SELECT TOP 1 @intNetworkCardType = intCardTypeId FROM tblCFCardType WHERE intNetworkId = @intNetworkId AND strCSUCardType = @strCardType
+
 			INSERT INTO tblCFTempCSUCard
 			(
 				 intCardId
@@ -961,6 +963,7 @@ BEGIN
 			,intCardLimitedCode			   = @strLimitCode
 			,intProductAuthId			   = @intProductAuthCode
 			,strCardPinNumber			   = @strPINNumber
+			,intCardTypeId				   = @intNetworkCardType
 			WHERE strCardNumber = @strCardNumber
 
 			UPDATE tblCFCard SET 
@@ -972,6 +975,7 @@ BEGIN
 			,intCardLimitedCode			   = @strLimitCode
 			,intProductAuthId			   = @intProductAuthCode
 			,strCardPinNumber			   = @strPINNumber
+			,intCardTypeId				   = @intNetworkCardType
 			WHERE strCardNumber = @strCardNumber
 
 			INSERT INTO tblCFCSUAuditLog
