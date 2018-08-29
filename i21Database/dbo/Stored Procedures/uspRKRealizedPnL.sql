@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKRealizedPnL  
+﻿CREATE PROC [dbo].[uspRKRealizedPnL]  
 	 @dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@intCommodityId INT = NULL
@@ -11,8 +11,9 @@
 	,@intBookId int=NULL
 	,@intSubBookId int=NULL
 AS  
+
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
 
 SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
 dblGrossPL - dblFutCommission  AS dblNetPL,dblGrossPL,

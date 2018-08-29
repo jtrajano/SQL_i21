@@ -13,7 +13,7 @@
 AS  
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
  
 SELECT CONVERT(INT,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
 intFutOptTransactionId ,GrossPnL ,dblLong ,dblShort ,dblFutCommission ,strFutMarketName ,strFutureMonth ,dtmTradeDate ,strInternalTradeNo ,strName ,strAccountNumber 

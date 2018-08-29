@@ -12,7 +12,7 @@
 AS
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
 
 DECLARE @UnRelaized AS TABLE (
 	intFutOptTransactionId INT,
@@ -229,8 +229,8 @@ DECLARE @Summary AS TABLE (
 			isnull(SUM(dblPrice), 0) AS dblPrice,
 			isnull((
 					SELECT SUM(dblGrossPL)
-					FROM vyuRKRealizedPnL r
-					WHERE t.intFutureMarketId = r.intFutureMarketId AND t.intFutureMonthId = r.intFutureMonthId
+					FROM @Relaized r
+					WHERE t.intFutureMarketId = r.intFutureMarketId AND t.intFutureMonthId = r.intFutureMonthId 					
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
 			strName,
@@ -348,5 +348,3 @@ DECLARE @Summary AS TABLE (
 		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
 		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName
 		END
-
-	
