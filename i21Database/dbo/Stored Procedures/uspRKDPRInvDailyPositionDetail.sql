@@ -231,7 +231,7 @@ FROM (
 		,dtmEndDate
 		--,isnull(dblQtyUnpriced,dblQuantity) + ISNULL(dblQtyPriced - (dblQuantity - dblBalance),0) dblBalance
 		,case when strPricingStatus='Parially Priced' then dblQuantity - ISNULL(dblQtyPriced + (dblQuantity - dblBalance),0) 
-				else isnull(dblQtyUnpriced,dblQuantity) end dblBalance 		
+				else case when dblBalance <> dblQuantity and intContractTypeId = 2 then dblBalance else isnull(dblQtyUnpriced,dblQuantity) end end dblBalance         		
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
 		,intPricingTypeId
@@ -530,7 +530,7 @@ FROM(
 				SUM(it.dblQty) dblShipmentQty,
 				ISNULL((SELECT  SUM(ad.dblQtyShipped) FROM tblARInvoice ia
 				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
-				WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1 and ysnPaid = 1),0)  as dblInvoiceQty,
+				WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1),0)  as dblInvoiceQty,
 				b.intShipFromLocationId intCompanyLocationId,
 				l.strLocationName strLocationName,
 				d.intContractDetailId,

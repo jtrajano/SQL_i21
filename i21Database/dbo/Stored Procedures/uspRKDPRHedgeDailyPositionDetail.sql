@@ -233,7 +233,7 @@ FROM (
 		,dtmEndDate
 		--,isnull(dblQtyUnpriced,dblQuantity) + ISNULL(dblQtyPriced - (dblQuantity - dblBalance),0) dblBalance
 		,case when strPricingStatus='Parially Priced' then dblQuantity - ISNULL(dblQtyPriced + (dblQuantity - dblBalance),0) 
-				else case when dblBalance = 0 and intContractTypeId = 2 then dblBalance else isnull(dblQtyUnpriced,dblQuantity) end end dblBalance         
+				else case when dblBalance <> dblQuantity and intContractTypeId = 2 then dblBalance else isnull(dblQtyUnpriced,dblQuantity) end end dblBalance         
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
 		,intPricingTypeId
