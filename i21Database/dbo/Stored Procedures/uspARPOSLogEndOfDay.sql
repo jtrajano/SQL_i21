@@ -119,7 +119,10 @@ AS
 					, [dtmDate]
 					, [dblAmount]
 					, [strMemo]			
-					, [intCompanyLocationId]
+					, [intCompanyLocationId] 
+					, [intEntityId]
+					, [intCreatedUserId]
+					, [intLastModifiedUserId]
 				)
 				SELECT 
 					[intBankAccountId]				= @intBankAccountId
@@ -129,7 +132,10 @@ AS
 					,[dtmDate]						= @dtmDateNow
 					,[dblAmount]					= @dblCashOverShort
 					,[strMemo]						= 'POS Bank Deposit - End of Day'
-					,[intCompanyLocationId]			= @intCompanyLocationId
+					,[intCompanyLocationId]			= @intCompanyLocationId 
+					,[intEntityId]					= @intEntityId
+					,[intCreatedUserId]				= @intEntityId
+					,[intLastModifiedUserId]		= @intEntityId
 
 				INSERT INTO @BankTransactionDetail(
 					  [intTransactionId]
