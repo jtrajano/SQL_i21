@@ -235,7 +235,8 @@ SELECT
     [int1099Form]                       = 0,
     [int1099Category]                   = 0,
     [strBillOfLading]                   = basisAdvance.strBillOfLading,
-    [ysnRestricted]                     = 1
+    [ysnRestricted]                     = 1,
+	[intLocationId]				=		receipt.intLocationId	
 INTO #tmpBillDetailData
 FROM #tmpVoucherCreated voucherCreated
 INNER JOIN vyuAPBasisAdvance basisAdvance 
@@ -289,7 +290,8 @@ WHEN NOT MATCHED THEN
         ,[int1099Form]                      
         ,[int1099Category]                  
         ,[strBillOfLading]       
-        ,[ysnRestricted]             
+        ,[ysnRestricted]
+		,[intLocationId]             
     )
     VALUES
     (
@@ -329,7 +331,8 @@ WHEN NOT MATCHED THEN
         ,[int1099Form]                      
         ,[int1099Category]                  
         ,[strBillOfLading]      
-        ,[ysnRestricted]  
+        ,[ysnRestricted] 
+		,[intLocationId] 
     );
 
 INSERT INTO @voucherIds
