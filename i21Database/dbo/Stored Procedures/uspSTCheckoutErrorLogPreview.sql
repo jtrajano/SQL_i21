@@ -9,7 +9,7 @@ BEGIN
 			, strRegisterTagValue
 	FROM tblSTCheckoutErrorLogs
 	WHERE intCheckoutId = @intCheckoutId
-	ORDER BY strErrorMessage ASC
+	ORDER BY strRegisterTag, strRegisterTagValue ASC
 
 	-- Delete Logs
 	DELETE FROM tblSTCheckoutErrorLogs

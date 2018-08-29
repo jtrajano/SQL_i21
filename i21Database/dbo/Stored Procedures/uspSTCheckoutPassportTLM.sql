@@ -66,7 +66,8 @@ BEGIN
 						FROM #tempCheckoutInsert Chk
 						JOIN tblSTCheckoutSalesTaxTotals STT
 							ON ISNULL(Chk.TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-						WHERE STT.intCheckoutId = @intCheckoutId 
+						WHERE STT.intCheckoutId = @intCheckoutId
+						AND ISNULL(Chk.TaxLevelID, '') != ''
 					) AS tbl
 				)
 				-- ------------------------------------------------------------------------------------------------------------------  

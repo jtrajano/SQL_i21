@@ -64,6 +64,7 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.MerchandiseCode, '') != ''
 			) AS tbl
 		)
 		-- ------------------------------------------------------------------------------------------------------------------  

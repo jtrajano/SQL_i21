@@ -74,6 +74,7 @@ BEGIN
 						AND chk.MiscellaneousSummaryCode = 'sales' 
 						AND chk.MiscellaneousSummarySubCode = 'MOP'
 						AND intCheckoutId = @intCheckoutId
+						AND ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') != ''
 					) AS tbl
 				)
 				-- ------------------------------------------------------------------------------------------------------------------  

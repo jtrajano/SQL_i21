@@ -51,8 +51,8 @@ BEGIN
 				SELECT DISTINCT
 					Chk.POSCode AS strXmlRegisterPOSCode
 				FROM #tempCheckoutInsert Chk
-				JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
-							   OR Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, ''))
+				JOIN dbo.tblICItemUOM UOM 
+					ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, ''))
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -65,6 +65,7 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.POSCode, '') != ''
 			) AS tbl
 		)
 		-- ------------------------------------------------------------------------------------------------------------------  
