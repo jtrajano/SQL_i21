@@ -160,7 +160,7 @@ Declare @tblLinkData AS table
 	intToRecordId int,
 	strTransactionName nvarchar(50)
 )
-DECLARE @tblMFExlude AS TABLE (intId INT)
+DECLARE @tblMFExlude AS TABLE (intId INT,strName nvarchar(MAX))
 --Forward
 DIR_FORWARD:
 If @intDirectionId=1
@@ -323,10 +323,10 @@ Begin
 	WHILE (@intRowCount > 0)
 	BEGIN    
 		DECLARE @RCUR CURSOR       
-		SET @RCUR = CURSOR FOR SELECT DISTINCT intLotId,intRecordId,strType FROM @tblTemp      
+		SET @RCUR = CURSOR FOR SELECT DISTINCT intLotId,intRecordId,strType,strLotNumber FROM @tblTemp      
 
 		OPEN @RCUR      
-		FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType
+		FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType,@strLotNumber
 			WHILE @@FETCH_STATUS = 0      
 			BEGIN     
 
@@ -370,8 +370,9 @@ Begin
 					EXEC uspMFGetTraceabilityLotMergeDetail @intId
 						,@intDirectionId
 						,@ysnParentLot
+						,1
 
-					INSERT INTO @tblMFExlude SELECT intLotId from @tblData WHERE strTransactionName = 'Merge' 
+					INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strTransactionName = 'Merge' 
 
 				End
 			
@@ -391,9 +392,9 @@ Begin
 				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL   
 				
 				INSERT INTO @tblMFExlude
-			SELECT @intId     
+			SELECT @intId,@strLotNumber     
 
-			FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType      
+			FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType,@strLotNumber      
 			END
 
 		DELETE FROM @tblTemp      
@@ -416,9 +417,9 @@ Begin
 
 		DELETE
 		FROM @tblTemp
-		WHERE intLotId IN (
-				SELECT intId
-				FROM @tblMFExlude
+		WHERE Exists (
+				SELECT *
+				FROM @tblMFExlude Where intId=intLotId and strName=strLotNumber
 				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblTemp     
