@@ -115,6 +115,11 @@ BEGIN
 				where intEntityId = @intEntityId 
 					and intEntityContactId = @intEntityContactId
 
+		update [tblEMEntityToContact] set 
+			intEntityRoleId = @intUserRoleId
+				where intEntityContactId = @intEntityContactId
+					and intEntityRoleId is null
+
 		set @message =  ''
 	end
 
