@@ -698,14 +698,15 @@ DECLARE @strDescription NVARCHAR(200)
 declare @intOneCommodityId int
 declare @intCommodityUnitMeasureId int
 DECLARE @intUnitMeasureId int
+DECLARE @ysnExchangeTraded bit
 DECLARE @strUnitMeasure NVARCHAR(200)
 SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
 WHILE @mRowNumber >0
 BEGIN
 	SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
-	SELECT @strDescription = strCommodityCode FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
+	SELECT @strDescription = strCommodityCode, @ysnExchangeTraded = ysnExchangeTraded FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
 	SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
-IF  @intCommodityId >0
+IF  @intCommodityId >0 
 BEGIN
 	
 if isnull(@intVendorId,0) = 0
@@ -755,6 +756,7 @@ BEGIN
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
+									AND @ysnExchangeTraded = 1
 									)		
 		) t	
 		
@@ -799,13 +801,14 @@ BEGIN
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
+									AND @ysnExchangeTraded = 1
 									)
 -- Net Hedge option end
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
 	SELECT DISTINCT @strCommodityCode,'Price Risk' [strType],'Inventory' strContractType,sum(dblTotal) dblTotal,intItemId,strItemNo,
 					intFromCommodityUnitMeasureId,intCommodityId,strLocationName  
-			FROM @invQty where intCommodityId=@intCommodityId 
+			FROM @invQty where intCommodityId=@intCommodityId  AND @ysnExchangeTraded = 1
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
 		
 	--Net Hedge Derivative Entry (Futures and Options)
@@ -813,7 +816,7 @@ BEGIN
     SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
     FROM @tempFinal
     WHERE intCommodityId=@intCommodityId 
-        AND strType = 'Net Hedge'
+        AND strType = 'Net Hedge' AND @ysnExchangeTraded = 1
 				 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intInventoryReceiptId,strReceiptNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT @strCommodityCode,'Price Risk' [strType],'PurBasisDelivary' strContractType,-sum(dblTotal),intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
@@ -834,7 +837,8 @@ BEGIN
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
-						ELSE isnull(ysnLicensed, 0) END)
+						ELSE isnull(ysnLicensed, 0) END
+						AND @ysnExchangeTraded = 1)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
 	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
@@ -850,7 +854,8 @@ BEGIN
 				WHERE  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
-						ELSE isnull(ysnLicensed, 0) END)
+						ELSE isnull(ysnLicensed, 0) END
+						AND @ysnExchangeTraded = 1)
 				 group by strCommodityCode,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intContractTypeId,strCurrency	
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
@@ -881,7 +886,8 @@ BEGIN
 									)
 		  WHERE cd.intCommodityId = @intCommodityId AND 
 		  cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then   cd.intCompanyLocationId else @intLocationId end  
-		  		and convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)<=convert(datetime,@dtmToDate))t
+		  		and convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+				AND @ysnExchangeTraded = 1)t
 		group by strCommodityCode,strShipmentNumber,intInventoryShipmentId,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency
 				
 	If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1)
@@ -899,6 +905,7 @@ BEGIN
 								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
+								AND @ysnExchangeTraded = 1
 				) group by intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 	
 	END
@@ -918,7 +925,8 @@ BEGIN
 				 )t WHERE intCompanyLocationId IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation
 								WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-												WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+												WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE isnull(ysnLicensed, 0) END 
+												AND @ysnExchangeTraded = 1
 				) group by intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 
 	END			
@@ -927,7 +935,7 @@ BEGIN
 	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
 	SELECT strCommodityCode,'Basis Risk' strType, strContractType,sum(dblTotal),intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
-	FROM @tempFinal where strType='Price Risk' and strContractType in('Inventory','Collateral','DP','SlsBasisDelivary','OffSite')
+	FROM @tempFinal where strType='Price Risk' and strContractType in('Inventory','Collateral','DP','SlsBasisDelivary','OffSite') AND @ysnExchangeTraded = 1
 		group by strCommodityCode,strContractType,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 	
 	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency)
@@ -1020,11 +1028,11 @@ BEGIN
 	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency	)
 	select @strDescription,'NR Un-Paid Quantity' strType,dblQtyReceived,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
 	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency	
-	 from @tempFinal where strType= 'Net Receivable  ($)' and intCommodityId=@intCommodityId
+	 from @tempFinal where strType= 'Net Receivable  ($)' and intCommodityId=@intCommodityId 
 
 	 INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	 SELECT strCommodityCode,'Avail for Spot Sale' strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency 
-	 from @tempFinal  where strType='Basis Risk' and intCommodityId=@intCommodityId
+	 from @tempFinal  where strType='Basis Risk' and intCommodityId=@intCommodityId AND @ysnExchangeTraded = 1
 
 	 INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId)
 	SELECT * FROM 
@@ -1039,6 +1047,7 @@ BEGIN
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
+								AND @ysnExchangeTraded = 1
 				)	
 		 
 		 SELECT @intUnitMeasureId =null
