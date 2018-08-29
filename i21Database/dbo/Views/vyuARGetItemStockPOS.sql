@@ -10,8 +10,8 @@ SELECT intItemId						= ITEM.intItemId
 	 , strType							= ITEM.strType
 	 , strStorageLocationName			= SL.strName
 	 , strIssueUOM						= UM.strUnitMeasure
-	 , strIssueUPC						= IUOM.strUpcCode
-	 , strIssueLongUPC					= IUOM.strLongUPCCode
+	 , strIssueUPC						= CASE WHEN ISNULL(ALTUPC.intItemUomUpcId,0) <> 0 THEN ALTUPC.strUpcCode ELSE IUOM.strUpcCode END 
+	 , strIssueLongUPC					= CASE WHEN ISNULL(ALTUPC.intItemUomUpcId,0) <> 0 THEN ALTUPC.strLongUpcCode ELSE IUOM.strLongUPCCode END
 	 , strLotTracking					= ITEM.strLotTracking
 	 , strMaintenanceCalculationMethod	= ITEM.strMaintenanceCalculationMethod
 	 , dblSalePrice						= ISNULL(IP.dblSalePrice, 0)
@@ -30,3 +30,4 @@ INNER JOIN dbo.tblICUnitMeasure UM WITH (NOLOCK) ON IUOM.intUnitMeasureId = UM.i
 LEFT JOIN dbo.tblICItemPricing IP WITH (NOLOCK) ON IL.intItemId = IP.intItemId AND IL.intItemLocationId = IP.intItemLocationId
 LEFT JOIN dbo.tblICItemStock ISTOCK WITH (NOLOCK) ON ITEM.intItemId = ISTOCK.intItemId AND IL.intItemLocationId = ISTOCK.intItemLocationId
 LEFT JOIN dbo.tblICStorageLocation SL WITH (NOLOCK) ON IL.intStorageLocationId = SL.intStorageLocationId
+LEFT JOIN dbo.tblICItemUomUpc ALTUPC WITH (NOLOCK) ON IUOM.intItemUOMId = ALTUPC.intItemUOMId
