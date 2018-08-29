@@ -128,9 +128,11 @@ DECLARE @List AS TABLE (
 		,@xmlParam AS xmlParam
 	 FROM
 		(
-            select strCommodityCode, strType, dblTotal, strContractEndMonth
-            from @List
-			group by strContractEndMonth,strCommodityCode,strType,dblTotal
+           select * from (
+				select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
+				from @List
+				group by strContractEndMonth,strCommodityCode,strType
+			) t
          ) x
          pivot 
          (
