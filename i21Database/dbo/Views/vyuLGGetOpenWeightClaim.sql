@@ -340,8 +340,15 @@ FROM (
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 		AND CA.strType = 'Origin'
-	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
-	LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
+	LEFT JOIN tblICItemContract CONI ON CONI.intItemId = I.intItemId
+		AND CD.intItemContractId = CONI.intItemContractId
+	LEFT JOIN tblSMCountry OG ON OG.intCountryID  = (
+		CASE 
+			WHEN ISNULL(CONI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE CONI.intCountryId
+			END
+		)
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 	LEFT JOIN (
 		SELECT SUM(ReceiptItem.dblNet) dblNet
