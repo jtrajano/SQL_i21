@@ -80,8 +80,15 @@ JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
-LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
+	AND CONI.intItemId = I.intItemId
+LEFT JOIN tblSMCountry OG ON OG.intCountryID  = (
+	CASE 
+		WHEN ISNULL(CONI.intCountryId, 0) = 0
+			THEN ISNULL(CA.intCountryID, 0)
+		ELSE CONI.intCountryId
+		END
+	)
 LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
