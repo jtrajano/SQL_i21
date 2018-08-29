@@ -18,6 +18,7 @@ DECLARE @intNoOfShipRecord INT
 DECLARE @intNoOfShipRecordCounter INT
 DECLARE @intNoOfShipRecordParentCounter INT
 DECLARE @strTransactionName NVARCHAR(50)
+Declare @strLotNumber nvarchar(MAX)
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
 	,intParentId INT
@@ -129,7 +130,7 @@ DECLARE @tblLinkData AS TABLE (
 	,intToRecordId INT
 	,strTransactionName NVARCHAR(50)
 	)
-DECLARE @tblMFExlude AS TABLE (intId INT)
+DECLARE @tblMFExlude AS TABLE (intId INT,strName nvarchar(MAX))
 
 --Forward
 IF @intDirectionId = 1
@@ -1945,6 +1946,7 @@ BEGIN
 			,intRecordId
 			,strType
 			,strTransactionName
+			,strLotNumber
 		FROM @tblTemp
 
 		OPEN @RCUR
@@ -1955,6 +1957,7 @@ BEGIN
 			,@intParentId
 			,@strType
 			,@strTransactionName
+			,@strLotNumber
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -2233,7 +2236,7 @@ BEGIN
 			WHERE intParentId IS NULL
 
 			INSERT INTO @tblMFExlude
-			SELECT @intId
+			SELECT @intId,@strLotNumber
 
 			FETCH NEXT
 			FROM @RCUR
@@ -2241,6 +2244,7 @@ BEGIN
 				,@intParentId
 				,@strType
 				,@strTransactionName
+				,@strLotNumber
 		END
 
 		DELETE
@@ -2377,9 +2381,9 @@ BEGIN
 
 		DELETE
 		FROM @tblTemp
-		WHERE intLotId IN (
-				SELECT intId
-				FROM @tblMFExlude
+		WHERE Exists (
+				SELECT *
+				FROM @tblMFExlude Where intId=intLotId and strName=strLotNumber
 				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId)
