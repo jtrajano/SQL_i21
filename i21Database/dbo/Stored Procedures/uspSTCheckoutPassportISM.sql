@@ -36,7 +36,7 @@ BEGIN
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'Missing Pos Code' as strErrorMessage
+			'No Matching UPC/Item in Inventory' as strErrorMessage
 			, 'POSCode' as strRegisterTag
 			, ISNULL(Chk.POSCode, '') AS strRegisterTagValue
 			, @intCheckoutId

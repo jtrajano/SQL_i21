@@ -38,7 +38,7 @@ BEGIN
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'Missing Merchandise Code' as strErrorMessage
+			'No Matching Register Department Setup in Category' as strErrorMessage
 			, 'MerchandiseCode' as strRegisterTag
 			, ISNULL(Chk.MerchandiseCode, '') AS strRegisterTagValue
 			, @intCheckoutId

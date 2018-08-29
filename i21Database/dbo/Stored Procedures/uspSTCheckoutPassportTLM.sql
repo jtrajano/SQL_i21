@@ -49,7 +49,7 @@ BEGIN
 					, intConcurrencyId
 				)
 				SELECT DISTINCT
-					'Missing Tax Level ID' as strErrorMessage
+					'No Matching Register Tax Code' as strErrorMessage
 					, 'TaxLevelID' as strRegisterTag
 					, ISNULL(Chk.TaxLevelID, '') AS strRegisterTagValue
 					, @intCheckoutId

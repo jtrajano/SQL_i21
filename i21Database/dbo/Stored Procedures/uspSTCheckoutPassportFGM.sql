@@ -37,7 +37,7 @@ BEGIN
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'Missing Fuel Grade' as strErrorMessage
+			'No Matching Fuel Grade in Inventory' as strErrorMessage
 			, 'FuelGradeId' as strRegisterTag
 			, ISNULL(Chk.FuelGradeID, '') AS strRegisterTagValue
 			, @intCheckoutId
