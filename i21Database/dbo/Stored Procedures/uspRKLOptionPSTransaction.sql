@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKLOptionPSTransaction  
+﻿CREATE PROC [dbo].[uspRKLOptionPSTransaction]  
 	@intTypeId int,
 	@intEntityId int,
     @intFutureMarketId int,
@@ -91,6 +91,7 @@ FROM (
 					JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId 
 					AND sp.intFutureMarketId = ot.intFutureMarketId AND spm.intOptionMonthId = ot.intOptionMonthId 
 					AND ot.dblStrike = spm.dblStrike AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmPriceDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 					ORDER BY sp.dtmPriceDate DESC
 					), 0) AS dblMarketPremium,
 			'' AS MarketValue,
@@ -103,6 +104,7 @@ FROM (
 					JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId 
 					AND sp.intFutureMarketId = ot.intFutureMarketId AND spm.intOptionMonthId = ot.intOptionMonthId 
 					AND ot.dblStrike = spm.dblStrike AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmPriceDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 					ORDER BY 1 DESC
 					), 0) AS dblDelta,
 			'' AS DeltaHedge,
