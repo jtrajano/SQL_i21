@@ -353,11 +353,7 @@ BEGIN TRY
 				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId,dblQtyReceived,dblCost)
 				SELECT intInventoryReceiptChargeId
 					,1
-					,LC.dblAmount / (
-						SELECT SUM(LO.dblQuantity)
-						FROM tblLGLoadDetail LO
-						WHERE LO.intLoadId = LC.intLoadId
-						) * LD.dblQuantity
+					,LC.dblRate
 				FROM tblICInventoryReceiptCharge C
 				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = C.intContractDetailId
 				JOIN tblLGLoadCost LC ON LC.intLoadId = LD.intLoadId
@@ -367,7 +363,7 @@ BEGIN TRY
 					AND LD.intLoadId = @intLoadId
 					AND  C.intEntityVendorId = @intVendorEntityId 
 				GROUP BY intInventoryReceiptChargeId
-					,LC.dblAmount
+					,LC.dblRate
 					,LD.dblQuantity
 					,LC.intLoadId
 
