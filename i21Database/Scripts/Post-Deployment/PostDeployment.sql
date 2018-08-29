@@ -316,6 +316,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
 :r .\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql 
 :r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
+:r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
