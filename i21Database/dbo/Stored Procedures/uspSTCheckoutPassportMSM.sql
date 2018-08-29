@@ -77,6 +77,7 @@ BEGIN
 						AND ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') != ''
 					) AS tbl
 				)
+				AND ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') != ''
 				-- ------------------------------------------------------------------------------------------------------------------  
 				-- END Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
@@ -101,90 +102,6 @@ BEGIN
               AND chk.MiscellaneousSummaryCode = 'sales' 
 			  AND chk.MiscellaneousSummarySubCode = 'MOP'
               AND intCheckoutId = @intCheckoutId
-
-              --Update dbo.tblSTCheckoutPaymentOptions
-              --SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-              --     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-              --     , dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-              --FROM #tempCheckoutInsert chk
-              --WHERE intCheckoutId = @intCheckoutId
-              --AND chk.MiscellaneousSummaryCode = 4
-              --AND chk.MiscellaneousSummarySubCode IN (5,6)
-              --AND intPaymentOptionId IN
-              --(
-              --     SELECT intLotteryWinnersMopId
-              --     FROM dbo.tblSTRegister
-              --     Where intStoreId = @intStoreId
-              --)
-      
-              --Update dbo.tblSTCheckoutPaymentOptions
-              --SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-              --     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-              --     , dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-              --FROM #tempCheckoutInsert chk
-              --WHERE intCheckoutId = @intCheckoutId
-              --AND chk.MiscellaneousSummaryCode = 19
-              --AND chk.MiscellaneousSummarySubCodeModifier = 1550
-              --AND intPaymentOptionId IN
-              --(
-              --     SELECT intPaymentOptionId
-              --     FROM dbo.tblSTPaymentOption
-              --     Where intRegisterMop = chk.MiscellaneousSummarySubCodeModifier
-              --)
-
-				------ Most probably this is not nessesary because sales tax totals is already preloaded
-    --          IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
-    --          BEGIN
-    --                       DECLARE @tbl TABLE
-    --                       (
-    --                              intCnt INT,
-    --                              intAccountId INT,
-    --                              strAccountId nvarchar(100),
-    --                              intItemId INT,
-    --                              strItemNo NVARCHAR(100),
-    --                              strItemDescription NVARCHAR(100)
-    --                       )
-    --                       INSERT INTO @tbl
-    --                       EXEC uspSTGetSalesTaxTotalsPreload @intStoreId
-    --                       INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
-    --                       (
-    --                              intCheckoutId
-    --                              , strTaxNo
-    --                              , dblTotalTax
-    --                              , dblTaxableSales
-    --                              , dblTaxExemptSales
-    --                              , intSalesTaxAccount
-    --                              , intConcurrencyId
-    --                       )
-    --                       SELECT
-    --                              @intCheckoutId
-    --                              , intCnt
-    --                              , NULL
-    --                              , NULL
-    --                              , NULL
-    --                              , intAccountId
-    --                              , 0
-    --                       FROM @tbl
-    --          END
-      
-          
-    --          UPDATE STT
-    --          SET dblTaxableSales =  (
-    --                                    SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
-    --                                    FROM #tempCheckoutInsert
-    --                                    WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
-    --                                    AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
-    --                                    AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-    --                                 ) 
-    --          , dblTotalTax = (
-    --                             SELECT CAST(ISNULL(MiscellaneousSummaryAmount, 0) AS DECIMAL(18,6))
-    --                             FROM #tempCheckoutInsert
-    --                             WHERE ISNULL(MiscellaneousSummaryCode, '')  = 'taxTotals' 
-    --                             AND ISNULL(MiscellaneousSummarySubCode, '') = 'taxableSalesByTaxCode'
-    --                             AND ISNULL(MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-    --                          ) 
-    --          FROM dbo.tblSTCheckoutSalesTaxTotals STT
-    --          WHERE STT.intCheckoutId = @intCheckoutId
 
     --          -- Difference between Passport and Radiant
     --          -- 1. Passport does not have 'TenderTransactionsCount' tag in MSM register file
