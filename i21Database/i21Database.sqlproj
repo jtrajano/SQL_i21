@@ -7015,6 +7015,11 @@
     <Build Include="dbo\Tables\tblSTCheckoutErrorLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutErrorLogPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKLOptionPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionMatchedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKExpiredPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionExerciseAssignTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
