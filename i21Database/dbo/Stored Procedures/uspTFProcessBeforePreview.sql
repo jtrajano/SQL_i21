@@ -113,7 +113,7 @@ BEGIN TRY
 			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
 			LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 				LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
-					LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFCard.intDefaultFixVehicleNumber
+				LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFTransaction.intVehicleId
 				LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
 			--LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
 			--LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
