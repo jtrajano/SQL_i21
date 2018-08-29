@@ -126,7 +126,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICReduceStockInLot
+			EXEC @intReturnValue = dbo.uspICReduceStockInLotInTransit
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -200,6 +200,32 @@ BEGIN
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 			
 		
+			-- Update the Lot's Qty and Weights. 
+			BEGIN 
+				UPDATE	Lot 
+				SET		Lot.dblQtyInTransit =	
+							dbo.fnCalculateLotQty(
+								Lot.intItemUOMId
+								, @intItemUOMId
+								, Lot.dblQtyInTransit
+								, Lot.dblWeightInTransit 
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+						,Lot.dblWeightInTransit = 
+							dbo.fnCalculateLotWeight(
+								Lot.intItemUOMId
+								, Lot.intWeightUOMId
+								, @intItemUOMId 
+								, Lot.dblWeightInTransit
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+						AND Lot.intLotId = @intLotId
+			END 
+
 			-- Reduce the remaining qty
 			-- Round it to the sixth decimal place. If it turns out as zero, the system has fully consumed the stock. 
 			SET @dblReduceQty = ROUND(@RemainingQty, 6);
@@ -290,7 +316,7 @@ BEGIN
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICIncreaseStockInLot
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInLotInTransit
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -397,5 +423,33 @@ BEGIN
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewInventoryLotId IS NOT NULL 
+
+		-- Increase the lot Qty and Weight. 
+		BEGIN 
+			UPDATE	Lot 
+			SET		Lot.dblQtyInTransit =	
+						dbo.fnCalculateLotQty(
+							Lot.intItemUOMId
+							, @intItemUOMId
+							, Lot.dblQtyInTransit
+							, Lot.dblWeightInTransit
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblWeightInTransit = 
+						dbo.fnCalculateLotWeight(
+							Lot.intItemUOMId
+							, Lot.intWeightUOMId
+							, @intItemUOMId 
+							, Lot.dblWeightInTransit
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
+						ON StockUOM.intItemId = Lot.intItemId
+						AND StockUOM.ysnStockUnit = 1
+			WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+					AND Lot.intLotId = @intLotId
+		END
 	END 
 END 

@@ -621,6 +621,8 @@ BEGIN
 	UPDATE	l
 	SET		l.dblQty = 0
 			,l.dblWeight = 0 
+			,l.dblQtyInTransit = 0 
+			,l.dblWeightInTransit = 0 
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
 	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
@@ -637,9 +639,29 @@ BEGIN
 								)
 							)
 						, 0) 
-				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICLot Lot
+				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN tblICItemLocation il
+								ON InvTrans.intItemLocationId = il.intItemLocationId 
+						INNER JOIN dbo.tblICLot Lot
 							ON InvTrans.intLotId = Lot.intLotId 
 				WHERE	Lot.intLotId = UpdateLot.intLotId			
+						AND il.intLocationId IS NOT NULL 
+			)
+			,dblQtyInTransit = (
+				SELECT	ISNULL(
+							SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									InvTrans.intItemUOMId
+									, Lot.intItemUOMId
+									, InvTrans.dblQty
+								)
+							)
+						, 0) 
+				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN tblICItemLocation il
+								ON InvTrans.intItemLocationId = il.intItemLocationId 
+						INNER JOIN dbo.tblICLot Lot
+							ON InvTrans.intLotId = Lot.intLotId 
+				WHERE	Lot.intLotId = UpdateLot.intLotId			
+						AND il.intLocationId IS NULL 
 			)
 	FROM	tblICLot UpdateLot INNER JOIN tblICItem i
 				ON UpdateLot.intItemId = i.intItemId
@@ -648,6 +670,7 @@ BEGIN
 
 	UPDATE	l
 	SET		l.dblWeight = dbo.fnMultiply(ISNULL(l.dblQty, 0), ISNULL(l.dblWeightPerQty, 0)) 	
+			,l.dblWeightInTransit = dbo.fnMultiply(ISNULL(l.dblQtyInTransit, 0), ISNULL(l.dblWeightPerQty, 0)) 	
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
 	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 

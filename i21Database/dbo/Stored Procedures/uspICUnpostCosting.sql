@@ -61,6 +61,7 @@ DECLARE @intItemId AS INT
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intCostingMethod AS INT
 		,@intFobPointId AS TINYINT
+		,@intInTransitSourceLocationId AS INT 
 
 -- Get the list of items to unpost
 BEGIN 
@@ -461,6 +462,7 @@ BEGIN
 					,intLotId 
 					,intCostingMethod
 					,intFobPointId
+					,intInTransitSourceLocationId
 			FROM	@ItemsToUnpost 
 
 			OPEN loopItemsToUnpost;	
@@ -478,6 +480,7 @@ BEGIN
 				,@intLotId
 				,@intCostingMethod
 				,@intFobPointId
+				,@intInTransitSourceLocationId
 				;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -487,27 +490,68 @@ BEGIN
 			BEGIN 
 				-- Update the lot Qty for each inventory transaction being unposted. 
 				UPDATE	Lot 
-				SET		Lot.dblQty =	dbo.fnCalculateLotQty(
+				SET		Lot.dblQty =	
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NULL THEN 
+									dbo.fnCalculateLotQty(
 											Lot.intItemUOMId
 											, @intItemUOMId
 											, Lot.dblQty
 											, Lot.dblWeight
 											, @dblQty 
 											, Lot.dblWeightPerQty
-										)
-						,Lot.dblWeight = dbo.fnCalculateLotWeight(
-												Lot.intItemUOMId
-												, Lot.intWeightUOMId
-												, @intItemUOMId 
-												, Lot.dblWeight
-												, @dblQty 
-												, Lot.dblWeightPerQty
-											)
+									)
+								ELSE 
+									Lot.dblQty
+							END 
+						,Lot.dblWeight = 
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NULL THEN 
+									dbo.fnCalculateLotWeight(
+										Lot.intItemUOMId
+										, Lot.intWeightUOMId
+										, @intItemUOMId 
+										, Lot.dblWeight
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE 
+									Lot.dblWeight
+							END 
+						,Lot.dblQtyInTransit =	
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NOT NULL THEN 
+									dbo.fnCalculateLotQty(
+										Lot.intItemUOMId
+										, @intItemUOMId
+										, Lot.dblQtyInTransit
+										, Lot.dblWeightInTransit 
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE
+									Lot.dblQtyInTransit 
+							END
+						,Lot.dblWeightInTransit = 
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NOT NULL THEN 
+									dbo.fnCalculateLotWeight(
+										Lot.intItemUOMId
+										, Lot.intWeightUOMId
+										, @intItemUOMId 
+										, Lot.dblWeightInTransit
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE
+									Lot.dblWeightInTransit
+							END 
 						--,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
 				FROM	dbo.tblICLot Lot
-				WHERE	Lot.intItemLocationId = @intItemLocationId
+				WHERE	Lot.intItemLocationId = ISNULL(@intInTransitSourceLocationId, @intItemLocationId) 
 						AND Lot.intLotId = @intLotId
-						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+						--AND intInTransitSourceLocationId IS NULL 
+						--AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 				-- Recalculate the average cost from the inventory transaction table. 
 				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
@@ -553,7 +597,8 @@ BEGIN
 					,@dblCost
 					,@intLotId
 					,@intCostingMethod
-					,@intFobPointId					
+					,@intFobPointId	
+					,@intInTransitSourceLocationId				
 					;
 			END;
 

@@ -7012,6 +7012,10 @@
     <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
