@@ -24,7 +24,6 @@ BEGIN
 		,@intWeightUOMId INT
 		,@strCountLine NVARCHAR(50)
 		,@strCalculatedCountLine NVARCHAR(50)
-	DECLARE @intWeightUOMId INT
 	DECLARE @dblWeightPerQty NUMERIC(18, 6)
 
 	SELECT @intLocationId = intLocationId
