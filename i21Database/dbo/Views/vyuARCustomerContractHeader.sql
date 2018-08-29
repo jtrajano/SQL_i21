@@ -21,8 +21,7 @@ GROUP BY intContractHeaderId
 	   , strContractStatus
 	   , ysnUnlimitedQuantity
 	   , strPricingType
-	   , dblAvailableQty
 	   , intCurrencyId
 	   , strCurrency    
 
-HAVING dblAvailableQty > 0
+HAVING SUM(ISNULL(dblAvailableQty, 0)) > 0 
