@@ -66,9 +66,11 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				--JOIN tblGRCustomerStorage GCS ON DS.intDeliverySheetId = GCS.intDeliverySheetId
 				JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId 
 				--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),DS.dtmDeliverySheetDate,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND i.intCommodityId= @intCommodityId
+			WHERE
+			 --convert(datetime,CONVERT(VARCHAR(10),DS.dtmDeliverySheetDate,110),110) BETWEEN
+				-- convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				--AND
+				 i.intCommodityId= @intCommodityId
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 				and  DSS.intStorageScheduleTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
 				AND  st.intProcessingLocationId  IN (
@@ -112,9 +114,11 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
 		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
 
-		WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
-								convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-							AND CS.intCommodityId= @intCommodityId
+		WHERE
+		 --convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+			--					convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			--				AND 
+							CS.intCommodityId= @intCommodityId
 							and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
 							AND  CS.intCompanyLocationId  IN (
 																		SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -174,9 +178,11 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				,NULL dblSettleUnit			
 			FROM tblSCTicket st
 				JOIN tblICItem i on i.intItemId=st.intItemId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND i.intCommodityId= @intCommodityId
+			WHERE 
+				--convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+				-- convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				--AND 
+				i.intCommodityId= @intCommodityId
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 				AND  st.intProcessingLocationId  IN (
 															SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -305,18 +311,50 @@ END
 DECLARE @intColumn_Id1  int
 DECLARE @strInsertList NVARCHAR(MAX)=''
 declare @strPermtableList NVARCHAR(MAX)=''
+DECLARE @strInsertListBF NVARCHAR(MAX)='' --For Balance Forward
+DECLARE @strInsertListBFGroupBy NVARCHAR(MAX) = ''
+declare @strPermtableListBF NVARCHAR(MAX)=''
 declare @intColCount int
+declare @SQLBalanceForward nvarchar(max)=''
 declare @SQLFinal nvarchar(max)=''
+
+select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%')
+SELECT @strInsertListBF=  case when LEN(@strInsertListBF)>0 then LEFT(@strInsertListBF,LEN(@strInsertListBF)-1) else @strInsertListBF end  --Remove the comma at the end
+
+select @strInsertListBFGroupBy += '['+ name +'],'  from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and   name like '%Distribution%'
+SELECT @strInsertListBFGroupBy=  case when LEN(@strInsertListBFGroupBy)>0 then LEFT(@strInsertListBFGroupBy,LEN(@strInsertListBFGroupBy)-1) else @strInsertListBFGroupBy end  --Remove the comma at the end
+
 
 select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
 select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
-SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  
+SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  --Remove the comma at the end
+
 
 select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount
 SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
+
+select @strPermtableListBF+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount and ( COLUMN_NAME like '%Net' OR COLUMN_NAME like '%Distribution%') 
+SELECT @strPermtableListBF= LEFT(@strPermtableListBF,LEN(@strPermtableListBF)-1)  
+
+
+
+set @SQLBalanceForward='
+INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableListBF+')
+SELECT  '+@strInsertListBF+'
+FROM ##tblRKDailyPositionForCustomer1 t 
+WHERE dtmDate < ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) + '''
+GROUP BY ' + @strInsertListBFGroupBy + '
+'
+
+EXEC sp_executesql @SQLBalanceForward
+
+
+
 set @SQLFinal='
 INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableList+')
 SELECT  '+@strInsertList+'
-FROM ##tblRKDailyPositionForCustomer1 t order by dtmDate'
+FROM ##tblRKDailyPositionForCustomer1 t 
+WHERE dtmDate between ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) +''' AND ''' + CONVERT(VARCHAR(10),@dtmToTransactionDate,110) +'''
+order by dtmDate'
 
 EXEC sp_executesql @SQLFinal
