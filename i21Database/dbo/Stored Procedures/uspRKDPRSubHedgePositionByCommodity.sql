@@ -637,14 +637,15 @@ DECLARE @strDescription NVARCHAR(200)
 declare @intOneCommodityId int
 declare @intCommodityUnitMeasureId int
 DECLARE @intUnitMeasureId int
+DECLARE @ysnExchangeTraded bit
 DECLARE @strUnitMeasure NVARCHAR(200)
 SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
 WHILE @mRowNumber >0
 BEGIN
 	SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
-	SELECT @strDescription = strCommodityCode FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
+	SELECT @strDescription = strCommodityCode, @ysnExchangeTraded = ysnExchangeTraded FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
 	SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
-IF  @intCommodityId >0
+IF  @intCommodityId >0 AND @ysnExchangeTraded = 1
 BEGIN
 	
 if isnull(@intVendorId,0) = 0
