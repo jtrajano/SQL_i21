@@ -23,11 +23,10 @@ END
 GO
 
 -- UPDATES NULL intEntityId columns that is causing batch post error GL-6595
-UPDATE A SET A.intEntityId = B.intEntityId FROM
-tblCMBankTransaction A
-cross apply(
-	SELECT TOP 1 isnull( D.intEntityId,D.intCreatedUserId) intEntityId from tblCMBankTransactionDetail D where  D.intTransactionId = A.intTransactionId
-)B
-WHERE A.intEntityId is null AND ysnPosted = 0
+UPDATE Trans SET Trans.intEntityId = Undep.intLastModifiedUserId 
+FROM tblCMBankTransactionDetail TransDetail 
+JOIN tblCMUndepositedFund Undep ON Undep.intUndepositedFundId = TransDetail.intUndepositedFundId
+JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTransactionId
+WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
 GO
 
