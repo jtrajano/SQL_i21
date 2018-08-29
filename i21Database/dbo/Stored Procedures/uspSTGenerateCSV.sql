@@ -385,15 +385,19 @@ BEGIN
 								, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 								, dblTrlQty as intQuantity
 
+
 								-- PRICE
 								, CASE 
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+										-- THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+										THEN (TR.dblTrlUnitPrice - TR.dblTrlMatchLineTrlPromoAmount)
 									WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
-										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+										-- THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
+										THEN (TR.dblTrlUnitPrice - TR.dblTrlMatchLineTrlPromoAmount)
+									WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+										THEN (TR.dblTrlUnitPrice - TR.dblTrpAmt)
 									ELSE dblTrlUnitPrice 
 								  END as dblPrice
-								--dblTrlUnitPrice as dblPrice
 
 
 								, strTrlUPC as strUpcCode
@@ -410,8 +414,6 @@ BEGIN
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 										THEN 'Y' -- 2 Can Deal
-									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-									--	THEN 'Y' 
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 										THEN 'Y'
 									ELSE 'N' 	
@@ -419,7 +421,6 @@ BEGIN
 
 								  -- Multi-Pack Discount
 								, CASE 
-									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'N'
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 										THEN 'Y' -- 2 Can Deal
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
@@ -429,17 +430,15 @@ BEGIN
 									ELSE 'N' 
 								  END as strOutletMultipackFlag
 								, CASE 
-									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
 									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 										THEN 2
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 										THEN 0 	
 									WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
-										THEN 2 --dblTrlMatchLineTrlMatchQuantity 
+										THEN 2
 								    ELSE 0 
 								  END as intOutletMultipackQuantity
 								, CASE 
-									--WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 0
 									WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 											THEN TR.dblTrlMatchLineTrlPromoAmount
 									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
@@ -449,29 +448,26 @@ BEGIN
 									ELSE 0 
 								  END as dblOutletMultipackDiscountAmount
 
-								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
 								, '' as strAccountPromotionName --21
-								--, CASE WHEN strTrlDesc like '% OFF%' THEN strTrlDesc ELSE '' END as strAccountPromotionName --21
-
-								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount --22
 								, 0 as dblAccountDiscountAmount --22
 
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
 										THEN CRP.dblManufacturerDiscountAmount 
-									--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
-									--	THEN 0 -- 2 Can Deal
-									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-									--	THEN dblTrlMatchLineTrlPromoAmount
-									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
 									ELSE 0 
 								  END as dblManufacturerDiscountAmount
 
 								-- COUPONS
-								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
-									THEN strTrlUPC ELSE '' END as strCouponPid --24 COUPON
-								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
-									THEN dblTrpAmt ELSE 0 END as dblCouponAmount --25 COUPON
+								, CASE 
+									WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+										THEN strTrlUPC 
+									ELSE '' 
+								END as strCouponPid --24 COUPON
+								, CASE 
+									WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+										THEN dblTrpAmt 
+									ELSE 0 
+								END as dblCouponAmount --25 COUPON
 
 								, 'N' as strManufacturerMultipackFlag
 								, 0 as intManufacturerMultipackQuantity
@@ -480,11 +476,6 @@ BEGIN
 								, CASE 
 									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
 										THEN CRP.strManufacturerPromotionDescription 
-									--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
-									--	THEN '' -- 2 Can Deal
-									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') AND strTrlMatchLineTrlMatchName IS NOT NULL AND dblTrlMatchLineTrlPromoAmount IS NOT NULL 
-									--	THEN strTrlDesc
-									--WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
 									ELSE '' 
 								  END as strManufacturerPromotionDescription
 
@@ -493,7 +484,6 @@ BEGIN
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								
-								--, TR.strTrLoyaltyProgramProgramID as strCouponDescription
 								, '' as strCouponDescription
 					FROM 
 					(   
