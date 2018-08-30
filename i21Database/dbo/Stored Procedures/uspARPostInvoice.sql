@@ -468,7 +468,8 @@ CREATE TABLE #ARInvalidInvoiceData
 	,[intInvoiceDetailId]		INT				NULL
 	,[intItemId]				INT				NULL
 	,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
-	,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL)
+	,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnInsertedToResult]		BIT DEFAULT(0)	NOT NULL)
 
 IF(OBJECT_ID('tempdb..#ARItemsForCosting') IS NOT NULL)
 BEGIN
@@ -591,6 +592,8 @@ IF(@totalInvalid > 0)
 			,[intInvoiceId]
 		FROM
 			#ARInvalidInvoiceData
+		
+		update #ARInvalidInvoiceData set ysnInsertedToResult = 1
 
 		SET @invalidCount = @totalInvalid
 
@@ -648,7 +651,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 					--IF (XACT_STATE()) = 1
 					--	COMMIT TRANSACTION  @Savepoint
 				END	
-
+			
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT 	
 				[strPostingError]
@@ -657,7 +660,8 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 				,[strBatchId]
 				,[intInvoiceId]
 			FROM
-				#ARInvalidInvoiceData 			
+				#ARInvalidInvoiceData
+					where  isnull(ysnInsertedToResult, 0) = 0		
 		END
 
 		IF @raiseError = 1
