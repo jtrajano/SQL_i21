@@ -442,7 +442,7 @@ BEGIN
 		SELECT TOP 1 @InvoiceIDP = [intInvoiceId], @LoadIDP = [intLoadId] FROM @IdsP ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
-        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP,@ysnDelete = 0, @UserId = @intUserId
+        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP,@ysnDelete = 0, @UserId = @UserId
 
 		--Committed QUatities
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
@@ -931,7 +931,7 @@ BEGIN
 		SELECT TOP 1 @InvoiceIDU = [intInvoiceId], @LoadIDU = [intLoadId] FROM @IdsU ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
-        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDU,@ysnDelete = 1, @UserId = @intUserId
+        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDU,@ysnDelete = 1, @UserId = @UserId
 
 		--Committed QUatities
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
