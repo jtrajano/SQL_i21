@@ -168,13 +168,14 @@ daysopen as
 		intEntityId = a.intAssignedToEntity
 		,intDaysOpen = convert(numeric(18,6),datediff(hour,a.dtmCreated,getdate())) / convert(numeric(18,6),24.000000)
 	from
-		tblHDTicket a
+		tblHDTicket a, tblHDTicketStatus b
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.dtmCreated is not null
-		and a.dtmCompleted is null
+		and b.strStatus <> 'Closed'
+		and a.intTicketStatusId = b.intTicketStatusId
 		--and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
 	)as rawResult
 	group by intEntityId
