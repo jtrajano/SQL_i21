@@ -221,7 +221,7 @@ BEGIN
 								, Lot.dblWeightPerQty
 							)
 				FROM	dbo.tblICLot Lot
-				WHERE	Lot.intItemLocationId = @intItemLocationId
+				WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
 						AND Lot.intLotId = @intLotId
 			END 
 
@@ -447,7 +447,7 @@ BEGIN
 			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
 						ON StockUOM.intItemId = Lot.intItemId
 						AND StockUOM.ysnStockUnit = 1
-			WHERE	Lot.intItemLocationId = @intItemLocationId
+			WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
 					AND Lot.intLotId = @intLotId
 		END
 	END 
