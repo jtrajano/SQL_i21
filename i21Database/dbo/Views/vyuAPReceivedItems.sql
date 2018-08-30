@@ -648,8 +648,10 @@ FROM
 	--) Qty
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2))  --EXLCUDE ALL BASIS
-		AND CH.intEntityId != A.intEntityVendorId AND CH.intPricingTypeId = 5--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+		AND 1 =  CASE WHEN CH.intPricingTypeId IS NOT NULL AND CH.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId 
+						AND CH.intPricingTypeId IS NOT NULL AND CH.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+				ELSE 1 END
 	UNION ALL
 
 	--PRICE CONTRACT COST
