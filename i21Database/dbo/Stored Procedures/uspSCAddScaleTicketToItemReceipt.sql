@@ -311,16 +311,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
-												WHEN QM.dblDiscountAmount < 0 THEN 
-												CASE
-													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0) * -1)
-													ELSE (QM.dblDiscountAmount * -1)
-												END 
-												WHEN QM.dblDiscountAmount > 0 THEN 
-												CASE
-													WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 0)
-													ELSE QM.dblDiscountAmount
-												END
+												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
