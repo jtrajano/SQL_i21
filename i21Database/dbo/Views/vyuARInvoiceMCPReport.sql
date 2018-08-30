@@ -7,8 +7,11 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strBOLNumber				= INV.strBOLNumber
 	 , strPONumber				= INV.strPONumber
-	 , intTruckDriverId			= INV.intTruckDriverId
-	 , strTruckDriver			= DRIVER.strName
+	 , intTruckDriverId			= ISNULL(INV.intTruckDriverId, INV.intEntitySalespersonId)
+	 , strTruckDriver			= CASE WHEN INV.strType = 'Tank Delivery'
+	 									THEN ISNULL(NULLIF(DRIVER.strName, ''), SALESPERSON.strName)
+	   								  	ELSE NULL
+								  END
 	 , intBillToLocationId		= INV.intBillToLocationId
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , strBillToLocationName	= BILLTO.strEntityNo
@@ -24,14 +27,26 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intShipViaId				= INV.intShipViaId
 	 , strShipVia				= SHIPVIA.strShipVia
 	 , intCompanyLocationId		= INV.intCompanyLocationId
-	 , strCompanyLocation		= [LOCATION].strLocationName	 
+	 , strCompanyLocation		= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL
+	 									THEN CONSUMPTIONSITE.strSiteNumber
+	   								  	ELSE [LOCATION].strLocationName
+								  END
 	 , INVOICEDETAIL.*
-	 , dblInvoiceTotal			= INV.dblInvoiceTotal
-	 , dblAmountDue				= INV.dblAmountDue
+	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
+	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
-	 , strComments				= dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
-	 , strItemComments          = ITEMCOMMENTS.strItemComments
-	 , strOrigin				= REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
+	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery'
+	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
+	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
+								  END
+	 , strItemComments          = CASE WHEN INV.strType = 'Tank Delivery'
+	 									THEN HAZMAT.strMessage
+	   								  	ELSE ITEMCOMMENTS.strItemComments
+								  END
+	 , strOrigin				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL
+	 									THEN CONSUMPTIONSITE.strLocationName
+	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
+								  END
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 LEFT JOIN (
@@ -90,6 +105,11 @@ LEFT JOIN (
 	FROM tblEMEntity WITH (NOLOCK) 
 ) DRIVER ON INV.intTruckDriverId = DRIVER.intEntityId
 LEFT JOIN (
+	SELECT intEntityId
+		 , strName
+	FROM tblEMEntity WITH (NOLOCK) 
+) SALESPERSON ON INV.intEntitySalespersonId = SALESPERSON.intEntityId
+LEFT JOIN (
 	SELECT intEntityLocationId	= EL.intEntityLocationId
 		 , strEntityNo			= EM.strEntityNo
 	FROM tblEMEntityLocation EL WITH (NOLOCK)
@@ -139,10 +159,31 @@ OUTER APPLY (
 	) DETAILS (strInvoiceComments)
 ) ITEMCOMMENTS
 OUTER APPLY (
-	SELECT TOP 1 strSiteFullAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, S.strSiteAddress, S.strCity, S.strState, S.strZipCode, S.strCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
-			   , intSiteId			= ID.intSiteId
+	SELECT strMessage = LEFT(strMessage, LEN(strMessage) - 0)
+	FROM (
+		SELECT CAST(ISNULL(ICC.strMessage, '') AS VARCHAR(MAX)) + CHAR(10)
+		FROM dbo.tblARInvoiceDetail IDD WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intItemId
+				 , ICT.strMessage 
+			FROM dbo.tblICItem ICC WITH (NOLOCK)
+			INNER JOIN dbo.tblICTag ICT ON ICC.intHazmatTag = ICT.intTagId AND ICT.strType = 'Hazmat Message'
+			WHERE ISNULL(ICC.intHazmatTag, 0) <> 0
+		) ICC ON IDD.intItemId = ICC.intItemId
+		WHERE IDD.intInvoiceId = INV.intInvoiceId		
+		GROUP BY IDD.intItemId, ICC.strMessage
+		FOR XML PATH ('')
+	) DETAILS (strMessage)
+) HAZMAT
+OUTER APPLY (
+	SELECT TOP 1 strSiteFullAddress 	= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, S.strSiteAddress, S.strCity, S.strState, S.strZipCode, S.strCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+			   , intSiteId				= ID.intSiteId
+			   , intCompanyLocationId	= CLS.intCompanyLocationId
+			   , strLocationName		= CLS.strLocationName
+			   , strSiteNumber			= RIGHT('000'+ CAST(S.intSiteNumber AS NVARCHAR(4)),4) + ' - ' + ISNULL(S.strDescription, '')
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+	INNER JOIN tblSMCompanyLocation CLS ON S.intLocationId = CLS.intCompanyLocationId
 	WHERE intInvoiceId = INVOICEDETAIL.intInvoiceId 
 	  AND ISNULL(ID.intSiteId, 0) <> 0
 ) CONSUMPTIONSITE
