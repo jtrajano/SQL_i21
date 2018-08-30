@@ -22,11 +22,3 @@ BEGIN
 END
 GO
 
--- UPDATES NULL intEntityId columns that is causing batch post error GL-6595
-UPDATE Trans SET Trans.intEntityId = Undep.intLastModifiedUserId 
-FROM tblCMBankTransactionDetail TransDetail 
-JOIN tblCMUndepositedFund Undep ON Undep.intUndepositedFundId = TransDetail.intUndepositedFundId
-JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTransactionId
-WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
-GO
-

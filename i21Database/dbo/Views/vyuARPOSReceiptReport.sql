@@ -3,6 +3,7 @@ AS
 SELECT intPOSId				= POS.intPOSId
 	 , strItemNo			= POSD.strItemNo
 	 , strCustomerName		= CUSTOMER.strName
+	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 	 , strCustomerAddress   = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strAddress, CUSTOMER.strCity, CUSTOMER.strState, CUSTOMER.strZipCode, NULL, NULL, NULL)
 	 , strItemDescription	= POSD.strItemDescription
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
@@ -56,6 +57,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , strName
+		 , strCustomerNumber
 		 , strAddress
 		 , strCity
 		 , strState

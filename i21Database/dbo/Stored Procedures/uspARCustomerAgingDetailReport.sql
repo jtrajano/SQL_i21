@@ -36,7 +36,6 @@ DECLARE @dtmDateTo				DATETIME
 	  , @endgroup				NVARCHAR(50)
 	  , @datatype				NVARCHAR(50)
 	  , @strSourceTransaction	NVARCHAR(50)
-	  , @strAgedBalances				AS NVARCHAR(100)
 	  , @ysnPrintOnlyOverCreditLimit	AS BIT
 	  , @intEntityUserId		INT
 		
@@ -113,10 +112,6 @@ SELECT  @strSourceTransaction = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSourceTransaction'
 
-SELECT	@strAgedBalances = ISNULL([from], 'All')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAgedBalances'
-
 SELECT	@ysnPrintOnlyOverCreditLimit = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
@@ -162,84 +157,32 @@ INNER JOIN (
 WHERE AGING.intEntityUserId = @intEntityUserId
   AND AGING.strAgingType = 'Detail'
 
-IF @strAgedBalances = 'Current'
-	BEGIN 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl0Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE IF @strAgedBalances = '1-10 Days'
-	BEGIN 
-		DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl10Days, 0)) = 0)
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl10Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE IF @strAgedBalances = '11-30 Days'
-	BEGIN 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl30Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE IF @strAgedBalances = '31-60 Days'
-	BEGIN 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl60Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE IF @strAgedBalances = '61-90 Days'
-	BEGIN 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl90Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE IF @strAgedBalances = 'Over 90 Days'
-	BEGIN 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId 
-			FROM tblARCustomerAgingStagingTable 
-			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-			GROUP BY intEntityCustomerId 
-			HAVING SUM(ISNULL(dbl120Days, 0)) = 0
-		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
+IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
+BEGIN
+    DROP TABLE #AGEDBALANCES
+END
+
+SELECT strAgedBalances = ISNULL([from], 'All')
+INTO #AGEDBALANCES
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strAgedBalances'
+
+IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
+	BEGIN
+		UPDATE tblARCustomerAgingStagingTable 
+		SET dbl0Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current') THEN ISNULL(dbl0Days, 0) ELSE 0 END
+		  , dbl10Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days') THEN ISNULL(dbl10Days, 0) ELSE 0 END
+		  , dbl30Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days') THEN ISNULL(dbl30Days, 0) ELSE 0 END
+		  , dbl60Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days') THEN ISNULL(dbl60Days, 0) ELSE 0 END
+		  , dbl90Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days') THEN ISNULL(dbl90Days, 0) ELSE 0 END
+		  , dbl91Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days') THEN ISNULL(dbl91Days, 0) ELSE 0 END
+		WHERE intEntityUserId = @intEntityUserId 
+		AND strAgingType = 'Detail'
+
+		UPDATE tblARCustomerAgingStagingTable 
+		SET dblTotalAR = (ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblPrepayments, 0) + ISNULL(dblCredits, 0)
+		WHERE intEntityUserId = @intEntityUserId 
+		  AND strAgingType = 'Detail'
 	END
 
 IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
@@ -256,7 +199,7 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 				OR AVG(ISNULL(dblCreditLimit, 0)) = 0
 		) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 		WHERE AGING.intEntityUserId = @intEntityUserId
-		  AND AGING.strAgingType = 'Detail'
+		AND AGING.strAgingType = 'Detail'
 	END
 
 INSERT INTO @temp_open_invoices

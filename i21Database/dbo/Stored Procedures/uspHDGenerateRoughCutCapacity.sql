@@ -68,8 +68,16 @@ planed as (
 		a.intTicketId
 		,a.intAssignedToEntity
 		,intDate = convert(int, convert(nvarchar(8), a.dtmDueDate, 112))
-		--,dblHours = sum(convert(numeric(18,6),datediff(day,d.dtmStartDate, d.dtmEndDate)) / convert(numeric(18,6),8))
-		,dblHours = sum((convert(numeric(18,6),datediff(hour,d.dtmStartDate, d.dtmEndDate)) / convert(numeric(18,6),24.00)) * convert(numeric(18,6),8.00))
+		--,dblHours = sum((convert(numeric(18,6),datediff(hour,d.dtmStartDate, d.dtmEndDate)) / convert(numeric(18,6),24.00)) * convert(numeric(18,6),8.00))
+		,dblHours = (case
+						when datediff(day,d.dtmStartDate, d.dtmEndDate) > 0 and (d.ysnAllDayEvent is null or d.ysnAllDayEvent = convert(bit,0))
+						then sum(convert(numeric(18,6),datediff(day,d.dtmStartDate, d.dtmEndDate)) * convert(numeric(18,6),8.00))
+						when d.ysnAllDayEvent = convert(bit,1)
+						then 8.00
+						when datediff(day,d.dtmStartDate, d.dtmEndDate) = 0 and (d.ysnAllDayEvent is null or d.ysnAllDayEvent = convert(bit,0))
+						then sum(convert(numeric(18,6),datediff(hour,d.dtmStartDate, d.dtmEndDate)))
+						else 0.00
+					end)
 	from
 		tblHDTicket a
 		,tblSMTransaction b
@@ -89,6 +97,9 @@ planed as (
 		a.intTicketId
 		,a.intAssignedToEntity
 		,a.dtmDueDate
+		,d.dtmStartDate
+		,d.dtmEndDate
+		,d.ysnAllDayEvent
 )
 
 INSERT INTO tblHDRoughCountCapacity

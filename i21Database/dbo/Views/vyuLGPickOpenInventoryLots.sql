@@ -103,6 +103,7 @@ SELECT Lot.intLotId
 	   ,C.strCurrency AS strDefaultCurrency
 	   ,UM.intUnitMeasureId AS intDefaultUOMId
 	   ,UM.strUnitMeasure AS strDefaultUOM
+	   ,IU.intItemUOMId AS intDefaultItemUOMId
 	   , '' COLLATE Latin1_General_CI_AS AS strCropYear 
 	   , '' COLLATE Latin1_General_CI_AS AS strProducer 
 	   , '' COLLATE Latin1_General_CI_AS AS strCertification  

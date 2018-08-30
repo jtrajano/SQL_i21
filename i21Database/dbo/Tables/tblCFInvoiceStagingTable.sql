@@ -80,6 +80,7 @@
     [dtmTransactionDate]				DATETIME        NULL,
     [dtmDate]							DATETIME        NULL,
     [dtmPostedDate]						DATETIME        NULL,
+	[dtmBillingDate]					DATETIME        NULL,
     [dtmDiscountDate]					DATETIME        NULL,
     [dtmDueDate]						DATETIME        NULL,
     [dtmInvoiceDate]					DATETIME        NULL,
