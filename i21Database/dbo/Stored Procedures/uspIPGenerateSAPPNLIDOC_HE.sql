@@ -74,7 +74,7 @@ SELECT S.intStgMatchPnSId
 	,S.intMatchNo
 	,S.dtmMatchDate
 	,S.strCurrency
-	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblGrossPnL, 0)
+	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblNetPnL, 0)
 	,S.dtmPostingDate
 	,L.strLocationName
 	,Left('F-'+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, ''),16) AS strReference
@@ -152,7 +152,7 @@ BEGIN
 		--GL account details (Broker account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BUZEI>' + '001' + '</BUZEI>'
-		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
+		SET @strXml += '<BSCHL>' + Case When @dblGrossPnL>0 then '40' Else '50' End + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '800' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
@@ -164,7 +164,7 @@ BEGIN
 		--GL account details (TM account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BUZEI>' + '002' + '</BUZEI>'
-		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
+		SET @strXml += '<BSCHL>' + Case When @dblGrossPnL>0 then '50' Else '40' End + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
