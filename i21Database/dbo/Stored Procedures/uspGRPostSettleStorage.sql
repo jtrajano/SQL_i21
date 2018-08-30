@@ -115,6 +115,9 @@ BEGIN TRY
 	--get the original value of Spot Units before settlement
 	DECLARE @origdblSpotUnits DECIMAL(24, 10) 
 
+	DECLARE @intShipFrom INT
+	DECLARE @shipFromEntityId INT
+
 	SET @dtmDate = GETDATE()
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -543,6 +546,13 @@ BEGIN TRY
 
 					UPDATE tblGRSettleStorage SET intCompanyLocationId = @intCompanyLocationId WHERE intSettleStorageId = @intTempSettleStorageId
 				END
+
+				SELECT @intShipFrom = DS.intFarmFieldId
+					,@shipFromEntityId = DS.intEntityId
+				FROM tblSCDeliverySheet DS
+				JOIN tblGRCustomerStorage CS
+					ON DS.intDeliverySheetId = CS.intDeliverySheetId
+				WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
 				--Storage Due		
 				SET @dblStorageDuePerUnit = 0
@@ -1437,6 +1447,8 @@ BEGIN TRY
 					,@type = 1
 					,@voucherDetailStorage = @voucherDetailStorage
 					,@shipTo = @LocationId
+					,@shipFrom = @intShipFrom
+					,@shipFromEntityId = @shipFromEntityId
 					,@vendorOrderNumber = NULL
 					,@voucherDate = @dtmDate
 					,@billId = @intCreatedBillId OUTPUT
