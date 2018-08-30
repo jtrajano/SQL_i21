@@ -32,17 +32,24 @@ BEGIN TRY
 			@intNewContractHeaderId	INT,
 			@ysnAutoCreateDP		BIT,
 			@strScreenName			NVARCHAR(20),
-			@XML					NVARCHAR(MAX)
+			@XML					NVARCHAR(MAX),
+			@dtmEndDate				DATETIME,
+			@intContractTypeId		INT,
+			@intCommodityId			INT,
+			@strSeqMonth			NVARCHAR(50),
+			@UseScheduleForAvlCalc	BIT = 1
 
 	DECLARE @Processed TABLE
 	(
 			intContractDetailId INT,
 			dblUnitsDistributed NUMERIC(18,6),
 			dblUnitsRemaining	NUMERIC(18,6),
-			dblCost				NUMERIC(18,6)
+			dblCost				NUMERIC(18,6),
+			ysnIgnore			BIT
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
+	SELECT  @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 	IF @ysnDeliverySheet = 0
 		BEGIN
@@ -78,8 +85,7 @@ BEGIN TRY
 			WHERE	SCD.intDeliverySheetId = @intTicketId AND IUOM.ysnStockUnit = 1
 		END
 
-	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
-	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
+	SELECT	@ApplyScaleToBasis = ISNULL(ysnApplyScaleToBasis,0) FROM tblCTCompanyPreference
 
 	IF	ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -112,8 +118,46 @@ BEGIN TRY
 			BEGIN
 				SET @strScreenName = CASE WHEN ISNULL(@ysnDeliverySheet,0) = 0 THEN 'Scale' ELSE 'Delivery Sheet' END
 				SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+				
 				EXEC uspCTCreateContract @intTicketId,@strScreenName,@intUserId,@XML,@intNewContractHeaderId OUTPUT
-				SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+				
+				SELECT	@intContractDetailId	=	intContractDetailId, 
+						@intContractTypeId		=	intContractTypeId,
+						@intCommodityId			=	intCommodityId,
+						@strSeqMonth			=	RIGHT(CONVERT(varchar, dtmEndDate, 106),8),
+						@intItemId				=	intItemId
+				FROM	vyuCTContractSequence 
+				WHERE	intContractHeaderId = @intNewContractHeaderId
+
+				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
+					DROP TABLE #FutureAndBasisPrice						
+
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId,null)
+
+				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblSettlementPrice,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+				
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblBasis,0) = 0)
+				BEGIN
+					RAISERROR ('Basis price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intSettlementUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intBasisUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Basis UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
 			END
 			IF	ISNULL(@intContractDetailId,0) = 0
 			BEGIN
@@ -170,7 +214,10 @@ BEGIN TRY
 											THEN	ISNULL(dblSeqFutures,0)
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
-				@dblAvailable	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)),
+				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 
+											THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
+											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
+									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId
 		FROM	tblCTContractDetail CD
@@ -183,7 +230,7 @@ BEGIN TRY
 
 			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0
 
 			--EXEC	uspCTUpdateSequenceQuantity 
 			--		@intContractDetailId	=	@intContractDetailId,
@@ -199,12 +246,13 @@ BEGIN TRY
 
 		IF NOT @dblAvailable > 0
 		BEGIN
+			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
 			GOTO CONTINUEISH
 		END
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
 
 			SELECT	@dblNetUnits = 0
 
@@ -212,7 +260,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
 
 			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
 		END
@@ -261,6 +309,7 @@ BEGIN TRY
 			PR.dblCost
 	FROM	@Processed	PR
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+	WHERE	ISNULL(ysnIgnore,0) <> 1
 	
 END TRY
 
