@@ -102,7 +102,8 @@ BEGIN TRY
 		,L1.strLotNumber
 		,Convert(Decimal(24,2),SUM(LDL.dblLotQuantity)) dblLotQuantity
 		,UM.strUnitMeasure
-		,IsNULL(Rtrim(Ltrim(L1.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(LDL.dblLotQuantity))) + ' ' + UM.strUnitMeasure + ')')),Rtrim(Ltrim(S.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(IsNULL(LD.dblQuantity,S.dblRepresentingQty)))) + ' ' + UM.strUnitMeasure + ')'))) AS [LotDetails]
+		--,IsNULL(Rtrim(Ltrim(L1.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(LDL.dblLotQuantity))) + ' ' + UM.strUnitMeasure + ')')),Rtrim(Ltrim(S.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(IsNULL(LD.dblQuantity,S.dblRepresentingQty)))) + ' ' + UM.strUnitMeasure + ')'))) AS [LotDetails]
+		,IsNULL(L1.strLotNumber,S.strLotNumber) AS [LotDetails]
 		,@UserSign AS UserSignature
 		,(
 			CASE 
