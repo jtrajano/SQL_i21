@@ -17,6 +17,7 @@ SELECT
 		,dtmLogin						=	POSLog.dtmLogin
 		,dtmLogout						=	POSLog.dtmLogout
 		,ysnLoggedIn					=	POSLog.ysnLoggedIn
+		,ysnAllowMultipleUser			=	DRAWER.ysnAllowMultipleUser
  FROM tblARPOSLog POSLog WITH (NOLOCK)
 INNER JOIN (
 	SELECT
@@ -29,6 +30,7 @@ LEFT JOIN(
 	SELECT
 		intCompanyLocationPOSDrawerId
 		,strPOSDrawerName
+		,ysnAllowMultipleUser
 	FROM tblSMCompanyLocationPOSDrawer WITH (NOLOCK)
 ) DRAWER ON POSLog.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 LEFT JOIN (
