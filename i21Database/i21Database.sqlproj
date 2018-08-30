@@ -7024,6 +7024,8 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
+    <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
