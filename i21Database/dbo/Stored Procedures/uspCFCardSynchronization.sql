@@ -31,8 +31,10 @@ BEGIN
 	DECLARE @strAction				NVARCHAR(MAX)	 =	 ''
 	DECLARE @dtmImportDate			DATETIME
 	DECLARE @ysnIsVehicleNumeric	BIT 
-
+	DECLARE @strNetwork				NVARCHAR(MAX)	 =   ''
 	
+
+	SELECT TOP 1 @strNetwork = strNetwork FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
 
 	--VALIDATE ACCOUNT--
 	---VALIDATE ACCOUNT---
@@ -814,6 +816,8 @@ BEGIN
 				,strUserName
 				,strRecord
 				,strAccountNumber
+				,intNetworkId
+				,strNetwork
 			)
 			SELECT 
 				 @strSessionId
@@ -832,6 +836,9 @@ BEGIN
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
 				,@strAccountNumber
+				,@intNetworkId
+				,@strNetwork
+
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -991,6 +998,9 @@ BEGIN
 				,strUserName
 				,strRecord
 				,strAccountNumber
+				,intNetworkId
+				,strNetwork
+				
 			)
 			SELECT 
 				 @strSessionId
@@ -1009,6 +1019,8 @@ BEGIN
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
 				,@strAccountNumber
+				,@intNetworkId
+				,@strNetwork
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -1121,6 +1133,8 @@ BEGIN
 				,strUserName
 				,strRecord
 				,strAccountNumber
+				,intNetworkId
+				,strNetwork
 			)
 			SELECT 
 				 @strSessionId
@@ -1139,6 +1153,8 @@ BEGIN
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
 				,@strAccountNumber
+				,@intNetworkId
+				,@strNetwork
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -1251,6 +1267,8 @@ BEGIN
 			,strUserName
 			,strRecord
 			,strAccountNumber
+			,intNetworkId
+			,strNetwork
 		)
 		SELECT 
 			@strSessionId
@@ -1269,6 +1287,8 @@ BEGIN
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
 			,@strAccountNumber
+			,@intNetworkId
+			,@strNetwork
 		FROM 
 		tblCFTempCSUAuditLog
 
