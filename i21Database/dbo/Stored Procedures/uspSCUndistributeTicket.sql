@@ -85,7 +85,7 @@ BEGIN TRY
 				END
 			END
 			SELECT @intId = MIN(intInventoryReceiptItemId) 
-			FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+			FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 		END
 
 		IF @strInOutFlag = 'I'
@@ -364,9 +364,6 @@ BEGIN TRY
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
 			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId;
-			SET @dblDeliveredQuantity = @dblDeliveredQuantity * -1;
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
 		END
 	_Exit:
 
