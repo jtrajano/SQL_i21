@@ -72,7 +72,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp,dtmBillingDate',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -319,6 +319,7 @@ BEGIN
 			,dtmCreatedDate						DATETIME
 			,dtmInvoiceDate						DATETIME
 			,dtmPostedDate						DATETIME
+			,dtmBillingDate						DATETIME
 			-------------------------------------------------------
 			,ysnPostedCSV						BIT
 			,ysnIncludeInQuantityDiscount		BIT
@@ -380,7 +381,8 @@ BEGIN
 				,dtmTransactionDate				
 				,dtmCreatedDate					
 				,dtmInvoiceDate					
-				,dtmPostedDate					
+				,dtmPostedDate		
+				,dtmBillingDate			
 				--------------------------------
 				,ysnPostedCSV					
 				,ysnIncludeInQuantityDiscount	
@@ -438,7 +440,8 @@ BEGIN
 				,dtmTransactionDate				
 				,dtmCreatedDate					
 				,dtmInvoiceDate					
-				,dtmPostedDate					
+				,dtmPostedDate			
+				,dtmBillingDate				
 				--------------------------------
 				,ysnPostedCSV					
 				,ysnIncludeInQuantityDiscount	
@@ -500,7 +503,8 @@ BEGIN
 				,dtmTransactionDate				
 				,dtmCreatedDate					
 				,dtmInvoiceDate					
-				,dtmPostedDate					
+				,dtmPostedDate			
+				,dtmBillingDate				
 				--------------------------------
 				,ysnPostedCSV					
 				,ysnIncludeInQuantityDiscount	
@@ -558,7 +562,8 @@ BEGIN
 				,dtmTransactionDate				
 				,dtmCreatedDate					
 				,dtmInvoiceDate					
-				,dtmPostedDate					
+				,dtmPostedDate			
+				,dtmBillingDate				
 				--------------------------------
 				,ysnPostedCSV					
 				,ysnIncludeInQuantityDiscount	

@@ -106,7 +106,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber,dtmBillingDate',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -355,6 +355,7 @@ BEGIN
 			,dtmPostedDate					DATETIME
 			,dtmCreatedDate					DATETIME
 			,dtmDate						DATETIME
+			,dtmBillingDate					DATETIME
 			----------------------------------------------------
 			,strTransactionId				NVARCHAR(MAX)
 			,strTransactionType				NVARCHAR(MAX)
@@ -451,7 +452,8 @@ BEGIN
 			,dtmInvoiceDate				
 			,dtmPostedDate				
 			,dtmCreatedDate				
-			,dtmDate					
+			,dtmDate		
+			,dtmBillingDate			
 			----------------------------
 			,strTransactionId			
 			,strTransactionType			
@@ -543,7 +545,8 @@ BEGIN
 			,dtmInvoiceDate				
 			,dtmPostedDate				
 			,dtmCreatedDate				
-			,dtmDate					
+			,dtmDate	
+			,dtmBillingDate				
 			----------------------------
 			,strTransactionId			
 			,strTransactionType			
@@ -639,6 +642,7 @@ BEGIN
 			,dtmPostedDate				
 			,dtmCreatedDate				
 			,dtmDate					
+			,dtmBillingDate	
 			----------------------------
 			,strTransactionId			
 			,strTransactionType			
@@ -731,6 +735,7 @@ BEGIN
 			,dtmPostedDate				
 			,dtmCreatedDate				
 			,dtmDate					
+			,dtmBillingDate	
 			----------------------------
 			,strTransactionId			
 			,strTransactionType			

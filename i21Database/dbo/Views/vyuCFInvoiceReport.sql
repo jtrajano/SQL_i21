@@ -8,6 +8,7 @@ SELECT
  cfTrans.intCustomerId
  ,cfTrans.intTransactionId
  ,cfTrans.dtmTransactionDate
+ ,cfTrans.dtmBillingDate
  ,dtmInvoiceDate =Dateadd(dd, Datediff(dd, 0, cfTrans.dtmInvoiceDate), 0)
  ,cfTrans.intOdometer
  ,cfTrans.dtmPostedDate

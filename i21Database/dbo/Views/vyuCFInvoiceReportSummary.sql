@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 
 
@@ -10,6 +8,7 @@ SELECT
  cfTrans.intCustomerId
 ,cfTrans.strMiscellaneous
 ,cfTrans.dtmTransactionDate
+,cfTrans.dtmBillingDate
 ,cfTrans.intOdometer
 ,cfTrans.strTransactionId
 ,cfTrans.intCardId
