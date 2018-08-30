@@ -7026,6 +7026,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql" />
     <Build Include="dbo\Stored Procedures\uspICConvertReceiptToVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspICConvertReturnToVoucher.sql" />
+    <Build Include="dbo\Views\vyuLGStockSaleLotDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
