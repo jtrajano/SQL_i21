@@ -1397,21 +1397,35 @@ BEGIN TRY
 												ELSE SV.dblUnits 
 											END
 				 ,[strMiscDescription]	  = Item.[strItemNo]
-				 ,[dblCost]				  = (
-											  CASE 
-											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)
-											  		ELSE  CC.dblRate
-											  END
-											 )
-											 /											
-											 (CASE 
-												WHEN CC.strCostMethod ='Per Unit' THEN 1
-												WHEN CC.strCostMethod ='Amount'	  THEN 
-																					   CASE 
-																							WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
-																							ELSE SV.dblUnits 
-																						END
-											 END)
+				 ,[dblCost]				  = CASE
+												WHEN CC.intVendorId = @EntityId AND ISNULL(CC.ysnAccrue, 0) = 1 AND ISNULL(CC.ysnPrice, 0) = 0 
+													THEN 
+														( CASE 
+															WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1) ELSE  CC.dblRate
+														END
+														)
+														/											
+														( CASE 
+															WHEN CC.strCostMethod ='Per Unit' THEN 1
+															WHEN CC.strCostMethod ='Amount'	  THEN 
+																								CASE 
+																										WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits) ELSE SV.dblUnits 
+																									END
+														END)
+												ELSE
+													- (( CASE 
+														WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1) ELSE  CC.dblRate
+													END
+													)
+													/											
+													( CASE 
+														WHEN CC.strCostMethod ='Per Unit' THEN 1
+														WHEN CC.strCostMethod ='Amount'	  THEN 
+																							CASE 
+																									WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits) ELSE SV.dblUnits 
+																								END
+													END))
+				 							END
 				 ,[intContractHeaderId]	  = CD.[intContractHeaderId]
 				 ,[intContractDetailId]	  = CD.[intContractDetailId]
 				 ,[intUnitOfMeasureId]	  = CASE 
@@ -1426,8 +1440,7 @@ BEGIN TRY
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1
 				 ,[dblNetWeight]		  = 0
-				 FROM 
-				 tblCTContractCost CC 
+				 FROM tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD 
 					ON CD.intContractDetailId =  CC.intContractDetailId
 				 JOIN @SettleVoucherCreate SV 
