@@ -39,7 +39,7 @@ BEGIN
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
-		,[dblQty]				= ARID.[dblQtyShipped] * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
 		,[strTransactionId]		= ARI.[strInvoiceNumber]
 		,[intTransactionTypeId]	= @TransactionTypeId
