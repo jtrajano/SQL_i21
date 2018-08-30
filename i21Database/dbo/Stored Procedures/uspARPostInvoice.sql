@@ -688,8 +688,8 @@ BEGIN TRY
     DELETE FROM #ARPostInvoiceHeader WHERE ysnRecap = 1
     IF NOT EXISTS(SELECT TOP 1 NULL FROM #ARPostInvoiceHeader)
 	BEGIN
-		IF @BatchIdGenerated = 1
-			UPDATE tblSMStartingNumber SET [intNumber] = [intNumber] - 1 WHERE [intStartingNumberId] = @StartingNumberId
+		-- IF @BatchIdGenerated = 1
+		-- 	UPDATE tblSMStartingNumber SET [intNumber] = [intNumber] - 1 WHERE [intStartingNumberId] = @StartingNumberId
 				
 		GOTO Do_Commit
 	END
