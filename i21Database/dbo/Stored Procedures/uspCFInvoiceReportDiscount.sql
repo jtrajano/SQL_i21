@@ -74,7 +74,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intCustomerGroupId,intAccountId,strNetwork,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp',',') 
+		FROM [fnCFSplitString]('intCustomerGroupId,intAccountId,strNetwork,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp,dtmBillingDate',',') 
 
 
 		--READ XML
@@ -444,6 +444,7 @@ BEGIN
 			 ,dtmDiscountDate					DATETIME
 			 ,dtmDueDate						DATETIME
 			 ,dtmTransactionDate				DATETIME
+			 ,dtmBillingDate					DATETIME
 			 ,dtmPostedDate						DATETIME
 
 		)
