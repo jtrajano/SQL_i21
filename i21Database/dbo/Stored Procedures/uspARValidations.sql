@@ -109,7 +109,7 @@
 	IF(@originCustomerCount <> @customerCount)
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = @key
+		SET @Message = 'There is a discrepancy on Salesperson records.'
 
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
