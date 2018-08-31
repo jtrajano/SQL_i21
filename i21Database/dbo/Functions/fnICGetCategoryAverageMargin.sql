@@ -6,13 +6,20 @@ RETURNS NUMERIC(32,20)
 AS
 BEGIN
 
-	DECLARE @dblAverageMargin AS NUMERIC(38,20);
+	DECLARE @dblAverageMargin NUMERIC(38,20);
+	DECLARE @intLocationId INT;
 
-	SELECT	@dblAverageMargin = ISNULL(dblAverageMargin, 0)
+	-- GET THE LOCATION 
+	SELECT @intLocationId = intLocationId FROM tblICItemLocation
+	WHERE intItemLocationId = @intItemLocationId;
+
+
+	SELECT	@dblAverageMargin = dbo.fnDivide(SUM(ISNULL(dblTotalRetailValue, 0)) - SUM(ISNULL(dblTotalCostValue,0)), SUM(ISNULL(dblTotalRetailValue, 0)))
 		FROM	tblICCategoryPricing CategoryPricing 
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemLocationId = CategoryPricing.intItemLocationId
 		WHERE	CategoryPricing.intCategoryId = @intCategoryId
-				AND CategoryPricing.intItemLocationId = @intItemLocationId
-
+				AND ItemLocation.intLocationId = @intLocationId
 
 	RETURN @dblAverageMargin
 
