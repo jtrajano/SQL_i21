@@ -529,6 +529,26 @@ BEGIN
         AND P.[intTransactionDetailId] IS NULL
         AND P.[intEntityId] <> [intUserId]
         AND P.[ysnUserAllowedToPostOtherTrans] = 1
+
+    UNION
+
+    --Unprocessed Credit Card
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Credit Card Needs Processed to continue with Posting.'
+	FROM
+		@Payments P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NULL
+        AND ISNULL(P.[intEntityCardInfoId], 0) <> 0 
+        AND ISNULL(P.[ysnProcessCreditCard], 0) = 0
+        AND @Recap = 0
+
     --UNPOST
     UNION
 
