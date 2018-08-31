@@ -59,6 +59,7 @@ Declare @intMinSeq					INT,
 		@strProductType				NVARCHAR(100),
 		@strVendorBatch				NVARCHAR(100),
 		@str10Zeros					NVARCHAR(50)='0000000000',
+		@strProducer				NVARCHAR(MAX),
 		@strLoadingPoint			NVARCHAR(200),
 		@strPackingDescription		NVARCHAR(50)
 
@@ -242,6 +243,7 @@ Begin
 			@strFeedStatus				= strFeedStatus,
 			@strContractItemNo			= strContractItemNo,
 			@strOrigin					= strOrigin,
+			@strProducer				= strProducer,
 			@strLoadingPoint			= strLoadingPoint,
 			@strPackingDescription		= strPackingDescription	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
@@ -620,6 +622,25 @@ Begin
 						Set @strTextXml += '<TEXT_LINE>'	+  '0' + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
+
+					--Country of Origin (L17)
+					If ISNULL(@strOrigin,'')<>''
+					Begin
+						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
+						Set @strTextXml += '<TEXT_ID>' + 'L17' + '</TEXT_ID>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
+						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
+					End
+
+					--Shipper (F17)
+					If ISNULL(@strProducer,'')<>''
+					Begin
+						Set @strTextXml += '<E1BPMEPOTEXT>'
+						Set @strTextXml += '<PO_ITEM>' + '0001'	+ '</PO_ITEM>'
+						Set @strTextXml += '<TEXT_ID>' + 'F17' + '</TEXT_ID>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strProducer,'')) + '</TEXT_LINE>' 
+						Set @strTextXml += '</E1BPMEPOTEXT>'
+					End
 				End
 
 				If UPPER(@strCommodityCode)='TEA'
@@ -628,6 +649,25 @@ Begin
 						Set @strTextXml += '<TEXT_ID>'		+ 'L15' + '</TEXT_ID>' 
 						Set @strTextXml += '<TEXT_LINE>'	+  'N' + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
+
+						--Country of Origin (L17)
+						If ISNULL(@strOrigin,'')<>''
+						Begin
+							Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
+							Set @strTextXml += '<TEXT_ID>' + 'L17' + '</TEXT_ID>' 
+							Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
+							Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
+						End
+
+						--Shipper (F17)
+						If ISNULL(@strProducer,'')<>''
+						Begin
+							Set @strTextXml += '<E1BPMEPOTEXT>'
+							Set @strTextXml += '<PO_ITEM>' + ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'') + '</PO_ITEM>'
+							Set @strTextXml += '<TEXT_ID>' + 'F17' + '</TEXT_ID>'
+							Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strProducer,'')) + '</TEXT_LINE>'
+							Set @strTextXml += '</E1BPMEPOTEXT>'
+						End
 				End
 			End
 
