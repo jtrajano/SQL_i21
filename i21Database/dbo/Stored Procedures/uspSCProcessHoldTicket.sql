@@ -97,7 +97,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		IF EXISTS (SELECT intDeliverySheetId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId AND ysnPost = 1)
+		IF EXISTS (SELECT intDeliverySheetId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId AND ysnPost = 1)
 		BEGIN 
 			IF ISNULL(@ysnPost , 0) = 1
 			BEGIN
