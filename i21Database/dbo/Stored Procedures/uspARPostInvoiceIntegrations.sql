@@ -443,7 +443,7 @@ BEGIN
 		
         -- Update CT - Sequence Balance
         EXEC [uspARInvoiceUpdateSequenceBalance] 
-              @post          = 1
+              @ysnDelete          = 1
              ,@TransactionId = @InvoiceIDP
              ,@UserId        = @UserId
 
@@ -935,7 +935,7 @@ BEGIN
 		
         -- Update CT - Sequence Balance
         EXEC [uspARInvoiceUpdateSequenceBalance] 
-              @post          = 0
+              @ysnDelete          = 0
              ,@TransactionId = @InvoiceIDU
              ,@UserId        = @UserId
 

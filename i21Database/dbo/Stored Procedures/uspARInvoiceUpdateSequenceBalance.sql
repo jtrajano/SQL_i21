@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceUpdateSequenceBalance]
-	 @post			BIT = 0  
+	 @ysnDelete			BIT = 0  
 	,@TransactionId	INT = NULL   
 	,@UserId		INT = NULL    
 AS
 BEGIN
 		DECLARE InvoiceTickets CURSOR
-		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId AND intTicketId IS NOT NULL and (intContractDetailId IS NOT NULL AND intContractHeaderId IS NOT NULL)
+		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped,dblQtyOrdered FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId AND intTicketId IS NOT NULL and (intContractDetailId IS NOT NULL AND intContractHeaderId IS NOT NULL)
 		OPEN InvoiceTickets
 		DECLARE @intInvoiceId INT,
 				@intInvoiceDetailId INT,
@@ -13,9 +13,10 @@ BEGIN
 				@intInventoryShipmentItemId INT,
 				@intContractHeaderId INT,
 				@intContractDetailId INT,
-				@dblQty NUMERIC(18,6)
+				@dblQty NUMERIC(18,6),
+				@dblQtyOrdered NUMERIC(18,6)
 		FETCH NEXT FROM InvoiceTickets
-		INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty
+		INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered
 		WHILE @@FETCH_STATUS = 0
 			BEGIN
 				DECLARE   @intTicketTypeId	INT = NULL
@@ -29,22 +30,51 @@ BEGIN
 								, @strInOutFlag	= strInOutFlag
 						FROM tblSCTicket WHERE intTicketId = @intTicketId
 					END		
-				IF @post = 0
+				IF @ysnDelete = 1
 					BEGIN
 						SET @dblQty = @dblQty * (-1)
 					END
 
 				IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6)) AND ISNULL(@intInventoryShipmentItemId, 0) = 0
 					BEGIN
-							EXEC uspCTUpdateSequenceBalance 
-								 @intContractDetailId = @intContractDetailId
-								,@dblQuantityToUpdate = @dblQty
-								,@intUserId = @UserId
-								,@intExternalId = @intInvoiceId
-								,@strScreenName = 'Invoice'
+							IF(@ysnDelete = 1)
+							BEGIN 
+								EXEC uspCTUpdateSequenceBalance 
+									 @intContractDetailId = @intContractDetailId
+									,@dblQuantityToUpdate = @dblQty
+									,@intUserId = @UserId
+									,@intExternalId = @intInvoiceId
+									,@strScreenName = 'Invoice'		
+
+								EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblQtyOrdered,
+									@intUserId				=	@UserId,
+									@intExternalId			=	@intInvoiceId,
+									@strScreenName			=	'Invoice'		
+
+						
+							END
+						ELSE
+							BEGIN
+								SET @dblQtyOrdered = @dblQtyOrdered * (-1)
+								EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblQtyOrdered,
+									@intUserId				=	@UserId,
+									@intExternalId			=	@intInvoiceId,
+									@strScreenName			=	'Invoice'		
+
+								EXEC uspCTUpdateSequenceBalance 
+									 @intContractDetailId = @intContractDetailId
+									,@dblQuantityToUpdate = @dblQty
+									,@intUserId = @UserId
+									,@intExternalId = @intInvoiceId
+									,@strScreenName = 'Invoice'
+							END
 					END
 				FETCH NEXT FROM InvoiceTickets
-				INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty
+				INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered
 			END
 		CLOSE InvoiceTickets
 		DEALLOCATE InvoiceTickets
