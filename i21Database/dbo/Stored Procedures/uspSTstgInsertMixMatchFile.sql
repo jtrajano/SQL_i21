@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTstgInsertMixMatchFile]
-	@StoreId int
-	, @Register int
-	, @BeginningMixMatchId int
-	, @EndingMixMatchId int
-	, @BuildFileThruEndingDate Datetime
-	, @strGenerateXML nvarchar(max) OUTPUT
+	@StoreId INT
+	, @Register INT
+	--, @BeginningMixMatchId INT
+	--, @EndingMixMatchId INT
+	--, @BuildFileThruEndingDate DATETIME
+	, @strGenerateXML NVARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @strResult NVARCHAR(1000) OUTPUT
 AS
@@ -16,11 +16,12 @@ BEGIN
 	DECLARE @strRegister NVARCHAR(200)
 			, @strRegisterClass NVARCHAR(200)
 			, @dblXmlVersion NUMERIC(4, 2)
+
 	SELECT @strRegister = strRegisterName 
 			, @strRegisterClass = strRegisterClass
 			, @dblXmlVersion = dblXmlVersion
 	FROM dbo.tblSTRegister 
-	Where intRegisterId = @Register
+	WHERE intRegisterId = @Register
 
 
 	-- =========================================================================================================
@@ -36,10 +37,12 @@ BEGIN
 		BEGIN
 				SET @strGenerateXML = ''
 				SET @intImportFileHeaderId = 0
-				SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File (' + @strFilePrefix + ')'
+				SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Promotion Sales List - Mix and Match (' + @strFilePrefix + ')'
+				-- SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File (' + @strFilePrefix + ')'
 
 				RETURN
 		END
+	-- =========================================================================================================
 
 
 	-- PASSPORT
@@ -99,19 +102,28 @@ BEGIN
 							, PSLD.dblPrice [MixMatchPrice]
 							, @strUniqueGuid AS [strUniqueGuid]
 						FROM tblICItem I
-						JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-						JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
-						JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
-						JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-						JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
-						JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
-						JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId
-						JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId
-						JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+						JOIN tblICItemLocation IL 
+							ON IL.intItemId = I.intItemId
+						JOIN tblSMCompanyLocation L 
+							ON L.intCompanyLocationId = IL.intLocationId
+						JOIN tblICItemUOM IUOM 
+							ON IUOM.intItemId = I.intItemId 
+						JOIN tblICUnitMeasure IUM 
+							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+						JOIN tblSTStore ST 
+							ON ST.intCompanyLocationId = L.intCompanyLocationId 
+						JOIN tblSTRegister R 
+							ON R.intStoreId = ST.intStoreId
+						JOIN tblSTPromotionItemList PIL 
+							ON PIL.intStoreId = ST.intStoreId
+						JOIN tblSTPromotionSalesList PSL 
+							ON PSL.intStoreId = ST.intStoreId
+						JOIN tblSTPromotionSalesListDetail PSLD 
+							ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
 						WHERE R.intRegisterId = @Register 
 						AND ST.intStoreId = @StoreId
-						AND PSL.strPromoType = 'M'
-						AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId	
+						AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
+						-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId	
 
 						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookMixMatchMMT33)
 						BEGIN
@@ -119,7 +131,8 @@ BEGIN
 							EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGenerateXML OUTPUT
 
 							--Once XML is generated delete the data from pricebook staging table.
-							DELETE FROM tblSTstgPassportPricebookMixMatchMMT33
+							DELETE 
+							FROM tblSTstgPassportPricebookMixMatchMMT33
 							WHERE strUniqueGuid = @strUniqueGuid
 						END
 				END
@@ -134,14 +147,28 @@ BEGIN
 				, 'Rel. 13.2.0' [VendorModelVersion]
 				, 'update' [TableActionType]
 				, 'addchange' [RecordActionType] 
-				, CASE PSL.ysnDeleteFromRegister WHEN 0 THEN 'addchange' WHEN 1 THEN 'delete' ELSE 'addchange' END as [MMTDetailRecordActionType] 
+				, CASE PSL.ysnDeleteFromRegister 
+					WHEN 0 
+						THEN 'addchange' 
+					WHEN 1 
+						THEN 'delete' 
+					ELSE 'addchange' 
+				END AS [MMTDetailRecordActionType] 
 				, 'no' [MMTDetailRecordActionConfirm]
 				, PSL.intPromoSalesId [PromotionID]
 				, PSL.strPromoReason [PromotionReason]
 				, PSL.strPromoSalesDescription [MixMatchDescription]
 				, 1 [SalesRestrictCode]
-				, CASE WHEN PSL.ysnPurchaseAtleastMin = 1 THEN 'yes' Else 'no' END [MixMatchStrictHighFlagValue]
-				, CASE WHEN PSL.ysnPurchaseExactMultiples = 1 THEN 'yes' ELSE 'no' END [MixMatchStrictLowFlagValue]
+				, CASE 
+					WHEN PSL.ysnPurchaseAtleastMin = 1 
+						THEN 'yes' 
+					ELSE 'no' 
+				END [MixMatchStrictHighFlagValue]
+				, CASE 
+					WHEN PSL.ysnPurchaseExactMultiples = 1 
+						THEN 'yes' 
+					ELSE 'no' 
+				END [MixMatchStrictLowFlagValue]
 				, PIL.intPromoItemListNo [ItemListID]
 				, PSLD.intQuantity [MixMatchUnits]
 				, PSLD.dblPrice [MixMatchPrice]
@@ -150,7 +177,11 @@ BEGIN
 				, '0:00:01' [StartTime]
 				, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) [StopDate]
 				, '23:59:59' [StopTime]
-				, CASE WHEN R.strRegisterClass = 'RADIANT' THEN 0 ELSE NULL END [Priority]
+				, CASE 
+					WHEN R.strRegisterClass = 'RADIANT' 
+						THEN 0 
+					ELSE NULL 
+				END [Priority]
 				, 'yes' [WeekdayAvailabilitySunday]
 				, 'Sunday' [WeekdaySunday]
 				, 'yes' [WeekdayAvailabilityMonday]
@@ -167,18 +198,29 @@ BEGIN
 				, 'Saturday' [WeekdaySaturday]	
 				, NULL [MixMatchPromotions]
 				, R.strRegisterStoreId [DiscountExternalID]
-			from tblICItem I
-			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-			JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
-			JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
-			JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-			JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
-			JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
-			JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId
-			JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
-			JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
-			WHERE R.intRegisterId = @Register AND ST.intStoreId = @StoreId AND PSL.strPromoType = 'M'
-			AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId
+			FROM tblICItem I
+			JOIN tblICItemLocation IL 
+				ON IL.intItemId = I.intItemId
+			JOIN tblSMCompanyLocation L 
+				ON L.intCompanyLocationId = IL.intLocationId
+			JOIN tblICItemUOM IUOM 
+				ON IUOM.intItemId = I.intItemId 
+			JOIN tblICUnitMeasure IUM 
+				ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+			JOIN tblSTStore ST 
+				ON ST.intCompanyLocationId = L.intCompanyLocationId 
+			JOIN tblSTRegister R 
+				ON R.intStoreId = ST.intStoreId
+			JOIN tblSTPromotionItemList PIL 
+				ON PIL.intStoreId = ST.intStoreId
+			JOIN tblSTPromotionSalesList PSL 
+				ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
+			JOIN tblSTPromotionSalesListDetail PSLD 
+				ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+			WHERE R.intRegisterId = @Register 
+			AND ST.intStoreId = @StoreId 
+			AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
+			-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId
 
 			--SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
 			--Where strLayoutTitle = 'Pricebook Mix Match' AND strFileType = 'XML'
