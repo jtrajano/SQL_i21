@@ -855,25 +855,27 @@ BEGIN
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
-
+-- Sales Basis Deliveries
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-			select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from (
-			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader, strCommodityCode,'Sls Basis Deliveries' strType,
+	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from  (
+			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
-			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber
-			,r.intInventoryShipmentId,strShipmentNumber strShipmentNumber1
+			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,r.strShipmentNumber,cd.strContractNumber
+			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1
 			FROM vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
-			WHERE cd.intCommodityId =@intCommodityId AND v.strTransactionType ='Inventory Shipment'
+			LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
+			INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-			and isnull(cd.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(cd.intEntityId,0) else @intVendorId end
 			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+			and ISNULL(inv.ysnPosted,0) = 0
 			)t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
