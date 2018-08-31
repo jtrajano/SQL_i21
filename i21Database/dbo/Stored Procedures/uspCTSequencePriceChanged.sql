@@ -105,8 +105,9 @@ BEGIN TRY
 		FROM	tblICInventoryReceipt		IR
 		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
    LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
+												AND BD.intInventoryReceiptChargeId IS NULL
    LEFT	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract'  AND BD.intInventoryReceiptChargeId IS NULL
+		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract'  
 
 		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
 
