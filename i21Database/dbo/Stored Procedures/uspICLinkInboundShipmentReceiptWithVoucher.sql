@@ -14,7 +14,8 @@ FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 			AND r.ysnPosted = 1
 		INNER JOIN (
 			tblAPBill b INNER JOIN tblAPBillDetail bd
-				ON b.intBillId = bd.intBillId		
+				ON b.intBillId = bd.intBillId
+				AND b.intTransactionType = 1 -- 'Voucher type'
 		)
 			ON ri.intOrderId = bd.intContractHeaderId
 			AND ri.intLineNo = bd.intContractDetailId
