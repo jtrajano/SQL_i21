@@ -10,7 +10,7 @@ SELECT
 	, dblUnitPerFoot		= ISNULL(storage.dblUnitPerFoot, 0)
 	, dblStock				= CAST(summary.dblStock AS NUMERIC(16, 8))
 	, dblCapacity			= CAST(ISNULL(storage.dblEffectiveDepth, 0) * ISNULL(storage.dblUnitPerFoot, 0) AS NUMERIC(16, 8))
-	, dblAvailable			= CAST(dbo.fnMaxNumeric((ISNULL(storage.dblEffectiveDepth, 0) * ISNULL(storage.dblUnitPerFoot, 0)) - summary.dblStock, 0) AS NUMERIC(16, 8))
+	, dblAvailable			= CAST((ISNULL(storage.dblEffectiveDepth, 0) * ISNULL(storage.dblUnitPerFoot, 0)) - summary.dblStock AS NUMERIC(16, 8))
 FROM tblSMCompanyLocationSubLocation subLocation
 	INNER JOIN (
 		SELECT 
