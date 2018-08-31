@@ -58,7 +58,7 @@ BEGIN
 	  AD.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
 	  JOIN tblCTAOP A ON A.intAOPId=AD.intAOPId
 	  JOIN tblICItem Item ON Item.intItemId=AD.intBasisItemId
-	  WHERE AD.intCommodityId=1 AND A.strYear=@strYear
+	  WHERE A.intCommodityId=1 AND A.strYear=@strYear
 	  UNION
 	  SELECT intItemId,strItemNo FROM tblICItem Where strType='Other Charge' AND  ysnBasisContract=1 
 
@@ -147,16 +147,16 @@ BEGIN
 								FROM	tblCTAOPDetail		AD
 								JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId
 								LEFT  JOIN     tblSMCurrency     Currency ON Currency.intCurrencyID=AD.intCurrencyId
-								LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AD.intCommodityId	LEFT
+								LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
 								JOIN	tblICItem			IM	ON	IM.intItemId		=	AD.intItemId		LEFT
 								JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId	LEFT
 								JOIN	tblICItemUOM		VU	ON	VU.intItemUOMId		=	AD.intVolumeUOMId	LEFT
 								JOIN	tblICUnitMeasure	VM	ON	VM.intUnitMeasureId	=	VU.intUnitMeasureId	LEFT
 								JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId		=	AD.intWeightUOMId	LEFT
 								JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId LEFT
-								JOIN	tblSMCompanyLocation	CL  ON	CL.intCompanyLocationId	=	AD.intCompanyLocationId
+								JOIN	tblSMCompanyLocation	CL  ON	CL.intCompanyLocationId	=	AP.intCompanyLocationId
 								LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId							
-								WHERE AD.dblCost >0 AND AD.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +'
+								WHERE AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +'
 							END'
 		
 
@@ -167,7 +167,7 @@ BEGIN
 						FROM	tblCTAOPDetail		AD
 						JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId
 						LEFT  JOIN     tblSMCurrency     Currency ON Currency.intCurrencyID=AD.intCurrencyId
-						LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AD.intCommodityId	LEFT
+						LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
 						JOIN	tblICItem			IM	ON	IM.intItemId		=	AD.intItemId		LEFT
 						JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId	LEFT
 						JOIN	tblICItemUOM		VU	ON	VU.intItemUOMId		=	AD.intVolumeUOMId	LEFT
@@ -175,7 +175,7 @@ BEGIN
 						JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId		=	AD.intWeightUOMId	LEFT
 						JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId
 						LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId							
-						WHERE AD.dblCost >0 AND AD.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
+						WHERE AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
 		
 		--SELECT @SqlUpdate
 		EXEC (@SqlUpdate)
@@ -186,9 +186,9 @@ BEGIN
 										 FROM	#tblCoffeeNeedPlan
 										 JOIN   tblCTAOPDetail		AD ON 1=1
 										 JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId			LEFT
-										 JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AD.intCommodityId	LEFT
+										 JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
 										 JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId 
-										 WHERE  AD.dblCost >0 AND AD.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
+										 WHERE  AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
 		--SELECT @SqlTotalPremiumCalculation
 
 		EXEC (@SqlTotalPremiumCalculation)		
