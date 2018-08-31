@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTstgInsertPricebookSendFile]
-	@intStoreId INT
+	@strFilePrefix NVARCHAR(50)
+	, @intStoreId INT
 	, @intRegisterId INT
 	, @strCategoryCode NVARCHAR(MAX)
 	, @dtmBeginningChangeDate DATETIME
@@ -15,7 +16,7 @@ BEGIN
 		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
 		SET @strMessageResult = ''
 
-		DECLARE @strFilePrefix AS NVARCHAR(10) = 'ITT'
+		-- DECLARE @strFilePrefix AS NVARCHAR(10) = 'ITT'
 
 		-- =========================================================================================================
 		-- CONVERT DATE's to UTC
@@ -76,6 +77,7 @@ BEGIN
 					END
 				ELSE
 					BEGIN
+						SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
 						SET @strGeneratedXML = ''
 						SET @intImportFileHeaderId = 0
 						SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'

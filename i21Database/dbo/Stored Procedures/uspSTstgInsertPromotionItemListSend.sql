@@ -1,15 +1,18 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTstgInsertPromotionItemListSend]
-	@StoreLocation INT
-	, @Register INT
-	--, @BeginningItemListId INT
-	--, @EndingItemListId INT
-	, @strGenerateXML NVARCHAR(MAX) OUTPUT
+	@strFilePrefix NVARCHAR(50)
+	, @intStoreId INT
+	, @intRegisterId INT
+	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
-	, @strResult NVARCHAR(1000) OUTPUT
+	, @ysnSuccessResult BIT OUTPUT
+	, @strMessageResult NVARCHAR(1000) OUTPUT
 AS
 BEGIN
-	
-	DECLARE @strFilePrefix AS NVARCHAR(10) = 'ILT'
+	BEGIN TRY
+		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
+		SET @strMessageResult = ''
+
+		-- DECLARE @strFilePrefix AS NVARCHAR(10) = 'ILT'
 
 	-- =========================================================================================================
 	-- Check if register has intImportFileHeaderId
@@ -21,33 +24,30 @@ BEGIN
 		   , @strRegisterClass = strRegisterClass
 		   , @dblXmlVersion = dblXmlVersion
 	FROM dbo.tblSTRegister 
-	Where intRegisterId = @Register
+	Where intRegisterId = @intRegisterId
 
-	IF EXISTS(SELECT intImportFileHeaderId FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @Register AND strFilePrefix = @strFilePrefix)
+	IF EXISTS(SELECT intImportFileHeaderId FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
 		BEGIN
 			SELECT @intImportFileHeaderId = intImportFileHeaderId 
 			FROM tblSTRegisterFileConfiguration 
-			WHERE intRegisterId = @Register AND strFilePrefix = @strFilePrefix
+			WHERE intRegisterId = @intRegisterId 
+			AND strFilePrefix = @strFilePrefix
 		END
 	ELSE
 		BEGIN
+			SET @strGeneratedXML = ''
 			SET @intImportFileHeaderId = 0
+			SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
+			SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Promotion Item List File (' + @strFilePrefix + ')'
+
+			RETURN
 		END	
 	-- =========================================================================================================
 
 
-	IF(@intImportFileHeaderId = 0)
-	BEGIN
-		SET @strGenerateXML = ''
-		SET @intImportFileHeaderId = 0
-		SET @strResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Promotion Item List File (' + @strFilePrefix + ')'
-
-		RETURN
-	END
-
 
 	DECLARE @XMLGatewayVersion nvarchar(100)
-	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
+	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @intRegisterId
 
 	IF(@strRegisterClass = 'PASSPORT')
 		BEGIN
@@ -122,14 +122,14 @@ BEGIN
 					JOIN tblSTPromotionItemList PIL 
 						ON PIL.intStoreId = ST.intStoreId 
 					WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-					AND R.intRegisterId = @Register 
-					AND ST.intStoreId = @StoreLocation
+					AND R.intRegisterId = @intRegisterId 
+					AND ST.intStoreId = @intStoreId
 					-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 
 					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookItemListILT33)
 						BEGIN
 							-- Generate XML for the pricebook data availavle in staging table
-							EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGenerateXML OUTPUT
+							EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
 
 							--Once XML is generated delete the data from pricebook  staging table.
 							DELETE 
@@ -189,19 +189,22 @@ BEGIN
 			JOIN tblSTPromotionItemList PIL 
 				ON PIL.intStoreId = ST.intStoreId 
 			WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-			AND R.intRegisterId = @Register 
-			AND ST.intStoreId = @StoreLocation --AND SaleList.strPromoType = 'M'
+			AND R.intRegisterId = @intRegisterId 
+			AND ST.intStoreId = @intStoreId --AND SaleList.strPromoType = 'M'
 			-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 	
 	
 			--Generate XML for the pricebook data availavle in staging table
-			Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPromotionItemListSend~intPromotionItemListSend > 0', 0, @strGenerateXML OUTPUT
+			Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPromotionItemListSend~intPromotionItemListSend > 0', 0, @strGeneratedXML OUTPUT
 
 			--Once XML is generated delete the data from pricebook  staging table.
 			DELETE FROM [tblSTstgPromotionItemListSend]	
 		END
 
-	
-	
-	SET @strResult = 'Success'
+	END TRY
+
+	BEGIN CATCH
+		SET @ysnSuccessResult = CAST(0 AS BIT)
+		SET @strMessageResult = ERROR_MESSAGE()
+	END CATCH
 END
