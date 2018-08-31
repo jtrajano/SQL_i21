@@ -126,7 +126,7 @@ BEGIN
 					AND ST.intStoreId = @intStoreId
 					-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 
-					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookItemListILT33)
+					IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookItemListILT33 WHERE strUniqueGuid = @strUniqueGuid)
 						BEGIN
 							-- Generate XML for the pricebook data availavle in staging table
 							EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
@@ -135,6 +135,11 @@ BEGIN
 							DELETE 
 							FROM dbo.tblSTstgPassportPricebookItemListILT33
 							WHERE strUniqueGuid = @strUniqueGuid
+						END
+					ELSE 
+						BEGIN
+							SET @ysnSuccessResult = CAST(0 AS BIT)
+							SET @strMessageResult = 'No result found'
 						END
 				END
 		END

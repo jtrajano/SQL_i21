@@ -393,7 +393,7 @@ BEGIN
 								)
 							END
 
-						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookITT33)
+						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookITT33 WHERE strUniqueGuid = @strUniqueGuid)
 							BEGIN
 								-- Generate XML for the pricebook data availavle in staging table
 								Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
@@ -402,6 +402,11 @@ BEGIN
 								DELETE 
 								FROM dbo.tblSTstgPassportPricebookITT33
 								WHERE strUniqueGuid = @strUniqueGuid
+							END
+						ELSE 
+							BEGIN
+								SET @ysnSuccessResult = CAST(0 AS BIT)
+								SET @strMessageResult = 'No result found'
 							END
 					END
 			END
