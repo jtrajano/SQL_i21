@@ -280,13 +280,17 @@ BEGIN TRY
 		AND @ysnMergeOnMove = 1
 		AND @ysnCPMergeOnMove = 1
 	BEGIN
-		SELECT @strOutputLotNumber = strLotNumber
+		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND dblQty > 0
 			AND intLotStatusId = @intLotStatusId
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+
+		Select @strParentLotNumber=strParentLotNumber
+		From tblICParentLot
+		Where intParentLotId=@intParentLotId
 	END
 	ELSE IF EXISTS (
 			SELECT *
