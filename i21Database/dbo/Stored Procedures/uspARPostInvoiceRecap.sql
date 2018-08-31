@@ -1,7 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceRecap]
-     @BatchId           NVARCHAR(40)
+     @Post              BIT				= 0
+    ,@Recap             BIT				= 0
+    ,@BatchId           NVARCHAR(40)
     ,@PostDate          DATETIME                
     ,@UserId            INT
+	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
 	,@raiseError		AS BIT				= 0
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -47,15 +50,26 @@ IF @@TRANCOUNT = 0
 ELSE	 
 	SAVE TRAN @TransactionName
 
-
 BEGIN TRY
 
+    DECLARE @StartingNumberId INT
+    SET @StartingNumberId = 3
+    IF(LEN(RTRIM(LTRIM(ISNULL(@BatchId,'')))) = 0)
+    BEGIN
+        EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @BatchId OUT
+    END
+
+	SET @BatchIdUsed = @BatchId
+
+	IF @Post = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @UserId
 
+	IF @Post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]
 
+	IF @Post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  
 
 END TRY
@@ -158,205 +172,15 @@ BEGIN TRY
 	intSourceEntityId INT NULL,
 	ysnRebuild BIT NULL)
 	
-    DECLARE @GLEntries RecapTableType
-	INSERT INTO @GLEntries
-		([dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		,[strRateType]
-		,[strDocument]
-		,[strComments]
-		,[strSourceDocumentId]
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		,[dblSourceUnitDebit]
-		,[dblSourceUnitCredit]
-		,[intCommodityId]
-		,[intSourceEntityId]
-		,[ysnRebuild])
+	IF @Post = 1
 	EXEC dbo.uspARGenerateEntriesForAccrual  
 
     EXEC [dbo].[uspARGenerateGLEntries]
-
-	--IF @recap = 0
-	--	BEGIN
-	--		BEGIN TRY
-	--			DECLARE @FinalGLEntries AS RecapTableType
-	--			DELETE FROM @FinalGLEntries
-
-	--			IF EXISTS ( SELECT TOP 1 1 FROM @FinalGLEntries)
-
-	--				DECLARE @InvalidGLEntries AS TABLE
-	--				(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	--				,strText			NVARCHAR(150)  COLLATE Latin1_General_CI_AS NULL
-	--				,intErrorCode		INT
-	--				,strModuleName		NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL)
-
-	--				INSERT INTO @InvalidGLEntries
-	--					(strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName)
-	--				SELECT DISTINCT
-	--					strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName
-	--				FROM
-	--					[dbo].[fnGetGLEntriesErrors](@GLEntries)
-
-	--				SET @invalidCount = @invalidCount + ISNULL((SELECT COUNT(strTransactionId) FROM @InvalidGLEntries), 0)
-
-	--				INSERT INTO 
-	--						tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-	--					SELECT DISTINCT
-	--							strError				= IGLE.strText
-	--						,strTransactionType		= GLE.strTransactionType 
-	--						,strTransactionId		= IGLE.strTransactionId
-	--						,strBatchNumber			= GLE.strBatchId
-	--						,intTransactionId		= GLE.intTransactionId 
-	--					FROM
-	--						@InvalidGLEntries IGLE
-	--					LEFT OUTER JOIN
-	--						@GLEntries GLE
-	--							ON IGLE.strTransactionId = GLE.strTransactionId
-					
-
-	--				DELETE FROM @GLEntries
-	--				WHERE
-	--					strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				DELETE FROM @PostInvoiceData
-	--				WHERE
-	--					strInvoiceNumber IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				EXEC	dbo.uspGLBookEntries
-	--								@GLEntries		= @FinalGLEntries
-	--							,@ysnPost		= @post
-	--							,@XACT_ABORT_ON = @raiseError
-	--		END TRY
-	--		BEGIN CATCH
-	--			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--			GOTO Do_Rollback
-	--		END CATCH
-	--	END	
-
-	INSERT INTO @GLEntries
-		([dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		,[strRateType]
-		,[strDocument]
-		,[strComments]
-		,[strSourceDocumentId]
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		,[dblSourceUnitDebit]
-		,[dblSourceUnitCredit]
-		,[intCommodityId]
-		,[intSourceEntityId]
-		,[ysnRebuild])
-	SELECT
-		 [dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		,[strRateType]
-		,[strDocument]
-		,[strComments]
-		,[strSourceDocumentId]
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		,[dblSourceUnitDebit]
-		,[dblSourceUnitCredit]
-		,[intCommodityId]
-		,[intSourceEntityId]
-		,[ysnRebuild]
-    FROM
-        #ARInvoiceGLEntries
+         @Post     = @Post
+	    ,@Recap    = @Recap
+        ,@PostDate = @PostDate
+        ,@BatchId  = @BatchId
+        ,@UserId   = @UserId
 
 END TRY
 BEGIN CATCH
@@ -407,172 +231,389 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 
---DECLARE @DefaultCurrencyId                  INT
---        ,@DefaultCurrencyExchangeRateTypeId INT
---SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
---SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
+DECLARE @Invoice [InvoicePostingTable]
+INSERT @Invoice
+    ([intInvoiceId]
+    ,[strInvoiceNumber]
+    ,[strTransactionType]
+    ,[strType]
+    ,[dtmDate]
+    ,[dtmPostDate]
+    ,[dtmShipDate]
+    ,[intEntityCustomerId]
+    ,[strCustomerNumber]
+    ,[ysnCustomerActive]
+    ,[dblCustomerCreditLimit]
+    ,[intCompanyLocationId]
+    ,[strCompanyLocationName]
+    ,[intAccountId]
+    ,[intAPAccount]
+    ,[intFreightIncome]
+    ,[intDeferredRevenueAccountId]
+    ,[intUndepositedFundsId]
+    ,[intProfitCenter]
+    ,[intLocationSalesAccountId]
+    ,[intCurrencyId]
+    ,[dblAverageExchangeRate]
+    ,[intTermId]
+    ,[dblInvoiceTotal]
+    ,[dblBaseInvoiceTotal]
+    ,[dblShipping]
+    ,[dblBaseShipping]
+    ,[dblTax]
+    ,[dblBaseTax]
+    ,[dblAmountDue]
+    ,[dblBaseAmountDue]
+    ,[dblPayment]
+    ,[dblBasePayment]
+    ,[strComments]
+    ,[strImportFormat]
+    ,[intSourceId]
+    ,[intOriginalInvoiceId]
+    ,[strInvoiceOriginId]
+    ,[intDistributionHeaderId]
+    ,[intLoadDistributionHeaderId]
+    ,[intLoadId]
+    ,[intFreightTermId]
+    ,[strActualCostId]
+    ,[intPeriodsToAccrue]
+    ,[ysnAccrueLicense]
+    ,[intSplitId]
+    ,[dblSplitPercent]
+    ,[ysnSplitted]
+    ,[ysnPosted]
+    ,[ysnRecurring]
+    ,[ysnImpactInventory]
+    ,[ysnImportedAsPosted]
+	,[ysnImportedFromOrigin]
+    ,[dtmDatePosted]
+    ,[strBatchId]
+    ,[ysnPost]
+    ,[ysnRecap]
+    ,[intEntityId]
+    ,[intUserId]
+    ,[ysnUserAllowedToPostOtherTrans]
+    ,[ysnWithinAccountingDate]
+    ,[ysnForApproval]
+    ,[ysnImpactForProvisional]
+    ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnIsInvoicePositive]
 
---IF @recap = 1		
---	BEGIN
---		IF @raiseError = 0
---			ROLLBACK TRAN @TransactionName		
+    ,[intInvoiceDetailId]
+    ,[intItemId]
+    ,[strItemNo]
+    ,[strItemType]
+    ,[strItemDescription]
+    ,[intItemUOMId]
+    ,[intItemWeightUOMId]
+    ,[intItemAccountId]
+    ,[intServiceChargeAccountId]
+    ,[intSalesAccountId]
+    ,[intCOGSAccountId]
+    ,[intInventoryAccountId]
+    ,[intLicenseAccountId]
+    ,[intMaintenanceAccountId]
+    ,[intConversionAccountId]
+    ,[dblQtyShipped]
+    ,[dblUnitQtyShipped]
+    ,[dblShipmentNetWt]
+    ,[dblUnitQty]
+    ,[dblUnitOnHand]
+    ,[intAllowNegativeInventory]
+    ,[ysnStockTracking]
+    ,[intItemLocationId]
+    ,[dblLastCost]
+    ,[intCategoryId]
+    ,[ysnRetailValuation]
+    ,[dblPrice]
+    ,[dblBasePrice]
+    ,[dblUnitPrice]
+    ,[dblBaseUnitPrice]
+    ,[strPricing]
+    ,[dblDiscount]
+    ,[dblDiscountAmount]
+    ,[dblBaseDiscountAmount]
+    ,[dblTotal]
+    ,[dblBaseTotal]
+    ,[dblLineItemGLAmount]
+    ,[dblBaseLineItemGLAmount]
+    ,[intCurrencyExchangeRateTypeId]
+    ,[dblCurrencyExchangeRate]
+    ,[strCurrencyExchangeRateType]
+    ,[intLotId]
+    ,[strMaintenanceType]
+    ,[strFrequency]
+    ,[dtmMaintenanceDate]
+    ,[dblLicenseAmount]
+    ,[dblBaseLicenseAmount]
+    ,[dblLicenseGLAmount]
+    ,[dblBaseLicenseGLAmount]
+    ,[dblMaintenanceAmount]
+    ,[dblBaseMaintenanceAmount]
+    ,[dblMaintenanceGLAmount]
+    ,[dblBaseMaintenanceGLAmount]
+    ,[ysnTankRequired]
+    ,[ysnLeaseBilling]
+    ,[intSiteId]
+    ,[intPerformerId]
+    ,[intContractHeaderId]
+    ,[intContractDetailId]
+    ,[intInventoryShipmentItemId]
+    ,[intInventoryShipmentChargeId]
+    ,[intSalesOrderDetailId]
+    ,[intLoadDetailId]
+    ,[intShipmentId]
+    ,[intTicketId]
+    ,[intDiscountAccountId]
+    ,[intCustomerStorageId]
+    ,[intStorageScheduleTypeId]
+    ,[intSubLocationId]
+    ,[intStorageLocationId]
+    ,[ysnAutoBlend]
+    ,[ysnBlended]
+    ,[dblQuantity]
+    ,[dblMaxQuantity]
+    ,[strOptionType]
+    ,[strSourceType]
+    ,[strPostingMessage]
+    ,[strDescription])
+SELECT 
+     [intInvoiceId]
+    ,[strInvoiceNumber]
+    ,[strTransactionType]
+    ,[strType]
+    ,[dtmDate]
+    ,[dtmPostDate]
+    ,[dtmShipDate]
+    ,[intEntityCustomerId]
+    ,[strCustomerNumber]
+    ,[ysnCustomerActive]
+    ,[dblCustomerCreditLimit]
+    ,[intCompanyLocationId]
+    ,[strCompanyLocationName]
+    ,[intAccountId]
+    ,[intAPAccount]
+    ,[intFreightIncome]
+    ,[intDeferredRevenueAccountId]
+    ,[intUndepositedFundsId]
+    ,[intProfitCenter]
+    ,[intLocationSalesAccountId]
+    ,[intCurrencyId]
+    ,[dblAverageExchangeRate]
+    ,[intTermId]
+    ,[dblInvoiceTotal]
+    ,[dblBaseInvoiceTotal]
+    ,[dblShipping]
+    ,[dblBaseShipping]
+    ,[dblTax]
+    ,[dblBaseTax]
+    ,[dblAmountDue]
+    ,[dblBaseAmountDue]
+    ,[dblPayment]
+    ,[dblBasePayment]
+    ,[strComments]
+    ,[strImportFormat]
+    ,[intSourceId]
+    ,[intOriginalInvoiceId]
+    ,[strInvoiceOriginId]
+    ,[intDistributionHeaderId]
+    ,[intLoadDistributionHeaderId]
+    ,[intLoadId]
+    ,[intFreightTermId]
+    ,[strActualCostId]
+    ,[intPeriodsToAccrue]
+    ,[ysnAccrueLicense]
+    ,[intSplitId]
+    ,[dblSplitPercent]
+    ,[ysnSplitted]
+    ,[ysnPosted]
+    ,[ysnRecurring]
+    ,[ysnImpactInventory]
+    ,[ysnImportedAsPosted]
+	,[ysnImportedFromOrigin]
+    ,[dtmDatePosted]
+    ,[strBatchId]
+    ,[ysnPost]
+    ,[ysnRecap]
+    ,[intEntityId]
+    ,[intUserId]
+    ,[ysnUserAllowedToPostOtherTrans]
+    ,[ysnWithinAccountingDate]
+    ,[ysnForApproval]
+    ,[ysnImpactForProvisional]
+    ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnIsInvoicePositive]
 
---		DELETE GLDR  
---		FROM 
---			(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID  
---		INNER JOIN 
---			(SELECT intTransactionId, strTransactionId, strCode FROM dbo.tblGLDetailRecap WITH (NOLOCK)) GLDR 
---				ON (PID.strInvoiceNumber = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
-		   
---		BEGIN TRY		
-		 
---			INSERT INTO tblGLPostRecap(
---			 [strTransactionId]
---			,[intTransactionId]
---			,[intAccountId]
---			,[strDescription]
---			,[strJournalLineDescription]
---			,[strReference]	
---			,[dtmTransactionDate]
---			,[dblDebit]
---			,[dblCredit]
---			,[dblDebitUnit]
---			,[dblCreditUnit]
---			,[dblDebitForeign]
---			,[dblCreditForeign]			
---			,[intCurrencyId]
---			,[dtmDate]
---			,[ysnIsUnposted]
---			,[intConcurrencyId]	
---			,[dblExchangeRate]
---			,[intUserId]
---			,[dtmDateEntered]
---			,[strBatchId]
---			,[strCode]
---			,[strModuleName]
---			,[strTransactionForm]
---			,[strTransactionType]
---			,[strAccountId]
---			,[strAccountGroup]
---			,[strRateType]
---		)
---		SELECT
---			[strTransactionId]
---			,A.[intTransactionId]
---			,A.[intAccountId]
---			--,A.[strDescription]
---			, strDescription					= B.strDescription
---			,A.[strJournalLineDescription]
---			,A.[strReference]	
---			,A.[dtmTransactionDate]
---			,Debit.Value
---			,Credit.Value
---			,DebitUnit.Value
---			,CreditUnit.Value
---			,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblDebitForeign] END
---			,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblCreditForeign]	 END 		
---			,A.[intCurrencyId]
---			,A.[dtmDate]
---			,A.[ysnIsUnposted]
---			,A.[intConcurrencyId]	
---			,[dblExchangeRate]					= ISNULL(RATETYPE.dblCurrencyExchangeRate, @OneDecimal)
---			,A.[intUserId]
---			,A.[dtmDateEntered]
---			,A.[strBatchId]
---			,A.[strCode]
---			,A.[strModuleName]
---			,A.[strTransactionForm]
---			,A.[strTransactionType]
---			,B.strAccountId
---			,C.strAccountGroup
---			,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
---		FROM @GLEntries A
---		INNER JOIN dbo.tblGLAccount B 
---			ON A.intAccountId = B.intAccountId
---		INNER JOIN dbo.tblGLAccountGroup C
---			ON B.intAccountGroupId = C.intAccountGroupId			
---		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Debit
---		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Credit
---		CROSS APPLY dbo.fnGetDebitUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) DebitUnit
---		CROSS APPLY dbo.fnGetCreditUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) CreditUnit
---		OUTER APPLY (
---			SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate
---			FROM dbo.tblARInvoice I
---			OUTER APPLY (
---				SELECT TOP 1 intCurrencyExchangeRateTypeId
---				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
---				WHERE intInvoiceId = I.intInvoiceId
---			) ID
---			INNER JOIN (
---				SELECT intCurrencyExchangeRateTypeId
---					 , strCurrencyExchangeRateType
---				FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
---			) SMCERT ON SMCERT.intCurrencyExchangeRateTypeId = ISNULL(ID.intCurrencyExchangeRateTypeId, @DefaultCurrencyExchangeRateTypeId)
---			WHERE I.strInvoiceNumber = A.strTransactionId 
---			  AND I.intInvoiceId = A.intTransactionId
---		) RATETYPE
-				
---		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
+    ,[intInvoiceDetailId]
+    ,[intItemId]
+    ,[strItemNo]
+    ,[strItemType]
+    ,[strItemDescription]
+    ,[intItemUOMId]
+    ,[intItemWeightUOMId]
+    ,[intItemAccountId]
+    ,[intServiceChargeAccountId]
+    ,[intSalesAccountId]
+    ,[intCOGSAccountId]
+    ,[intInventoryAccountId]
+    ,[intLicenseAccountId]
+    ,[intMaintenanceAccountId]
+    ,[intConversionAccountId]
+    ,[dblQtyShipped]
+    ,[dblUnitQtyShipped]
+    ,[dblShipmentNetWt]
+    ,[dblUnitQty]
+    ,[dblUnitOnHand]
+    ,[intAllowNegativeInventory]
+    ,[ysnStockTracking]
+    ,[intItemLocationId]
+    ,[dblLastCost]
+    ,[intCategoryId]
+    ,[ysnRetailValuation]
+    ,[dblPrice]
+    ,[dblBasePrice]
+    ,[dblUnitPrice]
+    ,[dblBaseUnitPrice]
+    ,[strPricing]
+    ,[dblDiscount]
+    ,[dblDiscountAmount]
+    ,[dblBaseDiscountAmount]
+    ,[dblTotal]
+    ,[dblBaseTotal]
+    ,[dblLineItemGLAmount]
+    ,[dblBaseLineItemGLAmount]
+    ,[intCurrencyExchangeRateTypeId]
+    ,[dblCurrencyExchangeRate]
+    ,[strCurrencyExchangeRateType]
+    ,[intLotId]
+    ,[strMaintenanceType]
+    ,[strFrequency]
+    ,[dtmMaintenanceDate]
+    ,[dblLicenseAmount]
+    ,[dblBaseLicenseAmount]
+    ,[dblLicenseGLAmount]
+    ,[dblBaseLicenseGLAmount]
+    ,[dblMaintenanceAmount]
+    ,[dblBaseMaintenanceAmount]
+    ,[dblMaintenanceGLAmount]
+    ,[dblBaseMaintenanceGLAmount]
+    ,[ysnTankRequired]
+    ,[ysnLeaseBilling]
+    ,[intSiteId]
+    ,[intPerformerId]
+    ,[intContractHeaderId]
+    ,[intContractDetailId]
+    ,[intInventoryShipmentItemId]
+    ,[intInventoryShipmentChargeId]
+    ,[intSalesOrderDetailId]
+    ,[intLoadDetailId]
+    ,[intShipmentId]
+    ,[intTicketId]
+    ,[intDiscountAccountId]
+    ,[intCustomerStorageId]
+    ,[intStorageScheduleTypeId]
+    ,[intSubLocationId]
+    ,[intStorageLocationId]
+    ,[ysnAutoBlend]
+    ,[ysnBlended]
+    ,[dblQuantity]
+    ,[dblMaxQuantity]
+    ,[strOptionType]
+    ,[strSourceType]
+    ,[strPostingMessage]
+    ,[strDescription]
+FROM
+    #ARPostInvoiceHeader
 
---		END TRY
---		BEGIN CATCH
---			SELECT @ErrorMerssage = ERROR_MESSAGE()
---			IF @raiseError = 0
---				BEGIN
---					SET @CurrentTranCount = @@TRANCOUNT
---					SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
---					IF @CurrentTranCount = 0
---						BEGIN TRANSACTION
---					ELSE
---						SAVE TRANSACTION @CurrentSavepoint
-
---					EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param		
---				IF @CurrentTranCount = 0
---					BEGIN
---						IF (XACT_STATE()) = -1
---							ROLLBACK TRANSACTION
---						IF (XACT_STATE()) = 1
---							COMMIT TRANSACTION
---					END		
---				ELSE
---					BEGIN
---						IF (XACT_STATE()) = -1
---							ROLLBACK TRANSACTION  @CurrentSavepoint
---						--IF (XACT_STATE()) = 1
---						--	COMMIT TRANSACTION  @Savepoint
---					END
---				END			
---			IF @raiseError = 1
---				RAISERROR(@ErrorMerssage, 11, 1)
---			GOTO Post_Exit
---		END CATCH
-	
---	END 	
-
---ELSE 
---BEGIN
---	DECLARE @tmpBatchId NVARCHAR(100)
---	SELECT @tmpBatchId = [strBatchId] 
---	FROM @GLEntries A
---	INNER JOIN dbo.tblGLAccount B 
---		ON A.intAccountId = B.intAccountId
---	INNER JOIN dbo.tblGLAccountGroup C
---		ON B.intAccountGroupId = C.intAccountGroupId
---	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Debit
---	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Credit
---	CROSS APPLY dbo.fnGetDebitUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) DebitUnit
---	CROSS APPLY dbo.fnGetCreditUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) CreditUnit
-
---	UPDATE tblGLPostRecap 
---	SET 
---		dblCreditForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN @ZeroDecimal ELSE dblDebitForeign END
---		, dblDebitForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN @ZeroDecimal ELSE dblDebitForeign END
---		, dblExchangeRate = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN @ZeroDecimal ELSE dblExchangeRate END
---		, strRateType = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN NULL ELSE strRateType END
---	WHERE 			
---		tblGLPostRecap.strBatchId = @tmpBatchId
---END
+DECLARE @GLEntries RecapTableType
+INSERT INTO @GLEntries
+	([dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+	,[strRateType]
+	,[strDocument]
+	,[strComments]
+	,[strSourceDocumentId]
+	,[intSourceLocationId]
+	,[intSourceUOMId]
+	,[dblSourceUnitDebit]
+	,[dblSourceUnitCredit]
+	,[intCommodityId]
+	,[intSourceEntityId]
+	,[ysnRebuild])
+SELECT
+	 [dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+	,[strRateType]
+	,[strDocument]
+	,[strComments]
+	,[strSourceDocumentId]
+	,[intSourceLocationId]
+	,[intSourceUOMId]
+	,[dblSourceUnitDebit]
+	,[dblSourceUnitCredit]
+	,[intCommodityId]
+	,[intSourceEntityId]
+	,[ysnRebuild]
+FROM
+    #ARInvoiceGLEntries
 
 DECLARE @DefaultCurrencyId                  INT
         ,@DefaultCurrencyExchangeRateTypeId INT
@@ -584,14 +625,13 @@ ROLLBACK TRAN @TransactionName
 
 BEGIN TRY	
 
-	DELETE GLDR  
-	FROM 
-		(SELECT intInvoiceId, strInvoiceNumber FROM #ARPostInvoiceHeader WHERE [ysnRecap] = 1) PID  
-	INNER JOIN 
-		(SELECT intTransactionId, strTransactionId, strCode FROM dbo.tblGLDetailRecap WITH (NOLOCK)) GLDR 
-			ON (PID.strInvoiceNumber = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
-		   
-	
+	DELETE GLPR  
+	FROM
+		tblGLPostRecap GLPR
+	INNER JOIN
+		@Invoice I
+			ON GLPR.[intTransactionId] = I.[intInvoiceId]
+			AND GLPR.[strTransactionId] = I.[strInvoiceNumber]		   	
 		 
 	INSERT INTO tblGLPostRecap(
 		 [strTransactionId]

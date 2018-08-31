@@ -28,7 +28,6 @@ DECLARE @LineItemAccounts AS TABLE(
 	INNER JOIN
 		#ARPostInvoiceHeader PID 
 			ON ARI.[intInvoiceId] = PID.[intInvoiceId]
-			AND PID.[ysnPost] = 1
 
 	INSERT INTO @LineItemAccounts(
 		 [intDetailId]
@@ -51,8 +50,6 @@ DECLARE @LineItemAccounts AS TABLE(
 		,[intMaintenanceAccountId]
 	FROM 
 		#ARPostInvoiceDetail
-	WHERE
-		[ysnPost] = 1
 
 	--NOT IN Non-Inventory, Service, Other Charge, Software
 	UPDATE LIA
@@ -72,7 +69,6 @@ DECLARE @LineItemAccounts AS TABLE(
 	WHERE
         ISNULL(ARID.[intItemId], 0) <> 0
         AND ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
-        AND ARID.[ysnPost] = 1
 
 	--Non-Inventory, Service, Other Charge
 	UPDATE LIA
@@ -96,12 +92,9 @@ DECLARE @LineItemAccounts AS TABLE(
 	OUTER APPLY (SELECT ISNULL(dbo.fnGetItemGLAccount(ARID.intItemId, ARID.intItemLocationId, N'General'), NULLIF(dbo.fnGetItemBaseGLAccount(ARID.intItemId, ARID.intItemLocationId, N'General'), 0)) AS intGeneralAccountId) GENERAL
 	OUTER APPLY (SELECT ISNULL(dbo.fnGetItemGLAccount(ARID.intItemId, ARID.intItemLocationId, N'Other Charge Income'), NULLIF(dbo.fnGetItemBaseGLAccount(ARID.intItemId, ARID.intItemLocationId, N'Other Charge Income'), 0)) AS intOtherChargeIncomeAccountId) OTHERCHARGE
 	WHERE
-        ARID.[ysnPost] = 1
-        AND (
-            ISNULL(ARID.intItemId, 0) <> 0
-            OR
-            ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
-            )
+        ISNULL(ARID.intItemId, 0) <> 0
+        OR
+        ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
 
 	--Software License
 	UPDATE LIA
@@ -115,8 +108,7 @@ DECLARE @LineItemAccounts AS TABLE(
 			ON ARID.intItemId = IST.intItemId
 			AND ARID.[intCompanyLocationId] = IST.[intLocationId]
 	WHERE
-        ARID.[ysnPost] = 1
-        AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
+        ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
         AND ARID.strItemType = 'Software'
 
 	--Software Maintenance and SaaS
@@ -132,8 +124,7 @@ DECLARE @LineItemAccounts AS TABLE(
 			ON ARID.intItemId = IST.intItemId
 			AND ARID.[intCompanyLocationId] = IST.[intLocationId]
 	WHERE
-        ARID.[ysnPost] = 1
-        AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+        ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 		AND ARID.strItemType = 'Software'					
 
 	--NULL Account Ids
@@ -152,8 +143,7 @@ DECLARE @LineItemAccounts AS TABLE(
 			ON ARID.[intItemId] = IST.[intItemId]
 			AND ARID.intCompanyLocationId = IST.intLocationId
 	WHERE
-        ARID.[ysnPost] = 1
-        AND ISNULL(LIA.intAccountId, 0) = 0
+        ISNULL(LIA.intAccountId, 0) = 0
 		
 	--NULL Sales Account Ids
 	UPDATE LIA
@@ -168,8 +158,7 @@ DECLARE @LineItemAccounts AS TABLE(
 			ON ARID.[intItemId] = IST.[intItemId]
 			AND ARID.intCompanyLocationId = IST.intLocationId
 	WHERE
-        ARID.[ysnPost] = 1
-        AND ISNULL(LIA.intSalesAccountId, 0) = 0			
+        ISNULL(LIA.intSalesAccountId, 0) = 0			
 		
 	--Update Invoice Detail
 	UPDATE ARID
@@ -194,7 +183,6 @@ DECLARE @LineItemAccounts AS TABLE(
 	INNER JOIN
 		#ARPostInvoiceDetail ARID
 			ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
-            AND ARID.[ysnPost] = 1
 
 
     UPDATE PID
@@ -208,7 +196,6 @@ DECLARE @LineItemAccounts AS TABLE(
     INNER JOIN
         tblARInvoiceDetail ARID
             ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
-            AND PID.[ysnPost] = 1
 
 
 RETURN 0

@@ -77,8 +77,6 @@ FROM
     #ARPostInvoiceHeader
 WHERE
 	[ysnSplitted] = 0
-    AND [ysnPost] = 1
-    AND [ysnRecap] = 0
     AND ISNULL([intSplitId], 0) > 0
     AND [strTransactionType] IN ('Invoice', 'Cash', 'Debit Memo')
 
@@ -142,7 +140,7 @@ IF (ISNULL(@ForInsertion, '') <> '')
         --        ,@UserId       --@UserId
         --        ,NULL          --@IntegrationLogId
         --        )
-		DELETE FROM @InvoiceIds		
+		--DELETE FROM @InvoiceIds		
 		EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 			 @Param             = NULL
 			,@BeginDate         = NULL

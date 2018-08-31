@@ -242,7 +242,6 @@ WHERE
     [ysnBlended] = 0
     AND [ysnAutoBlend] = 1
     AND [strTransactionType] NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-    AND [ysnPost] = 1
     AND [dblUnitOnHand] = @ZeroDecimal
     AND [intAllowNegativeInventory] = 3
 

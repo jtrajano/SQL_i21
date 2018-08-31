@@ -123,8 +123,7 @@ LEFT OUTER JOIN
     ) ARID
         ON I.[intInvoiceId] = ARID.[intInvoiceId]
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND
         (
         I.[dblInvoiceTotal] <> @ZeroDecimal
@@ -328,8 +327,7 @@ SELECT
 FROM
     #ARPostInvoiceHeader I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND
         (
         (I.[dblBaseAmountDue] - I.[dblBaseInvoiceTotal]) <> @ZeroDecimal
@@ -445,7 +443,6 @@ FROM
 INNER JOIN
     #ARPostInvoiceHeader I
         ON ARPAC.[intInvoiceId] = I.[intInvoiceId]
-        AND I.[ysnPost] = 1
         AND ISNULL(ARPAC.[ysnApplied],0) = 1 
         AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 WHERE
@@ -540,8 +537,7 @@ SELECT
 FROM
     #ARPostInvoiceHeader I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND I.[dblPayment] <> @ZeroDecimal
 
 INSERT #ARInvoiceGLEntries
@@ -650,7 +646,6 @@ FROM
 INNER JOIN
     #ARPostInvoiceHeader I
         ON ARPAC.[intInvoiceId] = I.[intInvoiceId]
-        AND I.[ysnPost] = 1
         AND ISNULL(ARPAC.[ysnApplied],0) = 1 
         AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 WHERE
@@ -747,8 +742,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND (
         I.[intItemId] IS NULL
         OR
@@ -855,8 +849,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[dblLicenseAmount] <> @ZeroDecimal
+    I.[dblLicenseAmount] <> @ZeroDecimal
     AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
     AND I.[strItemType] = 'Software'
     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
@@ -959,8 +952,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] > 1
+    I.[intPeriodsToAccrue] > 1
     AND I.[dblLicenseAmount] <> @ZeroDecimal
     AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
     AND I.[strItemType] = 'Software'
@@ -1056,8 +1048,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND I.[dblMaintenanceAmount] <> @ZeroDecimal
     AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
     AND I.[strItemType] = 'Software'
@@ -1153,8 +1144,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND I.[intItemId] IS NOT NULL
     AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
@@ -1253,8 +1243,7 @@ SELECT
 FROM
     #ARPostInvoiceDetail I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND I.[dblQtyShipped] <> @ZeroDecimal
     AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
     AND I.[strTransactionType] = 'Debit Memo'
@@ -1349,8 +1338,7 @@ SELECT
 FROM
     #ARPostInvoiceHeader I
 WHERE
-    I.[ysnPost] = 1
-    AND I.[dblShipping] <> @ZeroDecimal
+    I.[dblShipping] <> @ZeroDecimal
 
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
@@ -1471,8 +1459,7 @@ INNER JOIN
     #ARPostInvoiceDetail I
         ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE
-    I.[ysnPost] = 1
-    AND I.[intPeriodsToAccrue] <= 1
+    I.[intPeriodsToAccrue] <= 1
     AND ARIDT.[dblAdjustedTax] <> @ZeroDecimal
 
 INSERT #ARInvoiceGLEntries
@@ -1568,7 +1555,6 @@ LEFT OUTER JOIN
        ON I.[intItemId] = IA.[intItemId]
        AND I.[intCompanyLocationId] = IA.[intLocationId]
 WHERE
-    I.[ysnPost] = 1
-    AND I.[dblBaseDiscountAmount] <> @ZeroDecimal
+    I.[dblBaseDiscountAmount] <> @ZeroDecimal
 
 RETURN 1 

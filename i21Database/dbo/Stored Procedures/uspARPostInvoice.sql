@@ -74,13 +74,11 @@ SET @post = ISNULL(@post, 0)
 SET @recap = ISNULL(@recap, 0)
 SET @accrueLicense = ISNULL(@accrueLicense, 0)
 
-DECLARE @BatchIdGenerated BIT = 0
 DECLARE @StartingNumberId INT
 SET @StartingNumberId = 3
-IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0)
+IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0) AND @recap = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @batchId OUT
-	SET @BatchIdGenerated = 1
 END
 SET @batchIdUsed = @batchId
  
@@ -312,7 +310,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
-    ,[intInvoiceDetailId]                   INT             NOT NULL
+    ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
     ,[intItemId]                            INT             NULL
     ,[strItemNo]                            NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[strItemType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
@@ -389,8 +387,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[strOptionType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
-    ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
-	,PRIMARY KEY CLUSTERED ([intInvoiceDetailId], [intInvoiceId]))
+    ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL)
 --DECLARE @PostProvisionalData AS [InvoicePostingTable]
 
 EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
@@ -455,6 +452,7 @@ CREATE TABLE #ARInvoiceItemAccount
 	,PRIMARY KEY CLUSTERED ([intItemId], [intLocationId]))
 
 EXEC [dbo].[uspARPopulateInvoiceAccountForPosting]
+     @Post     = @post
 
 IF(OBJECT_ID('tempdb..#ARInvalidInvoiceData') IS NOT NULL)
 BEGIN
@@ -487,7 +485,7 @@ CREATE TABLE #ARItemsForCosting
 	,[intCurrencyId] INT NULL
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL
     ,[intTransactionId] INT NOT NULL
-	,[intTransactionDetailId] INT NULL
+	,[intTransactionDetailId] INT NOT NULL
 	,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,[intTransactionTypeId] INT NOT NULL
 	,[intLotId] INT NULL
@@ -505,7 +503,6 @@ CREATE TABLE #ARItemsForCosting
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[ysnPost] BIT NULL
 	,[ysnForValidation] BIT NULL)
 
 IF(OBJECT_ID('tempdb..#ARItemsForInTransitCosting') IS NOT NULL)
@@ -525,7 +522,7 @@ CREATE TABLE #ARItemsForInTransitCosting
 	,[intCurrencyId] INT NULL
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL
     ,[intTransactionId] INT NOT NULL
-	,[intTransactionDetailId] INT NULL
+	,[intTransactionDetailId] INT NOT NULL
 	,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,[intTransactionTypeId] INT NOT NULL
 	,[intLotId] INT NULL
@@ -535,8 +532,7 @@ CREATE TABLE #ARItemsForInTransitCosting
 	,[intFobPointId] TINYINT NULL
 	,[intInTransitSourceLocationId] INT NULL
 	,[intForexRateTypeId] INT NULL
-	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
-	,[ysnPost] BIT NULL)
+	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1)
 
 IF(OBJECT_ID('tempdb..#ARItemsForStorageCosting') IS NOT NULL)
 BEGIN
@@ -555,7 +551,7 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[intCurrencyId] INT NULL
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL
     ,[intTransactionId] INT NOT NULL
-	,[intTransactionDetailId] INT NULL
+	,[intTransactionDetailId] INT NOT NULL
 	,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,[intTransactionTypeId] INT NOT NULL
 	,[intLotId] INT NULL
@@ -572,10 +568,13 @@ CREATE TABLE #ARItemsForStorageCosting
     ,[dblUnitRetail] NUMERIC(38, 20) NULL
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
-	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[ysnPost] BIT NULL)
+	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
+         @Post     = @post
+        ,@Recap    = @recap
+        ,@PostDate = @PostDate
+        ,@BatchId  = @batchIdUsed
 		
 SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM #ARInvalidInvoiceData
 
@@ -626,6 +625,9 @@ IF(@totalInvalid > 0)
 				RAISERROR(@ErrorMerssage, 11, 1)							
 				GOTO Post_Exit
 			END					
+
+        DELETE FROM #ARInvalidInvoiceData
+
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM #ARPostInvoiceHeader
@@ -662,7 +664,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 		IF @raiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
+				SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
 				RAISERROR(@ErrorMerssage, 11, 1)							
 				GOTO Post_Exit
 			END				
@@ -677,27 +679,26 @@ BEGIN TRY
 	--INSERT INTO @RecapInvoiceData
 	--SELECT * FROM #ARPostInvoiceData WHERE [ysnRecap] = 1
 
-	IF EXISTS(SELECT TOP 1 NULL FROM #ARPostInvoiceHeader WHERE [ysnRecap] = 1)
-    EXEC [dbo].[uspARPostInvoiceRecap]
-		    @BatchId         = @batchIdUsed
-		   ,@PostDate        = @PostDate
-		   ,@UserId          = @userId
-		   ,@raiseError      = @raiseError
+	IF @recap = 1
+    BEGIN
+        EXEC [dbo].[uspARPostInvoiceRecap]
+                @Post            = @post
+		       ,@Recap           = @recap
+		       ,@BatchId         = @batchId
+		       ,@PostDate        = @PostDate
+		       ,@UserId          = @userId
+		       ,@BatchIdUsed     = @batchIdUsed OUT
+		       ,@raiseError      = @raiseError
+        GOTO Do_Commit
+    END
 
 
-    DELETE FROM #ARPostInvoiceHeader WHERE ysnRecap = 1
-    IF NOT EXISTS(SELECT TOP 1 NULL FROM #ARPostInvoiceHeader)
-	BEGIN
-		IF @BatchIdGenerated = 1
-			UPDATE tblSMStartingNumber SET [intNumber] = [intNumber] - 1 WHERE [intStartingNumberId] = @StartingNumberId
-				
-		GOTO Do_Commit
-	END
-
+	IF @post = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @userId
 
+	IF @post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]
 
 	--BEGIN TRY 
@@ -731,6 +732,7 @@ BEGIN TRY
 	--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
 	--	GOTO Do_Rollback
 	--END CATCH
+	IF @post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  	
 
 END TRY
@@ -901,52 +903,15 @@ BEGIN TRY
 	ysnRebuild BIT NULL)
 	
     DECLARE @GLEntries RecapTableType
-	INSERT INTO @GLEntries
-		([dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		,[strRateType]
-		,[strDocument]
-		,[strComments]
-		,[strSourceDocumentId]
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		,[dblSourceUnitDebit]
-		,[dblSourceUnitCredit]
-		,[intCommodityId]
-		,[intSourceEntityId]
-		,[ysnRebuild])
+	IF @post = 1
 	EXEC dbo.[uspARGenerateEntriesForAccrual] 
 
     EXEC [dbo].[uspARGenerateGLEntries]
+         @Post     = @post
+	    ,@Recap    = @recap
+        ,@PostDate = @PostDate
+        ,@BatchId  = @batchIdUsed
+        ,@UserId   = @userId
 
 	--IF @recap = 0
 	--	BEGIN
@@ -1158,10 +1123,14 @@ BEGIN TRY
 		[strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
     EXEC [dbo].[uspARBookInvoiceGLEntries]
-            @BatchId            = @batchIdUsed
-		   ,@UserId             = @userId
+            @Post    = @post
+           ,@BatchId = @batchIdUsed
+		   ,@UserId  = @userId
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
+            @Post    = @post
+           ,@BatchId = @batchIdUsed
+		   ,@UserId  = @userId
 
 END TRY
 BEGIN CATCH

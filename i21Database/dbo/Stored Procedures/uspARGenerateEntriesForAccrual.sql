@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGenerateEntriesForAccrual]
-     --@Invoices      [InvoicePostingTable]   READONLY
-    --,@ItemAccounts  [InvoiceItemAccount]    READONLY
-    --,@PostDate      DATETIME                = NULL
+
 AS
 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
@@ -19,7 +17,7 @@ SET @OneHundredDecimal = 100.000000
 
 EXEC dbo.[uspARInsertDefaultAccrual]  
 
-WHILE EXISTS(SELECT NULL FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND I.[ysnPost] = 1 AND ISNULL(G.[intTransactionId],0) = 0)
+WHILE EXISTS(SELECT NULL FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0)
 BEGIN
     DECLARE  @InvoiceId							INT
             ,@AccrualPeriod						INT
@@ -34,7 +32,7 @@ BEGIN
             ,@UnitsRemainder					DECIMAL(18,6)
             ,@TaxRemainder						DECIMAL(18,6)
 
-    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND I.[ysnPost] = 1 AND ISNULL(G.intTransactionId,0) = 0
+    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0
 
     SELECT
         @AccrualPeriod = [intPeriodsToAccrue]
@@ -44,7 +42,7 @@ BEGIN
         [intInvoiceId] = @InvoiceId 
 
     --DEBIT AR
-	INSERT INTO @GLEntries
+	INSERT INTO #ARInvoiceGLEntries
 		([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
@@ -2394,52 +2392,97 @@ WHERE
 
 END
 
+--INSERT INTO #ARInvoiceGLEntries
+--	([dtmDate]
+--	,[strBatchId]
+--	,[intAccountId]
+--	,[dblDebit]
+--	,[dblCredit]
+--	,[dblDebitUnit]
+--	,[dblCreditUnit]
+--	,[strDescription]
+--	,[strCode]
+--	,[strReference]
+--	,[intCurrencyId]
+--	,[dblExchangeRate]
+--	,[dtmDateEntered]
+--	,[dtmTransactionDate]
+--	,[strJournalLineDescription]
+--	,[intJournalLineNo]
+--	,[ysnIsUnposted]
+--	,[intUserId]
+--	,[intEntityId]
+--	,[strTransactionId]
+--	,[intTransactionId]
+--	,[strTransactionType]
+--	,[strTransactionForm]
+--	,[strModuleName]
+--	,[intConcurrencyId]
+--	,[dblDebitForeign]
+--	,[dblDebitReport]
+--	,[dblCreditForeign]
+--	,[dblCreditReport]
+--	,[dblReportingRate]
+--	,[dblForeignRate]
+--	,[strRateType]
+--	,[strDocument]
+--	,[strComments]
+--	,[strSourceDocumentId]
+--	,[intSourceLocationId]
+--	,[intSourceUOMId]
+--	,[dblSourceUnitDebit]
+--	,[dblSourceUnitCredit]
+--	,[intCommodityId]
+--	,[intSourceEntityId]
+--	,[ysnRebuild])
+--SELECT 
+--     [dtmDate]                      = GLEntries.[dtmDate]
+--    ,[strBatchId]                   = GLEntries.[strBatchId]
+--    ,[intAccountId]                 = GLEntries.[intAccountId]
+--    ,[dblDebit]                     = GLEntries.[dblDebit]
+--    ,[dblCredit]                    = GLEntries.[dblCredit]
+--    ,[dblDebitUnit]                 = DebitUnit.Value
+--    ,[dblCreditUnit]                = CreditUnit.Value
+--    ,[strDescription]               = GLEntries.[strDescription]
+--    ,[strCode]                      = GLEntries.[strCode]
+--    ,[strReference]                 = GLEntries.[strReference]
+--    ,[intCurrencyId]                = GLEntries.[intCurrencyId]
+--    ,[dblExchangeRate]              = GLEntries.[dblExchangeRate]
+--    ,[dtmDateEntered]               = GLEntries.[dtmDateEntered]
+--    ,[dtmTransactionDate]           = GLEntries.[dtmTransactionDate]
+--    ,[strJournalLineDescription]    = GLEntries.[strJournalLineDescription]
+--    ,[intJournalLineNo]             = GLEntries.[intJournalLineNo]
+--    ,[ysnIsUnposted]                = GLEntries.[ysnIsUnposted]
+--    ,[intUserId]                    = GLEntries.[intUserId]
+--    ,[intEntityId]                  = GLEntries.[intEntityId]
+--    ,[strTransactionId]             = GLEntries.[strTransactionId]
+--    ,[intTransactionId]             = GLEntries.[intTransactionId]
+--    ,[strTransactionType]           = GLEntries.[strTransactionType]
+--    ,[strTransactionForm]           = GLEntries.[strTransactionForm]
+--    ,[strModuleName]                = GLEntries.[strModuleName]
+--    ,[intConcurrencyId]             = GLEntries.[intConcurrencyId]
+--    ,[dblDebitForeign]              = GLEntries.[dblDebitForeign]
+--    ,[dblDebitReport]               = GLEntries.[dblDebitReport]
+--    ,[dblCreditForeign]             = GLEntries.[dblCreditForeign]
+--    ,[dblCreditReport]              = GLEntries.[dblCreditReport]
+--    ,[dblReportingRate]             = GLEntries.[dblReportingRate]
+--    ,[dblForeignRate]               = GLEntries.[dblForeignRate]
+--    ,[strRateType]                  = GLEntries.[strRateType]
+--    ,[strDocument]                  = GLEntries.[strDocument]
+--    ,[strComments]                  = GLEntries.[strComments]
+--    ,[strSourceDocumentId]          = GLEntries.[strSourceDocumentId]
+--    ,[intSourceLocationId]          = GLEntries.[intSourceLocationId]
+--    ,[intSourceUOMId]               = GLEntries.[intSourceUOMId]
+--    ,[dblSourceUnitDebit]           = GLEntries.[dblSourceUnitDebit]
+--    ,[dblSourceUnitCredit]          = GLEntries.[dblSourceUnitCredit]
+--    ,[intCommodityId]               = GLEntries.[intCommodityId]
+--    ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
+--    ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
+--FROM
+--	@GLEntries GLEntries
+--CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
+--CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
 
-SELECT
-     [dtmDate]
-    ,[strBatchId]
-    ,[intAccountId]
-    ,[dblDebit]
-    ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
-    ,[strDescription]
-    ,[strCode]
-    ,[strReference]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[dtmDateEntered]
-    ,[dtmTransactionDate]
-    ,[strJournalLineDescription]
-    ,[intJournalLineNo]
-    ,[ysnIsUnposted]
-    ,[intUserId]
-    ,[intEntityId]
-    ,[strTransactionId]
-    ,[intTransactionId]
-    ,[strTransactionType]
-    ,[strTransactionForm]
-    ,[strModuleName]
-    ,[intConcurrencyId]
-    ,[dblDebitForeign]
-    ,[dblDebitReport]
-    ,[dblCreditForeign]
-    ,[dblCreditReport]
-    ,[dblReportingRate]
-    ,[dblForeignRate]
-    ,[strRateType]
-    ,[strDocument]
-    ,[strComments]
-    ,[strSourceDocumentId]
-    ,[intSourceLocationId]
-    ,[intSourceUOMId]
-    ,[dblSourceUnitDebit]
-    ,[dblSourceUnitCredit]
-    ,[intCommodityId]
-    ,[intSourceEntityId]
-    ,[ysnRebuild]
-FROM
-	@GLEntries
 GO
 
 

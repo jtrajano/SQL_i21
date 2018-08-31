@@ -85,7 +85,6 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnPost]
 	,[ysnForValidation]
 ) 
 
@@ -143,7 +142,6 @@ SELECT
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnPost]					= ARID.[ysnPost]
 	,[ysnForValidation]         = 1
 FROM
     #ARPostInvoiceDetail ARID
@@ -166,12 +164,12 @@ WHERE
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
-	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
-	AND (ISNULL(ARID.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
+	AND ARID.[intItemId] IS NOT NULL
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	AND ISNULL(ARID.[strItemType],'') <> 'Finished Good'
+	AND ARID.[strItemType] <> 'Finished Good'
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 
 
@@ -201,7 +199,6 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnPost]
 	,[ysnForValidation]
 ) 
 
@@ -259,7 +256,6 @@ SELECT
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnPost]					= ARID.[ysnPost]
 	,[ysnForValidation]         = 0
 FROM
     #ARPostInvoiceDetail ARID
@@ -282,8 +278,8 @@ WHERE
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
-	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
-	AND (ISNULL(ARID.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
+	AND ARID.[intItemId] IS NOT NULL
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
@@ -316,7 +312,6 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnPost]
 	,[ysnForValidation]
 )
 SELECT
@@ -353,7 +348,6 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblQtyShipped] * ARID.[dblPrice] ELSE NULL END
-	,[ysnPost]					= ARID.[ysnPost]
 	,[ysnForValidation]         = NULL
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
@@ -377,7 +371,7 @@ WHERE
 	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 	AND ISNULL(ARID.[intLoadDetailId],0) = 0
-	AND ISNULL(ARID.[intItemId],0) <> 0
+	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
