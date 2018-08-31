@@ -320,9 +320,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
+			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  ROUND(A.dblAmount * ISNULL(@dblHistoricRate,1),2) ELSE A.dblAmount END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE A.dblAmount / ISNULL(@dblHistoricRate,1)  END
+			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE ROUND(A.dblAmount / ISNULL(@dblHistoricRate,1),2)  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
@@ -356,9 +356,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
+			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  ROUND(A.dblAmount * ISNULL(@dblRate, 1),2) ELSE  A.dblAmount END
 			,[dblCredit]			= 0 
-			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN A.dblAmount/ ISNULL(@dblRate, 1)  ELSE A.dblAmount END
+			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN ROUND(A.dblAmount/ ISNULL(@dblRate, 1),2)  ELSE A.dblAmount END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -737,4 +737,3 @@ Audit_Log:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
 GO
-
