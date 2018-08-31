@@ -1,5 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateInvalidPostInvoiceData]
-
+     @Post              BIT				= 0
+    ,@Recap             BIT				= 0
+    ,@PostDate          DATETIME        = NULL
+    ,@BatchId           NVARCHAR(40)    = NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -30,7 +33,7 @@ DECLARE @ItemsForStoragePosting [ItemCostingTableType]
 EXEC [dbo].[uspARPopulateItemsForStorageCosting]
 
 
-IF EXISTS(SELECT TOP 1 NULL FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1)
+IF @Post = 1
 BEGIN
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -53,7 +56,6 @@ BEGIN
 		#ARPostInvoiceHeader I
 	WHERE  
 		I.[ysnPosted] = 1
-		AND I.[ysnPost] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -76,8 +78,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPost] = 1
-		AND I.[ysnRecurring] = 1
+		I.[ysnRecurring] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -100,8 +101,7 @@ BEGIN
 		#ARPostInvoiceHeader I	
 	WHERE  
 		--ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
-		I.[ysnPost] = 1
-		AND ISNULL(I.[ysnWithinAccountingDate], 0) = 0
+		I.[ysnWithinAccountingDate] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -119,12 +119,11 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN [ysnRecap] = 0 THEN 'You cannot Post transactions you did not create.' ELSE 'You cannot Preview transactions you did not create.' END
+		,[strPostingError]		= 'You cannot Post transactions you did not create.'
 	FROM 					
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPost] = 1
-		AND I.[intEntityId] <> I.[intUserId]
+		I.[intEntityId] <> I.[intUserId]
 		AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = 1)
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -147,11 +146,10 @@ BEGIN
 	FROM 
 		#ARPostInvoiceDetail I					
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[intSiteId] IS NULL
+		I.[intSiteId] IS NULL
 		AND I.[strType] = 'Tank Delivery'
 		AND I.[ysnTankRequired] = 1
-		AND ISNULL(I.[strItemType],'') <> 'Comment'		
+		AND I.[strItemType] <> 'Comment'		
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -173,11 +171,10 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I					
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblInvoiceTotal] = @ZeroDecimal
+		I.[dblInvoiceTotal] = @ZeroDecimal
 		AND I.[strTransactionType] != 'Cash Refund'
-		AND ISNULL(I.[strImportFormat], '') <> 'CarQuest'		
-		AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ISNULL(ARID.[intItemId], 0) <> 0)		
+		AND I.[strImportFormat] <> 'CarQuest'		
+		AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.[intItemId] IS NOT NULL)		
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -199,8 +196,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I					
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblInvoiceTotal] < @ZeroDecimal	
+		I.[dblInvoiceTotal] < @ZeroDecimal	
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -224,8 +220,7 @@ BEGIN
 	--INNER JOIN dbo.tblARCustomer  ARC
 	--		ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[ysnCustomerActive] = 0
+		I.[ysnCustomerActive] = 0
 			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -247,8 +242,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I                       
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblCustomerCreditLimit] IS NULL 
+		I.[dblCustomerCreditLimit] IS NULL 
 		AND I.[strTransactionType] != 'Cash'
 
 
@@ -273,8 +267,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[ysnForApproval] = 1
+		I.[ysnForApproval] = 1
 	--INNER JOIN
 	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
 	--		ON I.intInvoiceId = FAT.intTransactionId
@@ -312,14 +305,13 @@ BEGIN
 	--	AND (ARID.[intItemId] IS NOT NULL OR ARID.[intItemId] <> 0)
 	--	AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[strTransactionType] = 'Invoice'	
+		I.[strTransactionType] = 'Invoice'	
 		AND (I.[intItemUOMId] IS NULL OR I.[intItemUOMId] = 0) 
 		AND (I.[intInventoryShipmentItemId] IS NULL OR I.[intInventoryShipmentItemId] = 0)
 		AND (I.[intSalesOrderDetailId] IS NULL OR I.[intSalesOrderDetailId] = 0)
 		AND (I.[intLoadDetailId] IS NULL OR I.[intLoadDetailId] = 0)
 		AND (I.[intItemId] IS NOT NULL OR I.[intItemId] <> 0)
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -359,10 +351,9 @@ BEGIN
 	LEFT OUTER JOIN dbo.tblGLAccount GLA
 			ON ISNULL(IST.[intDiscountAccountId], I.[intDiscountAccountId]) = GLA.[intAccountId]		 
 	WHERE
-		I.[ysnPost] = 1
-		AND ((ISNULL(IST.[intDiscountAccountId],0) = 0  AND  ISNULL(I.[intDiscountAccountId],0) = 0) OR GLA.[intAccountId] IS NULL)
+		((ISNULL(IST.[intDiscountAccountId],0) = 0  AND  ISNULL(I.[intDiscountAccountId],0) = 0) OR GLA.[intAccountId] IS NULL)
 		AND I.[dblDiscount] <> @ZeroDecimal		
-		AND ISNULL(I.[strItemType],'') <> 'Comment'
+		AND I.[strItemType] <> 'Comment'
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -384,8 +375,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I			 
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[intCurrencyId], 0) = 0
+		ISNULL(I.[intCurrencyId], 0) = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -407,8 +397,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I			 
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[intTermId], 0) = 0
+		ISNULL(I.[intTermId], 0) = 0
 
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -431,8 +420,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I			 
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM #ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0))
+		I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM #ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0))
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -456,8 +444,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA 
 			ON ISNULL(I.[intAccountId], 0) = GLA.[intAccountId]		 
 	WHERE
-		I.[ysnPost] = 1
-		AND (ISNULL(I.[intAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
+		(ISNULL(I.[intAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -479,8 +466,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[intCompanyLocationId] IS NULL
+		I.[intCompanyLocationId] IS NULL
 
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -505,8 +491,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON I.[intFreightIncome] = GLA.[intAccountId]						
 	WHERE
-		I.[ysnPost] = 1
-		AND (ISNULL(I.[intFreightIncome], 0) = 0 OR GLA.[intAccountId] IS NULL)
+		(ISNULL(I.[intFreightIncome], 0) = 0 OR GLA.[intAccountId] IS NULL)
 		AND ISNULL(I.[dblShipping],0) <> @ZeroDecimal
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -531,8 +516,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount  GLA
 			ON I.[intUndepositedFundsId] = GLA.[intAccountId]					
 	WHERE
-		I.[ysnPost] = 1
-		AND (ISNULL(I.[intUndepositedFundsId], 0) = 0 OR GLA.[intAccountId] IS NULL)
+		(ISNULL(I.[intUndepositedFundsId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 		AND (
 			I.[strTransactionType] IN ('Cash','Cash Refund')
 			OR
@@ -561,11 +545,10 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount  GLA
 			ON I.[intLocationSalesAccountId] = GLA.[intAccountId]			
 	WHERE
-		I.[ysnPost] = 1
-		AND (ISNULL(I.[intLocationSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
+		(ISNULL(I.[intLocationSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 		AND ISNULL(I.[intServiceChargeAccountId],0) = 0
 		AND ISNULL(I.[intSalesAccountId], 0) = 0
-		AND ISNULL(I.[intItemId],0) = 0
+		AND I.[intItemId] IS NULL
 		AND I.[dblTotal] <> @ZeroDecimal
 
 
@@ -589,8 +572,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[intPeriodsToAccrue],0) > 1  
+		ISNULL(I.[intPeriodsToAccrue],0) > 1  
 		AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate]))), 0) = 0
 
 
@@ -638,8 +620,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.intPeriodsToAccrue,0) > 1
+		ISNULL(I.intPeriodsToAccrue,0) > 1
 		AND ISNULL(I.[intDeferredRevenueAccountId], 0) = 0
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -662,8 +643,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[intPeriodsToAccrue], 0) > 1
+		ISNULL(I.[intPeriodsToAccrue], 0) > 1
 		AND ISNULL(I.[intDeferredRevenueAccountId], 0) <> 0
 		AND NOT EXISTS(SELECT NULL FROM tblGLAccount GLA WITH (NOLOCK) WHERE GLA.[intAccountId] = I.[intDeferredRevenueAccountId])
 
@@ -688,9 +668,8 @@ BEGIN
 	FROM 
 		#ARPostInvoiceDetail I			
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[intPeriodsToAccrue],0) > 1
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+		I.[intPeriodsToAccrue] > 1
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 
 
 	--INSERT INTO @returntable(
@@ -741,9 +720,8 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I					
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[strType] = 'Provisional'
-		AND ISNULL(I.[ysnImpactForProvisional],0) = 0
+		I.[strType] = 'Provisional'
+		AND I.[ysnImpactForProvisional] = 0
 
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -784,9 +762,8 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON Acct.[intGeneralAccountId] = GLA.[intAccountId]
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') IN ('Non-Inventory','Service')
-		AND ISNULL(I.[strItemType],'') <> 'Comment'
+		I.[strItemType] IN ('Non-Inventory','Service')
+		AND I.[strItemType] <> 'Comment'
 		AND (ISNULL(Acct.[intGeneralAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
 			
 
@@ -815,8 +792,7 @@ BEGIN
 	--INNER JOIN tblICItem ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') NOT IN ('License/Maintenance', 'Maintenance Only', 'SaaS', 'License Only')
 
 
@@ -844,8 +820,7 @@ BEGIN
 	--INNER JOIN tblICItem ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		ISNULL(I.[strItemType],'') = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 		AND ISNULL(I.[strFrequency], '') NOT IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 
@@ -873,8 +848,7 @@ BEGIN
 	--INNER JOIN tblICItem ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 		AND ISNULL(I.[strFrequency], '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 		AND I.[dtmMaintenanceDate] IS NULL
@@ -903,8 +877,7 @@ BEGIN
 	--INNER JOIN tblICItem ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License Only')
 		AND ISNULL(I.[strFrequency], '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 		AND ISNULL(I.[dblLicenseAmount], @ZeroDecimal) <> ISNULL(I.[dblPrice], @ZeroDecimal)
@@ -934,8 +907,7 @@ BEGIN
 	--INNER JOIN tblICItem ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('Maintenance Only', 'SaaS')
 		AND ISNULL(I.[strFrequency], '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 		AND ISNULL(I.[dblMaintenanceAmount], @ZeroDecimal) <> ISNULL(I.[dblPrice], @ZeroDecimal)
@@ -965,8 +937,7 @@ BEGIN
 	--INNER JOIN tblICItem  ICI
 	--		ON ARID.[intItemId] = ICI.[intItemId]											
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance')
 		AND ISNULL(I.[strFrequency], '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 		AND ((ISNULL(I.[dblMaintenanceAmount], @ZeroDecimal) + ISNULL(I.[dblLicenseAmount], @ZeroDecimal)) <> ISNULL(I.[dblPrice], @ZeroDecimal))
@@ -1000,8 +971,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON Acct.[intMaintenanceSalesAccountId] = GLA.[intAccountId]	 								
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 		AND (ISNULL(Acct.[intMaintenanceSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			
@@ -1036,8 +1006,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON Acct.[intGeneralAccountId] = GLA.[intAccountId]	 			
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Software'	
+		I.[strItemType] = 'Software'	
 		AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
 		AND (ISNULL(Acct.[intGeneralAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			
@@ -1072,8 +1041,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON Acct.intOtherChargeIncomeAccountId = GLA.[intAccountId]
 	WHERE
-		I.[ysnPost] = 1
-		AND ISNULL(I.[strItemType],'') = 'Other Charge'
+		I.[strItemType] = 'Other Charge'
 		AND (ISNULL(Acct.[intOtherChargeIncomeAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			
 
@@ -1108,12 +1076,11 @@ BEGIN
 	LEFT OUTER JOIN tblSMCompanyLocation SMCL
 			ON I.[intCompanyLocationId] = SMCL.[intCompanyLocationId] 
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal 
-		AND (I.[intItemId] IS NOT NULL OR I.[intItemId] <> 0)
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+		I.[dblTotal] <> @ZeroDecimal 
+		AND I.[intItemId] IS NOT NULL
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 		AND (I.[strTransactionType] <> 'Debit Memo' OR (I.[strTransactionType] = 'Debit Memo' AND ISNULL(I.[strType],'') IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
-		AND ISNULL(I.[intPeriodsToAccrue], 0) <= 1
+		AND I.[intPeriodsToAccrue] <= 1
 		AND (ISNULL(Acct.[intSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
 
 
@@ -1141,11 +1108,10 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON I.[intSalesAccountId] = GLA.[intAccountId]
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal 
+		I.[dblTotal] <> @ZeroDecimal 
 		AND I.[strTransactionType] = 'Debit Memo'
 		AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
-		AND ISNULL(I.[intPeriodsToAccrue],0) <= 1
+		AND I.[intPeriodsToAccrue] <= 1
 		AND (ISNULL(I.[intSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
 
 
@@ -1174,8 +1140,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON ISNULL(ARIDT.[intSalesTaxAccountId], SMTC.[intSalesTaxAccountId]) = GLA.[intAccountId]	
 	WHERE
-		I.[ysnPost] = 1
-		AND ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
 		AND (ISNULL(ISNULL(ARIDT.[intSalesTaxAccountId], SMTC.[intSalesTaxAccountId]), 0) = 0 OR GLA.[intAccountId] IS NULL)
 
 
@@ -1240,10 +1205,9 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON IST.[intCOGSAccountId] = GLA.[intAccountId]
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
-		AND ISNULL(I.[intItemId], 0) <> 0
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+		I.[dblTotal] <> @ZeroDecimal
+		AND I.[intItemId] IS NOT NULL
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 		AND I.[strTransactionType] <> 'Debit Memo'
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
 		AND (ISNULL(IST.[intCOGSAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)			
@@ -1309,11 +1273,10 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON IST.[intInventoryInTransitAccountId] = GLA.[intAccountId]				
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
+		I.[dblTotal] <> @ZeroDecimal
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
-		AND ISNULL(I.[intItemId], 0) <> 0
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+		AND I.[intItemId] IS NOT NULL
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 		AND I.[strTransactionType] <> 'Debit Memo'	
 		AND (ISNULL(IST.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 
@@ -1343,12 +1306,11 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
+		I.[dblTotal] <> @ZeroDecimal
         AND I.[intInventoryShipmentItemId] IS NULL
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
-		AND ISNULL(I.[intItemId], 0) <> 0
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+		AND I.[intItemId] IS NOT NULL
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 		AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
 		AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
 			
@@ -1404,11 +1366,10 @@ BEGIN
 	LEFT OUTER JOIN  tblGLAccount  GLA
 			ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	 
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
+		I.[dblTotal] <> @ZeroDecimal
         AND I.[intInventoryShipmentItemId] IS NULL
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
-		AND ISNULL(I.[intItemId],0) <> 0
+		AND I.[intItemId] IS NOT NULL
 		AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 		AND I.[strTransactionType] <> 'Debit Memo'	
 		AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
@@ -1441,11 +1402,10 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId]
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
+		I.[dblTotal] <> @ZeroDecimal
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
-		AND ISNULL(I.[intItemId], 0) <> 0
-		AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+		AND I.[intItemId] IS NOT NULL
+		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 		AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
 		AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
 
@@ -1503,10 +1463,9 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId] 		 		 
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblTotal] <> @ZeroDecimal
+		I.[dblTotal] <> @ZeroDecimal
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
-		AND ISNULL(I.[intItemId],0) <> 0
+		AND I.[intItemId] IS NOT NULL
 		AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 		AND I.[strTransactionType] <> 'Debit Memo'																		
 		AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
@@ -1542,8 +1501,7 @@ BEGIN
 			ON I.[intContractHeaderId] = CTCD.[intContractHeaderId] 
 			AND I.[intContractDetailId] = CTCD.[intContractDetailId] 
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[strItemType] <> 'Other Charge'
+		I.[strItemType] <> 'Other Charge'
 		AND I.[dblPrice] = @ZeroDecimal			
 		AND CTCD.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0
@@ -1580,8 +1538,7 @@ BEGIN
 			ON I.[intContractHeaderId] = ARCC.[intContractHeaderId] 
 			AND I.[intContractDetailId] = ARCC.[intContractDetailId] 			 				
 	WHERE
-		I.[ysnPost] = 1
-		AND I.[dblUnitPrice] <> @ZeroDecimal				
+		I.[dblUnitPrice] <> @ZeroDecimal				
 		AND I.[strItemType] <> 'Other Charge'
 		AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(I.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 		AND ARCC.[strPricingType] <> 'Index'
@@ -1634,8 +1591,7 @@ BEGIN
 		WHERE ARID.intInvoiceDetailId = ARIDL.intInvoiceDetailId
 	) LOT
 	WHERE
-		I.[ysnPost] = 1
-		AND ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
+		ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
 		AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
 		AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) NOT IN (2, 3)) OR ISNULL(I.[intLoadId], 0) IS NULL)
 
@@ -1666,8 +1622,7 @@ BEGIN
 			AND ISNULL(dblAppliedInvoiceDetailAmount, 0) > 0			
 	) PREPAIDS
 	WHERE
-		I.[ysnPost] = 1
-		AND I.strTransactionType = 'Cash Refund'
+		I.strTransactionType = 'Cash Refund'
 		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
 	--Invoice Split
@@ -1713,8 +1668,6 @@ BEGIN
 	INNER JOIN
 		(SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS
 			ON PID.[intSiteId] = TMS.[intSiteID]
-	WHERE
-		PID.[ysnPost] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1743,8 +1696,7 @@ BEGIN
 	FROM
 		#ARPostInvoiceDetail PID
 	WHERE
-		PID.[ysnPost]  = 1
-		AND PID.[ysnBlended] <> 1
+		PID.[ysnBlended] <> 1
 		AND PID.[ysnAutoBlend] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -1823,8 +1775,8 @@ BEGIN
 	FROM
 		#ARItemsForCosting
 	WHERE
-		[ysnPost] = 1
-		AND ([ysnForValidation] IS NULL OR [ysnForValidation] = 1)
+		[ysnForValidation] IS NULL
+		OR [ysnForValidation] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1899,8 +1851,6 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForInTransitCosting
-	WHERE
-		[ysnPost] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1978,9 +1928,6 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForStorageCosting
-	WHERE
-		[ysnPost] = 1
-
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2003,7 +1950,7 @@ BEGIN
 		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, 1)
 END
 
-IF EXISTS(SELECT TOP 1 NULL FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0)
+IF @Post = 0
 BEGIN
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2026,8 +1973,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPost] = 0
-		AND I.[ysnPosted] = 0
+		I.[ysnPosted] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2054,8 +2000,7 @@ BEGIN
 				) b on a.intInvoiceId = b.intInvoiceId
 			join #ARPostInvoiceHeader c
 				on a.intSCInvoiceId = c.intInvoiceId
-		WHERE
-			c.[ysnPost] = 0			
+			
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2077,8 +2022,7 @@ BEGIN
 	FROM 					
 		#ARPostInvoiceHeader I	
 	WHERE  
-		I.[ysnPost] = 0
-        AND ISNULL(I.[ysnWithinAccountingDate], 0) = 0
+		I.[ysnWithinAccountingDate] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2105,8 +2049,7 @@ BEGIN
 		ON D2.intOriginalInvoiceDetailId = I.[intInvoiceDetailId]
 	INNER JOIN tblARInvoice I2
 		ON I2.intInvoiceId = D2.intInvoiceId
-	WHERE
-		I.[ysnPost] = 0
+
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2124,12 +2067,11 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		=  CASE WHEN [ysnRecap] = 0 THEN 'You cannot Unpost transactions you did not create.' ELSE 'You cannot Preview transactions you did not create.' END
+		,[strPostingError]		=  'You cannot Unpost transactions you did not create.'
 	FROM 					
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPost] = 0
-		AND I.[intEntityId] <> I.[intUserId]
+		I.[intEntityId] <> I.[intUserId]
 		AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = 1)			
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2157,8 +2099,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 			ON ARPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 		AND I.strTransactionType != 'Cash Refund'
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2182,8 +2123,7 @@ BEGIN
 	INNER JOIN tblAPBill A
 		ON A.strVendorOrderNumber = I.strInvoiceNumber
 	WHERE
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2209,8 +2149,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 			ON APPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2237,8 +2176,7 @@ BEGIN
 	INNER JOIN tblCMBankTransactionDetail CMBTD
 			ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 	WHERE 
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 		AND CMUF.[strSourceSystem] = 'AR'
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2267,8 +2205,7 @@ BEGIN
 			AND P.ysnPosted = 1
 	) PAT
 	WHERE
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2296,8 +2233,7 @@ BEGIN
 		WHERE PD.intInvoiceId = I.intInvoiceId
 	) VOUCHER
 	WHERE
-		I.[ysnPost] = 0
-		AND I.[ysnRecap] = 0
+		@Recap = 0
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
@@ -2310,8 +2246,6 @@ BEGIN
 	INNER JOIN
 		(SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS
 			ON PID.[intSiteId] = TMS.[intSiteID]
-	WHERE
-		PID.[ysnPost] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2340,8 +2274,7 @@ BEGIN
 	FROM
 		#ARPostInvoiceDetail PID
 	WHERE
-		PID.[ysnPost]  = 0
-		AND PID.[ysnBlended] <> 0
+		PID.[ysnBlended] <> 0
 		AND PID.[ysnAutoBlend] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2420,8 +2353,8 @@ BEGIN
 	FROM
 		#ARItemsForCosting
 	WHERE
-		[ysnPost] = 0
-		AND ([ysnForValidation] IS NULL OR [ysnForValidation] = 1)
+		[ysnForValidation] IS NULL
+		OR [ysnForValidation] = 1
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2496,8 +2429,6 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForInTransitCosting
-	WHERE
-		[ysnPost] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2575,8 +2506,6 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForStorageCosting
-	WHERE
-		[ysnPost] = 0
 
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2635,8 +2564,7 @@ BEGIN
 				(SELECT [agivc_ivc_no] FROM agivcmst WITH (NOLOCK)) OI
 					ON I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS = OI.[agivc_ivc_no] COLLATE Latin1_General_CI_AS
 			WHERE  
-				I.[ysnPost] = 0
-				AND I.[ysnPosted] = 1
+				I.[ysnPosted] = 1
 				AND I.[ysnImportedAsPosted] = 1 
 				AND I.[ysnImportedFromOrigin] = 1														
 		END
@@ -2666,21 +2594,15 @@ BEGIN
 				(SELECT [ptivc_invc_no] FROM ptivcmst WITH (NOLOCK)) OI
 					ON I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS = OI.[ptivc_invc_no] COLLATE Latin1_General_CI_AS
 			WHERE
-				I.[ysnPost] = 0
-				AND I.[ysnPosted] = 1
+				I.[ysnPosted] = 1
 				AND I.[ysnImportedAsPosted] = 1 
 				AND I.[ysnImportedFromOrigin] = 1												
 		END
 END
 
-UPDATE RT
-SET RT.[strBatchId] = I.[strBatchId]
-FROM
-	#ARInvalidInvoiceData RT
-INNER JOIN
-	#ARPostInvoiceHeader I
-		ON RT.[intInvoiceId] = I.[intInvoiceId]
+UPDATE #ARInvalidInvoiceData
+SET [strBatchId] = @BatchId
 WHERE 
-	LTRIM(RTRIM(ISNULL(RT.[strBatchId],''))) = ''
+	LTRIM(RTRIM(ISNULL([strBatchId],''))) = ''
 
 RETURN 1

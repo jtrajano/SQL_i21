@@ -1,4 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceIntegrations]
+     @Post              BIT				= 0
+	,@BatchId           NVARCHAR(40)
+    ,@UserId            INT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -23,13 +26,7 @@ DECLARE @Invoices AS dbo.[InvoiceId]
 --	[ysnPost] = 1
 --	AND [strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
 
-DECLARE @BatchId NVARCHAR(40)
-		,@UserId INT
-SET @BatchId = NULL
-SET @UserId = NULL
-
-SELECT TOP 1 @BatchId = [strBatchId], @UserId = [intUserId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1
-IF @UserId IS NOT NULL AND @BatchId IS NOT NULL
+IF @Post = 1
 BEGIN
     --UPDATE ARI						
 --SET
@@ -239,7 +236,7 @@ BEGIN
         ,ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
         ,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
     FROM
-        (SELECT intInvoiceId, ysnExcludeInvoiceFromPayment FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1) PID
+        #ARPostInvoiceHeader PID
     INNER JOIN
         (SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate, ysnExcludeFromPayment
 			FROM dbo.tblARInvoice WITH (NOLOCK))  ARI ON PID.intInvoiceId = ARI.intInvoiceId
@@ -251,7 +248,7 @@ BEGIN
         ,ARPD.dblAmountDue			= (ARI.dblInvoiceTotal + ISNULL(ARPD.dblInterest, @ZeroDecimal))  - (ISNULL(ARPD.dblPayment, @ZeroDecimal) + ISNULL(ARPD.dblDiscount, @ZeroDecimal))
         ,ARPD.dblBaseAmountDue		= (ARI.dblBaseInvoiceTotal + ISNULL(ARPD.dblBaseInterest, @ZeroDecimal))  - (ISNULL(ARPD.dblBasePayment, @ZeroDecimal) + ISNULL(ARPD.dblBaseDiscount, @ZeroDecimal))
     FROM
-        (SELECT intInvoiceId FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1) PID
+        #ARPostInvoiceHeader PID
     INNER JOIN
         (SELECT intInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
             ON PID.intInvoiceId = ARI.intInvoiceId
@@ -265,7 +262,7 @@ BEGIN
 		 HDTHW.[ysnBilled] = 1
 		,HDTHW.[dtmBilled] = (CASE WHEN HDTHW.[dtmBilled] IS NULL THEN GETDATE() ELSE HDTHW.[dtmBilled] END)
 	FROM
-		(SELECT [intInvoiceId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1) PID
+		#ARPostInvoiceHeader PID
 	INNER JOIN
 		(SELECT [intInvoiceId], [dtmBilled], [ysnBilled] FROM dbo.tblHDTicketHoursWorked WITH (NOLOCK)) HDTHW
 			ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
@@ -284,8 +281,6 @@ BEGIN
 	INNER JOIN
 		(SELECT [intSiteID] FROM dbo.tblTMSite WITH (NOLOCK)) TMS
 			ON PID.[intSiteId] = TMS.[intSiteID] 
-	WHERE
-		[ysnPost] = 1
 								
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync)
 	BEGIN
@@ -312,8 +307,6 @@ BEGIN
 			AND ysnApplied = 1
 			AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
 	) PREPAIDS
-	WHERE
-		I.[ysnPost] = 1
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @InvoicesWithPrepaids)
 	BEGIN
@@ -371,7 +364,7 @@ BEGIN
 
 	DECLARE @Ids Id
 	INSERT INTO @Ids
-	SELECT [intInvoiceId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1
+	SELECT [intInvoiceId] FROM #ARPostInvoiceHeader
 
 	EXEC dbo.uspARAutoApplyPrepaids @tblInvoiceIds = @Ids
 
@@ -397,8 +390,6 @@ BEGIN
 			,[dblTotalInvoice]     = SUM(CASE WHEN [ysnIsInvoicePositive] = 1 THEN [dblInvoiceTotal] ELSE -[dblInvoiceTotal] END)
 		FROM
 			#ARPostInvoiceHeader
-		WHERE
-			[ysnPost] = 1
 		GROUP BY
 			[intEntityCustomerId]
 		) INVOICE
@@ -418,7 +409,7 @@ BEGIN
 	--Patronage
 	DECLARE @IdsP TABLE([intInvoiceId] INT, [intLoadId] INT)
 	INSERT INTO @IdsP([intInvoiceId], [intLoadId])
-	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1
+	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader
 	DECLARE	@successfulCountP INT
 		,@strId NVARCHAR(MAX)
 
@@ -442,7 +433,7 @@ BEGIN
 		SELECT TOP 1 @InvoiceIDP = [intInvoiceId], @LoadIDP = [intLoadId] FROM @IdsP ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
-        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP,@ysnDelete = 0, @UserId = @UserId
+		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
 
 		--Committed QUatities
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
@@ -487,11 +478,7 @@ BEGIN
 END
 
 
-SET @BatchId = NULL
-SET @UserId = NULL
-
-SELECT TOP 1 @BatchId = [strBatchId], @UserId = [intUserId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0
-IF @UserId IS NOT NULL AND @BatchId IS NOT NULL
+IF @Post = 0
 BEGIN
 --BEGIN
 --	--Reverse Blend for Finished Goods
@@ -685,7 +672,6 @@ BEGIN
 			ON UPD.[intInvoiceDetailId] = MFWO.[intInvoiceDetailId]
 	WHERE
 		UPD.[ysnBlended] = 1
-		AND UPD.[ysnPost] = 0
 
 	WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 		BEGIN
@@ -738,13 +724,13 @@ BEGIN
 		,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
 		,ARI.dblInterest				= @ZeroDecimal
 		,ARI.dblBaseInterest			= @ZeroDecimal
-		,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(dblPayment, @ZeroDecimal) END
-		,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(dblBasePayment, @ZeroDecimal) END
+		,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END
+		,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END
 		,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 		,ARI.ysnExcludeFromPayment		= 0
 		,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 	FROM
-		(SELECT intInvoiceId FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0) PID
+		#ARPostInvoiceHeader PID
 	INNER JOIN
 		(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate, ysnExcludeFromPayment
 			FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
@@ -757,7 +743,7 @@ BEGIN
 		HDTHW.ysnBilled = 0
 		,HDTHW.dtmBilled = NULL
 	FROM
-		(SELECT intInvoiceId FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0) PID
+		#ARPostInvoiceHeader PID
 	INNER JOIN
 		(SELECT intInvoiceId, dtmBilled, ysnBilled FROM dbo.tblHDTicketHoursWorked WITH (NOLOCK)) HDTHW ON PID.intInvoiceId = HDTHW.intInvoiceId	
 															
@@ -777,9 +763,7 @@ BEGIN
 		#ARPostInvoiceDetail PID
 	INNER JOIN
 		(SELECT [intSiteID] FROM dbo.tblTMSite WITH (NOLOCK)) TMS
-			ON PID.[intSiteId] = TMS.[intSiteID]
-	WHERE
-		PID.[ysnPost] = 0 					
+			ON PID.[intSiteId] = TMS.[intSiteID]				
 															
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForUnSync ORDER BY intInvoiceId)
 		BEGIN
@@ -807,8 +791,7 @@ BEGIN
 			AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
 	) PREPAIDS
 	WHERE
-		I.[ysnPost] = 0
-		AND I.strTransactionType = 'Cash Refund'
+		I.strTransactionType = 'Cash Refund'
 
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @CashRefunds)
@@ -863,7 +846,6 @@ BEGIN
 			AND CF.strSourceTransactionId = I.strInvoiceNumber
 	WHERE
 		CF.strSourceSystem = 'AR'
-		AND I.[ysnPost] = 0
 
 	----UPDATE tblARCustomer.dblARBalance
 	--UPDATE CUSTOMER
@@ -887,8 +869,6 @@ BEGIN
 			,[dblTotalInvoice]     = SUM(CASE WHEN [ysnIsInvoicePositive] = 1 THEN [dblInvoiceTotal] ELSE -[dblInvoiceTotal] END)
 		FROM
 			#ARPostInvoiceHeader
-		WHERE
-			[ysnPost] = 0
 		GROUP BY
 			[intEntityCustomerId]
 		) INVOICE
@@ -908,7 +888,7 @@ BEGIN
 	--Patronage
 	DECLARE @IdsU TABLE([intInvoiceId] INT, [intLoadId] INT)
 	INSERT INTO @IdsU([intInvoiceId], [intLoadId])
-	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0
+	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader
 	DECLARE	@successfulCountU INT
 		,@strIdU NVARCHAR(MAX)
 
@@ -931,8 +911,8 @@ BEGIN
 		SELECT TOP 1 @InvoiceIDU = [intInvoiceId], @LoadIDU = [intLoadId] FROM @IdsU ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
-        EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDU,@ysnDelete = 1, @UserId = @UserId
-
+		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 1, @UserId = @UserId
+		
 		--Committed QUatities
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
 
@@ -1019,10 +999,6 @@ INNER JOIN
 	#ARPostInvoiceHeader PID
 		ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
-
-SET @BatchId = NULL
-SET @UserId = NULL
-SELECT TOP 1 @BatchId = [strBatchId], @UserId = [intUserId] FROM #ARPostInvoiceHeader
 -- Get the details from the invoice 
 --BEGIN 
 --DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]

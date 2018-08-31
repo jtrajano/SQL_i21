@@ -75,7 +75,6 @@ INSERT INTO #ARItemsForStorageCosting
 	,[intSubLocationId]
 	,[intStorageLocationId]
 	,[strActualCostId]
-	,[ysnPost]
 ) 
 SELECT 
 	 [intItemId]					= ARID.[intItemId]  
@@ -120,7 +119,6 @@ SELECT
 	,[intSubLocationId]			= ARID.[intSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARID.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARID.[intLoadDistributionHeaderId],0) <> 0) THEN ARID.[strActualCostId] ELSE NULL END
-	,[ysnPost]                  = ARID.[ysnPost]
 FROM 
 	#ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -132,8 +130,8 @@ WHERE
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
-	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
-	AND (ISNULL(ARID.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = 1))
+	AND ARID.[intItemId] IS NOT NULL
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	--AND ( ARID.[intStorageScheduleTypeId] IS NULL OR (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0) )
 	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)

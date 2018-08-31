@@ -23,8 +23,7 @@ INNER JOIN
         AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
         AND ARID.[intItemId] = ICSR.[intItemId]
 WHERE
-	ARID.[ysnPost] = 1
-    AND ICSR.[ysnPosted] = 0
+	ICSR.[ysnPosted] = 0
 
 WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
 BEGIN
