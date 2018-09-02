@@ -1219,6 +1219,8 @@ BEGIN TRY
 					,strValue NVARCHAR(50)
 					)
 
+				Delete from @tblCustomTabColumn
+
 				INSERT INTO @tblCustomTabColumn
 				SELECT Extent1.intCustomTabDetailId
 					,NULL
