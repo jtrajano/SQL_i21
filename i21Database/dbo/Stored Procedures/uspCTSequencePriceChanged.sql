@@ -113,6 +113,16 @@ BEGIN TRY
 
 		WHILE ISNULL(@intInventoryReceiptId,0) > 0
 		BEGIN
+
+			IF EXISTS(	SELECT 1 FROM tblICInventoryReceiptItem RI
+						JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
+						WHERE intInventoryReceiptId = @intInventoryReceiptId AND intLineNo <> @intContractDetailId AND intLineNo IS NOT NULL AND CD.intPricingTypeId NOT IN (1,6)
+					)
+			BEGIN
+				SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
+				CONTINUE;
+			END
+
 			SELECT	@intBillId = NULL, @intBillDetailId = NULL
 
 			SELECT	@intBillId = intBillId, @intBillDetailId = intBillDetailId,@strVendorOrderNumber = strReceiptNumber,@ysnBillPosted = ysnBillPosted FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
