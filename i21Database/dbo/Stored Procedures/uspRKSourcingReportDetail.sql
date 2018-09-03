@@ -41,8 +41,6 @@ DECLARE @GetStandardQty AS TABLE(
 		,dblOriginalBalanceQty  numeric(24,10)
 		)
 
-
---IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
@@ -282,10 +280,13 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,dblQty,
 							else
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)
 							end
-							dblPrice,t.intCompanyLocationId,dblOriginalBalanceQty
-, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
+							dblPrice,t.intCompanyLocationId,
+							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,i.intUnitMeasureId, dblOriginalBalanceQty) dblOriginalBalanceQty
+							
+							
+							, ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
 
-case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
+							case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull((SELECT sum(dblCost) from tblCTAOP a
 							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId and a.intAOPId=@intAOPId
 							and b.intItemId=cd.intItemId
@@ -339,8 +340,9 @@ case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then
 							end	  dblNewPPVPrice,
 							strLocationName	,strPricingType,strItemNo,ca.strDescription strProductType,intCurrencyId,ysnSubCurrency
 
- from @GetStandardQty t
+ FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
+join tblICItemUOM i on cd.intPriceItemUOMId=i.intItemUOMId
 join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
 join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICItem ic ON ic.intItemId = cd.intItemId

@@ -286,7 +286,7 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							else
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null)
 							end
-							dblPrice,t.intCompanyLocationId,dblOriginalBalanceQty
+							dblPrice,t.intCompanyLocationId,	dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,i.intUnitMeasureId, dblOriginalBalanceQty) dblOriginalBalanceQty
 , ca.dblRatio dblStandardRatio, dblBalanceQty*isnull(ca.dblRatio,1) dblStandardQty,ic.intItemId,
 
 case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
@@ -343,6 +343,7 @@ case when ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then
 						,strPricingType,strItemNo,strOrigin,strProductType
  from @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
+join tblICItemUOM i on cd.intPriceItemUOMId=i.intItemUOMId
 join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
 join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 join tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
