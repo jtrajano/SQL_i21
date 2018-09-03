@@ -156,7 +156,7 @@ INNER JOIN (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
-		  AND ICT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE TGC.intTaxGroupId = ID.intTaxGroupId)
+		  AND ICT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
 		GROUP BY intCategoryId
 	) TAXCLASSTOTAL
 	LEFT JOIN (
@@ -171,7 +171,7 @@ INNER JOIN (
 			 , strCategoryCode
 		FROM dbo.tblICCategory WITH (NOLOCK)
 	) CATEGORY ON ITEM.intCategoryId = CATEGORY.intCategoryId
-	INNER JOIN (
+	LEFT JOIN (
 		SELECT intTaxGroupId
 			 , strTaxGroup
 		FROM dbo.tblSMTaxGroup WITH (NOLOCK)
