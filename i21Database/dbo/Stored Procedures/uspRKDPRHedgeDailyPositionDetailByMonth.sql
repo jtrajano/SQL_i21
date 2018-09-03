@@ -236,12 +236,8 @@ SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeN
 	isnull(dblTotal,0) dblTotal,
 	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @List 
 
-UPDATE @List set intSeqNo = 1 where strType='Purchase Priced'
-UPDATE @List set intSeqNo = 2 where strType='Purchase Basis'
-UPDATE @List set intSeqNo = 3 where strType='Purchase HTA'
-UPDATE @List set intSeqNo = 4 where strType='Sale Priced'
-UPDATE @List set intSeqNo = 5 where strType='Sale Basis'
-UPDATE @List set intSeqNo = 6 where strType='Sale HTA'
+UPDATE @List set intSeqNo = 1 where strType like 'Purchase%'
+UPDATE @List set intSeqNo = 2 where strType like 'Sale%'
 UPDATE @List set intSeqNo = 7 where strType='Net Hedge'
 UPDATE @List set intSeqNo = 8 where strType='Position'
 
@@ -258,6 +254,7 @@ IF isnull(@intVendorId,0) = 0
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
 FROM @List where dblTotal <> 0 
+ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END, intSeqNo, strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
  
@@ -266,6 +263,7 @@ ELSE
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
 FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
+ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END ,intSeqNo, strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
 END
