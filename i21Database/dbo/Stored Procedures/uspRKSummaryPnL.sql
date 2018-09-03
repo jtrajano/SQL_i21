@@ -85,7 +85,13 @@ DECLARE @Relaized AS TABLE (
 	RowNum INT,
 	intCommodityId INT,
 	ysnExpired BIT,
-	intFutureMonthId INT
+	intFutureMonthId INT,
+	strLInternalTradeNo nvarchar(100),
+	strSInternalTradeNo nvarchar(100),
+	strLRollingMonth nvarchar(100),
+	strSRollingMonth nvarchar(100),
+	intLFutOptTransactionHeaderId int,
+	intSFutOptTransactionHeaderId int
 	)
 
 INSERT INTO @UnRelaized (
@@ -171,7 +177,7 @@ INSERT INTO @Relaized (
 	intFutureMarketId,
 	intCommodityId,
 	ysnExpired,
-	intFutureMonthId
+	intFutureMonthId,strLInternalTradeNo ,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
 	)
 EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@dtmToDate = @dtmToDate,
