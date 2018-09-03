@@ -38,7 +38,7 @@ strCommodityCode,
 strLocationName,
 intFutureMarketId ,
 intCommodityId ,
-ysnExpired ,intFutureMonthId
+ysnExpired ,intFutureMonthId,strLInternalTradeNo,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
  from (
 SELECT * FROM(  
 SELECT   
@@ -67,7 +67,13 @@ SELECT psh.intMatchFuturesPSHeaderId,
     acc.strAccountNumber,  
     icc.strCommodityCode,  
     sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId,
-	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency                  
+	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency, 
+	ot.strInternalTradeNo strLInternalTradeNo,  
+    ot1.strInternalTradeNo strSInternalTradeNo,   
+	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot.intRollingMonthId)   strLRollingMonth,   
+	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot1.intRollingMonthId)   strSRollingMonth   ,
+	 ot.intFutOptTransactionHeaderId intLFutOptTransactionHeaderId,  
+    ot1.intFutOptTransactionHeaderId intSFutOptTransactionHeaderId                   
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  
