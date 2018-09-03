@@ -12,7 +12,7 @@
     ,@BatchId           NVARCHAR(40)    = NULL
     ,@AccrueLicense     BIT             = 0
     ,@TransType         NVARCHAR(25)    = 'all'
-    ,@UserId            BIT             = NULL
+    ,@UserId            INT				= 1
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
