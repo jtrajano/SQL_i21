@@ -809,6 +809,7 @@ BEGIN
 	SELECT DISTINCT @strCommodityCode,'Price Risk' [strType],'Inventory' strContractType,sum(dblTotal) dblTotal,intItemId,strItemNo,
 					intFromCommodityUnitMeasureId,intCommodityId,strLocationName  
 			FROM @invQty where intCommodityId=@intCommodityId  AND @ysnExchangeTraded = 1
+				AND intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN intLocationId ELSE @intLocationId END
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
 		
 	--Net Hedge Derivative Entry (Futures and Options)
