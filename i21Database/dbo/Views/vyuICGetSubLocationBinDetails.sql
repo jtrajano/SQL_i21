@@ -10,7 +10,7 @@ SELECT intCompanyLocationId		= companyLocation.intCompanyLocationId
 	, intItemLocationId			= stockUOM.intItemLocationId
 	, dblStock					= CAST((totalStock.dblStock) AS NUMERIC(16, 8))
 	, dblCapacity				= CAST(SUM(storageLocation.dblEffectiveDepth * storageLocation.dblUnitPerFoot) AS NUMERIC(16, 8))
-	, dblAvailable				= CAST(SUM(storageLocation.dblEffectiveDepth * storageLocation.dblUnitPerFoot) - SUM(totalStock.dblStock) AS NUMERIC(16, 8))
+	, dblAvailable				= CAST(SUM(storageLocation.dblEffectiveDepth * storageLocation.dblUnitPerFoot) - (totalStock.dblStock) AS NUMERIC(16, 8))
 	, strCommodityCode			= commodity.strCommodityCode
 FROM tblICItemStockUOM stockUOM
 	INNER JOIN tblICItem item ON item.intItemId = stockUOM.intItemId
@@ -38,4 +38,4 @@ WHERE itemUOM.ysnStockUnit = 1
 GROUP BY stockUOM.intItemId, subLocation.intCompanyLocationSubLocationId, subLocation.strSubLocationName,
 	companyLocation.intCompanyLocationId, companyLocation.strLocationName,
 	item.strItemNo, item.strDescription, stockUOM.intItemLocationId, totalStock.dblStock, commodity.strCommodityCode
-HAVING CAST(SUM(totalStock.dblStock) AS NUMERIC(16, 8)) <> 0
+HAVING CAST((totalStock.dblStock) AS NUMERIC(16, 8)) <> 0
