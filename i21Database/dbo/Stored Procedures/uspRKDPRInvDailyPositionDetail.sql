@@ -584,7 +584,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY   GR1.intCustomerStorageId ORDER BY dtmHi
 	WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0   and isnull(SCD.ysnPost,0) =1
 	AND SCT.intCommodityId = @intCommodityId  --AND isnull(GR.intStorageScheduleTypeId,0) > 0
 	AND	l.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end and isnull(strTicketStatus,'') <> 'V'
-	and isnull(SCD.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(SCD.intEntityId,0) else @intVendorId end
+	and isnull(E.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(E.intEntityId,0) else @intVendorId end
 	and  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate)
 	and l.intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -612,7 +612,7 @@ SELECT * FROM (
 	WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0 and isnull(SCD.ysnPost,0) = 0 and isnull(strTicketStatus,'') <> 'V'
 	AND SCT.intCommodityId = @intCommodityId  --AND GR.intStorageScheduleTypeId > 0
 		AND	l.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end and   convert(DATETIME, CONVERT(VARCHAR(10), dtmDeliverySheetHistoryDate, 110), 110) <= convert(datetime,@dtmToDate)
-		and isnull(SCD.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(SCD.intEntityId,0) else @intVendorId end
+		and isnull(E.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(E.intEntityId,0) else @intVendorId end
 		)a where a.intRowNum =1 	
 	)t  
 	WHERE dblTotal >0 AND intCompanyLocationId IN (
