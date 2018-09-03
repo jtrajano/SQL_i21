@@ -5,13 +5,13 @@ SELECT storageLocation.intStorageLocationId, stockUOM.intItemId, companyLocation
 	, companyLocation.strLocationName strLocation, storageLocation.strName strStorageLocation, unitMeasure.strUnitMeasure strUOM
 	, item.strItemNo, item.strDescription strItemDescription
 	, storageLocation.dblEffectiveDepth, storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot
-	, CAST(SUM(totalStock.dblStock) AS NUMERIC(16, 8)) dblStock
+	, CAST((totalStock.dblStock) AS NUMERIC(16, 8)) dblStock
 	, CAST(storageLocation.dblEffectiveDepth *  storageLocation.dblUnitPerFoot AS NUMERIC(16, 8)) dblCapacity
 	, CAST(storageLocation.dblEffectiveDepth *  storageLocation.dblUnitPerFoot - totalStock.dblStock AS NUMERIC(16, 8)) dblAvailable
 	, commodity.strCommodityCode
 	, CAST(ISNULL(mrc.dblAirSpaceReading, 0) AS NUMERIC(16, 8)) dblAirSpaceReading
 	, CAST(((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot ) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblPhysicalReading
-	, CAST(SUM(totalStock.dblStock) - ((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot ) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblStockVariance,
+	, CAST((totalStock.dblStock) - ((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot ) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblStockVariance,
 	grd.strDiscountId strDiscountCode, grd.strDiscountDescription, smr.dtmDate [dtmReadingDate]
 FROM tblICItemStockUOM stockUOM
 	INNER JOIN tblICItem item ON item.intItemId = stockUOM.intItemId
@@ -42,4 +42,4 @@ GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId, subLocation.i
 	storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot, totalStock.dblStock, unitMeasure.strUnitMeasure,
 	commodity.strCommodityCode, mrc.dblAirSpaceReading, storageLocation.dblResidualUnit, grd.strDiscountId, grd.strDiscountDescription,
 	smr.dtmDate
-HAVING CAST(SUM(totalStock.dblStock) AS NUMERIC(16, 8)) <> 0
+HAVING CAST((totalStock.dblStock) AS NUMERIC(16, 8)) <> 0
