@@ -122,8 +122,10 @@ BEGIN
 		IF @NetUnits = 0
 			SET @NetUnits = @ticketTotalUnitQty;
 		SET @tmpUnits = ROUND((@NetUnits * @SplitAverage) / 100, @currencyDecimal);
-		IF @remainingUnits > @tmpUnits AND @splitCounter = @counter
+		IF @splitCounter = @counter
+		BEGIN
 			SET @tmpUnits = @remainingUnits;
+		END
 
 		--For priced contract
 		SET @Contract = 
