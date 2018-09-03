@@ -7125,6 +7125,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI4004.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3978.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMTMF32.sql" />
+    <Build Include="Scripts\Post-Deployment\TF\DefaultData\MT_Montana.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
