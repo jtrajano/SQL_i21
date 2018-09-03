@@ -41,7 +41,7 @@ DECLARE @LineItemAccounts AS TABLE(
 	)
 	SELECT
 		 [intInvoiceDetailId]
-		,[intAccountId]
+		,[intItemAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
 		,[intInventoryAccountId]
@@ -67,8 +67,7 @@ DECLARE @LineItemAccounts AS TABLE(
 			ON ARID.[intItemId] = IA.[intItemId]
 			AND ARID.[intCompanyLocationId] = IA.[intLocationId]
 	WHERE
-        ISNULL(ARID.[intItemId], 0) <> 0
-        AND ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
+        ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
 
 	--Non-Inventory, Service, Other Charge
 	UPDATE LIA
@@ -92,8 +91,6 @@ DECLARE @LineItemAccounts AS TABLE(
 	OUTER APPLY (SELECT ISNULL(dbo.fnGetItemGLAccount(ARID.intItemId, ARID.intItemLocationId, N'General'), NULLIF(dbo.fnGetItemBaseGLAccount(ARID.intItemId, ARID.intItemLocationId, N'General'), 0)) AS intGeneralAccountId) GENERAL
 	OUTER APPLY (SELECT ISNULL(dbo.fnGetItemGLAccount(ARID.intItemId, ARID.intItemLocationId, N'Other Charge Income'), NULLIF(dbo.fnGetItemBaseGLAccount(ARID.intItemId, ARID.intItemLocationId, N'Other Charge Income'), 0)) AS intOtherChargeIncomeAccountId) OTHERCHARGE
 	WHERE
-        ISNULL(ARID.intItemId, 0) <> 0
-        OR
         ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
 
 	--Software License
@@ -174,6 +171,20 @@ DECLARE @LineItemAccounts AS TABLE(
 	INNER JOIN
         @LineItemAccounts LIA
 			ON ARID.intInvoiceDetailId = LIA.intDetailId
+
+	--Update Invoice Detail
+	UPDATE ARID
+	SET  ARID.intAccountId = (CASE WHEN LIA.[strTransactionType] = 'Debit Memo' 
+								   THEN ISNULL(LIA.[intSalesAccountId], ISNULL(LIA.[intConversionAccountId],(CASE WHEN LIA.[intServiceChargeAccountId] IS NOT NULL AND LIA.[intServiceChargeAccountId] <> 0 THEN LIA.[intServiceChargeAccountId] ELSE LIA.[intSalesAccountId] END))) 
+                                   ELSE ISNULL(LIA.[intConversionAccountId],(CASE WHEN LIA.[intServiceChargeAccountId] IS NOT NULL AND LIA.[intServiceChargeAccountId] <> 0 THEN LIA.[intServiceChargeAccountId] ELSE LIA.[intSalesAccountId] END)) 
+                              END)		
+	FROM
+		tblARInvoiceDetail ARID
+	INNER JOIN
+        #ARPostInvoiceDetail LIA
+			ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId]
+			AND LIA.[intItemId] IS NULL
+
 
 	--Update Invoice Tax Detail
 	UPDATE ARITD
