@@ -139,7 +139,7 @@ DECLARE @List AS TABLE (
             sum(dblTotal)
             for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Sale Basis],[Sale Priced],[Sale HTA],[Net Hedge],[Position])
 				
-         ) p 
+         ) p order by CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END
 
 	END
 	ELSE
