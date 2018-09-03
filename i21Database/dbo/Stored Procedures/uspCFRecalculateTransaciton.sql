@@ -2169,8 +2169,8 @@ BEGIN
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
-					,calculatedTax.dblTax
-					,originalTax.dblTax
+					,([dbo].fnRoundBanker(calculatedTax.dblTax,2))
+					,([dbo].fnRoundBanker(originalTax.dblTax,2))
 				FROM @tblCFOriginalTax as originalTax
 				CROSS APPLY (
 						SELECT TOP 1 
@@ -3491,8 +3491,8 @@ BEGIN
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
-					,calculatedTax.dblTax
-					,originalTax.dblTax
+					,([dbo].fnRoundBanker(calculatedTax.dblTax,2))
+					,([dbo].fnRoundBanker(originalTax.dblTax,2))
 				FROM @tblCFOriginalTax as originalTax
 				CROSS APPLY (
 						SELECT TOP 1 
@@ -4872,8 +4872,8 @@ BEGIN
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
-					,calculatedTax.dblTax
-					,originalTax.dblTax
+					,([dbo].fnRoundBanker(calculatedTax.dblTax,2))
+					,([dbo].fnRoundBanker(originalTax.dblTax,2))
 				FROM @tblCFOriginalTax as originalTax
 				CROSS APPLY (
 						SELECT TOP 1 
@@ -5189,8 +5189,8 @@ BEGIN
 					,0
 					,strTaxGroup
 					,strNotes
-					,dblRate
-					,dblRate
+					,([dbo].fnRoundBanker(dblRate,2))
+					,([dbo].fnRoundBanker(dblRate,2))
 				FROM @tblCFRemoteTax
 				WHERE (intTaxClassId IS NOT NULL AND intTaxClassId > 0)
 				AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
@@ -5308,15 +5308,32 @@ BEGIN
 	DECLARE @totalOriginalTax					NUMERIC(18,6) = 0
 	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6) = 0
 
+	--SELECT 
+	-- @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
+	--,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
+	--FROM
+	--@tblCFTransactionTax
+	--WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+
+	--SELECT 
+	-- @totalCalculatedTaxExempt = ISNULL(SUM(cftx.dblTax),0)
+	--FROM
+	--@tblCFTransactionTax as cft
+	--INNER JOIN @tblCFCalculatedTaxExempt as cftx
+	--ON cft.intTaxClassId = cftx.intTaxClassId
+	--WHERE cft.ysnTaxExempt = 1 AND 
+	--(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+	
+
 	SELECT 
-	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
-	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
+	 @totalCalculatedTax = ISNULL(SUM([dbo].fnRoundBanker(dblCalculatedTax,2)),0)
+	,@totalOriginalTax = ISNULL(SUM([dbo].fnRoundBanker(dblOriginalTax,2)),0)
 	FROM
 	@tblCFTransactionTax
 	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 	SELECT 
-	 @totalCalculatedTaxExempt = ISNULL(SUM(cftx.dblTax),0)
+	 @totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblTax,2)),0)
 	FROM
 	@tblCFTransactionTax as cft
 	INNER JOIN @tblCFCalculatedTaxExempt as cftx
