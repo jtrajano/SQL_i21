@@ -429,7 +429,7 @@ BEGIN
 		INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
 		WHERE SE.intSourceId = @intTicketId AND SC.dblTicketFees > 0
 
-	IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
+	IF @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 		BEGIN
 			SET @ysnAccrue = 1
 		END
@@ -892,8 +892,8 @@ BEGIN
 							,[dblForexRate]						= SE.dblForexRate
 
 							--Charges
-							,[intContractId]					= NULL
-							,[intContractDetailId]				= NULL 
+							,[intContractId]					= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intOrderId,0) > 0 THEN SE.intOrderId ELSE NULL END
+							,[intContractDetailId]				= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intLineNo,0) > 0 THEN SE.intLineNo ELSE NULL END 
 							,[intCurrencyId]  					= SE.intCurrencyId
 							,[intChargeId]						= @intFreightItemId
 							,[strCostMethod]					= SC.strCostMethod
