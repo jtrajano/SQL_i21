@@ -7028,6 +7028,7 @@
     <Build Include="dbo\Stored Procedures\uspICConvertReturnToVoucher.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleLotDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetDate.sql" />
+    <Build Include="dbo\Views\vyuSTInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
