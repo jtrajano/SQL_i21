@@ -1990,8 +1990,8 @@ SELECT
     ,[intMaintenanceAccountId]          = ARID.[intMaintenanceAccountId]
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
-    ,[dblUnitQtyShipped]                = ARID.[dblQtyShipped]
-    ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
+    ,[dblUnitQtyShipped]                = @ZeroDecimal
+    ,[dblShipmentNetWt]                 = @ZeroDecimal
     ,[dblUnitQty]                       = @ZeroDecimal
     ,[dblUnitOnHand]                    = @ZeroDecimal
     ,[intAllowNegativeInventory]        = NULL
