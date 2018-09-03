@@ -1128,29 +1128,35 @@ BEGIN
 		intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,strDistributionOption,dblUnitCost1,
 		dblQtyReceived,intCommodityId,strCurrency,intBillId,strBillId,strCustomerReference
 	 FROM(	
-		SELECT DISTINCT tr.intBillId,strBillId,		
+		SELECT DISTINCT tr.intBillId,tr.strBillId,		
 				strLocationName
 				,tr.strTicketNumber
 				,tr.dtmTicketDateTime
 				,strDistributionOption
 				,dblCost dblUnitCost
 				,sum(tr.dblQtyReceived) over (partition by tr.intBillId) dblQtyReceived
-				,sum(dblTotal) over (partition by tr.intBillId) dblTotal
+				,sum(tr.dblTotal) over (partition by tr.intBillId) dblTotal
 				,tr.dblCost
-				,dblAmountDue
+				,tr.dblAmountDue
 				,dblCost dblUnitCost1
-				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,tr.strCurrency,e.strName strCustomerReference
+				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,tr.strCurrency,strName strCustomerReference
 				FROM tblAPVoucherHistory tr
+				join tblAPBill b on tr.intBillId = b.intBillId
 				join tblICCommodity c on tr.strCommodity=c.strCommodityCode
 				join tblSMCompanyLocation cl on cl.strLocationName=tr.strLocation
 				LEFT JOIN tblSCTicket t on tr.strTicketNumber=t.strTicketNumber
-				LEFT JOIN tblEMEntity e on e.intEntityId=t.intEntityId				
+				LEFT JOIN tblEMEntity e on b.intEntityVendorId=e.intEntityId 
 				WHERE 
-				c.intCommodityId = @intCommodityId  and
+				c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-				and t.intEntityId =@intVendorId and isnull(strTicketStatus,'') <> 'V'
-				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 			
-			)t where dblTotal<>0
+				and b.intEntityVendorId = @intVendorId
+				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate)
+				and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+									ELSE isnull(ysnLicensed, 0) END
+									) 			
+			)t  where dblTotal <> 0
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
 		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
