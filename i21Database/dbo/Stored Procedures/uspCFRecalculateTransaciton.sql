@@ -3218,7 +3218,7 @@ BEGIN
 					,[strNotes]						
 				FROM [fnConstructLineItemTaxDetail] 
 				(
-					 @dblZeroQuantity
+					 @dblQuantity
 					,0
 					,@LineItemTaxDetailStagingTable
 					,0
