@@ -28,6 +28,8 @@ BEGIN TRY
 		,@dblInputCost NUMERIC(38, 20)
 		,@dblValue NUMERIC(38, 20)
 		,@strBatchId NVARCHAR(50)
+		,@intWOItemUOMId INT
+		,@intUnitMeasureId INT
 	DECLARE @tblMFConsumedLot TABLE (
 		intWorkOrderConsumedLotId INT identity(1, 1)
 		,intBatchId INT
@@ -38,8 +40,13 @@ BEGIN TRY
 		,@intWorkOrderId = intWorkOrderId
 		,@strWorkOrderNo = strWorkOrderNo
 		,@intLocationId = intLocationId
+		,@intWOItemUOMId = intItemUOMId
 	FROM tblMFWorkOrder
 	WHERE strCostAdjustmentBatchId = @strCostAdjustmentBatchId
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intWOItemUOMId
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -121,8 +128,10 @@ BEGIN TRY
 		SELECT @dblInputCost = abs(@dblInputCost) + @dblOtherCharges
 	END
 
-	SELECT @dblProduceQty = SUM(dblQuantity)
+	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 	FROM dbo.tblMFWorkOrderProducedLot WP
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+	AND IU.intUnitMeasureId = @intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.intItemId IN (
@@ -132,7 +141,7 @@ BEGIN TRY
 				AND ysnConsumptionRequired = 1
 				AND intWorkOrderId = @intWorkOrderId
 			)
-
+	SET @dblNewCost = ABS(@dblInputCost) + ISNULL(@dblOtherCharges, 0)
 	SET @dblNewUnitCost = abs(@dblInputCost) / @dblProduceQty
 
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
@@ -172,7 +181,12 @@ BEGIN TRY
 		,intFobPointId
 		)
 	SELECT [intItemId] = PL.intItemId
-		,[intItemLocationId] = L.intItemLocationId
+		,[intItemLocationId] = isNULL(L.intItemLocationId, (
+					SELECT IL.intItemLocationId
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = PL.intItemId
+						AND IL.intLocationId = @intLocationId
+					))
 		,[intItemUOMId] = PL.intItemUOMId
 		,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
 		,[dblQty] = PL.dblQuantity
@@ -183,8 +197,8 @@ BEGIN TRY
 				THEN (
 						CASE 
 							WHEN IsNULL(RI.dblPercentage, 0) = 0
-								THEN @dblNewUnitCost * PL.dblQuantity
-							ELSE (@dblNewUnitCost * @dblProduceQty * RI.dblPercentage / 100)
+								THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
+							ELSE ((@dblNewCost * RI.dblPercentage / 100 / SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)) OVER (PARTITION BY PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
 							END
 						)
 			ELSE (@dblNewUnitCost * @dblProduceQty * RI.dblPercentage / 100) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
@@ -209,8 +223,9 @@ BEGIN TRY
 		,intFobPointId = 2
 	FROM dbo.tblMFWorkOrderProducedLot PL
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-	JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
-	--JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
+		AND IU.intUnitMeasureId = @intUnitMeasureId
+	LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 	LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 		AND RI.intItemId = PL.intItemId
 		AND RI.intRecipeItemTypeId = 2
