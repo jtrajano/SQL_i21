@@ -7024,6 +7024,7 @@
     <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetDate.sql" />
     <Build Include="dbo\Views\vyuSTInventoryItem.sql" />
     <Build Include="dbo\Views\vyuARPOSEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
