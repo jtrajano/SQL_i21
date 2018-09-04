@@ -77,6 +77,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strERPPONumber
 	, ReceiptItemSource.strERPItemNumber
 	, ReceiptItemSource.strOrigin
+	, ReceiptItemSource.strPurchasingGroup
+	, ReceiptItemSource.strINCOShipTerm
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
