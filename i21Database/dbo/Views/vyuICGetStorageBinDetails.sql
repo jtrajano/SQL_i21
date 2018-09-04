@@ -2,32 +2,36 @@
 AS
 SELECT
 	  intItemId					= sm.intItemId
-	, intCompanyLocationId		= sd.intLocationId
+	, intCompanyLocationId		= sl.intLocationId
 	, intItemLocationId			= sm.intItemLocationId
 	, intSubLocationId			= sm.intSubLocationId
 	, strSubLocationName		= sc.strSubLocationName
-	, strLocation				= sd.strLocationName
+	, strLocation				= c.strLocationName
 	, strStorageLocation		= sl.strName
-	, strItemNo					= sd.strItemNo
-	, strItemDescription		= sd.strDescription
+	, strItemNo					= i.strItemNo
+	, strItemDescription		= i.strDescription
 	, intStorageLocationId		= sm.intStorageLocationId
-	, strCommodityCode			= sd.strCommodityCode
-	, dblStock					= (sd.dblUnitOnHand + sd.dblUnitStorage)
+	, strCommodityCode			= cd.strCommodityCode
+	, dblStock					= (sm.dblOnHand + sm.dblUnitStorage)
 	, dblCapacity				= sl.dblEffectiveDepth *  sl.dblUnitPerFoot
-	, dblAvailable				= (sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sd.dblUnitOnHand + sd.dblUnitStorage)
+	, dblAvailable				= (sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sm.dblOnHand + sm.dblUnitStorage)
 	, dblAirSpaceReading		= ISNULL(mrc.dblAirSpaceReading, 0)
 	, dblPhysicalReading		= ((sl.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * sl.dblUnitPerFoot) + sl.dblResidualUnit
-	, dblStockVariance			= (sd.dblUnitOnHand + sd.dblUnitStorage) - (((sl.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * sl.dblUnitPerFoot)) + sl.dblResidualUnit
+	, dblStockVariance			= (sm.dblOnHand + sm.dblUnitStorage) - (((sl.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * sl.dblUnitPerFoot)) + sl.dblResidualUnit
 	, dtmReadingDate			= smr.dtmReadingDate
 	, strDiscountCode			= grd.strDiscountId
 	, strDiscountDescription	= grd.strDiscountDescription
 	, strUOM					= um.strUnitMeasure
-FROM vyuICStockDetail sd
-	INNER JOIN tblICItemStockUOM sm ON sm.intItemStockUOMId = sd.intStockUOMId
+FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
+	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
 	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
 	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
+		AND il.intItemLocationId = sm.intItemLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
+	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
 	LEFT OUTER JOIN (
 		SELECT 
 			  dblAirSpaceReading						= SUM(ISNULL(mrc.dblAirSpaceReading, 0))
@@ -45,9 +49,9 @@ FROM vyuICStockDetail sd
 			, mrc.intDiscountSchedule
 			, mrc.intStorageMeasurementReadingId
 			, mrc.intStorageMeasurementReadingConversionId
-	) mrc ON mrc.intItemId = sd.intItemId
+	) mrc ON mrc.intItemId = i.intItemId
 		AND mrc.intStorageLocationId = sm.intStorageLocationId
-		AND mrc.intCommodityId = sd.intCommodityId
+		AND mrc.intCommodityId = i.intCommodityId
 	LEFT OUTER JOIN (
 		SELECT
 			  intLocationId						= smr.intLocationId
@@ -56,8 +60,8 @@ FROM vyuICStockDetail sd
 		FROM tblICStorageMeasurementReading smr
 			INNER JOIN tblICStorageMeasurementReadingConversion smrc ON smrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
 		GROUP BY smr.intLocationId, smr.intStorageMeasurementReadingId
-	) smr ON smr.intLocationId = sd.intLocationId
+	) smr ON smr.intLocationId = il.intLocationId
 		AND mrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
 	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
-WHERE sd.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
+WHERE i.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
 	AND sm.intStorageLocationId IS NOT NULL

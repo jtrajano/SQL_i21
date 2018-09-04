@@ -2,23 +2,36 @@
 AS
 SELECT
 	  intItemId					= sm.intItemId
-	, intCompanyLocationId		= sd.intLocationId
+	, intCompanyLocationId		= il.intLocationId
 	, intItemLocationId			= sm.intItemLocationId
 	, intSubLocationId			= sm.intSubLocationId
 	, strSubLocationName		= sc.strSubLocationName
-	, strLocation				= sd.strLocationName
-	, strStorageLocation		= sl.strName
-	, intStorageLocationId		= sl.intStorageLocationId
-	, strItemNo					= sd.strItemNo
-	, strItemDescription		= sd.strDescription
-	, dblStock					= (sd.dblUnitOnHand + sd.dblUnitStorage)
-	, dblCapacity				= sl.dblEffectiveDepth *  sl.dblUnitPerFoot
-	, dblAvailable				= (sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sd.dblUnitOnHand + sd.dblUnitStorage)
-	, strCommodityCode			= sd.strCommodityCode
-FROM vyuICStockDetail sd
-	INNER JOIN tblICItemStockUOM sm ON sm.intItemStockUOMId = sd.intStockUOMId
+	, intStorageLocationId		= MAX(sl.intStorageLocationId)
+	, strLocation				= MAX(c.strLocationName)
+	, strStorageLocation		= MAX(sl.strName)
+	, strItemNo					= i.strItemNo
+	, strItemDescription		= i.strDescription
+	, dblStock					= SUM((sm.dblOnHand + sm.dblUnitStorage))
+	, dblCapacity				= SUM(sl.dblEffectiveDepth *  sl.dblUnitPerFoot)
+	, dblAvailable				= SUM((sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sm.dblOnHand + sm.dblUnitStorage))
+	, strCommodityCode			= cd.strCommodityCode
+FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
+	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
+	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
+		AND il.intItemLocationId = sm.intItemLocationId
 	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
 	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
-WHERE sd.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
+	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
+	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
+WHERE i.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
+GROUP BY   sm.intItemId
+		 , il.intLocationId
+		 , sm.intItemLocationId
+		 , sm.intSubLocationId
+		 , sc.strSubLocationName
+		 , c.strLocationName
+		 , i.strItemNo
+		 , i.strDescription
+		 , cd.strCommodityCode

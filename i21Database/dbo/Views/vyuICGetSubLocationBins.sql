@@ -5,7 +5,7 @@ SELECT companyLocation.intCompanyLocationId, subLocation.intCompanyLocationSubLo
 	, dblEffectiveDepth		= SUM(ISNULL(storage.dblEffectiveDepth, 0))
 	, dblUnitPerFoot		= SUM(ISNULL(storage.dblUnitPerFoot, 0))
 	, dblPackFactor			= 1.0
-	, CAST(SUM(bd.dblStock) AS NUMERIC(16, 8)) dblStock
+	, CAST(dbo.fnMaxNumeric(SUM(bd.dblStock), 0) AS NUMERIC(16, 8)) dblStock
 	, CAST(SUM(bd.dblCapacity) AS NUMERIC(16, 8)) dblCapacity
 	, CAST(dbo.fnMaxNumeric(SUM(bd.dblAvailable), 0) AS NUMERIC(16, 8)) dblAvailable
 FROM tblSMCompanyLocationSubLocation subLocation
