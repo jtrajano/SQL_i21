@@ -279,6 +279,7 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - T
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Troutdale Diesel', intMasterId = 37122
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Multnomah County Diesel', intMasterId = 37123
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Washington County Diesel', intMasterId = 37124
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR Use Fuel Tax (CRD)', intMasterId = 37125
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'OR', @TaxCategories = @TaxCategoryOR
 
