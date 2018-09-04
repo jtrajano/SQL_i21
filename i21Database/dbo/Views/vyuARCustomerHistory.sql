@@ -14,7 +14,7 @@ FROM (
 		 , intEntityCustomerId
 		 , ysnPaid				= 0
 	FROM dbo.tblSOSalesOrder SO	WITH (NOLOCK)
-	WHERE SO.ysnRecurring = 0
+	WHERE ISNULL(SO.ysnRecurring, 0) = 0
 	
 	UNION	
 
