@@ -311,11 +311,11 @@ BEGIN
 	BEGIN
 		UPDATE CF
 		SET strRowState = CASE 
-				WHEN Not EXISTS (
+				WHEN NOT EXISTS (
 						SELECT *
 						FROM @tblCTContractFeedHistory CFH
 						WHERE CFH.intContractHeaderId = CF.intContractHeaderId
-						and CFH.strItemNo =CF.strItemNo 
+							AND CFH.strItemNo = CF.strItemNo
 						)
 					THEN 'Added'
 				ELSE strRowState
@@ -547,6 +547,13 @@ BEGIN
 				SELECT *
 				FROM @tblCTContractFeedHistory CFH
 				WHERE CF2.intContractFeedId = CFH.intContractFeedId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblCTContractFeed CF3
+				WHERE CF3.intContractDetailId = CF2.intContractDetailId and CF3.intContractHeaderId=CF2.intContractHeaderId
+					AND CF3.strRowState = 'Delete'
+					AND IsNULL(CF3.strFeedStatus, '') = ''
 				)
 	END
 END
