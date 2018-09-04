@@ -78,7 +78,8 @@ INSERT INTO #ARItemsForInTransitCosting
 	,[intFobPointId] 
 	,[intInTransitSourceLocationId]
 	,[intForexRateTypeId]
-	,[dblForexRate])
+	,[dblForexRate]
+	,[intLinkedItem])
 -- FOR Provisional and Standard Invoices From Inventory Shipment
 SELECT
 	 [intItemId]					= ICIT.[intItemId]
@@ -104,10 +105,11 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICISI.intChildItemLinkId
 FROM 
 	#ARPostInvoiceDetail ARID
 INNER JOIN 
-	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
+	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId], intChildItemLinkId  FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
 INNER JOIN
 	(SELECT [intInventoryShipmentId], [strShipmentNumber] FROM tblICInventoryShipment) ICIS
@@ -155,6 +157,7 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICISI.intChildItemLinkId
 FROM 
 	#ARPostInvoiceDetail ARID
 INNER JOIN
@@ -172,7 +175,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND ICIT.[ysnIsUnposted] = 0		
 LEFT OUTER JOIN 
-	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
+	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId], [intChildItemLinkId]  FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
 	ICIT.[intFobPointId] IS NOT NULL
@@ -210,10 +213,11 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICISI.intChildItemLinkId
 FROM 
 	#ARPostInvoiceDetail ARID
 INNER JOIN 
-	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
+	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId], [intChildItemLinkId]  FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
 INNER JOIN
 	(SELECT [intInventoryShipmentId], [strShipmentNumber] FROM tblICInventoryShipment) ICIS
@@ -258,6 +262,7 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICISI.intChildItemLinkId
 FROM 
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
@@ -285,11 +290,22 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND ICIT.[ysnIsUnposted] = 0		 
 LEFT OUTER JOIN 
-	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
+	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId], [intChildItemLinkId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
+
+UPDATE 
+	A 
+		Set [intLinkedItemId] = B.intItemId
+	From 
+	#ARItemsForInTransitCosting A
+		join tblICInventoryShipmentItem B
+			on A.intLinkedItem = B.intParentItemLinkId
+	where A.intLinkedItem is not null
+
+
 
 RETURN 1

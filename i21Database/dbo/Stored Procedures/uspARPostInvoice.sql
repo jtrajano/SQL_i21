@@ -532,7 +532,10 @@ CREATE TABLE #ARItemsForInTransitCosting
 	,[intFobPointId] TINYINT NULL
 	,[intInTransitSourceLocationId] INT NULL
 	,[intForexRateTypeId] INT NULL
-	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1)
+	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
+	,[intLinkedItem] INT NULL
+	,[intLinkedItemId] INT NULL
+	)
 
 IF(OBJECT_ID('tempdb..#ARItemsForStorageCosting') IS NOT NULL)
 BEGIN
