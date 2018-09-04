@@ -1,45 +1,63 @@
 ﻿CREATE VIEW [dbo].[vyuICGetStorageBinDetails]
-AS 
-SELECT storageLocation.intStorageLocationId, stockUOM.intItemId, companyLocation.intCompanyLocationId, stockUOM.intItemLocationId
-	, subLocation.intCompanyLocationSubLocationId intSubLocationId, subLocation.strSubLocationName
-	, companyLocation.strLocationName strLocation, storageLocation.strName strStorageLocation, unitMeasure.strUnitMeasure strUOM
-	, item.strItemNo, item.strDescription strItemDescription
-	, storageLocation.dblEffectiveDepth, storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot
-	, CAST((totalStock.dblStock) AS NUMERIC(16, 8)) dblStock
-	, CAST(storageLocation.dblEffectiveDepth *  storageLocation.dblUnitPerFoot AS NUMERIC(16, 8)) dblCapacity
-	, CAST(storageLocation.dblEffectiveDepth *  storageLocation.dblUnitPerFoot - totalStock.dblStock AS NUMERIC(16, 8)) dblAvailable
-	, commodity.strCommodityCode
-	, CAST(ISNULL(mrc.dblAirSpaceReading, 0) AS NUMERIC(16, 8)) dblAirSpaceReading
-	, CAST(((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot ) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblPhysicalReading
-	, CAST((totalStock.dblStock) - ((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot ) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblStockVariance,
-	grd.strDiscountId strDiscountCode, grd.strDiscountDescription, smr.dtmDate [dtmReadingDate]
-FROM tblICItemStockUOM stockUOM
-	INNER JOIN tblICItem item ON item.intItemId = stockUOM.intItemId
-	INNER JOIN tblICItemUOM itemUOM ON itemUOM.intItemUOMId = stockUOM.intItemUOMId
-	LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = itemUOM.intUnitMeasureId
-	INNER JOIN tblICStorageLocation storageLocation ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId
-	INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = storageLocation.intLocationId
-	INNER JOIN (
-		SELECT stockUOM.intItemId, stockUOM.intItemLocationId,
-			SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) dblStock
-		FROM tblICItemStockUOM stockUOM
-			INNER JOIN tblICItemUOM iu ON iu.intItemUOMId = stockUOM.intItemUOMId
-		WHERE iu.ysnStockUnit = 1
-		GROUP BY stockUOM.intItemLocationId, stockUOM.intItemId
-	) totalStock ON totalStock.intItemId = stockUOM.intItemId
-		AND totalStock.intItemLocationId = stockUOM.intItemLocationId
-	LEFT OUTER JOIN tblICCommodity commodity ON commodity.intCommodityId = item.intCommodityId
-	LEFT OUTER JOIN tblICStorageMeasurementReadingConversion mrc ON mrc.intCommodityId = commodity.intCommodityId
-		AND mrc.intStorageLocationId = storageLocation.intStorageLocationId
-		AND mrc.intItemId = item.intItemId
-	LEFT OUTER JOIN tblICStorageMeasurementReading smr ON smr.intLocationId = companyLocation.intCompanyLocationId
+AS
+SELECT
+	  intItemId					= sm.intItemId
+	, intCompanyLocationId		= sd.intLocationId
+	, intItemLocationId			= sm.intItemLocationId
+	, intSubLocationId			= sm.intSubLocationId
+	, strSubLocationName		= sc.strSubLocationName
+	, strLocation				= sd.strLocationName
+	, strStorageLocation		= sl.strName
+	, strItemNo					= sd.strItemNo
+	, strItemDescription		= sd.strDescription
+	, intStorageLocationId		= sm.intStorageLocationId
+	, strCommodityCode			= sd.strCommodityCode
+	, dblStock					= (sd.dblUnitOnHand + sd.dblUnitStorage)
+	, dblCapacity				= sl.dblEffectiveDepth *  sl.dblUnitPerFoot
+	, dblAvailable				= (sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sd.dblUnitOnHand + sd.dblUnitStorage)
+	, dblAirSpaceReading		= ISNULL(mrc.dblAirSpaceReading, 0)
+	, dblPhysicalReading		= ((sl.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * sl.dblUnitPerFoot) + sl.dblResidualUnit
+	, dblStockVariance			= (sd.dblUnitOnHand + sd.dblUnitStorage) - (((sl.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * sl.dblUnitPerFoot)) + sl.dblResidualUnit
+	, dtmReadingDate			= smr.dtmReadingDate
+	, strDiscountCode			= grd.strDiscountId
+	, strDiscountDescription	= grd.strDiscountDescription
+	, strUOM					= um.strUnitMeasure
+FROM vyuICStockDetail sd
+	INNER JOIN tblICItemStockUOM sm ON sm.intItemStockUOMId = sd.intStockUOMId
+	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
+	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
+	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+	LEFT OUTER JOIN (
+		SELECT 
+			  dblAirSpaceReading						= SUM(ISNULL(mrc.dblAirSpaceReading, 0))
+			, intItemId									= mrc.intItemId
+			, intStorageLocationId						= mrc.intStorageLocationId
+			, intCommodityId							= mrc.intCommodityId
+			, intDiscountSchedule						= mrc.intDiscountSchedule
+			, intStorageMeasurementReadingId			= mrc.intStorageMeasurementReadingId
+			, intStorageMeasurementReadingConversionId	= mrc.intStorageMeasurementReadingConversionId
+		FROM tblICStorageMeasurementReadingConversion mrc
+		GROUP BY 
+			  mrc.intItemId
+			, mrc.intStorageLocationId
+			, mrc.intCommodityId
+			, mrc.intDiscountSchedule
+			, mrc.intStorageMeasurementReadingId
+			, mrc.intStorageMeasurementReadingConversionId
+	) mrc ON mrc.intItemId = sd.intItemId
+		AND mrc.intStorageLocationId = sm.intStorageLocationId
+		AND mrc.intCommodityId = sd.intCommodityId
+	LEFT OUTER JOIN (
+		SELECT
+			  intLocationId						= smr.intLocationId
+			, dtmReadingDate					= MAX(smr.dtmDate)
+			, intStorageMeasurementReadingId	= smr.intStorageMeasurementReadingId
+		FROM tblICStorageMeasurementReading smr
+			INNER JOIN tblICStorageMeasurementReadingConversion smrc ON smrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
+		GROUP BY smr.intLocationId, smr.intStorageMeasurementReadingId
+	) smr ON smr.intLocationId = sd.intLocationId
+		AND mrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
 	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
-	LEFT OUTER JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = stockUOM.intSubLocationId
-WHERE itemUOM.ysnStockUnit = 1
-GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId, subLocation.intCompanyLocationSubLocationId, subLocation.strSubLocationName,
-	companyLocation.intCompanyLocationId, storageLocation.strName, companyLocation.strLocationName,
-	item.strItemNo, item.strDescription, storageLocation.dblEffectiveDepth, stockUOM.intItemLocationId,
-	storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot, totalStock.dblStock, unitMeasure.strUnitMeasure,
-	commodity.strCommodityCode, mrc.dblAirSpaceReading, storageLocation.dblResidualUnit, grd.strDiscountId, grd.strDiscountDescription,
-	smr.dtmDate
-HAVING CAST((totalStock.dblStock) AS NUMERIC(16, 8)) <> 0
+WHERE sd.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
+	AND sm.intStorageLocationId IS NOT NULL
