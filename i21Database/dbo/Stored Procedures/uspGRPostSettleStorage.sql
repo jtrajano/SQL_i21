@@ -547,11 +547,17 @@ BEGIN TRY
 					UPDATE tblGRSettleStorage SET intCompanyLocationId = @intCompanyLocationId WHERE intSettleStorageId = @intTempSettleStorageId
 				END
 
-				SELECT @intShipFrom = DS.intFarmFieldId
+				SELECT @intShipFrom = ISNULL(DS.intFarmFieldId, EL.intEntityLocationId) 
 					,@shipFromEntityId = DS.intEntityId
-				FROM tblSCDeliverySheet DS
+				FROM tblSCDeliverySheetSplit DSS
+				JOIN tblSCDeliverySheet DS
+					ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+				LEFT JOIN tblEMEntityLocation EL 
+					ON EL.intEntityId = DSS.intEntityId 
+						AND EL.ysnDefaultLocation = 1
 				JOIN tblGRCustomerStorage CS
-					ON DS.intDeliverySheetId = CS.intDeliverySheetId
+					ON DSS.intDeliverySheetId = CS.intDeliverySheetId
+						AND CS.intEntityId = DSS.intEntityId
 				WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
 				--Storage Due		
