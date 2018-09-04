@@ -56,6 +56,7 @@ SELECT DISTINCT
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
+	, strFobPoint			= fTerms.strFobPoint
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
 	, strInternalNotes		= entityToCustomer.strInternalNotes
