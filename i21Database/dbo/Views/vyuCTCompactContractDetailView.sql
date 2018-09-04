@@ -17,6 +17,8 @@ AS
 			,CD.strERPPONumber
 			,CD.strERPItemNumber
 			,strOrigin = ISNULL(RY.strCountry,OG.strCountry)
+			,strPurchasingGroup = PG.strName 
+			,strINCOShipTerm = CB.strContractBasis
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
 	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
@@ -29,3 +31,5 @@ AS
 	LEFT JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId  =	IM.intOriginId												
 														AND	CA.strType				=	'Origin'			
 	LEFT JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	CA.intCountryID	
+	LEFT JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId
+	LEFT JOIN	tblCTContractBasis				CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
