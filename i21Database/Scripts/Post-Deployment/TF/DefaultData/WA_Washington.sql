@@ -654,9 +654,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strStatus
 		, intMasterId
 	)
-	SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '1', strType = 'Motor Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47564
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '1', strType = 'Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47565
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10C', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47591
+	SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10C', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47591
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10C', strType = 'Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47590
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10F', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47600
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10F', strType = 'Motor Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47598
@@ -664,9 +662,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10G', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47594
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10G', strType = 'Motor Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47592
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '10G', strType = 'Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47593
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '2A', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47568
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '2A', strType = 'Motor Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47566
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47567
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '2B', strType = 'Motor Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47569
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '2B', strType = 'Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47570
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Supplier', strScheduleCode = '3', strType = 'Dyed Special Fuel', strState = 'WA', strStatus = 'Include', intMasterId = 47573
