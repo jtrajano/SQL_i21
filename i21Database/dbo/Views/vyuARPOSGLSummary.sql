@@ -1,21 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSGLSummary]
 AS
-SELECT intPOSLogId			= GLSUMMARY.intPOSLogId
+SELECT intPOSEndOfDayId		= GLSUMMARY.intPOSEndOfDayId
 	 , dblDebit				= CASE WHEN GLSUMMARY.strAccountCategory = 'Undeposited Funds' THEN GLSUMMARY.dblEndingBalance - GLSUMMARY.dblOpeningBalance ELSE GLSUMMARY.dblDebit END
 	 , dblCredit			= GLSUMMARY.dblCredit
 	 , strAccountId			= GLSUMMARY.strAccountId
 	 , strAccountCategory	= GLSUMMARY.strAccountCategory
 	 , strDescription		= GLSUMMARY.strDescription
 FROM ( 
-	SELECT intPOSLogId			= POSLOG.intPOSLogId
-		 , dblOpeningBalance	= POSLOG.dblOpeningBalance
-		 , dblEndingBalance		= POSLOG.dblEndingBalance
+	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
+		 , dblOpeningBalance	= EOD.dblOpeningBalance
+		 , dblEndingBalance		= EOD.dblFinalEndingBalance
 		 , dblDebit				= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN SUM(GL.dblDebit) - SUM(GL.dblCredit) ELSE SUM(GL.dblDebit) END
 		 , dblCredit			= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN 0.00000 ELSE SUM(GL.dblCredit) END
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
-	FROM dbo.tblARPOSLog POSLOG WITH (NOLOCK)
+	FROM dbo.tblARPOSEndOfDay EOD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT
+			intPOSLogId,
+			intPOSEndOfDayId
+		FROM tblARPOSLog
+	) POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
 	INNER JOIN (
 		SELECT intInvoiceId
 			 , intPOSLogId
@@ -65,31 +71,37 @@ FROM (
 			 , strDescription
 		FROM dbo.vyuGLAccountDetail WITH (NOLOCK)	
 	) GLA ON GL.intAccountId = GLA.intAccountId
-	GROUP BY POSLOG.intPOSLogId
-		   , POSLOG.dblEndingBalance
-		   , POSLOG.dblOpeningBalance
+	GROUP BY EOD.intPOSEndOfDayId
+		   , EOD.dblFinalEndingBalance
+		   , EOD.dblOpeningBalance
 		   , GLA.strAccountId
 		   , GLA.strAccountCategory
 		   , GLA.strDescription
 
 	UNION ALL
 
-	SELECT intPOSLogId			= POSLOG.intPOSLogId
-		 , dblOpeningBalance	= POSLOG.dblOpeningBalance
-		 , dblEndingBalance		= POSLOG.dblEndingBalance
+	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
+		 , dblOpeningBalance	= EOD.dblOpeningBalance
+		 , dblEndingBalance		= EOD.dblFinalEndingBalance
 		 , dblDebit				= BTD.dblDebit
 		 , dblCredit			= BTD.dblCredit
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
-	FROM dbo.tblARPOSLog POSLOG WITH (NOLOCK)
+	FROM dbo.tblARPOSEndOfDay EOD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT
+			intPOSLogId
+			,intPOSEndOfDayId
+		FROM tblARPOSLog
+	) POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
 	INNER JOIN (
 		SELECT intTransactionId
 			 , intGLAccountId
 			 , dblCredit
 			 , dblDebit
 		FROM dbo.tblCMBankTransactionDetail WITH (NOLOCK)		
-	) BTD ON POSLOG.intBankDepositId = BTD.intTransactionId
+	) BTD ON EOD.intBankDepositId = BTD.intTransactionId
 	INNER JOIN (
 		SELECT intTransactionId
 			 , strTransactionId

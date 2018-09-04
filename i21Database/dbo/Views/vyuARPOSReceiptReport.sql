@@ -22,18 +22,30 @@ SELECT intPOSId				= POS.intPOSId
 	 , strReceiptNumber		= POS.strReceiptNumber
 	 , strUserName			= USERNAME.strUserName
 	 , strLocation			= LOCATION.strLocationName
-	 , strStore				= ISNULL(STORE.strDescription, '') 
+	 , strStore				= ISNULL(STORE.strDescription, '')
 	 , strPONumber			= POS.strPONumber
 	 , strComment			= POS.strComment
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN dbo.tblARPOSDetail POSD ON POS.intPOSId = POSD.intPOSId
 INNER JOIN (
 	SELECT intPOSLogId
-		 , intEntityUserId
-		 , intCompanyLocationId
-		 , intStoreId
+		 , intEntityId
+		 , intPOSEndOfDayId
 	FROM dbo.tblARPOSLog WITH (NOLOCK)
 ) POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
+INNER JOIN (
+	SELECT
+		intPOSEndOfDayId
+		, intEntityId
+		, intStoreId
+		, intCompanyLocationPOSDrawerId
+		, intBankDepositId
+		, ysnClosed
+		, strEODNo
+		, dblOpeningBalance
+		, dblFinalEndingBalance
+	FROM tblARPOSEndOfDay
+) EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 LEFT JOIN (
 	SELECT intInvoiceId
 		 , strInvoiceNumber
@@ -43,17 +55,23 @@ LEFT JOIN (
 	SELECT intEntityId
 		 , strUserName 
 	FROM dbo.tblEMEntityCredential WITH (NOLOCK)
-) USERNAME ON USERNAME.intEntityId = POSLOG.intEntityUserId
+) USERNAME ON USERNAME.intEntityId = EOD.intEntityId
+INNER JOIN (
+	SELECT
+		intCompanyLocationPOSDrawerId
+		, intCompanyLocationId
+	FROM tblSMCompanyLocationPOSDrawer
+) DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 LEFT JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName 
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
-) LOCATION ON LOCATION.intCompanyLocationId = POSLOG.intCompanyLocationId
+) LOCATION ON LOCATION.intCompanyLocationId = DRAWER.intCompanyLocationId
 LEFT JOIN (
 	SELECT intStoreId
 		 , strDescription 
 	FROM dbo.tblSTStore WITH (NOLOCK)
-) STORE ON STORE.intStoreId = POSLOG.intStoreId
+) STORE ON STORE.intStoreId = EOD.intStoreId
 LEFT JOIN (
 	SELECT intEntityId
 		 , strName
