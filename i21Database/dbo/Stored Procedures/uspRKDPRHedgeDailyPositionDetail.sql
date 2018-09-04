@@ -995,39 +995,75 @@ BEGIN
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
 		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
-	SELECT @strDescription, 'Net Receivable  ($)' [strType],dblUnitCost AS dblTotal,strLocationName,
-			intContractHeaderId,'' strContractNumber
+	SELECT
+		@strDescription
+		,'Net Receivable  ($)' [strType] 
+		,dblAmountDue
+		,strLocationName
+		,null intContractHeaderId
+		,'' strContractNumber
+		,strTicketNumber
+		,dtmTransactionDate
+		,strCustomerName
+		,'' strDistributionOption
+		,null dblUCost
+		,dblQtyReceived
+		,intCommodityId
+		,strCurrency
+		,intInvoiceId
+		,strInvoiceNumber
+	FROM (
+		select distinct
+			(
+				select top 1
+					convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) as dtmTransactionDate
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+				order by convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) desc
+				) as dtmTransactionDate
+			,strLocationName
 			,strTicketNumber
-			, dtmTicketDate dtmTicketDateTime
-			,strCustomerReference
-			,strDistributionOption, dblUCost
-			,dblQtyReceived,@intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber	
-		FROM (		
-			SELECT			
-				strLocationName
-				,strInvoiceNumber
-				,dtmTicketDate
-				,c.intTicketId intContractHeaderId
-				,s.strTicketNumber strTicketNumber	
-				,dblPrice dblUCost
-				,sum(dblAmountDue) over (partition by c.intTicketId) dblUnitCost				
-				,sum(dblQtyReceived) over (partition by c.intTicketId) dblQtyReceived
-				,c.intCommodityId,c.strCurrency,strDistributionOption,ysnPost
-				,c.intInvoiceId,e.strName strCustomerReference
-			FROM vyuARInvoiceTransactionHistory c		
-			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
-				LEFT JOIN tblEMEntity e on s.intEntityId=e.intEntityId 
-			WHERE c.intCommodityId = @intCommodityId and isnull(strTicketStatus,'') <> 'V'
-				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
-				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-				 and ysnPost is not null
-				 and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
-									ELSE isnull(ysnLicensed, 0) END
-									)
-				
-			) a where dblUnitCost <> 0
+			,strInvoiceNumber
+			,intInvoiceId
+			,(
+				select 
+					sum(dblQtyReceived) as dblQtyReceived
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+				) as dblQtyReceived
+				,(
+				select 
+					sum(dblAmountDue) as dblAmountDue
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+			) as dblAmountDue
+			,intCommodityId
+			,(SELECT strCustomerName FROM vyuARInvoicesForPayment WHERE intInvoiceId = ITH.intInvoiceId) AS strCustomerName
+			,strCurrency
+			,intCompanyLocationId
+		from vyuARInvoiceTransactionHistory ITH
+		where 
+			ysnPost IS NOT NULL 
+			and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+			
+	) t 
+	WHERE dblAmountDue <> 0
+		and intCommodityId = @intCommodityId 
+		and intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
+		and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+							WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+							WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+							ELSE isnull(ysnLicensed, 0) END
+							)
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency)
@@ -1161,33 +1197,79 @@ BEGIN
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
 		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
-	SELECT @strDescription, 'Net Receivable  ($)' [strType],dblUnitCost AS dblTotal,strLocationName,
-			intContractHeaderId,'' strContractNumber
+	SELECT
+		@strDescription
+		,'Net Receivable  ($)' [strType] 
+		,dblAmountDue
+		,strLocationName
+		,null intContractHeaderId
+		,'' strContractNumber
+		,strTicketNumber
+		,dtmTransactionDate
+		,strCustomerName
+		,'' strDistributionOption
+		,null dblUCost
+		,dblQtyReceived
+		,intCommodityId
+		,strCurrency
+		,intInvoiceId
+		,strInvoiceNumber
+	FROM (
+		select distinct
+			(
+				select top 1
+					convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) as dtmTransactionDate
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+				order by convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) desc
+				) as dtmTransactionDate
+			,strLocationName
 			,strTicketNumber
-			, dtmTicketDate dtmTicketDateTime
-			,strCustomerReference
-			,strDistributionOption, dblUCost
-			,dblQtyReceived,@intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber	
-		FROM (		
-			SELECT			
-				strLocationName
-				,strInvoiceNumber
-				,dtmTicketDate
-				,c.intTicketId intContractHeaderId
-				,s.strTicketNumber strTicketNumber	
-				,dblPrice dblUCost
-				,sum(dblAmountDue) over (partition by c.intTicketId) dblUnitCost				
-				,sum(dblQtyReceived) over (partition by c.intTicketId) dblQtyReceived
-				,c.intCommodityId,c.strCurrency,strName strCustomerReference,strDistributionOption,ysnPost
-				,c.intInvoiceId
-			FROM vyuARInvoiceTransactionHistory c		
-			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
-			LEFT JOIN tblEMEntity e on e.intEntityId=s.intEntityId	
-			WHERE c.intCommodityId = @intCommodityId and e.intEntityId =@intVendorId
-				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
-				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-				 and ysnPost is not null and isnull(strTicketStatus,'') <> 'V'				
-			) a where dblUnitCost <> 0
+			,strInvoiceNumber
+			,intInvoiceId
+			,(
+				select 
+					sum(dblQtyReceived) as dblQtyReceived
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+				) as dblQtyReceived
+				,(
+				select 
+					sum(dblAmountDue) as dblAmountDue
+				from vyuARInvoiceTransactionHistory 
+				where 
+					ysnPost IS NOT NULL 
+					and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					and intInvoiceId = ITH.intInvoiceId
+			) as dblAmountDue
+			,intCommodityId
+			,(SELECT strCustomerName FROM vyuARInvoicesForPayment WHERE intInvoiceId = ITH.intInvoiceId) AS strCustomerName
+			,(SELECT intEntityCustomerId FROM vyuARInvoicesForPayment WHERE intInvoiceId = ITH.intInvoiceId) AS intEntityCustomerId
+			,strCurrency
+			,intCompanyLocationId
+		from vyuARInvoiceTransactionHistory ITH
+				
+		where 
+			ysnPost IS NOT NULL 
+			and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+					
+			
+	) t 
+	WHERE dblAmountDue <> 0
+		and intCommodityId = @intCommodityId 
+		and intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
+		and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+							WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+							WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+							ELSE isnull(ysnLicensed, 0) END
+							)
+		and intEntityCustomerId = @intVendorId
 
 		
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
