@@ -13,6 +13,9 @@ SELECT
 	, intStorageLocationId		= sm.intStorageLocationId
 	, strCommodityCode			= cd.strCommodityCode
 	, dblStock					= (sm.dblOnHand + sm.dblUnitStorage)
+	, dblEffectiveDepth			= sl.dblEffectiveDepth
+	, dblPackFactor				= 1.00
+	, dblUnitPerFoot			= sl.dblUnitPerFoot
 	, dblCapacity				= sl.dblEffectiveDepth *  sl.dblUnitPerFoot
 	, dblAvailable				= (sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sm.dblOnHand + sm.dblUnitStorage)
 	, dblAirSpaceReading		= ISNULL(mrc.dblAirSpaceReading, 0)
