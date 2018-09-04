@@ -250,6 +250,8 @@ SELECT
 	, ContractView.strERPPONumber
 	, ContractView.strERPItemNumber
 	, ContractView.strOrigin
+	, ContractView.strPurchasingGroup
+	, ContractView.strINCOShipTerm
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
