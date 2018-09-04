@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDay]
 	AS 
+
 	SELECT
 		 intPOSEndOfDayId				=	EOD.intPOSEndOfDayId
 		 ,intPOSLogId					=	POSLOG.intPOSLogId
@@ -16,6 +17,7 @@
 		,strEmail						=	EM.strEmail
 		,strPOSDrawerName				=	DRAWER.strPOSDrawerName
 		,strLocationName				=	LOC.strLocationName
+		,strStoreName					=	ST.strDescription
 		,ysnClosed						=	EOD.ysnClosed
 		,ysnAllowMultipleUser			=	DRAWER.ysnAllowMultipleUser
 		
@@ -54,3 +56,9 @@
 		FROM tblEMEntityCredential
 
 	) CRED ON EM.intEntityId = CRED.intEntityId
+	LEFT JOIN (
+		SELECT
+			intStoreId,
+			strDescription
+		FROM tblSTStore
+	) ST ON EOD.intStoreId = ST.intStoreId
