@@ -62,10 +62,10 @@ SELECT @intLoadId = intLoadId
 	, @intScaleStationId = intScaleSetupId
 	, @ysnDeductFreightFarmer = ysnFarmerPaysFreight
 	, @strWhereFinalizedWeight = strWeightFinalized
-	, @strWhereFinalizedWeight = strGradeFinalized
+	, @strWhereFinalizedGrade = strGradeFinalized
 	, @intTicketItemUOMId = intItemUOMIdTo
 	, @intItemId = intItemId
-FROM vyuSCTicketScreenView where @intTicketId = @intTicketId
+FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
 FROM dbo.tblGRStorageType ST WHERE 
