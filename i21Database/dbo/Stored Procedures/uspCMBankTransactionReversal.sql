@@ -180,8 +180,13 @@ ELSE
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
-							SET ysnPosted = CASE WHEN intBankTransactionTypeId IN (116,122,123) THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
-								dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
+							SET 
+							ysnPosted = CASE WHEN intBankTransactionTypeId IN (116,122,123) THEN 1 ELSE 0 END, 
+							ysnCheckVoid = CASE WHEN intBankTransactionTypeId  = 123 THEN 0 ELSE 1 END, --GL-6623 VOIDED PAYMENT IN CM SHOULD BE MARKED VOIDED (REMOVED 122)
+							ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
+							dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, 
+							dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, 
+							intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
 						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE
