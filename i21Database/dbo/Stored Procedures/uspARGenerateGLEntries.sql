@@ -530,6 +530,25 @@ BEGIN
         ,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
         ,@UserId
 
+
+	update 
+		B
+			set intAccountId =  dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
+	from tblICInventoryTransaction  A
+			join #ARInvoiceGLEntries B
+				on A.intInventoryTransactionId = B.intJournalLineNo
+					and A.intTransactionId = B.intTransactionId
+					and A.strTransactionId = B.strTransactionId
+			join #ARItemsForInTransitCosting C
+				ON A.intTransactionId = C.intTransactionId
+					and A.strTransactionId = C.strTransactionId
+					and A.intTransactionDetailId =  C.intTransactionDetailId 
+					and A.intItemId = C.intItemId
+					and A.intItemLocationId = C.intItemLocationId
+
+		where A.strBatchId = @BatchId  and C.intLinkedItemId is not null 
+			and dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
+
 END
 
 DECLARE @StorageItemsForPost AS ItemCostingTableType  			
