@@ -130,6 +130,8 @@ BEGIN
 				-- Table and Condition
 				DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookITT33~strUniqueGuid=''' + @strUniqueGuid + ''''
 
+
+
 				IF(@dblXmlVersion = 3.40)
 					BEGIN
 						--Insert data into Procebook staging table	
@@ -245,7 +247,7 @@ BEGIN
 								JOIN tblICUnitMeasure IUM 
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 								JOIN tblSTRegister R 
-									ON R.intStoreId = ST.intStoreId
+									ON R.intRegisterId = ST.intRegisterId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
 								JOIN tblICItemSpecialPricing SplPrc 
@@ -367,7 +369,7 @@ BEGIN
 								JOIN tblICUnitMeasure IUM 
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 								JOIN tblSTRegister R 
-									ON R.intStoreId = ST.intStoreId
+									ON R.intRegisterId = ST.intRegisterId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
 								JOIN tblICItemSpecialPricing SplPrc 
@@ -405,8 +407,16 @@ BEGIN
 							END
 						ELSE 
 							BEGIN
+								-- Posible fix for (ITT) if has no result
+								-- 1. Go to Store -> Register Product -> Product Code
+								--     Make sure that there is Product Code setup and Location Code
+								--    Now go to Item -> Item Location -> Product Code
+								--     Make sure that there is Location Code setup same to Store
+								--      and there is Product Code setup same to Store
+								-- 2. Does not have Newly added items or modified items on selected date range
+
 								SET @ysnSuccessResult = CAST(0 AS BIT)
-								SET @strMessageResult = 'No result found'
+								SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
 							END
 					END
 			END
@@ -515,7 +525,7 @@ BEGIN
 						JOIN tblICUnitMeasure IUM 
 							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 						JOIN tblSTRegister R 
-							ON R.intStoreId = ST.intStoreId
+							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						JOIN tblICItemSpecialPricing SplPrc 
@@ -641,7 +651,7 @@ BEGIN
 						JOIN tblICUnitMeasure IUM 
 							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 						JOIN tblSTRegister R 
-							ON R.intStoreId = ST.intStoreId
+							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						JOIN tblICItemSpecialPricing SplPrc 
@@ -680,11 +690,29 @@ BEGIN
 
 					END
 
-				-- Generate XML for the pricebook data availavle in staging table
-				Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPricebookSendFile~intPricebookSendFile > 0', 0, @strGeneratedXML OUTPUT
 
-				--Once XML is generated delete the data from pricebook  staging table.
-				DELETE FROM dbo.tblSTstgPricebookSendFile	
+
+				IF EXISTS(SELECT StoreLocationID FROM tblSTstgPricebookSendFile)
+					BEGIN
+							-- Generate XML for the pricebook data availavle in staging table
+							Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPricebookSendFile~intPricebookSendFile > 0', 0, @strGeneratedXML OUTPUT
+
+							--Once XML is generated delete the data from pricebook  staging table.
+							DELETE FROM dbo.tblSTstgPricebookSendFile
+					END
+				ELSE 
+					BEGIN
+							-- Posible fix for (ITT) if has no result
+							-- 1. Go to Store -> Register Product -> Product Code
+							--     Make sure that there is Product Code setup and Location Code
+							--    Now go to Item -> Item Location -> Product Code
+							--     Make sure that there is Location Code setup same to Store
+							--      and there is Product Code setup same to Store
+							-- 2. Does not have Newly added items or modified items on selected date range
+
+							SET @ysnSuccessResult = CAST(0 AS BIT)
+							SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
+					END	
 			END
 	END TRY
 

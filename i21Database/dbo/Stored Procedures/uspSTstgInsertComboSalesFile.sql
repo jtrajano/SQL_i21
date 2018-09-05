@@ -40,7 +40,6 @@ BEGIN
 					SET @strGeneratedXML = ''
 					SET @intImportFileHeaderId = 0
 					SET @strMessageResult = 'Register ' + @strRegister + ' has no Outbound setup for Promotion Sales List - Combo (' + @strFilePrefix + ')'
-					--SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File (' + @strFilePrefix + ')'
 
 					RETURN
 			END
@@ -131,6 +130,8 @@ BEGIN
 						AND PSL.strPromoType = 'C' -- <--- 'C' = Combo
 						-- AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
 
+
+
 						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookComboCBT33 WHERE strUniqueGuid = @strUniqueGuid)
 							BEGIN
 								--Generate XML for the pricebook data availavle in staging table
@@ -144,7 +145,7 @@ BEGIN
 						ELSE 
 							BEGIN
 								SET @ysnSuccessResult = CAST(0 AS BIT)
-								SET @strMessageResult = 'No result found'
+								SET @strMessageResult = 'No result found to generate Combo - ' + @strFilePrefix + ' Outbound file'
 							END
 					
 					END
@@ -227,12 +228,22 @@ BEGIN
 				AND PSL.strPromoType = 'C' -- <--- 'C' = Combo
 				-- AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
 	
-	
-				--Generate XML for the pricebook data availavle in staging table
-				Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgComboSalesFile~intComboSalesFile > 0', 0, @strGeneratedXML OUTPUT
+				
 
-				--Once XML is generated delete the data from pricebook  staging table.
-				DELETE FROM tblSTstgComboSalesFile	
+				IF EXISTS(SELECT StoreLocationID FROM tblSTstgComboSalesFile)
+					BEGIN
+							--Generate XML for the pricebook data availavle in staging table
+							Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgComboSalesFile~intComboSalesFile > 0', 0, @strGeneratedXML OUTPUT
+
+							--Once XML is generated delete the data from pricebook  staging table.
+							DELETE FROM tblSTstgComboSalesFile	
+					END
+				ELSE 
+					BEGIN
+							SET @ysnSuccessResult = CAST(0 AS BIT)
+							SET @strMessageResult = 'No result found to generate Combo - ' + @strFilePrefix + ' Outbound file'
+					END
+				
 			END
 
 	END TRY
