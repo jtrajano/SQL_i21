@@ -77,7 +77,7 @@ SELECT Lot.intLotId
        , EY.strName as strVendor 
        , L.strLoadNumber
        , L.dtmPostedDate
-       , Receipt.strWarehouseRefNo
+       , ISNULL(Receipt.strWarehouseRefNo,'') AS strWarehouseRefNo
 	   , CTDetail.dblFutures
 	   , CTDetail.dblBasis
 	   , CTDetail.dblCashPrice
@@ -86,7 +86,7 @@ SELECT Lot.intLotId
 	   , LD.intWeightItemUOMId
 	   , PO.strPosition
 FROM tblICLot Lot
-LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
+LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
