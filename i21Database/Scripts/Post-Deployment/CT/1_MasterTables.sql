@@ -644,6 +644,28 @@ BEGIN
    UPDATE tblCTAmendmentApproval SET strType ='3.Pricing'  WHERE intAmendmentApprovalId   IN(13,14,15,16,17,18,19)
 END
 GO
+
+GO
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'strBook' AND strType = '2.Sequence')
+BEGIN
+    INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
+    SELECT 'strBook','Book',1,'2.Sequence'
+END
+GO
+
+GO
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'dblRatio' AND strType = '3.Pricing')
+BEGIN
+    INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
+    SELECT 'dblRatio','Ratio',1,'3.Pricing'
+END
+GO
+
+GO
+UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly =1 WHERE strDataIndex NOT IN (
+SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,strBook,dblRatio',','))
+GO
+
 IF EXISTS(SELECT 1 FROM tblCTCompanyPreference WHERE ISNULL(strDefaultAmendmentReport,'')='')
 BEGIN
   UPDATE tblCTCompanyPreference SET strDefaultAmendmentReport = 'Amendment' WHERE strDefaultAmendmentReport IS NULL
