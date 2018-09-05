@@ -127,6 +127,7 @@ EXEC [uspARGetItemPrice]
 ,@ContractSeq = @CFContractSeq OUTPUT  
 ,@AvailableQuantity = @CFAvailableQuantity OUTPUT
 ,@AllowQtyToExceedContract = 1
+,@InvoiceType = 'CF Tran'
 
 IF(@CFPriceOut IS NOT NULL) 
 
