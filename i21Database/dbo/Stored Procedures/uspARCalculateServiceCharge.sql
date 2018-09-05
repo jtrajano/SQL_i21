@@ -33,6 +33,16 @@ AS
 	BEGIN
 		DROP TABLE #OPENINVOICES
 	END
+	CREATE TABLE #OPENINVOICES
+		(intInvoiceId         INT NULL
+		,intEntityCustomerId  INT NULL
+		,strInvoiceNumber     NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
+		,dblInvoiceTotal      NUMERIC(18,6) NULL
+		,dblAmountDue         NUMERIC(18,6) NULL
+		,dtmDueDate           DATETIME NULL
+		,dtmCalculated        DATETIME NULL
+		,dtmToCalculate       DATETIME NULL
+		,ysnCreditApplied     BIT)
 
 	IF(OBJECT_ID('tempdb..#OPENCREDITS') IS NOT NULL)
 	BEGIN
@@ -177,6 +187,16 @@ AS
 	ELSE
 		BEGIN
 			--GET PAST DUE, POSTED, UNPAID INVOICES
+			INSERT INTO #OPENINVOICES
+				(intInvoiceId
+				,intEntityCustomerId
+				,strInvoiceNumber
+				,dblInvoiceTotal
+				,dblAmountDue
+				,dtmDueDate
+				,dtmCalculated
+				,dtmToCalculate
+				,ysnCreditApplied)
 			SELECT intInvoiceId			= INV.intInvoiceId
 				 , intEntityCustomerId	= INV.intEntityCustomerId
 				 , strInvoiceNumber		= INV.strInvoiceNumber
@@ -186,7 +206,7 @@ AS
 				 , dtmCalculated		= INV.dtmCalculated
 				 , dtmToCalculate		= CASE WHEN ISNULL(INV.ysnForgiven, 0) = 0 AND ISNULL(INV.ysnCalculated, 0) = 0 THEN INV.dtmDueDate ELSE INV.dtmCalculated END
 				 , ysnCreditApplied		= CAST(0 AS BIT)
-			INTO #OPENINVOICES
+			--INTO #OPENINVOICES
 			FROM tblARInvoice INV
 			INNER JOIN #tmpCustomers CUST ON INV.intEntityCustomerId = CUST.intEntityId
 			INNER JOIN tblARServiceCharge SC ON CUST.intServiceChargeId = SC.intServiceChargeId
@@ -479,3 +499,6 @@ AS
 	BEGIN
 		UPDATE tblARCustomer set dtmLastServiceCharge = @serviceChargeDate WHERE dtmLastServiceCharge is null or dtmLastServiceCharge < @asOfDate
 	END
+GO
+
+
