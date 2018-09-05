@@ -20,7 +20,7 @@ BEGIN
 		,UM.strUnitMeasure AS strItemUOM
 		,WUM.strUnitMeasure AS strWeightUOM
 		,LOT.strLotNumber
-		,Receipt.strWarehouseRefNo
+		,ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo) AS strWarehouseRefNo
 		,CLSL.strSubLocationName
 		,SL.strName AS strStorageLocation
 	FROM tblLGLoad L
