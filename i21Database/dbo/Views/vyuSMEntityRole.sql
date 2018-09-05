@@ -16,6 +16,10 @@ SELECT CAST (ROW_NUMBER() OVER (ORDER BY intEntityId DESC) AS INT)	AS	intEntityR
 		INNER JOIN tblSMUserSecurity UserSecurity ON SubRole.intUserRoleId = UserSecurity.intUserRoleID
 		INNER JOIN tblSMUserRole UserRole ON SubRole.intSubRoleId = UserRole.intUserRoleID
 		INNER JOIN tblEMEntity Entity ON Entity.intEntityId = UserSecurity.[intEntityId]
+		UNION ALL
+		SELECT Entity.intEntityId AS intEntityId, Entity.strName AS strName, EntityToContact.intEntityRoleId AS intUserRoleId FROM tblEMEntityToContact EntityToContact
+		INNER JOIN tblSMUserRole UserRole ON EntityToContact.intEntityRoleId = UserRole.intUserRoleID
+		INNER JOIN tblEMEntity Entity ON Entity.intEntityId = EntityToContact.intEntityContactId
 	) EntityRoleSub
 ) EntityRoleMain
 GO
