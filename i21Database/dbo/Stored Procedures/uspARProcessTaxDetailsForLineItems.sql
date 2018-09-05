@@ -217,8 +217,8 @@ FROM
 				
 BEGIN TRY
 
-	--IF ISNULL(@IntegrationLogId, 0) <> 0
-	--	EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 
 	DELETE FROM
 		tblARInvoiceDetailTax 
