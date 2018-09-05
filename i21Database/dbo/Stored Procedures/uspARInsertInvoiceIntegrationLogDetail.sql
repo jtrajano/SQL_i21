@@ -58,6 +58,30 @@ SET ANSI_WARNINGS OFF
 		,[intConcurrencyId]				= 1
 	FROM
 		@IntegrationLogEntries
+
+	UPDATE ARILD
+	SET
+		ARILD.[ysnSuccess] = 0
+		,ARILD.[strPostingMessage] = FT.[strMessage]
+	FROM
+		[tblARInvoiceIntegrationLogDetail] ARILD
+	CROSS APPLY
+		(
+		SELECT TOP 1
+			 FR.[intInvoiceId]
+			,FR.[strMessage]
+		FROM
+			@IntegrationLogEntries FR
+		WHERE
+			FR.[intIntegrationLogId] = ARILD.[intIntegrationLogId]
+			AND FR.[intInvoiceId] = ARILD.[intInvoiceId]
+			AND FR.[ysnHeader] = 0
+			AND FR.[ysnSuccess] = 0
+		
+		) FT
+	WHERE
+		ARILD.[ysnHeader] = 1
+		AND ARILD.[ysnPost] = 1
 	
 RETURN 1
 END
