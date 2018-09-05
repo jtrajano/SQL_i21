@@ -30,8 +30,16 @@ BEGIN TRY
 			WHEN DATA_TYPE = 'numeric' THEN '('+LTRIM(NUMERIC_PRECISION)+','+LTRIM(NUMERIC_SCALE)+')'
 			ELSE ''
 	END + ' NULL' 
-	FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' AND IS_NULLABLE = 'NO' AND COLUMN_NAME NOT IN('intTicketId','intTicketDiscountId') FOR xml path('')) ,1,1,'')
-
+	FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' 
+	AND IS_NULLABLE = 'NO' 
+	AND COLUMN_NAME NOT IN('intTicketId','intTicketDiscountId') 
+	FOR xml path('')) ,1,1,'')
+	
+	IF EXISTS(SELECT 1 FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' AND COLUMN_NAME IN ('blbPlateNumber'))
+	BEGIN
+		  SET @SQL = @SQL + ' ALTER TABLE #tmpTicket DROP COLUMN blbPlateNumber '
+	END
+	
 	EXEC sp_executesql @SQL 
 	
 	IF OBJECT_ID('tempdb..#tmpTicketDiscount') IS NOT NULL  					
@@ -105,6 +113,7 @@ BEGIN TRY
 			,[intSubLocationId] 		 INT
 			,[intStorageLocationId]		 INT
 			,[intStorageScheduleId] 	 INT
+			,[intDeliverySheetId]		 INT
 			,[intConcurrencyId]			 INT
 			,[intItemUOMIdFrom]			 INT
 			,[intItemUOMIdTo]			 INT
@@ -184,6 +193,7 @@ BEGIN TRY
 			,[intSubLocationId] 
 			,[intStorageLocationId]
 			,[intStorageScheduleId] 
+			,[intDeliverySheetId]
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
@@ -227,7 +237,7 @@ BEGIN TRY
 				,[dblNetUnits] 				 = CI.dblNetUnits
 				,[intSplitId]				 = CI.intSplitId
 				,intStorageScheduleTypeId	 = ST.intStorageScheduleTypeId
-				,[strDistributionOption]	 = CI.strDistributionOption
+				,[strDistributionOption]	 = ST.strStorageTypeCode
 				,[intDiscountSchedule]    	 = DiscountSchedule.intDiscountScheduleId
 				,[strContractNumber]		 = CI.strContractNumber
 				,[intContractSequence]     	 = CI.intContractSequence
@@ -252,6 +262,7 @@ BEGIN TRY
 				,[intSubLocationId] 		 = SubLocation.intCompanyLocationSubLocationId
 				,[intStorageLocationId]		 = Bin.intStorageLocationId
 				,[intStorageScheduleId] 	 = SS.intStorageScheduleRuleId
+				,[intDeliverySheetId]		 = DS.intDeliverySheetId
 				,[intConcurrencyId]			 = 1
 				,[intItemUOMIdFrom]			 = ScaleUOM.intItemUOMId
 				,[intItemUOMIdTo]			 = UOM.intItemUOMId
@@ -282,6 +293,7 @@ BEGIN TRY
 		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber
 		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CI.strDistributionOption
 		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule
+		LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = CI.strDeliverySheet
 		LEFT JOIN tblCTContractHeader CH ON CH.strContractNumber = CI.strContractNumber
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = CI.intContractSequence
 		LEFT JOIN 
@@ -360,7 +372,8 @@ BEGIN TRY
 			,[intEntityId]	
 			,[intSubLocationId] 
 			,[intStorageLocationId]
-			,[intStorageScheduleId] 
+			,[intStorageScheduleId]
+			,[intDeliverySheetId] 
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
@@ -416,7 +429,8 @@ BEGIN TRY
 		,[intEntityId]	
 		,[intSubLocationId] 
 		,[intStorageLocationId]
-		,[intStorageScheduleId] 
+		,[intStorageScheduleId]
+		,[intDeliverySheetId] 
 		,[intConcurrencyId]
 		,[intItemUOMIdFrom]
 		,[intItemUOMIdTo]
