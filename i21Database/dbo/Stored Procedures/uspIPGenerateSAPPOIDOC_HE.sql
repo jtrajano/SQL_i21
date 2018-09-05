@@ -1287,6 +1287,40 @@ BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEMX>'
 		SET @strItemXml += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strERPItemNumber, '')) + '</ITEM_NO>'
 		SET @strItemXml += '</E1BPMEOUTITEMX>'
+
+		SET @strItemXml += '<E1BPMEOUTVALIDITY>'
+		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
+		SET @strItemXml += '<VALID_FROM>' + ISNULL(CONVERT(VARCHAR(10), GETDATE(), 112), '') + '</VALID_FROM>'
+		SET @strItemXml += '<VALID_TO>' + '99991231' + '</VALID_TO>'
+		SET @strItemXml += '</E1BPMEOUTVALIDITY>'
+
+		SET @strItemXml += '<E1BPMEOUTVALIDITYX>'
+		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
+		SET @strItemXml += '<VALID_FROM>' + 'X' + '</VALID_FROM>'
+		SET @strItemXml += '<VALID_TO>' + 'X' + '</VALID_TO>'
+		SET @strItemXml += '</E1BPMEOUTVALIDITYX>'
+
+		SET @strItemXml += '<E1BPMEOUTCONDITION>'
+		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
+		SET @strItemXml += '<COND_COUNT>' + '01' + '</COND_COUNT>'
+		SET @strItemXml += '<COND_TYPE>' + 'PB00' + '</COND_TYPE>'
+		SET @strItemXml += '<COND_VALUE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</COND_VALUE>'
+		SET @strItemXml += '<CURRENCY>' + ISNULL(@strCurrency,'') + '</CURRENCY>'
+		SET @strItemXml += '<COND_P_UNT>' + ISNULL(@strPriceUOM, '') + '</COND_P_UNT>'
+		SET @strItemXml += '<COND_UNIT>' + '1' + '</COND_UNIT>'
+		SET @strItemXml += '<CHANGE_ID>' + 'U' + '</CHANGE_ID>'
+		SET @strItemXml += '</E1BPMEOUTCONDITION>'
+
+		SET @strItemXml += '<E1BPMEOUTCONDITIONX>'
+		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
+		SET @strItemXml += '<COND_COUNT>' + '01' + '</COND_COUNT>'
+		SET @strItemXml += '<ITEM_NOX>' + 'X' + '</ITEM_NOX>'
+		SET @strItemXml += '<COND_TYPE>' + 'X' + '</COND_TYPE>'
+		SET @strItemXml += '<COND_VALUE>' + 'X' + '</COND_VALUE>'
+		SET @strItemXml += '<CURRENCY>' + 'X' + '</CURRENCY>'
+		SET @strItemXml += '<COND_P_UNT>' + 'X' + '</COND_P_UNT>'
+		SET @strItemXml += '<COND_UNIT>' + 'X' + '</COND_UNIT>'
+		SET @strItemXml += '</E1BPMEOUTCONDITIONX>'
 	END
 
 	--Header End Xml
