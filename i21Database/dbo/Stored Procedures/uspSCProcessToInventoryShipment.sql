@@ -77,13 +77,10 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 		@strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
-		IF @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'LOD' AND  @intLoadId IS NULL
 		BEGIN
-			IF @intLoadId IS NULL
-			BEGIN 
-				RAISERROR('Unable to find load details. Try Again.', 11, 1);
-				GOTO _Exit
-			END
+			RAISERROR('Unable to find load details. Try Again.', 11, 1);
+			GOTO _Exit
 		END
 
  		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
