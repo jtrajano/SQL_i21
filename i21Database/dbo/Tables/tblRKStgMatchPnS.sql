@@ -27,5 +27,6 @@
 	   [strFutMarketName] nvarchar(100) COLLATE Latin1_General_CI_AS  NULL,
 	   [strBook] nvarchar(100) COLLATE Latin1_General_CI_AS  NULL,
        [strSubBook] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
+	   ysnMailSent BIT DEFAULT 0,
     CONSTRAINT [PK_tblRKStgMatchPnS_intStgMatchPnSId] PRIMARY KEY (intStgMatchPnSId),  	  
 )

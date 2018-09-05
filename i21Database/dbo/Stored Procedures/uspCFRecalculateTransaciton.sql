@@ -71,6 +71,7 @@
 ,@ItemId							INT				= 0
 ,@QuoteTaxExemption					BIT				= 1
 ,@ProcessType						NVARCHAR(MAX)   = 'invoice'
+,@ForeignCardId						NVARCHAR(MAX)   = ''
 	
 AS
 
@@ -1456,7 +1457,7 @@ BEGIN
 					,[strNotes]						
 				FROM [fnConstructLineItemTaxDetail] 
 				(
-						@dblQuantity
+					@dblQuantity
 					,(@dblPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
@@ -1484,7 +1485,7 @@ BEGIN
 				)
 				INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 				(
-					[intTaxGroupId]				
+				[intTaxGroupId]				
 				,[intTaxCodeId]					
 				,[intTaxClassId]				
 				,[strTaxableByOtherTaxes]		
@@ -3218,7 +3219,7 @@ BEGIN
 					,[strNotes]						
 				FROM [fnConstructLineItemTaxDetail] 
 				(
-					 @dblZeroQuantity
+					 @dblQuantity
 					,0
 					,@LineItemTaxDetailStagingTable
 					,0
@@ -3226,7 +3227,7 @@ BEGIN
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblOriginalPrice
+					,@dblPrice
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
@@ -4118,68 +4119,8 @@ BEGIN
 					,NULL	--@@CurrencyExchangeRateTypeId
 					,NULL	--@@CurrencyExchangeRate											 
 				)
-					INSERT INTO  @tblCFOriginalTaxZeroQuantity 
-				(
-					 [intTaxGroupId]				
-					,[intTaxCodeId]					
-					,[intTaxClassId]				
-					,[strTaxableByOtherTaxes]		
-					,[strCalculationMethod]			
-					,[dblRate]	
-					,[dblBaseRate]		
-					,[dblExemptionPercent]			
-					,[dblTax]						
-					,[dblAdjustedTax]				
-					,[intSalesTaxAccountId]    			
-					,[ysnCheckoffTax]
-					,[ysnTaxExempt]
-					,[ysnInvalidSetup]				
-					,[strNotes]							
-				)	
-				SELECT 
-					 [intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]	
-					,[dblBaseRate]				
-					,[dblExemptionPercent]		
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[intTaxAccountId]			
-					,[ysnCheckoffTax]				
-					,[ysnTaxExempt]					
-					,[ysnInvalidSetup]				
-					,[strNotes]						
-				FROM [fnConstructLineItemTaxDetail] 
-				(
-					 @dblZeroQuantity
-					,(@dblOriginalPrice * @dblZeroQuantity)
-					,@LineItemTaxDetailStagingTable
-					,1
-					,@intItemId
-					,@intCustomerId
-					,@intLocationId
-					,@intTaxGroupId
-					,0
-					,@dtmTransactionDate
-					,NULL
-					,1
-					,NULL
-					,@companyConfigFreightTermId
-					,@intCardId		
-					,@intVehicleId
-					,1 --@DisregardExemptionSetup
-					,0
-					, @intItemUOMId	--intItemUOMId
-					,@intSiteId
-					,0		--@IsDeliver	
-					,@isQuote
-					,NULL	--@CurrencyId
-					,NULL	--@@CurrencyExchangeRateTypeId
-					,NULL	--@@CurrencyExchangeRate											 
-				)
+
+				
 
 					INSERT INTO @tblCFCalculatedTax	
 					(
@@ -5708,16 +5649,38 @@ BEGIN
 	DECLARE @ysnInvalid	BIT = 0
 	DECLARE @intParentId INT = 0
 
-	SELECT @intDupTransCount = COUNT(*)
-	FROM tblCFTransaction
-	WHERE intNetworkId = @intNetworkId
-	AND intSiteId = @intSiteId
-	AND dtmTransactionDate = @dtmTransactionDate
-	AND intCardId = @intCardId
-	AND intProductId = @ProductId
-	AND intPumpNumber = @PumpId
-	AND intTransactionId != @intTransactionId
-	AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	IF (@strTransactionType != 'Foreign Sale')
+	BEGIN
+		SELECT @intDupTransCount = COUNT(*)
+		FROM tblCFTransaction
+		WHERE intNetworkId = @intNetworkId
+		AND intSiteId = @intSiteId
+		AND dtmTransactionDate = @dtmTransactionDate
+		AND intCardId = @intCardId
+		AND intProductId = @ProductId
+		AND intPumpNumber = @PumpId
+		AND intTransactionId != @intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	END
+	ELSE
+	BEGIN
+		IF(ISNULL(@ForeignCardId,'') = '' AND ISNULL(@intTransactionId,0) != 0)
+		BEGIN
+			SELECT TOP 1 @ForeignCardId = strForeignCardId FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+			
+		END
+
+		SELECT @intDupTransCount = COUNT(*)
+		FROM tblCFTransaction
+		WHERE intNetworkId = @intNetworkId
+		AND intSiteId = @intSiteId
+		AND dtmTransactionDate = @dtmTransactionDate
+		AND ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'')
+		AND intProductId = @ProductId
+		AND intPumpNumber = @PumpId
+		AND intTransactionId != @intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	END
 
 	SELECT TOP 1 @intParentId = intOverFilledTransactionId 
 	FROM tblCFTransaction 

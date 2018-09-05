@@ -213,7 +213,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, intMasterId
 	)
 	SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '6', strType = 'Diesel - Undyed', strCriteria = '= 0', intMasterId = 37401
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '6CRD', strType = '', strCriteria = '= 0', intMasterId = 37407
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax (CRD)', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '6CRD', strType = '', strCriteria = '= 0', intMasterId = 37407
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Excise Tax Aviation Gasoline', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '2', strType = 'Aviation Gasoline', strCriteria = '= 0', intMasterId = 37387
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '10G', strType = 'Used Cooking Oil - Undyed', strCriteria = '= 0', intMasterId = 37410
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Excise Tax Aviation Gasoline', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '6', strType = 'Aviation Gasoline', strCriteria = '= 0', intMasterId = 37398
@@ -234,7 +234,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '6FLT', strType = '', strCriteria = '= 0', intMasterId = 37408
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '10G', strType = 'Used Cooking Oil - Dyed', strCriteria = '= 0', intMasterId = 37411
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Excise Tax Jet Fuel', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '2', strType = 'Jet Fuel', strCriteria = '= 0', intMasterId = 37388
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '5CRD', strType = '', strCriteria = '<> 0', intMasterId = 37395
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Use Fuel Tax (CRD)', strState = 'OR', strFormCode = '735-1334M', strScheduleCode = '5CRD', strType = '', strCriteria = '<> 0', intMasterId = 37395
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'WA Excise Tax Gasoline', strState = 'WA', strFormCode = '735-1302', strScheduleCode = '1', strType = 'Gasoline (Exports to WA)', strCriteria = '<> 0', intMasterId = 37412
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Excise Tax Gasoline', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '2', strType = 'Ethanol', strCriteria = '= 0', intMasterId = 37389
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OR Excise Tax Gasoline', strState = 'OR', strFormCode = '735-1302', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 37383
