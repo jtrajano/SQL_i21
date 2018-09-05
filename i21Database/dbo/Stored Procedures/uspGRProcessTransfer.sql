@@ -300,7 +300,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -470,7 +470,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -638,7 +638,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -806,7 +806,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				
@@ -976,7 +976,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -1144,7 +1144,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)		
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -1312,11 +1312,10 @@ BEGIN TRY
 			
 			--CASE #7:Customer MisMatch,Location MisMatch,Storatype MisMatch
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN
-			
+			BEGIN		
 				
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
