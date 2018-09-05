@@ -10,7 +10,22 @@ AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
 	begin
-		update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId
+		-- disable the contact admin if is not used by other customers
+		declare @count int
+		select @count = count(*) from tblEMEntityToContact where intEntityContactId = @intEntityContactId
+		if (@count > 1)
+		begin
+			update [tblEMEntityToContact] set ysnPortalAdmin = 0 where intEntityId = @intEntityId and intEntityContactId = @intEntityContactId
+		end
+		else
+		begin
+			update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId and intEntityContactId = @intEntityContactId
+		end
+		-- disable the contact users that is not linked to other customers
+		update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId and intEntityContactId not in 
+		(
+			select distinct intEntityContactId from tblEMEntityToContact where intEntityId <> @intEntityId and intEntityContactId in (select intEntityContactId from tblEMEntityToContact where intEntityId = @intEntityId)
+		)
 
 		--delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId)
 		delete from [tblEMEntityCredential] where intEntityId 
@@ -106,7 +121,8 @@ BEGIN
 			--ysnPortalAccess = 0, 
 			intEntityRoleId = null 
 				where intEntityId = @intEntityId 
-					and intEntityRoleId = @intUserRoleId--@roleId
+					--and intEntityRoleId = @intUserRoleId--@roleId
+					and intEntityContactId = @intEntityContactId
 
 		update [tblEMEntityToContact] set 
 			ysnPortalAccess = 1, 
