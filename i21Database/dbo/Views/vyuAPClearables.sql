@@ -104,7 +104,7 @@ SELECT	DISTINCT
 			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
 			,dblAmountPaid = 0
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
-			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
+			,dblAmountDue = ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0))
 			,dblVoucherAmount = CASE 
 								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
 								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
