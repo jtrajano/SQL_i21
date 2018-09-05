@@ -384,7 +384,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
 				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
-				  , intPaymentId				= NULL
+				  --, intPaymentId				= NULL
 			FROM tblARCustomerBudget CB
 				INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 				INNER JOIN (
