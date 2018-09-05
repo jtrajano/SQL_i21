@@ -226,7 +226,8 @@ BEGIN TRY
 						)
 				)
 			    ,'Washout net diff: Original Contract  ' + @strSourceContractNo + ' and Washout Contract ' + @strWashoutContractNo
-
+				-- we using the text "Washout net diff: Original Contract" to determine if an invoice to be created is for wash out
+				-- we need to know it because we have to set the ysnImpactInventory to False if it is coming from a washout contract
 	   EXEC		uspARProcessInvoices
 				@InvoiceEntries		=   @InvoiceEntries,
 				@LineItemTaxEntries	=   @LineItemTaxEntries,
