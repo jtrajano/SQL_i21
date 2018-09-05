@@ -625,13 +625,15 @@ ROLLBACK TRAN @TransactionName
 
 BEGIN TRY	
 
-	DELETE GLPR  
-	FROM
-		tblGLPostRecap GLPR
-	INNER JOIN
-		@Invoice I
-			ON GLPR.[intTransactionId] = I.[intInvoiceId]
-			AND GLPR.[strTransactionId] = I.[strInvoiceNumber]		   	
+    DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchId
+
+	--DELETE GLPR  
+	--FROM
+	--	tblGLPostRecap GLPR
+	--INNER JOIN
+	--	@Invoice I
+	--		ON GLPR.[intTransactionId] = I.[intInvoiceId]
+	--		AND GLPR.[strTransactionId] = I.[strInvoiceNumber]		   	
 		 
 	INSERT INTO tblGLPostRecap(
 		 [strTransactionId]
