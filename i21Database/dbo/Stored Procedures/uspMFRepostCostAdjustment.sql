@@ -27,7 +27,6 @@ BEGIN TRY
 		,@intWorkOrderConsumedLotId INT
 		,@dblInputCost NUMERIC(38, 20)
 		,@dblValue NUMERIC(38, 20)
-		,@strBatchId NVARCHAR(50)
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
 	DECLARE @tblMFConsumedLot TABLE (
@@ -179,6 +178,7 @@ BEGIN TRY
 		,[intSourceTransactionDetailId]
 		,[strSourceTransactionId]
 		,intFobPointId
+		,dblVoucherCost
 		)
 	SELECT [intItemId] = PL.intItemId
 		,[intItemLocationId] = isNULL(L.intItemLocationId, (
@@ -189,10 +189,10 @@ BEGIN TRY
 					))
 		,[intItemUOMId] = PL.intItemUOMId
 		,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
-		,[dblQty] = PL.dblQuantity
+		,[dblQty] =0
 		,[dblUOMQty] = 1
 		,[intCostUOMId] = PL.intItemUOMId
-		,[dblNewCost] = CASE 
+		,[dblNewValue] = CASE 
 			WHEN @strInstantConsumption = 'False'
 				THEN (
 						CASE 
@@ -221,6 +221,7 @@ BEGIN TRY
 		,[intSourceTransactionDetailId] = PL.intWorkOrderProducedLotId
 		,[strSourceTransactionId] = strWorkOrderNo
 		,intFobPointId = 2
+		,dblVoucherCost=0
 	FROM dbo.tblMFWorkOrderProducedLot PL
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
 	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
@@ -238,10 +239,6 @@ BEGIN TRY
 				AND ysnConsumptionRequired = 1
 				AND intWorkOrderId = @intWorkOrderId
 			)
-
-	-- Get the next batch number
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
-		,@strBatchId OUTPUT
 
 	DELETE
 	FROM @GLEntries
@@ -307,7 +304,7 @@ BEGIN TRY
 		DECLARE @intReturnValue AS INT
 
 		EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
-			,@strBatchId
+			,@strCostAdjustmentBatchId
 			,@userId
 
 		IF @intReturnValue <> 0
@@ -316,7 +313,7 @@ BEGIN TRY
 
 			SELECT TOP 1 @ErrorMessage = strMessage
 			FROM tblICPostResult
-			WHERE strBatchNumber = @strBatchId
+			WHERE strBatchNumber = @strCostAdjustmentBatchId
 
 			RAISERROR (
 					@ErrorMessage
@@ -362,7 +359,7 @@ BEGIN TRY
 				,dblReportingRate
 				,dblForeignRate
 				)
-			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
+			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strCostAdjustmentBatchId
 				,@intEntityUserSecurityId = @userId
 				,@AccountCategory_Cost_Adjustment = 'Work In Progress'
 		END
@@ -376,10 +373,6 @@ BEGIN TRY
 				,1
 		END
 	END
-
-	UPDATE tblMFWorkOrder
-	SET strCostAdjustmentBatchId = @strBatchId
-	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
