@@ -862,7 +862,9 @@ BEGIN
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
 									'Work in Progress'			
 								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement') THEN 
-									'AP Clearing'																								
+									'AP Clearing'
+								WHEN @strTransactionForm = 'Storage Measurement Reading' THEN
+									'Inventory Adjustment'																								
 								ELSE 
 									NULL 
 						END
@@ -2766,7 +2768,94 @@ BEGIN
 					END 				
 				END
 			END 									
-								
+				
+			-- Repost 'Storage Measurement Reading'
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Storage Measurement Reading'))
+			BEGIN
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustCostValue
+						,dblAdjustRetailValue
+				)
+				SELECT 	RebuildInvTrans.intItemId  
+						,RebuildInvTrans.intItemLocationId 
+						,RebuildInvTrans.intItemUOMId  
+						,RebuildInvTrans.dtmDate  
+						,RebuildInvTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+						,dblCost  = 	CASE	
+											WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+												dbo.fnGetItemAverageCost(
+													RebuildInvTrans.intItemId
+													, RebuildInvTrans.intItemLocationId
+													, RebuildInvTrans.intItemUOMId
+												) 
+											ELSE 
+												dbo.fnMultiply(
+													ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+													,dblUOMQty
+												)
+										END 
+						,RebuildInvTrans.dblSalesPrice  
+						,RebuildInvTrans.intCurrencyId  
+						,RebuildInvTrans.dblExchangeRate  
+						,RebuildInvTrans.intTransactionId  
+						,RebuildInvTrans.intTransactionDetailId  
+						,RebuildInvTrans.strTransactionId  
+						,RebuildInvTrans.intTransactionTypeId  
+						,RebuildInvTrans.intLotId 
+						,RebuildInvTrans.intSubLocationId
+						,RebuildInvTrans.intStorageLocationId
+						,RebuildInvTrans.strActualCostId
+						,RebuildInvTrans.intForexRateTypeId
+						,RebuildInvTrans.dblForexRate
+						,intCategoryId = RebuildInvTrans.intCategoryId 
+						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
+						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
+						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
+
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuildInvTrans.intLotId 
+				WHERE	RebuildInvTrans.strBatchId = @strBatchId
+						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL 
+
+				EXEC @intReturnValue = dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR 
+					
+			END				
 			ELSE 
 			BEGIN 								
 				-- Update the cost used in the adjustment 
@@ -3086,7 +3175,7 @@ BEGIN
 	FROM
 		tblGLDetail
 	WHERE ysnIsUnposted = 0	
-	GROUP BY 
+	GROUP BY   
 		intAccountId
 		,ISNULL(intMultiCompanyId, @intCompanyId)
 		,dtmDate
