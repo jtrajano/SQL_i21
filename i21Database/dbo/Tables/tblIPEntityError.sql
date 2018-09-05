@@ -22,5 +22,6 @@
 	[strImportStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
 	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dtmTransactionDate DATETIME NULL  DEFAULT((getdate())),
+	ysnMailSent BIT DEFAULT 0,
 	CONSTRAINT [PK_tblIPEntityError_intStageEntityId] PRIMARY KEY ([intStageEntityId])
 )

@@ -151,6 +151,50 @@ Begin
 	Where strPartnerNo='0012XI01' AND ISNULL(strErrorMessage,'') <>'Success'
 End
 
+If @strMessageType='GL'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Type</th>
+						<th>&nbsp;Match No</th>
+						<th>&nbsp;Book</th>
+						<th>&nbsp;Market Name</th>
+						<th>&nbsp;Reference No</th>
+						<th>&nbsp;Ack Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + 'Future' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strBook,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strReferenceNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	From tblRKStgMatchPnS 
+	Where strStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmPostingDate)
+	AND ISNULL(ysnMailSent,0)=0
+
+	Update tblRKStgMatchPnS Set ysnMailSent=1
+	Where strStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmPostingDate)
+
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + 'Future' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strBook,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strReferenceNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	From tblRKStgOptionMatchPnS 
+	Where strStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmPostingDate)
+	AND ISNULL(ysnMailSent,0)=0
+
+	Update tblRKStgOptionMatchPnS Set ysnMailSent=1
+	Where strStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmPostingDate)
+End
+
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
 Set @strHtml=REPLACE(@strHtml,'@detail',@strDetail)
 Set @strMessage=@strStyle + @strHtml

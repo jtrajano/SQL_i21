@@ -7026,6 +7026,7 @@
     <Build Include="dbo\Views\vyuARPOSEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetNumber.sql" />
     <Build Include="dbo\Views\vyuLGInventoryLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateImportProcessFailureEmailMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
