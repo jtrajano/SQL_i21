@@ -1281,7 +1281,7 @@ BEGIN
 		END
 
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
-		SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
+		--SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 		SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 		SET @strItemXml += '</E1BPMEOUTITEM>'
 		SET @strItemXml += '<E1BPMEOUTITEMX>'
