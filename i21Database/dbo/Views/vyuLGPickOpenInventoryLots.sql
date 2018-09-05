@@ -85,7 +85,7 @@ SELECT Lot.intLotId
        , EY.strName as strVendor 
        , L.strLoadNumber
        , L.dtmPostedDate
-       , Receipt.strWarehouseRefNo
+       , ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo) AS strWarehouseRefNo
 	   , CTDetail.dblFutures
 	   , CTDetail.dblBasis
 	   , CTDetail.dblCashPrice

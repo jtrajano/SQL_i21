@@ -4,7 +4,7 @@ SELECT strTaxCode			= TC.strTaxCode
 	 , strTaxDescription	= TC.strDescription
 	 , strCalculationMethod	= IDT.strCalculationMethod
 	 , dblQuantity			= SUM(ISNULL(DETAIL.dblQtyShipped, 0))
-	 , dblRate				= SUM(ISNULL(IDT.dblRate, 0))
+	 , dblRate				= ISNULL(IDT.dblRate, 0)
 	 , dblTax				= SUM(ISNULL(IDT.dblTax, 0))
 	 , dblAdjustedTax		= SUM(ISNULL(IDT.dblAdjustedTax, 0))
 	 , intInvoiceId			= DETAIL.intInvoiceId
@@ -24,5 +24,5 @@ INNER JOIN (
 		 , strDescription
 	FROM dbo.tblSMTaxCode WITH (NOLOCK)
 ) TC ON IDT.intTaxCodeId = TC.intTaxCodeId
-GROUP BY DETAIL.intInvoiceId, TC.strTaxCode, TC.strDescription, IDT.strCalculationMethod
+GROUP BY DETAIL.intInvoiceId, TC.strTaxCode, TC.strDescription, IDT.strCalculationMethod, IDT.dblRate
 HAVING SUM(ISNULL(IDT.dblAdjustedTax, 0)) <> 0

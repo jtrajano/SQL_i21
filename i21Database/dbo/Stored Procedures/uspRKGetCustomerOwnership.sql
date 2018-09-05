@@ -334,21 +334,22 @@ select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS w
 SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
 
 select @strPermtableListBF+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount and ( COLUMN_NAME like '%Net' OR COLUMN_NAME like '%Distribution%') 
-SELECT @strPermtableListBF= LEFT(@strPermtableListBF,LEN(@strPermtableListBF)-1)  
+
+SELECT @strPermtableListBF= CASE WHEN LEN(@strPermtableListBF) = 0 THEN '' ELSE LEFT(@strPermtableListBF,LEN(@strPermtableListBF)-1)  END
 
 
+IF LEN(@strPermtableListBF) <> 0 
+BEGIN
+	set @SQLBalanceForward='
+	INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableListBF+')
+	SELECT  '+@strInsertListBF+'
+	FROM ##tblRKDailyPositionForCustomer1 t 
+	WHERE dtmDate < ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) + '''
+	GROUP BY ' + @strInsertListBFGroupBy + '
+	'
 
-set @SQLBalanceForward='
-INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableListBF+')
-SELECT  '+@strInsertListBF+'
-FROM ##tblRKDailyPositionForCustomer1 t 
-WHERE dtmDate < ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) + '''
-GROUP BY ' + @strInsertListBFGroupBy + '
-'
-
-EXEC sp_executesql @SQLBalanceForward
-
-
+	EXEC sp_executesql @SQLBalanceForward
+END
 
 set @SQLFinal='
 INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableList+')

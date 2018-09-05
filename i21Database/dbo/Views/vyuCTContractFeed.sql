@@ -49,8 +49,9 @@ AS
 				CH.ysnSubstituteItem,
 				CD.strLocationName,
 				CH.strSalespersonId AS strSalesperson,
-				SE.strExternalERPId AS strSalespersonExternalERPId
-
+				SE.strExternalERPId AS strSalespersonExternalERPId,
+				PR.strName AS strProducer
+			
 		FROM	vyuCTContractSequence	CD
 		JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
 		JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
@@ -79,7 +80,9 @@ AS
 						WHERE intRowNum = 1
 				) AP ON AP.intRecordId = CD.intContractHeaderId											
 	LEFT JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
-		JOIN	tblEMEntity	SE	ON	SE.intEntityId	=	CH.intSalespersonId
-   LEFT JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)
-   LEFT JOIN	tblAPVendor	VE	ON	VE.intEntityId	=	CH.intEntityId							
-   LEFT JOIN	tblSMCity	LP	ON	LP.intCityId	=	DL.intLoadingPortId			
+		 JOIN	tblEMEntity	SE	ON	SE.intEntityId	=	CH.intSalespersonId
+	LEFT JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)
+	LEFT JOIN	tblAPVendor	VE	ON	VE.intEntityId	=	CH.intEntityId							
+	LEFT JOIN	tblSMCity	LP	ON	LP.intCityId	=	DL.intLoadingPortId
+	LEFT JOIN	tblEMEntity	PR	ON	PR.intEntityId	=	DL.intProducerId
+
