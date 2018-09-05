@@ -182,7 +182,7 @@ BEGIN
 			,I.strDescription
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+					THEN Convert(Decimal(18,2),CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
 				END AS dblCalculatedQuantity
 			,UM.strUnitMeasure
@@ -190,14 +190,14 @@ BEGIN
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
 			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
+				WHEN I.intCategoryId <> @intPMCategoryId
 					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE Convert(Decimal(18,2),CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				END AS dblCalculatedUpperTolerance
 			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
+				WHEN I.intCategoryId <> @intPMCategoryId
 					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE Convert(Decimal(18,2),CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				END AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
@@ -258,7 +258,7 @@ BEGIN
 			,I.strDescription
 			,CASE 
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+					THEN Convert(Decimal(18,2),CEILING((ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
 				END AS dblCalculatedQuantity
 			,UM.strUnitMeasure
@@ -266,14 +266,14 @@ BEGIN
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
 			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
+				WHEN I.intCategoryId <> @intPMCategoryId
 					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE Convert(Decimal(18,2),CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				END AS dblCalculatedUpperTolerance
 			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
+				WHEN I.intCategoryId <> @intPMCategoryId
 					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity
-				ELSE CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity)
+				ELSE Convert(Decimal(18,2),CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity-@dblCalculatedQuantity)) * W.dblQuantity))
 				END AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled

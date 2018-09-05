@@ -17,6 +17,8 @@ DECLARE @intContainerId INT
 DECLARE @intNoOfShipRecord INT
 DECLARE @intNoOfShipRecordCounter INT
 DECLARE @intNoOfShipRecordParentCounter INT
+DECLARE @strTransactionName NVARCHAR(50)
+Declare @strLotNumber nvarchar(MAX)
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
 	,intParentId INT
@@ -39,6 +41,8 @@ DECLARE @tblTemp AS TABLE (
 	,strCustomer NVARCHAR(200)
 	,intAttributeTypeId INT DEFAULT 0
 	,intImageTypeId INT DEFAULT 0
+	,strText NVARCHAR(MAX)
+	,dblWOQty NUMERIC(18, 6)
 	)
 DECLARE @tblData AS TABLE (
 	intRecordId INT
@@ -62,6 +66,9 @@ DECLARE @tblData AS TABLE (
 	,strCustomer NVARCHAR(200)
 	,intAttributeTypeId INT DEFAULT 0
 	,intImageTypeId INT DEFAULT 0
+	,ysnProcessed BIT DEFAULT 0
+	,strText NVARCHAR(MAX)
+	,dblWOQty NUMERIC(18, 6)
 	)
 DECLARE @tblNodeData AS TABLE (
 	intRecordId INT
@@ -85,6 +92,8 @@ DECLARE @tblNodeData AS TABLE (
 	,strCustomer NVARCHAR(200)
 	,intAttributeTypeId INT DEFAULT 0
 	,intImageTypeId INT DEFAULT 0
+	,strText NVARCHAR(MAX)
+	,dblWOQty NUMERIC(18, 6)
 	)
 DECLARE @tblNodeDataFinal AS TABLE (
 	[key] INT
@@ -121,6 +130,7 @@ DECLARE @tblLinkData AS TABLE (
 	,intToRecordId INT
 	,strTransactionName NVARCHAR(50)
 	)
+DECLARE @tblMFExlude AS TABLE (intId INT,strName nvarchar(MAX))
 
 --Forward
 IF @intDirectionId = 1
@@ -852,6 +862,8 @@ BEGIN
 					,strProcessName
 					,strType
 					,intAttributeTypeId
+					,strText
+					,dblWOQty
 					)
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
@@ -919,7 +931,7 @@ BEGIN
 
 			-- Lot Ship
 			IF @strType = 'L'
-			begin
+			BEGIN
 				INSERT INTO @tblData (
 					strTransactionName
 					,intLotId
@@ -939,7 +951,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotShipDetail @intId
 					,@ysnParentLot
 
-					INSERT INTO @tblData (
+				INSERT INTO @tblData (
 					strTransactionName
 					,intLotId
 					,strLotNumber
@@ -957,7 +969,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityLotOutboundShipDetail @intId
 					,@ysnParentLot
-				End
+			END
 
 			-- Sales Order & Invoice from Shipment
 			IF @strType = 'S'
@@ -1240,7 +1252,7 @@ BEGIN
 		EXEC uspMFGetTraceabilityLotShipDetail @intLotId
 			,@ysnParentLot
 
-			INSERT INTO @tblNodeData (
+		INSERT INTO @tblNodeData (
 			strTransactionName
 			,intLotId
 			,strLotNumber
@@ -1323,10 +1335,13 @@ BEGIN
 				IF @intId IS NULL
 					SELECT TOP 1 @intId = intLotId
 					FROM @tblNodeData
+					WHERE strType = 'S'
+					ORDER BY 1
 				ELSE
 					SELECT TOP 1 @intId = intLotId
 					FROM @tblNodeData
-					WHERE intLotId <> @intId
+					WHERE intLotId > @intId
+						AND strType = 'S'
 
 				--Invoice
 				INSERT INTO @tblData (
@@ -1822,7 +1837,10 @@ BEGIN
 	FROM @tblNodeData
 
 	--Shipment
-	IF (@intObjectTypeId = 7 or @intObjectTypeId = 8)
+	IF (
+			@intObjectTypeId = 7
+			OR @intObjectTypeId = 8
+			)
 	BEGIN
 		--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
 		INSERT INTO @tblTemp (
@@ -1893,13 +1911,7 @@ BEGIN
 			,intParentLotId
 			,strType
 			)
-		SELECT TOP 1 intRecordId - (
-				CASE 
-					WHEN @intNoOfShipRecord > 0
-						THEN (@intNoOfShipRecord - 1)
-					ELSE 0
-					END
-				)
+		SELECT intRecordId
 			,intParentId
 			,strTransactionName
 			,intLotId
@@ -1916,7 +1928,11 @@ BEGIN
 			,intParentLotId
 			,strType
 		FROM @tblNodeData
-		WHERE strType NOT IN ('SO')
+		WHERE strType NOT IN (
+				'SO'
+				,'IN'
+				,'S'
+				)
 		ORDER BY intRecordId DESC
 
 		SET @intRowCount = 1
@@ -1929,6 +1945,8 @@ BEGIN
 		SELECT DISTINCT intLotId
 			,intRecordId
 			,strType
+			,strTransactionName
+			,strLotNumber
 		FROM @tblTemp
 
 		OPEN @RCUR
@@ -1938,6 +1956,8 @@ BEGIN
 		INTO @intId
 			,@intParentId
 			,@strType
+			,@strTransactionName
+			,@strLotNumber
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -1963,23 +1983,24 @@ BEGIN
 					,strProcessName
 					,strType
 					,intAttributeTypeId
-					)
+					,strText
+					,dblWOQty
+						)
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
-
-				--Remove circular Reference, Remove the WO if exists
-				IF EXISTS (
-						SELECT 1
-						FROM @tblData
-						WHERE intLotId IN (
-								SELECT intLotId
-								FROM @tblNodeData
-								WHERE strType = 'W'
-								)
-						)
-					DELETE
-					FROM @tblData
+					--Remove circular Reference, Remove the WO if exists
+					--IF EXISTS (
+					--		SELECT 1
+					--		FROM @tblData
+					--		WHERE intLotId IN (
+					--				SELECT intLotId
+					--				FROM @tblNodeData
+					--				WHERE strType = 'W'
+					--				)
+					--		)
+					--	DELETE
+					--	FROM @tblData
 			END
 
 			-- WorkOrder Input details
@@ -2004,6 +2025,55 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityWorkOrderInputDetail @intId
 					,@ysnParentLot
+
+			-- Lot Merge
+			IF @strType = 'L'
+			BEGIN
+				INSERT INTO @tblData (
+					strTransactionName
+					,intLotId
+					,strLotNumber
+					,strLotAlias
+					,intItemId
+					,strItemNo
+					,strItemDesc
+					,intCategoryId
+					,strCategoryCode
+					,dblQuantity
+					,strUOM
+					,dtmTransactionDate
+					,intParentLotId
+					,strType
+					,intImageTypeId
+					,strText
+					)
+				EXEC uspMFGetTraceabilityLotMergeDetail @intId
+					,@intDirectionId
+					,@ysnParentLot
+
+				IF EXISTS (
+						SELECT *
+						FROM @tblData
+						WHERE strTransactionName = 'Merge'
+						)
+				BEGIN
+					UPDATE @tblNodeData
+					SET dblQuantity = IsNULL((
+								SELECT SUM(dblQuantity)
+								FROM @tblData
+								WHERE strTransactionName IN (
+										'Merge'
+										,'Produce'
+										)
+									AND ysnProcessed = 0
+								), 0)
+					WHERE intLotId = @intId
+						AND @strTransactionName IN (
+							'Ship'
+							,'Merge'
+							)
+				END
+			END
 
 			-- Lot Split
 			IF @strType = 'L'
@@ -2162,13 +2232,19 @@ BEGIN
 
 			UPDATE @tblData
 			SET intParentId = @intParentId
+				,ysnProcessed = 1
 			WHERE intParentId IS NULL
+
+			INSERT INTO @tblMFExlude
+			SELECT @intId,@strLotNumber
 
 			FETCH NEXT
 			FROM @RCUR
 			INTO @intId
 				,@intParentId
 				,@strType
+				,@strTransactionName
+				,@strLotNumber
 		END
 
 		DELETE
@@ -2196,6 +2272,8 @@ BEGIN
 			,strType
 			,intAttributeTypeId
 			,intImageTypeId
+			,strText
+			,dblWOQty
 			)
 		SELECT (
 				@intMaxRecordCount + ROW_NUMBER() OVER (
@@ -2222,6 +2300,8 @@ BEGIN
 			,strType
 			,intAttributeTypeId
 			,intImageTypeId
+			,strText
+			,dblWOQty
 		FROM @tblData
 		GROUP BY intParentId
 			,strTransactionName
@@ -2242,6 +2322,8 @@ BEGIN
 			,strType
 			,intAttributeTypeId
 			,intImageTypeId
+			,strText
+			,dblWOQty
 
 		--Node Date
 		INSERT INTO @tblNodeData (
@@ -2266,6 +2348,8 @@ BEGIN
 			,strType
 			,intAttributeTypeId
 			,intImageTypeId
+			,strText
+			,dblWOQty
 			)
 		SELECT intRecordId
 			,intParentId
@@ -2288,10 +2372,19 @@ BEGIN
 			,strType
 			,intAttributeTypeId
 			,intImageTypeId
+			,strText
+			,dblWOQty
 		FROM @tblTemp
 
 		DELETE
 		FROM @tblData
+
+		DELETE
+		FROM @tblTemp
+		WHERE Exists (
+				SELECT *
+				FROM @tblMFExlude Where intId=intLotId and strName=strLotNumber
+				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId)
 		FROM @tblTemp
@@ -2335,7 +2428,11 @@ INSERT INTO @tblNodeDataFinal (
 SELECT intRecordId AS [key]
 	,intRecordId
 	,intParentId
-	,strTransactionName
+	,CASE 
+		WHEN IsNULL(strText, '') = ''
+			THEN strTransactionName
+		ELSE strText
+		END
 	,intLotId
 	,strLotNumber
 	,strLotAlias
@@ -2344,7 +2441,7 @@ SELECT intRecordId AS [key]
 	,strItemDesc
 	,intCategoryId
 	,strCategoryCode
-	,dblQuantity
+	,IsNULL(dblWOQty,dblQuantity)
 	,strUOM
 	,dtmTransactionDate
 	,intParentLotId
@@ -2376,7 +2473,8 @@ SELECT intRecordId AS [key]
 					END
 		WHEN strType = 'R'
 			THEN './resources/images/graphics/traceability-receipt.png'
-		WHEN strType = 'S' or strType = 'OS'
+		WHEN strType = 'S'
+			OR strType = 'OS'
 			THEN './resources/images/graphics/traceability-shipment.png'
 		WHEN strType = 'C'
 			THEN './resources/images/graphics/contract.png'
@@ -2394,7 +2492,7 @@ SELECT intRecordId AS [key]
 			THEN strLotNumber
 		ELSE strLotNumber + CHAR(13) + '(' + strProcessName + ')'
 		END AS strNodeText
-	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + ISNULL(strItemDesc, '') + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(dblQuantity), '') + ' ' + ISNULL(strUOM + CHAR(13), '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
+	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + ISNULL(strItemDesc, '') + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(IsNULL(dblWOQty,dblQuantity)), '') + ' ' + ISNULL(strUOM + CHAR(13), '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
 		WHEN strType = 'R'
 			THEN 'Vendor     : ' + ISNULL(strVendor, '')
 		ELSE ''

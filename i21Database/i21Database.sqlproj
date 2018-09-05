@@ -1193,6 +1193,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
+    <Build Include="dbo\Index\IX_tblGLDtail_intTransactionId_strTransactionType.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -6403,6 +6404,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryStockMovement.sql" />
     <Build Include="dbo\Views\vyuICGetStockMovement.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

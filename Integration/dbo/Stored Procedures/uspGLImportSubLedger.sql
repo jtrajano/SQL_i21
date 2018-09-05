@@ -13,7 +13,8 @@
 GO
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
 BEGIN 
-EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC ('
+ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
@@ -165,7 +166,7 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
     		BEGIN TRY
     		BEGIN TRANSACTION
-    		DECLARE @uid UNIQUEIDENTIFIER
+    		DECLARE @uid UNIQUEIDENTIFIER, @beforePosting INT = 0
     		SELECT @uid =NEWID()
     		
 
@@ -392,14 +393,14 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				DECLARE @RC int
     				DECLARE @Param nvarchar(max) =''SELECT intJournalId FROM tblGLJournal WHERE intJournalId = '' + CONVERT (VARCHAR(10), @intJournalId)
     				DECLARE @strBatchId nvarchar(100)
-					DECLARE @successfulCount INT, @beforePosting INT
+					DECLARE @successfulCount INT 
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
-    				SET @beforePosting = @successfulCount
+    				
 					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
 
-    				IF  @successfulCount = 1 or @successfulCount - @beforePosting = 1
+    				IF  @successfulCount > @beforePosting
     				BEGIN
-						
+						SET @beforePosting = @successfulCount
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					INSERT INTO @tblLogSuccess(
 							strEventDescription,
@@ -588,4 +589,6 @@ EXEC ('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
 
     	END')
+
 END
+GO

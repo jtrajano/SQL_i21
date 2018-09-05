@@ -184,9 +184,9 @@ BEGIN TRY
 			WHILE @intMachineId IS NOT NULL
 			BEGIN
 				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-					,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
+					,@intItemUOMId = @intWOItemUOMId
 					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-					,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
+					,@intPhysicalItemUOMId = @intWOItemUOMId
 				FROM dbo.tblMFWorkOrderProducedLot WP
 				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 					AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -222,7 +222,7 @@ BEGIN TRY
 							,@dblProduceQty1 = NULL
 
 						SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-							,@intItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
+							,@intItemUOMId = @intWOItemUOMId
 						FROM dbo.tblMFWorkOrderProducedLot WP
 						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 							AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -242,7 +242,7 @@ BEGIN TRY
 							SELECT @dblProduceQty = 0
 
 						SELECT @dblProduceQty1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-							,@intItemUOMId1 = MIN(IsNULL(IU.intItemUOMId, WP.intItemUOMId))
+							,@intItemUOMId1 = @intWOItemUOMId
 						FROM dbo.tblMFWorkOrderProducedLot WP
 						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 							AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -316,7 +316,7 @@ BEGIN TRY
 							,@dblPhysicalCount1 = NULL
 
 						SELECT @dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
+							,@intPhysicalItemUOMId = @intWOItemUOMId
 						FROM dbo.tblMFWorkOrderProducedLot WP
 						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 							AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -336,7 +336,7 @@ BEGIN TRY
 							SELECT @dblPhysicalCount = 0
 
 						SELECT @dblPhysicalCount1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId1 = MIN(IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId))
+							,@intPhysicalItemUOMId1 = @intWOItemUOMId
 						FROM dbo.tblMFWorkOrderProducedLot WP
 						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 							AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -520,11 +520,11 @@ BEGIN TRY
 				,@intUserId
 				,@intBusinessShiftId
 				,@dtmBusinessDate
-				,L.intStorageLocationId
-				,L.intSubLocationId
+				,IsNULL(L.intStorageLocationId, PL.intStorageLocationId)
+				,IsNULL(L.intSubLocationId, PL.intSubLocationId)
 				,@strBatchId
 			FROM tblMFWorkOrderProducedLotTransaction PL
-			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
+			LEFT JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intTransactionTypeId = 25
 
@@ -554,13 +554,17 @@ BEGIN TRY
 				,intSourceTransactionId
 				,strSourceTransactionId
 				)
-			SELECT intItemId = l.intItemId
-				,intItemLocationId = l.intItemLocationId
+			SELECT intItemId = ISNULL(l.intItemId,cl.intItemId)
+				,intItemLocationId = IsNULL(l.intItemLocationId,IL.intItemLocationId)
 				,intItemUOMId = cl.intItemUOMId
 				,dtmDate = @dtmCurrentDateTime
 				,dblQty = (- cl.dblQuantity)
 				,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-				,dblCost = l.dblLastCost
+				,dblCost = IsNULL(l.dblLastCost, (
+						SELECT TOP 1 IP.dblLastCost
+						FROM tblICItemPricing IP
+						WHERE IP.intItemLocationId=IL.intItemLocationId
+						))
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
 				,dblExchangeRate = 1
@@ -569,14 +573,15 @@ BEGIN TRY
 				,strTransactionId = @strTransactionId
 				,intTransactionTypeId = @INVENTORY_CONSUME
 				,intLotId = l.intLotId
-				,intSubLocationId = l.intSubLocationId
-				,intStorageLocationId = l.intStorageLocationId
+				,intSubLocationId = ISNULL(l.intSubLocationId, cl.intSubLocationId)
+				,intStorageLocationId = ISNULL(l.intStorageLocationId, cl.intStorageLocationId)
 				,intSourceTransactionId = @INVENTORY_CONSUME
 				,strSourceTransactionId = @strTransactionId
 			FROM dbo.tblMFWorkOrderConsumedLot cl
-			JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
-			JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+			JOIN dbo.tblICItemUOM ItemUOM ON ISNULL(l.intItemUOMId, cl.intItemUOMId) = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+			Left JOIN tblICItemLocation IL on IL.intItemId=cl.intItemId and IL.intLocationId=@intLocationId
 			WHERE cl.intWorkOrderId = @intWorkOrderId
 				AND intSequenceNo = 9999
 

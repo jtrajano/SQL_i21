@@ -125,6 +125,8 @@ Declare @tblData AS table
 	strCustomer nvarchar(200),
 	intAttributeTypeId int Default 0,
 	intImageTypeId int Default 0
+	,strText NVARCHAR(MAX)
+	,dblWOQty NUMERIC(18, 6)
 )
 
 Declare @tblNodeData AS table
@@ -158,7 +160,7 @@ Declare @tblLinkData AS table
 	intToRecordId int,
 	strTransactionName nvarchar(50)
 )
-
+DECLARE @tblMFExlude AS TABLE (intId INT,strName nvarchar(MAX))
 --Forward
 DIR_FORWARD:
 If @intDirectionId=1
@@ -212,7 +214,8 @@ Begin
 				-- From Lot to WorkOrders
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId			,strText
+					,dblWOQty)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
 				-- WorkOrder Output details
@@ -320,10 +323,10 @@ Begin
 	WHILE (@intRowCount > 0)
 	BEGIN    
 		DECLARE @RCUR CURSOR       
-		SET @RCUR = CURSOR FOR SELECT DISTINCT intLotId,intRecordId,strType FROM @tblTemp      
+		SET @RCUR = CURSOR FOR SELECT DISTINCT intLotId,intRecordId,strType,strLotNumber FROM @tblTemp      
 
 		OPEN @RCUR      
-		FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType
+		FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType,@strLotNumber
 			WHILE @@FETCH_STATUS = 0      
 			BEGIN     
 
@@ -334,7 +337,8 @@ Begin
 				-- From Lot to WorkOrders
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId				,strText
+					,dblWOQty)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
 				-- WorkOrder Input details
@@ -342,6 +346,35 @@ Begin
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId,@ysnParentLot
+
+				IF @strType = 'L'
+				Begin
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,intParentLotId
+						,strType
+						,intImageTypeId
+						,strText
+						)
+					EXEC uspMFGetTraceabilityLotMergeDetail @intId
+						,@intDirectionId
+						,@ysnParentLot
+						,1
+
+					INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strTransactionName = 'Merge' 
+
+				End
 			
 				-- Lot Split
 				If @strType='L'
@@ -356,9 +389,12 @@ Begin
 					Exec uspMFGetTraceabilityLotReceiptDetail @intId,@ysnParentLot
 
 
-				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL        
+				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL   
+				
+				INSERT INTO @tblMFExlude
+			SELECT @intId,@strLotNumber     
 
-			FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType      
+			FETCH NEXT FROM @RCUR INTO @intId,@intParentId,@strType,@strLotNumber      
 			END
 
 		DELETE FROM @tblTemp      
@@ -378,6 +414,13 @@ Begin
 		From @tblTemp
 
 		DELETE FROM @tblData
+
+		DELETE
+		FROM @tblTemp
+		WHERE Exists (
+				SELECT *
+				FROM @tblMFExlude Where intId=intLotId and strName=strLotNumber
+				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblTemp     
 

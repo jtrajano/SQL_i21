@@ -28,6 +28,8 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
+			@FirstApprovalFullName  NVARCHAR(MAX),
+			@SecondApprovalFullName NVARCHAR(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
 			@ysnFeedOnApproval		BIT = 0,
@@ -126,6 +128,9 @@ BEGIN TRY
 	SELECT @SecondApprovalSign =Sig.blbDetail 
 								FROM tblSMSignature Sig
 								WHERE Sig.intEntityId=@SecondApprovalId
+	
+	SELECT @FirstApprovalFullName = strName FROM tblEMEntity WHERE intEntityId = @FirstApprovalId
+	SELECT @SecondApprovalFullName = strName FROM tblEMEntity WHERE intEntityId = @SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -317,7 +322,8 @@ BEGIN TRY
 			@strApprovalText AS strApprovalText,
 			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
 			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
-
+			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalFullName ELSE NULL END AS FirstApprovalFullName,
+			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalFullName ELSE NULL END AS SecondApprovalFullName,
 			@strAmendedColumns strAmendedColumns,
 			@strDetailAmendedColumns strDetailAmendedColumns
 

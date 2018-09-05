@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspCMBankReconClearedDepositsSubReport
+﻿CREATE PROCEDURE [dbo].[uspCMBankReconClearedDepositsSubReport]
 	@intBankAccountId AS INT
 	,@dtmStatementDate AS DATETIME
 AS
@@ -112,18 +112,31 @@ DECLARE @BANK_DEPOSIT INT = 1
 		
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmStatementDate IS NOT NULL
-	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
+	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
+
+DECLARE @lastDateReconciled datetime
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+	WHERE intBankAccountId = @intBankAccountId
+	ORDER BY dtmDateReconciled DESC
+	
+	SELECT @lastDateReconciled = DATEADD(SECOND, -1, DATEADD(DAY,1,@lastDateReconciled))
+
+DECLARE @filterDate DATETIME
+	SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))	
 	
 -- SANITIZE THE BANK ACCOUNT ID
 --SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
 --SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
 --IF @intBankAccountIdFrom > @intBankAccountIdTo
 --	SET @intBankAccountIdTo = @intBankAccountIdFrom
-		
+;WITH R AS(	
 SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmStatementDate = @dtmStatementDate
 		,strCbkNo = BankAccnt.strCbkNo
-		,ysnClr = BankTrans.ysnClr
+		,ysnClr = CASE WHEN (@lastDateReconciled >= @filterDate  AND BankTrans.dtmDateReconciled IS NULL AND BankTrans.ysnClr =1)
+			OR BankTrans.dtmDateReconciled > @filterDate THEN 0
+			ELSE BankTrans.ysnClr 
+			END
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
@@ -142,20 +155,17 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			ON BankTrans.intBankTransactionTypeId = BankTypes.intBankTransactionTypeId
 			
 WHERE	BankTrans.ysnPosted = 1
-		AND BankTrans.ysnClr = 1
 		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
-		AND CAST(FLOOR(CAST(BankTrans.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME)
-		AND (
-			-- Filter date reconciled. 
-			-- 1. Include only bank transaction is not permanently reconciled. 
-			-- 2. Or if the bank transaction is reconciled on the provided statement date. 
-			dtmDateReconciled IS NULL 
-			OR CAST(FLOOR(CAST(BankTrans.dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME)
-		)
+		AND BankTrans.dtmDate <= ISNULL(@filterDate, BankTrans.dtmDate)
+		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate, BankTrans.dtmDateReconciled)
 		AND (
 			-- Filter for all the bank deposits and credits:
 			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
 		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0
+)
+SELECT * FROM R WHERE ysnClr = 1
+GO
+
