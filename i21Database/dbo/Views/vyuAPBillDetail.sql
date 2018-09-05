@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillDetail]
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS
 
 SELECT 
@@ -72,7 +72,9 @@ SELECT
 	CD.strERPPONumber,
 	CD.strERPItemNumber,
 	term.strTerm,
-	A.strRemarks
+	A.strRemarks,
+	PG.strName as strPurchasingGroupName,
+	CB.strContractBasis as strINCO
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -125,4 +127,8 @@ LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc
 	ON IRE.intSubLocationId = subLoc.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblSMTerm term
 	ON term.intTermID = A.intTermsId
+LEFT JOIN dbo.tblSMPurchasingGroup PG
+	ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+LEFT JOIN tblCTContractBasis CB
+	ON CB.intContractBasisId = CH.intContractBasisId
 -- WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
