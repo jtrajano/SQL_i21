@@ -72,6 +72,8 @@
 	[strStorageLocation] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strStorageSchedule] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[strHaulerName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intDeliverySheetId] INT NULL,
+	[strDeliverySheet] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnImported] [bit] NULL,
 	[intImportedById] [int] NULL,
 	[dtmImported] [datetime] NULL,
