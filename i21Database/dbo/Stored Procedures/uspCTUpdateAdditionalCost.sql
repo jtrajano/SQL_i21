@@ -79,9 +79,7 @@ BEGIN TRY
 					FROM tblAPBillDetail BillDetail
 					JOIN tblAPBill Bill ON Bill.intBillId = BillDetail.intBillId
 					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
-					WHERE 
-						Item.strType ='Other Charge' 
-					AND Item.strCostType IN('Freight','Commission')
+					WHERE  Item.strType ='Other Charge'
 					AND ISNULL(BillDetail.intContractDetailId,0) <> 0
 					GROUP BY Bill.intEntityVendorId
 							,BillDetail.intContractDetailId
