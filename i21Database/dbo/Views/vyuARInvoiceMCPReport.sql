@@ -57,8 +57,8 @@ LEFT JOIN (
 		 , strContractNo		= CT.strContractNumber
 		 , strUnitMeasure		= UOM.strUnitMeasure
 		 , dblPrice				= ID.dblPrice
-		 , dblPriceWithTax		= ID.dblPrice + dbo.fnRoundBanker(ISNULL(CASE WHEN ID.dblTotalTax <> 0 AND ID.dblQtyShipped <> 0 THEN ID.dblTotalTax/ID.dblQtyShipped ELSE 0 END, 0), 2)
-		 , dblTotalPriceWithTax = ID.dblTotal
+		 , dblPriceWithTax		= ID.dblPrice + ISNULL(CASE WHEN ID.dblTotalTax <> 0 AND ID.dblQtyShipped <> 0 THEN ID.dblTotalTax/ID.dblQtyShipped ELSE 0 END, 0)
+		 , dblTotalPriceWithTax = ID.dblTotal + ID.dblTotalTax
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
