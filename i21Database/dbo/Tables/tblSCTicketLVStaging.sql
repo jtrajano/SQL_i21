@@ -67,8 +67,8 @@
 	[strLocationNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDiscountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strData] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	strEntityName  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	strLocationName NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,	
+	[strEntityName]  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,	
 	[strStorageLocation] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strStorageSchedule] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[strHaulerName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
@@ -79,5 +79,6 @@
 	[dtmImported] [datetime] NULL,
 	[intSession] [bigint],
 	[strErrorMsg] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL, 
+	[strScaleStationImport] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )
