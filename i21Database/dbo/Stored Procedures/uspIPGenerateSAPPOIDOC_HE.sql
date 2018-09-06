@@ -1311,8 +1311,8 @@ BEGIN
 		SET @strItemXml += '<COND_TYPE>' + 'PB00' + '</COND_TYPE>'
 		SET @strItemXml += '<COND_VALUE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</COND_VALUE>'
 		SET @strItemXml += '<CURRENCY>' + ISNULL(@strCurrency,'') + '</CURRENCY>'
-		SET @strItemXml += '<COND_P_UNT>' + ISNULL(@strPriceUOM, '') + '</COND_P_UNT>'
-		SET @strItemXml += '<COND_UNIT>' + '1' + '</COND_UNIT>'
+		SET @strItemXml += '<COND_P_UNT>' + '1'  + '</COND_P_UNT>'
+		SET @strItemXml += '<COND_UNIT>' + ISNULL(@strPriceUOM, '')+ '</COND_UNIT>'
 		SET @strItemXml += '<CHANGE_ID>' + 'U' + '</CHANGE_ID>'
 		SET @strItemXml += '</E1BPMEOUTCONDITION>'
 
