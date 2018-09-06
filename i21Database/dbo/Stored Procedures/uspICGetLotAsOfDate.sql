@@ -61,9 +61,9 @@ SELECT
 	,t.intLotId
 	,t.intCostingMethod
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	,dblQty				= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty)
+	,dblQty				= dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty)--dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty)
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
-	,dblCost
+	,Lot.dblLastCost
 	,intOwnershipType	= 1
 FROM	
 	tblICInventoryTransaction t
