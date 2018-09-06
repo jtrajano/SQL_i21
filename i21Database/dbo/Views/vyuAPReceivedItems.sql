@@ -639,16 +639,17 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END) /
+																		CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
 																			ROUND (CD.dblQuantity * dbo.fnCalculateQtyBetweenUOM(
 																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
 																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)), 2)
+																			, ISNULL(CC.dblRate,0)), 2)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -753,15 +754,16 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END) /
+																		CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																			(CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
+																			((CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
 																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
 																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)))
+																			, ISNULL(CC.dblRate,0))))/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -871,16 +873,17 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END) /
+																		CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
 																			ROUND (CD.dblQuantity * dbo.fnCalculateQtyBetweenUOM(
 																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
 																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)), 2)
+																			, ISNULL(CC.dblRate,0)), 2)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -939,7 +942,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(1 AS BIT)
+		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -989,15 +992,16 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END)/
+																		CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																			(CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
+																			((CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
 																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
 																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)))
+																			, ISNULL(CC.dblRate,0))))/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -1056,7 +1060,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(1 AS BIT)
+		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
