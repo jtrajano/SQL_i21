@@ -646,10 +646,18 @@ END
 GO
 
 GO
-IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'strBook' AND strType = '2.Sequence')
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intBookId' AND strType = '2.Sequence')
 BEGIN
     INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
-    SELECT 'strBook','Book',1,'2.Sequence'
+    SELECT 'intBookId','Book',1,'2.Sequence'
+END
+GO
+
+GO
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intSubBookId' AND strType = '2.Sequence')
+BEGIN
+    INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
+    SELECT 'intSubBookId','Sub Book',1,'2.Sequence'
 END
 GO
 
