@@ -7030,6 +7030,9 @@
     <Build Include="dbo\Stored Procedures\uspRKOptionUnPostMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspRKUnpostMatchPnS.sql" />
     <Build Include="dbo\Views\vyuRKAOP.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptChargeTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
