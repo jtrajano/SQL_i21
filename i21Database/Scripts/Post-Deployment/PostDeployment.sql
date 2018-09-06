@@ -485,8 +485,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\RM\02_DataFix.sql
 
 --FRM
-:r .\FRM\DefaultData\1_OfflineMenu.sql
-:r .\FRM\1_OfflineGuid.sql
+
+
 
 --CCR
 :r .\CCR\SiteDataFix.sql
