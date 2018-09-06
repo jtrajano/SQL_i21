@@ -6395,7 +6395,6 @@
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1810_SetKeepSearchOpen.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
