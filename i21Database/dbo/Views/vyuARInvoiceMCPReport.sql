@@ -39,10 +39,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
 								  END
-	 , strItemComments          = CASE WHEN INV.strType = 'Tank Delivery'
-	 									THEN HAZMAT.strMessage
-	   								  	ELSE ITEMCOMMENTS.strItemComments
-								  END
+	 , strItemComments          = HAZMAT.strMessage
 	 , strOrigin				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL
 	 									THEN CONSUMPTIONSITE.strLocationName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
@@ -142,22 +139,6 @@ OUTER APPLY (
 									  END
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-OUTER APPLY (
-	SELECT strItemComments = LEFT(strInvoiceComments, LEN(strInvoiceComments) - 0)
-	FROM (
-		SELECT CAST(ISNULL(ICC.strInvoiceComments, '') AS VARCHAR(MAX)) + CHAR(10)
-		FROM dbo.tblARInvoiceDetail IDD WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intItemId
-				 , strInvoiceComments 
-			FROM dbo.tblICItem ICC WITH (NOLOCK)
-			WHERE ISNULL(ICC.strInvoiceComments, '') <> ''
-		) ICC ON IDD.intItemId = ICC.intItemId
-		WHERE IDD.intInvoiceId = INV.intInvoiceId		
-		GROUP BY IDD.intItemId, ICC.strInvoiceComments
-		FOR XML PATH ('')
-	) DETAILS (strInvoiceComments)
-) ITEMCOMMENTS
 OUTER APPLY (
 	SELECT strMessage = LEFT(strMessage, LEN(strMessage) - 0)
 	FROM (
