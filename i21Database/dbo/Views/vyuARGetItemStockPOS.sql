@@ -3,6 +3,7 @@ AS
 SELECT intItemId						= ITEM.intItemId
 	 , intStorageLocationId				= IL.intStorageLocationId
 	 , intIssueUOMId					= IUOM.intItemUOMId
+	 , intCompanyLocationId				= CL.intCompanyLocationId
 	 , strItemNo						= ITEM.strItemNo
 	 , strDescription					= ITEM.strDescription
 	 , strStatus						= ITEM.strStatus
@@ -22,6 +23,7 @@ SELECT intItemId						= ITEM.intItemId
 	 , dblMaintenanceRate				= ISNULL(ITEM.dblMaintenanceRate, 0)
 	 , dblDefaultFull					= ISNULL(ITEM.dblDefaultFull, 0)
 	 , ysnListBundleSeparately			= ISNULL(ITEM.ysnListBundleSeparately, CAST(0 AS BIT))
+	 , intDepositPLUId					= IL.intDepositPLUId
 FROM dbo.tblICItem ITEM WITH (NOLOCK)
 INNER JOIN dbo.tblICItemLocation IL WITH (NOLOCK) ON ITEM.intItemId = IL.intItemId
 INNER JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON IL.intLocationId = CL.intCompanyLocationId
