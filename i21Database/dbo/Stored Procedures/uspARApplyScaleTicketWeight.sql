@@ -9,7 +9,8 @@ AS
 BEGIN
 	DECLARE @dblTotalOrderedQty		NUMERIC(18, 6) = 0
 	DECLARE @dblContractMaxQty		NUMERIC(18,6) = 0
-	DECLARE @dblOrigNetWeight NUMERIC(18,6) = @dblNetWeight
+	DECLARE @dblOrigNetWeight 		NUMERIC(18,6) = @dblNetWeight
+
 	SELECT @dblTotalOrderedQty = SUM(ISNULL(SOD.dblQtyOrdered, 0))
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
@@ -95,11 +96,36 @@ BEGIN
 				ON parentCTD.intContractDetailId = ParentAddon.intContractDetailId
 			WHERE ID.intInvoiceId = @intNewInvoiceId
 
+			--REMOVE OTHER CONTRACT SEQUENCE AND ITS ADD ON ITEMS IF NET WEIGHT IS LESS THAN THE ORDERED QTY FOR AR-8541 AND AR-8575
+			DECLARE @dblOrderedQtyContract 	NUMERIC(18, 6) = 0
+				  , @strAddonDetailKey		NVARCHAR(100) = NULL				  
+                  , @intContractToRetain	INT = 0
+
+			SELECT TOP 1 @dblOrderedQtyContract = ID.dblQtyOrdered
+				 	   , @strAddonDetailKey = ID.strAddonDetailKey
+					   , @intContractToRetain = ID.intContractDetailId
+			FROM tblARInvoiceDetail ID
+			WHERE ID.intInvoiceId = @intNewInvoiceId
+			AND ID.intContractDetailId IS NOT NULL
+			ORDER BY ID.intContractDetailId ASC
+
+			IF (ISNULL(@dblOrderedQtyContract, 0) > @dblNetWeight)
+				BEGIN
+					UPDATE ID
+					SET ID.dblQtyShipped = @dblNetWeight
+					FROM tblARInvoiceDetail ID
+					WHERE ID.intInvoiceId = @intNewInvoiceId
+					AND ID.strAddonDetailKey = @strAddonDetailKey
+									
+					DELETE ID
+					FROM tblARInvoiceDetail ID
+					WHERE ID.intInvoiceId = @intNewInvoiceId
+					  AND ((ID.intContractDetailId IS NOT NULL AND ID.intContractDetailId <> @intContractToRetain) OR (ISNULL(ID.strAddonDetailKey, '') <> '' AND ID.strAddonDetailKey <> @strAddonDetailKey))
+
+					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 'Sales Order'
+				END
+			
 			SELECT @dblNetWeight = @dblNetWeight - SUM(dblQtyShipped) FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId IS NOT NULL	
-			--EXEC[uspARInvoiceUpdateSequenceBalance] 
-			--	 @ysnDelete = 0,
-			--	 @TransactionId = @intNewInvoiceId,
-			--	 @UserId = @intUserId
 
 			IF(OBJECT_ID('tempdb..#CONTRACTLINEITEMS') IS NOT NULL)
 			BEGIN
