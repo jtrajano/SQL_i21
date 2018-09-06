@@ -2,8 +2,7 @@
  This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Vendor Prepayment"
 */  
 CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPVendorPrepayment
-	@intTransactionIdFrom INT = 0,
-	@intPaymentDetailId INT = 0   
+	@intTransactionIdFrom INT = 0
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -149,7 +148,6 @@ SELECT * FROM(
 				ON BILLDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
-			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 
 	--Include Invoice
 	UNION ALL SELECT
@@ -183,5 +181,4 @@ SELECT * FROM(
 				ON INVDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
-			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 ) as tbl order by intPaymentDetailId
