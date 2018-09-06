@@ -97,6 +97,7 @@ BEGIN TRY
 			CD.dtmEndDate			=	TD.dtmEndDate,
 			CD.dblFutures			=	CASE WHEN TD.dblFutures IS NULL THEN CD.dblFutures ELSE TD.dblFutures END,
 			CD.dblBasis				=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
+			CD.dblOriginalBasis		=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
 			CD.intFutureMonthId		=	TD.intFutureMonthId,
 			CD.intFutureMarketId	=	TD.intFutureMarketId
 			
