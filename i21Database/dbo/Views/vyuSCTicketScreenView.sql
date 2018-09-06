@@ -216,7 +216,6 @@
 
 	,CAST (0 AS BIT) ysnDateModified
 	,SCT.intConcurrencyId
-	,SCT.strOfflineGuid
 	,SO.strSalesOrderNumber
 	,(CASE WHEN SO.intCompanyLocationId > 0 THEN SMC.strLocationName ELSE '' END) AS strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
