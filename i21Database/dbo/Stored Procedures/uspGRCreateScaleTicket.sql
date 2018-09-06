@@ -122,6 +122,7 @@ BEGIN TRY
 			,[ysnDeliverySheetPost]		 BIT
 			,[ysnDestinationWeightGradePost] BIT
 			,[ysnReadyToTransfer]		BIT
+			,[ysnHasGeneratedTicketNumber] BIT
 		); 
 
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -200,6 +201,7 @@ BEGIN TRY
 			,[ysnDeliverySheetPost]
 			,[ysnDestinationWeightGradePost]
 			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber]
 		)
 		SELECT	
 			[strData]					 = CI.strData
@@ -261,6 +263,7 @@ BEGIN TRY
 			,[ysnDeliverySheetPost]		 = 0
 			,[ysnDestinationWeightGradePost] = 0
 			,[ysnReadyToTransfer]		 = 0
+			,[ysnHasGeneratedTicketNumber] = 1
 
 		FROM tblSCTicketLVStaging	    CI	
 		LEFT JOIN	tblSMCompanyLocation		CL	ON	CL.strLocationName	=	CI.strLocationName		
@@ -365,6 +368,7 @@ BEGIN TRY
 			,[ysnDeliverySheetPost]
 			,[ysnDestinationWeightGradePost]
 			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber] 
 		)
 		SELECT	
 			 [strTicketStatus]  
@@ -421,6 +425,7 @@ BEGIN TRY
 			,[ysnDeliverySheetPost]
 			,[ysnDestinationWeightGradePost]
 			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber] 
 		FROM #tmpExtracted 
 		WHERE strData = 'Header' 
 
