@@ -1310,8 +1310,8 @@ SELECT
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intCompanyLocationSubLocationId] END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
-    ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
-    ,[ysnBlended]                       = ARID.[ysnBlended]
+    ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
+    ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
     ,[dblQuantity]                      = NULL
     ,[dblMaxQuantity]                   = NULL
     ,[strOptionType]                    = NULL
@@ -1712,8 +1712,8 @@ SELECT
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intCompanyLocationSubLocationId] END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
-    ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
-    ,[ysnBlended]                       = ARID.[ysnBlended]
+    ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
+    ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
     ,[dblQuantity]                      = NULL
     ,[dblMaxQuantity]                   = NULL
     ,[strOptionType]                    = NULL
