@@ -6,10 +6,13 @@
        @ysnVendorProducer bit = null,
 	   @intBookId int = null,
 	   @intSubBookId int = null,
-	   @intAOPId int = null,
+	    @strYear nvarchar(10) = null,
+	   @dtmAOPFromDate datetime = null,
+	   @dtmAOPToDate datetime = null,	
 	   @intCurrencyId int = null
 
 AS 
+
 
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
@@ -40,12 +43,13 @@ DECLARE @GetStandardQty AS TABLE(
 		strPricingType nvarchar(100),
 		strItemNo nvarchar(100),
 		strProductType nvarchar(100),
-		strCurrency nvarchar(100)
+		strCurrency nvarchar(100),
+		strUnitMeasure nvarchar(100)
 		)
 
 insert into @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
 							dblNoOfLots,dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased, dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType,strCurrency)
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strProductType,strCurrency,strUnitMeasure)
 
 exec [uspRKSourcingReportDetail] @dtmFromDate = @dtmFromDate,
        @dtmToDate = @dtmToDate,
@@ -54,8 +58,8 @@ exec [uspRKSourcingReportDetail] @dtmFromDate = @dtmFromDate,
 	   @strEntityName  = null,
        @ysnVendorProducer = @ysnVendorProducer,
 	   @intBookId = @intBookId,
-	   @intSubBookId  = @intSubBookId,
-	   @intAOPId= @intAOPId,
+	   @intSubBookId  = @intSubBookId,	   
+	   @strYear=@strYear,@dtmAOPFromDate=@dtmAOPFromDate,@dtmAOPToDate=@dtmAOPToDate,
 	   @strLocationName='',
 	   @intCurrencyId=@intCurrencyId
 
@@ -64,4 +68,4 @@ select  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,1 as intC
 SELECT strEntityName strName,strLocationName,sum(dblBalanceQty) dblQty,sum(dblTotPurchased) dblTotPurchased,
 (sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100 dblCompanySpend,sum(dblStandardQty) dblStandardQty
 FROM @GetStandardQty
-GROUP BY strEntityName,strEntityName,strLocationName)t
+GROUP BY strEntityName,strEntityName,strLocationName)ty

@@ -7029,6 +7029,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateImportProcessFailureEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspRKOptionUnPostMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspRKUnpostMatchPnS.sql" />
+    <Build Include="dbo\Views\vyuRKAOP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

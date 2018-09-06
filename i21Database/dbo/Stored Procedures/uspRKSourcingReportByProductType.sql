@@ -6,7 +6,9 @@
        @ysnVendorProducer bit = null,
 	   	   @intBookId int = null,
 	   @intSubBookId int = null,
-	   @intAOPId int = null,
+	   @strYear nvarchar(10) = null,
+	   @dtmAOPFromDate datetime = null,
+	   @dtmAOPToDate datetime = null,	
 	   @intCurrencyId int = null
 
 AS
@@ -41,12 +43,13 @@ DECLARE @GetStandardQty AS TABLE(
 		strLocationName nvarchar(100),
 		strPricingType  nvarchar(100),
 		strItemNo  nvarchar(100),
-		strCurrency nvarchar(100)
+		strCurrency nvarchar(100),
+		strUnitMeasure nvarchar(100)
 		)
 
 INSERT INTO @GetStandardQty(intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,dblNoOfLots,dblFuturesPrice,
 							dblSettlementPrice,dblBasis,dblRatio,dblPrice,dblTotPurchased,strOrigin,strProductType,	dblStandardRatio,dblStandardQty,intItemId,
-							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strCurrency)
+							dblStandardPrice,dblPPVBasis,strLocationName,dblNewPPVPrice,dblStandardValue,dblPPV,dblPPVNew,strPricingType,strItemNo,strCurrency,strUnitMeasure)
 
 EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate,
        @dtmToDate = @dtmToDate,
@@ -58,7 +61,7 @@ EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate,
 	   @strOrigin = null,
 	   @intBookId = @intBookId,
 	   @intSubBookId  = @intSubBookId,
-	   @intAOPId= @intAOPId,
+	   @strYear=@strYear,@dtmAOPFromDate=@dtmAOPFromDate,@dtmAOPToDate=@dtmAOPToDate,
 	   @strLocationName='',
 	   @intCurrencyId=@intCurrencyId
 
