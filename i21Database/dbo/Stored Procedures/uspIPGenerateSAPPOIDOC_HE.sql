@@ -54,6 +54,8 @@ DECLARE @intMinSeq INT
 	,@strSAPLocation NVARCHAR(50)
 	,@strERPItemNumber NVARCHAR(100)
 	,@strTblRowState NVARCHAR(50)
+	,@strMessageCode nvarchar(50)
+
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strContractFeedIds NVARCHAR(MAX)
@@ -104,7 +106,8 @@ SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 
 SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 
---SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
+Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
+
 IF EXISTS (
 		SELECT *
 		FROM tblCTContractFeed CF
@@ -1196,6 +1199,7 @@ BEGIN
 			--IDOC Header
 			SET @strXmlHeaderStart += '<EDI_DC40>'
 			SET @strXmlHeaderStart += @strPOCreateIDOCHeader
+			SET @strXmlHeaderStart +='<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 			SET @strXmlHeaderStart += '</EDI_DC40>'
 			SET @strXmlHeaderStart += '<E1PURCONTRACT_CREATE>'
 			--Header
@@ -1240,6 +1244,7 @@ BEGIN
 			--IDOC Header
 			SET @strXmlHeaderStart += '<EDI_DC40>'
 			SET @strXmlHeaderStart += @strPOUpdateIDOCHeader
+			SET @strXmlHeaderStart +='<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 			SET @strXmlHeaderStart += '</EDI_DC40>'
 			SET @strXmlHeaderStart += '<E1PURCONTRACT_CHANGE>'
 			SET @strXmlHeaderStart += '<PURCHASINGDOCUMENT>' + ISNULL(@strERPPONumber, '') + '</PURCHASINGDOCUMENT>'

@@ -52,6 +52,20 @@ BEGIN
 		,'15'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPIDOCTag
+		WHERE strMessageType = 'GLOBAL'
+			AND strTag = 'MESCOD'
+		)
+BEGIN
+	INSERT INTO tblIPSAPIDOCTag
+	SELECT 'GLOBAL'
+		,''
+		,'MESCOD'
+		,'I21'
+END
+GO
 
 UPDATE tblIPCompanyPreference
 SET strCommonDataFolderPath = 'E:\i21Integration\'

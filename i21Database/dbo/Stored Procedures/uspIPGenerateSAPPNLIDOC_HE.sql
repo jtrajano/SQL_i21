@@ -23,6 +23,7 @@ DECLARE @intStgMatchPnSId INT
 	,@ysnFuture BIT
 	,@strReferenceNo NVARCHAR(MAX)
 	,@strText nvarchar(MAX)
+	,@strMessageCode nvarchar(50)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strStgMatchPnSId NVARCHAR(MAX)
@@ -38,6 +39,8 @@ SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
 SELECT @strCostCenter = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'COSTCENTER')
 
 SELECT @strGLAccount = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'GL_ACCOUNT')
+
+Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
 DECLARE @tblRKStgMatchPnS TABLE (
 	intRecordId INT Identity(1, 1)
@@ -140,6 +143,7 @@ BEGIN
 		--IDOC Header
 		SET @strXml += '<EDI_DC40>'
 		SET @strXml += @strIDOCHeader
+		SET @strXml += '<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 		SET @strXml += '</EDI_DC40>'
 		--Header
 		SET @strXml += '<E1FIKPF>'
