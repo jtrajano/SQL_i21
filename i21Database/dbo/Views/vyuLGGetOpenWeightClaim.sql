@@ -322,6 +322,9 @@ FROM (
 		  FROM tblLGLoadWarehouse LW
 		  JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 		  WHERE LW.intLoadId = LOAD.intLoadId) strSublocation
+		,CD.intPurchasingGroupId
+		,PG.strName AS strPurchasingGroupName
+		,PG.strDescription AS strPurchasingGroupDesc
 	FROM tblLGLoad LOAD
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = LOAD.intLoadId
@@ -378,7 +381,8 @@ FROM (
 		AND RI.intOrderId = CH.intContractHeaderId
 		AND LOAD.intPurchaseSale = 1
 	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WCD.intWeightClaimId = WC.intWeightClaimId
+	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = LOAD.intLoadId
+	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	WHERE (LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN 4

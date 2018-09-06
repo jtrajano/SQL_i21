@@ -63,8 +63,10 @@ SELECT
 	(SELECT CLSL.strSubLocationName
 			FROM tblLGLoadWarehouse LW
 			JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
-			WHERE LW.intLoadId = Load.intLoadId) strSublocation
-
+			WHERE LW.intLoadId = Load.intLoadId) strSublocation,
+	CD.intPurchasingGroupId,
+	PG.strName AS strPurchasingGroupName,
+	PG.strDescription AS strPurchasingGroupDesc
 
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
@@ -95,3 +97,4 @@ LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
 LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
 LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId
+LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
