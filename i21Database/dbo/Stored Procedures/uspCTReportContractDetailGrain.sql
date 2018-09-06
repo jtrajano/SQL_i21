@@ -77,7 +77,10 @@ BEGIN TRY
 			,strRemark					 = NULL
 			,strDetailUnitMeasure		 = strItemUOM
 			,strPriceUOMWithCurrency	 = strPriceUOM + ' ' + strCurrency
-			,strCommodityCode			 = strCommodityCode
+			,strCommodityCode			 = CASE	
+											WHEN ISNULL(DV.strCommodityCode,'') < > ISNULL(DV.strCommodityDescription,'') THEN DV.strCommodityCode +' - '+ DV.strCommodityDescription										
+											ELSE DV.strCommodityCode
+							               END	
 			,strTerm					 = strTerm
 			FROM	vyuCTContractDetailView DV
 			WHERE	intContractDetailId	=	@intContractDetailId
