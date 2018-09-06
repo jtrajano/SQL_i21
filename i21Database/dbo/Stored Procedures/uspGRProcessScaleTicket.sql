@@ -26,8 +26,9 @@
 					intImportedById			=	@intUserId,
 					dtmImported				=	GETDATE(),
 					intTicketId				=	@intTicketId
-			--WHERE	intTicketLVStagingId	=	@intTicketLVStagingId
-			  WHERE strTicketNumber         =   @strTicketNo
+				
+				WHERE	intTicketLVStagingId	=	@intTicketLVStagingId
+			  --WHERE strTicketNumber         =   @strTicketNo
 
 		END TRY
 
