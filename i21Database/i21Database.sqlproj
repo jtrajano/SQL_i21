@@ -7027,6 +7027,8 @@
     <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetNumber.sql" />
     <Build Include="dbo\Views\vyuLGInventoryLots.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateImportProcessFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKOptionUnPostMatchPnS.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUnpostMatchPnS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
