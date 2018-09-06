@@ -71,14 +71,6 @@ BEGIN TRY
 		UPDATE  CC
 		SET	    CC.dblActualAmount = tblBilled.dblTotal
 		FROM	tblCTContractCost	CC
-		JOIN ( 
-			   SELECT intContractCostId,SUM(dblTotal) dblTotal 
-			   FROM tblAPBillDetail 
-			   WHERE intContractCostId > 0 
-			   GROUP BY intContractCostId
-			 ) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
-       
-		/*
 		JOIN	(
 					SELECT Bill.intEntityVendorId
 						  ,BillDetail.intContractDetailId
@@ -94,10 +86,9 @@ BEGIN TRY
 					GROUP BY Bill.intEntityVendorId
 							,BillDetail.intContractDetailId
 							,BillDetail.intItemId
-				) tblBilled ON tblBilled.intContractDetailId = CD.intContractDetailId 
+				) tblBilled ON tblBilled.intContractDetailId = CC.intContractDetailId 
 			 AND  tblBilled.intItemId						 = CC.intItemId 
-			 AND  tblBilled.intEntityVendorId				 = CH.intEntityId
-		  */			
+			 AND  tblBilled.intEntityVendorId				 = CC.intVendorId
 		WHERE	CC.intContractDetailId = @intContractDetailId
 
 		UPDATE	CC 
