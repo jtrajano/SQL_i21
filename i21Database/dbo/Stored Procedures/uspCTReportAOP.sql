@@ -102,7 +102,7 @@ BEGIN
   AD.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
   JOIN tblCTAOP A ON A.intAOPId=AD.intAOPId
   JOIN tblICItem Item ON Item.intItemId=AD.intBasisItemId
-  WHERE AD.intCommodityId=1 AND A.strYear=@strYear
+  WHERE A.intCommodityId=@IntCommodityId AND A.strYear=@strYear
   UNION
   SELECT intItemId,strItemNo FROM tblICItem Where strType='Other Charge' AND  ysnBasisContract=1 
 

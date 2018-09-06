@@ -31,6 +31,7 @@ BEGIN
 	CREATE TABLE #tblCoffeeNeedPlan 
 	(
 		 [intNeedPlanKey] INT IDENTITY(1, 1)		
+		 ,intAOPDetailId INT
 		,[strCommodityCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 		,[strLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 		,[strShortName] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
@@ -127,14 +128,16 @@ BEGIN
 					
 		SET @SqlALTER = 'ALTER TABLE #tblCoffeeNeedPlan ADD  [' + @strColumnName + ']  DECIMAL(24,2) NULL'		
 		--SELECT @SqlALTER
+		--SELECT @strColumnName
 		EXEC (@SqlALTER)	
 		
 				
 		
 		  SET @SqlInsert = 'IF NOT EXISTS(SELECT 1 FROM #tblCoffeeNeedPlan)
 							BEGIN
-								INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
+								INSERT INTO #tblCoffeeNeedPlan([intAOPDetailId],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
 								SELECT DISTINCT
+								AD.intAOPDetailId,
 								CO.strCommodityCode,
 								CL.strLocationName,
 								IM.strShortName,
@@ -162,33 +165,23 @@ BEGIN
 
 		--SELECT @SqlInsert
 		EXEC (@SqlInsert)
-		SET @SqlUpdate='UPDATE #tblCoffeeNeedPlan 
+		SET @SqlUpdate='UPDATE AP
 						SET ['+ @strColumnName + ']=AD.dblCost
 						FROM	tblCTAOPDetail		AD
-						JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId
-						LEFT  JOIN     tblSMCurrency     Currency ON Currency.intCurrencyID=AD.intCurrencyId
-						LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
-						JOIN	tblICItem			IM	ON	IM.intItemId		=	AD.intItemId		LEFT
-						JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId	LEFT
-						JOIN	tblICItemUOM		VU	ON	VU.intItemUOMId		=	AD.intVolumeUOMId	LEFT
-						JOIN	tblICUnitMeasure	VM	ON	VM.intUnitMeasureId	=	VU.intUnitMeasureId	LEFT
-						JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId		=	AD.intWeightUOMId	LEFT
-						JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId
-						LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId							
-						WHERE AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
+						JOIN	#tblCoffeeNeedPlan			AP	ON	AD.intAOPDetailId			=	AP.intAOPDetailId
+						JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId								
+						WHERE BI.strItemNo='''+@strColumnName+''''
 		
 		--SELECT @SqlUpdate
 		EXEC (@SqlUpdate)
 		
 		--SELECT * INTO tblCoffeeNeedPlan_1 FROM  #tblCoffeeNeedPlan
-		SET @SqlTotalPremiumCalculation='UPDATE #tblCoffeeNeedPlan 
+		SET @SqlTotalPremiumCalculation='UPDATE AP 
 										 SET [dblTotalPremium]=ISNULL([dblTotalPremium],0)+AD.dblCost
-										 FROM	#tblCoffeeNeedPlan
-										 JOIN   tblCTAOPDetail		AD ON 1=1
-										 JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId			LEFT
-										 JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
+										 FROM	#tblCoffeeNeedPlan AP
+										 JOIN   tblCTAOPDetail		AD ON AD.intAOPDetailId			=	AP.intAOPDetailId
 										 JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId 
-										 WHERE  AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +' AND BI.strItemNo='''+@strColumnName+''''
+										 WHERE  BI.strItemNo='''+@strColumnName+''''
 		--SELECT @SqlTotalPremiumCalculation
 
 		EXEC (@SqlTotalPremiumCalculation)		
@@ -210,6 +203,7 @@ BEGIN
 							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId
 							LEFT JOIN tblCTAOPDetail AD ON AD.intItemId=Item.intItemId
 							WHERE Item.strType IN (''Raw Material'',''Inventory'') AND Item.intCommodityId='+LTRIM(@IntCommodityId)+' AND Item.strStatus <> ''Discontinued'' AND  AD.intItemId IS NULL'
+		--SELECT @SqlInsert
 		EXEC (@SqlInsert)
 
 		--SELECT * FROM #tblCoffeeNeedPlan 
