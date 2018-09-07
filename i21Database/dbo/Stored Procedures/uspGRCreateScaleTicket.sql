@@ -370,7 +370,7 @@ BEGIN TRY
 		LEFT JOIN tblGRDiscountSchedule DiscountSchedule ON DiscountSchedule.intDiscountScheduleId = CRef.intDiscountScheduleId 
 														AND DiscountSchedule.intCommodityId = IM.intCommodityId 
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.strSubLocationName = CI.strStorageLocation
-		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber
+		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber AND Bin.intSubLocationId=SubLocation.intCompanyLocationSubLocationId
 		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CI.strDistributionOption
 		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule
 		LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = CI.strDeliverySheet
