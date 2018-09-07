@@ -33,6 +33,7 @@ DECLARE @ErrorMessage AS NVARCHAR(4000)
 		,@TransactionName AS VARCHAR(32)		
 		,@ReturnValue AS INT 
 		,@TransCount AS INT = @@TRANCOUNT 
+		,@IsEscalate AS BIT = 0 
 
 -- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
@@ -322,6 +323,7 @@ BEGIN
 			,@ysnPost
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
+			,@IsEscalate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -364,6 +366,7 @@ BEGIN
 			,@ysnPost
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
+			,@IsEscalate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -406,6 +409,7 @@ BEGIN
 			,@ysnPost
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
+			,@IsEscalate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -448,6 +452,8 @@ BEGIN
 			,@ysnPost
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
+			,@intLotId 
+			,@IsEscalate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -491,6 +497,7 @@ BEGIN
 			,@ysnPost
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
+			,@IsEscalate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -649,6 +656,8 @@ BEGIN
 
 	-- Clear the contents of the temp table.
 	DELETE FROM #tmpRevalueProducedItems
+
+	SET @IsEscalate = 1 
 
 	-- Do the loop. 
 	GOTO ESCALATE_COST_ADJUSTMENT
