@@ -791,7 +791,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN 0
 																		ELSE LoadCost.dblRate
 																	END	
-								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
+								,[intCostUOMId]						= LoadCost.intItemUOMId
 								,[intEntityVendorId]				= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
