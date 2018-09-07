@@ -61,7 +61,10 @@ SELECT
 	,t.intLotId
 	,t.intCostingMethod
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	,dblQty				= dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty)--dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty)
+	,dblQty				= CASE 
+							WHEN Lot.intWeightUOMId IS NULL THEN dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty) 
+							ELSE dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty) 
+						END
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
 	,Lot.dblLastCost
 	,intOwnershipType	= 1
@@ -90,7 +93,10 @@ SELECT	t.intItemId
 		,t.intCostingMethod
 		,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 		,dblQty				= CAST(0 AS NUMERIC(38, 20))
-		,dblUnitStorage		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty)
+		,dblUnitStorage		= CASE 
+								WHEN Lot.intWeightUOMId IS NULL THEN dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty) 
+								ELSE dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty) 
+							END
 		,dblCost
 		,intOwnershipType	= 2
 FROM	
