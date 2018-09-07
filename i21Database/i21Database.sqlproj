@@ -7034,6 +7034,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptChargeTax.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
     <Build Include="dbo\Views\vyuARAddOnItemsInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuARPOSSearchLoggedIn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
