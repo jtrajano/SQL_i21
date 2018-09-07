@@ -74,7 +74,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
+WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
