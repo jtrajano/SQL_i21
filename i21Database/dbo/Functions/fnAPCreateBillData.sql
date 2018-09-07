@@ -85,6 +85,7 @@ BEGIN
 	DECLARE @vendorCurrency INT;
 	DECLARE @shipVia INT;
 	DECLARE @subCurrencyCents INT;
+	DECLARE @payto INT;
 	
 	DECLARE @shipFromAddress NVARCHAR(200)
 	DECLARE @shipFromCity NVARCHAR(50)
@@ -112,6 +113,7 @@ BEGIN
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
 		@shipFrom = ISNULL(@shipFromId, B.intEntityLocationId),
+		@payto = B.intEntityLocationId,
 		@shipVia = B.intShipViaId,
 		@shipFromAddress = B.strAddress,
 		@shipFromCity = B.strCity,
@@ -212,7 +214,7 @@ BEGIN
 		@shipFromCountry,
 		@shipFromPhone,
 		@shipFrom,
-		@shipFrom,
+		@payto,
 		@shipTo,
 		@shipVia,
 		@contact,
