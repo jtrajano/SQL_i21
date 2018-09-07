@@ -1346,8 +1346,8 @@ ELSE
 			,A.[dtmTransactionDate]
 			,Debit.Value
 			,Credit.Value
-			,A.[dblDebitUnit]
-			,A.[dblCreditUnit]
+			,DebitUnit.Value
+			,CreditUnit.Value
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
@@ -1373,6 +1373,8 @@ ELSE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0))  CreditUnit
 		LEFT JOIN tblSMCurrencyExchangeRateType forex ON forex.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 		
 		IF @@ERROR <> 0	GOTO Post_Rollback;

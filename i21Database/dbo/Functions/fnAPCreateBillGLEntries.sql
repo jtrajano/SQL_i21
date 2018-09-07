@@ -157,7 +157,7 @@ BEGIN
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A
-			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
+			-- CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			-- CROSS APPLY
@@ -186,13 +186,12 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType != 'Inventory' THEN 0
+					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType != 'Inventory' THEN 0
 									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
-											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
-									END, 
-									itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-				END
+											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
                 FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
 				LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
