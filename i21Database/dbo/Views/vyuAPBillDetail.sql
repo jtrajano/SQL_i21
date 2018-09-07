@@ -55,7 +55,7 @@ SELECT
 		ELSE uom.strUnitMeasure
 	END AS strUOM,
 	ISNULL(CD.intContractSeq,0) AS intSequenceId,
-	L.strLoadNumber,
+	ISNULL(L.strLoadNumber,ICS.strSourceNumber) AS strLoadNumber,
 	um.strUnitMeasure AS strCostUOM,
 	B.dblNetWeight,
 	B.dblDiscount,
@@ -110,4 +110,6 @@ LEFT JOIN dbo.tblICStorageLocation SL
 	ON SL.intStorageLocationId = B.intStorageLocationId
 LEFT JOIN (dbo.tblPOPurchaseDetail PD LEFT JOIN dbo.tblPOPurchase P ON PD.intPurchaseId = P.intPurchaseId)
 	ON PD.intPurchaseDetailId = B.intPurchaseDetailId
+LEFT JOIN vyuICGetReceiptItemSource ICS 
+ 	ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND strSourceType = 'Inbound Shipment'	
 -- WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
