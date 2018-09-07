@@ -1357,7 +1357,11 @@ GO
 	UPDATE tblSMStartingNumber
 	SET intNumber = x.intNumber,
 	strPrefix = x.strPrefix,
-	ysnUseLocation = x.ysnUseLocation
+	intDigits = x.intDigits,
+	ysnUseLocation = x.ysnUseLocation,
+	ysnResetNumber = x.ysnResetNumber,
+	dtmResetDate = x.dtmResetDate,
+	ysnEnable = x.ysnEnable
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO

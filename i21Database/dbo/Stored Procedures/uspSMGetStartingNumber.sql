@@ -14,14 +14,10 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @i
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND ysnUseLocation = 1)
 	BEGIN
-		UPDATE tblSMStartingNumberLocation SET intNumber = 1 WHERE intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId
+		UPDATE tblSMStartingNumberLocation SET intNumber = 1 WHERE intStartingNumberId = @intStartingNumberId
 	END	
-	ELSE
-	BEGIN
-		UPDATE tblSMStartingNumber SET intNumber = 1 WHERE intStartingNumberId = @intStartingNumberId
-	END
 
-	UPDATE tblSMStartingNumber SET dtmResetDate = SYSDATETIME() WHERE intStartingNumberId = @intStartingNumberId
+	UPDATE tblSMStartingNumber SET intNumber = 1, dtmResetDate = SYSDATETIME() WHERE intStartingNumberId = @intStartingNumberId
 END
 
 -- IF MODULE IS CONTRACT MANAGEMENT
