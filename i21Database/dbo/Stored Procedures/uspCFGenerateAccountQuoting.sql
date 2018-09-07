@@ -35,10 +35,16 @@ BEGIN
 			,intCustomerId 
 		)
 		SELECT 
-			intAccountId  
-			,intCustomerId 
+		    intAccountId  
+		   ,intCustomerId 
 		FROM
-		tblCFAccount WHERE intCustomerGroupId = @intCustomerGroupId
+		tblCFAccount as cfAccount
+		INNER JOIN tblARCustomerGroupDetail as arCusDetail
+		ON cfAccount.intCustomerGroupId = arCusDetail.intCustomerGroupId
+		AND cfAccount.intCustomerId = arCusDetail.intEntityId
+		WHERE cfAccount.intCustomerGroupId = @intCustomerGroupId
+		AND ISNULL(arCusDetail.ysnQuote,0) = 1
+
 	END
 
 	DELETE FROM tblCFAccountQuote WHERE intEntityUserId = @intEntityUserId OR ISNULL(intEntityUserId,0) = 0 
