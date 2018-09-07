@@ -516,8 +516,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
 																		ELSE 0
 																	END						
-								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
-								,[intContractDetailId]				= @intLoadContractId
+								,[intContractHeaderId]				= RE.intContractHeaderId
+								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
@@ -647,7 +647,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		END
 																		ELSE 0
 																	END
-								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+								,[intContractHeaderId]				= RE.intContractHeaderId
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
@@ -712,7 +712,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		END
 																		ELSE 0
 																	END
-								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+								,[intContractHeaderId]				= RE.intContractHeaderId
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
@@ -776,8 +776,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
 																		ELSE 0
 																	END
-								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
-								,[intContractDetailId]				= @intLoadContractId
+								,[intContractHeaderId]				= RE.intContractHeaderId
+								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
@@ -839,7 +839,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * ContractCost.dblRate), 2)
 																		ELSE 0
 																	END
-								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+								,[intContractHeaderId]				= RE.intContractHeaderId
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
