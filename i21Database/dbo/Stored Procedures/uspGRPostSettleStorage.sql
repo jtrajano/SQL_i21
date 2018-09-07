@@ -497,6 +497,12 @@ BEGIN TRY
 					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 				INNER JOIN tblICItem IC 
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
+				GROUP BY SST.intCustomerStorageId
+						,CS.intCompanyLocationId
+						,SC.ysnCusVenPaysFees
+						,SST.dblUnits
+						,CS.dblFeesDue
+						,IC.intItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
