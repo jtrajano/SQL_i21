@@ -7124,6 +7124,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3992.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI4004.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3978.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMTMF32.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
