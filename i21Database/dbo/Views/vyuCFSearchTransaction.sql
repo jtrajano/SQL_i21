@@ -1,7 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
+
 SELECT   
 	cfVehicle.strVehicleNumber
+	,cfVehicle.strVehicleDescription
 	,cfTransaction.intOdometer
 	,cfTransaction.intPumpNumber
 	,cfTransaction.strPONumber
@@ -81,6 +83,15 @@ SELECT
     ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
 	,strItemCategory = cfItem.strCategoryCode           
 	,cfDuplicateUnpostedTransaction.intTotalDuplicateUnposted
+	,cfCard.strCardDepartment
+	,cfCard.strPrimaryDepartment
+	,cfVehicle.strVehicleDepartment
+	,strTransactionDepartment = CASE 
+		WHEN ISNULL(cfCard.strPrimaryDepartment,'') = 'Card' THEN cfCard.strCardDepartment
+		WHEN ISNULL(cfCard.strPrimaryDepartment,'') = 'Vehicle' THEN cfVehicle.strVehicleDepartment
+		ELSE ''
+	END
+
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
@@ -99,7 +110,15 @@ LEFT OUTER JOIN
 			ON cfiSite.intTaxGroupId = TG.intTaxGroupId
 			) AS cfSite 
 	ON cfTransaction.intSiteId = cfSite.intSiteId 
-LEFT OUTER JOIN dbo.tblCFVehicle AS cfVehicle 
+LEFT OUTER JOIN 
+	( SELECT   
+	strVehicleNumber,
+	intVehicleId,
+	strVehicleDescription,
+	ISNULL(cfDept.strDepartment,'') + ' - ' + ISNULL(cfDept.strDepartmentDescription,'') as  strVehicleDepartment 
+	FROM dbo.tblCFVehicle AS cfiVehicle
+	LEFT JOIN tblCFDepartment AS cfDept
+	ON cfiVehicle.intDepartmentId =  cfDept.intDepartmentId ) AS cfVehicle
 	ON cfTransaction.intVehicleId = cfVehicle.intVehicleId 
 LEFT OUTER JOIN(SELECT   
 					cfiItem.intItemId
@@ -136,7 +155,8 @@ LEFT OUTER JOIN (SELECT
 					,cfiCard.strCardNumber
 					,cfiCard.strCardDescription 
 					,PRG.strPriceGroup
-					
+					,cfiAccount.strPrimaryDepartment
+					,ISNULL(cfDept.strDepartment,'') + ' - ' + ISNULL(cfDept.strDepartmentDescription,'') as strCardDepartment
 				 FROM dbo.tblCFAccount AS cfiAccount 
 				 INNER JOIN dbo.tblCFCard AS cfiCard 
 					ON cfiCard.intAccountId = cfiAccount.intAccountId 
@@ -144,6 +164,8 @@ LEFT OUTER JOIN (SELECT
 					ON cfiCustomer.intEntityId = cfiAccount.intCustomerId
 				 LEFT JOIN tblCFPriceRuleGroup AS PRG
 					ON  cfiAccount.intPriceRuleGroup = PRG.intPriceRuleGroupId
+				 LEFT JOIN tblCFDepartment AS cfDept
+					ON cfiCard.intDepartmentId =  cfDept.intDepartmentId
 				) AS cfCard 
 	ON cfTransaction.intCardId = cfCard.intCardId 
 LEFT OUTER JOIN dbo.tblCTContractHeader AS ctContracts 
@@ -180,7 +202,6 @@ LEFT OUTER JOIN (SELECT intTransactionId,
 	OUTER APPLY (
 		SELECT COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0
 	) AS cfDuplicateUnpostedTransaction
-
 
 
 
