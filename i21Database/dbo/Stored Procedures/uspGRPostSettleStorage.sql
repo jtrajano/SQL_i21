@@ -553,7 +553,7 @@ BEGIN TRY
 				JOIN tblSCDeliverySheet DS
 					ON DS.intDeliverySheetId = DSS.intDeliverySheetId
 				LEFT JOIN tblEMEntityLocation EL 
-					ON EL.intEntityId = DSS.intEntityId 
+					ON EL.intEntityId = DS.intEntityId 
 						AND EL.ysnDefaultLocation = 1
 				JOIN tblGRCustomerStorage CS
 					ON DSS.intDeliverySheetId = CS.intDeliverySheetId
