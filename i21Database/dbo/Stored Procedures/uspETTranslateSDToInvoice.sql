@@ -24,6 +24,7 @@ BEGIN
 	DECLARE	@dblQuantity							NUMERIC(18, 6)
 	DECLARE	@dblTotal								NUMERIC(18, 6)
 	DECLARE	@intLineItem							INT
+	DECLARE	@intTaxKey							    INT
 	DECLARE	@dblPrice								NUMERIC(18, 6)
 	DECLARE	@strComment								NVARCHAR(MAX)
 	DECLARE @strDetailType							NVARCHAR(2)
@@ -146,19 +147,24 @@ BEGIN
 			AND dtmDate = @dtmInvoiceDate
 			AND strDetailType = 'D'
 		
+		
+		/*TaxDetail*/
+		------------------------------------------------------------------------------------------------------------------
+		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceTaxDetail')) 
+		BEGIN
+			DROP TABLE #tmpCustomerInvoiceTaxDetail
+		END
+		
+		
+		SELECT *
+		INTO #tmpCustomerInvoiceTaxDetail
+		FROM  #tmpSDToInvoice
+		WHERE strCustomerNumber = @strCustomerNumber
+			AND strInvoiceNumber = @strInvoiceNumber
+			AND dtmDate = @dtmInvoiceDate
+			AND strDetailType <> 'D'
 
-		--IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceTaxDetail')) 
-		--BEGIN
-		--	DROP TABLE #tmpCustomerInvoiceTaxDetail
-		--END
-
-		--SELECT *
-		--INTO #tmpCustomerInvoiceTaxDetail
-		--FROM  #tmpSDToInvoice
-		--WHERE strCustomerNumber = @strCustomerNumber
-		--	AND strInvoiceNumber = @strInvoiceNumber
-		--	AND dtmDate = @dtmInvoiceDate
-		--	AND strDetailType <> 'D'
+		------------------------------------------------------------------------------------------------------------------
 
 		--BEGIN TRANSACTION
 		SET @ysnHeader = 1
@@ -200,6 +206,7 @@ BEGIN
 				,@strContractNumber			  = strContractNumber
 				,@intContractSequence		  = intContractSequence
 				,@strPONumber				  = strPONumber
+				,@intTaxKey				  = intKey
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
 
@@ -356,7 +363,7 @@ BEGIN
 						,@EntitySalespersonId	   = @intDriverEntityId		
 						,@Comment				   = @strComment	
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemTaxGroupId		   = NULL--@intTaxGroupId	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@BOLNumber				   = @strInvoiceNumber
@@ -366,11 +373,12 @@ BEGIN
 						,@InvoiceOriginId         = @strInvoiceNumber
 						,@PONumber				   =@strPONumber
 						,@RefreshPrice = @getARPrice
+						,@RecomputeTax	= 0
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 					SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
-
+					--SELECT * FROM tblARInvoiceDetailTax WHERE intInvoiceDetailId = @intNewInvoiceDetailId
 					--Check if any error in creating invoice 
 					--Log Entry
 					LOGHEADERENTRY:
@@ -385,7 +393,7 @@ BEGIN
 						END
 				END
 			ELSE
-			BEGIN
+				BEGIN
 			ADDITEM:
 				IF ISNULL(@intNewInvoiceId, 0) <> 0
 				BEGIN			
@@ -401,13 +409,13 @@ BEGIN
 						,@ItemPrice                = @dblPrice
 						,@ItemSiteId               = @intSiteId
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemTaxGroupId		   = NULL	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@ItemContractDetailId     = @intContractDetailId
 						,@ItemCurrencyExchangeRateTypeId = NULL            
                         ,@ItemCurrencyExchangeRateId = NULL            
-						,@RecomputeTax			   = 1
+						,@RecomputeTax			   = 0
 						,@RefreshPrice = @getARPrice
 
 				LOGDETAILENTRY:
@@ -421,10 +429,122 @@ BEGIN
 						GOTO CONTINUELOOP
 					END
 			END
+
+			/*Insert Taxes*/
+			------------------------------------
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail)
+			BEGIN
+				--Check for Detail Tax
+				IF(@intLineItem <> 0)
+				BEGIN
+					IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpLineTax')) 
+					BEGIN
+						DROP TABLE #tmpLineTax
+					END
+					
+					--Get Tax detail for the line item
+					SELECT * INTO #tmpLineTax
+					FROM #tmpCustomerInvoiceTaxDetail
+					WHERE (( intKey - 100 ) = @intTaxKey)
+
+					--SELECT * from #tmpLineTax
+
+					
+					WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLineTax)
+					BEGIN
+						SELECT TOP 1 
+							@strCustomerNumberTax			  = strCustomerNumber
+							,@strInvoiceNumberTax			  = strInvoiceNumber
+							,@dtmInvoiceDateTax				  = dtmDate
+							,@intLineItemTax				  = intLineItem
+							,@strSiteNumberTax				  = strSiteNumber	
+							,@strUOMTax						  =	strUOM
+							,@dblUnitPriceTax				  = dblUnitPrice
+							,@strItemDescriptionTax		      = strItemDescription
+							,@dblPercentFullAfterDeliveryTax  = dblPercentFullAfterDelivery
+							,@strLocationTax				  =	strLocation
+							,@strTermCodeTax				  =	strTermCode
+							,@strSalesAccountTax			  =	strSalesAccount
+							,@strItemNumberTax				  =	strItemNumber
+							,@strSalesTaxIdTax				  =	strSalesTaxId
+							,@strDriverNumberTax			  =	strDriverNumber
+							,@strTypeTax					  =	strType
+							,@dblQuantityTax				  =	dblQuantity
+							,@dblTotalTax					  =	dblTotal
+							,@intLineItemTax				  =	intLineItem
+							,@dblPriceTax					  =	dblPrice
+							,@strCommentTax					  =	strComment
+							,@intImportSDToInvoiceIdTax		  = intImportSDToInvoiceId
+							,@strDetailTypeTax				  = strDetailType
+							,@strContractNumberTax			  = strContractNumber
+							,@intTaxCodeId  = intTaxCodeId
+						FROM #tmpLineTax
+						
+						ORDER BY intLineItem ASC
+						
+						----GetTaxcode detail
+						--SET @intTaxCodeId = NULL
+						--SET @intTaxClassId = NULL
+						--SET @intTaxGroupId = NULL
+						
+						SELECT TOP 1 
+							@intTaxCodeId = intTaxCodeId 
+						--	,@intTaxClassId = intTaxClassId
+						FROM tblSMTaxCode 
+						WHERE intTaxCodeId = @intTaxCodeId
+
+						IF (ISNULL(@intTaxCodeId,0) = 0)
+							BEGIN
+								SET @strErrorMessage = 'Tax Code does not Exists!'
+								delete from #tmpLineTax where intImportSDToInvoiceId =  @intImportSDToInvoiceIdTax
+								
+								IF(@ysnHeader = 1)
+								BEGIN
+									GOTO LOGHEADERENTRY
+								END
+								ELSE
+								BEGIN
+									GOTO LOGDETAILENTRY
+								END
+				
+							END
+						ELSE
+							BEGIN
+							EXEC [uspARAddInvoiceTaxDetail]
+								 @InvoiceDetailId		= @intNewInvoiceDetailId
+								,@TaxGroupId			= @intTaxGroupId
+								,@TaxCodeId				= @intTaxCodeId
+								,@TaxClassId			= @intTaxClassId
+								,@AdjustedTax			= @dblTotalTax
+								,@Notes					= @strItemDescriptionTax
+								,@TaxAdjusted		    = 1
+								,@ErrorMessage			= @strErrorMessage OUTPUT
+
+							delete from #tmpLineTax where intImportSDToInvoiceId =  @intImportSDToInvoiceIdTax
+							
+							IF (ISNULL(@strErrorMessage,'') != '')
+							BEGIN
+								IF(@ysnHeader = 1)
+								BEGIN
+									GOTO LOGHEADERENTRY
+								END
+								ELSE
+								BEGIN
+									GOTO LOGDETAILENTRY
+								END
+				
+							END
+						END
+
+						
+					END
+
+				END
+			END
 		
 						
 			BEGIN TRY
-
+			    UPDATE tblARInvoiceDetail SET intTaxGroupId = @intTaxGroupId WHERE intInvoiceDetailId = @intNewInvoiceDetailId --WORKAROUND : AR currently dont have way to set tax group id when doing manual insert of tax details.
 				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 
