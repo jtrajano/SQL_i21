@@ -272,7 +272,7 @@ IF(ISNULL(@Post,0)) = 1
 		INNER JOIN dbo.tblARCustomer  ARC
 				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 		WHERE
-			ARC.dblCreditLimit is null and I.[strTransactionType] != 'Cash'
+			ARC.dblCreditLimit is null and I.[strTransactionType] != 'Cash' and I.[strType] != 'POS'
 			
 
 		INSERT INTO @returntable(

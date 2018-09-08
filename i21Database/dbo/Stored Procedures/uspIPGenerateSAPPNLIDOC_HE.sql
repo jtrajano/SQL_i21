@@ -23,6 +23,7 @@ DECLARE @intStgMatchPnSId INT
 	,@ysnFuture BIT
 	,@strReferenceNo NVARCHAR(MAX)
 	,@strText nvarchar(MAX)
+	,@strMessageCode nvarchar(50)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strStgMatchPnSId NVARCHAR(MAX)
@@ -38,6 +39,8 @@ SELECT @strCompCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'COMP_CODE')
 SELECT @strCostCenter = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'COSTCENTER')
 
 SELECT @strGLAccount = dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS', 'GL_ACCOUNT')
+
+Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
 DECLARE @tblRKStgMatchPnS TABLE (
 	intRecordId INT Identity(1, 1)
@@ -74,10 +77,10 @@ SELECT S.intStgMatchPnSId
 	,S.intMatchNo
 	,S.dtmMatchDate
 	,S.strCurrency
-	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblGrossPnL, 0)
+	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, S.dblNetPnL, 0)
 	,S.dtmPostingDate
 	,L.strLocationName
-	,ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, '') AS strReference
+	,Left('F-'+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, ''),16) AS strReference
 	,1
 	,ISNULL(S.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '')  
 FROM tblRKStgMatchPnS S
@@ -105,7 +108,7 @@ SELECT intStgOptionMatchPnSId
 	,[dbo].[fnCTCalculateAmountBetweenCurrency](C.intCurrencyID, @intToCurrencyId, PS.dblGrossPnL, 0)
 	,dtmPostingDate
 	,strLocationName
-	,ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, '') + '- Option' AS strReference
+	,Left('O-'+ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, ''),16) AS strReference
 	,0
 	,ISNULL(PS.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, PS.intMatchNo), '') 
 FROM tblRKStgOptionMatchPnS PS
@@ -140,6 +143,7 @@ BEGIN
 		--IDOC Header
 		SET @strXml += '<EDI_DC40>'
 		SET @strXml += @strIDOCHeader
+		SET @strXml += '<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 		SET @strXml += '</EDI_DC40>'
 		--Header
 		SET @strXml += '<E1FIKPF>'
@@ -152,7 +156,7 @@ BEGIN
 		--GL account details (Broker account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BUZEI>' + '001' + '</BUZEI>'
-		SET @strXml += '<BSCHL>' + '40' + '</BSCHL>'
+		SET @strXml += '<BSCHL>' + Case When @dblGrossPnL>0 then '40' Else '50' End + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '800' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
@@ -164,7 +168,7 @@ BEGIN
 		--GL account details (TM account)
 		SET @strXml += '<E1FISEG>'
 		SET @strXml += '<BUZEI>' + '002' + '</BUZEI>'
-		SET @strXml += '<BSCHL>' + '50' + '</BSCHL>'
+		SET @strXml += '<BSCHL>' + Case When @dblGrossPnL>0 then '50' Else '40' End + '</BSCHL>'
 		SET @strXml += '<GSBER>' + '899' + '</GSBER>'
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'

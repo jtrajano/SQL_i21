@@ -116,6 +116,8 @@ BEGIN TRY
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	'Import'
 
+	EXEC uspCTCreateDetailHistory NULL, @intContractDetailId
+
 END TRY      
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      

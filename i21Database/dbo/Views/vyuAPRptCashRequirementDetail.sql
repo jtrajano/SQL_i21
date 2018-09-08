@@ -100,7 +100,7 @@ SELECT DISTINCT
 	LEFT JOIN tblSCTicket SC 
 		ON SC.intTicketId = IRI.intSourceId
 	LEFT JOIN tblEMEntityLocation EML
-		ON V.intEntityId = EML.intEntityId and strLocationType = 'Farm'
+		ON V.intEntityId = EML.intEntityId and strLocationType = 'Farm' AND EML.intEntityLocationId = SC.intFarmFieldId
 	OUTER APPLY (
 				SELECT 
 					SUM(dblTotal) AS dblTotal,

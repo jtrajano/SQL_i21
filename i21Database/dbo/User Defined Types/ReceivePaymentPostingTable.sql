@@ -26,6 +26,7 @@
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
+    ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
     ,[strBatchId]                       NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
@@ -34,6 +35,7 @@
     ,[intEntityId]                      INT             NOT NULL
     ,[intUserId]                        INT             NOT NULL
     ,[ysnUserAllowedToPostOtherTrans]   BIT             NULL
+    ,[ysnProcessCreditCard]             BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL

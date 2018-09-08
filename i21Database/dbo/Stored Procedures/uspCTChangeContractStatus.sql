@@ -90,12 +90,12 @@ BEGIN TRY
 				@toValue				= '',
 				@details				= @details 		
 
+		UPDATE tblCTContractDetail SET intContractStatusId = @intContractStatusId WHERE intContractDetailId = @intId
+
 		EXEC	uspCTCreateDetailHistory	NULL, @intId
 
 		SELECT @intId = MIN(intId) FROM @ids WHERE intId > @intId
 	END
-
-	UPDATE tblCTContractDetail SET intContractStatusId = @intContractStatusId WHERE intContractDetailId IN  (SELECT intId FROM @ids)
 
 END TRY
 

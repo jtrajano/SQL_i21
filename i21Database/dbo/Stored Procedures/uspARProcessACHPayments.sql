@@ -94,7 +94,10 @@ INSERT INTO @BankTransaction (
 	, [dtmDate]
 	, [dblAmount]
 	, [strMemo]			
-	, [intCompanyLocationId])
+	, [intCompanyLocationId]
+	, [intEntityId]
+	, [intCreatedUserId]
+	, [intLastModifiedUserId])
 SELECT 
 	 [intBankAccountId]				= UF.intBankAccountId
 	,[strTransactionId]				= 'temp'
@@ -104,6 +107,9 @@ SELECT
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
 	,[intCompanyLocationId]			= UF.intLocationId
+	,[intEntityId]					= ISNULL(@intUserId, UF.intLastModifiedUserId)
+	,[intCreatedUserId]				= ISNULL(@intUserId, UF.intLastModifiedUserId)
+	,[intLastModifiedUserId]		= ISNULL(@intUserId, UF.intLastModifiedUserId)
 FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 CROSS APPLY (
 	SELECT TOP 1 * FROM @tblACHPayments
@@ -114,10 +120,34 @@ GROUP BY UF.intBankAccountId
 	   , P.dtmDatePaid
 	   , UF.intLocationId
 	   , P.ysnVendorRefund
-	   
+	   , UF.intLastModifiedUserId
 --PaymentDup
-INSERT INTO @BankTransactionDup([intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo], [intCompanyLocationId]) 
-SELECT [intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo]	, [intCompanyLocationId] FROM @BankTransaction
+INSERT INTO @BankTransactionDup(
+	  [intBankAccountId]
+	, [strTransactionId]
+	, [intCurrencyId]
+	, [intBankTransactionTypeId] 
+	, [dtmDate]
+	, [dblAmount]
+	, [strMemo]
+	, [intCompanyLocationId]
+	, [intEntityId]
+	, [intCreatedUserId]
+	, [intLastModifiedUserId]) 
+SELECT 
+	[intBankAccountId]
+	, [strTransactionId]
+	, [intCurrencyId]
+	, [intBankTransactionTypeId] 
+	, [dtmDate], [dblAmount]
+	, [strMemo]	
+	, [intCompanyLocationId] 
+	, [intEntityId]
+	, [intCreatedUserId]
+	, [intLastModifiedUserId]
+FROM @BankTransaction
+
+
 
 DECLARE @DupBankId		INT
 	  , @DupCurrency	INT
@@ -155,8 +185,30 @@ BEGIN
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
 	
 	--Payment Current
-	INSERT INTO @BankTransactionCur([intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId], [dtmDate], [dblAmount], [strMemo], [intCompanyLocationId]) 
-	SELECT [intBankAccountId], @strTransactionId, [intCurrencyId], [intBankTransactionTypeId], [dtmDate], [dblAmount], [strMemo], [intCompanyLocationId] 
+	INSERT INTO @BankTransactionCur(
+			[intBankAccountId]
+			, [strTransactionId]
+			, [intCurrencyId]
+			, [intBankTransactionTypeId]
+			, [dtmDate]
+			, [dblAmount]
+			, [strMemo]
+			, [intCompanyLocationId] 
+			, [intEntityId]
+			, [intCreatedUserId]
+			, [intLastModifiedUserId]) 
+	SELECT 
+		[intBankAccountId]
+		, @strTransactionId
+		, [intCurrencyId]
+		, [intBankTransactionTypeId]
+		, [dtmDate]
+		, [dblAmount]
+		, [strMemo]
+		, [intCompanyLocationId] 
+		, [intEntityId]
+		, [intCreatedUserId]
+		, [intLastModifiedUserId]
 	FROM @BankTransaction 
 	WHERE [intBankAccountId] = @DupBankId 
 	  AND [intCurrencyId] = @DupCurrency

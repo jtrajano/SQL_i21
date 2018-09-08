@@ -1,4 +1,4 @@
-﻿CREATE  VIEW [dbo].[vyuRKMatchedPSTransaction]
+﻿CREATE VIEW [dbo].[vyuRKMatchedPSTransaction]
 
 AS
 SELECT 
@@ -26,6 +26,7 @@ SELECT
 	,intCent
 	,ysnSubCurrency
 	,isnull((dblGrossPL + dblFutCommission),0.0)  AS dblNetPL 
+	,dtmLFilledDate,dtmSFilledDate
 FROM
 	(SELECT 
 		((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL
@@ -41,6 +42,8 @@ FROM
 		,ot1.intFutOptTransactionHeaderId as intSFutOptTransactionHeaderId
 		,ot.dtmTransactionDate dtmLTransDate
 		,ot1.dtmTransactionDate dtmSTransDate
+		,ot.dtmFilledDate dtmLFilledDate
+		,ot1.dtmFilledDate dtmSFilledDate
 		,isnull(ot.dblPrice,0) dblLPrice
 		,isnull(ot1.dblPrice,0) dblSPrice
 		,ot.strInternalTradeNo strLInternalTradeNo

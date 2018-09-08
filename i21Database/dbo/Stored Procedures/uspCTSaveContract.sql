@@ -111,6 +111,17 @@ BEGIN TRY
 	WHERE	IU.intItemId			<>	CD.intItemId	
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
+	UPDATE	CD 
+	SET		CD.intBasisUOMId		=	CU.intItemUOMId
+	FROM	tblCTContractDetail CD
+	JOIN	tblICItemUOM		IU		ON	IU.intItemUOMId			=	CD.intBasisUOMId
+	JOIN	tblICUnitMeasure	BU		ON	BU.intUnitMeasureId		=	IU.intUnitMeasureId
+	JOIN	tblICUnitMeasure	UM		ON	UM.strUnitMeasure		=	BU.strUnitMeasure
+	JOIN	tblICItemUOM		CU		ON	CU.intItemId			=	CD.intItemId 
+										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
+	WHERE	IU.intItemId			<>	CD.intItemId
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
 	--End Correct if UOM are wrong
 
 	--Other safety Checks--

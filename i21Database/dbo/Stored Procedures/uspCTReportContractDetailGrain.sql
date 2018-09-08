@@ -77,7 +77,10 @@ BEGIN TRY
 			,strRemark					 = NULL
 			,strDetailUnitMeasure		 = strItemUOM
 			,strPriceUOMWithCurrency	 = strPriceUOM + ' ' + strCurrency
-			,strCommodityCode			 = strCommodityCode
+			,strCommodityCode			 = CASE	
+											WHEN ISNULL(DV.strCommodityCode,'') < > ISNULL(DV.strCommodityDescription,'') THEN DV.strCommodityCode +' - '+ DV.strCommodityDescription										
+											ELSE DV.strCommodityCode
+							               END	
 			,strTerm					 = strTerm
 			FROM	vyuCTContractDetailView DV
 			WHERE	intContractDetailId	=	@intContractDetailId
@@ -128,20 +131,24 @@ BEGIN TRY
 										WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
 										WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
 							          END
-			,strCommodityCode		 = CY.strCommodityCode
+			,strCommodityCode		 = CASE	
+											WHEN ISNULL(CY.strCommodityCode,'') < > ISNULL(CY.strDescription,'') THEN CY.strCommodityCode +' - '+ CY.strDescription										
+											ELSE CY.strCommodityCode
+							          END			
 			,strTerm				 = NULL
-			FROM tblCTContractCost   CC
-			JOIN tblCTContractDetail CD        ON CD.intContractDetailId = CC.intContractDetailId
-			JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
-			JOIN    tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId
-			JOIN tblICItem			 Item      ON Item.intItemId = CC.intItemId
-			LEFT JOIN tblSMCurrency       Currency  ON Currency.intCurrencyID = CC.intCurrencyId
-			JOIN tblICItemUOM		 UOM	   ON UOM.intItemUOMId = CC.intItemUOMId
-			JOIN tblICUnitMeasure	 UM        ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-			LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
-			LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	UOM.intUnitMeasureId AND CM.intItemId =	CD.intItemId 
-			
+			FROM		tblCTContractCost			CC
+			JOIN		tblCTContractDetail			CD	      ON CD.intContractDetailId  = CC.intContractDetailId
+			JOIN		tblSMCompanyLocation		CL	      ON CL.intCompanyLocationId = CD.intCompanyLocationId
+			JOIN		tblCTContractHeader			CH        ON CH.intContractHeaderId  = CD.intContractHeaderId
+			JOIN		tblICCommodity				CY	      ON CY.intCommodityId		 = CH.intCommodityId
+			JOIN		tblICItem				    Item      ON Item.intItemId			 = CC.intItemId
+			JOIN		tblICItemUOM				UOM	      ON UOM.intItemUOMId		 = CC.intItemUOMId
+			JOIN		tblICUnitMeasure			UM        ON UM.intUnitMeasureId	 = UOM.intUnitMeasureId
+			LEFT JOIN   tblSMCurrency				Currency  ON Currency.intCurrencyID  = CC.intCurrencyId
+			LEFT JOIN	tblICItemUOM				QU        ON QU.intItemUOMId		 = CD.intItemUOMId	
+			LEFT JOIN	tblICItemUOM				CM        ON CM.intUnitMeasureId	 = UOM.intUnitMeasureId 
+															 AND CM.intItemId =	CD.intItemId 
+															 			
 			WHERE CD.intContractDetailId	=	@intContractDetailId AND CC.ysnPrice = 1
 
 			UPDATE tbl 

@@ -205,7 +205,8 @@ BEGIN TRY
 					,[dblSubCurrencyRate]
 					,[strVFDDocumentNumber]
 					,[intCurrencyExchangeRateTypeId]
-					,[dblCurrencyExchangeRate])
+					,[dblCurrencyExchangeRate]
+					,intSubLocationId)
 				SELECT 
 					@NewTransactionId
 					,[intItemId]
@@ -248,6 +249,7 @@ BEGIN TRY
 					,[strVFDDocumentNumber]
 					,[intCurrencyExchangeRateTypeId]
 					,[dblCurrencyExchangeRate]
+					,intSubLocationId
 				FROM tblSOSalesOrderDetail		
 				WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

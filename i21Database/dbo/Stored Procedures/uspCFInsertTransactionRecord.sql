@@ -1535,6 +1535,7 @@ BEGIN
 		,@TaxValue8						=	@TaxValue8	
 		,@TaxValue9						=	@TaxValue9	
 		,@TaxValue10					=	@TaxValue10
+		,@ForeignCardId					=   @strCardId
 
 
 		DECLARE @dblGrossTransferCost	NUMERIC(18,6)	

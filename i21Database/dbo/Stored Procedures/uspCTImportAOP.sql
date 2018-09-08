@@ -49,12 +49,17 @@ BEGIN TRY
     )
 
     UPDATE  B
-    SET	  B.intAOPId  =   A.intAOPId
-    FROM	  tblCTAOP	   A
-    JOIN	  tblCTImportAOP  B   ON  A.strYear	  =	  B.strYear 
-						  AND A.dtmFromDate	  =	  B.dtmFromDate
-						  AND A.dtmToDate	  =	  B.dtmToDate
+    SET		B.intAOPId  =   A.intAOPId
+    FROM	tblCTAOP				A
+	JOIN	tblICCommodity			C	ON	C.intCommodityId		=	A.intCommodityId
+	JOIN	tblSMCompanyLocation	L	ON  L.intCompanyLocationId  =	A.intCompanyLocationId
+    JOIN	tblCTImportAOP			B   ON  A.strYear				=	B.strYear 
+										AND A.dtmFromDate			=	B.dtmFromDate
+										AND A.dtmToDate				=	B.dtmToDate
+										
     WHERE	ISNULL(ysnImported,0)	=	0
+	AND		B.strCommodity			=	C.strCommodityCode
+	AND		B.strCompanyLocation	=	L.strLocationName	
 
 	UPDATE	B 
 	SET		B.dblComponent1 = ISNULL(dblComponent1,0),
@@ -183,13 +188,13 @@ BEGIN TRY
     IF @intAOPId IS NULL
     BEGIN
 
-	   INSERT INTO tblCTAOP(strYear,dtmFromDate,dtmToDate,intBookId,intSubBookId,intConcurrencyId)
-	   SELECT @strYear,@dtmFromDate,@dtmToDate,@intBookId,@intSubBookId,1
+	   INSERT INTO tblCTAOP(strYear,dtmFromDate,dtmToDate,intBookId,intSubBookId,intConcurrencyId,intCommodityId,intCompanyLocationId)
+	   SELECT @strYear,@dtmFromDate,@dtmToDate,@intBookId,@intSubBookId,1,@intCommodityId,@intCompanyLocationId
 
 	   SELECT @intAOPId = SCOPE_IDENTITY()
 
-	   INSERT INTO tblCTAOPDetail(intAOPId,intCommodityId,intCompanyLocationId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
-	   SELECT @intAOPId,@intCommodityId,@intCompanyLocationId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
+	   INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
+	   SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
 	   FROM @Detail M
 	   WHERE intAOPDetailId	 IS NULL
     END
@@ -201,8 +206,8 @@ BEGIN TRY
 	   JOIN tblCTAOPDetail AD ON AD.intAOPDetailId = D.intAOPDetailId
 	   WHERE D.intAOPDetailId IS NOT NULL
 
-	   INSERT INTO tblCTAOPDetail(intAOPId,intCommodityId,intCompanyLocationId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
-	   SELECT @intAOPId,@intCommodityId,@intCompanyLocationId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
+	   INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
+	   SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
 	   FROM @Detail M
 	   WHERE intAOPDetailId	 IS NULL
     END

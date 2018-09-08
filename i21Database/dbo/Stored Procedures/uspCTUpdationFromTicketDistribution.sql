@@ -36,7 +36,8 @@ BEGIN TRY
 			@dtmEndDate				DATETIME,
 			@intContractTypeId		INT,
 			@intCommodityId			INT,
-			@strSeqMonth			NVARCHAR(50)
+			@strSeqMonth			NVARCHAR(50),
+			@UseScheduleForAvlCalc	BIT = 1
 
 	DECLARE @Processed TABLE
 	(
@@ -48,6 +49,7 @@ BEGIN TRY
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
+	SELECT  @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 	IF @ysnDeliverySheet = 0
 		BEGIN
@@ -212,7 +214,10 @@ BEGIN TRY
 											THEN	ISNULL(dblSeqFutures,0)
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
-				@dblAvailable	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)),
+				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 
+											THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
+											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
+									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId
 		FROM	tblCTContractDetail CD

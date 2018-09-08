@@ -84,5 +84,6 @@
 	,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemError_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 	,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemError_dtmTransactionDate] DEFAULT((getdate()))
 	,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,ysnMailSent BIT DEFAULT 0
 	,CONSTRAINT [PK_tblIPItemError_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )

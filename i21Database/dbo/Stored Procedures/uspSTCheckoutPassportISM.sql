@@ -5,6 +5,9 @@
 AS
 BEGIN
 	BEGIN TRY
+		
+		DECLARE @intStoreId INT, @strAllowRegisterMarkUpDown NVARCHAR(50), @intShiftNo INT, @intMarkUpDownId INT
+		SELECT @intStoreId = intStoreId, @intShiftNo = intShiftNo FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
 
 		--------------------------------------------------------------------------------------------  
 		-- Create Save Point.  
@@ -18,8 +21,63 @@ BEGIN
 		-------------------------------------------------------------------------------------------- 
 
 
-		DECLARE @intStoreId INT, @strAllowRegisterMarkUpDown NVARCHAR(50), @intShiftNo INT, @intMarkUpDownId INT
-		SELECT @intStoreId = intStoreId, @intShiftNo = intShiftNo FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
+
+
+		-- ================================================================================================================== 
+		-- Get Error logs. Check Register XML that is not configured in i21
+		-- Compare <POSCode> tag of (RegisterXML) and (Inventory->Item->strUpcCode, strLongUPCCode)
+		-- ------------------------------------------------------------------------------------------------------------------ 
+		INSERT INTO tblSTCheckoutErrorLogs 
+		(
+			strErrorMessage 
+			, strRegisterTag
+			, strRegisterTagValue
+			, intCheckoutId
+			, intConcurrencyId
+		)
+		SELECT DISTINCT
+			'No Matching UPC/Item in Inventory' as strErrorMessage
+			, 'POSCode' as strRegisterTag
+			, ISNULL(Chk.POSCode, '') AS strRegisterTagValue
+			, @intCheckoutId
+			, 1
+		FROM #tempCheckoutInsert Chk
+		WHERE ISNULL(Chk.POSCode, '') NOT IN
+		(
+			SELECT DISTINCT 
+				tbl.strXmlRegisterPOSCode
+			FROM
+			(
+				SELECT DISTINCT
+					Chk.POSCode AS strXmlRegisterPOSCode
+				FROM #tempCheckoutInsert Chk
+				JOIN dbo.tblICItemUOM UOM 
+					ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, ''))
+				JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				JOIN dbo.tblICItemPricing P 
+					ON IL.intItemLocationId = P.intItemLocationId 
+					AND I.intItemId = P.intItemId
+				JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.POSCode, '') != ''
+			) AS tbl
+		)
+		AND ISNULL(Chk.POSCode, '') != ''
+		-- ------------------------------------------------------------------------------------------------------------------  
+		-- END Get Error logs. Check Register XML that is not configured in i21.  
+		-- ==================================================================================================================
+
+
+
+
+
+		
 
 		DECLARE @intLocationId AS INT = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
 

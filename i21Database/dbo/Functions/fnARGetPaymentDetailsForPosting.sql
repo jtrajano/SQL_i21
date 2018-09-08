@@ -37,6 +37,7 @@ RETURNS @returntable TABLE
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
+    ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
     ,[strBatchId]                       NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
@@ -45,6 +46,7 @@ RETURNS @returntable TABLE
     ,[intEntityId]                      INT             NOT NULL
     ,[intUserId]                        INT             NOT NULL
     ,[ysnUserAllowedToPostOtherTrans]   BIT             NULL
+    ,[ysnProcessCreditCard]             BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
@@ -608,6 +610,7 @@ INSERT @Header
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
     ,[strBatchId]
@@ -616,6 +619,7 @@ INSERT @Header
     ,[intEntityId]
     ,[intUserId]
     ,[ysnUserAllowedToPostOtherTrans]
+    ,[ysnProcessCreditCard]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -689,6 +693,7 @@ SELECT
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
     ,[intGainLossAccount]               = @GainLossAccount
+    ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
     ,[strBatchId]                       = @BatchId
@@ -697,6 +702,7 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+    ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
@@ -788,6 +794,7 @@ INSERT @Detail
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
     ,[strBatchId]
@@ -796,6 +803,7 @@ INSERT @Detail
     ,[intEntityId]
     ,[intUserId]
     ,[ysnUserAllowedToPostOtherTrans]
+    ,[ysnProcessCreditCard]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -860,6 +868,7 @@ SELECT
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+    ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
     ,[strBatchId]                       = @BatchId
@@ -868,6 +877,7 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+    ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
@@ -949,6 +959,7 @@ SELECT
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+    ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
     ,[strBatchId]                       = @BatchId
@@ -957,6 +968,7 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
+    ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]

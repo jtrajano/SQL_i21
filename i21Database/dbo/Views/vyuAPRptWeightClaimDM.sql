@@ -125,7 +125,7 @@ FROM
 												AND ContractDetail.intItemContractId > 0
 												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
-										ELSE ISNULL(Item.strDescription,'')
+										ELSE ISNULL(Item.strDescription,DMDetails.strMiscDescription)
 									END
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	Receipt.strBillOfLading

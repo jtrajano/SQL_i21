@@ -1338,6 +1338,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'POS End Of Day')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 138
+			,[strTransactionType]	= N'Shift Number'
+			,[strPrefix]			= N'SN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Mobile Billing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Shift Number')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
@@ -1347,7 +1357,11 @@ GO
 	UPDATE tblSMStartingNumber
 	SET intNumber = x.intNumber,
 	strPrefix = x.strPrefix,
-	ysnUseLocation = x.ysnUseLocation
+	intDigits = x.intDigits,
+	ysnUseLocation = x.ysnUseLocation,
+	ysnResetNumber = x.ysnResetNumber,
+	dtmResetDate = x.dtmResetDate,
+	ysnEnable = x.ysnEnable
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO

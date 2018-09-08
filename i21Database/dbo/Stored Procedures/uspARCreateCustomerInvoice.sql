@@ -325,6 +325,11 @@ ELSE
 IF @TransactionType = 'Credit Memo'
 	SET @ImpactInventory = 1
 
+IF @ItemDescription like 'Washout net diff: Original Contract%' and @TransactionType = 'Credit Memo'
+BEGIN
+	SET @ImpactInventory = 0
+END
+
 IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1

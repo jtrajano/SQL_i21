@@ -114,7 +114,7 @@ SELECT
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 	FROM tblSOSalesOrder SO
-		JOIN ( SELECT	intEntityId,			strCustomerNumber,
+		LEFT JOIN ( SELECT	intEntityId,			strCustomerNumber,
 						intEntityContactId,		strName,
 						dblCreditLimit,			dblARBalance,
 						ysnPORequired,			intEntityLineOfBusinessIds,

@@ -13,6 +13,11 @@ BEGIN TRY
 		,@strSubBook NVARCHAR(100)
 		,@strLocationName NVARCHAR(100)
 		,@strFutMarketName NVARCHAR(100)
+	declare @intMatchFuturesPSHeaderId int
+
+	select top 1 @intMatchFuturesPSHeaderId=intMatchFuturesPSHeaderId from tblRKMatchFuturesPSHeader where intMatchNo=@intMatchNo
+	
+	select @dblGrossPL=sum(dblGrossPL) ,@dblNetPnL=sum(dblNetPL) from vyuRKMatchedPSTransaction where intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
 	SELECT TOP 1 @strUserName = strExternalERPId
 	FROM tblEMEntity
@@ -32,7 +37,7 @@ BEGIN TRY
 	JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = h.intCompanyLocationId
 	LEFT JOIN tblCTBook b ON b.intBookId = h.intBookId
 	LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = h.intSubBookId
-	WHERE intMatchNo = @intMatchNo
+	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
 	IF EXISTS (
 			SELECT *

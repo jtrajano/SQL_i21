@@ -85,7 +85,7 @@ SELECT Lot.intLotId
        , EY.strName as strVendor 
        , L.strLoadNumber
        , L.dtmPostedDate
-       , Receipt.strWarehouseRefNo
+       , ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo) AS strWarehouseRefNo
 	   , CTDetail.dblFutures
 	   , CTDetail.dblBasis
 	   , CTDetail.dblCashPrice
@@ -103,12 +103,13 @@ SELECT Lot.intLotId
 	   ,C.strCurrency AS strDefaultCurrency
 	   ,UM.intUnitMeasureId AS intDefaultUOMId
 	   ,UM.strUnitMeasure AS strDefaultUOM
+	   ,IU.intItemUOMId AS intDefaultItemUOMId
 	   , '' COLLATE Latin1_General_CI_AS AS strCropYear 
 	   , '' COLLATE Latin1_General_CI_AS AS strProducer 
 	   , '' COLLATE Latin1_General_CI_AS AS strCertification  
 	   , '' COLLATE Latin1_General_CI_AS AS strCertificationId 
 FROM tblICLot Lot
-LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
+LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 

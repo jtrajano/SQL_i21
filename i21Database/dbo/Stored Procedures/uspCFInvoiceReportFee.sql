@@ -849,7 +849,7 @@ BEGIN
 											 WHEN cffee.strCalculationType = 'Flat' 
 											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
-											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthly' AND @ysnInvoiceMonthyFee = 1)
 											 )
 												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
 											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
@@ -873,7 +873,7 @@ BEGIN
 											 WHEN cffee.strCalculationType = 'Flat' 
 											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
-											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthly' AND @ysnInvoiceMonthyFee = 1)
 											 )
 												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
 											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
@@ -897,7 +897,7 @@ BEGIN
 											 WHEN cffee.strCalculationType = 'Flat' 
 											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
-											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthly' AND @ysnInvoiceMonthyFee = 1)
 											 )
 												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
 											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)

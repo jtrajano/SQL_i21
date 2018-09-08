@@ -241,7 +241,7 @@ SELECT --IS decressing the Unpaid Balance and Company Owned
 	,dblInQty as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
-	,intInventoryShipmentItemId
+	,intReceiptId
 FROM (
 	SELECT 
 		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate

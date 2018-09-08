@@ -37,7 +37,6 @@ DECLARE @dtmDateTo						DATETIME
 	  , @endgroup						NVARCHAR(50)
 	  , @datatype						NVARCHAR(50)
 	  , @strSourceTransaction			NVARCHAR(100)
-	  , @strAgedBalances				NVARCHAR(100)
 	  , @ysnPrintOnlyOverCreditLimit	BIT
 	
 -- Create a table variable to hold the XML data. 		
@@ -111,10 +110,6 @@ SELECT  @strSourceTransaction = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSourceTransaction'
 
-SELECT	@strAgedBalances = ISNULL([from], 'All')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAgedBalances'
-
 SELECT	@ysnPrintOnlyOverCreditLimit = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
@@ -151,24 +146,47 @@ DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2
 											 AND intEntityUserId = @intEntityUserId
 											 AND strAgingType = 'Summary'
 
-IF @strAgedBalances = 'Current'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl0Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
+BEGIN
+    DROP TABLE #AGEDBALANCES
 END
-ELSE IF @strAgedBalances = '1-10 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl10Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-END
-ELSE IF @strAgedBalances = '11-30 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl30Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-END
-ELSE IF @strAgedBalances = '31-60 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl60Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-END
-ELSE IF @strAgedBalances = '61-90 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl90Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-END
-ELSE IF @strAgedBalances = 'Over 90 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl91Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-END
+
+SELECT strAgedBalances = ISNULL([from], 'All')
+INTO #AGEDBALANCES
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strAgedBalances'
+
+IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
+	BEGIN
+		UPDATE tblARCustomerAgingStagingTable 
+		SET dbl0Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current') THEN ISNULL(dbl0Days, 0) ELSE 0 END
+		  , dbl10Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days') THEN ISNULL(dbl10Days, 0) ELSE 0 END
+		  , dbl30Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days') THEN ISNULL(dbl30Days, 0) ELSE 0 END
+		  , dbl60Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days') THEN ISNULL(dbl60Days, 0) ELSE 0 END
+		  , dbl90Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days') THEN ISNULL(dbl90Days, 0) ELSE 0 END
+		  , dbl91Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days') THEN ISNULL(dbl91Days, 0) ELSE 0 END
+		WHERE intEntityUserId = @intEntityUserId 
+		AND strAgingType = 'Summary'
+
+		UPDATE tblARCustomerAgingStagingTable 
+		SET dblTotalAR = (ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblPrepayments, 0) + ISNULL(dblCredits, 0)
+		WHERE intEntityUserId = @intEntityUserId 
+		  AND strAgingType = 'Summary'
+
+		UPDATE GL
+		SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)
+		  , GL.dblTotalReportBalance 	= ISNULL(AGING.dblTotalAR, 0) + ISNULL(AGING.dblTotalPrepayments, 0)
+		FROM tblARGLSummaryStagingTable GL
+		OUTER APPLY (
+			SELECT dblTotalAR 			= SUM((ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblCredits, 0))
+				 , dblTotalPrepayments 	= SUM(ISNULL(dblPrepayments, 0))
+			FROM dbo.tblARCustomerAgingStagingTable
+			WHERE intEntityUserId = @intEntityUserId 
+		  	  AND strAgingType = 'Summary'
+		) AGING
+		WHERE intEntityUserId = @intEntityUserId 
+	END
+
 
 IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 	BEGIN

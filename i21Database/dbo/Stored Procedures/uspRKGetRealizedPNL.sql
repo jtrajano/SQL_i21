@@ -316,7 +316,7 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
 		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
-		,dblContractInvoiceValue					= (BillDetail.dblTotal)*
+		,dblContractInvoiceValue					= (BillDetail.dblTotal * ISNULL(BillDetail.dblRate,1)) *
 													  (InvoiceDetail.dblQtyShipped
 													  /dbo.fnCTConvertQuantityToTargetItemUOM(BillDetail.intItemId,BillUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,BillDetail.dblQtyReceived))
 		
@@ -423,7 +423,7 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		LEFT JOIN	tblSMCountry				CO				 ON	CO.intCountryID					=	CT.intCountryId
 		LEFT JOIN (SELECT  
 					  BillDetail.intContractDetailId
-					,SUM( BillDetail.dblTotal) dblTotal
+					,SUM( BillDetail.dblTotal * ISNULL(BillDetail.dblRate,1)) dblTotal
 					FROM tblAPBillDetail BillDetail
 					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
 					WHERE Item.strType='Other Charge'
@@ -593,7 +593,7 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		LEFT JOIN	tblSMCountry				CO				 ON	CO.intCountryID					=	CT.intCountryId
 		LEFT JOIN (SELECT  
 					  BillDetail.intContractDetailId
-					,SUM( BillDetail.dblTotal) dblTotal
+					,SUM( BillDetail.dblTotal * ISNULL(BillDetail.dblRate,1)) dblTotal
 					FROM tblAPBillDetail BillDetail
 					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
 					WHERE Item.strType='Other Charge'

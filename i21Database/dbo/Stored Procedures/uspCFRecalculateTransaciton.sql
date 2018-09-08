@@ -71,6 +71,7 @@
 ,@ItemId							INT				= 0
 ,@QuoteTaxExemption					BIT				= 1
 ,@ProcessType						NVARCHAR(MAX)   = 'invoice'
+,@ForeignCardId						NVARCHAR(MAX)   = ''
 	
 AS
 
@@ -5648,16 +5649,38 @@ BEGIN
 	DECLARE @ysnInvalid	BIT = 0
 	DECLARE @intParentId INT = 0
 
-	SELECT @intDupTransCount = COUNT(*)
-	FROM tblCFTransaction
-	WHERE intNetworkId = @intNetworkId
-	AND intSiteId = @intSiteId
-	AND dtmTransactionDate = @dtmTransactionDate
-	AND intCardId = @intCardId
-	AND intProductId = @ProductId
-	AND intPumpNumber = @PumpId
-	AND intTransactionId != @intTransactionId
-	AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	IF (@strTransactionType != 'Foreign Sale')
+	BEGIN
+		SELECT @intDupTransCount = COUNT(*)
+		FROM tblCFTransaction
+		WHERE intNetworkId = @intNetworkId
+		AND intSiteId = @intSiteId
+		AND dtmTransactionDate = @dtmTransactionDate
+		AND intCardId = @intCardId
+		AND intProductId = @ProductId
+		AND intPumpNumber = @PumpId
+		AND intTransactionId != @intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	END
+	ELSE
+	BEGIN
+		IF(ISNULL(@ForeignCardId,'') = '' AND ISNULL(@intTransactionId,0) != 0)
+		BEGIN
+			SELECT TOP 1 @ForeignCardId = strForeignCardId FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+			
+		END
+
+		SELECT @intDupTransCount = COUNT(*)
+		FROM tblCFTransaction
+		WHERE intNetworkId = @intNetworkId
+		AND intSiteId = @intSiteId
+		AND dtmTransactionDate = @dtmTransactionDate
+		AND ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'')
+		AND intProductId = @ProductId
+		AND intPumpNumber = @PumpId
+		AND intTransactionId != @intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	END
 
 	SELECT TOP 1 @intParentId = intOverFilledTransactionId 
 	FROM tblCFTransaction 

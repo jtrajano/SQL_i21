@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspMBILBuildOrder]
-	@intShiftId AS INT
+	@intDriverId		AS INT,
+	@intShiftId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,7 +8,14 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
-DELETE tblMBILOrder WHERE intShiftId = @intShiftId
+IF (ISNULL(@intShiftId, '') != '')
+BEGIN
+	DELETE tblMBILOrder WHERE intShiftId = @intShiftId
+END
+ELSE
+BEGIN
+	DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+END
 
 SELECT intDispatchId = Dispatch.intDispatchID
 	, strOrderNumber = Dispatch.strOrderNumber
@@ -66,7 +74,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intShiftId = @intShiftId AND strOrderStatus = 'Open'
+WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
@@ -83,7 +91,7 @@ SELECT [Order].intOrderId
 	, #Dispatch.[dblPrice]
 FROM #Dispatch
 LEFT JOIN vyuMBILOrder [Order] ON #Dispatch.intDispatchId = [Order].intDispatchId
-WHERE [Order].intShiftId = @intShiftId
+WHERE [Order].intDriverId = @intDriverId
 
 
 -- ++++++ ITEM TAX CODE PROCESS ++++++ --
@@ -97,7 +105,7 @@ FROM (
 		, B.intSiteId
 	FROM tblMBILOrder A
 	LEFT JOIN tblMBILOrderItem B ON A.intOrderId = B.intOrderId
-	WHERE A.intShiftId = @intShiftId) tblOrder
+	WHERE A.intDriverId = @intDriverId) tblOrder
 
 
 DECLARE  @MBILOrderId					INT				= NULL
@@ -274,9 +282,3 @@ BEGIN
 	DELETE #tempOrderTaxCode
 	DELETE #tempDriverOrder WHERE intOrderItemId = @MBILOrderId
 END
-
---=====================================================================================================================================
--- 	SCRIPT EXECUTION 
----------------------------------------------------------------------------------------------------------------------------------------
-
---EXEC [dbo].[uspMBILBuildOrder] 125

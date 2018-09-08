@@ -65,7 +65,7 @@ from gacommst oc
 join tblICCommodity ic on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICUnitMeasure iu on upper(iu.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(oc.gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
 where upper(rtrim(oc.gacom_un_desc)) <> 'LB'
- AND NOT EXISTS (select * from tblICCommodityUnitMeasure where intCommodityId = ic.intCommodityId and intUnitMeasureId = iu.intUnitMeasureId)
+ AND NOT EXISTS (select * from tblICCommodityUnitMeasure where intCommodityId = ic.intCommodityId and intUnitMeasureId = (select top 1 intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'lb'))
 
 
 ----====================================STEP 4======================================

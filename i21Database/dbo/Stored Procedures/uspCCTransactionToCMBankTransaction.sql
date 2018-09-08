@@ -45,6 +45,7 @@ BEGIN
 		,[intBankTransactionTypeId] 
 		,[dtmDate]
 		,[strMemo]
+		,[intEntityId]
 		,[intCompanyLocationId])
 	SELECT 
 		[intBankAccountId] = ccSiteHeader.intBankAccountId
@@ -53,6 +54,7 @@ BEGIN
 		,[intBankTransactionTypeId]  = 5
 		,[dtmDate] = ccSiteHeader.dtmDate
 		,[strMemo] = ccSiteHeader.strCcdReference
+		,[intEntityId] = @userId
 		,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
 	FROM tblCCSiteHeader ccSiteHeader
 	INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
@@ -67,14 +69,16 @@ BEGIN
 		,[intGLAccountId] 
 		,[strDescription]
 		,[dblDebit]
-		,[dblCredit])
+		,[dblCredit]
+		,[intEntityId])
 	SELECT 
 		[intTransactionId] = 0,
 		[dtmDate] = dtmDate,
 		intBankAccountId,
 		[strDescription] = strItem, 
 		[dblDebit] = SUM(ISNULL(dblDebit,0)),
-		[dblCredit] = SUM(ISNULL(dblCredit,0))
+		[dblCredit] = SUM(ISNULL(dblCredit,0)),
+		[intEntityId] = @userId
 	FROM (
 	SELECT ccSiteHeader.intSiteHeaderId
 	    ,ccSiteHeader.dtmDate

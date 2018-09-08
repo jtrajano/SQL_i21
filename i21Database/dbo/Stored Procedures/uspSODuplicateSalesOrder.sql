@@ -234,6 +234,7 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
+					,intSubLocationId
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -280,6 +281,7 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
+				   ,intSubLocationId
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

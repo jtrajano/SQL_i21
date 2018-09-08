@@ -156,8 +156,8 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 0 THEN 1
 									  WHEN LI.ysnIsStorage = 1 THEN 2
 									  END
-		,dblQuantity				= LI.dblQty
-		,intPriceUOMId				= LI.intItemUOMId
+		,dblQuantity				= CASE WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, LI.dblQty) ELSE LI.dblQty END
+		,intPriceUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
 		,dblUnitPrice				= CASE
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
 										(
@@ -166,29 +166,48 @@ BEGIN
 											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
 										)
 										ELSE
-											CASE 
-												WHEN CNT.ysnUseFXPrice = 1 
-													AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-													AND CNT.dblRate IS NOT NULL 
-													AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN CNT.dblSeqPrice
-												ELSE LI.dblCost
-											END 
-											* -- AD.dblQtyToPriceUOMConvFactor
-											CASE 
-												WHEN CNT.ysnUseFXPrice = 1 
-													 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-													 AND CNT.dblRate IS NOT NULL 
-													 AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
-												WHEN CNT.intPricingTypeId = 5 THEN 1
-												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+											CASE WHEN ISNULL(SC.intLotId,0) > 0 THEN  
+												CASE 
+													WHEN CNT.ysnUseFXPrice = 1 
+														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														AND CNT.dblRate IS NOT NULL 
+														AND CNT.intFXPriceUOMId IS NOT NULL 
+													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId, ICL.intItemUOMId, CNT.dblSeqPrice),0) 
+													WHEN ISNULL(SC.intContractId,0) > 0 THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId, ICL.intItemUOMId, LI.dblCost),0) 
+													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId, ICL.intItemUOMId, LI.dblCost), 0) 
+												END 
+												*
+												CASE 
+													WHEN CNT.ysnUseFXPrice = 1 
+														 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														 AND CNT.dblRate IS NOT NULL 
+														 AND CNT.intFXPriceUOMId IS NOT NULL 
+													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
+													WHEN CNT.intPricingTypeId = 5 THEN 1
+													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+												END
+											ELSE 
+												CASE
+													WHEN CNT.ysnUseFXPrice = 1 
+														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														AND CNT.dblRate IS NOT NULL 
+														AND CNT.intFXPriceUOMId IS NOT NULL 
+													THEN CNT.dblSeqPrice
+													ELSE LI.dblCost
+												END 
+												* -- AD.dblQtyToPriceUOMConvFactor
+												CASE 
+													WHEN CNT.ysnUseFXPrice = 1 
+														 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														 AND CNT.dblRate IS NOT NULL 
+														 AND CNT.intFXPriceUOMId IS NOT NULL 
+													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
+													WHEN CNT.intPricingTypeId = 5 THEN 1
+													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+												END
 											END
 										END
-		,intWeightUOMId				= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
-										ELSE LI.intItemUOMId
-									END
+		,intWeightUOMId				= NULL
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,intStorageScheduleTypeId	= CASE
@@ -207,7 +226,7 @@ BEGIN
 											END
 										END
 									  END
-		,intItemUOMId				= LI.intItemUOMId
+		,intItemUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
 		,intItemLotGroup			= LI.intId
 		,intDestinationGradeId		= SC.intGradeId
 		,intDestinationWeightId		= SC.intWeightId
@@ -217,12 +236,12 @@ BEGIN
 		,intSourceType				= 1
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
-		,dblGross					=  CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
+		,dblGross					=  CASE 
+										WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossUnits))
 										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 									END
 		,dblTare					= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
+										WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, SC.dblShrink)
 										ELSE SC.dblShrink 
 									END
 		,ysnDestinationWeightsAndGrades = CASE
@@ -257,6 +276,7 @@ BEGIN
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = SC.intLotId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 
@@ -328,11 +348,7 @@ BEGIN
 		,[intChargeId]						= IC.intItemId
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN 
-												CASE
-													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0) * -1)
-													ELSE (QM.dblDiscountAmount * -1)
-												END 
+												WHEN IC.strCostMethod = 'Per Unit' THEN  (QM.dblDiscountAmount * -1)
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
 		,[intCostUOMId]						= CASE
@@ -433,7 +449,7 @@ BEGIN
 		INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
 		WHERE SE.intSourceId = @intTicketId AND SC.dblTicketFees > 0
 
-	IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
+	IF @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 		BEGIN
 			SET @ysnAccrue = 1
 		END
@@ -773,7 +789,7 @@ BEGIN
 																			WHEN LoadCost.strCostMethod = 'Amount' THEN 0
 																			ELSE LoadCost.dblRate
 																		END	
-									,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
+									,[intCostUOMId]						= LoadCost.intItemUOMId
 									,[intEntityVendorId]				= LoadCost.intVendorId
 									,[dblAmount]						=  CASE
 																			WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
@@ -896,8 +912,8 @@ BEGIN
 							,[dblForexRate]						= SE.dblForexRate
 
 							--Charges
-							,[intContractId]					= NULL
-							,[intContractDetailId]				= NULL 
+							,[intContractId]					= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intOrderId,0) > 0 THEN SE.intOrderId ELSE NULL END
+							,[intContractDetailId]				= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intLineNo,0) > 0 THEN SE.intLineNo ELSE NULL END 
 							,[intCurrencyId]  					= SE.intCurrencyId
 							,[intChargeId]						= @intFreightItemId
 							,[strCostMethod]					= SC.strCostMethod

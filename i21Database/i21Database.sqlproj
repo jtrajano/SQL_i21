@@ -6458,7 +6458,6 @@
     <Build Include="dbo\Views\vyuAPYearPATR.sql" />
     <Build Include="dbo\Views\vyuAPYearDIV.sql" />
     <Build Include="dbo\Views\vyuAPYearINT.sql" />
-    <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDataInsertAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentUOMChange.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentInspection.sql" />
@@ -6769,7 +6768,6 @@
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
     <Build Include="dbo\Views\vyuCTUsedPriceUOM.sql" />
     <Build Include="dbo\Views\vyuARSearchPOS.sql" />
-    <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Tables\tblRKMatchDerivativesHistoryForOption.sql" />
     <Build Include="dbo\Views\vyuSTStorePumpItem.sql" />
@@ -6927,8 +6925,6 @@
     <Build Include="dbo\Stored Procedures\uspLGBillOfLadingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_HE.sql" />
     <Build Include="dbo\Tables\tblIPSAPLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdatePOSLog.sql" />
-    <Build Include="dbo\Views\vyuARPOSAvailableDrawer.sql" />
     <Build Include="dbo\Functions\fnAPCreatePOVoucherPayable.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherPayableFromBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayable.sql" />
@@ -6953,7 +6949,6 @@
     <Build Include="dbo\Stored Procedures\uspCTValidateContractCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessImportContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportContract.sql" />
-    <Build Include="dbo\Views\vyuARPOSLog.sql" />
     <Build Include="dbo\Views\vyuSTStoreAppRegistered.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateSite.sql" />
     <None Include="Scripts\Post-Deployment\ST\16_FileFieldMapping_Passport_TLM_340.sql" />
@@ -6976,7 +6971,6 @@
     <Build Include="dbo\Tables\tblSMTruck.sql" />
     <Build Include="dbo\Tables\tblSMTruckDetail.sql" />
     <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
-    <Build Include="dbo\Views\vyuARPOSOpenDrawers.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMCPReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMCPReport.sql" />
     <Build Include="dbo\Tables\tblARPOSEndOfDay.sql" />
@@ -6991,9 +6985,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
-    <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
-    <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSCreateNegativeCashReceipts.sql" />
     <Build Include="vyuEMSearchEntityBroker.sql" />
     <Build Include="dbo\Functions\fnARGenerateGLEntriesForInvoices.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceDetailsForPosting.sql" />
@@ -7012,10 +7004,37 @@
     <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
+    <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutErrorLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutErrorLogPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKLOptionPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionMatchedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKExpiredPSTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSOptionExerciseAssignTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICConvertReceiptToVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspICConvertReturnToVoucher.sql" />
+    <Build Include="dbo\Views\vyuLGStockSaleLotDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetDate.sql" />
+    <Build Include="dbo\Views\vyuSTInventoryItem.sql" />
+    <Build Include="dbo\Views\vyuARPOSEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMStartingNumberResetNumber.sql" />
+    <Build Include="dbo\Views\vyuLGInventoryLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateImportProcessFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKOptionUnPostMatchPnS.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUnpostMatchPnS.sql" />
+    <Build Include="dbo\Views\vyuRKAOP.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptChargeTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
+    <Build Include="dbo\Views\vyuARAddOnItemsInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuARPOSSearchLoggedIn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

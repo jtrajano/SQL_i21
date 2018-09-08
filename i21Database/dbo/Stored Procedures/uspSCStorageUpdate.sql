@@ -462,7 +462,7 @@ BEGIN TRY
 		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
 			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
 		FROM tblGRCustomerStorage CS
-		JOIN (SELECT intTicketFileId,SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' GROUP BY intTicketFileId)QM
+		JOIN (SELECT intTicketFileId,SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar' GROUP BY intTicketFileId)QM
 		ON CS.intCustomerStorageId=QM.intTicketFileId
 
 	END

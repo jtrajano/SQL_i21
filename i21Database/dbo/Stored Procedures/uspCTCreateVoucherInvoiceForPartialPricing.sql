@@ -213,7 +213,7 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						EXEC	uspICProcessToBill @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
 

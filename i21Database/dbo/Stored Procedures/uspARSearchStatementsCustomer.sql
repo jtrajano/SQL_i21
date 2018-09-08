@@ -79,7 +79,7 @@ OUTER APPLY (
 		AND ISNULL(CC.strEmail, '') <> '' 
 		AND CC.strEmailDistributionOption LIKE '%Statements%'
 ) EMAILSETUP
-WHERE ISNULL(AGING.dblTotalAR, 0) <> 0
+WHERE  ( @ysnPrintZeroBalance = 1 or ( @ysnPrintZeroBalance = 0 and ISNULL(AGING.dblTotalAR, 0) <> 0 ) )
 AND AGING.intEntityUserId = @intEntityUserId
 AND AGING.strAgingType = 'Summary'
 

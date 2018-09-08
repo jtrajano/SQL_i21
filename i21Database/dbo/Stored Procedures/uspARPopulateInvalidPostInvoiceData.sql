@@ -244,7 +244,7 @@ BEGIN
 	WHERE
 		I.[dblCustomerCreditLimit] IS NULL 
 		AND I.[strTransactionType] != 'Cash'
-
+		AND I.[strType] != 'POS'
 
 			
 	INSERT INTO #ARInvalidInvoiceData

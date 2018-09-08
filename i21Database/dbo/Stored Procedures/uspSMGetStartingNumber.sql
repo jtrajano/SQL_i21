@@ -10,6 +10,16 @@ SET @locationNumber = ''
 DECLARE @parameters VARCHAR(150)
 SET @parameters = ''
 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND strModule = 'Contract Management' AND ysnResetNumber = 1 AND CAST(dtmResetDate AS DATE) <> CAST(SYSDATETIME() AS DATE))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND ysnUseLocation = 1)
+	BEGIN
+		UPDATE tblSMStartingNumberLocation SET intNumber = 1 WHERE intStartingNumberId = @intStartingNumberId
+	END	
+
+	UPDATE tblSMStartingNumber SET intNumber = 1, dtmResetDate = SYSDATETIME() WHERE intStartingNumberId = @intStartingNumberId
+END
+
 -- IF MODULE IS CONTRACT MANAGEMENT
 IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND strModule = 'Contract Management')
 BEGIN
@@ -39,6 +49,7 @@ BEGIN
 		WHEN 'MMYYYY' THEN RIGHT(REPLACE(CONVERT(VARCHAR(10), SYSDATETIME(), 103), '/', ''), 6)
 		WHEN 'YY' THEN LEFT(CONVERT(VARCHAR(5), SYSDATETIME(), 2), 2)
 		WHEN 'YYYY' THEN LEFT(CONVERT(VARCHAR(7), SYSDATETIME(), 102), 4)
+		WHEN 'YYMMDD' THEN REPLACE(CONVERT(VARCHAR(8), SYSDATETIME(), 2), '.', '')
 		WHEN 'MON-YYYY' THEN UPPER(LEFT(DATENAME(MONTH, SYSDATETIME()), 3)) + '-' + DATENAME(YEAR, SYSDATETIME())
 		WHEN 'MON-YY' THEN UPPER(LEFT(DATENAME(MONTH, SYSDATETIME()), 3)) + '-' + RIGHT(DATENAME(YEAR, SYSDATETIME()), 2)
 		WHEN 'DD-MM-YY' THEN REPLACE(CONVERT(VARCHAR(10), SYSDATETIME(), 4), '.', '-')

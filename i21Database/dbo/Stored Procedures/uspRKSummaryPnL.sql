@@ -12,11 +12,11 @@
 AS
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
 
 DECLARE @UnRelaized AS TABLE (
 	intFutOptTransactionId INT,
-	GrossPnL NUMERIC(24, 10),
+	dblGrossPnL NUMERIC(24, 10),
 	dblLong NUMERIC(24, 10),
 	dblShort NUMERIC(24, 10),
 	dblFutCommission NUMERIC(24, 10),
@@ -31,22 +31,22 @@ DECLARE @UnRelaized AS TABLE (
 	strSalespersonId NVARCHAR(100),
 	strCommodityCode NVARCHAR(100),
 	strLocationName NVARCHAR(100),
-	Long1 INT,
-	Sell1 INT,
-	intNet INT,
+	dblLong1 INT,
+	dblSell1 INT,
+	dblNet INT,
 	dblActual NUMERIC(24, 10),
 	dblClosing NUMERIC(24, 10),
 	dblPrice NUMERIC(24, 10),
 	dblContractSize NUMERIC(24, 10),
 	dblFutCommission1 NUMERIC(24, 10),
-	MatchLong NUMERIC(24, 10),
-	MatchShort NUMERIC(24, 10),
-	NetPnL NUMERIC(24, 10),
+	dblMatchLong NUMERIC(24, 10),
+	dblMatchShort NUMERIC(24, 10),
+	dblNetPnL NUMERIC(24, 10),
 	intFutureMarketId INT,
 	intFutureMonthId INT,
 	intOriginalQty INT,
 	intFutOptTransactionHeaderId INT,
-	MonthOrder NVARCHAR(100),
+	strMonthOrder NVARCHAR(100),
 	RowNum INT,
 	intCommodityId INT,
 	ysnExpired BIT,
@@ -81,18 +81,24 @@ DECLARE @Relaized AS TABLE (
 	strLocationName NVARCHAR(100),
 	dblNetPL NUMERIC(24, 10),
 	intFutureMarketId INT,
-	MonthOrder NVARCHAR(100),
+	strMonthOrder NVARCHAR(100),
 	RowNum INT,
 	intCommodityId INT,
 	ysnExpired BIT,
-	intFutureMonthId INT
+	intFutureMonthId INT,
+	strLInternalTradeNo nvarchar(100),
+	strSInternalTradeNo nvarchar(100),
+	strLRollingMonth nvarchar(100),
+	strSRollingMonth nvarchar(100),
+	intLFutOptTransactionHeaderId int,
+	intSFutOptTransactionHeaderId int
 	)
 
 INSERT INTO @UnRelaized (
 	RowNum,
-	MonthOrder,
+	strMonthOrder,
 	intFutOptTransactionId,
-	GrossPnL,
+	dblGrossPnL,
 	dblLong,
 	dblShort,
 	dblFutCommission,
@@ -107,17 +113,17 @@ INSERT INTO @UnRelaized (
 	strSalespersonId,
 	strCommodityCode,
 	strLocationName,
-	Long1,
-	Sell1,
-	intNet,
+	dblLong1,
+	dblSell1,
+	dblNet,
 	dblActual,
 	dblClosing,
 	dblPrice,
 	dblContractSize,
 	dblFutCommission1,
-	MatchLong,
-	MatchShort,
-	NetPnL,
+	dblMatchLong,
+	dblMatchShort,
+	dblNetPnL,
 	intFutureMarketId,
 	intFutureMonthId,
 	intOriginalQty,
@@ -143,7 +149,7 @@ EXEC uspRKUnrealizedPnL @dtmFromDate = @dtmFromDate,
 
 INSERT INTO @Relaized (
 	RowNum,
-	MonthOrder,
+	strMonthOrder,
 	dblNetPL,
 	dblGrossPL,
 	intMatchFuturesPSHeaderId,
@@ -171,7 +177,7 @@ INSERT INTO @Relaized (
 	intFutureMarketId,
 	intCommodityId,
 	ysnExpired,
-	intFutureMonthId
+	intFutureMonthId,strLInternalTradeNo ,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
 	)
 EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@dtmToDate = @dtmToDate,
@@ -193,11 +199,11 @@ DECLARE @Summary AS TABLE (
 			intFutureMonthId int,
 			strFutMarketName nvarchar(100),
 			strFutureMonth nvarchar(100),
-			intLongContracts NUMERIC(24, 10),
+			intLongContracts int,
 			dblLongAvgPrice NUMERIC(24, 10),
-			intShortContracts NUMERIC(24, 10),
+			intShortContracts int,
 			dblShortAvgPrice NUMERIC(24, 10),
-			intNet NUMERIC(24, 10),
+			dblNet NUMERIC(24, 10),
 			dblUnrealized NUMERIC(24, 10),
 			dblClosing NUMERIC(24, 10),
 			dblFutCommission NUMERIC(24, 10),
@@ -208,13 +214,13 @@ DECLARE @Summary AS TABLE (
 			strAccountNumber VARCHAR(100) COLLATE Latin1_General_CI_AS,
 			dblTotal NUMERIC(24, 10)	
 	)
-	insert into @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,intNet,
+	INSERT INTO @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,dblNet,
 					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal)
-	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0.0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0.0) intShortContracts  ,dblShortAvgPrice ,isnull(intNet,0.0) intNet,
+	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0) intShortContracts  ,dblShortAvgPrice ,isnull(dblNet,0) dblNet,
 					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,
 		dblUnrealized + dblRealized AS dblTotal
 	FROM (
-		SELECT intFutureMarketId,
+		SELECT distinct intFutureMarketId,
 			intFutureMonthId,
 			strFutMarketName,
 			strFutureMonth,
@@ -222,27 +228,27 @@ DECLARE @Summary AS TABLE (
 			isnull(CASE WHEN SUM(LongWaitedPrice) = 0 THEN NULL ELSE SUM(LongWaitedPrice) / isnull(SUM(ISNULL(dblLong, 0)), NULL) END, 0) dblLongAvgPrice,
 			SUM(ISNULL(dblShort, 0)) intShortContracts,
 			isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0) dblShortAvgPrice,
-			SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS intNet,
-			isnull(SUM(NetPnL), 0) dblUnrealized,
+			SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS dblNet,
+			isnull(SUM(dblNetPnL), 0) dblUnrealized,
 			isnull(max(dblClosing), 0) dblClosing,
 			isnull(SUM(dblFutCommission), 0) dblFutCommission,
 			isnull(SUM(dblPrice), 0) AS dblPrice,
 			isnull((
 					SELECT SUM(dblGrossPL)
-					FROM vyuRKRealizedPnL r
-					WHERE t.intFutureMarketId = r.intFutureMarketId AND t.intFutureMonthId = r.intFutureMonthId
+					FROM @Relaized r
+					WHERE t.intFutureMarketId = r.intFutureMarketId AND t.intFutureMonthId = r.intFutureMonthId and t.strName=r.strName
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
 			strName,
 			strAccountNumber
 		FROM (
-			SELECT GrossPnL,
+			SELECT dblGrossPnL,
 				LongWaitedPrice,
 				dblLong,
 				dblShort,
 				ShortWaitedPrice,
 				dblFutCommission,
-				intNet,
+				dblNet,
 				intFutOptTransactionId,
 				strFutMarketName,
 				strFutureMonth,
@@ -252,7 +258,7 @@ DECLARE @Summary AS TABLE (
 				dtmTradeDate,
 				dblClosing AS dblClosing,
 				dblPrice,
-				NetPnL,
+				dblNetPnL,
 				dblVariationMargin,				
 				strName,
 				strAccountNumber
@@ -260,13 +266,13 @@ DECLARE @Summary AS TABLE (
 			
 			UNION
 			
-			SELECT DISTINCT GrossPnL,
+			SELECT DISTINCT dblGrossPnL,
 				LongWaitedPrice,
 				dblLong,
 				dblShort,
 				ShortWaitedPrice,
 				t.dblFutCommission,
-				intNet,
+				dblNet,
 				t.intFutOptTransactionId,
 				t.strFutMarketName,
 				t.strFutureMonth,
@@ -276,16 +282,16 @@ DECLARE @Summary AS TABLE (
 				p.dtmTradeDate,
 				dblClosing AS dblClosing,
 				dblPrice,
-				NetPnL,
+				null dblNetPnL,
 				dblVariationMargin,				
 				t.strName,
 				t.strAccountNumber
 			FROM @Relaized t
 			LEFT JOIN @UnRelaized p ON t.intFutureMarketId = p.intFutureMarketId AND t.intFutureMonthId = p.intFutureMonthId
-			WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END AND t.intFutureMarketId = CASE WHEN isnull(@intFutureMarketId, 0) = 0 THEN t.intFutureMarketId ELSE @intFutureMarketId END AND t.intFutureMonthId NOT IN (
-					SELECT intFutureMonthId
-					FROM @UnRelaized
-					)
+			WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END 
+					AND t.intFutureMarketId = CASE WHEN isnull(@intFutureMarketId, 0) = 0 THEN t.intFutureMarketId ELSE @intFutureMarketId END 
+					--AND t.intFutureMonthId NOT IN (SELECT intFutureMonthId FROM @UnRelaized	)
+					--AND t.strName NOT IN (SELECT strName FROM @UnRelaized)
 			) t
 		GROUP BY intFutureMonthId,
 			intFutureMarketId,
@@ -295,16 +301,15 @@ DECLARE @Summary AS TABLE (
 			strAccountNumber
 		) t
 
-
 		select intFutureMarketId,
 			intFutureMonthId,
 			strFutMarketName,
 			strFutureMonth,
-			sum(intLongContracts) intLongContracts,
+			sum(intLongContracts) dblLongContracts,
 			sum(dblLongAvgPrice) dblLongAvgPrice,
-			sum(intShortContracts) intShortContracts,
+			sum(intShortContracts) dblShortContracts,
 			sum(dblShortAvgPrice) dblShortAvgPrice,
-			sum(intNet) intNet,
+			sum(dblNet) dblNet,
 			sum(dblUnrealized) dblUnrealized,
 			sum(dblClosing) dblClosing,
 			sum(dblFutCommission) dblFutCommission,
@@ -326,7 +331,7 @@ DECLARE @Summary AS TABLE (
 			dblLongAvgPrice,
 			intShortContracts,
 			dblShortAvgPrice,
-			intNet,
+			dblNet,
 			dblUnrealized,
 			dblClosing,
 			dblFutCommission,
@@ -335,12 +340,12 @@ DECLARE @Summary AS TABLE (
 			dblVariationMargin,
 			strName ,
 			strAccountNumber,
-			dblTotal, (case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*intNet else 		
+			dblTotal, (case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*dblNet else 		
 		CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 					WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 					ELSE dblContractMargin END end) as dblInitialMargin
 		FROM(
-		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((intNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
+		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
 		dblPerFutureContract from @Summary t 
 		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
@@ -348,5 +353,3 @@ DECLARE @Summary AS TABLE (
 		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
 		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName
 		END
-
-	

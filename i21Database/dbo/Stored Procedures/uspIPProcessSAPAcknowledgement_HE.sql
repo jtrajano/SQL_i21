@@ -26,6 +26,8 @@ BEGIN TRY
 	DECLARE @intReceiptId INT
 	DECLARE @intLoadStgId INT
 		,@ysnMaxPrice BIT
+		,@intItemId INT
+		,@strItemNo NVARCHAR(50)
 
 	SET @strXml = REPLACE(@strXml, 'utf-8' COLLATE Latin1_General_CI_AS, 'utf-16' COLLATE Latin1_General_CI_AS)
 
@@ -78,7 +80,7 @@ BEGIN TRY
 			MESTYP_LNG NVARCHAR(50)
 			,[STATUS] NVARCHAR(50) 'E1STATE/STATUS'
 			,STACOD NVARCHAR(50) 'E1STATE/STACOD'
-			,STATXT NVARCHAR(50) 'E1STATE/STATXT'
+			,STATXT NVARCHAR(MAX) 'E1STATE/STATXT'
 			,STATYP NVARCHAR(50) 'E1STATE/STATYP'
 			,STAPA2_LNG NVARCHAR(50) 'E1STATE/STAPA2_LNG'
 			,STAPA1_LNG NVARCHAR(50) 'E1STATE/STAPA1_LNG'
@@ -119,6 +121,15 @@ BEGIN TRY
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
 
+			SELECT @intItemId = intItemId
+			FROM tblCTContractDetail
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND intContractSeq = @strTrackingNo
+
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intItemId
+
 			IF @strStatus IN (53) --Success
 			BEGIN
 				IF (
@@ -140,6 +151,7 @@ BEGIN TRY
 								ELSE intContractSeq
 								END
 							)
+						AND intItemId = @intItemId
 
 					UPDATE tblCTContractHeader
 					SET intConcurrencyId = intConcurrencyId + 1
@@ -160,6 +172,7 @@ BEGIN TRY
 							ELSE intContractSeq
 							END
 						)
+					AND strItemNo = @strItemNo
 					AND ISNULL(strFeedStatus, '') IN (
 						'Awt Ack'
 						,'Ack Rcvd'
@@ -177,6 +190,7 @@ BEGIN TRY
 							ELSE intContractSeq
 							END
 						)
+					AND strItemNo = @strItemNo
 					AND ISNULL(strFeedStatus, '') = ''
 
 				INSERT INTO @tblMessage (
@@ -201,7 +215,14 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractSeq = @strTrackingNo
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND strItemNo = @strItemNo
 					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
@@ -228,6 +249,15 @@ BEGIN TRY
 			WHERE strContractNumber = @strRefNo
 				AND intContractTypeId = 1
 
+			SELECT @intItemId = intItemId
+			FROM tblCTContractDetail
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND intContractSeq = @strTrackingNo
+
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intItemId
+
 			IF @strStatus IN (53) --Success
 			BEGIN
 				IF (
@@ -248,6 +278,7 @@ BEGIN TRY
 								ELSE intContractSeq
 								END
 							)
+						AND intItemId = @intItemId
 
 				UPDATE tblCTContractFeed
 				SET strFeedStatus = 'Ack Rcvd'
@@ -260,7 +291,8 @@ BEGIN TRY
 							ELSE intContractSeq
 							END
 						)
-					AND strFeedStatus IN (
+					AND strItemNo = @strItemNo
+					AND ISNULL(strFeedStatus, '') IN (
 						'Awt Ack'
 						,'Ack Rcvd'
 						)
@@ -287,8 +319,15 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = @strMessage
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractSeq = @strTrackingNo
-					AND strFeedStatus = 'Awt Ack'
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND strItemNo = @strItemNo
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 
 				INSERT INTO @tblMessage (
 					strMessageType

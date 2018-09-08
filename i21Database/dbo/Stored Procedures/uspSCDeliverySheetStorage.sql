@@ -411,7 +411,7 @@ BEGIN TRY
 			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
 		FROM tblGRCustomerStorage CS
 		OUTER APPLY (
-			SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
+			SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar'
 		) QM
 		WHERE CS.intCustomerStorageId = @intCustomerStorageId
 

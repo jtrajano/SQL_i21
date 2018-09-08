@@ -106,6 +106,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
+	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -161,6 +163,8 @@ LEFT JOIN (
 		 , SITE.strSiteNumber
 		 , SITE.dblEstimatedPercentLeft
 		 , ID.dblPercentFull
+		 , ID.strAddonDetailKey
+		 , ID.ysnAddonParent
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -225,6 +229,7 @@ LEFT JOIN (
 		FROM tblTMSite
 	) SITE
 		ON SITE.intSiteID = ID.intSiteId
+	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
@@ -323,3 +328,8 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
+LEFT JOIN(
+	SELECT intInvoiceId, strAddonDetailKey 
+	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
+	WHERE  ysnAddonParent = 0
+) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey

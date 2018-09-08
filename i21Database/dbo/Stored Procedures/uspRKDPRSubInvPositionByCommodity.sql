@@ -35,7 +35,7 @@ SELECT @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) ,@ysnIncludeDPPurch
 	IF(@strByType='ByCommodity')
 	BEGIN
 		INSERT INTO @Commodity(intCommodity)
-		SELECT intCommodityId from tblICCommodity where isnull(ysnExchangeTraded,0)=1
+		SELECT intCommodityId from tblICCommodity 
 	END
 	ELSE
 	BEGIN
@@ -238,7 +238,7 @@ FROM (
 		,dtmEndDate
 		--,isnull(dblQtyUnpriced,dblQuantity) + ISNULL(dblQtyPriced - (dblQuantity - dblBalance),0) dblBalance
 		,case when strPricingStatus='Parially Priced' then dblQuantity - ISNULL(dblQtyPriced + (dblQuantity - dblBalance),0) 
-				else isnull(dblQtyUnpriced,dblQuantity) end dblBalance 		
+				else case when dblBalance <> dblQuantity and intContractTypeId = 2 then dblBalance else isnull(dblQtyUnpriced,dblQuantity) end end dblBalance         	
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
 		,intPricingTypeId
@@ -560,7 +560,7 @@ DECLARE @invQty TABLE (
 INSERT INTO @invQty
 SELECT s.dblQuantity  dblTotal,
 	t.strTicketNumber Ticket,s.strLocationName,s.strItemNo,i.intCommodityId intCommodityId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,
-	s.intLocationId intLocationId,strTransactionId,strTransactionType,i.intItemId, t.strDistributionOption,strTicketStatus,intEntityId	FROM vyuRKGetInventoryValuation s  		
+	s.intLocationId intLocationId,strTransactionId,strTransactionType,i.intItemId, t.strDistributionOption,strTicketStatus,s.intEntityId	FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1 and  isnull(ysnInTransit,0)=0 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId  
@@ -773,7 +773,7 @@ BEGIN
 		,intCommodityId
 		,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM(
-		select distinct 
+		select 
 			'In-House' strSeqHeader
 			,[Storage Type] AS [strType]
 			,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance)  dblTotal
@@ -813,7 +813,7 @@ BEGIN
 	
 		-- Delivery sheet
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT DISTINCT 1,'In-House', strType, 
+	SELECT  1,'In-House', strType, 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(intFromCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblTotal) dblTotal,
 		  strLocationName,intCommodityId, intFromCommodityUnitMeasureId,intCompanyLocationId  
 	FROM @tempDeliverySheet where intCommodityId =@intCommodityId
@@ -855,25 +855,27 @@ BEGIN
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
-
+-- Sales Basis Deliveries
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-			select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from (
-			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader, strCommodityCode,'Sls Basis Deliveries' strType,
+	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from  (
+			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
-			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber
-			,r.intInventoryShipmentId,strShipmentNumber strShipmentNumber1
+			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,r.strShipmentNumber,cd.strContractNumber
+			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1
 			FROM vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
-			WHERE cd.intCommodityId =@intCommodityId AND v.strTransactionType ='Inventory Shipment'
+			LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
+			INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-			and isnull(cd.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(cd.intEntityId,0) else @intVendorId end
 			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+			and ISNULL(inv.ysnPosted,0) = 0
 			)t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation

@@ -57,7 +57,9 @@ BEGIN TRY
 				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
 				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
 				strERPBatchNumber,			strLoadingPoint,			strPackingDescription,	ysnMaxPrice,
-				ysnSubstituteItem,			strLocationName,			strSalesperson,			strSalespersonExternalERPId
+				ysnSubstituteItem,			strLocationName,			strSalesperson,			strSalespersonExternalERPId,	
+				strProducer
+
 		)
 		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,		strCommodityDesc,
 				strContractBasis,			strContractBasisDesc,		strSubLocation,			strCreatedBy,
@@ -72,7 +74,9 @@ BEGIN TRY
 				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
 				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
 				strERPBatchNumber,			strLoadingPoint,			strPackingDescription,	ysnMaxPrice,
-				ysnSubstituteItem,			strLocationName,			strSalesperson,			strSalespersonExternalERPId
+				ysnSubstituteItem,			strLocationName,			strSalesperson,			strSalespersonExternalERPId,  
+				strProducer
+
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
