@@ -61,6 +61,9 @@ SELECT @intToCurrencyId = intCurrencyID
 FROM tblSMCurrency
 WHERE strCurrency = 'USD'
 
+Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
+Update tblRKStgOptionMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
+
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId
 	,intMatchNo
@@ -87,7 +90,7 @@ FROM tblRKStgMatchPnS S
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = S.intFutureMarketId
 JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = S.intCompanyLocationId
 JOIN tblSMCurrency C ON C.strCurrency = S.strCurrency
-WHERE ISNULL(S.strStatus, '') = ''
+WHERE ISNULL(S.strStatus, '') = '' AND IsNULL(S.ysnPost,0)=1
 
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId
@@ -113,7 +116,7 @@ SELECT intStgOptionMatchPnSId
 	,ISNULL(PS.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, PS.intMatchNo), '') 
 FROM tblRKStgOptionMatchPnS PS
 JOIN tblSMCurrency C ON C.strCurrency = PS.strCurrency
-WHERE ISNULL(strStatus, '') = ''
+WHERE ISNULL(strStatus, '') = ''AND IsNULL(PS.ysnPost,0)=1
 
 SELECT @intRecordId = Min(intRecordId)
 FROM @tblRKStgMatchPnS
