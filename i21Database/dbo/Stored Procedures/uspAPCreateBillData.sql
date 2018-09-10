@@ -159,7 +159,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intCurrencyId]			=	A.[intCurrencyId],
 		[intSubCurrencyCents]	=	A.[intSubCurrencyCents]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, @currencyId, DEFAULT, @shipFrom, @shipTo) A
+	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, @currencyId, DEFAULT, @shipFrom, @shipTo, @shipFromEntityId) A
 
 	INSERT INTO tblAPBill
 	(
