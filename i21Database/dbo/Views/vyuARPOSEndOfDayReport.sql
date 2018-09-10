@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDayReport]
 AS 
 SELECT intPOSLogId			= POSLOG.intPOSLogId
+     , intPOSEndOfDayId		= POSLOG.intPOSEndOfDayId
 	 , intEntityUserId		= EOD.intEntityId
 	 , intCompanyLocationId	= CL.intCompanyLocationId
 	 , dtmLogin				= POSLOG.dtmLogin
