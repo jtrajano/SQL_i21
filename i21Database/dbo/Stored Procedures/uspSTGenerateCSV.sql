@@ -507,7 +507,7 @@ BEGIN
 						GROUP BY [intID]
 					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 					WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
-
+					AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 
 					-- Check if has record
 					IF EXISTS(select * from @tblTempRJR)
