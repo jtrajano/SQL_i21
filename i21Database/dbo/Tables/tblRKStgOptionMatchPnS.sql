@@ -19,5 +19,6 @@
 	   strStatus nvarchar(50),
 	   [strMessage] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	   ysnMailSent BIT DEFAULT 0,
+    [ysnPost] BIT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblRKStgOptionMatchPnS_intStgOptionMatchPnSId] PRIMARY KEY (intStgOptionMatchPnSId)  
 )

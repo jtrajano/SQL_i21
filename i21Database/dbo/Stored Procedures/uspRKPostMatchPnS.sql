@@ -89,6 +89,7 @@ BEGIN TRY
 		,strSubBook
 		,strLocationName
 		,strFutMarketName
+		,ysnPost
 		)
 	SELECT 0
 		,intMatchFuturesPSHeaderId
@@ -117,6 +118,7 @@ BEGIN TRY
 		,@strSubBook
 		,@strLocationName
 		,@strFutMarketName
+		,1
 	FROM tblRKMatchFuturesPSHeader h
 	WHERE intMatchNo = @intMatchNo
 

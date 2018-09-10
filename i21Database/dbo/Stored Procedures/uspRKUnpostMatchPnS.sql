@@ -32,7 +32,8 @@ strReferenceNo,
 strLocationName,
 strFutMarketName,
 strBook,
-strSubBook)
+strSubBook
+,ysnPost)
 
 SELECT top 1 1,
 intMatchFuturesPSHeaderId,
@@ -59,7 +60,9 @@ strReferenceNo,
 strLocationName,
 strFutMarketName,
 strBook,
-strSubBook FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo order by intStgMatchPnSId desc
+strSubBook,
+0
+FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo order by intStgMatchPnSId desc
 
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 0
