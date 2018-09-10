@@ -102,11 +102,18 @@ DECLARE @tblIPOutput TABLE (
 	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 
+DECLARE @tblHoldContract TABLE (
+		intContractHeaderId INT
+		,intContractSeq INT
+		)
+
 SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 
 SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 
 Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
+
+Update tblCTContractFeed Set strFeedStatus ='' Where strFeedStatus ='Hold'
 
 IF EXISTS (
 		SELECT *
@@ -200,6 +207,7 @@ BEGIN
 		,strLoadingPoint
 		,strPackingDescription
 		,strLocationName
+		,ysnPopulatedByIntegration
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -249,6 +257,7 @@ BEGIN
 		,strLoadingPoint
 		,strPackingDescription
 		,strLocationName
+		,1
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
@@ -297,6 +306,32 @@ BEGIN
 			ORDER BY intContractFeedId DESC
 			)
 	FROM @tblCTContractFeed2 CF2
+
+
+
+	DELETE CF2
+	OUTPUT deleted.intContractHeaderId
+		,deleted.intContractSeq
+	INTO @tblHoldContract
+	FROM @tblCTContractFeed2 CF2
+	JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
+		AND CFH.intContractSeq = CF2.intContractSeq
+		AND CFH.strItemNo <> CF2.strItemNo
+		AND EXISTS (
+			SELECT *
+			FROM tblCTContractFeed CF
+			WHERE CF.intContractHeaderId = CF2.intContractHeaderId
+				AND CF.intContractSeq = CF2.intContractSeq
+				AND CF.strFeedStatus = 'Awt Ack'
+			)
+
+	UPDATE CF
+	SET strFeedStatus = 'Hold'
+	FROM tblCTContractFeed CF
+	JOIN @tblHoldContract HC ON HC.intContractHeaderId = CF.intContractHeaderId
+		AND HC.intContractSeq = CF.intContractSeq
+	WHERE IsNULL(strFeedStatus,'') = ''
+
 
 	IF EXISTS (
 			SELECT *
@@ -394,6 +429,7 @@ BEGIN
 			,strLoadingPoint
 			,strPackingDescription
 			,strLocationName
+			,ysnPopulatedByIntegration
 			)
 		OUTPUT inserted.intContractHeaderId
 			,inserted.strItemNo
@@ -442,6 +478,7 @@ BEGIN
 			,strLoadingPoint
 			,strPackingDescription
 			,strLocationName
+			,1
 		FROM vyuCTContractFeed CF
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 			AND CF1.strItemNo = CF.strItemNo
@@ -497,6 +534,7 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,strMessage
+			,ysnPopulatedByIntegration
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -543,6 +581,7 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,'System'
+			,1
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
@@ -621,6 +660,30 @@ BEGIN
 			)
 	FROM @tblCTContractFeed2 CF2
 
+	DELETE CF2
+	OUTPUT deleted.intContractHeaderId
+		,deleted.intContractSeq
+	INTO @tblHoldContract
+	FROM @tblCTContractFeed2 CF2
+	JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
+		AND CFH.intContractSeq = CF2.intContractSeq
+		AND CFH.strItemNo <> CF2.strItemNo
+		AND EXISTS (
+			SELECT *
+			FROM tblCTContractFeed CF
+			WHERE CF.intContractHeaderId = CF2.intContractHeaderId
+				AND CF.intContractSeq = CF2.intContractSeq
+				AND CF.strFeedStatus = 'Awt Ack'
+			)
+
+	UPDATE CF
+	SET strFeedStatus = 'Hold'
+	FROM tblCTContractFeed CF
+	JOIN @tblHoldContract HC ON HC.intContractHeaderId = CF.intContractHeaderId
+		AND HC.intContractSeq = CF.intContractSeq
+	WHERE IsNULL(strFeedStatus,'') = ''
+
+
 	IF EXISTS (
 			SELECT *
 			FROM @tblCTContractFeed2 CF2
@@ -696,6 +759,7 @@ BEGIN
 			,strLoadingPoint
 			,strPackingDescription
 			,strLocationName
+			,ysnPopulatedByIntegration
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -741,6 +805,7 @@ BEGIN
 			,strLoadingPoint
 			,strPackingDescription
 			,strLocationName
+			,1
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo

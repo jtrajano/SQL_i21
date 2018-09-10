@@ -54,6 +54,6 @@
 	strSalesperson			NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strSalespersonExternalERPId NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strProducer				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-			
-	CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC) 
+	ysnPopulatedByIntegration BIT NULL CONSTRAINT [DF_tblCTContractFeed_ysnPopulatedByIntegration] DEFAULT 0, 
+    CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC) 
 )
