@@ -78,7 +78,7 @@ SELECT
 				FROM    [tblEMEntityType]
 				WHERE   intEntityId = a.intEntityId
 		) ET
-		CROSS APPLY(
+		OUTER APPLY(
 			SELECT  TOP 1 intEntityId, strPhone
 				FROM    [tblEMEntityPhoneNumber]
 				WHERE   intEntityId = f.intEntityContactId
