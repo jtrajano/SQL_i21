@@ -39,7 +39,9 @@ Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 Select @strCostCenter=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','COSTCENTER')
 Select @strGLAccount=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','GL_ACCOUNT')
 
-Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')=''
+Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
+
+Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')='' AND IsNULL(ysnPost,0)=1
 
 While(@intMinStageId is not null)
 Begin
@@ -123,7 +125,7 @@ Begin
 		INSERT INTO @tblOutput(strStgMatchPnSId,strRowState,strXml,strMatchNo)
 		VALUES(@intMinStageId,'CREATE',@strXml,@intMatchNo)
 	End
-	Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId
+	Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId and ISNULL(strStatus,'')=''AND IsNULL(ysnPost,0)=1
 End
 
 Select * From @tblOutput ORDER BY intRowNo
