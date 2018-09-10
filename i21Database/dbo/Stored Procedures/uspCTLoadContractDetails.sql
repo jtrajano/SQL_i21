@@ -115,10 +115,8 @@ BEGIN TRY
 				CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
 				BM.strUnitMeasure				AS	strBasisUOM,
 				VM.strUnitMeasure				AS	strConvertedUOM,
-				CASE WHEN ISNULL((SELECT COUNT(1) from tblLGAllocationDetail WHERE CD.intContractDetailId IN (intPContractDetailId,intSContractDetailId)),0) > 1 
-				THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnMultiAllocation,
-				CASE WHEN ISNULL((SELECT COUNT(1) from tblRKAssignFuturesToContractSummary SM WHERE SM.intContractDetailId = CD.intContractDetailId ),0) > 1 
-				THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnMultiDerivatives,
+				[dbo].[fnCTIsMultiAllocationExists](CD.intContractDetailId)		ysnMultiAllocation,
+				[dbo].[fnCTIsMultiDerivativesExists](CD.intContractDetailId)	ysnMultiDerivatives,
 
 				AD.intSeqCurrencyId,	
 				AD.strSeqCurrency,				
@@ -265,7 +263,7 @@ BEGIN TRY
 					)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
 		OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
 		CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-	)t
+	)t ORDER BY intContractSeq
 
 END TRY
 
