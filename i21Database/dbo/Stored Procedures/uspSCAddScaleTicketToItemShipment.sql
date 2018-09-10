@@ -603,8 +603,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= @ysnAccrue
-								,[ysnPrice]							= @ysnPrice
+								,[ysnAccrue]						= LoadCost.ysnAccrue
+								,[ysnPrice]							= LoadCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
@@ -731,7 +731,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
+								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
@@ -797,7 +797,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
+								,[ysnAccrue]						= LoadCost.ysnAccrue
 								,[ysnPrice]							= LoadCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
@@ -862,7 +862,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
+								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
