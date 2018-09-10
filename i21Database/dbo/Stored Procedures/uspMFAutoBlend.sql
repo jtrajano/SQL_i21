@@ -745,6 +745,9 @@ BEGIN TRY
 
 	SELECT	@intMaxWorkOrderId = MAX(intWorkOrderId) 
 	FROM	tblMFWorkOrder
+
+	IF @intMaxWorkOrderId IS NULL
+		SELECT @intMaxWorkOrderId = 0
 	
 	EXEC uspMFCreateWorkOrderFromSalesOrder @strXml
 
