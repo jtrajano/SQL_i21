@@ -17,9 +17,16 @@ BEGIN
 			intAccountId = CASE WHEN (@ysnUpdateAccount = 1) THEN Earning.intAccountId ELSE EmpEarning.intAccountId END,
 			intTaxCalculationType = CASE WHEN (@ysnUpdateTaxCalc = 1) THEN Earning.intTaxCalculationType ELSE EmpEarning.intTaxCalculationType END,
 			dblRateAmount = CASE WHEN (@ysnUpdateAmount = 1) THEN
-									Earning.dblAmount * (CASE WHEN Earning.strCalculationType IN ('Rate Factor', 'Overtime') THEN ISNULL(Link.dblAmount, 1) ELSE 1 END)
+									Earning.dblAmount * (CASE WHEN (CASE WHEN (@ysnUpdateCalcType = 1) 
+																		THEN Earning.strCalculationType 
+																		ELSE EmpEarning.strCalculationType END) IN ('Rate Factor', 'Overtime') 
+															THEN
+																CASE WHEN (Link.strCalculationType IN ('Fixed Amount', 'Salary') AND Link.dblDefaultHours <> 0)
+																	THEN ROUND(ISNULL(Link.dblAmount, 0) / ISNULL(Link.dblDefaultHours, 1), 2)
+																	ELSE ISNULL(Link.dblAmount, 0) END
+														ELSE 1 END)
 								 ELSE 
-									EmpEarning.dblAmount * (CASE WHEN EmpEarning.strCalculationType IN ('Rate Factor', 'Overtime') THEN ISNULL(Link.dblAmount, 1) ELSE 1 END)
+									EmpEarning.dblRateAmount
 								 END,
 			intEmployeeEarningLinkId = CASE WHEN (@ysnUpdateCalcType = 1 AND Earning.strCalculationType NOT IN ('Rate Factor', 'Overtime')) THEN NULL 
 										ELSE EmpEarning.intEmployeeEarningLinkId END,
@@ -27,7 +34,7 @@ BEGIN
 		FROM tblPRTypeEarning Earning 
 			INNER JOIN tblPREmployeeEarning EmpEarning
 				ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
-			LEFT JOIN (SELECT intTypeEarningId, intEntityEmployeeId, dblAmount FROM tblPREmployeeEarning) Link
+			LEFT JOIN (SELECT intTypeEarningId, intEntityEmployeeId, dblAmount, strCalculationType, dblDefaultHours FROM tblPREmployeeEarning) Link
 				ON EmpEarning.intEmployeeEarningLinkId = Link.intTypeEarningId
 				AND EmpEarning.intEntityEmployeeId = Link.intEntityEmployeeId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId
