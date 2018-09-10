@@ -71,4 +71,3 @@ SELECT strEntityName strName,strLocationName,strOrigin,strProductType,sum(dblBal
 (sum(dblTotPurchased)/SUM(CASE WHEN isnull(sum(dblTotPurchased),0)=0 then 1 else sum(dblTotPurchased) end) OVER ())*100 dblCompanySpend,sum(dblStandardQty) dblStandardQty
 FROM @GetStandardQty
 GROUP BY strEntityName,strEntityName,strLocationName,strOrigin,strProductType)t
-
