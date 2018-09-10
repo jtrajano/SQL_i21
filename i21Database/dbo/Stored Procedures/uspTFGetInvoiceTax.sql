@@ -192,7 +192,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblARInvoice.strInvoiceNumber ELSE tblARInvoice.strBOLNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE DestinationCounty.strCounty END) AS strDestinationCounty
@@ -381,7 +381,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblARInvoice.strInvoiceNumber ELSE tblARInvoice.strBOLNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE DestinationCounty.strCounty END) AS strDestinationCounty
