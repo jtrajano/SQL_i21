@@ -13,14 +13,15 @@ BEGIN TRY
 
 
 INSERT INTO [tblRKStgOptionMatchPnS] (intConcurrencyId,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName)
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,ysnPost)
 
 SELECT 1,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL ,dtmPostingDate,strUserName  from (
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL ,dtmPostingDate,strUserName,0  from (
 select ROW_NUMBER() OVER (
 			PARTITION BY intMatchNo ORDER BY dtmPostingDate DESC
 			) intRowNum,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,case when dblGrossPnL < 0 then abs(dblGrossPnL) else -dblGrossPnL end dblGrossPnL ,dtmPostingDate,strUserName 
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,
+	case when dblGrossPnL < 0 then abs(dblGrossPnL) else -dblGrossPnL end dblGrossPnL ,dtmPostingDate,strUserName 
 FROM [tblRKStgOptionMatchPnS]  WHERE intMatchNo in(
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strMatchedRecId, ','))
 	) a WHERE a.intRowNum = 1

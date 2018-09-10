@@ -1,6 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKOptionPostMatchPnS]
 		@strMatchedRecId nvarchar(Max)
-
 AS
 
 BEGIN TRY
@@ -29,9 +28,9 @@ WHERE intMatchOptionsPnSId in(
 GROUP BY dtmMatchDate,strCurrency,strLocationName,strFutMarketName,strOptionMonth,strMLBook,strMLSubBook,strName,strAccountNumber)t
 
 INSERT INTO [tblRKStgOptionMatchPnS] (intConcurrencyId,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName)
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,ysnPost)
 select 1,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName from #temp
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,1 from #temp
 
 UPDATE tblRKOptionsMatchPnS
 SET intMatchNo = t2.intMatchNo, ysnPost = 1, dtmPostDate=GetDATE()
@@ -65,4 +64,4 @@ BEGIN CATCH
   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
  END  
    
-END CATCH  
+END CATCH 
