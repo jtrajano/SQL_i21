@@ -7035,6 +7035,8 @@
     <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
     <Build Include="dbo\Views\vyuARAddOnItemsInvoiceReport.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchLoggedIn.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
+    <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
