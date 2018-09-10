@@ -86,12 +86,29 @@ SELECT
 	,cfCard.strCardDepartment
 	,cfCard.strPrimaryDepartment
 	,cfVehicle.strVehicleDepartment
-	,strTransactionDepartment = CASE 
-		WHEN ISNULL(cfCard.strPrimaryDepartment,'') = 'Card' THEN cfCard.strCardDepartment
-		WHEN ISNULL(cfCard.strPrimaryDepartment,'') = 'Vehicle' THEN cfVehicle.strVehicleDepartment
-		ELSE ''
-	END
-
+	,strTransactionDepartment = (CASE 
+						WHEN cfCard.strPrimaryDepartment = 'Card' 
+						THEN 
+                        CASE WHEN ISNULL(cfCard.intDepartmentId, 0) >= 1 
+							 THEN cfCard.strCardDepartment 
+                             ELSE 
+                                 CASE WHEN ISNULL(cfVehicle.intDepartmentId, 0) >= 1 
+									  THEN cfVehicle.strVehicleDepartment 
+									  ELSE 'Unknown' 
+                                 END 
+                        END 
+                        WHEN cfCard.strPrimaryDepartment = 'Vehicle' 
+                        THEN 
+                        CASE WHEN ISNULL(cfVehicle.intDepartmentId, 0) >=  1 
+                             THEN cfVehicle.strVehicleDepartment 
+                             ELSE 
+                                 CASE WHEN ISNULL(cfCard.intDepartmentId, 0) >= 1 
+									  THEN cfCard.strCardDepartment 
+									  ELSE 'Unknown' 
+                                 END 
+                             END 
+                        ELSE 'Unknown' 
+                    END)
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
@@ -115,6 +132,7 @@ LEFT OUTER JOIN
 	strVehicleNumber,
 	intVehicleId,
 	strVehicleDescription,
+	cfiVehicle.intDepartmentId,
 	ISNULL(cfDept.strDepartment,'') + ' - ' + ISNULL(cfDept.strDepartmentDescription,'') as  strVehicleDepartment 
 	FROM dbo.tblCFVehicle AS cfiVehicle
 	LEFT JOIN tblCFDepartment AS cfDept
@@ -156,6 +174,7 @@ LEFT OUTER JOIN (SELECT
 					,cfiCard.strCardDescription 
 					,PRG.strPriceGroup
 					,cfiAccount.strPrimaryDepartment
+					,cfDept.intDepartmentId
 					,ISNULL(cfDept.strDepartment,'') + ' - ' + ISNULL(cfDept.strDepartmentDescription,'') as strCardDepartment
 				 FROM dbo.tblCFAccount AS cfiAccount 
 				 INNER JOIN dbo.tblCFCard AS cfiCard 
