@@ -3,7 +3,7 @@ AS
 SELECT intPOSId			= POS.intPOSId
 	 , dblTotal			= POS.dblTotal
 	 , strPaymentMethod	= PAYMENT.strPaymentMethod
-	 , strReferenceNo	= PAYMENT.strReferenceNo
+	 , strReferenceNo	= CASE WHEN PAYMENT.strPaymentMethod = 'Check' THEN ' # ' + PAYMENT.strReferenceNo ELSE PAYMENT.strReferenceNo END
 	 , dblAmount		= PAYMENT.dblAmountTendered
 	 , dblTotalAmount	= TOTAL.dblTotalAmount
 FROM tblARPOS POS 
