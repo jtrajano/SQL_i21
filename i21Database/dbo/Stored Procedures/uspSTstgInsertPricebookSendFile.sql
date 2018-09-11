@@ -202,14 +202,14 @@ BEGIN
 									END AS [RegularSellPrice], 
 									I.strDescription AS [Description],
 									CASE 
-										WHEN R.strRegisterClass = @strRegisterClass 
+										WHEN R.strRegisterClass = 'PASSPORT' 
 											THEN 
 												CASE 
-													WHEN ISNULL(SubCat.strRegProdCode, '') = '' OR SubCat.strRegProdCode = 0 
-														THEN 7 
+													WHEN ISNULL(SubCat.strRegProdCode, '') = '' OR SubCat.strRegProdCode = '0'
+														THEN '7' 
 													ELSE SubCat.strRegProdCode 
 												END 
-										ELSE  ISNULL(SubCat.strRegProdCode, '40') 
+											ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 									END AS [PaymentSystemsProductCode],
 									CAST(IUOM.dblUnitQty AS NUMERIC(18,2)) AS [SellingUnits],
 									CASE	
