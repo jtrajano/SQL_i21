@@ -29,9 +29,35 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
+IF(OBJECT_ID('tempdb..#InvoiceDetailTax') IS NOT NULL)
+BEGIN
+    DROP TABLE #InvoiceDetailTax
+END
+
+CREATE TABLE #InvoiceDetailTax
+	([intInvoiceDetailId]		INT												NULL
+	,[intTaxGroupId]			INT												NULL
+	,[intTaxCodeId]				INT												NOT NULL
+	,[intTaxClassId]			INT												NULL
+	,[strTaxableByOtherTaxes]	NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strCalculationMethod]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblRate]					NUMERIC(18, 6)									NULL
+	,[dblBaseRate]				NUMERIC(18, 6)									NULL
+	,[intSalesTaxAccountId]		INT												NULL
+	,[dblTax]					NUMERIC(18, 6)									NULL
+	,[dblAdjustedTax]			NUMERIC(18, 6)									NULL
+	,[dblBaseAdjustedTax]		NUMERIC(18, 6)									NULL
+	,[ysnTaxAdjusted]			BIT												NULL
+	,[ysnSeparateOnInvoice]		BIT												NULL
+	,[ysnCheckoffTax]			BIT												NULL
+	,[ysnTaxExempt]				BIT												NULL                                 	
+	,[ysnTaxOnly]				BIT												NULL
+	,[strNotes]					NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[intConcurrencyId]			INT												NULL)
 	
 BEGIN TRY
-	INSERT INTO [tblARInvoiceDetailTax]
+
+	INSERT INTO #InvoiceDetailTax
 		([intInvoiceDetailId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
@@ -84,6 +110,49 @@ BEGIN TRY
 			ON TD.[intTaxCodeId] = SMTC.[intTaxCodeId]
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], ARID.[intItemUOMId], ARI.[intCurrencyId], ARID.[intCurrencyExchangeRateTypeId], ARID.[dblCurrencyExchangeRate]) TRD		
+
+	INSERT INTO [tblARInvoiceDetailTax]
+		([intInvoiceDetailId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[dblRate]
+		,[dblBaseRate]
+		,[intSalesTaxAccountId]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[dblBaseAdjustedTax]
+		,[ysnTaxAdjusted]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[ysnTaxExempt]
+		,[ysnTaxOnly]
+		,[strNotes]
+		,[intConcurrencyId])
+	SELECT
+		 [intInvoiceDetailId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[dblRate]
+		,[dblBaseRate]
+		,[intSalesTaxAccountId]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[dblBaseAdjustedTax]
+		,[ysnTaxAdjusted]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[ysnTaxExempt]
+		,[ysnTaxOnly]
+		,[strNotes]
+		,[intConcurrencyId]
+	FROM
+		#InvoiceDetailTax
 			
 END TRY
 BEGIN CATCH
