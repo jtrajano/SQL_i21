@@ -617,7 +617,7 @@ SELECT
 		, intCostUOMId
 		, intCurrency
 		, dblAmount
-		, ysnAccrue
+		, CASE intEntityVendorId WHEN NULL THEN 0 ELSE 1 END AS ysnAccrue
 		, intEntityVendorId
 		, ysnPrice
 		, intForexRateTypeId 
@@ -1012,7 +1012,7 @@ SELECT
 	, sc.intContractId
 	, sc.intContractDetailId
 	, sc.ysnPrice
-	, sc.ysnAccrue
+	, CASE sc.intEntityVendorId WHEN NULL THEN 0 ELSE 1 END --sc.ysnAccrue
 	, sc.intCostUOMId
 	, ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
 	, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
