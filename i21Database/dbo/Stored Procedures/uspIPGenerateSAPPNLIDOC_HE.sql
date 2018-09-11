@@ -61,8 +61,8 @@ SELECT @intToCurrencyId = intCurrencyID
 FROM tblSMCurrency
 WHERE strCurrency = 'USD'
 
-Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
-Update tblRKStgOptionMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
+Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
+Update tblRKStgOptionMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
 
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId

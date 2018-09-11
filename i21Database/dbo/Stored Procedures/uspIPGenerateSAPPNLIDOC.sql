@@ -39,9 +39,9 @@ Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 Select @strCostCenter=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','COSTCENTER')
 Select @strGLAccount=dbo.[fnIPGetSAPIDOCTagValue]('PROFIT AND LOSS','GL_ACCOUNT')
 
-Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0
+Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
 
-Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')='' AND IsNULL(ysnPost,0)=1
+Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where ISNULL(strStatus,'')='' AND IsNULL(ysnPost,0)=1 
 
 While(@intMinStageId is not null)
 Begin
