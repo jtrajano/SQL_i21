@@ -57,10 +57,14 @@ BEGIN TRY
 		,@ysnGenerateTaskOnCreatePickOrder BIT
 		,@strInventoryTracking NVARCHAR(50)
 		,@intStorageLocationId INT
-		,@intIncludeConsumptionByLocationInPickOrder int
+		,@intIncludeConsumptionByLocationInPickOrder INT
 
 	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
-		,@intIncludeConsumptionByLocationInPickOrder= case When IsNULL(ysnIncludeConsumptionByLocationInPickOrder,0) =1 Then 2 else 1 end
+		,@intIncludeConsumptionByLocationInPickOrder = CASE 
+			WHEN IsNULL(ysnIncludeConsumptionByLocationInPickOrder, 0) = 1
+				THEN 2
+			ELSE 1
+			END
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDate = GetDate()
@@ -688,7 +692,7 @@ BEGIN TRY
 				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 				WHERE S.intItemId = @intItemId
 					AND IL.intLocationId = @intLocationId
-					AND IsNULL(S.intStorageLocationId,-1) NOT IN (
+					AND IsNULL(S.intStorageLocationId, - 1) NOT IN (
 						SELECT intStageLocationId
 						FROM @tblMFStageLocation
 						)
@@ -782,13 +786,13 @@ BEGIN TRY
 						,@dblMaxSubstituteRatio = NULL
 						,@intSubstituteItemId = NULL
 						,@strInventoryTracking = NULL
-						,@intSubstituteItemUOMId=NULL
+						,@intSubstituteItemUOMId = NULL
 
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 						,@intSubstituteItemId = intSubstituteItemId
 						,@strInventoryTracking = strInventoryTracking
-						,@intSubstituteItemUOMId=intSubstituteItemUOMId
+						,@intSubstituteItemUOMId = intSubstituteItemUOMId
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
 
@@ -806,7 +810,7 @@ BEGIN TRY
 						JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 						WHERE S.intItemId = @intItemId
 							AND IL.intLocationId = @intLocationId
-							AND IsNULL(S.intStorageLocationId,-1) NOT IN (
+							AND IsNULL(S.intStorageLocationId, - 1) NOT IN (
 								SELECT intStageLocationId
 								FROM @tblMFStageLocation
 								)
@@ -1012,8 +1016,15 @@ BEGIN TRY
 		,@intUserId
 	FROM @tblMFWorkOrder
 
+	DECLARE @tblICStockReservation TABLE (intTransactionId INT)
+	DECLARE @tblICFinalStockReservation TABLE (intTransactionId INT)
+	DECLARE @intTransactionId INT
+		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+
 	DELETE
 	FROM tblMFOrderHeader
+	OUTPUT deleted.intOrderHeaderId
+	INTO @tblICStockReservation
 	WHERE intOrderTypeId = 5
 		AND strReferenceNo NOT IN (
 			SELECT S.strShipmentNumber
@@ -1021,6 +1032,8 @@ BEGIN TRY
 			)
 
 	DELETE T
+	OUTPUT deleted.intOrderHeaderId
+	INTO @tblICStockReservation
 	FROM tblMFTask T
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
 		AND OH.intOrderTypeId = 5
@@ -1029,6 +1042,8 @@ BEGIN TRY
 		AND S.ysnPosted = 1
 
 	DELETE T
+	OUTPUT deleted.intOrderHeaderId
+	INTO @tblICStockReservation
 	FROM tblMFTask T
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
 		AND OH.intOrderTypeId = 1
@@ -1037,18 +1052,32 @@ BEGIN TRY
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 		AND W.intStatusId = 13
 
-	DELETE
-	FROM tblICStockReservation
-	WHERE intInventoryTransactionType = 34
-		AND ysnPosted = 0
-		AND NOT EXISTS (
-			SELECT *
-			FROM tblMFTask
-			WHERE intLotId = tblICStockReservation.intLotId
-				AND intOrderHeaderId = tblICStockReservation.intTransactionId
-			)
+	INSERT INTO @tblICStockReservation
+	SELECT OH.intOrderHeaderId
+	FROM tblICInventoryShipment Inv
+	JOIN tblMFOrderHeader OH ON OH.strReferenceNo = Inv.strShipmentNumber
+		AND Inv.ysnPosted = 1
+	JOIN tblICStockReservation SR ON SR.intTransactionId = OH.intOrderHeaderId
+		AND intInventoryTransactionType = 34
+	WHERE SR.ysnPosted <> 1
 
+	INSERT INTO @tblICFinalStockReservation
+	SELECT DISTINCT intTransactionId
+	FROM @tblICStockReservation
 
+	SELECT @intTransactionId = MIN(intTransactionId)
+	FROM @tblICFinalStockReservation
+
+	WHILE @intTransactionId IS NOT NULL
+	BEGIN
+		EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
+			,@intTransactionId
+			,34
+
+		SELECT @intTransactionId = MIN(intTransactionId)
+		FROM @tblICFinalStockReservation
+		WHERE intTransactionId > @intTransactionId
+	END
 
 	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
 	BEGIN
