@@ -18,7 +18,8 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , strLocationName				= LOC.strLocationName
 	 , strStoreName					= ST.strDescription
 	 , ysnClosed					= EOD.ysnClosed
-	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser	
+	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
+	 , dblTotalCashReceipt          = CASHRECEIPT.dblTotalCashReceipt	
 FROM tblARPOSEndOfDay EOD
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
@@ -65,3 +66,25 @@ OUTER APPLY (
 	WHERE ysnReturn = 1
 	  AND intPOSLogId = POSLOG.intPOSLogId
 ) CASHRETURN
+OUTER APPLY(
+	SELECT CR.intPOSLogId, dblTotalCashReceipt = SUM(ISNULL(CR.dblAmount,0))  FROM
+	(
+		SELECT intPOSId			= POS.intPOSId
+			, dblTotal			= POS.dblTotal
+			, strPaymentMethod	= PAYMENT.strPaymentMethod
+			, dblAmount		= PAYMENT.dblAmountTendered
+			, dblTotalAmount	= TOTAL.dblTotalAmount
+			, ysnReturn        = POS.ysnReturn
+			, intPOSLogId      = POS.intPOSLogId
+			, ysnPaid			= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM tblARPOS POS 
+	INNER JOIN tblARPOSPayment PAYMENT ON POS.intPOSId = PAYMENT.intPOSId
+	CROSS APPLY (
+		SELECT dblTotalAmount = SUM(POSP.dblAmountTendered) 
+		FROM tblARPOSPayment POSP
+		WHERE POSP.intPOSId = POS.intPOSId
+	) TOTAL
+	WHERE intPOSLogId = POSLOG.intPOSLogId AND POS.intInvoiceId IS NOT NULL AND POS.ysnReturn = 0 AND(PAYMENT.strPaymentMethod = 'Cash' OR PAYMENT.strPaymentMethod = 'Check')
+	) CR
+	GROUP BY CR.intPOSLogId
+)CASHRECEIPT
