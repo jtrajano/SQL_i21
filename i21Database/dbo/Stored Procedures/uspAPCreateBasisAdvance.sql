@@ -84,6 +84,7 @@ OUTER APPLY (
         ,DEFAULT
         ,basisAdvance.intShipFromId
         ,basisAdvance.intCompanyLocationId
+		,basisAdvance.intEntityId
     ) voucherData
 ) A
 WHERE --basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis > 0;
