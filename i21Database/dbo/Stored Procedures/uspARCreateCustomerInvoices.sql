@@ -929,145 +929,448 @@ SELECT
 FROM
 	@InvalidRecords
 
+IF(OBJECT_ID('tempdb..#CustomerInvoice') IS NOT NULL)
+BEGIN
+    DROP TABLE #CustomerInvoice
+END
+
+CREATE TABLE #CustomerInvoice
+	([intInvoiceId]					INT												NULL
+	,[strInvoiceNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strTransactionType]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[intEntityCustomerId]			INT												NULL
+	,[intCompanyLocationId]			INT												NULL
+	,[intAccountId]					INT												NULL
+	,[intCurrencyId]				INT												NULL
+	,[intTermId]					INT												NULL
+	,[intOriginalSourceId]			INT												NULL
+	,[intSourceId]					INT												NULL
+	,[intPeriodsToAccrue]			INT												NULL
+	,[dtmDate]						DATETIME										NULL
+	,[dtmDueDate]					DATETIME										NULL
+	,[dtmShipDate]					DATETIME										NULL
+	,[dtmPostDate]					DATETIME										NULL
+	,[dtmCalculated]				DATETIME										NULL
+	,[dblInvoiceSubtotal]			NUMERIC(18, 6)									NULL
+	,[dblBaseInvoiceSubtotal]		NUMERIC(18, 6)									NULL
+	,[dblShipping]					NUMERIC(18, 6)									NULL
+	,[dblBaseShipping]				NUMERIC(18, 6)									NULL
+	,[dblTax]						NUMERIC(18, 6)									NULL
+	,[dblBaseTax]					NUMERIC(18, 6)									NULL
+	,[dblInvoiceTotal]				NUMERIC(18, 6)									NULL
+	,[dblBaseInvoiceTotal]			NUMERIC(18, 6)									NULL
+	,[dblDiscount]					NUMERIC(18, 6)									NULL
+	,[dblBaseDiscount]				NUMERIC(18, 6)									NULL
+	,[dblDiscountAvailable]			NUMERIC(18, 6)									NULL
+	,[dblBaseDiscountAvailable]		NUMERIC(18, 6)									NULL
+	,[dblInterest]					NUMERIC(18, 6)									NULL
+	,[dblBaseInterest]				NUMERIC(18, 6)									NULL
+	,[dblAmountDue]					NUMERIC(18, 6)									NULL
+	,[dblBaseAmountDue]				NUMERIC(18, 6)									NULL
+	,[dblPayment]					NUMERIC(18, 6)									NULL
+	,[dblBasePayment]				NUMERIC(18, 6)									NULL
+	,[intEntitySalespersonId]		INT												NULL
+	,[intFreightTermId]				INT												NULL
+	,[intShipViaId]					INT												NULL
+	,[intPaymentMethodId]			INT												NULL
+	,[strInvoiceOriginId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strPONumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[strComments]					NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFooterComments]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[intShipToLocationId]			INT												NULL
+	,[strShipToLocationName]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[strShipToAddress]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strShipToCity]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strShipToState]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strShipToZipCode]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strShipToCountry]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[intBillToLocationId]			INT												NULL
+	,[strBillToLocationName]		NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBillToAddress]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBillToCity]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBillToState]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBillToZipCode]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strBillToCountry]				NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnPosted]					BIT												NULL
+	,[ysnPaid]						BIT												NULL
+	,[ysnProcessed]					BIT												NULL
+	,[ysnRecurring]					BIT												NULL
+	,[ysnTemplate]					BIT												NULL
+	,[ysnForgiven]					BIT												NULL
+	,[ysnCalculated]				BIT												NULL
+	,[ysnSplitted]					BIT												NULL
+	,[ysnImpactInventory]			BIT												NULL
+	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
+	,[ysnImportedFromOrigin]		BIT												NULL
+	,[ysnImportedAsPosted]			BIT												NULL
+	,[intPaymentId]					INT												NULL
+	,[intSplitId]					INT												NULL
+	,[intDistributionHeaderId]		INT												NULL
+	,[intLoadDistributionHeaderId]	INT												NULL
+	,[strActualCostId]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[strImportFormat]				NVARCHAR(50)									NULL
+	,[intShipmentId]				INT												NULL
+	,[intTransactionId]				INT												NULL
+	,[intMeterReadingId]			INT												NULL
+	,[intContractHeaderId]			INT												NULL
+	,[intOriginalInvoiceId]			INT												NULL
+	,[intLoadId]					INT												NULL
+	,[intEntityId]					INT												NULL
+	,[intEntityContactId]			INT												NULL
+	,[intDocumentMaintenanceId]		INT												NULL
+	,[dblTotalWeight]				NUMERIC(18, 6)									NULL
+	,[dblTotalTermDiscount]			NUMERIC(18, 6)									NULL
+	,[intTruckDriverId]				INT												NULL
+	,[intTruckDriverReferenceId]	INT												NULL
+	,[intConcurrencyId]				INT												NULL
+	,[intId]						INT												NULL
+	,[strSourceTransaction]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
+	,[intSourceIdTemp]				INT												NULL
+	,[strSourceId]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnPost]						BIT												NULL
+	,[ysnUpdateAvailableDiscount]	BIT												NULL
+	,[ysnRecap]						BIT												NULL)
+
+INSERT INTO #CustomerInvoice
+	([intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[strType]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intAccountId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[intOriginalSourceId]
+	,[intSourceId]
+	,[intPeriodsToAccrue]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[dtmPostDate]
+	,[dtmCalculated]
+	,[dblInvoiceSubtotal]
+	,[dblBaseInvoiceSubtotal]
+	,[dblShipping]
+	,[dblBaseShipping]
+	,[dblTax]
+	,[dblBaseTax]
+	,[dblInvoiceTotal]
+	,[dblBaseInvoiceTotal]
+	,[dblDiscount]
+	,[dblBaseDiscount]
+	,[dblDiscountAvailable]
+	,[dblBaseDiscountAvailable]
+	,[dblInterest]
+	,[dblBaseInterest]
+	,[dblAmountDue]
+	,[dblBaseAmountDue]
+	,[dblPayment]
+	,[dblBasePayment]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strComments]
+	,[strFooterComments]
+	,[intShipToLocationId]
+	,[strShipToLocationName]
+	,[strShipToAddress]
+	,[strShipToCity]
+	,[strShipToState]
+	,[strShipToZipCode]
+	,[strShipToCountry]
+	,[intBillToLocationId]
+	,[strBillToLocationName]
+	,[strBillToAddress]
+	,[strBillToCity]
+	,[strBillToState]
+	,[strBillToZipCode]
+	,[strBillToCountry]
+	,[ysnPosted]
+	,[ysnPaid]
+	,[ysnProcessed]
+	,[ysnRecurring]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[ysnImpactInventory]
+	,[dblSplitPercent]
+	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[strImportFormat]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intMeterReadingId]
+	,[intContractHeaderId]
+	,[intOriginalInvoiceId]
+	,[intLoadId]
+	,[intEntityId]
+	,[intEntityContactId]
+	,[intDocumentMaintenanceId]
+	,[dblTotalWeight]
+	,[dblTotalTermDiscount]
+	,[intTruckDriverId]
+	,[intTruckDriverReferenceId]
+	,[intConcurrencyId]
+	,[intId]
+	,[strSourceTransaction]
+	,[intSourceIdTemp]
+	,[strSourceId]
+	,[ysnPost]
+	,[ysnUpdateAvailableDiscount]
+	,[ysnRecap])
+SELECT
+	 [intInvoiceId]					= NULL
+	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 THEN ITG.strInvoiceOriginId ELSE NULL END
+	,[strTransactionType]			= ITG.strTransactionType
+	,[strType]						= ITG.strType
+	,[intEntityCustomerId]			= ARC.[intEntityId]
+	,[intCompanyLocationId]			= ITG.intCompanyLocationId
+	,[intAccountId]					= ITG.[intAccountId]
+	,[intCurrencyId]				= ITG.intCurrencyId
+	,[intTermId]					= ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]), EL.[intTermsId])
+	,[intOriginalSourceId]			= ITG.[intSourceId]
+	,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
+	,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
+	,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
+	,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
+	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, DATEADD(month, 1, ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)))
+	,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
+	,[dtmCalculated]				= NULL
+	,[dblInvoiceSubtotal]			= @ZeroDecimal
+	,[dblBaseInvoiceSubtotal]		= @ZeroDecimal
+	,[dblShipping]					= @ZeroDecimal
+	,[dblBaseShipping]				= @ZeroDecimal
+	,[dblTax]						= @ZeroDecimal
+	,[dblBaseTax]					= @ZeroDecimal
+	,[dblInvoiceTotal]				= @ZeroDecimal
+	,[dblBaseInvoiceTotal]			= @ZeroDecimal
+	,[dblDiscount]					= @ZeroDecimal
+	,[dblBaseDiscount]				= @ZeroDecimal
+	,[dblDiscountAvailable]			= @ZeroDecimal
+	,[dblBaseDiscountAvailable]		= @ZeroDecimal
+	,[dblInterest]					= @ZeroDecimal
+	,[dblBaseInterest]				= @ZeroDecimal
+	,[dblAmountDue]					= @ZeroDecimal
+	,[dblBaseAmountDue]				= @ZeroDecimal
+	,[dblPayment]					= @ZeroDecimal		
+	,[dblBasePayment]				= @ZeroDecimal		
+	,[intEntitySalespersonId]		= ISNULL(ITG.intEntitySalespersonId, ARC.[intSalespersonId])		
+	,[intFreightTermId]				= ISNULL(ITG.intFreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
+	,[intShipViaId]					= ISNULL(ITG.intShipViaId, EL.[intShipViaId])
+	,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = ITG.intPaymentMethodId)
+	,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
+	,[strPONumber]					= ITG.strPONumber
+	,[strBOLNumber]					= ITG.strBOLNumber
+	,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL, 0) ELSE ITG.strComments END
+	,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL, 0)
+	,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
+	,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
+	,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
+	,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
+	,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
+	,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
+	,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
+	,[intBillToLocationId]			= ISNULL(ITG.intBillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
+	,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
+	,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
+	,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
+	,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
+	,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
+	,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))		
+	,[ysnPosted]					= (CASE WHEN ITG.strTransactionType IN ('Overpayment', 'Customer Prepayment') THEN ITG.ysnPost ELSE 0 END)
+	,[ysnPaid]						= 0
+	,[ysnProcessed]					= 0
+	,[ysnRecurring]					= 0
+	,[ysnTemplate]					= ISNULL(ITG.[ysnTemplate],0)
+	,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 
+	,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
+	,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
+	,[ysnImpactInventory]			= CASE WHEN ITG.strTransactionType = 'Credit Memo' 
+										THEN 
+											CASE WHEN ITG.strItemDescription like 'Washout net diff: Original Contract%' THEN
+												CAST(0 AS BIT) 
+											ELSE
+												CAST(1 AS BIT) 
+											END
+										ELSE CAST(0 AS BIT) END
+	,[dblSplitPercent]				= 1.000000		
+	,[ysnImportedFromOrigin]		= 0
+	,[ysnImportedAsPosted]			= 0
+	,[intPaymentId]					= ITG.[intPaymentId]
+	,[intSplitId]					= ITG.[intSplitId] 
+	,[intDistributionHeaderId]		= NULL
+	,[intLoadDistributionHeaderId]	= ITG.[intLoadDistributionHeaderId] 
+	,[strActualCostId]				= ITG.[strActualCostId]
+	,[strImportFormat]				= ITG.[strImportFormat]
+	,[intShipmentId]				= ITG.[intShipmentId] 
+	,[intTransactionId]				= ITG.[intTransactionId]
+	,[intMeterReadingId]			= ITG.[intMeterReadingId]
+	,[intContractHeaderId]			= ITG.[intContractHeaderId]
+	,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
+	,[intLoadId]                    = ITG.[intLoadId]
+	,[intEntityId]					= ITG.[intEntityId]
+	,[intEntityContactId]			= ITG.[intEntityContactId]
+	,[intDocumentMaintenanceId]		= NULL
+	,[dblTotalWeight]				= @ZeroDecimal
+	,[dblTotalTermDiscount]			= @ZeroDecimal
+	,[intTruckDriverId]				= ITG.[intTruckDriverId]
+	,[intTruckDriverReferenceId]	= ITG.[intTruckDriverReferenceId]
+	,[intConcurrencyId]				= 0
+	,[intId]						= ITG.[intId]
+	,[strSourceTransaction]			= ITG.[strSourceTransaction]
+	,[intSourceIdTemp]				= ITG.[intSourceId]	
+	,[strSourceId]					= ITG.[strSourceId]
+	,[ysnPost]						= ITG.[ysnPost]
+	,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
+	,[ysnRecap]						= ITG.[ysnRecap]
+FROM	
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT intId FROM @InvoicesToGenerate) ITG2  --WITH (NOLOCK)) ITG2
+--		ON ITG.[intId] = ITG2.[intId]
+INNER JOIN
+	(SELECT [intEntityId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
+		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
+	FROM 
+		[tblEMEntityLocation] WITH (NOLOCK)
+	WHERE
+		ysnDefaultLocation = 1
+	) EL
+		ON ARC.[intEntityId] = EL.[intEntityId]
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
+		ON ISNULL(ITG.intShipToLocationId, 0) <> 0
+		AND ITG.intShipToLocationId = SL.[intEntityLocationId]
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
+		ON ARC.[intShipToId] = SL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL
+		ON ISNULL(ITG.intBillToLocationId, 0) <> 0
+		AND ITG.intBillToLocationId = BL.intEntityLocationId		
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
+		ON ARC.[intBillToId] = BL1.intEntityLocationId		
+
 BEGIN TRY
 MERGE INTO tblARInvoice AS Target
 USING 
 	(
 	SELECT
-		 [intInvoiceId]					= NULL
-		,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 THEN ITG.strInvoiceOriginId ELSE NULL END
-		,[strTransactionType]			= ITG.strTransactionType
-		,[strType]						= ITG.strType
-		,[intEntityCustomerId]			= ARC.[intEntityId]
-		,[intCompanyLocationId]			= ITG.intCompanyLocationId
-		,[intAccountId]					= ITG.[intAccountId]
-		,[intCurrencyId]				= ITG.intCurrencyId
-		,[intTermId]					= ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]), EL.[intTermsId])
-		,[intOriginalSourceId]			= ITG.[intSourceId]
-		,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
-		,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
-		,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
-		,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
-		,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, DATEADD(month, 1, ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)))
-		,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
-		,[dtmCalculated]				= NULL
-		,[dblInvoiceSubtotal]			= @ZeroDecimal
-		,[dblBaseInvoiceSubtotal]		= @ZeroDecimal
-		,[dblShipping]					= @ZeroDecimal
-		,[dblBaseShipping]				= @ZeroDecimal
-		,[dblTax]						= @ZeroDecimal
-		,[dblBaseTax]					= @ZeroDecimal
-		,[dblInvoiceTotal]				= @ZeroDecimal
-		,[dblBaseInvoiceTotal]			= @ZeroDecimal
-		,[dblDiscount]					= @ZeroDecimal
-		,[dblBaseDiscount]				= @ZeroDecimal
-		,[dblDiscountAvailable]			= @ZeroDecimal
-		,[dblBaseDiscountAvailable]		= @ZeroDecimal
-		,[dblInterest]					= @ZeroDecimal
-		,[dblBaseInterest]				= @ZeroDecimal
-		,[dblAmountDue]					= @ZeroDecimal
-		,[dblBaseAmountDue]				= @ZeroDecimal
-		,[dblPayment]					= @ZeroDecimal		
-		,[dblBasePayment]				= @ZeroDecimal		
-		,[intEntitySalespersonId]		= ISNULL(ITG.intEntitySalespersonId, ARC.[intSalespersonId])		
-		,[intFreightTermId]				= ISNULL(ITG.intFreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
-		,[intShipViaId]					= ISNULL(ITG.intShipViaId, EL.[intShipViaId])
-		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = ITG.intPaymentMethodId)
-		,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
-		,[strPONumber]					= ITG.strPONumber
-		,[strBOLNumber]					= ITG.strBOLNumber
-		,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL, 0) ELSE ITG.strComments END
-		,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL, 0)
-		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
-		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
-		,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
-		,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
-		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
-		,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
-		,[intBillToLocationId]			= ISNULL(ITG.intBillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
-		,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
-		,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
-		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
-		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
-		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))		
-		,[ysnPosted]					= (CASE WHEN ITG.strTransactionType IN ('Overpayment', 'Customer Prepayment') THEN ITG.ysnPost ELSE 0 END)
-		,[ysnPaid]						= 0
-		,[ysnProcessed]					= 0
-		,[ysnRecurring]					= 0
-		,[ysnTemplate]					= ISNULL(ITG.[ysnTemplate],0)
-		,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 
-		,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
-		,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
-		,[ysnImpactInventory]			= CASE WHEN ITG.strTransactionType = 'Credit Memo' 
-											THEN 
-												CASE WHEN ITG.strItemDescription like 'Washout net diff: Original Contract%' THEN
-													CAST(0 AS BIT) 
-												ELSE
-													CAST(1 AS BIT) 
-												END
-											ELSE CAST(0 AS BIT) END
-		,[dblSplitPercent]				= 1.000000		
-		,[ysnImportedFromOrigin]		= 0
-		,[ysnImportedAsPosted]			= 0
-		,[intPaymentId]					= ITG.[intPaymentId]
-		,[intSplitId]					= ITG.[intSplitId] 
-		,[intDistributionHeaderId]		= NULL
-		,[intLoadDistributionHeaderId]	= ITG.[intLoadDistributionHeaderId] 
-		,[strActualCostId]				= ITG.[strActualCostId]
-		,[strImportFormat]				= ITG.[strImportFormat]
-		,[intShipmentId]				= ITG.[intShipmentId] 
-		,[intTransactionId]				= ITG.[intTransactionId]
-		,[intMeterReadingId]			= ITG.[intMeterReadingId]
-		,[intContractHeaderId]			= ITG.[intContractHeaderId]
-		,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
-		,[intLoadId]                    = ITG.[intLoadId]
-		,[intEntityId]					= ITG.[intEntityId]
-		,[intEntityContactId]			= ITG.[intEntityContactId]
-		,[intDocumentMaintenanceId]		= NULL
-		,[dblTotalWeight]				= @ZeroDecimal
-		,[dblTotalTermDiscount]			= @ZeroDecimal
-		,[intTruckDriverId]				= ITG.[intTruckDriverId]
-		,[intTruckDriverReferenceId]	= ITG.[intTruckDriverReferenceId]
-		,[intConcurrencyId]				= 0
-		,[intId]						= ITG.[intId]
-		,[strSourceTransaction]			= ITG.[strSourceTransaction]
-		,[intSourceIdTemp]				= ITG.[intSourceId]	
-		,[strSourceId]					= ITG.[strSourceId]
-		,[ysnPost]						= ITG.[ysnPost]
-		,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
-		,[ysnRecap]						= ITG.[ysnRecap]
-	FROM	
-		@InvoicesToGenerate ITG --WITH (NOLOCK)
-	INNER JOIN
-		(SELECT intId FROM @InvoicesToGenerate) ITG2  --WITH (NOLOCK)) ITG2
-			ON ITG.[intId] = ITG2.[intId]
-	INNER JOIN
-		(SELECT [intEntityId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
-			ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
-	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
-		FROM 
-			[tblEMEntityLocation] WITH (NOLOCK)
-		WHERE
-			ysnDefaultLocation = 1
-		) EL
-			ON ARC.[intEntityId] = EL.[intEntityId]
-	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
-			ON ISNULL(ITG.intShipToLocationId, 0) <> 0
-			AND ITG.intShipToLocationId = SL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
-			ON ARC.[intShipToId] = SL1.intEntityLocationId
-	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL
-			ON ISNULL(ITG.intBillToLocationId, 0) <> 0
-			AND ITG.intBillToLocationId = BL.intEntityLocationId		
-	LEFT OUTER JOIN
-		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
-			ON ARC.[intBillToId] = BL1.intEntityLocationId		
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[strType]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intAccountId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[intOriginalSourceId]
+		,[intSourceId]
+		,[intPeriodsToAccrue]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[dtmPostDate]
+		,[dtmCalculated]
+		,[dblInvoiceSubtotal]
+		,[dblBaseInvoiceSubtotal]
+		,[dblShipping]
+		,[dblBaseShipping]
+		,[dblTax]
+		,[dblBaseTax]
+		,[dblInvoiceTotal]
+		,[dblBaseInvoiceTotal]
+		,[dblDiscount]
+		,[dblBaseDiscount]
+		,[dblDiscountAvailable]
+		,[dblBaseDiscountAvailable]
+		,[dblInterest]
+		,[dblBaseInterest]
+		,[dblAmountDue]
+		,[dblBaseAmountDue]
+		,[dblPayment]
+		,[dblBasePayment]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strComments]
+		,[strFooterComments]
+		,[intShipToLocationId]
+		,[strShipToLocationName]
+		,[strShipToAddress]
+		,[strShipToCity]
+		,[strShipToState]
+		,[strShipToZipCode]
+		,[strShipToCountry]
+		,[intBillToLocationId]
+		,[strBillToLocationName]
+		,[strBillToAddress]
+		,[strBillToCity]
+		,[strBillToState]
+		,[strBillToZipCode]
+		,[strBillToCountry]
+		,[ysnPosted]
+		,[ysnPaid]
+		,[ysnProcessed]
+		,[ysnRecurring]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[ysnImpactInventory]
+		,[dblSplitPercent]
+		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
+		,[strActualCostId]
+		,[strImportFormat]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intMeterReadingId]
+		,[intContractHeaderId]
+		,[intOriginalInvoiceId]
+		,[intLoadId]
+		,[intEntityId]
+		,[intEntityContactId]
+		,[intDocumentMaintenanceId]
+		,[dblTotalWeight]
+		,[dblTotalTermDiscount]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
+		,[intConcurrencyId]
+		,[intId]
+		,[strSourceTransaction]
+		,[intSourceIdTemp]
+		,[strSourceId]
+		,[ysnPost]
+		,[ysnUpdateAvailableDiscount]
+		,[ysnRecap]
+	FROM
+		#CustomerInvoice
 	)
 AS Source
 ON Target.[intInvoiceId] = Source.[intInvoiceId]
