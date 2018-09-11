@@ -35,8 +35,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @InventoryStockMovementId AS INT 
-
+DECLARE @InventoryStockMovementId AS INT
 SET @InventoryTransactionIdentityId = NULL
 
 INSERT INTO dbo.tblICInventoryTransactionStorage (

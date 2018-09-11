@@ -592,6 +592,14 @@ BEGIN
 				, @dtmStartDate
 			) = 1 
 			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryStockMovement 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND intInventoryTransactionId IS NOT NULL
 END 
 
 --------------------------------------------------------------------
