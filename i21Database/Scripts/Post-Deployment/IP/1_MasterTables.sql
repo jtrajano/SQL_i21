@@ -252,5 +252,12 @@ BEGIN
 	SELECT NULL
 END
 GO
+UPDATE tblRKStgMatchPnS
+SET ysnPost = 1
+WHERE ysnPost IS NULL
 
+UPDATE tblRKStgOptionMatchPnS
+SET ysnPost = 1
+WHERE ysnPost IS NULL
+GO
 
