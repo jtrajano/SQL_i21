@@ -1,87 +1,117 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTXMLToIntermediateTable]
-  @intImportFileHeaderId Int
-, @intCheckoutId Int
-, @strSPName nvarchar(100) 
-, @strXML nvarchar(max)
+  @intImportFileHeaderId INT
+, @intRegisterFileConfigId INT
+, @intCheckoutId INT
+, @strSPName NVARCHAR(100) 
+, @strXML NVARCHAR(max)
 , @strStatusMsg NVARCHAR(250) OUTPUT
-, @intCountRows int OUTPUT
+, @intCountRows INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
 
 	SET NOCOUNT ON;
 
-	---- Create the temp table for Checkout Error Logging
-	--IF OBJECT_ID('tempdb..#tmpCheckoutErrorLogs') IS NULL  
-	--	CREATE TABLE #tmpCheckoutErrorLogs (
-	--		strErrorMessage NVARCHAR(500) 
-	--		, strRegisterTag NVARCHAR(150)
-	--		, strRegisterTagValue NVARCHAR(150) 
-	--	)
+	-- XML Layout version
+	DECLARE @strXmlLayoutVersion AS NVARCHAR(20) = ''
 
+	-- GET ROOT TAG
+	DECLARE @strRootTag NVARCHAR(200), 
+			@strRootCompressTag NVARCHAR(200), 
+			@intRootLevel INT, 
+			@intRootImportFileHeaderId INT, 
+			@intRootImportFileColumnDetailId INT
 
-
-	--GET ROOT TAG
-	DECLARE @strRootTag nvarchar(200), @strRootCompressTag nvarchar(200), @intRootLevel int, @intRootImportFileHeaderId int, @intRootImportFileColumnDetailId int
-	Select @intRootImportFileHeaderId = intImportFileHeaderId, @intRootImportFileColumnDetailId = intImportFileColumnDetailId, @strRootTag = REPLACE(strXMLTag, ' ', ''), @strRootCompressTag = REPLACE(REPLACE(REPLACE(strXMLTag, ' ', ''), ':', ''), '-', ''), @intRootLevel = intLevel 
-		   from dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel <= 1
+	-- Get the Header element
+	SELECT @intRootImportFileHeaderId = intImportFileHeaderId, 
+	       @intRootImportFileColumnDetailId = intImportFileColumnDetailId, 
+		   @strRootTag = REPLACE(strXMLTag, ' ', ''), 
+		   @strRootCompressTag = REPLACE(REPLACE(REPLACE(strXMLTag, ' ', ''), ':', ''), '-', ''), 
+		   @intRootLevel = intLevel 
+    FROM dbo.tblSMImportFileColumnDetail 
+	WHERE intImportFileHeaderId = @intImportFileHeaderId 
+	AND intLevel <= 1
 
 	--GET XML Initiator
 	DECLARE @strXMLinitiator nvarchar(200)
 	Select @strXMLinitiator = strXMLInitiater FROM dbo.tblSMImportFileHeader WHERE intImportFileHeaderId = @intImportFileHeaderId
 
+
 	DECLARE @NamespaceVar NVARCHAR(200) = '', @NamespaceVendor NVARCHAR(200) = ''
 
-	--GET ROOT TAG Namespace
+	-- ===============================================================================================================================================================
+	-- START GET ROOT TAG Namespace
+	-- Table tblSMXMLTagAttribute has two sttribute flag for version and xml namespace
+	-- If has only 'version' attribute it means that there is no xml namespace
 	DECLARE @strRootTagNamespace nvarchar(MAX) = ''
-	IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId)
-	BEGIN
-		DECLARE @intTagAttributeIdMin Int, @intTagAttributeIdMax Int
-		SELECT  @intTagAttributeIdMin = MIN(intTagAttributeId)
-			, @intTagAttributeIdMax = MAX(intTagAttributeId)
-		FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId
-		
-		DECLARE @intTempTagAttributeId int, @intTempImportFileColumnDetailId int, @strTempTagAttribute NVARCHAR(200), @strTempDefaultValue NVARCHAR(200)
-
-		DECLARE @intLoopTagAttributeCount int = 0
-
-		SET @strRootTagNamespace = @strRootTagNamespace + ';WITH XMLNAMESPACES ' + CHAR(13) + '(' + CHAR(13)
-
-		WHILE(@intTagAttributeIdMin <= @intTagAttributeIdMax)
+	IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId AND strTagAttribute != 'version')
 		BEGIN
-			IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intTagAttributeId = @intTagAttributeIdMin)
+			DECLARE @intTagAttributeIdMin Int, 
+					@intTagAttributeIdMax Int
+
+			SELECT  @intTagAttributeIdMin = MIN(intTagAttributeId)
+				  , @intTagAttributeIdMax = MAX(intTagAttributeId)
+			FROM dbo.tblSMXMLTagAttribute 
+			WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId
+		
+			DECLARE @intTempTagAttributeId int, 
+			        @intTempImportFileColumnDetailId int, 
+					@strTempTagAttribute NVARCHAR(200), 
+					@strTempDefaultValue NVARCHAR(200)
+
+			DECLARE @intLoopTagAttributeCount int = 0
+
+			SET @strRootTagNamespace = @strRootTagNamespace + ';WITH XMLNAMESPACES ' + CHAR(13) + '(' + CHAR(13)
+
+			WHILE(@intTagAttributeIdMin <= @intTagAttributeIdMax)
 			BEGIN
-				SELECT @intTempTagAttributeId = intTagAttributeId, @intTempImportFileColumnDetailId = intImportFileColumnDetailId, @strTempTagAttribute = strTagAttribute, @strTempDefaultValue = strDefaultValue FROM dbo.tblSMXMLTagAttribute WHERE intTagAttributeId = @intTagAttributeIdMin
-
-				IF(@strTempTagAttribute like '%:%')
+				IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId AND intTagAttributeId = @intTagAttributeIdMin)
 				BEGIN
-					SET @strTempTagAttribute = REPLACE(@strTempTagAttribute, LEFT(@strTempTagAttribute, CHARINDEX(':', @strTempTagAttribute) - 1) + ':', '')
-					SET @NamespaceVendor = @strTempTagAttribute + ':';
-				END
+					SELECT @intTempTagAttributeId = intTagAttributeId, 
+						   @intTempImportFileColumnDetailId = intImportFileColumnDetailId, 
+						   @strTempTagAttribute = strTagAttribute, 
+						   @strTempDefaultValue = strDefaultValue 
+					FROM dbo.tblSMXMLTagAttribute 
+					WHERE intTagAttributeId = @intTagAttributeIdMin
+					
+					IF(@strTempTagAttribute != 'version')
+						BEGIN
+							IF(@strTempTagAttribute like '%:%')
+								BEGIN
+									SET @strTempTagAttribute = REPLACE(@strTempTagAttribute, LEFT(@strTempTagAttribute, CHARINDEX(':', @strTempTagAttribute) - 1) + ':', '')
+									SET @NamespaceVendor = @strTempTagAttribute + ':';
+								END
+							ELSE
+								BEGIN
+									SET @strTempTagAttribute = @strTempTagAttribute + 'VAR'
+									SET @NamespaceVar = @strTempTagAttribute + ':';
+								END
 
-				ELSE
-				BEGIN
-					SET @strTempTagAttribute = @strTempTagAttribute + 'VAR'
-					SET @NamespaceVar = @strTempTagAttribute + ':';
-				END
-
-				IF(@intLoopTagAttributeCount = 0)
-				BEGIN
-					SET @strRootTagNamespace = @strRootTagNamespace + '	''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
-				END
-
-				ELSE IF(@intLoopTagAttributeCount > 0)
-				BEGIN
-					SET @strRootTagNamespace = @strRootTagNamespace + '	, ''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
-				END
-			END    
+							IF(@intLoopTagAttributeCount = 0)
+								BEGIN
+									SET @strRootTagNamespace = @strRootTagNamespace + '	''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
+								END
+							ELSE IF(@intLoopTagAttributeCount > 0)
+								BEGIN
+									SET @strRootTagNamespace = @strRootTagNamespace + '	, ''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
+								END
+						END
+					--ELSE IF(@strTempTagAttribute = 'version')
+					--	BEGIN
+					--		SET @strXmlLayoutVersion = @strTempDefaultValue
+					--	END
+				END    
  
-			SET @intLoopTagAttributeCount = @intLoopTagAttributeCount + 1
-			SET @intTagAttributeIdMin = @intTagAttributeIdMin + 1
-		END
+				SET @intLoopTagAttributeCount = @intLoopTagAttributeCount + 1
+				SET @intTagAttributeIdMin = @intTagAttributeIdMin + 1
+			END
 
-		SET @strRootTagNamespace = @strRootTagNamespace + ')'
-	END
+			SET @strRootTagNamespace = @strRootTagNamespace + ')'
+		END
+	-- END GET ROOT TAG Namespace
+	-- ===============================================================================================================================================================
+
+
 
 	DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intParent int, intPosition int, strXMLTag nvarchar(200), strDataType nvarchar(50), strTable nvarchar(200), strCompressTag nvarchar(200))
 
@@ -136,13 +166,13 @@ BEGIN
 											))
 
 				IF(@strRegisterClassName = 'RADIANT')
-				BEGIN
-					SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
-				END
+					BEGIN
+						SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+					END
 				ELSE IF(@strRegisterClassName <> 'RADIANT')
-				BEGIN
-					SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
-				END
+					BEGIN
+						SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+					END
 			END
 
 		
@@ -152,37 +182,37 @@ BEGIN
 			BEGIN
 				DECLARE @intHeaderAttributeMin Int, @intHeaderAttributeMax Int
 				SELECT  @intHeaderAttributeMin = MIN(intSequence)
-				, @intHeaderAttributeMax = MAX(intSequence)
-				FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1
+				      , @intHeaderAttributeMax = MAX(intSequence)
+				FROM dbo.tblSMXMLTagAttribute 
+				WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId 
+				AND ysnActive = 1
 
 				WHILE(@intHeaderAttributeMin <= @intHeaderAttributeMax)
 				BEGIN
 					SELECT @strHeaderTagAttribute = strTagAttribute FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1 AND intSequence = @intHeaderAttributeMin
 
-						if(@intLoopCount = 0)
-						BEGIN
-							IF(@strXMLTag like '%:%')
+						IF(@intLoopCount = 0)
 							BEGIN
-								SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+								IF(@strXMLTag like '%:%')
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+									END
+								ELSE
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+									END
 							END
-
-							ELSE
-							BEGIN
-								SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
-							END
-						END
 
 						ELSE if(@intLoopCount > 0)
 						BEGIN
 							IF(@strXMLTag like '%:%')
-							BEGIN
-								SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
-							END
-
+								BEGIN
+									SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+								END
 							ELSE
-							BEGIN
-								SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
-							END
+								BEGIN
+									SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+								END
 						END
 
 					SET @intLoopCount = @intLoopCount + 1
@@ -294,153 +324,61 @@ BEGIN
 	END
 
 
-	--SELECT 'Error Message' AS strErrorMessage
-	--, 'FuelID' AS strRegisterTag
-	--, '001' AS strRegisterTagValue
-	--SELECT * FROM #tmpCheckoutErrorLogs
+	-- =========================================================================================================== 
+	-- Validate Xml version
+	-- ===========================================================================================================
+	IF(@strRegisterClassName = 'PASSPORT' OR @strRegisterClassName = 'RADIANT')
+		BEGIN
+		    ------------------------------------------------------------------------------------------------------------------------
+			-- XML Version
+			DECLARE @strXmlVersion AS NVARCHAR(20)
+			DECLARE @strXmlForVersion AS NVARCHAR(MAX) = @strXML
+			SET @strXmlForVersion = REPLACE(@strXmlForVersion, '<?xml version="1.0" encoding="ISO-8859-1"?>', '')   
+			SET @strXmlForVersion = REPLACE(@strXmlForVersion, '<?xml version="1.0" encoding="UTF-8"?>', '')
 
-	---- ===========================================================================================================
-	---- START - Populate Temporary Table from XML file
-	---- ===========================================================================================================
-	--SET @SQL =
-	--N'
-	--IF(OBJECT_ID(''tempdb..#tempCheckoutInsert'') IS NOT NULL)
-	--BEGIN
-	--	DROP TABLE #tempCheckoutInsert
-	--END
-	--Declare @strXML nvarchar(max) 
-	--SET @strXML = @strXMLParam
-	--SET @strXML = REPLACE(@strXML, @strXMLinitiatorParam, '''')
+			--Replace single quote to double quote  
+			SET @strXmlForVersion = REPLACE(@strXmlForVersion, '''','')    
+			Declare @xmlVersion XML = @strXmlForVersion
 
-	----Replace single quote to double quote
-	--SET @strXML = REPLACE(@strXML, '''''''','''')
-
-	--Declare @xml XML = @strXML 
-	--' + @strRootTagNamespace + '
-
-	--SELECT ' + CHAR(13)
-	--+ ' IDENTITY(int, 1, 1) AS intRowCount,' + CHAR(13)
-	--+ @SELECTCOLUMNS
-	--+ ' INTO #tempCheckoutInsert ' + CHAR(13)
-	--+ ' FROM ' + CHAR(13)
-	--+ @FROMNODES + CHAR(13)
-	--+ ' ORDER BY intRowCount ASC'
-
-	---- Execute
-	--DECLARE @ParmDef nvarchar(max);
-
-	--SET @ParmDef = N'@strXMLParam NVARCHAR(MAX)'
-	--             + ', @strXMLinitiatorParam NVARCHAR(MAX)'
-	--			 + ', @strRootTagNamespaceParam NVARCHAR(MAX)';
-	----EXECUTE (@SQL)
-	--EXEC sp_executesql @SQL, @ParmDef, @strXML, @strXMLinitiator, @strRootTagNamespace
-	---- ===========================================================================================================
-	---- END - Populate Temporary Table from XML file
-	---- ===========================================================================================================
-
-	
+			SELECT @strXmlVersion = ISNULL(NAXMLMovementReport.value('(@version)[1]', 'NVARCHAR(200)'), '0')
+			FROM  @xmlVersion.nodes('NAXML-MovementReport') NAXMLMovementReport(NAXMLMovementReport)
+			------------------------------------------------------------------------------------------------------------------------
 
 
+			SET @strXmlLayoutVersion = (SELECT strDefaultValue FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId AND strTagAttribute = 'version')
 
+			IF(@strXmlVersion != @strXmlLayoutVersion)
+				BEGIN
+					DECLARE @strFilePrefix AS NVARCHAR(50) = (
+																SELECT strFilePrefix 
+																FROM tblSTRegisterFileConfiguration 
+																WHERE intRegisterFileConfigId = @intRegisterFileConfigId
+															 )
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'ERROR: ' + @strFilePrefix + ' - Cannot map xml content to table. Version did not match. Layout setup is ' + @strXmlLayoutVersion + ' while Register xml is ' + @strXmlVersion
 
-	---- ===========================================================================================================
-	---- START - Create Checkout Error Logging
-	---- ===========================================================================================================
-	--DECLARE @intStoreId INT, @strRegisterClass AS NVARCHAR(50)
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						@strStatusMsg
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
 
-	--SELECT @intStoreId = ST.intStoreId 
-	--	   , @strRegisterClass = R.strRegisterClass 
-	--FROM dbo.tblSTCheckoutHeader CH
-	--JOIN dbo.tblSTStore ST
-	--	ON CH.intStoreId = ST.intStoreId
-	--JOIN dbo.tblSTRegister R
-	--	ON ST.intRegisterId = R.intRegisterId
-	--WHERE intCheckoutId = @intCheckoutId
-
-	--IF(@strRegisterClass = 'PASSPORT')
-	--	BEGIN
-
-	--		DELETE FROM tblSTCheckoutErrorLogging
-	--		WHERE intCheckoutId = @intCheckoutId
-
-	--		IF(@strSPName = 'uspSTCheckoutPassportFGM')
-	--			BEGIN
-	--				-- FGM
-	--				-- Display Checkout Error Logs
-	--				SELECT strErrorMessage
-	--					   , strRegisterTag
-	--					   , strRegisterTagValue 
-	--				FROM tblSTCheckoutErrorLogging
-	--				WHERE intCheckoutId = @intCheckoutId
-
-	--				--INSERT INTO #tmpCheckoutErrorLogs 
-	--				--(
-	--				--	strErrorMessage 
-	--				--	, strRegisterTag
-	--				--	, strRegisterTagValue
-	--				--)
-	--				--SELECT DISTINCT
-	--				--	'Missing Fuel Grade' as strErrorMessage
-	--				--	, 'FuelGradeId' as strRegisterTag
-	--				--	, ISNULL(Chk.FuelGradeID, '') AS strRegisterTagValue
-	--				--FROM #tempCheckoutInsert Chk
-	--				--WHERE ISNULL(Chk.FuelGradeID, '') NOT IN
-	--				--(
-	--				--	SELECT DISTINCT 
-	--				--		tbl.strXmlRegisterFuelGradeID
-	--				--	FROM
-	--				--	(
-	--				--		SELECT DISTINCT
-	--				--			Chk.FuelGradeID AS strXmlRegisterFuelGradeID
-	--				--		FROM #tempCheckoutInsert Chk
-	--				--		JOIN dbo.tblICItemLocation IL 
-	--				--			ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-	--				--		JOIN dbo.tblICItem I 
-	--				--			ON I.intItemId = IL.intItemId
-	--				--		JOIN dbo.tblICItemUOM UOM 
-	--				--			ON UOM.intItemId = I.intItemId
-	--				--		JOIN dbo.tblSMCompanyLocation CL 
-	--				--			ON CL.intCompanyLocationId = IL.intLocationId
-	--				--		JOIN dbo.tblSTStore S 
-	--				--			ON S.intCompanyLocationId = CL.intCompanyLocationId
-	--				--		WHERE S.intStoreId = @intStoreId
-	--				--	) AS tbl
-	--				--)
-	--			END
-			
-	--		-- Return this table to Server side
-	--		--SELECT * FROM #tmpCheckoutErrorLogs
-	--	END
-	
-	---- ===========================================================================================================
-	---- END - Create Checkout Error Logging
-	---- ===========================================================================================================
-
-
-
-
-
-
-	---- ===========================================================================================================
-	---- START - Execute Stored Procedure
-	---- ===========================================================================================================
-	--SET @SQL =
-	--N' EXEC @strSPNameParam @intCheckoutIdParam, @strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
-	--+ ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
-
-	--SET @ParmDef = N'@strSPNameParam NVARCHAR(250)'
-	--			 + ', @intCheckoutIdParam INT'
-	--             + ', @strStatusMsg NVARCHAR(250) OUTPUT'
-	--             + ', @intCountRows INT OUTPUT';
-
-	--EXEC sp_executesql @SQL, @ParmDef, @strSPName, @intCheckoutId, @strStatusMsg OUTPUT, @intCountRows OUTPUT
-	---- ===========================================================================================================
-	---- END - Execute Stored Procedure
-	---- ===========================================================================================================
-
-
-	
-
+					RETURN
+				END
+		END
+    -- ===========================================================================================================
 
 
 	-- ===========================================================================================================
@@ -487,6 +425,8 @@ BEGIN
 	-- ===========================================================================================================
 	-- END - ORIGINAL CODE
 	-- ===========================================================================================================
+
+	
 
 	END TRY
 

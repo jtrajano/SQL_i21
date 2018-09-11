@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Inbound'
        ,[strXMLInitiater] = '<?xml version="1.0" encoding="ISO-8859-1"?>'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 4
+       ,[intConcurrencyId] = 5
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Passport - MCM 3.4','XML',NULL,'Inbound','<?xml version="1.0" encoding="ISO-8859-1"?>',1,4)
+      ('Passport - MCM 3.4','XML',NULL,'Inbound','<?xml version="1.0" encoding="ISO-8859-1"?>',1,5)
 END
 --END CHECK HEADER
 
@@ -46,7 +46,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,1,0,'NAXML-MovementReport','tblSTPriceBookStaging',NULL,NULL,0,NULL,1,2)
+      (@intImportFileHeaderId,NULL,1,0,'NAXML-MovementReport','tblSTPriceBookStaging',NULL,NULL,0,NULL,1,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -63,7 +63,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLength] = 0
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[intConcurrencyId] = 3
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -853,6 +853,34 @@ END
 --Delete Rows Not Included
 DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30)
 
+
+
+--LEVEL 1   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MovementReport'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'version',NULL,NULL,'3.4',1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'version'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = '3.4'
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 1   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
 GO
