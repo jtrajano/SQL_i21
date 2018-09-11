@@ -46,13 +46,14 @@ BEGIN TRY
 			@intFutureMarketId			INT,
 			@ysnBasisComponent			BIT,
 			@intUnitMeasureId			INT,
-			@intCurrencyId				INT
+			@intCurrencyId				INT,
+			@intHeaderPricingTypeId		INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
 			@dblFutures					=	dblFutures,
-			@intPricingTypeId			=	intPricingTypeId,
+			@intHeaderPricingTypeId		=	intPricingTypeId,
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0)
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
@@ -126,7 +127,7 @@ BEGIN TRY
 
 	--Other safety Checks--
 
-	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intPricingTypeId = 2
+	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intHeaderPricingTypeId = 2
 	BEGIN
 		UPDATE tblCTContractHeader SET dblFutures = NULL  WHERE intContractHeaderId = @intContractHeaderId
 
@@ -204,7 +205,7 @@ BEGIN TRY
 				SET		dblFutures			=	NULL,
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
-						intPricingTypeId	=	2
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
