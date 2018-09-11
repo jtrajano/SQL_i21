@@ -527,11 +527,31 @@ BEGIN TRY
 			)
 		AND @blnIsPartialMove = 0
 	BEGIN
+		UPDATE T
+		SET intLotId = @intNewLotId
+			,intFromStorageLocationId = @intNewStorageLocationId
+			,intTaskStateId = CASE 
+				WHEN intToStorageLocationId = @intNewStorageLocationId
+					THEN 4
+				ELSE intTaskStateId
+				END
+		FROM tblMFTask T
+		JOIN @ItemsToReserve SR ON SR.intTransactionId = T.intOrderHeaderId
+			AND SR.intLotId = T.intLotId
+		Where T.intLotId=@intLotId
+
 		UPDATE @ItemsToReserve
 		SET intLotId = @intNewLotId
 			,intStorageLocationId = @intNewStorageLocationId
 			,intSubLocationId = @intNewSubLocationId
 		WHERE intLotId = @intLotId
+
+		DELETE SR
+		FROM tblMFTask T
+		JOIN @ItemsToReserve SR ON SR.intTransactionId = T.intOrderHeaderId
+			AND SR.intLotId = T.intLotId
+			AND T.intLotId=@intNewLotId
+			AND T.intTaskStateId = 4
 
 		SELECT @intTransactionId = NULL
 
