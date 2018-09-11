@@ -216,14 +216,26 @@ SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 			EXEC uspRKDPRContractDetail @intCommodityId	,@dtmToDate
 
 			DECLARE @tblGetOpenFutureByDate TABLE (
-				intFutOptTransactionId INT
-				,intOpenContract INT
-				)
+					intFutOptTransactionId int, 
+					intOpenContract  int,
+					strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
+					dblContractSize numeric(24,10),
+					strFutureMarket nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strOptionMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+					dblStrike numeric(24,10),
+					strOptionType nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strInstrumentType nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strBrokerAccount nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
+					intFutOptTransactionHeaderId int 
+					)
 
-			INSERT INTO @tblGetOpenFutureByDate (
-				intFutOptTransactionId
-				,intOpenContract
-				)
+			INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
+						strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
 			EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
 
 			INSERT INTO @List (
@@ -586,14 +598,14 @@ INSERT INTO @List (
 				,7 intOrderId
 			FROM (
 				SELECT  
-					strCommodityCode
-					,strInternalTradeNo
-					,intFutOptTransactionHeaderId
+					ic.strCommodityCode
+					,f.strInternalTradeNo
+					,f.intFutOptTransactionHeaderId
 					,f.intCommodityId
-					,left(strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) dtmFutureMonthsDate
-					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * dblContractSize) AS HedgedQty
+					,left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) dtmFutureMonthsDate
+					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 					,l.strLocationName
-					,left(strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) strFutureMonth
+					,left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) strFutureMonth
 					,m.intUnitMeasureId
 					,e.strName + '-' + ba.strAccountNumber strAccountNumber
 					,strBuySell AS strTranType
@@ -656,14 +668,14 @@ INSERT INTO @List (
 				,8 intOrderId
 			FROM (
 				SELECT  
-					strCommodityCode
-					,strInternalTradeNo
-					,intFutOptTransactionHeaderId
+					ic.strCommodityCode
+					,f.strInternalTradeNo
+					,f.intFutOptTransactionHeaderId
 					,f.intCommodityId
-					,left(strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) dtmFutureMonthsDate
-					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * dblContractSize) AS HedgedQty
+					,left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) dtmFutureMonthsDate
+					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 					,l.strLocationName
-					,left(strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) strFutureMonth
+					,left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) strFutureMonth
 					,m.intUnitMeasureId
 					,e.strName + '-' + ba.strAccountNumber strAccountNumber
 					,strBuySell AS strTranType
