@@ -54,6 +54,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryStockMovementId, 0)
 				WHEN t.intOwnershipType = 1 THEN 'Own'
 				WHEN t.intOwnershipType = 2 THEN 'Storage'
 			END 
+		,dtmCreated					= dbo.fnRemoveTimeOnDate(t.dtmCreated)
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
