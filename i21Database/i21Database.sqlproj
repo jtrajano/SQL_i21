@@ -7037,6 +7037,7 @@
     <Build Include="dbo\Views\vyuARPOSSearchLoggedIn.sql" />
     <Build Include="dbo\Functions\fnCTIsMultiAllocationExists.sql" />
     <Build Include="dbo\Functions\fnCTIsMultiDerivativesExists.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
