@@ -32,6 +32,12 @@ BEGIN
 		FROM tblICCategory
 	END
 
+	IF @strBlendAttributeValue = ''
+	BEGIN
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+		FROM tblICCategory
+	END
+
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 

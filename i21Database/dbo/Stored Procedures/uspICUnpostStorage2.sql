@@ -41,6 +41,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4
 		,@ACTUALCOST AS INT = 5
 
+		,@Ownership_Own AS INT = 1
+		,@Ownership_Storage AS INT = 2
+
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 DECLARE @DecreaseOnStorageQty AS ItemCostingTableType
 
@@ -442,3 +445,85 @@ BEGIN
 	END
 END
 ;
+
+-------------------------------------------
+-- Add records to the stock movement table
+-------------------------------------------
+BEGIN 
+	INSERT INTO dbo.tblICInventoryStockMovement (		
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,intLotId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblValue
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,strBatchId
+		,intTransactionTypeId
+		,ysnIsUnposted
+		,strTransactionForm
+		,intRelatedInventoryTransactionId
+		,intRelatedTransactionId
+		,strRelatedTransactionId
+		,intCostingMethod
+		,dtmCreated
+		,intCreatedUserId
+		,intCreatedEntityId
+		,intConcurrencyId
+		,intForexRateTypeId
+		,dblForexRate
+		,intInventoryTransactionId
+		,intInventoryTransactionStorageId
+		,intOwnershipType
+	)
+	SELECT	
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,intLotId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblValue
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,strBatchId
+		,intTransactionTypeId
+		,ysnIsUnposted
+		,strTransactionForm
+		,intRelatedInventoryTransactionId
+		,intRelatedTransactionId
+		,strRelatedTransactionId
+		,intCostingMethod
+		,dtmCreated
+		,intCreatedUserId
+		,intCreatedEntityId
+		,intConcurrencyId
+		,intForexRateTypeId
+		,dblForexRate
+		,intInventoryTransactionId = NULL 
+		,intInventoryTransactionStorageId 
+		,intOwnershipType = @Ownership_Storage
+	FROM	tblICInventoryTransactionStorage t
+	WHERE	t.intTransactionId = @intTransactionId	
+			AND t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0
+END 
