@@ -7040,6 +7040,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
