@@ -272,6 +272,13 @@ BEGIN
 		)
 
 		DECLARE @intVehicleId INT
+
+		--CF-1934--
+		IF(LEN(@strVehicleNumber) < 4)
+		BEGIN
+			SET @strVehicleNumber = LEFT(replicate('0', (4 - LEN(@strVehicleNumber))) + @strVehicleNumber, 4) 
+		END
+
 	
 		IF(@strVehicleNumber IS NOT NULL)
 		BEGIN
