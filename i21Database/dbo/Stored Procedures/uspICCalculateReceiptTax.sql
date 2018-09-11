@@ -80,6 +80,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			LEFT OUTER JOIN tblICItemUOM TaxUOM ON TaxUOM.intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
+		AND Receipt.strReceiptType <> 'Transfer Order' -- Do not compute tax for Transfer Orders. 
 
 OPEN loopReceiptItems;
 
