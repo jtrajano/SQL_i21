@@ -7047,6 +7047,7 @@
     <Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
     <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
+    <Build Include="dbo\Tables\tblHDTicketForImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
