@@ -55,7 +55,7 @@ CREATE PROCEDURE [dbo].[uspCFImportInvoiceCycle]
 		,intI21IdentityId = null
 		,strUserId = ''
 		FROM cfactmst
-				WHERE cfact_ivc_cyc COLLATE Latin1_General_CI_AS NOT IN (select strInvoiceCycle from tblCFInvoiceCycle) 
+				WHERE cfact_ivc_cyc COLLATE Latin1_General_CI_AS IN (select strInvoiceCycle from tblCFInvoiceCycle) 
 				AND cfact_ivc_cyc IS NOT NULL 
 		
 		--DUPLICATE SITE ON i21--
