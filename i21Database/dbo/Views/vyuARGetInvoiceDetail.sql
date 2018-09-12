@@ -162,7 +162,8 @@ SELECT
     strCurrencyExchangeRateType = isnull(RTYPE.strCurrencyExchangeRateType, ''),
     intOriginDestWeight = DWEIGHT.intOriginDest,
 	strAddonDetailKey,
-    ysnAddonParent
+    ysnAddonParent,
+	INV.dblPriceAdjustment
 FROM  ( SELECT intInvoiceId, intCompanyLocationId 
 			FROM tblARInvoice WITH(NOLOCK) ) PINV		
 	JOIN tblARInvoiceDetail INV
