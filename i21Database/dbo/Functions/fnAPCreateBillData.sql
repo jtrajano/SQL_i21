@@ -120,7 +120,7 @@ BEGIN
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
 		@shipFrom =  ISNULL(@shipFromId, B.intEntityLocationId),
-		@payto = B.intEntityLocationId,
+		@payto = CASE WHEN A.intBillToId > 0 THEN A.intBillToId ELSE B.intEntityLocationId END,
 		@shipVia = B.intShipViaId,
 		@shipFromAddress = B.strAddress,
 		@shipFromCity = B.strCity,
