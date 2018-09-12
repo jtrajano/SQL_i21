@@ -99,7 +99,7 @@ BEGIN
 	,NULL --Bank Account
 	,dblAmountDue
 	,NULL --Set NULL to Create
-	,intEntityCustomerId
+	,@intUserId
 	,Inv.intInvoiceId
 	,Inv.strTransactionType
 	,Inv.strTransactionNumber
