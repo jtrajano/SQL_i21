@@ -10,6 +10,7 @@ SELECT
 	,TMS.[strDescription] 
 	,TMS.[strBillingBy] 
 	,TMS.[dblLastMeterReading] 
+	,TMS.[dblPriceAdjustment]
 	,(SELECT TOP 1 MT.[strMeterType] FROM tblTMSiteDevice SD
 		INNER JOIN tblTMDevice D ON SD.[intDeviceId] = D.[intDeviceId]  
 		INNER JOIN tblTMDeviceType DT ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
