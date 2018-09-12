@@ -76,8 +76,8 @@ BEGIN TRY
 			,GETDATE()
 			,LD.dblQuantity
 			,IU.dblUnitQty
-			,ISNULL(LD.dblAmount,0)/LD.dblQuantity dblCost
-			,ISNULL(LD.dblAmount,0) dblValue
+			,ISNULL(LD.dblAmount,CD.dblTotalCost)/LD.dblQuantity dblCost
+			,ISNULL(LD.dblAmount,CD.dblTotalCost) dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
