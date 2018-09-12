@@ -1409,14 +1409,14 @@ BEGIN TRY
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
 				 ,[intItemId]			  = CC.[intItemId]
-				 ,[intAccountId]		  = NULL
+				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,@LocationId,'Other Charge Expense')
 				 ,[dblQtyReceived]		  = CASE 
 												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
 												ELSE SV.dblUnits 
 											END
 				 ,[strMiscDescription]	  = Item.[strItemNo]
 				 ,[dblCost]				  = CASE
-												WHEN CC.intVendorId = @EntityId AND ISNULL(CC.ysnAccrue, 0) = 1 AND ISNULL(CC.ysnPrice, 0) = 0 
+												WHEN ISNULL(CC.ysnPrice, 0) = 0  --this is the only field that needs to be checked when a contract that has a charge is applied to a storage
 													THEN 
 														( CASE 
 															WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1) ELSE  CC.dblRate
