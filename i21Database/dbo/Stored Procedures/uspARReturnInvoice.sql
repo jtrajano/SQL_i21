@@ -410,49 +410,6 @@ SET ysnReturned = 1
   , dblBaseDiscountAvailable = @ZeroDecimal
 WHERE intInvoiceId = @InvoiceId
 
---POS RETURN
-
-DECLARE @creditMemoIntId AS NVARCHAR(10)
-	   ,@creditMemoStrType VARCHAR(5)
-	   ,@creditMemoStrTransactionType VARCHAR(20)
-	   ,@intCompanyLocationId AS INT
-
-SELECT @creditMemoStrType = strType
-	  ,@creditMemoStrTransactionType = strTransactionType
-	  ,@creditMemoIntId = CAST(@NewInvoiceId AS NVARCHAR(10))
-	  ,@intCompanyLocationId = intCompanyLocationId
-FROM @EntriesForInvoice
-
-IF(@creditMemoStrType = 'POS' AND @creditMemoStrTransactionType = 'Credit Memo')
-BEGIN
-
-	--post credit memo created
-	EXEC uspARPostInvoice @param = @creditMemoIntId, @post = 1
-
-	DECLARE @posStrPayment VARCHAR(10)
-
-	SELECT @posStrPayment = posPayment.strPaymentMethod
-	FROM tblARPOSPayment posPayment
-	INNER JOIN tblARPOS pos ON posPayment.intPOSId = pos.intPOSId
-	WHERE pos.intInvoiceId = @InvoiceId
-
-	IF(@posStrPayment != 'On Account')
-	BEGIN
-		--create negative cash receipt
-			EXEC uspARPOSCreateNegativeCashReceipts @intInvoiceId = @creditMemoIntId, @intUserId = @UserId, @intCompanyLocationId = @intCompanyLocationId, @strErrorMessage = @ErrorMessage  OUTPUT
-	END
-	
-	IF(@ErrorMessage IS NULL)
-	BEGIN
-		UPDATE tblARPOS
-		SET ysnReturn = 1
-		WHERE intInvoiceId = @InvoiceId
-	END
-
-END
-
---END OF POS RETURN
-
 IF ISNULL(@RaiseError,0) = 0
 BEGIN
 	COMMIT TRANSACTION 
