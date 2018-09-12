@@ -62,7 +62,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intItemUOMId)
 	SELECT
 		 intItemId					= B.intItemId
-		,intVendorId				= A.intEntityVendorId
+		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
 		,dblItemCost				= B.dblCost
 		,dblQuantity				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
@@ -72,7 +72,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 										-- 	THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
 										-- 	ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
 										-- END
-		,intTaxGroupId				= B.intTaxGroupId
+		,intTaxGroupId				= CASE 
+									   WHEN B.intTaxGroupId > 0 THEN B.intTaxGroupId
+									   ELSE D.intTaxGroupId END 
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 0
@@ -84,7 +86,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 										ELSE B.intUnitOfMeasureId END
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
+	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId
+	LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityId] = D.intEntityId AND D.ysnDefaultLocation = 1
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId  FROM tblSMUserRoleCompanyLocationPermission)
 
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
