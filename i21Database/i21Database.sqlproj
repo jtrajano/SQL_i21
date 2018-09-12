@@ -6394,6 +6394,7 @@
     <Build Include="dbo\Stored Procedures\uspICRestoreMissingTransactionsFromBackup.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromAVGTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
