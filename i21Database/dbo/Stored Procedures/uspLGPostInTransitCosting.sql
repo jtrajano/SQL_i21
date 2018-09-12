@@ -134,6 +134,7 @@ BEGIN TRY
 			,LD.dblForexRate
 			,LD.dblAmount
 			,L.intPurchaseSale
+			,CD.dblTotalCost
 
 		BEGIN
 			INSERT INTO @GLEntries (
