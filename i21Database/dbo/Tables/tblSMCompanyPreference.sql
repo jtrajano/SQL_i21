@@ -43,6 +43,8 @@
 	[intLockedRecordExpiration] INT NOT NULL DEFAULT 60,
 	[ysnValidatePassword] BIT NOT NULL DEFAULT 0, 
 	[ysnAutoRefreshOnOpen] BIT NOT NULL DEFAULT 0, 
+	[intAnnouncementFontColorId] INT NULL, 
+	[intAnnouncementBackgroundColorId] INT NULL, 
 	[intDefaultTermId] INT NULL, 
 	[strReportDateFormat] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
 	[strReportNumberFormat] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
