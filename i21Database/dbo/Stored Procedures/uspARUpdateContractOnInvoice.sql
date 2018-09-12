@@ -28,7 +28,8 @@ BEGIN TRY
 				@intUniqueId					INT,
 				@dblQty							NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
-				@dblSchQuantityToUpdate			NUMERIC(12,4)
+				@dblSchQuantityToUpdate			NUMERIC(12,4),
+				@intLoadDetailId				INT
 
 
 	DECLARE @tblToProcess TABLE
@@ -39,7 +40,8 @@ BEGIN TRY
 		intTicketId					INT,
 		intInventoryShipmentItemId	INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+		dblQty						NUMERIC(12,4),
+		intLoadDetailId				INT
 	)
 
 	INSERT INTO @tblToProcess(
@@ -48,7 +50,8 @@ BEGIN TRY
 		,[intTicketId]
 		,[intInventoryShipmentItemId]
 		,[intItemUOMId]
-		,[dblQty])
+		,[dblQty]
+		,[intLoadDetailId])
 
 	--Quantity/UOM Changed
 	SELECT
@@ -58,6 +61,7 @@ BEGIN TRY
 		,D.[intInventoryShipmentItemId]
 		,D.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
+		, I.intLoadDetailId
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
@@ -99,6 +103,7 @@ BEGIN TRY
 		,D.[intInventoryShipmentItemId]
 		,D.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
+		,I.[intLoadDetailId]
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
@@ -139,6 +144,7 @@ BEGIN TRY
 		,D.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		,I.[intLoadDetailId]
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
@@ -179,6 +185,7 @@ BEGIN TRY
 		,D.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		,I.[intLoadDetailId]
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
@@ -218,6 +225,7 @@ BEGIN TRY
 		,TD.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		,TD.[intLoadDetailId]
 	FROM
 		tblARTransactionDetail TD
 	INNER JOIN
@@ -251,6 +259,7 @@ BEGIN TRY
 		,Detail.[intInventoryShipmentItemId]
 		,Detail.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
+		,Detail.[intLoadDetailId]
 	FROM
 		tblARInvoiceDetail Detail
 	INNER JOIN
@@ -284,14 +293,16 @@ BEGIN TRY
 				@dblQty							=	NULL,
 				@intInvoiceDetailId				=	NULL,
 				@intTicketId					=	NULL,
-				@intInventoryShipmentItemId		=	NULL
+				@intInventoryShipmentItemId		=	NULL,
+				@intLoadDetailId				=	NULL
 
 		SELECT	@intContractDetailId			=	[intContractDetailId],
 				@intFromItemUOMId				=	[intItemUOMId],
 				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
 				@intInvoiceDetailId				=	[intInvoiceDetailId],
 				@intTicketId					=   [intTicketId],
-				@intInventoryShipmentItemId		=   [intInventoryShipmentItemId]
+				@intInventoryShipmentItemId		=   [intInventoryShipmentItemId],
+				@intLoadDetailId				=	[intLoadDetailId]
 		FROM	@tblToProcess 
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
@@ -313,8 +324,7 @@ BEGIN TRY
 					 , @strInOutFlag	= strInOutFlag
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END		
-		
-		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND ISNULL(@intInventoryShipmentItemId, 0) = 0
+		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND ISNULL(@intInventoryShipmentItemId, 0) = 0 AND ISNULL(@intLoadDetailId,0) = 0
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
@@ -335,4 +345,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
