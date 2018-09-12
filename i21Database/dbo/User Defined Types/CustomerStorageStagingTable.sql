@@ -24,5 +24,6 @@
 	[intContractDetailId] INT NULL,				-- Contract Detail Id
 	[intUnitMeasureId] INT NULL,				-- Unit of measure Id Ex: Bushels,Kilogram,Pounds
 	[intItemUOMId] INT NULL,					-- UOM Id of Item Unit Quantity
+	[strTransactionNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, --Storage Ticket number (Ticket or Delivery sheet number)
 	[intUserId]	INT NULL						
 )
