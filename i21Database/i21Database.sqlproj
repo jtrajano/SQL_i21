@@ -7043,6 +7043,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryStockMovement.sql" />
     <Build Include="dbo\Views\vyuICGetStockMovement.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
+    <Build Include="dbo\User Defined Types\CustomerStorageStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
