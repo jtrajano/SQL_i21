@@ -259,6 +259,8 @@ BEGIN
 				   ,[intStoreId]
 				   ,[intCheckoutId]
 				   ,[ysnSubmitted]
+				   ,[ysnPMMSubmitted]
+				   ,[ysnRJRSubmitted]
 				   ,[intConcurrencyId] --142
 				)
 				SELECT 	
@@ -408,6 +410,8 @@ BEGIN
 
 					, @intStoreId
 					, @intCheckoutId
+					, 0
+					, 0
 					, 0
 					, 0
 				FROM #tempCheckoutInsert chk
