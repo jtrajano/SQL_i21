@@ -273,10 +273,10 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 												   WHERE strPriceProfile = RTRIM(LTRIM(cfact_ext_rmt_prc_prf_id)) COLLATE Latin1_General_CI_AS
 												   AND strType = 'Extended Remote'),0),
 
-					@intLocalPriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
+					@intLocalPriceProfileId = (SELECT TOP 1 intPriceProfileHeaderId 
 												FROM tblCFPriceProfileHeader 
 												WHERE strPriceProfile = RTRIM(LTRIM(cfact_local_prc_prf_id)) COLLATE Latin1_General_CI_AS
-												AND strType = 'Local/Network'),0),
+												AND strType = 'Local/Network'),
 
 					@intDiscountDays = ISNULL(cfact_dsc_days,0),
 					@dblBonusCommissionRate = ISNULL(cfact_bonus_comm_rt,0),
