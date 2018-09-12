@@ -19,6 +19,13 @@ BEGIN
 	INSERT INTO tblGLFiscalYearPeriod ( intFiscalYearId, strPeriod, dtmStartDate, dtmEndDate,ysnOpen, ysnAPOpen, ysnAROpen, ysnINVOpen, ysnCMOpen, ysnCTOpen, ysnFAOpen, ysnPROpen, intConcurrencyId)
 	SELECT @intFiscalYearId, 'January ' + @strFiscalYear , @dtmDateFrom ,@dtmDateTo,0,0,0,0,0,0,0,0,1
 
+	
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1)
+	BEGIN
+		INSERT INTO glfypmst (glfyp_yr, glfyp_beg_date_1,glfyp_end_date_1,glfyp_closed_yn,glfyp_purged_yn)
+		SELECT @strFiscalYear, CAST( @strFiscalYear + '0101' AS INT), CAST(@strFiscalYear + '0131' AS INT),'Y','N'
+	END
+
 	RETURN 1
 
 END
