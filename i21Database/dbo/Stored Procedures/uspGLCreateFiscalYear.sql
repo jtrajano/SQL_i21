@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE uspGLCreateFiscalYear
-	@strFiscalYear NVARCHAR(4)
+	@strFiscalYear NVARCHAR(4),
+	@intFiscalYearId INT OUTPUT 
 AS 
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYear WHERE strFiscalYear = @strFiscalYear)
 		RETURN -1
 
-	DECLARE @intRetainAccount INT, @dtmDateTo DATETIME, @dtmDateFrom DATETIME,@intFiscalYearId INT
+	DECLARE @intRetainAccount INT, @dtmDateTo DATETIME, @dtmDateFrom DATETIME
 
 	SELECT TOP 1 @intRetainAccount = intRetainAccount FROM tblGLFiscalYear
 	SELECT @dtmDateTo = DATEADD(SECOND,-1, @strFiscalYear +'-02-01')
