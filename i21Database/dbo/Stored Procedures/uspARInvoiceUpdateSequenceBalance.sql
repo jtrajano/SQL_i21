@@ -5,7 +5,7 @@
 AS
 BEGIN
 		DECLARE InvoiceTickets CURSOR
-		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped,dblQtyOrdered FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId AND intTicketId IS NOT NULL and (intContractDetailId IS NOT NULL AND intContractHeaderId IS NOT NULL)
+		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped,dblQtyOrdered,intLoadDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId AND intTicketId IS NOT NULL and (intContractDetailId IS NOT NULL AND intContractHeaderId IS NOT NULL)
 		OPEN InvoiceTickets
 		DECLARE @intInvoiceId INT,
 				@intInvoiceDetailId INT,
@@ -14,9 +14,10 @@ BEGIN
 				@intContractHeaderId INT,
 				@intContractDetailId INT,
 				@dblQty NUMERIC(18,6),
-				@dblQtyOrdered NUMERIC(18,6)
+				@dblQtyOrdered NUMERIC(18,6),
+				@intLoadDetailId INT
 		FETCH NEXT FROM InvoiceTickets
-		INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered
+		INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered, @intLoadDetailId
 		WHILE @@FETCH_STATUS = 0
 			BEGIN
 				DECLARE   @intTicketTypeId	INT = NULL
@@ -35,7 +36,7 @@ BEGIN
 						SET @dblQty = @dblQty * (-1)
 					END
 
-				IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6)) AND ISNULL(@intInventoryShipmentItemId, 0) = 0
+				IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6)) AND ISNULL(@intInventoryShipmentItemId, 0) = 0 AND ISNULL(@intLoadDetailId,0) = 0
 					BEGIN
 							IF(@ysnDelete = 1)
 							BEGIN 
@@ -74,7 +75,7 @@ BEGIN
 							END
 					END
 				FETCH NEXT FROM InvoiceTickets
-				INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered
+				INTO @intInvoiceId,@intInvoiceDetailId,@intTicketId,@intInventoryShipmentItemId,@intContractHeaderId,@intContractDetailId,@dblQty,@dblQtyOrdered, @intLoadDetailId
 			END
 		CLOSE InvoiceTickets
 		DEALLOCATE InvoiceTickets
