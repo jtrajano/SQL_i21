@@ -51,7 +51,7 @@
 	,@SpecialPriceId			INT				= NULL OUTPUT
 	,@ProgramId					INT				= NULL OUTPUT
 	,@ProgramType				NVARCHAR(100)	= NULL OUTPUT
-	
+	,@ysnFromItemSelection		BIT				= 0
 AS	
 
 	SELECT
@@ -114,6 +114,7 @@ AS
 			,@GetAllAvailablePricing
 			,@CurrencyExchangeRate
 			,@CurrencyExchangeRateTypeId
+			,@ysnFromItemSelection
 		)
 		WHERE CASE WHEN @FromSeq = 1 THEN CASE WHEN ISNULL(@ContractHeaderId,0) = ISNULL(intContractHeaderId,0) AND ISNULL(@ContractDetailId,0) = ISNULL(intContractDetailId,0) THEN 1 ELSE 0 END ELSE 1 END = 1
 
