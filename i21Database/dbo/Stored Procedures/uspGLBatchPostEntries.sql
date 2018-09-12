@@ -83,8 +83,8 @@ BEGIN
 			dbo.fnRemoveTimeOnDate([dtmDate])
 			,[strBatchId]
 			,[intAccountId]
-			,[dblDebit] = CASE WHEN Debit.Value > 0 THEN Debit.Value ELSE 0 END
-			,[dblCredit] = CASE WHEN Credit.Value > 0 THEN Credit.Value ELSE 0 END
+			,[dblDebit] = Debit.Value 
+			,[dblCredit] = Credit.Value
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
