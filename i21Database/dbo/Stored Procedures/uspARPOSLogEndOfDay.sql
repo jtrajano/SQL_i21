@@ -59,6 +59,7 @@ AS
 			SET
 				intEntityId = @intEntityId
 				,dblFinalEndingBalance = @dblNewEndingBalance
+				,dtmClose = GETDATE()
 				,ysnClosed = 1
 		WHERE intPOSEndOfDayId = @intPOSEndOfDayId
 

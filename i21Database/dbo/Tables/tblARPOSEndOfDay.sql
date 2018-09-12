@@ -9,6 +9,8 @@
 	[intStoreId] INT NULL,
 	[intBankDepositId] INT NULL,
 	[intEntityId] INT NOT NULL,
+	[dtmOpen] DATETIME NOT NULL DEFAULT GETDATE(),
+	[dtmClose] DATETIME NULL,
 	[ysnClosed] BIT NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 1,
 	CONSTRAINT [FK_tblARPOSEndOfDay_tblSMCompanyLocationPOSDrawer] FOREIGN KEY (intCompanyLocationPOSDrawerId) REFERENCES tblSMCompanyLocationPOSDrawer(intCompanyLocationPOSDrawerId),
