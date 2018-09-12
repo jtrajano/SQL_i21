@@ -77,6 +77,7 @@ BEGIN
 	DECLARE @intTaxCodeId							INT
 	DECLARE @intTaxClassId							INT
 	DECLARE	@strPONumber						    NVARCHAR(50)
+	DECLARE @ShipViaId INT
 
 	DECLARE @ContractAvailableQuantity	NUMERIC(18, 6)
 	DECLARE @ContractOverFillQuantity	NUMERIC(18, 6)
@@ -343,6 +344,7 @@ BEGIN
 			IF(@ysnHeader = 1)
 				BEGIN
 				
+				SET @ShipViaId =  (SELECT TOP 1 intEntityId FROM tblSMShipVia WHERE ysnCompanyOwnedCarrier = 1)
 				BEGIN TRANSACTION
 
 					EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -374,6 +376,7 @@ BEGIN
 						,@PONumber				   =@strPONumber
 						,@RefreshPrice = @getARPrice
 						,@RecomputeTax	= 0
+						,@ShipViaId = @ShipViaId
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
