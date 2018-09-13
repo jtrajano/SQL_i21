@@ -56,7 +56,10 @@ LEFT JOIN tblCTContractHeader CH
     ON CH.intContractHeaderId = SH.intContractHeaderId  
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SH1.intInventoryReceiptId
+LEFT JOIN tblSCDeliverySheet DS
+    ON DS.intDeliverySheetId = CS.intDeliverySheetId
 WHERE CS.dblOpenBalance > 0 
     AND ISNULL(CS.strStorageType,'') <> 'ITR'
-    AND SH.strType IN ('From Scale','From Transfer','From Delivery Sheet')  
+    AND SH.strType IN ('From Scale','From Transfer','From Delivery Sheet')
+    AND DS.ysnPost = 1
 ORDER BY CS.dtmDeliveryDate

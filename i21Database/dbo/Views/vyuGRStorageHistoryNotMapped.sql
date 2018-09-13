@@ -28,6 +28,8 @@ SELECT
 								WHEN SH.strType <> 'From Delivery Sheet' THEN ISNULL(SCTicketSplit.dblSplitPercent,100)
 								ELSE DSSplit.dblSplitPercent
 							END
+	,intUserId				= US.intEntityId
+	,strUserName			= US.strUserName
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -59,3 +61,5 @@ LEFT JOIN tblEMEntitySplit EMSplit
 LEFT JOIN tblSCDeliverySheetSplit DSSplit
 	ON DS.intDeliverySheetId = DSSplit.intDeliverySheetId
 		AND CS.intEntityId = DSSplit.intEntityId
+LEFT JOIN tblSMUserSecurity US
+	ON US.intEntityId = SH.intEntityId

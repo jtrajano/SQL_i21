@@ -4,9 +4,9 @@ CREATE PROCEDURE uspGRCustomerStorageBalance
 	,@intLocationId INT = NULL
 	,@intDeliverySheetId INT = NULL
 	,@intCustomerStorageId INT = NULL
-	,@dblBalance DECIMAL(18,6)
+	,@dblBalance DECIMAL(38,20)
 	,@ysnDistribute BIT	
-	,@newBalance DECIMAL(18,6) OUTPUT
+	,@newBalance DECIMAL(38,20) OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
