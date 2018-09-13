@@ -117,7 +117,7 @@ AS SELECT
 	,SC.dblConvertedUOMQty
 	,SC.strCostMethod
 	,SC.strElevatorReceiptNumber
-	,SC.intEntityContactId
+	--,SC.intEntityContactId
 	,(ISNULL(SC.dblUnitPrice,0) + ISNULL(SC.dblUnitBasis,0)) AS dblCashPrice
 	,SC.intSalesOrderId
 	,SC.intDeliverySheetId

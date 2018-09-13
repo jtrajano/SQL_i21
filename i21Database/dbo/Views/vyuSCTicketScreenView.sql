@@ -131,7 +131,8 @@
 	,SCT.ysnDestinationWeightGradePost
 	,SCT.strPlateNumber
 	,SCT.blbPlateNumber
-	,SCT.intEntityContactId
+	,SCT.strDriverName
+	--,SCT.intEntityContactId
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
@@ -153,7 +154,7 @@
 	,EMEntityFarm.strLocationName AS strFarmField
 	,EMEntity.strName AS strCustomerNumber
 	,EMEntity.strName AS strCustomerName
-	,EMDriver.strName AS strDriverName
+	--,EMDriver.strName AS strDriverName
 
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
@@ -289,7 +290,7 @@
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
-	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
+	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (
 		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
