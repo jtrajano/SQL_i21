@@ -236,7 +236,7 @@ SELECT
     ,[intSublocationId]     = [intSubLocationId]
     ,[intStorageLocationId] = [intStorageLocationId]
     ,[intUserId]            = [intUserId]
-    ,[dtmDate]              = [dtmDate]
+    ,[dtmDate]              = [dtmPostDate] 
 FROM #ARPostInvoiceDetail
 WHERE
     [ysnBlended] = 0

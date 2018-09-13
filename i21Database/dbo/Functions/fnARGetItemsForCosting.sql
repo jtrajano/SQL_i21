@@ -94,7 +94,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= IST.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ARI.[dtmShipDate]
+	,[dtmDate]					= CASE WHEN ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1 THEN ARI.[dtmPostDate] ELSE ARI.[dtmShipDate] END
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -150,7 +150,7 @@ FROM
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [dtmPostDate]
 	 FROM @Invoices) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARI.[strTransactionType]  IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
 			AND ISNULL(intPeriodsToAccrue,0) <= 1

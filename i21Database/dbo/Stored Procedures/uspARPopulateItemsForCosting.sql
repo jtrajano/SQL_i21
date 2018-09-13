@@ -206,7 +206,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ARID.[dtmShipDate]
+	,[dtmDate]					= CASE WHEN ARID.[strItemType] = 'Finished Good' AND ARID.[ysnBlended] = 1 THEN ARID.[dtmPostDate] ELSE ARID.[dtmShipDate] END
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
