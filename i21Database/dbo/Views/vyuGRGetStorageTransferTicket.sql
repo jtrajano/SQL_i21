@@ -61,5 +61,5 @@ LEFT JOIN tblSCDeliverySheet DS
 WHERE CS.dblOpenBalance > 0 
     AND ISNULL(CS.strStorageType,'') <> 'ITR'
     AND SH.strType IN ('From Scale','From Transfer','From Delivery Sheet')
-    AND DS.ysnPost = 1
+    AND (DS.ysnPost = 1 OR CS.intTicketId IS NOT NULL)
 ORDER BY CS.dtmDeliveryDate
