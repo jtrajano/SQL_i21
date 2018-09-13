@@ -63,6 +63,7 @@ BEGIN
 			,@GetAllAvailablePricing
 			,@CurrencyExchangeRate
 			,@CurrencyExchangeRateTypeId
+			,0
 		)
 
 	RETURN @ItemPrice
