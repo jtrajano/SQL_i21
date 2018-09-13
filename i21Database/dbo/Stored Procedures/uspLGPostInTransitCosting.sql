@@ -76,8 +76,8 @@ BEGIN TRY
 			,GETDATE()
 			,LD.dblQuantity
 			,IU.dblUnitQty
-			,ISNULL(LD.dblAmount,0)/LD.dblQuantity dblCost
-			,ISNULL(LD.dblAmount,0) dblValue
+			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END dblCost
+			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
@@ -134,6 +134,7 @@ BEGIN TRY
 			,LD.dblForexRate
 			,LD.dblAmount
 			,L.intPurchaseSale
+			,CD.dblTotalCost
 
 		BEGIN
 			INSERT INTO @GLEntries (

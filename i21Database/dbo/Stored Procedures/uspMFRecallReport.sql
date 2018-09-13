@@ -53,6 +53,7 @@ Declare @intContractId int
 Declare @intShipmentId int
 Declare @intContainerId int
 Declare @strLotNumber nvarchar(50)
+Declare @strRecallLotNumber nvarchar(50)
  
 SELECT	@intLotId = [from]
 FROM	@temp_xml_table   
@@ -61,6 +62,8 @@ WHERE	[fieldname] = 'intLotId'
 Set @intDirectionId=2
 
 Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+
+Select @strRecallLotNumber=@strLotNumber
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -443,7 +446,7 @@ End
 Update @tblNodeData Set strTransactionName='Work Order' Where strType='W'
 
 Select * 
-		,@strLotNumber AS strRecallLotNumber
+		,@strRecallLotNumber AS strRecallLotNumber
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip

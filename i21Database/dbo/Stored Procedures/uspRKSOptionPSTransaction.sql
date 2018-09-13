@@ -15,7 +15,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
   strOptionType,dblStrike,dblPremium,dblPremiumValue as dblPremiumValue,dblCommission,intFutOptTransactionId  
  ,(dblPremiumValue+dblCommission) as dblNetPremium,  
  dblMarketPremium as dblMarketPremium,  
- dblMarketValue as dblMarketValue,  
+ -abs(dblMarketValue) as dblMarketValue,  
   case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as dblMTM,  
  strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,  
  -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,  

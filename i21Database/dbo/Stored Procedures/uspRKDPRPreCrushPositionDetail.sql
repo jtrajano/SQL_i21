@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspRKDPRPreCrushPositionDetail] @intCommodityId NVARCHAR(max)
+﻿CREATE PROCEDURE [dbo].[uspRKDPRPreCrushPositionDetail] 
+	@intCommodityId NVARCHAR(max)
 	,@intLocationId NVARCHAR(max) = NULL
 	,@intVendorId INT = NULL
 	,@strPurchaseSales NVARCHAR(50) = NULL
@@ -215,29 +216,30 @@ SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				)
 			EXEC uspRKDPRContractDetail @intCommodityId	,@dtmToDate
 
-			DECLARE @tblGetOpenFutureByDate TABLE (
-					intFutOptTransactionId int, 
-					intOpenContract  int,
-					strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
-					dblContractSize numeric(24,10),
-					strFutureMarket nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strOptionMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
-					dblStrike numeric(24,10),
-					strOptionType nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strInstrumentType nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strBrokerAccount nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
-					strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
-					intFutOptTransactionHeaderId int 
-					)
+			
 
-			INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
-						strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
+			
+DECLARE @tblGetOpenFutureByDate TABLE (
+		intFutOptTransactionId int, 
+		intOpenContract  int,
+		strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
+		dblContractSize numeric(24,10),
+		strFutureMarket nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strOptionMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+		dblStrike numeric(24,10),
+		strOptionType nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strInstrumentType nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strBrokerAccount nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
+		intFutOptTransactionHeaderId int 
+		)
+INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
+			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
 			EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
-
 			INSERT INTO @List (
 				strCommodityCode
 				,intCommodityId
@@ -598,9 +600,9 @@ INSERT INTO @List (
 				,7 intOrderId
 			FROM (
 				SELECT  
-					ic.strCommodityCode
-					,f.strInternalTradeNo
-					,f.intFutOptTransactionHeaderId
+					oc.strCommodityCode
+					,	oc.strInternalTradeNo
+					,	oc.intFutOptTransactionHeaderId
 					,f.intCommodityId
 					,left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) dtmFutureMonthsDate
 					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
@@ -615,7 +617,7 @@ INSERT INTO @List (
 				FROM @tblGetOpenFutureByDate oc
 				JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0 and isnull(ysnPreCrush,0)=1
 				INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
-				INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
+				--INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
 				JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 				INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
 				INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
@@ -626,7 +628,7 @@ INSERT INTO @List (
 						)
 				INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
-				WHERE ic.intCommodityId IN (select distinct intCommodity from @Commodity c) 
+				WHERE f.intCommodityId IN (select distinct intCommodity from @Commodity c) 
 				AND f.intLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN f.intLocationId ELSE @intLocationId END
 				--and f.intBookId = case when isnull(@intBookId,0) =0 then f.intBookId else @intBookId end
 				--and f.intSubBookId = case when isnull(@intSubBookId,0) =0 then f.intSubBookId else @intSubBookId end
@@ -668,7 +670,7 @@ INSERT INTO @List (
 				,8 intOrderId
 			FROM (
 				SELECT  
-					ic.strCommodityCode
+					oc.strCommodityCode
 					,f.strInternalTradeNo
 					,f.intFutOptTransactionHeaderId
 					,f.intCommodityId
@@ -685,7 +687,7 @@ INSERT INTO @List (
 				FROM @tblGetOpenFutureByDate oc
 				JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0 and isnull(ysnPreCrush,0)=0
 				INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
-				INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
+				--INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
 				JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 				INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
 				INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
@@ -696,7 +698,7 @@ INSERT INTO @List (
 						)
 				INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
-				WHERE ic.intCommodityId IN (select distinct intCommodity from @Commodity c) 
+				WHERE f.intCommodityId IN (select distinct intCommodity from @Commodity c) 
 				AND f.intLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN f.intLocationId ELSE @intLocationId END
 				--and f.intBookId = case when isnull(@intBookId,0) =0 then f.intBookId else @intBookId end
 				--and f.intSubBookId = case when isnull(@intSubBookId,0) =0 then f.intSubBookId else @intSubBookId end
@@ -800,19 +802,19 @@ SELECT distinct  strContractEndMonth FROM @List where strContractEndMonth <> 'Ne
 DECLARE @MonthOrderListFinal AS TABLE (		
 		strContractEndMonth NVARCHAR(100))
 
-insert into @MonthOrderListFinal 
+INSERT INTO @MonthOrderListFinal 
 SELECT 'Near By' 
-insert into @MonthOrderListFinal 
-SELECT  strContractEndMonth from @MonthOrderList order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
+INSERT INTO @MonthOrderListFinal 
+SELECT  strContractEndMonth FROM @MonthOrderList ORDER BY CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
 DECLARE @TopRowRec AS TABLE (		
 		strType NVARCHAR(100),
 		strCommodityCode NVARCHAR(100))
-insert into @TopRowRec 
+INSERT INTO @TopRowRec 
 SELECT TOP 1 strType,strCommodityCode from @List 
 
-insert into @ListFinal(
-		strCommodityCode		
+INSERT INTO @ListFinal(
+		 strCommodityCode		
 		,strType		
 		,strContractEndMonth
 		,dblTotal)
@@ -821,9 +823,9 @@ SELECT   strCommodityCode
 		,strContractEndMonth		
 		,0.0 dblTotal
 	FROM @TopRowRec t
-	cross join @MonthOrderListFinal t1
+	CROSS JOIN @MonthOrderListFinal t1
 	
-insert into @ListFinal(intSeqNo
+INSERT INTO @ListFinal(intSeqNo
 		,intRowNumber
 		,strCommodityCode
 		,strContractNumber
@@ -864,7 +866,7 @@ SELECT intSeqNo
 		,strInstrumentType
 		,strEntityName,intOrderId
 	FROM @List 
-	WHERE --ISNULL(dblTotal,0) <> 0 
+	WHERE ISNULL(dblTotal,0) <> 0 and
 	 strContractEndMonth = 'Near By'
 
 insert into @ListFinal(intSeqNo
@@ -911,7 +913,7 @@ SELECT intSeqNo
 	WHERE ISNULL(dblTotal,0) <> 0 
 	and strContractEndMonth not in( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
-	select intSeqNo
+	select intOrderId intSeqNo
 		,convert(int,row_number() over (order by intSeqNo)) intRowNumber
 		,strCommodityCode
 		,strContractNumber
@@ -930,4 +932,4 @@ SELECT intSeqNo
 		,dblDelta
 		,intBrokerageAccountId
 		,strInstrumentType
-		,strEntityName,intOrderId from @ListFinal  order by intOrderId
+		,strEntityName,intOrderId from @ListFinal where dblTotal <> 0 order by intSeqNo

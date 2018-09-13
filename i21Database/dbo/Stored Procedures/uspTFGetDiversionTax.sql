@@ -190,8 +190,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -370,8 +370,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -551,8 +551,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -731,8 +731,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
