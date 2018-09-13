@@ -100,8 +100,8 @@
 	--			FROM
 	--			agivcmst
 	--		)
-	--)
-	
+	--)	
+
 	IF(@originCustomerCount = @customerCount)
 	BEGIN
 		SET @Sucess = 1
@@ -109,7 +109,7 @@
 	IF(@originCustomerCount <> @customerCount)
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = 'There is a discrepancy on Salesperson records.'
+		SET @Message = @key
 
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
@@ -225,7 +225,7 @@
 	IF(@originSalespersonCount <> @salespersonCount)
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = @key
+		SET @Message = 'There is a discrepancy on Salesperson records.'
 		
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
@@ -411,7 +411,25 @@
 	ELSE
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = 'The AR Account in the Company Configuration was not set.'
+		SET @Message = @key 
+
+		INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT 'The AR Account in the Company Configuration was not set.'
+				,'Company Configuration'
+				,'The AR Account in the Company Configuration was not set.'
+				,@UserId
+				,@logDate
+				,@key 
+
+
 		RETURN;	
 	END
 
@@ -439,7 +457,25 @@
 			IF(@strCompanyLocation IS NOT NULL)
 			BEGIN
 				SET @Sucess = 0
-				SET @Message = 'The Service Charge Account of Company Location - ' + @strCompanyLocation + ' was not set.'
+				SET @Message =@key 
+
+				INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT 'The Service Charge Account of Company Location - ' + @strCompanyLocation + ' was not set.'
+				,'Company Configuration'
+				,'The Service Charge Account of Company Location - ' + @strCompanyLocation + ' was not set.'
+				,@UserId
+				,@logDate
+				,@key 
+
+
 				RETURN;	
 			END
 
@@ -454,7 +490,26 @@
 			IF(@intServiceChargeAccountId IS NULL)
 			BEGIN
 				SET @Sucess = 0
-				SET @Message = 'The Service Charge Account in the Company Configuration was not set.'
+				
+				SET @Message =@key 
+
+				INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT 'The Service Charge Account in the Company Configuration was not set.'
+				,'Company Configuration'
+				,'The Service Charge Account in the Company Configuration was not set.'
+				,@UserId
+				,@logDate
+				,@key 
 				RETURN;	
 			END
 		 END
+
+GO
