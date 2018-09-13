@@ -93,13 +93,13 @@ BEGIN
 	,GETDATE()
 	,11 --For Credit Card
 	,@strCreditCardNumber --Payment Method
-	,@strCreditCardNumber --Check weather we can use the payment method cc number
+	,NULL
 	,'' --Notes
 	,Inv.intAccountId
 	,NULL --Bank Account
 	,dblAmountDue
 	,NULL --Set NULL to Create
-	,intEntityCustomerId
+	,@intUserId
 	,Inv.intInvoiceId
 	,Inv.strTransactionType
 	,Inv.strTransactionNumber
@@ -160,7 +160,11 @@ BEGIN
 	SET @intPaymentIdNew = @intPaymentId
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentId
 	--Set the Card Info Id and Process Credit Card
-	UPDATE tblARPayment SET intEntityCardInfoId = @intEntityCardInfoId, ysnProcessCreditCard = 1 WHERE intPaymentId = @intPaymentId
+	UPDATE tblARPayment 
+	SET intEntityCardInfoId = @intEntityCardInfoId
+	  , ysnProcessCreditCard = 1 
+	  , intCurrentStatus = 5
+	WHERE intPaymentId = @intPaymentId
 
 	GOTO Exit_Routine
 END

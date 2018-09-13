@@ -201,7 +201,10 @@ FROM
 IF(@totalRecords = 0)  
 BEGIN
 
-	SET @batchId = NEWID();
+	IF @batchId IS NULL
+	BEGIN
+		SET @batchId = NEWID();
+	END
 	SET @batchIdUsed = @batchId;
 	
 	UPDATE A

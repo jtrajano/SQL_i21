@@ -887,9 +887,13 @@ BEGIN
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
-				,intTaxGroupId			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 
-				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
-				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+				,intTaxGroupId			= 
+										CASE 
+											WHEN RawData.strReceiptType = 'Transfer Order' THEN NULL 
+											ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 
+										END
+				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
 				,strChargesLink			= RawData.strChargesLink
 				,intLoadReceive			= RawData.intLoadReceive
@@ -928,7 +932,7 @@ BEGIN
 				-- Get the SM forex rate. 
 				OUTER APPLY dbo.fnSMGetForexRate(
 					ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId)
-					,CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+					,CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 					,RawData.dtmDate
 				) forexRate
 

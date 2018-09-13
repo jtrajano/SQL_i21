@@ -2,8 +2,8 @@
 AS
 SELECT     
  Entity.intEntityId 
- ,strPaymentMethod
- ,intPaymentMethodId
+  ,CustoPM.strPaymentMethod
+ ,Cus.intPaymentMethodId
 ,Entity.strName
 ,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Cus.strType

@@ -392,7 +392,7 @@ BEGIN TRY
 			SELECT @intProductTypeId = 8 -- Contract Line Item
 				,@intProductValueId = CD.intContractDetailId
 				,@intItemContractId = CD.intItemContractId
-				,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
+				,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
 				,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
 				,@intLocationId = CD.intCompanyLocationId
 				,@intRepresentingUOMId = CD.intUnitMeasureId
@@ -411,7 +411,7 @@ BEGIN TRY
 				,@intContractHeaderId = NULL
 				,@intContractDetailId = NULL
 				,@intItemContractId = NULL
-				,@intCountryID = IM.intOriginId
+				,@intCountryID = CA.intCountryID
 				,@strCountry = CA.strDescription
 			FROM tblICItem IM
 			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId

@@ -605,6 +605,14 @@ BEGIN
 			) = 1 
 			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	DELETE	FROM tblICInventoryStockMovement 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND intInventoryTransactionId IS NOT NULL
 END 
 
 --------------------------------------------------------------------
@@ -621,6 +629,8 @@ BEGIN
 	UPDATE	l
 	SET		l.dblQty = 0
 			,l.dblWeight = 0 
+			,l.dblQtyInTransit = 0 
+			,l.dblWeightInTransit = 0 
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
 	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
@@ -637,9 +647,29 @@ BEGIN
 								)
 							)
 						, 0) 
-				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICLot Lot
+				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN tblICItemLocation il
+								ON InvTrans.intItemLocationId = il.intItemLocationId 
+						INNER JOIN dbo.tblICLot Lot
 							ON InvTrans.intLotId = Lot.intLotId 
 				WHERE	Lot.intLotId = UpdateLot.intLotId			
+						AND il.intLocationId IS NOT NULL 
+			)
+			,dblQtyInTransit = (
+				SELECT	ISNULL(
+							SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									InvTrans.intItemUOMId
+									, Lot.intItemUOMId
+									, InvTrans.dblQty
+								)
+							)
+						, 0) 
+				FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN tblICItemLocation il
+								ON InvTrans.intItemLocationId = il.intItemLocationId 
+						INNER JOIN dbo.tblICLot Lot
+							ON InvTrans.intLotId = Lot.intLotId 
+				WHERE	Lot.intLotId = UpdateLot.intLotId			
+						AND il.intLocationId IS NULL 
 			)
 	FROM	tblICLot UpdateLot INNER JOIN tblICItem i
 				ON UpdateLot.intItemId = i.intItemId
@@ -648,6 +678,7 @@ BEGIN
 
 	UPDATE	l
 	SET		l.dblWeight = dbo.fnMultiply(ISNULL(l.dblQty, 0), ISNULL(l.dblWeightPerQty, 0)) 	
+			,l.dblWeightInTransit = dbo.fnMultiply(ISNULL(l.dblQtyInTransit, 0), ISNULL(l.dblWeightPerQty, 0)) 	
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
 	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
@@ -839,7 +870,9 @@ BEGIN
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
 									'Work in Progress'			
 								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement') THEN 
-									'AP Clearing'																								
+									'AP Clearing'
+								WHEN @strTransactionForm = 'Storage Measurement Reading' THEN
+									'Inventory Adjustment'																								
 								ELSE 
 									NULL 
 						END
@@ -2743,7 +2776,94 @@ BEGIN
 					END 				
 				END
 			END 									
-								
+				
+			-- Repost 'Storage Measurement Reading'
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Storage Measurement Reading'))
+			BEGIN
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustCostValue
+						,dblAdjustRetailValue
+				)
+				SELECT 	RebuildInvTrans.intItemId  
+						,RebuildInvTrans.intItemLocationId 
+						,RebuildInvTrans.intItemUOMId  
+						,RebuildInvTrans.dtmDate  
+						,RebuildInvTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+						,dblCost  = 	CASE	
+											WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+												dbo.fnGetItemAverageCost(
+													RebuildInvTrans.intItemId
+													, RebuildInvTrans.intItemLocationId
+													, RebuildInvTrans.intItemUOMId
+												) 
+											ELSE 
+												dbo.fnMultiply(
+													ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+													,dblUOMQty
+												)
+										END 
+						,RebuildInvTrans.dblSalesPrice  
+						,RebuildInvTrans.intCurrencyId  
+						,RebuildInvTrans.dblExchangeRate  
+						,RebuildInvTrans.intTransactionId  
+						,RebuildInvTrans.intTransactionDetailId  
+						,RebuildInvTrans.strTransactionId  
+						,RebuildInvTrans.intTransactionTypeId  
+						,RebuildInvTrans.intLotId 
+						,RebuildInvTrans.intSubLocationId
+						,RebuildInvTrans.intStorageLocationId
+						,RebuildInvTrans.strActualCostId
+						,RebuildInvTrans.intForexRateTypeId
+						,RebuildInvTrans.dblForexRate
+						,intCategoryId = RebuildInvTrans.intCategoryId 
+						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
+						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
+						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
+
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuildInvTrans.intLotId 
+				WHERE	RebuildInvTrans.strBatchId = @strBatchId
+						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL 
+
+				EXEC @intReturnValue = dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR 
+					
+			END				
 			ELSE 
 			BEGIN 								
 				-- Update the cost used in the adjustment 
@@ -3063,7 +3183,7 @@ BEGIN
 	FROM
 		tblGLDetail
 	WHERE ysnIsUnposted = 0	
-	GROUP BY 
+	GROUP BY   
 		intAccountId
 		,ISNULL(intMultiCompanyId, @intCompanyId)
 		,dtmDate

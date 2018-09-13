@@ -54,6 +54,7 @@
     [dtmTransactionDate]          DATETIME        NULL,
     [dtmDate]                     DATETIME        NULL,
     [dtmPostedDate]               DATETIME        NULL,
+	[dtmBillingDate]			  DATETIME        NULL,
     [dblTotalMiles]               NUMERIC (18, 6) NULL,
     [dblQuantity]                 NUMERIC (18, 6) NULL,
     [dblCalculatedTotalAmount]    NUMERIC (18, 6) NULL,

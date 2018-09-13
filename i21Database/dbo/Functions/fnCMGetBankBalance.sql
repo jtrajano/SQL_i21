@@ -99,7 +99,7 @@ WHERE	ysnPosted = 1
 		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)
 
 -- Add the opening balance to the return balance. 
-SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance
+SELECT @returnBalance = ROUND((ISNULL(@openingBalance, 0) + @returnBalance), 2)
 
 RETURN ISNULL(@returnBalance, 0)
 

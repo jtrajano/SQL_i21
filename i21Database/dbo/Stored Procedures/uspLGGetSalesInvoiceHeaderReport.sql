@@ -110,7 +110,7 @@ BEGIN
 		L.dtmETAPOD,
 		L.intNumberOfContainers,
 		ShippingLine.strName AS strShippingLineName,
-		ysnDisplayPIInfo = @ysnDisplayPIInfo,
+		ysnDisplayPIInfo = CASE WHEN @ysnDisplayPIInfo = 0 THEN 'False' ELSE 'True' END,
 		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType,
 		strReportName = @strReportName,
 		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
@@ -121,7 +121,12 @@ BEGIN
 		C.strVatNumber AS strYourVATNo,
 		'' AS strBrokerReferenceNo,
 		'' AS strRemarks,
-		ICT.strICTDesc
+		ICT.strICTDesc,
+		CP.strInvoiceText,
+		(SELECT TOP 1 E.strName  
+		FROM tblLGLoadWarehouse LW
+		JOIN tblEMEntity E ON E.intEntityId = LW.intHaulerEntityId
+		WHERE LW.intLoadId = L.intLoadId) strCarrier
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId

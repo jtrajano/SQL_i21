@@ -16,7 +16,7 @@ BEGIN TRY
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @strVoucher NVARCHAR(20)
 	DECLARE @intCreatedUserId INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @ItemLocationId INT
 	DECLARE @SettleStorageKey INT
 	DECLARE @intSettleStorageTicketId INT
@@ -114,6 +114,9 @@ BEGIN TRY
 
 	--get the original value of Spot Units before settlement
 	DECLARE @origdblSpotUnits DECIMAL(24, 10) 
+
+	DECLARE @intShipFrom INT
+	DECLARE @shipFromEntityId INT
 
 	SET @dtmDate = GETDATE()
 
@@ -271,9 +274,9 @@ BEGIN TRY
 								   ELSE 'calculate'
 							  END
 
-		SELECT @UserName = strUserName
-		FROM tblSMUserSecurity
-		WHERE [intEntityId] = @intCreatedUserId
+		-- SELECT @UserName = strUserName
+		-- FROM tblSMUserSecurity
+		-- WHERE [intEntityId] = @intCreatedUserId
 
 		-- SELECT @FeeItemId = intItemId
 		-- FROM tblGRCompanyPreference
@@ -474,7 +477,10 @@ BEGIN TRY
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
-					,dblUnits             = SST.dblUnits
+					,dblUnits             = CASE
+												WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits
+												ELSE SST.dblUnits
+											END
 					,dblCashPrice         = CS.dblFeesDue
 					,intItemId            = IC.intItemId
 					,intItemType          = 4
@@ -491,6 +497,12 @@ BEGIN TRY
 					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 				INNER JOIN tblICItem IC 
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
+				GROUP BY SST.intCustomerStorageId
+						,CS.intCompanyLocationId
+						,SC.ysnCusVenPaysFees
+						,SST.dblUnits
+						,CS.dblFeesDue
+						,IC.intItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
@@ -540,6 +552,19 @@ BEGIN TRY
 
 					UPDATE tblGRSettleStorage SET intCompanyLocationId = @intCompanyLocationId WHERE intSettleStorageId = @intTempSettleStorageId
 				END
+
+				SELECT @intShipFrom = ISNULL(DS.intFarmFieldId, EL.intEntityLocationId) 
+					,@shipFromEntityId = DS.intEntityId
+				FROM tblSCDeliverySheetSplit DSS
+				JOIN tblSCDeliverySheet DS
+					ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+				LEFT JOIN tblEMEntityLocation EL 
+					ON EL.intEntityId = DS.intEntityId 
+						AND EL.ysnDefaultLocation = 1
+				JOIN tblGRCustomerStorage CS
+					ON DSS.intDeliverySheetId = CS.intDeliverySheetId
+						AND CS.intEntityId = DSS.intEntityId
+				WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
 				--Storage Due		
 				SET @dblStorageDuePerUnit = 0
@@ -1378,27 +1403,41 @@ BEGIN TRY
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
 				 ,[intItemId]			  = CC.[intItemId]
-				 ,[intAccountId]		  = NULL
+				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,@LocationId,'Other Charge Expense')
 				 ,[dblQtyReceived]		  = CASE 
 												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
 												ELSE SV.dblUnits 
 											END
 				 ,[strMiscDescription]	  = Item.[strItemNo]
-				 ,[dblCost]				  = (
-											  CASE 
-											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)
-											  		ELSE  CC.dblRate
-											  END
-											 )
-											 /											
-											 (CASE 
-												WHEN CC.strCostMethod ='Per Unit' THEN 1
-												WHEN CC.strCostMethod ='Amount'	  THEN 
-																					   CASE 
-																							WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
-																							ELSE SV.dblUnits 
-																						END
-											 END)
+				 ,[dblCost]				  = CASE
+												WHEN ISNULL(CC.ysnPrice, 0) = 0  --this is the only field that needs to be checked when a contract that has a charge is applied to a storage
+													THEN 
+														( CASE 
+															WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1) ELSE  CC.dblRate
+														END
+														)
+														/											
+														( CASE 
+															WHEN CC.strCostMethod ='Per Unit' THEN 1
+															WHEN CC.strCostMethod ='Amount'	  THEN 
+																								CASE 
+																										WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits) ELSE SV.dblUnits 
+																									END
+														END)
+												ELSE
+													- (( CASE 
+														WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1) ELSE  CC.dblRate
+													END
+													)
+													/											
+													( CASE 
+														WHEN CC.strCostMethod ='Per Unit' THEN 1
+														WHEN CC.strCostMethod ='Amount'	  THEN 
+																							CASE 
+																									WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits) ELSE SV.dblUnits 
+																								END
+													END))
+				 							END
 				 ,[intContractHeaderId]	  = CD.[intContractHeaderId]
 				 ,[intContractDetailId]	  = CD.[intContractDetailId]
 				 ,[intUnitOfMeasureId]	  = CASE 
@@ -1413,8 +1452,7 @@ BEGIN TRY
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1
 				 ,[dblNetWeight]		  = 0
-				 FROM 
-				 tblCTContractCost CC 
+				 FROM tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD 
 					ON CD.intContractDetailId =  CC.intContractDetailId
 				 JOIN @SettleVoucherCreate SV 
@@ -1434,6 +1472,8 @@ BEGIN TRY
 					,@type = 1
 					,@voucherDetailStorage = @voucherDetailStorage
 					,@shipTo = @LocationId
+					,@shipFrom = @intShipFrom
+					,@shipFromEntityId = @shipFromEntityId
 					,@vendorOrderNumber = NULL
 					,@voucherDate = @dtmDate
 					,@billId = @intCreatedBillId OUTPUT
@@ -1590,6 +1630,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -1605,7 +1646,8 @@ BEGIN TRY
 					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
-					,[strUserName]			= @UserName 
+					,[strUserName]			= NULL
+					,[intUserId]		 	= @intCreatedUserId
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 

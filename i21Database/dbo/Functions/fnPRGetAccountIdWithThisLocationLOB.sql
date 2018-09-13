@@ -55,7 +55,7 @@ BEGIN
 		AND ISNULL([Location], 0) = ISNULL(@intProfitCenter, ISNULL(@intOrigProfitCenter, 0))
 		AND ISNULL([LOB], 0) = ISNULL(@intLineOfBusiness, ISNULL(@intOrigLOB, 0))
 
-	RETURN @intFinalAccountId
+	RETURN ISNULL(@intFinalAccountId, @intAccountId)
 END
 
 GO

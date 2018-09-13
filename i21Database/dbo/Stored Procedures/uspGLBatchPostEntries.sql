@@ -83,8 +83,8 @@ BEGIN
 			dbo.fnRemoveTimeOnDate([dtmDate])
 			,[strBatchId]
 			,[intAccountId]
-			,[dblDebit] = Debit.Value
-			,[dblCredit] = Credit.Value 
+			,[dblDebit] = Debit.Value 
+			,[dblCredit] = Credit.Value
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -116,7 +116,7 @@ BEGIN
 			,[intConcurrencyId]
 	FROM	@GLEntries GLEntries 
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
 	WHERE strTransactionId NOT IN (select strTransactionId from @FoundErrors)
 END
 ;

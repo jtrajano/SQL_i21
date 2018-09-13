@@ -443,6 +443,7 @@ BEGIN
 			,intProducerId
 			,strCertificateId
 			,strTrackingNumber
+			,strParentLotNumber
 			)
 		SELECT intLotId = NULL
 			,strLotNumber = @strLotNumber
@@ -476,6 +477,7 @@ BEGIN
 			,intProducerId = @intProducerId
 			,strCertificateId = @strCertificateId
 			,strTrackingNumber = @strTrackingNumber
+			,strParentLotNumber = @strParentLotNumber
 
 		EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 			,@intUserId

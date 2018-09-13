@@ -28,6 +28,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@ysnPost AS BIT = 1
 	,@intOtherChargeItemId AS INT = NULL
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
+	,@intLotId AS INT = NULL 
+	,@IsEscalate AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -190,6 +192,7 @@ BEGIN
 			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 		
 	-- Validate the cost bucket
 	BEGIN 
@@ -205,7 +208,7 @@ BEGIN
 		END
 
 		-- Check if cost adjustment date is earlier than the cost bucket date. 
-		IF dbo.fnDateLessThan(@dtmDate, @CostBucketDate) = 1
+		IF dbo.fnDateLessThan(@dtmDate, @CostBucketDate) = 1 AND ISNULL(@IsEscalate,0) = 0 
 		BEGIN 
 			-- 'Cost adjustment cannot continue. Cost adjustment for {Item} cannot be earlier than {Cost Bucket Date}.'
 			EXEC uspICRaiseError 80219, @strItemNo, @CostBucketDate;  
@@ -239,6 +242,7 @@ BEGIN
 			AND t.strTransactionId = @strSourceTransactionId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.dblQty > 0 
+			AND t.intLotId = ISNULL(@intLotId, t.intLotId) 
 	-- Cost Bucket Out: 
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
@@ -250,6 +254,7 @@ BEGIN
 			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 END 
 
 -- Remember the original cost from the cost bucket
@@ -298,6 +303,7 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 	
 			AND cb.dblStockIn > 0 
+			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 
 	-- If value of cost adjustment is zero, then exit immediately. 
 	IF @CostAdjustmentPerLot IS NULL 
@@ -501,6 +507,8 @@ BEGIN
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment = (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+					--dbo.fnMultiply(@t_dblQty, @CostBucketNewCost)
+					--- dbo.fnMultiply(@t_dblQty, @CostBucketOriginalCost)				
 
 			SET @EscalateInventoryTransactionTypeId = NULL
 			EXEC [uspICPostCostAdjustmentEscalate]
@@ -674,7 +682,7 @@ BEGIN
 			,@strTransactionId						= @strTransactionId
 			,@strBatchId							= @strBatchId
 			,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
-			,@intLotId								= NULL  
+			,@intLotId								= @intLotId  
 			,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
 			,@intRelatedTransactionId				= @intSourceTransactionId
 			,@strRelatedTransactionId				= @strSourceTransactionId

@@ -1,8 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuMBILInvoiceItem]
 	AS
 	
-SELECT InvoiceSite.*
+SELECT Invoice.*
 	, InvoiceItem.intInvoiceItemId
+	, InvoiceItem.intSiteId
+	, Site.intSiteNumber
+	, Site.strSiteDescription
+	, Site.strSiteAddress
+	, Site.strCity
+	, Site.strState
+	, Site.strZipCode
+	, Site.strCountry
+	, strSiteStatus = dbo.fnMBILGetInvoiceStatus(NULL, InvoiceItem.intSiteId)
 	, InvoiceItem.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
@@ -15,10 +24,11 @@ SELECT InvoiceSite.*
 	, ContractDetail.intContractSeq
 	, inti21InvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
 FROM tblMBILInvoiceItem InvoiceItem
-LEFT JOIN vyuMBILInvoiceSite InvoiceSite ON InvoiceSite.intInvoiceSiteId = InvoiceItem.intInvoiceSiteId
+LEFT JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 LEFT JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InvoiceItem.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = InvoiceItem.intContractDetailId
 LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
 LEFT JOIN tblARInvoiceDetail i21InvoiceDetail ON i21InvoiceDetail.intInvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
+LEFT JOIN vyuMBILSite Site ON Site.intSiteId = InvoiceItem.intSiteId

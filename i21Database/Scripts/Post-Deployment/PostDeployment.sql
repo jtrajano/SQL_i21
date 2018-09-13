@@ -288,6 +288,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOPendingStatus.sql
 :r .\AP\UpdateVendorCreatePostVoucher.sql
 :r .\AP\VoucherPayableDefaultData.sql
+:r .\AP\FixStartingNumbers.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -315,6 +316,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
 :r .\IC\Data_Fix_For_18.3\11_ImplementBasketChanges.sql 
 :r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
+:r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
@@ -330,6 +332,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1_MasterTables.sql
 :R .\CT\172To173.sql
 :R .\CT\174To181.sql
+:R .\CT\ExcelAndTableColumnMap.sql
+
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
 
@@ -410,6 +414,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 :r .\EM\040_UpdatePasswordHistoryEncryption.sql
+:r .\EM\041_FixVendorNo.sql
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
@@ -437,6 +442,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\13_FileFieldMapping_Passport_MCM.sql
 :r .\ST\14_FileFieldMapping_Passport_MSM.sql
 :r .\ST\15_FileFieldMapping_Passport_TLM.sql
+:r .\ST\16_FileFieldMapping_Passport_TLM_340.sql
+:r .\ST\17_FileFieldMapping_Passport_FGM_340.sql
+:r .\ST\18_FileFieldMapping_Passport_ISM_340.sql
+:r .\ST\19_FileFieldMapping_Passport_MCM_340.sql
+:r .\ST\20_FileFieldMapping_Passport_MSM_340.sql
+:r .\ST\21_FileFieldMapping_Passport_CBT.sql
+:r .\ST\22_FileFieldMapping_Passport_ITT.sql
+:r .\ST\23_FileFieldMapping_Passport_ILT.sql
+
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
@@ -471,8 +485,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\RM\02_DataFix.sql
 
 --FRM
-:r .\FRM\DefaultData\1_OfflineMenu.sql
-:r .\FRM\1_OfflineGuid.sql
+
+
 
 --CCR
 :r .\CCR\SiteDataFix.sql

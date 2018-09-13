@@ -152,24 +152,12 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @strCustomerCode = 'JDE'
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strISOCode
-					WHERE intStageEntityId = @intStageEntityId
-				END
-				ELSE
-				BEGIN
-					SELECT @intCountryId = c.intCountryID
-						,@strCountry = c.strCountry
-						,@strState = strState
-					FROM tblIPEntityStage e
-					JOIN tblSMCountry c ON e.strCountry = c.strCountry
-					WHERE intStageEntityId = @intStageEntityId
-				END
+			SELECT @intCountryId = c.intCountryID
+				,@strCountry = c.strCountry
+				,@strState = strState
+			FROM tblIPEntityStage e
+			JOIN tblSMCountry c ON e.strCountry = c.strISOCode
+			WHERE intStageEntityId = @intStageEntityId
 
 			IF ISNULL(@intEntityId, 0) = 0 --Create
 			BEGIN
@@ -256,11 +244,13 @@ BEGIN TRY
 					,strEntityNo
 					,ysnActive
 					,strContactNumber
+					,strExternalERPId
 					)
 				SELECT strName
 					,@strEntityNo
 					,1
 					,''
+					,strAccountNo
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
@@ -426,7 +416,7 @@ BEGIN TRY
 				--Add Audit Trail Record
 				SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intEntityId) + '","keyValue":' + CONVERT(VARCHAR, @intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
 
-				SELECT @dtmDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated)
+				SELECT @dtmDate = DATEADD(ss, DATEDIFF(ss, GETDATE(), GETUTCDATE()), dtmCreated)
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 

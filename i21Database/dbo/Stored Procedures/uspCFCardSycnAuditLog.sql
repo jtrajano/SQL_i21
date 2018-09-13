@@ -145,7 +145,7 @@ BEGIN
 		,@loopRecord			 =  strRecord			
 		,@loopAccountNumber		 =  strAccountNumber
 		,@loopAction			 =  (CASE WHEN strType = 'Update' THEN 'Updated' ELSE 'Created' END)
-		,@screenName			 =  (CASE WHEN strTableName = 'tblCFCard' THEN 'CardFueling.view.AccountCard' ELSE 'CardFueling.view.Vehicle' END) 
+		,@screenName			 =  (CASE WHEN strTableName = 'tblCFCard' THEN 'CardFueling.view.AccountCard' ELSE 'CardFueling.view.AccountVehicle' END) 
 		,@loopIcon				 =  (CASE WHEN strType = 'Update' THEN 'small-tree-modified' ELSE 'small-new-plus' END)
 		FROM @tmpCSULogs
 

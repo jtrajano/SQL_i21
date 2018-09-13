@@ -140,6 +140,7 @@ BEGIN TRY
 	,strTermCode
 	,strTermType
 	,dtmTransactionDate
+	,dtmBillingDate
 	,dtmDate
 	,dtmPostedDate
 	,dtmDiscountDate
@@ -276,6 +277,7 @@ BEGIN TRY
 	,strTermCode
 	,strTermType
 	,dtmTransactionDate
+	,dtmBillingDate
 	,dtmDate
 	,dtmPostedDate
 	,dtmDiscountDate

@@ -21,6 +21,7 @@ AS
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
+				,LO.dtmDeadlineCargo
 				,CAST(
 						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
 								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
@@ -67,6 +68,7 @@ AS
 			,dtmETAPOD
 			,dtmStuffingDate
 			,dtmETSPOL
+			,dtmDeadlineCargo
 			,strBookingReference
 			,intLoadId
 
@@ -93,6 +95,7 @@ AS
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
+				,LO.dtmDeadlineCargo
 				,CAST(
 						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
 								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
@@ -129,5 +132,6 @@ AS
 			,dtmETAPOD
 			,dtmStuffingDate
 			,dtmETSPOL
+			,dtmDeadlineCargo
 			,strBookingReference
 			,intLoadId

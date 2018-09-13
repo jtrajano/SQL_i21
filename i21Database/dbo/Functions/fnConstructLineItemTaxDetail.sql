@@ -21,6 +21,7 @@
 	,@ItemUOMId						INT								= NULL
 	,@CFSiteId						INT								= NULL
 	,@IsDeliver						BIT								= 0
+	,@IsCFQuote					    BIT                             = 0
 	,@CurrencyId					INT								= NULL
 	,@CurrencyExchangeRateTypeId	INT								= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)					= NULL
@@ -133,6 +134,7 @@ BEGIN
 						,@ExcludeCheckOff
 						,@CFSiteId
 						,@IsDeliver
+						,@IsCFQuote
 						,@ItemUOMId
 						,@CurrencyId
 						,@CurrencyExchangeRateTypeId

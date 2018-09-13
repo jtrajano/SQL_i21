@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARValidateItemLicense]
-	  @intEntityCustomerId		INT
+	  @intEntityCustomerId		INT = NULL
 	, @intEntityApplicatorId	INT	= NULL
 	, @dtmDate					DATETIME = NULL
 	, @strItemIds				NVARCHAR(MAX) = NULL

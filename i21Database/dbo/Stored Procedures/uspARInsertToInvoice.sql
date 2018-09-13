@@ -23,7 +23,8 @@ DECLARE @DateOnly				DATETIME,
 		@dblZeroAmount			NUMERIC(18, 6),
 		@RaiseError				BIT,
 		@ErrorMessage			NVARCHAR(MAX),
-		@CurrentErrorMessage	NVARCHAR(MAX) 
+		@CurrentErrorMessage	NVARCHAR(MAX),
+		@IsRecurring BIT = 0 
 		 
 
 --VARIABLES FOR INVOICE HEADER
@@ -533,8 +534,9 @@ IF ISNULL(@RaiseError,0) = 0
 IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	BEGIN
 		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnRecurring = 1 AND strType = 'Software'
-		
-		IF ISNULL(@SoftwareInvoiceId, 0) > 0
+		SELECT TOP 1 @IsRecurring = ISNULL(ysnRecurring,0) FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+
+		IF ISNULL(@SoftwareInvoiceId, 0) > 0 AND @IsRecurring = 1
 			BEGIN
 				--UPDATE EXISTING RECURRING INVOICE
 				UPDATE tblARInvoice 
@@ -1269,8 +1271,9 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
 				UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
-
-				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
+				
+				EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice',@raiseError = 1
 			END
 
 		SET @NewInvoiceId = ISNULL(@NewInvoiceId, @SoftwareInvoiceId)

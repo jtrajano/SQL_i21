@@ -113,13 +113,10 @@
 	[intCustomerChargesItemId] int NULL,
 	[intCustomerPaymentItemId] int NULL,
 	[intOverShortItemId] int NULL,
-
 	[strStoreAppWebUrl] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[ysnStoreAppOnline] BIT DEFAULT 0,
 	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
-
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 

@@ -25,6 +25,13 @@ BEGIN
 END
 GO
 
+GO
+IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE dblRefreshRate IS NULL)
+BEGIN
+	UPDATE tblRKCompanyPreference SET dblRefreshRate = 5 WHERE dblRefreshRate IS NULL
+END
+GO
+
 
 PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
 GO

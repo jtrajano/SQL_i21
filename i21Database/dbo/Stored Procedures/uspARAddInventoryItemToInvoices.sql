@@ -359,6 +359,7 @@ BEGIN TRY
 		,0							--@GetAllAvailablePricing
 		,ISNULL(IE.[dblCurrencyExchangeRate], 1)	--@CurrencyExchangeRate
 		,IE.[intCurrencyExchangeRateId] --@CurrencyExchangeRateTypeId
+		,0							--@ysnFromItemSelection
 	) IP
 	WHERE
 		ISNULL(IE.[ysnRefreshPrice],0) = 1
@@ -371,213 +372,576 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+IF(OBJECT_ID('tempdb..#InvoiceInventoryItem') IS NOT NULL)
+BEGIN
+    DROP TABLE #InvoiceInventoryItem
+END
+
+CREATE TABLE #InvoiceInventoryItem
+	([intInvoiceId]						INT												NOT NULL
+	,[intInvoiceDetailId]				INT												NULL
+	,[strDocumentNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[intItemId]						INt												NULL
+	,[intPrepayTypeId]					INT												NULL
+	,[dblPrepayRate]					NUMERIC(18, 6)									NULL
+	,[strItemDescription]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblQtyOrdered]					NUMERIC(18, 6)									NULL
+	,[intOrderUOMId]					INT												NULL
+	,[dblQtyShipped]					NUMERIC(18, 6)									NULL
+	,[intItemUOMId]						INT												NULL
+	,[intPriceUOMId]					INT												NULL
+	,[dblUnitQuantity]					NUMERIC(18, 6)									NULL
+	,[dblItemWeight]					NUMERIC(18, 6)									NULL
+	,[intItemWeightUOMId]				INT												NULL
+	,[dblDiscount]						NUMERIC(18, 6)									NULL
+	,[dblItemTermDiscount]				NUMERIC(18, 6)									NULL
+	,[strItemTermDiscountBy]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblItemTermDiscountAmount]		NUMERIC(18, 6)									NULL
+	,[dblBaseItemTermDiscountAmount]	NUMERIC(18, 6)									NULL
+	,[dblItemTermDiscountExemption]		NUMERIC(18, 6)									NULL
+	,[dblBaseItemTermDiscountExemption]	NUMERIC(18, 6)									NULL
+	,[dblTermDiscountRate]				NUMERIC(18, 6)									NULL
+	,[ysnTermDiscountExempt]			BIT												NULL
+	,[dblPrice]							NUMERIC(18, 6)									NULL
+	,[dblBasePrice]						NUMERIC(18, 6)									NULL
+	,[dblUnitPrice]						NUMERIC(18, 6)									NULL
+	,[dblBaseUnitPrice]					NUMERIC(18, 6)									NULL
+	,[strPricing]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblTotalTax]						NUMERIC(18, 6)									NULL
+	,[dblBaseTotalTax]					NUMERIC(18, 6)									NULL
+	,[dblTotal]							NUMERIC(18, 6)									NULL
+	,[dblBaseTotal]						NUMERIC(18, 6)									NULL
+	,[intCurrencyExchangeRateTypeId]	INT												NULL
+	,[intCurrencyExchangeRateId]		INT												NULL
+	,[dblCurrencyExchangeRate]			NUMERIC(18, 6)									NULL
+	,[intSubCurrencyId]					INT												NULL
+	,[dblSubCurrencyRate]				NUMERIC(18, 6)									NULL
+	,[ysnRestricted]					BIT												NULL
+	,[ysnBlended]						BIT												NULL
+	,[intAccountId]						INT												NULL
+	,[intCOGSAccountId]					INT												NULL
+	,[intSalesAccountId]				INT												NULL
+	,[intInventoryAccountId]			INT												NULL
+	,[intServiceChargeAccountId]		INT												NULL
+	,[intLicenseAccountId]				INT												NULL
+	,[intMaintenanceAccountId]			INT												NULL
+	,[strMaintenanceType]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL			
+	,[strFrequency]						NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[dtmMaintenanceDate]				DATETIME										NULL
+	,[dblMaintenanceAmount]				NUMERIC(18, 6)									NULL
+	,[dblBaseMaintenanceAmount]			NUMERIC(18, 6)									NULL
+	,[dblLicenseAmount]					NUMERIC(18, 6)									NULL
+	,[dblBaseLicenseAmount]				NUMERIC(18, 6)									NULL
+	,[intTaxGroupId]					INT												NULL
+	,[intStorageLocationId]				INT												NULL
+	,[intCompanyLocationSubLocationId]	INT												NULL
+	,[intSCInvoiceId]					INT												NULL
+	,[intSCBudgetId]					INT												NULL
+	,[strSCInvoiceNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSCBudgetDescription]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[intInventoryShipmentItemId]		INT												NULL
+	,[intInventoryShipmentChargeId]		INT												NULL
+	,[intRecipeItemId]					INT												NULL
+	,[strShipmentNumber]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[intSalesOrderDetailId]			INT												NULL
+	,[strSalesOrderNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strVFDDocumentNumber]				NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
+	,[intContractHeaderId]				INT												NULL
+	,[intContractDetailId]				INT												NULL
+	,[dblContractBalance]				NUMERIC(18, 6)									NULL
+	,[dblContractAvailable]				NUMERIC(18, 6)									NULL
+	,[intShipmentId]					INT												NULL
+	,[intShipmentPurchaseSalesContractId]	INT											NULL
+	,[dblShipmentGrossWt]				NUMERIC(18, 6)									NULL
+	,[dblShipmentTareWt]				NUMERIC(18, 6)									NULL
+	,[dblShipmentNetWt]					NUMERIC(18, 6)									NULL
+	,[intTicketId]						INT												NULL
+	,[intTicketHoursWorkedId]			INT												NULL
+	,[intCustomerStorageId]				INT												NULL
+	,[intSiteDetailId]					INT												NULL
+	,[intLoadDetailId]					INT												NULL
+	,[intLotId]							INT												NULL
+	,[intOriginalInvoiceDetailId]		INT												NULL
+	,[intConversionAccountId]			INT												NULL
+	,[intEntitySalespersonId]			INT												NULL
+	,[intSiteId]						INT												NULL
+	,[strBillingBy]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblPercentFull]					NUMERIC(18, 6)									NULL
+	,[dblNewMeterReading]				NUMERIC(18, 6)									NULL
+	,[dblPreviousMeterReading]			NUMERIC(18, 6)									NULL
+	,[dblConversionFactor]				NUMERIC(18, 6)									NULL
+	,[intPerformerId]					INT												NULL
+	,[ysnLeaseBilling]					INT												NULL
+	,[ysnVirtualMeterReading]			BIT												NULL
+	,[dblOriginalItemWeight]			NUMERIC(18, 6)									NULL
+	,[intRecipeId]						INT												NULL
+	,[intSubLocationId]					INT												NULL
+	,[intCostTypeId]					INT												NULL
+	,[intMarginById]					INT												NULL
+	,[intCommentTypeId]					INT												NULL
+	,[dblMargin]						NUMERIC(18, 6)									NULL
+	,[dblRecipeQuantity]				NUMERIC(18, 6)									NULL
+	,[intStorageScheduleTypeId]			INT												NULL
+	,[intDestinationGradeId]			INT												NULL
+	,[intDestinationWeightId]			INT												NULL
+	,[intConcurrencyId]					INT												NULL
+	,[ysnRecomputeTax]					BIT												NULL
+	,[intEntityId]						INT												NULL
+	,[intId]							INT												NULL
+	,[strTransactionType]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSourceTransaction]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
+	,[intSourceId]						INT												NULL
+	,[strSourceId]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
+	,[ysnPost]							BIT												NULL
+	,[intTempDetailIdForTaxes]			INT												NULL)
+
+INSERT INTO #InvoiceInventoryItem
+	([intInvoiceId]
+	,[intInvoiceDetailId]
+	,[strDocumentNumber]
+	,[intItemId]
+	,[intPrepayTypeId]
+	,[dblPrepayRate]
+	,[strItemDescription]
+	,[dblQtyOrdered]
+	,[intOrderUOMId]
+	,[dblQtyShipped]
+	,[intItemUOMId]
+	,[intPriceUOMId]
+	,[dblUnitQuantity]
+	,[dblItemWeight]
+	,[intItemWeightUOMId]
+	,[dblDiscount]
+	,[dblItemTermDiscount]
+	,[strItemTermDiscountBy]
+	,[dblItemTermDiscountAmount]
+	,[dblBaseItemTermDiscountAmount]
+	,[dblItemTermDiscountExemption]
+	,[dblBaseItemTermDiscountExemption]
+	,[dblTermDiscountRate]
+	,[ysnTermDiscountExempt]
+	,[dblPrice]
+	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
+	,[strPricing]
+	,[dblTotalTax]
+	,[dblBaseTotalTax]
+	,[dblTotal]
+	,[dblBaseTotal]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]
+	,[dblSubCurrencyRate]
+	,[ysnRestricted]
+	,[ysnBlended]
+	,[intAccountId]
+	,[intCOGSAccountId]
+	,[intSalesAccountId]
+	,[intInventoryAccountId]
+	,[intServiceChargeAccountId]
+	,[intLicenseAccountId]
+	,[intMaintenanceAccountId]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblBaseMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[dblBaseLicenseAmount]
+	,[intTaxGroupId]
+	,[intStorageLocationId]
+	,[intCompanyLocationSubLocationId]
+	,[intSCInvoiceId]
+	,[intSCBudgetId]
+	,[strSCInvoiceNumber]
+	,[strSCBudgetDescription]
+	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
+	,[intRecipeItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[strVFDDocumentNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[dblContractBalance]
+	,[dblContractAvailable]
+	,[intShipmentId]
+	,[intShipmentPurchaseSalesContractId]
+	,[dblShipmentGrossWt]
+	,[dblShipmentTareWt]
+	,[dblShipmentNetWt]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intCustomerStorageId]
+	,[intSiteDetailId]
+	,[intLoadDetailId]
+	,[intLotId]
+	,[intOriginalInvoiceDetailId]
+	,[intConversionAccountId]
+	,[intEntitySalespersonId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[dblOriginalItemWeight]
+	,[intRecipeId]
+	,[intSubLocationId]
+	,[intCostTypeId]
+	,[intMarginById]
+	,[intCommentTypeId]
+	,[dblMargin]
+	,[dblRecipeQuantity]
+	,[intStorageScheduleTypeId]
+	,[intDestinationGradeId]
+	,[intDestinationWeightId]
+	,[intConcurrencyId]
+	,[ysnRecomputeTax]
+	,[intEntityId]
+	,[intId]
+	,[strTransactionType]
+	,[strType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[ysnPost]
+	,[intTempDetailIdForTaxes])
+SELECT
+	 [intInvoiceId]							= IE.[intInvoiceId]
+	,[intInvoiceDetailId]					= NULL
+	,[strDocumentNumber]					= ISNULL(IE.[strDocumentNumber], IE.[strSourceId])
+	,[intItemId]							= IC.[intItemId]
+	,[intPrepayTypeId]						= IE.[intPrepayTypeId]
+	,[dblPrepayRate]						= IE.[dblPrepayRate]
+	,[strItemDescription]					= ISNULL(ISNULL(IE.[strItemDescription], IC.[strDescription]), '')
+	,[dblQtyOrdered]						= ISNULL(IE.[dblQtyOrdered], @ZeroDecimal)
+	,[intOrderUOMId]						= IE.[intOrderUOMId]
+	,[dblQtyShipped]						= ISNULL(IE.[dblQtyShipped], @ZeroDecimal)
+	,[intItemUOMId]							= ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId])))
+	,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))))
+	,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
+	,[dblItemWeight]						= IE.[dblItemWeight]
+	,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
+	,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
+	,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
+	,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+	,[dblItemTermDiscountAmount]			= [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+																				,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
+																				,IE.[dblQtyShipped]
+																				,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																				,1.000000)
+	,[dblBaseItemTermDiscountAmount]		 = [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+																				,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
+																				,IE.[dblQtyShipped]
+																				,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																				,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
+	,[dblItemTermDiscountExemption]			= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
+																						,IP.[dblTermDiscountRate]
+																						,IE.[dblQtyShipped]
+																						,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																						,1.000000)
+	,[dblBaseItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
+																						,IP.[dblTermDiscountRate]
+																						,IE.[dblQtyShipped]
+																						,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																						,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
+	,[dblTermDiscountRate]					= ISNULL(IP.[dblTermDiscountRate], @ZeroDecimal)
+	,[ysnTermDiscountExempt]				= ISNULL(IP.[ysnTermDiscountExempt], 0)
+	,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+	,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+	,[dblUnitPrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END)
+	,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+	,[strPricing]							= ISNULL(IP.[strPricing], CASE WHEN ISNULL(IE.[strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END)
+	,[dblTotalTax]							= @ZeroDecimal
+	,[dblBaseTotalTax]						= @ZeroDecimal
+	,[dblTotal]								= @ZeroDecimal
+	,[dblBaseTotal]							= @ZeroDecimal
+	,[intCurrencyExchangeRateTypeId]		= ISNULL(IP.[intCurrencyExchangeRateTypeId], IE.[intCurrencyExchangeRateTypeId])
+	,[intCurrencyExchangeRateId]			= IE.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END
+	,[intSubCurrencyId]						= ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), IE.[intCurrencyId])
+	,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IP.[dblSubCurrencyRate], 0.000000) <> @ZeroDecimal THEN IP.[dblSubCurrencyRate] ELSE (CASE WHEN ISNULL(IE.[dblSubCurrencyRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblSubCurrencyRate], 1.000000) END) END
+	,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
+	,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
+	,[intAccountId]							= NULL --Acct.[intAccountId]
+	,[intCOGSAccountId]						= NULL --Acct.[intCOGSAccountId]
+	,[intSalesAccountId]					= IE.[intSalesAccountId] --ISNULL(IE.[intSalesAccountId], Acct.[intSalesAccountId])
+	,[intInventoryAccountId]				= NULL --Acct.[intInventoryAccountId]
+	,[intServiceChargeAccountId]			= NULL --Acct.[intAccountId]
+	,[intLicenseAccountId]					= NULL --Acct.[intGeneralAccountId]
+	,[intMaintenanceAccountId]				= NULL --Acct.[intMaintenanceSalesAccountId]
+	,[strMaintenanceType]					= IE.[strMaintenanceType]
+	,[strFrequency]							= IE.[strFrequency]
+	,[dtmMaintenanceDate]					= IE.[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]					= IE.[dblMaintenanceAmount]
+	,[dblBaseMaintenanceAmount]				= IE.[dblMaintenanceAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+	,[dblLicenseAmount]						= IE.[dblLicenseAmount]
+	,[dblBaseLicenseAmount]					= IE.[dblLicenseAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+	,[intTaxGroupId]						= IE.[intTaxGroupId]
+	,[intStorageLocationId]					= IE.[intStorageLocationId]
+	,[intCompanyLocationSubLocationId]		= IE.[intCompanyLocationSubLocationId]
+	,[intSCInvoiceId]						= IE.[intSCInvoiceId]
+	,[intSCBudgetId]						= IE.[intSCBudgetId]
+	,[strSCInvoiceNumber]					= IE.[strSCInvoiceNumber]
+	,[strSCBudgetDescription]				= IE.[strSCBudgetDescription]
+	,[intInventoryShipmentItemId]			= IE.[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]			= IE.[intInventoryShipmentChargeId]
+	,[intRecipeItemId]						= IE.[intRecipeItemId]
+	,[strShipmentNumber]					= IE.[strShipmentNumber]
+	,[intSalesOrderDetailId]				= IE.[intSalesOrderDetailId]
+	,[strSalesOrderNumber]					= IE.[strSalesOrderNumber]
+	,[strVFDDocumentNumber]					= IE.[strVFDDocumentNumber]
+	,[intContractHeaderId]					= ISNULL(IP.[intContractHeaderId], IE.[intContractHeaderId])
+	,[intContractDetailId]					= ISNULL(IP.[intContractDetailId], IE.[intContractDetailId])
+	,[dblContractBalance]					= @ZeroDecimal
+	,[dblContractAvailable]					= ISNULL(IP.[dblAvailableQty], @ZeroDecimal)
+	,[intShipmentId]						= IE.[intShipmentId]
+	,[intShipmentPurchaseSalesContractId]	= IE.[intShipmentPurchaseSalesContractId]
+	,[dblShipmentGrossWt]					= IE.[dblShipmentGrossWt]	
+	,[dblShipmentTareWt]					= IE.[dblShipmentTareWt]
+	,[dblShipmentNetWt]						= IE.[dblShipmentNetWt]
+	,[intTicketId]							= IE.[intTicketId]
+	,[intTicketHoursWorkedId]				= IE.[intTicketHoursWorkedId]
+	,[intCustomerStorageId]					= IE.[intCustomerStorageId]
+	,[intSiteDetailId]						= IE.[intSiteDetailId]
+	,[intLoadDetailId]						= IE.[intLoadDetailId]
+	,[intLotId]								= IE.[intLotId]
+	,[intOriginalInvoiceDetailId]			= IE.[intOriginalInvoiceDetailId]
+	,[intConversionAccountId]				= IE.[intConversionAccountId]
+	,[intEntitySalespersonId]				= IE.[intEntitySalespersonId]
+	,[intSiteId]							= IE.[intSiteId]
+	,[strBillingBy]							= IE.[strBillingBy]
+	,[dblPercentFull]						= IE.[dblPercentFull]
+	,[dblNewMeterReading]					= IE.[dblNewMeterReading]
+	,[dblPreviousMeterReading]				= IE.[dblPreviousMeterReading]
+	,[dblConversionFactor]					= IE.[dblConversionFactor]
+	,[intPerformerId]						= IE.[intPerformerId]
+	,[ysnLeaseBilling]						= ISNULL(IE.[ysnLeaseBilling], 0)
+	,[ysnVirtualMeterReading]				= ISNULL(IE.[ysnVirtualMeterReading], 0)
+	,[dblOriginalItemWeight]				= @ZeroDecimal
+	,[intRecipeId]							= IE.[intRecipeId]
+	,[intSubLocationId]						= IE.[intSubLocationId]
+	,[intCostTypeId]						= IE.[intCostTypeId]
+	,[intMarginById]						= IE.[intMarginById]
+	,[intCommentTypeId]						= IE.[intCommentTypeId]
+	,[dblMargin]							= IE.[dblMargin]
+	,[dblRecipeQuantity]					= IE.[dblRecipeQuantity]
+	,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
+	,[intDestinationGradeId]				= IE.[intDestinationGradeId]
+	,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+	,[intConcurrencyId]						= 1
+	,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
+	,[intEntityId]							= IE.[intEntityId]
+	,[intId]								= IE.[intId]
+	,[strTransactionType]					= IE.[strTransactionType]
+	,[strType]								= IE.[strType]
+	,[strSourceTransaction]					= IE.[strSourceTransaction]
+	,[intSourceId]							= IE.[intSourceId]
+	,[strSourceId]							= IE.[strSourceId]
+	,[ysnPost]								= IE.[ysnPost]
+	,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+FROM
+	@ItemEntries IE
+INNER JOIN
+	(
+	SELECT
+			[intItemId]
+		,[strDescription]
+	FROM tblICItem WITH (NOLOCK)
+	) IC
+		ON IE.[intItemId] = IC.[intItemId]
+INNER JOIN
+	(
+	SELECT
+		intItemId
+		,[intLocationId] 
+		,[intIssueUOMId]
+	FROM tblICItemLocation WITH (NOLOCK)
+	) IL
+		ON IC.intItemId = IL.intItemId
+		AND IE.[intCompanyLocationId] = IL.[intLocationId]
+LEFT OUTER JOIN
+	(
+	SELECT
+			[intId]
+		,[intInvoiceId]
+		,[intInvoiceDetailId]
+		,[dblPrice]
+		,[dblUnitPrice]
+		,[dblTermDiscount]
+		,[strTermDiscountBy]
+		,[ysnTermDiscountExempt]
+		,[dblTermDiscountRate]
+		,[strPricing]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
+		,[dblDeviation]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intContractSeq]
+		,[dblAvailableQty]
+		,[intCurrencyExchangeRateTypeId]
+		,[dblCurrencyExchangeRate]
+		,[intContractUOMId]
+		,[intPriceUOMId]
+		,[dblPriceUOMQuantity]
+	FROM
+		#Pricing WITH (NOLOCK)
+	) IP
+		ON IE.[intInvoiceId] = IP.[intInvoiceId]
+		AND (IE.[intId] = IP.[intId]
+			OR
+			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
+--No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
+--And this has been causing performance issue
+--LEFT OUTER JOIN
+--	(
+--	SELECT
+--		 [intAccountId] 
+--		,[intCOGSAccountId] 
+--		,[intSalesAccountId]
+--		,[intInventoryAccountId]	
+--		,[intGeneralAccountId]
+--		,[intMaintenanceSalesAccountId]		
+--		,[intItemId]
+--		,[intLocationId]			
+--	FROM vyuARGetItemAccount WITH (NOLOCK)
+--	) Acct
+--		ON IC.[intItemId] = Acct.[intItemId]
+--		AND IL.[intLocationId] = Acct.[intLocationId]		
+
 BEGIN TRY
 MERGE INTO tblARInvoiceDetail AS Target
 USING 
 	(
 	SELECT
-		 [intInvoiceId]							= IE.[intInvoiceId]
-		,[intInvoiceDetailId]					= NULL
-		,[strDocumentNumber]					= ISNULL(IE.[strDocumentNumber], IE.[strSourceId])
-		,[intItemId]							= IC.[intItemId]
-		,[intPrepayTypeId]						= IE.[intPrepayTypeId]
-		,[dblPrepayRate]						= IE.[dblPrepayRate]
-		,[strItemDescription]					= ISNULL(ISNULL(IE.[strItemDescription], IC.[strDescription]), '')
-		,[dblQtyOrdered]						= ISNULL(IE.[dblQtyOrdered], @ZeroDecimal)
-		,[intOrderUOMId]						= IE.[intOrderUOMId]
-		,[dblQtyShipped]						= ISNULL(IE.[dblQtyShipped], @ZeroDecimal)
-		,[intItemUOMId]							= ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId])))
-		,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))))
-		,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
-		,[dblItemWeight]						= IE.[dblItemWeight]
-		,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
-		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
-		,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
-		,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
-		,[dblItemTermDiscountAmount]			= [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
-																					,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
-																					,IE.[dblQtyShipped]
-																					,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
-																					,1.000000)
-		,[dblBaseItemTermDiscountAmount]		 = [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
-																					,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
-																					,IE.[dblQtyShipped]
-																					,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
-																					,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
-		,[dblItemTermDiscountExemption]			= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
-																							,IP.[dblTermDiscountRate]
-																							,IE.[dblQtyShipped]
-																							,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
-																							,1.000000)
-		,[dblBaseItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
-																							,IP.[dblTermDiscountRate]
-																							,IE.[dblQtyShipped]
-																							,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
-																							,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
-		,[dblTermDiscountRate]					= ISNULL(IP.[dblTermDiscountRate], @ZeroDecimal)
-		,[ysnTermDiscountExempt]				= ISNULL(IP.[ysnTermDiscountExempt], 0)
-		,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
-		,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[dblUnitPrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END)
-		,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[strPricing]							= ISNULL(IP.[strPricing], CASE WHEN ISNULL(IE.[strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END)
-		,[dblTotalTax]							= @ZeroDecimal
-		,[dblBaseTotalTax]						= @ZeroDecimal
-		,[dblTotal]								= @ZeroDecimal
-		,[dblBaseTotal]							= @ZeroDecimal
-		,[intCurrencyExchangeRateTypeId]		= ISNULL(IP.[intCurrencyExchangeRateTypeId], IE.[intCurrencyExchangeRateTypeId])
-		,[intCurrencyExchangeRateId]			= IE.[intCurrencyExchangeRateId]
-		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END
-		,[intSubCurrencyId]						= ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), IE.[intCurrencyId])
-		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IP.[dblSubCurrencyRate], 0.000000) <> @ZeroDecimal THEN IP.[dblSubCurrencyRate] ELSE (CASE WHEN ISNULL(IE.[dblSubCurrencyRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblSubCurrencyRate], 1.000000) END) END
-		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
-		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
-		,[intAccountId]							= NULL --Acct.[intAccountId]
-		,[intCOGSAccountId]						= NULL --Acct.[intCOGSAccountId]
-		,[intSalesAccountId]					= IE.[intSalesAccountId] --ISNULL(IE.[intSalesAccountId], Acct.[intSalesAccountId])
-		,[intInventoryAccountId]				= NULL --Acct.[intInventoryAccountId]
-		,[intServiceChargeAccountId]			= NULL --Acct.[intAccountId]
-		,[intLicenseAccountId]					= NULL --Acct.[intGeneralAccountId]
-		,[intMaintenanceAccountId]				= NULL --Acct.[intMaintenanceSalesAccountId]
-		,[strMaintenanceType]					= IE.[strMaintenanceType]
-		,[strFrequency]							= IE.[strFrequency]
-		,[dtmMaintenanceDate]					= IE.[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]					= IE.[dblMaintenanceAmount]
-		,[dblBaseMaintenanceAmount]				= IE.[dblMaintenanceAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[dblLicenseAmount]						= IE.[dblLicenseAmount]
-		,[dblBaseLicenseAmount]					= IE.[dblLicenseAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[intTaxGroupId]						= IE.[intTaxGroupId]
-		,[intStorageLocationId]					= IE.[intStorageLocationId]
-		,[intCompanyLocationSubLocationId]		= IE.[intCompanyLocationSubLocationId]
-		,[intSCInvoiceId]						= IE.[intSCInvoiceId]
-		,[intSCBudgetId]						= IE.[intSCBudgetId]
-		,[strSCInvoiceNumber]					= IE.[strSCInvoiceNumber]
-		,[strSCBudgetDescription]				= IE.[strSCBudgetDescription]
-		,[intInventoryShipmentItemId]			= IE.[intInventoryShipmentItemId]
-		,[intInventoryShipmentChargeId]			= IE.[intInventoryShipmentChargeId]
-		,[intRecipeItemId]						= IE.[intRecipeItemId]
-		,[strShipmentNumber]					= IE.[strShipmentNumber]
-		,[intSalesOrderDetailId]				= IE.[intSalesOrderDetailId]
-		,[strSalesOrderNumber]					= IE.[strSalesOrderNumber]
-		,[strVFDDocumentNumber]					= IE.[strVFDDocumentNumber]
-		,[intContractHeaderId]					= ISNULL(IP.[intContractHeaderId], IE.[intContractHeaderId])
-		,[intContractDetailId]					= ISNULL(IP.[intContractDetailId], IE.[intContractDetailId])
-		,[dblContractBalance]					= @ZeroDecimal
-		,[dblContractAvailable]					= ISNULL(IP.[dblAvailableQty], @ZeroDecimal)
-		,[intShipmentId]						= IE.[intShipmentId]
-		,[intShipmentPurchaseSalesContractId]	= IE.[intShipmentPurchaseSalesContractId]
-		,[dblShipmentGrossWt]					= IE.[dblShipmentGrossWt]	
-		,[dblShipmentTareWt]					= IE.[dblShipmentTareWt]
-		,[dblShipmentNetWt]						= IE.[dblShipmentNetWt]
-		,[intTicketId]							= IE.[intTicketId]
-		,[intTicketHoursWorkedId]				= IE.[intTicketHoursWorkedId]
-		,[intCustomerStorageId]					= IE.[intCustomerStorageId]
-		,[intSiteDetailId]						= IE.[intSiteDetailId]
-		,[intLoadDetailId]						= IE.[intLoadDetailId]
-		,[intLotId]								= IE.[intLotId]
-		,[intOriginalInvoiceDetailId]			= IE.[intOriginalInvoiceDetailId]
-		,[intConversionAccountId]				= IE.[intConversionAccountId]
-		,[intEntitySalespersonId]				= IE.[intEntitySalespersonId]
-		,[intSiteId]							= IE.[intSiteId]
-		,[strBillingBy]							= IE.[strBillingBy]
-		,[dblPercentFull]						= IE.[dblPercentFull]
-		,[dblNewMeterReading]					= IE.[dblNewMeterReading]
-		,[dblPreviousMeterReading]				= IE.[dblPreviousMeterReading]
-		,[dblConversionFactor]					= IE.[dblConversionFactor]
-		,[intPerformerId]						= IE.[intPerformerId]
-		,[ysnLeaseBilling]						= ISNULL(IE.[ysnLeaseBilling], 0)
-		,[ysnVirtualMeterReading]				= ISNULL(IE.[ysnVirtualMeterReading], 0)
-		,[dblOriginalItemWeight]				= @ZeroDecimal
-		,[intRecipeId]							= IE.[intRecipeId]
-		,[intSubLocationId]						= IE.[intSubLocationId]
-		,[intCostTypeId]						= IE.[intCostTypeId]
-		,[intMarginById]						= IE.[intMarginById]
-		,[intCommentTypeId]						= IE.[intCommentTypeId]
-		,[dblMargin]							= IE.[dblMargin]
-		,[dblRecipeQuantity]					= IE.[dblRecipeQuantity]
-		,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
-		,[intDestinationGradeId]				= IE.[intDestinationGradeId]
-		,[intDestinationWeightId]				= IE.[intDestinationWeightId]
-		,[intConcurrencyId]						= 1
-		,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
-		,[intEntityId]							= IE.[intEntityId]
-		,[intId]								= IE.[intId]
-		,[strTransactionType]					= IE.[strTransactionType]
-		,[strType]								= IE.[strType]
-		,[strSourceTransaction]					= IE.[strSourceTransaction]
-		,[intSourceId]							= IE.[intSourceId]
-		,[strSourceId]							= IE.[strSourceId]
-		,[ysnPost]								= IE.[ysnPost]
-		,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+		 [intInvoiceId]
+		,[intInvoiceDetailId]
+		,[strDocumentNumber]
+		,[intItemId]
+		,[intPrepayTypeId]
+		,[dblPrepayRate]
+		,[strItemDescription]
+		,[dblQtyOrdered]
+		,[intOrderUOMId]
+		,[dblQtyShipped]
+		,[intItemUOMId]
+		,[intPriceUOMId]
+		,[dblUnitQuantity]
+		,[dblItemWeight]
+		,[intItemWeightUOMId]
+		,[dblDiscount]
+		,[dblItemTermDiscount]
+		,[strItemTermDiscountBy]
+		,[dblItemTermDiscountAmount]
+		,[dblBaseItemTermDiscountAmount]
+		,[dblItemTermDiscountExemption]
+		,[dblBaseItemTermDiscountExemption]
+		,[dblTermDiscountRate]
+		,[ysnTermDiscountExempt]
+		,[dblPrice]
+		,[dblBasePrice]
+		,[dblUnitPrice]
+		,[dblBaseUnitPrice]
+		,[strPricing]
+		,[dblTotalTax]
+		,[dblBaseTotalTax]
+		,[dblTotal]
+		,[dblBaseTotal]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
+		,[ysnRestricted]
+		,[ysnBlended]
+		,[intAccountId]
+		,[intCOGSAccountId]
+		,[intSalesAccountId]
+		,[intInventoryAccountId]
+		,[intServiceChargeAccountId]
+		,[intLicenseAccountId]
+		,[intMaintenanceAccountId]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblBaseMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[dblBaseLicenseAmount]
+		,[intTaxGroupId]
+		,[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]
+		,[intSCInvoiceId]
+		,[intSCBudgetId]
+		,[strSCInvoiceNumber]
+		,[strSCBudgetDescription]
+		,[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]
+		,[intRecipeItemId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[strVFDDocumentNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[dblContractBalance]
+		,[dblContractAvailable]
+		,[intShipmentId]
+		,[intShipmentPurchaseSalesContractId]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intCustomerStorageId]
+		,[intSiteDetailId]
+		,[intLoadDetailId]
+		,[intLotId]
+		,[intOriginalInvoiceDetailId]
+		,[intConversionAccountId]
+		,[intEntitySalespersonId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[dblOriginalItemWeight]
+		,[intRecipeId]
+		,[intSubLocationId]
+		,[intCostTypeId]
+		,[intMarginById]
+		,[intCommentTypeId]
+		,[dblMargin]
+		,[dblRecipeQuantity]
+		,[intStorageScheduleTypeId]
+		,[intDestinationGradeId]
+		,[intDestinationWeightId]
+		,[intConcurrencyId]
+		,[ysnRecomputeTax]
+		,[intEntityId]
+		,[intId]
+		,[strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[ysnPost]
+		,[intTempDetailIdForTaxes]
 	FROM
-		@ItemEntries IE
-	INNER JOIN
-		(
-		SELECT
-			 [intItemId]
-			,[strDescription]
-		FROM tblICItem WITH (NOLOCK)
-		) IC
-			ON IE.[intItemId] = IC.[intItemId]
-	INNER JOIN
-		(
-		SELECT
-			intItemId
-			,[intLocationId] 
-			,[intIssueUOMId]
-		FROM tblICItemLocation WITH (NOLOCK)
-		) IL
-			ON IC.intItemId = IL.intItemId
-			AND IE.[intCompanyLocationId] = IL.[intLocationId]
-	LEFT OUTER JOIN
-		(
-		SELECT
-			 [intId]
-			,[intInvoiceId]
-			,[intInvoiceDetailId]
-			,[dblPrice]
-			,[dblUnitPrice]
-			,[dblTermDiscount]
-			,[strTermDiscountBy]
-			,[ysnTermDiscountExempt]
-			,[dblTermDiscountRate]
-			,[strPricing]
-			,[intSubCurrencyId]
-			,[dblSubCurrencyRate]
-			,[dblDeviation]
-			,[intContractHeaderId]
-			,[intContractDetailId]
-			,[intContractSeq]
-			,[dblAvailableQty]
-			,[intCurrencyExchangeRateTypeId]
-			,[dblCurrencyExchangeRate]
-			,[intContractUOMId]
-			,[intPriceUOMId]
-			,[dblPriceUOMQuantity]
-		FROM
-			#Pricing WITH (NOLOCK)
-		) IP
-			ON IE.[intInvoiceId] = IP.[intInvoiceId]
-			AND (IE.[intId] = IP.[intId]
-				OR
-				IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
-	--No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
-	--And this has been causing performance issue
-	--LEFT OUTER JOIN
-	--	(
-	--	SELECT
-	--		 [intAccountId] 
-	--		,[intCOGSAccountId] 
-	--		,[intSalesAccountId]
-	--		,[intInventoryAccountId]	
-	--		,[intGeneralAccountId]
-	--		,[intMaintenanceSalesAccountId]		
-	--		,[intItemId]
-	--		,[intLocationId]			
-	--	FROM vyuARGetItemAccount WITH (NOLOCK)
-	--	) Acct
-	--		ON IC.[intItemId] = Acct.[intItemId]
-	--		AND IL.[intLocationId] = Acct.[intLocationId]		
+		#InvoiceInventoryItem
 	)
 AS Source
 ON Target.[intInvoiceDetailId] = Source.[intInvoiceDetailId]
@@ -799,48 +1163,48 @@ VALUES(
 	,[intConcurrencyId]
 )
 	OUTPUT  
-			@IntegrationLogId						--[intIntegrationLogId]
-			,INSERTED.[intInvoiceId]				--[intInvoiceId]
-			,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
-			,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
-			,Source.[intId]							--[intId]
-			,'Line Item was successfully added.'	--[strErrorMessage]
-			,Source.[strTransactionType]			--[strTransactionType]
-			,Source.[strType]						--[strType]
-			,Source.[strSourceTransaction]			--[strSourceTransaction]
-			,Source.[intSourceId]					--[intSourceId]
-			,Source.[strSourceId]					--[strSourceId]
-			,Source.[ysnPost]						--[ysnPost]
-			,NULL									--[ysnRecap]
-			,1										--[ysnInsert]
-			,0										--[ysnHeader]
-			,1										--[ysnSuccess]
-			,NULL									--[ysnPosted]
-			,NULL									--[ysnUnPosted]
-			,NULL									--[strBatchId]
-			,Source.[ysnRecomputeTax]				--[ysnRecomputeTax]
-		INTO @IntegrationLog(
-			[intIntegrationLogId]
-           ,[intInvoiceId]
-           ,[intInvoiceDetailId]
-           ,[intTemporaryDetailIdForTax]
-           ,[intId]
-           ,[strMessage]
-           ,[strTransactionType]
-           ,[strType]
-           ,[strSourceTransaction]
-           ,[intSourceId]
-           ,[strSourceId]
-           ,[ysnPost]
-           ,[ysnRecap]
-           ,[ysnInsert]
-           ,[ysnHeader]
-           ,[ysnSuccess]
-           ,[ysnPosted]
-           ,[ysnUnPosted]
-           ,[strBatchId]
-		   ,[ysnRecomputeTax]          
-		);					
+		@IntegrationLogId						--[intIntegrationLogId]
+		,INSERTED.[intInvoiceId]				--[intInvoiceId]
+		,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
+		,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
+		,Source.[intId]							--[intId]
+		,'Line Item was successfully added.'	--[strErrorMessage]
+		,Source.[strTransactionType]			--[strTransactionType]
+		,Source.[strType]						--[strType]
+		,Source.[strSourceTransaction]			--[strSourceTransaction]
+		,Source.[intSourceId]					--[intSourceId]
+		,Source.[strSourceId]					--[strSourceId]
+		,Source.[ysnPost]						--[ysnPost]
+		,NULL									--[ysnRecap]
+		,1										--[ysnInsert]
+		,0										--[ysnHeader]
+		,1										--[ysnSuccess]
+		,NULL									--[ysnPosted]
+		,NULL									--[ysnUnPosted]
+		,NULL									--[strBatchId]
+		,Source.[ysnRecomputeTax]				--[ysnRecomputeTax]
+	INTO @IntegrationLog(
+		[intIntegrationLogId]
+        ,[intInvoiceId]
+        ,[intInvoiceDetailId]
+        ,[intTemporaryDetailIdForTax]
+        ,[intId]
+        ,[strMessage]
+        ,[strTransactionType]
+        ,[strType]
+        ,[strSourceTransaction]
+        ,[intSourceId]
+        ,[strSourceId]
+        ,[ysnPost]
+        ,[ysnRecap]
+        ,[ysnInsert]
+        ,[ysnHeader]
+        ,[ysnSuccess]
+        ,[ysnPosted]
+        ,[ysnUnPosted]
+        ,[strBatchId]
+		,[ysnRecomputeTax]          
+	);					
 
 	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog

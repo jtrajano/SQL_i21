@@ -67,11 +67,12 @@ BEGIN
 		,@VendorLocationId		
 		,@PricingLevelId		
 		,@AllowQtyToExceed		
-		,@InvoiceType			
+		,'Tank Delivery'			
 		,@TermId				
 		,@GetAllAvailablePricing
 		,1.000000
-		,NULL)
+		,NULL
+		,0)
 
 	RETURN
 END

@@ -115,6 +115,7 @@
 	,@dtmInvoiceDate					DATETIME		= NULL		
 	
 	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
+	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
 
 	
 	
@@ -781,18 +782,32 @@ BEGIN
 				--SET @i = '0000000'
 				--SELECT CONVERT(BIGINT, @i)
 
-				IF(ISNULL(@strCardId,0) = 0)
+				IF(ISNULL(@strCardId,'') = '')
 				BEGIN
-					SET @strCardId = @strVehicleId
-					SET @strVehicleId = null
+					IF(ISNULL(@CardNumberForDualCard,'') != '')
+					BEGIN
+						SET @strCardId = @CardNumberForDualCard
+					END
+					ELSE
+					BEGIN
+						SET @strCardId = @strVehicleId
+						SET @strVehicleId = null
+					END
 				END
 
 				IF (ISNUMERIC(@strCardId) = 1)
 				BEGIN
 					IF (CONVERT(BIGINT, @strCardId) = 0)
 					BEGIN
-						SET @strCardId = @strVehicleId
-						SET @strVehicleId = null
+						IF(ISNULL(@CardNumberForDualCard,'') != '')
+						BEGIN
+							SET @strCardId = @CardNumberForDualCard
+						END
+						ELSE
+						BEGIN
+							SET @strCardId = @strVehicleId
+							SET @strVehicleId = null
+						END
 					END
 				END
 			END
@@ -1009,7 +1024,7 @@ BEGIN
 
 	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
 	BEGIN
-		IF((@strVehicleId = '0' OR  @strVehicleId IS NULL OR @strVehicleId = 0) AND @ysnConvertMiscToVehicle = 1)
+		IF((@strVehicleId = '0' OR  @strVehicleId IS NULL OR ISNULL(@intVehicleId,0) = 0) AND @ysnConvertMiscToVehicle = 1)
 		BEGIN
 			SET @strVehicleId = @strMiscellaneous
 		END
@@ -1072,7 +1087,8 @@ BEGIN
 	------------------------------------------------------------
 
 
-
+	SELECT TOP 1 @ysnOnHold  = ISNULL(ysnIgnoreCardTransaction,0) 
+	FROM tblCFCard WHERE intCardId = @intCardId
 
 
 	------------------------------------------------------------
@@ -1283,6 +1299,7 @@ BEGIN
 			,[strInvoiceReportNumber]
 			,[ysnOnHold]
 			,[intCustomerId]
+			,[intImportCardId]
 		)
 		VALUES
 		(
@@ -1332,6 +1349,7 @@ BEGIN
 			,@strInvoiceReportNumber
 			,@ysnOnHold
 			,@intCustomerId
+			,@intCardId
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1517,6 +1535,7 @@ BEGIN
 		,@TaxValue8						=	@TaxValue8	
 		,@TaxValue9						=	@TaxValue9	
 		,@TaxValue10					=	@TaxValue10
+		,@ForeignCardId					=   @strCardId
 
 
 		DECLARE @dblGrossTransferCost	NUMERIC(18,6)	

@@ -29,7 +29,7 @@ BEGIN TRY
 	DECLARE @IntCommodityId INT
 	DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
-	DECLARE @strUserName NVARCHAR(40)
+	--DECLARE @strUserName NVARCHAR(40)
 	DECLARE @strInventoryItem NVARCHAR(40)
 	DECLARE @intItemUOMId AS INT
 	DECLARE @intTransactionTypeId AS INT
@@ -73,9 +73,9 @@ BEGIN TRY
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 	
-	SELECT @strUserName=strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @intUserId
+	-- SELECT @strUserName=strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @intUserId
 
 	SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
 	FROM vyuGRGetStorageTransferTicket
@@ -406,6 +406,7 @@ BEGIN TRY
 			,[dblPaidAmount]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 		)
 		SELECT 
 			 [intConcurrencyId] = 1
@@ -421,7 +422,8 @@ BEGIN TRY
 							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
 							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
 					     END
-			,[strUserName] = @strUserName
+			,[strUserName] = NULL
+			,[intUserId] = @intUserId
 		FROM @StorageTicketInfoByFIFO
 		WHERE strItemType = 'Inventory'
 

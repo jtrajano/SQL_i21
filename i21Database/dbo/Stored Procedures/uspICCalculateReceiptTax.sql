@@ -81,6 +81,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
 		AND ISNULL(ReceiptItem.intCostingMethod, 0) <> 6 -- Do not compute tax if stock is Category-Managed. 
+		AND Receipt.strReceiptType <> 'Transfer Order' -- Do not compute tax for Transfer Orders. 
 
 OPEN loopReceiptItems;
 

@@ -39,14 +39,14 @@ SELECT
 	,Shipment.intItemId
 	,intWeightItemUOMId = (SELECT U.intItemUOMId FROM tblICItemUOM U WHERE U.intItemId = Shipment.intItemId AND U.intUnitMeasureId=Shipment.intWeightUOMId)
 	,strWarehouseRefNo = ''
-	,((dbo.fnCTConvertQtyToTargetItemUOM(Shipment.intWeightItemUOMId, 
+	,CAST(ISNULL(((dbo.fnCTConvertQtyToTargetItemUOM(Shipment.intWeightItemUOMId, 
 											CD.intPriceItemUOMId, 
 											CASE 
 											WHEN ISNULL(Shipment.dblContainerContractReceivedQty, 0) > 0
 												THEN ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
 											ELSE ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)
 											END)
-		) * Shipment.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END) AS dblTotalCost
+		) * Shipment.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END),0) AS NUMERIC(18,6)) AS dblTotalCost
 	,Shipment.dblFutures
 	,Shipment.dblCashPrice
 	,Shipment.dblBasis
@@ -102,9 +102,9 @@ SELECT
 	,Spot.intItemId
 	,intWeightItemUOMId = Spot.intItemWeightUOMId
 	,Spot.strWarehouseRefNo
-	,((dbo.fnCTConvertQtyToTargetItemUOM(Spot.intWeightItemUOMId, 
+	,CAST(ISNULL(((dbo.fnCTConvertQtyToTargetItemUOM(Spot.intWeightItemUOMId, 
 											CD.intPriceItemUOMId, Spot.dblNetWeight )
-		) * Spot.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END)
+		) * Spot.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END),0) AS NUMERIC(18,6))
 	,Spot.dblFutures
 	,Spot.dblCashPrice
 	,Spot.dblBasis

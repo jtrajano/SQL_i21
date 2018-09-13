@@ -119,7 +119,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I
 		WHERE  
 			I.[intEntityId] <> I.[intUserId]
-			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)			
+			AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = 1)			
 
 		INSERT INTO @returntable(
 			 [intInvoiceId]
@@ -272,7 +272,7 @@ IF(ISNULL(@Post,0)) = 1
 		INNER JOIN dbo.tblARCustomer  ARC
 				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 		WHERE
-			ARC.dblCreditLimit is null and I.[strTransactionType] != 'Cash'
+			ARC.dblCreditLimit is null and I.[strTransactionType] != 'Cash' and I.[strType] != 'POS'
 			
 
 		INSERT INTO @returntable(
@@ -1678,7 +1678,7 @@ ELSE
 			@Invoices I
 		WHERE  
 			I.[intEntityId] <> I.[intUserId]
-			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)			
+			AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = 1)			
 
 		INSERT INTO @returntable(
 			 [intInvoiceId]
@@ -2151,7 +2151,7 @@ INSERT INTO @PostInvoiceDataFromIntegration(
 				,[strBatchId]
 				,[strPostingMessage]
 				,[intUserId]
-				,[ysnAllowOtherUserToPost]
+				,[ysnUserAllowedToPostOtherTrans]
 			)
 			 SELECT DISTINCT
 				 [intInvoiceId]					= PID.[intInvoiceId]
@@ -2197,7 +2197,7 @@ INSERT INTO @PostInvoiceDataFromIntegration(
 				,[strBatchId]					= PID.[strBatchId]
 				,[strPostingMessage]			= ''
 				,[intUserId]					= PID.[intUserId]
-				,[ysnAllowOtherUserToPost]		= PID.[ysnAllowOtherUserToPost]
+				,[ysnUserAllowedToPostOtherTrans]		= PID.[ysnUserAllowedToPostOtherTrans]
 FROM
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblQtyShipped], [intItemUOMId], [intStorageScheduleTypeId], [intCustomerStorageId], [intStorageLocationId], [ysnBlended] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 

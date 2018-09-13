@@ -31,7 +31,7 @@ SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 in
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
 	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
-	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
+	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,ti.dtmFilledDate,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
 JOIN tblRKBrokerageAccount ba on ba.strAccountNumber=ti.strAccountNumber
@@ -54,14 +54,23 @@ INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransac
 									dtmFilledDate,intBookId,intSubBookId,dtmCreateDateTime)
 
 SELECT 1,* FROM #temp 
+
+
 END
 select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 
 UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
 COMMIT TRAN
-SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime FROM tblRKFutOptTransactionImport_ErrLog
+--SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+--		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+--		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime FROM tblRKFutOptTransactionImport_ErrLog
+
+--This will return the newly created Derivative Entry
+SELECT DE.strInternalTradeNo AS Result1,DE.strBrokerTradeNo AS Result2,DE.dtmFilledDate AS Result3 
+FROM tblRKFutOptTransaction DE 
+WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+
+
 DELETE FROM tblRKFutOptTransactionImport
 
 END TRY

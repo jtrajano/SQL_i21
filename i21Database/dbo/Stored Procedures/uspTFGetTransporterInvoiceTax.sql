@@ -33,7 +33,7 @@ BEGIN TRY
 		DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 	END
 
-	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+	--DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 		
 	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -204,8 +204,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -388,8 +388,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strName from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strName END AS strTransporterName
-					, CASE WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoice.intShipViaId IS NULL THEN (SELECT TOP 1 tblEMEntity.strFederalTaxId from tblSMShipVia INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblSMShipVia.intEntityId WHERE tblSMShipVia.ysnCompanyOwnedCarrier = 1 ORDER BY tblEMEntity.intEntityId) ELSE Transporter.strFederalTaxId END AS strTransporterFEIN
+					, Transporter.strName AS strTransporterName
+					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber

@@ -80,19 +80,21 @@ AS
 					--	END
 			--END 
 	, TransferDetail.dblQuantity
+	, TransferDetail.dblOriginalAvailableQty
+	, TransferDetail.dblOriginalStorageQty
 	, TransferDetail.intOwnershipType
 	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
 								ELSE NULL END)
 	, [Transfer].ysnPosted
+	, TransferDetail.dblCost
 	, ysnWeights
 	, [Transfer].strDescription
 	, COALESCE(TransferDetail.strItemType, Item.strType) AS strItemType
 	, TransferDetail.dblGross
 	, TransferDetail.dblNet
 	, TransferDetail.dblTare
-	, TransferDetail.intNewLotStatusId
 	, TransferDetail.intGrossNetUOMId
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strNewLotId = ISNULL(TransferDetail.strNewLotId, '')
@@ -130,6 +132,8 @@ AS
 		,DEFAULT 
 	)
 	, TransferDetail.strLotCondition
+	, TransferDetail.intNewLotStatusId
+	, strNewLotStatus = NewLotStatus.strPrimaryStatus
 	, TransferDetail.dblWeightPerQty
 	, TransferDetail.intCostingMethod
 	, TransferDetail.strWarehouseRefNo
@@ -164,3 +168,5 @@ AS
 			AND ParentLot.intItemId = TransferDetail.intItemId 
 			AND TransferDetail.intLotId = Lot.intLotId
 		LEFT JOIN tblICCostingMethod CostingMethod ON CostingMethod.intCostingMethodId = TransferDetail.intCostingMethod
+		LEFT JOIN tblICLotStatus NewLotStatus
+			ON NewLotStatus.intLotStatusId = TransferDetail.intNewLotStatusId

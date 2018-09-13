@@ -72,7 +72,7 @@ BEGIN TRY
 				,MEINS
 				,MTART
 				,LVORM
-			FROM OPENXML(@idoc, 'MATMAS/IDOC/E1MARAM', 2) WITH (
+			FROM OPENXML(@idoc, 'MATMAS05/IDOC/E1MARAM', 2) WITH (
 					MATNR NVARCHAR(50)
 					,MATKL NVARCHAR(100)
 					,MEINS NVARCHAR(50)
@@ -85,7 +85,7 @@ BEGIN TRY
 
 			UPDATE @tblItem
 			SET strDescription = x.MAKTX
-			FROM OPENXML(@idoc, 'MATMAS/IDOC/E1MARAM/E1MAKTM', 2) WITH (
+			FROM OPENXML(@idoc, 'MATMAS05/IDOC/E1MARAM/E1MAKTM', 2) WITH (
 					MATNR NVARCHAR(50) COLLATE Latin1_General_CI_AS '../MATNR'
 					,MAKTX NVARCHAR(250)
 					,SPRAS NVARCHAR(50)
@@ -98,7 +98,7 @@ BEGIN TRY
 					FROM @tblItem
 					)
 				RAISERROR (
-						'Xml tag (MATMAS/IDOC/E1MARAM) not found.'
+						'Xml tag (MATMAS05/IDOC/E1MARAM) not found.'
 						,16
 						,1
 						)
@@ -120,7 +120,7 @@ BEGIN TRY
 				)
 			SELECT MATNR
 				,MEINS
-			FROM OPENXML(@idoc, 'MATMAS/IDOC/E1MARAM', 2) WITH (
+			FROM OPENXML(@idoc, 'MATMAS05/IDOC/E1MARAM', 2) WITH (
 					MATNR NVARCHAR(50)
 					,MEINS NVARCHAR(50)
 					) x

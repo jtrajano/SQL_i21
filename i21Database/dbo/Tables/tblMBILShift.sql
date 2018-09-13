@@ -4,6 +4,7 @@
     [dtmShiftDate] DATETIME NULL, 
     [intDriverId] INT NULL, 
     [intLocationId] INT NULL, 
+	[strShiftNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intShiftNumber] INT NULL, 
     [dtmStartTime] DATETIME NULL, 
     [dtmEndTime] DATETIME NULL, 

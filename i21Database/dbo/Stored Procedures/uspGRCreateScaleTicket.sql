@@ -15,6 +15,97 @@ BEGIN TRY
 			@intTicketDiscountId		INT,
 			@intDiscountScheduleId		INT,
 			@SQL						NVARCHAR(MAX)
+
+    IF ISNULL(@strTicketNo,'') = ''
+	BEGIN
+			SET @ErrMsg = 'Ticket No is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strTicketType,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Type is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strTicketType NOT IN (SELECT strTicketType FROM tblSCListTicketTypes))
+	BEGIN
+			SET @ErrMsg = 'Invalid Type.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END 
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strEntityName,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Entity is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strEntityName NOT IN (SELECT strName FROM tblEMEntity))
+	BEGIN
+			SET @ErrMsg = 'Invalid Entity.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strItemNo,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Item is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strItemNo NOT IN (SELECT strItemNo FROM tblICItem))
+	BEGIN
+			SET @ErrMsg = 'Invalid Item.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strLocationName,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Location is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strLocationName NOT IN (SELECT strLocationName FROM tblSMCompanyLocation))
+	BEGIN
+			SET @ErrMsg = 'Invalid Location.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END  
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND dtmTicketDateTime IS NULL)
+	BEGIN
+			SET @ErrMsg = 'Scale Date is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(dblGrossWeight,0) = 0)
+	BEGIN
+			SET @ErrMsg = 'Gross Weight is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(dblTareWeight,0) = 0)
+	BEGIN
+			SET @ErrMsg = 'Tare Weight is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(dblGrossUnits,0) = 0)
+	BEGIN
+			SET @ErrMsg = 'Gross Units is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(dblNetUnits,0) = 0)
+	BEGIN
+			SET @ErrMsg = 'Net Units is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strDiscountId,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Discount Schedule is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strDiscountId NOT IN (SELECT strDiscountId FROM tblGRDiscountId))
+	BEGIN
+			SET @ErrMsg = 'Invalid Discount Schedule.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END 
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strDistributionOption,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Distribution is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strDistributionOption NOT IN (SELECT strStorageTypeDescription FROM tblGRStorageType))
+	BEGIN
+			SET @ErrMsg = 'Invalid Distribution.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
 				
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML
 
@@ -22,16 +113,24 @@ BEGIN TRY
 		DROP TABLE #tmpTicket					
 
 	SELECT * INTO #tmpTicket FROM tblSCTicket WHERE 1 = 2
-	
+	    
 	SET @SQL = NULL
-	
+
 	SELECT @SQL =  STUFF((SELECT ' ALTER TABLE #tmpTicket ALTER COLUMN '+COLUMN_NAME+' ' + DATA_TYPE + 
 	CASE	WHEN DATA_TYPE LIKE '%varchar' THEN '('+LTRIM(CHARACTER_MAXIMUM_LENGTH)+')' 
 			WHEN DATA_TYPE = 'numeric' THEN '('+LTRIM(NUMERIC_PRECISION)+','+LTRIM(NUMERIC_SCALE)+')'
 			ELSE ''
 	END + ' NULL' 
-	FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' AND IS_NULLABLE = 'NO' AND COLUMN_NAME NOT IN('intTicketId','intTicketDiscountId') FOR xml path('')) ,1,1,'')
-
+	FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' 
+	AND IS_NULLABLE = 'NO' 
+	AND COLUMN_NAME NOT IN('intTicketId','intTicketDiscountId') 
+	FOR xml path('')) ,1,1,'')
+	
+	IF EXISTS(SELECT 1 FROM tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME LIKE '#tmpTicket%' AND COLUMN_NAME IN ('blbPlateNumber'))
+	BEGIN
+		  SET @SQL = @SQL + ' ALTER TABLE #tmpTicket DROP COLUMN blbPlateNumber '
+	END
+	
 	EXEC sp_executesql @SQL 
 	
 	IF OBJECT_ID('tempdb..#tmpTicketDiscount') IS NOT NULL  					
@@ -55,66 +154,67 @@ BEGIN TRY
 	
 		CREATE TABLE #tmpExtracted
 		(
-			 [strData]					 NVARCHAR(40)
-			,[strType]					 NVARCHAR(40)
-			,[strEntityName]				 NVARCHAR(40)
-			,[strItemNo]				 NVARCHAR(40)
-			,[strLocationName]			 NVARCHAR(50)
-			,[strTicketStatus]			 NVARCHAR(40)
-			,[strTicketNumber]			 NVARCHAR(40)
-			,[intScaleSetupId]			 INT
-			,[intTicketPoolId]			 INT
-			,[intTicketLocationId]		 INT
-			,[intTicketType]			 INT
-			,[strInOutFlag]				 NVARCHAR(40)
-			,[dtmTicketDateTime]		 DATETIME
-			,[intProcessingLocationId]   INT
-			,[strScaleOperatorUser]		 NVARCHAR(40)
-			,[intEntityScaleOperatorId]  INT
-			,[strTruckName]			     NVARCHAR(40)
-			,[strDriverName]		     NVARCHAR(40)
-			,[dblGrossWeight]			 DECIMAL(13, 3)
-			,[dblTareWeight]			 DECIMAL(13, 3)
-			,[dblGrossUnits]			 DECIMAL(13, 3)
-			,[dblShrink]				 DECIMAL(13, 3)
-			,[dblNetUnits]				 DECIMAL(13, 3)
-			,[intSplitId]				 INT
-			,[intStorageScheduleTypeId]	 INT
-			,[strDistributionOption]	 NVARCHAR(40)
-			,[intDiscountSchedule]		 INT
-			,[strContractNumber]	     NVARCHAR(40)
-			,[intContractSequence]       INT
-			,[dblUnitPrice]				 NUMERIC(38, 20)
-			,[dblUnitBasis]				 NUMERIC(38, 20)
-			,[dblTicketFees]			 NUMERIC(38, 20)
-			,[intCurrencyId]			 INT
-			,[strTicketComment]			 NVARCHAR(40)
-			,[strCustomerReference]		 NVARCHAR(40)
-			,[intHaulerId]				 INT
-			,[dblFreightRate]			 NUMERIC(38, 20)
-			,[ysnFarmerPaysFreight]      BIT
-			,[ysnCusVenPaysFees]		 BIT
-			,[intAxleCount]				 INT
-			,[strBinNumber]				 NVARCHAR(40)
-			,[strDiscountComment]		 NVARCHAR(40)	
-			,[intCommodityId]			 INT
-			,[intDiscountId] 			 INT
-			,[intContractId] 			 INT
-			,[intItemId] 				 INT
-			,[intEntityId]				 INT
-			,[intSubLocationId] 		 INT
-			,[intStorageLocationId]		 INT
-			,[intStorageScheduleId] 	 INT
-			,[intConcurrencyId]			 INT
-			,[intItemUOMIdFrom]			 INT
-			,[intItemUOMIdTo]			 INT
-			,[intTicketTypeId]			 INT
-			,ysnRailCar					 BIT 
-			,strOfflineGuid				 NVARCHAR(100)
-			,ysnDeliverySheetPost		 BIT
-			,ysnDestinationWeightGradePost BIT
-			,ysnReadyToTransfer			  BIT
-		
+			 [strData]							NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strType]							NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strEntityName]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strItemNo]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strLocationName]					NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,[strTicketStatus]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strTicketNumber]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intScaleSetupId]					INT
+			,[intTicketPoolId]					INT
+			,[intTicketLocationId]				INT
+			,[intTicketType]					INT
+			,[strInOutFlag]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[dtmTicketDateTime]				DATETIME
+			,[intProcessingLocationId]			INT
+			,[strScaleOperatorUser]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intEntityScaleOperatorId]			INT
+			,[strTruckName]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strDriverName]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[dblGrossWeight]					DECIMAL(13, 3)
+			,[dblTareWeight]					DECIMAL(13, 3)
+			,[dblGrossUnits]					DECIMAL(13, 3)
+			,[dblShrink]						DECIMAL(13, 3)
+			,[dblNetUnits]						DECIMAL(13, 3)
+			,[intSplitId]						INT
+			,[intStorageScheduleTypeId]			INT
+			,[strDistributionOption]			NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intDiscountSchedule]				INT
+			,[strContractNumber]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intContractSequence]				INT
+			,[dblUnitPrice]						NUMERIC(38, 20)
+			,[dblUnitBasis]						NUMERIC(38, 20)
+			,[dblTicketFees]					NUMERIC(38, 20)
+			,[intCurrencyId]					INT
+			,[strTicketComment]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strCustomerReference]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intHaulerId]						INT
+			,[dblFreightRate]					NUMERIC(38, 20)
+			,[ysnFarmerPaysFreight]				BIT
+			,[ysnCusVenPaysFees]				BIT
+			,[intAxleCount]						INT
+			,[strBinNumber]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strDiscountComment]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[intCommodityId]					INT
+			,[intDiscountId] 					INT
+			,[intContractId] 					INT
+			,[intItemId] 						INT
+			,[intEntityId]						INT
+			,[intSubLocationId] 				INT
+			,[intStorageLocationId]				INT
+			,[intStorageScheduleId] 			INT
+			,[intDeliverySheetId]				INT
+			,[intConcurrencyId]					INT
+			,[intItemUOMIdFrom]					INT
+			,[intItemUOMIdTo]					INT
+			,[intTicketTypeId]					INT
+			,[ysnRailCar]						BIT 
+			,[ysnDeliverySheetPost]				BIT
+			,[ysnDestinationWeightGradePost]	BIT
+			,[ysnReadyToTransfer]				BIT
+			,[ysnHasGeneratedTicketNumber]		BIT
+			,[dblConvertedUOMQty]				NUMERIC(38, 20) NULL,
 		); 
 
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -132,7 +232,7 @@ BEGIN TRY
 
 	BEGIN
 
-		INSERT	INTO	#tmpExtracted
+		INSERT INTO #tmpExtracted
 		(
 			 [strData]
 			,[strType]
@@ -184,112 +284,105 @@ BEGIN TRY
 			,[intSubLocationId] 
 			,[intStorageLocationId]
 			,[intStorageScheduleId] 
+			,[intDeliverySheetId]
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
-			,[intTicketTypeId]			
-			,ysnRailCar
-			,strOfflineGuid
-			,ysnDeliverySheetPost
-			,ysnDestinationWeightGradePost
-			,ysnReadyToTransfer
-	
+			,[intTicketTypeId]		
+			,[ysnRailCar]
+			,[ysnDeliverySheetPost]
+			,[ysnDestinationWeightGradePost]
+			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber]
+			,dblConvertedUOMQty
 		)
 		SELECT	
-				 [strData]					 = CI.strData
-				,[strType]					 = CI.strTicketType
-				,[strEntityNo]				 = CI.strEntityName
-				,[strItemNo]				 = CI.strItemNo
-				,[strLocationNumber]		 = CI.strLocationNumber
-				,[strTicketStatus]           = 'O'
-				,[strTicketNumber] 			 = CI.strTicketNumber
-				,[intScaleSetupId] 			 = ScaleSetup.intScaleSetupId
-				,[intTicketPoolId] 			 = ScaleSetup.intTicketPoolId
-				,[intTicketLocationId]		 = CL.intCompanyLocationId
-				,[intTicketType] 			 = CASE 
-													WHEN CI.strTicketType = 'Load In'  THEN 1
-													WHEN CI.strTicketType = 'Load Out' THEN 2
-											   END	
-				,[strInOutFlag] 			 = CASE 
-											   	WHEN CI.strTicketType = 'Load In'  THEN 'I'
-											   	WHEN CI.strTicketType = 'Load Out' THEN 'O'
-											   END
-				,[dtmTicketDateTime]		 = CI.dtmTicketDateTime
-				,[intProcessingLocationId]	 = CL.intCompanyLocationId
-				,[strScaleOperatorUser]		 = 1
-				,[intEntityScaleOperatorId]	 = @intUserId
-				,[strTruckName]				 = CI.strTruckName
-				,[strDriverName]			 = CI.strDriverName
-				,[dblGrossWeight] 			 = CI.dblGrossWeight
-				,[dblTareWeight]			 = CI.dblTareWeight
-				,[dblGrossUnits]			 = CI.dblGrossUnits
-				,[dblShrink]				 = CI.dblShrink
-				,[dblNetUnits] 				 = CI.dblNetUnits
-				,[intSplitId]				 = CI.intSplitId
-				,intStorageScheduleTypeId	 = ST.intStorageScheduleTypeId
-				,[strDistributionOption]	 = CI.strDistributionOption
-				,[intDiscountSchedule]    	 = DiscountSchedule.intDiscountScheduleId
-				,[strContractNumber]		 = CI.strContractNumber
-				,[intContractSequence]     	 = CI.intContractSequence
-				,[dblUnitPrice]				 = CI.dblUnitPrice
-				,[dblUnitBasis]				 = CI.dblUnitBasis
-				,[dblTicketFees]			 = CI.dblTicketFees
-				,[intCurrencyId]			 =  EY.intCurrencyId
-				,[strTicketComment]			 = CI.strTicketComment
-				,[strCustomerReference]		 = CI.strCustomerReference
-				,[intHaulerId]				 = CI.intHaulerId
-				,[dblFreightRate]			 = CI.dblFreightRate
-				,[ysnFarmerPaysFreight]		 = CI.ysnFarmerPaysFreight
-				,[ysnCusVenPaysFees]		 = CI.ysnCusVenPaysFees
-				,[intAxleCount]				 = CI.intAxleCount
-				,[strBinNumber]				 = CI.strBinNumber
-				,[strDiscountComment]		 = NULL
-				,[intCommodityId]			 = IM.intCommodityId
-				,[intDiscountId] 			 = DiscountId.intDiscountId
-				,[intContractId] 			 = CD.intContractDetailId
-				,[intItemId] 				 = IM.intItemId
-				,[intEntityId]				 = EY.intEntityId
-				,[intSubLocationId] 		 = SubLocation.intCompanyLocationSubLocationId
-				,[intStorageLocationId]		 = Bin.intStorageLocationId
-				,[intStorageScheduleId] 	 = SS.intStorageScheduleRuleId
-				,[intConcurrencyId]			 = 1
-				,[intItemUOMIdFrom]			 = ScaleUOM.intItemUOMId
-				,[intItemUOMIdTo]			 = UOM.intItemUOMId
-				,[intTicketTypeId]			 = CASE 
-													WHEN CI.strTicketType = 'Load In'  THEN 1
-													WHEN CI.strTicketType = 'Load Out' THEN 2
-											   END
-				,ysnRailCar					 = 0
-				,strOfflineGuid				 = ''
-				,ysnDeliverySheetPost		 = 0
-				,ysnDestinationWeightGradePost = 0
-				,ysnReadyToTransfer = 0
+			[strData]					 = CI.strData
+			,[strType]					 = CI.strTicketType
+			,[strEntityNo]				 = CI.strEntityName
+			,[strItemNo]				 = CI.strItemNo
+			,[strLocationNumber]		 = CI.strLocationNumber
+			,[strTicketStatus]           = 'O'
+			,[strTicketNumber] 			 = CI.strTicketNumber
+			,[intScaleSetupId] 			 = SCS.intScaleSetupId
+			,[intTicketPoolId] 			 = SCS.intTicketPoolId
+			,[intTicketLocationId]		 = CL.intCompanyLocationId
+			,[intTicketType] 			 = SCTicketType.intTicketType
+			,[strInOutFlag] 			 = SCTicketType.strInOutIndicator
+			,[dtmTicketDateTime]		 = CI.dtmTicketDateTime
+			,[intProcessingLocationId]	 = CL.intCompanyLocationId
+			,[strScaleOperatorUser]		 = 1
+			,[intEntityScaleOperatorId]	 = @intUserId
+			,[strTruckName]				 = CI.strTruckName
+			,[strDriverName]			 = CI.strDriverName
+			,[dblGrossWeight] 			 = CI.dblGrossWeight
+			,[dblTareWeight]			 = CI.dblTareWeight
+			,[dblGrossUnits]			 = CI.dblGrossUnits
+			,[dblShrink]				 = CI.dblShrink
+			,[dblNetUnits] 				 = CI.dblNetUnits
+			,[intSplitId]				 = CI.intSplitId
+			,intStorageScheduleTypeId	 = ST.intStorageScheduleTypeId
+			,[strDistributionOption]	 = ST.strStorageTypeCode
+			,[intDiscountSchedule]    	 = DiscountSchedule.intDiscountScheduleId
+			,[strContractNumber]		 = CI.strContractNumber
+			,[intContractSequence]     	 = CI.intContractSequence
+			,[dblUnitPrice]				 = CI.dblUnitPrice
+			,[dblUnitBasis]				 = CI.dblUnitBasis
+			,[dblTicketFees]			 = CI.dblTicketFees
+			,[intCurrencyId]			 = CASE WHEN SCTicketType.strInOutIndicator = 'I' THEN APV.intCurrencyId ELSE ARC.intCurrencyId END
+			,[strTicketComment]			 = CI.strTicketComment
+			,[strCustomerReference]		 = CI.strCustomerReference
+			,[intHaulerId]				 = CI.intHaulerId
+			,[dblFreightRate]			 = CI.dblFreightRate
+			,[ysnFarmerPaysFreight]		 = CI.ysnFarmerPaysFreight
+			,[ysnCusVenPaysFees]		 = CI.ysnCusVenPaysFees
+			,[intAxleCount]				 = CI.intAxleCount
+			,[strBinNumber]				 = CI.strBinNumber
+			,[strDiscountComment]		 = NULL
+			,[intCommodityId]			 = IM.intCommodityId
+			,[intDiscountId] 			 = DiscountId.intDiscountId
+			,[intContractId] 			 = CD.intContractDetailId
+			,[intItemId] 				 = IM.intItemId
+			,[intEntityId]				 = CASE WHEN SCTicketType.strInOutIndicator = 'I' THEN APV.intEntityId ELSE ARC.intEntityId END
+			,[intSubLocationId] 		 = SubLocation.intCompanyLocationSubLocationId
+			,[intStorageLocationId]		 = Bin.intStorageLocationId
+			,[intStorageScheduleId] 	 = SS.intStorageScheduleRuleId
+			,[intDeliverySheetId]		 = DS.intDeliverySheetId
+			,[intConcurrencyId]			 = 1
+			,[intItemUOMIdFrom]			 = SCS.intItemUOMId
+			,[intItemUOMIdTo]			 = UOM.intItemUOMId
+			,[intTicketTypeId]			 = SCTicketType.intTicketTypeId
+			,[ysnRailCar]				 = 0
+			,[ysnDeliverySheetPost]		 = 0
+			,[ysnDestinationWeightGradePost] = 0
+			,[ysnReadyToTransfer]		 = 0
+			,[ysnHasGeneratedTicketNumber] = 1
+			,dblConvertedUOMQty			   = UN.dblUnitQty
 
-		FROM		tblSCTicketLVStaging	    CI	
+		FROM tblSCTicketLVStaging	    CI	
 		LEFT JOIN	tblSMCompanyLocation		CL	ON	CL.strLocationName	=	CI.strLocationName		
 		LEFT JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItemNo
 		LEFT JOIN	tblICItemUOM				UOM	ON	UOM.intItemId		=	IM.intItemId AND UOM.ysnStockUnit = 1
-		LEFT JOIN	vyuCTEntity					EY	ON	EY.strEntityName	=	CI.strEntityName
-												AND	EY.strEntityType		=	CASE 
-																					WHEN CI.strTicketType = 'Load In'  THEN 'Vendor'
-																					WHEN CI.strTicketType = 'Load Out' THEN 'Customer'
-																				END
+		LEFT JOIN	vyuAPVendor					APV	ON APV.strName	=	CI.strEntityName
+		LEFT JOIN	vyuARCustomer				ARC	ON ARC.strName	=	CI.strEntityName
 		LEFT JOIN tblGRDiscountId DiscountId ON DiscountId.strDiscountId = CI.strDiscountId
 		LEFT JOIN tblGRDiscountCrossReference CRef ON CRef.intDiscountId = DiscountId.intDiscountId 
 		LEFT JOIN tblGRDiscountSchedule DiscountSchedule ON DiscountSchedule.intDiscountScheduleId = CRef.intDiscountScheduleId 
 														AND DiscountSchedule.intCommodityId = IM.intCommodityId 
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.strSubLocationName = CI.strStorageLocation
-		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber
+		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber AND Bin.intSubLocationId=SubLocation.intCompanyLocationSubLocationId
 		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CI.strDistributionOption
 		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule
+		LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = CI.strDeliverySheet
 		LEFT JOIN tblCTContractHeader CH ON CH.strContractNumber = CI.strContractNumber
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = CI.intContractSequence
-		LEFT JOIN 
-		(
-		 SELECT TOP 1 * FROM tblSCScaleSetup
-		)ScaleSetup ON 1 =1
-		LEFT JOIN tblICItemUOM ScaleUOM ON ScaleUOM.intUnitMeasureId = ScaleSetup.intUnitMeasureId AND ScaleUOM.intItemId = IM.intItemId
-		--WHERE	intTicketLVStagingId	= @intExternalId 
+		LEFT JOIN tblSCListTicketTypes SCTicketType ON SCTicketType.strTicketType = CI.strTicketType
+		OUTER APPLY (
+			SELECT SCSetup.intScaleSetupId, SCSetup.strStationShortDescription, SCSetup.intTicketPoolId,ScaleUOM.intItemUOMId FROM tblSCScaleSetup SCSetup
+			LEFT JOIN tblICItemUOM ScaleUOM ON ScaleUOM.intUnitMeasureId = SCSetup.intUnitMeasureId AND ScaleUOM.intItemId = IM.intItemId
+			WHERE SCSetup.strStationShortDescription = CI.strScaleStationImport
+		) SCS
+		LEFT JOIN	tblICItemUOM UN	ON	UN.intItemUOMId = SCS.intItemUOMId
 		WHERE strTicketNumber = @strTicketNo AND CI.strData = 'Header' AND DiscountSchedule.intDiscountScheduleId IS NOT NULL
 
 		INSERT INTO #tmpExtracted
@@ -360,73 +453,77 @@ BEGIN TRY
 			,[intEntityId]	
 			,[intSubLocationId] 
 			,[intStorageLocationId]
-			,[intStorageScheduleId] 
+			,[intStorageScheduleId]
+			,[intDeliverySheetId] 
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
 			,[intTicketTypeId]			
-			,ysnRailCar		
-			,strOfflineGuid
-			,ysnDeliverySheetPost
-			,ysnDestinationWeightGradePost
-			,ysnReadyToTransfer	
+			,[ysnRailCar]
+			,[ysnDeliverySheetPost]
+			,[ysnDestinationWeightGradePost]
+			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber]
+			,dblConvertedUOMQty 
 		)
 		SELECT	
-		 [strTicketStatus]  
-		,[strTicketNumber] 
-		,[intScaleSetupId] 
-		,[intTicketPoolId] 
-		,[intTicketLocationId]
-		,[intTicketType] 
-		,[strInOutFlag] 
-		,[dtmTicketDateTime]
-		,[intProcessingLocationId]
-		,[strScaleOperatorUser]
-		,[intEntityScaleOperatorId]
-		,[strTruckName]
-		,[strDriverName]
-		,[dblGrossWeight] 
-		,[dblTareWeight]
-		,[dblGrossUnits]
-		,[dblShrink]
-		,[dblNetUnits] 
-		,[intSplitId]
-		,intStorageScheduleTypeId
-		,[strDistributionOption]
-		,[intDiscountSchedule]    
-		,[strContractNumber]
-		,[intContractSequence]     
-		,[dblUnitPrice]
-		,[dblUnitBasis]
-		,[dblTicketFees]
-		,[intCurrencyId]
-		,[strTicketComment]
-		,[strCustomerReference]
-		,[intHaulerId]
-		,[dblFreightRate]
-		,[ysnFarmerPaysFreight]
-		,[ysnCusVenPaysFees]
-		,[intAxleCount]
-		,[strBinNumber]
-		,[strDiscountComment]	
-		,[intCommodityId]
-		,[intDiscountId] 
-		,[intContractId] 
-		,[intItemId] 
-		,[intEntityId]	
-		,[intSubLocationId] 
-		,[intStorageLocationId]
-		,[intStorageScheduleId] 
-		,[intConcurrencyId]
-		,[intItemUOMIdFrom]
-		,[intItemUOMIdTo]
-		,[intTicketTypeId]		
-		,ysnRailCar		
-		,strOfflineGuid
-		,ysnDeliverySheetPost
-		,ysnDestinationWeightGradePost
-		,ysnReadyToTransfer	
-		FROM	#tmpExtracted 
+			 [strTicketStatus]  
+			,[strTicketNumber] 
+			,[intScaleSetupId] 
+			,[intTicketPoolId] 
+			,[intTicketLocationId]
+			,[intTicketType] 
+			,[strInOutFlag] 
+			,[dtmTicketDateTime]
+			,[intProcessingLocationId]
+			,[strScaleOperatorUser]
+			,[intEntityScaleOperatorId]
+			,[strTruckName]
+			,[strDriverName]
+			,[dblGrossWeight] 
+			,[dblTareWeight]
+			,[dblGrossUnits]
+			,[dblShrink]
+			,[dblNetUnits] 
+			,[intSplitId]
+			,intStorageScheduleTypeId
+			,[strDistributionOption]
+			,[intDiscountSchedule]    
+			,[strContractNumber]
+			,[intContractSequence]     
+			,[dblUnitPrice]
+			,[dblUnitBasis]
+			,[dblTicketFees]
+			,[intCurrencyId]
+			,[strTicketComment]
+			,[strCustomerReference]
+			,[intHaulerId]
+			,[dblFreightRate]
+			,[ysnFarmerPaysFreight]
+			,[ysnCusVenPaysFees]
+			,[intAxleCount]
+			,[strBinNumber]
+			,[strDiscountComment]	
+			,[intCommodityId]
+			,[intDiscountId] 
+			,[intContractId] 
+			,[intItemId] 
+			,[intEntityId]	
+			,[intSubLocationId] 
+			,[intStorageLocationId]
+			,[intStorageScheduleId]
+			,[intDeliverySheetId] 
+			,[intConcurrencyId]
+			,[intItemUOMIdFrom]
+			,[intItemUOMIdTo]
+			,[intTicketTypeId]		
+			,[ysnRailCar]
+			,[ysnDeliverySheetPost]
+			,[ysnDestinationWeightGradePost]
+			,[ysnReadyToTransfer]
+			,[ysnHasGeneratedTicketNumber]
+			,dblConvertedUOMQty 
+		FROM #tmpExtracted 
 		WHERE strData = 'Header' 
 
 		EXEC	uspCTGetTableDataInXML '#tmpTicket',null,@strTblXML OUTPUT,'tblSCTicket'
@@ -435,25 +532,24 @@ BEGIN TRY
 		SELECT @intDiscountScheduleId = intDiscountSchedule FROM	#tmpExtracted WHERE strData = 'Header'
 
 
-				INSERT	INTO #tmpTicketDiscount
-				(
-					 intConcurrencyId
-					,dblGradeReading
-					,strCalcMethod
-					,strShrinkWhat
-					,dblShrinkPercent
-					,dblDiscountAmount
-					,dblDiscountDue
-					,dblDiscountPaid
-					,ysnGraderAutoEntry
-					,intDiscountScheduleCodeId					
-					,intTicketId
-					,intTicketFileId
-					,strSourceType
-					,intSort
-					,strDiscountChargeType
-				)
-
+			INSERT	INTO #tmpTicketDiscount
+			(
+				intConcurrencyId
+				,dblGradeReading
+				,strCalcMethod
+				,strShrinkWhat
+				,dblShrinkPercent
+				,dblDiscountAmount
+				,dblDiscountDue
+				,dblDiscountPaid
+				,ysnGraderAutoEntry
+				,intDiscountScheduleCodeId					
+				,intTicketId
+				,intTicketFileId
+				,strSourceType
+				,intSort
+				,strDiscountChargeType
+			)
 			SELECT 
 				 intConcurrencyId				= 1
 				,dblGradeReading				= CAST(Extracted.strEntityName AS DECIMAL(24,10))
@@ -466,7 +562,7 @@ BEGIN TRY
 				,ysnGraderAutoEntry				= 0
 				,intDiscountScheduleCodeId		= QM.intDiscountScheduleCodeId				
 				,intTicketId					= @intTicketId
-				,intTicketFileId				= @intTicketId
+				,intTicketFileId				= null
 				,strSourceType					= 'Scale'
 				,intSort						= 1
 				,strDiscountChargeType			= 'Dollar'

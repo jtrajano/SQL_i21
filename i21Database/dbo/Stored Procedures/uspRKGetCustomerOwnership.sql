@@ -1,6 +1,6 @@
 ﻿CREATE PROC [dbo].[uspRKGetCustomerOwnership]
-       @dtmFromTransactionDate datetime = null,
-	   @dtmToTransactionDate datetime = null,
+       @dtmFromTransactionDate date = null,
+	   @dtmToTransactionDate date = null,
 	   @intCommodityId int =  null,
 	   @intItemId int= null,
 	   @strPositionIncludes nvarchar(100) = NULL,
@@ -66,9 +66,11 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				--JOIN tblGRCustomerStorage GCS ON DS.intDeliverySheetId = GCS.intDeliverySheetId
 				JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId 
 				--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),DS.dtmDeliverySheetDate,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND i.intCommodityId= @intCommodityId
+			WHERE
+			 --convert(datetime,CONVERT(VARCHAR(10),DS.dtmDeliverySheetDate,110),110) BETWEEN
+				-- convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				--AND
+				 i.intCommodityId= @intCommodityId
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 				and  DSS.intStorageScheduleTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
 				AND  st.intProcessingLocationId  IN (
@@ -81,43 +83,57 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.strTicketStatus = 'H'
 				AND DS.ysnPost = 0
 
-		UNION ALL --Distributed Delivery Sheet
-			SELECT 
-				dtmDate 
-				,strStorageTypeDescription
-				,dblInQty
-				,dblOutQty
-				,intStorageTypeId
-				,dblSettleUnit
-			FROM (
-				SELECT
-					CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
-					,strStorageTypeDescription
-					,sum(dblOpenBalance) + (sum(dblOriginalBalance) - sum(dblOpenBalance)) dblInQty
-					,sum(dblOriginalBalance) - sum(dblOpenBalance) dblOutQty --This will give you the value of transfered qty
-					,GCS.intStorageTypeId  
-					,0	dblSettleUnit	
-					,intDeliverySheetId	
-				FROM  vyuGRStorageSearchView GCS
-				WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
-					 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-					AND GCS.intCommodityId= @intCommodityId
-					and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
-					and  GCS.intStorageTypeId > 0 
-					AND  GCS.intCompanyLocationId  IN (
-																SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																ELSE isnull(ysnLicensed, 0) END)
+		UNION ALL --Storages
+		SELECT
+			dtmDate
+			,strStorageTypeDescription
+			,SUM(dblInQty) as dblInQty
+			,SUM(dblOutQty) as dblOutQty
+			,intStorageScheduleTypeId as intStorageTypeId
+			,0 as dblSettleUnit
+		FROM (
+		select 
+			CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+			,S.strStorageTypeDescription
+			,CASE WHEN strType = 'From Delivery Sheet' 
+					OR strType = 'From Scale'  
+					OR strType = 'From Transfer'  THEN
+				dblUnits
+				ELSE 0 END AS dblInQty
+			,CASE WHEN strType = 'Reduced By Inventory Shipment' 
+					OR strType = 'Settlement' 
+					OR strType = 'Transfer'  THEN
+				ABS(dblUnits)
+				WHEN  strType = 'Reverse Settlement'  THEN
+					ABS(dblUnits) * -1
+				ELSE 0 END AS dblOutQty
+			,S.intStorageScheduleTypeId
+
+		from 
+		tblGRCustomerStorage CS
+		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+
+		WHERE
+		 --convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+			--					convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			--				AND 
+							CS.intCommodityId= @intCommodityId
+							and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+							AND  CS.intCompanyLocationId  IN (
+																		SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																		WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																		ELSE isnull(ysnLicensed, 0) END)
 				
-					AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
-					ANd GCS.intDeliverySheetId IS NOT NULL
-					GROUP BY 
-						CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110)
-						,strStorageTypeDescription
-						,intStorageTypeId
-						,intDeliverySheetId
-			) a
+							AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+
+		)t
+		GROUP BY
+			dtmDate
+			,strStorageTypeDescription
+			,intStorageScheduleTypeId
+		
 
 		--UNION ALL --Delivery Sheet with IR
 		--	SELECT DISTINCT
@@ -162,9 +178,11 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				,NULL dblSettleUnit			
 			FROM tblSCTicket st
 				JOIN tblICItem i on i.intItemId=st.intItemId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND i.intCommodityId= @intCommodityId
+			WHERE 
+				--convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+				-- convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				--AND 
+				i.intCommodityId= @intCommodityId
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 				AND  st.intProcessingLocationId  IN (
 															SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -175,34 +193,34 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
 
-			UNION ALL --Direct Scale and Transfer Storage
-			SELECT
-				CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
-				,strStorageTypeDescription
-				,dblOriginalBalance * (GCS.dblSplitPercent/100)   dblInQty
-				,(dblOriginalBalance - dblOpenBalance) * (GCS.dblSplitPercent/100)   dblOutQty
-				,GCS.intStorageTypeId  
-				,0	dblSettleUnit		
-			FROM  vyuGRStorageSearchView GCS
+			--UNION ALL --Direct Scale and Transfer Storage
+			--SELECT
+			--	CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110) dtmDate
+			--	,strStorageTypeDescription
+			--	,dblOriginalBalance * (GCS.dblSplitPercent/100)   dblInQty
+			--	,(dblOriginalBalance - dblOpenBalance) * (GCS.dblSplitPercent/100)   dblOutQty
+			--	,GCS.intStorageTypeId  
+			--	,0	dblSettleUnit		
+			--FROM  vyuGRStorageSearchView GCS
 			
-				--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
-				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND GCS.intCommodityId= @intCommodityId
-				and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
-				and  GCS.intStorageTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
-				AND  GCS.intCompanyLocationId  IN (
-															SELECT intCompanyLocationId FROM tblSMCompanyLocation
-															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-															ELSE isnull(ysnLicensed, 0) END)
+			--	--JOIN tblICInventoryReceiptItem IRI on DS.intDeliverySheetId = IRI.intSourceId
+			--WHERE convert(datetime,CONVERT(VARCHAR(10),GCS.dtmDeliveryDate,110),110) BETWEEN
+			--	 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			--	AND GCS.intCommodityId= @intCommodityId
+			--	and GCS.intItemId= case when isnull(@intItemId,0)=0 then GCS.intItemId else @intItemId end 
+			--	and  GCS.intStorageTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
+			--	AND  GCS.intCompanyLocationId  IN (
+			--												SELECT intCompanyLocationId FROM tblSMCompanyLocation
+			--												WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+			--												WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+			--												ELSE isnull(ysnLicensed, 0) END)
 				
-				AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
-				ANd GCS.intDeliverySheetId IS NULL
+			--	AND GCS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then GCS.intCompanyLocationId  else @intLocationId end
+			--	ANd GCS.intDeliverySheetId IS NULL
 
 			
 
-		  )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
+		 )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
 ) t1
 
 IF (@ysnDisplayAllStorage=1)
@@ -293,18 +311,51 @@ END
 DECLARE @intColumn_Id1  int
 DECLARE @strInsertList NVARCHAR(MAX)=''
 declare @strPermtableList NVARCHAR(MAX)=''
+DECLARE @strInsertListBF NVARCHAR(MAX)='' --For Balance Forward
+DECLARE @strInsertListBFGroupBy NVARCHAR(MAX) = ''
+declare @strPermtableListBF NVARCHAR(MAX)=''
 declare @intColCount int
+declare @SQLBalanceForward nvarchar(max)=''
 declare @SQLFinal nvarchar(max)=''
+
+select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%')
+SELECT @strInsertListBF=  case when LEN(@strInsertListBF)>0 then LEFT(@strInsertListBF,LEN(@strInsertListBF)-1) else @strInsertListBF end  --Remove the comma at the end
+
+select @strInsertListBFGroupBy += '['+ name +'],'  from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and   name like '%Distribution%'
+SELECT @strInsertListBFGroupBy=  case when LEN(@strInsertListBFGroupBy)>0 then LEFT(@strInsertListBFGroupBy,LEN(@strInsertListBFGroupBy)-1) else @strInsertListBFGroupBy end  --Remove the comma at the end
+
 
 select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
 select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
-SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  
+SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  --Remove the comma at the end
+
 
 select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount
 SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
+
+select @strPermtableListBF+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount and ( COLUMN_NAME like '%Net' OR COLUMN_NAME like '%Distribution%') 
+
+SELECT @strPermtableListBF= CASE WHEN LEN(@strPermtableListBF) = 0 THEN '' ELSE LEFT(@strPermtableListBF,LEN(@strPermtableListBF)-1)  END
+
+
+IF LEN(@strPermtableListBF) <> 0 
+BEGIN
+	set @SQLBalanceForward='
+	INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableListBF+')
+	SELECT  '+@strInsertListBF+'
+	FROM ##tblRKDailyPositionForCustomer1 t 
+	WHERE dtmDate < ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) + '''
+	GROUP BY ' + @strInsertListBFGroupBy + '
+	'
+
+	EXEC sp_executesql @SQLBalanceForward
+END
+
 set @SQLFinal='
 INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableList+')
 SELECT  '+@strInsertList+'
-FROM ##tblRKDailyPositionForCustomer1 t order by dtmDate'
+FROM ##tblRKDailyPositionForCustomer1 t 
+WHERE dtmDate between ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) +''' AND ''' + CONVERT(VARCHAR(10),@dtmToTransactionDate,110) +'''
+order by dtmDate'
 
 EXEC sp_executesql @SQLFinal

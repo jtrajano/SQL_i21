@@ -19,6 +19,15 @@
 RETURNS NUMERIC(18,6)
 AS
 BEGIN
+
+	DECLARE @intItemUOMId INT
+
+	SELECT @intItemUOMId = intIssueUOMId 
+    FROM tblICItemLocation
+    WHERE intItemId = @ItemId
+    AND intLocationId = @CompanyLocationId
+
+
 	RETURN dbo.fnGetItemTotalTaxForCustomer( @ItemId
 											,@CustomerId			
 											,@TransactionDate		
@@ -37,7 +46,8 @@ BEGIN
 											,0
 											,NULL
 											,1
-											,NULL	-- intItemUOMId
+											,0
+											,@intItemUOMId	-- intItemUOMId
 											,NULL
 											,NULL
 											,NULL

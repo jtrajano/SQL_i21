@@ -10,6 +10,11 @@ BEGIN
        
 	   BEGIN TRY
               
+			  DECLARE @intStoreId int
+              SELECT @intStoreId = intStoreId
+              FROM dbo.tblSTCheckoutHeader
+              WHERE intCheckoutId = @intCheckoutId
+
 			  -------------------------------------------------------------------------------------------- 
 			  -- Create Save Point. 
 			  --------------------------------------------------------------------------------------------   
@@ -29,10 +34,57 @@ BEGIN
 			  -- END Create Save Point. 
 			  --------------------------------------------------------------------------------------------
 
-              DECLARE @intStoreId int
-              SELECT @intStoreId = intStoreId
-              FROM dbo.tblSTCheckoutHeader
-              WHERE intCheckoutId = @intCheckoutId
+
+
+			  -- ================================================================================================================== 
+				-- Get Error logs. Check Register XML that is not configured in i21
+				-- Compare <MiscellaneousSummarySubCodeModifier> tag of (RegisterXML) and (Store -> Store -> Payment Option(Tab) -> 'Register Mop'(strRegisterMopId))
+				-- ------------------------------------------------------------------------------------------------------------------ 
+				INSERT INTO tblSTCheckoutErrorLogs 
+				(
+					strErrorMessage 
+					, strRegisterTag
+					, strRegisterTagValue
+					, intCheckoutId
+					, intConcurrencyId
+				)
+				SELECT DISTINCT
+					'No Matching Register MOP in Payment Options' as strErrorMessage
+					, 'MiscellaneousSummarySubCodeModifier' as strRegisterTag
+					, ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') AS strRegisterTagValue
+					, @intCheckoutId
+					, 1
+				FROM #tempCheckoutInsert Chk
+				WHERE ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') NOT IN
+				(
+					SELECT DISTINCT 
+						tbl.strXmlRegisterMiscellaneousSummarySubCodeModifier
+					FROM
+					(
+						SELECT DISTINCT
+							Chk.MiscellaneousSummarySubCodeModifier AS strXmlRegisterMiscellaneousSummarySubCodeModifier
+						FROM #tempCheckoutInsert Chk
+						JOIN tblSTPaymentOption PO 
+							ON ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+						JOIN tblSTStore Store 
+							ON Store.intStoreId = PO.intStoreId
+						JOIN tblSTCheckoutPaymentOptions CPO 
+							ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+						WHERE Store.intStoreId = @intStoreId
+						AND Chk.MiscellaneousSummaryCode = 'sales' 
+						AND Chk.MiscellaneousSummarySubCode = 'MOP'
+						AND ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') != ''
+					) AS tbl
+				)
+				AND Chk.MiscellaneousSummaryCode = 'sales' 
+				AND Chk.MiscellaneousSummarySubCode = 'MOP'
+				AND ISNULL(Chk.MiscellaneousSummarySubCodeModifier, '') != ''
+				-- ------------------------------------------------------------------------------------------------------------------  
+				-- END Get Error logs. Check Register XML that is not configured in i21.  
+				-- ==================================================================================================================
+
+
+              
       
               ----Update tblSTCheckoutPaymentOptions
               Update dbo.tblSTCheckoutPaymentOptions
@@ -40,9 +92,13 @@ BEGIN
                      , intRegisterCount = ISNULL(chk.MiscellaneousSummaryCount, 0)
                      , dblAmount = ISNULL(chk.MiscellaneousSummaryAmount, 0)
               FROM #tempCheckoutInsert chk
-              JOIN tblSTPaymentOption PO ON PO.strRegisterMop COLLATE DATABASE_DEFAULT = ISNULL(chk.MiscellaneousSummarySubCodeModifier, '')
-              JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
-              JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+              JOIN tblSTPaymentOption PO 
+				ON ISNULL(chk.MiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+				-- ON PO.strRegisterMop COLLATE DATABASE_DEFAULT = ISNULL(chk.MiscellaneousSummarySubCodeModifier, '')
+              JOIN tblSTStore Store 
+				ON Store.intStoreId = PO.intStoreId
+              JOIN tblSTCheckoutPaymentOptions CPO 
+				ON CPO.intPaymentOptionId = PO.intPaymentOptionId
               WHERE Store.intStoreId = @intStoreId
               AND chk.MiscellaneousSummaryCode = 'sales' 
 			  AND chk.MiscellaneousSummarySubCode = 'MOP'

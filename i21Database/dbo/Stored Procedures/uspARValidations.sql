@@ -109,7 +109,7 @@
 	IF(@originCustomerCount <> @customerCount)
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = @key
+		SET @Message = 'There is a discrepancy on Salesperson records.'
 
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
@@ -393,21 +393,18 @@
 			
 		RETURN;	
 	END
-
-
 	--==========================
 	--	Company Location Setup
 	--==========================		
-	DECLARE @CompanyLocation VARCHAR(250)
-	--AR Account
-	SET @CompanyLocation = 
-	(
-		--SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount'
-		SELECT [intARAccountId] FROM tblARCompanyPreference
+	DECLARE @intARAccountId 			INT = NULL
+		  , @intServiceChargeAccountId	INT = NULL
+		  , @strCompanyLocation 		NVARCHAR(200) = NULL
+	SELECT TOP 1 @intARAccountId = intARAccountId
+			   , @intServiceChargeAccountId = intServiceChargeAccountId
+	FROM tblARCompanyPreference
 
-	)
-
-	IF NOT(@CompanyLocation IS NULL OR LTRIM(RTRIM(@CompanyLocation)) = '' OR @CompanyLocation = 0)
+	--AR ACCOUNT
+	IF ISNULL(@intARAccountId, 0) <> 0
 	BEGIN
 		SET @Sucess = 1
 	END
@@ -418,12 +415,10 @@
 		RETURN;	
 	END
 
-	--Service Charge Account
-	SET @CompanyLocation = NULL
-
+	--SERVICE CHARGE ACCOUNT
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
-			SET @CompanyLocation = 
+			SET @strCompanyLocation = 
 			(SELECT TOP 1 CL.strLocationName
 			FROM agivcmst
 			LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
@@ -437,14 +432,14 @@
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 				)
 			AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0))
-			IF(@CompanyLocation IS NULL)
+			IF(@strCompanyLocation IS NULL)
 			BEGIN
 				SET @Sucess = 1
 			END
-			IF(@CompanyLocation IS NOT NULL)
+			IF(@strCompanyLocation IS NOT NULL)
 			BEGIN
 				SET @Sucess = 0
-				SET @Message = 'The Service Charge Account of Company Location - ' + @CompanyLocation + ' was not set.'
+				SET @Message = 'The Service Charge Account of Company Location - ' + @strCompanyLocation + ' was not set.'
 				RETURN;	
 			END
 
@@ -452,12 +447,11 @@
 
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
 		 BEGIN
-			SET @CompanyLocation = (SELECT intServiceChargeAccountId FROM tblARCompanyPreference)
-			IF(@CompanyLocation IS NOT NULL)
+			IF(@intServiceChargeAccountId IS NOT NULL)
 			BEGIN
 				SET @Sucess = 1
 			END
-			IF(@CompanyLocation IS NULL)
+			IF(@intServiceChargeAccountId IS NULL)
 			BEGIN
 				SET @Sucess = 0
 				SET @Message = 'The Service Charge Account in the Company Configuration was not set.'

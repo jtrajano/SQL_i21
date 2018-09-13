@@ -11,7 +11,7 @@ SELECT DISTINCT 'Invoice' AS strTransactionName
 	,i.strDescription
 	,mt.intCategoryId
 	,mt.strCategoryCode
-	,ivd.dblQtyOrdered AS dblQuantity
+	,SUM(ivd.dblQtyShipped) AS dblQuantity
 	,um.strUnitMeasure AS strUOM
 	,iv.dtmDate AS dtmTransactionDate
 	,c.strName AS strVendor
@@ -26,3 +26,14 @@ LEFT JOIN tblICItemUOM iu ON ivd.intItemUOMId = iu.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 LEFT JOIN vyuARCustomer c ON iv.intEntityCustomerId = c.[intEntityId]
 WHERE sh.intInventoryShipmentId = @intShipmentId
+Group by 
+iv.intInvoiceId
+	,iv.strInvoiceNumber
+	,i.intItemId
+	,i.strItemNo
+	,i.strDescription
+	,mt.intCategoryId
+	,mt.strCategoryCode
+	,um.strUnitMeasure 
+	,iv.dtmDate
+	,c.strName

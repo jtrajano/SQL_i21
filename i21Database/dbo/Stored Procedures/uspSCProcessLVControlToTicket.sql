@@ -76,7 +76,6 @@ BEGIN TRY
 					,[dblConvertedUOMQty]
 					,[ysnHasGeneratedTicketNumber]
 					,[intDistributionMethod]
-					,[strOfflineGuid]
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,[intConcurrencyId]
@@ -140,7 +139,6 @@ BEGIN TRY
 					,[dblConvertedUOMQty]
 					,1
 					,1
-					,NEWID()
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1

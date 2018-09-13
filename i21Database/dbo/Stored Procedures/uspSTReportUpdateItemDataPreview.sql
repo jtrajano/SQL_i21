@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportUpdateItemDataPreview]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
-
 BEGIN TRY
-
 	BEGIN TRANSACTION
 
 		DECLARE @ErrMsg NVARCHAR(MAX)
@@ -711,8 +709,8 @@ BEGIN TRY
 					-- filter params
 					@strUpcCode = @strUpcCode 
 					,@strDescription = @strDescription 
-					,@dblRetailPriceFrom = NULL  
-					,@dblRetailPriceTo = NULL 
+					,@dblRetailPriceFrom = @dblPriceBetween1  
+					,@dblRetailPriceTo = @dblPriceBetween2 
 					,@intItemLocationId = NULL 
 					-- update params 
 					,@ysnTaxFlag1 = @ysnTaxFlag1
@@ -1272,11 +1270,32 @@ BEGIN TRY
 				) n
 				WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 			) [Changes]
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-			WHERE 
+			JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			JOIN tblICItemPricing P
+				ON I.intItemId = P.intItemId
+			JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId 
+			JOIN tblICItemUOM UOM
+				ON IL.intItemId = UOM.intItemId
+			JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
+			WHERE 	 
+			(
+				@dblPriceBetween1 IS NULL 
+				OR ISNULL(P.dblSalePrice, 0) >= @dblPriceBetween1
+			)
+			AND 
+			(
+				@dblPriceBetween2 IS NULL 
+				OR ISNULL(P.dblSalePrice, 0) <= @dblPriceBetween2
+			)
+			AND 
+			(
+				@strDescription IS NULL 
+				OR I.strDescription = @strDescription 
+			)
+			AND
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			

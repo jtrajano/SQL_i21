@@ -22,11 +22,6 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 DECLARE @ItemsForItemShipment AS ItemCostingTableType 
-
-DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
-		,@SALES_ORDER AS NVARCHAR(50) = 'SalesOrder'
-		,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
-
 DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS DECIMAL (38,20)
 DECLARE @dblRemainingQuantity AS DECIMAL (38,20)
@@ -36,8 +31,6 @@ DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketItemUOMId INT
 DECLARE @intOrderId INT
-DECLARE @intLoadContractId AS INT
-DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @intLoadId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @intScaleStationId AS INT
@@ -61,17 +54,18 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@dblQtyShipped AS DECIMAL (18,6)
 		,@strWhereFinalizedWeight NVARCHAR(20)
 		,@strWhereFinalizedGrade NVARCHAR(20)
-		,@ysnDPStorage AS BIT;
+		,@ysnDPStorage AS BIT
+		,@intContractDetailId INT;
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
 	, @intScaleStationId = intScaleSetupId
 	, @ysnDeductFreightFarmer = ysnFarmerPaysFreight
 	, @strWhereFinalizedWeight = strWeightFinalized
-	, @strWhereFinalizedWeight = strGradeFinalized
+	, @strWhereFinalizedGrade = strGradeFinalized
 	, @intTicketItemUOMId = intItemUOMIdTo
 	, @intItemId = intItemId
-FROM vyuSCTicketScreenView where @intTicketId = @intTicketId
+FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
 FROM dbo.tblGRStorageType ST WHERE 
@@ -79,45 +73,20 @@ ST.strStorageTypeCode = @strDistributionOption
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
         @dblBalance          NUMERIC(12,4),                    
-        
         @dblNewBalance       NUMERIC(12,4),
         @strInOutFlag        NVARCHAR(4),
         @dblQuantity         NUMERIC(12,4),
-        @strAdjustmentNo     NVARCHAR(50)
+        @strAdjustmentNo     NVARCHAR(50);
+		
 
 BEGIN TRY
-		IF @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'LOD' AND  @intLoadId IS NULL
 		BEGIN
-			IF @intLoadId IS NULL
-			BEGIN 
-				RAISERROR('Unable to find load details. Try Again.', 11, 1);
-				GOTO _Exit
-			END
-			ELSE
-			BEGIN
-				SELECT @intLoadContractId = LGLD.intSContractDetailId, @dblLoadScheduledUnits = LGLD.dblQuantity FROM tblLGLoad LGL 
-				INNER JOIN tblLGLoadDetail LGLD
-				ON LGL.intLoadId = LGLD.intLoadId
-				WHERE LGL.intLoadId = @intLoadId
-			END
-			IF @intLoadContractId IS NULL
-			BEGIN 
-				RAISERROR('Unable to find load contract details. Try Again.', 11, 1);
-				GOTO _Exit
-			END
-			BEGIN
-			SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
-			END
+			RAISERROR('Unable to find load details. Try Again.', 11, 1);
+			GOTO _Exit
 		END
- 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
- 		BEGIN
- 			SET @intOrderId = 1
- 		END
- 		ELSE
- 		BEGIN
- 			SET @intOrderId = 4
- 		END
+
+ 		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 			BEGIN
@@ -134,7 +103,7 @@ BEGIN TRY
 				,@intContractId
 				,@intUserId
 				,0
-			IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+			IF @strDistributionOption = 'CNT'
 			BEGIN
 				DECLARE @intLoopContractId INT;
 				DECLARE @dblLoopContractUnits NUMERIC(38,20);
@@ -150,13 +119,11 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-				   -- Here we do some kind of action that requires us to 
-				   -- process the table variable row-by-row. This example simply
-				   -- uses a PRINT statement as that action (not a very good
-				   -- example).
-				   IF	ISNULL(@intLoopContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+				   IF ISNULL(@intLoopContractId,0) != 0
+				   BEGIN
+					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+				   END
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -164,6 +131,38 @@ BEGIN TRY
 				CLOSE intListCursor;
 				DEALLOCATE intListCursor;
 			END
+			ELSE IF @strDistributionOption = 'LOD'
+			BEGIN
+				DECLARE @intLoadContractId INT;
+				DECLARE @dblLoadContractUnits NUMERIC(38,20);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					IF ISNULL(@intLoadContractId,0) != 0
+					BEGIN
+						SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
+						IF @intContractDetailId != @intContractId
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+						END
+					END
+				   -- Attempt to fetch next row from cursor
+				   FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+				END;
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+			END
+
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)
 		BEGIN

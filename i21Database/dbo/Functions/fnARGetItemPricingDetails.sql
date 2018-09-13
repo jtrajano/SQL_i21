@@ -29,6 +29,7 @@
 	,@GetAllAvailablePricing	BIT
 	,@CurrencyExchangeRate		NUMERIC(18,6)
 	,@CurrencyExchangeRateTypeId INT
+	,@ysnFromItemSelection		BIT = 0
 )
 RETURNS @returntable TABLE
 (
@@ -124,7 +125,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 	FROM
 		[dbo].[fnARItemTermDiscountExemptDetails](@ItemId, @LocationId, @TermId, @TransactionDate, GETDATE())
 		
-	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0
+	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0 AND @ysnFromItemSelection = 0
 	BEGIN		
 		--Customer Contract Price		
 		SELECT TOP 1

@@ -275,7 +275,7 @@ BEGIN
 			,[dtmDate]						= @dtmDate
 			,[dblQty]						= t.dblQty
 			,[dblUOMQty]					= t.dblUOMQty
-			,[dblNewValue]					= @dblEscalateValue
+			,[dblNewValue]					= -@dblEscalateValue
 			,[intCurrencyId]				= t.intCurrencyId
 			,[intTransactionId]				= @intTransactionId
 			,[intTransactionDetailId]		= @intTransactionDetailId

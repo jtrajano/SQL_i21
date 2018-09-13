@@ -131,7 +131,8 @@
 	,SCT.ysnDestinationWeightGradePost
 	,SCT.strPlateNumber
 	,SCT.blbPlateNumber
-	,SCT.intEntityContactId
+	,SCT.strDriverName
+	--,SCT.intEntityContactId
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
@@ -153,7 +154,7 @@
 	,EMEntityFarm.strLocationName AS strFarmField
 	,EMEntity.strName AS strCustomerNumber
 	,EMEntity.strName AS strCustomerName
-	,EMDriver.strName AS strDriverName
+	--,EMDriver.strName AS strDriverName
 
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
@@ -174,6 +175,9 @@
 	 AS BIT) AS ysnHasCommodityGrade
 	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
 	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
+	 ,ICCategory.intCategoryId
+	 ,ICCategory.strCategoryCode
+	 ,ICCategory.strDescription AS strCategoryDescription
 
 	,SCSetup.strStationShortDescription
 	,SCSetup.strWeightDescription
@@ -213,7 +217,6 @@
 
 	,CAST (0 AS BIT) ysnDateModified
 	,SCT.intConcurrencyId
-	,SCT.strOfflineGuid
 	,SO.strSalesOrderNumber
 	,(CASE WHEN SO.intCompanyLocationId > 0 THEN SMC.strLocationName ELSE '' END) AS strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
@@ -242,6 +245,7 @@
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
 	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
+	LEFT JOIN tblICCategory ICCategory on ICCategory.intCategoryId = ICItem.intCategoryId
 
 	LEFT JOIN tblGRStorageType GRStorage on GRStorage.intStorageScheduleTypeId = SCT.intStorageScheduleTypeId 
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
@@ -286,7 +290,7 @@
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
-	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
+	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (
 		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId

@@ -14,5 +14,6 @@
 	[strStorageType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblCharges] DECIMAL(24, 10) NULL,
 	[dtmTerminationOfReceipt] DATETIME NULL,	
+	[intUnitMeasureId] INT NULL
     CONSTRAINT [PK_tblGRStorageStatement_intStorageStatementId] PRIMARY KEY ([intStorageStatementId])
 )

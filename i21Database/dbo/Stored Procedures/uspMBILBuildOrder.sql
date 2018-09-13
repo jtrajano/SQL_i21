@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspMBILBuildOrder]
-	@intDriverId		AS INT
+	@intDriverId		AS INT,
+	@intShiftId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,7 +8,14 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
-DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+IF (ISNULL(@intShiftId, '') != '')
+BEGIN
+	DELETE tblMBILOrder WHERE intShiftId = @intShiftId
+END
+ELSE
+BEGIN
+	DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+END
 
 SELECT intDispatchId = Dispatch.intDispatchID
 	, strOrderNumber = Dispatch.strOrderNumber
@@ -28,6 +36,7 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, Site.intTaxStateID	
 	, Customer.intShipToId	
 	, Site.intLocationId
+	, intShiftId = @intShiftId
 INTO #Dispatch
 FROM tblTMDispatch Dispatch
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
@@ -65,7 +74,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus = 'Open'
+WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
@@ -273,9 +282,3 @@ BEGIN
 	DELETE #tempOrderTaxCode
 	DELETE #tempDriverOrder WHERE intOrderItemId = @MBILOrderId
 END
-
---=====================================================================================================================================
--- 	SCRIPT EXECUTION 
----------------------------------------------------------------------------------------------------------------------------------------
-
---EXEC [dbo].[uspMBILBuildOrder] 125

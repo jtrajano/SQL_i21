@@ -43,20 +43,24 @@ BEGIN TRY
 			@intConcurrencyId			INT,
 			@intNoOfDays				INT,
 			@dtmPlannedAvalability		DATETIME,
-			@intFutureMarketId			INT
+			@intFutureMarketId			INT,
+			@ysnBasisComponent			BIT,
+			@intUnitMeasureId			INT,
+			@intCurrencyId				INT,
+			@intHeaderPricingTypeId		INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
 			@dblFutures					=	dblFutures,
-			@intPricingTypeId			=	intPricingTypeId,
+			@intHeaderPricingTypeId		=	intPricingTypeId,
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0)
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId			=	@intContractHeaderId
 
 
-	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth from tblCTCompanyPreference
+	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = ysnBasisComponent from tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -108,11 +112,22 @@ BEGIN TRY
 	WHERE	IU.intItemId			<>	CD.intItemId	
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
+	UPDATE	CD 
+	SET		CD.intBasisUOMId		=	CU.intItemUOMId
+	FROM	tblCTContractDetail CD
+	JOIN	tblICItemUOM		IU		ON	IU.intItemUOMId			=	CD.intBasisUOMId
+	JOIN	tblICUnitMeasure	BU		ON	BU.intUnitMeasureId		=	IU.intUnitMeasureId
+	JOIN	tblICUnitMeasure	UM		ON	UM.strUnitMeasure		=	BU.strUnitMeasure
+	JOIN	tblICItemUOM		CU		ON	CU.intItemId			=	CD.intItemId 
+										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
+	WHERE	IU.intItemId			<>	CD.intItemId
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
 	--End Correct if UOM are wrong
 
 	--Other safety Checks--
 
-	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intPricingTypeId = 2
+	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intHeaderPricingTypeId = 2
 	BEGIN
 		UPDATE tblCTContractHeader SET dblFutures = NULL  WHERE intContractHeaderId = @intContractHeaderId
 
@@ -151,7 +166,9 @@ BEGIN TRY
 				@dblNoOfLots		=	dblNoOfLots,
 				@ysnPriceChanged	=	ysnPriceChanged,
 				@intConcurrencyId	=	intConcurrencyId,
-				@intFutureMarketId	=	intFutureMarketId
+				@intFutureMarketId	=	intFutureMarketId,
+				@intUnitMeasureId	=	intUnitMeasureId,
+				@intCurrencyId		=	intCurrencyId
 
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -163,7 +180,7 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
 		END
 
-		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8)
+		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
 			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmEndDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmEndDate)  WHERE intContractDetailId = @intContractDetailId
 			
@@ -188,7 +205,7 @@ BEGIN TRY
 				SET		dblFutures			=	NULL,
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
-						intPricingTypeId	=	2
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
@@ -244,6 +261,16 @@ BEGIN TRY
 			NOT EXISTS (SELECT * from tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
 			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
+		END
+
+		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
+			NOT EXISTS(SELECT * FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
+		BEGIN
+			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis)
+			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis
+			FROM	tblICItem		IM
+			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
+			WHERE	ysnBasisContract = 1
 		END
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId

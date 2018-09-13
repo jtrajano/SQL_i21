@@ -55,7 +55,7 @@ RETURNS TABLE AS RETURN
 												  THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END), 
 													itemUOM.intItemUOMId, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
 					 
-		END) as dblTotalUnits
+		END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END) as dblTotalUnits
 		,CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL 
 				THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
 				ELSE B.intAccountId

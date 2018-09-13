@@ -93,13 +93,13 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,AD.dblSeqPrice
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,AD.intSeqCurrencyId 
-	,AD.strSeqCurrency
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
 	,AD.intSeqPriceUOMId
 	,AD.strSeqPriceUOM
-	,PCU.ysnSubCurrency
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
 	,CD.intRateTypeId
 	,CD.dblRate
 	,CD.intInvoiceCurrencyId
@@ -114,6 +114,7 @@ JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
+LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -258,13 +259,13 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,AD.dblSeqPrice
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,AD.intSeqCurrencyId 
-	,AD.strSeqCurrency
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
 	,AD.intSeqPriceUOMId
 	,AD.strSeqPriceUOM
-	,PCU.ysnSubCurrency
+	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
 	,CD.intRateTypeId
 	,CD.dblRate
 	,CD.intInvoiceCurrencyId
@@ -279,6 +280,7 @@ JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
+LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -401,3 +403,8 @@ GROUP BY CD.intContractDetailId
 	,CET.strCurrencyExchangeRateType
 	,CD.intInvoiceCurrencyId
 	,FXC.strCurrency
+	,CD.dblCashPrice
+	,CD.intCurrencyId
+	,CPCU.strCurrency
+	,CPCU.ysnSubCurrency
+	,CD.ysnUseFXPrice

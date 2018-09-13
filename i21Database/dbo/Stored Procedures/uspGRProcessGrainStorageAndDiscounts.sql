@@ -653,17 +653,19 @@ BEGIN TRY
 						,[dtmHistoryDate]
 						,[dblPaidAmount]							
 						,[strType]
-						,[strUserName]							
+						,[strUserName]
+						,[intUserId]
 					)
 					SELECT 
 						[intConcurrencyId] = 1
 						,[intCustomerStorageId] = ARD.intCustomerStorageId														
 						,[intInvoiceId] = AR.intInvoiceId							
 						,[dblUnits] = ARD.dblQtyOrdered
-						,[dtmHistoryDate]=GetDATE()
-						,[dblPaidAmount]=ARD.dblPrice							
-						,[strType]='Generated Storage and Discount Invoice'
-						,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+						,[dtmHistoryDate] = GetDATE()
+						,[dblPaidAmount] = ARD.dblPrice							
+						,[strType] = 'Generated Storage and Discount Invoice'
+						,[strUserName] = NULL
+						,[intUserId] = @UserKey
 					FROM tblARInvoice AR
 					JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 					WHERE AR.intInvoiceId = CONVERT(INT,@CreatedInvoices)

@@ -122,7 +122,8 @@
 	   ,SCT.intDeliverySheetId
 	   ,SCT.strElevatorReceiptNumber
 	   ,SCT.intSalesOrderId
-	   ,SCT.intEntityContactId
+	   --,SCT.intEntityContactId
+	   ,SCT.strDriverName
 	   ,SCT.dtmTransactionDateTime
 	   ,(SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) AS dblTotalGrossWeight
 	   ,(SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0)) AS dblTotalTareWeight
@@ -155,7 +156,7 @@
 	   ,ICCA.strDescription AS strGrade
 	   ,SO.strSalesOrderNumber
 	   ,IC.strItemNo AS strItemNumber
-	   ,EMDriver.strName AS strDriverName
+	   --,EMDriver.strName AS strDriverName
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -175,4 +176,4 @@
 	LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	LEFT JOIN tblICItem IC ON IC.intItemId = SCT.intItemId
-	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
+	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId

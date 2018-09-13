@@ -316,6 +316,7 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 				)
 				SELECT 
 					 [intConcurrencyId] = 1
@@ -325,7 +326,8 @@ BEGIN TRY
 					,[dtmHistoryDate] = GetDATE()
 					,[dblPaidAmount] = ARD.dblPrice
 					,[strType] = 'Generated Discount Invoice'
-					,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+					,[strUserName] = NULL
+					,[intUserId] = @UserKey
 				FROM tblARInvoice AR
 				JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 				WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
@@ -426,6 +428,7 @@ BEGIN TRY
 						,[dblPaidAmount]
 						,[strType]
 						,[strUserName]
+						,[intUserId]
 					)
 					SELECT 
 						 [intConcurrencyId] = 1
@@ -435,7 +438,8 @@ BEGIN TRY
 						,[dtmHistoryDate] = GetDATE()
 						,[dblPaidAmount] =CASE WHEN dblDiscountUnpaid <0 THEN -dblDiscountUnpaid ELSE dblDiscountUnpaid END
 						,[strType] = 'Generated Bill'
-						,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+						,[strUserName] = NULL
+						,[intUserId] = @UserKey
 					FROM @BillDiscounts WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId AND IsProcessed = 0
 					
 					

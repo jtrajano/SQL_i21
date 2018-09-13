@@ -42,6 +42,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @InventoryStockMovementId AS INT 
+
 BEGIN 
 	DECLARE @intFunctionalCurrencyId AS INT
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
@@ -133,7 +135,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intCostingMethod]					= @intCostingMethod
 		,[intFobPointId]					= @intFobPointId
 		,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
-		,[intForexRateTypeId]				= @intForexRateTypeId
+		,[intForexRateTypeId]				= @intForexRateTypeId	
 		,[dblForexRate]						= @dblForexRate
 		,[strDescription]					= @strDescription
 		,[strActualCostId]					= @strActualCostId
@@ -171,5 +173,13 @@ BEGIN
 		,@intEntityUserSecurityId 
 		,NULL  
 END
+
+IF @InventoryTransactionIdentityId IS NOT NULL 
+BEGIN 
+	EXEC uspICPostInventoryStockMovement
+		@InventoryTransactionId = @InventoryTransactionIdentityId
+		,@InventoryTransactionStorageId = NULL
+		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+END 
 
 _EXIT:

@@ -257,7 +257,7 @@ FROM (
 		,strContractType + ' Priced' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,getdate() dtmContractDate
+		,dtmHistoryCreated dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
 		,intFutureMarketId
@@ -301,7 +301,7 @@ FROM (
 		,strContractType + ' Basis' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,getdate() dtmContractDate
+		,dtmHistoryCreated dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
 		,intFutureMarketId
@@ -345,7 +345,7 @@ FROM (
 		,strContractType + ' Priced' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,getdate() dtmContractDate
+		,dtmHistoryCreated dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
 		,intFutureMarketId
@@ -389,7 +389,7 @@ FROM (
 		,strContractType + ' ' + strPricingType AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,getdate() dtmContractDate
+		,dtmHistoryCreated dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
 		,intFutureMarketId
@@ -486,7 +486,7 @@ SELECT
 	CY.strCommodityCode,    
 	CH.intCommodityId,    
 	PO.strPosition strPosition,    
-	convert(datetime,convert(varchar, CH.dtmContractDate, 101),101) dtmContractDate,      
+	convert(datetime,convert(varchar, OCD.dtmContractDate, 101),101) dtmContractDate,      
 	CH.intContractBasisId,    
 	CD.intContractSeq,    
 	CD.dtmStartDate,         
@@ -588,7 +588,8 @@ WHERE  CH.intCommodityId= @intCommodityId
 	AND CL.intCompanyLocationId= case when isnull(@intLocationId,0) = 0 then CL.intCompanyLocationId else @intLocationId end
 	AND isnull(CD.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0) = 0 then isnull(CD.intMarketZoneId,0) else @intMarketZoneId end
 	AND CD.intContractStatusId not in(2,3,6) 
-	AND CH.dtmContractDate <= @dtmTransactionDateUpTo
+	AND convert(datetime,convert(varchar, OCD.dtmContractDate, 101),101)  <= @dtmTransactionDateUpTo
+
 
 DECLARE @tblContractCost TABLE (     
        intContractDetailId int 

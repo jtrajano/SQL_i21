@@ -18,6 +18,7 @@
 	,@ExcludeCheckOff				BIT
 	,@CFSiteId						INT
 	,@IsDeliver						BIT
+	,@IsCFQuote					    BIT
 	,@ItemUOMId						INT				= NULL
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
@@ -143,7 +144,7 @@ BEGIN
 		,[strNotes]
 		,[intUnitMeasureId]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 															
 			
 	-- Calculate Item Tax

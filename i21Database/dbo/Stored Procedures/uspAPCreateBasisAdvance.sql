@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateBasisAdvance]
     @userId INT,
-    @createdBasisAdvance NVARCHAR(MAX) OUTPUT
+    @createdBasisAdvance NVARCHAR(MAX) OUTPUT,
+    @totalInvalid INT = 0 OUTPUT,
+    @batchIdUsed NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,6 +16,9 @@ BEGIN TRY
 DECLARE @billId INT;
 DECLARE @billRecordNumber NVARCHAR(50);
 DECLARE @voucherIds AS Id;
+DECLARE @postBatchId NVARCHAR(40);
+DECLARE @postFailedCount INT = 0;
+DECLARE @postSuccess BIT = 0;
 
 DECLARE @functionalCurrency INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference);
 DECLARE @rateType INT;
@@ -79,6 +84,7 @@ OUTER APPLY (
         ,DEFAULT
         ,basisAdvance.intShipFromId
         ,basisAdvance.intCompanyLocationId
+		,basisAdvance.intEntityId
     ) voucherData
 ) A
 WHERE --basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis > 0;
@@ -230,7 +236,8 @@ SELECT
     [int1099Form]                       = 0,
     [int1099Category]                   = 0,
     [strBillOfLading]                   = basisAdvance.strBillOfLading,
-    [ysnRestricted]                     = 1
+    [ysnRestricted]                     = 1,
+	[intLocationId]				=		receipt.intLocationId	
 INTO #tmpBillDetailData
 FROM #tmpVoucherCreated voucherCreated
 INNER JOIN vyuAPBasisAdvance basisAdvance 
@@ -284,7 +291,8 @@ WHEN NOT MATCHED THEN
         ,[int1099Form]                      
         ,[int1099Category]                  
         ,[strBillOfLading]       
-        ,[ysnRestricted]             
+        ,[ysnRestricted]
+		,[intLocationId]             
     )
     VALUES
     (
@@ -324,7 +332,8 @@ WHEN NOT MATCHED THEN
         ,[int1099Form]                      
         ,[int1099Category]                  
         ,[strBillOfLading]      
-        ,[ysnRestricted]  
+        ,[ysnRestricted] 
+		,[intLocationId] 
     );
 
 INSERT INTO @voucherIds
@@ -383,6 +392,21 @@ SELECT @createdBasisAdvance = COALESCE(@createdBasisAdvance + ',', '') +  CONVER
 FROM #tmpVoucherCreated
 ORDER BY intBillId
 
+EXEC uspAPPostVoucherPrepay 
+    @post = 1,
+    @param = @createdBasisAdvance,
+    @userId = @userId,
+    @recap = 0,
+    @invalidCount = @postFailedCount OUT,
+    @success = @postSuccess OUT,
+    @batchIdUsed = @postBatchId OUT
+
+IF @postFailedCount > 0
+BEGIN 
+    SET @totalInvalid = @postFailedCount;
+    --if there is failed posting, return the batch to use in displaying the result.
+    SET @batchIdUsed = @postBatchId;    
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 

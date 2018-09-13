@@ -70,8 +70,7 @@ BEGIN TRY
 		IF ISNULL(@ysnDirectShip,0) = 0 AND ISNULL(@intEntityId,0) > 0
 		BEGIN
 			SELECT @intId = MIN(intInventoryReceiptItemId) 
-			FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
-
+			FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 			WHILE ISNULL(@intId,0) > 0
 			BEGIN
 				SELECT @intContractDetailId = intLineNo FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intId
@@ -90,7 +89,7 @@ BEGIN TRY
 					END
 				END
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
-				FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 			END
 		END
 
@@ -472,9 +471,6 @@ BEGIN TRY
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
 			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId, NULL, 0;
-			SET @dblDeliveredQuantity = @dblDeliveredQuantity * -1;
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
 		END
 	_Exit:
 

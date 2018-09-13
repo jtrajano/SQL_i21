@@ -1,8 +1,4 @@
-﻿
-
-
-
-CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
 AS
 
 SELECT 
@@ -11,6 +7,7 @@ SELECT
  ,cfTrans.intTransactionId
  ,cfTrans.dtmPostedDate
  ,cfTrans.dtmTransactionDate
+ ,cfTrans.dtmBillingDate
  ,cfTrans.strTransactionType
  ,cfTrans.strInvoiceReportNumber
  ,cfTrans.dtmCreatedDate

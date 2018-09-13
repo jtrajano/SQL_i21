@@ -280,13 +280,17 @@ BEGIN TRY
 		AND @ysnMergeOnMove = 1
 		AND @ysnCPMergeOnMove = 1
 	BEGIN
-		SELECT @strOutputLotNumber = strLotNumber
+		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND dblQty > 0
 			AND intLotStatusId = @intLotStatusId
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+
+		Select @strParentLotNumber=strParentLotNumber
+		From tblICParentLot
+		Where intParentLotId=@intParentLotId
 	END
 	ELSE IF EXISTS (
 			SELECT *
@@ -315,6 +319,23 @@ BEGIN TRY
 			OR @strLotTracking = 'Yes - Manual/Serial Number'
 			)
 	BEGIN
+		IF @strParentLotNumber IS NULL
+			OR @strParentLotNumber = ''
+		BEGIN
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = @intManufacturingCellId
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 78
+				,@ysnProposed = 0
+				,@strPatternString = @strParentLotNumber OUTPUT
+				,@intShiftId = @intPlannedShiftId
+				,@dtmDate = @dtmPlannedDate
+		END
+
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
@@ -329,6 +350,7 @@ BEGIN TRY
 			,@strPatternString = @strOutputLotNumber OUTPUT
 			,@intShiftId = @intPlannedShiftId
 			,@dtmDate = @dtmPlannedDate
+			,@strParentLotNumber = @strParentLotNumber
 	END
 
 	IF EXISTS (

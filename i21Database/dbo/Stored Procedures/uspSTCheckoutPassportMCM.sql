@@ -1,11 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPassportMCM]
-@intCheckoutId INT,
-@strStatusMsg NVARCHAR(250) OUTPUT,
-@intCountRows INT OUTPUT
+	@intCheckoutId INT,
+	@strStatusMsg NVARCHAR(250) OUTPUT,
+	@intCountRows INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
 		
+		DECLARE @intStoreId INT
+
+		SELECT @intStoreId = intStoreId 
+		FROM dbo.tblSTCheckoutHeader 
+		WHERE intCheckoutId = @intCheckoutId
+
 		--------------------------------------------------------------------------------------------  
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
@@ -18,11 +24,56 @@ BEGIN
 		-------------------------------------------------------------------------------------------- 
 
 
-		DECLARE @intStoreId INT
 
-		SELECT @intStoreId = intStoreId 
-		FROM dbo.tblSTCheckoutHeader 
-		WHERE intCheckoutId = @intCheckoutId
+		-- ================================================================================================================== 
+		-- Get Error logs. Check Register XML that is not configured in i21
+		-- Compare <MerchandiseCode> tag of (RegisterXML) and (Inventory --> Category --> Point of Sale --> Select Location same with Store --> 'Cash Register Department')
+		-- ------------------------------------------------------------------------------------------------------------------ 
+		INSERT INTO tblSTCheckoutErrorLogs 
+		(
+			strErrorMessage 
+			, strRegisterTag
+			, strRegisterTagValue
+			, intCheckoutId
+			, intConcurrencyId
+		)
+		SELECT DISTINCT
+			'No Matching Register Department Setup in Category' as strErrorMessage
+			, 'MerchandiseCode' as strRegisterTag
+			, ISNULL(Chk.MerchandiseCode, '') AS strRegisterTagValue
+			, @intCheckoutId
+			, 1
+		FROM #tempCheckoutInsert Chk
+		WHERE ISNULL(Chk.MerchandiseCode, '') NOT IN
+		(
+			SELECT DISTINCT 
+				tbl.strXmlRegisterMerchandiseCode
+			FROM
+			(
+				SELECT DISTINCT
+					Chk.MerchandiseCode AS strXmlRegisterMerchandiseCode
+				FROM #tempCheckoutInsert Chk
+				JOIN dbo.tblICCategoryLocation Cat 
+					ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+				LEFT JOIN dbo.tblICItem I 
+					ON Cat.intGeneralItemId = I.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.MerchandiseCode, '') != ''
+			) AS tbl
+		)
+		AND ISNULL(Chk.MerchandiseCode, '') != ''
+		-- ------------------------------------------------------------------------------------------------------------------  
+		-- END Get Error logs. Check Register XML that is not configured in i21.  
+		-- ==================================================================================================================
+
+
+		
 
 		IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutDepartmetTotals WHERE intCheckoutId = @intCheckoutId)
 			BEGIN

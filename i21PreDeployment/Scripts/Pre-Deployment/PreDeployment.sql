@@ -152,6 +152,8 @@
 :r .\12_EM\16_CleanCustomerProductVersion.sql
 :r .\12_EM\20_CleanCustomerSpecialPrice.sql
 :r .\12_EM\21_CleanAPBillMissingContact.sql
+
+:r .\12_EM\22_DeleteDuplicateEntityType.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
@@ -160,6 +162,7 @@
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
+:r .\15_GR\1830_FixDeliverySheetSplit.sql
 
 --HD
 :r .\16_HD\Drop_Constraint.sql

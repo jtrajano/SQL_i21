@@ -34,9 +34,7 @@ SELECT SCH.intContractHeaderId
               END strStatus
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
-FROM tblLGPickLotHeader PLH
-JOIN tblLGPickLotDetail PLD ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
-JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
+FROM tblLGAllocationDetail ALD 
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 JOIN tblEMEntity VEN ON VEN.intEntityId = PCH.intEntityId
@@ -51,7 +49,9 @@ JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetai
 JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 JOIN tblICInventoryReceiptItem IRI ON IRI.intContainerId = LC.intLoadContainerId
 JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId AND IRIL.intLotId = PLD.intLotId
+JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId 
+LEFT JOIN tblLGPickLotDetail PLD ON IRIL.intLotId = PLD.intLotId
+LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
 LEFT JOIN tblSMCity PC ON PC.intCityId = CASE 
               WHEN PCD.strDestinationPointType = 'Port'
                      THEN PCD.intDestinationPortId
@@ -84,7 +84,7 @@ LEFT JOIN (
        ) S ON S.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblLGLoadDetail DOD ON DOD.intPickLotDetailId = PLD.intPickLotDetailId
 LEFT JOIN tblLGLoad DO ON DO.intLoadId = DOD.intLoadId 
-WHERE ISNULL(DO.intShipmentStatus,0) NOT IN (6, 11)
+WHERE ISNULL(DO.intShipmentStatus,0) NOT IN (6, 11) AND L.intShipmentStatus <> 3 
 
 UNION ALL
 

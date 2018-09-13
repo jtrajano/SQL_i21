@@ -46,8 +46,6 @@ DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
-DECLARE @intLoadContractId AS INT
-DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @total AS INT
 DECLARE @ysnDPStorage AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
@@ -86,7 +84,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@shipFromEntityId INT
 		,@intFarmFieldId INT;
 
-	SELECT TOP 1 @intLoadId = ST.intLoadId
+    SELECT TOP 1 @intLoadId = ST.intLoadId
 	, @dblTicketFreightRate = ST.dblFreightRate
 	, @intScaleStationId = ST.intScaleSetupId
 	, @ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
@@ -112,88 +110,13 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
         @strAdjustmentNo     NVARCHAR(50);
 
 BEGIN TRY
-		IF @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'LOD' AND @intLoadId IS NULL
 		BEGIN
-			IF @intLoadId IS NULL
-			BEGIN 
-				RAISERROR('Unable to find load details. Try Again.', 11, 1);
-				GOTO _Exit
-			END
-			ELSE
-			BEGIN
-				SELECT @intLoadContractId = LGLD.intPContractDetailId, @dblLoadScheduledUnits = LGLD.dblQuantity FROM tblLGLoad LGL
-				INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId 
-				WHERE LGL.intLoadId = @intLoadId
-			END
-			IF @intLoadContractId IS NULL
-			BEGIN 
-				RAISERROR('Unable to find load contract details. Try Again.', 11, 1);
-				GOTO _Exit
-			END
-			BEGIN
-				SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-			END
-			BEGIN
-				INSERT INTO [dbo].[tblSCTicketCost]
-						   ([intTicketId]
-						   ,[intConcurrencyId]
-						   ,[intItemId]
-						   ,[intEntityVendorId]
-						   ,[strCostMethod]
-						   ,[dblRate]
-						   ,[intItemUOMId]
-						   ,[ysnAccrue]
-						   ,[ysnMTM]
-						   ,[ysnPrice])
-				SELECT	@intTicketId,
-						1, 
-						LD.intItemId,
-						LD.intVendorId,
-						LD.strCostMethod,
-						LD.dblRate,
-						LD.intItemUOMId,
-						LD.ysnAccrue,
-						LD.ysnMTM,
-						LD.ysnPrice
-				FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
-			END
-		END
-		IF @strDistributionOption = 'CNT'
-		BEGIN
-		INSERT INTO [dbo].[tblSCTicketCost]
-				   ([intTicketId]
-				   ,[intConcurrencyId]
-				   ,[intItemId]
-				   ,[intEntityVendorId]
-				   ,[strCostMethod]
-				   ,[dblRate]
-				   ,[intItemUOMId]
-				   ,[ysnAccrue]
-				   ,[ysnMTM]
-				   ,[ysnPrice])
-		SELECT	@intTicketId,
-				1, 
-				CC.intItemId,
-				CC.intVendorId,
-				CC.strCostMethod,
-				CC.dblRate,
-				CC.intItemUOMId,
-				CC.ysnAccrue,
-				CC.ysnMTM,
-				CC.ysnPrice
-		FROM	tblCTContractCost CC WHERE CC.intContractDetailId = @intContractId
-		END
-		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
-		BEGIN
-			SET @strReceiptType = 'Purchase Contract'
-		END
-		ELSE
-		BEGIN
-			SET @strReceiptType = 'Direct'
+			RAISERROR('Unable to find load details. Try Again.', 11, 1);
+			GOTO _Exit
 		END
 
-	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			INSERT INTO @LineItems (
 			intContractDetailId,
@@ -208,36 +131,68 @@ BEGIN TRY
 			,@intContractId
 			,@intUserId
 			,0
-			IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'CNT'
+		BEGIN
+			DECLARE @intLoopContractId INT;
+			DECLARE @dblLoopContractUnits NUMERIC(38,20);
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT intContractDetailId, dblUnitsDistributed
+			FROM @LineItems;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+
+			WHILE @@FETCH_STATUS = 0
 			BEGIN
-				DECLARE @intLoopContractId INT;
-				DECLARE @dblLoopContractUnits NUMERIC(38,20);
-				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
-				FROM @LineItems;
-
-				OPEN intListCursor;
-
-				-- Initial fetch attempt
+				-- Here we do some kind of action that requires us to 
+				-- process the table variable row-by-row. This example simply
+				-- uses a PRINT statement as that action (not a very good
+				-- example).
+				IF ISNULL(@intLoopContractId,0) != 0
+				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+				-- Attempt to fetch next row from cursor
 				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+			END;
 
-				WHILE @@FETCH_STATUS = 0
+			CLOSE intListCursor;
+			DEALLOCATE intListCursor;
+		END
+		ELSE IF @strDistributionOption = 'LOD'
+		BEGIN
+			DECLARE @intLoadContractId INT;
+			DECLARE @dblLoadContractUnits NUMERIC(38,20);
+			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT intContractDetailId, dblUnitsDistributed
+			FROM @LineItems;
+
+			OPEN intListCursor;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				IF ISNULL(@intLoadContractId,0) != 0
 				BEGIN
-				   -- Here we do some kind of action that requires us to 
-				   -- process the table variable row-by-row. This example simply
-				   -- uses a PRINT statement as that action (not a very good
-				   -- example).
-				   IF ISNULL(@intLoopContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-				END;
+					SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
+					IF @intContractDetailId != @intContractId
+					BEGIN
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+					END
+				END
+				-- Attempt to fetch next row from cursor
+				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+			END;
+			CLOSE intListCursor;
+			DEALLOCATE intListCursor;
+		END
 
-				CLOSE intListCursor;
-				DEALLOCATE intListCursor;
-			END
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)
 		BEGIN

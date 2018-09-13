@@ -16,6 +16,7 @@ BEGIN TRY
 			,@dblWTBasis			NUMERIC(18,6)
 			,@dblWTCashPrice		NUMERIC(18,6)
 			,@strNumber				NVARCHAR(80)
+			,@strMiscComment		NVARCHAR(150)
 			,@strXML				NVARCHAR(MAX) 
 			,@intContractTypeId		INT 
 			,@strCondition			NVARCHAR(MAX)
@@ -29,6 +30,7 @@ BEGIN TRY
 			,@intEntityId			INT
 			,@intBillInvoiceId		INT 
 			,@intItemId				INT
+			,@intItemLocationId		INT
 			,@intCreatedById		INT
 			,@type					INT
 			,@intCompanyLocationId	INT 
@@ -41,6 +43,7 @@ BEGIN TRY
 			,@LineItemTaxEntries	LineItemTaxDetailStagingTable
 			,@strSourceContractNo	NVARCHAR(50)
 			,@strWashoutContractNo	NVARCHAR(50)
+			,@dblFXPrice			NUMERIC(18,6)
 
 	SELECT   @intSourceHeaderId		=	intSourceHeaderId
 			,@intSourceDetailId		=   intSourceDetailId
@@ -65,13 +68,13 @@ BEGIN TRY
 	FROM	vyuCTContractSequence 
 	WHERE   intContractDetailId = @intSourceDetailId
 
-	SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))
+	--SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))
 	
-	WHILE	ISNULL(@intLoadId,0) > 0
-	BEGIN
-		EXEC	uspLGCancelLoadSchedule	@intLoadId, 1, @intCreatedById
-		SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE (intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))) AND intLoadId > @intLoadId
-	END
+	--WHILE	ISNULL(@intLoadId,0) > 0
+	--BEGIN
+	--	EXEC	uspLGCancelLoadSchedule	@intLoadId, 1, @intCreatedById
+	--	SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE (intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))) AND intLoadId > @intLoadId
+	--END
 	
 	EXEC uspAPUnrestrictContractPrepay  @intSourceDetailId
 	IF ISNULL(@intWashoutDetailId,0) > 0
@@ -122,6 +125,18 @@ BEGIN TRY
 		EXEC	uspCTGetTableDataInXML 'tblCTContractDetail',@strCondition,@strXML OUTPUT
 		--EXEC	uspCTValidateContractDetail @strXML,'Added'
 
+		UPDATE  CD 
+		SET		dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity)*CD.dblCashPrice
+							  / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+		FROM    tblCTContractDetail CD
+		JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
+		WHERE  intContractDetailId = @intWashoutDetailId
+
+		SELECT  @dblFXPrice = dblSeqPrice FROM dbo.[fnCTGetAdditionalColumnForDetailView](@intWashoutDetailId)
+		UPDATE	tblCTContractDetail	
+		SET		dblFXPrice = @dblFXPrice 
+		WHERE	intContractDetailId = @intWashoutDetailId
+
 		EXEC	uspCTSaveContract @intWashoutHeaderId, NULL
 
 		UPDATE	tblCTWashout SET intWashoutHeaderId = @intWashoutHeaderId, intWashoutDetailId = @intWashoutDetailId WHERE intWashoutId = @intWashoutId
@@ -137,9 +152,12 @@ BEGIN TRY
 
 	SELECT	@intItemId				=	CD.intItemId,
 			@intCompanyLocationId	=	CD.intCompanyLocationId,
-			@intProfitCenter		=	CL.intProfitCenter
+			@intProfitCenter		=	CL.intProfitCenter,
+			@intItemLocationId		=	IL.intItemLocationId
 	FROM	tblCTContractDetail		CD
 	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId
+	JOIN	tblICItemLocation		IL	ON	IL.intItemId			=	CD.intItemId
+										AND	IL.intLocationId		=	CD.intCompanyLocationId
 	WHERE	intContractDetailId = @intWashoutDetailId
 
 	SELECT	@strSourceContractNo	=	strContractNumber
@@ -152,8 +170,8 @@ BEGIN TRY
 
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
-		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
-		SELECT	NULL, 1, 0, ABS(@dblAmount)
+		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost,intAccountId)
+		SELECT	NULL, 1, 0, ABS(@dblAmount),dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Cost of Goods')
 	   
 		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
 
@@ -166,11 +184,22 @@ BEGIN TRY
 				@billId					=   @intBillInvoiceId OUTPUT
 
 		SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId	   
+		SET		@strMiscComment = ''
 
-		SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
-		SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
-		UPDATE tblAPBill		SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
-		UPDATE tblAPBillDetail	SET dblQtyOrdered = 0, intLocationId = @intCompanyLocationId WHERE intBillId = @intBillInvoiceId
+		SELECT	@strNumber = 'Washout, contracts ' + strContractNumber, 
+				@strMiscComment =  'Washout net difference - Original Contract ' + strContractNumber
+		FROM	tblCTContractHeader 
+		WHERE	intContractHeaderId = @intSourceHeaderId
+
+		SELECT	@strNumber = @strNumber + ' and ' + strContractNumber ,
+				@strMiscComment =  @strMiscComment + ' and Washout Contract ' + strContractNumber
+		FROM	tblCTContractHeader 
+		WHERE	intContractHeaderId = @intWashoutHeaderId
+
+		UPDATE	tblAPBill		SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
+		UPDATE	tblAPBillDetail	SET dblQtyOrdered = 0, intLocationId = @intCompanyLocationId,
+				strMiscDescription = @strMiscComment
+		WHERE	intBillId = @intBillInvoiceId
 	   
     END
 
@@ -219,7 +248,8 @@ BEGIN TRY
 						)
 				)
 			    ,'Washout net diff: Original Contract  ' + @strSourceContractNo + ' and Washout Contract ' + @strWashoutContractNo
-
+				-- we using the text "Washout net diff: Original Contract" to determine if an invoice to be created is for wash out
+				-- we need to know it because we have to set the ysnImpactInventory to False if it is coming from a washout contract
 	   EXEC		uspARProcessInvoices
 				@InvoiceEntries		=   @InvoiceEntries,
 				@LineItemTaxEntries	=   @LineItemTaxEntries,
@@ -238,6 +268,9 @@ BEGIN TRY
 			strBillInvoice	  =	 @strBillInvoice,
 			intBillInvoiceId  =	 @intBillInvoiceId
     WHERE	intWashoutId	  =	 @intWashoutId
+
+	--EXEC uspCTCreateDetailHistory @intSourceHeaderId, @intSourceDetailId
+	--EXEC uspCTCreateDetailHistory @intWashoutHeaderId, @intWashoutDetailId
 
 END TRY
 

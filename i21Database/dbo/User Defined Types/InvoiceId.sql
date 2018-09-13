@@ -5,7 +5,9 @@
 	,[intDetailId]						INT	NULL	-- Invoice/Sales Order Detail Id
 	,[ysnForDelete]						BIT	NULL
 	,[ysnFromPosting]					BIT	NULL
+    ,[strBatchId]                       NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
 	,[ysnPost]							BIT	NULL
+    ,[ysnRecap]                         BIT             NULL
 	,[ysnAccrueLicense]					BIT	NULL
 	,[strTransactionType]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strSourceTransaction]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values 

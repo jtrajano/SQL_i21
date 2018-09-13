@@ -320,9 +320,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
+			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountUSD.Val ELSE A.dblAmount END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE A.dblAmount / ISNULL(@dblHistoricRate,1)  END
+			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE AmountForeign.Val  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
@@ -345,8 +345,16 @@ BEGIN
 				ON A.intGLAccountIdFrom = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+			OUTER APPLY
+			(
+				SELECT ROUND(A.dblAmount * ISNULL(@dblHistoricRate,1),2)Val
+			)AmountUSD
+			OUTER APPLY
+			(
+				SELECT ROUND(A.dblAmount / ISNULL(@dblHistoricRate,1),2)Val
+			)AmountForeign
 	WHERE	A.strTransactionId = @strTransactionId
-	
+
 	
 	
 	-- 2. DEBIT SIdE (TARGET OF THE FUND)
@@ -356,9 +364,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
+			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  AmountUSD.Val ELSE  A.dblAmount END
 			,[dblCredit]			= 0 
-			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN A.dblAmount/ ISNULL(@dblRate, 1)  ELSE A.dblAmount END
+			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN AmountForeign.Val ELSE A.dblAmount END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -382,6 +390,14 @@ BEGIN
 				ON A.intGLAccountIdTo = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+			OUTER APPLY
+			(
+				SELECT ROUND(A.dblAmount * ISNULL(@dblRate,1),2)Val
+			)AmountUSD
+			OUTER APPLY
+			(
+				SELECT ROUND(A.dblAmount / ISNULL(@dblRate,1),2)Val
+			)AmountForeign
 	WHERE	A.strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
@@ -526,16 +542,13 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				--,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
-				--,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount ELSE 0 END 
-
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) --CAD TO USD
+				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
 												   ELSE A.dblAmount
 											  END
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  A.dblAmount / ISNULL(@dblHistoricRate,1)
+												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblHistoricRate,1))
+				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -560,6 +573,13 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount * ISNULL(@dblHistoricRate,1),2)Val
+				)AmountUSD
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount / ISNULL(@dblHistoricRate,1),2)Val
+				)AmountForeign
+
 		WHERE	A.strTransactionId = @strTransactionId
 	
 		-- Bank Transaction Debit
@@ -578,14 +598,13 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(A.dblRate,1) --CAD TO USD
+				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
 												   ELSE A.dblAmount
 											  END
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  A.dblAmount / ISNULL(A.dblRate,1)
+												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
-
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblRate,1))
+				,strAmountInWords			= dbo.fnConvertNumberToWord(  ROUND(A.dblAmount * ISNULL(@dblRate,1),2))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -610,6 +629,12 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount * ISNULL(A.dblRate,1),2)Val
+				)AmountUSD
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
+				)AmountForeign
 		WHERE	A.strTransactionId = @strTransactionId	
 	END
 	ELSE
@@ -737,4 +762,3 @@ Audit_Log:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
 GO
-

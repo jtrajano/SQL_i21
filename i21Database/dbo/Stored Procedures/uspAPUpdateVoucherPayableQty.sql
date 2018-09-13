@@ -146,7 +146,7 @@ ELSE SAVE TRAN @SavePoint
 				,B.[ysnReturn]	
 				,B.[intVoucherPayableId]
 			FROM tblAPVoucherPayable B
-			LEFT JOIN @voucherPayable C
+			INNER JOIN @voucherPayable C
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 				AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
 				AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)

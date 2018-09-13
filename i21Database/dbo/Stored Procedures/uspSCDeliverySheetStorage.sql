@@ -33,7 +33,7 @@ DECLARE @intStorageCommodityId AS INT
 DECLARE @intStorageTypeId AS INT
 DECLARE @intStorageLocationId AS INT
 DECLARE @dblRunningBalance AS DECIMAL (13,3)
-DECLARE @strUserName AS NVARCHAR (50)
+--DECLARE @strUserName AS NVARCHAR (50)
 DECLARE @ysnDPStorage BIT
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
@@ -70,8 +70,8 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
 
 BEGIN TRY
 
-	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
-	WHERE US.[intEntityId] = @intUserId
+	-- SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
+	-- WHERE US.[intEntityId] = @intUserId
 	
 	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
 	
@@ -346,6 +346,7 @@ BEGIN TRY
 		   ,[dblCurrencyRate]
 		   ,[strType]
 		   ,[strUserName]
+		   ,[intUserId]
 		   ,[intTransactionTypeId])
 	VALUES
 		   (1
@@ -360,7 +361,8 @@ BEGIN TRY
 		   ,'Generated From Delivery Sheet'
 		   ,1
 		   ,'From Delivery Sheet'
-		   ,@strUserName
+		   ,NULL
+		   ,@intUserId
 		   ,5)
 	
 	SET @intHoldCustomerStorageId = NULL
@@ -411,7 +413,7 @@ BEGIN TRY
 			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
 		FROM tblGRCustomerStorage CS
 		OUTER APPLY (
-			SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
+			SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar'
 		) QM
 		WHERE CS.intCustomerStorageId = @intCustomerStorageId
 

@@ -38,6 +38,8 @@ BEGIN TRY
 		,intLoadCostId INT
 		,ysnInventoryCost BIT
 		,intItemUOMId INT
+		,dblUnitQty DECIMAL(38,20)
+		,dblCostUnitQty DECIMAL(38,20)
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -125,6 +127,8 @@ BEGIN TRY
 		,intLoadCostId
 		,ysnInventoryCost
 		,intItemUOMId
+		,dblUnitQty
+		,dblCostUnitQty
 		)
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
@@ -133,20 +137,14 @@ BEGIN TRY
 		,CD.intContractDetailId
 		,V.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = 1
-		,dblCost = (
-			CONVERT(NUMERIC(18, 6), Sum(V.dblPrice)) / (
-				CONVERT(NUMERIC(18, 6), (
-						SELECT SUM(dblNet)
-						FROM tblLGLoadDetail VN
-						WHERE VN.intLoadId = V.intLoadId
-						))
-				)
-			) * CONVERT(NUMERIC(18, 6), V.dblNet)
+		,dblQtyReceived = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+		,dblCost = ISNULL(V.dblPrice,V.dblTotal)
 		,V.intPriceItemUOMId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
+		,ISNULL(ItemUOM.dblUnitQty,1)
+		,ISNULL(CostUOM.dblUnitQty,1)
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -158,6 +156,8 @@ BEGIN TRY
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
 	JOIN tblICItem I ON I.intItemId = V.intItemId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
 	WHERE V.intLoadId = @intLoadId
 	GROUP BY V.intEntityVendorId
 		,CH.intContractHeaderId
@@ -173,6 +173,12 @@ BEGIN TRY
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
 		,V.intPriceItemUOMId
+		,ItemUOM.dblUnitQty
+		,CostUOM.dblUnitQty
+		,LD.dblQuantity
+		,V.strCostMethod
+		,V.dblPrice
+		,V.dblTotal
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -227,6 +233,8 @@ BEGIN TRY
 				,dblCost
 				,intCostUOMId
 				,intItemUOMId
+				,dblUnitQty
+				,dblCostUnitQty
 				)
 			SELECT intContractHeaderId
 				,intContractDetailId
@@ -237,6 +245,8 @@ BEGIN TRY
 				,dblCost
 				,intCostUOMId
 				,intItemUOMId
+				,dblUnitQty
+				,dblCostUnitQty
 			FROM @voucherDetailData
 			WHERE intVendorEntityId = @intVendorEntityId
 
@@ -255,9 +265,6 @@ BEGIN TRY
 			UPDATE tblAPBillDetail 
 			SET intLoadId = @intLoadId 
 			WHERE intBillId = @intBillId
-		
-			SELECT * FROM tblAPBill WHERE intBillId = @intBillId
-			SELECT * FROM tblAPBillDetail WHERE intBillId = @intBillId
 
 			SELECT @intMinVendorRecordId = MIN(intRecordId)
 			FROM @distinctVendor
@@ -297,6 +304,8 @@ BEGIN TRY
 					,dblCost
 					,intCostUOMId
 					,intItemUOMId
+					,dblUnitQty
+					,dblCostUnitQty
 					)
 				SELECT intContractHeaderId
 					,intContractDetailId
@@ -307,6 +316,8 @@ BEGIN TRY
 					,dblCost
 					,intCostUOMId
 					,intItemUOMId
+					,dblUnitQty
+					,dblCostUnitQty
 				FROM @voucherDetailData
 				WHERE intVendorEntityId = @intVendorEntityId
 					AND ysnInventoryCost = 0
@@ -342,11 +353,7 @@ BEGIN TRY
 				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId,dblQtyReceived,dblCost)
 				SELECT intInventoryReceiptChargeId
 					,1
-					,LC.dblAmount / (
-						SELECT SUM(LO.dblQuantity)
-						FROM tblLGLoadDetail LO
-						WHERE LO.intLoadId = LC.intLoadId
-						) * LD.dblQuantity
+					,LC.dblRate
 				FROM tblICInventoryReceiptCharge C
 				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = C.intContractDetailId
 				JOIN tblLGLoadCost LC ON LC.intLoadId = LD.intLoadId
@@ -356,7 +363,7 @@ BEGIN TRY
 					AND LD.intLoadId = @intLoadId
 					AND  C.intEntityVendorId = @intVendorEntityId 
 				GROUP BY intInventoryReceiptChargeId
-					,LC.dblAmount
+					,LC.dblRate
 					,LD.dblQuantity
 					,LC.intLoadId
 

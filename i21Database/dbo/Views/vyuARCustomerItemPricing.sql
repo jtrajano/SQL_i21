@@ -163,6 +163,7 @@ CROSS APPLY
 		,1							--@GetAllAvailablePricing
 		,1.000000					--@CurrencyExchangeRate
 		,NULL						--@CurrencyExchangeRateTypeId
+		,0							--@ysnFromItemSelection
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 
@@ -338,6 +339,7 @@ CROSS APPLY
 		,1							--@GetAllAvailablePricing
 		,1.000000					--@CurrencyExchangeRate
 		,NULL						--@CurrencyExchangeRateTypeId
+		,0							--@ysnFromItemSelection
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 

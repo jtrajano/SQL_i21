@@ -535,7 +535,7 @@ FROM vyuARCustomerSearch C
 			 , dtmShipDate			= I.dtmShipDate
 			 , dtmDatePaid			= PCREDITS.dtmDatePaid
 			 , strType				= I.strType
-			 , strComment			= I.strComments
+			 , strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)
 			 , strTicketNumbers		= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		OUTER APPLY (

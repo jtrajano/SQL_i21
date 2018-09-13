@@ -1,4 +1,4 @@
-﻿CREATE PROC [uspRKUnrealizedPnL]  
+﻿CREATE PROC [dbo].[uspRKUnrealizedPnL]  
 	 @dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@intCommodityId INT = NULL
@@ -13,12 +13,12 @@
 AS  
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
  
-SELECT CONVERT(INT,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
-intFutOptTransactionId ,GrossPnL ,dblLong ,dblShort ,dblFutCommission ,strFutMarketName ,strFutureMonth ,dtmTradeDate ,strInternalTradeNo ,strName ,strAccountNumber 
-,strBook ,strSubBook ,strSalespersonId ,strCommodityCode ,strLocationName ,Long1 ,Sell1 ,intNet ,dblActual,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 
-,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,intOriginalQty ,intFutOptTransactionHeaderId ,intCommodityId ,ysnExpired ,dblVariationMargin ,dblInitialMargin 
+SELECT CONVERT(INT,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName strMonthOrder,
+intFutOptTransactionId ,GrossPnL dblGrossPnL,dblLong ,dblShort ,-abs(dblFutCommission)dblFutCommission ,strFutMarketName ,strFutureMonth ,dtmTradeDate ,strInternalTradeNo ,strName ,strAccountNumber 
+,strBook ,strSubBook ,strSalespersonId ,strCommodityCode ,strLocationName ,Long1 dblLong1,Sell1 dblSell1,intNet dblNet,dblActual,dblClosing ,dblPrice ,dblContractSize ,-abs(dblFutCommission1) dblFutCommission1
+,MatchLong dblMatchLong,MatchShort dblMatchShort,NetPnL dblNetPnL,intFutureMarketId ,intFutureMonthId ,intOriginalQty dblOriginalQty,intFutOptTransactionHeaderId ,intCommodityId ,ysnExpired ,dblVariationMargin ,0.0 dblInitialMargin 
 ,LongWaitedPrice,ShortWaitedPrice
  from 
 (SELECT *,(GrossPnL1 * (dblClosing - dblPrice)-dblFutCommission2)  NetPnL,intNet*dblVariationMargin1 dblVariationMargin
@@ -72,7 +72,7 @@ SELECT  intFutOptTransactionId,
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency            
 		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0)*fm.dblContractSize dblVariationMargin1
-		,IsNull(dbo.fnRKGetInitialMargin (ot.intFutOptTransactionId), 0.0) as dblInitialMargin		
+			
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  

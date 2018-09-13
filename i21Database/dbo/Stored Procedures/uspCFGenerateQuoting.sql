@@ -122,11 +122,18 @@ BEGIN
 	icItem.strItemNo, 
 	icItem.strDescription
 	FROM tblCFNetwork as cfNetwork 
-	INNER JOIN 
-	(SELECT * FROM tblCFSite WHERE strSiteType != ''Extended Remote'') AS cfSite ON cfNetwork.intNetworkId = cfSite.intNetworkId
-	INNER JOIN tblCFItem as cfItem ON cfNetwork.intNetworkId = cfItem.intNetworkId
-	INNER JOIN tblICItem as icItem ON cfItem.intARItemId = icItem.intItemId
-	INNER JOIN tblCFItemCategory as cfItemCat ON icItem.intCategoryId = cfItemCat.intCategoryId' + ' ' 
+	INNER JOIN (SELECT * FROM tblCFSite WHERE strSiteType = ''Remote'') AS cfSite 
+		ON cfNetwork.intNetworkId = cfSite.intNetworkId
+	INNER JOIN tblCFItem as cfItem 
+		ON cfNetwork.intNetworkId = cfItem.intNetworkId
+	INNER JOIN tblICItem as icItem 
+		ON cfItem.intARItemId = icItem.intItemId
+	INNER JOIN tblCFItemCategory as cfItemCat
+		ON icItem.intCategoryId = cfItemCat.intCategoryId 
+	INNER JOIN tblCFNetworkCost as cfNetCost
+		ON cfNetCost.intItemId = cfItem.intARItemId
+		AND cfNetCost.intSiteId = cfSite.intSiteId
+		AND cfNetwork.intNetworkId = cfNetwork.intNetworkId' + ' ' 
 	+ ISNULL(@where,'')
 	+ ' GROUP BY
 	 cfNetwork	.intNetworkId	
@@ -142,8 +149,58 @@ BEGIN
 	,icItem		.strItemNo
 	,icItem		.strDescription'
 
+	--SELECT @q
 	INSERT INTO @tblNetworkSiteItem
 	EXEC(@q)
+
+
+	SET @q = 'SELECT 
+	ROW_NUMBER() OVER(ORDER BY cfSite.intSiteId DESC),
+	cfNetwork.intNetworkId, 
+	strNetwork , 
+	cfSite.intSiteId, 
+	strSiteNumber ,
+	strSiteName, 
+	cfSite.strSiteType, 
+	cfSite.strSiteAddress, 
+	cfSite.strSiteCity,
+	cfSite.strTaxState,
+	cfItem.intARItemId,
+	ISNULL(icItem.strItemNo,'''') + '' - '' + ISNULL(icItem.strDescription,'''') as strProductNumber,
+	icItem.strItemNo, 
+	icItem.strDescription
+	FROM tblCFNetwork as cfNetwork 
+	INNER JOIN (SELECT * FROM tblCFSite WHERE strSiteType = ''Local/Network'') AS cfSite 
+		ON cfNetwork.intNetworkId = cfSite.intNetworkId
+	INNER JOIN tblCFItem as cfItem 
+		ON cfNetwork.intNetworkId = cfItem.intNetworkId
+	INNER JOIN tblICItem as icItem 
+		ON cfItem.intARItemId = icItem.intItemId
+	INNER JOIN tblCFItemCategory as cfItemCat
+		ON icItem.intCategoryId = cfItemCat.intCategoryId' + ' ' 
+	+ ISNULL(@where,'')
+	+ ' GROUP BY
+	 cfNetwork	.intNetworkId	
+	,cfNetwork	.strNetwork		
+	,cfSite		.intSiteId		
+	,cfSite		.strSiteNumber	
+	,cfSite		.strSiteName	
+	,cfSite		.strSiteType	
+	,cfSite		.strSiteAddress	
+	,cfSite		.strSiteCity	
+	,cfSite		.strTaxState	
+	,cfItem		.intARItemId	
+	,icItem		.strItemNo
+	,icItem		.strDescription'
+
+
+	--SELECT @q
+	INSERT INTO @tblNetworkSiteItem
+	EXEC(@q)
+
+
+	
+	--SELECT COUNT (*) FROM @tblNetworkSiteItem
 
 	DECLARE @loopNetworkId	INT	
 	DECLARE @loopSiteId		INT
@@ -196,11 +253,17 @@ BEGIN
 	--JIRA CF-1820--
 	---------------------------------------------
 
-
+	DECLARE @ysnApplyTaxExemption BIT
+	DECLARE @intPriceRuleGroup BIT
+	SELECT TOP 1 @ysnApplyTaxExemption = ysnQuoteTaxExempt FROM tblCFAccount WHERE intCustomerId = @intCustomerId
 	
+
+	DECLARE @counter INT = 0
 
 	WHILE (EXISTS(SELECT 1 FROM @tblNetworkSiteItem))
 	BEGIN
+		
+
 		SELECT 
 		 @loopNetworkId			= 	 intNetworkId	
 		,@loopSiteId			= 	 intSiteId	
@@ -231,28 +294,38 @@ BEGIN
 		AND intItemId = @loopARItemId
 		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
 		ORDER BY dtmDate DESC
+		
+
+		IF(ISNULL(@networkCost,0) = 0 AND @loopSiteType = 'Remote')
+		BEGIN
+			GOTO ENDLOOP
+		END
 
 		
 
-			EXEC dbo.uspCFRecalculateTransaciton 
-			@CustomerId = @intCustomerId,
-			@ProductId=0,
-			@SiteId=@loopSiteId,
-			@NetworkId=@loopNetworkId,
-			@TransactionDate=@dtmDate,
-			@TransactionType=@loopSiteType,
-			---------STATIC VALUE----------
-			@TransactionId=0,
-			@CreditCardUsed=0,
-			@PumpId=0,
-			@VehicleId=0,
-			@CardId=0,
-			@Quantity=1,
-			@OriginalPrice=@networkCost, -- NETWORK COST
-			@TransferCost=@networkCost,	-- NETWORK COST
-			@IsImporting = 1,
-			@ItemId = @loopARItemId
+		EXEC dbo.uspCFRecalculateTransaciton 
+		@CustomerId = @intCustomerId,
+		@ProductId=0,
+		@SiteId=@loopSiteId,
+		@NetworkId=@loopNetworkId,
+		@TransactionDate=@dtmDate,
+		@TransactionType=@loopSiteType,
+		---------STATIC VALUE----------
+		@TransactionId=0,
+		@CreditCardUsed=0,
+		@PumpId=0,
+		@VehicleId=0,
+		@CardId=0,
+		@Quantity=1,
+		@OriginalPrice=@networkCost, -- NETWORK COST
+		@TransferCost=@networkCost,	-- NETWORK COST
+		@IsImporting = 1,
+		@ItemId = @loopARItemId,
+		@QuoteTaxExemption = @ysnApplyTaxExemption,
+		@ProcessType	= 'quote'
 
+		
+		
 
 		DECLARE @dblOutPriceProfileRate				NUMERIC(18,6)
 		DECLARE @dblOutAdjustmentRate				NUMERIC(18,6)
@@ -270,6 +343,11 @@ BEGIN
 		,@dtmOutPriceIndexDate	 = dtmPriceIndexDate
 		,@strOutPriceBasis		 = strPriceBasis
 		FROM tblCFTransactionPricingType
+
+
+		--DEBUGGER--
+		--SELECT @counter  ,@loopARItemId ,@loopSiteId, @loopNetworkId, GETDATE() ,@loopSiteType, @strOutPriceBasis ,@dblOutNetTaxCalculatedAmount 
+		--DEBUGGER--
 
 		SELECT TOP 1 @dblOutNetTaxCalculatedAmount = ISNULL(dblTaxCalculatedAmount,0)	
 		FROM tblCFTransactionPriceType 
@@ -297,10 +375,12 @@ BEGIN
 			--JIRA CF-1820--
 			print 'skip'	
 		END
-		ELSE IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND @dblOutNetTaxCalculatedAmount > 0)
+		ELSE IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND ISNULL(@dblOutNetTaxCalculatedAmount,0) > 0)
 		BEGIN
 			
-
+				--DEBUGGER--
+				--SELECT @counter 
+				--DEBUGGER--
 			IF(ISNULL(@ysnHavePriceIndex,0) = 1)
 			BEGIN
 				IF(@dtmOutPriceIndexDate IS NOT NULL)
@@ -458,6 +538,14 @@ BEGIN
 		--begin
 		--		drop table ##tblCFTransactionPricingType
 		--end
+
+		
+
+		ENDLOOP:
+
+		--DEBUGGER--
+		--SET @counter += 1
+		--DEBUGGER--
 
 		PRINT 'S------------------'
 		PRINT @loopNetworkId

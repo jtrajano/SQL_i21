@@ -158,7 +158,12 @@ BEGIN
 			@payStartingNumber = intNumber
 			,@payPrefix = strPrefix
 		FROM tblSMStartingNumber
-		WITH (UPDLOCK, ROWLOCK)
+		WHERE intStartingNumberId = 8 AND strTransactionType = 'Payable'
+
+		--update inconcurrency to lock the record by sql
+		UPDATE A
+			SET A.intConcurrencyId = A.intConcurrencyId + 1
+		FROM tblSMStartingNumber A
 		WHERE intStartingNumberId = 8 AND strTransactionType = 'Payable'
 
 		IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
@@ -257,7 +262,7 @@ BEGIN
 		--UPDATE STARTING NUMBER
 		UPDATE pay
 			SET 
-				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber AS NVARCHAR)
+				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR)
 				,@payStartingNumber = @payStartingNumber + 1
 		FROM tblAPPayment pay
 		INNER JOIN #tmpMultiVouchersCreatedPayment createdPay ON pay.intPaymentId = createdPay.intCreatePaymentId
@@ -328,25 +333,29 @@ BEGIN
 		RETURN;
 	END CATCH
 
-	--IF RECAP ONLY DELETE CREATED PAYMENT RECORDS
+	--IF RECAP ONLY, DELETE CREATED PAYMENT RECORDS
 	IF @recap = 1
 	BEGIN
-		GOTO DELETECREATEDPAYMENT;
+		DELETE A
+		FROM tblAPPayment A
+		INNER JOIN #tmpMultiVouchersCreatedPayment B ON A.intPaymentId = B.intCreatePaymentId
+		GOTO COMPLETEPROCESS;
 	END
 	ELSE
 	BEGIN
 		--IF SUCCESS POSTING BUT NO SUCCESSFUL COUNT, DELETE CREATED PAYMENT
-		IF @successPostPayment = 1 AND @totalPostedPayment = 0 
+		IF @unpostedCount > 0
 		BEGIN
-			GOTO DELETECREATEDPAYMENT;
+			GOTO DELETEUNPOSTEDPAYMENT;
 		END
 		ELSE GOTO COMPLETEPROCESS;
 	END
 
-	DELETECREATEDPAYMENT:
+	DELETEUNPOSTEDPAYMENT:
 	DELETE A
 	FROM tblAPPayment A
 	INNER JOIN #tmpMultiVouchersCreatedPayment B ON A.intPaymentId = B.intCreatePaymentId
+	WHERE A.ysnPosted = 0
 	GOTO DONE;
 
 	COMPLETEPROCESS:

@@ -70,7 +70,10 @@ BEGIN
 		Inv.strFooterComments,
 		Inv.strTransactionType,
 		Inv.strType,
-		InvDet.strItemDescription,
+		CASE WHEN ISNULL(CD.strItemSpecification, '') <> ''
+				THEN (InvDet.strItemDescription + ' - ' + CD.strItemSpecification)
+			ELSE InvDet.strItemDescription
+			END AS strItemDescription,
 		InvDet.dblPrice,
 		strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,2) AS NUMERIC(18,2))),
 		strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,4) AS NUMERIC(18,4))),

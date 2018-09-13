@@ -158,9 +158,9 @@ billedhours as
 		,d.intTicketPriorityId
 		,d.strPriority
 )
-select
-	intId = convert(int,ROW_NUMBER() over (order by intEntityId))
-	,intEntityId
+insert into tblHDCallDetailNested
+(
+	intEntityId
 	,strName
 	,strFirstName
 	,intTicketTypeId
@@ -173,6 +173,8 @@ select
 	,intReopenCalls
 	,intStartDate
 	,intEndDate
+	,dtmStartDate
+	,dtmEndDate
 	,strFilterKey
 	,intRequestedByEntityId
 	,intCreatedDate
@@ -181,6 +183,34 @@ select
 	,intCallsRated
 	,dblAverageRating
 	,intDaysOutstanding
+	,dtmCreatedDate
+	,intConcurrencyId
+)
+select
+	intEntityId
+	,strName
+	,strFirstName
+	,intTicketTypeId
+	,strType
+	,intTicketPriorityId
+	,strPriority
+	,intClosedCalls
+	,intOpenCalls
+	,intTotalCalls
+	,intReopenCalls
+	,intStartDate
+	,intEndDate
+	,dtmStartDate
+	,dtmEndDate
+	,strFilterKey
+	,intRequestedByEntityId
+	,intCreatedDate
+	,intTotalBilledHours
+	,dblTotalBillableAmount
+	,intCallsRated
+	,dblAverageRating
+	,intDaysOutstanding
+	,dtmCreatedDate
 	,intConcurrencyId
 from
 (
@@ -198,6 +228,8 @@ select distinct
 		,intReopenCalls = isnull((select sum(intReopenCalls) from reopenCalls where intEntityId = b.intEntityId and intTicketTypeId = a.intTicketTypeId and intTicketPriorityId = a.intTicketPriorityId and dtmDate between @DateFrom and @DateTo),0)
 		,intStartDate = @DateFrom
 		,intEndDate = @DateTo
+		,dtmStartDate = Convert(DATETIME, LEFT(@DateFrom, 8))
+		,dtmEndDate = Convert(DATETIME, LEFT(@DateTo, 8))
 		,strFilterKey = @strIdentifier
 		,intRequestedByEntityId = 0
 		,intCreatedDate = convert(int, convert(nvarchar(8), getdate(), 112))
@@ -206,6 +238,7 @@ select distinct
 		,intCallsRated = null
 		,dblAverageRating = null
 		,intDaysOutstanding = null
+		,dtmCreatedDate = getdate()
 		,intConcurrencyId = 1
 from
 		tblHDTicket a
@@ -214,7 +247,7 @@ from
 		,tblHDTicketPriority d
 where
 		a.intAssignedToEntity is not null
-		and a.intAssignedToEntity = @EntityId
+		and a.intAssignedToEntity = (case when @EntityId = 0 then a.intAssignedToEntity else @EntityId end)
 		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and c.intTicketTypeId = a.intTicketTypeId
@@ -223,5 +256,7 @@ where
 ) as result
 order by
 		strName
+
+select @strIdentifier;
 
 END

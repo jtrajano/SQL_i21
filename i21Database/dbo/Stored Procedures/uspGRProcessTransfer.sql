@@ -26,7 +26,7 @@ BEGIN TRY
 		,@ActionCompanyLocationId INT
 		
 	DECLARE @UserKey INT
-	DECLARE @UserName NVARCHAR(100)	
+	--DECLARE @UserName NVARCHAR(100)	
 	DECLARE @InventoryStockUOM Nvarchar(50)
 	DECLARE @ItemsToMoveKey INT
 	DECLARE @ActionKey INT
@@ -122,7 +122,7 @@ BEGIN TRY
 
 	SELECT @ActionLocationName = strLocationName FROM tblSMCompanyLocation	WHERE intCompanyLocationId = @ActionCompanyLocationId
 
-	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityId] = @UserKey
+	--SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityId] = @UserKey
 
 	INSERT INTO @ItemsToMove 
 	(
@@ -300,7 +300,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -321,6 +321,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -339,7 +340,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -439,6 +441,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -457,7 +460,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -470,7 +474,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -491,6 +495,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -509,7 +514,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -608,6 +614,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -626,7 +633,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -638,7 +646,7 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -659,6 +667,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -677,7 +686,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -776,6 +786,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -794,7 +805,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -806,7 +818,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				
@@ -828,6 +840,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
@@ -846,7 +859,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -945,6 +959,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -963,7 +978,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -976,7 +992,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -997,6 +1013,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
@@ -1015,7 +1032,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -1114,6 +1132,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -1132,7 +1151,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -1144,7 +1164,7 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)		
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -1165,6 +1185,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -1183,7 +1204,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -1282,6 +1304,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -1300,7 +1323,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId
@@ -1312,11 +1336,10 @@ BEGIN TRY
 			
 			--CASE #7:Customer MisMatch,Location MisMatch,Storatype MisMatch
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN
-			
+			BEGIN		
 				
+				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
 
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -1336,6 +1359,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
@@ -1354,7 +1378,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
@@ -1453,6 +1478,7 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
@@ -1471,7 +1497,8 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,'From Transfer'
-					,@UserName
+					,NULL
+					,@UserKey
 					,3
 					,@ItemEntityid
 					,@ItemCompanyLocationId

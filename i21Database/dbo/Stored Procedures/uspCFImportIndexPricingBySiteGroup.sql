@@ -169,7 +169,7 @@ BEGIN
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strPriceIndex,'Duplicate record/Same price - Skipped')
-		SET @intResult = 3
+		SET @intResult = 2
 		RETURN 
 	END
 	

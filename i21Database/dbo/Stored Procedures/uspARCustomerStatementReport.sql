@@ -453,6 +453,13 @@ IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE (((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0
 		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
+
+		DELETE from #CUSTOMERS 
+			WHERE intEntityCustomerId not in (
+					select intEntityCustomerId from 
+						tblARCustomerAgingStagingTable 
+							where  intEntityUserId = @intEntityUserIdLocal 
+								AND strAgingType = 'Summary')
 	END
 
 IF @ysnPrintCreditBalanceLocal = 0

@@ -45,6 +45,7 @@ BEGIN TRY
 		,@strParentLotNumber NVARCHAR(50)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
+		,@dblNewSplitLotQuantity NUMERIC(38, 20)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -187,6 +188,22 @@ BEGIN TRY
 				)
 	END
 
+	SELECT @dblNewSplitLotQuantity = NULL
+
+	SELECT @intNewItemUOMId = NULL
+
+	IF @intItemUOMId <> @intSplitItemUOMId
+		AND IsNULL(@intWeightUOMId,@intItemUOMId) <> @intSplitItemUOMId
+	BEGIN
+		SELECT @dblNewSplitLotQuantity = abs(@dblAdjustByQuantity)
+
+		SELECT @intNewItemUOMId = @intSplitItemUOMId
+
+		SELECT @dblAdjustByQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId, IsNULL(@intWeightUOMId,@intItemUOMId), @dblAdjustByQuantity)
+
+		SELECT @intSplitItemUOMId = IsNULL(@intWeightUOMId,@intItemUOMId)
+	END
+
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
@@ -202,9 +219,9 @@ BEGIN TRY
 		,@strNewLotNumber = @strNewLotNumber
 		,@dblAdjustByQuantity = @dblAdjustByQuantity
 		,@intItemUOMId = @intSplitItemUOMId
-		,@dblNewSplitLotQuantity = NULL
+		,@dblNewSplitLotQuantity = @dblNewSplitLotQuantity
 		,@dblNewWeight = NULL
-		,@intNewItemUOMId = NULL
+		,@intNewItemUOMId = @intNewItemUOMId
 		,@intNewWeightUOMId = NULL
 		,@dblNewUnitCost = NULL
 		,@intSourceId = @intSourceId

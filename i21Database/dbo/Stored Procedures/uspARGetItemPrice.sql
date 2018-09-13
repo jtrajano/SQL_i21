@@ -38,6 +38,7 @@
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
 	,@CurrencyId				INT				= NULL
+	,@FromSeq					BIT				= 0
 	,@CurrencyExchangeRateTypeId    INT            = NULL OUTPUT
     ,@CurrencyExchangeRateType  NVARCHAR(20)    = NULL OUTPUT
     ,@CurrencyExchangeRate      NUMERIC(18,6)    = NULL OUTPUT
@@ -50,7 +51,7 @@
 	,@SpecialPriceId			INT				= NULL OUTPUT
 	,@ProgramId					INT				= NULL OUTPUT
 	,@ProgramType				NVARCHAR(100)	= NULL OUTPUT
-	
+	,@ysnFromItemSelection		BIT				= 0	
 AS	
 
 	SELECT
@@ -113,7 +114,9 @@ AS
 			,@GetAllAvailablePricing
 			,@CurrencyExchangeRate
 			,@CurrencyExchangeRateTypeId
+			,@ysnFromItemSelection
 		)
+		WHERE CASE WHEN @FromSeq = 1 THEN CASE WHEN ISNULL(@ContractHeaderId,0) = ISNULL(intContractHeaderId,0) AND ISNULL(@ContractDetailId,0) = ISNULL(intContractDetailId,0) THEN 1 ELSE 0 END ELSE 1 END = 1
 
 		IF @SpecialPriceId is not null or @SpecialPriceId > 0
 		BEGIN

@@ -28,7 +28,9 @@ CREATE TYPE [dbo].[ETTranslateSDToInvoiceTable] AS TABLE
 	[intContractSequence] INT NULL,
 	[dblLatitude] NUMERIC(18, 6),
 	[dblLongitude] NUMERIC(18, 6),
-	[strPONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL 
+	[strPONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
+	[intKey] INT NULL, 
+	[intTaxCodeId] INT NULL
 )
 
 

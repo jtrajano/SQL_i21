@@ -45,7 +45,7 @@ BEGIN
 	  CASE WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
 		 @dblBalance
 		ELSE 
-		 CASE WHEN @dblUnitQtyTo <> 0 THEN CAST((@dblBalance * @dblUnitQtyFrom) AS  NUMERIC(18,6)) / CAST(@dblUnitQtyTo AS NUMERIC(18,6))       
+		 CASE WHEN @dblUnitQtyTo <> 0 THEN CAST((@dblBalance * @dblUnitQtyFrom) / (@dblUnitQtyTo)   AS NUMERIC(18,6))     
 		   ELSE NULL 
 		 END
 	  END 
@@ -54,7 +54,7 @@ BEGIN
 	  CASE WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
 		 @dblAppliedQty
 		ELSE 
-		 CASE WHEN @dblUnitQtyTo <> 0 THEN CAST((@dblAppliedQty * @dblUnitQtyFrom) AS  NUMERIC(18,6)) / CAST(@dblUnitQtyTo AS NUMERIC(18,6))       
+		 CASE WHEN @dblUnitQtyTo <> 0 THEN CAST((@dblAppliedQty * @dblUnitQtyFrom)/ (@dblUnitQtyTo)  AS  NUMERIC(18,6) )
 		   ELSE NULL 
 		 END
 	  END 

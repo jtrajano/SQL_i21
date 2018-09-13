@@ -24,7 +24,7 @@ FROM
 	UNION ALL
 	SELECT strTransactionType, intTransactionId, strTransactionId, dblAmount, strVendorInvoiceNumber, intEntityCustomerId, intEntityId, dtmDate, strDescription, intCompanyLocationId FROM [vyuARBatchPosting]
 	UNION ALL
-	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription, NULL AS intCompanyLocationId FROM vyuCFBatchPostTransactions
+	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, intCustomerEntityId as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription, intARLocationId AS intCompanyLocationId FROM vyuCFBatchPostTransactions
 	UNION ALL
 	SELECT BankTranType.strBankTransactionTypeName, intTransactionId, strTransactionId, dblAmount, '' AS strVendorInvoiceNumber, NULL AS intEntityVendorId, intEntityId, dtmDate, strMemo, NULL AS intCompanyLocationId
 	FROM tblCMBankTransaction BankTran INNER JOIN tblCMBankTransactionType BankTranType ON BankTran.intBankTransactionTypeId = BankTranType.intBankTransactionTypeId

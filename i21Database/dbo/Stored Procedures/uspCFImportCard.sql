@@ -135,10 +135,10 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																	+ SUBSTRING (RTRIM(LTRIM(cfcus_date_last_used)),7,2), 120)
 																else NULL
 															 end)
-				,@intCardTypeId							   = ISNULL((SELECT intCardTypeId 
+				,@intCardTypeId							   = (SELECT intCardTypeId 
 																	FROM tblCFCardType 
 																	WHERE strCardType = LTRIM(RTRIM(cfcus_card_type))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@dtmIssueDate							   = (case
 																when LEN(RTRIM(LTRIM(ISNULL(cfcus_issue_date,0)))) = 8 
 																then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfcus_issue_date)),1,4) 

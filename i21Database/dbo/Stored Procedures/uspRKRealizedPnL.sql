@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKRealizedPnL  
+﻿CREATE PROC [dbo].[uspRKRealizedPnL]  
 	 @dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@intCommodityId INT = NULL
@@ -11,11 +11,12 @@
 	,@intBookId int=NULL
 	,@intSubBookId int=NULL
 AS  
-SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
-SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
-SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
-dblGrossPL - dblFutCommission  AS dblNetPL,dblGrossPL,
+SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
+
+SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName strMonthOrder,
+dblGrossPL + -abs(dblFutCommission) AS dblNetPL,dblGrossPL,
 intMatchFuturesPSHeaderId ,
 intMatchFuturesPSDetailId ,
 intFutOptTransactionId ,
@@ -29,7 +30,7 @@ dblSPrice,
 strLBrokerTradeNo,
 strSBrokerTradeNo,
 dblContractSize,
-dblFutCommission * -1 as dblFutCommission,
+-abs(dblFutCommission) as dblFutCommission,
 strFutMarketName,
 strFutureMonth,
 intMatchNo ,
@@ -40,7 +41,7 @@ strCommodityCode,
 strLocationName,
 intFutureMarketId ,
 intCommodityId ,
-ysnExpired ,intFutureMonthId
+ysnExpired ,intFutureMonthId,strLInternalTradeNo,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
  from (
 SELECT * FROM(  
 SELECT   
@@ -69,7 +70,13 @@ SELECT psh.intMatchFuturesPSHeaderId,
     acc.strAccountNumber,  
     icc.strCommodityCode,  
     sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId,
-	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency                  
+	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency,
+		ot.strInternalTradeNo strLInternalTradeNo,  
+    ot1.strInternalTradeNo strSInternalTradeNo,   
+	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot.intRollingMonthId)   strLRollingMonth,   
+	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot1.intRollingMonthId)   strSRollingMonth   ,
+	 ot.intFutOptTransactionHeaderId intLFutOptTransactionHeaderId,  
+    ot1.intFutOptTransactionHeaderId intSFutOptTransactionHeaderId                      
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  

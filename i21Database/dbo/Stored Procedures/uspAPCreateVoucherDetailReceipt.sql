@@ -23,6 +23,8 @@ DECLARE @receiptItems AS TABLE (
 	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
 	[dblTotal]						DECIMAL(18, 6)	NULL, 
 	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
+	[intUnitOfMeasureId]    		INT             NULL ,
+	[dblUnitQty]					DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	/*Start - Bund Item Info*/
 	[intItemBundleId]				INT				NULL, --Primary key of tblICItemBundle
 	[intBundletUOMId]				INT				NULL,
@@ -132,7 +134,9 @@ INSERT INTO @receiptItems(
 	,[dblQtyBundleReceived]			
 	,[dblBundleUnitQty]		
 	,[strBundleDescription]		
-	,[dblBundleTotal]				
+	,[dblBundleTotal]	
+	,[intUnitOfMeasureId]
+	,[dblUnitQty]			
 	/*End - Bund Item Info*/
 )		
 SELECT 
@@ -198,7 +202,11 @@ SELECT
 	[dblQtyBundleReceived]			=	ISNULL(A.dblQtyBundleReceived,0),
 	[dblBundleUnitQty]				=	ISNULL(A.dblBundleUnitQty,0),
 	[strBundleDescription]			=	itemBundle.strDescription,
-	[dblBundleTotal]				=	ISNULL(A.dblBundleTotal,0)
+	[dblBundleTotal]				=	ISNULL(A.dblBundleTotal,0),
+	[intUnitOfMeasureId]			=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
+											THEN contractDetail.intItemUOMId
+											ELSE B.intUnitMeasureId END,
+	[dblUnitQty]					=	ISNULL(contractDetail.dblUnitQty, ABS(ISNULL(ItemUOM.dblUnitQty,0)))
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
@@ -208,6 +216,7 @@ LEFT JOIN tblICItemBundle itemBundle ON itemBundle.intItemBundleId = A.intItemBu
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 LEFT JOIN vyuPATEntityPatron patron ON C.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView contractDetail 
 			ON 	contractDetail.intContractHeaderId = B.intOrderId 
 				AND contractDetail.intContractDetailId = B.intLineNo
@@ -488,15 +497,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intContractDetailId]		=	E1.intContractDetailId,
 			[intContractHeaderId]		=	E.intContractHeaderId,
 			[intContractSeq]			=	E1.intContractSeq,
-			[intUnitOfMeasureId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract'  
-												THEN  E1.intItemUOMId
-												ELSE B.intUnitMeasureId END,
+			[intUnitOfMeasureId]		=	voucherDetailReceipt.intUnitOfMeasureId,
 			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
 			[dblCostUnitQty]			=	ABS(ISNULL(voucherDetailReceipt.dblCostUnitQty,0)),
-			[dblUnitQty]				=	ItemContractUOM.dblUnitQty,
+			[dblUnitQty]				=	voucherDetailReceipt.dblUnitQty,
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
@@ -991,8 +998,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	C.strCalculationMethod, 
 		[dblRate]				=	C.dblRate, 
 		[intAccountId]			=	C.intTaxAccountId, 
-		[dblTax]				=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
-		[dblAdjustedTax]		=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
+		[dblTax]				=	CAST(((C.dblTax * CASE WHEN C.strCalculationMethod = 'Unit' THEN D.dblLineTotal ELSE  B.dblTotal END) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
+		[dblAdjustedTax]		=	CAST(((C.dblTax * CASE WHEN C.strCalculationMethod = 'Unit' THEN D.dblLineTotal ELSE  B.dblTotal END) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
 		[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]		=	C.ysnCheckoffTax

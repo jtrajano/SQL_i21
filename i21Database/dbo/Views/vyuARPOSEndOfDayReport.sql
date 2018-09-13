@@ -1,11 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDayReport]
 AS 
-SELECT intPOSLogId			= POSLOG.intPOSLogId
-	 , intEntityUserId		= POSLOG.intEntityUserId
-	 , intCompanyLocationId	= POSLOG.intCompanyLocationId
-	 , dtmLogin				= POSLOG.dtmLogin
-	 , dtmLogout			= POSLOG.dtmLogout
-	 , strStatus			= (CASE WHEN POSLOG.dtmLogout IS NULL THEN 'Open' ELSE 'Closed' END)
+SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
+	 , intPOSLogId			= POSLOG.intPOSLogId
+	 , intEntityUserId		= EOD.intEntityId
+	 , intCompanyLocationId	= CL.intCompanyLocationId
+	 , dtmLogin				= EOD.dtmOpen
+	 , dtmLogout			= EOD.dtmClose
+	 , ysnClosed			= EOD.ysnClosed
+	 , strStatus			= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END)
 	 , strLocation			= CL.strLocationName
 	 , strUserName			= EC.strUserName
 	 , strStore				= ISNULL(STORE.strDescription, '')
@@ -15,8 +17,8 @@ SELECT intPOSLogId			= POSLOG.intPOSLogId
 	 , Tax					= ISNULL(POS.dblTax, 0)
 	 , Total				= ISNULL(POS.dblTotal, 0)
 	 , NumberOfSales		= ISNULL(POS.intTotalSales, 0)
-	 , dblEndingBalance		= ISNULL(POSLOG.dblEndingBalance, 0)
-	 , dblOpeningBalance	= ISNULL(POSLOG.dblOpeningBalance, 0)
+	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+	 , dblOpeningBalance	= ISNULL(EOD.dblOpeningBalance, 0)
 	 , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
 	 , CashCount			= ISNULL(PAYMENT.intCashCount, 0)
 	 , [Check]				= ISNULL(PAYMENT.dblCheckAmount, 0)
@@ -27,22 +29,38 @@ SELECT intPOSLogId			= POSLOG.intPOSLogId
 	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
-FROM dbo.tblARPOSLog POSLOG WITH (NOLOCK)
+FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
+INNER JOIN (
+	SELECT 
+		intPOSLogId
+		,intEntityId
+		,ysnLoggedIn
+		,intPOSEndOfDayId
+	FROM tblARPOSLog WITH (NOLOCK)
+)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+INNER JOIN(
+	SELECT
+		intCompanyLocationPOSDrawerId
+		,intCompanyLocationId
+		,strPOSDrawerName
+		,ysnAllowMultipleUser
+	FROM tblSMCompanyLocationPOSDrawer
+) DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) CL ON POSLOG.intCompanyLocationId = CL.intCompanyLocationId
+) CL ON DRAWER.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN (
 	SELECT intEntityId
 		 , strUserName 
 	FROM dbo.tblEMEntityCredential WITH (NOLOCK)
-) EC ON POSLOG.intEntityUserId = EC.intEntityId
+) EC ON EOD.intEntityId = EC.intEntityId
 LEFT JOIN (
 	SELECT intStoreId
 		 , strDescription 
 	FROM dbo.tblSTStore WITH (NOLOCK)
-) STORE ON POSLOG.intStoreId = STORE.intStoreId
+) STORE ON EOD.intStoreId = STORE.intStoreId
 OUTER APPLY (
 	SELECT dblSubTotal		= SUM(ISNULL(dblSubTotal, 0))
 		 , dblShipping		= SUM(ISNULL(dblShipping, 0))

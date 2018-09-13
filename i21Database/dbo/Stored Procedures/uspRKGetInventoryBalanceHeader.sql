@@ -1,7 +1,7 @@
 ﻿CREATE PROC uspRKGetInventoryBalanceHeader
 
-		  @dtmFromTransactionDate DATETIME = null,
-          @dtmToTransactionDate DATETIME = NULL,
+		  @dtmFromTransactionDate DATE = null,
+          @dtmToTransactionDate DATE = NULL,
           @intCommodityId int =  NULL,
 	      @intItemId int= null,
 		  @strPositionIncludes nvarchar(100) = NULL,

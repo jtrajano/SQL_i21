@@ -32,6 +32,7 @@ BEGIN TRY
 		,@strCustomerCode NVARCHAR(50)
 		,@strProductType NVARCHAR(50)
 		,@intCommodityAttributeId INT
+		,@stri21ProductType NVARCHAR(50)
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -179,11 +180,22 @@ BEGIN TRY
 							,1
 							)
 
+				SELECT @stri21ProductType = stri21ProductType
+				FROM tblIPSAPProductType
+				WHERE strSAPProductType = @strProductType
+
 				SELECT @intCommodityAttributeId = intCommodityAttributeId
 					,@intCommodityId = intCommodityId
 				FROM tblICCommodityAttribute
 				WHERE strType = 'ProductType'
-					AND strDescription = @strProductType
+					AND strDescription = @stri21ProductType
+
+				IF @intCommodityId IS NULL
+					RAISERROR (
+							'Product Type not found.'
+							,16
+							,1
+							)
 			END
 
 			BEGIN TRAN
@@ -422,7 +434,7 @@ BEGIN TRY
 					--Add Audit Trail Record
 					SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intItemId) + '","keyValue":' + CONVERT(VARCHAR, @intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 
-					SELECT @dtmDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated)
+					SELECT @dtmDate = DATEADD(ss, DATEDIFF(ss, GETDATE(), GETUTCDATE()), dtmCreated)
 					FROM tblIPItemStage
 					WHERE intStageItemId = @intStageItemId
 
