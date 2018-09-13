@@ -39,7 +39,8 @@ SELECT DISTINCT
 	LEFT JOIN tblCTWeightGrade Wght
 		ON Wght.intWeightGradeId = SC.intWeightId
 	LEFT JOIN tblCTWeightGrade Grd
-		ON Grd.intWeightGradeId = SC.intGradeId
+		ON Grd.intWeightGradeId = SC.intGradeId	
+	LEFT JOIN tblAPBillDetail BillDetail ON BillDetail.intScaleTicketId  = SC.intTicketId
 WHERE ISNULL(SC.dblUnitPrice,0) = 0 
 	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
@@ -47,3 +48,4 @@ WHERE ISNULL(SC.dblUnitPrice,0) = 0
 	AND CASE WHEN (lower(Wght.strWhereFinalized) = 'destination' and lower(Grd.strWhereFinalized) = 'destination') THEN SC.ysnDestinationWeightGradePost ELSE 1 END = 1
 	AND CASE WHEN TicketType.strInOutIndicator='I' THEN CASE WHEN ISNULL(IRI.dblUnitCost,0) = 0 OR (SC.dblUnitBasis + SC.dblUnitPrice) = 0 THEN 0 ELSE 1 END ELSE CASE WHEN ISNULL(ISI.dblUnitPrice,0) = 0 OR (SC.dblUnitBasis + SC.dblUnitPrice) = 0 THEN 0 ELSE 1 END END = 0
 	AND SC.intTicketTypeId != 10
+	AND ISNULL(intScaleTicketId,0) = 0
