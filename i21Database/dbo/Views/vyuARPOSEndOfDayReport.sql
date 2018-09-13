@@ -1,12 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDayReport]
 AS 
-SELECT intPOSLogId			= POSLOG.intPOSLogId
-     , intPOSEndOfDayId		= POSLOG.intPOSEndOfDayId
+SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
+	 , intPOSLogId			= POSLOG.intPOSLogId
 	 , intEntityUserId		= EOD.intEntityId
 	 , intCompanyLocationId	= CL.intCompanyLocationId
-	 , dtmLogin				= POSLOG.dtmLogin
-	 , dtmLogout			= POSLOG.dtmLogout
-	 , strStatus			= (CASE WHEN POSLOG.dtmLogout IS NULL THEN 'Open' ELSE 'Closed' END)
+	 , dtmLogin				= EOD.dtmOpen
+	 , dtmLogout			= EOD.dtmClose
+	 , ysnClosed			= EOD.ysnClosed
+	 , strStatus			= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END)
 	 , strLocation			= CL.strLocationName
 	 , strUserName			= EC.strUserName
 	 , strStore				= ISNULL(STORE.strDescription, '')
@@ -33,8 +34,6 @@ INNER JOIN (
 	SELECT 
 		intPOSLogId
 		,intEntityId
-		,dtmLogin
-		,dtmLogout
 		,ysnLoggedIn
 		,intPOSEndOfDayId
 	FROM tblARPOSLog WITH (NOLOCK)
