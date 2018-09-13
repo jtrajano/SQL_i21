@@ -71,6 +71,7 @@ AS
 	,A.dtmForecastedDelivery
 	,ysnCustomerActive = ISNULL(D.ysnActive,0)
 	,strAccountStatusCode = A.strAcctStatus	
+	,A.ysnHoldDDCalculations
 	FROM tblTMSite A WITH(NOLOCK)
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
