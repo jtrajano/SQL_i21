@@ -243,9 +243,9 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 									  FROM tblARCustomer 
 									  WHERE strCustomerNumber = RTRIM(LTRIM(cfact_cus_no)) COLLATE Latin1_General_CI_AS),
 
-					@intInvoiceCycle = (SELECT TOP 1 intInvoiceCycleId 
+					@intInvoiceCycle = ISNULL((SELECT TOP 1 intInvoiceCycleId 
 										FROM tblCFInvoiceCycle 
-										WHERE strInvoiceCycle = RTRIM(LTRIM(cfact_ivc_cyc)) COLLATE Latin1_General_CI_AS),
+										WHERE strInvoiceCycle = RTRIM(LTRIM(cfact_ivc_cyc)) COLLATE Latin1_General_CI_AS),(SELECT TOP 1 intInvoiceCycleId FROM tblCFInvoiceCycle WHERE strInvoiceCycle = 'M')),
 
 					@intDiscountScheduleId = (SELECT TOP 1 intDiscountScheduleId 
 											  FROM tblCFDiscountSchedule 
@@ -263,15 +263,15 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											FROM tblARAccountStatus 
 											WHERE strAccountStatusCode = RTRIM(LTRIM(cfact_acct_stat)) COLLATE Latin1_General_CI_AS),
 
-					@intRemotePriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
+					@intRemotePriceProfileId = (SELECT TOP 1 intPriceProfileHeaderId 
 												FROM tblCFPriceProfileHeader 
 												WHERE strPriceProfile = RTRIM(LTRIM(cfact_rmt_prc_prf_id)) COLLATE Latin1_General_CI_AS
-												AND strType = 'Remote'),0),
+												AND strType = 'Remote'),
 
-					@intExtRemotePriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
+					@intExtRemotePriceProfileId = (SELECT TOP 1 intPriceProfileHeaderId 
 												   FROM tblCFPriceProfileHeader 
 												   WHERE strPriceProfile = RTRIM(LTRIM(cfact_ext_rmt_prc_prf_id)) COLLATE Latin1_General_CI_AS
-												   AND strType = 'Extended Remote'),0),
+												   AND strType = 'Extended Remote'),
 
 					@intLocalPriceProfileId = (SELECT TOP 1 intPriceProfileHeaderId 
 												FROM tblCFPriceProfileHeader 
