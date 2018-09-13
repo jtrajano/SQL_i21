@@ -251,16 +251,16 @@ FROM (
 		,ABS(isnull(SI.dblQuantity, 0)) * -1 dblInQty
 		,0 AS dblOutQty
 		,ST.strDistributionOption
-		,S.strShipmentNumber AS strReceiptNumber
-		,S.intInventoryShipmentId AS intReceiptId
+		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN Inv.strInvoiceNumber ELSE  S.strShipmentNumber END AS strReceiptNumber
+		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN Inv.intInvoiceId ELSE  S.intInventoryShipmentId END  AS intReceiptId
 		--,Inv.strInvoiceNumber AS strReceiptNumber
 		--,Inv.intInvoiceId AS intReceiptId
 	FROM vyuSCTicketView ST
 	INNER JOIN tblICInventoryShipmentItem SI ON ST.intTicketId = SI.intSourceId
 	INNER JOIN tblICInventoryShipment S ON S.intInventoryShipmentId = SI.intInventoryShipmentId
 	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-	--LEFT JOIN tblARInvoiceDetail ID ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
-	--LEFT JOIN tblARInvoice Inv ON ID.intInvoiceId = Inv.intInvoiceId
+	LEFT JOIN tblARInvoiceDetail ID ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
+	LEFT JOIN tblARInvoice Inv ON ID.intInvoiceId = Inv.intInvoiceId
 	WHERE ST.strTicketStatus = 'C'
 	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 	AND ST.intCommodityId = @intCommodityId 
