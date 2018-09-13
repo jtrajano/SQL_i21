@@ -24,7 +24,10 @@ AS
 		,A.intCustomerID
 		,A.intConcurrencyId
 		,A.intLocationId
-	
+		,A.strSiteAddress
+		,A.strZipCode
+		,A.strState
+		,A.strCity
 	FROM tblTMSite A
 	INNER JOIN tblTMWorkOrder B
 		ON A.intSiteID = B.intSiteID
