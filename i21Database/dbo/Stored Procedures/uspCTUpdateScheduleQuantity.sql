@@ -41,13 +41,6 @@ BEGIN TRY
 
 	BEGINING:
 
-	SELECT	@dblQuantityToUpdate	=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN @dblQuantityToUpdate ELSE @dblQuantityToUpdate / ABS(@dblQuantityToUpdate) END
-	FROM	tblCTContractDetail		CD
-	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
-	WHERE	intContractDetailId		=	@intContractDetailId
-
-	SELECT	@strQuantityToUpdate	=	LTRIM(@dblQuantityToUpdate)
-
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(CD.dblQuantity,0) ELSE ISNULL(CD.intNoOfLoad,0) END,
 			@dblScheduleQty			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(CD.dblScheduleQty,0) ELSE ISNULL(CD.dblScheduleLoad,0) END,
 			@dblOrgScheduleQty		=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(CD.dblScheduleQty,0) ELSE ISNULL(CD.dblScheduleLoad,0) END,
