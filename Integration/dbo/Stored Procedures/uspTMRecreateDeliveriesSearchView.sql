@@ -76,6 +76,7 @@ BEGIN
 						,F.strInvoiceNumber
 						,K.strFillMethod
 						,strItemDescription = I.vwitm_desc COLLATE Latin1_General_CI_AS
+						,strAccountStatus = C.strAcctStatus	
 					FROM tblTMSite C 
 					INNER JOIN tblTMCustomer E 
 						ON C.intCustomerID = E.intCustomerID
@@ -122,6 +123,7 @@ BEGIN
 					,F.strInvoiceNumber
 					,K.strFillMethod
 					,strItemDescription = I.strDescription
+					,strAccountStatus = C.strAcctStatus	
 				FROM tblTMSite C 
 				INNER JOIN tblTMCustomer E 
 					ON C.intCustomerID = E.intCustomerID

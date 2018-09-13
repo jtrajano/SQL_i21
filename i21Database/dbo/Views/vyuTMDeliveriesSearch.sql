@@ -22,6 +22,7 @@ AS
 		,F.strInvoiceNumber
 		,K.strFillMethod
 		,strItemDescription = I.strDescription		
+		,strAccountStatus = C.strAcctStatus	
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
