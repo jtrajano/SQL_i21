@@ -25,7 +25,7 @@ BEGIN TRY
 	DECLARE @dblUOMQty DECIMAL(24, 10)
 	DECLARE @CommodityStockUomId INT
 	DECLARE @intInventoryItemStockUOMId INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
@@ -38,9 +38,9 @@ BEGIN TRY
 	
 	SET @intParentSettleStorageId = @intSettleStorageId
 
-	SELECT @UserName = strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @UserId
+	-- SELECT @UserName = strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @UserId
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -369,6 +369,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -384,7 +385,8 @@ BEGIN TRY
 					,[dblUnits]				= [dblUnits]
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Reverse Settlement'
-					,[strUserName]			= @UserName
+					,[strUserName]			= NULL
+					,[intUserId]			= @UserId
 					,[intEntityId]			= [intEntityId]
 					,[strSettleTicket]		= [strSettleTicket]
 					,[intTransactionTypeId]	= 4

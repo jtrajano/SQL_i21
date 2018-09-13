@@ -16,7 +16,7 @@ BEGIN TRY
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @strVoucher NVARCHAR(20)
 	DECLARE @intCreatedUserId INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @ItemLocationId INT
 	DECLARE @SettleStorageKey INT
 	DECLARE @intSettleStorageTicketId INT
@@ -274,9 +274,9 @@ BEGIN TRY
 								   ELSE 'calculate'
 							  END
 
-		SELECT @UserName = strUserName
-		FROM tblSMUserSecurity
-		WHERE [intEntityId] = @intCreatedUserId
+		-- SELECT @UserName = strUserName
+		-- FROM tblSMUserSecurity
+		-- WHERE [intEntityId] = @intCreatedUserId
 
 		-- SELECT @FeeItemId = intItemId
 		-- FROM tblGRCompanyPreference
@@ -1630,6 +1630,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -1645,7 +1646,8 @@ BEGIN TRY
 					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
-					,[strUserName]			= @UserName 
+					,[strUserName]			= NULL
+					,[intUserId]		 	= @intCreatedUserId
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 

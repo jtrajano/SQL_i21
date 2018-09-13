@@ -33,7 +33,7 @@ DECLARE @intStorageCommodityId AS INT
 DECLARE @intStorageTypeId AS INT
 DECLARE @intStorageLocationId AS INT
 DECLARE @dblRunningBalance AS DECIMAL (13,3)
-DECLARE @strUserName AS NVARCHAR (50)
+--DECLARE @strUserName AS NVARCHAR (50)
 DECLARE @ysnDPStorage BIT
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
@@ -64,8 +64,8 @@ DECLARE @ItemsForItemShipment AS ItemCostingTableType
 
 BEGIN TRY
 
-	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
-	WHERE US.[intEntityId] = @intUserId
+	-- SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
+	-- WHERE US.[intEntityId] = @intUserId
 	
 	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
 	
@@ -396,6 +396,7 @@ BEGIN TRY
 		   ,[dblCurrencyRate]
 		   ,[strType]
 		   ,[strUserName]
+		   ,[intUserId]
 		   ,[intTransactionTypeId])
 	VALUES
 		   (1
@@ -410,7 +411,8 @@ BEGIN TRY
 		   ,'Generated From Scale'
 		   ,1
 		   ,'From Scale'
-		   ,@strUserName
+		   ,NULL
+		   ,@intUserId
 		   ,1)
 	
 	SET @intHoldCustomerStorageId = NULL

@@ -7046,6 +7046,9 @@
     <Build Include="dbo\User Defined Types\CustomerStorageStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateCustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCustomerStorageBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GR\StorageHistoryUserId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -17,7 +17,7 @@ BEGIN TRY
 	DECLARE @intUnitMeasureId INT
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @UserKey INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 
 	--Storage Varibales
 	DECLARE @SellOffsiteKey INT
@@ -130,9 +130,9 @@ BEGIN TRY
 			,strOffsiteTicket NVARCHAR(50)
 	)
 
-	SELECT @UserName = strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @UserKey --Another Hiccup
+	-- SELECT @UserName = strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @UserKey --Another Hiccup
 
 	INSERT INTO #SellStorage 
 	(
@@ -323,6 +323,7 @@ BEGIN TRY
 						,[dtmHistoryDate]
 						,[strType]
 						,[strUserName]
+						,[intUserId]
 						,[intEntityId]
 						,[strSettleTicket]
 						)
@@ -334,7 +335,8 @@ BEGIN TRY
 						,@dblStorageUnits
 						,GETDATE()
 						,'Settlement'
-						,@UserName
+						,NULL
+						,@UserKey
 						,@ContractEntityId
 						,@strOffsiteTicket
 						)
@@ -376,6 +378,7 @@ BEGIN TRY
 						,[dtmHistoryDate]
 						,[strType]
 						,[strUserName]
+						,[intUserId]
 						,[intEntityId]
 						,[strSettleTicket]
 						)
@@ -387,7 +390,8 @@ BEGIN TRY
 						,@dblContractUnits
 						,GETDATE()
 						,'Settlement'
-						,@UserName
+						,NULL
+						,@UserKey
 						,@ContractEntityId
 						,@strOffsiteTicket
 						)
@@ -498,6 +502,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 				 )
@@ -510,7 +515,8 @@ BEGIN TRY
 					,@dblStorageUnits
 					,GETDATE()
 					,'Settlement'
-					,@UserName
+					,NULL
+					,@UserKey
 					,NULL
 					,@strOffsiteTicket
 				  )				  
@@ -536,6 +542,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 				)
@@ -548,7 +555,8 @@ BEGIN TRY
 					,@dblSpotUnits
 					,GETDATE()
 					,'Settlement'
-					,@UserName
+					,NULL
+					,@UserKey
 					,NULL
 					,@strOffsiteTicket
 				 )
@@ -751,19 +759,21 @@ BEGIN TRY
 				,[dblPaidAmount]							
 				,[strType]
 				,[strUserName]							
+				,[intUserId]
 			)
 			SELECT 
 				 [intConcurrencyId] = 1
 				,[intCustomerStorageId] = ARD.intCustomerStorageId														
 				,[intInvoiceId] = AR.intInvoiceId							
 				,[dblUnits] = ARD.dblQtyOrdered
-				,[dtmHistoryDate]=GetDATE()
-				,[dblPaidAmount]=ARD.dblPrice							
-				,[strType]='Generated Invoice'
-				,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
-				 FROM tblARInvoice AR
-				 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
-				 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
+				,[dtmHistoryDate] = GetDATE()
+				,[dblPaidAmount] = ARD.dblPrice							
+				,[strType] = 'Generated Invoice'
+				,[strUserName] = NULL
+				,[intUserId] = @UserKey
+			FROM tblARInvoice AR
+			JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+			WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
 								   
 				
 		END

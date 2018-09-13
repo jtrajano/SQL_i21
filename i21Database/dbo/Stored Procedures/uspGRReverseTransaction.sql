@@ -10,7 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intStorageHistoryId INT
 	DECLARE @intEntityUserSecurityId INT
-	DECLARE @StrUserName Nvarchar(50)
+	--DECLARE @StrUserName Nvarchar(50)
 	DECLARE @intCustomerStorageId INT
 	DECLARE @intTransactionTypeId INT
 	DECLARE @dblUnits DECIMAL(24, 10)
@@ -47,7 +47,7 @@ BEGIN TRY
 	SELECT @intStorageHistoryId = intStorageHistoryId,@intEntityUserSecurityId=intEntityUserSecurityId
 	FROM OPENXML(@idoc, 'root', 2) WITH (intStorageHistoryId INT,intEntityUserSecurityId INT)
 
-	SELECT @StrUserName=strUserName FROM tblSMUserSecurity Where intEntityId=@intEntityUserSecurityId
+	--SELECT @StrUserName=strUserName FROM tblSMUserSecurity Where intEntityId=@intEntityUserSecurityId
 	
 	SELECT @intCustomerStorageId = SH.intCustomerStorageId 
 		,@intTransactionTypeId = SH.intTransactionTypeId
@@ -137,6 +137,7 @@ BEGIN TRY
 			,[dblCurrencyRate]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 			,[intTransactionTypeId]
 			,[intEntityId]
 			,[intCompanyLocationId]
@@ -155,7 +156,8 @@ BEGIN TRY
 			,NULL
 			,NULL
 			,'Reverse Adjustment'
-			,@StrUserName
+			,NULL
+			,@intEntityUserSecurityId
 			,2
 			,NULL
 			,NULL

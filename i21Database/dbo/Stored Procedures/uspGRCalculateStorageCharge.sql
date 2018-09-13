@@ -25,7 +25,7 @@ BEGIN TRY
 	   SET @StorageChargeDate = GETDATE()
 
 	DECLARE @ErrMsg											NVARCHAR(MAX)
-	DECLARE @UserName										NVARCHAR(100)
+	--DECLARE @UserName										NVARCHAR(100)
 	DECLARE @dblOldStoragePaid								DECIMAL(24, 10)
 	DECLARE @dblOpenBalance									DECIMAL(24, 10)
 	DECLARE @intStorageScheduleId							INT
@@ -316,9 +316,9 @@ BEGIN TRY
 	IF @dtmDeliveryDate < @dtmHEffectiveDate AND @dtmHEffectiveDate IS NOT NULL
 		SET @dtmDeliveryDate = @dtmHEffectiveDate
 
-	SELECT @UserName = strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @UserKey
+	-- SELECT @UserName = strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @UserKey
 	
 	IF EXISTS(
 					SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
@@ -5245,8 +5245,9 @@ BEGIN TRY
 				,[dblPaidAmount]
 				,[strPaidDescription]
 				,[dblCurrencyRate]
-				,[strType]
+				,[strType]				
 				,[strUserName]
+				,[intUserId]
 				,[intTransactionTypeId]
 				,[intEntityId]
 				,[intCompanyLocationId]
@@ -5264,7 +5265,8 @@ BEGIN TRY
 				,[strPaidDescription]	 = NULL
 				,[dblCurrencyRate]		 = NULL
 				,[strType]				 = 'Accrued Storage Due'
-				,[strUserName]			 = @UserName
+				,[strUserName]			 = NULL
+				,[intUserId]			 = @UserKey
 				,[intTransactionTypeId]	 = NULL
 				,[intEntityId]			 = NULL
 				,[intCompanyLocationId]	 = NULL
@@ -5297,6 +5299,7 @@ BEGIN TRY
 			,[dblCurrencyRate]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 			,[intTransactionTypeId]
 			,[intEntityId]
 			,[intCompanyLocationId]
@@ -5314,7 +5317,8 @@ BEGIN TRY
 			,[strPaidDescription]	 = NULL
 			,[dblCurrencyRate]		 = NULL
 			,[strType]				 = 'Storage Paid'
-			,[strUserName]			 = @UserName
+			,[strUserName]			 = NULL
+			,[intUserId]			 = @UserKey
 			,[intTransactionTypeId]	 = NULL
 			,[intEntityId]			 = NULL
 			,[intCompanyLocationId]	 = NULL

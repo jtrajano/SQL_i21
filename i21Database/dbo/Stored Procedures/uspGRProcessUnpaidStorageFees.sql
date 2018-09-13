@@ -311,6 +311,7 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 				)
 				SELECT 
 					 [intConcurrencyId] = 1
@@ -320,7 +321,8 @@ BEGIN TRY
 					,[dtmHistoryDate] = GetDATE()
 					,[dblPaidAmount] = ARD.dblPrice
 					,[strType] = 'Generated Fee Invoice'
-					,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+					,[strUserName] = NULL
+					,[intUserId] = @UserKey
 				FROM tblARInvoice AR
 				JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = ARD.intCustomerStorageId

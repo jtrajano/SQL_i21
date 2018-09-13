@@ -16,6 +16,7 @@
     [dblCurrencyRate] NUMERIC(18, 8) NULL, 
     [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intUserId]	INT NULL,
 	[intTransactionTypeId] INT  NULL,
 	[intEntityId] INT  NULL,
 	[intCompanyLocationId] INT  NULL,
@@ -34,7 +35,8 @@
 	CONSTRAINT [FK_tblGRStorageHistory_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [dbo].[tblSCDeliverySheet] ([intDeliverySheetId]),
-	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
+	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
+	CONSTRAINT [FK_tblGRStorageHistory_tblSMUserSecurity_intEntityId] FOREIGN KEY ([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
 )
 
 GO
