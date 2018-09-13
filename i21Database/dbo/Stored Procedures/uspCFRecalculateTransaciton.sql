@@ -1124,35 +1124,6 @@ BEGIN
 					UPDATE @tblCFRemoteTax 
 					SET dblAdjustedTax = dblRate , dblTax = dblRate
 
-					--BACKOUT TAX--
-					IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
-					OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
-					OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
-					OR @strPriceMethod = 'Import File Price' 
-					OR @strPriceMethod = 'Credit Card' 
-					OR @strPriceMethod = 'Posted Trans from CSV'
-					OR @strPriceMethod = 'Origin History'
-					OR @strPriceMethod = 'Network Cost')
-					BEGIN
-						UPDATE @tblCFRemoteTax 
-						SET dblRate = CASE 
-							WHEN LOWER(strCalculationMethod) = 'percentage' 
-							THEN ((ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0) - (ISNULL(dblRate,0) / @dblQuantity))) * 100
-							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
-							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
-							END
-					END
-
-					ELSE
-					BEGIN
-						UPDATE @tblCFRemoteTax 
-						SET dblRate = CASE 
-							WHEN LOWER(strCalculationMethod) = 'percentage' 
-							THEN (ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0)) * 100
-							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
-							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
-							END
-					END
 
 				END
 				
@@ -5264,6 +5235,8 @@ BEGIN
 	--ON cft.intTaxClassId = cftx.intTaxClassId
 	--WHERE cft.ysnTaxExempt = 1 AND 
 	--(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+
+
 	
 
 	SELECT 
@@ -6568,6 +6541,20 @@ BEGIN
 
 	--SELECT * FROM @tblCFTransactionTax 
 
+	
+	IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1)
+	BEGIN
+					
+		UPDATE @tblCFTransactionTax 
+		SET dblRate = CASE 
+		WHEN LOWER(strCalculationMethod) = 'percentage' 
+		THEN ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice)
+		ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+		END
+
+	END
+
+	--COMPUTE REMOTE TAX--
 	IF(@IsImporting = 1)
 		BEGIN
 			IF(ISNULL(@ProcessType,'invoice') = 'invoice')
