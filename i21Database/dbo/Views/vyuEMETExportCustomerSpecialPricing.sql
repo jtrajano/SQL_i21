@@ -46,7 +46,8 @@
 			null,  
 			0,  
 			1.000000,  
-			null  
+			null,
+			0  
 			) c  
 	WHERE a.intItemId IS null AND a.intCategoryId IS NOT NULL
 	   
@@ -101,7 +102,8 @@
 	   null,  
 	   0,  
 	   1.000000,  
-	   null  
+	   null,
+	   0  
 	  ) c  
 	   
 	  WHERE g.strItemNo IS NOT NULL

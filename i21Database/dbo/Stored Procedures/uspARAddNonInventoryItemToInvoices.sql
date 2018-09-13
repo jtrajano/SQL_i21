@@ -358,6 +358,7 @@ BEGIN TRY
 		,0							--@GetAllAvailablePricing
 		,ISNULL(IE.[dblCurrencyExchangeRate], 1)	--@CurrencyExchangeRate
 		,IE.[intCurrencyExchangeRateId] --@CurrencyExchangeRateTypeId
+		,0							--@ysnFromItemSelection
 	) IP
 	WHERE
 		ISNULL(IE.[ysnRefreshPrice],0) = 1
