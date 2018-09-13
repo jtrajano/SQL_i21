@@ -94,6 +94,7 @@ BEGIN
 				,A.dtmRunOutDate
 				,A.dtmForecastedDelivery
 				,ysnCustomerActive = CAST((CASE WHEN C.vwcus_active_yn = ''Y'' THEN 1 ELSE 0 END) AS BIT)
+				,strAccountStatusCode = A.strAcctStatus	
 				FROM tblTMSite A WITH(NOLOCK)
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -204,6 +205,7 @@ BEGIN
 				,A.dtmRunOutDate
 				,A.dtmForecastedDelivery
 				,ysnCustomerActive = ISNULL(D.ysnActive,0)
+				,strAccountStatusCode = A.strAcctStatus	
 				FROM tblTMSite A WITH(NOLOCK)
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID

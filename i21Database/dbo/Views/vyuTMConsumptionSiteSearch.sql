@@ -70,6 +70,7 @@ AS
 	,A.dtmRunOutDate
 	,A.dtmForecastedDelivery
 	,ysnCustomerActive = ISNULL(D.ysnActive,0)
+	,strAccountStatusCode = A.strAcctStatus	
 	FROM tblTMSite A WITH(NOLOCK)
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
