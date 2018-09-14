@@ -76,7 +76,7 @@ SELECT intContractDetailId,
 	  
 FROM(
 SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,cd.intContractDetailId,
-             dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, cd.dblQuantity)  dblQty,
+             cd.dblQuantity  dblQty,
 			 cd.dblQuantity dblOriginalQty			 
 			 ,cd.dblNoOfLots
 			,(SELECT dblCashPrice FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId AND intPricingTypeId in(1,6))  dblFullyPriced
@@ -194,7 +194,7 @@ AND isnull(strProductType,'')=case when isnull(@strProductType,'')='' then isnul
 and isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
 and isnull(cd.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(cd.intSubBookId,0) else @intSubBookId end
 and isnull(l.strLocationName,'')= case when isnull(@strLocationName,'')='' then isnull(l.strLocationName,'') else @strLocationName end
-)t)t1
+)t)t1 
 END
 
 declare @ysnSubCurrency int
@@ -231,7 +231,7 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null))	dblBasis,
 							
-							t.dblRatio,	cost.dblRate,
+							t.dblRatio,	dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,cost.dblRate,null) dblRate,
 							
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,						
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null))	dblPrice,
@@ -256,16 +256,18 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
 											isnull(cost.dblRate,t.dblBasis),null))	dblPPVBasis,
 							strLocationName,strPricingType,strItemNo,strOrigin,strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
-FROM @GetStandardQty t
+ FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
 JOIN tblRKFutureMarket m on cd.intFutureMarketId=m.intFutureMarketId
-join tblICItemUOM i on cd.intPriceItemUOMId=i.intItemUOMId
-join tblICItemUOM j on cd.intBasisUOMId=j.intItemUOMId
-join tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
-join tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
-join tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
+JOIN tblICItemUOM i on cd.intPriceItemUOMId=i.intItemUOMId
+JOIN tblICItemUOM j on cd.intBasisUOMId=j.intItemUOMId
+JOIN tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
+JOIN tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
 JOIN tblICItem ic ON ic.intItemId = cd.intItemId
-LEFT JOIN(SELECT intContractDetailId,SUM(dblRate) dblRate FROM tblCTContractCost where ysnBasis=1 and intItemId not in(
-		  SELECT ISNULL(intItemId,0) FROM tblCTComponentMap WHERE ysnExcludeFromPPV=1) GROUP BY intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
+JOIN tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
+LEFT JOIN(select intContractDetailId,sum(dbo.[fnCTConvertQuantityToTargetItemUOM](c1.intItemId,@intUnitMeasureId,i.intUnitMeasureId,isnull(dblRate,0))) dblRate 
+			FROM tblCTContractCost c1
+			JOIN tblICItemUOM i on c1.intItemUOMId=i.intItemUOMId  where ysnBasis=1 and c1.intItemId not in(
+		 SELECT isnull(intItemId,0) from tblCTComponentMap where ysnExcludeFromPPV=1) Group by intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
 LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId)t)t1
