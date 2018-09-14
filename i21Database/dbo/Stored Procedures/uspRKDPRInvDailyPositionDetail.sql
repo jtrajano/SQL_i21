@@ -531,7 +531,7 @@ FROM(
 				SUM(it.dblQty) dblShipmentQty,
 				ISNULL((SELECT  SUM(ad.dblQtyShipped) FROM tblARInvoice ia
 				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
-				WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1),0)  as dblInvoiceQty,
+				WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1 and intInventoryShipmentChargeId IS NULL),0)  as dblInvoiceQty,
 				b.intShipFromLocationId intCompanyLocationId,
 				l.strLocationName strLocationName,
 				d.intContractDetailId,
