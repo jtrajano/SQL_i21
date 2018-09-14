@@ -478,14 +478,14 @@ BEGIN TRY
 					,intItemType
 					,IsProcessed
 				)
-				SELECT TOP 1
+				SELECT DISTINCT
 					 intCustomerStorageId = SST.intCustomerStorageId
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
-					,dblUnits             = CASE
-												WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits
-												ELSE SST.dblUnits
+					,dblUnits             = CASE 
+												WHEN CS.intDeliverySheetId IS NOT NULL THEN CASE WHEN IC.ysnPrice = 1 THEN -SST.dblUnits ELSE SST.dblUnits END
+												ELSE CASE WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits ELSE SST.dblUnits END
 											END
 					,dblCashPrice         = CS.dblFeesDue
 					,intItemId            = IC.intItemId
@@ -503,12 +503,6 @@ BEGIN TRY
 					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 				INNER JOIN tblICItem IC 
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
-				GROUP BY SST.intCustomerStorageId
-						,CS.intCompanyLocationId
-						,SC.ysnCusVenPaysFees
-						,SST.dblUnits
-						,CS.dblFeesDue
-						,IC.intItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
