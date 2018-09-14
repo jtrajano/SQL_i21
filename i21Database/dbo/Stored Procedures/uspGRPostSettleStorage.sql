@@ -472,7 +472,7 @@ BEGIN TRY
 					,intItemType
 					,IsProcessed
 				)
-				SELECT 
+				SELECT TOP 1
 					 intCustomerStorageId = SST.intCustomerStorageId
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
