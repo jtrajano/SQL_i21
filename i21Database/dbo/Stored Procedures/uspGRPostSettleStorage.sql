@@ -405,6 +405,20 @@ BEGIN TRY
 						AND ISNULL(QM.dblDiscountDue, 0) <> ISNULL(QM.dblDiscountPaid, 0)
 					  )
 			BEGIN
+				--get the cash price from the contract if contract was applied
+				IF EXISTS(SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+				BEGIN
+					SET @dblCashPrice = NULL
+
+					SELECT 
+						@dblCashPrice		 = CD.dblCashPrice
+					FROM tblGRSettleContract SSC
+					JOIN vyuGRGetContracts CD 
+						ON CD.intContractDetailId = SSC.intContractDetailId
+					WHERE intSettleStorageId = @intSettleStorageId 
+						AND SSC.dblUnits > 0
+					ORDER BY SSC.intSettleContractId
+				END
 				INSERT INTO @SettleVoucherCreate 
 				(
 					intCustomerStorageId
@@ -472,7 +486,7 @@ BEGIN TRY
 					,intItemType
 					,IsProcessed
 				)
-				SELECT 
+				SELECT TOP 1
 					 intCustomerStorageId = SST.intCustomerStorageId
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
