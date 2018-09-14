@@ -7038,6 +7038,7 @@
     <Build Include="dbo\Functions\fnCTIsMultiAllocationExists.sql" />
     <Build Include="dbo\Functions\fnCTIsMultiDerivativesExists.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
