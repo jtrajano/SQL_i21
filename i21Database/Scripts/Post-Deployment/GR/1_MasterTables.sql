@@ -308,3 +308,8 @@ BEGIN
 		WHERE SC.intStorageScheduleTypeId = -3
 END
 GO
+IF EXISTS(SELECT 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo' AND intNumber < 139401)
+BEGIN
+	UPDATE tblSMStartingNumber SET intNumber = 139401 WHERE strTransactionType = N'Storage Statement FormNo' AND intNumber < 139401
+END
+GO

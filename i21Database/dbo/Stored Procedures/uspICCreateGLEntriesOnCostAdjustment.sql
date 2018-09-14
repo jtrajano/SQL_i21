@@ -650,6 +650,7 @@ WITH ForGLEntries_CTE (
 	,dblForexRate
 	,intInventoryCostAdjustmentTypeId
 	,intOtherChargeItemId
+	,ysnFixInventoryRoundingDiscrepancy 
 )
 AS 
 (
@@ -676,6 +677,7 @@ AS
 			,t.dblForexRate
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -712,6 +714,7 @@ AS
 			,t.dblForexRate
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -748,6 +751,7 @@ AS
 			,t.dblForexRate
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -760,6 +764,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
+
 	-- ACTUAL COST 
 	UNION ALL 
 	SELECT	t.dtmDate
@@ -784,6 +789,7 @@ AS
 			,t.dblForexRate
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -821,6 +827,7 @@ AS
 			,t.dblForexRate
 			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 			,intOtherChargeItemId = NULL 
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -829,6 +836,343 @@ AS
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
 
+	-- AUTO VARIANCE TO FIX ROUNDING DISCREPANCIES (Lot)
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = 
+				CASE 
+					WHEN isInTransit.intInventoryTransactionId IS NULL THEN -ROUND(lot.[variance], 2) 
+					ELSE ROUND(lot.[variance], 2) 
+				END
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,t.strItemNo
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+			,intOtherChargeItemId = NULL 
+			,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+	FROM	dbo.tblICInventoryTransactionType TransType
+			CROSS APPLY (
+				SELECT	cbLog.strRelatedTransactionId 
+						,cbLog.intRelatedTransactionId
+						,cbLog.intRelatedTransactionDetailId
+						,[cnt] = COUNT(1)
+						,[variance] = SUM(ROUND(cbLog.dblValue, 2))
+				FROM	tblICInventoryLotCostAdjustmentLog cbLog INNER JOIN tblICInventoryLot cb
+							ON cbLog.intInventoryLotId = cb.intInventoryLotId				
+						INNER JOIN dbo.tblICInventoryTransaction t 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+							AND cb.intLotId = t.intLotId
+				WHERE	cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+						AND t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+				GROUP BY 
+					cbLog.strRelatedTransactionId 
+					,cbLog.intRelatedTransactionId
+					,cbLog.intRelatedTransactionDetailId
+				HAVING 
+					COUNT(1) > 1
+					AND SUM(ROUND(cbLog.dblValue, 2)) <> 0 							
+			) lot
+			CROSS APPLY (
+				SELECT	TOP 1 
+						t.* 
+						,i.strItemNo
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON i.intItemId = t.intItemId
+						INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = lot.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = lot.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = lot.intRelatedTransactionDetailId
+				ORDER BY 
+						t.intInventoryTransactionId DESC 
+			) t
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t.* 
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
+							ON il.intItemLocationId = t.intItemLocationId
+						INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = lot.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = lot.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = lot.intRelatedTransactionDetailId
+						AND il.intLocationId IS NULL 
+			) isInTransit
+	WHERE	TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
+			AND ABS(ROUND(lot.[variance], 2)) <= 1
+			AND ROUND(lot.[variance], 2) % 1 <> 0
+
+	-- AUTO VARIANCE TO FIX ROUNDING DISCREPANCIES (FIFO)
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = 
+				CASE 
+					WHEN isInTransit.intInventoryTransactionId IS NULL THEN -ROUND(fifo.[variance], 2) 
+					ELSE ROUND(fifo.[variance], 2) 
+				END
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,t.strItemNo
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+			,intOtherChargeItemId = NULL 
+			,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+	FROM	dbo.tblICInventoryTransactionType TransType
+			CROSS APPLY (
+				SELECT	cbLog.strRelatedTransactionId 
+						,cbLog.intRelatedTransactionId
+						,cbLog.intRelatedTransactionDetailId
+						,[cnt] = COUNT(1)
+						,[variance] = SUM(ROUND(cbLog.dblValue, 2))
+				FROM	tblICInventoryFIFOCostAdjustmentLog cbLog INNER JOIN dbo.tblICInventoryTransaction t 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+						AND t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+				GROUP BY 
+					cbLog.strRelatedTransactionId 
+					,cbLog.intRelatedTransactionId
+					,cbLog.intRelatedTransactionDetailId
+				HAVING 
+					COUNT(1) > 1
+					AND SUM(ROUND(cbLog.dblValue, 2)) <> 0 							
+			) fifo
+			CROSS APPLY (
+				SELECT	TOP 1 
+						t.* 
+						,i.strItemNo
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON i.intItemId = t.intItemId
+						INNER JOIN tblICCostingMethod c
+							ON c.intCostingMethodId = t.intCostingMethod
+						INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = fifo.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = fifo.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = fifo.intRelatedTransactionDetailId
+						AND c.strCostingMethod = 'FIFO' 
+				ORDER BY 
+						t.intInventoryTransactionId DESC 
+			) t
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t.* 
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
+							ON il.intItemLocationId = t.intItemLocationId
+						INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = fifo.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = fifo.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = fifo.intRelatedTransactionDetailId
+						AND il.intLocationId IS NULL 
+			) isInTransit
+	WHERE	TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
+			AND ABS(ROUND(fifo.[variance], 2)) <= 1
+			AND ROUND(fifo.[variance], 2) % 1 <> 0
+
+	-- AUTO VARIANCE TO FIX ROUNDING DISCREPANCIES (LIFO)
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = 
+				CASE 
+					WHEN isInTransit.intInventoryTransactionId IS NULL THEN -ROUND(lifo.[variance], 2) 
+					ELSE ROUND(lifo.[variance], 2) 
+				END
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,t.strItemNo
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+			,intOtherChargeItemId = NULL 
+			,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+	FROM	dbo.tblICInventoryTransactionType TransType
+			CROSS APPLY (
+				SELECT	cbLog.strRelatedTransactionId 
+						,cbLog.intRelatedTransactionId
+						,cbLog.intRelatedTransactionDetailId
+						,[cnt] = COUNT(1)
+						,[variance] = SUM(ROUND(cbLog.dblValue, 2))
+				FROM	tblICInventoryLIFOCostAdjustmentLog cbLog INNER JOIN dbo.tblICInventoryTransaction t 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+						AND t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+				GROUP BY 
+					cbLog.strRelatedTransactionId 
+					,cbLog.intRelatedTransactionId
+					,cbLog.intRelatedTransactionDetailId
+				HAVING 
+					COUNT(1) > 1
+					AND SUM(ROUND(cbLog.dblValue, 2)) <> 0 							
+			) lifo
+			CROSS APPLY (
+				SELECT	TOP 1 
+						t.* 
+						,i.strItemNo
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON i.intItemId = t.intItemId
+						INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = lifo.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = lifo.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = lifo.intRelatedTransactionDetailId
+				ORDER BY 
+						t.intInventoryTransactionId DESC 
+			) t
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t.* 
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
+							ON il.intItemLocationId = t.intItemLocationId
+						INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = lifo.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = lifo.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = lifo.intRelatedTransactionDetailId
+						AND il.intLocationId IS NULL 
+			) isInTransit
+	WHERE	TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
+			AND ABS(ROUND(lifo.[variance], 2)) <= 1
+			AND ROUND(lifo.[variance], 2) % 1 <> 0
+
+	-- AUTO VARIANCE TO FIX ROUNDING DISCREPANCIES (ACTUAL)
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = 
+				CASE 
+					WHEN isInTransit.intInventoryTransactionId IS NULL THEN -ROUND(actual.[variance], 2) 
+					ELSE ROUND(actual.[variance], 2) 
+				END
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,t.strItemNo
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+			,intOtherChargeItemId = NULL 
+			,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+	FROM	dbo.tblICInventoryTransactionType TransType
+			CROSS APPLY (
+				SELECT	cbLog.strRelatedTransactionId 
+						,cbLog.intRelatedTransactionId
+						,cbLog.intRelatedTransactionDetailId
+						,[cnt] = COUNT(1)
+						,[variance] = SUM(ROUND(cbLog.dblValue, 2))
+				FROM	tblICInventoryActualCostAdjustmentLog cbLog INNER JOIN dbo.tblICInventoryTransaction t 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+						AND t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+				GROUP BY 
+					cbLog.strRelatedTransactionId 
+					,cbLog.intRelatedTransactionId
+					,cbLog.intRelatedTransactionDetailId
+				HAVING 
+					COUNT(1) > 1
+					AND SUM(ROUND(cbLog.dblValue, 2)) <> 0 							
+			) actual
+			CROSS APPLY (
+				SELECT	TOP 1 
+						t.* 
+						,i.strItemNo
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON i.intItemId = t.intItemId
+						INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = actual.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = actual.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = actual.intRelatedTransactionDetailId
+				ORDER BY 
+						t.intInventoryTransactionId DESC 
+			) t
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t.* 
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
+							ON il.intItemLocationId = t.intItemLocationId
+						INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog 
+							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND cbLog.strRelatedTransactionId = actual.strRelatedTransactionId
+						AND cbLog.intRelatedTransactionId = actual.intRelatedTransactionId
+						AND cbLog.intRelatedTransactionDetailId = actual.intRelatedTransactionDetailId
+						AND il.intLocationId IS NULL 
+			) isInTransit
+	WHERE	TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
+			AND ABS(ROUND(actual.[variance], 2)) <= 1
+			AND ROUND(actual.[variance], 2) % 1 <> 0
 )
 
 /*-----------------------------------------------------------------------------------
@@ -1716,6 +2060,7 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+		AND ysnFixInventoryRoundingDiscrepancy = 0
 
 UNION ALL 
 SELECT	
@@ -1765,3 +2110,58 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+		AND ysnFixInventoryRoundingDiscrepancy = 0
+
+/*-------------------------------------------------------------------------------------------
+  GL Entries for Auto Variance to rounding discrepancy
+  Debit	....... Inventory
+-------------------------------------------------------------------------------------------*/
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									) 
+		,strCode					= 'ICA' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= NULL 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+FROM	ForGLEntries_CTE
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+		AND ysnFixInventoryRoundingDiscrepancy = 1

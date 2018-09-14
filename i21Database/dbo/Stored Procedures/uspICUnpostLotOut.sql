@@ -156,10 +156,12 @@ SET		cbOut.dblQtyReturned = cbOut.dblQtyReturned - rtn.dblQtyReturned
 FROM	tblICInventoryLotOut cbOut CROSS APPLY (
 			SELECT	rtn.intInventoryLotId
 					,rtn.intOutId
-					,dblQtyReturned = SUM(rtn.dblQtyReturned) 
+					,dblQtyReturned = rtn.dblQtyReturned
 			FROM	tblICInventoryReturned rtn 
 			WHERE	rtn.intTransactionId = @intTransactionId
 					AND rtn.strTransactionId = @strTransactionId
-			GROUP BY rtn.intInventoryLotId, rtn.intOutId
+					AND rtn.intOutId = cbOut.intId 
+			--GROUP BY rtn.intInventoryLotId, rtn.intOutId
 		) rtn
+WHERE	cbOut.dblQtyReturned IS NOT NULL 
 ;

@@ -76,9 +76,8 @@ BEGIN
 		----------------------------------------------------------------------------------------------
 		-- Bagged vs Weight. 
 		----------------------------------------------------------------------------------------------
-		-- 1. If the "bagged" qty is a whole number, do not convert it to the weight uom. 
-		-- 2. If Lot Cost bucket is using the weight UOM, then convert the UOM and Qty to weight. 
-		-- 3. Otherwise, keep the same Qty and UOM. 
+		-- 1. If Lot Cost bucket is using the weight UOM, then convert the UOM and Qty to weight. 
+		-- 2. Otherwise, keep the same Qty and UOM. 
 		BEGIN 
 			SET @dblReduceQty = ISNULL(@dblQty, 0) 
 
@@ -93,12 +92,12 @@ BEGIN
 						AND Lot.intWeightUOMId IS NOT NULL 
 						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
 						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
-						AND (
-							Lot.intLotId = @intLotId
-							AND Lot.intItemLocationId = @intItemLocationId
-							AND Lot.intItemUOMId = @intItemUOMId
-							AND ROUND((@dblQty % 1), 6) <> 0 -- Check if bagged qty is a whole number.
-						)
+						--AND (
+						--	Lot.intLotId = @intLotId
+						--	AND Lot.intItemLocationId = @intItemLocationId
+						--	AND Lot.intItemUOMId = @intItemUOMId
+						--	AND ROUND((@dblQty % 1), 6) <> 0 -- Check if bagged qty is a whole number.
+						--)
 			)			 
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
@@ -126,7 +125,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICReduceStockInLot
+			EXEC @intReturnValue = dbo.uspICReduceStockInLotInTransit
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -200,6 +199,32 @@ BEGIN
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 			
 		
+			-- Update the Lot's Qty and Weights. 
+			BEGIN 
+				UPDATE	Lot 
+				SET		Lot.dblQtyInTransit =	
+							dbo.fnCalculateLotQty(
+								Lot.intItemUOMId
+								, @intItemUOMId
+								, Lot.dblQtyInTransit
+								, Lot.dblWeightInTransit 
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+						,Lot.dblWeightInTransit = 
+							dbo.fnCalculateLotWeight(
+								Lot.intItemUOMId
+								, Lot.intWeightUOMId
+								, @intItemUOMId 
+								, Lot.dblWeightInTransit
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+						AND Lot.intLotId = @intLotId
+			END 
+
 			-- Reduce the remaining qty
 			-- Round it to the sixth decimal place. If it turns out as zero, the system has fully consumed the stock. 
 			SET @dblReduceQty = ROUND(@RemainingQty, 6);
@@ -290,7 +315,7 @@ BEGIN
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICIncreaseStockInLot
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInLotInTransit
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -397,5 +422,33 @@ BEGIN
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewInventoryLotId IS NOT NULL 
+
+		-- Increase the lot Qty and Weight. 
+		BEGIN 
+			UPDATE	Lot 
+			SET		Lot.dblQtyInTransit =	
+						dbo.fnCalculateLotQty(
+							Lot.intItemUOMId
+							, @intItemUOMId
+							, Lot.dblQtyInTransit
+							, Lot.dblWeightInTransit
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblWeightInTransit = 
+						dbo.fnCalculateLotWeight(
+							Lot.intItemUOMId
+							, Lot.intWeightUOMId
+							, @intItemUOMId 
+							, Lot.dblWeightInTransit
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
+						ON StockUOM.intItemId = Lot.intItemId
+						AND StockUOM.ysnStockUnit = 1
+			WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+					AND Lot.intLotId = @intLotId
+		END
 	END 
 END 

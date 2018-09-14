@@ -530,7 +530,7 @@ FROM vyuARCustomerSearch C
 			 , dtmShipDate			= I.dtmShipDate
 			 , dtmDatePaid			= PCREDITS.dtmDatePaid
 			 , strType				= I.strType
-			 , strComment			= I.strComments
+			 , strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		LEFT JOIN (
 			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)

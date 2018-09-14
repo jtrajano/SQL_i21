@@ -138,10 +138,10 @@ BEGIN TRY
 			SELECT 
 				    @OldEndDate			= dbo.fnRemoveTimeOnDate(Old.dtmEndDate)
 				   ,@NewEndDate			= dbo.fnRemoveTimeOnDate(New.dtmEndDate)
-				   ,@OldFutures			= Old.dblFutures
-				   ,@NewFutures			= New.dblFutures
-				   ,@OldBasis			= Old.dblBasis
-				   ,@NewBasis			= New.dblBasis
+				   ,@OldFutures			= ISNULL(Old.dblFutures,0)
+				   ,@NewFutures			= ISNULL(New.dblFutures,0)
+				   ,@OldBasis			= ISNULL(Old.dblBasis,0)
+				   ,@NewBasis			= ISNULL(New.dblBasis,0)
 				   ,@OldFutureMarketId	= Old.intFutureMarketId
 				   ,@OldFutureMarket	= Old.FutureMarket
 				   ,@NewFutureMarketId  = New.intFutureMarketId
@@ -185,11 +185,13 @@ BEGIN TRY
 												        "iconCls":"small-gear",
 												        "isField":true,
 												        "keyValue":'+LTRIM(@ContractDetailId)+',
-												        "associationKey":"tblCTContractDetails"
-												     }'
+												        "associationKey":"tblCTContractDetails",
+												        "changeDescription":"End Date"
+												     },'
+
 													 IF @OldFutures <> @NewFutures
 													 SET @details = @details+'
-													 ,{  
+													 {  
 												      "change":"dblFutures",
 												      "from":"'+LTRIM(@OldFutures)+'",
 												      "to":"'+LTRIM(@NewFutures)+'",
@@ -200,11 +202,11 @@ BEGIN TRY
 												      "associationKey":"tblCTContractDetails",
 												      "changeDescription":"Futures Price",
 												      "hidden":false
-												   }'
+												     },'
 												   
 												    IF @OldBasis <> @NewBasis
 													SET @details = @details+'
-												    ,
+												    
 												     {  
 												        "change":"dblBasis",
 												        "from":'+LTRIM(@OldBasis)+',
@@ -216,38 +218,38 @@ BEGIN TRY
 												        "associationKey":"tblCTContractDetails",
 												        "changeDescription":"Basis",
 												        "hidden":false
-												     }'
+												     },'
 													 
 													 IF @OldFutureMarketId <> @NewFutureMarketId
 													 SET @details = @details+'
-													  {  
-												      "change":"intFutureMarketId",
-												      "from":"'+LTRIM(@OldFutureMarketId)+'",
-												      "to":"'+LTRIM(@NewFutureMarketId)+'",
-												      "leaf":true,
-												      "iconCls":"small-gear",
-												      "isField":true,
-												      "keyValue":'+LTRIM(@ContractDetailId)+',
-												      "associationKey":"tblCTContractDetails",
-												      "hidden":true
-												   },					                                   
-												   {  
-												      "change":"strFutMarketName",
-												      "from":"'+LTRIM(@OldFutureMarket)+'",
-												      "to":"'+LTRIM(@NewFutureMarket)+'",
-												      "leaf":true,
-												      "iconCls":"small-gear",
-												      "isField":true,
-												      "keyValue":'+LTRIM(@ContractDetailId)+',
-												      "associationKey":"tblCTContractDetails",
-												      "changeDescription":"Future Market",
-												      "hidden":false
-												   }'
+													 {  
+														"change":"intFutureMarketId",
+														"from":"'+LTRIM(@OldFutureMarketId)+'",
+														"to":"'+LTRIM(@NewFutureMarketId)+'",
+														"leaf":true,
+														"iconCls":"small-gear",
+														"isField":true,
+														"keyValue":'+LTRIM(@ContractDetailId)+',
+														"associationKey":"tblCTContractDetails",
+														"hidden":true
+												     },					                                   
+												     {  
+												        "change":"strFutMarketName",
+												        "from":"'+LTRIM(@OldFutureMarket)+'",
+												        "to":"'+LTRIM(@NewFutureMarket)+'",
+												        "leaf":true,
+												        "iconCls":"small-gear",
+												        "isField":true,
+												        "keyValue":'+LTRIM(@ContractDetailId)+',
+												        "associationKey":"tblCTContractDetails",
+												        "changeDescription":"Future Market",
+												        "hidden":false
+												     },'
 												   
 												   IF @OldFutureMonthId <> @NewFutureMonthId
 													  SET @details = @details
 													+'
-													,{  
+													{  
 												      "change":"intFutureMonthId",
 												      "from":"'+LTRIM(@OldFutureMonthId)+'",
 												      "to":"'+LTRIM(@NewFutureMonthId)+'",
@@ -270,7 +272,11 @@ BEGIN TRY
 												      "changeDescription":"Futures Month/Yr",
 												      "hidden":false
 												   }'
-												  +'
+												  
+												  IF RIGHT(@details,1) = ','
+												  SET @details = SUBSTRING(@details,0,LEN(@details))
+
+												  SET @details = @details +'
 												]
 										  }
 									   ],

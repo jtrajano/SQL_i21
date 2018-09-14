@@ -869,8 +869,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	C.strCalculationMethod, 
 		[dblRate]				=	C.dblRate, 
 		[intAccountId]			=	C.intTaxAccountId, 
-		[dblTax]				=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
-		[dblAdjustedTax]		=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
+		[dblTax]				=	CAST(((C.dblTax * CASE WHEN C.strCalculationMethod = 'Unit' THEN D.dblLineTotal ELSE  B.dblTotal END) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
+		[dblAdjustedTax]		=	CAST(((C.dblTax * CASE WHEN C.strCalculationMethod = 'Unit' THEN D.dblLineTotal ELSE  B.dblTotal END) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
 		[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]		=	C.ysnCheckoffTax

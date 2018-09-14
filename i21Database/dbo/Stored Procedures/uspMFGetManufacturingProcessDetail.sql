@@ -12,6 +12,10 @@ BEGIN
 		,@dtmCurrentDate DATETIME
 		,@intEndOffset INT
 		,@dtmShiftEndTime DATETIME
+		,@ysnWorkOrderPlannedDateByBusinessDate BIT
+
+	SELECT @ysnWorkOrderPlannedDateByBusinessDate = ysnWorkOrderPlannedDateByBusinessDate
+	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDate = Getdate()
 
@@ -49,7 +53,11 @@ BEGIN
 			,'' strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@dtmBusinessDate AS dtmBusinessDate
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,@strShiftName AS strShiftName
 			,@intEndOffset AS intEndOffset
@@ -66,7 +74,11 @@ BEGIN
 			,P.strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@dtmBusinessDate AS dtmBusinessDate
+			,CASE 
+				WHEN @ysnWorkOrderPlannedDateByBusinessDate = 1
+					THEN @dtmBusinessDate
+				ELSE Convert(NVARCHAR, Convert(DATETIME, @dtmCurrentDate, 101), 101)
+				END AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,@strShiftName AS strShiftName
 			,@intEndOffset AS intEndOffset

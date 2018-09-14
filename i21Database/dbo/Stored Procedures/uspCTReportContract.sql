@@ -26,6 +26,8 @@ BEGIN TRY
 			@strApprovalText			NVARCHAR(MAX),
 			@FirstApprovalId			INT,
 			@SecondApprovalId			INT,
+			@FirstApprovalFullName		NVARCHAR(MAX),
+			@SecondApprovalFullName		NVARCHAR(MAX),
 			@FirstApprovalSign			VARBINARY(MAX),
 			@SecondApprovalSign			VARBINARY(MAX),
 			@IsFullApproved				BIT = 0,
@@ -130,6 +132,9 @@ BEGIN TRY
 								FROM tblSMSignature Sig 
 								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
 								WHERE Sig.intEntityId=@SecondApprovalId
+	
+	SELECT @FirstApprovalFullName  = strName FROM tblEMEntity WHERE intEntityId = @FirstApprovalId
+	SELECT @SecondApprovalFullName = strName FROM tblEMEntity WHERE intEntityId = @SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -243,6 +248,7 @@ BEGIN TRY
 		
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
+			,strCaptionBGT							= TP.strContractType + ' Contract: ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' Contract' 
 			,strAtlasDeclaration					= 'We confirm having'			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
 			,strPurchaseOrder						= TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
@@ -271,7 +277,7 @@ BEGIN TRY
 			,strArbitration							= 'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' 
 														+ CHAR(13)+CHAR(10) +
 														'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry
-
+			,strBeGreenArbitration					=   AB.strCity
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
@@ -301,8 +307,11 @@ BEGIN TRY
 			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
 			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Contract :'					ELSE NULL END
+			,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'						ELSE NULL END
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
+			
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Price Basis :'					ELSE NULL END
+			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
 			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Condition :'					ELSE NULL END
 			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Producer :'					ELSE NULL END
@@ -333,14 +342,17 @@ BEGIN TRY
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalFullName					= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalFullName ELSE NULL END
+			,SecondApprovalFullName					= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalFullName ELSE NULL END
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:'  ELSE NULL END
 			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN 'Pricing :'		ELSE NULL END
+			,lblBeGreenPricing						= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>''								   THEN 'Pricing :'		ELSE NULL END
 			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' 
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
 			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalAtlasLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
-			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 													  ELSE 
 													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'

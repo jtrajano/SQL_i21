@@ -49,11 +49,12 @@ BEGIN
 			,@AllowNegativeInventory AS INT 
 			,@UnitsOnHand AS NUMERIC(38, 20)
 
-	-- Get the on-hand qty 
-	SELECT	@UnitsOnHand = s.dblUnitOnHand
-	FROM	tblICItemStock s
-	WHERE	s.intItemId = @intItemId
-			AND s.intItemLocationId = @intItemLocationId
+	SELECT @UnitsOnHand = dblQty
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+		AND intItemId = @intItemId
+		AND intSubLocationId = @intSubLocationId
+		AND intStorageLocationId = @intStorageLocationId
 
 	SELECT	@strItemNo = i.strItemNo
 			,@CostBucketId = cb.intInventoryLotId
@@ -87,8 +88,11 @@ BEGIN
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 		ORDER BY cb.dtmDate ASC, cb.intInventoryLotId ASC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intLotId ASC, cb.intItemUOMId ASC
-
-		IF @UnitsOnHand > 0 AND @strCostBucketDate IS NOT NULL 
+		
+		DECLARE @QtyRemaining NUMERIC(38, 20)
+		SET @QtyRemaining = @UnitsOnHand - @dblQty
+		
+		IF (@UnitsOnHand = 0 OR @dblQty > @UnitsOnHand) AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
 			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
@@ -97,8 +101,8 @@ BEGIN
 			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
 			RETURN -80096;
 		END 
-		ELSE 
-		BEGIN 
+		ELSE IF @QtyRemaining < 0
+		BEGIN
 			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
 			
 			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'

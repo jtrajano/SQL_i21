@@ -3412,3 +3412,11 @@ UPDATE tblMFCompanyPreference
 SET ysnConcatenateParentLotonProduction =0
 Where ysnConcatenateParentLotonProduction IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnWorkOrderPlannedDateByBusinessDate = 1
+Where ysnWorkOrderPlannedDateByBusinessDate IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnConcatenateParentLotonProduction =0
+Where ysnConcatenateParentLotonProduction IS NULL
+GO

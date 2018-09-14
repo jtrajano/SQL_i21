@@ -18,12 +18,17 @@ BEGIN
 	DECLARE @intItemUOMId INT
 	DECLARE @intCountItemUOMId INT
 
+	DECLARE @intWeightUOMId INT
+	DECLARE @dblWeightPerQty NUMERIC(18, 6)
+
+
 	SELECT @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@intInventoryCountId = intInventoryCountId
 	FROM tblICInventoryCount
 	WHERE strCountNo = @strInventoryCountNo
+
 
 	SELECT @intLotId = intLotId
 		,@strLotNumber = strLotNumber
@@ -33,8 +38,17 @@ BEGIN
 		,@dblLastCost = dblLastCost
 		,@intItemUOMId = intItemUOMId
 		,@dblLotWeight = dblWeight
+		,@intWeightUOMId = intWeightUOMId
+		,@dblWeightPerQty = dblWeightPerQty
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	
+
+	    SELECT @intCountItemUOMId = intItemUOMId
+		FROM tblICInventoryCountDetail
+		WHERE intLotId = @intLotId
+		AND intInventoryCountId = @intInventoryCountId
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -61,6 +75,7 @@ BEGIN
 			,intEntityUserSecurityId
 			,intSort
 			,intConcurrencyId
+			,dblNetQty
 			)
 		VALUES (
 			@intInventoryCountId
@@ -80,19 +95,26 @@ BEGIN
 			,@intUserSecurityId
 			,1
 			,1
+				,CASE 
+				WHEN @intWeightUOMId = @intPhysicalCountUOMId
+					THEN @dblPhysicalCount
+				ELSE @dblPhysicalCount * @dblWeightPerQty
+				END
 			)
 	END
 	ELSE
 	BEGIN
-		SELECT @intCountItemUOMId = intItemUOMId
-		FROM tblICInventoryCountDetail
-		WHERE intLotId = @intLotId
-			AND intInventoryCountId = @intInventoryCountId
+		
 
 		IF @intCountItemUOMId = @intPhysicalCountUOMId
 		BEGIN
 			UPDATE tblICInventoryCountDetail
 			SET dblPhysicalCount = @dblPhysicalCount
+			,dblNetQty = CASE 
+					WHEN @intWeightUOMId = @intPhysicalCountUOMId
+						THEN @dblPhysicalCount
+					ELSE @dblPhysicalCount * @dblWeightPerQty
+					END
 			WHERE intLotId = @intLotId
 				AND intInventoryCountId = @intInventoryCountId
 		END
@@ -100,6 +122,11 @@ BEGIN
 		BEGIN
 			UPDATE tblICInventoryCountDetail
 			SET dblPhysicalCount = @dblPhysicalCount
+			,dblNetQty = CASE 
+					WHEN @intWeightUOMId = @intPhysicalCountUOMId
+						THEN @dblPhysicalCount
+					ELSE @dblPhysicalCount * @dblWeightPerQty
+					END
 				,dblSystemCount = CASE 
 					WHEN @intPhysicalCountUOMId = @intItemUOMId
 						THEN @dblLotQty

@@ -55,6 +55,7 @@ SELECT DISTINCT
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
+	, strFobPoint			= fTerms.strFobPoint
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
 	, ysnPORequired			= ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))

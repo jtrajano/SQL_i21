@@ -904,8 +904,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																WHEN IC.strCostMethod = 'Amount' THEN ROUND (((RE.dblQty / SC.dblNetUnits) * SC.dblFreightRate), 2)
 																ELSE 0
 															END
-						,[intContractHeaderId]				= NULL
-						,[intContractDetailId]				= NULL
+						,[intContractHeaderId]				= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(RE.intContractHeaderId,0) > 0 THEN RE.intContractHeaderId ELSE NULL END
+						,[intContractDetailId]				= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(RE.intContractDetailId,0) > 0 THEN RE.intContractDetailId ELSE NULL END
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink

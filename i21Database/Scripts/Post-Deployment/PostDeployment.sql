@@ -268,6 +268,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 :r .\AP\CleanBasisAdvance.sql
 :r .\AP\UpdatePOPendingStatus.sql
+:r .\AP\FixStartingNumbers.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -295,6 +296,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.1\10_Update_Qty_Cost_For_ReceiptTaxes.sql 
 :r .\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql 
 :r .\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql
+:r .\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql
+:r .\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

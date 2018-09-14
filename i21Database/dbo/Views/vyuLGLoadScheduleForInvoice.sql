@@ -23,7 +23,7 @@ SELECT strTransactionType = 'Load Schedule'
 	,intContractHeaderId = CH.intContractHeaderId
 	,intContractDetailId = ISNULL(CD.intContractDetailId, LD.intPContractDetailId)
 	,intCompanyLocationId = LD.intSCompanyLocationId
-	,intShipToLocationId = NULL
+	,intShipToLocationId = intCustomerEntityLocationId
 	,intFreightTermId = CD.intFreightTermId
 	,intItemId = LD.intItemId
 	,strItemDescription = ICI.[strDescription]
@@ -104,6 +104,7 @@ JOIN (
 	SELECT intLoadId
 		,intLoadDetailId
 		,intCustomerEntityId
+		,intCustomerEntityLocationId
 		,intItemId
 		,intSContractDetailId
 		,intItemUOMId

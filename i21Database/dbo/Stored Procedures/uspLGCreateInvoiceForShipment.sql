@@ -128,7 +128,7 @@ DECLARE
 		,@BOLNumber					= L.strBLNumber
 		,@Comments					= L.strLoadNumber + ' : ' + L.strCustomerReference
 		,@FooterComments			= NULL
-		,@ShipToLocationId			= NULL
+		,@ShipToLocationId			= LD.intCustomerEntityLocationId
 		,@ShipToLocationName		= NULL
 		,@ShipToAddress				= NULL
 		,@ShipToCity				= NULL

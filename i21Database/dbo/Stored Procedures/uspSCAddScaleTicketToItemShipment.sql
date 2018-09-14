@@ -914,8 +914,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[dblForexRate]						= SE.dblForexRate
 
 						--Charges
-						,[intContractId]					= NULL
-						,[intContractDetailId]				= NULL 
+						,[intContractId]					= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intOrderId,0) > 0 THEN SE.intOrderId ELSE NULL END
+						,[intContractDetailId]				= CASE WHEN SC.strDistributionOption = 'SPL' AND ISNULL(SE.intLineNo,0) > 0 THEN SE.intLineNo ELSE NULL END 
 						,[intCurrencyId]  					= SE.intCurrencyId
 						,[intChargeId]						= @intFreightItemId
 						,[strCostMethod]					= SC.strCostMethod

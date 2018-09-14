@@ -35,6 +35,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @InventoryStockMovementId AS INT 
+
 SET @InventoryTransactionIdentityId = NULL
 
 INSERT INTO dbo.tblICInventoryTransactionStorage (
@@ -68,6 +70,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[intForexRateTypeId]
 		,[dblForexRate]
 		,[ysnIsUnposted]
+		,[dtmCreated]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -99,11 +102,20 @@ SELECT	[intItemId]								= @intItemId
 		,[intForexRateTypeId]					= @intForexRateTypeId
 		,[dblForexRate]							= @dblForexRate
 		,[ysnIsUnposted]						= 0
+		,[dtmCreated]						= GETDATE()
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+IF @InventoryTransactionIdentityId IS NOT NULL 
+BEGIN 
+	EXEC uspICPostInventoryStockMovement
+		@InventoryTransactionId = NULL
+		,@InventoryTransactionStorageId = @InventoryTransactionIdentityId
+		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+END 
 
 IF @intLotId IS NOT NULL 
 BEGIN 

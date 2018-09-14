@@ -363,7 +363,7 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = CASE WHEN ISNULL(P.intCurrencyExchangeRateTypeId, 0) = 0 THEN 'Base amounts are not equal. This needs data fix.' ELSE 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.' END
+        ,[strError]                 = CASE WHEN ISNULL(P.intCurrencyExchangeRateTypeId, 0) = 0 THEN 'The totals of the base amounts are not equal.' ELSE 'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.' END
 	FROM
 		@Payments P
     WHERE
@@ -529,6 +529,26 @@ BEGIN
         AND P.[intTransactionDetailId] IS NULL
         AND P.[intEntityId] <> [intUserId]
         AND P.[ysnUserAllowedToPostOtherTrans] = 1
+
+    UNION
+
+    --Unprocessed Credit Card
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Credit Card Needs Processed to continue with Posting.'
+	FROM
+		@Payments P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NULL
+        AND ISNULL(P.[intEntityCardInfoId], 0) <> 0 
+        AND ISNULL(P.[ysnProcessCreditCard], 0) = 0
+        AND @Recap = 0
+
     --UNPOST
     UNION
 

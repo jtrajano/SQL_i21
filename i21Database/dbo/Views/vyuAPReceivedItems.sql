@@ -45,7 +45,7 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[intTermId]				=	A.intTermsId
-		,[strContractNumber]		=	CAST(G1.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]		=	G1.strContractNumber
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
@@ -362,7 +362,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
-	,[strContractNumber]		=	CAST(F1.strContractNumber AS NVARCHAR(100))
+	,[strContractNumber]		=	F1.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
@@ -465,7 +465,7 @@ FROM
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-									AND F1.intPricingTypeId NOT IN (2, 3, 4) --AP-4971
+									AND F1.intPricingTypeId NOT IN (2, 3, 4, 5) --AP-4971
 							THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
@@ -520,7 +520,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
@@ -576,6 +576,7 @@ FROM
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId		 
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -598,6 +599,7 @@ FROM
 	--) Qty
 	WHERE  
 		A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
+		AND (CH.intPricingTypeId  IS NULL OR CH.intPricingTypeId NOT IN (2,3,4,5))  --EXLCUDE ALL BASIS AND DELAYED PRICING TYPE
 	UNION ALL
 	SELECT
 	DISTINCT  
@@ -648,7 +650,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -762,7 +764,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -878,7 +880,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -992,7 +994,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	CC.intTermId	
-		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -1096,7 +1098,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intPContractDetailId
@@ -1190,7 +1192,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	L.strBLNumber
 		,[intContractHeaderId]						=	NULL -- A.intContractHeaderId
 		,[intContractDetailId]						=	NULL -- A.intPContractDetailId
@@ -1207,9 +1209,9 @@ FROM
 		,[strCostUOM]								=	A.strPriceUOM
 		,[strgrossNetUOM]							=	NULL
 		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
-		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1
+		,[dblWeightUnitQty]							=	ISNULL(ItemWeightUOM.dblUnitQty,1)
+		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	A.intCurrencyId
 		,[strCurrency]								=	C.strCurrency
 		,[intCostCurrencyId]						=	A.intCurrencyId
@@ -1288,7 +1290,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
-		,[strContractNumber]						=	CAST(A.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId

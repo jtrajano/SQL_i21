@@ -17,7 +17,7 @@ SET ANSI_WARNINGS OFF
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
-
+	
 -- Create the temp table 
 CREATE TABLE #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId INT NOT NULL 
@@ -44,6 +44,9 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
 
+		,@Ownership_Own AS INT = 1
+		,@Ownership_Storage AS INT = 2
+
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
 DECLARE @intItemId AS INT
@@ -61,6 +64,7 @@ DECLARE @intItemId AS INT
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intCostingMethod AS INT
 		,@intFobPointId AS TINYINT
+		,@intInTransitSourceLocationId AS INT 
 
 -- Get the list of items to unpost
 BEGIN 
@@ -435,6 +439,7 @@ BEGIN
 					,intLotId 
 					,intCostingMethod
 					,intFobPointId
+					,intInTransitSourceLocationId
 			FROM	@ItemsToUnpost 
 
 			OPEN loopItemsToUnpost;	
@@ -452,6 +457,7 @@ BEGIN
 				,@intLotId
 				,@intCostingMethod
 				,@intFobPointId
+				,@intInTransitSourceLocationId
 				;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -461,27 +467,68 @@ BEGIN
 			BEGIN 
 				-- Update the lot Qty for each inventory transaction being unposted. 
 				UPDATE	Lot 
-				SET		Lot.dblQty =	dbo.fnCalculateLotQty(
+				SET		Lot.dblQty =	
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NULL THEN 
+									dbo.fnCalculateLotQty(
 											Lot.intItemUOMId
 											, @intItemUOMId
 											, Lot.dblQty
 											, Lot.dblWeight
 											, @dblQty 
 											, Lot.dblWeightPerQty
-										)
-						,Lot.dblWeight = dbo.fnCalculateLotWeight(
-												Lot.intItemUOMId
-												, Lot.intWeightUOMId
-												, @intItemUOMId 
-												, Lot.dblWeight
-												, @dblQty 
-												, Lot.dblWeightPerQty
-											)
+									)
+								ELSE 
+									Lot.dblQty
+							END 
+						,Lot.dblWeight = 
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NULL THEN 
+									dbo.fnCalculateLotWeight(
+										Lot.intItemUOMId
+										, Lot.intWeightUOMId
+										, @intItemUOMId 
+										, Lot.dblWeight
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE 
+									Lot.dblWeight
+							END 
+						,Lot.dblQtyInTransit =	
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NOT NULL THEN 
+									dbo.fnCalculateLotQty(
+										Lot.intItemUOMId
+										, @intItemUOMId
+										, Lot.dblQtyInTransit
+										, Lot.dblWeightInTransit 
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE
+									Lot.dblQtyInTransit 
+							END
+						,Lot.dblWeightInTransit = 
+							CASE 
+								WHEN @intInTransitSourceLocationId IS NOT NULL THEN 
+									dbo.fnCalculateLotWeight(
+										Lot.intItemUOMId
+										, Lot.intWeightUOMId
+										, @intItemUOMId 
+										, Lot.dblWeightInTransit
+										, @dblQty 
+										, Lot.dblWeightPerQty
+									)
+								ELSE
+									Lot.dblWeightInTransit
+							END 
 						--,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
 				FROM	dbo.tblICLot Lot
-				WHERE	Lot.intItemLocationId = @intItemLocationId
+				WHERE	Lot.intItemLocationId = ISNULL(@intInTransitSourceLocationId, @intItemLocationId) 
 						AND Lot.intLotId = @intLotId
-						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+						--AND intInTransitSourceLocationId IS NULL 
+						--AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
 				-- Recalculate the average cost from the inventory transaction table. 
 				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
@@ -527,7 +574,8 @@ BEGIN
 					,@dblCost
 					,@intLotId
 					,@intCostingMethod
-					,@intFobPointId					
+					,@intFobPointId	
+					,@intInTransitSourceLocationId				
 					;
 			END;
 
@@ -690,4 +738,103 @@ BEGIN
 		,@strTransactionId
 		,@intEntityUserSecurityId
 	;
+END 
+
+-------------------------------------------
+-- Add records to the stock movement table
+-------------------------------------------
+BEGIN 
+	INSERT INTO dbo.tblICInventoryStockMovement (		
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,intLotId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblValue
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,strBatchId
+		,intTransactionTypeId
+		,ysnIsUnposted
+		,strTransactionForm
+		,intRelatedInventoryTransactionId
+		,intRelatedTransactionId
+		,strRelatedTransactionId
+		,intCostingMethod
+		,dtmCreated
+		,intCreatedUserId
+		,intCreatedEntityId
+		,intConcurrencyId
+		,intForexRateTypeId
+		,dblForexRate
+		,intInventoryTransactionId
+		,intInventoryTransactionStorageId
+		,intOwnershipType
+	)
+	SELECT 
+		t.intItemId
+		,t.intItemLocationId
+		,t.intItemUOMId
+		,t.intSubLocationId
+		,t.intStorageLocationId
+		,t.intLotId
+		,t.dtmDate
+		,-t.dblQty
+		,t.dblUOMQty
+		,t.dblCost
+		,t.dblValue
+		,t.dblSalesPrice
+		,t.intCurrencyId
+		,t.dblExchangeRate
+		,t.intTransactionId
+		,t.intTransactionDetailId
+		,t.strTransactionId
+		,@strBatchId
+		,t.intTransactionTypeId
+		,t.ysnIsUnposted
+		,t.strTransactionForm
+		,t.intRelatedInventoryTransactionId
+		,t.intRelatedTransactionId
+		,t.strRelatedTransactionId
+		,t.intCostingMethod
+		,GETDATE()
+		,@intEntityUserSecurityId
+		,@intEntityUserSecurityId
+		,t.intConcurrencyId
+		,t.intForexRateTypeId
+		,t.dblForexRate
+		,t.intInventoryTransactionId
+		,t.intInventoryTransactionStorageId
+		,t.intOwnershipType
+	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
+				ON tmp.intInventoryTransactionId = t.intInventoryTransactionId 
+		
+	--------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the related transactions 
+	--------------------------------------------------------------
+	UPDATE	t
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblICInventoryStockMovement t 
+	WHERE	t.intRelatedTransactionId = @intTransactionId
+			AND t.strRelatedTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0
+
+	--------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the transaction
+	--------------------------------------------------------------
+	UPDATE	t
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblICInventoryStockMovement t 
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0
 END 

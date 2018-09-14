@@ -150,6 +150,17 @@ BEGIN
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
 		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
 	FROM apivcmst A
+	--INNER JOIN aphglmst B --join to make sure import only those have details
+	--	ON A.apivc_ivc_no = B.aphgl_ivc_no 
+	--	AND A.apivc_vnd_no = B.aphgl_vnd_no
+	--join to make sure import only those have details will get top 1 to avoid unique constraints error.
+	CROSS APPLY 
+        (
+        SELECT  TOP 1 *
+        FROM    aphglmst B
+        WHERE   A.apivc_ivc_no = B.aphgl_ivc_no  
+			AND A.apivc_vnd_no = B.aphgl_vnd_no
+        ) aphglmst
 	OUTER APPLY (
 		SELECT 
 			G.A4GLIdentity
@@ -235,6 +246,17 @@ BEGIN
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
 		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
 	FROM apivcmst A
+	--INNER JOIN aphglmst B --join to make sure import only those have details
+	--	ON A.apivc_ivc_no = B.aphgl_ivc_no 
+	--	AND A.apivc_vnd_no = B.aphgl_vnd_no
+	--join to make sure import only those have details will get top 1 to avoid unique constraints error.
+	CROSS APPLY
+        (
+        SELECT  TOP 1 *
+        FROM    aphglmst B
+        WHERE   A.apivc_ivc_no = B.aphgl_ivc_no  
+			AND A.apivc_vnd_no = B.aphgl_vnd_no
+        ) aphglmst
 	OUTER APPLY (
 		SELECT 
 			G.A4GLIdentity

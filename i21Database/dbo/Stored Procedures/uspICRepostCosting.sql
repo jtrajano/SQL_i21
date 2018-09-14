@@ -53,14 +53,12 @@ DECLARE @intReturnValue AS INT
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @returnValue AS INT 
+--BEGIN 
+--	EXEC @intReturnValue = dbo.uspICValidateCostingOnPost
+--		@ItemsToValidate = @ItemsToPost
 
-	EXEC @returnValue = dbo.uspICValidateCostingOnPost
-		@ItemsToValidate = @ItemsToPost
-
-	IF @returnValue < 0 RETURN -1;
-END
+--	IF @intReturnValue < 0 RETURN @intReturnValue;
+--END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
@@ -214,6 +212,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- FIFO 
@@ -241,6 +241,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LIFO 
@@ -268,6 +270,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LOT 
@@ -296,6 +300,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- ACTUAL COST 
@@ -341,6 +347,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
@@ -367,6 +375,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
@@ -393,6 +403,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
@@ -420,6 +432,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 		END 
 		ELSE 
@@ -447,6 +461,8 @@ BEGIN
 				,@intEntityUserSecurityId 
 				,@intForexRateTypeId
 				,@dblForexRate;
+
+			IF @intReturnValue < 0 GOTO _TerminateLoop;
 		END 
 	END
 
@@ -592,7 +608,68 @@ _TerminateLoop:
 CLOSE loopItems;
 DEALLOCATE loopItems;
 
-IF @intReturnValue < 0 RETURN @intReturnValue;
+IF @intReturnValue < 0 
+BEGIN 
+	
+	DECLARE @msg AS NVARCHAR(1000)
+			,@strItemNo AS NVARCHAR(50)
+			,@TransactionTotal AS NUMERIC(18, 16)
+
+	SELECT	@strItemNo = strItemNo
+	FROM	tblICItem i
+	WHERE	i.intItemId = @intItemId
+
+	SELECT	@TransactionTotal = ROUND(SUM(t.dblQty), 6)
+	FROM	tblICInventoryTransaction t LEFT JOIN tblICLot l
+				ON t.intLotId = l.intLotId
+	WHERE	t.intItemId = @intItemId 			
+			AND t.intItemLocationId = @intItemLocationId
+			AND t.intItemUOMId = @intItemUOMId
+			AND (@intLotId IS NULL OR t.intLotId = @intLotId) 
+			AND (@strActualCostId IS NULL or t.strActualCostId = @strActualCostId) 
+			AND ISNULL(t.dblQty, 0) <> 0
+
+	-- Unable to post <Transaction No> for <Item>. Available stock of <Stock> as of <transaction date> is below the transaction quantity <Qty>. Negative stock is not allowed.
+	SELECT @msg = dbo.fnICFormatErrorMessage (
+				80220
+				,@strTransactionId
+				,@strItemNo
+				,CASE 
+					WHEN @TransactionTotal = 0 THEN 'zero' 
+					ELSE  
+						CAST(
+							dbo.fnICFormatErrorMessage (
+								'%f'
+								,@TransactionTotal
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+								,DEFAULT
+							)
+							AS NVARCHAR(50)
+						)
+				END 
+				,@dtmDate
+				,ABS(@dblQty)
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+				,DEFAULT
+			)
+
+	PRINT @msg
+END 
+
+IF @intReturnValue < 0 
+BEGIN 
+	RETURN @intReturnValue;
+END 
 
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing

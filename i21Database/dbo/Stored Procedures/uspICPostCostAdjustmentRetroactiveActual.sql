@@ -29,6 +29,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveActual]
 	,@ysnPost AS BIT = 1 
 	,@intOtherChargeItemId AS INT = NULL
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
+	,@IsEscalate AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -205,7 +206,7 @@ BEGIN
 		END
 
 		-- Check if cost adjustment date is earlier than the cost bucket date. 
-		IF dbo.fnDateLessThan(@dtmDate, @CostBucketDate) = 1
+		IF dbo.fnDateLessThan(@dtmDate, @CostBucketDate) = 1 AND ISNULL(@IsEscalate, 0) = 0 
 		BEGIN 
 			-- 'Cost adjustment cannot continue. Cost adjustment for {Item} cannot be earlier than {Cost Bucket Date}.'
 			EXEC uspICRaiseError 80219, @strItemNo, @CostBucketDate;  

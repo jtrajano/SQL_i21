@@ -88,7 +88,7 @@ IF (@dtmReverseDate IS NULL)
 					ON F.strTransactionId = TMP.strTransactionId
 		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
 				-- Condition #1:
-				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
 
@@ -110,8 +110,11 @@ ELSE
 		**/
 
 		/** Clean-up Reversing Date parameter **/
-		SELECT @dtmReversalDate = ISNULL(@dtmReverseDate, dtmDate), @intTransactionId = intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId = TMP.strTransactionId
-		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT, @ACH) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
+		SELECT @dtmReversalDate = ISNULL(@dtmReverseDate, dtmDate), @intTransactionId = intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP 
+		ON F.strTransactionId = TMP.strTransactionId
+		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT, @ACH) 
+		AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
+		AND F.dtmCheckPrinted IS NOT NULL 
 
 		/** Insert Reversal Entry Header **/
 		INSERT INTO tblCMBankTransaction
@@ -128,7 +131,7 @@ ELSE
 					ON F.strTransactionId = TMP.strTransactionId
 		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)		
 				-- Condition #1:
-				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
 		SELECT @intVoidTransactionId = @@IDENTITY
@@ -145,7 +148,7 @@ ELSE
 			LEFT JOIN (SELECT F.intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 						ON F.strTransactionId = TMP.strTransactionId
 						WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
-						AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+						AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 						AND F.dtmCheckPrinted IS NOT NULL
 						) M ON D.intTransactionId = M.intTransactionId
 						WHERE D.intTransactionId = @intTransactionId 
@@ -158,7 +161,7 @@ ELSE
 			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId, F.intBankTransactionTypeId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 				ON F.strTransactionId = TMP.strTransactionId
 				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)		
-				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
+				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				AND F.dtmCheckPrinted IS NOT NULL) X
 
 		/* Execute Posting Procedure for each Void Check entry*/
@@ -177,8 +180,13 @@ ELSE
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
-							SET ysnPosted = CASE WHEN intBankTransactionTypeId IN (116,122,123) THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
-								dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
+							SET 
+							ysnPosted = CASE WHEN intBankTransactionTypeId IN (116,122,123) THEN 1 ELSE 0 END, 
+							ysnCheckVoid = CASE WHEN intBankTransactionTypeId  = 123 THEN 0 ELSE 1 END, --GL-6623 VOIDED PAYMENT IN CM SHOULD BE MARKED VOIDED (REMOVED 122)
+							ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
+							dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, 
+							dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, 
+							intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
 						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE
@@ -227,7 +235,7 @@ ELSE
 					ON F.strTransactionId = TMP.strTransactionId
 		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)		
 				-- Condition #1:
-				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
@@ -262,7 +270,7 @@ FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
 		INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
 WHERE	-- Condition #1:
-		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
+		ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 		-- Condition #2:
 		AND F.dtmCheckPrinted IS NOT NULL 
 		-- Condition #3:
