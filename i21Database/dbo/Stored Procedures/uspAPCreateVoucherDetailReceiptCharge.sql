@@ -85,7 +85,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBillId]						=	@voucherId,
 		[intItemId]						=	A.intItemId,
 		[strMiscDescription]			=	item.strDescription,
-		[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
+		[intInventoryReceiptItemId]  	= 	H.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
@@ -166,6 +166,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
 		WHERE IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	)  IRCT
+	OUTER APPLY
+	(
+		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
+		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	) H
 	WHERE A.intEntityVendorId = @voucherVendor --PARAMETER TO DISTINGUISH CORRECT CHARGES PER VENDOR
 	-- OUTER APPLY(
 	-- 	SELECT ysnPrice FROM #tmpReceiptChargeData RC
