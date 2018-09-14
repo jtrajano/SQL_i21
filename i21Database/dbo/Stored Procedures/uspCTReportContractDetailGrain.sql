@@ -28,6 +28,7 @@ BEGIN TRY
 		,strPriceUOMWithCurrency			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strCommodityCode					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strTerm							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	
@@ -55,7 +56,8 @@ BEGIN TRY
 				,strDetailUnitMeasure		
 				,strPriceUOMWithCurrency	
 				,strCommodityCode			
-				,strTerm					
+				,strTerm
+				,strFutureMonth					
 			)
 			 SELECT 
 			 strItemNo					 = strItemNo
@@ -82,8 +84,12 @@ BEGIN TRY
 											ELSE DV.strCommodityCode
 							               END	
 			,strTerm					 = strTerm
+			,strFutureMonth				 = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')
+			
 			FROM	vyuCTContractDetailView DV
-			WHERE	intContractDetailId	=	@intContractDetailId
+			LEFT JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId = DV.intFutureMonthId
+
+			WHERE	DV.intContractDetailId	=	@intContractDetailId
 
 			INSERT INTO @ContractDetailGrain
 			(
