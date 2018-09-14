@@ -154,7 +154,7 @@ BEGIN
 
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
-			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+			,[dblWeight]				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
 													-- when a new wgt is supplied, then use it. 
 													Detail.dblNewWeight
 												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
@@ -169,15 +169,12 @@ BEGIN
 													)
 												WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN
 													-- when there is a new split lot qty, compute the original weight. 
-													CASE	WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+													CASE	WHEN Detail.intNewItemUOMId = SourceLot.intWeightUOMId THEN 
 																-- if new split lot qty is using the weight uom, then use it. 
 																Detail.dblNewSplitLotQuantity
 															ELSE
 																-- if new split lot qty is not using the wgt uom, then compute the original wgt. 
-																dbo.fnMultiply(																	
-																	SourceLot.dblWeightPerQty
-																	,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
-																) 
+																dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, SourceLot.intWeightUOMId, Detail.dblNewSplitLotQuantity)
 													END 
 												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
 													-- When cutting a bag into weights, then qty becomes wgt. 
