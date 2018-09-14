@@ -115,12 +115,11 @@ BEGIN TRY
 		--PO Create
 		IF @strMesssageType = 'PURCONTRACT_CREATE'
 		BEGIN
-			SELECT @strRefNo = [dbo].[fnRemoveTrailingZeroes](@strRefNo)
 
 			SELECT @intContractHeaderId = intContractHeaderId
 				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
-			WHERE strContractNumber = @strRefNo
+			WHERE RIGHT('000000000000'+strContractNumber,12) = @strRefNo
 				AND intContractTypeId = 1
 
 			SELECT @intItemId = intItemId
@@ -245,12 +244,11 @@ BEGIN TRY
 		--PO Update
 		IF @strMesssageType = 'PURCONTRACT_CHANGE'
 		BEGIN
-			SELECT @strRefNo = [dbo].[fnRemoveTrailingZeroes](@strRefNo)
 
 			SELECT @intContractHeaderId = intContractHeaderId
 				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
-			WHERE strContractNumber = @strRefNo
+			WHERE RIGHT('000000000000'+strContractNumber,12) = @strRefNo
 				AND intContractTypeId = 1
 
 			SELECT @intItemId = intItemId
