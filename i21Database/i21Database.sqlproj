@@ -6395,6 +6395,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_SetKeepSearchOpen.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotInTransit.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql" />
@@ -6405,6 +6406,7 @@
     <Build Include="dbo\Views\vyuICGetStockMovement.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

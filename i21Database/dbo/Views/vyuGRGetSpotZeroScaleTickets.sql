@@ -29,10 +29,12 @@ JOIN tblSMCompanyLocation Loc		 ON Loc.intCompanyLocationId	 = SC.intProcessingL
 JOIN tblEMEntity Entity				 ON Entity.intEntityId			 = ISNULL(TS.intCustomerId,SC.intEntityId)
 JOIN tblICItemUOM UOM				 ON UOM.intItemUOMId			 = SC.intItemUOMIdTo
 JOIN tblICUnitMeasure UnitMeasure	 ON UnitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
+LEFT JOIN tblAPBillDetail BillDetail ON BillDetail.intScaleTicketId  = SC.intTicketId
 WHERE 
 ISNULL(SC.dblUnitPrice,0) = 0 
 AND ISNULL(SC.dblUnitBasis,0) = 0
 AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
 AND SC.strTicketStatus = 'C'
+AND ISNULL(intScaleTicketId,0) = 0
 
 

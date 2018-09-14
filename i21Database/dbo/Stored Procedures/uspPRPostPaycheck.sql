@@ -371,7 +371,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @intTmpDeductionId = intTmpDeductionId FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId
 						
-			IF ((SELECT COUNT(1) FROM #tmpDeductionAmount WHERE intTypeDeductionId = intTypeDeductionId AND ysnIsExpense = @ysnDeductionIsExpense) = 1
+			IF ((SELECT COUNT(1) FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId AND ysnIsExpense = @ysnDeductionIsExpense) = 1
 				OR (@ysnDeductionIsNegative = 1 AND (SELECT @dblDeductionFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpDeduction WHERE intTmpDeductionId = @intTmpDeductionId) > 0)
 				OR (@ysnDeductionIsNegative = 0 AND (SELECT @dblDeductionFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpDeduction WHERE intTmpDeductionId = @intTmpDeductionId) < 0))
 				BEGIN
