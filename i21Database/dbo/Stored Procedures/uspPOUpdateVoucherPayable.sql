@@ -17,10 +17,16 @@ IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 INSERT INTO @voucherPayables(
-	[intEntityVendorId]					
-	,[intLocationId]					
+	[intEntityVendorId]			
+	,[intTransactionType]		
+	,[intLocationId]	
+	,[intShipToId]	
+	,[intShipFromId]			
+	,[intShipFromEntityId]
+	,[intPayToAddressId]
 	,[intCurrencyId]					
-	,[dtmDate]							
+	,[dtmDate]				
+	,[strVendorOrderNumber]			
 	,[strReference]						
 	,[strSourceNumber]					
 	,[intPurchaseDetailId]				
