@@ -7,6 +7,7 @@ SELECT DISTINCT
 	,strItemNo			  = SS.strItemNo
 	,strStorageType		  = SS.strStorageType
 	,strName			  = SV.strName
+	,strScheduleId		  = SV.strScheduleId
 FROM tblGRStorageStatement SS
 JOIN vyuGRStorageSearchView SV ON SV.intCustomerStorageId = 
 															(

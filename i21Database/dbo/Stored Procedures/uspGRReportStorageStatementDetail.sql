@@ -3,7 +3,8 @@
 	@intItemId   INT,
 	@intStorageTypeId INT,
 	@intStorageScheduleId INT,
-	@strFormNumber NVarchar(30)
+	@strFormNumber NVarchar(30),
+	@strType NVarchar(30)
 AS
 
 BEGIN TRY
@@ -68,71 +69,76 @@ BEGIN TRY
 	AND   CS.dblOpenBalance > 0
 	ORDER BY CS.intCustomerStorageId
 	
-	INSERT INTO [dbo].[tblGRStorageStatement]
-	(	
-		[strFormNumber],
-		[dtmIssueDate],
-		[strLicenceNumber],
-		[strItemNo],
-		[intCustomerStorageId],
-		[dtmDeliveryDate],
-		[strGrade],
-		[strDryingItem],
-		[dblGradeReading],
-		[dblDryTonnes],
-		[strStorageType],
-		[dblCharges],
-		[dtmTerminationOfReceipt]
-	)
-	SELECT	
-	NULL,
-	GetDATE(),
-	@strLicenseNumber,
-	@strItemNo,	
-	CS.intCustomerStorageId,
-	CS.dtmDeliveryDate,
-	CASE 
-		WHEN COM.strDescription LIKE '%Corn%' THEN 2
-		WHEN COM.strDescription LIKE '%Wheat%' OR COM.strDescription LIKE '%bean%'  THEN 1
-		ELSE NULL
+	IF @strType = 'Print'
+	BEGIN
+
+		INSERT INTO [dbo].[tblGRStorageStatement]
+		(	
+			[strFormNumber],
+			[dtmIssueDate],
+			[strLicenceNumber],
+			[strItemNo],
+			[intCustomerStorageId],
+			[dtmDeliveryDate],
+			[strGrade],
+			[strDryingItem],
+			[dblGradeReading],
+			[dblDryTonnes],
+			[strStorageType],
+			[dblCharges],
+			[dtmTerminationOfReceipt]
+		)
+		SELECT	
+		NULL,
+		GetDATE(),
+		@strLicenseNumber,
+		@strItemNo,	
+		CS.intCustomerStorageId,
+		CS.dtmDeliveryDate,
+		CASE 
+			WHEN COM.strDescription LIKE '%Corn%' THEN 2
+			WHEN COM.strDescription LIKE '%Wheat%' OR COM.strDescription LIKE '%bean%'  THEN 1
+			ELSE NULL
+		END
+		AS strGrade,
+		DItem.strItemNo,	
+		QM.dblGradeReading,
+		ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,UOM.intUnitMeasureId, SC.dblNetUnits),3),
+		@strStorageType AS strStorageType,
+		@dblThereAfterCharge,
+		@dtmTerminationOfReceipt
+		FROM	tblGRCustomerStorage CS
+		JOIN    tblICCommodity COM ON COM.intCommodityId=CS.intCommodityId
+		JOIN    tblQMTicketDiscount QM ON QM.intTicketFileId=CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
+		JOIN tblGRDiscountScheduleCode Dcode ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId AND Dcode.ysnDryingDiscount=1 
+		JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
+		JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId
+		JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
+		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Tonne'
+		WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
+		AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId
+		AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
+		AND   CS.dblOpenBalance > 0
+		ORDER BY CS.intCustomerStorageId
+
+		;WITH CTE as
+		(
+			SELECT tblGRStorageStatement.intStorageStatementId, ROW_NUMBER() OVER (ORDER BY intStorageStatementId) AS rowNum
+			FROM tblGRStorageStatement WHERE strFormNumber IS NULL 
+		)
+	
+		UPDATE SST
+		SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15 = 0 THEN 0 ELSE 1 END)
+		FROM tblGRStorageStatement SST
+		JOIN CTE C ON C.intStorageStatementId=SST.intStorageStatementId
+
+		UPDATE tblSMStartingNumber 
+		SET intNumber=(SELECT MAX(CAST(REPLACE(strFormNumber,@strPrefix,'')AS INT)) FROM tblGRStorageStatement)
+		FROM tblSMStartingNumber SN	
+		WHERE SN.[strTransactionType]	= N'Storage Statement FormNo'
+
 	END
-	AS strGrade,
-	DItem.strItemNo,	
-	QM.dblGradeReading,
-	ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,UOM.intUnitMeasureId, SC.dblNetUnits),3),
-	@strStorageType AS strStorageType,
-	@dblThereAfterCharge,
-	@dtmTerminationOfReceipt
-	FROM	tblGRCustomerStorage CS
-	JOIN    tblICCommodity COM ON COM.intCommodityId=CS.intCommodityId
-	JOIN    tblQMTicketDiscount QM ON QM.intTicketFileId=CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
-	JOIN tblGRDiscountScheduleCode Dcode ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId AND Dcode.ysnDryingDiscount=1 
-	JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
-	JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId
-	JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
-	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Tonne'
-	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
-	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId
-	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
-	AND   CS.dblOpenBalance > 0
-	ORDER BY CS.intCustomerStorageId
 
-	;WITH CTE as
-	(
-		SELECT tblGRStorageStatement.intStorageStatementId, ROW_NUMBER() OVER (ORDER BY intStorageStatementId) AS rowNum
-		FROM tblGRStorageStatement WHERE strFormNumber IS NULL 
-	)
-	
-	UPDATE SST
-	SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15 = 0 THEN 0 ELSE 1 END)
-	FROM tblGRStorageStatement SST
-	JOIN CTE C ON C.intStorageStatementId=SST.intStorageStatementId
-
-	UPDATE tblSMStartingNumber 
-	SET intNumber=(SELECT MAX(CAST(REPLACE(strFormNumber,@strPrefix,'')AS INT)) FROM tblGRStorageStatement)
-	FROM tblSMStartingNumber SN	
-	WHERE SN.[strTransactionType]	= N'Storage Statement FormNo'
-	
 	END
 	ELSE
 	BEGIN
