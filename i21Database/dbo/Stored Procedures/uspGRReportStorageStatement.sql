@@ -25,7 +25,8 @@ BEGIN TRY
 			@xmlDocumentId			INT,
 			@strPrefix              Nvarchar(100),
 			@intNumber				INT,
-			@strFormNumber			NVARCHAR(100)
+			@strFormNumber			NVARCHAR(100),
+			@strType				NVARCHAR(100)
 						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -57,29 +58,45 @@ BEGIN TRY
 				[begingroup]	NVARCHAR(50),  
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
-	)  
-    
-	SELECT	@intEntityId = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intEntityId'
-
-	SELECT @intItemId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intItemId'
-	
-	SELECT @intStorageTypeId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intStorageTypeId'
-
-	SELECT @intStorageScheduleId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intStorageScheduleRuleId'
+	)
 
 	SELECT  @strFormNumber=[from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strFormNumber'
+	
+	SELECT  @strType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strType'
+
+	IF ISNULL(@strFormNumber,'') <> ''
+	BEGIN
+		SELECT	@intEntityId          = NULL
+		SELECT  @intItemId		      = NULL
+		SELECT  @intStorageTypeId     = NULL
+		SELECT  @intStorageScheduleId = NULL
+	END
+	ELSE
+	BEGIN
 		
-	IF @intEntityId IS NULL
+		SELECT	@intEntityId = [from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intEntityId'
+
+		SELECT @intItemId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intItemId'
+		
+		SELECT @intStorageTypeId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intStorageTypeId'
+
+		SELECT @intStorageScheduleId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intStorageScheduleRuleId'
+
+	END
+		
+	IF @intEntityId IS NULL 
 	BEGIN
 	
 		SELECT @intEntityId=intEntityId,@intItemId=intItemId,@intStorageTypeId=intStorageTypeId,@intStorageScheduleId=intStorageScheduleId
@@ -129,7 +146,8 @@ BEGIN TRY
 		@intStorageScheduleId AS intStorageScheduleId,
 		@strFormNumber AS strFormNumber,
 		@strPrefix AS strPrefix,
-		@intNumber AS intNumber
+		@intNumber AS intNumber,
+		@strType   AS strType
 	FROM vyuCTEntity EY	WHERE EY.intEntityId=@intEntityId		
 
 END TRY
