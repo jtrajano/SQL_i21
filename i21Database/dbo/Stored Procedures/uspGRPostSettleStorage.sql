@@ -425,7 +425,9 @@ BEGIN TRY
 					,intContractDetailId   = NULL
 					,dblUnits			   = SST.dblUnits
 					,dblCashPrice		   = CASE WHEN QM.strDiscountChargeType = 'Percent'
-														THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))) * (SELECT dblFuturesPrice + dblFuturesBasis FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+														THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
+															*
+															(CASE WHEN SS.dblFuturesBasis <> 0 AND SS.dblFuturesPrice <> 0 THEN SS.dblFuturesBasis + SS.dblFuturesPrice ELSE SC.dblCashPrice END)
 											ELSE --Dollar
 												dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
 											END
@@ -438,6 +440,8 @@ BEGIN TRY
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
 						AND SST.intSettleStorageId = @intSettleStorageId 
 						AND SST.dblUnits > 0
+				JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = SST.intSettleStorageId
 				JOIN tblICCommodityUnitMeasure CU 
 					ON CU.intCommodityId = CS.intCommodityId 
 						AND CU.ysnStockUnit = 1
@@ -448,6 +452,8 @@ BEGIN TRY
 					ON a.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 				JOIN tblICItem DItem 
 					ON DItem.intItemId = a.intItemId
+				LEFT JOIN @SettleContract SC 
+					ON SC.ContractEntityId = CS.intEntityId
 				WHERE ISNULL(CS.strStorageType, '') <> 'ITR' 
 					AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
 			END
