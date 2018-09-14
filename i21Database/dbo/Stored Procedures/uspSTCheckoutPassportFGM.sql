@@ -30,14 +30,16 @@ BEGIN
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
-			strErrorMessage 
+			strErrorType
+			, strErrorMessage 
 			, strRegisterTag
 			, strRegisterTagValue
 			, intCheckoutId
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'No Matching Fuel Grade in Inventory' as strErrorMessage
+			'NO MATCHING TAG' as strErrorType
+			, 'No Matching Fuel Grade in Inventory' as strErrorMessage
 			, 'FuelGradeId' as strRegisterTag
 			, ISNULL(Chk.FuelGradeID, '') AS strRegisterTagValue
 			, @intCheckoutId

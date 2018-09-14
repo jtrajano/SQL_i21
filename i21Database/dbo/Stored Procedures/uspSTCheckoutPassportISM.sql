@@ -29,14 +29,16 @@ BEGIN
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
-			strErrorMessage 
+			strErrorType
+			, strErrorMessage 
 			, strRegisterTag
 			, strRegisterTagValue
 			, intCheckoutId
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'No Matching UPC/Item in Inventory' as strErrorMessage
+			'NO MATCHING TAG' as strErrorType
+			, 'No Matching UPC/Item in Inventory' as strErrorMessage
 			, 'POSCode' as strRegisterTag
 			, ISNULL(Chk.POSCode, '') AS strRegisterTagValue
 			, @intCheckoutId
