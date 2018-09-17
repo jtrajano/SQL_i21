@@ -220,8 +220,6 @@ BEGIN TRY
 				GROUP BY intTicketFileId
 			) QM ON CS.intCustomerStorageId = QM.intTicketFileId
 	END
-
-	SELECT @intCustomerStorageId AS 'intCustomerStorageId'
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
