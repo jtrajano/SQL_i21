@@ -32,7 +32,7 @@ FROM dbo.tblAPBill A
 	INNER JOIN 
 	(
 		SELECT 
-			CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS INT) AS intId
+			CAST(ROW_NUMBER() OVER(ORDER BY (dtmDatePaid) DESC) AS INT) AS intId
 			,allPayment.intEntityVendorId
 			,allPayment.intPaymentId
 			,allPayment.intARPaymentId
