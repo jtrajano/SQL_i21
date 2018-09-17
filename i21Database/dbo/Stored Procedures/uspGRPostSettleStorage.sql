@@ -1671,6 +1671,107 @@ BEGIN TRY
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
 
+	INSERT INTO @adjustCostOfDelayedPricingStock 
+		(
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[intCostUOMId] 
+			,[dblNewValue] 
+			,[intCurrencyId]     
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
+			,[strSourceTransactionId] 
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
+		)
+	SELECT
+			 [intItemId]      				= @ItemId
+			,[intItemLocationId]    		= @ItemLocationId
+			,[intItemUOMId]     			= itemUOM.intItemUOMId
+			,[dtmDate]       				= A.dtmDate
+			,[dblQty]        				= CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
+			,[dblUOMQty]       				= itemUOM.dblUnitQty
+			,[intCostUOMId]     			= voucherCostUOM.intItemUOMId 
+			,[dblNewValue]      			=  dbo.fnCalculateCostBetweenUOM(
+													voucherCostUOM.intItemUOMId
+													,receiptCostUOM.intItemUOMId
+													,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+												) * B.dblQtyOrdered - (E2.dblUnitCost * E2.dblReceived)
+			,[intCurrencyId]      			= @intDefaultCurrencyId
+			,[intTransactionId]    			= B.intBillId
+			,[intTransactionDetailId]   	= B.intBillDetailId
+			,[strTransactionId]     		= A.strBillId
+			,[intTransactionTypeId]    		= 44
+			,[intLotId]       				= NULL 
+			,[intSubLocationId]     		= NULL 
+			,[intStorageLocationId]    		= NULL 
+			,[ysnIsStorage]      			= 0
+			,[strActualCostId]     			= NULL 
+			,[intSourceTransactionId]   	= E2.intInventoryReceiptId
+			,[intSourceTransactionDetailId] = E2.intInventoryReceiptItemId
+			,[strSourceTransactionId]    	= E1.strReceiptNumber
+			,[intFobPointId]     			= NULL 
+			,[intInTransitSourceLocationId] = NULL 
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B
+			ON A.intBillId = B.intBillId
+		INNER JOIN tblGRCustomerStorage GS 
+			ON GS.intCustomerStorageId = B.intCustomerStorageId
+		INNER JOIN (
+			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+			LEFT JOIN tblICItemLocation sourceLocation
+				ON sourceLocation.intItemId = E2.intItemId
+				AND sourceLocation.intLocationId = E1.intLocationId
+			LEFT JOIN tblSMFreightTerms ft
+				ON ft.intFreightTermId = E1.intFreightTermId
+			LEFT JOIN tblICFobPoint fp
+				ON fp.strFobPoint = ft.strFreightTerm
+		)
+			ON GS.intTicketId= E2.intSourceId
+		INNER JOIN tblICItem item 
+			ON B.intItemId = item.intItemId
+		INNER JOIN tblICItemLocation D
+			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
+		LEFT JOIN tblICItemUOM itemUOM
+			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM receiptCostUOM
+			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+		LEFT JOIN tblICInventoryTransactionType transType
+			ON transType.strName = 'Bill'
+
+		WHERE A.intBillId = @intCreatedBillId
+		AND B.intInventoryReceiptItemId IS NULL 
+		AND E2.intOwnershipType != 2
+		AND (
+			dbo.fnCalculateCostBetweenUOM(
+				voucherCostUOM.intItemUOMId
+				,receiptCostUOM.intItemUOMId
+				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				) <> E2.dblUnitCost
+			OR E2.dblForexRate <> B.dblRate
+		) AND item.intItemId = E2.intItemId
+	
+	EXEC @intReturnValue = uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @intCreatedUserId
+	
+	IF @intReturnValue < 0
+		GOTO SettleStorage_Exit;
+
 	END
 
 	UPDATE tblGRSettleStorage

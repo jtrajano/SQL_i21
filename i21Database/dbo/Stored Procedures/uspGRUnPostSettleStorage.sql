@@ -402,6 +402,8 @@ BEGIN TRY
 			END
 			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
 		
+			EXEC uspICUnpostCostAdjustment @BillId, @strBillId, @strBatchId, @userId, DEFAULT
+			
 			--5. Removing Voucher
 			BEGIN
 				EXEC uspAPDeleteVoucher 
