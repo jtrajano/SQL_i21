@@ -6,7 +6,8 @@
 	@EndDate DATETIME = NULL
 
 	AS
-
+	declare @current_date datetime
+	set @current_date = getdate()
 	--==========================
 	--	CUSTOMER
 	--==========================
@@ -15,7 +16,7 @@
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0
 	DECLARE @key NVARCHAR(100) = NEWID()
-	DECLARE @logDate DATETIME = GETDATE()
+	DECLARE @logDate DATETIME = @current_date
 
 	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
@@ -35,10 +36,11 @@
 			agivcmst
 			WHERE
 			(
-				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and agivc_bal_due <> 0
 
 		 END
 
@@ -50,10 +52,11 @@
 			ptivcmst
 			WHERE
 			(
-				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and ptivc_bal_due <> 0
 
 		 END
 
@@ -65,10 +68,11 @@
 				INNER JOIN tblARCustomer ON agivcmst.agivc_bill_to_cus COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE
 			(
-				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and agivc_bal_due <> 0
 		 END	
 			
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -79,10 +83,11 @@
 				INNER JOIN tblARCustomer ON ptivcmst.ptivc_sold_to COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE
 			(
-				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and ptivc_bal_due <> 0
 		 END	
 			
 	--SELECT
@@ -130,6 +135,7 @@
 				,@key 
 			FROM agivcmst WHERE agivc_bill_to_cus COLLATE Latin1_General_CI_AS  NOT IN 
 					(select strCustomerNumber COLLATE Latin1_General_CI_AS FROM tblARCustomer)
+			and agivc_bal_due <> 0
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -151,6 +157,7 @@
 				,@key 
 			FROM ptivcmst WHERE ptivc_sold_to COLLATE Latin1_General_CI_AS  NOT IN 
 					(select strCustomerNumber COLLATE Latin1_General_CI_AS FROM tblARCustomer)
+			and ptivc_bal_due <> 0
 		 END
 			
 		RETURN;
@@ -170,10 +177,11 @@
 			WHERE agivc_slsmn_no IS NOT NULL
 			AND 
 			(
-				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and agivc_bal_due <> 0
 		 END
 
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -184,10 +192,11 @@
 			WHERE ptivc_sold_by IS NOT NULL
 			AND 
 			(
-				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and ptivc_bal_due <> 0
 		 END
 
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
@@ -198,10 +207,11 @@
 				INNER JOIN tblARSalesperson ON agivcmst.agivc_slsmn_no COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
 			WHERE 
 			(
-				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and agivc_bal_due <> 0
 		 END
 		 	
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -212,10 +222,11 @@
 				INNER JOIN tblARSalesperson ON ptivcmst.ptivc_sold_by COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
 			WHERE 
 			(
-				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and ptivc_bal_due <> 0
 		 END
 	
 	IF(@originSalespersonCount = @salespersonCount)
@@ -246,6 +257,7 @@
 				,@key 
 			FROM agivcmst WHERE agivc_slsmn_no COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
 					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson where strSalespersonId is not null) 
+			and agivc_bal_due <> 0
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -267,6 +279,7 @@
 				,@key 
 			FROM ptivcmst WHERE ptivc_sold_by COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
 					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson where strSalespersonId is not null) 
+			and ptivc_bal_due <> 0
 		 END
 		RETURN;	
 	END
@@ -285,10 +298,11 @@
 			WHERE agivc_terms_code IS NOT NULL
 			AND 
 			(
-				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and agivc_bal_due <> 0
 
 		 END
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -299,10 +313,11 @@
 			WHERE ptivc_terms_code IS NOT NULL
 			AND 
 			(
-				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 				OR
 				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			)
+			and ptivc_bal_due <> 0
 
 		 END
 
@@ -315,12 +330,14 @@
 					DISTINCT (CASE WHEN SUBSTRING(agivc_terms_code,1, 1) = 0 THEN SUBSTRING(agivc_terms_code,2,1) ELSE agivc_terms_code END) COLLATE Latin1_General_CI_AS
 					FROM agivcmst 
 					WHERE agivc_terms_code IS NOT NULL
+					and agivc_bal_due <> 0
 					AND 
 						(
-							((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 							OR
 							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 						))
+					
 		 END 
 
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -332,9 +349,10 @@
 					DISTINCT (CASE WHEN SUBSTRING(ptivc_terms_code,1, 1) = 0 THEN SUBSTRING(ptivc_terms_code,2,1) ELSE ptivc_terms_code END) COLLATE Latin1_General_CI_AS
 					FROM ptivcmst 
 					WHERE ptivc_terms_code IS NOT NULL
+					and ptivc_bal_due <> 0
 					AND 
 						(
-							((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 							OR
 							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 						))
@@ -368,6 +386,7 @@
 				,@key  
 			FROM agivcmst WHERE agivc_terms_code  IS NOT NULL AND CAST(Cast(agivc_terms_code AS INTEGER) AS VARCHAR) COLLATE SQL_Latin1_General_CP1_CS_AS 
 			NOT IN (select strTermCode SQL_Latin1_General_CP1_CS_AS from tblSMTerm)
+					and agivc_bal_due <> 0
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -388,7 +407,8 @@
 				,@logDate
 				,@key  
 			FROM ptivcmst WHERE ptivc_terms_code  IS NOT NULL AND CAST(Cast(ptivc_terms_code AS INTEGER) AS VARCHAR) COLLATE SQL_Latin1_General_CP1_CS_AS 
-			NOT IN (select strTermCode SQL_Latin1_General_CP1_CS_AS from tblSMTerm)				
+			NOT IN (select strTermCode SQL_Latin1_General_CP1_CS_AS from tblSMTerm)	
+					and ptivc_bal_due <> 0			
 		 END
 			
 		RETURN;	
@@ -445,11 +465,13 @@
 			INNER JOIN tblSMCompanyLocation CL ON agivcmst.agivc_loc_no COLLATE Latin1_General_CI_AS = CL.strLocationNumber  COLLATE Latin1_General_CI_AS
 			WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
 			AND (
-					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 					OR
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 				)
-			AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0))
+			AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0)
+			and agivc_bal_due <> 0)
+			
 			IF(@strCompanyLocation IS NULL)
 			BEGIN
 				SET @Sucess = 1

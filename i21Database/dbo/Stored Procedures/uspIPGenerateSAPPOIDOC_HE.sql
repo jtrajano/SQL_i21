@@ -44,7 +44,7 @@ DECLARE @intMinSeq INT
 	,@strItemXXml NVARCHAR(MAX)
 	,@strTextXml NVARCHAR(MAX)
 	,@strSeq NVARCHAR(MAX)
-	,@str10Zeros NVARCHAR(50) = '0000000000'
+	,@str12Zeros NVARCHAR(50) = '000000000000'
 	,@strLoadingPoint NVARCHAR(200)
 	,@ysnMaxPrice BIT
 	,@strPrintableRemarks NVARCHAR(MAX)
@@ -1277,7 +1277,7 @@ BEGIN
 			SET @strXmlHeaderStart += '<PUR_GROUP>' + ISNULL(@strSalesPerson, '') + '</PUR_GROUP>'
 			SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 			SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
-			SET @strXmlHeaderStart += '<REF_1>' + ISNULL(@strContractNumber, '') + '</REF_1>'
+			SET @strXmlHeaderStart += '<REF_1>' + ISNULL(RIGHT(@str12Zeros+@strContractNumber,12), '') + '</REF_1>'
 			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
 			SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
 			SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
@@ -1290,7 +1290,7 @@ BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEM>'
 		SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo, '-', ''), '')) + '</MATERIAL>'
 		SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
-		SET @strItemXml += '<TRACKINGNO>' + ISNULL(CONVERT(VARCHAR, @intContractSeq), '') + '</TRACKINGNO>'
+		SET @strItemXml += '<TRACKINGNO>' + ISNULL(RIGHT('000'+CONVERT(VARCHAR, @intContractSeq),3), '') + '</TRACKINGNO>'
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
 		SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'

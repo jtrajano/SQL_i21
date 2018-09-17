@@ -15,6 +15,10 @@ BEGIN
 	--================================================
 	--     ONE TIME INVOICE SYNCHRONIZATION	
 	--================================================
+	
+	declare @current_date datetime
+	set @current_date = getdate()
+
 
 	DECLARE  @ZeroDecimal		DECIMAL(18,6)
 	SET @ZeroDecimal = 0.000000
@@ -125,9 +129,9 @@ BEGIN
 			SELECT
 				agivc_ivc_no,--[strInvoiceOriginId]		
 				Cus.intEntityId,--[intEntityCustomerId]		
-				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
-				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
-				(CASE WHEN ISDATE(agivc_orig_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_orig_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
+				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDate]
+				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDueDate]
+				(CASE WHEN ISDATE(agivc_orig_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_orig_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmPostDate]
 				ISNULL(Cur.intCurrencyID,0),--[intCurrencyId]
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = agivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				Salesperson.intEntityId,--[intEntitySalespersonId]
@@ -179,11 +183,12 @@ BEGIN
 			WHERE 
 				Inv.strInvoiceNumber IS NULL 
 				AND (
-						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
 				AND agivc_type NOT IN ('O','X')
+				and agivc_bal_due <> 0
 
 			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
 			INNER JOIN agcrdmst CRD ON CRD.agcrd_ref_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -232,9 +237,9 @@ BEGIN
 			SELECT
 				ptivc_invc_no,--[strInvoiceOriginId]		
 				Cus.intEntityId,--[intEntityCustomerId]		
-				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
-				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
-				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
+				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDate]
+				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDueDate]
+				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmPostDate]
 				(select intDefaultCurrencyId from tblSMCompanyPreference),--[intCurrencyId]
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = ptivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				ISNULL((SELECT intEntityId FROM tblARSalesperson Salesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptivc_sold_by COLLATE Latin1_General_CI_AS),Cus.intSalespersonId),--[intEntitySalespersonId],--[intEntitySalespersonId]
@@ -292,11 +297,12 @@ BEGIN
 			WHERE 
 				Inv.strInvoiceNumber IS NULL 
 				AND (
-						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
 				AND ptivc_type NOT IN ('O','X')
+				and ptivc_bal_due <> 0
 				
 			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
 			INNER JOIN ptcrdmst CRD ON CRD.ptcrd_invc_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -337,9 +343,9 @@ BEGIN
 		SELECT
 				 LTRIM(RTRIM(ptcrd_invc_no))+'_'+CONVERT(CHAR(3),ptcrd_seq_no),--[strInvoiceOriginId]		
 				Cus.intEntityId,--[intEntityCustomerId]		
-				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
-				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
-				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
+				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDate]
+				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmDueDate]
+				(CASE WHEN ISDATE(ptcrd_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptcrd_rev_dt AS CHAR(12)), 112) ELSE @current_date END),--[dtmPostDate]
 				(select intDefaultCurrencyId from tblSMCompanyPreference),--[intCurrencyId]
 				LOC.intCompanyLocationId,--[intCompanyLocationId]
 				Cus.intSalespersonId,--[intEntitySalespersonId]
@@ -764,10 +770,11 @@ BEGIN
 				tblARInvoice.strInvoiceOriginId IS NULL 
 				AND agivc_type NOT IN ('O','X')
 				AND (
-						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
+				and agivc_bal_due <> 0
 				
 		 END
 
@@ -784,10 +791,11 @@ BEGIN
 				tblARInvoice.strInvoiceOriginId IS NULL 
 				AND ptivc_type NOT IN ('O','X')
 				AND (
-						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-					)			
+					)
+				and ptivc_bal_due <> 0			
 		 END		 
 		
 	END
@@ -807,7 +815,7 @@ BEGIN
 				tblARInvoice.strInvoiceOriginId IS NULL 
 				AND agord_type NOT IN ('O','X')
 				AND (
-						((CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
@@ -826,7 +834,7 @@ BEGIN
 				tblARInvoice.strInvoiceOriginId IS NULL 
 				AND pttic_type NOT IN ('O','X')				
 				AND (
-						((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)

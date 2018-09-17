@@ -31,6 +31,7 @@ DECLARE @totalRecords INT;
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @error NVARCHAR(200);
 DECLARE @batchId NVARCHAR(40);
+DECLARE @batchIdUsedInBill NVARCHAR(40);
 
 --=====================================================================================================================================
 --  VALIDATE REFUND DETAILS
@@ -106,8 +107,10 @@ SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
 IF(@totalRecords = 0)  
 BEGIN
-	SET @success = 0
-	GOTO Post_Exit
+	SET @success = 0;
+	SET @error = 'There are no refunds to post.';
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
 END
 ----------------------------------------------------------------------------------------
 
@@ -140,7 +143,9 @@ BEGIN
 		@userId = @intUserId,
 		@beginTransaction = NULL,
 		@endTransaction = NULL,
-		@success = @success OUTPUT;
+		@success = @success OUTPUT,
+		@batchIdUsed = @batchIdUsedInBill OUTPUT;
+
 
 	END TRY
 	BEGIN CATCH
@@ -148,6 +153,14 @@ BEGIN
 		RAISERROR(@error, 16, 1);
 		GOTO Post_Rollback;
 	END CATCH
+	
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @error = strMessage
+		FROM tblAPPostResult where strTransactionType = 'Bill' AND strBatchNumber = @batchIdUsedInBill;
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END
 
 	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));
 	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);

@@ -42,14 +42,16 @@ BEGIN
 				-- ------------------------------------------------------------------------------------------------------------------ 
 				INSERT INTO tblSTCheckoutErrorLogs 
 				(
-					strErrorMessage 
+					strErrorType
+					, strErrorMessage 
 					, strRegisterTag
 					, strRegisterTagValue
 					, intCheckoutId
 					, intConcurrencyId
 				)
 				SELECT DISTINCT
-					'No Matching Register Tax Code' as strErrorMessage
+					'NO MATCHING TAG' as strErrorType
+					, 'No Matching Register Tax Code' as strErrorMessage
 					, 'TaxLevelID' as strRegisterTag
 					, ISNULL(Chk.TaxLevelID, '') AS strRegisterTagValue
 					, @intCheckoutId

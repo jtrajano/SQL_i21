@@ -201,9 +201,8 @@ BEGIN TRY
 		   ,[intSort]					= SD.[intSort]
 		   ,[strDiscountChargeType]		= SD.[strDiscountChargeType]
 		FROM dbo.[tblQMTicketDiscount] SD
-		LEFT JOIN @CustomerStorageStagingTable CS ON CS.intTicketId = SD.intTicketId
+		JOIN @CustomerStorageStagingTable CS ON CS.intTicketId = SD.intTicketId
 		JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = SD.intDiscountScheduleCodeId
-		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = DCode.intUnitMeasureId
 		WHERE SD.strSourceType = 'Scale'
 		
 		UPDATE CS
@@ -221,8 +220,6 @@ BEGIN TRY
 				GROUP BY intTicketFileId
 			) QM ON CS.intCustomerStorageId = QM.intTicketFileId
 	END
-
-	SELECT @intCustomerStorageId AS 'intCustomerStorageId'
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

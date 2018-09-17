@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @intSettleStorageId INT
 	DECLARE @UserId INT
 	DECLARE @BillId INT
+	DECLARE @strBillId VARCHAR(MAX)
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @ItemId INT
 
@@ -62,6 +63,8 @@ BEGIN TRY
 			,@CommodityStockUomId=intCommodityStockUomId
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
+
+		SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
 
 		IF ISNULL(@BillId,0) = 0
 		BEGIN
@@ -402,6 +405,8 @@ BEGIN TRY
 			END
 			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
 		
+			EXEC uspICUnpostCostAdjustment @BillId, @strBillId, @strBatchId, @UserId, DEFAULT
+			
 			--5. Removing Voucher
 			BEGIN
 				EXEC uspAPDeleteVoucher 
