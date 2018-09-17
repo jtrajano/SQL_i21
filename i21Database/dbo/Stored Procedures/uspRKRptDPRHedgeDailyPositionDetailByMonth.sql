@@ -382,109 +382,139 @@ declare @strContractEndMonth nvarchar(max)
 DECLARE @ctr as int
 SELECT @ctr = COUNT(intRowNumber) FROM @List 
 
-IF isnull(@intVendorId,0) = 0
+IF OBJECT_ID('tempdb..#tmpList') IS NOT NULL
+DROP TABLE  #tmpList
+IF OBJECT_ID('tempdb..##tmpTry') IS NOT NULL
+DROP TABLE  ##tmpTry
+IF OBJECT_ID('tempdb..##tmpTry2') IS NOT NULL
+DROP TABLE  ##tmpTry2
+
+
+IF @ctr > 0 
 BEGIN
-	IF @ctr > 0 
-	BEGIN
-		 SELECT 
-			strCommodityCode
-			,strContractEndMonth
-			,[Purchase Basis] as PurcahseBasis
-			,[Purchase Priced] as PurchasePriced
-			,[Purchase HTA] as PurchaseHTA
-			,[Purchase Ratio] as PurchaseRatio
-			,[Sale Basis] as SaleBasis
-			,[Sale Priced] as SalePriced
-			,[Sale HTA] as SaleHTA
-			,[Sale Ratio] as SaleRatio
-			,[Net Hedge] as NetHedge
-			,[Position]
-			,@xmlParam AS xmlParam
-			,@dtmToDate as dtmToDate
-		 FROM
-			(
-				select * from (
-					select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
-					from @List
-					group by strContractEndMonth,strCommodityCode,strType
-				) t
-			 ) x
-			 pivot 
-			 (
-				sum(dblTotal)
-				for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Purchase Ratio],[Sale Basis],[Sale Priced],[Sale HTA],[Sale Ratio],[Net Hedge],[Position])
-				
-			 ) p order by CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END
-	END
-	ELSE
-	SELECT 
-			@strCommodityCode as strCommodityCode
-			,'' as strContractEndMonth
-			,NULL as PurcahseBasis
-			,NULL as PurchasePriced
-			,NULL as PurchaseHTA
-			,NULL as PurchaseRatio
-			,NULL as SaleBasis
-			,NULL as SalePriced
-			,NULL as SaleHTA
-			,NULL as SaleRatio
-			,NULL as NetHedge
-			,NULL as Position
-			,@xmlParam as xmlParam
-			,@dtmToDate as dtmToDate
- 
+
+	select * into #tmpList
+	from @List 
+	where strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
+
+
+	DECLARE @cols AS NVARCHAR(MAX),
+			@colstry AS NVARCHAR(MAX) = '',
+			@query  AS NVARCHAR(MAX),
+			@intColCount AS INT,
+			@colCtr as int = 2
+
+
+	DECLARE  @tmpColList TABLE(
+		strType nvarchar(max),
+		intSeqNo int
+	)
+
+	select @cols = STUFF((select ',' + QUOTENAME(strType) 
+						from @List
+						where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
+						group by strType, intSeqNo
+						order by intSeqNo, strType
+				FOR XML PATH(''), TYPE
+				).value('.', 'NVARCHAR(MAX)') 
+			,1,1,'')
+
+	insert into @tmpColList (strType,intSeqNo)
+	SELECT DISTINCT strType,intSeqNo
+				from @List
+				where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
+				order by intSeqNo, strType
+				--group by strType
+
+
+			WHILE EXISTS (SELECT TOP 1 strType FROM @tmpColList)
+			BEGIN
+				DECLARE @strCol AS NVARCHAR(max)
+				SET @colCtr = @colCtr + 1;
+
+				SELECT TOP 1 @strCol = strType FROM @tmpColList ORDER BY intSeqNo, strType
+			
+
+				SET @colstry = @colstry + '''' + @strCol + ''' as col' + cast(@colCtr as nvarchar(20)) + ','
+			
+				DELETE FROM @tmpColList WHERE strType = @strCol 
+
+			END
+			
+			SET @colstry = @colstry + '''Position''as col' +  cast(@colCtr + 1 as nvarchar(20)) +' '
+
+	
+		set @query = N'
+
+				SELECT 1 as col1 ,strContractEndMonth,' + @cols + N',Position into ##tmpTry from 
+				 (
+               		select * from (
+						select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
+						from #tmpList
+						group by strContractEndMonth,strCommodityCode,strType
+					) t
+				) x
+				pivot 
+				(
+					sum(dblTotal)
+					for strType in (' + @cols + N',Position)
+				) p  order by CASE WHEN  strContractEndMonth not in(''Near By'',''Total'') THEN CONVERT(DATETIME,''01 ''+strContractEndMonth) END
+			 
+
+				'
+
+	exec (@query)
+
+
+	exec ('select 0 as col1,''Year'' as col2, '+ @colstry +'into ##tmpTry2')
+
+
+	 DECLARE @colCAST AS NVARCHAR(MAX)
+
+	 select @colCAST = STUFF((SELECT ',CAST(CONVERT(varchar,cast(round(' + QUOTENAME([name]) + ',2)as money),1) as nvarchar(max))'
+						from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+				FOR XML PATH(''), TYPE
+				).value('.', 'NVARCHAR(MAX)') 
+			,1,1,'')
+
+	 DECLARE @colSUM AS NVARCHAR(MAX)
+
+	 select @colSUM = STUFF((SELECT ',CAST(CONVERT(varchar,cast(sum(' + QUOTENAME([name]) + ')as money),1) as nvarchar(max))'
+						from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+				FOR XML PATH(''), TYPE
+				).value('.', 'NVARCHAR(MAX)') 
+			,1,1,'')
+
+	exec (N' SELECT *, '''+@xmlParam +''' AS xmlParam FROM (
+		select * from ##tmpTry2
+	union all
+	select col1,strContractEndMonth,
+		' + @colCAST +'
+	from ##tmpTry
+	union all
+	select 2 as col1,''Total'' strContractEndMonth,
+		' + @colSUM +'
+	from ##tmpTry
+	) t ORDER BY col1 , CASE WHEN  col2 not in(''Near By'',''Year'',''Total'') THEN CONVERT(DATETIME,''01 ''+col2) END'
+	)
+
+
 END
 ELSE
 BEGIN
-IF @ctr > 0 
-	BEGIN
-		 SELECT 
-			strCommodityCode
-			,strContractEndMonth
-			,[Purchase Basis] as PurcahseBasis
-			,[Purchase Priced] as PurchasePriced
-			,[Purchase HTA] as PurchaseHTA
-			,[Purchase Ratio] as PurchaseRatio
-			,[Sale Basis] as SaleBasis
-			,[Sale Priced] as SalePriced
-			,[Sale HTA] as SaleHTA
-			,[Sale Ratio] as SaleRatio
-			,[Net Hedge] as NetHedge
-			,[Position]
-			,@xmlParam AS xmlParam
-			,@dtmToDate as dtmToDate
-		 FROM
-			(
-				select * from (
-					select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
-					from @List
-					where strType<>'Net Hedge' 
-					group by strContractEndMonth,strCommodityCode,strType
-				) t
-			 ) x
-			 pivot 
-			 (
-				sum(dblTotal)
-				for strType in ([Purchase Basis],[Purchase Priced],[Purchase HTA],[Purchase Ratio],[Sale Basis],[Sale Priced],[Sale HTA],[Sale Ratio],[Net Hedge],[Position])
-				
-			 ) p order by CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END
-	END
-	ELSE
 	SELECT 
-			@strCommodityCode as strCommodityCode
-			,'' as strContractEndMonth
-			,NULL as PurcahseBasis
-			,NULL as PurchasePriced
-			,NULL as PurchaseHTA
-			,NULL as PurchaseRatio
-			,NULL as SaleBasis
-			,NULL as SalePriced
-			,NULL as SaleHTA
-			,NULL as SaleRatio
-			,NULL as NetHedge
-			,NULL as Position
-			,@xmlParam as xmlParam
-			,@dtmToDate as dtmToDate
+		'' as col1,
+		'' as col2,
+		'' as col3,
+		'' as col4,
+		'' as col5,
+		'' as col6,
+		'' as col7,
+		'' as col8,
+		'' as col9,
+		'' as col10,
+		'' as col11,
+		'' as col12,
+		@xmlParam as xmlParam
+
 END
-
-
