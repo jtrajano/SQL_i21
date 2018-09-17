@@ -9,6 +9,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
 		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
 		, intItemUOMDecimalPlaces = ItemUnitMeasure.intDecimalPlaces
+		, intGrossUOMDecimalPlaces = WeightUOM.intDecimalPlaces
 		, strUnitType = ItemUnitMeasure.strUnitType
 		, SubLocation.strSubLocationName
 		, strStorageLocationName = StorageLocation.strName
