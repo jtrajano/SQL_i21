@@ -4,7 +4,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , intPOSLogId					= POSLOG.intPOSLogId
 	 , strEODNo						= EOD.strEODNo
 	 , dblOpeningBalance			= EOD.dblOpeningBalance
-	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + EOD.dblExpectedEndingBalance)
+	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + EOD.dblExpectedEndingBalance) - ISNULL(CASHRETURN.dblCashReturn, 0)
 	 , dblFinalEndingBalance		= EOD.dblFinalEndingBalance
 	 , dblCashReturn				= ISNULL(CASHRETURN.dblCashReturn, 0)
 	 , intCompanyLocationPOSDrawerId= EOD.intCompanyLocationPOSDrawerId
@@ -21,7 +21,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , dtmClose						= EOD.dtmClose
 	 , ysnClosed					= EOD.ysnClosed
 	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
-	 , dblTotalCashReceipt          = CASHRECEIPT.dblTotalCashReceipt	
+	 , dblTotalCashReceipt          = EOD.dblExpectedEndingBalance -- CASHRECEIPT.dblTotalCashReceipt	
 FROM tblARPOSEndOfDay EOD
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
