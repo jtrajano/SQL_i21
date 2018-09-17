@@ -7052,6 +7052,9 @@
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAddVoucherDetail.sql" />
     <Build Include="dbo\Functions\fnAPValidateVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

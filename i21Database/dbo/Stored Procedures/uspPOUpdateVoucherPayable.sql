@@ -12,6 +12,7 @@ BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspPOUpdateVoucherPayable';
 DECLARE @voucherPayables AS VoucherPayable;
+DECLARE @voucherPayableTax AS VoucherDetailTax;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
@@ -69,6 +70,38 @@ INSERT INTO @voucherPayables(
 	,[ysnReturn]						
 )
 SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds);
+
+INSERT INTO @voucherPayableTax (
+	[intTaxGroupId]				
+	,[intTaxCodeId]				
+	,[intTaxClassId]				
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[intAccountId]				
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[ysnTaxAdjusted]			
+	,[ysnSeparateOnBill]			
+	,[ysnCheckOffTax]			
+)
+SELECT
+	[intTaxGroupId]				=	A.intTaxGroupId, 
+	[intTaxCodeId]				=	A.intTaxCodeId, 
+	[intTaxClassId]				=	A.intTaxClassId, 
+	[strTaxableByOtherTaxes]	=	A.strTaxableByOtherTaxes, 
+	[strCalculationMethod]		=	A.strCalculationMethod, 
+	[dblRate]					=	A.dblRate, 
+	[intAccountId]				=	A.intAccountId, 
+	[dblTax]					=	A.dblTax, 
+	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
+	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
+	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
+	[ysnCheckOffTax]			=	A.ysnCheckOffTax
+FROM tblPOPurchaseDetailTax A
+INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
+INNER JOIN @voucherPayables payables ON B.intPurchaseDetailId = payables.intPurchaseDetailId
+WHERE (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL) AND payables.dblTax != 0
 
 IF @remove = 0
 BEGIN

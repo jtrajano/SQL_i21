@@ -2,6 +2,7 @@
 DROP PROCEDURE uspAPAddVoucherDetail
 DROP PROCEDURE uspAPCreateVoucher
 DROP FUNCTION fnAPCreateVoucherData
+DROP FUNCTION fnAPValidateVoucherPayable
 DROP TYPE VoucherPayable
 */
 CREATE TYPE [dbo].[VoucherPayable] AS TABLE
@@ -78,7 +79,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblExchangeRate]				DECIMAL(18,6) DEFAULT(1),
 	/*Tax info*/
 	[intPurchaseTaxGroupId]			INT NULL,
-	[dblTax]						DECIMAL(18,2),
+	[dblTax]						DECIMAL(18,2) DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
 	[dblDiscount]					DECIMAL(18,2),
 	[dblDetailDiscountPercent]		DECIMAL(18,2),

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPAddVoucherPayable]
 	@voucherPayable AS VoucherPayable READONLY,
+	@voucherPayableTax AS VoucherDetailTax READONLY,
 	@throwError BIT = 0,
 	@error NVARCHAR(MAX) = NULL OUTPUT
 AS
@@ -237,6 +238,39 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 	LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
+
+	INSERT INTO tblAPVoucherPayableTaxStaging(
+		[intVoucherPayableId]		
+		,[intTaxGroupId]				
+		,[intTaxCodeId]				
+		,[intTaxClassId]				
+		,[strTaxableByOtherTaxes]	
+		,[strCalculationMethod]		
+		,[dblRate]					
+		,[intAccountId]				
+		,[dblTax]					
+		,[dblAdjustedTax]			
+		,[ysnTaxAdjusted]			
+		,[ysnSeparateOnBill]			
+		,[ysnCheckOffTax]			
+	)
+	SELECT
+		[intVoucherPayableId]		= A.intVoucherPayableId
+		,[intTaxGroupId]			= A.intTaxGroupId
+		,[intTaxCodeId]				= A.intTaxCodeId
+		,[intTaxClassId]			= A.intTaxClassId
+		,[strTaxableByOtherTaxes]	= A.strTaxableByOtherTaxes
+		,[strCalculationMethod]		= A.strCalculationMethod
+		,[dblRate]					= A.dblRate
+		,[intAccountId]				= A.intAccountId
+		,[dblTax]					= A.dblTax
+		,[dblAdjustedTax]			= A.dblAdjustedTax
+		,[ysnTaxAdjusted]			= A.ysnTaxAdjusted
+		,[ysnSeparateOnBill]		= A.ysnSeparateOnBill
+		,[ysnCheckOffTax]			= A.ysnCheckOffTax
+	FROM @voucherPayableTax A
+	INNER JOIN @voucherPayable payables
+		ON A.intVoucherPayableId = payables.intVoucherPayableId
 END
 
 IF @transCount = 0

@@ -1,6 +1,7 @@
-﻿CREATE TYPE [dbo].[VoucherDetailTax] AS TABLE
+﻿CREATE TABLE [dbo].[tblAPVoucherPayableTaxCompleted]
 (
-    [intTaxGroupId]				INT NOT NULL, 
+	[intVoucherPayableId]		INT NOT NULL PRIMARY KEY,
+	[intTaxGroupId]				INT NOT NULL, 
     [intTaxCodeId]				INT NOT NULL, 
     [intTaxClassId]				INT NOT NULL, 
 	[strTaxableByOtherTaxes]	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
@@ -12,5 +13,6 @@
 	[ysnTaxAdjusted]			BIT NOT NULL DEFAULT 0, 
 	[ysnSeparateOnBill]			BIT NOT NULL DEFAULT 0, 
 	[ysnCheckOffTax]			BIT NOT NULL DEFAULT 0,
-	[ysnTaxOnly]				BIT NOT NULL DEFAULT 0
+	[ysnTaxOnly]				BIT NOT NULL DEFAULT 0,
+	[dtmDateEntered]			DATETIME DEFAULT(GETDATE())
 )
