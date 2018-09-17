@@ -85,7 +85,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBillId]						=	@voucherId,
 		[intItemId]						=	A.intItemId,
 		[strMiscDescription]			=	item.strDescription,
-		[intInventoryReceiptItemId]  	= 	H.intInventoryReceiptItemId,
+		[intInventoryReceiptItemId]  	= 	J.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
@@ -170,7 +170,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	(
 		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
 		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-	) H
+	) J
 	WHERE A.intEntityVendorId = @voucherVendor --PARAMETER TO DISTINGUISH CORRECT CHARGES PER VENDOR
 	-- OUTER APPLY(
 	-- 	SELECT ysnPrice FROM #tmpReceiptChargeData RC
