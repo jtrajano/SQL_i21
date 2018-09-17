@@ -106,8 +106,10 @@ SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
 IF(@totalRecords = 0)  
 BEGIN
-	SET @success = 0
-	GOTO Post_Exit
+	SET @success = 0;
+	SET @error = 'There are no refunds to post.';
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
 END
 ----------------------------------------------------------------------------------------
 
