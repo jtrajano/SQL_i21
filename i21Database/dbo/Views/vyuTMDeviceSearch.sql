@@ -3,8 +3,8 @@ AS
 	SELECT 
 		strSerialNumber = A.strSerialNumber
 		,strDeviceType = D.strDeviceType
-		,strManufacturerID = A.strManufacturerID
-		,strManufacturerName = A.strManufacturerName
+		,strManufacturerId = L.strManufacturerId
+		,strManufacturerName = L.strManufacturerName
 		,strInventoryStatusType = E.strInventoryStatusType
 		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
 		,strSiteAddress = C.strSiteAddress
@@ -47,6 +47,8 @@ AS
 		ON A.intDeviceId = J.intDeviceId
 	LEFT JOIN tblTMLease K
 		ON J.intLeaseId = K.intLeaseId
+	LEFT JOIN tblTMManufacturer L
+		ON A.intManufacturerId = L.intManufacturerId
 	WHERE A.ysnAppliance <> 1
 	
 GO
