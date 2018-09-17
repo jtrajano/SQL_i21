@@ -67,6 +67,8 @@ BEGIN
 				, @intClassId INT
 				, @strUpcCode NVARCHAR(20)
 				, @intItemId INT
+				, @intRecordCount INT
+				, @strDescription NVARCHAR(250)
 		DECLARE @intRetailPriceAdjustmentDetailId INT
 		DECLARE @intItemUOMId INT
 		DECLARE @dblSalePrice DECIMAL(18,6)
@@ -95,92 +97,144 @@ BEGIN
 				       , @intItemUOMId = UOM.intItemUOMId
 					   , @dblSalePrice = PAD.dblPrice 
 					   , @intItemId = UOM.intItemId
+					   , @strDescription = I.strDescription
 			    FROM tblSTRetailPriceAdjustmentDetail PAD
 				JOIN tblICItemUOM UOM
 					ON PAD.intItemUOMId = UOM.intItemUOMId
+				JOIN tblICItem I
+					ON UOM.intItemId = I.intItemId
 				WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 
-				-- ===============================================================================
-				-- START Add the filter records
-				BEGIN
-					IF(@intLocationId IS NOT NULL)
+
+				-- ====================================================================================================================
+				-- Check No. of records
+				SELECT	@intRecordCount = COUNT(ItemPricing.intItemPricingId)
+				FROM	tblICItemPricing ItemPricing 
+				INNER JOIN tblICItemLocation il
+					ON ItemPricing.intItemLocationId = il.intItemLocationId 
+				AND il.intLocationId IS NOT NULL 
+				INNER JOIN tblICItem i
+					ON i.intItemId = ItemPricing.intItemId 
+				AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+				WHERE (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
+				)
+				AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor WHERE intVendorId = il.intVendorId) 			
+				)
+				AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category WHERE intCategoryId = i.intCategoryId)			
+				)
+				AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family WHERE intFamilyId = il.intFamilyId)			
+				)
+				AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class WHERE intClassId = il.intClassId )			
+				)
+				AND (
+						@strDescription IS NULL 
+						OR i.strDescription = @strDescription 
+				)
+				AND (
+						@strUpcCode IS NULL 
+						OR EXISTS (
+									SELECT TOP 1 1 
+									FROM	tblICItemUOM uom 
+									WHERE	uom.intItemId = i.intItemId 
+									AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
+								)
+				)
+				AND ISNULL(ItemPricing.strPricingMethod, 0) = 'None'
+				-- ====================================================================================================================
+
+				
+				IF(@intRecordCount = 1)
+					BEGIN
+						-- ===============================================================================
+						-- START Add the filter records
 						BEGIN
-							INSERT INTO #tmpUpdateItemPricingForCStore_Location (
-								intLocationId
-							)
-							VALUES(@intLocationId)
-						END
+							IF(@intLocationId IS NOT NULL)
+								BEGIN
+									INSERT INTO #tmpUpdateItemPricingForCStore_Location (
+										intLocationId
+									)
+									VALUES(@intLocationId)
+								END
 		
-					IF(@intVendorId IS NOT NULL)
-						BEGIN
-							INSERT INTO #tmpUpdateItemPricingForCStore_Vendor (
-								intVendorId
-							)
-							VALUES(@intVendorId)
-						END
+							IF(@intVendorId IS NOT NULL)
+								BEGIN
+									INSERT INTO #tmpUpdateItemPricingForCStore_Vendor (
+										intVendorId
+									)
+									VALUES(@intVendorId)
+								END
 
-					IF(@intCategoryId IS NOT NULL)
-						BEGIN
-							INSERT INTO #tmpUpdateItemPricingForCStore_Category (
-								intCategoryId
-							)
-							VALUES(@intCategoryId)
-						END
+							IF(@intCategoryId IS NOT NULL)
+								BEGIN
+									INSERT INTO #tmpUpdateItemPricingForCStore_Category (
+										intCategoryId
+									)
+									VALUES(@intCategoryId)
+								END
 
-					IF(@intFamilyId IS NOT NULL)
-						BEGIN
-							INSERT INTO #tmpUpdateItemPricingForCStore_Family (
-								intFamilyId
-							)
-							VALUES(@intFamilyId)
-						END
+							IF(@intFamilyId IS NOT NULL)
+								BEGIN
+									INSERT INTO #tmpUpdateItemPricingForCStore_Family (
+										intFamilyId
+									)
+									VALUES(@intFamilyId)
+								END
 
-					IF(@intClassId IS NOT NULL)
-						BEGIN
-							INSERT INTO #tmpUpdateItemPricingForCStore_Class (
-								intClassId
-							)
-							VALUES(@intClassId)
+							IF(@intClassId IS NOT NULL)
+								BEGIN
+									INSERT INTO #tmpUpdateItemPricingForCStore_Class (
+										intClassId
+									)
+									VALUES(@intClassId)
+								END
 						END
-				END
-				-- END Add the filter records
-				-- ===============================================================================
+						-- END Add the filter records
+						-- ===============================================================================
 				
 
-				DECLARE @dblSalePriceConv AS NUMERIC(38, 20) = CAST(@dblSalePrice AS NUMERIC(38, 20))
+						DECLARE @dblSalePriceConv AS NUMERIC(38, 20) = CAST(@dblSalePrice AS NUMERIC(38, 20))
 
+						-- ITEM PRICING
+						EXEC [uspICUpdateItemPricingForCStore]
+							  @strUpcCode = @strUpcCode
+							, @strDescription = @strDescription -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
+							, @intItemId = @intItemId
+							, @dblStandardCost = NULL
+							, @dblRetailPrice = @dblSalePriceConv
+							, @intEntityUserSecurityId = @intCurrentUserId
 
-				-- ITEM PRICING
-				EXEC [uspICUpdateItemPricingForCStore]
-					  @strUpcCode = @strUpcCode
-					, @strDescription = NULL -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
-					, @intItemId = @intItemId
-					, @dblStandardCost = NULL
-					, @dblRetailPrice = @dblSalePriceConv
-					, @intEntityUserSecurityId = @intCurrentUserId
+						-- ===============================================================================
+						-- CLEAR
+						DELETE FROM #tmpUpdateItemPricingForCStore_Location
+						DELETE FROM #tmpUpdateItemPricingForCStore_Vendor
+						DELETE FROM #tmpUpdateItemPricingForCStore_Category
+						DELETE FROM #tmpUpdateItemPricingForCStore_Family
+						DELETE FROM #tmpUpdateItemPricingForCStore_Class
+						-- ===============================================================================
 
-				-- ===============================================================================
-				-- CLEAR
-				DELETE FROM #tmpUpdateItemPricingForCStore_Location
-				DELETE FROM #tmpUpdateItemPricingForCStore_Vendor
-				DELETE FROM #tmpUpdateItemPricingForCStore_Category
-				DELETE FROM #tmpUpdateItemPricingForCStore_Family
-				DELETE FROM #tmpUpdateItemPricingForCStore_Class
-				-- ===============================================================================
-
-				--IF((@intItemUOMId IS NOT NULL) AND (@intLocationId IS NOT NULL))
-				--BEGIN
-				--	--UPDATE IP
-				--	--	SET IP.dblSalePrice = ISNULL(CAST(@dblSalePrice AS DECIMAL(18,6)), 0.000000)
-				--	--FROM tblICItemLocation AS IL
-				--	--JOIN tblICItemUOM AS UOM 
-				--	--	ON UOM.intItemId = IL.intItemId
-				--	--JOIN tblICItemPricing AS IP 
-				--	--	ON IP.intItemLocationId = IL.intItemLocationId
-				--	--WHERE UOM.intItemUOMId = @intItemUOMId
-				--	--AND IL.intLocationId = @intLocationId
-				--END
-
+						--IF((@intItemUOMId IS NOT NULL) AND (@intLocationId IS NOT NULL))
+						--BEGIN
+						--	--UPDATE IP
+						--	--	SET IP.dblSalePrice = ISNULL(CAST(@dblSalePrice AS DECIMAL(18,6)), 0.000000)
+						--	--FROM tblICItemLocation AS IL
+						--	--JOIN tblICItemUOM AS UOM 
+						--	--	ON UOM.intItemId = IL.intItemId
+						--	--JOIN tblICItemPricing AS IP 
+						--	--	ON IP.intItemLocationId = IL.intItemLocationId
+						--	--WHERE UOM.intItemUOMId = @intItemUOMId
+						--	--AND IL.intLocationId = @intLocationId
+						--END
+					END
 
 
 				-- Flag as processed
