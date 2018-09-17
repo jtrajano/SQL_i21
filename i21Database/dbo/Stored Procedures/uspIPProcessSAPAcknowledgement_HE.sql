@@ -256,7 +256,7 @@ BEGIN TRY
 			SELECT @intContractHeaderId = intContractHeaderId
 				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
-			WHERE RIGHT('000000000000' + strContractNumber, 12) = @strRefNo
+			WHERE RIGHT('000000000000' + strContractNumber, 12) = RIGHT('000000000000' + @strRefNo, 12)
 				AND intContractTypeId = 1
 
 			SELECT @intItemId = intItemId
