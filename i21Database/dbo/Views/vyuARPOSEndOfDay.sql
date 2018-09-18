@@ -89,4 +89,4 @@ OUTER APPLY(
 	WHERE intPOSLogId = POSLOG.intPOSLogId AND POS.intInvoiceId IS NOT NULL AND POS.ysnReturn = 0 AND(PAYMENT.strPaymentMethod = 'Cash' OR PAYMENT.strPaymentMethod = 'Check')
 	) CR
 	GROUP BY CR.intPOSLogId
-)CASHRECEIPT
+) CASHRECEIPT
