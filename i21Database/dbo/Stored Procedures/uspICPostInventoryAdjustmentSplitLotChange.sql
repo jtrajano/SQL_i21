@@ -222,6 +222,17 @@ BEGIN
 	END
 END
 
+--------------------------------------------------------------------------
+-- Check if there contents in @MergeLotSource and @MergeLotSourceStorage
+--------------------------------------------------------------------------
+IF	NOT EXISTS (SELECT TOP 1 1 FROM @MergeLotSource) 
+	AND NOT EXISTS (SELECT TOP 1 1 FROM @MergeLotSourceStorage) 
+BEGIN 
+	-- 'Please check if there is enough stock to do the split.'
+	EXEC uspICRaiseError 80222; 
+	RETURN -80222;
+END 
+
 --------------------------------------------------------------------------------
 -- REDUCE THE SOURCE LOT NUMBER STORAGE
 --------------------------------------------------------------------------------
