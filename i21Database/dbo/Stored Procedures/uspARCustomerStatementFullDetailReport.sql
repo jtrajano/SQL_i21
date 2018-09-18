@@ -24,6 +24,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @dtmDateFromLocal					AS DATETIME			= NULL
+	  , @dtmBalanceForwardDateLocal			AS DATETIME			= NULL
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= 0
 	  , @ysnPrintCreditBalanceLocal			AS BIT				= 1
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
@@ -53,6 +54,7 @@ SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
 SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
 SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 
 IF (@@version NOT LIKE '%2008%')
 	BEGIN
@@ -183,11 +185,12 @@ IF ISNULL(@strCustomerIdsLocal, '') = ''
 	END
 
 --BEGINNING BALANCE
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateFromLocal 
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal 
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
+										  , @ysnFromBalanceForward = 1
 
 SELECT *
 INTO #BEGINNINGBALANCE
@@ -195,18 +198,28 @@ FROM dbo.tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
+UPDATE #BEGINNINGBALANCE
+SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0) 
+  , dblFuture = 0.000000
+
 --AGING SUMMARY
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal 
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
+										  , @ysnFromBalanceForward = 0
+										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
 
 SELECT *
 INTO #AGINGSUMMARY
 FROM dbo.tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
+
+UPDATE #AGINGSUMMARY
+SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0) 
+  , dblFuture = 0.000000
 
 --STATEMENT TRANSACTIONS
 SELECT intEntityCustomerId		= C.intEntityCustomerId
@@ -275,6 +288,7 @@ LEFT JOIN (
 	AND I.ysnRejected = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType NOT IN ('Customer Prepayment', 'Overpayment')
+	AND I.strType <> 'CF Tran'
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 	UNION ALL
@@ -298,6 +312,7 @@ LEFT JOIN (
 	AND I.ysnCancelled = 0
 	AND I.ysnRejected = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+	AND I.strType <> 'CF Tran'
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	
 	UNION ALL
