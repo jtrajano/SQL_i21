@@ -22,7 +22,7 @@ BEGIN TRY
 				,CD.intContractStatusId intCurrentContractStatusId
 				,dbo.[fnCTGetSeqDisplayField](CD.intMarketZoneId,'tblARMarketZone') strMarketZoneCode--MZ.strMarketZoneCode
 				,IM.strItemNo
-				,XM.strUnitMeasure strAdjustmentUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intAdjItemUOMId,'tblICItemUOM') strAdjustmentUOM--XM.strUnitMeasure strAdjustmentUOM
 				,CL.strLocationName
 				,FT.strFreightTerm
 				,dbo.[fnCTGetSeqDisplayField](CD.intShipViaId,'tblEMEntity') strShipVia--SV.strName AS strShipVia
@@ -43,9 +43,9 @@ BEGIN TRY
 				,FI.[dblLotsFixed]
 				,CD.dblNoOfLots - ISNULL(FI.[dblLotsFixed], 0) AS dblUnpricedLots
 				,IC.strContractItemName
-				,WM.strUnitMeasure strNetWeightUOM
-				,PM.strUnitMeasure strPriceUOM
-				,ISNULL(RY.strCountry, OG.strCountry) AS strOrigin
+				,dbo.[fnCTGetSeqDisplayField](CD.intNetWeightUOMId,'tblICItemUOM') strNetWeightUOM--WM.strUnitMeasure strNetWeightUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intPriceItemUOMId,'tblICItemUOM') strPriceUOM--PM.strUnitMeasure strPriceUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId,'Origin') strOrigin--ISNULL(RY.strCountry, OG.strCountry) AS strOrigin
 				,dbo.[fnCTGetSeqDisplayField](CD.intIndexId,'tblCTIndex') strIndex--IX.strIndex
 				,CS.strContractStatus
 				,FI.intPriceFixationId
@@ -60,13 +60,8 @@ BEGIN TRY
 				,FI.ysnSpreadAvailable
 				,FI.ysnFixationDetailAvailable
 				,FI.ysnMultiPricingDetail
-				--,CASE 
-				--	WHEN	 CH.ysnCategory = 1
-				--		 THEN dbo.fnCTConvertQtyToTargetCategoryUOM(CD.intCategoryUOMId, GU.intCategoryUOMId, 1)
-				--	ELSE	 dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
-				--  END	 AS dblConversionFactor
-				,QU.dblUnitQty/ CM.dblUnitQty AS dblConversionFactor
-				,QM.strUnitMeasure strUOM--ISNULL(QM.strUnitMeasure, YM.strUnitMeasure) AS strUOM -- YM. is not in use
+				,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1) AS dblConversionFactor
+				,dbo.[fnCTGetSeqDisplayField](CD.intItemUOMId,'tblICItemUOM')strUOM --QM.strUnitMeasure strUOM--ISNULL(QM.strUnitMeasure, YM.strUnitMeasure) AS strUOM -- YM. is not in use
 				,CASE 
 					WHEN CH.ysnLoad = 1
 						THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
@@ -80,14 +75,14 @@ BEGIN TRY
 				,CQ.strContainerUOM --RM.strUnitMeasure strContainerUOM
 				,dbo.[fnCTGetSeqDisplayField](CD.intSubLocationId,'tblSMCompanyLocationSubLocation') strSubLocationName --SB.strSubLocationName
 				,dbo.[fnCTGetSeqDisplayField](CD.intStorageLocationId,'tblICStorageLocation') strStorageLocationName --SL.strName AS strStorageLocationName
-				,LP.strCity AS strLoadingPoint
-				,DP.strCity AS strDestinationPoint
+				,dbo.[fnCTGetSeqDisplayField](CD.intLoadingPortId,'tblSMCity') strLoadingPoint--LP.strCity AS strLoadingPoint
+				,dbo.[fnCTGetSeqDisplayField](CD.intDestinationPortId,'tblSMCity') strDestinationPoint--DP.strCity AS strDestinationPoint
 				,dbo.[fnCTGetLastApprovalStatus](CD.intContractHeaderId) strApprovalStatus
 				,MA.dblContractSize AS dblMarketContractSize
 				,MA.intUnitMeasureId AS intMarketUnitMeasureId
 				,MA.intCurrencyId AS intMarketCurrencyId
 				,MU.strUnitMeasure AS strMarketUnitMeasure
-				,XM.strUnitType AS strQtyUnitType
+				,dbo.[fnCTGetSeqDisplayField](CD.intAdjItemUOMId,'tblICItemUOMUnitType') strQtyUnitType--XM.strUnitType AS strQtyUnitType
 				,CAST(ISNULL(LG.intLoadDetailId, 0) AS BIT) AS ysnLoadAvailable
 				,dbo.[fnCTGetSeqDisplayField](CD.intBookId,'tblCTBook') strBook --BK.strBook
 				,dbo.[fnCTGetSeqDisplayField](CD.intSubBookId,'tblCTSubBook') strSubBook --SK.strSubBook
@@ -101,11 +96,11 @@ BEGIN TRY
 				,dbo.[fnCTGetSeqDisplayField](CD.intStorageScheduleRuleId,'tblGRStorageScheduleRule') strScheduleDescription--,SR.strScheduleDescription
 				,NULL AS strCategoryCode--CG.strCategoryCode --CG. is not in use
 				,CQ.strContainerType
-				,DY.strCity AS strDestinationCity
+				,dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId,'tblSMCity') strDestinationCity--DY.strCity AS strDestinationCity
 				,IY.strCurrency AS strInvoiceCurrency
 				,'From ' + FY.strCurrency + ' To ' + TY.strCurrency AS strExchangeRate
 				,PG.strName AS strPurchasingGroup
-				,FM.strUnitMeasure AS strFXPriceUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intFXPriceUOMId,'tblICItemUOM') strFXPriceUOM--FM.strUnitMeasure AS strFXPriceUOM
 				,RT.strCurrencyExchangeRateType
 				,dbo.[fnCTGetSeqDisplayField](CD.intProducerId,'tblEMEntity') strProducer--PR.strName AS strProducer
 				,CU.intCent AS intPriceCurrencyCent
@@ -115,8 +110,8 @@ BEGIN TRY
 				,BC.ysnSubCurrency AS ysnBasisSubCurrency
 				,CC.strCurrency AS strConvertedCurrency
 				,CC.ysnSubCurrency AS ysnConvertedSubCurrency
-				,BM.strUnitMeasure AS strBasisUOM
-				,VM.strUnitMeasure AS strConvertedUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intBasisUOMId,'tblICItemUOM') strBasisUOM --BM.strUnitMeasure AS strBasisUOM
+				,dbo.[fnCTGetSeqDisplayField](CD.intConvPriceUOMId,'tblICItemUOM') strConvertedUOM -- VM.strUnitMeasure AS strConvertedUOM
 				,[dbo].[fnCTIsMultiAllocationExists](CD.intContractDetailId) ysnMultiAllocation
 				,[dbo].[fnCTIsMultiDerivativesExists](CD.intContractDetailId) ysnMultiDerivatives
 				,AD.intSeqCurrencyId
@@ -169,29 +164,30 @@ BEGIN TRY
 	  --LEFT    JOIN	tblICUnitMeasure				YM	ON	YM.intUnitMeasureId					=		YU.intUnitMeasureId			--strUOM
 		LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
 		LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
-		LEFT    JOIN	tblICItemUOM					QU	ON	QU.intItemUOMId						=		CD.intItemUOMId				
-		LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
-		LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		
-		LEFT    JOIN	tblICUnitMeasure				WM	ON	WM.intUnitMeasureId					=		WU.intUnitMeasureId			--strNetWeightUOM
-		LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId		
-		LEFT    JOIN	tblICUnitMeasure				PM	ON	PM.intUnitMeasureId					=		PU.intUnitMeasureId			--strPriceUOM
-		LEFT    JOIN	tblICItemUOM					XU	ON	XU.intItemUOMId						=		CD.intAdjItemUOMId
-		LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
-		LEFT    JOIN	tblICItemUOM					FU	ON	FU.intItemUOMId						=		CD.intFXPriceUOMId
-		LEFT    JOIN	tblICUnitMeasure				FM	ON	FM.intUnitMeasureId					=		FU.intUnitMeasureId			--strFXPriceUOM
-		LEFT    JOIN	tblICItemUOM					BU	ON	BU.intItemUOMId						=		CD.intBasisUOMId
-		LEFT    JOIN	tblICUnitMeasure				BM	ON	BM.intUnitMeasureId					=		BU.intUnitMeasureId			--strBasisUOM
-		LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
-		LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
+
+	  --LEFT    JOIN	tblICItemUOM					QU	ON	QU.intItemUOMId						=		CD.intItemUOMId				
+	  --LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
+	  --LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		
+	  --LEFT    JOIN	tblICUnitMeasure				WM	ON	WM.intUnitMeasureId					=		WU.intUnitMeasureId			--strNetWeightUOM
+	  --LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId		
+	  --LEFT    JOIN	tblICUnitMeasure				PM	ON	PM.intUnitMeasureId					=		PU.intUnitMeasureId			--strPriceUOM
+	  --LEFT    JOIN	tblICItemUOM					XU	ON	XU.intItemUOMId						=		CD.intAdjItemUOMId
+	  --LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
+	  --LEFT    JOIN	tblICItemUOM					FU	ON	FU.intItemUOMId						=		CD.intFXPriceUOMId
+	  --LEFT    JOIN	tblICUnitMeasure				FM	ON	FM.intUnitMeasureId					=		FU.intUnitMeasureId			--strFXPriceUOM
+	  --LEFT    JOIN	tblICItemUOM					BU	ON	BU.intItemUOMId						=		CD.intBasisUOMId
+	  --LEFT    JOIN	tblICUnitMeasure				BM	ON	BM.intUnitMeasureId					=		BU.intUnitMeasureId			--strBasisUOM
+	  --LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
+	  --LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
 	  --LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
 	
 		LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
 		LEFT    JOIN	tblICUnitMeasure				MU	ON	MU.intUnitMeasureId					=		MA.intUnitMeasureId
 		LEFT    JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId					=		CD.intFutureMonthId			--strFutureMonth
 	
-		LEFT    JOIN	tblSMCity						DY	ON	DY.intCityId						=		CD.intDestinationCityId		--strDestinationCity
-		LEFT    JOIN	tblSMCity						DP	ON	DP.intCityId						=		CD.intDestinationPortId		--strDestinationPort
-		LEFT    JOIN	tblSMCity						LP	ON	LP.intCityId						=		CD.intLoadingPortId			--strLoadingPort
+	  --LEFT    JOIN	tblSMCity						DY	ON	DY.intCityId						=		CD.intDestinationCityId		--strDestinationCity
+	  --LEFT    JOIN	tblSMCity						DP	ON	DP.intCityId						=		CD.intDestinationPortId		--strDestinationPort
+	  --LEFT    JOIN	tblSMCity						LP	ON	LP.intCityId						=		CD.intLoadingPortId			--strLoadingPort
 		LEFT    JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=		CD.intCompanyLocationId		--strLocationName
 		LEFT    JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID					=		CD.intCurrencyId			--strCurrency
 		LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
@@ -209,10 +205,10 @@ BEGIN TRY
 		LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
 	  --LEFT    JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=		CD.intSubLocationId 		--strLocationName
 	
-		LEFT    JOIN	tblSMCountry					RY	ON	RY.intCountryID						=		IC.intCountryId
-		LEFT    JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId			=		IM.intOriginId												
-															AND	CA.strType							=		'Origin'			
-		LEFT    JOIN	tblSMCountry					OG	ON	OG.intCountryID						=		CA.intCountryID	
+	  --LEFT    JOIN	tblSMCountry					RY	ON	RY.intCountryID						=		IC.intCountryId
+	  --LEFT    JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId			=		IM.intOriginId												
+		--													AND	CA.strType							=		'Origin'			
+	  --LEFT    JOIN	tblSMCountry					OG	ON	OG.intCountryID						=		CA.intCountryID	
 		LEFT	JOIN	tblICCommodityUnitMeasure		CO	ON	CO.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				
 		LEFT    JOIN	tblICItemUOM					CM	ON	CM.intItemId						=		CD.intItemId		
 															AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId		
@@ -243,7 +239,7 @@ BEGIN TRY
 		OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
 		OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
 		OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
-		OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId,CD.intContainerTypeId,ISNULL(IC.intCountryId,CA.intCountryID)) CQ
+		OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId,CD.intContainerTypeId,dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId,'Origin')) CQ
 		CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		
 	)t ORDER BY intContractSeq
