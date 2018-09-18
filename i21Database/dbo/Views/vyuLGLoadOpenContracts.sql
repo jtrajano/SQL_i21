@@ -49,7 +49,7 @@ SELECT CD.intContractDetailId
 			END 
 		END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
-	,CH.ysnLoad
+	,ISNULL(CH.ysnLoad, 0) AS ysnLoad
 	,CD.dblQuantityPerLoad
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
@@ -215,7 +215,7 @@ SELECT CD.intContractDetailId
 				END 
 			END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
-	,CH.ysnLoad
+	,ISNULL(CH.ysnLoad, 0) AS ysnLoad
 	,CD.dblQuantityPerLoad
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
