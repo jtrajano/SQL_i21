@@ -1,8 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnCTGetSeqContainerInfo]
 (
-	@intCommodityId	   INT,
-	@intContainerTypeId	   INT,
-	@intCountryId		   INT
+	@intCommodityId		INT,
+	@intContainerTypeId	INT,
+	@strCountry			NVARCHAR(50)
 )
 
 RETURNS	@returntable	TABLE
@@ -15,7 +15,10 @@ RETURNS	@returntable	TABLE
 
 AS
 BEGIN
-    IF EXISTS(SELECT TOP 1 1 FROM tblLGContainerType WHERE intContainerTypeId = ISNULL(@intContainerTypeId,0))
+	DECLARE @intCountryId	INT
+	SELECT	@intCountryId	=	intCountryID FROM tblSMCountry WHERE strCountry = @strCountry
+
+    IF EXISTS(SELECT TOP 1 1 FROM tblLGContainerType WHERE intContainerTypeId = ISNULL(@intContainerTypeId,0)) AND @intCountryId IS NOT NULL
     BEGIN
 	   INSERT INTO @returntable(dblBulkQuantity,dblBagQuantity,strContainerType,strContainerUOM)	
 	   SELECT 	dblBulkQuantity,dblBagQuantity,strContainerType,RM.strUnitMeasure
