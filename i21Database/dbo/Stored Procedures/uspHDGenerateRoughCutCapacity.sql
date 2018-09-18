@@ -213,14 +213,11 @@ INSERT INTO tblHDRoughCountCapacity
 						,dtmPlanDate = getdate()
 						,strFilterKey = @strIdentifier
 			from
-				tblHDTicketHoursWorked a
-				,tblHDTicket b
-				,tblEMEntity c
-				,tblEMEntity d
+				tblHDTicket b
+				join tblEMEntity c on c.intEntityId = b.intAssignedToEntity
+				join tblEMEntity d on d.intEntityId = b.intCustomerId
+				left join tblHDTicketHoursWorked a on b.intTicketId = a.intTicketId
 			where
-				b.intTicketId = a.intTicketId
-				and c.intEntityId = b.intAssignedToEntity
-				and d.intEntityId = b.intCustomerId
-				and convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) between @intDateFrom and @intDateTo
+				convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) between @intDateFrom and @intDateTo
 
 END
