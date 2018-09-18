@@ -14,5 +14,6 @@
 	[ysnSeparateOnBill]			BIT NOT NULL DEFAULT 0, 
 	[ysnCheckOffTax]			BIT NOT NULL DEFAULT 0,
 	[ysnTaxOnly]				BIT NOT NULL DEFAULT 0,
+	[ysnTaxExempt]              BIT NOT NULL DEFAULT 0,
 	[dtmDateEntered]			DATETIME DEFAULT(GETDATE())
 )

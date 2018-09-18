@@ -5,6 +5,7 @@
 */
 CREATE PROCEDURE [dbo].[uspAPAddVoucherDetail]
 	@voucherDetails AS VoucherPayable READONLY
+	,@voucherPayableTax AS VoucherDetailTax READONLY
 	,@throwError BIT = 1
 	,@error NVARCHAR(1000) = NULL OUTPUT
 AS

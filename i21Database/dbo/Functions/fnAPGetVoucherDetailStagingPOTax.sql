@@ -1,6 +1,6 @@
-﻿CREATE FUNCTION [dbo].[fnAPGetVoucherDetailReceiptTax]
+﻿CREATE FUNCTION [dbo].[fnAPGetVoucherDetailStagingPOTax]
 (
-	@intInventoryReceiptItemId INT
+	@voucherPayableId INT
 )
 RETURNS TABLE AS RETURN
 (
@@ -11,17 +11,15 @@ RETURNS TABLE AS RETURN
 		[strTaxableByOtherTaxes]	=	A.strTaxableByOtherTaxes, 
 		[strCalculationMethod]		=	A.strCalculationMethod, 
 		[dblRate]					=	A.dblRate, 
-		[intAccountId]				=	A.intTaxAccountId, 
+		[intAccountId]				=	A.intAccountId, 
 		[dblTax]					=	A.dblTax, 
 		[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 		[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]			=	A.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]			=	A.ysnCheckoffTax,
 		[strTaxCode]				=	D.strTaxCode,
-		[ysnTaxOnly]				=	A.ysnTaxOnly
-	FROM tblICInventoryReceiptItemTax A
-	INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-	--INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
-	INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
-	WHERE B.intInventoryReceiptItemId = @intInventoryReceiptItemId
+		[ysnTaxOnly]				=	A.ysnTaxOnly,
+		[ysnTaxExempt]				=	A.ysnTaxExempt
+	FROM tblAPVoucherPayableTaxStaging A
+	WHERE A.intVoucherPayableId = @voucherPayableId
 )

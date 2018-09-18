@@ -72,7 +72,8 @@ INSERT INTO @voucherPayables(
 SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds);
 
 INSERT INTO @voucherPayableTax (
-	[intTaxGroupId]				
+	[intVoucherPayableId]
+	,[intTaxGroupId]				
 	,[intTaxCodeId]				
 	,[intTaxClassId]				
 	,[strTaxableByOtherTaxes]	
@@ -83,9 +84,12 @@ INSERT INTO @voucherPayableTax (
 	,[dblAdjustedTax]			
 	,[ysnTaxAdjusted]			
 	,[ysnSeparateOnBill]			
-	,[ysnCheckOffTax]			
+	,[ysnCheckOffTax]		
+	,[ysnTaxExempt]	
+	,[ysnTaxOnly]
 )
 SELECT
+	[intVoucherPayableId]		=	payables.intVoucherPayableId,
 	[intTaxGroupId]				=	A.intTaxGroupId, 
 	[intTaxCodeId]				=	A.intTaxCodeId, 
 	[intTaxClassId]				=	A.intTaxClassId, 
@@ -97,15 +101,18 @@ SELECT
 	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
-	[ysnCheckOffTax]			=	A.ysnCheckOffTax
+	[ysnCheckOffTax]			=	A.ysnCheckOffTax,
+	[ysnTaxExempt]				=	A.ysnTaxExempt,
+	[ysnTaxOnly]				=	A.ysnTaxOnly
 FROM tblPOPurchaseDetailTax A
 INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
 INNER JOIN @voucherPayables payables ON B.intPurchaseDetailId = payables.intPurchaseDetailId
+LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
 WHERE (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL) AND payables.dblTax != 0
 
 IF @remove = 0
 BEGIN
-	EXEC uspAPUpdateVoucherPayableQty @voucherPayables, NULL
+	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax
 END
 ELSE
 BEGIN

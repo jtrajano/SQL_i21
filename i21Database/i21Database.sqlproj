@@ -7055,6 +7055,7 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxStaging.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
     <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeStagingTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

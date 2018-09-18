@@ -24,7 +24,8 @@ DECLARE @vouchers AS TABLE(
 	,intLoadShipmentDetailId INT NULL
 	);
 DECLARE @payablesDeleted AS TABLE(
-	intEntityVendorId INT NULL
+	intVoucherPayableId INT NOT NULL
+	,intEntityVendorId INT NULL
 	,intPurchaseDetailId INT NULL
 	,intContractDetailId INT NULL
 	,intScaleTicketId INT NULL
@@ -74,7 +75,8 @@ BEGIN
 	BEGIN
 		--IF THERE IS A VOUCHERS CREATED, DELETE ONLY IF QTY TO BILL IS 0
 		DELETE A
-		OUTPUT deleted.intEntityVendorId
+		OUTPUT deleted.intVoucherPayableId
+			,deleted.intEntityVendorId
 			,deleted.intPurchaseDetailId
 			,deleted.intContractDetailId
 			,deleted.intScaleTicketId
@@ -95,6 +97,12 @@ BEGIN
 		WHERE A.dblQuantityToBill = 0
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;
+
+		--REMOVE TAXES STAGING
+		DELETE A
+		FROM tblAPVoucherPayableTaxStaging A
+		INNER JOIN @payablesDeleted B
+			ON A.intVoucherPayableId = B.intVoucherPayableId
 
 		--REMOVE FROM @vouchers the deleted
 		DELETE A
@@ -122,6 +130,16 @@ BEGIN
 	BEGIN
 		--NO VOUCHER CREATED
 		DELETE A
+		OUTPUT deleted.intVoucherPayableId
+			,deleted.intEntityVendorId
+			,deleted.intPurchaseDetailId
+			,deleted.intContractDetailId
+			,deleted.intScaleTicketId
+			,deleted.intInventoryReceiptChargeId
+			,deleted.intInventoryReceiptItemId
+			,deleted.intInventoryShipmentChargeId
+			,deleted.intLoadShipmentDetailId
+		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable B ON ISNULL(A.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
 			AND ISNULL(A.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
@@ -142,6 +160,12 @@ BEGIN
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;
+
+		--REMOVE TAXES STAGING
+		DELETE A
+		FROM tblAPVoucherPayableTaxStaging A
+		INNER JOIN @payablesDeleted B
+			ON A.intVoucherPayableId = B.intVoucherPayableId
 	END
 
 	IF @recordCountToDelete != @recordCountDeleted

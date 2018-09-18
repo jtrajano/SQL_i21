@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPRecomputeTaxes]
 (
-	@taxes AS VoucherDetailTax READONLY,
+	@voucherPayableId INT,
 	@cost DECIMAL(38,20),
 	@quantity DECIMAL(38,20)
 )
@@ -24,7 +24,8 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @ZeroDecimal NUMERIC(18, 6)
+	DECLARE @ZeroDecimal NUMERIC(18, 6);
+	DECLARE @id INT = @voucherPayableId;
 	SET @ZeroDecimal = 0.000000
 	DECLARE @ExcludeCheckOff BIT = 0;
 	
@@ -44,7 +45,7 @@ BEGIN
 		,[ysnTaxExempt]					BIT
 		,[ysnTaxOnly]					BIT DEFAULT 0
 		,[ysnTaxAdjusted]				BIT DEFAULT 0
-		,[ysnComputed]					BIT
+		,[ysnComputed]					BIT DEFAULT 0
 	)
 
 	INSERT INTO @ItemTaxes(
@@ -78,7 +79,8 @@ BEGIN
 		,[ysnTaxExempt]				= A.[ysnTaxExempt]	
 		,[ysnTaxOnly]				= A.[ysnTaxOnly]	
 		,[ysnTaxAdjusted]		    = A.[ysnTaxAdjusted]
-	FROM @taxes A
+	FROM tblAPVoucherPayableTaxStaging A
+	WHERE A.intVoucherPayableId = @id;
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
 	BEGIN
