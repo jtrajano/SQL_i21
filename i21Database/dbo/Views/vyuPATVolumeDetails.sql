@@ -32,8 +32,6 @@ FROM (SELECT	CV.intFiscalYear,
 	FROM tblEMEntity EM
 	INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = EM.intEntityId AND AR.strStockStatus != '' AND AR.dtmMembershipDate IS NULL
-	INNER JOIN tblAPVendor AP
-		ON AP.intEntityId = EM.intEntityId
 	CROSS JOIN tblGLFiscalYear FY
 	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
 	UNION
@@ -45,8 +43,6 @@ FROM (SELECT	CV.intFiscalYear,
 	FROM tblEMEntity EM
 	INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = EM.intEntityId AND AR.strStockStatus != '' AND AR.dtmMembershipDate IS NOT NULL
-	INNER JOIN tblAPVendor AP
-		ON AP.intEntityId = EM.intEntityId
 	INNER JOIN tblGLFiscalYear FY
 		ON FY.dtmDateFrom >= AR.dtmMembershipDate
 	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
