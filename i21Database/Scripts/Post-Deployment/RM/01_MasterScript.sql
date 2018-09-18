@@ -19,19 +19,24 @@ BEGIN
 END
 END
 GO
-IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE strM2MView IS NULL)
+IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(strM2MView, '') = '')
 BEGIN
-	UPDATE tblRKCompanyPreference SET strM2MView = 'View 1 - Standard' WHERE strM2MView IS NULL
+	UPDATE tblRKCompanyPreference SET strM2MView = 'View 1 - Standard' WHERE ISNULL(strM2MView, '') = ''
 END
 GO
 
 GO
-IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE dblRefreshRate IS NULL)
+IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(dblRefreshRate, 0) = 0)
 BEGIN
-	UPDATE tblRKCompanyPreference SET dblRefreshRate = 5 WHERE dblRefreshRate IS NULL
+	UPDATE tblRKCompanyPreference SET dblRefreshRate = 5 WHERE ISNULL(dblRefreshRate, 0) = 0
 END
 GO
 
+IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(strDateTimeFormat, '') = '')
+BEGIN
+	UPDATE tblRKCompanyPreference SET strDateTimeFormat = 'MM DD YYYY HH:MI' WHERE ISNULL(strDateTimeFormat, '') = ''
+END
+GO
 
 PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
 GO
