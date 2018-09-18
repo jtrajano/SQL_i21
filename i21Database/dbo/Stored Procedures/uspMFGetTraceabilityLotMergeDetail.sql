@@ -31,7 +31,7 @@ BEGIN
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
-		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intSourceLotId = @intLotId
@@ -57,7 +57,7 @@ BEGIN
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 		JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
-		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intSourceLotId = @intLotId
@@ -85,7 +85,7 @@ BEGIN
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
-		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intDestinationLotId = @intLotId
@@ -122,7 +122,7 @@ BEGIN
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
-		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intSourceLotId = @intLotId
@@ -159,7 +159,7 @@ BEGIN
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
-		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intDestinationLotId = @intLotId
@@ -185,7 +185,7 @@ BEGIN
 		FROM tblICLot l
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
-		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intSourceLotId = @intLotId
@@ -211,7 +211,7 @@ BEGIN
 		JOIN tblICItem i ON l.intItemId = i.intItemId
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 		JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
-		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId
+		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intDestinationLotId = @intLotId
