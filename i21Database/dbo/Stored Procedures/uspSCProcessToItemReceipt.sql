@@ -383,25 +383,25 @@ BEGIN TRY
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
 							INSERT INTO @ItemsForItemReceipt (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
-							,strSourceTransactionId  
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId
+								,ysnIsStorage
+								,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;

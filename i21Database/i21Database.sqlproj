@@ -7050,6 +7050,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCustomerStorageBalance.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageHistoryUserId.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateDiscountandShrink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

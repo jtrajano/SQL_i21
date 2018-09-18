@@ -75,13 +75,7 @@ BEGIN
 	)
 END 
 
---IF(@batchId IS NULL)
---	EXEC uspSMGetStartingNumber 105, @batchId OUT
-
---SET @ticketBatchId = @batchId
-
--- Insert Entries to Stagging table that needs to processed to Transport Load
-INSERT into @ReceiptStagingTable(
+INSERT INTO @ReceiptStagingTable(
 		-- Header
 		strReceiptType
 		,intEntityVendorId

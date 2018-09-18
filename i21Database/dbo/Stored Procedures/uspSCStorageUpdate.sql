@@ -53,6 +53,7 @@ DECLARE @total AS INT;
 
 DECLARE @ItemsForItemShipment AS ItemCostingTableType
 		,@ItemsForItemShipmentContract AS ItemCostingTableType
+		,@CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@InventoryShipmentId	INT
 		,@ErrMsg				NVARCHAR(MAX)
         ,@dblBalance			NUMERIC(12,4)
@@ -298,182 +299,164 @@ BEGIN TRY
 		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
 		RETURN;
 	END
-	
-	SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId ,@intUnitMeasureId = ItemUOM.intUnitMeasureId
-	FROM    dbo.tblICItemUOM ItemUOM
-	WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
 
-	-- Insert the Customer Storage Record 
-	INSERT INTO [dbo].[tblGRCustomerStorage]
-	           ([intConcurrencyId]
-	           ,[intEntityId]
-	           ,[intCommodityId]
-	           ,[intStorageScheduleId]
-	           ,[intStorageTypeId]
-	           ,[intCompanyLocationId]
-	           ,[intTicketId]
-	           ,[intDiscountScheduleId]
-	           ,[dblTotalPriceShrink]
-	           ,[dblTotalWeightShrink]
-	           ,[dblOriginalBalance]
-	           ,[dblOpenBalance]
-	           ,[dtmDeliveryDate]
-	           ,[dtmZeroBalanceDate]
-	           ,[strDPARecieptNumber]
-	           ,[dtmLastStorageAccrueDate]
-	           ,[dblStorageDue]
-	           ,[dblStoragePaid]
-	           ,[dblInsuranceRate]
-	           ,[strOriginState]
-	           ,[strInsuranceState]
-	           ,[dblFeesDue]
-	           ,[dblFeesPaid]
-	           ,[dblFreightDueRate]
-	           ,[ysnPrinted]
-	           ,[dblCurrencyRate]
-			   ,[intCurrencyId]
-			   ,[strStorageTicketNumber]
-			   ,[intItemId]
-			   ,[intCompanyLocationSubLocationId]
-			   ,[intStorageLocationId]
-			   ,[intUnitMeasureId]
-			   ,[intItemUOMId])
-	SELECT 	[intConcurrencyId]		= 1
-			,[intEntityId]			= @intEntityId
-			,[intCommodityId]		= SC.intCommodityId
-			,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
-			,[intStorageTypeId]		= @intGRStorageId
-			,[intCompanyLocationId]= SC.intProcessingLocationId
-			,[intTicketId]= SC.intTicketId
-			,[intDiscountScheduleId]= SC.intDiscountSchedule
-			,[dblTotalPriceShrink]= 0
-			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= @dblNetUnits
-			,[dblOpenBalance]= @dblNetUnits
-			,[dtmDeliveryDate]= SC.dtmTicketDateTime
-			,[dtmZeroBalanceDate]= NULL
-			,[strDPARecieptNumber]= NULL
-			,[dtmLastStorageAccrueDate]= NULL 
-			,[dblStorageDue]= 0 
-			,[dblStoragePaid]= 0
-			,[dblInsuranceRate]= 0 
-			,[strOriginState]= NULL 
-			,[strInsuranceState]= NULL
-			,[dblFeesDue]=ROUND(SC.dblTicketFees,6) 
-			,[dblFeesPaid]= 0 
-			,[dblFreightDueRate]= 0 
-			,[ysnPrinted]= 0 
-			,[dblCurrencyRate]= 1
-			,[intCurrencyId] = SC.intCurrencyId
-			,[intStorageTicketNumber] = SC.strTicketNumber
-			,SC.[intItemId]
-			,SC.[intSubLocationId]
-			,SC.[intStorageLocationId]
-			,@intUnitMeasureId
-			,@intTicketItemUOMId
-	FROM	dbo.tblSCTicket SC
-	WHERE	SC.intTicketId = @intTicketId
+	INSERT INTO @CustomerStorageStagingTable(
+		[intEntityId]
+		,[intItemId]
+		,[intCommodityId]
+		,[intCompanyLocationId]
+		,[intCompanyLocationSubLocationId]
+		,[intStorageLocationId]
+		,[dblQuantity]
+		,[intStorageTypeId]
+		,[intStorageScheduleId]
+		,[intDiscountScheduleId]
+		,[dtmDeliveryDate]
+		,[dblFreightDueRate]
+		,[dblFeesDue]
+		,[intDeliverySheetId]
+		,[intTicketId]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intUnitMeasureId]						
+		,[intItemUOMId]
+		,[intCurrencyId]
+		,[intUserId]
+	)
+	SELECT 	
+		[intEntityId]							= @intEntityId
+		,[intItemId]							= SC.intItemId
+		,[intCommodityId]						= SC.intCommodityId
+		,[intCompanyLocationId]					= SC.intProcessingLocationId
+		,[intCompanyLocationSubLocationId]		= SC.intSubLocationId
+		,[intStorageLocationId]					= SC.intStorageLocationId
+		,[dblQuantity]							= @dblNetUnits
+		,[intStorageTypeId]						= @intGRStorageId
+		,[intStorageScheduleId]					= @intDefaultStorageSchedule
+		,[intDiscountScheduleId]				= SC.intDiscountSchedule
+		,[dtmDeliveryDate]						= dbo.fnRemoveTimeOnDate(SC.dtmTicketDateTime)
+		,[dblFreightDueRate]					= 0
+		,[dblFeesDue]							= ROUND(SC.dblTicketFees,6) 
+		,[intDeliverySheetId]					= SC.intDeliverySheetId
+		,[intTicketId]							= SC.intTicketId
+		,[intContractHeaderId]					= CT.intContractHeaderId
+		,[intContractDetailId]					= SC.intContractId
+		,[intUnitMeasureId]						= UOM.intUnitMeasureId
+		,[intItemUOMId]							= SC.intItemUOMIdTo
+		,[intCurrencyId]						= SC.intCurrencyId
+		,[intUserId]							= @intUserId
+	FROM dbo.tblSCTicket SC
+	LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = SC.intItemId AND UOM.intItemUOMId = SC.intItemUOMIdTo
+	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = SC.intContractId
+	WHERE SC.intTicketId = @intTicketId
 
-	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
-	
-	IF @intCustomerStorageId IS NULL 
+	EXEC uspGRCreateCustomerStorage @CustomerStorageStagingTable, @intHoldCustomerStorageId OUTPUT
+
+	IF EXISTS(SELECT * FROM @CustomerStorageStagingTable WHERE ISNULL(intDeliverySheetId,0) > 0)
 	BEGIN
-		RAISERROR('Unable to get Identity value from Customer Storage', 16, 1);
-		RETURN;
-	END
-
-	INSERT INTO [dbo].[tblGRStorageHistory]
-		   ([intConcurrencyId]
-		   ,[intCustomerStorageId]
-		   ,[intTicketId]
-		   ,[intInventoryReceiptId]
-		   ,[intInvoiceId]
-		   ,[intContractHeaderId]
-		   ,[dblUnits]
-		   ,[dtmHistoryDate]
-		   ,[dblPaidAmount]
-		   ,[strPaidDescription]
-		   ,[dblCurrencyRate]
-		   ,[strType]
-		   ,[strUserName]
-		   ,[intUserId]
-		   ,[intTransactionTypeId])
-	VALUES
-		   (1
-		   ,@intCustomerStorageId
-		   ,@intTicketId
-		   ,NULL
-		   ,NULL
-		   ,@intContractHeaderId
-		   ,@dblNetUnits
-		   ,dbo.fnRemoveTimeOnDate((SELECT dtmTicketDateTime FROM tblSCTicket WHERE intTicketId = @intTicketId))
-		   ,0
-		   ,'Generated From Scale'
-		   ,1
-		   ,'From Scale'
-		   ,NULL
-		   ,@intUserId
-		   ,1)
-	
-	SET @intHoldCustomerStorageId = NULL
-	SELECT @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
-	WHERE SD.intTicketFileId = @intCustomerStorageId and SD.[strSourceType]= 'Storage'
-	
-	IF @intHoldCustomerStorageId IS NULL
-	BEGIN
-		INSERT INTO [dbo].[tblQMTicketDiscount]
-           ([intConcurrencyId]         
-           ,[dblGradeReading]
-           ,[strCalcMethod]
-           ,[strShrinkWhat]
-           ,[dblShrinkPercent]
-           ,[dblDiscountAmount]
-           ,[dblDiscountDue]
-           ,[dblDiscountPaid]
-           ,[ysnGraderAutoEntry]
-           ,[intDiscountScheduleCodeId]
-           ,[dtmDiscountPaidDate]
-           ,[intTicketId]
-           ,[intTicketFileId]
-           ,[strSourceType]
-		   ,[intSort]
-		   ,[strDiscountChargeType])
-		SELECT	 
-			[intConcurrencyId]			= 1       
-           ,[dblGradeReading]			= SD.[dblGradeReading]
-           ,[strCalcMethod]				= SD.[strCalcMethod]
-           ,[strShrinkWhat]				= SD.[strShrinkWhat]			
-           ,[dblShrinkPercent]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblShrinkPercent]  ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblShrinkPercent])  END
-           ,[dblDiscountAmount]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblDiscountAmount] ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblDiscountAmount]) END
-           ,[dblDiscountDue]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblDiscountAmount] ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblDiscountAmount]) END
-           ,[dblDiscountPaid]			= ISNULL(SD.[dblDiscountPaid],0)
-           ,[ysnGraderAutoEntry]		= SD.[ysnGraderAutoEntry]
-           ,[intDiscountScheduleCodeId] = SD.[intDiscountScheduleCodeId]
-           ,[dtmDiscountPaidDate]		= SD.[dtmDiscountPaidDate]
-           ,[intTicketId]				= NULL
-           ,[intTicketFileId]			= @intCustomerStorageId
-           ,[strSourceType]				= 'Storage'
-		   ,[intSort]					= SD.[intSort]
-		   ,[strDiscountChargeType]		= SD.[strDiscountChargeType]
-		FROM	  dbo.[tblQMTicketDiscount] SD
-		JOIN      tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = SD.intDiscountScheduleCodeId
-		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = DCode.intUnitMeasureId
-		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
+		DECLARE @intId INT
+				,@finalGrossWeight NUMERIC (38,20)
+				,@wsGrossShrinkWeight NUMERIC (38,20)
+				,@wsWetShrinkWeight NUMERIC (38,20)
+				,@wsNetShrinkWeight NUMERIC (38,20)
+				,@wetWeight NUMERIC (38,20)
+				,@wsWetWeight NUMERIC (38,20)
+				,@totalWetShrink NUMERIC (38,20)
+				,@totalNetShrink NUMERIC (38,20)
+				,@totalShrinkPrice NUMERIC (38,20)
+				,@dblShrinkPercent NUMERIC(38,20)
+				,@finalShrinkUnits NUMERIC(38,20)
+				,@strShrinkWhat NVARCHAR(40);
 		
-		UPDATE CS
-		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
-			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
-		FROM tblGRCustomerStorage CS
-		JOIN (SELECT intTicketFileId,SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar' GROUP BY intTicketFileId)QM
-		ON CS.intCustomerStorageId=QM.intTicketFileId
+		DECLARE @CalculatedDiscount TABLE
+		(
+			[intExtendedKey] INT
+			,[dblFrom] NUMERIC(38, 20) NULL
+			,[dblTo] NUMERIC(38, 20) NULL
+			,[dblDiscountAmount] NUMERIC(38, 20) NULL
+			,[dblShrink] NUMERIC(38, 20) NULL
+			,[strMessage] NVARCHAR(40)
+			,[intDiscountCalculationOptionId] INT NULL
+			,[strCalculationDiscountOption] NVARCHAR(40)
+			,[strDiscountChargeType] NVARCHAR(40)
+			,[intShrinkCalculationOptionId] INT NULL
+			,[strCalculationShrinkOption] NVARCHAR(40)
+			,[intDiscountUOMId] INT NULL
+			,[intDeliverySheetId] INT NULL
+			,[intDiscountScheduleCodeId] INT NULL
+		)
+		INSERT INTO @CalculatedDiscount(
+			[intExtendedKey]
+			,[dblFrom]
+			,[dblTo]
+			,[dblDiscountAmount]
+			,[dblShrink]
+			,[strMessage]
+			,[intDiscountCalculationOptionId]
+			,[strCalculationDiscountOption]
+			,[strDiscountChargeType]
+			,[intShrinkCalculationOptionId]
+			,[strCalculationShrinkOption]
+			,[intDiscountUOMId]
+			,[intDeliverySheetId]
+			,[intDiscountScheduleCodeId]
+		)
+		SELECT 
+			[intExtendedKey]						= Discount.intExtendedKey
+			,[dblFrom]								= Discount.dblFrom
+			,[dblTo]								= Discount.dblTo
+			,[dblDiscountAmount]					= Discount.dblDiscountAmount
+			,[dblShrink]							= Discount.dblShrink
+			,[strMessage]							= Discount.strMessage
+			,[intDiscountCalculationOptionId]		= Discount.intDiscountCalculationOptionId
+			,[strCalculationDiscountOption]			= Discount.strCalculationDiscountOption
+			,[strDiscountChargeType]				= Discount.strDiscountChargeType
+			,[intShrinkCalculationOptionId]			= Discount.intShrinkCalculationOptionId
+			,[strCalculationShrinkOption]			= Discount.strCalculationShrinkOption
+			,[intDiscountUOMId] 					= Discount.intDiscountUOMId
+			,[intDeliverySheetId]					= CS.intDeliverySheetId
+			,[intDiscountScheduleCodeId]			= QM.intDiscountScheduleCodeId
+		FROM @CustomerStorageStagingTable CS
+		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
+		LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnGRCalculateDiscountandShrink(QM.intDiscountScheduleCodeId, QM.dblGradeReading , 0, GR.intItemId)
+		) Discount
+		
+		SELECT @finalGrossWeight = (SCD.dblGross + CS.dblQuantity) FROM tblSCDeliverySheet SCD
+		INNER JOIN @CustomerStorageStagingTable CS ON CS.intDeliverySheetId = SCD.intDeliverySheetId
 
+		SELECT @intId = MIN(intDiscountScheduleCodeId) FROM @CalculatedDiscount WHERE intDiscountScheduleCodeId > 0
+		WHILE ISNULL(@intId,0) > 0
+		BEGIN
+			SELECT @strShrinkWhat = strCalculationShrinkOption, @dblShrinkPercent = dblShrink FROM @CalculatedDiscount WHERE intDiscountScheduleCodeId = @intId
+			IF @strShrinkWhat = 'Wet Weight'
+                SET @totalWetShrink = ISNULL(@totalWetShrink,0) + @dblShrinkPercent;
+            ELSE IF @strShrinkWhat = 'Net Weight'
+                SET @totalNetShrink = ISNULL(@totalNetShrink,0) + @dblShrinkPercent
+            ELSE IF @strShrinkWhat = 'Gross Weight'
+                SET @totalShrinkPrice = ISNULL(@totalShrinkPrice,0) + @dblShrinkPercent;
+			SELECT @intId = MIN(intDiscountScheduleCodeId) FROM @CalculatedDiscount WHERE intDiscountScheduleCodeId > @intId
+		END
+
+		SET @wsGrossShrinkWeight = (ISNULL(@finalGrossWeight, 0) * ISNULL(@totalShrinkPrice, 0)) / 100
+        SET @wetWeight = (@finalGrossWeight - @wsGrossShrinkWeight)
+        SET @wsWetShrinkWeight = (ISNULL(@wetWeight, 0) * ISNULL(@totalWetShrink, 0) ) / 100
+        SET @wsWetWeight = (@wetWeight - @wsWetShrinkWeight)
+        SET @wsNetShrinkWeight = (ISNULL(@wsWetWeight, 0) * ISNULL(@totalNetShrink, 0)) / 100
+        SET @finalShrinkUnits = (@wsGrossShrinkWeight + @wsWetShrinkWeight + @wsNetShrinkWeight)
+
+		UPDATE SCD SET SCD.dblGross = @finalGrossWeight, SCD.dblShrink = @finalShrinkUnits , SCD.dblNet = (@finalGrossWeight - @finalShrinkUnits)
+		FROM tblSCDeliverySheet SCD
+		INNER JOIN @CustomerStorageStagingTable CS ON CS.intDeliverySheetId = SCD.intDeliverySheetId
+		WHERE CS.intTicketId = @intTicketId AND ISNULL(CS.intDeliverySheetId, 0) > 0
 	END
-	
+
 	IF @intGRStorageId > 0
 	BEGIN
 		SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
 	END
-
+	
 	SELECT intItemId = ScaleTicket.intItemId
 			,intLocationId = ItemLocation.intItemLocationId 
 			,intItemUOMId = ItemUOM.intItemUOMId

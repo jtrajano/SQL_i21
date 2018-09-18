@@ -18,6 +18,7 @@
 	[intStorageScheduleRuleId] INT NULL, 
 	[intCompanyId] INT NULL,
     [ysnPost] BIT NULL DEFAULT (0),
+    [ysnLockSummaryGrid] BIT NULL DEFAULT (0),
 	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),  
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
