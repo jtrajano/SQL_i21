@@ -107,6 +107,15 @@ DECLARE @tblHoldContract TABLE (
 		,intContractSeq INT
 		)
 
+DECLARE @tblRollUpContract TABLE (
+		intContractHeaderId INT
+		,ysnMaxPrice INT
+		)
+DECLARE @tblRollUpFinalContract TABLE (
+		intContractHeaderId INT
+		,ysnMaxPrice INT
+		)
+
 SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 
 SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
@@ -115,12 +124,23 @@ Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
 Update tblCTContractFeed Set strFeedStatus ='' Where strFeedStatus ='Hold'
 
+Update CF 
+Set ysnMaxPrice =(Select Top 1 CF1.ysnMaxPrice  From tblCTContractFeed CF1 Where CF1.intContractHeaderId=CF.intContractHeaderId Order by intContractFeedId asc)
+	OUTPUT inserted.intContractHeaderId
+		,inserted.ysnMaxPrice
+	INTO @tblRollUpContract
+FROM tblCTContractFeed CF
+WHERE ISNULL(strFeedStatus, '') = ''
+
+Insert into @tblRollUpFinalContract
+Select distinct intContractHeaderId,ysnMaxPrice from @tblRollUpContract
+
 IF EXISTS (
 		SELECT *
 		FROM tblCTContractFeed CF
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-			AND IsNULL(CH.ysnMaxPrice, 0) = 1
-		WHERE ISNULL(strFeedStatus, '') = ''
+		--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
+		WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
 			AND UPPER(strRowState) IN (
 				'MODIFIED'
 				,'DELETE'
@@ -133,12 +153,12 @@ BEGIN
 		,strItemNo
 		)
 	SELECT CF.intContractFeedId
-		,CH.intContractHeaderId
+		,CF.intContractHeaderId
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 1
-	WHERE ISNULL(strFeedStatus, '') = ''
+	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+	--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
+	WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) = 1 
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
@@ -147,7 +167,7 @@ BEGIN
 		AND EXISTS (
 			SELECT *
 			FROM tblCTContractDetail CD
-			WHERE CD.intContractHeaderId = CH.intContractHeaderId
+			WHERE CD.intContractHeaderId = CF.intContractHeaderId
 			)
 
 	INSERT INTO @tblCTFinalContractFeed (
@@ -208,6 +228,7 @@ BEGIN
 		,strPackingDescription
 		,strLocationName
 		,ysnPopulatedByIntegration
+		,ysnMaxPrice 
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -258,9 +279,11 @@ BEGIN
 		,strPackingDescription
 		,strLocationName
 		,1
+		,RC.ysnMaxPrice 
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
+	Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF.intContractHeaderId
 
 	---********************************************************
 	--- Item Change
@@ -270,13 +293,13 @@ BEGIN
 		,intContractSeq
 		,strItemNo
 		)
-	SELECT CH.intContractHeaderId
+	SELECT CF.intContractHeaderId
 		,CF.intContractSeq
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 1
-	WHERE ISNULL(strFeedStatus, '') = ''
+	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+	--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
+	WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND UPPER(strRowState) = 'MODIFIED'
 
 	INSERT INTO @tblCTContractFeedHistory (
@@ -430,6 +453,7 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,ysnPopulatedByIntegration
+			,ysnMaxPrice
 			)
 		OUTPUT inserted.intContractHeaderId
 			,inserted.strItemNo
@@ -479,9 +503,11 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,1
+			,RC.ysnMaxPrice 
 		FROM vyuCTContractFeed CF
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 			AND CF1.strItemNo = CF.strItemNo
+		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF.intContractHeaderId
 
 		DELETE CF1
 		FROM @tblIPOutput OP
@@ -535,6 +561,7 @@ BEGIN
 			,strLocationName
 			,strMessage
 			,ysnPopulatedByIntegration
+			,ysnMaxPrice
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -582,9 +609,11 @@ BEGIN
 			,strLocationName
 			,'System'
 			,1
+			,RC.ysnMaxPrice 
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
+		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF2.intContractHeaderId
 		WHERE EXISTS (
 				SELECT *
 				FROM @tblCTContractFeedHistory CFH
@@ -603,9 +632,9 @@ END
 IF EXISTS (
 		SELECT *
 		FROM tblCTContractFeed CF
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-			AND IsNULL(CH.ysnMaxPrice, 0) = 0
-		WHERE ISNULL(strFeedStatus, '') = ''
+		--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+		--	AND IsNULL(CH.ysnMaxPrice, 0) = 0
+		WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) =0
 			AND UPPER(strRowState) = 'MODIFIED'
 		)
 BEGIN
@@ -620,13 +649,13 @@ BEGIN
 		,intContractSeq
 		,strItemNo
 		)
-	SELECT CH.intContractHeaderId
+	SELECT CF.intContractHeaderId
 		,CF.intContractSeq
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 0
-	WHERE ISNULL(strFeedStatus, '') = ''
+	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+	--	AND IsNULL(CH.ysnMaxPrice, 0) = 0
+	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND UPPER(strRowState) = 'MODIFIED'
 
 	DELETE
@@ -760,6 +789,7 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,ysnPopulatedByIntegration
+			,ysnMaxPrice
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -806,9 +836,11 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,1
+			,RC.ysnMaxPrice 
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
+		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF2.intContractHeaderId
 		WHERE EXISTS (
 				SELECT *
 				FROM @tblCTContractFeedHistory CFH
@@ -872,20 +904,20 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 1
+		--AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND Upper(strRowState) = 'ADDED'
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,CF.strItemNo
@@ -896,15 +928,15 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,''
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 0
+		--AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND Upper(strRowState) = 'ADDED'
 	ORDER BY CF.intContractHeaderId
 END
@@ -924,15 +956,15 @@ BEGIN
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 1
+		--AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
@@ -940,7 +972,7 @@ BEGIN
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,CF.strItemNo
@@ -951,15 +983,15 @@ BEGIN
 		,strCommodityCode
 		,intContractFeedId
 		,strSubLocation
-		,IsNULL(CH.ysnMaxPrice, 0)
+		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
 		,''
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		AND IsNULL(CH.ysnMaxPrice, 0) = 0
+		--AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
