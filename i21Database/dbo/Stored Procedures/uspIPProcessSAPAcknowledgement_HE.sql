@@ -212,7 +212,7 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (53, 64) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -321,7 +321,7 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (53, 64) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -385,7 +385,7 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (53, 64) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
