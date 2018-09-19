@@ -18,8 +18,7 @@ SELECT @ConvertYear=103
 DECLARE @strInternalTradeNo int= null
 DECLARE @intFutOptTransactionHeaderId int = null
 declare @MaxTranNumber int = null
-select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
-
+select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where intStartingNumberId=45
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
@@ -58,9 +57,9 @@ SELECT 1,* FROM #temp
 
 
 END
-select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
+SELECT @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 
-UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
+UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where intStartingNumberId=45
 COMMIT TRAN
 --SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 --		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
