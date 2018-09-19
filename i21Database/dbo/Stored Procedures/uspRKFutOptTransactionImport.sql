@@ -1,4 +1,5 @@
 ﻿CREATE PROC uspRKFutOptTransactionImport
+	@intEntityUserId VARCHAR (100) = NULL
 AS
 BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
@@ -70,6 +71,16 @@ SELECT DE.strInternalTradeNo AS Result1,DE.strBrokerTradeNo AS Result2,DE.dtmFil
 FROM tblRKFutOptTransaction DE 
 WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 
+BEGIN
+EXEC	dbo.uspSMAuditLog 
+		@keyValue = @intFutOptTransactionHeaderId			  -- Primary Key Value of the Derivative Entry. 
+		,@screenName = 'RiskManagement.view.DerivativeEntry'  -- Screen Namespace
+		,@entityId = @intEntityUserId                   	  -- Entity Id
+		,@actionType = 'Imported'                             -- Action Type
+		,@changeDescription = ''							  -- Description
+		,@fromValue = ''									  -- Previous Value
+		,@toValue = ''										  -- New Value
+END
 
 DELETE FROM tblRKFutOptTransactionImport
 
