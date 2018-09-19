@@ -431,7 +431,7 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 					GROUP BY intContractDetailId
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
-		AND   ISNULL(Bill.intTranasactionType,0) = 1
+		AND   ISNULL(Bill.intTransactionType,0) = 1
 	
 	UNION ALL
 	
