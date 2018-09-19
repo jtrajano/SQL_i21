@@ -330,7 +330,7 @@ ELSE SAVE TRAN @SavePoint
 		MERGE INTO tblAPVoucherPayableTaxCompleted AS destination
 		USING (
 			SELECT
-				taxes.*
+				*
 			FROM tblAPVoucherPayableTaxStaging taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
 			WHERE taxes.dblTax = 0
