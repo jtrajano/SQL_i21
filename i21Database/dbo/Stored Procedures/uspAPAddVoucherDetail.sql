@@ -84,10 +84,12 @@ USING
 		,dblCost							=	A.dblCost
 		,dblOldCost							=	A.dblOldCost
 		/*Quantity info*/					
-		,intUnitOfMeasureId					=	A.intQtyToBillUOMId
+		,intUnitOfMeasureId					=	ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
 		,dblUnitQty							=	A.dblQtyToBillUnitQty
 		,dblQtyOrdered						=	A.dblOrderQty
-		,dblQtyReceived						=	A.dblQuantityToBill
+		,dblQtyReceived						=	CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+													THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
+												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
 		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
 		,dblContractCost					=	ISNULL(ctDetail.dblSeqPrice,0)
