@@ -161,7 +161,7 @@ AS
 			[strTransactionType]					= 'Credit Memo'
 			,[strType]								= 'POS'
 			,[strSourceTransaction]					= 'Direct'--'Invoice'
-			,[intSourceId]							= NULL--ARI.[intInvoiceId] 
+			,[intSourceId]							= ARI.[intSourceId] 
 			,[strSourceId]							= ARI.[strInvoiceNumber]
 			,[intInvoiceId]							= NULL
 			,[intEntityCustomerId]					= ARI.[intEntityCustomerId]
