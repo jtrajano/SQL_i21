@@ -7059,6 +7059,12 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\APPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCFBatchUnpost.sql" />
     <Build Include="dbo\Tables\tblCFBatchUnpostStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddVoucherDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeStagingTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
