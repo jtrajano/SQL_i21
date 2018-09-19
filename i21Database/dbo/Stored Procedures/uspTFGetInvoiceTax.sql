@@ -741,7 +741,7 @@ BEGIN TRY
 					AND Invoice.strType <> 'CF Tran'
 				)
 			END
-			ELSE IF (@ScheduleCode = '5BLK' OR @ScheduleCode = '6BLK')
+			ELSE IF (@ScheduleCode IN ('5BLK', '6BLK', '5', '5LO', '6', '7', '7E', '8', '10', '10AC', '10AD', '10D'))
 			BEGIN
 				-- Exclude all non CF Trans for schedule 5BLK and 6BLK
 				DELETE @tmpInvoiceTransaction WHERE intId IN (
