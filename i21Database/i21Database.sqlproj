@@ -7055,6 +7055,7 @@
     <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqWashoutInfo.sql" />
+    <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
