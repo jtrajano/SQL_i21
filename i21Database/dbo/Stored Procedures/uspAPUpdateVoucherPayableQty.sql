@@ -330,7 +330,21 @@ ELSE SAVE TRAN @SavePoint
 		MERGE INTO tblAPVoucherPayableTaxCompleted AS destination
 		USING (
 			SELECT
-				*
+				taxes.[intVoucherPayableId]		
+				,taxes.[intTaxGroupId]				
+				,taxes.[intTaxCodeId]				
+				,taxes.[intTaxClassId]				
+				,taxes.[strTaxableByOtherTaxes]	
+				,taxes.[strCalculationMethod]		
+				,taxes.[dblRate]					
+				,taxes.[intAccountId]				
+				,taxes.[dblTax]					
+				,taxes.[dblAdjustedTax]			
+				,taxes.[ysnTaxAdjusted]			
+				,taxes.[ysnSeparateOnBill]			
+				,taxes.[ysnCheckOffTax]			
+				,taxes.[ysnTaxOnly]
+				,taxes.[ysnTaxExempt]
 			FROM tblAPVoucherPayableTaxStaging taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
 			WHERE taxes.dblTax = 0
@@ -627,7 +641,21 @@ ELSE SAVE TRAN @SavePoint
 		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
 		USING (
 			SELECT
-				*
+				taxes.[intVoucherPayableId]		
+				,taxes.[intTaxGroupId]				
+				,taxes.[intTaxCodeId]				
+				,taxes.[intTaxClassId]				
+				,taxes.[strTaxableByOtherTaxes]	
+				,taxes.[strCalculationMethod]		
+				,taxes.[dblRate]					
+				,taxes.[intAccountId]				
+				,taxes.[dblTax]					
+				,taxes.[dblAdjustedTax]			
+				,taxes.[ysnTaxAdjusted]			
+				,taxes.[ysnSeparateOnBill]			
+				,taxes.[ysnCheckOffTax]			
+				,taxes.[ysnTaxOnly]
+				,taxes.[ysnTaxExempt]
 			FROM tblAPVoucherPayableTaxCompleted taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
 		) AS SourceData
