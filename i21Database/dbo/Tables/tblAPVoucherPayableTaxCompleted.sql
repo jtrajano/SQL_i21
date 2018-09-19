@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPVoucherPayableTaxCompleted]
 (
-	[intVoucherPayableId]		INT NOT NULL PRIMARY KEY,
+	[intVoucherPayableId]		INT NOT NULL,
 	[intTaxGroupId]				INT NOT NULL, 
     [intTaxCodeId]				INT NOT NULL, 
     [intTaxClassId]				INT NOT NULL, 
