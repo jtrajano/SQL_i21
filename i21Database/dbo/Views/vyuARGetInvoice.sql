@@ -145,6 +145,7 @@ SELECT
 	strCreditCode = CUS.strCreditCode,
 	intPurchaseSale	= LG.intPurchaseSale,
     strReceiptNumber = POS.strReceiptNumber,
+    strEODNumber = POS.strEODNo,
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
@@ -229,6 +230,9 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT intInvoiceId
          , strReceiptNumber
-    FROM dbo.tblARPOS WITH (NOLOCK)
+         , strEODNo
+    FROM dbo.tblARPOS POS WITH (NOLOCK)
+    INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
+    INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) POS ON INV.intInvoiceId = POS.intInvoiceId 
      AND INV.strType = 'POS'

@@ -9,6 +9,7 @@ SELECT DISTINCT
 , Item.strItemNo
 , Item.strDescription AS strItemDescription
 , CatLoc.intRegisterDepartmentId
+, Item.strLotTracking
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
 	ON CatLoc.intCategoryId = Cat.intCategoryId 
