@@ -7065,6 +7065,9 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
     <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
     <Build Include="dbo\Functions\fnAPRecomputeStagingTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucher.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherData.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailStagingPOTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnAPRecomputeTaxes]
+﻿CREATE FUNCTION [dbo].[fnAPRecomputeStagingTaxes]
 (
 	@voucherPayableId INT,
 	@cost DECIMAL(38,20),
@@ -25,7 +25,7 @@ AS
 BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6);
-	DECLARE @id INT = @voucherPayableId;
+	DECLARE @payableId INT = @voucherPayableId;
 	SET @ZeroDecimal = 0.000000
 	DECLARE @ExcludeCheckOff BIT = 0;
 	
@@ -75,12 +75,12 @@ BEGIN
 		,[dblAdjustedTax]			= A.[dblAdjustedTax]	
 		,[intTaxAccountId]			= A.[intAccountId]	
 		,[ysnSeparateOnBill]		= A.[ysnSeparateOnBill]	
-		,[ysnCheckoffTax]			= A.[ysnCheckoffTax]	
+		,[ysnCheckoffTax]			= A.[ysnCheckOffTax]	
 		,[ysnTaxExempt]				= A.[ysnTaxExempt]	
 		,[ysnTaxOnly]				= A.[ysnTaxOnly]	
 		,[ysnTaxAdjusted]		    = A.[ysnTaxAdjusted]
 	FROM tblAPVoucherPayableTaxStaging A
-	WHERE A.intVoucherPayableId = @id;
+	WHERE A.intVoucherPayableId = @payableId;
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
 	BEGIN
@@ -272,7 +272,7 @@ BEGIN
 		,[ysnSeparateOnBill]
 		,[intTaxAccountId]
 		,[ysnTaxAdjusted]
-		,[ysnCheckoffTax]
+		,[ysnCheckOffTax]
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
 	FROM
