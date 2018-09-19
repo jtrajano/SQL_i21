@@ -17,7 +17,7 @@
     [intTransTime]               INT             NULL,
     [strSequenceNumber]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strPONumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strMiscellaneous]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strMiscellaneous]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intOdometer]                INT             NULL,
     [intPumpNumber]              INT             NULL,
     [dblTransferCost]            NUMERIC (18, 6) NULL,
