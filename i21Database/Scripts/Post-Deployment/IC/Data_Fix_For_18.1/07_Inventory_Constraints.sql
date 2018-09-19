@@ -14,5 +14,19 @@ BEGIN
 	END
 END
 
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+BEGIN 
+	-- Add the CHECK CONSTRAINTS in tblICItemUOM
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_AllowLotTrackingChange' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItem', 'U'))
+	BEGIN
+		EXEC('
+			ALTER TABLE tblICItem
+			WITH NOCHECK ADD CONSTRAINT CK_AllowLotTrackingChange
+			CHECK (dbo.fnAllowLotTrackingToChange(intItemId, strLotTracking) = 1)'
+		);
+
+	END
+END
+
 PRINT N'END - IC Data Fix for 18.1. #7'
 GO

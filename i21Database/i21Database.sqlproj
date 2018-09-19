@@ -6407,6 +6407,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
+    <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
