@@ -99,7 +99,7 @@ BEGIN TRY
 			CD.dblBasis				=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
 			CD.dblOriginalBasis		=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
 			CD.intFutureMonthId		=	TD.intFutureMonthId,
-			CD.intFutureMarketId	=	TD.intFutureMarketId
+			CD.intFutureMarketId	=	CASE WHEN ISNULL(TD.intFutureMarketId,0) = 0 THEN CD.intFutureMarketId ELSE TD.intFutureMarketId END
 			
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
