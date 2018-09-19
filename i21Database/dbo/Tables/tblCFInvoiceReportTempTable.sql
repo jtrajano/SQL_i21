@@ -54,7 +54,7 @@
     [dtmTransactionDate]          DATETIME        NULL,
     [dtmDate]                     DATETIME        NULL,
     [dtmPostedDate]               DATETIME        NULL,
-	[dtmBillingDate]			  DATETIME        NULL,
+    [dtmBillingDate]              DATETIME        NULL,
     [dblTotalMiles]               NUMERIC (18, 6) NULL,
     [dblQuantity]                 NUMERIC (18, 6) NULL,
     [dblCalculatedTotalAmount]    NUMERIC (18, 6) NULL,
@@ -85,8 +85,11 @@
     [ysnDepartmentGrouping]       BIT             NULL,
     [ysnSummaryByDeptVehicleProd] BIT             NULL,
     [strGuid]                     NVARCHAR (MAX)  NULL,
-    [strUserId]                   NVARCHAR (MAX)  NULL
+    [strUserId]                   NVARCHAR (MAX)  NULL,
+    [intVehicleId]                INT             NULL
 );
+
+
 
 
 
