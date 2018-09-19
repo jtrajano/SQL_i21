@@ -89,8 +89,8 @@ USING
 		,dblQtyOrdered						=	A.dblOrderQty
 		,dblQtyReceived						=	A.dblQuantityToBill
 		/*Contract info*/					
-		,dblQtyContract						=	ctDetail.dblDetailQuantity
-		,dblContractCost					=	ctDetail.dblSeqPrice
+		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
+		,dblContractCost					=	ISNULL(ctDetail.dblSeqPrice,0)
 		/*1099 info*/						
 		,int1099Form						=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND item.intItemId > 0

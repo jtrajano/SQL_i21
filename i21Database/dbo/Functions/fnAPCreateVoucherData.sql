@@ -46,49 +46,50 @@ BEGIN
 	DECLARE @shipTo INT;
 	DECLARE @currentDate DATETIME = GETDATE()
 	DECLARE @apAccount INT;
+	DECLARE @partitionId INT = 0;
 
-	-- WITH voucherPayables AS (
-	-- 	SELECT
-	-- 		ROW_NUMBER() OVER(PARTITION BY intEntityVendorId,
-	-- 									 intTransactionType,
-	-- 									 intLocationId,
-	-- 									 intShipToId,
-	-- 									 intShipFromId,
-	-- 									 intShipFromEntityId,
-	-- 									 intPayToAddressId,
-	-- 									 intCurrencyId,
-	-- 									 strVendorOrderNumber
-	-- 							ORDER BY intLineNo) AS intCountId
-	-- 		,A.*
-	-- 	FROM @voucherPayables A
-	-- 	-- WHERE EXISTS (
-	-- 	-- 	SELECT * FROM (
-	-- 	-- 		SELECT
-	-- 	-- 			MIN(header.intVoucherPayableId) intVoucherPayableId,
-	-- 	-- 			MIN(header.intEntityVendorId) intEntityVendorId,
-	-- 	-- 			header.strVendorOrderNumber strVendorOrderNumber,
-	-- 	-- 			MIN(header.intTransactionType) intTransactionType,
-	-- 	-- 			MIN(header.intLocationId) intLocationId,
-	-- 	-- 			MIN(header.intShipToId) intShipToId,
-	-- 	-- 			MIN(header.intShipFromId) intShipFromId,
-	-- 	-- 			MIN(header.intShipFromEntityId) intShipFromEntityId,
-	-- 	-- 			MIN(header.intPayToAddressId) intPayToAddressId,
-	-- 	-- 			MIN(header.intCurrencyId) intCurrencyId
-	-- 	-- 		FROM @voucherPayables header
-	-- 	-- 		GROUP BY 
-	-- 	-- 			header.intEntityVendorId,
-	-- 	-- 			header.strVendorOrderNumber,
-	-- 	-- 			header.intTransactionType,
-	-- 	-- 			header.intLocationId,
-	-- 	-- 			header.intShipToId,
-	-- 	-- 			header.intShipFromId,
-	-- 	-- 			header.intShipFromEntityId,
-	-- 	-- 			header.intPayToAddressId,
-	-- 	-- 			header.intCurrencyId
-	-- 	-- 	) filteredPayables
-	-- 	-- 	WHERE filteredPayables.intVoucherPayableId = A.intVoucherPayableId
-	-- 	-- )
-	-- )
+	WITH voucherPayables AS (
+		SELECT
+			ROW_NUMBER() OVER(PARTITION BY intEntityVendorId,
+										 intTransactionType,
+										 intLocationId,
+										 intShipToId,
+										 intShipFromId,
+										 intShipFromEntityId,
+										 intPayToAddressId,
+										 intCurrencyId,
+										 strVendorOrderNumber
+								ORDER BY intLineNo) AS intCountId
+			,A.*
+		FROM @voucherPayables A
+		-- WHERE EXISTS (
+		-- 	SELECT * FROM (
+		-- 		SELECT
+		-- 			MIN(header.intVoucherPayableId) intVoucherPayableId,
+		-- 			MIN(header.intEntityVendorId) intEntityVendorId,
+		-- 			header.strVendorOrderNumber strVendorOrderNumber,
+		-- 			MIN(header.intTransactionType) intTransactionType,
+		-- 			MIN(header.intLocationId) intLocationId,
+		-- 			MIN(header.intShipToId) intShipToId,
+		-- 			MIN(header.intShipFromId) intShipFromId,
+		-- 			MIN(header.intShipFromEntityId) intShipFromEntityId,
+		-- 			MIN(header.intPayToAddressId) intPayToAddressId,
+		-- 			MIN(header.intCurrencyId) intCurrencyId
+		-- 		FROM @voucherPayables header
+		-- 		GROUP BY 
+		-- 			header.intEntityVendorId,
+		-- 			header.strVendorOrderNumber,
+		-- 			header.intTransactionType,
+		-- 			header.intLocationId,
+		-- 			header.intShipToId,
+		-- 			header.intShipFromId,
+		-- 			header.intShipFromEntityId,
+		-- 			header.intPayToAddressId,
+		-- 			header.intCurrencyId
+		-- 	) filteredPayables
+		-- 	WHERE filteredPayables.intVoucherPayableId = A.intVoucherPayableId
+		-- )
+	)
 
 	INSERT @returntable
 	(
@@ -198,7 +199,7 @@ BEGIN
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END
-	FROM @voucherPayables A
+	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location
 	-- LEFT JOIN tblEMEntityLocation B2 ON B2.intEntityLocationId = A.intShipFromId AND B2.intEntityId = A.intEntityVendorId --voucher payable ship from vendor
@@ -271,7 +272,7 @@ BEGIN
 			WHERE defaultTerm.intTermID = vendor.intTermsId
 		) termHeirarchy
 	) termData
-	WHERE A.intVoucherPayableId = 1
+	WHERE A.intCountId = 1
 	
 	RETURN;
 END

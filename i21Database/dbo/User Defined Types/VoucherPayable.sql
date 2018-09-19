@@ -1,6 +1,9 @@
 ﻿/*
 DROP PROCEDURE uspAPAddVoucherDetail
 DROP PROCEDURE uspAPCreateVoucher
+DROP PROCEDURE uspAPUpdateVoucherPayableQty
+DROP PROCEDURE uspAPAddVoucherPayable
+DROP PROCEDURE uspAPRemoveVoucherPayable
 DROP FUNCTION fnAPCreateVoucherData
 DROP FUNCTION fnAPValidateVoucherPayable
 DROP TYPE VoucherPayable
@@ -36,8 +39,8 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[ysnReturn]						BIT DEFAULT(0), --this should be 1 if transaction type is 3 (Debit Memo)
 	[intLineNo]						INT	NULL, --Provide value if what order we will insert the data
 	[intStorageLocationId]			INT NULL,
-	[dblBasis]						DECIMAL(18, 6),
-	[dblFutures]					DECIMAL(18, 6),
+	[dblBasis]						DECIMAL(18, 6) NOT NULL DEFAULT(0),
+	[dblFutures]					DECIMAL(18, 6) NOT NULL DEFAULT(0),
 	/*Integration fields*/
 	[intPurchaseDetailId]			INT NULL,
 	[intContractHeaderId]			INT NULL,
@@ -57,21 +60,21 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
 	/*Quantity info*/
-	[dblOrderQty]					DECIMAL(18,6),	
-	[dblOrderUnitQty]				DECIMAL(38,20) DEFAULT(1),	
+	[dblOrderQty]					DECIMAL(18,6) NOT NULL DEFAULT(0),	
+	[dblOrderUnitQty]				DECIMAL(38,20) NOT NULL DEFAULT(1),	
 	[intOrderUOMId]					INT NULL,
-	[dblQuantityToBill]				DECIMAL(18,6),
+	[dblQuantityToBill]				DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblQtyToBillUnitQty]			DECIMAL(38,20) DEFAULT(1),	
 	[intQtyToBillUOMId]				INT NULL,
 	/*Cost info*/
-	[dblCost]						DECIMAL(38,20),
+	[dblCost]						DECIMAL(38,20) NOT NULL DEFAULT(0),
 	[dblOldCost]					DECIMAL(38,20) NULL,
 	[dblCostUnitQty]				DECIMAL(38,20) DEFAULT(1),
 	[intCostUOMId]					INT NULL,
 	[intCostCurrencyId]				INT NULL,  --deprecated, use only for vyuAPReceivedItems, use ysnSubCurrency instead
 	/*Weight info*/
-	[dblWeight]						DECIMAL(18,6),
-	[dblNetWeight]					DECIMAL(18,6),
+	[dblWeight]						DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblNetWeight]					DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblWeightUnitQty]				DECIMAL(38,20) DEFAULT(1),
 	[intWeightUOMId]				INT NULL,
 	/*Exchange Rate info*/
@@ -79,21 +82,21 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblExchangeRate]				DECIMAL(18,6) DEFAULT(1),
 	/*Tax info*/
 	[intPurchaseTaxGroupId]			INT NULL,
-	[dblTax]						DECIMAL(18,2) DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
+	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
-	[dblDiscount]					DECIMAL(18,2),
-	[dblDetailDiscountPercent]		DECIMAL(18,2),
+	[dblDiscount]					DECIMAL(18,2) NOT NULL DEFAULT(0),
+	[dblDetailDiscountPercent]		DECIMAL(18,2) NOT NULL DEFAULT(0),
 	[ysnDiscountOverride]			BIT DEFAULT(0),
 	/*Deferred Voucher*/
 	[intDeferredVoucherId]			INT NULL,
 	/*Prepaid Info*/
-	[dblPrepayPercentage]			DECIMAL(18,6),
+	[dblPrepayPercentage]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[intPrepayTypeId]				INT NULL,
 	/*Claim info*/
-	[dblNetShippedWeight]			DECIMAL(18,6),
-	[dblWeightLoss]					DECIMAL(18,6),
-	[dblFranchiseWeight]			DECIMAL(18,6),
-	[dblFranchiseAmount]			DECIMAL(18,6),
-	[dblActual]						DECIMAL(18,6),
-	[dblDifference]					DECIMAL(18,6)
+	[dblNetShippedWeight]			DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblWeightLoss]					DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblFranchiseWeight]			DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblFranchiseAmount]			DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblActual]						DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblDifference]					DECIMAL(18,6) NOT NULL DEFAULT(0)
 )

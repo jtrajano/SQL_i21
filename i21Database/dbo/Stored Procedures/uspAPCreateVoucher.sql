@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateVoucher]
 	@voucherPayables AS VoucherPayable READONLY
+	,@voucherPayableTax AS VoucherDetailTax READONLY
 	,@userId INT
 	,@throwError BIT = 1
 	,@error NVARCHAR(1000) = NULL OUTPUT
@@ -17,6 +18,7 @@ BEGIN TRY
 
 	DECLARE @startingRecordId INT;
 	DECLARE @voucherPayablesData AS VoucherPayable;
+	DECLARE @voucherDetailTaxData AS VoucherDetailTax;
 	DECLARE @APAccount INT;
 	DECLARE @deleted TABLE(intVoucherPayableId INT);
 	DECLARE @voucherIds AS Id;
@@ -108,7 +110,7 @@ BEGIN TRY
 
 	SELECT
 		@error = strError
-	FROM dbo.fnAPValidateVoucherPayable(@voucherPayables)
+	FROM dbo.fnAPValidateVoucherPayable(@voucherPayables, @voucherPayableTax)
 
 	IF @error IS NOT NULL
 	BEGIN
@@ -119,35 +121,116 @@ BEGIN TRY
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherPayables')) DROP TABLE #tmpVoucherPayables
 	--reinsert voucher payables to new VoucherPayable so that we could update the data of intBillId	
 	SELECT 
-		*
+		DENSE_RANK() OVER(ORDER BY intEntityVendorId,
+									intTransactionType,
+									intLocationId,
+									intShipToId,
+									intShipFromId,
+									intShipFromEntityId,
+									intPayToAddressId,
+									intCurrencyId,
+									strVendorOrderNumber) intPartitionId
+		/*Header info*/
+		,[intBillId]						
+		,[intEntityVendorId]				
+		,[intTransactionType]			
+		,[intLocationId]					
+		,[intShipToId]					
+		,[intShipFromId]					
+		,[intShipFromEntityId]			
+		,[intPayToAddressId]				
+		,[intCurrencyId]					
+		,[dtmDate]						
+		,[strVendorOrderNumber]			
+		,[strReference]					
+		,[strSourceNumber]				
+		,[intSubCurrencyCents]			
+		,[intShipViaId]					
+		,[intTermId]						
+		,[strBillOfLading]				
+		,[intAPAccount]					
+		/*Detail info*/
+		,[strMiscDescription]			
+		,[intItemId]						
+		,[ysnSubCurrency]				
+		,[intAccountId]					
+		,[ysnReturn]						
+		,[intLineNo]						
+		,[intStorageLocationId]			
+		,[dblBasis]						
+		,[dblFutures]					
+		/*Integration fields*/
+		,[intPurchaseDetailId]			
+		,[intContractHeaderId]			
+		,[intContractCostId]				
+		,[intContractSeqId]				
+		,[intContractDetailId]			
+		,[intScaleTicketId]				
+		,[intInventoryReceiptItemId]		
+		,[intInventoryReceiptChargeId]	
+		,[intInventoryShipmentItemId]	
+		,[intInventoryShipmentChargeId]
+		,[intLoadShipmentId]				
+		,[intLoadShipmentDetailId]		
+		,[intPaycheckHeaderId]			
+		,[intCustomerStorageId]			
+		,[intCCSiteDetailId]				
+		,[intInvoiceId]					
+		,[intBuybackChargeId]			
+		/*Quantity info*/
+		,[dblOrderQty]					
+		,[dblOrderUnitQty]				
+		,[intOrderUOMId]					
+		,[dblQuantityToBill]				
+		,[dblQtyToBillUnitQty]			
+		,[intQtyToBillUOMId]				
+		/*Cost info*/
+		,[dblCost]						
+		,[dblOldCost]					
+		,[dblCostUnitQty]				
+		,[intCostUOMId]					
+		,[intCostCurrencyId]				
+		/*Weight info*/
+		,[dblWeight]						
+		,[dblNetWeight]					
+		,[dblWeightUnitQty]				
+		,[intWeightUOMId]				
+		/*Exchange Rate info*/
+		,[intCurrencyExchangeRateTypeId]
+		,[dblExchangeRate]				
+		/*Tax info*/
+		,[intPurchaseTaxGroupId]			
+		,[dblTax]						
+		/*Discount Info*/
+		,[dblDiscount]					
+		,[dblDetailDiscountPercent]		
+		,[ysnDiscountOverride]			
+		/*Deferred Voucher*/
+		,[intDeferredVoucherId]			
+		/*Prepaid Info*/
+		,[dblPrepayPercentage]			
+		,[intPrepayTypeId]				
+		/*Claim info*/
+		,[dblNetShippedWeight]			
+		,[dblWeightLoss]					
+		,[dblFranchiseWeight]			
+		,[dblFranchiseAmount]			
+		,[dblActual]						
+		,[dblDifference]					
 	INTO #tmpVoucherPayables
 	FROM @voucherPayables A
 
-	ALTER TABLE #tmpVoucherPayables DROP COLUMN intPartitionId, intVoucherPayableId
+	--THERE SHOULD BE NO CHANGES ON PRIMARY KEY (intVoucherPayableId)
 	INSERT INTO @voucherPayablesData
 	SELECT 
-		ROW_NUMBER() OVER(PARTITION BY intEntityVendorId,
-																intTransactionType,
-																intLocationId,
-																intShipToId,
-																intShipFromId,
-																intShipFromEntityId,
-																intPayToAddressId,
-																intCurrencyId,
-																strVendorOrderNumber
-														ORDER BY intLineNo) AS intPartitionId
-		,A.* 
+		A.* 
 	FROM #tmpVoucherPayables A
-
-	DECLARE @transCount INT = @@TRANCOUNT;
-	IF @transCount = 0 BEGIN TRANSACTION
-	ELSE SAVE TRAN @SavePoint
 
 	--CREATE HEADER DATA
 	IF OBJECT_ID(N'tempdb..#tmpVoucherHeaderData') IS NOT NULL DROP TABLE #tmpVoucherHeaderData
 	
 	SELECT DISTINCT
-		[intPartitionId]			=	A.intPartitionId,
+		[intPartitionId]		=	A.intPartitionId,
 		[strBillId]				=	CAST('' AS NVARCHAR(50)),
 		[intTermsId]			=	A.[intTermsId],
 		[dtmDueDate]			=	A.[dtmDueDate],
@@ -187,7 +270,7 @@ BEGIN TRY
 
 	--UPDATE VOUCHER PAYABLES TO MATCH WITH THE VOUCHER HEADER
  	UPDATE A
-		SET
+	SET
 		A.intLocationId			= B.intStoreLocationId
 		,A.intShipToId			= B.intShipToId
 		,A.intShipFromEntityId	= B.intShipFromEntityId
@@ -196,6 +279,10 @@ BEGIN TRY
 	FROM @voucherPayablesData A
 	INNER JOIN #tmpVoucherHeaderData B
 		ON A.intPartitionId = B.intPartitionId
+
+	DECLARE @transCount INT = @@TRANCOUNT;
+	IF @transCount = 0 BEGIN TRANSACTION
+	ELSE SAVE TRAN @SavePoint
 
 	--Voucher Type
 	UPDATE A
@@ -381,7 +468,7 @@ BEGIN TRY
 	INSERT INTO @voucherIds
 	SELECT intBillId FROM @createdVouchers
 
-	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @throwError = 1
+	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
 	SELECT @createdVouchersId = COALESCE(@createdVouchersId + ',', '') +  CONVERT(VARCHAR(12),intBillId)
