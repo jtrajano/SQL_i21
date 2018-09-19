@@ -7056,7 +7056,7 @@
     <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqWashoutInfo.sql" />
     <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
-    <Build Include="Scripts\Post-Deployment\AP\DefaultData\APPreference.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\APPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCFBatchUnpost.sql" />
     <Build Include="dbo\Tables\tblCFBatchUnpostStagingTable.sql" />
   </ItemGroup>
