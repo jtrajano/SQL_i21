@@ -93,7 +93,7 @@ BEGIN TRY
 		 SSC.intSettleContractId AS intSettleContractId
 		,SSC.intContractDetailId AS intContractDetailId
 		,SSC.dblUnits AS dblContractUnits
-		,CD.dblCashPriceInCommodityStockUOM AS dblCashPrice
+		,CD.dblCashPriceInItemStockUOM AS dblCashPrice
 		,CD.intPricingTypeId AS intPricingTypeId
 	FROM tblGRSettleContract SSC
 	JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId

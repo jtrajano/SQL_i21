@@ -364,7 +364,7 @@ BEGIN TRY
 				,ContractEntityId    = CD.intEntityId
 				,dblCashPrice		 = CD.dblCashPrice
 				,intPricingTypeId    = CD.intPricingTypeId
-				,dblBasis			 = CD.dblBasisInCommodityStockUOM
+				,dblBasis			 = CD.dblBasisInItemStockUOM
 				,intContractUOMId	 = CD.intContractUOMId
 				,dblCostUnitQty		 = CD.dblCostUnitQty
 			FROM tblGRSettleContract SSC
