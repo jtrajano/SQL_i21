@@ -252,6 +252,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
 --:r .\AP\FixEntitiesData.sql
+:r .\AP\DefaultData\APPreference.sql
 :r .\AP\FixVendorGLAccountExpense.sql
 :r .\AP\UpdateBillBatch.sql
 :r .\AP\FixPaymentRecordStatus.sql
