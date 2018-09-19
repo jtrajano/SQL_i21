@@ -2511,6 +2511,10 @@ IF @Recap = 0
 				@ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARPaymentPostData WHERE intPaymentId = Z.[intPaymentId])
 
+			UPDATE tblARPayment
+			SET		intCurrentStatus = 5
+			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)	
+
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -2774,7 +2778,8 @@ IF @Recap = 0
 			UPDATE 
 				tblARPayment
 			SET 
-				intAccountId = NULL			
+				intAccountId = NULL
+				,intCurrentStatus = NULL		
 			WHERE
 				intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)		
 									
@@ -2829,19 +2834,18 @@ IF @Recap = 0
 				,[intCFAccountId]		= @intCFAccount
 				,[intEntityId]			= Z.intEntityId
 			FROM @ZeroPayment Z
-			WHERE NOT EXISTS(SELECT NULL FROM @ARPaymentPostData WHERE intPaymentId = Z.[intPaymentId])		
+			WHERE NOT EXISTS(SELECT NULL FROM @ARPaymentPostData WHERE intPaymentId = Z.[intPaymentId])	
+			
+			UPDATE tblARPayment
+			SET		intCurrentStatus = 4
+			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)			
 
 			-- Delete Invoice with Zero Payment
 			DELETE FROM tblARPaymentDetail
 			WHERE
 				dblPayment = 0
 				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARPaymentPostData)
-
-			-- Update the posted flag in the transaction table
-			UPDATE tblARPayment
-			SET		ysnPosted = 1
-					--,intConcurrencyId += 1 
-			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)			
+					
 
 			UPDATE 
 				tblARInvoice
@@ -3068,31 +3072,38 @@ IF @Recap = 0
 				ILD.[intIntegrationLogId] = @IntegrationLogId
 				AND ILD.[ysnPost] IS NOT NULL
 							
-			END						
+			END		
+		
+			-- Update the posted flag in the transaction table
+			UPDATE tblARPayment
+			SET		
+				intCurrentStatus = NULL
+				,ysnPosted = 1
+			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)					
 
-		UPDATE 
-			tblARPaymentDetail
-		SET 
-			dblAmountDue = ISNULL(C.[dblAmountDue], 0.00) -- ISNULL(A.[dblDiscount],0.00)) - A.[dblPayment]							
-			,dblBaseAmountDue = ISNULL(C.[dblBaseAmountDue], 0.00) -- ISNULL(A.[dblDiscount],0.00)) - A.[dblPayment]							
-		FROM
-			tblARPaymentDetail A
-		INNER JOIN
-			tblARPayment B
-				ON A.[intPaymentId] = B.[intPaymentId]
-				AND A.[intPaymentId] NOT IN (SELECT intPaymentId FROM @ARPaymentPostData)
-		INNER JOIN 
-			tblARInvoice C
-				ON A.[intInvoiceId] = C.[intInvoiceId]
-		WHERE
-			B.[ysnPosted] = 1
-			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0		
+		--UPDATE 
+		--	A
+		--SET 
+		--	A.dblAmountDue = ISNULL(C.[dblAmountDue], 0.00) -- ISNULL(A.[dblDiscount],0.00)) - A.[dblPayment]							
+		--	,A.dblBaseAmountDue = ISNULL(C.[dblBaseAmountDue], 0.00) -- ISNULL(A.[dblDiscount],0.00)) - A.[dblPayment]							
+		--FROM
+		--	tblARPaymentDetail A
+		--INNER JOIN
+		--	tblARPayment B
+		--		ON A.[intPaymentId] = B.[intPaymentId]
+		--		AND A.[intPaymentId] NOT IN (SELECT intPaymentId FROM @ARPaymentPostData)
+		--INNER JOIN 
+		--	tblARInvoice C
+		--		ON A.[intInvoiceId] = C.[intInvoiceId]
+		--WHERE
+		--	B.[ysnPosted] = 1
+		--	AND ISNULL(B.[ysnInvoicePrepayment],0) = 0		
 						
 		UPDATE 
-			tblARPaymentDetail
+			A
 		SET 
-			dblPayment = CASE WHEN (((ISNULL(C.[dblAmountDue],0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00)) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.[dblPayment] THEN (((ISNULL(C.[dblAmountDue],0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00))* (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.[dblPayment] END
-			,dblBasePayment = CASE WHEN (((ISNULL(C.[dblBaseAmountDue],0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00)) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.[dblBasePayment] THEN (((ISNULL(C.[dblBaseAmountDue],0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00))* (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.[dblBasePayment] END
+			A.dblPayment = CASE WHEN (((ISNULL(C.[dblAmountDue],0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00)) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.[dblPayment] THEN (((ISNULL(C.[dblAmountDue],0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00))* (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.[dblPayment] END
+			,A.dblBasePayment = CASE WHEN (((ISNULL(C.[dblBaseAmountDue],0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00)) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.[dblBasePayment] THEN (((ISNULL(C.[dblBaseAmountDue],0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00))* (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.[dblBasePayment] END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -3107,10 +3118,10 @@ IF @Recap = 0
 			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 				
 		UPDATE 
-			tblARPaymentDetail
+			A
 		SET 
-			dblAmountDue = ((((ISNULL(C.[dblAmountDue], 0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.[dblPayment])
-			,dblBaseAmountDue = ((((ISNULL(C.[dblBaseAmountDue], 0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.[dblBasePayment])
+			A.dblAmountDue = ((((ISNULL(C.[dblAmountDue], 0.00) + ISNULL(A.[dblInterest],0.00)) - ISNULL(A.[dblDiscount],0.00) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.[dblPayment])
+			,A.dblBaseAmountDue = ((((ISNULL(C.[dblBaseAmountDue], 0.00) + ISNULL(A.[dblBaseInterest],0.00)) - ISNULL(A.[dblBaseDiscount],0.00) * (CASE WHEN C.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.[dblBasePayment])
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
