@@ -316,6 +316,21 @@ BEGIN TRY
 						,'Ack Rcvd'
 						)
 
+				UPDATE tblCTContractFeed
+				SET strFeedStatus = 'Ack Rcvd'
+					,strMessage = 'Success'
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+					AND ISNULL(strRowState, '') = 'DELETE'
+					AND ISNULL(strERPPONumber, '') = @strParam
+
 				INSERT INTO @tblMessage (
 					strMessageType
 					,strMessage
