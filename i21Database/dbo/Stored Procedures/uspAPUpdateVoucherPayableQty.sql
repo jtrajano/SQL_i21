@@ -74,7 +74,7 @@ ELSE SAVE TRAN @SavePoint
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = tax.dblAdjustedTax
+			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @voucherPayable B
 			ON A.intVoucherPayableId = B.intVoucherPayableId
@@ -352,6 +352,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnSeparateOnBill]			
 			,[ysnCheckOffTax]			
 			,[ysnTaxOnly]
+			,[ysnTaxExempt]
 		)
 		VALUES (
 			[intVoucherPayableId]		
@@ -368,6 +369,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnSeparateOnBill]			
 			,[ysnCheckOffTax]			
 			,[ysnTaxOnly]
+			,[ysnTaxExempt]
 		)
 		OUTPUT 
 			SourceData.intVoucherPayableId
@@ -646,6 +648,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnSeparateOnBill]			
 			,[ysnCheckOffTax]			
 			,[ysnTaxOnly]
+			,[ysnTaxExempt]
 		)
 		VALUES (
 			[intVoucherPayableId]		
@@ -662,6 +665,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnSeparateOnBill]			
 			,[ysnCheckOffTax]			
 			,[ysnTaxOnly]
+			,[ysnTaxExempt]
 		);
 
 		DELETE A
@@ -692,7 +696,7 @@ ELSE SAVE TRAN @SavePoint
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = tax.dblAdjustedTax
+			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @voucherPayable B
 			ON A.intVoucherPayableId = B.intVoucherPayableId
