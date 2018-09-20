@@ -74,7 +74,7 @@ BEGIN
 		,[dblAdjustedTax]			= A.[dblAdjustedTax]	
 		,[intTaxAccountId]			= A.[intAccountId]	
 		,[ysnSeparateOnBill]		= A.[ysnSeparateOnBill]	
-		,[ysnCheckoffTax]			= A.[ysnCheckoffTax]	
+		,[ysnCheckoffTax]			= A.[ysnCheckOffTax]	
 		,[ysnTaxExempt]				= A.[ysnTaxExempt]	
 		,[ysnTaxOnly]				= A.[ysnTaxOnly]	
 		,[ysnTaxAdjusted]		    = A.[ysnTaxAdjusted]
