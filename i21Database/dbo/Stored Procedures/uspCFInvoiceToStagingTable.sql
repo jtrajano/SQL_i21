@@ -218,9 +218,21 @@ BEGIN TRY
 						 WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
 							THEN 
 								CASE 
-								WHEN ISNULL(strMiscellaneous, '') =  ''
+								WHEN strMiscellaneous =  '' OR strMiscellaneous IS NULL
 									THEN cfCardOdom.intOdometer
-								ELSE cfMiscOdom.intOdometer
+								ELSE ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0)
 								END
 						ELSE 0
 					END)
@@ -332,7 +344,7 @@ BEGIN TRY
 							WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
 							THEN 
 								CASE 
-								WHEN ISNULL(cfInvRpt.strMiscellaneous, '') =  ''
+								WHEN cfInvRpt.strMiscellaneous =  '' OR cfInvRpt.strMiscellaneous IS NULL
 								THEN 
 									CASE
 										WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
@@ -341,8 +353,33 @@ BEGIN TRY
 									END
 								ELSE 
 									CASE
-										WHEN  ISNULL (cfMiscOdom.intOdometer, 0)   > 0 
-										THEN cfInvRpt.intOdometer -	ISNULL (cfMiscOdom.intOdometer, 0) 
+										WHEN  
+										ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0)  > 0 
+										THEN cfInvRpt.intOdometer -	ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0) 
 										ELSE 0 
 									END
 							END
@@ -432,21 +469,21 @@ BEGIN TRY
 			  ORDER  BY dtmTransactionDate DESC
 	) AS cfVehicleOdom
 	-----------------------------------------------------------
-	OUTER APPLY (
-		SELECT TOP 1 intOdometer FROM (
-			SELECT iocftran.*  
-				FROM   dbo.tblCFTransaction as iocftran
-				LEFT JOIN tblCFItem as iocfitem
-				ON iocftran.intProductId = iocfitem.intItemId
-				WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-				AND strMiscellaneous IS NOT NULL
-				AND strMiscellaneous != ''
-				AND ISNULL(ysnPosted,0) = 1
-			) as miscBase
-		WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-		AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-		ORDER  BY dtmTransactionDate DESC
-	) AS cfMiscOdom
+	--OUTER APPLY (
+	--	SELECT TOP 1 intOdometer FROM (
+	--		SELECT iocftran.*  
+	--			FROM   dbo.tblCFTransaction as iocftran
+	--			LEFT JOIN tblCFItem as iocfitem
+	--			ON iocftran.intProductId = iocfitem.intItemId
+	--			WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+	--			AND strMiscellaneous IS NOT NULL
+	--			AND strMiscellaneous != ''
+	--			AND ISNULL(ysnPosted,0) = 1
+	--		) as miscBase
+	--	WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+	--	AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+	--	ORDER  BY dtmTransactionDate DESC
+	--) AS cfMiscOdom
 	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
 	AND cfInvRptSum.strUserId = @UserId
