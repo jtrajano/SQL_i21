@@ -37,6 +37,7 @@
 	[dtmBatchDate]			DATETIME		NULL,
 	[intPostedById]			INT				NULL,
 	[intCurrentStatus]		INT				NULL,
+	[ysnShowAPTransaction]	BIT				CONSTRAINT [DF_tblARPayment_ysnShowAPTransaction] DEFAULT ((0)) NULL,
     [intConcurrencyId]		INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
     CONSTRAINT [PK_tblARPayment_intPaymentId] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
