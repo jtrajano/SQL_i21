@@ -112,9 +112,9 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	 C.strBillId ,
 	 CAST(
 		 	(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment > 0
-					THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
+					THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
+				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19 OR  E.intBankTransactionTypeId = 122 )
 					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
 				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
 	 dblTotal = 0 
