@@ -237,7 +237,9 @@ FROM
 				WHERE QM.strSourceType = 'Storage'
 		  ) StorageDiscount ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId AND StorageDiscount.intItemId = BillDtl.intItemId
 
-	WHERE  Item.strType = 'Other Charge' AND ISNULL(BillDtl.intContractDetailId, 0) > 0
+	WHERE  Item.strType = 'Other Charge'
+		AND ((BillDtl.intScaleTicketId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL) --scale with contract
+			OR (BillDtl.intScaleTicketId IS NULL AND BillDtl.intContractDetailId IS NULL)) --settled with contract
 
 	) tbl 
 	GROUP BY 
