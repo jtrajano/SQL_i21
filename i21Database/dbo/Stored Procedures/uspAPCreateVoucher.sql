@@ -44,6 +44,8 @@ BEGIN TRY
 	DECLARE @claimPref NVARCHAR(50);
 	DECLARE @baStartNum INT = 0;
 	DECLARE @baPref NVARCHAR(50);
+	DECLARE @deferStartNum INT = 0;
+	DECLARE @deferPref NVARCHAR(50);
 
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
@@ -121,7 +123,17 @@ BEGIN TRY
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherPayables')) DROP TABLE #tmpVoucherPayables
 	--reinsert voucher payables to new VoucherPayable so that we could update the data of intBillId	
 	SELECT 
-		DENSE_RANK() OVER(ORDER BY intEntityVendorId,
+		A.*
+	INTO #tmpVoucherPayables
+	FROM @voucherPayables A
+	
+	--GENERATE PARITION IF NOT PROVIDED
+	UPDATE A
+		SET A.intPartitionId = partitionData.intPartitionId
+	FROM #tmpVoucherPayables A
+	OUTER APPLY (
+		SELECT 
+			DENSE_RANK() OVER(ORDER BY intEntityVendorId,
 									intTransactionType,
 									intLocationId,
 									intShipToId,
@@ -129,97 +141,15 @@ BEGIN TRY
 									intShipFromEntityId,
 									intPayToAddressId,
 									intCurrencyId,
-									strVendorOrderNumber) intPartitionId
-		/*Header info*/
-		,[intBillId]						
-		,[intEntityVendorId]				
-		,[intTransactionType]			
-		,[intLocationId]					
-		,[intShipToId]					
-		,[intShipFromId]					
-		,[intShipFromEntityId]			
-		,[intPayToAddressId]				
-		,[intCurrencyId]					
-		,[dtmDate]						
-		,[strVendorOrderNumber]			
-		,[strReference]					
-		,[strSourceNumber]				
-		,[intSubCurrencyCents]			
-		,[intShipViaId]					
-		,[intTermId]						
-		,[strBillOfLading]				
-		,[intAPAccount]					
-		/*Detail info*/
-		,[strMiscDescription]			
-		,[intItemId]						
-		,[ysnSubCurrency]				
-		,[intAccountId]					
-		,[ysnReturn]						
-		,[intLineNo]						
-		,[intStorageLocationId]			
-		,[dblBasis]						
-		,[dblFutures]					
-		/*Integration fields*/
-		,[intPurchaseDetailId]			
-		,[intContractHeaderId]			
-		,[intContractCostId]				
-		,[intContractSeqId]				
-		,[intContractDetailId]			
-		,[intScaleTicketId]				
-		,[intInventoryReceiptItemId]		
-		,[intInventoryReceiptChargeId]	
-		,[intInventoryShipmentItemId]	
-		,[intInventoryShipmentChargeId]
-		,[intLoadShipmentId]				
-		,[intLoadShipmentDetailId]		
-		,[intPaycheckHeaderId]			
-		,[intCustomerStorageId]			
-		,[intCCSiteDetailId]				
-		,[intInvoiceId]					
-		,[intBuybackChargeId]			
-		/*Quantity info*/
-		,[dblOrderQty]					
-		,[dblOrderUnitQty]				
-		,[intOrderUOMId]					
-		,[dblQuantityToBill]				
-		,[dblQtyToBillUnitQty]			
-		,[intQtyToBillUOMId]				
-		/*Cost info*/
-		,[dblCost]						
-		,[dblOldCost]					
-		,[dblCostUnitQty]				
-		,[intCostUOMId]					
-		,[intCostCurrencyId]				
-		/*Weight info*/
-		,[dblWeight]						
-		,[dblNetWeight]					
-		,[dblWeightUnitQty]				
-		,[intWeightUOMId]				
-		/*Exchange Rate info*/
-		,[intCurrencyExchangeRateTypeId]
-		,[dblExchangeRate]				
-		/*Tax info*/
-		,[intPurchaseTaxGroupId]			
-		,[dblTax]						
-		/*Discount Info*/
-		,[dblDiscount]					
-		,[dblDetailDiscountPercent]		
-		,[ysnDiscountOverride]			
-		/*Deferred Voucher*/
-		,[intDeferredVoucherId]			
-		/*Prepaid Info*/
-		,[dblPrepayPercentage]			
-		,[intPrepayTypeId]				
-		/*Claim info*/
-		,[dblNetShippedWeight]			
-		,[dblWeightLoss]					
-		,[dblFranchiseWeight]			
-		,[dblFranchiseAmount]			
-		,[dblActual]						
-		,[dblDifference]					
-	INTO #tmpVoucherPayables
-	FROM @voucherPayables A
+									strVendorOrderNumber,
+									strCheckComment) intPartitionId
+			,B.intVoucherPayableId
+		FROM #tmpVoucherPayables B
+		WHERE B.intVoucherPayableId = A.intVoucherPayableId
+	) partitionData
+	WHERE NULLIF(A.intPartitionId,0) IS NULL
 
+	ALTER TABLE #tmpVoucherPayables DROP COLUMN intVoucherPayableId
 	--THERE SHOULD BE NO CHANGES ON PRIMARY KEY (intVoucherPayableId)
 	INSERT INTO @voucherPayablesData
 	SELECT 
@@ -230,43 +160,49 @@ BEGIN TRY
 	IF OBJECT_ID(N'tempdb..#tmpVoucherHeaderData') IS NOT NULL DROP TABLE #tmpVoucherHeaderData
 	
 	SELECT DISTINCT
-		[intPartitionId]		=	A.intPartitionId,
-		[strBillId]				=	CAST('' AS NVARCHAR(50)),
-		[intTermsId]			=	A.[intTermsId],
-		[dtmDueDate]			=	A.[dtmDueDate],
-		[dtmDate]				=	A.[dtmDate],
-		[dtmBillDate]			=	A.[dtmDate],
-		[intAccountId]			=	A.[intAccountId],
-		[intEntityId]			=	A.[intEntityId],
-		[intEntityVendorId]		=	A.[intEntityVendorId],
-		[intTransactionType]	=	A.[intTransactionType],
-		[strVendorOrderNumber]	=	A.[strVendorOrderNumber],
-		[strShipToAttention]	=	A.[strShipToAttention],
-		[strShipToAddress]		=	A.[strShipToAddress],
-		[strShipToCity]			=	A.[strShipToCity],
-		[strShipToState]		=	A.[strShipToState],
-		[strShipToZipCode]		=	A.[strShipToZipCode],
-		[strShipToCountry]		=	A.[strShipToCountry],
-		[strShipToPhone]		=	A.[strShipToPhone],
-		[strShipFromAttention]	=	A.[strShipFromAttention],
-		[strShipFromAddress]	=	A.[strShipFromAddress],
-		[strShipFromCity]		=	A.[strShipFromCity],
-		[strShipFromState]		=	A.[strShipFromState],
-		[strShipFromZipCode]	=	A.[strShipFromZipCode],
-		[strShipFromCountry]	=	A.[strShipFromCountry],
-		[strShipFromPhone]		=	A.[strShipFromPhone],
-		[intShipFromId]			=	A.[intShipFromId],
-		[intShipFromEntityId]	=	A.[intShipFromEntityId],
-		[intPayToAddressId]		=	A.[intPayToAddressId],
-		[intShipToId]			=	A.[intShipToId],
-		[intShipViaId]			=	A.[intShipViaId],
-		[intStoreLocationId]	=	A.[intStoreLocationId],
-		[intContactId]			=	A.[intContactId],
-		[intOrderById]			=	A.[intOrderById],
-		[intCurrencyId]			=	A.[intCurrencyId],
-		[intSubCurrencyCents]	=	A.[intSubCurrencyCents]
+		A. *
+		-- [intPartitionId]		=	A.intPartitionId,
+		-- [strBillId]				=	CAST('' AS NVARCHAR(50)),
+		-- [intTermsId]			=	A.[intTermsId],
+		-- [dtmDueDate]			=	A.[dtmDueDate],
+		-- [dtmDate]				=	A.[dtmDate],
+		-- [dtmBillDate]			=	A.[dtmDate],
+		-- [intAccountId]			=	A.[intAccountId],
+		-- [intEntityId]			=	A.[intEntityId],
+		-- [intEntityVendorId]		=	A.[intEntityVendorId],
+		-- [intTransactionType]	=	A.[intTransactionType],
+		-- [strVendorOrderNumber]	=	A.[strVendorOrderNumber],
+		-- [strComment]			=	A.[strComment],
+		-- [strShipToAttention]	=	A.[strShipToAttention],
+		-- [strShipToAddress]		=	A.[strShipToAddress],
+		-- [strShipToCity]			=	A.[strShipToCity],
+		-- [strShipToState]		=	A.[strShipToState],
+		-- [strShipToZipCode]		=	A.[strShipToZipCode],
+		-- [strShipToCountry]		=	A.[strShipToCountry],
+		-- [strShipToPhone]		=	A.[strShipToPhone],
+		-- [strShipFromAttention]	=	A.[strShipFromAttention],
+		-- [strShipFromAddress]	=	A.[strShipFromAddress],
+		-- [strShipFromCity]		=	A.[strShipFromCity],
+		-- [strShipFromState]		=	A.[strShipFromState],
+		-- [strShipFromZipCode]	=	A.[strShipFromZipCode],
+		-- [strShipFromCountry]	=	A.[strShipFromCountry],
+		-- [strShipFromPhone]		=	A.[strShipFromPhone],
+		-- [intShipFromId]			=	A.[intShipFromId],
+		-- [intShipFromEntityId]	=	A.[intShipFromEntityId],
+		-- [intDeferredVoucherId]	=	A.[intDeferredVoucherId],
+		-- [intPayToAddressId]		=	A.[intPayToAddressId],
+		-- [intShipToId]			=	A.[intShipToId],
+		-- [intShipViaId]			=	A.[intShipViaId],
+		-- [intStoreLocationId]	=	A.[intStoreLocationId],
+		-- [intContactId]			=	A.[intContactId],
+		-- [intOrderById]			=	A.[intOrderById],
+		-- [intCurrencyId]			=	A.[intCurrencyId],
+		-- [intSubCurrencyCents]	=	A.[intSubCurrencyCents]
 	INTO #tmpVoucherHeaderData
 	FROM dbo.fnAPCreateVoucherData(@userId, @voucherPayablesData) A
+
+	ALTER TABLE #tmpVoucherHeaderData
+	ADD strBillId NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 
 	--UPDATE VOUCHER PAYABLES TO MATCH WITH THE VOUCHER HEADER
  	UPDATE A
@@ -340,6 +276,20 @@ BEGIN TRY
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
 
+	--DEFERRED INTEREST Type
+	UPDATE A
+		SET A.intConcurrencyId = A.intConcurrencyId + 1
+		,@deferStartNum = A.intNumber
+		,@deferPref = A.strPrefix
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 132
+
+	UPDATE A
+		SET A.strBillId = @deferPref + CAST(@deferStartNum - 1 AS NVARCHAR)
+		,@deferStartNum = @deferStartNum + 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 14
+
 	MERGE INTO tblAPBill AS destination
 	USING
 	(
@@ -351,6 +301,7 @@ BEGIN TRY
 	(
 		[intTermsId]			,
 		[dtmDueDate]			,
+		[dtmVoucherDate]		,
 		[dtmDate]				,
 		[dtmBillDate]			,
 		[intAccountId]			,
@@ -358,6 +309,7 @@ BEGIN TRY
 		[intEntityVendorId]		,
 		[intTransactionType]	,
 		[strVendorOrderNumber]	,
+		[strComment]			,
 		[strBillId]				,
 		[strShipToAttention]	,
 		[strShipToAddress]		,
@@ -375,6 +327,7 @@ BEGIN TRY
 		[strShipFromPhone]		,
 		[intShipFromId]			,
 		[intShipFromEntityId]	,
+		[intDeferredVoucherId]	,
 		[intPayToAddressId]		, 
 		[intShipToId]			,
 		[intStoreLocationId]	,
@@ -387,6 +340,7 @@ BEGIN TRY
 	VALUES (
 		[intTermsId]			,
 		[dtmDueDate]			,
+		[dtmVoucherDate]		,
 		[dtmDate]				,
 		[dtmBillDate]			,
 		[intAccountId]			,
@@ -394,6 +348,7 @@ BEGIN TRY
 		[intEntityVendorId]		,
 		[intTransactionType]	,
 		[strVendorOrderNumber]	,
+		[strComment]			,
 		[strBillId]				,
 		[strShipToAttention]	,
 		[strShipToAddress]		,
@@ -411,6 +366,7 @@ BEGIN TRY
 		[strShipFromPhone]		,
 		[intShipFromId]			,
 		[intShipFromEntityId]	,
+		[intDeferredVoucherId]	,
 		[intPayToAddressId]		, 
 		[intShipToId]			,
 		[intStoreLocationId]	,
@@ -449,6 +405,12 @@ BEGIN TRY
 		SET A.intNumber = @baStartNum
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 124
+
+	--DEFERRED INTEREST Type
+	UPDATE A
+		SET A.intNumber = @deferStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 132
 
 	UPDATE A
 		SET A.intBillId = B.intBillId
@@ -490,6 +452,11 @@ BEGIN CATCH
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
+	SET @ErrorProc     = ERROR_PROCEDURE()
+
+	SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) + 
+		'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
+		' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
 
 	IF (XACT_STATE()) = -1
 	BEGIN

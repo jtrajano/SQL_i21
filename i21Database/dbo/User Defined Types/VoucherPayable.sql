@@ -11,7 +11,10 @@ DROP TYPE VoucherPayable
 CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 (
     [intVoucherPayableId]			INT IDENTITY(1,1) PRIMARY KEY,
-	[intPartitionId]				INT NULL,  --FOR INTERNAL USE ONLY
+	--IF NOT PROVIDED, WE WILL GROUP THE PAYABLES BASED ON THESE FIELS
+	--intEntityVendorId,intTransactionType,intLocationId,intShipToId,intShipFromId,intShipFromEntityId,intPayToAddressId,intCurrencyId,strVendorOrderNumber
+	--IF PROVIDED, WE WILL VALIDATE THE VALUES OF THOSE FIELDS ABOVE IF intParitionId IS VALID TO GROUP
+	[intPartitionId]				INT NULL, 
 	/*Header info*/
 	[intBillId]						INT NULL, --provide if adding on existing voucher
 	[intEntityVendorId]				INT NOT NULL,
@@ -22,7 +25,9 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intShipFromEntityId]			INT NULL, --will default to vendor
 	[intPayToAddressId]				INT NULL, --will default to ship from
 	[intCurrencyId]					INT NULL, --will default to default currency in company pref
-	[dtmDate]						DATETIME DEFAULT GETDATE(),
+	[dtmDate]						DATETIME NULL DEFAULT GETDATE(),
+	[dtmVoucherDate]				DATETIME NULL DEFAULT GETDATE(),
+	[dtmDueDate]					DATETIME NULL DEFAULT GETDATE(),
 	[strVendorOrderNumber]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strReference]					NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceNumber]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL, --record number of integrated module
@@ -30,6 +35,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intShipViaId]					INT NULL, --default to vendor location ship via if not provided
 	[intTermId]						INT NULL, --default to vendor location term setup
 	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	[strCheckComment]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intAPAccount]					INT NULL, --if null, we will use default setup
 	/*Detail info*/
 	[strMiscDescription]			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
@@ -89,6 +95,8 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[ysnDiscountOverride]			BIT DEFAULT(0),
 	/*Deferred Voucher*/
 	[intDeferredVoucherId]			INT NULL,
+	[dtmDeferredInterestDate]		DATETIME NULL,
+	[dtmInterestAccruedThru]		DATETIME NULL,
 	/*Prepaid Info*/
 	[dblPrepayPercentage]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[intPrepayTypeId]				INT NULL,

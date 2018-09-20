@@ -8,6 +8,7 @@ RETURNS @returntable TABLE
 	[intPartitionId]		INT				NOT NULL,
 	[intTermsId]			INT             NOT NULL,
 	[dtmDueDate]			DATETIME        NOT NULL DEFAULT GETDATE(),
+	[dtmVoucherDate]		DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDate]				DATETIME        NOT NULL DEFAULT GETDATE(),
 	[dtmBillDate]			DATETIME NOT NULL DEFAULT GETDATE(), 
     [intAccountId]			INT             NOT NULL,
@@ -15,6 +16,7 @@ RETURNS @returntable TABLE
     [intEntityVendorId]		INT NOT NULL  , 
     [intTransactionType]	INT NOT NULL DEFAULT 0, 
 	[strVendorOrderNumber]	NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intShipToId]			INT NULL , 
 	[strShipToAttention]	NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAddress]		NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
@@ -32,6 +34,7 @@ RETURNS @returntable TABLE
 	[strShipFromPhone]		NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId]			INT NULL , 
 	[intShipFromEntityId]	INT NOT NULL,
+	[intDeferredVoucherId]	INT NULL,
 	[intPayToAddressId]		INT NULL , 
 	[intShipViaId]			INT NULL , 
     [intStoreLocationId]	INT NULL , 
@@ -58,10 +61,18 @@ BEGIN
 										 intShipFromEntityId,
 										 intPayToAddressId,
 										 intCurrencyId,
-										 strVendorOrderNumber
+										 strVendorOrderNumber,
+										 strCheckComment
 								ORDER BY intLineNo) AS intCountId
 			,A.*
 		FROM @voucherPayables A
+		WHERE NULLIF(A.intPartitionId,0) IS NULL
+		UNION ALL
+		SELECT
+			ROW_NUMBER() OVER(PARTITION BY intPartitionId ORDER BY intLineNo) AS intCountId
+			,A.*
+		FROM @voucherPayables A
+		WHERE A.intPartitionId > 0
 		-- WHERE EXISTS (
 		-- 	SELECT * FROM (
 		-- 		SELECT
@@ -96,12 +107,14 @@ BEGIN
 		[intPartitionId]		,
 		[intTermsId]			,
 		[dtmDate]				,
+		[dtmVoucherDate]		,
 		[dtmDueDate]			,
 		[intAccountId]			,
 		[intEntityId]			,
 		[intEntityVendorId]		,
 		[intTransactionType]	,
 		[strVendorOrderNumber]	,
+		[strComment]			,
 		[intShipToId]			,
 		[strShipToAttention]	,
 		[strShipToAddress]		,
@@ -119,6 +132,7 @@ BEGIN
 		[strShipFromPhone]		,
 		[intShipFromId]			,
 		[intShipFromEntityId]	,
+		[intDeferredVoucherId]	,
 		[intPayToAddressId]		, 
 		[intShipViaId]			,
 		[intStoreLocationId]	,
@@ -135,7 +149,8 @@ BEGIN
 									-- 	WHEN B.intTermsId > 0 THEN B.intTermsId --default location
 									-- ELSE vendor.intTermsId END, --vendor
 		[dtmDate]				=	A.dtmDate,
-		[dtmDueDate]			=	dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID),
+		[dtmVoucherDate]		=	A.dtmVoucherDate,
+		[dtmDueDate]			=	ISNULL(A.dtmDueDate, dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID)),
 		[intAccountId]			=	CASE WHEN A.intAPAccount > 0 THEN A.intAPAccount
 										WHEN A.intTransactionType IN (2, 13)
 											THEN (CASE WHEN A.intLocationId > 0 THEN payableLoc.intPurchaseAdvAccount
@@ -148,6 +163,7 @@ BEGIN
 		[intEntityVendorId]		=	A.intEntityVendorId,
 		[intTransactionType]	=	A.intTransactionType,
 		[strVendorOrderNumber]	=	A.strVendorOrderNumber,
+		[strComment]			=	A.strCheckComment,
 		[intShipToId]			=	CASE WHEN A.intLocationId > 0 THEN A.intLocationId ELSE userCompLoc.intCompanyLocationId END,
 		[strShipToAttention]	=	NULL,
 		[strShipToAddress]		=	CASE WHEN A.intLocationId > 0 THEN payableLoc.strAddress ELSE userCompLoc.strAddress END,
@@ -188,6 +204,7 @@ BEGIN
 		[intShipFromEntityId]	=	CASE WHEN A.intShipFromEntityId > 0 THEN A.intShipFromEntityId
 										ELSE A.intEntityVendorId
 									END,
+		[intDeferredVoucherId]	=	A.intDeferredVoucherId,
 		[intPayToAddressId]		=	CASE WHEN A.intPayToAddressId > 0 THEN A.intPayToAddressId --Voucher Payable data
 										WHEN A.intShipFromId > 0 AND A.intShipFromEntityId IS NULL THEN A.intShipFromId --Voucher Payable data
 									ELSE shipFromData.intEntityLocationId END, --vendor default location
@@ -245,6 +262,13 @@ BEGIN
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM (
+			--use deferred interest term
+			SELECT
+				term.*
+			FROM tblSMTerm term
+			INNER JOIN tblAPDeferredPaymentInterest deferredInterest
+				ON deferredInterest.strTerm = term.strTerm AND A.intDeferredVoucherId > 0
+			UNION ALL
 			--There is term value received
 			SELECT
 				payableTerm.*
@@ -273,6 +297,31 @@ BEGIN
 		) termHeirarchy
 	) termData
 	WHERE A.intCountId = 1
+
+	-- UPDATE A
+	-- SET A.dtmDate = deferredInterest.dtmPaymentPostDate,
+	-- 	A.dtmDueDate = deferredInterest.dtmPaymentDueDateOverride, 
+	-- 	A.dtmBillDate = deferredInterest.dtmPaymentInvoiceDate,
+	-- 	A.intTermsId = term.intTermID,
+	-- 	A.intDeferredVoucherId = @currentVoucherId,
+	-- 	A.strComment = deferredInterest.strCheckComment
+	-- FROM tblAPBill A
+	-- CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
+	-- INNER JOIN tblSMTerm term ON deferredInterest.strTerm = term.strTerm
+	-- INNER JOIN @voucherCreated B ON A.intBillId = B.intBillId
+
+	-- UPDATE A
+	-- 	SET A.intDeferredVoucherId = @currentVoucherId
+	-- FROM tblAPBillDetail A
+	-- INNER JOIN @voucherCreated B ON A.intBillId = B.intBillId
+
+	-- UPDATE A
+	-- 	SET A.dtmDeferredInterestDate = deferredInterest.dtmPaymentDueDateOverride,
+	-- 		A.dtmInterestAccruedThru = deferredInterest.dtmCalculationDate
+	-- FROM tblAPBill A
+	-- CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
+	-- INNER JOIN tblSMTerm term ON deferredInterest.strTerm = term.strTerm
+	-- INNER JOIN @voucherCreated B ON A.intBillId = B.intBillId
 	
 	RETURN;
 END
