@@ -506,7 +506,7 @@ FROM
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
-		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
+		,[intInventoryReceiptItemId]				=	J.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
@@ -604,6 +604,11 @@ FROM
 					SELECT strDescription, strAccountId, intAccountId FROM tblGLAccount 
 					WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 	) IA
+	OUTER APPLY
+	(
+		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
+		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	) J
 	--OUTER APPLY 
 	--(
 	--	SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
