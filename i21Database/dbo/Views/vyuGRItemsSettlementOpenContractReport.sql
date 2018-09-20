@@ -1,49 +1,40 @@
 CREATE VIEW [dbo].[vyuGRItemsSettlementOpenContractReport]
 AS
-SELECT --CD.intItemId
-		Item.strItemNo AS ItemName
-		, dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,
-				(
-				SELECT intItemUOMId 
-				FROM tblICItemUOM 
-				WHERE intItemId = CD.intItemId 
-						AND ysnStockUOM = 1
-				),
-				SUM(CD.dblBalance)) 
-			AS Amount
-		 , CTT.strContractType AS PivotColumn
-		 , (
-			SELECT strUnitMeasure 
-			FROM tblICUnitMeasure UM
-			LEFT JOIN tblICItemUOM ItemUOM ON
-				UM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-			WHERE ItemUOM.intItemId = CD.intItemId
-				AND ItemUOM.ysnStockUOM = 1
-			) AS UnitMeasure
+SELECT A.ItemName	 
+	 , PivotColumn = CONVERT(NVARCHAR,A.PivotColumn)
+	 , Amount = CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.Amount),0)))
+	 , A.UnitMeasure
+	 , intEntityId = CONVERT(NVARCHAR,A.intEntityId)
+	 , PivotColumnId = CASE 
+						WHEN A.PivotColumn = 'Purchase' THEN 111
+						ELSE 222
+					  END
+FROM (
+	SELECT 
+		ItemName = Item.strItemNo
+		, PivotColumn = CT.strContractType
+		, Amount = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, ItemUOM.intItemUOMId, CD.dblBalance)
+		, UnitMeasure = UOM.strUnitMeasure
 		, CH.intEntityId
-FROM tblCTContractDetail CD
-JOIN tblCTContractHeader CH ON
-	CD.intContractHeaderId = CH.intContractHeaderId
-LEFT JOIN tblCTPricingType PT ON
-	CD.intPricingTypeId = PT.intPricingTypeId
-LEFT JOIN tblCTContractType CTT ON
-	CH.intContractTypeId = CTT.intContractTypeId
-LEFT JOIN tblICItem Item ON
-	CD.intItemId = Item.intItemId 
-LEFT JOIN tblICItemUOM ItemUOM ON 
-	Item.intItemId = ItemUOM.intItemId 
-	AND CD.intItemUOMId = ItemUOM.intItemUOMId
-LEFT JOIN tblICUnitMeasure UM ON ItemUOM.intUnitMeasureId = UM.intUnitMeasureId
-WHERE PT.strPricingType IN ('Priced','Basis','HTA')
-	AND CD.dblBalance > 0
-	AND Item.ysnUseWeighScales = 1
-GROUP BY CD.intItemId
-		, Item.strItemNo
-		, CD.intItemUOMId
-		, CTT.strContractType
-		, CD.dblBalance
-		, CH.intEntityId
-
+	FROM tblCTContractDetail CD
+	JOIN tblCTContractHeader CH
+		ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblCTPricingType PT
+		ON PT.intPricingTypeId = CD.intPricingTypeId
+	JOIN tblCTContractType CT
+		ON CT.intContractTypeId = CH.intContractTypeId
+	LEFT JOIN tblICItem Item 
+		ON Item.intItemId = CD.intItemId
+	LEFT JOIN tblICItemUOM ItemUOM
+		ON ItemUOM.intItemId = Item.intItemId
+			AND ItemUOM.ysnStockUnit = 1
+	LEFT JOIN tblICUnitMeasure UOM
+		ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	WHERE CD.dblBalance > 0
+		AND Item.ysnUseWeighScales = 1
+) A
+GROUP BY A.intEntityId
+		,A.ItemName
+		,A.PivotColumn
+		,A.UnitMeasure
 GO
-
-
