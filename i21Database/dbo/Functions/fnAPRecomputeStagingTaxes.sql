@@ -272,7 +272,7 @@ BEGIN
 		,[ysnSeparateOnBill]
 		,[intTaxAccountId]
 		,[ysnTaxAdjusted]
-		,[ysnCheckOffTax]
+		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
 	FROM
