@@ -54,8 +54,7 @@ DECLARE @intMinSeq INT
 	,@strSAPLocation NVARCHAR(50)
 	,@strERPItemNumber NVARCHAR(100)
 	,@strTblRowState NVARCHAR(50)
-	,@strMessageCode nvarchar(50)
-
+	,@strMessageCode NVARCHAR(50)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strContractFeedIds NVARCHAR(MAX)
@@ -79,6 +78,7 @@ DECLARE @tblCTContractFeed TABLE (
 	intContractFeedId INT
 	,intContractHeaderId INT
 	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,intContractSeq INT
 	)
 DECLARE @tblCTFinalContractFeed TABLE (
 	intContractHeaderId INT
@@ -101,69 +101,87 @@ DECLARE @tblIPOutput TABLE (
 	intContractHeaderId INT
 	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
-
 DECLARE @tblHoldContract TABLE (
-		intContractHeaderId INT
-		,intContractSeq INT
-		)
-
+	intContractHeaderId INT
+	,intContractSeq INT
+	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	)
 DECLARE @tblRollUpContract TABLE (
-		intContractHeaderId INT
-		,ysnMaxPrice INT
-		)
+	intContractHeaderId INT
+	,ysnMaxPrice INT
+	)
 DECLARE @tblRollUpFinalContract TABLE (
-		intContractHeaderId INT
-		,ysnMaxPrice INT
-		)
+	intContractHeaderId INT
+	,ysnMaxPrice INT
+	)
 
 SELECT @strPOCreateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO CREATE')
 
 SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 
-Select @strMessageCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
+SELECT @strMessageCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
-Update tblCTContractFeed Set strFeedStatus ='' Where strFeedStatus ='Hold'
+UPDATE tblCTContractFeed
+SET strFeedStatus = ''
+WHERE strFeedStatus = 'Hold'
 
-Update CF 
-Set ysnMaxPrice =(Select Top 1 CF1.ysnMaxPrice  From tblCTContractFeed CF1 Where CF1.intContractHeaderId=CF.intContractHeaderId Order by intContractFeedId asc)
-	OUTPUT inserted.intContractHeaderId
-		,inserted.ysnMaxPrice
-	INTO @tblRollUpContract
+UPDATE CF
+SET ysnMaxPrice = (
+		SELECT TOP 1 CF1.ysnMaxPrice
+		FROM tblCTContractFeed CF1
+		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+		ORDER BY intContractFeedId ASC
+		)
+	,strPurchasingGroup = (
+		SELECT TOP 1 CF1.strPurchasingGroup
+		FROM tblCTContractFeed CF1
+		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+			AND CF1.strItemNo = CF.strItemNo
+			AND IsNULL(CF1.strPurchasingGroup, '') <> ''
+		ORDER BY intContractFeedId ASC
+		)
+OUTPUT inserted.intContractHeaderId
+	,inserted.ysnMaxPrice
+INTO @tblRollUpContract
 FROM tblCTContractFeed CF
 WHERE ISNULL(strFeedStatus, '') = ''
 
-Insert into @tblRollUpFinalContract
-Select distinct intContractHeaderId,ysnMaxPrice from @tblRollUpContract
+INSERT INTO @tblRollUpFinalContract
+SELECT DISTINCT intContractHeaderId
+	,ysnMaxPrice
+FROM @tblRollUpContract
 
 IF EXISTS (
 		SELECT *
 		FROM tblCTContractFeed CF
-		--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
-		WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
+		WHERE ISNULL(strFeedStatus, '') = ''
+			AND IsNULL(CF.ysnMaxPrice, 0) = 1
 			AND UPPER(strRowState) IN (
 				'MODIFIED'
 				,'DELETE'
 				)
+			AND IsNULL(ysnPopulatedByIntegration, 0) = 0
 		)
 BEGIN
 	INSERT INTO @tblCTContractFeed (
 		intContractFeedId
 		,intContractHeaderId
 		,strItemNo
+		,intContractSeq
 		)
 	SELECT CF.intContractFeedId
 		,CF.intContractHeaderId
 		,CF.strItemNo
+		,CF.intContractSeq
 	FROM tblCTContractFeed CF
-	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-	--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
-	WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) = 1 
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
 			)
 		AND IsNULL(strMessage, '') <> 'System'
+		AND IsNULL(ysnPopulatedByIntegration, 0) = 0
 		AND EXISTS (
 			SELECT *
 			FROM tblCTContractDetail CD
@@ -228,7 +246,7 @@ BEGIN
 		,strPackingDescription
 		,strLocationName
 		,ysnPopulatedByIntegration
-		,ysnMaxPrice 
+		,ysnMaxPrice
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -279,85 +297,139 @@ BEGIN
 		,strPackingDescription
 		,strLocationName
 		,1
-		,RC.ysnMaxPrice 
+		,RC.ysnMaxPrice
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
-	Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF.intContractHeaderId
+	LEFT JOIN @tblRollUpFinalContract RC ON RC.intContractHeaderId = CF.intContractHeaderId
 
 	---********************************************************
 	--- Item Change
 	---********************************************************
-	INSERT INTO @tblCTContractFeed2 (
-		intContractHeaderId
-		,intContractSeq
-		,strItemNo
-		)
-	SELECT CF.intContractHeaderId
-		,CF.intContractSeq
-		,CF.strItemNo
-	FROM tblCTContractFeed CF
-	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-	--	AND IsNULL(CH.ysnMaxPrice, 0) = 1
-	WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) = 1
-		AND UPPER(strRowState) = 'MODIFIED'
-
-	INSERT INTO @tblCTContractFeedHistory (
-		intContractHeaderId
-		,intContractSeq
-		,strItemNo
-		,intContractFeedId
-		)
-	SELECT CF2.intContractHeaderId
-		,CF2.intContractSeq
-		,(
-			SELECT TOP 1 CF.strItemNo
-			FROM tblCTContractFeed CF
-			WHERE CF2.intContractHeaderId = CF.intContractHeaderId
-				AND CF2.intContractSeq = CF.intContractSeq
-				AND IsNULL(CF.strFeedStatus, '') <> ''
-				AND CF.strRowState <> 'DELETE'
-			ORDER BY intContractFeedId DESC
+	IF @strRowState = 'Added'
+	BEGIN
+		INSERT INTO @tblCTContractFeed2 (
+			intContractHeaderId
+			,intContractSeq
+			,strItemNo
 			)
-		,(
-			SELECT TOP 1 CF.intContractFeedId
-			FROM tblCTContractFeed CF
-			WHERE CF2.intContractHeaderId = CF.intContractHeaderId
-				AND CF2.intContractSeq = CF.intContractSeq
-				AND IsNULL(CF.strFeedStatus, '') <> ''
-				AND CF.strRowState <> 'DELETE'
-			ORDER BY intContractFeedId DESC
+		SELECT CF.intContractHeaderId
+			,CF.intContractSeq
+			,CF.strItemNo
+		FROM tblCTContractFeed CF
+		WHERE ISNULL(strFeedStatus, '') = ''
+			AND IsNULL(CF.ysnMaxPrice, 0) = 1
+			AND UPPER(strRowState) = 'MODIFIED'
+
+		INSERT INTO @tblCTContractFeedHistory (
+			intContractHeaderId
+			,intContractSeq
+			,strItemNo
+			,intContractFeedId
 			)
-	FROM @tblCTContractFeed2 CF2
+		SELECT CF2.intContractHeaderId
+			,CF2.intContractSeq
+			,(
+				SELECT TOP 1 CF.strItemNo
+				FROM tblCTContractFeed CF
+				WHERE CF2.intContractHeaderId = CF.intContractHeaderId
+					AND CF2.intContractSeq = CF.intContractSeq
+					AND IsNULL(CF.strFeedStatus, '') <> ''
+					AND CF.strRowState <> 'DELETE'
+				ORDER BY intContractFeedId DESC
+				)
+			,(
+				SELECT TOP 1 CF.intContractFeedId
+				FROM tblCTContractFeed CF
+				WHERE CF2.intContractHeaderId = CF.intContractHeaderId
+					AND CF2.intContractSeq = CF.intContractSeq
+					AND IsNULL(CF.strFeedStatus, '') <> ''
+					AND CF.strRowState <> 'DELETE'
+				ORDER BY intContractFeedId DESC
+				)
+		FROM @tblCTContractFeed2 CF2
 
+		DELETE CF2
+		OUTPUT deleted.intContractHeaderId
+			,deleted.intContractSeq
+			,deleted.strItemNo
+		INTO @tblHoldContract
+		FROM @tblCTContractFeed2 CF2
+		JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
+			AND CFH.intContractSeq = CF2.intContractSeq
+			AND CFH.strItemNo <> CF2.strItemNo
+			AND EXISTS (
+				SELECT *
+				FROM tblCTContractFeed CF
+				WHERE CF.intContractHeaderId = CF2.intContractHeaderId
+					AND CF.intContractSeq = CF2.intContractSeq
+					AND CF.strFeedStatus = 'Awt Ack'
+				)
 
+		UPDATE CF
+		SET strFeedStatus = 'Hold'
+		FROM tblCTContractFeed CF
+		JOIN @tblHoldContract HC ON HC.intContractHeaderId = CF.intContractHeaderId
+			AND HC.strItemNo = CF.strItemNo
+		WHERE IsNULL(strFeedStatus, '') = ''
 
-	DELETE CF2
-	OUTPUT deleted.intContractHeaderId
-		,deleted.intContractSeq
-	INTO @tblHoldContract
-	FROM @tblCTContractFeed2 CF2
-	JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
-		AND CFH.intContractSeq = CF2.intContractSeq
-		AND CFH.strItemNo <> CF2.strItemNo
-		AND EXISTS (
-			SELECT *
+		IF EXISTS (
+				SELECT *
+				FROM @tblCTContractFeed2 CF2
+				JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
+					AND CFH.intContractSeq = CF2.intContractSeq
+					AND CFH.strItemNo <> CF2.strItemNo
+					AND NOT EXISTS (
+						SELECT *
+						FROM @tblCTFinalContractFeed CF1
+						WHERE CF1.intContractHeaderId = CF2.intContractHeaderId
+							AND CF1.strItemNo = CFH.strItemNo
+						)
+				)
+		BEGIN
+			UPDATE CF
+			SET strRowState = CASE 
+					WHEN NOT EXISTS (
+							SELECT *
+							FROM @tblCTContractFeedHistory CFH
+							WHERE CFH.intContractHeaderId = CF.intContractHeaderId
+								AND CFH.strItemNo = CF.strItemNo
+							)
+						THEN 'Added'
+					ELSE strRowState
+					END
+				,strERPPONumber = CASE 
+					WHEN NOT EXISTS (
+							SELECT *
+							FROM @tblCTContractFeedHistory CFH
+							WHERE CFH.intContractHeaderId = CF.intContractHeaderId
+								AND CFH.strItemNo = CF.strItemNo
+							)
+						THEN ''
+					ELSE IsNULL((
+								SELECT TOP 1 strERPPONumber
+								FROM tblCTContractDetail CD
+								JOIN tblICItem I ON CD.intItemId = I.intItemId
+								WHERE CD.intContractHeaderId = CF.intContractHeaderId
+									AND I.strItemNo = CF.strItemNo
+									AND CD.intContractSeq <> CF.intContractSeq
+								), strERPPONumber)
+					END
 			FROM tblCTContractFeed CF
-			WHERE CF.intContractHeaderId = CF2.intContractHeaderId
-				AND CF.intContractSeq = CF2.intContractSeq
-				AND CF.strFeedStatus = 'Awt Ack'
-			)
+			JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF.intContractHeaderId
+				AND CFH.intContractSeq = CF.intContractSeq
+				AND CFH.strItemNo <> CF.strItemNo
+			WHERE IsNULL(strFeedStatus, '') = ''
 
-	UPDATE CF
-	SET strFeedStatus = 'Hold'
-	FROM tblCTContractFeed CF
-	JOIN @tblHoldContract HC ON HC.intContractHeaderId = CF.intContractHeaderId
-		AND HC.intContractSeq = CF.intContractSeq
-	WHERE IsNULL(strFeedStatus,'') = ''
+			DELETE
+			FROM @tblCTFinalContractFeed
 
-
-	IF EXISTS (
-			SELECT *
+			INSERT INTO @tblCTFinalContractFeed (
+				intContractHeaderId
+				,strItemNo
+				)
+			SELECT DISTINCT CF2.intContractHeaderId
+				,CFH.strItemNo
 			FROM @tblCTContractFeed2 CF2
 			JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
 				AND CFH.intContractSeq = CF2.intContractSeq
@@ -368,273 +440,247 @@ BEGIN
 					WHERE CF1.intContractHeaderId = CF2.intContractHeaderId
 						AND CF1.strItemNo = CFH.strItemNo
 					)
-			)
-	BEGIN
-		UPDATE CF
-		SET strRowState = CASE 
-				WHEN NOT EXISTS (
-						SELECT *
-						FROM @tblCTContractFeedHistory CFH
-						WHERE CFH.intContractHeaderId = CF.intContractHeaderId
-							AND CFH.strItemNo = CF.strItemNo
-						)
-					THEN 'Added'
-				ELSE strRowState
-				END
-		FROM tblCTContractFeed CF
-		JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF.intContractHeaderId
-			AND CFH.intContractSeq = CF.intContractSeq
-			AND CFH.strItemNo <> CF.strItemNo
-		WHERE IsNULL(strFeedStatus, '') = ''
 
-		DELETE
-		FROM @tblCTFinalContractFeed
-
-		INSERT INTO @tblCTFinalContractFeed (
-			intContractHeaderId
-			,strItemNo
-			)
-		SELECT DISTINCT CF2.intContractHeaderId
-			,CFH.strItemNo
-		FROM @tblCTContractFeed2 CF2
-		JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
-			AND CFH.intContractSeq = CF2.intContractSeq
-			AND CFH.strItemNo <> CF2.strItemNo
-			AND NOT EXISTS (
-				SELECT *
-				FROM @tblCTFinalContractFeed CF1
-				WHERE CF1.intContractHeaderId = CF2.intContractHeaderId
-					AND CF1.strItemNo = CFH.strItemNo
+			INSERT INTO tblCTContractFeed (
+				intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,intContractSeq
+				,strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,strRowState
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,dtmFeedCreated
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,strLocationName
+				,ysnPopulatedByIntegration
+				,ysnMaxPrice
 				)
+			OUTPUT inserted.intContractHeaderId
+				,inserted.strItemNo
+			INTO @tblIPOutput
+			SELECT CF.intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,intContractSeq
+				,CF.strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,'MODIFIED'
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,GETDATE()
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,strLocationName
+				,1
+				,RC.ysnMaxPrice
+			FROM vyuCTContractFeed CF
+			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
+				AND CF1.strItemNo = CF.strItemNo
+			LEFT JOIN @tblRollUpFinalContract RC ON RC.intContractHeaderId = CF.intContractHeaderId
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblCTContractFeed CF2
+					WHERE CF2.intContractDetailId = CF.intContractDetailId
+						AND CF2.intContractHeaderId = CF.intContractHeaderId
+						AND CF2.strRowState = 'Modified'
+						AND (
+							IsNULL(CF2.strFeedStatus, '') = ''
+							OR IsNULL(CF2.strFeedStatus, '') = 'Awt Ack'
+							)
+					)
 
-		INSERT INTO tblCTContractFeed (
-			intContractHeaderId
-			,intContractDetailId
-			,strCommodityCode
-			,strCommodityDesc
-			,strContractBasis
-			,strContractBasisDesc
-			,strSubLocation
-			,strCreatedBy
-			,strCreatedByNo
-			,strEntityNo
-			,strTerm
-			,strPurchasingGroup
-			,strContractNumber
-			,strERPPONumber
-			,intContractSeq
-			,strItemNo
-			,strStorageLocation
-			,dblQuantity
-			,dblCashPrice
-			,strQuantityUOM
-			,dtmPlannedAvailabilityDate
-			,dblBasis
-			,strCurrency
-			,dblUnitCashPrice
-			,strPriceUOM
-			,strRowState
-			,dtmContractDate
-			,dtmStartDate
-			,dtmEndDate
-			,dtmFeedCreated
-			,strSubmittedBy
-			,strSubmittedByNo
-			,strOrigin
-			,dblNetWeight
-			,strNetWeightUOM
-			,strVendorAccountNum
-			,strTermCode
-			,strContractItemNo
-			,strContractItemName
-			,strERPItemNumber
-			,strERPBatchNumber
-			,strLoadingPoint
-			,strPackingDescription
-			,strLocationName
-			,ysnPopulatedByIntegration
-			,ysnMaxPrice
-			)
-		OUTPUT inserted.intContractHeaderId
-			,inserted.strItemNo
-		INTO @tblIPOutput
-		SELECT CF.intContractHeaderId
-			,intContractDetailId
-			,strCommodityCode
-			,strCommodityDesc
-			,strContractBasis
-			,strContractBasisDesc
-			,strSubLocation
-			,strCreatedBy
-			,strCreatedByNo
-			,strEntityNo
-			,strTerm
-			,strPurchasingGroup
-			,strContractNumber
-			,strERPPONumber
-			,intContractSeq
-			,CF.strItemNo
-			,strStorageLocation
-			,dblQuantity
-			,dblCashPrice
-			,strQuantityUOM
-			,dtmPlannedAvailabilityDate
-			,dblBasis
-			,strCurrency
-			,dblUnitCashPrice
-			,strPriceUOM
-			,'MODIFIED'
-			,dtmContractDate
-			,dtmStartDate
-			,dtmEndDate
-			,GETDATE()
-			,strSubmittedBy
-			,strSubmittedByNo
-			,strOrigin
-			,dblNetWeight
-			,strNetWeightUOM
-			,strVendorAccountNum
-			,strTermCode
-			,strContractItemNo
-			,strContractItemName
-			,strERPItemNumber
-			,strERPBatchNumber
-			,strLoadingPoint
-			,strPackingDescription
-			,strLocationName
-			,1
-			,RC.ysnMaxPrice 
-		FROM vyuCTContractFeed CF
-		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
-			AND CF1.strItemNo = CF.strItemNo
-		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF.intContractHeaderId
+			DELETE CF1
+			FROM @tblIPOutput OP
+			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = OP.intContractHeaderId
+				AND CF1.strItemNo = OP.strItemNo
 
-		DELETE CF1
-		FROM @tblIPOutput OP
-		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = OP.intContractHeaderId
-			AND CF1.strItemNo = OP.strItemNo
-
-		INSERT INTO tblCTContractFeed (
-			intContractHeaderId
-			,intContractDetailId
-			,strCommodityCode
-			,strCommodityDesc
-			,strContractBasis
-			,strContractBasisDesc
-			,strSubLocation
-			,strCreatedBy
-			,strCreatedByNo
-			,strEntityNo
-			,strTerm
-			,strPurchasingGroup
-			,strContractNumber
-			,strERPPONumber
-			,intContractSeq
-			,strItemNo
-			,strStorageLocation
-			,dblQuantity
-			,dblCashPrice
-			,strQuantityUOM
-			,dtmPlannedAvailabilityDate
-			,dblBasis
-			,strCurrency
-			,dblUnitCashPrice
-			,strPriceUOM
-			,strRowState
-			,dtmContractDate
-			,dtmStartDate
-			,dtmEndDate
-			,dtmFeedCreated
-			,strSubmittedBy
-			,strSubmittedByNo
-			,strOrigin
-			,dblNetWeight
-			,strNetWeightUOM
-			,strVendorAccountNum
-			,strTermCode
-			,strContractItemNo
-			,strContractItemName
-			,strERPItemNumber
-			,strERPBatchNumber
-			,strLoadingPoint
-			,strPackingDescription
-			,strLocationName
-			,strMessage
-			,ysnPopulatedByIntegration
-			,ysnMaxPrice
-			)
-		SELECT CF2.intContractHeaderId
-			,intContractDetailId
-			,strCommodityCode
-			,strCommodityDesc
-			,strContractBasis
-			,strContractBasisDesc
-			,strSubLocation
-			,strCreatedBy
-			,strCreatedByNo
-			,strEntityNo
-			,strTerm
-			,strPurchasingGroup
-			,strContractNumber
-			,strERPPONumber
-			,CF2.intContractSeq
-			,CF2.strItemNo
-			,strStorageLocation
-			,dblQuantity
-			,dblCashPrice
-			,strQuantityUOM
-			,dtmPlannedAvailabilityDate
-			,dblBasis
-			,strCurrency
-			,dblUnitCashPrice
-			,strPriceUOM
-			,'DELETE'
-			,dtmContractDate
-			,dtmStartDate
-			,dtmEndDate
-			,dtmFeedCreated
-			,strSubmittedBy
-			,strSubmittedByNo
-			,strOrigin
-			,dblNetWeight
-			,strNetWeightUOM
-			,strVendorAccountNum
-			,strTermCode
-			,strContractItemNo
-			,strContractItemName
-			,strERPItemNumber
-			,strERPBatchNumber
-			,strLoadingPoint
-			,strPackingDescription
-			,strLocationName
-			,'System'
-			,1
-			,RC.ysnMaxPrice 
-		FROM tblCTContractFeed CF2
-		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
-			AND CF1.strItemNo = CF2.strItemNo
-		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF2.intContractHeaderId
-		WHERE EXISTS (
-				SELECT *
-				FROM @tblCTContractFeedHistory CFH
-				WHERE CF2.intContractFeedId = CFH.intContractFeedId
+			INSERT INTO tblCTContractFeed (
+				intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,intContractSeq
+				,strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,strRowState
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,dtmFeedCreated
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,strLocationName
+				,strMessage
+				,ysnPopulatedByIntegration
+				,ysnMaxPrice
 				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblCTContractFeed CF3
-				WHERE CF3.intContractDetailId = CF2.intContractDetailId and CF3.intContractHeaderId=CF2.intContractHeaderId
-					AND CF3.strRowState = 'Delete'
-					AND IsNULL(CF3.strFeedStatus, '') = ''
-				)
+			SELECT CF2.intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,CF2.intContractSeq
+				,CF2.strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,'DELETE'
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,dtmFeedCreated
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,strLocationName
+				,'System'
+				,1
+				,RC.ysnMaxPrice
+			FROM tblCTContractFeed CF2
+			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
+				AND CF1.strItemNo = CF2.strItemNo
+			LEFT JOIN @tblRollUpFinalContract RC ON RC.intContractHeaderId = CF2.intContractHeaderId
+			WHERE EXISTS (
+					SELECT *
+					FROM @tblCTContractFeedHistory CFH
+					WHERE CF2.intContractFeedId = CFH.intContractFeedId
+					)
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblCTContractFeed CF3
+					WHERE CF3.intContractDetailId = CF2.intContractDetailId
+						AND CF3.intContractHeaderId = CF2.intContractHeaderId
+						AND CF3.strRowState = 'Delete'
+						AND IsNULL(CF3.strFeedStatus, '') = ''
+					)
+		END
 	END
 END
 
 IF EXISTS (
 		SELECT *
 		FROM tblCTContractFeed CF
-		--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--	AND IsNULL(CH.ysnMaxPrice, 0) = 0
-		WHERE ISNULL(strFeedStatus, '') = '' AND IsNULL(CF.ysnMaxPrice, 0) =0
+		WHERE ISNULL(strFeedStatus, '') = ''
+			AND IsNULL(CF.ysnMaxPrice, 0) = 0
 			AND UPPER(strRowState) = 'MODIFIED'
 		)
 BEGIN
@@ -653,9 +699,8 @@ BEGIN
 		,CF.intContractSeq
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
-	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-	--	AND IsNULL(CH.ysnMaxPrice, 0) = 0
-	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND UPPER(strRowState) = 'MODIFIED'
 
 	DELETE
@@ -692,6 +737,7 @@ BEGIN
 	DELETE CF2
 	OUTPUT deleted.intContractHeaderId
 		,deleted.intContractSeq
+		,deleted.strItemNo
 	INTO @tblHoldContract
 	FROM @tblCTContractFeed2 CF2
 	JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF2.intContractHeaderId
@@ -710,8 +756,7 @@ BEGIN
 	FROM tblCTContractFeed CF
 	JOIN @tblHoldContract HC ON HC.intContractHeaderId = CF.intContractHeaderId
 		AND HC.intContractSeq = CF.intContractSeq
-	WHERE IsNULL(strFeedStatus,'') = ''
-
+	WHERE IsNULL(strFeedStatus, '') = ''
 
 	IF EXISTS (
 			SELECT *
@@ -723,6 +768,7 @@ BEGIN
 	BEGIN
 		UPDATE CF
 		SET strRowState = 'Added'
+			,strERPPONumber = ''
 		FROM tblCTContractFeed CF
 		JOIN @tblCTContractFeedHistory CFH ON CFH.intContractHeaderId = CF.intContractHeaderId
 			AND CFH.intContractSeq = CF.intContractSeq
@@ -836,11 +882,11 @@ BEGIN
 			,strPackingDescription
 			,strLocationName
 			,1
-			,RC.ysnMaxPrice 
+			,RC.ysnMaxPrice
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
-		Left JOIN @tblRollUpFinalContract RC on RC.intContractHeaderId = CF2.intContractHeaderId
+		LEFT JOIN @tblRollUpFinalContract RC ON RC.intContractHeaderId = CF2.intContractHeaderId
 		WHERE EXISTS (
 				SELECT *
 				FROM @tblCTContractFeedHistory CFH
@@ -910,9 +956,9 @@ BEGIN
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND Upper(strRowState) = 'ADDED'
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
@@ -934,9 +980,9 @@ BEGIN
 		,''
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND Upper(strRowState) = 'ADDED'
 	ORDER BY CF.intContractHeaderId
 END
@@ -962,9 +1008,9 @@ BEGIN
 		,CF.strItemNo
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--AND IsNULL(CH.ysnMaxPrice, 0) = 1
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 1
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 1
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
@@ -989,9 +1035,9 @@ BEGIN
 		,''
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		--AND IsNULL(CH.ysnMaxPrice, 0) = 0
 	JOIN tblEMEntity E ON E.intEntityId = CH.intSalespersonId
-	WHERE ISNULL(strFeedStatus, '') = ''AND IsNULL(CF.ysnMaxPrice, 0) = 0
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND IsNULL(CF.ysnMaxPrice, 0) = 0
 		AND UPPER(strRowState) IN (
 			'MODIFIED'
 			,'DELETE'
@@ -1296,7 +1342,7 @@ BEGIN
 			--IDOC Header
 			SET @strXmlHeaderStart += '<EDI_DC40>'
 			SET @strXmlHeaderStart += @strPOCreateIDOCHeader
-			SET @strXmlHeaderStart +='<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
+			SET @strXmlHeaderStart += '<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 			SET @strXmlHeaderStart += '</EDI_DC40>'
 			SET @strXmlHeaderStart += '<E1PURCONTRACT_CREATE>'
 			--Header
@@ -1309,7 +1355,7 @@ BEGIN
 			SET @strXmlHeaderStart += '<PUR_GROUP>' + ISNULL(@strSalesPerson, '') + '</PUR_GROUP>'
 			SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 			SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
-			SET @strXmlHeaderStart += '<REF_1>' + ISNULL(RIGHT(@str12Zeros+@strContractNumber,12), '') + '</REF_1>'
+			SET @strXmlHeaderStart += '<REF_1>' + ISNULL(RIGHT(@str12Zeros + @strContractNumber, 12), '') + '</REF_1>'
 			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
 			SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
 			SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
@@ -1322,7 +1368,7 @@ BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEM>'
 		SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo, '-', ''), '')) + '</MATERIAL>'
 		SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
-		SET @strItemXml += '<TRACKINGNO>' + ISNULL(RIGHT('000'+CONVERT(VARCHAR, @intContractSeq),3), '') + '</TRACKINGNO>'
+		SET @strItemXml += '<TRACKINGNO>' + ISNULL(RIGHT('000' + CONVERT(VARCHAR, @intContractSeq), 3), '') + '</TRACKINGNO>'
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
 		SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
@@ -1341,7 +1387,7 @@ BEGIN
 			--IDOC Header
 			SET @strXmlHeaderStart += '<EDI_DC40>'
 			SET @strXmlHeaderStart += @strPOUpdateIDOCHeader
-			SET @strXmlHeaderStart +='<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
+			SET @strXmlHeaderStart += '<MESCOD>' + ISNULL(@strMessageCode, '') + '</MESCOD>'
 			SET @strXmlHeaderStart += '</EDI_DC40>'
 			SET @strXmlHeaderStart += '<E1PURCONTRACT_CHANGE>'
 			SET @strXmlHeaderStart += '<PURCHASINGDOCUMENT>' + ISNULL(@strERPPONumber, '') + '</PURCHASINGDOCUMENT>'
@@ -1389,30 +1435,26 @@ BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEMX>'
 		SET @strItemXml += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strERPItemNumber, '')) + '</ITEM_NO>'
 		SET @strItemXml += '</E1BPMEOUTITEMX>'
-
 		SET @strItemXml += '<E1BPMEOUTVALIDITY>'
 		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
 		SET @strItemXml += '<VALID_FROM>' + ISNULL(CONVERT(VARCHAR(10), GETDATE(), 112), '') + '</VALID_FROM>'
 		SET @strItemXml += '<VALID_TO>' + '99991231' + '</VALID_TO>'
 		SET @strItemXml += '</E1BPMEOUTVALIDITY>'
-
 		SET @strItemXml += '<E1BPMEOUTVALIDITYX>'
 		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
 		SET @strItemXml += '<VALID_FROM>' + 'X' + '</VALID_FROM>'
 		SET @strItemXml += '<VALID_TO>' + 'X' + '</VALID_TO>'
 		SET @strItemXml += '</E1BPMEOUTVALIDITYX>'
-
 		SET @strItemXml += '<E1BPMEOUTCONDITION>'
 		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
 		SET @strItemXml += '<COND_COUNT>' + '01' + '</COND_COUNT>'
 		SET @strItemXml += '<COND_TYPE>' + 'PB00' + '</COND_TYPE>'
 		SET @strItemXml += '<COND_VALUE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</COND_VALUE>'
-		SET @strItemXml += '<CURRENCY>' + ISNULL(@strCurrency,'') + '</CURRENCY>'
-		SET @strItemXml += '<COND_P_UNT>' + '1'  + '</COND_P_UNT>'
-		SET @strItemXml += '<COND_UNIT>' + ISNULL(@strPriceUOM, '')+ '</COND_UNIT>'
+		SET @strItemXml += '<CURRENCY>' + ISNULL(@strCurrency, '') + '</CURRENCY>'
+		SET @strItemXml += '<COND_P_UNT>' + '1' + '</COND_P_UNT>'
+		SET @strItemXml += '<COND_UNIT>' + ISNULL(@strPriceUOM, '') + '</COND_UNIT>'
 		SET @strItemXml += '<CHANGE_ID>' + 'U' + '</CHANGE_ID>'
 		SET @strItemXml += '</E1BPMEOUTCONDITION>'
-
 		SET @strItemXml += '<E1BPMEOUTCONDITIONX>'
 		SET @strItemXml += '<ITEM_NO>' + '00010' + '</ITEM_NO>'
 		SET @strItemXml += '<COND_COUNT>' + '01' + '</COND_COUNT>'
