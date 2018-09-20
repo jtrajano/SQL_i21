@@ -247,7 +247,7 @@ BEGIN TRY
 				IF ISNULL(@ysnInvoicePosted,0) = 1
 				BEGIN
 					EXEC	uspARPostInvoice
-							 @param				= @intNewInvoiceId
+							 @param				= @intInvoiceId
 							,@post				= 0
 							,@userId			= @intUserId
 							,@raiseError		= 1
@@ -262,7 +262,7 @@ BEGIN TRY
 				IF ISNULL(@ysnInvoicePosted,0) = 1
 				BEGIN
 					EXEC	uspARPostInvoice
-							 @param				= @intNewInvoiceId
+							 @param				= @intInvoiceId
 							,@post				= 1
 							,@userId			= @intUserId
 							,@raiseError		= 1
