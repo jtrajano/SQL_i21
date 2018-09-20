@@ -7074,6 +7074,9 @@
     <Build Include="dbo\Views\vyuEMEntityVendorSearch.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureMonthId.sql" />
 	<None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
+	<Build Include="dbo\Views\vyuGRCustomerStorage.sql" />
+    <Build Include="dbo\Views\vyuGRStorageHistory.sql" />
+    <Build Include="dbo\Views\vyuGRTicketDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
