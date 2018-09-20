@@ -49,7 +49,10 @@ BEGIN TRY
 			@intBasisCurrencyId			INT,
 			@ysnBasisSubCurrency		INT,
 			@intFinalCurrencyId			INT,
-			@ysnFinalSubCurrency		BIT
+			@ysnFinalSubCurrency		BIT,
+			@dblTotalPFDetailQuantiy	NUMERIC(18,6),
+			@ysnFullyPriced				BIT = 0,
+			@strPricingQuantity			NVARCHAR(100)
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -66,13 +69,14 @@ BEGIN TRY
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
-	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots])
+	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots]),
+			@dblTotalPFDetailQuantiy	=	SUM(dblQuantity)
 	FROM	tblCTPriceFixationDetail
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
 	SELECT	@ysnUnlimitedQuantity	=	ysnUnlimitedQuantity FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT	@ysnPartialPricing = ysnPartialPricing FROM tblCTCompanyPreference
+	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
 
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -95,7 +99,16 @@ BEGIN TRY
 												AND	BM.intUnitMeasureId		=	BU.intUnitMeasureId
    LEFT JOIN	tblSMCurrency				AY	ON	AY.intCurrencyID		=	CD.intBasisCurrencyId
 		WHERE	intContractDetailId			=	@intContractDetailId
-			
+		
+		IF @strPricingQuantity = 'By Futures Contracts'
+		BEGIN
+			SELECT @ysnFullyPriced = CASE WHEN @dblLotsUnfixed = 0 THEN 1 ELSE 0 END
+		END
+		ELSE
+		BEGIN
+			SELECT @ysnFullyPriced = CASE WHEN @dblQuantity = @dblTotalPFDetailQuantiy THEN 1 ELSE 0 END
+		END
+
 		SELECT	@intUnitMeasureId	=	UM.intUnitMeasureId,
 				@strUnitMeasure		=	UM.strUnitMeasure
 		FROM	tblICItemUOM		IM
@@ -391,7 +404,7 @@ BEGIN TRY
 			END
 		END
 
-		IF	@dblLotsUnfixed = 0
+		IF	@ysnFullyPriced = 1
 		BEGIN
 			UPDATE	CD
 			SET		CD.intPricingTypeId		=	1,
