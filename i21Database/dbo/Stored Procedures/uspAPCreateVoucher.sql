@@ -301,7 +301,6 @@ BEGIN TRY
 	(
 		[intTermsId]			,
 		[dtmDueDate]			,
-		[dtmVoucherDate]		,
 		[dtmDate]				,
 		[dtmBillDate]			,
 		[intAccountId]			,
@@ -340,7 +339,6 @@ BEGIN TRY
 	VALUES (
 		[intTermsId]			,
 		[dtmDueDate]			,
-		[dtmVoucherDate]		,
 		[dtmDate]				,
 		[dtmBillDate]			,
 		[intAccountId]			,

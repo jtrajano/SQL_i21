@@ -8,7 +8,6 @@ RETURNS @returntable TABLE
 	[intPartitionId]		INT				NOT NULL,
 	[intTermsId]			INT             NOT NULL,
 	[dtmDueDate]			DATETIME        NOT NULL DEFAULT GETDATE(),
-	[dtmVoucherDate]		DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDate]				DATETIME        NOT NULL DEFAULT GETDATE(),
 	[dtmBillDate]			DATETIME NOT NULL DEFAULT GETDATE(), 
     [intAccountId]			INT             NOT NULL,
@@ -107,8 +106,8 @@ BEGIN
 		[intPartitionId]		,
 		[intTermsId]			,
 		[dtmDate]				,
-		[dtmVoucherDate]		,
 		[dtmDueDate]			,
+		[dtmBillDate]			,
 		[intAccountId]			,
 		[intEntityId]			,
 		[intEntityVendorId]		,
@@ -149,8 +148,8 @@ BEGIN
 									-- 	WHEN B.intTermsId > 0 THEN B.intTermsId --default location
 									-- ELSE vendor.intTermsId END, --vendor
 		[dtmDate]				=	A.dtmDate,
-		[dtmVoucherDate]		=	A.dtmVoucherDate,
 		[dtmDueDate]			=	ISNULL(A.dtmDueDate, dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID)),
+		[dtmBillDate]			=	A.dtmVoucherDate,
 		[intAccountId]			=	CASE WHEN A.intAPAccount > 0 THEN A.intAPAccount
 										WHEN A.intTransactionType IN (2, 13)
 											THEN (CASE WHEN A.intLocationId > 0 THEN payableLoc.intPurchaseAdvAccount
