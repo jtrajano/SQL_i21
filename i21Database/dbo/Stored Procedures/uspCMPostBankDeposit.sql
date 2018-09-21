@@ -229,13 +229,16 @@ BEGIN
 		END
 	END 
 
-	-- Check if amount is zero. 
-	IF @dblAmount = 0 AND @ysnPost = 1
-	BEGIN 
-	-- Cannot post a zero-value transaction.
-		RAISERROR('Cannot post a zero-value transaction.', 11, 1)
+	-- Check if amount in detail has zero value. 
+	IF EXISTS (SELECT TOP 1 1 
+		FROM tblCMBankTransaction A	JOIN  tblCMBankTransactionDetail B 
+		ON A.intTransactionId = B.intTransactionId
+		WHERE A.intTransactionId = @intTransactionId AND B.dblDebit = 0 AND B.dblCredit = 0	AND @ysnPost = 1)
+	BEGIN
+		RAISERROR('Cannot post zero-value transaction detail.', 11, 1)
 		GOTO Post_Rollback
-	END 
+	END
+	
 END --@ysnRecap = 0
 
 --Check if the header date is less than detail date
