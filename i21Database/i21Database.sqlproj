@@ -7070,6 +7070,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherDetailStagingPOTax.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTax.sql" />
     <Build Include="dbo\Views\vyuEMEntityVendorSearch.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureMonthId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
