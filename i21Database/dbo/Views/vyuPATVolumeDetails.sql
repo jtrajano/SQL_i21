@@ -13,16 +13,30 @@ SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY FY.dtmDateFrom DESC, ENT.strName) AS
 		dtmLastActivityDate = MAX(AR.dtmLastActivityDate),
 		dblTotalVolume = SUM(CustomerVolume.dblPurchase + CustomerVolume.dblSale),
 		CustomerVolume.ysnRefundProcessed
-FROM (SELECT	CV.intFiscalYear,
+FROM (
+	SELECT	CV.intFiscalYear,
 		CV.intCustomerPatronId,
-		dblPurchase = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolume ELSE 0 END,
-		dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume ELSE 0 END,
-		CV.ysnRefundProcessed
+		dblPurchase = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolume - CV.dblVolumeProcessed ELSE 0 END,
+		dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume - CV.dblVolumeProcessed ELSE 0 END,
+		ysnRefundProcessed = CAST(0 AS BIT)
 		FROM tblPATCustomerVolume CV
 	INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = intCustomerPatronId
 	INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
+	WHERE CV.dblVolume > CV.dblVolumeProcessed
+	UNION
+	SELECT	CV.intFiscalYear,
+		CV.intCustomerPatronId,
+		dblPurchase = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolumeProcessed ELSE 0 END,
+		dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolumeProcessed ELSE 0 END,
+		ysnRefundProcessed = CAST(1 AS BIT)
+		FROM tblPATCustomerVolume CV
+	INNER JOIN tblEMEntity ENT
+		ON ENT.intEntityId = intCustomerPatronId
+	INNER JOIN tblPATPatronageCategory PC
+		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
+	WHERE CV.dblVolumeProcessed > 0
 	UNION
 	SELECT FY.intFiscalYearId,
 			EM.intEntityId,

@@ -19,10 +19,10 @@ WITH ComPref AS(
 			SELECT  intCustomerId = B.intCustomerPatronId,
 					B.intFiscalYear,
 					RR.intRefundTypeId,
-					dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN B.dblVolume ELSE 0 END,
-					dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN B.dblVolume ELSE 0 END,
-					dblRefundAmount = ROUND(RRD.dblRate * B.dblVolume,2),
-					dblCashRefund = ROUND((RRD.dblRate * B.dblVolume) * (RR.dblCashPayout/100),2)
+					dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN B.dblVolume - B.dblVolumeProcessed ELSE 0 END,
+					dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN B.dblVolume - B.dblVolumeProcessed ELSE 0 END,
+					dblRefundAmount = ROUND(RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed),2),
+					dblCashRefund = ROUND((RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed)) * (RR.dblCashPayout/100),2)
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -31,7 +31,7 @@ WITH ComPref AS(
 			INNER JOIN tblPATPatronageCategory PC
 					ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			CROSS APPLY ComPref
-				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.dblVolume > B.dblVolumeProcessed
 		) Total
 		INNER JOIN tblARCustomer AC
 			ON AC.[intEntityId] = Total.intCustomerId

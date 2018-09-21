@@ -24,8 +24,8 @@ WITH Refunds AS (
 							RR.intRefundTypeId,
 							B.intFiscalYear,
 							dblVolume = SUM(B.dblVolume),
-							dblRefundAmount = SUM(ROUND(RRD.dblRate * dblVolume,2)),
-							dblCashRefund = SUM(ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),2))
+							dblRefundAmount = SUM(ROUND(RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed),2)),
+							dblCashRefund = SUM(ROUND((RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed)) * (RR.dblCashPayout/100),2))
 				FROM tblPATCustomerVolume B
 				INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -33,7 +33,7 @@ WITH Refunds AS (
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 				INNER JOIN tblARCustomer AC
 					ON AC.intEntityId = B.intCustomerPatronId
-				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.intFiscalYear = B.intFiscalYear AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.intFiscalYear = B.intFiscalYear AND B.dblVolume > B.dblVolumeProcessed
 				GROUP BY B.intCustomerPatronId,
 						 RR.intRefundTypeId,
 						 B.intFiscalYear
