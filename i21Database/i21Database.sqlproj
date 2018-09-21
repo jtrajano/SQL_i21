@@ -1267,6 +1267,7 @@
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
     <Build Include="dbo\Views\vyuEMSearch.sql" />
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
+    <Build Include="dbo\Views\vyuARCustomerVendorSearch.sql" />    
     <Build Include="dbo\Tables\tblEMEntityPortalPermission.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalMenu.sql" />
     <Build Include="dbo\Views\vyuEPContactMenu.sql" />
