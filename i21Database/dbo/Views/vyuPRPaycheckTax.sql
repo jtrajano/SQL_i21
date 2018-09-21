@@ -38,6 +38,8 @@ SELECT
 	,intConcurrencyId
 	,dblGross
 	,dblAdjustedGross
+	,dblTaxableAmount
+	,dblTaxableAmountYTD
 	,ysnVoid
 FROM 
 	(SELECT 
