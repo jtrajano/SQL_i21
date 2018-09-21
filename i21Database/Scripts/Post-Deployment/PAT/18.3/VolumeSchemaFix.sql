@@ -28,20 +28,43 @@ BEGIN
 
 		IF EXISTS(SELECT 1 FROM #tmpProcessedCustomerVolume)
 		BEGIN
-			UPDATE VolumeMaster
-			SET dblVolumeProcessed = VolumeMaster.dblVolumeProcessed + tempVolume.dblVolume
-			FROM tblPATCustomerVolume VolumeMaster
-			INNER JOIN #tmpProcessedCustomerVolume tempVolume
-				ON tempVolume.intFiscalYear = VolumeMaster.intFiscalYear
-				AND tempVolume.intCustomerPatronId = VolumeMaster.intCustomerPatronId
-				AND tempVolume.intPatronageCategoryId = VolumeMaster.intPatronageCategoryId
-
 			DELETE VolumeMaster FROM tblPATCustomerVolume VolumeMaster
 			INNER JOIN #tmpProcessedCustomerVolume tempVolume
 				ON tempVolume.intFiscalYear = VolumeMaster.intFiscalYear
 					AND tempVolume.intCustomerPatronId = VolumeMaster.intCustomerPatronId
 					AND tempVolume.intPatronageCategoryId = VolumeMaster.intPatronageCategoryId
 			WHERE VolumeMaster.ysnRefundProcessed = 1
+
+			MERGE
+			INTO tblPATCustomerVolume
+			WITH (HOLDLOCK)
+			AS VolumeMaster
+			USING #tmpProcessedCustomerVolume tempVolume
+				ON tempVolume.intFiscalYear = VolumeMaster.intFiscalYear
+				AND tempVolume.intCustomerPatronId = VolumeMaster.intCustomerPatronId
+				AND tempVolume.intPatronageCategoryId = VolumeMaster.intPatronageCategoryId
+			WHEN MATCHED THEN
+				UPDATE SET
+					VolumeMaster.dblVolumeProcessed = VolumeMaster.dblVolumeProcessed + tempVolume.dblVolume,
+					VolumeMaster.dblVolume = VolumeMaster.dblVolumeProcessed + tempVolume.dblVolume
+			WHEN NOT MATCHED THEN
+				INSERT (
+					intFiscalYear,
+					intCustomerPatronId,
+					intPatronageCategoryId,
+					dblVolume,
+					dblVolumeProcessed,
+					intConcurrencyId
+				)
+				VALUES(
+					tempVolume.intFiscalYear,
+					tempVolume.intCustomerPatronId,
+					tempVolume.intPatronageCategoryId,
+					tempVolume.dblVolume,
+					tempVolume.dblVolume,
+					1
+				);
+			
 		END
 	')
 
