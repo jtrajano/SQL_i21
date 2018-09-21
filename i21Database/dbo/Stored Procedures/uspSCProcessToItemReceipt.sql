@@ -1,9 +1,8 @@
 CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	 @intSourceTransactionId AS INT
-	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
 	,@dblNetUnits AS DECIMAL (38,20)
-	,@dblCost AS DECIMAL (9,5)
+	,@dblCost AS DECIMAL (38, 20)
 	,@intEntityId AS INT
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
@@ -248,7 +247,6 @@ BEGIN TRY
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
-					,@strSourceType
 					,@intUserId
 					,@dblRemainingUnits
 					,@dblCost
@@ -286,7 +284,6 @@ BEGIN TRY
 			)
 			EXEC dbo.uspSCGetScaleItemForItemReceipt 
 				 @intTicketId
-				,@strSourceType
 				,@intUserId
 				,@dblNetUnits
 				,@dblCost
@@ -332,7 +329,6 @@ BEGIN TRY
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
-					,@strSourceType
 					,@intUserId
 					,@dblNetUnits
 					,@dblCost
@@ -441,8 +437,6 @@ BEGIN TRY
 		END
 	END
 
-	-- Add the items to the item receipt 
-	--IF @strSourceType = @SourceType_Direct
 	BEGIN 
 		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 	END

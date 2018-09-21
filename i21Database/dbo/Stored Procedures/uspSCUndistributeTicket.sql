@@ -490,7 +490,11 @@ BEGIN TRY
 					, @dblBalance = IRI.dblOpenReceive FROM tblICInventoryReceiptItem IRI 
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intInventoryReceiptItemId = @intId
-					SELECT @intEntityId = intEntityId,@intItemId = intItemId, @intLocationId = intProcessingLocationId, @intDeliverySheetId = intDeliverySheetId  FROM tblSCTicket WHERE intTicketId = @intTicketId
+					SELECT @intEntityId = intEntityId
+					, @intItemId = intItemId
+					, @intLocationId = intProcessingLocationId
+					, @intDeliverySheetId = intDeliverySheetId 
+					FROM tblSCTicket WHERE intTicketId = @intTicketId
 					
 					EXEC uspGRCustomerStorageBalance	
 						@EntitySplitId 
@@ -500,7 +504,9 @@ BEGIN TRY
 						,@intCustomerStorageId
 						,@dblBalance
 						,0
+						,0
 						,@newBalance OUTPUT
+
 					IF ISNULL(@newBalance, 0) > 0
 						DELETE FROM tblGRStorageHistory WHERE intInventoryReceiptId = @InventoryReceiptId
 					ELSE
@@ -517,63 +523,61 @@ BEGIN TRY
 
 
 				--DELIVERY SHEET QUANTITY REVERSAL
-
-									DECLARE @CalculatedDiscount TABLE
-					(
-						[intExtendedKey] INT
-						,[dblFrom] NUMERIC(38, 20) NULL
-						,[dblTo] NUMERIC(38, 20) NULL
-						,[dblDiscountAmount] NUMERIC(38, 20) NULL
-						,[dblShrink] NUMERIC(38, 20) NULL
-						,[strMessage] NVARCHAR(40)
-						,[intDiscountCalculationOptionId] INT NULL
-						,[strCalculationDiscountOption] NVARCHAR(40)
-						,[strDiscountChargeType] NVARCHAR(40)
-						,[intShrinkCalculationOptionId] INT NULL
-						,[strCalculationShrinkOption] NVARCHAR(40)
-						,[intDiscountUOMId] INT NULL
-						,[intDeliverySheetId] INT NULL
-						,[intDiscountScheduleCodeId] INT NULL
-					)
-					INSERT INTO @CalculatedDiscount(
-						[intExtendedKey]
-						,[dblFrom]
-						,[dblTo]
-						,[dblDiscountAmount]
-						,[dblShrink]
-						,[strMessage]
-						,[intDiscountCalculationOptionId]
-						,[strCalculationDiscountOption]
-						,[strDiscountChargeType]
-						,[intShrinkCalculationOptionId]
-						,[strCalculationShrinkOption]
-						,[intDiscountUOMId]
-						,[intDeliverySheetId]
-						,[intDiscountScheduleCodeId]
-					)
-					SELECT 
-						[intExtendedKey]						= Discount.intExtendedKey
-						,[dblFrom]								= Discount.dblFrom
-						,[dblTo]								= Discount.dblTo
-						,[dblDiscountAmount]					= Discount.dblDiscountAmount
-						,[dblShrink]							= Discount.dblShrink
-						,[strMessage]							= Discount.strMessage
-						,[intDiscountCalculationOptionId]		= Discount.intDiscountCalculationOptionId
-						,[strCalculationDiscountOption]			= Discount.strCalculationDiscountOption
-						,[strDiscountChargeType]				= Discount.strDiscountChargeType
-						,[intShrinkCalculationOptionId]			= Discount.intShrinkCalculationOptionId
-						,[strCalculationShrinkOption]			= Discount.strCalculationShrinkOption
-						,[intDiscountUOMId] 					= Discount.intDiscountUOMId
-						,[intDeliverySheetId]					= SC.intDeliverySheetId
-						,[intDiscountScheduleCodeId]			= QM.intDiscountScheduleCodeId
-					FROM tblSCTicket SC
-					LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SC.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
-					LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-					OUTER APPLY (
-						SELECT * FROM dbo.fnGRCalculateDiscountandShrink(QM.intDiscountScheduleCodeId, QM.dblGradeReading , 0, GR.intItemId)
-					) Discount
-					WHERE SC.intTicketId = @intTicketId
-
+				DECLARE @CalculatedDiscount TABLE
+				(
+					[intExtendedKey] INT
+					,[dblFrom] NUMERIC(38, 20) NULL
+					,[dblTo] NUMERIC(38, 20) NULL
+					,[dblDiscountAmount] NUMERIC(38, 20) NULL
+					,[dblShrink] NUMERIC(38, 20) NULL
+					,[strMessage] NVARCHAR(40)
+					,[intDiscountCalculationOptionId] INT NULL
+					,[strCalculationDiscountOption] NVARCHAR(40)
+					,[strDiscountChargeType] NVARCHAR(40)
+					,[intShrinkCalculationOptionId] INT NULL
+					,[strCalculationShrinkOption] NVARCHAR(40)
+					,[intDiscountUOMId] INT NULL
+					,[intDeliverySheetId] INT NULL
+					,[intDiscountScheduleCodeId] INT NULL
+				)
+				INSERT INTO @CalculatedDiscount(
+					[intExtendedKey]
+					,[dblFrom]
+					,[dblTo]
+					,[dblDiscountAmount]
+					,[dblShrink]
+					,[strMessage]
+					,[intDiscountCalculationOptionId]
+					,[strCalculationDiscountOption]
+					,[strDiscountChargeType]
+					,[intShrinkCalculationOptionId]
+					,[strCalculationShrinkOption]
+					,[intDiscountUOMId]
+					,[intDeliverySheetId]
+					,[intDiscountScheduleCodeId]
+				)
+				SELECT 
+					[intExtendedKey]						= Discount.intExtendedKey
+					,[dblFrom]								= Discount.dblFrom
+					,[dblTo]								= Discount.dblTo
+					,[dblDiscountAmount]					= Discount.dblDiscountAmount
+					,[dblShrink]							= Discount.dblShrink
+					,[strMessage]							= Discount.strMessage
+					,[intDiscountCalculationOptionId]		= Discount.intDiscountCalculationOptionId
+					,[strCalculationDiscountOption]			= Discount.strCalculationDiscountOption
+					,[strDiscountChargeType]				= Discount.strDiscountChargeType
+					,[intShrinkCalculationOptionId]			= Discount.intShrinkCalculationOptionId
+					,[strCalculationShrinkOption]			= Discount.strCalculationShrinkOption
+					,[intDiscountUOMId] 					= Discount.intDiscountUOMId
+					,[intDeliverySheetId]					= SC.intDeliverySheetId
+					,[intDiscountScheduleCodeId]			= QM.intDiscountScheduleCodeId
+				FROM tblSCTicket SC
+				LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SC.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
+				LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+				OUTER APPLY (
+					SELECT * FROM dbo.fnGRCalculateDiscountandShrink(QM.intDiscountScheduleCodeId, QM.dblGradeReading , 0, GR.intItemId)
+				) Discount
+				WHERE SC.intTicketId = @intTicketId
 
 				SELECT @finalGrossWeight = (SCD.dblGross - @finalGrossWeight) FROM tblSCTicket SC
 				INNER JOIN tblSCDeliverySheet SCD ON SC.intDeliverySheetId = SCD.intDeliverySheetId

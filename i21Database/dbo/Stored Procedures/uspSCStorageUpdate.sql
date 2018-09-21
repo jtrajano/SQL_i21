@@ -41,7 +41,6 @@ DECLARE @intDefaultStorageSchedule AS INT
 DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
-DECLARE @intContractHeaderId INT
 DECLARE @strLotTracking NVARCHAR(4000)
 DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
 
@@ -62,20 +61,16 @@ DECLARE @ItemsForItemShipment AS ItemCostingTableType
         ,@strInOutFlag			NVARCHAR(4)
         ,@dblQuantity			NUMERIC(12,4)
         ,@strAdjustmentNo		NVARCHAR(50)
+		,@strCostMethod			NVARCHAR(50)
 
 BEGIN TRY
 
-	-- SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
-	-- WHERE US.[intEntityId] = @intUserId
-	
-	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
-	
-	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId
-	, @intCommodityId = TIC.intCommodityId
-	, @intScaleStationId = TIC.intScaleSetupId
-	, @intItemId = TIC.intItemId 
-	FROM tblSCTicket TIC
-	WHERE TIC.intTicketId = @intTicketId
+	SELECT @intDefaultStorageSchedule = SC.intStorageScheduleId
+	, @intCommodityId = SC.intCommodityId
+	, @intScaleStationId = SC.intScaleSetupId
+	, @intItemId = SC.intItemId 
+	FROM tblSCTicket SC
+	WHERE SC.intTicketId = @intTicketId
 
 	IF @intStorageScheduleId IS NOT NULL
 	BEGIN
@@ -283,23 +278,7 @@ BEGIN TRY
 		RETURN;
 	END
 
-	
-	SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
-	FROM	dbo.tblSCTicket SC	        
-	JOIN dbo.tblICCommodityUnitMeasure CommodityUOM On SC.intCommodityId  = CommodityUOM.intCommodityId
-	WHERE	SC.intTicketId = @intTicketId AND CommodityUOM.ysnStockUnit = 1
-	
-	SELECT	@intCommodityUOMId = UM.intItemUOMId
-	FROM dbo.tblICItemUOM UM	
-	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
-
-	IF @intCommodityUOMId IS NULL 
-	BEGIN		
-		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
-		RETURN;
-	END
-
+	--CREATING OF CUSTOMER STORAGE
 	INSERT INTO @CustomerStorageStagingTable(
 		[intEntityId]
 		,[intItemId]
@@ -336,7 +315,7 @@ BEGIN TRY
 		,[intDiscountScheduleId]				= SC.intDiscountSchedule
 		,[dtmDeliveryDate]						= dbo.fnRemoveTimeOnDate(SC.dtmTicketDateTime)
 		,[dblFreightDueRate]					= 0
-		,[dblFeesDue]							= ROUND(SC.dblTicketFees,6) 
+		,[dblFeesDue]							= CASE WHEN ICFees.strCostMethod = 'Amount' THEN ROUND(SC.dblTicketFees / SC.dblNetUnits ,6) ELSE SC.dblTicketFees END
 		,[intDeliverySheetId]					= SC.intDeliverySheetId
 		,[intTicketId]							= SC.intTicketId
 		,[intContractHeaderId]					= CT.intContractHeaderId
@@ -346,8 +325,11 @@ BEGIN TRY
 		,[intCurrencyId]						= SC.intCurrencyId
 		,[intUserId]							= @intUserId
 	FROM dbo.tblSCTicket SC
+	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICItem ICFees ON ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = SC.intItemId AND UOM.intItemUOMId = SC.intItemUOMIdTo
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = SC.intContractId
+	
 	WHERE SC.intTicketId = @intTicketId
 
 	EXEC uspGRCreateCustomerStorage @CustomerStorageStagingTable, @intHoldCustomerStorageId OUTPUT
@@ -366,8 +348,9 @@ BEGIN TRY
 				,@totalShrinkPrice NUMERIC (38,20)
 				,@dblShrinkPercent NUMERIC(38,20)
 				,@finalShrinkUnits NUMERIC(38,20)
-				,@strShrinkWhat NVARCHAR(40);
-		
+				,@strShrinkWhat NVARCHAR(40)
+				,@dblTotalFees NUMERIC(38,20);
+
 		DECLARE @CalculatedDiscount TABLE
 		(
 			[intExtendedKey] INT
@@ -385,6 +368,9 @@ BEGIN TRY
 			,[intDeliverySheetId] INT NULL
 			,[intDiscountScheduleCodeId] INT NULL
 		)
+
+		DELETE FROM @CalculatedDiscount
+
 		INSERT INTO @CalculatedDiscount(
 			[intExtendedKey]
 			,[dblFrom]
