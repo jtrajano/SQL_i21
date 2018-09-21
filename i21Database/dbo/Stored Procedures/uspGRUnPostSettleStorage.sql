@@ -31,6 +31,8 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	
+	DECLARE @isParentSettleStorage AS BIT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
