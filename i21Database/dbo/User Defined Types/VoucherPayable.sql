@@ -18,6 +18,15 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	/*Header info*/
 	[intBillId]						INT NULL, --provide if adding on existing voucher
 	[intEntityVendorId]				INT NOT NULL,
+	/*
+		1 = Voucher
+		2 = Vendor Prepayment
+		3 = Debit Memo
+		9 = 1099 Adjustment
+		11= Weight Claim
+		13= Basis Advance
+		14= Deferred Interest
+	*/
 	[intTransactionType]			INT NOT NULL,
 	[intLocationId]					INT NULL, --default to current user location
 	[intShipToId]					INT NULL, --will default to intLocationId
@@ -66,7 +75,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
 	/*Quantity info*/
-	[dblOrderQty]					DECIMAL(18,6) NOT NULL DEFAULT(0),	
+	[dblOrderQty]					DECIMAL(18,6) NOT NULL DEFAULT(0),	--IF NOT PROVIDED, WE WILL DEFAULT TO dblQuantityToBill
 	[dblOrderUnitQty]				DECIMAL(38,20) NOT NULL DEFAULT(1),	
 	[intOrderUOMId]					INT NULL,
 	[dblQuantityToBill]				DECIMAL(18,6) NOT NULL DEFAULT(0),
