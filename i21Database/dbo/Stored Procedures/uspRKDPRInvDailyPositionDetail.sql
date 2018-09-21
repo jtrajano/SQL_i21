@@ -204,7 +204,7 @@ SELECT
 	strCustomerContract,
 	NULL intFutureMarketId,
 	NULL intFutureMonthId, 
-	NULL strCurrency 
+	strCurrency 
 FROM 
 vyuRKContractDetail CD
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 

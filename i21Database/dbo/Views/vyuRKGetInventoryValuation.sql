@@ -91,6 +91,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,t.dtmCreated
+		,t.intCurrencyId
+		,cur.strCurrency
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
@@ -122,6 +124,9 @@ FROM 	tblICItem i
 			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
+
+		LEFT JOIN tblSMCurrency cur
+			ON cur.intCurrencyID = t.intCurrencyId
 		LEFT JOIN tblICCostingMethod CostingMethod
 			ON CostingMethod.intCostingMethodId = t.intCostingMethod
 		LEFT JOIN (

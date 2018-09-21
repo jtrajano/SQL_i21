@@ -191,7 +191,7 @@ SELECT
 	strCustomerContract,
 	NULL intFutureMarketId,
 	NULL intFutureMonthId, 
-	NULL strCurrency 
+	strCurrency 
 FROM 
 vyuRKContractDetail CD
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
@@ -668,7 +668,7 @@ BEGIN
 	SELECT @strCommodityCode,'Price Risk' [strType],'PurBasisDelivary' strContractType,-sum(dblTotal),intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
 	FROM (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0)) AS dblTotal,
-			r.intInventoryReceiptId,strReceiptNumber, ium.intCommodityUnitMeasureId, cd.intCommodityId,cd.strLocationName,cd.intCompanyLocationId,strCurrency
+			r.intInventoryReceiptId,strReceiptNumber, ium.intCommodityUnitMeasureId, cd.intCommodityId,cd.strLocationName,cd.intCompanyLocationId,cd.strCurrency
 	FROM vyuRKGetInventoryValuation v
 	join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 	INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -723,7 +723,7 @@ BEGIN
 		,ium.intCommodityUnitMeasureId as intFromCommodityUnitMeasureId
 		,cd.intCommodityId
 		,cl.strLocationName
-		,strCurrency
+		,cd.strCurrency
 	FROM vyuRKGetInventoryValuation v 
 	JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId

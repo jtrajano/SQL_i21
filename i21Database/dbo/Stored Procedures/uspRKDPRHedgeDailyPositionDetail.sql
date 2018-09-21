@@ -8,13 +8,13 @@
 		,@strByType NVARCHAR(200) = null
 AS
 
---declare 		 @intCommodityId nvarchar(max)= ''
+--declare 		 @intCommodityId nvarchar(max)= '1'
 --		,@intLocationId int = null
 --		,@intVendorId int = null
 --		,@strPurchaseSales NVARCHAR(200) = null
 --		,@strPositionIncludes NVARCHAR(200) = 'All Storage'
 --		,@dtmToDate datetime = getdate()
---		,@strByType NVARCHAR(200) = 'ByCommodity'
+--		,@strByType NVARCHAR(200) = ''
 
 DECLARE @strCommodityCode NVARCHAR(max)
 IF ISNULL(@strPurchaseSales,'') <> ''
@@ -229,7 +229,7 @@ SELECT
 	strCustomerContract,
 	NULL intFutureMarketId,
 	NULL intFutureMonthId, 
-	NULL strCurrency 
+	strCurrency 
 FROM 
 vyuRKContractDetail CD
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
@@ -495,6 +495,7 @@ DECLARE @invQty TABLE (
 		,strTransactionId  NVARCHAR(200)
 		,strTransactionType NVARCHAR(200)
 		,intItemId int
+		,strCurrency NVARCHAR(40)
 		)
 
 INSERT INTO @invQty
@@ -508,7 +509,8 @@ SELECT
 	s.intLocationId intLocationId,
 	strTransactionId,
 	strTransactionType,
-	i.intItemId 	
+	i.intItemId,
+	s.strCurrency 	
 FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1 and  isnull(ysnInTransit,0)=0 
@@ -614,7 +616,7 @@ BEGIN
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-				
+	
 	-- Hedge
 	INSERT INTO @tempFinal (strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
 							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot,strCurrency)		
@@ -694,12 +696,12 @@ BEGIN
 									)
 -- Net Hedge option end
 
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
+	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT DISTINCT @strCommodityCode,'Price Risk' [strType],'Inventory' strContractType,sum(dblTotal) dblTotal,intItemId,strItemNo,
-					intFromCommodityUnitMeasureId,intCommodityId,strLocationName  
+					intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency  
 			FROM @invQty where intCommodityId=@intCommodityId  AND @ysnExchangeTraded = 1
 				AND intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN intLocationId ELSE @intLocationId END
-			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
+			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId,strCurrency
 	
 	--Net Hedge Derivative Entry (Futures and Options)
     INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
@@ -712,7 +714,7 @@ BEGIN
 	SELECT @strCommodityCode,'Price Risk' [strType],'PurBasisDelivary' strContractType,-sum(dblTotal),intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
 	FROM (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0)) AS dblTotal,
-			r.intInventoryReceiptId,strReceiptNumber, ium.intCommodityUnitMeasureId, cd.intCommodityId,cd.strLocationName,cd.intCompanyLocationId,strCurrency
+			r.intInventoryReceiptId,strReceiptNumber, ium.intCommodityUnitMeasureId, cd.intCommodityId,cd.strLocationName,cd.intCompanyLocationId,cd.strCurrency
 	FROM vyuRKGetInventoryValuation v
 	join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 	INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -769,7 +771,7 @@ BEGIN
 		,ium.intCommodityUnitMeasureId as intFromCommodityUnitMeasureId
 		,cd.intCommodityId
 		,cl.strLocationName
-		,strCurrency
+		,cd.strCurrency
 	FROM vyuRKGetInventoryValuation v 
 	JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -834,10 +836,10 @@ BEGIN
 
 
 	
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
-	SELECT strCommodityCode,'Basis Risk' strType, strContractType,sum(dblTotal),intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
+	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
+	SELECT strCommodityCode,'Basis Risk' strType, strContractType,sum(dblTotal),intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency 
 	FROM @tempFinal where strType='Price Risk' and strContractType in('Inventory','Collateral','DP','Sls Basis Deliveries','OffSite') AND @ysnExchangeTraded = 1
-		group by strCommodityCode,strContractType,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName
+		group by strCommodityCode,strContractType,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency
 	
 	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency)
 	select strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,sum(dblTotal),intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency from (
@@ -874,8 +876,8 @@ BEGIN
 				JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId = B.intShipToId
 				LEFT JOIN tblSCTicket t on BD.intScaleTicketId = t.intTicketId
 				LEFT JOIN tblEMEntity e on t.intEntityId=e.intEntityId 
-				WHERE B.ysnPosted = 1
-				and c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
+				WHERE 
+				c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 				and convert(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= convert(datetime,@dtmToDate)
 				and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
