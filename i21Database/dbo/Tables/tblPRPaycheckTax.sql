@@ -11,6 +11,8 @@
 	[dblExtraWithholding] [numeric](18, 6) NULL,
 	[dblLimit] [numeric](18, 6) NULL,
 	[dblTotal] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblTaxableAmount] [numeric](18, 6) NULL,
+	[dblTaxableAmountYTD] [numeric](18, 6) NULL,
 	[intAccountId] [int] NULL,
 	[intExpenseAccountId] [int] NULL,
 	[intAllowance] [int] NULL DEFAULT ((0)),
