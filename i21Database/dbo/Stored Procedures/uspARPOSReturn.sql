@@ -347,6 +347,56 @@ AS
 			,ARIDT.[intInvoiceDetailTaxId] ASC
 
 
+		Declare @ReceiptNumber NVARCHAR(25) = NULL
+		Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output
+
+		INSERT INTO tblARPOS (
+				 [strReceiptNumber]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intGLAccountId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[intItemCount]
+				,[dblShipping]
+				,[dblDiscountPercent]
+				,[dblDiscount]
+				,[dblTax]
+				,[dblSubTotal]
+				,[dblTotal]
+				,[intInvoiceId]
+				,[ysnHold]
+				,[intEntityUserId]
+				,[intPOSLogId]
+				,[intConcurrencyId]
+				,[ysnReturn]
+				,[strPONumber]
+				,[strComment]
+			)
+			SELECT 
+				@ReceiptNumber
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intGLAccountId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[intItemCount]
+				,[dblShipping]
+				,[dblDiscountPercent]
+				,[dblDiscount]
+				,-[dblTax]
+				,-[dblSubTotal]
+				,-[dblTotal]
+				,[intInvoiceId]
+				,[ysnHold]
+				,[intEntityUserId]
+				,[intPOSLogId]
+				,[intConcurrencyId]
+				,[ysnReturn]
+				,[strPONumber]
+				,[strComment]
+			FROM tblARPOS WHERE intPOSId = @intSourceId
+
 		EXEC uspARProcessInvoices
 			 @InvoiceEntries		= @EntriesForCreditMemo
 			,@LineItemTaxEntries	= @LineItemTaxes
