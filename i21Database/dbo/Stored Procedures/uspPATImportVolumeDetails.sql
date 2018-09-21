@@ -703,7 +703,6 @@ BEGIN
 		ON CustomerVolumeStaging.intEntityId = CustomerVolume.intCustomerPatronId
 		AND CustomerVolumeStaging.intFiscalYearId = CustomerVolume.intFiscalYear
 		AND CustomerVolumeStaging.intPatronageCategoryId = CustomerVolume.intPatronageCategoryId
-		AND CustomerVolume.ysnRefundProcessed <> 0
 	WHEN MATCHED THEN
 		UPDATE SET
 			CustomerVolume.dblVolume = CustomerVolume.dblVolume + CustomerVolumeStaging.dblVolume

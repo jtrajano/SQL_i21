@@ -184,6 +184,7 @@
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
     <Folder Include="Scripts\Post-Deployment\CCR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
+    <Folder Include="Scripts\Post-Deployment\PAT\18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -6569,6 +6570,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\3_DefaultImportOriginFlag.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
