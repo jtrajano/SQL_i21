@@ -57,18 +57,18 @@ BEGIN TRY
 				WHEN strMonth = 'ysnOptOct' THEN 10
 				WHEN strMonth = 'ysnOptNov' THEN 11
 				WHEN strMonth = 'ysnOptDec' THEN 12 END)
-			, strSymbol = (CASE WHEN strMonth = 'ysnFutJan' THEN 'F'
-				WHEN strMonth = 'ysnFutFeb' THEN 'G'
-				WHEN strMonth = 'ysnFutMar' THEN 'H'
-				WHEN strMonth = 'ysnFutApr' THEN 'J'
-				WHEN strMonth = 'ysnFutMay' THEN 'K'
-				WHEN strMonth = 'ysnFutJun' THEN 'M'
-				WHEN strMonth = 'ysnFutJul' THEN 'N'
-				WHEN strMonth = 'ysnFutAug' THEN 'Q'
-				WHEN strMonth = 'ysnFutSep' THEN 'U'
-				WHEN strMonth = 'ysnFutOct' THEN 'V'
-				WHEN strMonth = 'ysnFutNov' THEN 'X'
-				WHEN strMonth = 'ysnFutDec' THEN 'Z' END)
+			, strSymbol = (CASE WHEN strMonth = 'ysnOptJan' THEN 'F'
+				WHEN strMonth = 'ysnOptFeb' THEN 'G'
+				WHEN strMonth = 'ysnOptMar' THEN 'H'
+				WHEN strMonth = 'ysnOptApr' THEN 'J'
+				WHEN strMonth = 'ysnOptMay' THEN 'K'
+				WHEN strMonth = 'ysnOptJun' THEN 'M'
+				WHEN strMonth = 'ysnOptJul' THEN 'N'
+				WHEN strMonth = 'ysnOptAug' THEN 'Q'
+				WHEN strMonth = 'ysnOptSep' THEN 'U'
+				WHEN strMonth = 'ysnOptOct' THEN 'V'
+				WHEN strMonth = 'ysnOptNov' THEN 'X'
+				WHEN strMonth = 'ysnOptDec' THEN 'Z' END)
 		 FROM (SELECT ysnOptJan
 					, ysnOptFeb
 					, ysnOptMar
@@ -100,9 +100,9 @@ BEGIN TRY
 		ORDER BY intMonthCode
 	) tblMonths
 	
-	IF OBJECT_ID('tempdb..##FinalFutMonths') IS NOT NULL DROP TABLE ##FinalFutMonths
+	IF OBJECT_ID('tempdb..##FinalOptMonths') IS NOT NULL DROP TABLE ##FinalOptMonths
 	
-	CREATE TABLE ##FinalFutMonths(
+	CREATE TABLE ##FinalOptMonths(
 		intYear INT
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
@@ -110,11 +110,11 @@ BEGIN TRY
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, intMonthCode INT)
 		
-	WHILE (SELECT COUNT(*) FROM ##FinalFutMonths) < @OptMonthsToOpen
+	WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @OptMonthsToOpen
 	BEGIN
-		SELECT @Top = @OptMonthsToOpen - COUNT(*) FROM ##FinalFutMonths
+		SELECT @Top = @OptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
 		
-		INSERT INTO ##FinalFutMonths
+		INSERT INTO ##FinalOptMonths
 		SELECT TOP (@Top) YEAR(@Date) + @Count, LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode, strMonth, strMonthCode, strSymbol, intMonthCode
 		FROM ##AllowedOptMonths
 		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
@@ -140,7 +140,7 @@ BEGIN TRY
 		, ysnExpired = 0
 		, intMonthCode
 	INTO #OptTemp
-	FROM  ##FinalFutMonths
+	FROM  ##FinalOptMonths
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth
 	
@@ -173,7 +173,7 @@ BEGIN TRY
 	ORDER BY CONVERT(DATETIME,'01 ' + strOMonth) ASC
 
 	DROP TABLE ##AllowedOptMonths
-	DROP TABLE ##FinalFutMonths
+	DROP TABLE ##FinalOptMonths
 	DROP TABLE #OptTemp
 
 END TRY
