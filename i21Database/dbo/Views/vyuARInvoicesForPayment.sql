@@ -266,8 +266,8 @@ FROM (
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN (
 			SELECT intEntityId
-				 , strAccountNumber
-			 FROM dbo.tblARCustomer WITH (NOLOCK)
+				 , strAccountNumber = strVendorAccountNum
+			 FROM dbo.tblAPVendor WITH (NOLOCK)
 		) AS ARC ON APB.intEntityCustomerId = ARC.intEntityId
 		INNER JOIN (
 			SELECT intEntityId
