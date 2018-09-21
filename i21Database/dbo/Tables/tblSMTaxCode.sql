@@ -30,3 +30,6 @@
     CONSTRAINT [FK_tblSMTaxCode_tblTFTaxCategory] FOREIGN KEY ([intTaxCategoryId]) REFERENCES [tblTFTaxCategory]([intTaxCategoryId]),
 	CONSTRAINT [FK_tblSMTaxCode_tblEMEntity] FOREIGN KEY ([intPayToVendorId]) REFERENCES [tblEMEntity]([intEntityId])
 )
+
+CREATE INDEX [IX_tblSMTaxCode_intTaxCategoryId] ON [dbo].[tblSMTaxCode] ([intTaxCategoryId])
+GO
