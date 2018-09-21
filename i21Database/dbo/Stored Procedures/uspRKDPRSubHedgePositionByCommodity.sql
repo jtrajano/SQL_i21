@@ -30,6 +30,9 @@ BEGIN
 	END
 END
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit
+SELECT @ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0) from tblRKCompanyPreference
+
 DECLARE @Commodity AS TABLE 
 (
 	intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
@@ -485,6 +488,7 @@ WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStoc
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				) 
+				and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END 
 
 DECLARE @tempCollateral TABLE (		
 		intRowNum int,
@@ -788,7 +792,8 @@ BEGIN
 	SELECT strCommodityCode,intContractHeaderId,strContractNumber,'Basis Risk' strType,strContractType,strLocationName,strContractEndMonth,
 	case when intContractTypeId=1 then (dblTotal) else -(dblTotal) end dblTotal
 	 ,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId from @tempFinal 
-	WHERE strContractType in('Physical Contract'))t
+	WHERE strContractType in('Physical Contract') and strType IN ('Purchase Priced', 'Purchase Basis', 'Sale Priced', 'Sale Basis'))t
+
 		GROUP BY strType,strCommodityCode,intContractHeaderId,strContractNumber,strContractType,strLocationName,strContractEndMonth,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId
 	
 
