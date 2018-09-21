@@ -79,16 +79,35 @@ USING
 		,dblNetWeight						=	A.dblNetWeight
 		,dblWeight							=	A.dblWeight
 		/*Cost info*/						
-		,intCostUOMId						=	A.intCostUOMId
-		,dblCostUnitQty						=	A.dblCostUnitQty
-		,dblCost							=	A.dblCost
+		,intCostUOMId						=	CASE WHEN A.intTransactionType = 1
+													THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
+												ELSE A.intCostUOMId END
+		,dblCostUnitQty						=	CASE WHEN A.intTransactionType = 1
+													THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
+												ELSE A.dblCostUnitQty END
+		,dblCost							=	CASE WHEN A.intTransactionType = 1
+													THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
+														THEN ctDetail.dblSeqPrice
+														ELSE 
+															(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+																THEN ctDetail.dblSeqPrice
+																ELSE A.dblCost
+																END)
+													END)
+												ELSE A.dblCost END
 		,dblOldCost							=	A.dblOldCost
 		/*Quantity info*/					
-		,intUnitOfMeasureId					=	ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
+		,intUnitOfMeasureId					=	CASE WHEN A.intTransactionType = 1 
+													THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
+												ELSE A.intQtyToBillUOMId END
 		,dblUnitQty							=	A.dblQtyToBillUnitQty
-		,dblQtyOrdered						=	A.dblOrderQty
-		,dblQtyReceived						=	CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-													THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
+		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1 
+													THEN ISNULL(ctDetail.dblDetailQuantity, ISNULL(A.dblOrderQty, A.dblQtyToBillUnitQty))
+												ELSE A.dblOrderQty END
+		,dblQtyReceived						=	CASE WHEN A.intTransactionType = 1
+													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
+														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
 		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
@@ -164,6 +183,7 @@ USING
 	LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 	LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
 	ORDER BY A.intBillId ASC
 ) AS SourceData
 ON (1=0)

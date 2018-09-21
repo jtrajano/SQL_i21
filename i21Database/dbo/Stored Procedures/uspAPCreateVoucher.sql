@@ -46,6 +46,8 @@ BEGIN TRY
 	DECLARE @baPref NVARCHAR(50);
 	DECLARE @deferStartNum INT = 0;
 	DECLARE @deferPref NVARCHAR(50);
+	DECLARE @adjStartNum INT = 0;
+	DECLARE @adjPref NVARCHAR(50);
 
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
@@ -290,6 +292,20 @@ BEGIN TRY
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 14
 
+	--1099 ADJUSTMENT Type
+	UPDATE A
+		SET A.intConcurrencyId = A.intConcurrencyId + 1
+		,@adjStartNum = A.intNumber
+		,@adjPref = A.strPrefix
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 77
+
+	UPDATE A
+		SET A.strBillId = @adjPref + CAST(@adjStartNum - 1 AS NVARCHAR)
+		,@adjStartNum = @adjStartNum + 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 9
+
 	MERGE INTO tblAPBill AS destination
 	USING
 	(
@@ -409,6 +425,12 @@ BEGIN TRY
 		SET A.intNumber = @deferStartNum
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 132
+
+	--1099 ADJUSTMENT Type
+	UPDATE A
+		SET A.intNumber = @adjStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 77
 
 	UPDATE A
 		SET A.intBillId = B.intBillId

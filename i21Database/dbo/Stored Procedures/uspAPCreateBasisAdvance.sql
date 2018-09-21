@@ -18,6 +18,7 @@ DECLARE @voucherIds AS Id;
 DECLARE @postBatchId NVARCHAR(40);
 DECLARE @postFailedCount INT = 0;
 DECLARE @postSuccess BIT = 0;
+DECLARE @vouchers TABLE(intBillId INT);
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPCreateBasisAdvance';
 
@@ -33,6 +34,7 @@ FROM tblAPBasisAdvanceDummyHeader A
 CREATE TABLE #tmpVoucherCreated(intBillId INT, intTicketId INT, intContractDetailId INT)
 
 INSERT INTO @voucherPayables(
+    intPartitionId,
     intEntityVendorId,
     intTransactionType,
     intLocationId,
@@ -63,7 +65,8 @@ INSERT INTO @voucherPayables(
     intAccountId
 )
 SELECT
-    intEntityVendorId               = basisAdvance.intEntityId
+    intPartitionId				    = ROW_NUMBER() OVER(ORDER BY (SELECT 1)) --1 voucher per 1 payable
+    ,intEntityVendorId               = basisAdvance.intEntityId
     ,intTransactionType             = 13
     ,intLocationId                  = basisAdvance.intCompanyLocationId
     ,intCurrencyId                  = basisAdvance.intCurrencyId
@@ -108,6 +111,7 @@ ELSE SAVE TRAN @SavePoint
 
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdBasisAdvance OUT
 
+INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdBasisAdvance)
 /*
 IF OBJECT_ID('tempdb..#tmpBillData') IS NOT NULL DROP TABLE #tmpBillData
 SELECT 
@@ -424,7 +428,12 @@ EXEC uspAPUpdateVoucherTotal @voucherIds
 --DELETE STAGING
 DELETE A
 FROM tblAPBasisAdvanceStaging A
-INNER JOIN #tmpVoucherCreated B ON A.intContractDetailId = B.intContractDetailId AND B.intTicketId = A.intTicketId
+--INNER JOIN #tmpVoucherCreated B ON A.intContractDetailId = B.intContractDetailId AND B.intTicketId = A.intTicketId
+INNER JOIN (@vouchers B INNER JOIN tblAPBill C 
+                            ON B.intBillId = C.intBillId
+                        INNER JOIN tblAPBillDetail D
+                            ON C.intBillId = D.intBillId)
+        ON D.intScaleTicketId = A.intTicketId AND D.intContractDetailId = A.intContractDetailId
 
 --tblAPBasisAdvanceFuture
 DELETE A
