@@ -21,7 +21,7 @@ RETURNS TABLE AS RETURN
 		[ysnTaxOnly]				=	A.ysnTaxOnly
 	FROM tblICInventoryReceiptItemTax A
 	INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
+	--INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 	INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
 	WHERE B.intInventoryReceiptItemId = @intInventoryReceiptItemId
 )

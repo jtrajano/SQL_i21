@@ -48,11 +48,11 @@ BEGIN TRY
 			
 				IF EXISTS(SELECT 1 FROM tblARInvoiceDetail WHERE intCustomerStorageId = @intCustomerStorageId)
 				BEGIN
-					RAISERROR('Invoice Exists for the Grain Ticket for this receipt.',16, 1);
+					RAISERROR('Invoice exists for the Grain Ticket for this receipt.',16, 1);
 				END
 				ELSE IF EXISTS(SELECT 1 FROM [tblAPBillDetail] WHERE [intCustomerStorageId] = @intCustomerStorageId)
 				BEGIN
-					RAISERROR('Voucher Exists for the Grain Ticket for this receipt.',16, 1);
+					RAISERROR('Voucher exists for this Delivery Sheet.',16, 1);
 				END
 				ELSE IF EXISTS(SELECT 1 FROM [tblGRStorageHistory] WHERE [intCustomerStorageId] = @intCustomerStorageId AND strType = 'Transfer')
 				BEGIN

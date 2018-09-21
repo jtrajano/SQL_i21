@@ -62,6 +62,9 @@
 	[intTransactionNumberId] INT NULL,
 	[ysnDiversion] BIT NULL,
 	[strContactName] NVARCHAR(50) NULL,
-	[strEmail] NVARCHAR(100) NULL
+	[strEmail] NVARCHAR(100) NULL,
+	PRIMARY KEY CLUSTERED ([intId] ASC) WITH (IGNORE_DUP_KEY = OFF),
+	UNIQUE NONCLUSTERED ([intId] ASC, [intInvoiceDetailId] ASC)
 )
 GO
+

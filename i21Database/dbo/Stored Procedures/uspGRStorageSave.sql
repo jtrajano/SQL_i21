@@ -48,7 +48,7 @@ BEGIN TRY
 	DECLARE @intDiscountScheduleId INT
 	DECLARE @intCurrencyId INT
 	DECLARE @UserKey INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @strDiscountCode NVARCHAR(3)
 		,@strDiscountCodeDescription NVARCHAR(20)
 		,@dblGradeReading DECIMAL(7, 3)
@@ -117,7 +117,7 @@ BEGIN TRY
 			,intCurrencyId INT
 	 )
 
-	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityId] = @UserKey
+	--SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityId] = @UserKey
 
 	IF @intConcurrencyId = 0 AND @intCustomerStorageId = 0
 	BEGIN
@@ -220,6 +220,7 @@ BEGIN TRY
 			,[strPaidDescription]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 		)
 		SELECT 1
 			,@intCustomerStorageId
@@ -227,7 +228,8 @@ BEGIN TRY
 			,GETDATE()
 			,'Added by Storage Maintenance'
 			,'NEW'
-			,@UserName
+			,NULL
+			,@UserKey
 	END
 	ELSE
 	BEGIN
@@ -302,6 +304,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -313,7 +316,8 @@ BEGIN TRY
 					ELSE 'Original Units Decreased'
 					END
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--2.Open Balance adjustment
@@ -328,6 +332,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -339,7 +344,8 @@ BEGIN TRY
 					ELSE 'Available Units Decreased'
 					END
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--3.Insurance Rate Change		
@@ -354,6 +360,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -361,7 +368,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Insurance Rate changed from ' + LTRIM(@OlddblInsuranceRate)
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--4.Storage Due Adjustment		
@@ -376,6 +384,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -383,7 +392,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Storage Due Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--5.Storage Paid Adjustment				
@@ -398,6 +408,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -405,7 +416,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Storage Paid Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--6.Fees Due Adjustment
@@ -420,6 +432,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -427,7 +440,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Fees Due Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--7.Fees Paid Adjustment
@@ -442,6 +456,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -449,7 +464,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Fees Paid Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--8.Discount Due Adjustment
@@ -464,6 +480,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -471,7 +488,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Discount Due Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 
 		--9.Discount Paid Adjustment
@@ -486,6 +504,7 @@ BEGIN TRY
 				,[strPaidDescription]
 				,[strType]
 				,[strUserName]
+				,[intUserId]
 			)
 			SELECT 1
 				,@intCustomerStorageId
@@ -493,7 +512,8 @@ BEGIN TRY
 				,GETDATE()
 				,'Discount Paid Adjustment'
 				,'ADJUSTMENT'
-				,@UserName
+				,NULL
+				,@UserKey
 		END
 	END
 

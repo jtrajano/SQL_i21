@@ -11,6 +11,7 @@ SELECT	vp.intVendorPricingId
 		,vp.dblUnit
 		,u.strUnitMeasure
 		,c.strCurrency
+		,vp.intEntityVendorId
 FROM	tblICItem i INNER JOIN tblAPVendorPricing vp 
 			ON i.intItemId = vp.intItemId 
 		LEFT JOIN tblEMEntity e

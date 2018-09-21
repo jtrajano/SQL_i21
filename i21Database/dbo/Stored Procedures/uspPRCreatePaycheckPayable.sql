@@ -116,7 +116,7 @@ BEGIN
 		[intPayToAddressId]		=	A.[intShipFromId],
 		[intCurrencyId]			=	A.[intCurrencyId]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, @intAPAccount, DEFAULT, NULL) A
+	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, @intAPAccount, DEFAULT, NULL, @intVendorEntityId) A
 
 	/* Insert Voucher Header */
 	INSERT INTO tblAPBill

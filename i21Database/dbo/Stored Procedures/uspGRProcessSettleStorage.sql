@@ -16,7 +16,7 @@ BEGIN TRY
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @UserKey INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	
 	--Storage Varibales
 	DECLARE @SettleStorageKey INT
@@ -163,9 +163,9 @@ BEGIN TRY
 	SET @strUpdateType = 'estimate'
 	SET @strProcessType = CASE WHEN @strStorageAdjustment IN ('No additional','Override') THEN 'Unpaid' ELSE 'calculate' END
 
-	SELECT @UserName = strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @UserKey --Another Hiccup
+	-- SELECT @UserName = strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @UserKey --Another Hiccup
 
 	INSERT INTO @SettleStorage 
 	(
@@ -565,6 +565,7 @@ BEGIN TRY
 						,[dtmHistoryDate]
 						,[strType]
 						,[strUserName]
+						,[intUserId]
 						,[intEntityId]
 						,[strSettleTicket]
 						,[intTransactionTypeId]
@@ -580,7 +581,8 @@ BEGIN TRY
 						,@dblUnitsToReduce
 						,GETDATE()
 						,'Settlement'
-						,@UserName
+						,NULL
+						,@UserKey
 						,@ContractEntityId
 						,@TicketNo
 						,4
@@ -658,6 +660,7 @@ BEGIN TRY
 						,[dtmHistoryDate]
 						,[strType]
 						,[strUserName]
+						,[intUserId]
 						,[intEntityId]
 						,[strSettleTicket]
 						,[intTransactionTypeId]
@@ -673,7 +676,8 @@ BEGIN TRY
 						,@dblUnitsToReduce
 						,GETDATE()
 						,'Settlement'
-						,@UserName
+						,NULL
+						,@UserKey
 						,@ContractEntityId
 						,@TicketNo
 						,4
@@ -748,6 +752,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -762,7 +767,8 @@ BEGIN TRY
 					,@dblUnitsToReduce
 					,GETDATE()
 					,'Settlement'
-					,@UserName
+					,NULL
+					,@UserKey
 					,NULL
 					,@TicketNo
 					,4
@@ -824,6 +830,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -838,7 +845,8 @@ BEGIN TRY
 					,@dblUnitsToReduce
 					,GETDATE()
 					,'Settlement'
-					,@UserName
+					,NULL
+					,@UserKey
 					,NULL
 					,@TicketNo
 					,4

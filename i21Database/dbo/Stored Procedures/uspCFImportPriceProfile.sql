@@ -147,10 +147,10 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 															  WHERE strSiteNumber = LTRIM(RTRIM(cfppd_site_no)) 
 																					COLLATE Latin1_General_CI_AS),0)
 
-					,@intLocalPricingIndex			= ISNULL((SELECT intPriceIndexId 
+					,@intLocalPricingIndex			= (SELECT intPriceIndexId 
 															  FROM tblCFPriceIndex 
 															  WHERE strPriceIndex = LTRIM(RTRIM(cfppd_local_idx))
-																					COLLATE Latin1_General_CI_AS),0)
+																					COLLATE Latin1_General_CI_AS)
 
 					,@dblRate						= LTRIM(RTRIM(cfppd_rt))
 

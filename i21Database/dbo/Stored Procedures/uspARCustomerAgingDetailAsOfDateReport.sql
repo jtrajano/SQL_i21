@@ -199,7 +199,7 @@ INNER JOIN (
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND @dtmDateToLocal < (SELECT CONVERT(DATETIME, CAST(I.dtmForgiveDate AS DATE)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR (I.strType <> 'Service Charge'))
+	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
@@ -236,7 +236,6 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strInvoiceNumber
 		, strRecordNumber
 		, intInvoiceId
-		, intPaymentId
 		, strBOLNumber
 		, intEntityCustomerId
 		, intEntityUserId
@@ -266,7 +265,6 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyName
 		, strCompanyAddress
 		, strAgingType
-		, dblTotalCustomerAR
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
@@ -274,7 +272,6 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strInvoiceNumber		= AGING.strInvoiceNumber
 	 , strRecordNumber		= AGING.strRecordNumber
 	 , intInvoiceId			= AGING.intInvoiceId
-	 , intPaymentId			= AGING.intPaymentId
 	 , strBOLNumber			= AGING.strBOLNumber
 	 , intEntityCustomerId  = AGING.intEntityCustomerId
 	 , intEntityUserId		= @intEntityUserIdLocal
@@ -304,14 +301,12 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
 	 , strAgingType			= 'Detail'
-	 , dblTotalCustomerAR   = CUSTAR.dblARBalance
 FROM
-(SELECT strInvoiceNumber	= A.strInvoiceNumber
-     , strRecordNumber		= B.strRecordNumber
-     , intInvoiceId			= A.intInvoiceId
-	 , intPaymentId			= B.intPaymentId
-	 , strBOLNumber			= A.strBOLNumber
-	 , intEntityCustomerId	= A.intEntityCustomerId
+(SELECT A.strInvoiceNumber
+     , B.strRecordNumber
+     , A.intInvoiceId	 
+	 , A.strBOLNumber
+	 , A.intEntityCustomerId
 	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
 	 , dblFuture			= B.dblFuture
 	 , dbl0Days				= B.dbl0Days
@@ -332,23 +327,23 @@ FROM
 	 , strType
 FROM
 (SELECT dtmDate				= I.dtmDate
-	 , strInvoiceNumber		= I.strInvoiceNumber
-	 , intCompanyLocationId	= I.intCompanyLocationId
-	 , intInvoiceId			= I.intInvoiceId
-	 , strBOLNumber			=I.strBOLNumber
+	 , I.strInvoiceNumber
+	 , I.intCompanyLocationId
+	 , I.intInvoiceId
+	 , I.strBOLNumber
      , dblInvoiceTotal		= ISNULL(I.dblInvoiceTotal,0)
-	 , intEntityCustomerId	= I.intEntityCustomerId
-	 , dtmDueDate			= I.dtmDueDate
-	 , strType				= I.strType
-	 , strAge				= CASE WHEN I.strType = 'CF Tran' THEN 'Future'
-				              ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 0 THEN 'Current'
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 60 THEN '31 - 60 Days'     
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 90 THEN '61 - 90 Days'    
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 120 THEN '91 - 120 Days' 
-				              		  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 120 THEN 'Over 120' END
-				              END
+	 , I.intEntityCustomerId
+	 , I.dtmDueDate
+	 , I.strType    
+	 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
+				ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 0 THEN 'Current'
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 60 THEN '31 - 60 Days'     
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 90 THEN '61 - 90 Days'    
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 120 THEN '91 - 120 Days' 
+						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 120 THEN 'Over 120' END
+				END
 FROM #POSTEDINVOICES I WITH (NOLOCK)) AS A    
 
 LEFT JOIN
@@ -356,7 +351,6 @@ LEFT JOIN
 (SELECT DISTINCT 
 	intEntityCustomerId
   , intInvoiceId
-  , intPaymentId
   , dblAmountPaid
   , dtmDatePaid
   , dblTotalDue		= dblInvoiceTotal - dblAmountPaid
@@ -380,33 +374,31 @@ LEFT JOIN
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 120 AND strType <> 'CF Tran'
   			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl121Days 
 FROM
-(SELECT intInvoiceId			= I.intInvoiceId
+(SELECT I.intInvoiceId
       , dblAmountPaid			= 0
       , dblInvoiceTotal			= ISNULL(dblInvoiceTotal,0)	  
-	  , dtmDueDate				= I.dtmDueDate
+	  , I.dtmDueDate
 	  , dtmDatePaid				= NULL
-	  , intEntityCustomerId		= I.intEntityCustomerId
+	  , I.intEntityCustomerId
 	  , dblAvailableCredit		= 0
 	  , dblPrepayments			= 0
-	  , strType					= I.strType
+	  , I.strType
 	  , strRecordNumber			= NULL
-	  , intPaymentId			= NULL
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
 
 UNION ALL
 
-SELECT intInvoiceId			= I.intInvoiceId
+SELECT I.intInvoiceId
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= 0
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	 , dtmDatePaid			= NULL
-	 , intEntityCustomerId	= I.intEntityCustomerId
+	 , I.intEntityCustomerId
 	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 	 , dblPrepayments		= 0
-	 , strType				= I.strType
+	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
-	 , intPaymentId			= P.intPaymentId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN (
@@ -419,17 +411,16 @@ WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 
 UNION ALL
 
-SELECT intInvoiceId			= I.intInvoiceId
+SELECT I.intInvoiceId
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= 0
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	 , dtmDatePaid			= P.dtmDatePaid
-	 , intEntityCustomerId	= I.intEntityCustomerId
+	 , I.intEntityCustomerId
 	 , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
-	 , strType				= I.strType
+	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
-	 , intPaymentId			= P.intPaymentId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
@@ -438,33 +429,30 @@ WHERE I.strTransactionType = 'Customer Prepayment'
 UNION ALL      
       
 SELECT DISTINCT
-	intInvoiceId		= I.intInvoiceId
+	I.intInvoiceId
   , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
   , dblInvoiceTotal		= 0
   , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
   , dtmDatePaid			= PAYMENT.dtmDatePaid
-  , intEntityCustomerId	= I.intEntityCustomerId
+  , I.intEntityCustomerId
   , dblAvailableCredit	= 0
   , dblPrepayments		= 0
-  , strType				= I.strType
+  , I.strType
   , strRecordNumber		= PAYMENT.strRecordNumber
-  , intPaymentId		= PAYMENT.intPaymentId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 LEFT JOIN (
-	SELECT intInvoiceId		= PD.intInvoiceId
-		 , intPaymentId		= P.intPaymentId
-		 , strRecordNumber	= P.strRecordNumber
-		 , dtmDatePaid		= P.dtmDatePaid
+	SELECT PD.intInvoiceId
+		 , P.strRecordNumber
+		 , P.dtmDatePaid
 		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
 
 	UNION ALL 
 
-	SELECT intInvoiceId		= PD.intInvoiceId
-		 , intPaymentId		= P.intPaymentId
+	SELECT PD.intInvoiceId
 		 , strRecordNumber	= strPaymentRecordNum
-		 , dtmDatePaid		= P.dtmDatePaid
+		 , P.dtmDatePaid
 		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
@@ -483,7 +471,7 @@ WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
 ON
 A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
- 
+
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 OUTER APPLY (
@@ -491,4 +479,3 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId 

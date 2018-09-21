@@ -16,7 +16,7 @@ BEGIN TRY
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @strVoucher NVARCHAR(20)
 	DECLARE @intCreatedUserId INT
-	DECLARE @UserName NVARCHAR(100)
+	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @ItemLocationId INT
 	DECLARE @SettleStorageKey INT
 	DECLARE @intSettleStorageTicketId INT
@@ -274,9 +274,9 @@ BEGIN TRY
 								   ELSE 'calculate'
 							  END
 
-		SELECT @UserName = strUserName
-		FROM tblSMUserSecurity
-		WHERE [intEntityId] = @intCreatedUserId
+		-- SELECT @UserName = strUserName
+		-- FROM tblSMUserSecurity
+		-- WHERE [intEntityId] = @intCreatedUserId
 
 		-- SELECT @FeeItemId = intItemId
 		-- FROM tblGRCompanyPreference
@@ -364,7 +364,7 @@ BEGIN TRY
 				,ContractEntityId    = CD.intEntityId
 				,dblCashPrice		 = CD.dblCashPrice
 				,intPricingTypeId    = CD.intPricingTypeId
-				,dblBasis			 = CD.dblBasisInCommodityStockUOM
+				,dblBasis			 = CD.dblBasisInItemStockUOM
 				,intContractUOMId	 = CD.intContractUOMId
 				,dblCostUnitQty		 = CD.dblCostUnitQty
 			FROM tblGRSettleContract SSC
@@ -478,14 +478,14 @@ BEGIN TRY
 					,intItemType
 					,IsProcessed
 				)
-				SELECT TOP 1
+				SELECT DISTINCT
 					 intCustomerStorageId = SST.intCustomerStorageId
 					,intCompanyLocationId = CS.intCompanyLocationId
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
-					,dblUnits             = CASE
-												WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits
-												ELSE SST.dblUnits
+					,dblUnits             = CASE 
+												WHEN CS.intDeliverySheetId IS NOT NULL THEN CASE WHEN IC.ysnPrice = 1 THEN -SST.dblUnits ELSE SST.dblUnits END
+												ELSE CASE WHEN SC.ysnCusVenPaysFees = 1 THEN -SST.dblUnits ELSE SST.dblUnits END
 											END
 					,dblCashPrice         = CS.dblFeesDue
 					,intItemId            = IC.intItemId
@@ -503,12 +503,6 @@ BEGIN TRY
 					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 				INNER JOIN tblICItem IC 
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
-				GROUP BY SST.intCustomerStorageId
-						,CS.intCompanyLocationId
-						,SC.ysnCusVenPaysFees
-						,SST.dblUnits
-						,CS.dblFeesDue
-						,IC.intItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
@@ -1265,7 +1259,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId,'AP Clearing')
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,ItemLocation.intItemLocationId,'AP Clearing')
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
@@ -1303,9 +1297,11 @@ BEGIN TRY
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
+				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
-					AND SST.intSettleStorageId = @intSettleStorageId 
+					AND SST.intSettleStorageId = @intSettleStorageId
+					AND ItemLocation.intLocationId = @LocationId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.
@@ -1409,7 +1405,7 @@ BEGIN TRY
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
 				 ,[intItemId]			  = CC.[intItemId]
-				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,@LocationId,'Other Charge Expense')
+				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,ItemLocation.intItemLocationId,'Other Charge Expense')
 				 ,[dblQtyReceived]		  = CASE 
 												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
 												ELSE SV.dblUnits 
@@ -1468,6 +1464,8 @@ BEGIN TRY
 					ON Item.intItemId = CC.intItemId
 				 LEFT JOIN tblICItemUOM UOM 
 					ON UOM.intItemUOMId = CC.intItemUOMId
+				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
+				 WHERE ItemLocation.intLocationId = @LocationId
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
@@ -1636,6 +1634,7 @@ BEGIN TRY
 					,[dtmHistoryDate]
 					,[strType]
 					,[strUserName]
+					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
@@ -1651,7 +1650,8 @@ BEGIN TRY
 					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
-					,[strUserName]			= @UserName 
+					,[strUserName]			= NULL
+					,[intUserId]		 	= @intCreatedUserId
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
@@ -1674,6 +1674,107 @@ BEGIN TRY
 	FROM tblGRSettleStorage
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
+
+	INSERT INTO @adjustCostOfDelayedPricingStock 
+		(
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[intCostUOMId] 
+			,[dblNewValue] 
+			,[intCurrencyId]     
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
+			,[strSourceTransactionId] 
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
+		)
+	SELECT
+			 [intItemId]      				= @ItemId
+			,[intItemLocationId]    		= @ItemLocationId
+			,[intItemUOMId]     			= itemUOM.intItemUOMId
+			,[dtmDate]       				= A.dtmDate
+			,[dblQty]        				= CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
+			,[dblUOMQty]       				= itemUOM.dblUnitQty
+			,[intCostUOMId]     			= voucherCostUOM.intItemUOMId 
+			,[dblNewValue]      			=  dbo.fnCalculateCostBetweenUOM(
+													voucherCostUOM.intItemUOMId
+													,receiptCostUOM.intItemUOMId
+													,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+												) * B.dblQtyOrdered - (E2.dblUnitCost * E2.dblReceived)
+			,[intCurrencyId]      			= @intDefaultCurrencyId
+			,[intTransactionId]    			= B.intBillId
+			,[intTransactionDetailId]   	= B.intBillDetailId
+			,[strTransactionId]     		= A.strBillId
+			,[intTransactionTypeId]    		= 44
+			,[intLotId]       				= NULL 
+			,[intSubLocationId]     		= NULL 
+			,[intStorageLocationId]    		= NULL 
+			,[ysnIsStorage]      			= 0
+			,[strActualCostId]     			= NULL 
+			,[intSourceTransactionId]   	= E2.intInventoryReceiptId
+			,[intSourceTransactionDetailId] = E2.intInventoryReceiptItemId
+			,[strSourceTransactionId]    	= E1.strReceiptNumber
+			,[intFobPointId]     			= NULL 
+			,[intInTransitSourceLocationId] = NULL 
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B
+			ON A.intBillId = B.intBillId
+		INNER JOIN tblGRCustomerStorage GS 
+			ON GS.intCustomerStorageId = B.intCustomerStorageId
+		INNER JOIN (
+			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+			LEFT JOIN tblICItemLocation sourceLocation
+				ON sourceLocation.intItemId = E2.intItemId
+				AND sourceLocation.intLocationId = E1.intLocationId
+			LEFT JOIN tblSMFreightTerms ft
+				ON ft.intFreightTermId = E1.intFreightTermId
+			LEFT JOIN tblICFobPoint fp
+				ON fp.strFobPoint = ft.strFreightTerm
+		)
+			ON GS.intTicketId= E2.intSourceId
+		INNER JOIN tblICItem item 
+			ON B.intItemId = item.intItemId
+		INNER JOIN tblICItemLocation D
+			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
+		LEFT JOIN tblICItemUOM itemUOM
+			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM receiptCostUOM
+			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+		LEFT JOIN tblICInventoryTransactionType transType
+			ON transType.strName = 'Bill'
+
+		WHERE A.intBillId = @intCreatedBillId
+		AND B.intInventoryReceiptItemId IS NULL 
+		AND E2.intOwnershipType != 2
+		AND (
+			dbo.fnCalculateCostBetweenUOM(
+				voucherCostUOM.intItemUOMId
+				,receiptCostUOM.intItemUOMId
+				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				) <> E2.dblUnitCost
+			OR E2.dblForexRate <> B.dblRate
+		) AND item.intItemId = E2.intItemId
+	
+	EXEC @intReturnValue = uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @intCreatedUserId
+	
+	IF @intReturnValue < 0
+		GOTO SettleStorage_Exit;
 
 	END
 

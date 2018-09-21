@@ -17,6 +17,7 @@
 	[ysnCheckOffTax] BIT NOT NULL DEFAULT 0, 
     [intConcurrencyId] INT CONSTRAINT [DF_tblPOPurchaseDetailTax_intConcurrencyId] DEFAULT 0 NOT NULL,
 	[ysnTaxExempt] BIT NOT NULL DEFAULT 0, 
+    [ysnTaxOnly] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblPOPurchaseDetailTax_intPurchaseDetailTaxId] PRIMARY KEY CLUSTERED ([intPurchaseDetailTaxId] ASC),
 	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblPOPurchaseDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES [dbo].[tblPOPurchaseDetail] ([intPurchaseDetailId]) ON DELETE CASCADE,
 	--CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),

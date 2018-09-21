@@ -377,7 +377,7 @@ BEGIN TRY
 			,strArbitration							= @rtStrArbitration1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + '  '+@rtStrArbitration2+'. ' 
 														+ CHAR(13)+CHAR(10) +
 														@rtStrArbitration3 + ' ' + AB.strState +', '+ dbo.fnCTGetTranslation('i21.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
-
+			,strBeGreenArbitration					=   AB.strCity
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
@@ -407,6 +407,7 @@ BEGIN TRY
 			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN @rtLocation + ' :'					ELSE NULL END
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired + ' :'			ELSE NULL END
 			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN @rtContract2 + ' :'					ELSE NULL END
+			,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'							ELSE NULL END
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE NULL END
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
 			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END

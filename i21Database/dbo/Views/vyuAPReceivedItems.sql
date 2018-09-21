@@ -531,7 +531,7 @@ FROM
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
-		,[intInventoryReceiptItemId]				=	ISNULL (A.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
+		,[intInventoryReceiptItemId]				=	ISNULL (J.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
@@ -638,6 +638,12 @@ FROM
 		GROUP BY intEntityVendorId, BD.intInventoryReceiptChargeId
 
 	) Billed
+	OUTER APPLY
+    (
+        SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
+        WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+    ) J
+
 	--OUTER APPLY 
 	--(
 	--	SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 

@@ -513,7 +513,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         WHERE
@@ -609,7 +609,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -708,7 +708,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -805,7 +805,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -902,7 +902,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -998,7 +998,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN

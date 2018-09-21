@@ -1,4 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKSettlementPriceImport]
+	@intEntityUserId VARCHAR (100) = NULL
 AS
 BEGIN TRY
 
@@ -73,6 +74,16 @@ WHILE @mRowNumber > 0
 	JOIN tblRKOptionsMonth fm on fm.strOptionMonth=replace(i.strFutureMonth ,'-',' ')  and intFutureMarketId=@intFutureMarketId
 	WHERE strInstrumentType like 'Opt%' and strFutureMarket=@strMarket
 
+	BEGIN
+		EXEC	dbo.uspSMAuditLog 
+				@keyValue = @intFutureSettlementPriceId									-- Primary Key Value of the Settlement Price. 
+				,@screenName = 'RiskManagement.view.FuturesOptionsSettlementPrices'     -- Screen Namespace
+				,@entityId = @intEntityUserId                   						-- Entity Id
+				,@actionType = 'Imported'				                                -- Action Type
+				,@changeDescription = ''												-- Description
+				,@fromValue = ''														-- Previous Value
+				,@toValue = ''															-- New Value
+	END
 
 SELECT @mRowNumber = MIN(intRowNum)	FROM #temp	WHERE intRowNum > @mRowNumber
 END

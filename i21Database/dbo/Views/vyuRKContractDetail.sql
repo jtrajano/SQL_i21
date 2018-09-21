@@ -23,6 +23,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
 		,max(CDT.dblQuantity-CDT.dblBalance) dblRecQty
@@ -45,6 +46,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
     GROUP BY c.strCommodityCode,
 						c.intCommodityId,
@@ -62,7 +64,8 @@ WITH Pricing AS
 						CDT.intContractDetailId,
 						CDT.intContractStatusId,
 						ch.intEntityId
-						,CDT.intCurrencyId,	
+						,CDT.intCurrencyId,
+						CUR.strCurrency,	
 						IM.intItemId
 						,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract)
 
@@ -86,6 +89,7 @@ WITH Pricing AS
 		intContractStatusId,
 		intEntityId
 		,intCurrencyId
+		,strCurrency
 		,strContractType+' Priced' AS strType	
 		,intItemId
 		,strItemNo,dtmContractDate,strEntityName,strCustomerContract
@@ -111,6 +115,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Basis' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
@@ -131,6 +136,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity >= dblRecQty
 
 	UNION ALL
@@ -153,6 +159,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Priced' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
@@ -173,6 +180,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity > dblRecQty
 
 	UNION ALL
@@ -195,6 +203,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Basis' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
@@ -215,6 +224,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity < dblRecQty
 
     UNION ALL
@@ -238,6 +248,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,case when pt.intPricingTypeId=1 then ct.strContractType+' Priced'  else  ct.strContractType+' Basis' end AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
@@ -257,6 +268,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
    
 	UNION 
@@ -280,7 +292,8 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+' HTA' END AS strType
+		,CUR.strCurrency
+		,ct.strContractType+' '+strPricingType AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM tblCTContractDetail CDT
@@ -294,11 +307,12 @@ WITH Pricing AS
 															END
 														) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
-	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId =3
+	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId not in (1,2)
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
     AND CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
-) t 
+) t

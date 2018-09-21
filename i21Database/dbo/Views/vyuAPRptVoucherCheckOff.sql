@@ -27,6 +27,7 @@ SELECT	DISTINCT
 				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
+			,strCounty = TC.strCounty
 	FROM	dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  
 				ON APBD.intBillId = APB.intBillId
@@ -50,6 +51,8 @@ SELECT	DISTINCT
 				ON  EL.intEntityLocationId = APB.intShipFromId --AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblSCDeliverySheet DS
 				ON DS.intDeliverySheetId = IRE.intSourceId
+			LEFT JOIN tblSMTaxCode TC 
+				ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			OUTER APPLY (
 			SELECT TOP 1 
 				SC.intTicketId

@@ -102,7 +102,7 @@ WHERE POS.intPOSId = @intPOSId
 UNION ALL
 
 SELECT TOP 1
-	 [strTransactionType]					= 'Cash'--'CASE WHEN @strPaymentMethod = 'Cash' THEN 'Cash Refund' ELSE 'Credit Memo' END
+	 [strTransactionType]					= CASE WHEN @strPaymentMethod = 'Cash' THEN 'Cash Refund' ELSE 'Credit Memo' END
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
 	,[intSourceId]							= POS.intPOSId

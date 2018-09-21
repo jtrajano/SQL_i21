@@ -7,7 +7,8 @@
 	@currencyId INT = NULL,
 	@apAccountId INT = NULL,
 	@shipFromId INT = NULL,
-	@shipToId INT = NULL
+	@shipToId INT = NULL,
+	@shipFromEntityId INT = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -108,12 +109,18 @@ BEGIN
 		@shipTo = (CASE WHEN ISNULL(@shipToId,0) > 0 THEN @shipToId ELSE intCompanyLocationId END)
 	FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 
+	IF ISNULL(@shipFromEntityId, 0) > 0
+	SELECT TOP 1
+		@shipFromId = (CASE WHEN ISNULL(@shipFromEntityId,0) != @vendorId AND @shipFromId IS NULL THEN A.intEntityLocationId ELSE @shipFromId END)
+	FROM [tblEMEntityLocation] A
+	WHERE A.ysnDefaultLocation = 1 AND A.intEntityId = @shipFromEntityId
+
 	SELECT TOP 1
 		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(B2.intTermsId, B.intTermsId) END),
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
-		@shipFrom = ISNULL(@shipFromId, B.intEntityLocationId),
-		@payto = B.intEntityLocationId,
+		@shipFrom =  ISNULL(@shipFromId, B.intEntityLocationId),
+		@payto = CASE WHEN A.intBillToId > 0 THEN A.intBillToId ELSE B.intEntityLocationId END,
 		@shipVia = B.intShipViaId,
 		@shipFromAddress = B.strAddress,
 		@shipFromCity = B.strCity,
@@ -124,14 +131,14 @@ BEGIN
 		@shipFromZipCode = B.strZipCode,
 		@vendorCurrency	= A.intCurrencyId
 	FROM tblAPVendor A
-	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId
-	LEFT JOIN [tblEMEntityLocation] B2 ON B2.intEntityLocationId = @shipFromId
+	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId AND B.ysnDefaultLocation = 1
+	LEFT JOIN [tblEMEntityLocation] B2 ON B2.intEntityLocationId = @shipFromId AND B2.ysnDefaultLocation = 1
 	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
 	WHERE A.[intEntityId]= @vendorId 
-	 AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
-     				(CASE WHEN @shipFromId = ISNULL(B2.intEntityLocationId,B.intEntityLocationId)
-    			THEN 1 ELSE 0 END)
-    ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)
+	--  AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
+    --  				(CASE WHEN @shipFromId = ISNULL(B2.intEntityLocationId,B.intEntityLocationId)
+    -- 			THEN 1 ELSE 0 END)
+    --ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)
  	AND C.ysnDefaultContact = 1
 
 	SELECT

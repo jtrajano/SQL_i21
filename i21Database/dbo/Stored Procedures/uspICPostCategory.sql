@@ -47,6 +47,7 @@ DECLARE @AVERAGECOST AS INT = 1
 
 DECLARE @AdjustTypeCategorySales AS INT = 1
 		,@AdjustTypeCategorySalesReturn AS INT = 2
+		,@AdjustTypeCategoryCreditMemo AS INT = 3
 		,@AdjustTypeCategoryMarkupOrMarkDown AS INT --= 3
 		,@AdjustTypeCategoryWriteOff AS INT --= 4
 
@@ -57,6 +58,10 @@ WHERE	strName = 'Invoice'
 SELECT	TOP 1 @AdjustTypeCategorySalesReturn = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
 WHERE	strName = 'Sales Return'
+
+SELECT	TOP 1 @AdjustTypeCategoryCreditMemo = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Credit Memo'
 
 SELECT	TOP 1 @AdjustTypeCategorySalesReturn = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
@@ -97,7 +102,7 @@ END
 
 
 -- Do Sales Adjustments for Category Retail 
-IF @AdjustTypeCategorySales = @intTransactionTypeId --AND (@dblUnitRetail IS NOT NULL OR @dblSalesPrice)
+IF @intTransactionTypeId IN (@AdjustTypeCategorySales, @AdjustTypeCategoryCreditMemo)--AND (@dblUnitRetail IS NOT NULL OR @dblSalesPrice)
 BEGIN
 	SET @dblAdjustRetailValue = dbo.fnMultiply(@dblQty, ISNULL(@dblUnitRetail,@dblSalesPrice));
 
@@ -167,7 +172,7 @@ END
 
 -- If Qty is unknown and it will only adjust the retail value, then do it here. 
 -- It will compute the cost using the Average Margin. 
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 AND @intTransactionTypeId != @AdjustTypeCategorySales
+IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 AND @intTransactionTypeId NOT IN (@AdjustTypeCategorySales, @AdjustTypeCategoryCreditMemo)
 BEGIN 
 	-- Compute the Cost Value 
 	SET	@dblCostValue = 

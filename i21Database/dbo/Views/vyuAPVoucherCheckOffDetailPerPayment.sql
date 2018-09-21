@@ -50,7 +50,7 @@ SELECT
 								,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 								,TC.strTaxCode
 								,TC.strDescription AS strTaxCodeDesc
-								,EL.strCounty
+								,TC.strCounty
 								,APBDT.strCalculationMethod
 								,APBDT.dblRate AS dblTaxRate
 								,APBDT.dblTax AS dblTaxAmount
@@ -198,7 +198,7 @@ SELECT
 								,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 								,TC.strTaxCode
 								,TC.strDescription AS strTaxCodeDesc
-								,EL.strCounty
+								,TC.strCounty
 								,APBDT.strCalculationMethod
 								,APBDT.dblRate AS dblTaxRate
 								,APBDT.dblTax AS dblTaxAmount

@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Canadian Storage Receipt' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Ticket Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Unpost' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Card Fueling'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4397,23 +4397,29 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Usage Ale
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.UsageExceptionAlert', intSort = 6 WHERE strMenuName = 'Usage Alert' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Unpost' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Batch Unpost', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Batch Unpost', N'Maintenance', N'Screen', N'CardFueling.view.BatchUnpost', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.BatchUnpost', intSort = 0 WHERE strMenuName = 'Batch Unpost' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Card Accounts', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Card Accounts', N'Maintenance', N'Screen', N'CardFueling.view.Account?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Card Accounts', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Card Accounts', N'Maintenance', N'Screen', N'CardFueling.view.Account?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Account?showSearch=true', intSort = 0 WHERE strMenuName = 'Card Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Account?showSearch=true', intSort = 1 WHERE strMenuName = 'Card Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Group Adjustment Rates' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Group Adjustment Rates', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Group Adjustment Rates', N'Maintenance', N'Screen', N'CardFueling.view.SiteGroupPriceAdjustment?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Group Adjustment Rates', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Group Adjustment Rates', N'Maintenance', N'Screen', N'CardFueling.view.SiteGroupPriceAdjustment?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.SiteGroupPriceAdjustment?showSearch=true', intSort = 1 WHERE strMenuName = 'Group Adjustment Rates' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.SiteGroupPriceAdjustment?showSearch=true', intSort = 2 WHERE strMenuName = 'Group Adjustment Rates' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Setup', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'CardFueling.view.Maintenance', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Setup', N'Card Fueling', @CardFuelingMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'CardFueling.view.Maintenance', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Maintenance', intSort = 2 WHERE strMenuName = 'Setup' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Maintenance', intSort = 3 WHERE strMenuName = 'Setup' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Summary By Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 

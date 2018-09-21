@@ -10,7 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-SELECT 
+SELECT DISTINCT
 	A.intBillId
 	,B.intScaleTicketId 
 	,C.strTicketNumber

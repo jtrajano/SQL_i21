@@ -139,7 +139,7 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= NULL
+    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[ysnForValidation]         = 1
@@ -253,7 +253,7 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= NULL
+    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[ysnForValidation]         = 0

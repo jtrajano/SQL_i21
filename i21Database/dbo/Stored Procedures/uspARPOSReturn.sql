@@ -4,6 +4,7 @@
 	@strMessage AS VARCHAR(50) OUTPUT 
 AS
 	DECLARE	@ysnReturned AS BIT = 0,
+			@intSourceId AS INT = 0,
 			@DateOnly	 AS DATETIME = CAST(GETDATE() AS DATE),
 			@EntriesForCreditMemo AS InvoiceIntegrationStagingTable,
 			@LineItemTaxes AS LineItemTaxDetailStagingTable,
@@ -16,7 +17,7 @@ AS
 			@intCompanyLocationId AS INT,
 			@strPOSPaymentMethod AS VARCHAR(50)
 
-	SELECT @ysnReturned = ysnReturned
+	SELECT @ysnReturned = ysnReturned, @intSourceId = intSourceId
 	FROM tblARInvoice
 	WHERE intInvoiceId = @intInvoiceId
 
@@ -160,8 +161,8 @@ AS
 		SELECT
 			[strTransactionType]					= 'Credit Memo'
 			,[strType]								= 'POS'
-			,[strSourceTransaction]					= 'Direct'--'Invoice'
-			,[intSourceId]							= NULL--ARI.[intInvoiceId] 
+			,[strSourceTransaction]					= 'POS'--'Invoice'
+			,[intSourceId]							= @intSourceId 
 			,[strSourceId]							= ARI.[strInvoiceNumber]
 			,[intInvoiceId]							= NULL
 			,[intEntityCustomerId]					= ARI.[intEntityCustomerId]

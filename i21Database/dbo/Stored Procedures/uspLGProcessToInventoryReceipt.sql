@@ -881,7 +881,7 @@ BEGIN TRY
 						WHERE LOD.intLoadId = L.intLoadId
 						)
 					) * LD.dblQuantity, 2)
-			,CV.intItemUOMId
+			,CV.intPriceItemUOMId
 			,CD.intContractHeaderId
 			,LD.intPContractDetailId
 			,1 ysnAccrue
@@ -922,7 +922,7 @@ BEGIN TRY
 			,CV.strCostMethod
 			,CV.[dblShipmentUnitPrice]
 			,CV.[dblTotal]
-			,CV.intItemUOMId
+			,CV.intPriceItemUOMId
 			,CD.intContractHeaderId
 			,LD.intPContractDetailId
 			,CV.intCurrencyId

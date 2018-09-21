@@ -7,7 +7,7 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strUserName NVARCHAR(40)
+	--DECLARE @strUserName NVARCHAR(40)
 	DECLARE @strType NVARCHAR(100)
 	DECLARE @intTransactionTypeId AS INT
 	DECLARE @ItemCostingTableType AS ItemCostingTableType
@@ -16,9 +16,9 @@ BEGIN TRY
 	FROM dbo.tblICInventoryTransactionType
 	WHERE strName = 'Inventory Adjustment - Quantity Change'
 
-	SELECT @strUserName=strUserName
-	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @intUserId
+	-- SELECT @strUserName=strUserName
+	-- FROM tblSMUserSecurity
+	-- WHERE [intEntityId] = @intUserId
 
 	SELECT @strType= CASE 
 							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
@@ -45,6 +45,7 @@ BEGIN TRY
 			,[dblPaidAmount]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 		)
 		SELECT 
 			 [intConcurrencyId] = 1
@@ -56,7 +57,8 @@ BEGIN TRY
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Inventory Shipment'
-			,[strUserName] = @strUserName
+			,[strUserName] = NULL
+			,[intUserId] = @intUserId
 		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
@@ -117,6 +119,7 @@ BEGIN TRY
 			,[dblPaidAmount]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 		)
 		SELECT 
 			 [intConcurrencyId] = 1
@@ -128,7 +131,8 @@ BEGIN TRY
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Scale'
-			,[strUserName] = @strUserName
+			,[strUserName] = NULL
+			,[intUserId] = @intUserId
 		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
@@ -189,6 +193,7 @@ BEGIN TRY
 			,[dblPaidAmount]
 			,[strType]
 			,[strUserName]
+			,[intUserId]
 		)
 		SELECT 
 			 [intConcurrencyId] = 1
@@ -200,7 +205,8 @@ BEGIN TRY
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Invoice'
-			,[strUserName] = @strUserName
+			,[strUserName] = NULL
+			,[intUserId] = @intUserId
 		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 

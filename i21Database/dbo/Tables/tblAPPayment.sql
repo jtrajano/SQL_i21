@@ -77,3 +77,30 @@ GO
 CREATE STATISTICS [ST_rptAging_6] ON [dbo].[tblAPPayment]([ysnPosted], [strPaymentRecordNum], [intEntityVendorId])
 GO
 CREATE STATISTICS [ST_rptAging_7] ON [dbo].[tblAPPayment]([dtmDatePaid], [ysnPrepay])
+GO
+CREATE TRIGGER [dbo].[trg_tblAPPayment]
+ON [dbo].[tblAPPayment]
+INSTEAD OF DELETE 
+AS
+
+BEGIN
+	DECLARE @paymentRecord NVARCHAR(50);
+	DECLARE @paymentId INT;
+	DECLARE @error NVARCHAR(500);
+	SELECT TOP 1 @paymentRecord = del.strPaymentRecordNum, @paymentId = del.intPaymentId FROM tblGLDetail glDetail
+					INNER JOIN DELETED del ON glDetail.strTransactionId = del.strPaymentRecordNum AND glDetail.intTransactionId = del.intPaymentId
+				WHERE glDetail.ysnIsUnposted = 0
+
+	IF @paymentId > 0
+	BEGIN
+		SET @error = 'You cannot delete posted Payment (' + @paymentRecord + ')';
+		RAISERROR(@error, 16, 1);
+	END
+	ELSE
+	BEGIN
+		DELETE A
+		FROM [tblAPPayment] A
+		INNER JOIN DELETED B ON A.intPaymentId = B.intPaymentId
+	END
+END
+GO

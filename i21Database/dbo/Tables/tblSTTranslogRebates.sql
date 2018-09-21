@@ -148,5 +148,7 @@
 	[intStoreId] int NOT NULL,
 	[intCheckoutId] int NOT NULL,
 	[ysnSubmitted] bit NOT NULL,
+	[ysnPMMSubmitted] BIT NOT NULL DEFAULT ((0)),
+	[ysnRJRSubmitted] BIT NOT NULL DEFAULT ((0)),
 	[intConcurrencyId] int NOT NULL,
 )

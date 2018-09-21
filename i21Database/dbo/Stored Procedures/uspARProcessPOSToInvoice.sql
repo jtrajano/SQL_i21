@@ -115,7 +115,7 @@ SELECT
 	 [strTransactionType]					= @strTransactionType
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
-	,[intSourceId]							= POS.intPOSId
+	,[intSourceId]							= @intPOSId
 	,[strSourceId]							= POS.strReceiptNumber
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
@@ -150,7 +150,7 @@ SELECT TOP 1
 	 [strTransactionType]					= @strTransactionType
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
-	,[intSourceId]							= POS.intPOSId
+	,[intSourceId]							= @intPOSId
 	,[strSourceId]							= POS.strReceiptNumber
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
