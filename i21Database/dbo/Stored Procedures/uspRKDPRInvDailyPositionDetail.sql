@@ -260,7 +260,7 @@ JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 left join tblSCTicket t on t.intTicketId=gh.intTicketId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V'
-and convert(DATETIME, CONVERT(VARCHAR(10), dtmDistributionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
 and isnull(a.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(a.intEntityId,0) else @intVendorId end
 
@@ -310,7 +310,7 @@ JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0
-and convert(DATETIME, CONVERT(VARCHAR(10), dtmDistributionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
 and isnull(a.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(a.intEntityId,0) else @intVendorId end)t
 
@@ -345,7 +345,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY sh.intStorageHistoryId ORDER BY intStorag
  	,c1.strScheduleId,
  	isnull(ysnExternal,0) as ysnExternal,
 	i.intItemId,  	 
-	sh.dtmDistributionDate,r.intInventoryReceiptId, r.strReceiptNumber
+	sh.dtmHistoryDate as dtmDistributionDate,r.intInventoryReceiptId, r.strReceiptNumber
 FROM tblICInventoryReceipt r
 JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 JOIN tblSCTicket sc on sc.intTicketId = ri.intSourceId
@@ -357,7 +357,7 @@ JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId and b
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId
-and convert(DATETIME, CONVERT(VARCHAR(10), dtmDistributionDate, 110), 110)  <= convert(datetime,@dtmToDate) and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
+and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)  <= convert(datetime,@dtmToDate) and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
 and isnull(strTicketStatus,'') <> 'V'
 and isnull(a.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(a.intEntityId,0) else @intVendorId end
 	) a WHERE a.intRowNum =1 
