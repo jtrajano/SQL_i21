@@ -30,7 +30,7 @@ SELECT DISTINCT strCommodityCode
 			,0 as intConcurrencyId,
 			i.strMarketValuation
 		FROM tblCTContractHeader ch 
-		join tblCTContractDetail  cd on ch.intContractHeaderId=cd.intContractHeaderId
+		JOIN tblCTContractDetail  cd on ch.intContractHeaderId=cd.intContractHeaderId
 		LEFT join tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 		LEFT join tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId
 		LEFT join tblICCommodity c on c.intCommodityId=ch.intCommodityId
@@ -142,5 +142,5 @@ SELECT DISTINCT strCommodityCode
 			LEFT JOIN tblICCommodity c on c.intCommodityId=ch.intCommodityId
 			LEFT JOIN tblSMCompanyLocation			cl	ON	cl.intCompanyLocationId		=	cd.intCompanyLocationId
 			LEFT JOIN	tblARMarketZone					mz	ON	mz.intMarketZoneId			=	cd.intMarketZoneId
-			WHERE (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) and strContractType <> 'Sale'  and cd.intContractStatusId <> 3
+			WHERE (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) 
 			   and i.strLotTracking = case when (select top 1 strRiskView from tblRKCompanyPreference) = 'Processor' then i.strLotTracking else 'No' end
