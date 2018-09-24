@@ -331,7 +331,7 @@ BEGIN
 			,CH.strContractNumber
 			,CH.dtmContractDate
 			,CH.strCustomerContract
-			,CONVERT(NVARCHAR, CD.dtmStartDate, 106) + CONVERT(NVARCHAR, CD.dtmEndDate, 106) AS strShipmentPeriod
+			,CONVERT(NVARCHAR, CD.dtmStartDate, 106) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, 106) AS strShipmentPeriod
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription
 			,FLNP.strText AS strFirstNotifyText
@@ -896,6 +896,7 @@ BEGIN
 				ELSE 'false'
 				END ysnFullHeaderLogo
 			,@strDocuments strDocuments
+			,'N/A' AS strAgentReference
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
