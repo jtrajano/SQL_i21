@@ -202,6 +202,10 @@ BEGIN
 		,@strContractConditions strCondition
 		,Inv.dtmDate AS dtmInvoiceDate
 		,@strPaymentInfo strInvoicePaymentInformation
+		,(SELECT TOP 1 I.strDescription 
+		  FROM tblARInvoiceDetail ID
+		  JOIN tblICItem I ON I.intItemId = ID.intItemId
+		  WHERE intInvoiceId = Inv.intInvoiceId AND I.strType = 'Comment') AS strWarehouseCondition
 	FROM tblARInvoice Inv
 	JOIN tblEMEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer CUS ON CUS.intEntityId = EN.intEntityId

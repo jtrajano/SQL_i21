@@ -130,11 +130,7 @@ BEGIN
 					SELECT DOC.strDocumentName
 					FROM tblLGLoadDocuments D
 					JOIN tblICDocument DOC ON DOC.intDocumentId = D.intDocumentId
-					WHERE intLoadId = (
-							SELECT intLoadId
-							FROM tblLGLoad
-							WHERE strLoadNumber = 'LS-44'
-							)
+					WHERE intLoadId = @intLoadId
 					) BD
 				FOR XML PATH('')
 					,TYPE
