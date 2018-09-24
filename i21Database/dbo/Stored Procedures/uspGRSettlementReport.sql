@@ -1492,7 +1492,7 @@ BEGIN
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
