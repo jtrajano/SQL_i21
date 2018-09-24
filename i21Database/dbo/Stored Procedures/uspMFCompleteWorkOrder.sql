@@ -105,7 +105,11 @@ BEGIN TRY
 		,@intWorkOrderProducedLotParentId INT
 		,@intBiProductLotId INT
 		,@ysnCPMergeOnMove BIT
-		,@intTargetItemId int
+		,@intTargetItemId INT
+		,@intWOItemUOMId INT
+		,@dblPhysicalCount1 NUMERIC(38, 20)
+		,@intUnitMeasureId INT
+		,@intWOActualItemUOMId INT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intId INT identity(1, 1)
 		,intItemId INT
@@ -280,7 +284,8 @@ BEGIN TRY
 		AND @ysnMergeOnMove = 1
 		AND @ysnCPMergeOnMove = 1
 	BEGIN
-		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
+		SELECT @strOutputLotNumber = strLotNumber
+			,@intParentLotId = intParentLotId
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
@@ -288,9 +293,9 @@ BEGIN TRY
 			AND intLotStatusId = @intLotStatusId
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 
-		Select @strParentLotNumber=strParentLotNumber
-		From tblICParentLot
-		Where intParentLotId=@intParentLotId
+		SELECT @strParentLotNumber = strParentLotNumber
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
 	END
 	ELSE IF EXISTS (
 			SELECT *
@@ -754,7 +759,8 @@ BEGIN TRY
 		SELECT @ysnPostProduction = 0
 	END
 
-	SELECT @intRecipeTypeId = intRecipeTypeId,@intTargetItemId=intItemId
+	SELECT @intRecipeTypeId = intRecipeTypeId
+		,@intTargetItemId = intItemId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -771,7 +777,6 @@ BEGIN TRY
 			DECLARE @intRecipeId INT
 				,@intRecipeItemId INT
 				,@intRecipeItemUOMId INT
-				,@intUnitMeasureId INT
 				,@intInputItemUOMId2 INT
 
 			SELECT @intRecipeId = intRecipeId
@@ -933,24 +938,39 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			SELECT @intWOItemUOMId = intItemUOMId
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			SELECT @intUnitMeasureId = intUnitMeasureId
+			FROM tblICItemUOM
+			WHERE intItemUOMId = @intWOItemUOMId
+
+			SELECT @intWOActualItemUOMId = intItemUOMId
+			FROM dbo.tblICItemUOM IU
+			WHERE IU.intItemId = @intItemId
+				AND IU.intUnitMeasureId = @intUnitMeasureId
+
+			SELECT @dblPhysicalCount1 = dbo.fnMFConvertQuantityToTargetItemUOM(@intPhysicalItemUOMId, @intWOActualItemUOMId, @dblPhysicalCount)
+
 			IF @ysnFillPartialPallet = 1
 			BEGIN
 				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 					,@dblProduceQty = 0
-					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@intProduceUOMId = @intWOItemUOMId
 					,@intBatchId = @intBatchId
 					,@intUserId = @intUserId
 					,@dblUnitQty = @dblUnitQty
 					,@ysnProducedQtyByWeight = 0
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
-					,@dblProducePartialQty = @dblPhysicalCount
+					,@dblProducePartialQty = @dblPhysicalCount1
 					,@intMachineId = @intMachineId
 			END
 			ELSE
 			BEGIN
 				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-					,@dblProduceQty = @dblPhysicalCount
-					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@dblProduceQty = @dblPhysicalCount1
+					,@intProduceUOMId = @intWOItemUOMId
 					,@intBatchId = @intBatchId
 					,@intUserId = @intUserId
 					,@dblUnitQty = @dblUnitQty
@@ -961,8 +981,8 @@ BEGIN TRY
 			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-				,@dblProduceQty = @dblPhysicalCount
-				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@dblProduceQty = @dblPhysicalCount1
+				,@intProduceUOMKey = @intWOItemUOMId
 				,@intUserId = @intUserId
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
@@ -1179,7 +1199,8 @@ BEGIN TRY
 				SELECT @strAutoProduceBiProducts = 'False'
 			END
 
-			IF @strAutoProduceBiProducts = 'True' and @intTargetItemId=@intItemId
+			IF @strAutoProduceBiProducts = 'True'
+				AND @intTargetItemId = @intItemId
 			BEGIN
 				INSERT INTO @tblMFWorkOrderRecipeItem (
 					intItemId
@@ -1194,7 +1215,7 @@ BEGIN TRY
 				FROM tblMFWorkOrderRecipeItem
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intRecipeItemTypeId = 2
-					AND intItemId <>@intTargetItemId
+					AND intItemId <> @intTargetItemId
 
 				SELECT @dblQuantity = dblQuantity
 				FROM tblMFWorkOrderRecipeItem
@@ -1213,13 +1234,13 @@ BEGIN TRY
 						,@intBiProductItemUOMId = NULL
 						,@dblBiProductQuantity = NULL
 						,@strRetBatchId = NULL
-						,@ysnConsumptionRequired=NULL
-						,@ysnPostProduction=1
+						,@ysnConsumptionRequired = NULL
+						,@ysnPostProduction = 1
 
 					SELECT @intBiProductItemId = intItemId
 						,@intBiProductItemUOMId = intItemUOMId
 						,@dblBiProductQuantity = dblQuantity
-						,@ysnConsumptionRequired=ysnConsumptionRequired
+						,@ysnConsumptionRequired = ysnConsumptionRequired
 					FROM @tblMFWorkOrderRecipeItem
 					WHERE intId = @intId
 
@@ -1250,7 +1271,8 @@ BEGIN TRY
 
 					SELECT @dblBiProductQty = (@dblProduceQty / @dblQuantity) * @dblBiProductQuantity
 
-					IF @strInstantConsumption = 'True' and @ysnConsumptionRequired=1
+					IF @strInstantConsumption = 'True'
+						AND @ysnConsumptionRequired = 1
 					BEGIN
 						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 							,@dblProduceQty = @dblBiProductQty
@@ -1274,7 +1296,7 @@ BEGIN TRY
 							,@ysnRecap = @ysnRecap
 							,@dtmDate = @dtmPlannedDate
 
-							select @ysnPostProduction=0
+						SELECT @ysnPostProduction = 0
 					END
 
 					EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
