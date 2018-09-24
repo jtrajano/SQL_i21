@@ -301,19 +301,8 @@ BEGIN TRY
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 =  'Success'
 				,intDiscountCalculationOptionId  =  @intDiscountCalculationOptionId
@@ -365,18 +354,8 @@ BEGIN TRY
 															END
 													END
 				,dblShrink						 = CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  
-															THEN 
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100 
-																	ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100
-																ELSE dblShrink 
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
@@ -415,19 +394,8 @@ BEGIN TRY
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
@@ -479,19 +447,8 @@ BEGIN TRY
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 

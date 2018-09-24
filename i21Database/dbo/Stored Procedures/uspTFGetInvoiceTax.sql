@@ -478,7 +478,7 @@ BEGIN TRY
 				DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
 					SELECT DISTINCT InvTran.intInvoiceDetailId 
 					FROM @tmpInvoiceTransaction InvTran
-					INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId
+					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId
 					WHERE tblARInvoiceDetailTax.intTaxCodeId IS NULL	
 				)
 			END
@@ -517,30 +517,29 @@ BEGIN TRY
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
 			BEGIN 	
-				DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
+				DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId NOT IN (
 					SELECT DISTINCT InvTran.intInvoiceDetailId
 					FROM @tmpInvoiceTransaction InvTran
 						INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId 
 						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 						INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 						INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
-						INNER JOIN tblTFReportingComponent ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
-						WHERE tblTFReportingComponent.intReportingComponentId = @RCId AND ISNULL(tblARInvoiceDetailTax.dblTax, 0) = 0
+						WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId AND ISNULL(tblARInvoiceDetailTax.dblTax, 0) <> 0
 					)
 			END
 
 		END
-		ELSE
-		BEGIN
-			-- NO TAX CRITERIA SETUP
-			-- REMOVE ALL INVOICE WITH ZERO TAX
-			DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
-				SELECT DISTINCT InvTran.intInvoiceDetailId 
-				FROM @tmpInvoiceTransaction InvTran
-					INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId 
-				WHERE ISNULL(tblARInvoiceDetailTax.dblTax, 0) = 0
-			)
-		END
+		--ELSE
+		--BEGIN
+		--	-- NO TAX CRITERIA SETUP
+		--	-- REMOVE ALL INVOICE WITH ZERO TAX
+		--	DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
+		--		SELECT DISTINCT InvTran.intInvoiceDetailId 
+		--		FROM @tmpInvoiceTransaction InvTran
+		--			INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId 
+		--		WHERE ISNULL(tblARInvoiceDetailTax.dblTax, 0) = 0
+		--	)
+		--END
 				
 		--INVENTORY TRANSFER - Track MFT Activity
 		INSERT INTO @tmpInvoiceTransaction(intId
