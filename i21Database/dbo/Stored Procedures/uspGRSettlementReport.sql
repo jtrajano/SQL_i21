@@ -589,7 +589,6 @@ BEGIN
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
-	JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -662,6 +661,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
 	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -785,8 +785,7 @@ BEGIN
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-	JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
-	JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
+	JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL	
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -879,6 +878,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
 	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -1288,8 +1288,7 @@ BEGIN
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
+			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -1369,6 +1368,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -1492,7 +1492,6 @@ BEGIN
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -1585,6 +1584,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
