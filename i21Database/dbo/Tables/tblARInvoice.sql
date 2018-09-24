@@ -204,13 +204,8 @@ BEGIN
 		IF EXISTS (SELECT NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceNumber)
 			BEGIN
 				SET @InvoiceNumber = NULL
-				DECLARE @intStartIndex INT = 4
-				IF (@strTransactionType = 'Prepayment' OR @strTransactionType = 'Customer Prepayment') OR @strTransactionType = 'Overpayment'
-					SET @intStartIndex = 5
 				
-				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strInvoiceNumber, @intStartIndex, 10))) FROM tblARInvoice WHERE strTransactionType = @strTransactionType
-
-				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = @intStartingNumberId
+				UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 
