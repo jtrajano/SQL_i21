@@ -44,8 +44,9 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 									THEN CONSUMPTIONSITE.strLocationName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
 								  END
-	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	 , blbLogo					= LOGO.blbLogo
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
+INNER JOIN tblARInvoiceReportStagingTable STAGING ON STAGING.intInvoiceId = INV.intInvoiceId
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , intInvoiceDetailId   = ID.intInvoiceDetailId
@@ -168,3 +169,8 @@ OUTER APPLY (
 	WHERE intInvoiceId = INVOICEDETAIL.intInvoiceId 
 	  AND ISNULL(ID.intSiteId, 0) <> 0
 ) CONSUMPTIONSITE
+OUTER APPLY (
+	SELECT blbLogo = blbFile 
+	FROM tblSMUpload 
+	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
+) LOGO
