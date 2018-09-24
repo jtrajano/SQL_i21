@@ -4,7 +4,3 @@ BEGIN
   exec sp_executesql N'UPDATE  tblCTCleanCost SET intShipmentId = NULL 
   WHERE intShipmentId NOT IN (SELECT intLoadDetailId from tblLGLoadDetail)'
 END
-GO
- exec sp_executesql N'UPDATE tblCTContractPlan SET intWeightId = NULL WHERE intWeightId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
- exec sp_executesql N'UPDATE tblCTContractPlan SET intGradeId = NULL WHERE intGradeId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
-GO
