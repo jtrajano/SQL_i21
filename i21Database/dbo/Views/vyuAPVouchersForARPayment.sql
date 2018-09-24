@@ -61,7 +61,7 @@ SELECT
 		INNER JOIN
 			tblEMEntityType EMET
 				ON APB.[intEntityVendorId] = EMET.[intEntityId]
-				AND EMET.[strType] = 'Customer'	
+				AND EMET.[strType] = 'Vendor'	
 		INNER JOIN
 			(SELECT 				
 				[intEntityId],

@@ -2082,10 +2082,11 @@ ORDER BY
 SELECT  
 	CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum
 	,*
-	,dblResult = (dblMarketPrice - dblContractPrice) * (dblPricedQty + dblUnPricedQty)
-	,dblMarketFuturesResult = (dblFuturePrice - dblFutures) * (dblPricedQty + dblUnPricedQty)
+	,dblResult = (dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
+	,dblMarketFuturesResult = (dblFuturePrice - dblFutures) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
 	,dblResultRatio =  CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL THEN  
-							((dblMarketPrice - dblContractPrice) * (dblPricedQty + dblUnPricedQty)) - ((dblFuturePrice - dblFutures) * (dblPricedQty + dblUnPricedQty)) - dblResultBasis 
+							((dblMarketPrice - dblContractPrice) * dblOpenQty) -- (dblPricedQty + dblUnPricedQty)
+							- ((dblFuturePrice - dblFutures) * dblOpenQty) - dblResultBasis --(dblPricedQty + dblUnPricedQty)
 						ELSE 
 							0 
 					END

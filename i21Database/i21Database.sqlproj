@@ -186,6 +186,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
+	<Folder Include="Scripts\Post-Deployment\PAT\18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1266,6 +1267,7 @@
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
     <Build Include="dbo\Views\vyuEMSearch.sql" />
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
+    <Build Include="dbo\Views\vyuARCustomerVendorSearch.sql" />    
     <Build Include="dbo\Tables\tblEMEntityPortalPermission.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalMenu.sql" />
     <Build Include="dbo\Views\vyuEPContactMenu.sql" />
@@ -7052,6 +7054,28 @@
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
     <Build Include="dbo\Functions\fnGRCalculateDiscountandShrink.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessDeliverySheetSummaryToTicket.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqWashoutInfo.sql" />
+    <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\APPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFBatchUnpost.sql" />
+    <Build Include="dbo\Tables\tblCFBatchUnpostStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddVoucherDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeStagingTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucher.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherData.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailStagingPOTax.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTax.sql" />
+    <Build Include="dbo\Views\vyuEMEntityVendorSearch.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureMonthId.sql" />
+	  <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

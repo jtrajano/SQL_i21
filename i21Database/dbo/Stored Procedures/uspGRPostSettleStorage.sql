@@ -364,7 +364,7 @@ BEGIN TRY
 				,ContractEntityId    = CD.intEntityId
 				,dblCashPrice		 = CD.dblCashPrice
 				,intPricingTypeId    = CD.intPricingTypeId
-				,dblBasis			 = CD.dblBasisInCommodityStockUOM
+				,dblBasis			 = CD.dblBasisInItemStockUOM
 				,intContractUOMId	 = CD.intContractUOMId
 				,dblCostUnitQty		 = CD.dblCostUnitQty
 			FROM tblGRSettleContract SSC
@@ -1259,7 +1259,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId,'AP Clearing')
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,ItemLocation.intItemLocationId,'AP Clearing')
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
@@ -1297,9 +1297,11 @@ BEGIN TRY
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
+				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
-					AND SST.intSettleStorageId = @intSettleStorageId 
+					AND SST.intSettleStorageId = @intSettleStorageId
+					AND ItemLocation.intLocationId = @LocationId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.
@@ -1403,7 +1405,7 @@ BEGIN TRY
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
 				 ,[intItemId]			  = CC.[intItemId]
-				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,@LocationId,'Other Charge Expense')
+				 ,[intAccountId]		  = [dbo].[fnGetItemGLAccount](CC.intItemId,ItemLocation.intItemLocationId,'Other Charge Expense')
 				 ,[dblQtyReceived]		  = CASE 
 												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
 												ELSE SV.dblUnits 
@@ -1462,6 +1464,8 @@ BEGIN TRY
 					ON Item.intItemId = CC.intItemId
 				 LEFT JOIN tblICItemUOM UOM 
 					ON UOM.intItemUOMId = CC.intItemUOMId
+				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
+				 WHERE ItemLocation.intLocationId = @LocationId
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0

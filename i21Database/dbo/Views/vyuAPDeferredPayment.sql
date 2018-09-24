@@ -20,7 +20,8 @@ SELECT DISTINCT
 	ysnSelected,
 	str1099Form,
 	str1099Type,
-	intDeferredPayableInterestId AS intDeferredAccountId
+	intDeferredPayableInterestId AS intDeferredAccountId,
+	strCheckComment
 FROM (
 	SELECT
 		A.intBillId,
@@ -47,7 +48,8 @@ FROM (
 		B.str1099Form,
 		B.str1099Type,
 		deferredInterest.dblMinimum,
-		loc.intDeferredPayableInterestId
+		loc.intDeferredPayableInterestId,
+		deferredInterest.strCheckComment
 	FROM tblAPBill A
 	INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
 	INNER JOIN tblAPVendor C ON B.intEntityId = C.intEntityId

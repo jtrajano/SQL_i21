@@ -29,6 +29,14 @@ SELECT TOP 100 PERCENT
     ,ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0) AS dblDiscountUnPaid
     ,ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0) AS dblStorageUnPaid
     ,IR.strReceiptNumber
+    ,CAST(
+        CASE 
+            WHEN DS.ysnPost = 1 THEN 1
+            WHEN CS.intTicketId IS NOT NULL THEN 1
+            ELSE 0
+        END
+        AS BIT
+    ) AS ysnReadyForTransfer
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -61,5 +69,4 @@ LEFT JOIN tblSCDeliverySheet DS
 WHERE CS.dblOpenBalance > 0 
     AND ISNULL(CS.strStorageType,'') <> 'ITR'
     AND SH.strType IN ('From Scale','From Transfer','From Delivery Sheet')
-    AND (DS.ysnPost = 1 OR CS.intTicketId IS NOT NULL)
 ORDER BY CS.dtmDeliveryDate

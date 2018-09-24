@@ -11,7 +11,7 @@
  cfTrans.intSiteId,
  cfTrans.intNetworkId,
  cfTrans.dtmTransactionDate,
- cfAccount.intCustomerId,
+ cfTrans.intCustomerId,
  cfTrans.dblCalculatedTotalPrice AS dblTotalAmount,
  cfTrans.strPriceMethod,
  cfNetwork.strNetwork

@@ -30,6 +30,9 @@ BEGIN
 	,@dblUnits						DECIMAL(24,10)
 	,@intContractCostId				INT
 	,@ysnIsStorage					BIT
+	,@IntCommodityId				INT
+	,@intStorageChargeItemId		INT
+	,@StorageChargeItemDescription  NVARCHAR(100)
 
 	DECLARE 
 	 @ACCOUNT_CATEGORY_Inventory		   NVARCHAR(30) = 'Inventory'
@@ -42,9 +45,29 @@ BEGIN
 	,@strTransactionId                     NVARCHAR(30)
 
 	SELECT @strTransactionId = strStorageTicket 
+	      ,@IntCommodityId   = intCommodityId	 
 	FROM tblGRSettleStorage 
 	WHERE intSettleStorageId = @intSettleStorageId
-	
+
+	SELECT TOP 1 @intStorageChargeItemId = intItemId
+	FROM tblICItem 
+	WHERE strType = 'Other Charge' 
+	  AND strCostType = 'Storage Charge' 
+	  AND intCommodityId = @IntCommodityId
+
+	IF @intStorageChargeItemId IS NULL
+	BEGIN
+		SELECT TOP 1 @intStorageChargeItemId = intItemId
+		FROM tblICItem
+		WHERE strType = 'Other Charge' 
+			AND strCostType = 'Storage Charge' 
+			AND intCommodityId IS NULL
+	END
+
+	SELECT @StorageChargeItemDescription = strDescription
+	FROM tblICItem
+	WHERE intItemId = @intStorageChargeItemId
+		
 	DECLARE @ItemGLAccounts			AS dbo.ItemGLAccount;
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;
 	DECLARE @ChargesGLEntries		AS RecapTableType;
@@ -344,7 +367,36 @@ BEGIN
 		AND RE.intContractDetailId IS NOT NULL  
 		AND ContractCost.dblRate != 0 
 		AND SST.intSettleStorageId = @intSettleStorageId
-			
+	
+	----Storage Charge
+    
+	UNION
+
+	SELECT
+		 intItemId							= @intStorageChargeItemId
+		,[strItemNo]						= @StorageChargeItemDescription	
+		,[intEntityVendorId]				= NULL	
+		,[intCurrencyId]  					= @intCurrencyId
+		,[intCostCurrencyId]  				= @intCurrencyId
+		,[intChargeId]						= @intStorageChargeItemId
+		,[intForexRateTypeId]				= NULL
+		,[dblForexRate]						= NULL
+		,[ysnInventoryCost]					= IC.ysnInventoryCost
+		,[strCostMethod]					= IC.strCostMethod
+		,[dblRate]							= SS.dblStorageDue / @dblUnits
+		,[intOtherChargeEntityVendorId]		= NULL
+		,[dblAmount]						= SS.dblStorageDue
+		,[intContractDetailId]				= NULL
+		,[ysnAccrue]						= 0
+		,[ysnPrice]							= 1
+		,[intTicketDiscountId]				= NULL
+		,[intContractCostId]				= NULL
+		,[dblUnits]							= @dblUnits
+	FROM tblGRSettleStorage SS
+	JOIN tblICItem IC ON 1 = 1
+	WHERE SS.intSettleStorageId = @intSettleStorageId 
+	AND   ISNULL(SS.dblStorageDue,0) > 0 
+	AND   IC.intItemId = @intStorageChargeItemId 	
 	
 	DECLARE @tblItem AS TABLE 
 	(
@@ -483,6 +535,22 @@ BEGIN
 		ON ItemLocation.intItemId = Dcode.intItemId 
 			AND ItemLocation.intLocationId = @LocationId
 	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+
+	UNION
+	--Storage Charge
+	SELECT  
+		 intItemId					= @intStorageChargeItemId
+		,intItemLocationId			= ItemLocation.intItemLocationId
+		,intItemType				=  2
+	
+	FROM tblGRSettleStorage SS
+	JOIN tblICItem IC ON 1 = 1
+	LEFT JOIN tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = IC.intItemId
+			AND ItemLocation.intLocationId = @LocationId 
+	WHERE SS.intSettleStorageId = @intSettleStorageId 
+	AND   ISNULL(SS.dblStorageDue,0) > 0 
+	AND   IC.intItemId = @intStorageChargeItemId
 
 	UNION
 	--Freight

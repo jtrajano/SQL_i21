@@ -6,9 +6,15 @@ RETURNS TABLE AS RETURN
 (
 	SELECT
 		[intEntityVendorId]					=	A.intEntityVendorId
-		,[intLocationId]					=	A.intShipToId
+		,[intTransactionType]				=	1 --voucher
+		,[intLocationId]					=	A.intLocationId
+		,[intShipToId]						=	A.intShipToId
+		,[intShipFromId]					=	A.intShipFromId
+		,[intShipFromEntityId]				=	A.intEntityVendorId
+		,[intPayToAddressId]				=	A.intShipFromId
 		,[intCurrencyId]					=	A.intCurrencyId
 		,[dtmDate]							=	A.dtmDate
+		,[strVendorOrderNumber]				=	A.strPurchaseOrderNumber
 		,[strReference]						=	A.strReference
 		,[strSourceNumber]					=	A.strPurchaseOrderNumber
 		,[intPurchaseDetailId]				=	B.intPurchaseDetailId

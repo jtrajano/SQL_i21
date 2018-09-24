@@ -121,10 +121,13 @@ BEGIN TRY
 			END
 
 			SELECT @intContractHeaderId = intContractHeaderId
-				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
 			WHERE RIGHT('000000000000' + strContractNumber, 12) = @strRefNo
 				AND intContractTypeId = 1
+
+			SELECT TOP 1 @ysnMaxPrice = ysnMaxPrice
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
 
 			SELECT @intItemId = intItemId
 			FROM tblCTContractDetail
@@ -212,7 +215,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -254,10 +260,13 @@ BEGIN TRY
 			END
 
 			SELECT @intContractHeaderId = intContractHeaderId
-				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
 			WHERE RIGHT('000000000000' + strContractNumber, 12) = RIGHT('000000000000' + @strRefNo, 12)
 				AND intContractTypeId = 1
+
+			SELECT TOP 1 @ysnMaxPrice = ysnMaxPrice
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
 
 			SELECT @intItemId = intItemId
 			FROM tblCTContractDetail
@@ -307,6 +316,21 @@ BEGIN TRY
 						,'Ack Rcvd'
 						)
 
+				UPDATE tblCTContractFeed
+				SET strFeedStatus = 'Ack Rcvd'
+					,strMessage = 'Success'
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+					AND ISNULL(strRowState, '') = 'DELETE'
+					AND ISNULL(strERPPONumber, '') = @strParam
+
 				INSERT INTO @tblMessage (
 					strMessageType
 					,strMessage
@@ -321,7 +345,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -385,7 +412,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 

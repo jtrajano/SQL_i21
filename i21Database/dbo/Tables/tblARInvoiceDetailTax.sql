@@ -31,3 +31,14 @@
 	CONSTRAINT [FK_tblARInvoiceDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARInvoiceDetailTax_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )
+
+GO
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_intInvoiceDetailId] ON [dbo].[tblARInvoiceDetailTax] ([intInvoiceDetailId])
+GO
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_intTaxCodeId] ON [dbo].[tblARInvoiceDetailTax] ([intTaxCodeId])
+GO
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_dblTax] ON [dbo].[tblARInvoiceDetailTax] ([dblTax])
+GO

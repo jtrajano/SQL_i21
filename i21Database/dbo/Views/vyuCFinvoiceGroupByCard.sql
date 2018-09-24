@@ -1,9 +1,9 @@
 ﻿CREATE VIEW dbo.vyuCFinvoiceGroupByCard
 AS
-SELECT   strCardNumber, strItemNo, intAccountId, CONVERT(datetime, FLOOR(CONVERT(numeric(18, 6), dtmTransactionDate))) AS dtmFloorDate, MIN(dtmTransactionDate) 
+SELECT   strUserId,strCardNumber, strItemNo, intAccountId, CONVERT(datetime, FLOOR(CONVERT(numeric(18, 6), dtmTransactionDate))) AS dtmFloorDate, MIN(dtmTransactionDate) 
                          AS dtmMinDate
 FROM         dbo.tblCFInvoiceStagingTable AS t2
-GROUP BY intAccountId, strCardNumber, strItemNo, CONVERT(datetime, FLOOR(CONVERT(numeric(18, 6), dtmTransactionDate)))
+GROUP BY intAccountId, strCardNumber, strItemNo, CONVERT(datetime, FLOOR(CONVERT(numeric(18, 6), dtmTransactionDate))), strUserId
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 1, @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFinvoiceGroupByCard';
 

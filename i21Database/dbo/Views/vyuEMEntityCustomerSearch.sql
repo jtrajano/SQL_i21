@@ -1,4 +1,9 @@
-﻿CREATE VIEW [dbo].[vyuEMEntityCustomerSearch]
+﻿/*
+	DEVELOPER NOTE
+	- Any changes here in terms of column add - delete, please update (vyuEMEntityVendorSearch) as well
+	- if there is no way to get the same value, just put null or default value to the added column
+*/
+CREATE VIEW [dbo].[vyuEMEntityCustomerSearch]
 AS 
 SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId

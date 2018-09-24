@@ -8,7 +8,6 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
@@ -19,16 +18,101 @@ DECLARE @voucherIds AS Id;
 DECLARE @postBatchId NVARCHAR(40);
 DECLARE @postFailedCount INT = 0;
 DECLARE @postSuccess BIT = 0;
+DECLARE @vouchers TABLE(intBillId INT);
+DECLARE @voucherPayables AS VoucherPayable;
+DECLARE @SavePoint NVARCHAR(32) = 'uspAPCreateBasisAdvance';
 
 DECLARE @functionalCurrency INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference);
 DECLARE @rateType INT;
 DECLARE @rate DECIMAL(18,6);
 
+SELECT TOP 1
+    @rateType = A.intRateTypeId,
+    @rate = A.dblRate
+FROM tblAPBasisAdvanceDummyHeader A
+
 CREATE TABLE #tmpVoucherCreated(intBillId INT, intTicketId INT, intContractDetailId INT)
+
+INSERT INTO @voucherPayables(
+    intPartitionId,
+    intEntityVendorId,
+    intTransactionType,
+    intLocationId,
+    intCurrencyId,
+    intShipFromId,
+    intScaleTicketId,
+    intContractDetailId,
+    intContractHeaderId,
+    intContractSeqId,
+    intItemId,
+    dblOrderQty,
+    dblOrderUnitQty,
+    intOrderUOMId,
+    dblQuantityToBill,
+    dblQtyToBillUnitQty,
+    intQtyToBillUOMId,
+    dblExchangeRate,
+    intCurrencyExchangeRateTypeId,
+    dblCost,
+    -- dblContractCost,
+    intCostUOMId,
+    dblCostUnitQty,
+    dblBasis,
+    dblFutures,
+    dblPrepayPercentage,
+    intPrepayTypeId,
+    intStorageLocationId,
+    intAccountId
+)
+SELECT
+    intPartitionId				    = ROW_NUMBER() OVER(ORDER BY (SELECT 1)) --1 voucher per 1 payable
+    ,intEntityVendorId               = basisAdvance.intEntityId
+    ,intTransactionType             = 13
+    ,intLocationId                  = basisAdvance.intCompanyLocationId
+    ,intCurrencyId                  = basisAdvance.intCurrencyId
+    ,intShipFromId                  = basisAdvance.intShipFromId
+    ,intScaleTicketId               = basisAdvance.intTicketId
+    ,intContractDetailId            = basisAdvance.intContractDetailId
+    ,intContractHeaderId            = basisAdvance.intContractHeaderId
+    ,intContractSeqId               = basisAdvance.intContractSeq
+    ,intItemId                      = receiptItem.intItemId
+    ,dblOrderQty                    = receiptItem.dblOpenReceive
+    ,dblOrderUnitQty                = ISNULL(ItemUOM.dblUnitQty,1)
+    ,intOrderUOMId                  = receiptItem.intUnitMeasureId
+    ,dblQuantityToBill              = receiptItem.dblOpenReceive
+    ,dblQtyToBillUnitQty            = ISNULL(ItemUOM.dblUnitQty,1)
+    ,intQtyToBillUOMId              = receiptItem.intUnitMeasureId
+    ,dblExchangeRate                = @rate
+    ,intCurrencyExchangeRateTypeId  = @rateType
+    ,dblCost                        = basisAdvance.dblAmountToAdvance / basisAdvance.dblQuantity
+    -- ,dblContractCost                = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis
+    ,intCostUOMId                   = receiptItem.intUnitMeasureId
+    ,dblCostUnitQty                 = 1
+    ,dblBasis                       = basisAdvance.dblUnitBasis
+    ,dblFutures                     = basisAdvance.dblFuturesPrice
+    ,dblPrepayPercentage            = basisAdvance.dblPercentage
+    ,intPrepayTypeId                = 2
+    ,intStorageLocationId           = receiptItem.intStorageLocationId
+    ,intAccountId                   = loc.intAPAccount
+FROM tblAPBasisAdvanceStaging basisStaging
+INNER JOIN vyuAPBasisAdvance basisAdvance 
+    ON basisStaging.intTicketId = basisAdvance.intTicketId AND basisStaging.intContractDetailId = basisAdvance.intContractDetailId
+INNER JOIN tblICInventoryReceiptItem receiptItem
+    ON basisAdvance.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+INNER JOIN tblSMCompanyLocation loc ON basisAdvance.intCompanyLocationId = loc.intCompanyLocationId
+LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = receiptItem.intWeightUOMId
+LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = receiptItem.intCostUOMId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItem.intUnitMeasureId
+WHERE basisAdvance.dblAmountToAdvance > 0
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
+ELSE SAVE TRAN @SavePoint
 
+EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdBasisAdvance OUT
+
+INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdBasisAdvance)
+/*
 IF OBJECT_ID('tempdb..#tmpBillData') IS NOT NULL DROP TABLE #tmpBillData
 SELECT 
     [intTermsId]			=	A.[intTermsId],
@@ -340,11 +424,16 @@ INSERT INTO @voucherIds
 SELECT intBillId FROM #tmpVoucherCreated
 
 EXEC uspAPUpdateVoucherTotal @voucherIds
-
+*/
 --DELETE STAGING
 DELETE A
 FROM tblAPBasisAdvanceStaging A
-INNER JOIN #tmpVoucherCreated B ON A.intContractDetailId = B.intContractDetailId AND B.intTicketId = A.intTicketId
+--INNER JOIN #tmpVoucherCreated B ON A.intContractDetailId = B.intContractDetailId AND B.intTicketId = A.intTicketId
+INNER JOIN (@vouchers B INNER JOIN tblAPBill C 
+                            ON B.intBillId = C.intBillId
+                        INNER JOIN tblAPBillDetail D
+                            ON C.intBillId = D.intBillId)
+        ON D.intScaleTicketId = A.intTicketId AND D.intContractDetailId = A.intContractDetailId
 
 --tblAPBasisAdvanceFuture
 DELETE A
@@ -388,9 +477,9 @@ OUTER APPLY (
 ) ticketSelected
 WHERE ticketSelected.ysnSelected IS NULL
 
-SELECT @createdBasisAdvance = COALESCE(@createdBasisAdvance + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-FROM #tmpVoucherCreated
-ORDER BY intBillId
+-- SELECT @createdBasisAdvance = COALESCE(@createdBasisAdvance + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+-- FROM #tmpVoucherCreated
+-- ORDER BY intBillId
 
 EXEC uspAPPostVoucherPrepay 
     @post = 1,
@@ -408,7 +497,7 @@ BEGIN
     SET @batchIdUsed = @postBatchId;    
 END
 
-IF @transCount = 0 COMMIT TRANSACTION
+IF @transCount = 0 COMMIT TRANSACTION;
 
 END TRY
 BEGIN CATCH
@@ -431,7 +520,20 @@ BEGIN CATCH
     -- Not all errors generate an error state, to set to 1 if it's zero
     IF @ErrorState  = 0
     SET @ErrorState = 1
+
     -- If the error renders the transaction as uncommittable or we have open transactions, we may want to rollback
-    IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+    IF (XACT_STATE()) = -1
+    BEGIN
+        ROLLBACK TRANSACTION
+    END
+    ELSE IF (XACT_STATE()) = 1 AND @transCount = 0
+    BEGIN
+        ROLLBACK TRANSACTION
+    END
+    ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+    BEGIN
+        ROLLBACK TRANSACTION  @SavePoint
+    END
+
     RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

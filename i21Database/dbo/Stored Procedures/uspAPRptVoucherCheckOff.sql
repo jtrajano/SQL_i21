@@ -47,7 +47,9 @@ BEGIN
 					dblTotal ,
 					dblTax ,
 					strCompanyName ,
-					strCompanyAddress FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
+					strCompanyAddress ,
+					strCounty
+					FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -158,7 +160,8 @@ SET @query = 'SELECT * FROM (
 					dblTax ,
 					strCompanyName ,
 					strCompanyAddress,
-					GETDATE() as dtmCurrentDate
+					GETDATE() as dtmCurrentDate,
+					strCounty
 					FROM 
 				[vyuAPRptVoucherCheckOff]
 				ORDER BY StateOfOrigin DESC

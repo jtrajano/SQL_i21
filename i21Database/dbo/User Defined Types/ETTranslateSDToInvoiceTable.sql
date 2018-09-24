@@ -17,6 +17,7 @@ CREATE TYPE [dbo].[ETTranslateSDToInvoiceTable] AS TABLE
     [strItemNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [strSalesTaxId] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [strDriverNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
+	[strTruckNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [strType] NVARCHAR(10) COLLATE Latin1_General_CI_AS  NULL, 
     [dblQuantity] NUMERIC(18, 6) NULL, 
     [dblTotal] NUMERIC(18, 6) NULL, 

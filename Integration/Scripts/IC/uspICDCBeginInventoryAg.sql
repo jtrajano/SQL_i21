@@ -125,6 +125,7 @@ BEGIN
         ,dblNewQuantity
         ,dblAdjustByQuantity
 		,intItemUOMId
+		,intNewItemUOMId
         ,dblCost
 		,intSubLocationId
 		,intStorageLocationId
@@ -139,6 +140,7 @@ BEGIN
 		,0
 		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
 		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
+		,uom.intItemUOMId
 		,uom.intItemUOMId
 		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,(select sl.intSubLocationId 
@@ -159,8 +161,8 @@ BEGIN
 				--,sl.intSubLocationId
 				--,sl.intStorageLocationId
 		,1
-		,lot.aglot_lot_no
-		,aglot_expire_date
+		,NULLIF(lot.aglot_lot_no, '')
+		,CAST(CONVERT(NVARCHAR(10), aglot_expire_date) AS DATE)
 
 	FROM	tblICItem inv INNER JOIN agitmmst itm 
 				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS

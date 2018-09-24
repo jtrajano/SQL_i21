@@ -86,7 +86,7 @@ BEGIN
 	set @dtmTransactionFromDate=CONVERT(VARCHAR(10), '1/1/1900', 110)
 	set @dtmTransactionToDate=CONVERT(VARCHAR(10), GETDATE(), 110)
 END
-
+--[uspRKClearingHouseStatementForAll]
 SET @query = '
 SELECT * 
 FROM 
@@ -100,8 +100,9 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId  
-WHERE  strName='''+ISNULL(@strName,'strName')+'''
-AND strAccountNumber = '''+ISNULL(@strAccountNumber,'strAccountNumber')+'''
+WHERE  strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
+AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
+AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''
 
 UNION 
 
@@ -114,8 +115,10 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId 
-WHERE  strName='''+ISNULL(@strName,'strName')+'''
-AND strAccountNumber = '''+ISNULL(@strAccountNumber,'strAccountNumber')+'''
+WHERE   strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
+AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
+AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''
+
 )t 
 '
 
@@ -143,7 +146,8 @@ EXEC sp_executesql @query
 
 IF Exists(select 1 from @tempTable)
 BEGIN
-select @strAccountNumber strAccountNumber,@strName strBroker,@dtmTransactionFromDate dtmTransactionFromDate ,@dtmTransactionToDate as dtmTransactionToDate,* from @tempTable
+SELECT @strAccountNumber strAccountNumber,@strName strBroker,@dtmTransactionFromDate dtmTransactionFromDate ,@dtmTransactionToDate as dtmTransactionToDate,* 
+FROM @tempTable
 ENd
 ELSE
 BEGIN

@@ -150,7 +150,7 @@ SET ANSI_WARNINGS OFF
 	MERGE tblPATCustomerVolume AS CustVol
 	USING @tempPatronageVolumes AS PatVol
 		ON (CustVol.intCustomerPatronId = PatVol.intCustomerPatronId AND CustVol.intPatronageCategoryId = PatVol.intPatronageCategoryId 
-			AND CustVol.intFiscalYear = PatVol.intFiscalYearId AND CustVol.ysnRefundProcessed <> 1)
+			AND CustVol.intFiscalYear = PatVol.intFiscalYearId)
 		WHEN MATCHED
 			THEN UPDATE SET CustVol.dblVolume = CASE WHEN PatVol.ysnPosted = 1 THEN (CustVol.dblVolume + PatVol.dblVolume) 
 												ELSE (CustVol.dblVolume - PatVol.dblVolume) END

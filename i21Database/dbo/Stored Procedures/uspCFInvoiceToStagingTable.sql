@@ -66,12 +66,13 @@ BEGIN TRY
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
 	DELETE FROM tblCFInvoiceStagingTable WHERE strUserId = @UserId
+
 	INSERT INTO tblCFInvoiceStagingTable
 	(
 	 intCustomerGroupId
 	,intTransactionId
 	,intOdometer
-	,intOdometerAging
+	,intOdometerAging 
 	,intInvoiceId
 	,intProductId
 	,intCardId
@@ -202,8 +203,40 @@ BEGIN TRY
 	SELECT 
 	 intCustomerGroupId
 	,cfInvRpt.intTransactionId
-	,intOdometer
-	,intOdometerAging
+	,cfInvRpt.intOdometer
+	----------------------------------------------------------------------------------
+	,intOdometerAging = (CASE 
+						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
+						THEN cfCardOdom.intOdometer
+                        WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
+							THEN 
+								CASE 
+								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
+									THEN cfCardOdom.intOdometer
+								ELSE cfVehicleOdom.intOdometer
+								END
+						 WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
+							THEN 
+								CASE 
+								WHEN strMiscellaneous =  '' OR strMiscellaneous IS NULL
+									THEN cfCardOdom.intOdometer
+								ELSE ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0)
+								END
+						ELSE 0
+					END)
+	----------------------------------------------------------------------------------
 	,intInvoiceId
 	,intProductId
 	,intCardId
@@ -283,7 +316,76 @@ BEGIN TRY
 	,dtmDiscountDate
 	,dtmDueDate
 	,dtmInvoiceDate
-	,ISNULL(dblTotalMiles				  ,0) AS dblTotalMiles
+	,dblTotalMiles = (CASE 
+						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
+						THEN
+							CASE
+								WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
+								THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
+								ELSE 0 
+							END
+                        WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
+						THEN 
+							CASE 
+								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
+								THEN 
+									CASE
+										WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
+										THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
+										ELSE 0 
+									END
+								ELSE 
+									CASE
+										WHEN  ISNULL (cfVehicleOdom.intOdometer, 0)   > 0 
+										THEN cfInvRpt.intOdometer -	ISNULL (cfVehicleOdom.intOdometer, 0) 
+										ELSE 0 
+									END
+							END
+							WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
+							THEN 
+								CASE 
+								WHEN cfInvRpt.strMiscellaneous =  '' OR cfInvRpt.strMiscellaneous IS NULL
+								THEN 
+									CASE
+										WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
+										THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
+										ELSE 0 
+									END
+								ELSE 
+									CASE
+										WHEN  
+										ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0)  > 0 
+										THEN cfInvRpt.intOdometer -	ISNULL((SELECT TOP 1 intOdometer FROM (
+											SELECT iocftran.*  
+												FROM   dbo.tblCFTransaction as iocftran
+												LEFT JOIN tblCFItem as iocfitem
+												ON iocftran.intProductId = iocfitem.intItemId
+												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+												AND strMiscellaneous IS NOT NULL
+												AND strMiscellaneous != ''
+												AND ISNULL(ysnPosted,0) = 1
+											) as miscBase
+										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+										ORDER  BY dtmTransactionDate DESC),0) 
+										ELSE 0 
+									END
+							END
+						ELSE 0
+					END)
+
 	,ISNULL(dblQuantity					  ,0) AS dblQuantity
 	,ISNULL(dblCalculatedTotalAmount	  ,0) AS dblCalculatedTotalAmount
 	,ISNULL(dblOriginalTotalAmount		  ,0) AS dblOriginalTotalAmount
@@ -340,6 +442,49 @@ BEGIN TRY
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId
 	INNER JOIN tblCFInvoiceDiscountTempTable AS cfInvRptDcnt
 	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId
+	-------------------------------------------------------------
+	OUTER APPLY (
+		SELECT TOP (1) intOdometer 
+			  FROM   dbo.tblCFTransaction as iocftran
+			  LEFT JOIN tblCFItem as iocfitem
+			  ON iocftran.intProductId = iocfitem.intItemId
+			  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+			  AND ( dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+			  AND ( intCardId = cfInvRpt.intCardId ) 
+			  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
+			  ORDER  BY dtmTransactionDate DESC
+	) AS cfCardOdom
+	-----------------------------------------------------------
+	OUTER APPLY (
+		SELECT TOP (1) intOdometer 
+			  FROM   dbo.tblCFTransaction as iocftran
+			  LEFT JOIN tblCFItem as iocfitem
+			  ON iocftran.intProductId = iocfitem.intItemId
+			  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+			  AND ( dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+			  AND ( intVehicleId = cfInvRpt.intVehicleId ) 
+			  AND intVehicleId IS NOT NULL
+			  AND intVehicleId != 0
+			  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
+			  ORDER  BY dtmTransactionDate DESC
+	) AS cfVehicleOdom
+	-----------------------------------------------------------
+	--OUTER APPLY (
+	--	SELECT TOP 1 intOdometer FROM (
+	--		SELECT iocftran.*  
+	--			FROM   dbo.tblCFTransaction as iocftran
+	--			LEFT JOIN tblCFItem as iocfitem
+	--			ON iocftran.intProductId = iocfitem.intItemId
+	--			WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+	--			AND strMiscellaneous IS NOT NULL
+	--			AND strMiscellaneous != ''
+	--			AND ISNULL(ysnPosted,0) = 1
+	--		) as miscBase
+	--	WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+	--	AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+	--	ORDER  BY dtmTransactionDate DESC
+	--) AS cfMiscOdom
+	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
 	AND cfInvRptSum.strUserId = @UserId
 	AND cfInvRptDcnt.strUserId = @UserId

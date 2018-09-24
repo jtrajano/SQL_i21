@@ -764,7 +764,7 @@ SELECT strCommodityCode
 				,intBrokerageAccountId
 				,strInstrumentType
 				,dblNoOfLot
-				,9 FROM  @List WHERE intOrderId in(1,2,3,4,7,8) 
+				,9 FROM  @List WHERE intOrderId in(1,2,3,4,5,7,8) 
 				group by strCommodityCode
 				,intCommodityId
 				,strInternalTradeNo

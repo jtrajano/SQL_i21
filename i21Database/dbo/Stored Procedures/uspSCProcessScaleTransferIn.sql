@@ -32,9 +32,7 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 
 	SELECT TOP 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
 
-	SELECT @intFreightItemId = SCSetup.intFreightItemId
-		, @intHaulerId = SCTicket.intHaulerId
-		, @intSurchargeItemId = SCSetup.intDefaultFeeItemId
+	SELECT @intSurchargeItemId = SCSetup.intDefaultFeeItemId
 		, @intItemUOMId = SCTicket.intItemUOMIdTo
 		, @intItemId = SCTicket.intItemId
 	FROM tblSCScaleSetup SCSetup 
@@ -168,7 +166,7 @@ BEGIN TRY
 		,[intShipFromId]					= RE.intShipFromId
 		,[intCurrencyId]  					= RE.intCurrencyId
 		,[intCostCurrencyId]				= RE.intCurrencyId
-		,[intChargeId]						= @intFreightItemId
+		,[intChargeId]						= SCS.intFreightItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
 		,[dblForexRate]						= RE.dblForexRate
 		,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
@@ -177,18 +175,15 @@ BEGIN TRY
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 												ELSE RE.dblFreightRate
 											END
-		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, RE.intItemUOMId)
-		,[intOtherChargeEntityVendorId]		= CASE
-												WHEN @intHaulerId = 0 THEN NULL
-												WHEN @intHaulerId != 0 THEN @intHaulerId
-											END
+		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCS.intFreightItemId, RE.intItemUOMId)
+		,[intOtherChargeEntityVendorId]		= SC.intHaulerId
 		,[dblAmount]						=  CASE
 												WHEN IC.strCostMethod = 'Amount' THEN ROUND (((RE.dblQty / SC.dblNetUnits) * SC.dblFreightRate), 2)
 												ELSE 0
 											END
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
-		,[ysnAccrue]						= @ysnAccrue
+		,[ysnAccrue]						= CASE WHEN ISNULL(SC.intHaulerId , 0) > 0 THEN 1 ELSE 0 END
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
 		FROM @ReceiptStagingTable RE 

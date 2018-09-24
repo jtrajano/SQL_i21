@@ -7,10 +7,10 @@ SELECT
 ,strContractNumber		= V.strContractNumber
 ,intEntityId			= V.intEntityId
 ,strEntityName			= V.strEntityName
-,dblAvailableQty		= V.dblAvailableQtyInCommodityStockUOM
+,dblAvailableQty		= V.dblAvailableQtyInItemStockUOM
 ,strContractType		= V.strContractType
 ,dblUnits				= T.dblUnits 
-,dblCashPrice			= V.dblCashPriceInCommodityStockUOM
+,dblCashPrice			= V.dblCashPriceInItemStockUOM
 ,dblFutures				= V.dblFutures   
 ,dtmStartDate			= V.dtmStartDate  
 ,intContractSeq			= V.intContractSeq   

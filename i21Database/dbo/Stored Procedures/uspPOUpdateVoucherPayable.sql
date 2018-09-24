@@ -12,15 +12,22 @@ BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspPOUpdateVoucherPayable';
 DECLARE @voucherPayables AS VoucherPayable;
+DECLARE @voucherPayableTax AS VoucherDetailTax;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 INSERT INTO @voucherPayables(
-	[intEntityVendorId]					
-	,[intLocationId]					
+	[intEntityVendorId]			
+	,[intTransactionType]		
+	,[intLocationId]	
+	,[intShipToId]	
+	,[intShipFromId]			
+	,[intShipFromEntityId]
+	,[intPayToAddressId]
 	,[intCurrencyId]					
-	,[dtmDate]							
+	,[dtmDate]				
+	,[strVendorOrderNumber]			
 	,[strReference]						
 	,[strSourceNumber]					
 	,[intPurchaseDetailId]				
@@ -64,9 +71,48 @@ INSERT INTO @voucherPayables(
 )
 SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds);
 
+INSERT INTO @voucherPayableTax (
+	[intVoucherPayableId]
+	,[intTaxGroupId]				
+	,[intTaxCodeId]				
+	,[intTaxClassId]				
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[intAccountId]				
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[ysnTaxAdjusted]			
+	,[ysnSeparateOnBill]			
+	,[ysnCheckOffTax]		
+	,[ysnTaxExempt]	
+	,[ysnTaxOnly]
+)
+SELECT
+	[intVoucherPayableId]		=	payables.intVoucherPayableId,
+	[intTaxGroupId]				=	A.intTaxGroupId, 
+	[intTaxCodeId]				=	A.intTaxCodeId, 
+	[intTaxClassId]				=	A.intTaxClassId, 
+	[strTaxableByOtherTaxes]	=	A.strTaxableByOtherTaxes, 
+	[strCalculationMethod]		=	A.strCalculationMethod, 
+	[dblRate]					=	A.dblRate, 
+	[intAccountId]				=	A.intAccountId, 
+	[dblTax]					=	A.dblTax, 
+	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
+	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
+	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
+	[ysnCheckOffTax]			=	A.ysnCheckOffTax,
+	[ysnTaxExempt]				=	A.ysnTaxExempt,
+	[ysnTaxOnly]				=	A.ysnTaxOnly
+FROM tblPOPurchaseDetailTax A
+INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
+INNER JOIN @voucherPayables payables ON B.intPurchaseDetailId = payables.intPurchaseDetailId
+LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+WHERE (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL) AND payables.dblTax != 0
+
 IF @remove = 0
 BEGIN
-	EXEC uspAPUpdateVoucherPayableQty @voucherPayables, NULL
+	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax
 END
 ELSE
 BEGIN

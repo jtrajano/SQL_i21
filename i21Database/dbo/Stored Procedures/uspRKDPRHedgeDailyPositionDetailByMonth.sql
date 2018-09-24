@@ -8,6 +8,14 @@
 		,@strByType nvarchar(50) = null
 AS
 
+--declare 		 @intCommodityId nvarchar(max)= '1'
+--		,@intLocationId int = null
+--		,@intVendorId int = null
+--		,@strPurchaseSales NVARCHAR(200) = null
+--		,@strPositionIncludes NVARCHAR(200) = 'All Storage'
+--		,@dtmToDate datetime = getdate()
+--		,@strByType NVARCHAR(200) = 'ByCommodity'
+
 BEGIN
  
 IF ISNULL(@strPurchaseSales,'') <> ''
@@ -129,9 +137,35 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		,intFutureMonthId	int
 		)
 
-INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
-	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
-	   	,intFutureMarketId,intFutureMonthId)	
+INSERT INTO @tblGetOpenContractDetail (
+	intRowNum,
+	strCommodityCode,
+	intCommodityId,
+	intContractHeaderId,
+	strContractNumber,
+	strLocationName,
+	dtmEndDate,
+	dblBalance,
+	intUnitMeasureId,
+	intPricingTypeId,
+	intContractTypeId,
+	intCompanyLocationId,
+	strContractType,
+	strPricingType,
+	intCommodityUnitMeasureId,
+	intContractDetailId,
+	intContractStatusId,
+	intEntityId,
+	intCurrencyId,
+	strType,
+	intItemId,
+	strItemNo,
+	dtmContractDate,
+	strEntityName,
+	strCustomerContract,
+	intFutureMarketId,
+	intFutureMonthId
+)	
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
 
 DECLARE @tblGetOpenFutureByDate TABLE (
@@ -152,9 +186,27 @@ DECLARE @tblGetOpenFutureByDate TABLE (
 		strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
 		intFutOptTransactionHeaderId int 
 		)
-INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
-			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
+
+INSERT INTO @tblGetOpenFutureByDate (
+	intFutOptTransactionId,
+	intOpenContract,
+	strCommodityCode,
+	strInternalTradeNo,
+	strLocationName,
+	dblContractSize,
+	strFutureMarket,
+	strFutureMonth,
+	strOptionMonth,
+	dblStrike,
+	strOptionType,
+	strInstrumentType,
+	strBrokerAccount,
+	strBroker,
+	strNewBuySell,
+	intFutOptTransactionHeaderId
+)
 EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
+
 
 INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId,strEntityName)
 	SELECT strCommodityCode,CD.intCommodityId,intContractHeaderId,strContractNumber
