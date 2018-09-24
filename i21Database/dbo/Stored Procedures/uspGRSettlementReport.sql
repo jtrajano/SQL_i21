@@ -292,7 +292,7 @@ BEGIN
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
-		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
+		,strVendorAddress					= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)		
 		,dtmDeliveryDate					= SC.dtmTicketDateTime 
 		,intTicketId						= SC.intTicketId		
 		,strTicketNumber					= SC.strTicketNumber 
@@ -406,6 +406,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
 	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -494,7 +495,7 @@ BEGIN
 		,strAccountNumber				    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo					    = BNKTRN.strReferenceNo
 		,strEntityName					    = ENTITY.strName
-		,strVendorAddress				    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+		,strVendorAddress					= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)		
 		,dtmDeliveryDate					= SC.dtmTicketDateTime
 		,intTicketId						= SC.intTicketId
 		,strTicketNumber					= SC.strTicketNumber
@@ -588,6 +589,7 @@ BEGIN
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
+	JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -691,7 +693,7 @@ BEGIN
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
-		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+		,strVendorAddress					= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 		,dtmDeliveryDate					= CS.dtmDeliveryDate
 		,intTicketId						= DS.intDeliverySheetId
 		,strTicketNumber					= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
@@ -784,6 +786,7 @@ BEGIN
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 	JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
+	JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -993,7 +996,7 @@ BEGIN
 				,strAccountNumber		    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    = BNKTRN.strReferenceNo
 				,strEntityName			    = ENTITY.strName
-				,strVendorAddress		    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
+				,strVendorAddress					= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate		    = SC.dtmTicketDateTime 
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
@@ -1106,6 +1109,7 @@ BEGIN
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
@@ -1193,7 +1197,7 @@ BEGIN
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
-				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+				,strVendorAddress			 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate			 = SC.dtmTicketDateTime		
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
@@ -1285,6 +1289,7 @@ BEGIN
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
@@ -1395,7 +1400,7 @@ BEGIN
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
-				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+				,strVendorAddress			 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate			 = CS.dtmDeliveryDate		
 				,intTicketId				 = DS.intDeliverySheetId		
 				,strTicketNumber			 = DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
@@ -1487,6 +1492,7 @@ BEGIN
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId
 			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
