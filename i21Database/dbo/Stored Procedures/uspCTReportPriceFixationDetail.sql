@@ -29,7 +29,10 @@ BEGIN TRY
 			MA.strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) AS [dblNoOfLots],
-			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
+			CASE 
+					WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) 
+					ELSE LTRIM(PD.dblFutures) 
+			END + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
 			PD.strNotes,
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPriceDesc,
 			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots
@@ -45,7 +48,8 @@ BEGIN TRY
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	PD.intFutureMonthId		LEFT	
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId		LEFT	
-	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId			
+	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId	
+	CROSS JOIN tblCTCompanyPreference   CP		
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

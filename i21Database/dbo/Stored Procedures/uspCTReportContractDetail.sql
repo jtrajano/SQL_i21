@@ -68,8 +68,8 @@ BEGIN TRY
 			strPrice				= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
 									  END,
-			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
+			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblCashPrice,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) END  + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+											WHEN 	CD.intPricingTypeId = 2	THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblBasis,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) END + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
 									  END,
 			strDescription			= ISNULL(IC.strContractItemName,IM.strDescription),
 			strBagMark				= BM.strBagMark,
@@ -131,6 +131,7 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId		LEFT
 	JOIN	@Amend				AM	ON	AM.intContractDetailId	=	CD.intContractDetailId	LEFT
 	JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId
+	CROSS JOIN tblCTCompanyPreference   CP
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
 
