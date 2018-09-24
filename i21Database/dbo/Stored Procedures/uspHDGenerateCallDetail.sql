@@ -226,9 +226,9 @@ INSERT INTO tblHDCallDetail
 		from
 				(
 					select distinct intEntityId from (
-						select intEntityId = c.intAssignedToEntity from tblHDTicket c where c.intAssignedToEntity is not null and convert(int, convert(nvarchar(8), c.dtmCreated, 112)) between @DateFrom and @DateTo
+						select intEntityId = c.intAssignedToEntity from tblHDTicket c where c.intAssignedToEntity is not null and c.intAssignedToEntity > 0 and convert(int, convert(nvarchar(8), c.dtmCreated, 112)) between @DateFrom and @DateTo
 						union all
-						select intEntityId = d.intAgentEntityId from tblHDTicketHoursWorked d where d.intAgentEntityId is not null and convert(int, convert(nvarchar(8), d.dtmDate, 112)) between @DateFrom and @DateTo
+						select intEntityId = d.intAgentEntityId from tblHDTicketHoursWorked d where d.intAgentEntityId is not null and d.intAgentEntityId > 0 and convert(int, convert(nvarchar(8), d.dtmDate, 112)) between @DateFrom and @DateTo
 					) as d
 				) as e
 			left join tblHDTicket a on a.intAssignedToEntity = e.intEntityId and a.strType = 'HD'
