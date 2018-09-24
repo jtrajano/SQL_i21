@@ -92,6 +92,10 @@ BEGIN TRY
 		,@dblProducePartialQty NUMERIC(38, 20)
 		,@intAttributeTypeId INT
 		,@ysnCPMergeOnMove BIT
+		,@intWOItemUOMId INT
+		,@dblPhysicalCount1 NUMERIC(38, 20)
+		,@intUnitMeasureId INT
+		,@intWOActualItemUOMId INT
 
 	SELECT TOP 1 @ysnCPMergeOnMove = ysnMergeOnMove
 	FROM tblMFCompanyPreference
@@ -258,7 +262,8 @@ BEGIN TRY
 		AND @ysnMergeOnMove = 1
 		AND @ysnCPMergeOnMove = 1
 	BEGIN
-		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
+		SELECT @strOutputLotNumber = strLotNumber
+			,@intParentLotId = intParentLotId
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
@@ -266,9 +271,9 @@ BEGIN TRY
 			AND intLotStatusId = @intLotStatusId
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 
-		Select @strParentLotNumber=strParentLotNumber
-		From tblICParentLot
-		Where intParentLotId=@intParentLotId
+		SELECT @strParentLotNumber = strParentLotNumber
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
 	END
 	ELSE IF EXISTS (
 			SELECT *
@@ -786,23 +791,38 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			SELECT @intWOItemUOMId = intItemUOMId
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			SELECT @intUnitMeasureId = intUnitMeasureId
+			FROM tblICItemUOM
+			WHERE intItemUOMId = @intWOItemUOMId
+
+			SELECT @intWOActualItemUOMId = intItemUOMId
+			FROM dbo.tblICItemUOM IU
+			WHERE IU.intItemId = @intItemId
+				AND IU.intUnitMeasureId = @intUnitMeasureId
+
+			SELECT @dblPhysicalCount1 = dbo.fnMFConvertQuantityToTargetItemUOM(@intPhysicalItemUOMId, @intWOActualItemUOMId, @dblPhysicalCount)
+
 			IF @ysnFillPartialPallet = 1
 			BEGIN
 				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 					,@dblProduceQty = 0
-					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@intProduceUOMId = @intWOItemUOMId
 					,@intBatchId = @intBatchId
 					,@intUserId = @intUserId
 					,@dblUnitQty = @dblUnitQty
 					,@ysnProducedQtyByWeight = 0
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
-					,@dblProducePartialQty = @dblPhysicalCount
+					,@dblProducePartialQty = @dblPhysicalCount1
 			END
 			ELSE
 			BEGIN
 				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-					,@dblProduceQty = @dblPhysicalCount
-					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@dblProduceQty = @dblPhysicalCount1
+					,@intProduceUOMId = @intWOItemUOMId
 					,@intBatchId = @intBatchId
 					,@intUserId = @intUserId
 					,@dblUnitQty = @dblUnitQty
@@ -812,8 +832,8 @@ BEGIN TRY
 			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-				,@dblProduceQty = @dblPhysicalCount
-				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@dblProduceQty = @dblPhysicalCount1
+				,@intProduceUOMKey = @intWOItemUOMId
 				,@intUserId = @intUserId
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
