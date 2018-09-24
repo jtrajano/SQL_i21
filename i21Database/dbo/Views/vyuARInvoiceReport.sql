@@ -98,17 +98,18 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnHasProvisional		= CASE WHEN (ISNULL(PROVISIONAL.strProvisionalDescription, '')) <> '' THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strProvisional			= PROVISIONAL.strProvisionalDescription
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
-	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
+	 , strCustomerComments		= CUSTOMERCOMMENTS.strCustomerComments
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
-	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
+INNER JOIN tblARInvoiceReportStagingTable STAGING ON STAGING.intInvoiceId = INV.intInvoiceId
 INNER JOIN (
 	SELECT intEntityId
 	     , strName
@@ -333,3 +334,18 @@ LEFT JOIN(
 	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
 	WHERE  ysnAddonParent = 0
 ) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
+OUTER APPLY (
+	SELECT blbLogo = blbFile 
+	FROM tblSMUpload 
+	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
+) LOGO
+OUTER APPLY (
+	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1)
+	FROM (
+		SELECT CAST(A.strMessage AS VARCHAR(MAX))  + ', '
+		FROM dbo.tblEMEntityMessage A WITH(NOLOCK)
+		WHERE A.intEntityId = INV.intEntityCustomerId
+		  AND A.strMessageType = 'Invoice'
+		FOR XML PATH ('')
+	) CC (strMessage)
+) CUSTOMERCOMMENTS
