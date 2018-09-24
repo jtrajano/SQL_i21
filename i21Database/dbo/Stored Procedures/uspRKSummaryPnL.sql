@@ -212,13 +212,14 @@ DECLARE @Summary AS TABLE (
 			dblVariationMargin NUMERIC(24, 10),
 			strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 			strAccountNumber VARCHAR(100) COLLATE Latin1_General_CI_AS,
-			dblTotal NUMERIC(24, 10)	
+			dblTotal NUMERIC(24, 10),
+			ysnExpired BIT	
 	)
 	INSERT INTO @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,dblNet,
-					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal)
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal,ysnExpired)
 	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0) intShortContracts  ,dblShortAvgPrice ,isnull(dblNet,0) dblNet,
 					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,
-		dblUnrealized + dblRealized AS dblTotal
+		dblUnrealized + dblRealized AS dblTotal,ysnExpired
 	FROM (
 		SELECT distinct intFutureMarketId,
 			intFutureMonthId,
@@ -240,7 +241,7 @@ DECLARE @Summary AS TABLE (
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
 			strName,
-			strAccountNumber
+			strAccountNumber,ysnExpired
 		FROM (
 			SELECT dblGrossPnL,
 				LongWaitedPrice,
@@ -261,7 +262,7 @@ DECLARE @Summary AS TABLE (
 				dblNetPnL,
 				dblVariationMargin,				
 				strName,
-				strAccountNumber
+				strAccountNumber,ysnExpired
 			FROM @UnRelaized
 			
 			UNION
@@ -285,7 +286,7 @@ DECLARE @Summary AS TABLE (
 				null dblNetPnL,
 				dblVariationMargin,				
 				t.strName,
-				t.strAccountNumber
+				t.strAccountNumber,isnull(t.ysnExpired,p.ysnExpired) as ysnExpired
 			FROM @Relaized t
 			LEFT JOIN @UnRelaized p ON t.intFutureMarketId = p.intFutureMarketId AND t.intFutureMonthId = p.intFutureMonthId
 			WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END 
@@ -298,7 +299,7 @@ DECLARE @Summary AS TABLE (
 			strFutMarketName,
 			strFutureMonth,
 			strName,
-			strAccountNumber
+			strAccountNumber,ysnExpired
 		) t
 
 		select intFutureMarketId,
@@ -321,7 +322,8 @@ DECLARE @Summary AS TABLE (
 			sum(dblTotal) dblTotal,
 			sum(dblInitialMargin) dblInitialMargin,
 			'' strBook,
-			'' strSubBook
+			'' strSubBook,
+			ysnExpired
 			 from(
 	SELECT intFutureMarketId,
 			intFutureMonthId,
@@ -344,6 +346,7 @@ DECLARE @Summary AS TABLE (
 		CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 					WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 					ELSE dblContractMargin END end) as dblInitialMargin
+			,ysnExpired
 		FROM(
 		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
 		dblPerFutureContract from @Summary t 
@@ -351,5 +354,5 @@ DECLARE @Summary AS TABLE (
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
 		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
-		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName
+		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName,ysnExpired
 		END
