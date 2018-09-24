@@ -119,6 +119,7 @@ INSERT into @ReceiptStagingTable(
 		,dblGross
 		,dblNet
 		,intFreightTermId
+		,intLoadShipped
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -223,6 +224,7 @@ SELECT
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= CNT.intFreightTermId
+		,intLoadShipped				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -247,7 +249,9 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
+			,CTH.ysnLoad
 			FROM tblCTContractDetail CTD 
+			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId

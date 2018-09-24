@@ -130,6 +130,7 @@ BEGIN
 		,dblGross
 		,dblTare
 		,ysnDestinationWeightsAndGrades
+		,intLoadShipped
 		)
 		SELECT
 		intOrderType				= @intOrderType
@@ -248,6 +249,7 @@ BEGIN
 											WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' THEN 1
 											ELSE 0 
 										END
+		,intLoadShipped				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -271,7 +273,9 @@ BEGIN
 			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
+			,CTH.ysnLoad
 			FROM tblCTContractDetail CTD 
+			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
