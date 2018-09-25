@@ -119,7 +119,7 @@ INSERT into @ReceiptStagingTable(
 		,dblGross
 		,dblNet
 		,intFreightTermId
-		,intLoadShipped
+		,intLoadReceive
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -224,7 +224,7 @@ SELECT
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= CNT.intFreightTermId
-		,intLoadShipped				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
+		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
