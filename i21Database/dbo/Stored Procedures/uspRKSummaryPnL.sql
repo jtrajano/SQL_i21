@@ -355,4 +355,5 @@ DECLARE @Summary AS TABLE (
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
 		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
 		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName,ysnExpired
+		ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC
 		END
