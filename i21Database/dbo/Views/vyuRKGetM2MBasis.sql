@@ -24,7 +24,8 @@ SELECT DISTINCT strCommodityCode
 			,cd.intCompanyLocationId
 			,mz.intMarketZoneId
 			,CASE WHEN ISNULL(muc.intCurrencyID,'') = '' THEN cd.intCurrencyId ELSE muc.intCurrencyID END  intCurrencyId
-			,ch.intPricingTypeId
+			-- ,ch.intPricingTypeId
+			,cd.intPricingTypeId
 			,ct.intContractTypeId
 			,CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END AS intUnitMeasureId
 			,0 as intConcurrencyId,
@@ -71,7 +72,8 @@ SELECT DISTINCT strCommodityCode
 			,cd.intCompanyLocationId
 			,mz.intMarketZoneId
 			,CASE WHEN ISNULL(muc.intCurrencyID,'') = '' THEN cd.intCurrencyId ELSE muc.intCurrencyID END  intCurrencyId
-			,ch.intPricingTypeId
+			-- ,ch.intPricingTypeId
+			,cd.intPricingTypeId
 			,ct.intContractTypeId
 			,CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END AS intUnitMeasureId
 			,0 as intConcurrencyId,
@@ -121,7 +123,8 @@ SELECT DISTINCT strCommodityCode
 				,cd.intCompanyLocationId
 				,cd.intMarketZoneId
 				,CASE WHEN ISNULL(muc.intCurrencyID,'') = '' THEN cd.intCurrencyId ELSE muc.intCurrencyID END  intCurrencyId
-				,ch.intPricingTypeId
+				-- ,ch.intPricingTypeId
+				,cd.intPricingTypeId
 				,ch.intContractTypeId
 				,CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END AS intUnitMeasureId
 				,0 as intConcurrencyId,
