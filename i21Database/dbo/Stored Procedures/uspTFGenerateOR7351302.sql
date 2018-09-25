@@ -293,7 +293,7 @@ BEGIN TRY
 		SET @DisbursementEthanol_12 = @DisbursementEthanol_8 + @DisbursementEthanol_9 + @DisbursementEthanol_10 + @DisbursementEthanol_11
 		
 		-- Disbursement Diesel
-		SELECT @DisbursementDiesel_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5LO' AND strType = 'Biodiesel - Undyed'
+		SELECT @DisbursementDiesel_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5LO' AND strType IN ('Biodiesel - Undyed', 'Biodiesel - Undyed (Stroutdale)')
 		SELECT @DisbursementDiesel_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Diesel - Undyed'
 		SELECT @DisbursementDiesel_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Diesel - Undyed'
