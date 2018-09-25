@@ -477,15 +477,16 @@ BEGIN
 						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
 						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
 						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 4
-						ELSE 5
-					END  
+						WHEN dblValue <> 0 THEN 5
+						ELSE 6
+					END    
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
 				,intItemUOMId
 				,intSubLocationId
 				,intStorageLocationId
-				,dtmDate
+				,dbo.fnRemoveTimeOnDate(dtmDate) 
 				,dblQty
 				,dblUOMQty
 				,dblCost
@@ -523,11 +524,13 @@ BEGIN
 			,CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 			,
 			CASE 
-				WHEN dblQty > 0 AND strTransactionForm <> 'Invoice' THEN 1 
+				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 1 
 				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 3
-				ELSE 4
-			END 
+				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
+				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 4
+				WHEN dblValue <> 0 THEN 5
+				ELSE 6
+			END   
 			ASC 
 	END
 	ELSE 
@@ -539,14 +542,19 @@ BEGIN
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
-				,intSortByQty = CASE WHEN dblQty > 0 THEN 1 ELSE 2 END 
+				,intSortByQty = 
+					CASE 
+						WHEN dblQty > 0 THEN 1 
+						WHEN dblValue <> 0 THEN 2
+						ELSE 3
+					END
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
 				,intItemUOMId
 				,intSubLocationId
 				,intStorageLocationId
-				,dtmDate
+				,dbo.fnRemoveTimeOnDate(dtmDate) 
 				,dblQty
 				,dblUOMQty
 				,dblCost
