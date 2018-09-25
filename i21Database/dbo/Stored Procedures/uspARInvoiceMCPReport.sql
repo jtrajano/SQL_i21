@@ -1,5 +1,60 @@
-﻿CREATE VIEW [dbo].[vyuARInvoiceMCPReport]
-AS
+﻿CREATE PROCEDURE [dbo].[uspARInvoiceMCPReport]
+	  @tblInvoiceReport				AS InvoiceReportTable READONLY
+	, @intEntityUserId				AS INT	= NULL
+AS 
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strInvoiceFormat = 'Format 1 - MCP'
+INSERT INTO tblARInvoiceReportStagingTable (
+	   strCompanyName
+	 , strCompanyAddress
+	 , strInvoiceNumber
+	 , dtmDate
+	 , dtmDueDate
+	 , strBOLNumber
+	 , strPONumber
+	 , intTruckDriverId
+	 , strTruckDriver
+	 , intBillToLocationId
+	 , intShipToLocationId
+	 , strBillToLocationName
+	 , strShipToLocationName
+	 , strBillTo		
+	 , strShipTo
+	 , strSource
+	 , intTermId
+	 , strTerm
+	 , intShipViaId
+	 , strShipVia
+	 , intCompanyLocationId
+	 , strCompanyLocation
+	 , intInvoiceId
+	 , intInvoiceDetailId
+	 , intSiteId
+	 , dblQtyShipped
+	 , intItemId
+	 , strItemNo
+	 , strItemDescription
+	 , strContractNo
+	 , strUnitMeasure
+	 , dblPrice
+	 , dblPriceWithTax
+	 , dblTotalPriceWithTax
+	 , dblInvoiceTotal
+	 , dblAmountDue
+	 , dblInvoiceTax
+	 , strComments
+	 , strItemComments
+	 , strOrigin
+	 , blbLogo
+	 , intEntityUserId
+	 , strInvoiceFormat
+)
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , strInvoiceNumber			= INV.strInvoiceNumber
@@ -45,7 +100,10 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
 								  END
 	 , blbLogo					= LOGO.blbLogo
+	 , intEntityUserId			= @intEntityUserId
+	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
+INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , intInvoiceDetailId   = ID.intInvoiceDetailId

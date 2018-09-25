@@ -1,5 +1,95 @@
-﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
+﻿CREATE PROCEDURE [dbo].[uspARInvoiceReport]
+	  @tblInvoiceReport				AS InvoiceReportTable READONLY
+	, @intEntityUserId				AS INT	= NULL
 AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strInvoiceFormat <> 'Format 1 - MCP'
+INSERT INTO tblARInvoiceReportStagingTable (
+	   intInvoiceId
+	 , intCompanyLocationId
+	 , strCompanyName
+	 , strCompanyAddress
+	 , strCompanyInfo
+	 , strCompanyPhoneNumber
+	 , strCompanyEmail
+	 , strType
+	 , strCustomerName
+	 , strCustomerNumber
+	 , strLocationName
+	 , dtmDate
+	 , dtmPostDate
+	 , strCurrency
+	 , strInvoiceNumber
+	 , strBillToLocationName
+	 , strBillTo
+	 , strShipTo
+	 , strSalespersonName
+	 , strPONumber
+	 , strBOLNumber
+	 , strShipVia
+	 , strTerm
+	 , dtmShipDate
+	 , dtmDueDate
+	 , strFreightTerm
+	 , strDeliverPickup
+	 , strInvoiceHeaderComment
+	 , strInvoiceFooterComment
+	 , dblInvoiceSubtotal
+	 , dblShipping
+	 , dblTax
+	 , dblInvoiceTotal
+	 , dblAmountDue
+	 , strItemNo
+	 , intInvoiceDetailId
+	 , dblContractBalance
+	 , strContractNumber
+	 , strItem
+	 , strItemDescription
+	 , strUnitMeasure
+	 , dblQtyShipped
+	 , dblQtyOrdered
+	 , dblDiscount
+	 , dblTotalTax
+	 , dblPrice
+	 , dblItemPrice
+	 , strPaid
+	 , strPosted
+	 , intTaxCodeId
+	 , strTaxCode
+	 , dblTaxDetail
+	 , strTransactionType
+	 , intDetailCount
+	 , intRecipeId
+	 , intOneLinePrintId
+	 , strInvoiceComments
+	 , strItemType
+	 , dblTotalWeight
+	 , strVFDDocumentNumber
+	 , ysnHasEmailSetup
+	 , ysnHasRecipeItem
+	 , ysnHasVFDDrugItem
+	 , ysnHasProvisional
+	 , strProvisional
+	 , dblTotalProvisional
+	 , strCustomerComments
+	 , ysnPrintInvoicePaymentDetail
+	 , ysnListBundleSeparately
+	 , strTicketNumbers
+	 , strSiteNumber
+	 , dblEstimatedPercentLeft
+	 , dblPercentFull
+	 , blbLogo
+	 , strAddonDetailKey
+	 , ysnHasAddOnItem
+	 , intEntityUserId
+	 , strInvoiceFormat
+)
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
 	 , strCompanyName			= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
@@ -46,7 +136,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmShipDate				= INV.dtmShipDate
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strFreightTerm			= FREIGHT.strFreightTerm
-	 , strDeliverPickup			= FREIGHT.strFobPoint--INV.strDeliverPickup	 
+	 , strDeliverPickup			= FREIGHT.strFobPoint
 	 , strInvoiceHeaderComment	= INV.strComments
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
@@ -108,7 +198,10 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , intEntityUserId			= @intEntityUserId
+	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
+INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
 	SELECT intEntityId
 	     , strName

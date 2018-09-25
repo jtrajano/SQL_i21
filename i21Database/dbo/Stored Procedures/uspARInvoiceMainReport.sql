@@ -8,12 +8,16 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @INVOICETABLE 		AS dbo.InvoiceReportTable
+DECLARE @MCPINVOICES  		AS dbo.InvoiceReportTable
+DECLARE @STANDARDINVOICES	AS dbo.InvoiceReportTable
+
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 
-		SELECT * FROM tblARInvoiceReportStagingTable
+		SELECT * FROM @INVOICETABLE
 	END
 
 -- Declare the variables.
@@ -114,14 +118,15 @@ IF ISNULL(@intInvoiceIdFrom, 0) = 0
 	SET @intInvoiceIdFrom = (SELECT MIN(intInvoiceId) FROM dbo.tblARInvoice)
 
 --GET INVOICES WITH FILTERS
-DELETE FROM tblARInvoiceReportStagingTable --WHERE intEntityUserId = @intEntityUserId
-INSERT INTO tblARInvoiceReportStagingTable (
+INSERT INTO @INVOICETABLE (
 	intInvoiceId
---   , intEntityUserId
-  , strInvoiceFormat
+  , intEntityUserId
+  , strType
+  , strInvoiceFormat  
 )
 SELECT intInvoiceId			= INVOICE.intInvoiceId
-	--  , intEntityUserId		= @intEntityUserId
+	 , intEntityUserId		= @intEntityUserId
+	 , strType				= INVOICE.strType
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
@@ -144,9 +149,20 @@ ORDER BY INVOICE.intInvoiceId
 IF ISNULL(@strInvoiceIds, '') <> ''
 	BEGIN
 		DELETE INVOICE 
-		FROM tblARInvoiceReportStagingTable INVOICE
+		FROM @INVOICETABLE INVOICE
 		WHERE INVOICE.intInvoiceId NOT IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
-		--   AND INVOICE.intEntityUserId = @intEntityUserId
 	END
 
-SELECT * FROM tblARInvoiceReportStagingTable --WHERE intEntityUserId = @intEntityUserId
+INSERT INTO @MCPINVOICES
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP')
+
+IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
+	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId
+
+INSERT INTO @STANDARDINVOICES
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP')
+
+IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
+	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId
+
+SELECT * FROM @INVOICETABLE
