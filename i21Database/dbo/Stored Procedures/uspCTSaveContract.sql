@@ -165,7 +165,7 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8)
 		BEGIN
-			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmEndDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmEndDate)  WHERE intContractDetailId = @intContractDetailId
+			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)  WHERE intContractDetailId = @intContractDetailId
 			
 			DECLARE @FutureMonthId INT
 
