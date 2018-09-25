@@ -744,7 +744,10 @@ FROM
 WHERE
     I.[intPeriodsToAccrue] <= 1
     AND (
-        I.[intItemId] IS NULL
+        (	I.[intItemId] IS NULL 
+			AND
+			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
+		)
         OR
         (
             I.[intItemId] IS NOT NULL
