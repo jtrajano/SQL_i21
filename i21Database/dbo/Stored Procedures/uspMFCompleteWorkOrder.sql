@@ -202,6 +202,16 @@ BEGIN TRY
 			,intSpecialPalletLotId INT
 			)
 
+	IF @dblProduceQty IS NULL
+		AND @intProduceUnitMeasureId IS NULL
+	BEGIN
+		SELECT @dblProduceQty = @dblPhysicalCount
+
+		SELECT @intProduceUnitMeasureId = @intPhysicalItemUOMId
+
+		SELECT @dblUnitQty = 1
+	END
+
 	SELECT @strComputeGrossWeight = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
