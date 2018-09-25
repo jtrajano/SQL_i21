@@ -1259,7 +1259,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,ItemLocation.intItemLocationId,'AP Clearing')
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,ItemLocation.intItemLocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
@@ -1298,6 +1298,10 @@ BEGIN TRY
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
+				LEFT JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = a.intCustomerStorageId
+				LEFT JOIN tblGRDiscountScheduleCode DSC
+					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId and DSC.intItemId = a.intItemId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
