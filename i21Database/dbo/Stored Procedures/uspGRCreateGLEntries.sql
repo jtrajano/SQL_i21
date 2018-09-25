@@ -158,6 +158,7 @@ BEGIN
 		,[dblUnits] 					   DECIMAL(24,10)
 	)
 
+	--CONTRACT
 	INSERT INTO @tblOtherCharges
 	(
 		 intItemId
@@ -191,10 +192,12 @@ BEGIN
 		,[dblForexRate]						= NULL
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)	
-													WHEN QM.dblDiscountAmount > 0 THEN  QM.dblDiscountAmount		
-											  END
+		,[dblRate]							= CASE
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * CD.dblCashPrice) * -1)
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * CD.dblCashPrice)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -219,6 +222,8 @@ BEGIN
 	FROM tblGRSettleContract RE
 	JOIN tblGRSettleStorageTicket SST 
 		ON SST.intSettleStorageId = RE.intSettleStorageId
+	JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = RE.intContractDetailId
 	JOIN tblQMTicketDiscount QM 
 		ON QM.intTicketFileId = SST.intCustomerStorageId AND QM.strSourceType = 'Storage'
 	JOIN tblGRDiscountScheduleCode GR 
@@ -230,6 +235,7 @@ BEGIN
 	
 	UNION
 
+	--SPOT
 	SELECT
 		 intItemId							= IC.intItemId
 		,[strItemNo]						= IC.strItemNo	
@@ -241,10 +247,12 @@ BEGIN
 		,[dblForexRate]						= NULL
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)	
-													WHEN QM.dblDiscountAmount > 0 THEN  QM.dblDiscountAmount		
-											  END
+		,[dblRate]							= CASE
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * SS.dblCashPrice) * -1)
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * SS.dblCashPrice)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0

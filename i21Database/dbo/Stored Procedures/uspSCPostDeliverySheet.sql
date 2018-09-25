@@ -166,6 +166,7 @@ BEGIN TRY
 			,@intItemUOMId
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
+		Print 'Quantity Adjustment'
 		--EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
 		---- Parameters for filtering:
 		--	@intItemId

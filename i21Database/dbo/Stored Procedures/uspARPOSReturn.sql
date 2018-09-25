@@ -387,7 +387,7 @@ AS
 				,-[dblTax]
 				,-[dblSubTotal]
 				,-[dblTotal]
-				,[intInvoiceId]
+				,0
 				,[ysnHold]
 				,[intEntityUserId]
 				,[intPOSLogId]
@@ -458,6 +458,10 @@ AS
 				UPDATE tblARPOS
 				SET ysnReturn = 1
 				WHERE intInvoiceId = @intInvoiceId
+
+				UPDATE tblARPOS    
+				SET intInvoiceId = @createdCreditMemoId    
+				WHERE strReceiptNumber = @ReceiptNumber  
 				
 				SET @strMessage = NULL
 			END
