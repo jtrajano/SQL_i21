@@ -107,7 +107,7 @@ BEGIN
 	END
 	ELSE IF NOT EXISTS(SELECT 1 FROM tblGRDiscountScheduleLine WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId)
 	BEGIN
-		  INSERT INTO @CalculatedDiscount
+		 INSERT INTO @CalculatedDiscount
 		 SELECT
 		  intExtendedKey				 = 1 
 		 ,dblFrom						 = 0.0 
@@ -320,19 +320,8 @@ BEGIN
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 =  'Success'
 				,intDiscountCalculationOptionId  =  @intDiscountCalculationOptionId
@@ -364,9 +353,9 @@ BEGIN
 			 END
 			 ELSE IF (@dblReading > @dblMaxToForIncremental)
 			 BEGIN
-				 INSERT INTO @CalculatedDiscount
-				 SELECT
-				 TOP 1 
+				INSERT INTO @CalculatedDiscount
+				SELECT 
+				TOP 1 
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
 				,dblTo							 = dblTo
@@ -386,18 +375,8 @@ BEGIN
 															END
 													END
 				,dblShrink						 = CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  
-															THEN 
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100 
-																	ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100
-																ELSE dblShrink 
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
@@ -416,7 +395,7 @@ BEGIN
 			IF EXISTS(SELECT 1 FROM @tblExtendedTab WHERE dblFrom >= @dblReading AND dblTo <= @dblReading)
 			BEGIN
 				INSERT INTO @CalculatedDiscount
-				 SELECT 
+				SELECT 
 				 TOP 1
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
@@ -437,19 +416,8 @@ BEGIN
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
@@ -463,7 +431,7 @@ BEGIN
 			ELSE IF (@dblReading > @dblMaxFromForDecremental)
 			BEGIN
 				INSERT INTO @CalculatedDiscount
-				 SELECT
+				SELECT
 				 TOP 1 
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
@@ -482,7 +450,7 @@ BEGIN
 			ELSE IF (@dblReading < @dblMinToForDecremental)
 			BEGIN
 				INSERT INTO @CalculatedDiscount
-				 SELECT
+				SELECT
 				 TOP 1 
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
@@ -503,19 +471,8 @@ BEGIN
 															END
 													END
 				,dblShrink						 =  CASE 
-														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-															THEN
-																CASE
-																	WHEN @strDiscountChargeType = 'Percent'
-																		THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink) * 100
-																	ELSE
-																		dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
-																END
-														ELSE 
-															CASE
-																WHEN @strDiscountChargeType = 'Percent' THEN dblShrink * 100 
-																ELSE dblShrink
-															END
+														WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)
+														ELSE dblShrink
 													END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
@@ -526,6 +483,7 @@ BEGIN
 				,intDiscountUOMId				 = @intDiscountUOMId 				 
 				 FROM @tblExtendedTab ORDER BY intExtendedKey DESC
 			END
+			
 		END								
 	END
 	RETURN

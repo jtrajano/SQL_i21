@@ -504,7 +504,6 @@ BEGIN TRY
 						,@intCustomerStorageId
 						,@dblBalance
 						,0
-						,0
 						,@newBalance OUTPUT
 
 					IF ISNULL(@newBalance, 0) > 0
@@ -602,6 +601,11 @@ BEGIN TRY
 				SET @wsWetWeight = (@wetWeight - @wsWetShrinkWeight)
 				SET @wsNetShrinkWeight = (ISNULL(@wsWetWeight, 0) * ISNULL(@totalNetShrink, 0)) / 100
 				SET @finalShrinkUnits = (@wsGrossShrinkWeight + @wsWetShrinkWeight + @wsNetShrinkWeight)
+				IF @finalGrossWeight < 0
+				BEGIN
+					SET @finalGrossWeight = 0;
+					SET @finalShrinkUnits = 0;
+				END
 
 				UPDATE SCD SET SCD.dblGross = @finalGrossWeight, SCD.dblShrink = @finalShrinkUnits , SCD.dblNet = (@finalGrossWeight - @finalShrinkUnits)
 				FROM tblSCDeliverySheet SCD
