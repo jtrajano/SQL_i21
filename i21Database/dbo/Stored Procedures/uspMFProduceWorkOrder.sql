@@ -310,7 +310,7 @@ BEGIN
 	FROM dbo.tblMFManufacturingProcess
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
-	SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount,@ysnConcatenateParentLotonProduction=ysnConcatenateParentLotonProduction
+	SELECT @ysnConcatenateParentLotonProduction=ysnConcatenateParentLotonProduction
 		FROM tblMFCompanyPreference
 
 	IF @intAttributeTypeId = 2
@@ -355,9 +355,13 @@ BEGIN
 			END
 		END
 
-		IF @ysnProducedQtyByUnitCount = 1
+		IF @ysnProducedQtyByUnitCount IS NULL
+			SELECT @ysnProducedQtyByUnitCount = 0
+
+		IF (@ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
 			OR @intProduceUOMKey = 0
+			OR @intPhysicalItemUOMId=@intProduceUOMKey)
 		BEGIN
 			SELECT @dblUnitQty = 0
 
@@ -411,9 +415,13 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		IF @ysnProducedQtyByUnitCount = 1
+
+		IF @ysnProducedQtyByUnitCount IS NULL
+			SELECT @ysnProducedQtyByUnitCount = 0
+
+		IF (@ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
-			OR @intProduceUOMKey = 0
+			OR @intProduceUOMKey = 0 OR @intPhysicalItemUOMId=@intProduceUOMKey)
 		BEGIN
 			SELECT @dblUnitQty = 0
 
