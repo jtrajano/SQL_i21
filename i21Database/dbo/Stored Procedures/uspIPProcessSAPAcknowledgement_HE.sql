@@ -299,23 +299,7 @@ BEGIN TRY
 							)
 						AND intItemId = @intItemId
 
-				UPDATE tblCTContractFeed
-				SET strFeedStatus = 'Ack Rcvd'
-					,strMessage = 'Success'
-				WHERE intContractHeaderId = @intContractHeaderId
-					AND intContractSeq = (
-						CASE 
-							WHEN ISNULL(@ysnMaxPrice, 0) = 0
-								THEN @strTrackingNo
-							ELSE intContractSeq
-							END
-						)
-					AND strItemNo = @strItemNo
-					AND ISNULL(strFeedStatus, '') IN (
-						'Awt Ack'
-						,'Ack Rcvd'
-						)
-
+				-- To update Item Change, Delete entries
 				UPDATE tblCTContractFeed
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = 'Success'
@@ -328,7 +312,6 @@ BEGIN TRY
 							END
 						)
 					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
-					AND ISNULL(strRowState, '') = 'DELETE'
 					AND ISNULL(strERPPONumber, '') = @strParam
 
 				INSERT INTO @tblMessage (
@@ -365,6 +348,21 @@ BEGIN TRY
 						)
 					AND strItemNo = @strItemNo
 					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+				-- To update Item Change, Delete entries
+				UPDATE tblCTContractFeed
+				SET strFeedStatus = 'Ack Rcvd'
+					,strMessage = @strMessage
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+					AND ISNULL(strERPPONumber, '') = @strParam
 
 				INSERT INTO @tblMessage (
 					strMessageType
