@@ -44,6 +44,7 @@ BEGIN
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
 				,intEntityUserSecurityId = E.intUserID
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -93,6 +94,7 @@ BEGIN
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
 				,intEntityUserSecurityId = E.intUserID
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
