@@ -3414,6 +3414,7 @@ BEGIN
 				END
 			
 				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+				UPDATE @tblCFOriginalTaxZeroQuantity SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
 				INSERT INTO @tblCFTransactionTax
 				(
@@ -4735,6 +4736,7 @@ BEGIN
 				END
 			
 				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+				UPDATE @tblCFOriginalTaxZeroQuantity SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
 				INSERT INTO @tblCFTransactionTax
 				(

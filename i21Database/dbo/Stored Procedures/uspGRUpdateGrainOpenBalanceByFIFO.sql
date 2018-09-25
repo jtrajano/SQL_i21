@@ -56,6 +56,7 @@ BEGIN TRY
 		,[strItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
 		,[dblCharge] DECIMAL(24, 10)
 		,[dblFlatFee] DECIMAL(24, 10)
+		,[dtmDeliveryDate] DATETIME NULL
 	)
 
 	SET @strUpdateType = 'estimate'
@@ -199,6 +200,7 @@ BEGIN TRY
 					,[intItemId]
 					,[strItem]
 					,[dblCharge]
+					,[dtmDeliveryDate]
 				 )
 				SELECT 
 					 @intCustomerStorageId
@@ -210,6 +212,7 @@ BEGIN TRY
 					,@intItemId
 					,@strInventoryItem
 					,0
+					,dtmDeliveryDate
 				FROM tblGRCustomerStorage a
 				JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
 				WHERE [intCustomerStorageId] = @intCustomerStorageId
@@ -415,7 +418,7 @@ BEGIN TRY
 			,[intInvoiceId] = CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
 			,[intInventoryShipmentId] = CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] = dblOpenBalance
-			,[dtmHistoryDate] = GetDATE()
+			,[dtmHistoryDate] = dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
 			,[dblPaidAmount] = [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
 			,[strType] = CASE
 							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 

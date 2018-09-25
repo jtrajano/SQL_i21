@@ -368,7 +368,7 @@ BEGIN
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
-			AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
+			--AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
 
 	ORDER BY t.intInventoryTransactionId ASC 

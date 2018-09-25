@@ -33,6 +33,18 @@ BEGIN TRY
 		,@strProductType NVARCHAR(50)
 		,@intCommodityAttributeId INT
 		,@stri21ProductType NVARCHAR(50)
+	DECLARE @tblICItem TABLE (
+		strOldDescription NVARCHAR(250)
+		,strOldShortName NVARCHAR(50)
+		,intOldProductTypeId INT
+		,strNewDescription NVARCHAR(250)
+		,strNewShortName NVARCHAR(50)
+		,intNewProductTypeId INT
+		)
+	DECLARE @tblICItemUOM TABLE (
+		intItemUOMId INT
+		,intUnitMeasureId INT
+		)
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -476,11 +488,21 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN --Update
+					DELETE
+					FROM @tblICItem
+
 					IF @strCustomerCode = 'JDE'
 					BEGIN
 						UPDATE i
 						SET i.strDescription = si.strDescription
 							,i.strShortName = LEFT(si.strDescription, 50)
+						OUTPUT deleted.strDescription
+							,deleted.strShortName
+							,deleted.intProductTypeId
+							,inserted.strDescription
+							,inserted.strShortName
+							,inserted.intProductTypeId
+						INTO @tblICItem
 						FROM tblICItem i
 						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
 						WHERE intItemId = @intItemId
@@ -493,11 +515,21 @@ BEGIN TRY
 						SET i.strDescription = si.strDescription
 							,i.strShortName = LEFT(si.strDescription, 50)
 							,intProductTypeId = @intCommodityAttributeId
+						OUTPUT deleted.strDescription
+							,deleted.strShortName
+							,deleted.intProductTypeId
+							,inserted.strDescription
+							,inserted.strShortName
+							,inserted.intProductTypeId
+						INTO @tblICItem
 						FROM tblICItem i
 						JOIN tblIPItemStage si ON i.strItemNo = si.strItemNo
 						WHERE intItemId = @intItemId
 							AND si.intStageItemId = @intStageItemId
 					END
+
+					DELETE
+					FROM @tblICItemUOM
 
 					INSERT INTO tblICItemUOM (
 						intItemId
@@ -507,6 +539,9 @@ BEGIN TRY
 						,ysnAllowPurchase
 						,ysnAllowSale
 						)
+					OUTPUT inserted.intItemUOMId
+						,inserted.intUnitMeasureId
+					INTO @tblICItemUOM
 					SELECT @intItemId
 						,um.intUnitMeasureId
 						,iu.dblNumerator / iu.dblDenominator
@@ -571,6 +606,58 @@ BEGIN TRY
 							WHERE s.intStageItemId = @intStageItemId
 								AND ISNULL(s.ysnDeleted, 0) = 1
 							)
+
+					DECLARE @strDetails NVARCHAR(MAX) = ''
+
+					IF EXISTS (
+							SELECT *
+							FROM @tblICItem
+							WHERE IsNULL(strOldDescription, '') <> IsNULL(strNewDescription, '')
+							)
+						SELECT @strDetails += '{"change":"strDescription","iconCls":"small-gear","from":"' + IsNULL(strOldDescription, '') + '","to":"' + IsNULL(strNewDescription, '') + '","leaf":true,"changeDescription":"Description"},'
+						FROM @tblICItem
+
+					IF EXISTS (
+							SELECT *
+							FROM @tblICItem
+							WHERE IsNULL(strOldShortName, '') <> IsNULL(strNewShortName, '')
+							)
+						SELECT @strDetails += '{"change":"strShortName","iconCls":"small-gear","from":"' + IsNULL(strOldShortName, '') + '","to":"' + IsNULL(strNewShortName, '') + '","leaf":true,"changeDescription":"Short Name"},'
+						FROM @tblICItem
+
+					IF EXISTS (
+							SELECT *
+							FROM @tblICItem
+							WHERE IsNULL(intOldProductTypeId, 0) <> IsNULL(intNewProductTypeId, 0)
+							)
+						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + Ltrim(intOldProductTypeId) + '","to":"' + Ltrim(intNewProductTypeId) + '","leaf":true,"changeDescription":"Product Type"},'
+						FROM @tblICItem
+
+					IF EXISTS (
+							SELECT *
+							FROM @tblICItemUOM
+							)
+					BEGIN
+						SELECT @strDetails += '{"change":"tblICItemUOMs","children":['
+
+						SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + strUnitMeasure + '","keyValue":' + ltrim(intItemUOMId) + ',"iconCls":"small-new-plus","leaf":true},'
+						FROM @tblICItemUOM IU
+						JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+						SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Unit of Measure"},'
+					END
+
+					IF (LEN(@strDetails) > 1)
+					BEGIN
+						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+						EXEC uspSMAuditLog @keyValue = @intItemId
+							,@screenName = 'Inventory.view.Item'
+							,@entityId = @intUserId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @strDetails
+					END
 				END
 			END
 
