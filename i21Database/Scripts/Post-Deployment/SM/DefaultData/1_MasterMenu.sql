@@ -474,9 +474,9 @@ UPDATE tblSMMasterMenu SET strCommand = N'i21.view.UserRole?showSearch=true', in
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Portal User Roles', N'System Manager', @SystemManagerActivitiesParentMenuId, N'Portal User Roles', N'Activity', N'Screen', N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Portal User Roles', N'System Manager', @SystemManagerActivitiesParentMenuId, N'Portal User Roles', N'Activity', N'Screen', N'i21.view.PortalRole?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', intSort = 2 WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PortalRole?showSearch=true', intSort = 2 WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Security Policies' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
