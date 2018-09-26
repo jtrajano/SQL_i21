@@ -4,9 +4,9 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , intPOSLogId					= POSLOG.intPOSLogId
 	 , strEODNo						= EOD.strEODNo
 	 , dblOpeningBalance			= EOD.dblOpeningBalance
-	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + EOD.dblExpectedEndingBalance) - ISNULL(CASHRETURN.dblCashReturn, 0)
+	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + EOD.dblExpectedEndingBalance) - ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
 	 , dblFinalEndingBalance		= EOD.dblFinalEndingBalance
-	 , dblCashReturn				= ISNULL(CASHRETURN.dblCashReturn, 0)
+	 , dblCashReturn				= ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
 	 , intCompanyLocationPOSDrawerId= EOD.intCompanyLocationPOSDrawerId
 	 , intCompanyLocationId			= DRAWER.intCompanyLocationId
 	 , intStoreId					= EOD.intStoreId
@@ -67,6 +67,7 @@ OUTER APPLY (
 	FROM dbo.tblARPOS WITH (NOLOCK)
 	WHERE ysnReturn = 1
 	  AND intPOSLogId = POSLOG.intPOSLogId
+	  AND dblTotal < 0
 ) CASHRETURN
 OUTER APPLY(
 	SELECT CR.intPOSLogId, dblTotalCashReceipt = SUM(ISNULL(CR.dblAmount,0))  FROM
@@ -90,3 +91,4 @@ OUTER APPLY(
 	) CR
 	GROUP BY CR.intPOSLogId
 )CASHRECEIPT
+GO
