@@ -170,10 +170,11 @@ SELECT
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = CASE WHEN ISNULL(P.[strNotes],'') = '' THEN (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ((CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
-                                            WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
-                                            ELSE P.[intAccountId]
-                                      END))) ELSE P.[strNotes] END
+    ,[strDescription]               = 'Payment from ' + P.strCustomerName
+	-- CASE WHEN ISNULL(P.[strNotes],'') = '' THEN (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ((CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+    --                                         WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
+    --                                         ELSE P.[intAccountId]
+    --                                   END))) ELSE P.[strNotes] END
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -285,7 +286,7 @@ SELECT
     ,[dblCredit]                    = P.[dblBaseUnappliedAmount]
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intARAccountId])  
+    ,[strDescription]               = 'Overpayment for ' + P.strTransactionId
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -384,7 +385,7 @@ SELECT
     ,[dblCredit]                    = P.[dblBaseAmountPaid]
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intSalesAdvAcct])  
+    ,[strDescription]               = 'Prepayment for ' + P.strTransactionId
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -496,7 +497,7 @@ SELECT
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId =  P.[intDiscountAccount]) 
+    ,[strDescription]               = 'Discount for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -617,7 +618,7 @@ SELECT
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intARAccountId]) 
+    ,[strDescription]               = 'Interest for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -741,7 +742,7 @@ SELECT
     ,[dblCredit]                    = (P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intTransactionAccountId]) 
+    ,[strDescription]               = 'Payment for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -876,7 +877,7 @@ SELECT
     ,[dblCredit]                    = CASE WHEN (ISNULL(( P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal))) ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intGainLossAccount]) 
+    ,[strDescription]               = 'Payment for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -994,7 +995,7 @@ SELECT
     ,[dblCredit]                    = P.[dblBaseDiscount]
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId =  P.[intARAccountId]) 
+    ,[strDescription]               = 'Discount for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
@@ -1116,7 +1117,7 @@ SELECT
     ,[dblCredit]                    = P.[dblBaseInterest]
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intInterestAccount]) 
+    ,[strDescription]               = 'Interest for ' + P.strTransactionNumber
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]

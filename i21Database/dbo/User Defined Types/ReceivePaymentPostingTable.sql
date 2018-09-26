@@ -6,6 +6,7 @@
     ,[strReceivePaymentType]            NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[intEntityCustomerId]              INT             NOT NULL
     ,[strCustomerNumber]                NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strCustomerName]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[intCompanyLocationId]             INT             NULL
     ,[strLocationName]                  NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
     ,[intUndepositedFundsId]            INT             NULL
