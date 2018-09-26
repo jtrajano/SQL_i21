@@ -901,13 +901,15 @@ FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 WHERE IsNULL(CH.ysnSubstituteItem, 0) = 0
 	AND ISNULL(strFeedStatus, '') = ''
+	AND IsNULL(strERPPONumber,'') =''
 
 UPDATE CF
-SET strFeedStatus = ''
+SET strFeedStatus = '',ysnMaxPrice=CH.ysnMaxPrice
 FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 WHERE IsNULL(CH.ysnSubstituteItem, 0) = 1
 	AND ISNULL(strFeedStatus, '') = 'IGNORE'
+	AND IsNULL(strERPPONumber,'') =''
 
 UPDATE tblCTContractFeed
 SET strFeedStatus = 'IGNORE'
