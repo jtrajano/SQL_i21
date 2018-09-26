@@ -877,7 +877,8 @@ BEGIN
 				LEFT JOIN tblSCTicket t on BD.intScaleTicketId = t.intTicketId
 				LEFT JOIN tblEMEntity e on t.intEntityId=e.intEntityId 
 				WHERE 
-				c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
+				B.ysnPosted = 1
+				and c.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V' and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 				and convert(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= convert(datetime,@dtmToDate)
 				and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
