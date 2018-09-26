@@ -116,9 +116,9 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																    WHERE arAcct.strCustomerNumber = LTRIM(RTRIM(cfcus_ar_cus_no))
 																    COLLATE Latin1_General_CI_AS),0)
 				--,@strCardForOwnUse						   = LTRIM(RTRIM())
-				,@intExpenseItemId						   = (SELECT intAccountId 
-																	FROM tblGLAccount 
-																	WHERE strAccountId = LTRIM(RTRIM(cfcus_exp_itm_no))
+				,@intExpenseItemId						   = (SELECT intItemId 
+																	FROM tblICItem 
+																	WHERE strItemNo = LTRIM(RTRIM(cfcus_exp_itm_no))
 																	COLLATE Latin1_General_CI_AS)
 				,@intDefaultFixVehicleNumber			   = ISNULL((SELECT intVehicleId 
 																	FROM tblCFVehicle 
@@ -179,15 +179,16 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				,@intCardvehicleControl					   = LTRIM(RTRIM(cfcus_card_veh_control))
 				,@intCardCustomPin						   = LTRIM(RTRIM(cfcus_card_custom_pin))
 				,@ysnCardForOwnUse						   = (case
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 'FALSE'
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 'TRUE'
+															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 0
+															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
 															 else 'FALSE'
 															 end)
-				,@ysnIgnoreCardTransaction				   = (case
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 'FALSE'
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 'TRUE'
-															 else 'FALSE'
-															 end)
+				,@ysnIgnoreCardTransaction				   = 0
+															--(case
+															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 0
+															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
+															-- else 'FALSE'
+															-- end)
 				,@intCreatedUserId						   = 0		
 				,@dtmCreated							   = CONVERT(VARCHAR(10), GETDATE(), 120)				
 				,@intLastModifiedUserId					   = 0
