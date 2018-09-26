@@ -1181,4 +1181,14 @@ GO
 	BEGIN
 		UPDATE [tblSMScreen] SET strScreenId = 'Signatures', strScreenName = 'Signatures', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Signatures'
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.PortalRole') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Portal User Roles', N'Portal User Roles', N'i21.view.PortalRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Portal User Roles', strScreenName = 'Portal User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'i21.view.PortalRole'
+	END
 GO
