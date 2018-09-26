@@ -79,9 +79,10 @@ FROM
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 'Per-unit retain allocations'
 													ELSE D2.str1099Type END
+		,[intSubLocationId]			=	tblReceived.intSubLocationId
+		,[strSubLocationName]		=	tblReceived.strSubLocationName
 		,[intStorageLocationId]		=	tblReceived.intStorageLocationId		 
 		,[strStorageLocationName]	=	tblReceived.strStorageLocationName
-	
 		,[dblNetShippedWeight]		=	0.00
 		,[dblWeightLoss]			=	0.00
 		,[dblFranchiseWeight]		=	0.00
@@ -138,6 +139,8 @@ FROM
 					  ELSE H.strCurrency 
 				 END AS strCostCurrency					   
 				,EL.strLocationName AS strVendorLocation
+				,B1.intSubLocationId
+				,subLoc.strSubLocationName
 				,B1.intStorageLocationId
 				,ISL.strName AS strStorageLocationName
 				,intLocationId = A1.intLocationId
@@ -163,6 +166,7 @@ FROM
 				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
 				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId AND SubCurrency.ysnSubCurrency = 1
 				LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B1.intStorageLocationId
+				LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc ON B1.intSubLocationId = subLoc.intCompanyLocationSubLocationId
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B1.intForexRateTypeId
 				LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B1.intTaxGroupId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
@@ -200,6 +204,8 @@ FROM
 				,SubCurrency.strCurrency
 				,A1.intCurrencyId
 				,B1.intStorageLocationId
+				,B1.intSubLocationId
+				,subLoc.strSubLocationName
 				,ISL.strName
 				,A1.intLocationId
 				,B1.intForexRateTypeId
@@ -298,8 +304,10 @@ FROM
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 'Per-unit retain allocations'
 													ELSE D2.str1099Type END
-	,[intStorageLocationId]		=	loc.intStorageLocationId	 
-	,[strStorageLocationName]	=	(SELECT TOP 1 strName FROM dbo.tblICStorageLocation WHERE intStorageLocationId =loc.intStorageLocationId)
+	,[intSubLocationId]			=	NULL
+	,[strSubLocationName]		=	NULL
+	,[intStorageLocationId]		=	NULL
+	,[strStorageLocationName]	=	NULL
 	,[dblNetShippedWeight]		=	0.00
 	,[dblWeightLoss]			=	0.00
 	,[dblFranchiseWeight]		=	0.00 
@@ -430,6 +438,8 @@ FROM
 													AND patron.ysnStockStatusQualified = 1 
 													THEN 'Per-unit retain allocations'
 												ELSE D2.str1099Type END
+	,[intSubLocationId]			=	B.intSubLocationId
+	,[strSubLocationName]		=	subLoc.strSubLocationName
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
 	,[dblNetShippedWeight]		=	ISNULL(CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN Loads.dblNet ELSE B.dblGross END,0)
@@ -477,6 +487,7 @@ FROM
 	LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B.intStorageLocationId 
+	LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc ON B.intSubLocationId = subLoc.intCompanyLocationSubLocationId
 	LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 	LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
@@ -598,6 +609,8 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
+		,[intSubLocationId]							=	NULL
+		,[strSubLocationName]						=	NULL
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -746,8 +759,10 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
-		,[intStorageLocationId]						=	NULL
-		,[strStorageLocationName]					=	NULL
+		,[intSubLocationId]							=	CD.intSubLocationId
+		,[strSubLocationName]						=	subLoc.strSubLocationName
+		,[intStorageLocationId]						=	CD.intStorageLocationId
+		,[strStorageLocationName]					=	SLOC.strName
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
@@ -774,7 +789,9 @@ FROM
 	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
-	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId)  
+	LEFT JOIN	tblICStorageLocation	   SLOC ON	SLOC.intStorageLocationId = CD.intStorageLocationId	
+	LEFT JOIN	tblSMCompanyLocationSubLocation	   subLoc ON	CD.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId  AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
@@ -876,8 +893,10 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
-		,[intStorageLocationId]						=	NULL
-		,[strStorageLocationName]					=	NULL
+		,[intSubLocationId]							=	CD.intSubLocationId
+		,[strSubLocationName]						=	subLoc.strSubLocationName
+		,[intStorageLocationId]						=	CD.intStorageLocationId
+		,[strStorageLocationName]					=	SLOC.strName
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
@@ -905,6 +924,8 @@ FROM
 	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
+	LEFT JOIN	tblICStorageLocation	   SLOC ON	SLOC.intStorageLocationId = CD.intStorageLocationId	
+	LEFT JOIN	tblSMCompanyLocationSubLocation	   subLoc ON	CD.intSubLocationId = subLoc.intCompanyLocationSubLocationId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
@@ -1007,8 +1028,10 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
-		,[intStorageLocationId]						=	NULL
-		,[strStorageLocationName]					=	NULL
+		,[intSubLocationId]							=	CD.intSubLocationId
+		,[strSubLocationName]						=	subLoc.strSubLocationName
+		,[intStorageLocationId]						=	CD.intStorageLocationId
+		,[strStorageLocationName]					=	SLOC.strName
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
@@ -1035,7 +1058,9 @@ FROM
 	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
-	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = CC.intCurrencyId  AND F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) 
+	LEFT JOIN	tblICStorageLocation	   SLOC ON	SLOC.intStorageLocationId = CD.intStorageLocationId	
+	LEFT JOIN	tblSMCompanyLocationSubLocation	   subLoc ON	CD.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
@@ -1137,8 +1162,10 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
-		,[intStorageLocationId]						=	NULL
-		,[strStorageLocationName]					=	NULL
+		,[intSubLocationId]							=	CD.intSubLocationId
+		,[strSubLocationName]						=	subLoc.strSubLocationName
+		,[intStorageLocationId]						=	CD.intStorageLocationId
+		,[strStorageLocationName]					=	SLOC.strName
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
@@ -1165,6 +1192,8 @@ FROM
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
 	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
 												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
+	LEFT JOIN	tblICStorageLocation	   SLOC ON	SLOC.intStorageLocationId = CD.intStorageLocationId	
+	LEFT JOIN	tblSMCompanyLocationSubLocation	   subLoc ON	CD.intSubLocationId = subLoc.intCompanyLocationSubLocationId
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -1255,6 +1284,8 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
+		,[intSubLocationId]							=	NULL
+		,[strSubLocationName]						=	NULL
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1351,6 +1382,8 @@ FROM
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
+		,[intSubLocationId]							=	NULL
+		,[strSubLocationName]						=	NULL
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1462,6 +1495,8 @@ FROM
 															AND patron.ysnStockStatusQualified = 1 
 															THEN 'Per-unit retain allocations'
 														ELSE D2.str1099Type END
+		,[intSubLocationId]							=	NULL
+		,[strSubLocationName]						=	NULL
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1577,6 +1612,8 @@ FROM
 	  ,[strVendorLocation]						= NULL
 	  ,[str1099Form]							= NULL		 
 	  ,[str1099Type]							= NULL
+	  ,[intSubLocationId]						= NULL	
+	  ,[strSubLocationName]						= NULL
 	  ,[intStorageLocationId]					= NULL
 	  ,[strStorageLocationName]					= NULL
 	  ,[dblNetShippedWeight]					= 0.00

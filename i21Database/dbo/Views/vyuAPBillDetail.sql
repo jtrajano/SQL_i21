@@ -67,7 +67,7 @@ SELECT
 	B.strBillOfLading,
 	P.strPurchaseOrderNumber,
 	PD.intLineNo AS intPOLineNumber,
-	subLoc.strSubLocationName,
+	ISNULL(subLoc.strSubLocationName, receiptSubLoc.strSubLocationName) AS strSubLocationName,
 	ISNULL(itemContractCountry.strCountry,CommodityAttr.strDescription) AS strCountryOrigin,
 	CD.strERPPONumber,
 	CD.strERPItemNumber,
@@ -124,7 +124,10 @@ LEFT JOIN dbo.tblICStorageLocation SL
 LEFT JOIN (dbo.tblPOPurchaseDetail PD LEFT JOIN dbo.tblPOPurchase P ON PD.intPurchaseId = P.intPurchaseId)
 	ON PD.intPurchaseDetailId = B.intPurchaseDetailId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc
-	ON IRE.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	--ON IRE.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	ON B.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation receiptSubLoc
+	ON IRE.intSubLocationId = receiptSubLoc.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblSMTerm term
 	ON term.intTermID = A.intTermsId
 LEFT JOIN dbo.tblSMPurchasingGroup PG
