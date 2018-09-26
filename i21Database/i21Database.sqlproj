@@ -7083,6 +7083,9 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
     <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportOriginItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceHeaderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceItemDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
