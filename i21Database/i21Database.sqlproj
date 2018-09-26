@@ -7082,6 +7082,9 @@
     <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
     <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
     <Build Include="dbo\Tables\tblHDTicketForImport.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResourcesSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
