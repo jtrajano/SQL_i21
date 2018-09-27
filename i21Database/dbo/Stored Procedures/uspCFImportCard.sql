@@ -183,7 +183,17 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
 															 else 'FALSE'
 															 end)
-				,@ysnIgnoreCardTransaction				   = 0
+				,@ysnIgnoreCardTransaction				   = CASE WHEN cfcus_own_use_yn = 'B' 
+																THEN 1
+																ELSE	
+																	ISNULL((
+																		SELECT TOP 1 1 
+																		FROM cflocmst
+																		WHERE CAST(ISNULL(cfloc_ignore_card,0) AS INT)= CAST(ISNULL(cfcus_card_no,0) AS INT)
+																			AND  cfloc_network_id = cfcus_network_id
+																	),0)
+																END
+															
 															--(case
 															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 0
 															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
