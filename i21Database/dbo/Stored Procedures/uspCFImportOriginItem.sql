@@ -181,7 +181,11 @@
 				)           
 		SELECT
 			[intNetworkId] = (SELECT TOP 1 intNetworkId FROM tblCFNetwork WHERE strNetwork = cfitm_network_id COLLATE Latin1_General_CI_AS)
-			,[intSiteId] = (SELECT TOP 1 intSiteId FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS)
+			,[intSiteId] =	CASE WHEN cfitm_site_no = 'NETWRK'
+							THEN NULL
+							ELSE 
+								(SELECT TOP 1 intSiteId FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS)
+							END
 			,[strProductNumber] = cfitm_prod_no
 			,[intARItemId] = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = cfitm_ar_itm_no  COLLATE Latin1_General_CI_AS )
 			,[strProductDescription] = cfitm_prod_desc
