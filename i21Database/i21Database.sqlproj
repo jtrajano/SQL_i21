@@ -7087,6 +7087,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceItemDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
