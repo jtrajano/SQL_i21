@@ -33,6 +33,8 @@ BEGIN TRY
 	
 	DECLARE @isParentSettleStorage AS BIT
 
+	DECLARE @dtmCreated AS DATETIME
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
@@ -69,6 +71,7 @@ BEGIN TRY
 			,@ItemId = intItemId
 			,@LocationId = intCompanyLocationId
 			,@CommodityStockUomId=intCommodityStockUomId
+			,@dtmCreated = dbo.fnRemoveTimeOnDate(dtmCreated)
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
@@ -354,7 +357,7 @@ BEGIN TRY
 					,@strBatchId
 					,@UserId
 					,0
-						
+					,@dtmCreated
 				UPDATE @GLEntries 
 				SET dblDebit = dblCredit
 				,dblCredit   = dblDebit
