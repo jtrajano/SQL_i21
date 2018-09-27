@@ -759,15 +759,16 @@ WHERE intLocationId IN (
 								ELSE isnull(ysnLicensed, 0) END
 				)
 	
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
 	SELECT 3 AS intSeqId,'Purchase In-Transit',@strDescription,'Purchase In-Transit' AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0)) 
-	 AS dblTotal,strLocationName,strItemNo,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
+	 AS dblTotal,strLocationName,strItemNo,intContractHeaderId,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 			SELECT i.intUnitMeasureId,			
 			isnull(i.dblPurchaseContractShippedQty, 0) as ReserveQty,
 			i.strLocationName,i.strItemNo,
-			i.strContractNumber,i.intCompanyLocationId
+			i.intContractHeaderId,
+			i.intContractDetailId, i.strContractNumber,i.intCompanyLocationId
 			FROM vyuRKPurchaseIntransitView i
 			WHERE i.intCommodityId = @intCommodityId
 			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end
