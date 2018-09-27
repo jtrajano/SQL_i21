@@ -20,6 +20,11 @@ DECLARE @intItemId AS INT
 		,@dtmRebuildDate AS DATETIME = GETDATE() 
 		,@intFobPointId AS INT 
 		,@intEntityId AS INT 
+		,@intBackupId INT 
+
+DECLARE @ShipmentPostScenario AS TINYINT = NULL 
+		,@ShipmentPostScenario_FreightBased AS TINYINT = 1
+		,@ShipmentPostScenario_InTransitBased AS TINYINT = 2
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 SELECT @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode 
@@ -95,7 +100,11 @@ SET @strRemarks = 'Rebuild inventory for ' + @strItems + ' in a '+
 	(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
 	' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
 
-EXEC dbo.uspICBackupInventory @intUserId = @intUserId, @strOperation = 'Rebuild Inventory', @strRemarks = @strRemarks
+EXEC dbo.uspICBackupInventory 
+	@intUserId = @intUserId
+	, @strOperation = 'Rebuild Inventory'
+	, @strRemarks = @strRemarks
+	, @intBackupId = @intBackupId OUTPUT 
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
@@ -1768,18 +1777,46 @@ BEGIN
 			-- Repost 'Inventory Shipment'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Shipment')) 
 			BEGIN 
-				SET @intFobPointId = NULL 
+				-- Check how the shipment was originally posted
+				BEGIN 
+					SET @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
 
-				SELECT	TOP 1   
-						@intFobPointId = fp.intFobPointId
-				FROM	tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
-							ON s.intFreightTermId = ft.intFreightTermId
-						LEFT JOIN tblICFobPoint fp
-							ON fp.strFobPoint = ft.strFobPoint
-				WHERE	s.strShipmentNumber = @strTransactionId  		
+					IF EXISTS (
+						SELECT	TOP 1 1
+						FROM	tblICBackupDetailInventoryTransaction b
+						WHERE	b.intBackupId = @intBackupId 
+								AND b.intItemId = @intItemId
+								AND b.strTransactionId = @strTransactionId
+								AND b.intInTransitSourceLocationId IS NOT NULL 
+								AND b.ysnIsUnposted = 0 
+					)
+					BEGIN 
+						SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+					END 
+				END 
 
-				SELECT	@strAccountToCounterInventory = NULL 
-				--WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
+				-- Check the freight terms if posting scenario is freight-based
+				IF @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
+				BEGIN 
+					SET @intFobPointId = NULL 
+
+					SELECT	TOP 1   
+							@intFobPointId = fp.intFobPointId
+					FROM	tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
+								ON s.intFreightTermId = ft.intFreightTermId
+							LEFT JOIN tblICFobPoint fp
+								ON fp.strFobPoint = ft.strFobPoint
+					WHERE	s.strShipmentNumber = @strTransactionId  		
+
+					SELECT	@strAccountToCounterInventory = NULL 
+					WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
+				END 
+
+				-- Check the freight terms if posting scenario is in-transit-based
+				IF @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+				BEGIN 
+					SET @strAccountToCounterInventory = NULL 
+				END 
 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -1899,39 +1936,18 @@ BEGIN
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
+					--PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
-				INSERT INTO @ItemsForInTransitCosting (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
-					,[dblCost] 
-					,[dblValue] 
-					,[dblSalesPrice] 
-					,[intCurrencyId] 
-					,[dblExchangeRate] 
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intTransactionTypeId] 
-					,[intLotId] 
-					,[intSourceTransactionId] 
-					,[strSourceTransactionId] 
-					,[intSourceTransactionDetailId]
-					,[intFobPointId]
-					,[intInTransitSourceLocationId]
-				)
-				SELECT 	
+				IF 	@strAccountToCounterInventory IS NULL -- If NULL, the shipment was originally posted as in-transit. 
+				BEGIN 
+					INSERT INTO @ItemsForInTransitCosting (
 						[intItemId] 
 						,[intItemLocationId] 
 						,[intItemUOMId] 
 						,[dtmDate] 
-						,-[dblQty] 
+						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
 						,[dblValue] 
@@ -1943,74 +1959,97 @@ BEGIN
 						,[strTransactionId] 
 						,[intTransactionTypeId] 
 						,[intLotId] 
-						,[intTransactionId] 
-						,[strTransactionId] 
-						,[intTransactionDetailId] 
-						,[intFobPointId] = @intFobPointId
-						,[intInTransitSourceLocationId] = t.intItemLocationId
-				FROM	tblICInventoryTransaction t
-				WHERE	t.strTransactionId = @strTransactionId
-						AND t.ysnIsUnposted = 0 
-						AND t.strBatchId = @strBatchId
-						--AND @intFobPointId = @FOB_DESTINATION
-						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
-						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId]
+						,[intFobPointId]
+						,[intInTransitSourceLocationId]
+					)
+					SELECT 	
+							[intItemId] 
+							,[intItemLocationId] 
+							,[intItemUOMId] 
+							,[dtmDate] 
+							,-[dblQty] 
+							,[dblUOMQty] 
+							,[dblCost] 
+							,[dblValue] 
+							,[dblSalesPrice] 
+							,[intCurrencyId] 
+							,[dblExchangeRate] 
+							,[intTransactionId] 
+							,[intTransactionDetailId] 
+							,[strTransactionId] 
+							,[intTransactionTypeId] 
+							,[intLotId] 
+							,[intTransactionId] 
+							,[strTransactionId] 
+							,[intTransactionDetailId] 
+							,[intFobPointId] = @intFobPointId
+							,[intInTransitSourceLocationId] = t.intItemLocationId
+					FROM	tblICInventoryTransaction t
+					WHERE	t.strTransactionId = @strTransactionId
+							AND t.ysnIsUnposted = 0 
+							AND t.strBatchId = @strBatchId
+							AND t.dblQty < 0 -- Ensure the Qty is negative. 
+							AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
-				EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
-					@ItemsForInTransitCosting
-					,@strBatchId
-					,NULL 
-					,@intEntityUserSecurityId
-					,@strGLDescription
+					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
+						@ItemsForInTransitCosting
+						,@strBatchId
+						,NULL 
+						,@intEntityUserSecurityId
+						,@strGLDescription
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
-				SET @intReturnValue = NULL 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]					
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm] 
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]
-						,[dblDebitReport]
-						,[dblCreditForeign]
-						,[dblCreditReport]
-						,[dblReportingRate]
-						,[dblForeignRate]
-				)
-				EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
-					@strBatchId
-					,NULL 
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,@intItemId
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+					)
+					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
+						@strBatchId
+						,NULL 
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@intItemId
 
-				IF @intReturnValue <> 0 
-				BEGIN 
-					--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Shipment'
-					GOTO _EXIT_WITH_ERROR
-				END 	
+					IF @intReturnValue <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Shipment'
+						GOTO _EXIT_WITH_ERROR
+					END 	
+				END 
 			END
 			 				
 			-- Repost 'Credit Memo'
