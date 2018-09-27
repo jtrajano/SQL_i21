@@ -70,9 +70,11 @@
     [intFreightTermId]           INT             NULL,
     [intForDeleteTransId]        INT             NULL,
     [intCustomerId]              INT             NULL,
-    [ysnInvoiced]                  BIT             NULL,
-    [intImportCardId] INT NULL, 
-    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
+    [ysnInvoiced]                BIT             NULL,
+    [intImportCardId]            INT             NULL,
+    [ysnExpensed]                BIT             NULL,
+    [intExpensedItemId]          INT             NULL,
+    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
@@ -81,8 +83,10 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-    CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC)
+    CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC) WITH (FILLFACTOR = 70)
 );
+
+
 
 
 GO

@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
+﻿
+CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
 	 @TransactionId				INT
 	,@UserId					INT	
 	,@Post						BIT	= NULL
@@ -254,7 +255,8 @@ SELECT
 	
 	,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
 												FROM tblARInvoiceDetail 
-												WHERE intInvoiceId = cfTrans.intInvoiceId)
+												WHERE intInvoiceId = cfTrans.intInvoiceId
+												ORDER BY dblQtyShipped DESC)
 	,[intItemId]							= cfSiteItem.intARItemId
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
@@ -356,6 +358,243 @@ LEFT OUTER JOIN
 	tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 WHERE cfTrans.intTransactionId = @TransactionId
+
+----------INSERT ENTRIES FOR EXPENSED TRANS-----------
+IF(ISNULL(@Post,0) = 1) 
+BEGIN
+	INSERT INTO @EntriesForInvoice(
+	 [strTransactionType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[ysnUseOriginIdAsInvoiceNumber]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]					
+	,[intTempDetailIdForTaxes]
+	,[strType]
+	,[ysnUpdateAvailableDiscount]
+	,[strItemTermDiscountBy]
+	,[dblItemTermDiscount]
+	,[dtmPostDate]
+	,[ysnImpactInventory]
+)
+SELECT
+	 [strTransactionType]					= (case
+												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
+												else 'Invoice'
+											  end)
+	,[strSourceTransaction]					= 'CF Tran'
+	,[intSourceId]							= cfTrans.intTransactionId
+	,[strSourceId]							= cfTrans.strTransactionId
+	,[intInvoiceId]							= I.intInvoiceId--@InvoiceId --NULL Value will create new invoice
+	,[intEntityCustomerId]					= (case
+												when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
+												else cfCardAccount.intCustomerId
+											  end)
+	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
+	,[intCurrencyId]						= I.intCurrencyId
+	,[intTermId]							= @companyConfigTermId
+	,[dtmDate]								= cfTrans.dtmTransactionDate
+	,[dtmDueDate]							= NULL
+	,[dtmShipDate]							= cfTrans.dtmTransactionDate
+	,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
+	,[intFreightTermId]						= @companyConfigFreightTermId --I.[intFreightTermId]
+	,[intShipViaId]							= I.[intShipViaId]
+	,[intPaymentMethodId]					= I.[intPaymentMethodId]
+	,[strInvoiceOriginId]					= cfTrans.strTransactionId
+	,[ysnUseOriginIdAsInvoiceNumber]		= 1
+	,[strPONumber]							= cfTrans.strPONumber
+	,[strBOLNumber]							= ''
+	,[strComments]							= ''
+	,[intShipToLocationId]					= I.[intShipToLocationId]
+	,[intBillToLocationId]					= I.[intBillToLocationId]
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0  --0 OS
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= NULL
+	,[intLoadDistributionHeaderId]			= NULL
+	,[strActualCostId]						= NULL
+	,[intShipmentId]						= NULL
+	,[intTransactionId]						= cfTrans.intTransactionId
+	,[intEntityId]							= @UserEntityId
+	,[ysnResetDetails]						= 0
+	,[ysnPost]								= @Post
+	
+	,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+												FROM tblARInvoiceDetail 
+												WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0)
+	,[intItemId]							= cfSiteItem.intARItemId
+	,[ysnInventory]							= 1
+	,[strItemDescription]					= cfSiteItem.strDescription 
+	,[intItemUOMId]							= cfSiteItem.intIssueUOMId
+	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity) * -1
+	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity) * -1
+	,[dblDiscount]							= 0
+	,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
+	,[ysnRefreshPrice]						= 0
+	,[strMaintenanceType]					= ''
+    ,[strFrequency]							= ''
+    ,[dtmMaintenanceDate]					= NULL
+    ,[dblMaintenanceAmount]					= NULL
+    ,[dblLicenseAmount]						= NULL
+	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
+	,[ysnRecomputeTax]						= 0 
+											  -- (CASE 
+													--WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1 OR cfSiteItem.intTaxGroupId IS NULL
+													--THEN 0
+													--ELSE 1
+											  -- END)
+	,[intSCInvoiceId]						= NULL
+	,[strSCInvoiceNumber]					= ''
+	,[intInventoryShipmentItemId]			= NULL
+	,[strShipmentNumber]					= ''
+	,[intSalesOrderDetailId]				= NULL
+	,[strSalesOrderNumber]					= ''
+	,[intContractHeaderId]					= cfTrans.intContractId
+	,[intContractDetailId]					= cfTrans.intContractDetailId
+	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[intTicketId]							= NULL
+	,[intTicketHoursWorkedId]				= NULL
+	,[intSiteId]							= NULL
+	,[strBillingBy]							= ''
+	,[dblPercentFull]						= NULL
+	,[dblNewMeterReading]					= NULL
+	,[dblPreviousMeterReading]				= NULL
+	,[dblConversionFactor]					= NULL
+	,[intPerformerId]						= NULL
+	,[ysnLeaseBilling]						= NULL
+	,[ysnVirtualMeterReading]				= NULL
+	,[ysnClearDetailTaxes]					= 0
+	,[intTempDetailIdForTaxes]				= @TransactionId
+	,[strType]								= 'CF Tran'
+	,[ysnUpdateAvailableDiscount]			= ISNULL(@UpdateAvailableDiscount,0)
+	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
+	,[dblItemTermDiscount]					= @Discount
+	,[dtmPostedDate]						= cfTrans.dtmPostedDate
+	,[ysnImpactInventory]					= 															
+											(case
+											when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Remote' 
+											OR  RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Extended Remote'
+											OR ISNULL((SELECT TOP 1 ysnCaptiveSite FROM tblCFSite where intSiteId = cfTrans.intSiteId),0) = 1
+											then 0
+											else 1
+											end)
+	
+FROM tblCFTransaction cfTrans
+INNER JOIN tblCFNetwork cfNetwork
+ON cfTrans.intNetworkId = cfNetwork.intNetworkId
+LEFT JOIN (SELECT icfCards.intCardId
+				   ,icfAccount.intAccountId
+				   ,icfAccount.intSalesPersonId
+				   ,icfAccount.intCustomerId
+				   ,icfAccount.intTermsCode	 
+			FROM tblCFCard icfCards
+			INNER JOIN tblCFAccount icfAccount
+			ON icfCards.intAccountId = icfAccount.intAccountId)
+			AS cfCardAccount
+ON cfTrans.intCardId = cfCardAccount.intCardId
+INNER JOIN (SELECT  icfSite.* 
+					,icfItem.intItemId
+					,icfItem.intARItemId
+					,iicItemLoc.intItemLocationId
+					,iicItemLoc.intIssueUOMId
+					,iicItem.strDescription
+			FROM tblCFSite icfSite
+			INNER JOIN tblCFNetwork icfNetwork
+			ON icfNetwork.intNetworkId = icfSite.intNetworkId
+			INNER JOIN tblCFItem icfItem
+			ON icfSite.intSiteId = icfItem.intSiteId 
+			OR icfNetwork.intNetworkId = icfItem.intNetworkId
+			INNER JOIN tblICItem iicItem
+			ON icfItem.intARItemId = iicItem.intItemId
+			LEFT JOIN tblICItemLocation iicItemLoc
+			ON iicItemLoc.intLocationId = icfSite.intARLocationId 
+			AND iicItemLoc.intItemId = icfItem.intARItemId)
+			AS cfSiteItem
+ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
+AND cfSiteItem.intItemId = cfTrans.intProductId
+--INNER JOIN (SELECT * 
+--			FROM tblCFTransactionPrice
+--			WHERE strTransactionPriceId = 'Net Price')
+--			AS cfTransPrice
+--ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
+--LEFT JOIN vyuCTContractDetailView ctContracts
+--ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
+LEFT OUTER JOIN
+	tblARInvoice I
+		ON cfTrans.intInvoiceId = I.intInvoiceId
+WHERE cfTrans.intTransactionId = @TransactionId AND ISNULL(ysnExpensed,0) = 1
+END
+----------INSERT ENTRIES FOR EXPENSED TRANS-----------
 
 
 DECLARE @InvoiceEntriesTEMP	InvoiceStagingTable
@@ -529,73 +768,117 @@ ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 ,[ysnImpactInventory]
 FROM @EntriesForInvoice
 
---select intCurrencyId, * from @EntriesForInvoice
-
-
---SELECT * FROM @InvoiceEntriesTEMP
-
-
---SELECT * FROM @EntriesForInvoice
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+INSERT INTO @TaxDetails
+	(
+	[intDetailId] 
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[dblRate]
+	,[intTaxAccountId]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[ysnTaxExempt]
+	,[ysnTaxOnly]
+	,[strNotes]
+	,[intTempDetailIdForTaxes]
+	,[ysnClearExisting])
+SELECT
+[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId ORDER BY dblQtyShipped DESC)
+,[intTaxGroupId]			= NULL
+,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
+,[intTaxClassId]			= cfTaxCode.intTaxClassId
+,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
+,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
+,[dblRate]					= cfTransactionTax.dblTaxRate
+,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
+,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
+,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+,[ysnTaxAdjusted]			= 0
+,[ysnSeparateOnInvoice]		= 0 
+,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
+,[ysnTaxExempt]				= 0
+,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
+,[strNotes]					= ''
+,[intTempDetailIdForTaxes]	= @TransactionId
+,[ysnClearExisting]			= 1
+FROM 
+tblCFTransaction cfTransaction
+INNER JOIN tblCFTransactionTax cfTransactionTax
+ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
+INNER JOIN tblSMTaxCode  cfTaxCode
+ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+WHERE cfTransaction.intTransactionId = @TransactionId
 
---IF (@ysnRemoteTransaction = 1)
---BEGIN
+----------INSERT TAX ENTRIES FOR EXPENSED TRANS-----------
+IF(ISNULL(@Post,0) = 1)
+BEGIN
 	INSERT INTO @TaxDetails
-		(
-		[intDetailId] 
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[dblRate]
-		,[intTaxAccountId]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[ysnTaxAdjusted]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[ysnTaxExempt]
-		,[ysnTaxOnly]
-		,[strNotes]
-		,[intTempDetailIdForTaxes]
-		,[ysnClearExisting])
-	SELECT
-	[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
-	,[intTaxGroupId]			= NULL
-	,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
-	,[intTaxClassId]			= cfTaxCode.intTaxClassId
-	,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
-	,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
-	,[dblRate]					= cfTransactionTax.dblTaxRate
-	,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-	,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
-	,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-	,[ysnTaxAdjusted]			= 0
-	,[ysnSeparateOnInvoice]		= 0 
-	,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
-	,[ysnTaxExempt]				= 0
-	,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
-	,[strNotes]					= ''
-	,[intTempDetailIdForTaxes]	= @TransactionId
-	,[ysnClearExisting]			= 1
-	FROM 
-	tblCFTransaction cfTransaction
-	INNER JOIN tblCFTransactionTax cfTransactionTax
-	ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
-	INNER JOIN tblSMTaxCode  cfTaxCode
-	ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
-	--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
-	--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
-	WHERE cfTransaction.intTransactionId = @TransactionId
+	(
+	[intDetailId] 
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[dblRate]
+	,[intTaxAccountId]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[ysnTaxExempt]
+	,[ysnTaxOnly]
+	,[strNotes]
+	,[intTempDetailIdForTaxes]
+	,[ysnClearExisting])
+SELECT
+[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ISNULL(dblQtyShipped,0) < 0)
+,[intTaxGroupId]			= NULL
+,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
+,[intTaxClassId]			= cfTaxCode.intTaxClassId
+,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
+,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
+,[dblRate]					= cfTransactionTax.dblTaxRate
+,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
+,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1
+,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1 --(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+,[ysnTaxAdjusted]			= 0
+,[ysnSeparateOnInvoice]		= 0 
+,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
+,[ysnTaxExempt]				= 0
+,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
+,[strNotes]					= ''
+,[intTempDetailIdForTaxes]	= @TransactionId
+,[ysnClearExisting]			= 1
+FROM 
+tblCFTransaction cfTransaction
+INNER JOIN tblCFTransactionTax cfTransactionTax
+ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
+INNER JOIN tblSMTaxCode  cfTaxCode
+ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+WHERE cfTransaction.intTransactionId = @TransactionId AND ISNULL(ysnExpensed,0) = 1
+END
+----------INSERT TAX ENTRIES FOR EXPENSED TRANS-----------
 
---END
 
---SELECT * FROM @EntriesForInvoice
---SELECT * FROM @TaxDetails
+SELECT intInvoiceDetailId,intInvoiceId,dblQtyOrdered,dblQtyShipped,* FROM @InvoiceEntriesTEMP
 
---SELECT * FROM @EntriesForInvoice
+SELECT SUM([dblPrice]) AS dblTotalAmount , SUM([dblQtyOrdered]) AS dblTotalQtyOrdered , SUM(dblQtyShipped) AS dblTotalQtyShipped , [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+FROM @InvoiceEntriesTEMP
+GROUP BY [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
 
 
 EXEC [dbo].[uspARProcessInvoicesByBatch]

@@ -1,5 +1,7 @@
-﻿CREATE VIEW [dbo].[vyuCFSearchTransaction]
+﻿
+CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
+
 
 SELECT   
 	cfVehicle.strVehicleNumber
@@ -109,7 +111,11 @@ SELECT
                              END 
                         ELSE 'Unknown' 
                     END)
+	,ysnExpensed
+	,icExpense.strItemNo AS strExpenseItem
 FROM dbo.tblCFTransaction AS cfTransaction 
+LEFT OUTER JOIN tblICItem AS icExpense
+ON cfTransaction.intExpensedItemId = icExpense.intItemId
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
 		LEFT JOIN tblEMEntity emEntity 

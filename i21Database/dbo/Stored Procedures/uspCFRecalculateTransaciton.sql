@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -5768,6 +5769,45 @@ BEGIN
 	-------------- End get card type/ dual card
 	------------------------------------------------------
 
+	
+	-----------------------------------------------------
+	-------------- Start Zero Dollar Transaction
+	------------------------------------------------------
+	DECLARE @ysnExpensed AS BIT = 0
+	DECLARE @intExpensedItemId AS INT
+
+	SELECT 
+	@ysnExpensed = ysnCardForOwnUse 
+	,@intExpensedItemId = intExpenseItemId
+	FROM tblCFVehicle WHERE intVehicleId = @intVehicleId 
+
+	IF(ISNULL(@ysnExpensed,0) = 0)
+	BEGIN
+
+		SELECT 
+		@ysnExpensed = ysnCardForOwnUse 
+		,@intExpensedItemId = intExpenseItemId
+		FROM tblCFCard WHERE intCardId = @intCardId 
+
+	END
+
+
+
+	IF(ISNULL(@ysnExpensed,0) = 0)
+	BEGIN
+		SET @intExpensedItemId = NULL
+	END
+	
+	------------------------------------------------------
+	-------------- End Zero Dollar Transaction
+	------------------------------------------------------
+	
+
+
+
+
+
+
 	IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND (@ysnDualCard = 1 OR (@intCardTypeId = 0 OR @intCardTypeId IS NULL)))
 	BEGIN
 		SET @intVehicleId = NULL
@@ -5992,6 +6032,8 @@ BEGIN
 			,dtmPriceIndexDate		   = @dtmPriceIndexDate		
 			,ysnDuplicate			   = @ysnDuplicate			
 			,ysnInvalid				   = @ysnInvalid	
+			,ysnExpensed			   = @ysnExpensed
+			,intExpensedItemId		   = @intExpensedItemId
 			,dblQuantity			   = @dblQuantity
 			,intSiteGroupId			   = @intSiteGroupId
 			,dblCalculatedGrossPrice   = @dblCalculatedGrossPrice
@@ -6425,6 +6467,8 @@ BEGIN
 			,dblOriginalNetPrice	
 			,dblCalculatedPumpPrice	
 			,dblOriginalPumpPrice	
+			,ysnExpensed			  
+			,intExpensedItemId		  
 			)
 			SELECT
 			 @intItemId					 AS intItemId
@@ -6474,6 +6518,8 @@ BEGIN
 			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
 			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
 			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice	
+			,@ysnExpensed
+			,@intExpensedItemId
 		END
 	ELSE
 		BEGIN
@@ -6525,6 +6571,8 @@ BEGIN
 			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
 			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
 			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice
+			,@ysnExpensed				 AS ysnExpensed
+			,@intExpensedItemId			 AS intExpensedItemId
 
 		END
 	---------------------------------------------------
