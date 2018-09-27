@@ -85,6 +85,14 @@ SELECT L.intLoadId
 	,L.strComments
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)
+	,strTransUsedBy = CASE L.intTransUsedBy
+						WHEN 2
+							THEN 'Scale'
+						WHEN 3
+							THEN 'Transport Load'
+						ELSE
+							'None'
+						END COLLATE Latin1_General_CI_AS
     ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
 								THEN 
 								CAST(ST.strTicketNumber AS VARCHAR(100))
