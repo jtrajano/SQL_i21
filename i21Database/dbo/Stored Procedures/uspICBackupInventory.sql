@@ -2,12 +2,13 @@
 	  @intUserId INT
 	, @strOperation VARCHAR(50)
 	, @strRemarks VARCHAR(200) = NULL
+	, @intBackupId INT = NULL OUTPUT 
 AS
 
 INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks)
 SELECT GETDATE(), @intUserId, @strOperation, @strRemarks
 
-DECLARE @intBackupId INT
+--DECLARE @intBackupId INT
 SET @intBackupId = SCOPE_IDENTITY()
 
 INSERT INTO tblICBackupDetailLot(			
