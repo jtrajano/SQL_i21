@@ -97,7 +97,7 @@ BEGIN
 		RETURN -80003
 	END
 
-	IF dbo.fnDateLessThan(@dtmReceiptDate, @dtmReturnDate) = 1
+	IF dbo.fnDateLessThan(@dtmReturnDate, @dtmReceiptDate) = 1
 	BEGIN 
 		DECLARE @strReturnDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmReturnDate, 101) 
 		DECLARE @strReceiptDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmReceiptDate, 101) 

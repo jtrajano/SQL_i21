@@ -121,7 +121,7 @@ BEGIN
 		WHEN @msgId = 80105 THEN 'Invalid Owner. %s is not configured as an Owner for %s. Please check the Item setup.'
 		WHEN @msgId = 80106 THEN 'Internal Error. The Adjust By Quantity is required to be a negative value.'
 		WHEN @msgId = 80107 THEN 'Unable to unpost the Inventory Transfer. The %s already have a receipt. Please remove it from the receipt "%s"'
-		WHEN @msgId = 80108 THEN 'Check the return date on the transaction. Return date is %s, while %s in %s is dated %s.'
+		WHEN @msgId = 80108 THEN 'Return date cannot be dated earlier than the receipt. Return date is %s while %s in %s is dated %s.'
 		WHEN @msgId = 80109 THEN 'Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.'
 		WHEN @msgId = 80110 THEN 'Debit Memo is no longer needed. All items have Debit Memo.'
 		WHEN @msgId = 80111 THEN 'Voucher is no longer needed. All items have Voucher.'
