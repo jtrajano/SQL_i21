@@ -6,8 +6,10 @@ LEFT JOIN (
 	SELECT intSourceTransactionId
 		 , intBankDepositId
 		 , intUndepositedFundId
+		 , strSourceTransactionId
 	FROM dbo.tblCMUndepositedFund WITH (NOLOCK)
 ) UF ON UF.intSourceTransactionId = P.intPaymentId
+	AND UF.strSourceTransactionId = P.strRecordNumber
 OUTER APPLY (
 	SELECT TOP 1 intUndepositedFundId
 	FROM dbo.tblCMBankTransactionDetail BTD
