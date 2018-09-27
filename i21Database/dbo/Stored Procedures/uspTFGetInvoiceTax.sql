@@ -45,12 +45,14 @@ BEGIN TRY
 		, @FormCode NVARCHAR(50) = NULL
 		, @ScheduleCode NVARCHAR(50) = NULL
 		, @TaxAuthorityCode NVARCHAR(50) = NULL
+		, @Type NVARCHAR(100) = NULL
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
 		SELECT TOP 1 @FormCode = strFormCode
 			, @ScheduleCode = strScheduleCode
 			, @TaxAuthorityCode = strTaxAuthorityCode
+			, @Type = strType
 		FROM tblTFReportingComponent
 		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 		WHERE intReportingComponentId = @RCId
@@ -448,7 +450,7 @@ BEGIN TRY
 		BEGIN
 			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
 			BEGIN
-				-- Include all CF Trans for schedule 5CRD and 6CRD 
+				-- Include CF Trans only
 				DELETE @tmpInvoiceTransaction WHERE intId IN (
 					SELECT Trans.intId
 					FROM @tmpInvoiceTransaction Trans
@@ -461,7 +463,7 @@ BEGIN TRY
 			END
 			ELSE IF (@ScheduleCode IN ('5BLK', '6BLK', '5LO', '6', '7', '7E', '8', '10', '10AC', '10AD', '10D'))
 			BEGIN
-				-- Exclude all non CF Trans
+				-- Exclude non CF Trans
 				DELETE @tmpInvoiceTransaction WHERE intId IN (
 					SELECT Trans.intId
 					FROM @tmpInvoiceTransaction Trans
@@ -474,7 +476,7 @@ BEGIN TRY
 			END
 			ELSE IF (@ScheduleCode IN ('5'))
 			BEGIN
-				-- Exclude all non CF Trans AND Tank Delivery
+				-- Exclude non CF Trans AND Tank Delivery
 				DELETE @tmpInvoiceTransaction WHERE intId IN (
 					SELECT Trans.intId
 					FROM @tmpInvoiceTransaction Trans
@@ -483,6 +485,19 @@ BEGIN TRY
 					WHERE Trans.strTransactionType = 'Invoice'
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType = 'CF Tran' OR Invoice.strType = 'Tank Delivery'
+				)
+			END
+			ELSE IF (@ScheduleCode IN ('1') AND @Type IN ('Gasoline (Exports to WA)', 'Aviation (Exports to WA)', 'Jet Fuel (Exports to WA)'))
+			BEGIN
+				-- Include Tank Delivery SI only
+				DELETE @tmpInvoiceTransaction WHERE intId IN (
+					SELECT Trans.intId
+					FROM @tmpInvoiceTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strType <> 'Tank Delivery'
 				)
 			END
 		END
