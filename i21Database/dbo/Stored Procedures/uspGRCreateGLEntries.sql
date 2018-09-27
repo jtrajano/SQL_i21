@@ -54,7 +54,7 @@ BEGIN
 	/*do not include the storage charge when unposting the settlement
 		if it was posted before without the storage charge
 	*/
-	IF @ysnPost = 0 AND @dtmCreated > CAST('9/24/2018' AS DATE)
+	IF @dtmCreated > CAST('9/24/2018' AS DATE)
 	BEGIN
 		SELECT TOP 1 @intStorageChargeItemId = intItemId
 		FROM tblICItem 
