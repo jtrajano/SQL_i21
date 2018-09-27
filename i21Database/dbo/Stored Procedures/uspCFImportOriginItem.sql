@@ -104,7 +104,7 @@
 		FROM cfitmmst 
 		WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblCFItem WHERE strProductNumber = cfitm_prod_no COLLATE Latin1_General_CI_AS)
 			AND EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = cfitm_ar_itm_no  COLLATE Latin1_General_CI_AS )
-			AND NOT EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS)
+			AND NOT EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS AND cfitm_site_no <> 'NETWRK' )
 
 		--------------------------------------------------------------------
 		--------------------------------------------------------------------------
@@ -138,8 +138,8 @@
 		FROM cfitmmst 
 		WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblCFItem WHERE strProductNumber = cfitm_prod_no COLLATE Latin1_General_CI_AS)
 			AND EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = cfitm_ar_itm_no  COLLATE Latin1_General_CI_AS )
-			AND EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS)
-			AND NOT EXISTS(SELECT TOP 1 1 FROM tblCFNetwork WHERE strNetwork = cfitm_network_id COLLATE Latin1_General_CI_AS)
+			AND EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS AND cfitm_site_no <> 'NETWRK' )
+			AND NOT EXISTS(SELECT TOP 1 1 FROM tblCFNetwork WHERE strNetwork = cfitm_network_id COLLATE Latin1_General_CI_AS )
 		--------------------------------------------------------------------
 		--------------------------------------------------------------------------
 		
@@ -152,7 +152,7 @@
 		FROM cfitmmst
 		WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblCFItem WHERE strProductNumber = cfitm_prod_no COLLATE Latin1_General_CI_AS)
 			AND EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = cfitm_ar_itm_no  COLLATE Latin1_General_CI_AS )
-			AND EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS)
+			AND EXISTS (SELECT TOP 1 1 FROM tblCFSite WHERE strSiteNumber = cfitm_site_no  COLLATE Latin1_General_CI_AS AND cfitm_site_no <> 'NETWRK' )
 			AND EXISTS (SELECT TOP 1 1 FROM tblCFNetwork WHERE strNetwork = cfitm_network_id COLLATE Latin1_General_CI_AS)
 
 
