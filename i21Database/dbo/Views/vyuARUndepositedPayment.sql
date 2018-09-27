@@ -9,7 +9,7 @@ SELECT
 	,[strSourceSystem]			= 'AR'
 	,[intBankAccountId]			= A.[intBankAccountId]
 	,[intLocationId]			= A.[intLocationId] 
-	,[strPaymentMethod]			= SMPM.[strPaymentMethod]					
+	,[strPaymentMethod]			= SMPM.[strPaymentMethod]
 
 FROM 
 	tblARPayment A
@@ -24,7 +24,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	tblCMUndepositedFund CM
 		ON 	A.intPaymentId = CM.intSourceTransactionId 
-		AND A.strRecordNumber = CM.strSourceTransactionId 							 
+		AND A.strRecordNumber = CM.strSourceTransactionId 
 		AND CM.strSourceSystem = 'AR'
 LEFT OUTER JOIN
 	tblSMPaymentMethod SMPM
@@ -73,6 +73,33 @@ WHERE
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
 	AND (ISNULL(A.ysnImportedFromOrigin,0) <> 1 AND ISNULL(A.ysnImportedAsPosted,0) <> 1)
-GO
 
+UNION ALL	
+	
+SELECT
+	 [strSourceTransactionId]	= EOD.strEODNo
+	,[intSourceTransactionId]	= EOD.intPOSEndOfDayId 
+	,[dtmDate]					= EOD.dtmClose
+	,[strName]					= ENTITY.strName
+	,[dblAmount]				= EOD.dblFinalEndingBalance - (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0))
+	,[strSourceSystem]			= 'AR'
+	,[intBankAccountId]			= NULL
+	,[intLocationId]			= DRAWER.intCompanyLocationId	
+	,[strPaymentMethod]			= 'Cash'								
+FROM tblARPOSEndOfDay EOD
+INNER JOIN (
+	SELECT
+		 intEntityId
+		,strName
+	FROM tblEMEntity
+)ENTITY ON EOD.intEntityId = ENTITY.intEntityId
+INNER JOIN(
+	SELECT 
+		intCompanyLocationId,
+		intCompanyLocationPOSDrawerId
+	FROM tblSMCompanyLocationPOSDrawer
+)DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
+WHERE EOD.ysnClosed = 1
+AND (EOD.dblFinalEndingBalance - (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0))) <> 0
+GO
 

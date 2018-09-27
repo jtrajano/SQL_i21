@@ -7083,6 +7083,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
     <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
 	<Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
