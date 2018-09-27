@@ -15,7 +15,7 @@ RETURNS TABLE AS RETURN
 		[dblTax]					= A.dblTax,
 		[dblAdjustedTax]			= ISNULL(NULLIF(A.dblAdjustedTax,0),A.dblTax),
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
-		[ysnSeparateOnBill]			= 'false',
+		[ysnSeparateOnBill]			= CAST(0 AS BIT),
 		[ysnCheckOffTax]			= A.ysnCheckoffTax,
 		[strTaxCode]				= A.strTaxCode,
 		[ysnTaxOnly]				= A.ysnTaxOnly
