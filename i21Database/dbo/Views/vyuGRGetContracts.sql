@@ -14,12 +14,12 @@ SELECT
 	,intCompanyLocationId				= CD.intCompanyLocationId
 	,strLocationName					= CL.strLocationName
 	,dblCashPrice						= AD.dblSeqPrice
-	,dblCashPriceInItemStockUOM			= dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, ItemUOM.intItemUOMId, AD.dblSeqPrice)
+	,dblCashPriceInItemStockUOM			= dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM.intItemUOMId, CD.intPriceItemUOMId, AD.dblSeqPrice)
 	,dblAvailableQty					= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
 	,dblAvailableQtyInItemStockUOM		= dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, ItemUOM.intItemUOMId, (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)))
 	,dblFutures							= CD.dblFutures
 	,dblBasis							= CD.dblBasis
-	,dblBasisInItemStockUOM				= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, CD.intBasisUOMId, ItemUOM.intItemUOMId, CD.dblBasis)
+	,dblBasisInItemStockUOM				= dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM.intItemUOMId, CD.intBasisUOMId, CD.dblBasis)
 	,intPricingTypeId					= CD.intPricingTypeId
 	,strPricingType						= PT.strPricingType
 	,dtmStartDate						= CD.dtmStartDate
@@ -27,7 +27,7 @@ SELECT
 	,strContractStatus					= CS.strContractStatus
 	,ysnUnlimitedQuantity				= CH.ysnUnlimitedQuantity	
 	,intContractUOMId					= AD.intSeqPriceUOMId
-	,dblCostUnitQty						= ItemUOM.dblUnitQty
+	,dblCostUnitQty						= dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, ItemUOM.intItemUOMId, 1)
 	,ysnIsAllowedToShow					= CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)
 	,ysnIsPricedOrBasis					= CAST(CASE WHEN CD.intPricingTypeId IN (1,2) THEN 1 ELSE 0 END AS BIT)
 	,ysnIsAvailable						= CAST(
