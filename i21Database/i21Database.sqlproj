@@ -7082,6 +7082,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
     <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
+	<Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
