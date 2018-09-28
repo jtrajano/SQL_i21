@@ -53,6 +53,8 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
 		,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
 		,@COST_ADJ_TYPE_Adjust_Auto_Variance AS INT = 10
+		,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add AS INT = 11
+		,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce AS INT = 12
 					
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -894,7 +896,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '1' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -944,7 +946,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '2' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -995,7 +997,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '3' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1057,7 +1059,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '4' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1106,7 +1108,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '5' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1160,7 +1162,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '6' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1208,7 +1210,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '7' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1242,9 +1244,9 @@ FROM	ForGLEntries_CTE
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit
 
 /*-----------------------------------------------------------------------------------
-  GL Entries for Adjust In-Transit Inventory (Reduce Inventory from Shipment)
-  Debit		... In-Transit 
-  Credit	..................... Inventory   
+  GL Entries for Adjust In-Transit from Transfer Order
+  Debit		... Inventory   
+  Credit	.......................... In-Transit   
 -----------------------------------------------------------------------------------*/
 UNION ALL 
 SELECT	
@@ -1262,55 +1264,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
-		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
-		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= NULL 
-		,strTransactionId			= ForGLEntries_CTE.strTransactionId
-		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
-		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
-		,dblCreditReport			= NULL 
-		,dblReportingRate			= NULL 
-		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
-FROM	ForGLEntries_CTE 
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
-		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
-		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory
-UNION ALL 
-SELECT	
-		dtmDate						= ForGLEntries_CTE.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Credit.Value
-		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= dbo.fnCreateCostAdjGLDescription(
-										@strGLDescription
-										,tblGLAccount.strDescription
-										,ForGLEntries_CTE.strItemNo
-										,ForGLEntries_CTE.strRelatedTransactionId
-									)
-		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '9' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1341,7 +1295,55 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
+		,strCode					= 'ICA' 
+		,strReference				= '8' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= NULL 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit Sold (In Transit reduced from Invoice)
@@ -1364,7 +1366,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '10' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1412,7 +1414,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '11' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1472,7 +1474,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '12' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1526,7 +1528,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '13' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1575,7 +1577,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '14' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1629,7 +1631,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '15' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1679,7 +1681,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '' 
+		,strReference				= '16' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -2136,7 +2138,7 @@ BEGIN
 											,DecimalDiscrepancy.strRelatedTransactionId
 										)
 			,strCode					= 'ICA' 
-			,strReference				= '' 
+			,strReference				= '17' 
 			,intCurrencyId				= DecimalDiscrepancy.intCurrencyId
 			,dblExchangeRate			= DecimalDiscrepancy.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
@@ -2260,6 +2262,7 @@ BEGIN
 END 
 
 -- Return the GL entries back to the caller. 
+DECLARE @debug AS BIT = 0
 SELECT		
 		dtmDate
 		,strBatchId
@@ -2270,7 +2273,7 @@ SELECT
 		,dblCreditUnit
 		,strDescription
 		,strCode
-		,strReference
+		,strReference = CASE WHEN @debug = 0 THEN '' ELSE strReference END 
 		,intCurrencyId
 		,dblExchangeRate
 		,dtmDateEntered
