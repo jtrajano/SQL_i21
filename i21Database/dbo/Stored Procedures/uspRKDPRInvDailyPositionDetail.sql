@@ -758,7 +758,28 @@ WHERE intLocationId IN (
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-				
+	
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
+	SELECT 3 AS intSeqId,'Purchase In-Transit',@strDescription,'Purchase In-Transit' AS [strType],
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0)) 
+	 AS dblTotal,strLocationName,strItemNo,intContractHeaderId,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
+	FROM (
+			SELECT i.intUnitMeasureId,			
+			isnull(i.dblPurchaseContractShippedQty, 0) as ReserveQty,
+			i.strLocationName,i.strItemNo,
+			i.intContractHeaderId,
+			i.intContractDetailId, i.strContractNumber,i.intCompanyLocationId
+			FROM vyuRKPurchaseIntransitView i
+			WHERE i.intCommodityId = @intCommodityId
+			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end
+			AND i.intEntityId= case when isnull(@intVendorId,0)=0 then isnull(i.intEntityId,0) else @intVendorId end 
+								
+		) t WHERE intCompanyLocationId  IN (
+				SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+								ELSE isnull(ysnLicensed, 0) END
+				)			
 	
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strShipmentNumber,intInventoryShipmentId,strCustomerReference,intContractHeaderId,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,dtmTicketDateTime,intTicketId,strTicketNumber)
 	SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription

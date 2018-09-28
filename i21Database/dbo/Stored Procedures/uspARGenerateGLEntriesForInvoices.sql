@@ -388,7 +388,7 @@ SELECT
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = I.[strComments]
+    ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
     ,[intCurrencyId]                = I.[intCurrencyId]
@@ -591,7 +591,7 @@ SELECT
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = I.[strComments]
+    ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
     ,[intCurrencyId]                = I.[intCurrencyId]
@@ -744,7 +744,10 @@ FROM
 WHERE
     I.[intPeriodsToAccrue] <= 1
     AND (
-        I.[intItemId] IS NULL
+        (	I.[intItemId] IS NULL 
+			AND
+			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
+		)
         OR
         (
             I.[intItemId] IS NOT NULL

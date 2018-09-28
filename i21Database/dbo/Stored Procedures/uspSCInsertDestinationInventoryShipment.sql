@@ -94,7 +94,7 @@ BEGIN TRY
 		,[intTransactionDetailId]		= ICSI.intInventoryShipmentItemId
 		,[strCostMethod]				= SC.strCostMethod
 		,[intScaleSetupId]				= SC.intScaleSetupId
-		,[dblFreightRate]				= SC.dblFreightRate
+		,[dblFreightRate]				= ISNULL(SC.dblFreightRate, 0)
 		,[dblTicketFees]				= SC.dblTicketFees
 		,[dblGross]						= SC.dblGrossUnits
 		,[dblTare]						= SC.dblShrink
@@ -499,7 +499,7 @@ BEGIN TRY
 																WHEN LoadCost.strCostMethod = 'Amount' THEN 0
 																ELSE LoadCost.dblRate
 															END	
-							,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
+							,[intCostUOMId]					= LoadCost.intItemUOMId
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
 																WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * LoadCost.dblRate,2)

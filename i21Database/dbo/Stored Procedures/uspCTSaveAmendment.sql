@@ -20,7 +20,7 @@ BEGIN TRY
 									FOR XML PATH('')
 									), 1, 1, '')
 
-	UPDATE tblCTCompanyPreference SET  strBulkChangeFields =  RTRIM(LTRIM(@strBulkChangeFields))
+	UPDATE tblCTCompanyPreference SET  strAmendmentFields = @strAmendmentFields,strBulkChangeFields =  RTRIM(LTRIM(@strBulkChangeFields))
 	
 	UPDATE tblCTAmendmentApprovalLog SET intLastModifiedById = @intUserId WHERE intLastModifiedById IS NULL
 

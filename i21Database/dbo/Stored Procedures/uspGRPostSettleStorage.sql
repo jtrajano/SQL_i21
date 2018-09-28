@@ -1255,6 +1255,7 @@ BEGIN TRY
 					,[dblUnitQty]
 					,[dblNetWeight]
 					,[intWeightUOMId]
+					,[intInventoryReceiptItemId]
 				 )
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
@@ -1288,6 +1289,7 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 													ELSE NULL
 												END
+					,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -1302,6 +1304,18 @@ BEGIN TRY
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId and DSC.intItemId = a.intItemId
+				LEFT  JOIN (
+					tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+						ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+					LEFT JOIN tblICItemLocation sourceLocation
+						ON sourceLocation.intItemId = E2.intItemId
+						AND sourceLocation.intLocationId = E1.intLocationId
+					LEFT JOIN tblSMFreightTerms ft
+						ON ft.intFreightTermId = E1.intFreightTermId
+					LEFT JOIN tblICFobPoint fp
+						ON fp.strFobPoint = ft.strFreightTerm
+				)
+					ON CS.intTicketId= E2.intSourceId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
@@ -1678,355 +1692,6 @@ BEGIN TRY
 	FROM tblGRSettleStorage
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
-
-	INSERT INTO @adjustCostOfDelayedPricingStock 
-		(
-			[intItemId] 
-			,[intItemLocationId] 
-			,[intItemUOMId] 
-			,[dtmDate] 
-			,[dblQty] 
-			,[dblUOMQty] 
-			,[intCostUOMId] 
-			,[dblNewValue] 
-			,[intCurrencyId]     
-			,[intTransactionId] 
-			,[intTransactionDetailId] 
-			,[strTransactionId] 
-			,[intTransactionTypeId] 
-			,[intLotId] 
-			,[intSubLocationId] 
-			,[intStorageLocationId] 
-			,[ysnIsStorage] 
-			,[strActualCostId] 
-			,[intSourceTransactionId] 
-			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 
-			,[intFobPointId]
-			,[intInTransitSourceLocationId]
-		)
-	SELECT
-			 [intItemId]      				= @ItemId
-			,[intItemLocationId]    		= @ItemLocationId
-			,[intItemUOMId]     			= itemUOM.intItemUOMId
-			,[dtmDate]       				= A.dtmDate
-			,[dblQty]        				= CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
-			,[dblUOMQty]       				= itemUOM.dblUnitQty
-			,[intCostUOMId]     			= voucherCostUOM.intItemUOMId 
-			,[dblNewValue]      			=  dbo.fnCalculateCostBetweenUOM(
-													voucherCostUOM.intItemUOMId
-													,receiptCostUOM.intItemUOMId
-													,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
-												) * B.dblQtyOrdered - (E2.dblUnitCost * E2.dblReceived)
-			,[intCurrencyId]      			= @intDefaultCurrencyId
-			,[intTransactionId]    			= B.intBillId
-			,[intTransactionDetailId]   	= B.intBillDetailId
-			,[strTransactionId]     		= A.strBillId
-			,[intTransactionTypeId]    		= 44
-			,[intLotId]       				= NULL 
-			,[intSubLocationId]     		= NULL 
-			,[intStorageLocationId]    		= NULL 
-			,[ysnIsStorage]      			= 0
-			,[strActualCostId]     			= NULL 
-			,[intSourceTransactionId]   	= E2.intInventoryReceiptId
-			,[intSourceTransactionDetailId] = E2.intInventoryReceiptItemId
-			,[strSourceTransactionId]    	= E1.strReceiptNumber
-			,[intFobPointId]     			= NULL 
-			,[intInTransitSourceLocationId] = NULL 
-		FROM tblAPBill A 
-		INNER JOIN tblAPBillDetail B
-			ON A.intBillId = B.intBillId
-		INNER JOIN tblGRCustomerStorage GS 
-			ON GS.intCustomerStorageId = B.intCustomerStorageId
-		INNER JOIN (
-			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-			LEFT JOIN tblICItemLocation sourceLocation
-				ON sourceLocation.intItemId = E2.intItemId
-				AND sourceLocation.intLocationId = E1.intLocationId
-			LEFT JOIN tblSMFreightTerms ft
-				ON ft.intFreightTermId = E1.intFreightTermId
-			LEFT JOIN tblICFobPoint fp
-				ON fp.strFobPoint = ft.strFreightTerm
-		)
-			ON GS.intTicketId= E2.intSourceId
-		INNER JOIN tblICItem item 
-			ON B.intItemId = item.intItemId
-		INNER JOIN tblICItemLocation D
-			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
-		LEFT JOIN tblICItemUOM itemUOM
-			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
-		LEFT JOIN tblICItemUOM voucherCostUOM
-			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		LEFT JOIN tblICItemUOM receiptCostUOM
-			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-		LEFT JOIN tblICInventoryTransactionType transType
-			ON transType.strName = 'Bill'
-
-		WHERE A.intBillId = @intCreatedBillId
-		AND B.intInventoryReceiptItemId IS NULL 
-		AND E2.intOwnershipType != 2
-		AND (
-			dbo.fnCalculateCostBetweenUOM(
-				voucherCostUOM.intItemUOMId
-				,receiptCostUOM.intItemUOMId
-				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
-				) <> E2.dblUnitCost
-			OR E2.dblForexRate <> B.dblRate
-		) AND item.intItemId = E2.intItemId
-	
-	EXEC @intReturnValue = uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @intCreatedUserId
-	
-	IF @intReturnValue < 0
-		GOTO SettleStorage_Exit;
-	
-	/* GL Entries for Settle Storage Cost Adjustment*/
-	DELETE FROM @GLEntries
-			
-	INSERT INTO @GLEntries 
-	(
-		[dtmDate] 
-	,[strBatchId]
-	,[intAccountId]
-	,[dblDebit]
-	,[dblCredit]
-	,[dblDebitUnit]
-	,[dblCreditUnit]
-	,[strDescription]
-	,[strCode]
-	,[strReference]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[dtmDateEntered]
-	,[dtmTransactionDate]
-	,[strJournalLineDescription]
-	,[intJournalLineNo]
-	,[ysnIsUnposted]
-	,[intUserId]
-	,[intEntityId]
-	,[strTransactionId]
-	,[intTransactionId]
-	,[strTransactionType]
-	,[strTransactionForm]
-	,[strModuleName]
-	,[intConcurrencyId]
-	,[dblDebitForeign]	
-	,[dblDebitReport]	
-	,[dblCreditForeign]	
-	,[dblCreditReport]	
-	,[dblReportingRate]	
-	,[dblForeignRate]
-	,[strRateType]
-	)
-	SELECT 
-				[dtmDate]                
-			,[strBatchId]             
-			,[intAccountId]           
-			,[dblDebit]               
-			,[dblCredit]              
-			,[dblDebitUnit]           
-			,[dblCreditUnit]          
-			,[strDescription]         
-			,[strCode]                
-			,[strReference]           
-			,[intCurrencyId]          
-			,[dblExchangeRate]        
-			,[dtmDateEntered]         
-			,[dtmTransactionDate]     
-			,[strJournalLineDescription]
-			,[intJournalLineNo]		
-			,[ysnIsUnposted]          
-			,[intUserId]              
-			,[intEntityId]			
-			,[strTransactionId]       
-			,[intTransactionId]       
-			,[strTransactionType]     
-			,[strTransactionForm]     
-			,[strModuleName]          
-			,[intConcurrencyId]       
-			,[dblDebitForeign]		
-			,[dblDebitReport]		
-			,[dblCreditForeign]		
-			,[dblCreditReport]		
-			,[dblReportingRate]		
-			,[dblForeignRate]		
-			,[strRateType]
-	FROM(SELECT 
-					item.intItemId
-				,item.strItemNo
-				,strBatchId = @strBatchId
-				,dtmDate = GS.dtmDeliveryDate
-				,[intAccountId] = [dbo].[fnGetItemGLAccount](item.intItemId, @LocationId,'Inventory')
-				,dblDebit = CASE WHEN Debit.Value < 0 THEN Debit.Value * -1 ELSE Debit.Value END
-				,dblCredit = CASE WHEN Credit.Value < 0 THEN Credit.Value * -1 ELSE Credit.Value END
-				,dblDebitUnit = 0
-				,dblCreditUnit = 0
-				,strDescription = GL.strDescription + ', Cost Adjustment'
-				,strCode = 'GR'
-				,strReference = 'A'
-				,intCurrencyId = GS.intCurrencyId
-				,dtmDateEntered    = GETDATE()
-				,dtmTransactionDate = GS.dtmDeliveryDate
-				,strJournalLineDescription = ''
-					,intJournalLineNo   = GS.intCustomerStorageId
-				,ysnIsUnposted    = 0
-				,intUserId     = NULL
-				,intEntityId    = GS.intEntityId
-				,strTransactionId   = SS.strStorageTicket
-				,intTransactionId   = SS.intSettleStorageId
-				,strTransactionType   = 'Storage Settlement'
-				,strTransactionForm   = 'Storage Settlement'
-				,strModuleName    = 'Grain'
-				,intConcurrencyId   = 1
-				,dblDebitForeign   = CASE WHEN B.intCurrencyId <> 1 THEN Debit.Value ELSE 0 END
-				,dblDebitReport    = NULL
-				,dblCreditForeign   = CASE WHEN B.intCurrencyId <> 1 THEN Credit.Value ELSE 0 END
-				,dblCreditReport   = NULL
-				,dblReportingRate   = NULL
-				,dblExchangeRate = GS.dblCurrencyRate
-				,dblForeignRate    =  B.dblRate
-				,strRateType    = EXR.strCurrencyExchangeRateType
-		FROM tblAPBill A 
-		INNER JOIN tblAPBillDetail B
-			ON A.intBillId = B.intBillId
-		INNER JOIN tblGRCustomerStorage GS 
-			ON GS.intCustomerStorageId = B.intCustomerStorageId
-		INNER JOIN (
-			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-			LEFT JOIN tblICItemLocation sourceLocation
-				ON sourceLocation.intItemId = E2.intItemId
-				AND sourceLocation.intLocationId = E1.intLocationId
-			LEFT JOIN tblSMFreightTerms ft
-				ON ft.intFreightTermId = E1.intFreightTermId
-			LEFT JOIN tblICFobPoint fp
-				ON fp.strFobPoint = ft.strFreightTerm
-		)
-			ON GS.intTicketId= E2.intSourceId
-		INNER JOIN tblICItem item 
-			ON B.intItemId = item.intItemId
-		INNER JOIN tblICItemLocation D
-			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
-		LEFT JOIN tblICItemUOM itemUOM
-			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
-		LEFT JOIN tblICItemUOM voucherCostUOM
-			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		LEFT JOIN tblICItemUOM receiptCostUOM
-			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-		LEFT JOIN tblICInventoryTransactionType transType
-			ON transType.strName = 'Bill'
-		LEFT JOIN tblSMCurrencyExchangeRateType EXR
-			ON EXR.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-		LEFT JOIN tblGRSettleStorage SS
-			ON SS.intBillId = A.intBillId
-		INNER JOIN tblGLAccount GL
-			ON GL.intAccountId = [dbo].[fnGetItemGLAccount](item.intItemId, @LocationId,'Inventory')
-		CROSS APPLY (SELECT CASE WHEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) > B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) THEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) * B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) ELSE 0 END Value) as Debit
-		CROSS APPLY (SELECT CASE WHEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) > B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) THEN 0 ELSE dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) * B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) END Value) as Credit
-		WHERE A.intBillId = @intCreatedBillId
-		AND B.intInventoryReceiptItemId IS NULL 
-		AND E2.intOwnershipType != 2
-		AND (
-			dbo.fnCalculateCostBetweenUOM(
-				voucherCostUOM.intItemUOMId
-				,receiptCostUOM.intItemUOMId
-				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
-				) <> E2.dblUnitCost
-			OR E2.dblForexRate <> B.dblRate
-		) AND item.intItemId = E2.intItemId
-
-		UNION ALL
-		SELECT 
-						item.intItemId
-					,item.strItemNo
-					,strBatchId = @strBatchId
-					,dtmDate = GS.dtmDeliveryDate
-					,[intAccountId] = [dbo].[fnGetItemGLAccount](item.intItemId, @LocationId,'AP Clearing')
-					,dblDebit = CASE WHEN Credit.Value < 0 THEN Credit.Value * -1 ELSE Credit.Value END
-					,dblCredit = CASE WHEN Debit.Value < 0 THEN Debit.Value * -1 ELSE Debit.Value END
-					,dblDebitUnit = 0
-					,dblCreditUnit = 0
-					,strDescription = GL.strDescription + ', Cost Adjustment'
-					,strCode = 'GR'
-					,strReference = 'A'
-					,intCurrencyId = GS.intCurrencyId
-					,dtmDateEntered    = GETDATE()
-					,dtmTransactionDate = GS.dtmDeliveryDate
-					,strJournalLineDescription = ''
-					,intJournalLineNo   = GS.intCustomerStorageId
-					,ysnIsUnposted    = 0
-					,intUserId     = NULL
-					,intEntityId    = GS.intEntityId
-					,strTransactionId   = SS.strStorageTicket
-					,intTransactionId   = SS.intSettleStorageId
-					,strTransactionType   = 'Storage Settlement'
-					,strTransactionForm   = 'Storage Settlement'
-					,strModuleName    = 'Grain'
-					,intConcurrencyId   = 1
-					,dblDebitForeign   = CASE WHEN B.intCurrencyId <> 1 THEN Debit.Value ELSE 0 END
-					,dblDebitReport    = NULL
-					,dblCreditForeign   = CASE WHEN B.intCurrencyId <> 1 THEN Credit.Value ELSE 0 END
-					,dblCreditReport   = NULL
-					,dblReportingRate   = NULL
-					,dblExchangeRate = GS.dblCurrencyRate
-					,dblForeignRate    =  B.dblRate
-					,strRateType    = EXR.strCurrencyExchangeRateType
-		FROM tblAPBill A 
-		INNER JOIN tblAPBillDetail B
-			ON A.intBillId = B.intBillId
-		INNER JOIN tblGRCustomerStorage GS 
-			ON GS.intCustomerStorageId = B.intCustomerStorageId
-		INNER JOIN (
-			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-			LEFT JOIN tblICItemLocation sourceLocation
-				ON sourceLocation.intItemId = E2.intItemId
-				AND sourceLocation.intLocationId = E1.intLocationId
-			LEFT JOIN tblSMFreightTerms ft
-				ON ft.intFreightTermId = E1.intFreightTermId
-			LEFT JOIN tblICFobPoint fp
-				ON fp.strFobPoint = ft.strFreightTerm
-		)
-			ON GS.intTicketId= E2.intSourceId
-		INNER JOIN tblICItem item 
-			ON B.intItemId = item.intItemId
-		INNER JOIN tblICItemLocation D
-			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
-		LEFT JOIN tblICItemUOM itemUOM
-			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
-		LEFT JOIN tblICItemUOM voucherCostUOM
-			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		LEFT JOIN tblICItemUOM receiptCostUOM
-			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-		LEFT JOIN tblICInventoryTransactionType transType
-			ON transType.strName = 'Bill'
-		LEFT JOIN tblSMCurrencyExchangeRateType EXR
-			ON EXR.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-		LEFT JOIN tblGRSettleStorage SS
-			ON SS.intBillId = A.intBillId
-		INNER JOIN tblGLAccount GL
-			ON GL.intAccountId = [dbo].[fnGetItemGLAccount](item.intItemId, @LocationId,'AP Clearing')
-		CROSS APPLY (SELECT CASE WHEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) > B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) THEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) * B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) ELSE 0 END Value) as Debit
-		CROSS APPLY (SELECT CASE WHEN dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) > B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) THEN 0 ELSE dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,receiptCostUOM.intItemUOMId,B.dblCost) * B.dblQtyReceived - (E2.dblUnitCost * E2.dblReceived) END Value) as Credit
-		WHERE A.intBillId = @intCreatedBillId
-		AND B.intInventoryReceiptItemId IS NULL 
-		AND E2.intOwnershipType != 2
-		AND (
-			dbo.fnCalculateCostBetweenUOM(
-				voucherCostUOM.intItemUOMId
-				,receiptCostUOM.intItemUOMId
-				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
-				) <> E2.dblUnitCost
-			OR E2.dblForexRate <> B.dblRate
-		) AND item.intItemId = E2.intItemId
-	) GLEntries
-
-	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-	BEGIN 
-			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
-	END
-
-	/* END GL Entries for Settle Storage Cost Adjustment*/
 
 	END
 

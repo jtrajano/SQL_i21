@@ -199,7 +199,9 @@ SELECT 'tblCTContractDetail' AS strTableName, 'Storage Unit'AS strExcelColumnNam
 SELECT 'tblCTContractDetail' AS strTableName, 'Print Remarks'AS strExcelColumnName, 'strRemark'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin
 
 UNION ALL
+
 --tblCTContractCost
+
 SELECT 'tblCTContractCost' AS strTableName, 'Sequence'AS strExcelColumnName, 'intContractDetailId'AS strTableCoulmnName, 'tblCTContractDetail'AS strRefTable, 'intContractDetailId'AS strRefTableIdCol, 'intContractSeq' AS strRefCoulumnToCmpr, 'JOIN' AS strJoinType, 
 'LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractSeq = EX.[Sequence] AND 
 ContractDetail.intContractHeaderId = (SELECT intContractHeaderId FROM tblCTContractHeader WHERE [strContractNumber] = LTRIM(RTRIM(EX.[Contract Number])) COLLATE Latin1_General_CI_AS)' AS strSpecialJoin UNION ALL
@@ -223,7 +225,45 @@ SELECT 'tblCTContractCost' AS strTableName, 'Accrue'AS strExcelColumnName, 'ysnA
 SELECT 'tblCTContractCost', 'intConcurrencyId' AS strExcelColumnName, 'intConcurrencyId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, ''AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin
 
 UNION ALL
+
 --tblCTContractCondition
+
 SELECT 'tblCTContractCondition', 'Contract Number' AS strExcelColumnName, 'intContractHeaderId'AS strTableCoulmnName, 'tblCTContractHeader'AS strRefTable, 'intContractHeaderId'AS strRefTableIdCol, 'strContractNumber'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, '' AS strSpecialJoin UNION ALL
 SELECT 'tblCTContractCondition', 'Condition' AS strExcelColumnName, 'intConditionId'AS strTableCoulmnName, 'tblCTCondition'AS strRefTable, 'intConditionId'AS strRefTableIdCol, 'strConditionName'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, '' AS strSpecialJoin UNION ALL
 SELECT 'tblCTContractCondition', 'intConcurrencyId' AS strExcelColumnName, 'intConcurrencyId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, ''AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin
+
+
+UNION ALL
+
+--tblCTContractDocument
+
+SELECT 'tblCTContractDocument', 'Contract Number' AS strExcelColumnName, 'intContractHeaderId'AS strTableCoulmnName, 'tblCTContractHeader'AS strRefTable, 'intContractHeaderId'AS strRefTableIdCol, 'strContractNumber'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractDocument', 'Document Name' AS strExcelColumnName, 'intDocumentId'AS strTableCoulmnName, 'tblICDocument'AS strRefTable, 'intDocumentId'AS strRefTableIdCol, 'strDocumentName'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractDocument', 'intConcurrencyId' AS strExcelColumnName, 'intConcurrencyId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, ''AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin
+
+UNION ALL
+
+--tblCTContractCertification
+
+SELECT 'tblCTContractCertification' AS strTableName, 'Sequence'AS strExcelColumnName, 'intContractDetailId'AS strTableCoulmnName, 'tblCTContractDetail'AS strRefTable, 'intContractDetailId'AS strRefTableIdCol, 'intContractSeq' AS strRefCoulumnToCmpr, 'JOIN' AS strJoinType, 
+'LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractSeq = EX.[Sequence] AND 
+ContractDetail.intContractHeaderId = (SELECT intContractHeaderId FROM tblCTContractHeader WHERE [strContractNumber] = LTRIM(RTRIM(EX.[Contract Number])) COLLATE Latin1_General_CI_AS)' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractCertification', 'Certificates' AS strExcelColumnName, 'intCertificationId'AS strTableCoulmnName, 'tblICCertification'AS strRefTable, 'intCertificationId'AS strRefTableIdCol, 'strCertificationName'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractCertification', 'Producer' AS strExcelColumnName, 'intProducerId'AS strTableCoulmnName, 'tblEMEntity'AS strRefTable, 'intEntityId'AS strRefTableIdCol, 'strName'AS strRefCoulumnToCmpr, 'LEFT JOIN' AS strJoinType, 
+'LEFT JOIN tblEMEntity Producer ON EX.[Producer] = Producer.[strName] COLLATE Latin1_General_CI_AS
+ AND Producer.intEntityId IN(SELECT intEntityId FROM tblEMEntityType WHERE strType = ''Producer'')' AS strSpecialJoin UNION ALL
+ SELECT 'tblCTContractCertification' AS strTableName, 'Certification Id'AS strExcelColumnName, 'strCertificationId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractCertification' AS strTableName, 'Tracking Number'AS strExcelColumnName, 'strTrackingNumber'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractCertification' AS strTableName, 'Quantity'AS strExcelColumnName, 'dblQuantity'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTContractCertification', 'intConcurrencyId' AS strExcelColumnName, 'intConcurrencyId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, ''AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin
+
+UNION ALL
+
+--tblCTBagMark
+
+SELECT 'tblCTBagMark' AS strTableName, 'Sequence'AS strExcelColumnName, 'intContractDetailId'AS strTableCoulmnName, 'tblCTContractDetail'AS strRefTable, 'intContractDetailId'AS strRefTableIdCol, 'intContractSeq' AS strRefCoulumnToCmpr, 'JOIN' AS strJoinType, 
+'LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractSeq = EX.[Sequence] AND 
+ContractDetail.intContractHeaderId = (SELECT intContractHeaderId FROM tblCTContractHeader WHERE [strContractNumber] = LTRIM(RTRIM(EX.[Contract Number])) COLLATE Latin1_General_CI_AS)' AS strSpecialJoin UNION ALL
+SELECT 'tblCTBagMark' AS strTableName, 'Bag Mark'AS strExcelColumnName, 'strBagMark'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTBagMark' AS strTableName, 'Default'AS strExcelColumnName, 'ysnDefault'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, '' AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin UNION ALL
+SELECT 'tblCTBagMark', 'intConcurrencyId' AS strExcelColumnName, 'intConcurrencyId'AS strTableCoulmnName, ''AS strRefTable, ''AS strRefTableIdCol, ''AS strRefCoulumnToCmpr, '' AS strJoinType, '' AS strSpecialJoin

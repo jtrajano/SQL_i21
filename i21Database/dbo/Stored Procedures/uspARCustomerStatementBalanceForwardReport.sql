@@ -14,7 +14,7 @@
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
-	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @ysnIncludeWriteOffPayment    AS BIT 				= 0
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 AS
@@ -33,7 +33,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
 	  , @ysnPrintFromCFLocal				AS BIT				= 0
 	  , @ysnReprintInvoiceLocal				AS BIT				= 1
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
@@ -161,7 +161,7 @@ SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
-SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
+SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @ysnPrintFromCFLocal				= ISNULL(@ysnPrintFromCF, 0)
 SET @ysnReprintInvoiceLocal				= ISNULL(@ysnReprintInvoice, 1)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
@@ -743,7 +743,14 @@ IF @ysnPrintFromCFLocal = 1
 	END
 ELSE 
 	BEGIN
-		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType IN ('Customer Prepayment', 'Payment')
+		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
+
+		UPDATE TSS
+		SET dblBalance = I.dblAmountDue
+		FROM @temp_statement_table TSS
+		INNER JOIN tblARInvoice I ON TSS.intInvoiceId = I.intInvoiceId
+		WHERE TSS.strTransactionType = 'Customer Prepayment'
+		
 		UPDATE @temp_statement_table SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 	END
 

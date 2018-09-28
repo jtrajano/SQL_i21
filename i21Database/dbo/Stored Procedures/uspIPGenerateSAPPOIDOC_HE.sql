@@ -121,6 +121,26 @@ SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 
 SELECT @strMessageCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
+UPDATE CF
+SET strRowState = 'MODIFIED'
+FROM tblCTContractFeed CF
+JOIN tblCTContractFeed CF1 on CF1.intContractHeaderId=CF.intContractHeaderId and CF1.strItemNo=CF.strItemNo and  ISNULL(CF1.strFeedStatus, '') <> ''
+WHERE ISNULL(CF.strFeedStatus, '') = ''
+	AND UPPER(CF.strRowState) = 'ADDED'
+	AND isNULL(CF.ysnMaxPrice,0)=1
+
+UPDATE CF
+SET strERPPONumber = CD.strERPPONumber
+	,strERPItemNumber = CD.strERPItemNumber
+FROM tblCTContractFeed CF
+JOIN tblICItem I on I.strItemNo=CF.strItemNo
+JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId and CD.intItemId=I.intItemId
+WHERE ISNULL(CF.strFeedStatus, '') = ''
+	AND IsNULL(CF.strERPPONumber, '') = ''
+	AND CF.strRowState = 'MODIFIED'
+	AND CD.strERPPONumber <> ''
+	AND isNULL(CF.ysnMaxPrice,0)=1
+
 UPDATE tblCTContractFeed
 SET strFeedStatus = ''
 WHERE strFeedStatus = 'Hold'
@@ -903,7 +923,17 @@ WHERE IsNULL(CH.ysnSubstituteItem, 0) = 0
 	AND ISNULL(strFeedStatus, '') = ''
 
 UPDATE CF
-SET strFeedStatus = ''
+SET CF.strFeedStatus = ''
+	,CF.ysnMaxPrice = CASE 
+		WHEN EXISTS (
+				SELECT *
+				FROM tblCTContractFeed CF1
+				WHERE CH.intContractHeaderId = CF1.intContractHeaderId
+					AND IsNULL(CF1.strERPPONumber,'') <> ''
+				)
+			THEN CF.ysnMaxPrice
+		ELSE CH.ysnMaxPrice
+		END
 FROM tblCTContractFeed CF
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 WHERE IsNULL(CH.ysnSubstituteItem, 0) = 1
@@ -919,19 +949,7 @@ WHERE EXISTS (
 		)
 	AND ISNULL(strFeedStatus, '') = ''
 
-UPDATE CF
-SET strERPPONumber = CD.strERPPONumber
-	,strRowState = 'MODIFIED'
-	,strERPItemNumber = CD.strERPItemNumber
-FROM tblCTContractFeed CF
-JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId
-LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CD.intSubLocationId
-WHERE CF.intContractHeaderId = @intContractHeaderId
-	AND ISNULL(CF.strSubLocation, '') = ISNULL(SL.strSubLocationName, '')
-	AND ISNULL(strFeedStatus, '') = ''
-	AND IsNULL(CF.strERPPONumber, '') = ''
-	AND CD.strERPPONumber <> ''
-	AND UPPER(strRowState) = 'ADDED'
+
 
 --Get the Headers
 IF UPPER(@strRowState) = 'ADDED'

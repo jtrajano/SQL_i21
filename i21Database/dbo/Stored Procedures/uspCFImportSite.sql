@@ -1,5 +1,4 @@
-﻿
-	CREATE PROCEDURE [dbo].[uspCFImportSite]
+﻿CREATE PROCEDURE [dbo].[uspCFImportSite]
 		@TotalSuccess INT = 0 OUTPUT,
 		@TotalFailed INT = 0 OUTPUT
 
@@ -81,6 +80,7 @@
 		DECLARE @dtmCreated								DATETIME
 		DECLARE @intLastModifiedUserId					INT
 		DECLARE @dtmLastModified						DATETIME
+		DECLARE @intTaxGroupId							INT
 
 		----================================--
 		----     DETAIL FIELDS SITE ITEM	  --
@@ -292,6 +292,11 @@
 					,@strImportPath								= RTRIM(LTRIM(cfloc_import_path))
 					,@strImportFileName							= RTRIM(LTRIM(cfloc_import_file))
 	
+					,@intTaxGroupId								=	(SELECT TOP 1 intTaxGroupId 
+																	FROM tblSMTaxXRef
+																	WHERE strOrgState = ISNULL(cfloc_state,'') COLLATE Latin1_General_CI_AS
+																		AND strOrgLocal1 = ISNULL(cfloc_auth_id1,'') COLLATE Latin1_General_CI_AS
+																		AND strOrgLocal2 = ISNULL(cfloc_auth_id2,'') COLLATE Latin1_General_CI_AS)
 
 				FROM cflocmst
 				WHERE cfloc_site_no = @originSite
@@ -322,7 +327,8 @@
 				 ,[strImportType]						
 				 ,[ysnMultipleSiteImport]				
 				 ,[strImportPath]						
-				 ,[strImportFileName]							
+				 ,[strImportFileName]	
+				 ,[intTaxGroupId]
 				)
 				VALUES(
 				 @intNetworkId						
@@ -349,8 +355,9 @@
 				,@strImportType						
 				,@ysnMultipleSiteImport				
 				,@strImportPath						
-				,@strImportFileName)
-
+				,@strImportFileName
+				,@intTaxGroupId
+				)
 
 				----========================================--
 				----		INSERT DETAIL SITE ITEM RECORDS	  --

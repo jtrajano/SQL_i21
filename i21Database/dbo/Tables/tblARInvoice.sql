@@ -237,3 +237,8 @@ GO
 CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
 ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
 INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
+
+GO
+CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
+
+
