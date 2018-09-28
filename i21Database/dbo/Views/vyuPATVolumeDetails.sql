@@ -58,7 +58,7 @@ FROM (
 	INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = EM.intEntityId AND AR.strStockStatus != '' AND AR.dtmMembershipDate IS NOT NULL
 	INNER JOIN tblGLFiscalYear FY
-		ON FY.dtmDateFrom >= AR.dtmMembershipDate
+		ON YEAR(AR.dtmMembershipDate) >= YEAR(FY.dtmDateFrom)
 	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
 ) CustomerVolume
 INNER JOIN tblEMEntity ENT
