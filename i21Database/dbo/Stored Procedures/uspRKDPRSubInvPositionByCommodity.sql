@@ -796,7 +796,7 @@ BEGIN
 
 -- Sales Basis Deliveries
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from  (
+	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId, intFromCommodityUnitMeasureId,intCompanyLocationId from  (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
@@ -852,8 +852,8 @@ BEGIN
 	If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
 	BEGIN
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT 15 intSeqId,'Company Titled Stock','Off-Site',	dblTotal,intCommodityId,strLocation,intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,
+	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,intCommodityId,strLocationName,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	SELECT 15 intSeqId,'Company Titled Stock','Off-Site',dblTotal,intCommodityId,strLocation,intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,
 	intCompanyLocationId 
 		FROM  (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(Balance))  dblTotal,
