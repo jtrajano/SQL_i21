@@ -208,7 +208,7 @@ BEGIN
 												END
 											END
 										END
-		,intWeightUOMId				= NULL
+		,intWeightUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,intStorageScheduleTypeId	= CASE
