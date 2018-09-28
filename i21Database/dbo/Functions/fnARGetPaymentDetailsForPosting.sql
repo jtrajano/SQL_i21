@@ -748,7 +748,7 @@ INNER JOIN
         ON ARP.[intPaymentId] = P.[intId]
 INNER JOIN
     (
-    SELECT [intEntityId], [strCustomerNumber] = strVendorId FROM tblAPVendor WITH(NoLock)
+    SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH(NoLock)
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
