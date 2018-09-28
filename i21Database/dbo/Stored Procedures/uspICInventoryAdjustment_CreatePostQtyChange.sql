@@ -5,8 +5,7 @@
 	,@intLocationId AS INT	
 	,@intSubLocationId AS INT	
 	,@intStorageLocationId AS INT	
-	,@strLotNumber AS NVARCHAR(50)
-	,@intOwnershipType AS INT = 1 -- (1) Own, (2) Storage, (3) Consigned Purchase, (4) Consigned Sale 
+	,@strLotNumber AS NVARCHAR(50)		
 	-- Parameters for the new values: 
 	,@dblAdjustByQuantity AS NUMERIC(38,20)
 	,@dblNewUnitCost AS NUMERIC(38,20)
@@ -31,11 +30,6 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
-
-		,@OWNERSHIP_TYPE_Own AS INT = 1
-		,@OWNERSHIP_TYPE_Storage AS INT = 2
-		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
-		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 
@@ -202,15 +196,7 @@ BEGIN
 			,intItemId					= @intItemId
 			,intLotId					= Lot.intLotId
 			,intItemUOMId				= @intItemUOMId
-			,intOwnershipType			= 
-				CASE 
-					WHEN Lot.intOwnershipType IS NOT NULL THEN 
-						Lot.intOwnershipType
-					WHEN @intOwnershipType IN (@OWNERSHIP_TYPE_Own, @OWNERSHIP_TYPE_Storage, @OWNERSHIP_TYPE_ConsignedPurchase, @OWNERSHIP_TYPE_ConsignedSale) THEN 
-						@intOwnershipType
-					ELSE 
-						@OWNERSHIP_TYPE_Own -- Default to "Own"
-				END 
+			,intOwnershipType			= Lot.intOwnershipType
 			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
 													ELSE ISNULL(StocksPerUOM.dblOnHand, 0)
