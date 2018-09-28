@@ -5,6 +5,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT	
 	,@ysnPost AS BIT 
+	,@dtmCreated AS DATETIME = NULL
 AS
 BEGIN TRY
 BEGIN
@@ -49,24 +50,31 @@ BEGIN
 	FROM tblGRSettleStorage 
 	WHERE intSettleStorageId = @intSettleStorageId
 
-	SELECT TOP 1 @intStorageChargeItemId = intItemId
-	FROM tblICItem 
-	WHERE strType = 'Other Charge' 
-	  AND strCostType = 'Storage Charge' 
-	  AND intCommodityId = @IntCommodityId
 
-	IF @intStorageChargeItemId IS NULL
+	/*do not include the storage charge when unposting the settlement
+		if it was posted before without the storage charge
+	*/
+	IF @dtmCreated > CAST('9/24/2018' AS DATE)
 	BEGIN
 		SELECT TOP 1 @intStorageChargeItemId = intItemId
-		FROM tblICItem
+		FROM tblICItem 
 		WHERE strType = 'Other Charge' 
-			AND strCostType = 'Storage Charge' 
-			AND intCommodityId IS NULL
-	END
+		AND strCostType = 'Storage Charge' 
+		AND intCommodityId = @IntCommodityId
 
-	SELECT @StorageChargeItemDescription = strDescription
-	FROM tblICItem
-	WHERE intItemId = @intStorageChargeItemId
+		IF @intStorageChargeItemId IS NULL
+		BEGIN
+			SELECT TOP 1 @intStorageChargeItemId = intItemId
+			FROM tblICItem
+			WHERE strType = 'Other Charge' 
+				AND strCostType = 'Storage Charge' 
+				AND intCommodityId IS NULL
+		END
+
+		SELECT @StorageChargeItemDescription = strDescription
+		FROM tblICItem
+		WHERE intItemId = @intStorageChargeItemId
+	END	
 		
 	DECLARE @ItemGLAccounts			AS dbo.ItemGLAccount;
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;
@@ -158,6 +166,7 @@ BEGIN
 		,[dblUnits] 					   DECIMAL(24,10)
 	)
 
+	--CONTRACT
 	INSERT INTO @tblOtherCharges
 	(
 		 intItemId
@@ -191,10 +200,12 @@ BEGIN
 		,[dblForexRate]						= NULL
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)	
-													WHEN QM.dblDiscountAmount > 0 THEN  QM.dblDiscountAmount		
-											  END
+		,[dblRate]							= CASE
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * CD.dblCashPrice) * -1)
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * CD.dblCashPrice)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -219,6 +230,8 @@ BEGIN
 	FROM tblGRSettleContract RE
 	JOIN tblGRSettleStorageTicket SST 
 		ON SST.intSettleStorageId = RE.intSettleStorageId
+	JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = RE.intContractDetailId
 	JOIN tblQMTicketDiscount QM 
 		ON QM.intTicketFileId = SST.intCustomerStorageId AND QM.strSourceType = 'Storage'
 	JOIN tblGRDiscountScheduleCode GR 
@@ -230,6 +243,7 @@ BEGIN
 	
 	UNION
 
+	--SPOT
 	SELECT
 		 intItemId							= IC.intItemId
 		,[strItemNo]						= IC.strItemNo	
@@ -241,10 +255,12 @@ BEGIN
 		,[dblForexRate]						= NULL
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)	
-													WHEN QM.dblDiscountAmount > 0 THEN  QM.dblDiscountAmount		
-											  END
+		,[dblRate]							= CASE
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * SS.dblCashPrice) * -1)
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * SS.dblCashPrice)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0

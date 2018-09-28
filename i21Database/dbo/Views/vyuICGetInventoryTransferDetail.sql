@@ -6,6 +6,14 @@ AS
 	, [Transfer].intFromLocationId
 	, [Transfer].intToLocationId
 	, [Transfer].strTransferNo
+	, [Transfer].strTransferType
+	, [Transfer].intSourceType
+	, strSourceType = CASE
+						WHEN [Transfer].intSourceType = 1 THEN 'Scale'
+						WHEN [Transfer].intSourceType = 2 THEN 'Inbound Shipment'
+						WHEN [Transfer].intSourceType = 3 THEN 'Transports'
+						ELSE 'None'
+					END
 	, TransferDetail.intSourceId
 	, strSourceNumber = (
 		CASE WHEN [Transfer].intSourceType = 1 -- Scale

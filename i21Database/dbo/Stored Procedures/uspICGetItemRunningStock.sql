@@ -76,7 +76,7 @@ SELECT
 			ELSE Lot.intStorageLocationId 
 		END
 	,Lot.intLotId
-	,t.intCostingMethod
+	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= t.dblQty
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
@@ -113,7 +113,7 @@ SELECT
 			WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId 
 			ELSE Lot.intStorageLocationId 
 		END	,Lot.intLotId
-	,t.intCostingMethod
+	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= CAST(0 AS NUMERIC(38, 20))
 	,dblUnitStorage		= t.dblQty

@@ -143,6 +143,11 @@ END
 
 IF @ysnRecap = 0
 BEGIN
+	IF @ysnPost = 1 AND NOT EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail where  intTransactionId = @intTransactionId )
+	BEGIN
+		RAISERROR('Cannot post an empty detail transaction.', 11, 1)
+		GOTO Post_Rollback
+	END
 -- Validate the date against the FY Periods
 	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0)
 	BEGIN 

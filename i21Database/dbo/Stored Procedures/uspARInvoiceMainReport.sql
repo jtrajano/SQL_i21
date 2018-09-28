@@ -8,10 +8,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @INVOICETABLE TABLE(
-	  intInvoiceId			INT
-	, strInvoiceFormat		NVARCHAR(200)
-)
+DECLARE @INVOICETABLE 		AS dbo.InvoiceReportTable
+DECLARE @MCPINVOICES  		AS dbo.InvoiceReportTable
+DECLARE @STANDARDINVOICES	AS dbo.InvoiceReportTable
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -25,9 +24,11 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE  @dtmDateTo						AS DATETIME
 		,@dtmDateFrom					AS DATETIME
 		,@strInvoiceIds					AS NVARCHAR(MAX)
+		,@strTransactionType			AS NVARCHAR(MAX)
 		,@intInvoiceIdTo				AS INT
 		,@intInvoiceIdFrom				AS INT
 		,@xmlDocumentId					AS INT
+		,@intEntityUserId				AS INT
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -88,9 +89,17 @@ SELECT  @intInvoiceIdFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intInvoiceId'
 
+SELECT	@intEntityUserId = [from]
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'intSrCurrentUserId'
+
 SELECT @strInvoiceIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strInvoiceIds'
+
+SELECT @strTransactionType = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTransactionType'
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -109,8 +118,15 @@ IF ISNULL(@intInvoiceIdFrom, 0) = 0
 	SET @intInvoiceIdFrom = (SELECT MIN(intInvoiceId) FROM dbo.tblARInvoice)
 
 --GET INVOICES WITH FILTERS
-INSERT INTO @INVOICETABLE
+INSERT INTO @INVOICETABLE (
+	intInvoiceId
+  , intEntityUserId
+  , strType
+  , strInvoiceFormat  
+)
 SELECT intInvoiceId			= INVOICE.intInvoiceId
+	 , intEntityUserId		= @intEntityUserId
+	 , strType				= INVOICE.strType
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
@@ -127,17 +143,26 @@ OUTER APPLY (
 ) COMPANYPREFERENCE
 WHERE INVOICE.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
   AND INVOICE.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo
+  AND ((@strTransactionType IS NOT NULL AND INVOICE.strTransactionType = @strTransactionType) OR @strTransactionType IS NULL)
 ORDER BY INVOICE.intInvoiceId
 
 IF ISNULL(@strInvoiceIds, '') <> ''
 	BEGIN
-		SELECT INVOICE.* FROM @INVOICETABLE INVOICE 
-		INNER JOIN (
-			SELECT intID 
-			FROM fnGetRowsFromDelimitedValues(@strInvoiceIds)
-		) SELECTED ON INVOICE.intInvoiceId = SELECTED.intID
+		DELETE INVOICE 
+		FROM @INVOICETABLE INVOICE
+		WHERE INVOICE.intInvoiceId NOT IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 	END
-ELSE 
-	BEGIN
-		SELECT * FROM @INVOICETABLE
-	END
+
+INSERT INTO @MCPINVOICES
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP')
+
+IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
+	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId
+
+INSERT INTO @STANDARDINVOICES
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP')
+
+IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
+	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId
+
+SELECT * FROM @INVOICETABLE

@@ -647,11 +647,19 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Users', N'Users', N'i21.view.EntityUser', N'System Manager', N'tblSMUserSecurity', 1, N'System Manager')
 	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Users', strScreenName = 'Users', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.EntityUser'
+	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.UserRole') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'User Roles', N'User Roles', N'i21.view.UserRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'User Roles', strScreenName = 'User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'i21.view.UserRole'
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Country') 
@@ -1134,4 +1142,53 @@ GO
 		UPDATE [tblSMScreen] SET strScreenId = 'Tax Groups', strScreenName = 'Tax Groups', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.TaxGroup'
 	END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Letters') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Letters', N'Letters', N'i21.view.Letters', N'System Manager', NULL, 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Letters', strScreenName = 'Letters', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Letters'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FileFieldMapping') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'File Field Mapping', N'File Field Mapping', N'i21.view.FileFieldMapping', N'System Manager', NULL, 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'File Field Mapping', strScreenName = 'File Field Mapping', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.FileFieldMapping'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.SecurityPolicy') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Security Policies', N'Security Policies', N'i21.view.SecurityPolicy', N'System Manager', NULL, 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Security Policies', strScreenName = 'Security Policies', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.SecurityPolicy'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Signatures') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Signatures', N'Signatures', N'i21.view.Signatures', N'System Manager', NULL, 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Signatures', strScreenName = 'Signatures', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Signatures'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.PortalRole') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Portal User Roles', N'Portal User Roles', N'i21.view.PortalRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Portal User Roles', strScreenName = 'Portal User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'i21.view.PortalRole'
+	END
 GO

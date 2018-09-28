@@ -186,7 +186,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
-	<Folder Include="Scripts\Post-Deployment\PAT\18.3" />
+    <Folder Include="Scripts\Post-Deployment\PAT\18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1267,7 +1267,7 @@
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
     <Build Include="dbo\Views\vyuEMSearch.sql" />
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
-    <Build Include="dbo\Views\vyuARCustomerVendorSearch.sql" />    
+    <Build Include="dbo\Views\vyuARCustomerVendorSearch.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalPermission.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalMenu.sql" />
     <Build Include="dbo\Views\vyuEPContactMenu.sql" />
@@ -7050,7 +7050,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCustomerStorageBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GR\StorageHistoryUserId.sql" />
+    <None Include="Scripts\Post-Deployment\GR\FixStorageHistoryData.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
@@ -7073,10 +7073,21 @@
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTax.sql" />
     <Build Include="dbo\Views\vyuEMEntityVendorSearch.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureMonthId.sql" />
-	<None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
-	<Build Include="dbo\Views\vyuGRCustomerStorage.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
+    <Build Include="dbo\Views\vyuGRCustomerStorage.sql" />
     <Build Include="dbo\Views\vyuGRStorageHistory.sql" />
     <Build Include="dbo\Views\vyuGRTicketDiscount.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceReportStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportOriginItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceHeaderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceItemDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

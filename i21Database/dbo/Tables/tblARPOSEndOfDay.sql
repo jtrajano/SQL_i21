@@ -8,6 +8,9 @@
 	[intCompanyLocationPOSDrawerId] INT NOT NULL,
 	[intStoreId] INT NULL,
 	[intBankDepositId] INT NULL,
+	[intUndepositedFundsId] INT NULL,
+	[intCashOverShortId] INT NULL,
+	[intCurrencyId] INT NULL,
 	[intEntityId] INT NOT NULL,
 	[dtmOpen] DATETIME NOT NULL DEFAULT GETDATE(),
 	[dtmClose] DATETIME NULL,
@@ -18,3 +21,25 @@
 	CONSTRAINT [FK_tblARPOSEndOfDay_tblEMEntity] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_tblARPOSEndOfDay_tblCMBankTransaction] FOREIGN KEY (intBankDepositId) REFERENCES tblCMBankTransaction (intTransactionId)
 )
+
+GO
+
+CREATE TRIGGER [dbo].[trgDefaultCurrency] 
+   ON  [dbo].[tblARPOSEndOfDay]
+   AFTER INSERT
+AS 
+
+DECLARE @intCurrencyId INT = 0
+
+BEGIN
+	SET NOCOUNT ON;
+	SET @intCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+
+	IF(ISNULL(@intCurrencyId,0) <> 0)
+	BEGIN
+		UPDATE tblARPOSEndOfDay
+		SET intCurrencyId = @intCurrencyId
+		WHERE intCurrencyId IS NULL
+	END
+END
+GO

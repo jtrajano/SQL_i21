@@ -524,6 +524,13 @@ BEGIN TRY
 		AND intItemId = @intItemId
 		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 
+	DELETE
+	FROM tblMFProductionSummary
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intItemId
+		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
+		AND dblOutputQuantity = 0
+
 	SELECT @strInstantConsumption = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId

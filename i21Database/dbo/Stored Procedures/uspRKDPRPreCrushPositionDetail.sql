@@ -626,12 +626,12 @@ INSERT INTO @List (
 					,	oc.intFutOptTransactionHeaderId
 					,f.intCommodityId
 					,
-					case when CONVERT(DATETIME, '01 ' + oc.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
+					case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
 					left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end dtmFutureMonthsDate
 					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 					,l.strLocationName
 					,
-					case when CONVERT(DATETIME, '01 ' + oc.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
+					case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
 					left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end strFutureMonth
 					,m.intUnitMeasureId
 					,e.strName + '-' + ba.strAccountNumber strAccountNumber
@@ -698,12 +698,12 @@ INSERT INTO @List (
 					,f.intFutOptTransactionHeaderId
 					,f.intCommodityId
 					,
-					case when CONVERT(DATETIME, '01 ' + oc.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
+					case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
 					left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end dtmFutureMonthsDate
 					,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 					,l.strLocationName
 					,
-					case when CONVERT(DATETIME, '01 ' + oc.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
+					case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By' else
 					left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end strFutureMonth
 					,m.intUnitMeasureId
 					,e.strName + '-' + ba.strAccountNumber strAccountNumber

@@ -217,8 +217,8 @@ BEGIN
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
-		AND ((il.intSubLocationId IS NULL) OR (il.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
-		AND ((il.intStorageLocationId IS NULL) OR (il.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
+		AND ((@intSubLocationId IS NULL) OR (COALESCE(stock.intSubLocationId, il.intSubLocationId) = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
+		AND ((@intStorageLocationId IS NULL) OR (COALESCE(stock.intStorageLocationId, il.intStorageLocationId) = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
 		AND i.strLotTracking = 'No'
 	--GROUP BY il.intItemId, 
 	--		stock.intItemLocationId, 

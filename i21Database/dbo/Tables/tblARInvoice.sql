@@ -205,7 +205,7 @@ BEGIN
 			BEGIN
 				SET @InvoiceNumber = NULL
 				
-				UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
+				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 
@@ -237,3 +237,8 @@ GO
 CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
 ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
 INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
+
+GO
+CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
+
+

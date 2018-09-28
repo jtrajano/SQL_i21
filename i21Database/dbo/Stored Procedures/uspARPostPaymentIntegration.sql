@@ -484,20 +484,31 @@ CROSS APPLY (
 ) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
---Update Customer's Budget 
+--UPDATE CUSTOMER'S BUDGET
+UPDATE BUDGET
+SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
+  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
+FROM tblARCustomerBudget BUDGET
+CROSS APPLY (
+    SELECT intEntityCustomerId
+         , dblTotalAmountPaid = SUM(dblAmountPaid)
+    FROM tblARPayment P
+    INNER JOIN @PaymentIds TB ON P.intPaymentId = TB.intId
+    WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
+      AND P.ysnApplytoBudget = 1
+    GROUP BY P.intEntityCustomerId        
+) PAYMENT
+WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
+
+--AUDIT LOG
 WHILE EXISTS (SELECT NULL FROM @PaymentIds)
 	BEGIN
 		DECLARE @paymentToUpdate INT
-
-		SELECT TOP 1 @paymentToUpdate = intId FROM @PaymentIds ORDER BY intId
-			
-		EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @Post
-
-
-		DECLARE @actionType AS NVARCHAR(50)
+        DECLARE @actionType AS NVARCHAR(50)
         SELECT @actionType = CASE WHEN @Post = 1 THEN 'Posted'  ELSE 'Unposted' END
 
-        --Audit Log          
+		SELECT TOP 1 @paymentToUpdate = intId FROM @PaymentIds ORDER BY intId
+        
         EXEC dbo.uspSMAuditLog 
                  @keyValue			= @paymentToUpdate									-- Primary Key Value of the Invoice. 
                 ,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'	-- Screen Namespace
@@ -507,10 +518,10 @@ WHILE EXISTS (SELECT NULL FROM @PaymentIds)
                 ,@fromValue			= ''												-- Previous Value
                 ,@toValue			= ''												-- New Value
 
-
 		DELETE FROM @PaymentIds WHERE intId = @paymentToUpdate
 	END
 
+--UPDATE BATCH DATE AND ID
 UPDATE
     tblARPayment 
 SET
