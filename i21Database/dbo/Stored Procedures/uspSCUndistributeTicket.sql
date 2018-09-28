@@ -601,7 +601,7 @@ BEGIN TRY
 				SET @wsWetWeight = (@wetWeight - @wsWetShrinkWeight)
 				SET @wsNetShrinkWeight = (ISNULL(@wsWetWeight, 0) * ISNULL(@totalNetShrink, 0)) / 100
 				SET @finalShrinkUnits = (@wsGrossShrinkWeight + @wsWetShrinkWeight + @wsNetShrinkWeight)
-				IF @finalGrossWeight < 0
+				IF @finalGrossWeight <= 0
 				BEGIN
 					SET @finalGrossWeight = 0;
 					SET @finalShrinkUnits = 0;

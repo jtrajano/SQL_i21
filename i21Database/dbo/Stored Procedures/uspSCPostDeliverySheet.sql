@@ -35,7 +35,8 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@intItemUOMId					INT 
 		,@newBalance					NUMERIC (38,20)
 		,@intInventoryAdjustmentId		INT
-		,@dblAdjustByQuantity			NUMERIC (38,20);
+		,@dblAdjustByQuantity			NUMERIC (38,20)
+		,@intOwnershipType				INT;
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -59,9 +60,7 @@ DECLARE @processTicket TABLE(
 	,[dblNewUnitCost]				NUMERIC(38,20)
 	,[intItemUOMId]					INT 
 	-- Parameters used for linking or FK (foreign key) relationships
-	,[intSourceId]					INT
-	,[intSourceTransactionTypeId]	INT
-	,[intEntityUserSecurityId]		INT 
+	,[intOwnershipType]				INT
 );
 
 BEGIN TRY
@@ -130,6 +129,7 @@ BEGIN TRY
 		,[dblAdjustByQuantity]
 		,[dblNewUnitCost]
 		,[intItemUOMId]
+		,[intOwnershipType]
 	)
 	SELECT 
 		[intItemId]							= SCD.intItemId
@@ -138,22 +138,24 @@ BEGIN TRY
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
 		,[strLotNumber]						= ''
-		,[dblAdjustByQuantity]				= CASE WHEN @dblNetUnits > SC.dblNetUnits THEN ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits ELSE ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits END
+		,[dblAdjustByQuantity]				= CASE WHEN @dblNetUnits > SC.dblNetUnits THEN SC.dblNetUnits - ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) ELSE ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits END
 		,[dblNewUnitCost]					= 0
 		,[intItemUOMId]						= SC.intItemUOMIdTo
-	FROM tblSCDeliverySheet SCD
+		,[intOwnershipType]					= 2
+	FROM 
+	tblSCDeliverySheet SCD
 	CROSS APPLY(
 		SELECT intSubLocationId
 		,intStorageLocationId
 		,intItemUOMIdTo
 		,SUM(dblGrossUnits) AS dblGrossUnits
 		,SUM(dblNetUnits) AS dblNetUnits
-		FROM tblSCTicket WHERE intDeliverySheetId = SCD.intDeliverySheetId
+		FROM tblSCTicket WHERE intDeliverySheetId = SCD.intDeliverySheetId AND strTicketStatus = 'C'
 		GROUP BY intSubLocationId, intStorageLocationId, intItemUOMIdTo
 	) SC
 	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 
-	DECLARE ticketCursor CURSOR FOR SELECT intItemId,dtmDate,intLocationId,intSubLocationId,intStorageLocationId,strLotNumber,dblAdjustByQuantity,intItemUOMId
+	DECLARE ticketCursor CURSOR FOR SELECT intItemId,dtmDate,intLocationId,intSubLocationId,intStorageLocationId,strLotNumber,dblAdjustByQuantity,intItemUOMId,intOwnershipType
 	FROM @processTicket
 	OPEN ticketCursor;  
 	FETCH NEXT FROM ticketCursor INTO  @intItemId
@@ -164,33 +166,35 @@ BEGIN TRY
 			,@strLotNumber
 			,@dblAdjustByQuantity 
 			,@intItemUOMId
+			,@intOwnershipType
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
-		Print 'Quantity Adjustment'
-		--EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
-		---- Parameters for filtering:
-		--	@intItemId
-		--	,@dtmDate
-		--	,@intLocationId
-		--	,@intSubLocationId
-		--	,@intStorageLocationId
-		--	,@strLotNumber
-		--	,@dblAdjustByQuantity 
-		--	,NULL
-		--	,@intItemUOMId
-		--	,@intDeliverySheetId --delivery sheet id
-		--	,53 --Delivery Sheet inventory transaction id
-		--	,@intUserId
-		--	,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
+			@intItemId
+			,@dtmDate
+			,@intLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@strLotNumber
+			,@intOwnershipType
+			,@dblAdjustByQuantity 
+			,0
+			,@intItemUOMId
+			,@intDeliverySheetId --delivery sheet id
+			,53 --Delivery Sheet inventory transaction id
+			,@intUserId
+			,@intInventoryAdjustmentId OUTPUT
+			,'Delivery Sheet Posting'
 
-		--FETCH NEXT FROM ticketCursor INTO @intItemId
-		--	,@dtmDate
-		--	,@intLocationId
-		--	,@intSubLocationId
-		--	,@intStorageLocationId
-		--	,@strLotNumber
-		--	,@dblAdjustByQuantity 
-		--	,@intItemUOMId;
+		FETCH NEXT FROM ticketCursor INTO @intItemId
+			,@dtmDate
+			,@intLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@strLotNumber
+			,@dblAdjustByQuantity 
+			,@intItemUOMId
+			,@intOwnershipType;
 	END
 	CLOSE ticketCursor;  
 	DEALLOCATE ticketCursor;
@@ -225,11 +229,12 @@ BEGIN TRY
         ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
         ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
         ,[intTicketId]= NULL
-        ,[intTicketFileId]= @intCustomerStorageId
+        ,[intTicketFileId]= GR.intCustomerStorageId
         ,[strSourceType]= 'Storage'
 		,[intSort]=SD.[intSort]
 		,[strDiscountChargeType]=SD.[strDiscountChargeType]
 	FROM dbo.[tblQMTicketDiscount] SD
+	INNER JOIN tblGRCustomerStorage GR ON GR.intDeliverySheetId = SD.intTicketFileId
 	WHERE SD.intTicketFileId = @intDeliverySheetId 
 	AND SD.strSourceType = 'Delivery Sheet'
 		
@@ -242,6 +247,8 @@ BEGIN TRY
 	) QM
 	WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
+	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
+
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
 		,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
@@ -251,6 +258,7 @@ BEGIN TRY
 		,@fromValue			= 'Unpost'							-- Old Value
 		,@toValue			= 'Posted'							-- New Value
 		,@details			= '';
+
 END TRY
 
 BEGIN CATCH
