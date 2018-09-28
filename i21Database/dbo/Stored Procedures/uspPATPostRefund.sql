@@ -44,14 +44,18 @@ IF(@ysnPosted = 1)
 BEGIN
 
 	INSERT INTO @invalidRefundCustomer
-	SELECT	'There are volumes that were already processed which made the record obsolete. Please delete this refund record.',
-			R.intRefundId
+	SELECT	TOP 1 R.intRefundId,
+			'There are volumes that were already processed which made the record obsolete. Please delete this refund record.'
 	FROM tblPATRefundCustomer RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblPATRefundCategory RCat
+		ON RCat.intRefundCustomerId = RC.intRefundCustomerId
 	INNER JOIN tblPATCustomerVolume CV
-		ON CV.intRefundCustomerId = RC.intRefundCustomerId
-	WHERE CV.ysnRefundProcessed = 0 AND RC.intRefundId <> @intRefundId
+		ON R.intFiscalYearId = CV.intFiscalYear
+		AND RC.intCustomerId = CV.intCustomerPatronId
+		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
+	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
 
 END
 ELSE
@@ -499,24 +503,41 @@ END CATCH
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER VOLUME TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-	IF(@ysnPosted = 1)
-	BEGIN
-		UPDATE CV
-		SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = 1
-		FROM tblPATCustomerVolume CV
-		INNER JOIN #tmpRefundData tRD
-			ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
-		WHERE CV.ysnRefundProcessed = 0
-	END
-	ELSE
-	BEGIN
-		UPDATE CV
-		--SET CV.intRefundCustomerId = null
-		SET ysnRefundProcessed = 0
-		FROM tblPATCustomerVolume CV
-		INNER JOIN #tmpRefundData tRD
-			ON CV.intRefundCustomerId = tRD.intRefundCustomerId
-	END
+	
+	UPDATE VolumeMaster
+	SET dblVolumeProcessed = CASE WHEN @ysnPosted = 1 THEN VolumeMaster.dblVolumeProcessed + tempRefund.dblVolume
+								ELSE VolumeMaster.dblVolumeProcessed - tempRefund.dblVolume END
+	FROM tblPATCustomerVolume VolumeMaster
+	INNER JOIN (SELECT	DISTINCT tmpRefund.intFiscalYearId,
+				tmpRefund.intCustomerId,
+				RefundCategory.intPatronageCategoryId,
+				RefundCategory.dblVolume
+		FROM #tmpRefundData tmpRefund
+		INNER JOIN tblPATRefundCategory RefundCategory
+			ON RefundCategory.intRefundCustomerId = tmpRefund.intRefundCustomerId
+		) tempRefund
+		ON VolumeMaster.intCustomerPatronId = tempRefund.intCustomerId 
+		AND VolumeMaster.intFiscalYear = tempRefund.intFiscalYearId
+		AND VolumeMaster.intPatronageCategoryId = tempRefund.intPatronageCategoryId
+
+	--IF(@ysnPosted = 1)
+	--BEGIN
+	--	UPDATE CV
+	--	SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = 1
+	--	FROM tblPATCustomerVolume CV
+	--	INNER JOIN #tmpRefundData tRD
+	--		ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
+	--	WHERE CV.ysnRefundProcessed = 0
+	--END
+	--ELSE
+	--BEGIN
+	--	UPDATE CV
+	--	--SET CV.intRefundCustomerId = null
+	--	SET ysnRefundProcessed = 0
+	--	FROM tblPATCustomerVolume CV
+	--	INNER JOIN #tmpRefundData tRD
+	--		ON CV.intRefundCustomerId = tRD.intRefundCustomerId
+	--END
 
 	--UPDATE tblPATCustomerVolume
 	--SET ysnRefundProcessed = @ysnPosted

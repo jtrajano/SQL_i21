@@ -303,6 +303,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
 :r .\PAT\DefaultData\2_DefaultCompanyPreference.sql
 :r .\PAT\DefaultData\3_DefaultImportOriginFlag.sql
+:r .\PAT\18.3\VolumeSchemaFix.sql
 :r .\PAT\1_DropStoredProcedures.sql
 :r .\PAT\2_MigrateStockRecords.sql
 :r .\PAT\3_UpdateIssueStockNo.sql

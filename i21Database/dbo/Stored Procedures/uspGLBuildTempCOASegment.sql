@@ -120,7 +120,7 @@ BEGIN
 	BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLSummary]
 		AS
-		SELECT		A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit            
+		SELECT		A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, CASE WHEN E.dblLbsPerUnit = 0 THEN NULL ELSE E.dblLbsPerUnit END as dblLbsPerUnit 
 		FROM         dbo.tblGLSummary AS A 
 						INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId 
 						INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId

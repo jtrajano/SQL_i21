@@ -91,6 +91,24 @@ Begin
 		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(wi.ysnProductionReversed,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
+		If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId IN (Select intSplitFromLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(ysnProductionReversed,0)=0) AND @ysnParentLot=0
+		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		t.intCategoryId,t.strCategoryCode,SUM(t.dblQty) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
+		FROM (  
+		Select DISTINCT '' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
+		mt.intCategoryId,mt.strCategoryCode,ABS(IA.dblQty)dblQty,um.strUnitMeasure AS strUOM,
+		IA.dtmDate AS dtmTransactionDate,l.intParentLotId
+		from tblMFInventoryAdjustment IA
+		Join tblICLot l on IA.intDestinationLotId=l.intLotId and IA.intTransactionTypeId=17
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
+		Join tblICItemUOM iu on IA.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Where IA.intDestinationLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
+		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
+
+
 	If Exists(Select 1 from tblICInventoryReceiptItemLot where intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) AND @ysnParentLot=0
 		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,

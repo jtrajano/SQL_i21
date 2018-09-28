@@ -339,9 +339,10 @@ BEGIN
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF @ysnProducedQtyByUnitCount = 1
+		IF (@ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
 			OR @intProduceUOMKey = 0
+			OR @intPhysicalItemUOMId=@intProduceUOMKey)
 		BEGIN
 			SELECT @dblUnitQty = 0
 
@@ -401,9 +402,9 @@ BEGIN
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF @ysnProducedQtyByUnitCount = 1
+		IF (@ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
-			OR @intProduceUOMKey = 0
+			OR @intProduceUOMKey = 0 OR @intPhysicalItemUOMId=@intProduceUOMKey)
 		BEGIN
 			SELECT @dblUnitQty = 0
 

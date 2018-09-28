@@ -72,7 +72,7 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN vyuEMEntityType EMT
 				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY tblPATCompanyPreference ComPref
-			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
+			WHERE B.dblVolume > B.dblVolumeProcessed AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
 			GROUP BY	B.intCustomerPatronId,
 						ARC.strStockStatus,
@@ -123,7 +123,7 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN tblARCustomer ARC
 					ON ARC.intEntityId = B.intCustomerPatronId
 			CROSS APPLY tblPATCompanyPreference ComPref
-			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus NOT IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
+			WHERE B.dblVolume > B.dblVolumeProcessed AND ARC.strStockStatus NOT IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
 			GROUP BY	B.intCustomerPatronId,
 						ARC.strStockStatus,

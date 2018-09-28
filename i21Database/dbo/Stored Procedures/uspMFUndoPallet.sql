@@ -34,9 +34,8 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intMachineId INT
-		,@intManufacturingProcessId int
-		,@strInstantConsumption nvarchar(50)
-
+		,@intManufacturingProcessId INT
+		,@strInstantConsumption NVARCHAR(50)
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -100,7 +99,7 @@ BEGIN TRY
 
 	SELECT @strTransactionId = strWorkOrderNo
 		,@intLocationId = intLocationId
-		,@intManufacturingProcessId=intManufacturingProcessId 
+		,@intManufacturingProcessId = intManufacturingProcessId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -517,40 +516,48 @@ BEGIN TRY
 		AND intItemId = @intItemId
 		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 
+	DELETE
+	FROM tblMFProductionSummary
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intItemId
+		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
+		AND dblOutputQuantity = 0
+
 	SELECT @strInstantConsumption = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = 20 --Is Instant Consumption
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20 --Is Instant Consumption
 
-			DECLARE @tblMFWorkOrderConsumedLot table(  
-					intWorkOrderId int,  
-					intItemId int,  
-					dblQuantity int 
-					,intMachineId int 
-				   ); 
+	DECLARE @tblMFWorkOrderConsumedLot TABLE (
+		intWorkOrderId INT
+		,intItemId INT
+		,dblQuantity INT
+		,intMachineId INT
+		);
 
-		IF @strInstantConsumption = 'True'
-		BEGIN
-			DELETE
-			FROM dbo.tblMFWorkOrderConsumedLot
-			OUTPUT deleted.intWorkOrderId,  
-				   deleted.intItemId,  
-				   deleted.dblQuantity, 
-				   deleted.intMachineId 
-			INTO @tblMFWorkOrderConsumedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intBatchId = @intBatchId
+	IF @strInstantConsumption = 'True'
+	BEGIN
+		DELETE
+		FROM dbo.tblMFWorkOrderConsumedLot
+		OUTPUT deleted.intWorkOrderId
+			,deleted.intItemId
+			,deleted.dblQuantity
+			,deleted.intMachineId
+		INTO @tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intBatchId = @intBatchId
 
-			UPDATE PS
-			SET dblConsumedQuantity = dblConsumedQuantity - WC.dblQuantity
-			from tblMFProductionSummary PS
-			JOIN @tblMFWorkOrderConsumedLot WC on PS.intWorkOrderId =WC.intWorkOrderId and PS.intItemId=WC.intItemId 
-			and IsNULL(PS.intMachineId, 0) = IsNULL(WC.intMachineId, 0)
-			WHERE PS.intWorkOrderId = @intWorkOrderId
-				AND PS.intItemId = @intItemId
-				AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
-		END
+		UPDATE PS
+		SET dblConsumedQuantity = dblConsumedQuantity - WC.dblQuantity
+		FROM tblMFProductionSummary PS
+		JOIN @tblMFWorkOrderConsumedLot WC ON PS.intWorkOrderId = WC.intWorkOrderId
+			AND PS.intItemId = WC.intItemId
+			AND IsNULL(PS.intMachineId, 0) = IsNULL(WC.intMachineId, 0)
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemId = @intItemId
+			AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
+	END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

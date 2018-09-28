@@ -77,6 +77,15 @@ BEGIN
 	SELECT @intIRParentLotNumberPatternId = intIRParentLotNumberPatternId
 	FROM tblMFCompanyPreference
 
+	IF @dtmDate IS NULL
+		AND @intTransactionTypeId = 4
+	BEGIN
+		SELECT @dtmDate = dtmReceiptDate
+		FROM tblICInventoryReceipt
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+	END
+
+
 	IF @intPatternCode = 78
 		AND @intTransactionTypeId = 4
 		AND @intIRParentLotNumberPatternId = 1

@@ -31,15 +31,15 @@ SELECT	Total.intCustomerId,
 			SELECT	B.intCustomerPatronId as intCustomerId,
 			B.intFiscalYear,
 			CompLoc.intCompanyLocationId,
-			B.ysnRefundProcessed,
+			--B.ysnRefundProcessed,
 			RR.intRefundTypeId,
 			RR.ysnQualified,
 			RR.dblCashPayout,
 			RRD.intPatronageCategoryId,
-			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
-			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
-			dblRefundAmount = ROUND((RRD.dblRate * dblVolume), 2) ,
-			dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100), 2),
+			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume - dblVolumeProcessed ELSE 0 END,
+			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume - dblVolumeProcessed ELSE 0 END,
+			dblRefundAmount = ROUND((RRD.dblRate * (dblVolume - dblVolumeProcessed)), 2) ,
+			dblCashRefund = ROUND((RRD.dblRate * (dblVolume - dblVolumeProcessed)) * (RR.dblCashPayout/100), 2),
 			dblLessFWTPercentage = CompLoc.dblWithholdPercent
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -50,7 +50,8 @@ SELECT	Total.intCustomerId,
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			CROSS APPLY ComPref
 			CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc 
-			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+			--WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+			WHERE B.dblVolume > B.dblVolumeProcessed
 		) Total
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityId = Total.intCustomerId

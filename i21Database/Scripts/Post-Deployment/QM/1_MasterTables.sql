@@ -877,14 +877,14 @@ GO
 IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 5)
 BEGIN
 	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
-	VALUES('ArrivalForm',5,1)
+	VALUES('',5,1)
 END
 GO
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 10)
 BEGIN
 	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
-	VALUES('ArrivalForm',10,1)
+	VALUES('',10,1)
 END
 ELSE
 BEGIN
