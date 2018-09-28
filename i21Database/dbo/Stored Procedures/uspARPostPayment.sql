@@ -1476,19 +1476,21 @@ IF @recap = 0
 				GROUP BY intEntityCustomerId
 			) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
-			--Update Customer's Budget 
-			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
-				BEGIN
-					DECLARE @paymentToUpdate INT,
-							@customerId		 INT
-
-					SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
-					SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
-			
-					EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
-
-					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
-				END
+			--Update Customer's Budget
+			UPDATE BUDGET
+			SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
+			  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
+			FROM tblARCustomerBudget BUDGET
+			CROSS APPLY (
+				SELECT intEntityCustomerId
+					 , dblTotalAmountPaid = SUM(dblAmountPaid)
+				FROM tblARPayment P
+				INNER JOIN @tblPaymentsToUpdateBudget TB ON P.intPaymentId = TB.intPaymentId
+				WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
+				  AND P.ysnApplytoBudget = 1
+				GROUP BY P.intEntityCustomerId		
+			) PAYMENT
+			WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
 
 			UPDATE A
                 SET A.intCurrentStatus = 5
