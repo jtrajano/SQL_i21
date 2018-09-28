@@ -91,7 +91,7 @@ END
 -- Check if the system needs to escalate the cost adjustment. 
 SET @EscalateInventoryTransactionId = NULL 
 SELECT	TOP 1 
-		@EscalateInventoryTransactionId = t.intInventoryTransactionId							
+		@EscalateInventoryTransactionId = t.intInventoryTransactionId
 		,@EscalateInventoryTransactionTypeId = t.intTransactionTypeId
 FROM	dbo.tblICInventoryTransaction t
 WHERE	@t_dblQty < 0 
@@ -99,12 +99,13 @@ WHERE	@t_dblQty < 0
 		AND t.intTransactionId = @t_intTransactionId
 		AND t.strTransactionId = @t_strTransactionId
 		AND ISNULL(t.ysnIsUnposted, 0) = 0
-		AND ISNULL(t.dblQty, 0) > 0 				
+		AND ISNULL(t.dblQty, 0) > 0
 		AND 1 = 
-			CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt THEN 0 
-					WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
-					WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
-					ELSE 0 
+			CASE 
+				WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt THEN 1
+				WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
+				WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
+				ELSE 0 
 			END 
 
 -- If it was an offset from the negative stock scenario, the query below will do more digging. 
