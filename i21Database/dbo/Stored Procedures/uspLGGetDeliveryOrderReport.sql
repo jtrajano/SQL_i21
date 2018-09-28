@@ -177,6 +177,17 @@ BEGIN
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			WHERE CD.intContractDetailId = LD.intSContractDetailId
 			) AS strBuyersPONo
+		  ,(SELECT TOP 1 CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq)
+			FROM tblCTContractDetail CD
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE CD.intContractDetailId = LD.intSContractDetailId
+			) AS strSalesContractNo
+		  ,(SELECT TOP 1 CB.strContractBasis
+			FROM tblCTContractHeader CH
+			JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+			JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+			WHERE CD.intContractDetailId = LD.intSContractDetailId
+			) AS strSalesContractIncoTerm
 		  ,(SELECT E1.strPhone
 			FROM tblEMEntity E
 			JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
