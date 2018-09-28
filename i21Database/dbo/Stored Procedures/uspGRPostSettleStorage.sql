@@ -1107,6 +1107,7 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
+					,[intInventoryReceiptItemId]
 				 )
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
@@ -1122,12 +1123,33 @@ BEGIN TRY
 					,[dblWeightUnitQty]			= 1 
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
-					,[dblNetWeight]				= 0 
+					,[dblNetWeight]				= CASE 
+													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
+													ELSE 0 
+												END
+					,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
-				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId			
-				WHERE a.dblCashPrice <> 0 AND a.dblUnits <> 0 AND SST.intSettleStorageId=@intSettleStorageId 
+				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId
+				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
+				LEFT JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = a.intCustomerStorageId
+				LEFT JOIN tblGRDiscountScheduleCode DSC
+					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId and DSC.intItemId = a.intItemId
+				LEFT  JOIN (
+					tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+						ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+					LEFT JOIN tblICItemLocation sourceLocation
+						ON sourceLocation.intItemId = E2.intItemId
+						AND sourceLocation.intLocationId = E1.intLocationId
+					LEFT JOIN tblSMFreightTerms ft
+						ON ft.intFreightTermId = E1.intFreightTermId
+					LEFT JOIN tblICFobPoint fp
+						ON fp.strFobPoint = ft.strFreightTerm
+				)
+					ON CS.intTicketId= E2.intSourceId
+				WHERE a.dblCashPrice <> 0 AND a.dblUnits <> 0 AND SST.intSettleStorageId=@intSettleStorageId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.
