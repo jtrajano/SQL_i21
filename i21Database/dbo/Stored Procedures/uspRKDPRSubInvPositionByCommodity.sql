@@ -796,7 +796,7 @@ BEGIN
 
 -- Sales Basis Deliveries
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId, intFromCommodityUnitMeasureId,intCompanyLocationId from  (
+	select intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intUnitMeasureId intFromCommodityUnitMeasureId,intCompanyLocationId from  (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
