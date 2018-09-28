@@ -236,6 +236,7 @@ BEGIN
 		WHEN @msgId = 80220 THEN 'Unable to post %s for %s. Available stock of %s as of %d is below the transaction quantity %f.'
 		WHEN @msgId = 80221 THEN 'Unable to Post. Cost is missing for %s for %s.'
 		WHEN @msgId = 80222 THEN 'Please check if there is enough stock to do the split.'
+		WHEN @msgId = 80223 THEN 'Receiving a negative stock for %s is not allowed.'
 	END 
 
 	RETURN @msg

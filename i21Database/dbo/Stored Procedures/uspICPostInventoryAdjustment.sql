@@ -586,14 +586,6 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit		
 	END 
 
-	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
-	BEGIN 
-		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
-				@intTransactionId
-				,@intEntityUserSecurityId
-				,@ysnPost
-	END 	
-
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
 	BEGIN 
 		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
