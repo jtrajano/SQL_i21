@@ -5,7 +5,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT	
 	,@ysnPost AS BIT 
-	,@dtmCreated AS DATETIME NULL
+	,@dtmCreated AS DATETIME = NULL
 AS
 BEGIN TRY
 BEGIN
