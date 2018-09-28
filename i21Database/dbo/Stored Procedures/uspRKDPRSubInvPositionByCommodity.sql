@@ -852,7 +852,7 @@ BEGIN
 	If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
 	BEGIN
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,intCommodityId,strLocationName,intFromCommodityUnitMeasureId,intCompanyLocationId)
 	SELECT 15 intSeqId,'Company Titled Stock','Off-Site',	dblTotal,intCommodityId,strLocation,intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,
 	intCompanyLocationId 
 		FROM  (
