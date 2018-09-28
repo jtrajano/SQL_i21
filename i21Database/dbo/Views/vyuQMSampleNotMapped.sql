@@ -17,6 +17,7 @@ SELECT S.intSampleId
 	,UOM.strUnitMeasure AS strSampleUOM
 	,UOM1.strUnitMeasure AS strRepresentingUOM
 	,SS.strSecondaryStatus AS strSampleStatus
+	,SS1.strSecondaryStatus AS strPreviousSampleStatus
 	,CS.strSubLocationName
 	,S1.strSampleNumber AS strParentSampleNo
 	,SL.strName AS strStorageLocationName
@@ -24,6 +25,7 @@ SELECT S.intSampleId
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+LEFT JOIN tblQMSampleStatus SS1 ON SS1.intSampleStatusId = S.intPreviousSampleStatusId
 LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId

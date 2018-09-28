@@ -15,6 +15,7 @@ BEGIN TRY
 
 	DECLARE @intSampleId INT
 	DECLARE @strMarks NVARCHAR(100)
+	DECLARE @intPreviousSampleStatusId INT
 	DECLARE @intShipperEntityId INT
 	DECLARE @ysnEnableParentLot BIT
 			,@intSampleTypeId INT
@@ -38,9 +39,11 @@ BEGIN TRY
 
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
+		,@intPreviousSampleStatusId = intSampleStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
+			,intSampleStatusId INT
 			)
 
 	IF NOT EXISTS (
@@ -194,6 +197,14 @@ BEGIN TRY
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 		AND x.strRowState = 'MODIFIED'
+
+	-- If sample status is not in Approved and Rejected, then set the previous sample status
+	IF @intPreviousSampleStatusId <> 3 AND @intPreviousSampleStatusId <> 4
+	BEGIN
+		UPDATE tblQMSample
+		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
+		WHERE intSampleId = @intSampleId
+	END
 
 	-- Sample Detail Create, Update, Delete
 	INSERT INTO dbo.tblQMSampleDetail (

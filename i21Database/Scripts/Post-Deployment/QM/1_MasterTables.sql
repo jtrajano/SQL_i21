@@ -1195,3 +1195,7 @@ UPDATE tblQMCompanyPreference
 SET ysnShowItemDescriptionOnly = 0
 WHERE ysnShowItemDescriptionOnly IS NULL
 GO
+UPDATE tblQMCompanyPreference
+SET ysnAllowReversalSampleEntry = 0
+WHERE ysnAllowReversalSampleEntry IS NULL
+GO
