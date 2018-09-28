@@ -68,6 +68,8 @@ SELECT
 	,receiptItemLot.strCertificateId
 	,receiptItemLot.strTrackingNumber
 	,strWeightUOM = WeightUOM.strUnitMeasure
+	,intGrossUOMDecimalPlaces = WeightUOM.intDecimalPlaces
+	,intQtyUOMDecimalPlaces = UOM.intDecimalPlaces
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
