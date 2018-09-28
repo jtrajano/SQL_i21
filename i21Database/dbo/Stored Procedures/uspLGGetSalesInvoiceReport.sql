@@ -82,8 +82,8 @@ BEGIN
 					,TYPE
 				).value('.', 'varchar(max)'), 1, 2, '')
 	FROM tblARInvoiceDetail InvDet
-	LEFT JOIN tblCTContractDetail COD ON COD.intContractDetailId = InvDet.intContractDetailId
-	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = COD.intContractHeaderId
+	JOIN tblCTContractDetail COD ON COD.intContractDetailId = InvDet.intContractDetailId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = COD.intContractHeaderId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
 	SELECT @strContractConditions = STUFF((
@@ -96,8 +96,8 @@ BEGIN
 					,TYPE
 				).value('.', 'varchar(max)'), 1, 2, '')
 	FROM tblARInvoiceDetail InvDet
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
-	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
 	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
@@ -231,7 +231,7 @@ BEGIN
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ISNULL(LD.intLoadDetailId, ReceiptItem.intSourceId) --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
+	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
 	CROSS APPLY tblLGCompanyPreference CP
