@@ -12,7 +12,7 @@
 	, @strCustomerName					AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds					AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly						AS BIT				= NULL
-	, @ysnIncludeWriteOffPayment    	AS BIT 				= 1
+	, @ysnIncludeWriteOffPayment    	AS BIT 				= 0
 	, @intEntityUserId					AS INT				= NULL
 AS
 
@@ -29,7 +29,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
