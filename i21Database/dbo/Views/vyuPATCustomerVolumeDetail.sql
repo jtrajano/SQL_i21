@@ -13,7 +13,26 @@ SELECT  CV.intCustomerVolumeId,
 		CV.dblVolume,
 		CV.ysnRefundProcessed,
 		CV.intConcurrencyId
-	FROM tblPATCustomerVolume CV
+	FROM (
+		SELECT	intCustomerVolumeId,
+			intFiscalYear,
+			intCustomerPatronId,
+			intPatronageCategoryId,
+			dblVolume = dblVolume - dblVolumeProcessed,
+			ysnRefundProcessed = CAST(0 AS BIT),
+			intConcurrencyId
+		FROM tblPATCustomerVolume
+		UNION ALL
+		SELECT	intCustomerVolumeId,
+				intFiscalYear,
+				intCustomerPatronId,
+				intPatronageCategoryId,
+				dblVolume = dblVolumeProcessed,
+				ysnRefundProcessed = CAST(1 AS BIT),
+				intConcurrencyId
+		FROM tblPATCustomerVolume
+		WHERE dblVolumeProcessed > 0
+	) CV
 	INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
 	INNER JOIN tblEMEntity EM
