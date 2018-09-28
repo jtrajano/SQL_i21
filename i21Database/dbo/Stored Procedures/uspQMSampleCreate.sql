@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @dblSampleQty NUMERIC(18, 6)
 	DECLARE @intSampleUOMId INT
+	DECLARE @intPreviousSampleStatusId INT
 	DECLARE @intItemId INT
 	DECLARE @intLotId INT
 	DECLARE @dblQty NUMERIC(18, 6)
@@ -48,6 +49,7 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@dblSampleQty = dblSampleQty
 		,@intSampleUOMId = intSampleUOMId
+		,@intPreviousSampleStatusId = intSampleStatusId
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -61,9 +63,16 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
+			,intSampleStatusId INT
 			,intItemId INT
 			,intCreatedUserId INT
 			)
+
+	-- If sample status is Approved / Rejected, setting default to Received
+	IF @intPreviousSampleStatusId = 3 OR @intPreviousSampleStatusId = 4
+	BEGIN
+		SELECT @intPreviousSampleStatusId = 1
+	END
 
 	IF @intStorageLocationId IS NULL
 		AND @strLotNumber IS NOT NULL
@@ -241,6 +250,7 @@ BEGIN TRY
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
+		,intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
 		--,intContractHeaderId
@@ -299,6 +309,7 @@ BEGIN TRY
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
+		,@intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
 		--,intContractHeaderId
