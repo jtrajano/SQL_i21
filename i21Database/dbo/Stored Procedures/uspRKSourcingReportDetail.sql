@@ -12,7 +12,6 @@
 	   @dtmAOPToDate datetime = null,	
 	   @strLocationName nvarchar(250)= null,
 	   @intCurrencyId int = null
-
 AS
 
 if @strEntityName = '-1'
@@ -20,14 +19,12 @@ set @strEntityName = NULL
  if @strLocationName = '-1'
 set @strLocationName = NULL
 
-
 declare @strCurrency nvarchar(100)
 declare @strUnitMeasure nvarchar(100)
 select @strCurrency=strCurrency from tblSMCurrency where intCurrencyID=@intCurrencyId
 
 select @strUnitMeasure=strUnitMeasure,@intUnitMeasureId=c.intUnitMeasureId from tblICCommodityUnitMeasure c
 join tblICUnitMeasure u on u.intUnitMeasureId=c.intUnitMeasureId where c.intCommodityUnitMeasureId=@intUnitMeasureId
-
 
 DECLARE @GetStandardQty AS TABLE(
 		intRowNum int,
@@ -206,7 +203,8 @@ SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContra
 							 dblStandardRatio,dblBalanceQty*isnull(dblStandardRatio,1) dblStandardQty,intItemId,
 							dblStandardPrice,dblPPVBasis,
 							
-							(case when isnull(dblFuturesPrice,0)=0 then dblSettlementPrice else dblFuturesPrice end *isnull(dblRatio,1))+isnull(dblRate,0) dblNewPPVPrice
+							((case when isnull(dblFuturesPrice,0)=0 then dblSettlementPrice else dblFuturesPrice end 
+								*isnull(dblRatio,1))+isnull(dblBasis,0)) - isnull(dblRate,0) dblNewPPVPrice
 							
 							,strLocationName,
 							
@@ -262,9 +260,9 @@ JOIN tblICItem ic ON ic.intItemId = cd.intItemId
 JOIN tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
 LEFT JOIN(select intContractDetailId,sum(dbo.[fnCTConvertQuantityToTargetItemUOM](c1.intItemId,@intUnitMeasureId,i.intUnitMeasureId,isnull(dblRate,0))) dblRate 
 			FROM tblCTContractCost c1
-			JOIN tblICItemUOM i on c1.intItemUOMId=i.intItemUOMId  where ysnBasis=1 and c1.intItemId not in(
+			JOIN tblICItemUOM i on c1.intItemUOMId=i.intItemUOMId  where ysnBasis=1 and c1.intItemId in(
 		 SELECT isnull(intItemId,0) from tblCTComponentMap where ysnExcludeFromPPV=1) Group by intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
 LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 
-)t)t1 
+)t)t1
