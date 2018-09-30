@@ -35,6 +35,7 @@
     ,[intEntityId]                      INT             NOT NULL
     ,[intUserId]                        INT             NOT NULL
     ,[ysnUserAllowedToPostOtherTrans]   BIT             NULL
+    ,[ysnWithinAccountingDate]          BIT             NULL
     ,[ysnProcessCreditCard]             BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
