@@ -94,6 +94,16 @@ IF @transCount = 0 BEGIN TRANSACTION
 	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
 	--LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'AP Clearing'
 	WHERE B.intBillId = @voucherId
+	
+	IF EXISTS (
+		SELECT * FROM [fnAPValidateAPAccounts] (@voucherId)
+	)
+	BEGIN 
+		SET @error = (SELECT strDescription FROM [fnAPValidateAPAccounts] (@voucherId));
+		BEGIN
+				RAISERROR(@error, 16, 1);
+		END
+	END
 
 	INSERT INTO @voucherIds
 	SELECT @voucherId

@@ -7096,6 +7096,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateInvalidPostPaymentData.sql" />
     <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
+    <Build Include="dbo\Functions\fnAPValidateAPAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
