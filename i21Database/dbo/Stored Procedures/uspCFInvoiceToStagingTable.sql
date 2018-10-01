@@ -199,6 +199,7 @@ BEGIN TRY
 	,ysnPostedCSV
 	,strGuid
 	,strUserId
+	,ysnExpensed
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -437,6 +438,7 @@ BEGIN TRY
 	,ysnPostedCSV
 	,@Guid
 	,@UserId
+	,ysnExpensed
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId

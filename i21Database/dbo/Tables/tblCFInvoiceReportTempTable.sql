@@ -79,6 +79,7 @@
     [ysnPrintTimeOnInvoices]      BIT             NULL,
     [ysnPrintTimeOnReports]       BIT             NULL,
     [ysnInvalid]                  BIT             NULL,
+    [ysnExpensed]                 BIT             NULL,
     [ysnPosted]                   BIT             NULL,
     [ysnPostedCSV]                BIT             NULL,
     [ysnPostForeignSales]         BIT             NULL,
@@ -88,6 +89,8 @@
     [strUserId]                   NVARCHAR (MAX)  NULL,
     [intVehicleId]                INT             NULL
 );
+
+
 
 
 
