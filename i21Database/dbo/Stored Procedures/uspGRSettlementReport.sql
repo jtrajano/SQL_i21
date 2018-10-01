@@ -293,7 +293,7 @@ BEGIN
 				,strAccountNumber		    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    = BNKTRN.strReferenceNo
 				,strEntityName			    = ENTITY.strName
-				,strVendorAddress		    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
+				,strVendorAddress		    = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate		    = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime) 
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
@@ -406,6 +406,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -494,7 +495,7 @@ BEGIN
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
-				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+				,strVendorAddress     		 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode) 
 				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)		
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
@@ -666,6 +667,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
@@ -697,7 +699,7 @@ BEGIN
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
-				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+				,strVendorAddress			 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)		
 				,intTicketId				 = DS.intDeliverySheetId		
 				,strTicketNumber			 = DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
@@ -882,6 +884,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
