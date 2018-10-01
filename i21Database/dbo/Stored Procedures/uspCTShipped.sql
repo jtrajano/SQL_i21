@@ -22,9 +22,13 @@ BEGIN TRY
 				@intOrderType					INT,
 				@dblSchQuantityToUpdate			NUMERIC(18,6),
 				@intSourceType					INT,
-				@ysnPO							BIT
+				@ysnPO							BIT,
+				@intSourceId					INT,
+				@strShipmentId					NVARCHAR(50),
+				@strTicketNumber				NVARCHAR(50),
+				@intSequenceUsageHistoryId		INT
 
-	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType FROM @ItemsFromInventoryShipment
+	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
 
 	IF(@intOrderType <> 1)
 		RETURN
@@ -53,7 +57,8 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
-				@intInventoryShipmentItemId		=	NULL
+				@intInventoryShipmentItemId		=	NULL,
+				@strTicketNumber				=	NULL
 
 		SELECT	@intContractDetailId			=	intContractDetailId,
 				@intFromItemUOMId				=	intItemUOMId,
@@ -61,6 +66,8 @@ BEGIN TRY
 				@intInventoryShipmentItemId		=	intInventoryShipmentItemId
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
+
+		SELECT @intSourceId = intSourceId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
@@ -84,7 +91,14 @@ BEGIN TRY
 				@strScreenName			=	'Inventory Shipment' 
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
-
+		/*
+			intSourceType: 
+				0 = 'None'
+				1 = 'Scale'
+				2 = 'Inbound Shipment'
+				3 = 'Pick Lot'
+				4 = 'Delivery Sheet'
+		*/
 		IF @intSourceType IN (0,1,2,3,5)
 		BEGIN					
 			EXEC	uspCTUpdateScheduleQuantity
@@ -93,6 +107,26 @@ BEGIN TRY
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryShipmentItemId,
 					@strScreenName			=	'Inventory Shipment' 
+		END
+
+		IF	@intSourceType = 1 AND 
+			EXISTS(SELECT TOP 1 1 FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND strScreenName = 'Auto - Scale' AND intExternalId = @intSourceId) AND
+			@dblSchQuantityToUpdate > 0
+		BEGIN
+			SELECT @strTicketNumber = strTicketNumber FROM tblSCTicket WHERE intTicketId = @intSourceId
+			IF @strTicketNumber IS NOT NULL
+			BEGIN
+				SELECT @intSequenceUsageHistoryId = intSequenceUsageHistoryId FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND strScreenName = 'Auto - Scale' AND intExternalId = @intSourceId
+				UPDATE tblCTSequenceUsageHistory SET  strScreenName =  strScreenName + ' - ' + @strTicketNumber WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+				SELECT @dblSchQuantityToUpdate = dblTransactionQuantity * -1,@strTicketNumber = 'Reverse ' + strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intSourceId,
+						@strScreenName			=	@strTicketNumber
+			END
 		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
