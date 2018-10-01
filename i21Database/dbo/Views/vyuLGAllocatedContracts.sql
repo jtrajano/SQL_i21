@@ -65,7 +65,7 @@ SELECT
 	,U3.strUnitMeasure as strSItemUOM
 	,SIM.strItemNo as strSItemNo
 	,SIM.strDescription as strSItemDescription
-	,SIM.strDescription + ' - ' + SCT.strItemSpecification as strSItemDescriptionSpecification
+	,SIM.strDescription + ' - ' + ISNULL(SCT.strItemSpecification,'') as strSItemDescriptionSpecification
 	,PTS.strDescription AS strSProductType
 	,SCT.dblQuantity as dblSDetailQuantity
 	,SCH.dtmContractDate as dtmSContractDate
