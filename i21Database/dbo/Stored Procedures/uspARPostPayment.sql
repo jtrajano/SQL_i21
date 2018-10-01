@@ -481,10 +481,12 @@ BEGIN TRY
     IF @recap = 1
     BEGIN
         EXEC [dbo].[uspARPostPaymentRecap]
-		        @BatchId         = @batchIdUsed
+		        @BatchId         = @batchIdUsed 
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
-		       ,@raiseError      = @raiseError
+		       ,@raiseError      = @raiseError			   
+		       ,@BatchIdUsed     = @batchIdUsed OUT
+			   ,@Post			 = @post
         GOTO Do_Commit
     END
 

@@ -1079,3 +1079,9 @@ BEGIN
 END
 
 
+UPDATE #ARPaymentGLEntries
+SET
+     [dtmDateEntered] = @PostDate
+	,[strBatchId]     = @BatchId
+
+    
