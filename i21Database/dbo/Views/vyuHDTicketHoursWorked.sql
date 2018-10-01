@@ -35,6 +35,9 @@
 			,intTimeEntryId = 1
 			,i.strTicketNumber
 			,i.intCustomerId
+			,dblExtendedRate = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) then 0.00 else a.intHours * a.dblRate end)
+			,k.strProjectName
+			,k.intProjectId
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -45,3 +48,5 @@
 			left join tblSMCurrencyExchangeRateType g on g.intCurrencyExchangeRateTypeId = a.intCurrencyExchangeRateTypeId
 			left join tblICItem h on h.intItemId = a.intItemId
 			left join tblHDTicket i on i.intTicketId = a.intTicketId
+			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
+			left join tblHDProject k on k.intProjectId = j.intProjectId
