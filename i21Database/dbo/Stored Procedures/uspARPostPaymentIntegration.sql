@@ -479,32 +479,52 @@ CROSS APPLY (
 ) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
---Update Customer's Budget 
-WHILE EXISTS (SELECT NULL FROM @PaymentIds)
-	BEGIN
-		DECLARE @paymentToUpdate INT
+--UPDATE CUSTOMER'S BUDGET
+UPDATE BUDGET
+SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
+  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
+FROM tblARCustomerBudget BUDGET
+CROSS APPLY (
+    SELECT intEntityCustomerId
+         , dblTotalAmountPaid = SUM(dblAmountPaid)
+    FROM tblARPayment P
+    INNER JOIN @PaymentIds TB ON P.intPaymentId = TB.intId
+    WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
+      AND P.ysnApplytoBudget = 1
+    GROUP BY P.intEntityCustomerId        
+) PAYMENT
+WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
 
-		SELECT TOP 1 @paymentToUpdate = intId FROM @PaymentIds ORDER BY intId
-			
-		EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @Post
+--AUDIT LOG
+DECLARE @IPaymentLog dbo.[AuditLogStagingTable]
+DELETE FROM @IPaymentLog
+INSERT INTO @IPaymentLog(
+	 [strScreenName]
+	,[intKeyValueId]
+	,[intEntityId]
+	,[strActionType]
+	,[strDescription]
+	,[strActionIcon]
+	,[strChangeDescription]
+	,[strFromValue]
+	,[strToValue]
+	,[strDetails]
+)
+SELECT DISTINCT
+	 [strScreenName]			= 'AccountsReceivable.view.Invoice'
+	,[intKeyValueId]			= [intTransactionId]
+	,[intEntityId]				= [intUserId]
+	,[strActionType]			= CASE WHEN [ysnPost] = 1 THEN 'Posted'  ELSE 'Unposted' END 
+	,[strDescription]			= ''
+	,[strActionIcon]			= NULL
+	,[strChangeDescription]		= ''
+	,[strFromValue]				= ''
+	,[strToValue]				= [strTransactionId]
+	,[strDetails]				= NULL
+FROM
+	#ARPostPaymentHeader
 
-
-		DECLARE @actionType AS NVARCHAR(50)
-        SELECT @actionType = CASE WHEN @Post = 1 THEN 'Posted'  ELSE 'Unposted' END
-
-        --Audit Log          
-        EXEC dbo.uspSMAuditLog 
-                 @keyValue			= @paymentToUpdate									-- Primary Key Value of the Invoice. 
-                ,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'	-- Screen Namespace
-                ,@entityId			= @UserId											-- Entity Id.
-                ,@actionType		= @actionType										-- Action Type
-                ,@changeDescription	= ''												-- Description
-                ,@fromValue			= ''												-- Previous Value
-                ,@toValue			= ''												-- New Value
-
-
-		DELETE FROM @PaymentIds WHERE intId = @paymentToUpdate
-	END
+EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @IPaymentLog
 
 UPDATE
     tblARPayment 
