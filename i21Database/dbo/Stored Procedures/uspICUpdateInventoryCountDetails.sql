@@ -167,9 +167,9 @@ BEGIN
 	SELECT
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
-		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
-		, intSubLocationId = COALESCE(stock.intSubLocationId, il.intSubLocationId)
-		, intStorageLocationId = COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
+		, intItemLocationId = stock.intItemLocationId --COALESCE(stock.intItemLocationId, il.intItemLocationId)
+		, intSubLocationId = stock.intSubLocationId --COALESCE(stock.intSubLocationId, il.intSubLocationId)
+		, intStorageLocationId = stock.intStorageLocationId --COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
@@ -192,7 +192,7 @@ BEGIN
 			AND p.intItemId = il.intItemId
 		INNER JOIN tblICItemUOM stockUOM 
 			ON stockUOM.intItemId = il.intItemId
-			AND stockUOM.ysnStockUnit = 1
+			--AND stockUOM.ysnStockUnit = 1
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
 		LEFT JOIN (
 			SELECT	intItemId
@@ -214,6 +214,7 @@ BEGIN
 			AND stockUOM.intItemUOMId = stock.intItemUOMId
 			AND stock.intItemLocationId = il.intItemLocationId
 	WHERE il.intLocationId = @intLocationId
+		AND il.intItemLocationId = stock.intItemLocationId
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
