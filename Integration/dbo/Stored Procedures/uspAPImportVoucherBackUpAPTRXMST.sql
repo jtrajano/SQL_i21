@@ -101,7 +101,7 @@ BEGIN
 		,[A4GLIdentity]		
 		,[ysnInsertedToAPIVC]
 	)
-	SELECT
+	SELECT DISTINCT
 		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
 		[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
@@ -177,7 +177,7 @@ BEGIN
 		,[A4GLIdentity]		
 		,[ysnInsertedToAPIVC]
 	)
-	SELECT
+	SELECT DISTINCT
 		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
 		[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
