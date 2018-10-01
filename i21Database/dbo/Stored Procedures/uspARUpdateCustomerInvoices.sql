@@ -5,6 +5,7 @@
 	,@RaiseError		BIT					= 0
 	,@BatchId			NVARCHAR(40)		= NULL
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -1475,7 +1476,10 @@ END CATCH
 
 	
 BEGIN TRY
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @UpdatedInvoiceIds
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @UpdatedInvoiceIds
+	END	
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog

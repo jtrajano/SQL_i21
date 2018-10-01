@@ -877,7 +877,10 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
 
-    EXEC dbo.uspGLBookEntries @GLEntries, @Post
+    EXEC dbo.uspGLBookEntries
+             @GLEntries         = @GLEntries
+            ,@ysnPost           = @Post
+            ,@SkipValidation	= 1
 
     EXEC [dbo].[uspARPostPaymentIntegration]
          @Post					= @Post

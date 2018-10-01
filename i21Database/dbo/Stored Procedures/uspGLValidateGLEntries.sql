@@ -1,12 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLValidateGLEntries]
-	@GLEntriesToValidate RecapTableType READONLY,
-	@XACT_ABORT_ON BIT = 1
+	@GLEntriesToValidate RecapTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-IF (@XACT_ABORT_ON = 1) SET XACT_ABORT ON -- DEFAULT IS OFF
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors'))
 	DROP TABLE #FoundErrors
@@ -23,7 +21,7 @@ SELECT	Errors.strTransactionId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Errors.strModuleName
-FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors;
+FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors; 
 
 DECLARE @intErrorCode INT = 0
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors)

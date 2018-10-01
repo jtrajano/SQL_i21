@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoicesTaxes]
 	@InvoiceIds		InvoiceId	READONLY
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -180,23 +181,29 @@ WHERE
 	AND NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 
 	
-DECLARE @CreatedInvoiceIds InvoiceId	
-DELETE FROM @CreatedInvoiceIds
 
-INSERT INTO @CreatedInvoiceIds(
-	 [intHeaderId]
-	,[ysnUpdateAvailableDiscountOnly]
-	,[intDetailId])
-SELECT 
-	 [intHeaderId]						= [intInvoiceId]
-	,[ysnUpdateAvailableDiscountOnly]	= 0
-	,[intDetailId]						= [intInvoiceDetailId]
-FROM
-	@InvoiceDetail IDs
-WHERE
-	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 
-EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		DECLARE @CreatedInvoiceIds InvoiceId	
+		DELETE FROM @CreatedInvoiceIds
+
+		INSERT INTO @CreatedInvoiceIds(
+			 [intHeaderId]
+			,[ysnUpdateAvailableDiscountOnly]
+			,[intDetailId])
+		SELECT 
+			 [intHeaderId]						= [intInvoiceId]
+			,[ysnUpdateAvailableDiscountOnly]	= 0
+			,[intDetailId]						= [intInvoiceDetailId]
+		FROM
+			@InvoiceDetail IDs
+		WHERE
+			NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
+
+
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+	END
 
 
 END

@@ -211,26 +211,27 @@ BEGIN
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Fiscal Year
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = P.[strTransactionId] + '- Unable to find an open fiscal year period to match the transaction date.'
-	FROM
-		#ARPostPaymentHeader P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[ysnWithinAccountingDate] = 0
+ --   This is being handled by [uspGLValidateGLEntries]
+ --   INSERT INTO #ARInvalidPaymentData
+ --       ([intTransactionId]
+ --       ,[strTransactionId]
+ --       ,[strTransactionType]
+ --       ,[intTransactionDetailId]
+ --       ,[strBatchId]
+ --       ,[strError])
+	----Fiscal Year
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = P.[strTransactionId] + '- Unable to find an open fiscal year period to match the transaction date.'
+	--FROM
+	--	#ARPostPaymentHeader P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[ysnWithinAccountingDate] = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
