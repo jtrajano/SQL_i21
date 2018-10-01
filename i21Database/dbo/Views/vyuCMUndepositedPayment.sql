@@ -2,7 +2,8 @@
 AS 
 WITH ARReceiptAndInvoice as (
 	SELECT strRecordNumber strTransactionId,intCurrencyId FROM tblARPayment UNION
-	SELECT strInvoiceNumber strTransactionId, intCurrencyId  FROM tblARInvoice 
+	SELECT strInvoiceNumber strTransactionId, intCurrencyId  FROM tblARInvoice UNION
+	SELECT strEODNo strTransactionId, intCurrencyId  FROM tblARPOSEndOfDay 
 )
 SELECT 
 Undep.intUndepositedFundId
