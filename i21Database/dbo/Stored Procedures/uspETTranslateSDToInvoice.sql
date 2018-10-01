@@ -83,6 +83,8 @@ BEGIN
 	DECLARE @ContractOverFillQuantity	NUMERIC(18, 6)
 	DECLARE @getARPrice	BIT
 	DECLARE @strStatus					NVARCHAR(50)
+	DECLARE @intEntitySalespersonId INT
+
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -226,7 +228,14 @@ BEGIN
 			--Get Term Code
 			SET @intTermCode = (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTermCode = @strTermCode)
 			--Get Entity ID of the Driver
-			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
+			--SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
+			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblARSalesperson where strType = 'Driver' and strDriverNumber COLLATE Latin1_General_CI_AS = @strDriverNumber)
+			/*----------------------------------------------------------------------------    
+			 --Default Salesperson to the Salesperson from Customer Setup (IET-359)    
+			 --If Customer Setup for Salesperson is blank    
+			 --Then Set to Driver Number    
+			 */----------------------------------------------------------------------------    
+			 SET @intEntitySalespersonId = ISNULL((SELECT TOP 1 intSalespersonId FROM tblARCustomer where intEntityId = @intCustomerEntityId),@intDriverEntityId)    
 			
 			---GEt Tax Group Id
 					--SET @intTaxGroupId = (SELECT TOP 1 B.intTaxGroupId 
@@ -362,7 +371,7 @@ BEGIN
 						,@Type					   = 'Tank Delivery'
 						,@TermId				   = @intTermCode
 						,@ShipDate				   = @dtmInvoiceDate
-						,@EntitySalespersonId	   = @intDriverEntityId		
+						,@EntitySalespersonId	   = @intEntitySalespersonId		
 						,@Comment				   = @strComment	
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 						,@ItemTaxGroupId		   = NULL--@intTaxGroupId	
@@ -377,6 +386,7 @@ BEGIN
 						,@RefreshPrice = @getARPrice
 						,@RecomputeTax	= 0
 						,@ShipViaId = @ShipViaId
+						,@TruckDriverId = @intDriverEntityId
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 

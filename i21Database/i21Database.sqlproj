@@ -7088,6 +7088,14 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
     <Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGInventoryTransferOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPrePostPaymentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPaymentRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulatePaymentDetailForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulatePaymentAccountForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvalidPostPaymentData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

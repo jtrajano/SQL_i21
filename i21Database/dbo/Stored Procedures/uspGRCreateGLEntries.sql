@@ -5,7 +5,6 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT	
 	,@ysnPost AS BIT 
-	,@dtmCreated AS DATETIME = NULL
 AS
 BEGIN TRY
 BEGIN
@@ -50,31 +49,24 @@ BEGIN
 	FROM tblGRSettleStorage 
 	WHERE intSettleStorageId = @intSettleStorageId
 
+	SELECT TOP 1 @intStorageChargeItemId = intItemId
+	FROM tblICItem 
+	WHERE strType = 'Other Charge' 
+	  AND strCostType = 'Storage Charge' 
+	  AND intCommodityId = @IntCommodityId
 
-	/*do not include the storage charge when unposting the settlement
-		if it was posted before without the storage charge
-	*/
-	IF @dtmCreated > CAST('9/24/2018' AS DATE)
+	IF @intStorageChargeItemId IS NULL
 	BEGIN
 		SELECT TOP 1 @intStorageChargeItemId = intItemId
-		FROM tblICItem 
-		WHERE strType = 'Other Charge' 
-		AND strCostType = 'Storage Charge' 
-		AND intCommodityId = @IntCommodityId
-
-		IF @intStorageChargeItemId IS NULL
-		BEGIN
-			SELECT TOP 1 @intStorageChargeItemId = intItemId
-			FROM tblICItem
-			WHERE strType = 'Other Charge' 
-				AND strCostType = 'Storage Charge' 
-				AND intCommodityId IS NULL
-		END
-
-		SELECT @StorageChargeItemDescription = strDescription
 		FROM tblICItem
-		WHERE intItemId = @intStorageChargeItemId
-	END	
+		WHERE strType = 'Other Charge' 
+			AND strCostType = 'Storage Charge' 
+			AND intCommodityId IS NULL
+	END
+
+	SELECT @StorageChargeItemDescription = strDescription
+	FROM tblICItem
+	WHERE intItemId = @intStorageChargeItemId
 		
 	DECLARE @ItemGLAccounts			AS dbo.ItemGLAccount;
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;

@@ -108,6 +108,15 @@ BEGIN
 	DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
 END
 
+IF (ISNULL(@ForDeletion, '') <> '')
+	BEGIN
+        DELETE FROM #ARPostInvoiceHeader
+        WHERE 
+            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
+        DELETE FROM #ARPostInvoiceDetail
+        WHERE 
+            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
+	END
 
 IF (ISNULL(@ForInsertion, '') <> '')
 	BEGIN
@@ -157,17 +166,6 @@ IF (ISNULL(@ForInsertion, '') <> '')
 			,@TransType         = NULL
 			,@UserId            = @UserId				
 	END
-
-IF (ISNULL(@ForDeletion, '') <> '')
-	BEGIN
-        DELETE FROM #ARPostInvoiceHeader
-        WHERE 
-            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-        DELETE FROM #ARPostInvoiceDetail
-        WHERE 
-            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-	END
-
 
 
 RETURN 0

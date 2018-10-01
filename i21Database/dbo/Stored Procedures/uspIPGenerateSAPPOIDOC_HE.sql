@@ -205,7 +205,8 @@ BEGIN
 		AND EXISTS (
 			SELECT *
 			FROM tblCTContractDetail CD
-			WHERE CD.intContractHeaderId = CF.intContractHeaderId
+			JOIN tblICItem I on I.intItemId=CD.intItemId
+			WHERE CD.intContractHeaderId = CF.intContractHeaderId and I.strItemNo=CF.strItemNo
 			)
 
 	INSERT INTO @tblCTFinalContractFeed (
