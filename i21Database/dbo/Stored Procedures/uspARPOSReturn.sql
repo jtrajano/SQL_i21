@@ -392,7 +392,7 @@ AS
 				,[intEntityUserId]
 				,[intPOSLogId]
 				,[intConcurrencyId]
-				,[ysnReturn]
+				,1
 				,[strPONumber]
 				,[strComment]
 			FROM tblARPOS WHERE intPOSId = @intSourceId

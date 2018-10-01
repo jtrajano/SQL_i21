@@ -353,7 +353,8 @@ FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
 	#ARPostInvoiceDetail ARID
-		ON ARIC.[intItemId] = ARID.[intItemId]	
+		ON ARIC.[intItemId] = ARID.[intItemId]
+		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
 INNER JOIN
 	(SELECT [intItemId], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 		ON ARIC.[intComponentItemId] = ICI.[intItemId]

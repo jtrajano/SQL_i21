@@ -400,28 +400,28 @@ BEGIN
 			INNER JOIN #POSPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
 			--UPDATE POS ENDING BALANCE
-				UPDATE EOD
-				--SET dblEndingBalance = ISNULL(POSLOG.dblEndingBalance,0) + POSTPAYMENT.dblAmount
-				SET dblExpectedEndingBalance = ISNULL(EOD.dblExpectedEndingBalance, 0) + POSTPAYMENT.dblAmount
+				UPDATE tblARPOSEndOfDay
+					SET
+						dblExpectedEndingBalance = ISNULL(EOD.dblExpectedEndingBalance, 0) + PAYMENT.dblAmount
 				FROM tblARPOSEndOfDay EOD
-				INNER JOIN(   
+				INNER JOIN(
 					SELECT
-						intPOSLogId
-						,intPOSEndOfDayId
+						intPOSLogId,
+						intPOSEndOfDayId
 					FROM tblARPOSLog
-				) POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
-				INNER JOIN (
-					SELECT intPOSLogId
-						, intPOSId
+				)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+				INNER JOIN(
+					SELECT
+						intPOSId,
+						intPOSLogId
 					FROM tblARPOS
-				) POS ON POS.intPOSLogId = POSLOG.intPOSLogId
-				CROSS APPLY (
-					SELECT dblAmount = SUM(ISNULL(dblAmount, 0))
-					FROM tblARPOSPayment PAY
-					WHERE ISNULL(PAY.strPaymentMethod, '') <> 'On Account'
-					  AND PAY.intPOSId = POS.intPOSId 
-					GROUP BY intPOSId
-				) POSTPAYMENT
-				WHERE POS.intPOSId = @intPOSId 
+				)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+				INNER JOIN (
+					SELECT
+						dblAmount,
+						intPOSId,
+						strPaymentMethod
+					FROM tblARPOSPayment
+				)PAYMENT ON POS.intPOSId = PAYMENT.intPOSId
 		END
 END

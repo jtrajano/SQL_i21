@@ -28,6 +28,8 @@ SELECT
 	, book.strBook
 	, subBook.strSubBook
 	, lot.strWarehouseRefNo
+	, intQtyUOMDecimalPlaces = uom.intDecimalPlaces
+	, intGrossUOMDecimalPlaces = weightUOM.intDecimalPlaces
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
