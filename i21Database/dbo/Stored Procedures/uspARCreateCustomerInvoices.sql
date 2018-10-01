@@ -6,6 +6,7 @@
 	,@RaiseError		BIT					= 0
 	,@BatchId			NVARCHAR(40)		= NULL
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -1944,6 +1945,7 @@ BEGIN TRY
 		,@UserId			= @UserId
 		,@RaiseError		= @RaiseError
 		,@ErrorMessage		= @AddDetailError	OUTPUT
+		,@SkipRecompute     = @SkipRecompute
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
@@ -1982,21 +1984,24 @@ END CATCH
 
 	
 BEGIN TRY
-	DECLARE @CreatedInvoiceIds InvoiceId	
-	DELETE FROM @CreatedInvoiceIds
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		DECLARE @CreatedInvoiceIds InvoiceId	
+		DELETE FROM @CreatedInvoiceIds
 
-	INSERT INTO @CreatedInvoiceIds(
-		 [intHeaderId]
-		,[ysnUpdateAvailableDiscountOnly]
-		,[intDetailId])
-	SELECT 
-		 [intHeaderId]						= [intInvoiceId]
-		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
-		,[intDetailId]						= NULL
-	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
+		INSERT INTO @CreatedInvoiceIds(
+			 [intHeaderId]
+			,[ysnUpdateAvailableDiscountOnly]
+			,[intDetailId])
+		SELECT 
+			 [intHeaderId]						= [intInvoiceId]
+			,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
+			,[intDetailId]						= NULL
+		 FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
-	EXEC [dbo].[uspARReComputeInvoicesTaxes] @InvoiceIds = @CreatedInvoiceIds
-
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+	END
+	
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
 

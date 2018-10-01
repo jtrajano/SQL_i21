@@ -4,6 +4,7 @@
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
