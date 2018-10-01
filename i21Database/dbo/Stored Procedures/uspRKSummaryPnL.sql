@@ -11,18 +11,6 @@
 	@intSubBookId INT = NULL
 AS
 
---DECLARE @dtmFromDate DATETIME='1900-01-01 05:21:10',
---	@dtmToDate DATETIME='2018-09-28 02:43:33',
---	@intCommodityId INT = 21,
---	@ysnExpired BIT='false',
---	@intFutureMarketId INT = 0,
---	@intEntityId INT = 0,
---	@intBrokerageAccountId INT = 0,
---	@intFutureMonthId INT = 0,
---	@strBuySell NVARCHAR(10) = 0,
---	@intBookId INT = 0,
---	@intSubBookId INT = 0
-
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate,getdate()), 110), 110)
 
@@ -240,9 +228,10 @@ DECLARE @Summary AS TABLE (
 			strFutMarketName,
 			strFutureMonth,
 			SUM(ISNULL(dblLong, 0)) intLongContracts,
-			isnull(CASE WHEN SUM(LongWaitedPrice) = 0 THEN NULL ELSE SUM(LongWaitedPrice) / isnull(SUM(ISNULL(dblLong, 0)), NULL) END, 0) dblLongAvgPrice,
+			sum(LongWaitedPrice)  dblLongAvgPrice,
 			SUM(ISNULL(dblShort, 0)) intShortContracts,
-			isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0) dblShortAvgPrice,
+			--isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0)
+			sum(ShortWaitedPrice)  dblShortAvgPrice,
 			SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS dblNet,
 			isnull(SUM(dblNetPnL), 0) dblUnrealized,
 			isnull(max(dblClosing), 0) dblClosing,
@@ -285,7 +274,7 @@ DECLARE @Summary AS TABLE (
 				null LongWaitedPrice,
 				null dblLong,
 				null dblShort,
-				ShortWaitedPrice,
+				null ShortWaitedPrice,
 				t.dblFutCommission,
 				dblNet,
 				t.intFutOptTransactionId,
@@ -316,6 +305,8 @@ DECLARE @Summary AS TABLE (
 			strAccountNumber,ysnExpired,dtmTradeDate
 		) t
 
+	
+
 		select  intFutureMarketId,
 			intFutureMonthId,
 			strFutMarketName,
@@ -326,7 +317,7 @@ DECLARE @Summary AS TABLE (
 			sum(dblShortAvgPrice) dblShortAvgPrice,
 			sum(dblNet) dblNet,
 			sum(dblUnrealized) dblUnrealized,
-			sum(dblClosing) dblClosing,
+			max(dblClosing) dblClosing,
 			sum(dblFutCommission) dblFutCommission,
 			sum(dblPrice) dblPrice,
 			sum(dblRealized) dblRealized,
