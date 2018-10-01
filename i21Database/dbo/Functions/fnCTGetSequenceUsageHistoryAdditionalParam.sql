@@ -131,7 +131,13 @@ BEGIN
 		FROM	tblCTContractAdjustment CA
 		WHERE	CA.intAdjustmentId	=	@intExternalId
 	END
-	
+	ELSE IF @strScreenName = 'Auto - Scale'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	-1,
+				@strNumber						=	'',
+				@strHeaderIdColumn				=	''
+	END
+
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN
 		SELECT TOP 1 @strNumber = strNumber FROM tblCTSequenceUsageHistory WHERE strScreenName = @strScreenName AND intExternalId = @intExternalId
