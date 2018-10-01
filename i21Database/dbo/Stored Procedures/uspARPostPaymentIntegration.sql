@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostPaymentIntegration]
-	 @ARReceivablePostData	[dbo].[ReceivePaymentPostingTable] Readonly
-	,@ZeroReceivable        [dbo].[ReceivePaymentPostingTable] Readonly
-    ,@Post                  BIT
+	 @Post                  BIT
     ,@PostDate              DATE
     ,@BatchId               NVARCHAR(40)
 	,@UserId                INT
@@ -20,7 +18,7 @@ SET @ZeroDecimal = 0.000000
 DECLARE @PaymentIds AS Id
 DELETE FROM @PaymentIds
 INSERT INTO @PaymentIds
-SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionId] IS NOT NULL AND [intTransactionDetailId] IS NULL
+SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL
 
 DECLARE @NonZeroPaymentIds AS Id
 DELETE FROM @NonZeroPaymentIds
@@ -30,7 +28,7 @@ SELECT DISTINCT
 FROM
     @PaymentIds
 WHERE
-    [intId] NOT IN (SELECT [intTransactionId] FROM @ZeroReceivable WHERE [intTransactionDetailId] IS NULL) 
+    [intId] NOT IN (SELECT [intTransactionId] FROM #ARPostZeroPayment)
 
 IF ISNULL(@IntegrationLogId,0) <> 0
 BEGIN
@@ -44,16 +42,14 @@ BEGIN
     FROM
         tblARPaymentIntegrationLogDetail ILD WITH (NOLOCK)
     INNER JOIN
-        @ARReceivablePostData PID
+        #ARPostPaymentHeader PID
             ON ILD.[intPaymentId] = PID.[intTransactionId]
-            AND PID.[intTransactionDetailId] IS NULL
     WHERE
         ILD.[intIntegrationLogId] = @IntegrationLogId
         AND ILD.[ysnPost] IS NOT NULL
         AND ILD.[ysnHeader] = 1
 END
 
-SET @Post = ISNULL(@Post,0)
 IF @Post = 0
 BEGIN
 
@@ -339,9 +335,9 @@ BEGIN
         dblPayment = 0
         AND dblDiscount = 0
         AND (
-            intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NOT NULL)
+            intInvoiceId IN (SELECT intInvoiceId FROM #ARPostPaymentDetail)
             OR
-            intBillId IN (SELECT intBillId FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NOT NULL)
+            intBillId IN (SELECT intBillId FROM #ARPostPaymentDetail)
             )
 
     -- Update the posted flag in the transaction table
@@ -352,9 +348,8 @@ BEGIN
     FROM
         tblARPayment ARP
     INNER JOIN
-        @ARReceivablePostData P
+        #ARPostPaymentHeader P
             ON ARP.[intPaymentId] = P.[intTransactionId] 
-            AND P.[intTransactionDetailId] IS NULL
 
     UPDATE 
         tblARInvoice
@@ -520,7 +515,7 @@ SET
 	,intCurrentStatus   = NULL
     ,ysnPosted          = @Post
 WHERE
-    intPaymentId IN (SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL)
+    intPaymentId IN (SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader)
 
 --Call integration 
 			
@@ -533,11 +528,66 @@ SELECT A.intPaymentId, A.intInvoiceId, B.dblBaseAmountPaid, B.strRecordNumber, '
 FROM tblARPaymentDetail A 
 join tblARPayment B 
 	on A.intPaymentId = B.intPaymentId
-where A.intPaymentId in (select intTransactionId from @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL)
+where A.intPaymentId in (select intTransactionId from #ARPostPaymentHeader)
 --			
 
 exec uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging
 --
+
+
+IF @Post = 0
+	BEGIN			
+					
+	--DELETE Overpayment
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostOverPayment)
+		BEGIN			
+			DECLARE @PaymentIdToDelete int		
+			SELECT TOP 1 @PaymentIdToDelete = [intTransactionId] FROM #ARPostOverPayment
+					
+			EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, 1, @BatchId ,@UserId 
+					
+			DELETE FROM #ARPostOverPayment WHERE [intTransactionId] = @PaymentIdToDelete
+		END	
+				
+	--DELETE Prepayment
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostPrePayment)
+		BEGIN			
+			DECLARE @PaymentIdToDeletePre int		
+			SELECT TOP 1 @PaymentIdToDeletePre = [intTransactionId] FROM #ARPostPrePayment
+					
+			EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, 1, @BatchId ,@UserId 
+					
+			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToDeletePre
+					
+		END												
+
+	END
+ELSE
+	BEGIN
+			
+	--CREATE Overpayment
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostOverPayment)
+		BEGIN
+			DECLARE @PaymentIdToAdd int
+			SELECT TOP 1 @PaymentIdToAdd = [intTransactionId] FROM #ARPostOverPayment
+					
+			EXEC [dbo].[uspARCreateOverPayment] @PaymentIdToAdd, 1, @BatchId ,@UserId 
+					
+			DELETE FROM #ARPostOverPayment WHERE [intTransactionId] = @PaymentIdToAdd
+		END
+				
+	--CREATE Prepayment
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostPrePayment)
+		BEGIN
+			DECLARE @PaymentIdToAddPre int
+			SELECT TOP 1 @PaymentIdToAddPre = [intTransactionId] FROM #ARPostPrePayment
+					
+			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId 
+					
+			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
+		END				
+									
+	END			
 
 
 RETURN 1
