@@ -115,6 +115,7 @@ CREATE TABLE #ARPostPaymentHeader
     ,[ysnWithinAccountingDate]          BIT             NULL
     ,[ysnForApproval]                   BIT             NULL
     ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
@@ -197,6 +198,7 @@ CREATE TABLE #ARPostPaymentDetail
     ,[ysnWithinAccountingDate]          BIT             NULL
     ,[ysnForApproval]                   BIT             NULL
     ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL

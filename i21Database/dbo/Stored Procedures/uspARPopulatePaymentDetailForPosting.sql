@@ -92,6 +92,7 @@ INSERT INTO #ARPostPaymentHeader
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -177,6 +178,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
     ,[ysnWithinAccountingDate]          = ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
@@ -491,6 +493,7 @@ INSERT INTO #ARPostPaymentHeader
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -576,6 +579,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
     ,[ysnWithinAccountingDate]          = ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
@@ -685,6 +689,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -761,6 +766,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
     ,[ysnWithinAccountingDate]          = ARP.[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]
@@ -849,6 +855,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]
 
     ,[dblAmountPaid]
     ,[dblBaseAmountPaid]
@@ -925,6 +932,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
     ,[ysnWithinAccountingDate]          = ARP.[ysnWithinAccountingDate]
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
+    ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ARP.[dblBaseAmountPaid]

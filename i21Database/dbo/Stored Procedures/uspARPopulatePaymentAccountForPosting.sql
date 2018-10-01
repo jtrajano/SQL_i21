@@ -11,7 +11,6 @@ INSERT INTO #ARPaymentAccount
     ,[strAccountId]
     ,[strAccountCategory]
     ,[ysnActive])
-
 SELECT  DISTINCT
      [intAccountId]         = GLAD.[intAccountId]
     ,[strAccountId]         = GLAD.[strAccountId]
@@ -23,8 +22,11 @@ INNER JOIN
     vyuGLAccountDetail GLAD
         ON ARPH.[intUndepositedFundsId] = GLAD.[intAccountId]
 
-UNION
-
+INSERT INTO #ARPaymentAccount
+	([intAccountId]
+    ,[strAccountId]
+    ,[strAccountCategory]
+    ,[ysnActive])
 SELECT DISTINCT
      [intAccountId]         = GLAD.[intAccountId]
     ,[strAccountId]         = GLAD.[strAccountId]
@@ -40,9 +42,13 @@ INNER JOIN
         ON CMBA.[intGLAccountId] = GLAD.[intAccountId]
 WHERE
 	ARPH.[intBankAccountId] IS NULL
+	AND NOT EXISTS (SELECT NULL FROM #ARPaymentAccount A WHERE GLAD.[intAccountId] = A.[intAccountId])
 
-UNION
-
+INSERT INTO #ARPaymentAccount
+	([intAccountId]
+    ,[strAccountId]
+    ,[strAccountCategory]
+    ,[ysnActive])
 SELECT DISTINCT
      [intAccountId]         = GLAD.[intAccountId]
     ,[strAccountId]         = GLAD.[strAccountId]
@@ -58,6 +64,7 @@ INNER JOIN
         ON CMBA.[intGLAccountId] = GLAD.[intAccountId]
 WHERE
 	ARPH.[intBankAccountId] IS NOT NULL
+	AND NOT EXISTS (SELECT NULL FROM #ARPaymentAccount A WHERE GLAD.[intAccountId] = A.[intAccountId])
 
 
 RETURN 1
