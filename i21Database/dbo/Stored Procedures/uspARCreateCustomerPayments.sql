@@ -5,6 +5,7 @@
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -746,6 +747,7 @@ BEGIN TRY
 		,@UserId			= @UserId
 		,@RaiseError		= @RaiseError
 		,@ErrorMessage		= @AddDetailError	OUTPUT
+		,@SkipRecompute     = @SkipRecompute
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
@@ -785,17 +787,22 @@ END CATCH
 	
 BEGIN TRY
 	DECLARE @CreatedPaymentIds PaymentId	
-	DELETE FROM @CreatedPaymentIds
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+			
+		DELETE FROM @CreatedPaymentIds
 
-	INSERT INTO @CreatedPaymentIds(
-		 [intHeaderId]
+		INSERT INTO @CreatedPaymentIds(
+			[intHeaderId]
 		,[intDetailId])
-	SELECT 
-		 [intHeaderId]						= [intPaymentId]
+		SELECT 
+			[intHeaderId]						= [intPaymentId]
 		,[intDetailId]						= NULL
-	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
+		FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
-	EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
+		EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
+	END
+	
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
