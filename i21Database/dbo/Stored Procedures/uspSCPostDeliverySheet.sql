@@ -93,9 +93,9 @@ BEGIN TRY
 	INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
 	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 	
-	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId FROM @splitTable
+	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId FROM @splitTable
 	OPEN splitCursor;  
-	FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;  
+	FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId;  
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
 		SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
@@ -118,7 +118,7 @@ BEGIN TRY
 				,@ysnDistribute = 1
 				,@newBalance = @newBalance OUT
 
-		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;
+		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId;
 	END
 	CLOSE splitCursor;  
 	DEALLOCATE splitCursor;

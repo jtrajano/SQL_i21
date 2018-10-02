@@ -520,7 +520,6 @@ BEGIN TRY
 					FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 				END
 
-
 				--DELIVERY SHEET QUANTITY REVERSAL
 				DECLARE @CalculatedDiscount TABLE
 				(
@@ -610,6 +609,15 @@ BEGIN TRY
 				UPDATE SCD SET SCD.dblGross = @finalGrossWeight, SCD.dblShrink = @finalShrinkUnits , SCD.dblNet = (@finalGrossWeight - @finalShrinkUnits)
 				FROM tblSCDeliverySheet SCD
 				WHERE intDeliverySheetId = @intDeliverySheetId
+
+				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+
+				UPDATE GRC SET dtmDeliveryDate = SC.dtmTicketDateTime
+				FROM tblGRCustomerStorage GRC
+				OUTER APPLY(
+					SELECT TOP 1 dtmTicketDateTime FROM tblSCTicket WHERE intDeliverySheetId = GRC.intDeliverySheetId AND strTicketStatus = 'C' ORDER BY dtmTicketDateTime DESC
+				) SC
+				WHERE GRC.intDeliverySheetId = @intDeliverySheetId  
 		END
 
 		--Audit Log
