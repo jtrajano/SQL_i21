@@ -6409,6 +6409,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
+    <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

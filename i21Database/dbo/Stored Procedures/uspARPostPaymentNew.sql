@@ -3181,7 +3181,7 @@ IF @Recap = 0
 
 	IF @Recap = 0
 		BEGIN			
-			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)			
+			DECLARE @tblPaymentsToUpdateBudget AS [dbo].[Id]
 
 			INSERT INTO @tblPaymentsToUpdateBudget
 			SELECT DISTINCT intPaymentId FROM @ARPaymentPostData
@@ -3197,25 +3197,12 @@ IF @Recap = 0
 											 , intEntityCustomerId
 										FROM dbo.tblARPayment WITH (NOLOCK)
 							) P ON PD.[intPaymentId] = P.[intPaymentId]
-						WHERE PD.[intPaymentId] IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
+						WHERE PD.[intPaymentId] IN (SELECT intId FROM @tblPaymentsToUpdateBudget)
 						GROUP BY intEntityCustomerId
 			) PAYMENT ON CUSTOMER.[intEntityId] = PAYMENT.intEntityCustomerId
 
 			--Update Customer's Budget
-			UPDATE BUDGET
-			SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
-			  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
-			FROM tblARCustomerBudget BUDGET
-			CROSS APPLY (
-				SELECT intEntityCustomerId
-					 , dblTotalAmountPaid = SUM(dblAmountPaid)
-				FROM tblARPayment P
-				INNER JOIN @tblPaymentsToUpdateBudget TB ON P.intPaymentId = TB.intPaymentId
-				WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
-				  AND P.ysnApplytoBudget = 1
-				GROUP BY P.intEntityCustomerId		
-			) PAYMENT
-			WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
+			EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @tblPaymentsToUpdateBudget, @Post = @Post 
 						
 			--Process ACH Payments
 			IF @Post = 1

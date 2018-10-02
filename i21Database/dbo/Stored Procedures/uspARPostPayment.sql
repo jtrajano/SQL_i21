@@ -1453,7 +1453,7 @@ IF @recap = 0
 
 	IF @recap = 0
 		BEGIN			
-			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)			
+			DECLARE @tblPaymentsToUpdateBudget AS [dbo].[Id]
 
 			INSERT INTO @tblPaymentsToUpdateBudget
 			SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData
@@ -1472,28 +1472,15 @@ IF @recap = 0
 					FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 					GROUP BY intPaymentId
 				) PD ON PD.intPaymentId = P.intPaymentId
-				WHERE P.intPaymentId IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
+				WHERE P.intPaymentId IN (SELECT intId FROM @tblPaymentsToUpdateBudget)
 				GROUP BY intEntityCustomerId
 			) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
-			--Update Customer's Budget
-			UPDATE BUDGET
-			SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
-			  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
-			FROM tblARCustomerBudget BUDGET
-			CROSS APPLY (
-				SELECT intEntityCustomerId
-					 , dblTotalAmountPaid = SUM(dblAmountPaid)
-				FROM tblARPayment P
-				INNER JOIN @tblPaymentsToUpdateBudget TB ON P.intPaymentId = TB.intPaymentId
-				WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
-				  AND P.ysnApplytoBudget = 1
-				GROUP BY P.intEntityCustomerId		
-			) PAYMENT
-			WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
+			--Update Customer's Budget			
+			EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @tblPaymentsToUpdateBudget, @Post = @post 
 
 			UPDATE A
-                SET A.intCurrentStatus = 5
+			SET A.intCurrentStatus = 5
             FROM tblARPayment A 
             WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
