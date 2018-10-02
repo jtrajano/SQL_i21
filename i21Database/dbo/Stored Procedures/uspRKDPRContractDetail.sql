@@ -12,7 +12,7 @@ SELECT
 	intContractHeaderId,
 	strContractNumber,
 	strLocationName,
-	dtmEndDate,
+	dtmEndDate = CASE  WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END,
 	dblBalance,
 	intUnitMeasureId,
 	intPricingTypeId,
