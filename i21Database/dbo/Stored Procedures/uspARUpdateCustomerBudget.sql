@@ -138,6 +138,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #PAYMENTSWITHBUDGET)
 			SELECT dblAmountApplied = CASE WHEN @Post = 1 THEN 1 ELSE -1 END * SUM(dblPayment)
 			FROM tblARPaymentBudget PB
 			WHERE PB.intCustomerBudgetId = BUDGET.intCustomerBudgetId
+			  AND PB.intPaymentId = @intPaymentId
 			GROUP BY PB.intPaymentId
 		) PAYMENTBUDGET
 		WHERE BUDGET.intEntityCustomerId = @intEntityCustomerId
