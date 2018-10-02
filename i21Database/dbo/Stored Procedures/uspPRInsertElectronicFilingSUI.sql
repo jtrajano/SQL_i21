@@ -156,4 +156,9 @@ END
 ELSE
 	SELECT TOP 1 @intElectronicFilingSUIId = intElectronicFilingSUIId 
 	FROM tblPRElectronicFilingSUI WHERE intYear = @intYear AND intQuarter = @intQuarter
+
+	/* Recalculate Tax Due */
+	UPDATE tblPRElectronicFilingSUI
+	SET dblSUITaxDue = ISNULL((SELECT SUM(dblTotal) FROM vyuPRReportQuarterlySUI WHERE intYear = @intYear AND intQuarter = @intQuarter), 0)
+	WHERE intElectronicFilingSUIId = @intElectronicFilingSUIId
 GO

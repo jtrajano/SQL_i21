@@ -27,7 +27,7 @@ FROM
 	,t3.dblGradeReading
 	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount	
 	,t3.intContractDetailId
-	,CASE WHEN t3.intContractDetailId = 0 THEN t3.dblTax ELSE 0 END AS dblTax
+	,t3.dblTax
 	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 	FROM (
 			 SELECT 
@@ -149,7 +149,7 @@ FROM
 	,t3.dblGradeReading
 	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount	
 	,t3.intContractDetailId
-	,CASE WHEN t3.intContractDetailId <> 0 THEN t3.dblTax ELSE 0 END AS dblTax
+	,t3.dblTax
 	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 	FROM (
 			 SELECT 
@@ -238,8 +238,8 @@ FROM
 		  ) StorageDiscount ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId AND StorageDiscount.intItemId = BillDtl.intItemId
 
 	WHERE  Item.strType = 'Other Charge'
-		AND ((BillDtl.intScaleTicketId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL) --scale with contract
-			OR (BillDtl.intScaleTicketId IS NULL AND BillDtl.intContractDetailId IS NULL)) --settled with contract
+		AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
+			OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
 
 	) tbl 
 	GROUP BY 

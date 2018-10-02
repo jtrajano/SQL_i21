@@ -130,8 +130,7 @@ BEGIN
 				@strHeaderIdColumn				=	'intAdjustmentId'
 		FROM	tblCTContractAdjustment CA
 		WHERE	CA.intAdjustmentId	=	@intExternalId
-	END
-	
+	END	
 	ELSE IF @strScreenName = 'Import'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	intImportBalanceId,
@@ -139,6 +138,12 @@ BEGIN
 				@strHeaderIdColumn				=	'intImportBalanceId'
 		FROM	tblCTImportBalance CA
 		WHERE	CA.intImportBalanceId	=	@intExternalId
+	END
+	ELSE IF @strScreenName = 'Auto - Scale'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	-1,
+				@strNumber						=	'',
+				@strHeaderIdColumn				=	''
 	END
 
 	IF ISNULL(@strNumber,'')  = ''

@@ -119,6 +119,7 @@ CREATE TABLE #ARPostPaymentHeader
     ,[ysnWithinAccountingDate]          BIT             NULL
     ,[ysnForApproval]                   BIT             NULL
     ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
@@ -201,6 +202,7 @@ CREATE TABLE #ARPostPaymentDetail
     ,[ysnWithinAccountingDate]          BIT             NULL
     ,[ysnForApproval]                   BIT             NULL
     ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
     ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
     ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
@@ -481,10 +483,12 @@ BEGIN TRY
     IF @recap = 1
     BEGIN
         EXEC [dbo].[uspARPostPaymentRecap]
-		        @BatchId         = @batchIdUsed
+		        @BatchId         = @batchIdUsed 
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
-		       ,@raiseError      = @raiseError
+		       ,@raiseError      = @raiseError			   
+		       ,@BatchIdUsed     = @batchIdUsed OUT
+			   ,@Post			 = @post
         GOTO Do_Commit
     END
 
@@ -783,8 +787,10 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
     WHERE
 		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
-
-    EXEC dbo.uspGLBookEntries @GLEntries, @post
+    EXEC dbo.uspGLBookEntries
+             @GLEntries         = @GLEntries
+            ,@ysnPost           = @post
+            ,@SkipValidation	= 1
 
     EXEC [dbo].[uspARPostPaymentIntegration]
          @Post					= @post

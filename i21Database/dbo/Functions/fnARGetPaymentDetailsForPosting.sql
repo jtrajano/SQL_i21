@@ -758,8 +758,10 @@ INNER JOIN
         ON ARP.[intPaymentId] = P.[intId]
 INNER JOIN
     (
-    SELECT C.[intEntityId], EM.[strName], [strCustomerNumber] FROM tblARCustomer C WITH(NoLock)
-    INNER JOIN tblEMEntity EM ON EM.intEntityId = C.intEntityId
+        SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
+                (	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
+                SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
+        JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN

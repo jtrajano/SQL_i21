@@ -33,6 +33,7 @@ BEGIN TRY
 	DECLARE @intPreviousSampleStatusId INT
 	DECLARE @intItemId INT
 	DECLARE @intLotId INT
+	DECLARE @intLotStatusId INT
 	DECLARE @dblQty NUMERIC(18, 6)
 	DECLARE @intItemUOMId INT
 	DECLARE @intCreatedUserId INT
@@ -242,6 +243,26 @@ BEGIN TRY
 	FROM tblQMSampleType
 	WHERE intSampleTypeId = @intSampleTypeId
 
+	IF ISNULL(@strLotNumber, '') <> ''
+	BEGIN
+		IF @ysnEnableParentLot = 0 -- Lot
+		BEGIN
+			SELECT TOP 1 @intLotStatusId = intLotStatusId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
+			ORDER BY intLotId DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intLotStatusId = L.intLotStatusId
+			FROM tblICParentLot PL
+			JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
+				AND PL.strParentLotNumber = @strLotNumber
+			ORDER BY PL.intParentLotId DESC
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -330,7 +351,7 @@ BEGIN TRY
 		,intLoadDetailId
 		,intCountryID
 		,ysnIsContractCompleted
-		,intLotStatusId
+		,@intLotStatusId
 		,IsNULL(intStorageLocationId, @intStorageLocationId)
 		,IsNULL(ysnAdjustInventoryQtyBySampleQty, @ysnAdjustInventoryQtyBySampleQty)
 		,intEntityId
@@ -389,7 +410,6 @@ BEGIN TRY
 			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
-			,intLotStatusId INT
 			,intStorageLocationId INT
 			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT

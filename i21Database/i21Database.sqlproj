@@ -7098,6 +7098,13 @@
     <Build Include="dbo\Stored Procedures\uspARPopulatePaymentAccountForPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateInvalidPostPaymentData.sql" />
     <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
+    <Build Include="dbo\Functions\fnAPValidateAPAccounts.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryTransferDetailFormat2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportFormat2.sql" />
+    <Build Include="dbo\Functions\fnICFormatTransferAddressFormat2.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureTradingMonthsInUse.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionTradingMonthsInUse.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
