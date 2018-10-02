@@ -123,13 +123,13 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @FMRowId = intRowId, @Month = strMonthName FROM @ValidateFutureMonth WHERE ysnProcessed = 0;
 		UPDATE @ValidateFutureMonth SET ysnProcessed = 1 WHERE intRowId = @FMRowId;
-		PRINT @Month
-		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuRKGetOptionTradingMonthsInUse WHERE strMonthName = @Month AND intFutureMarketId = @FutureMarketId)
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuRKGetOptionTradingMonthsInUse WHERE LEFT(strMonthName,3) = @Month AND intFutureMarketId = @FutureMarketId)
 		BEGIN
 			DELETE FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId AND LEFT(strOptionMonth,3) = @Month 
 		END
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuRKGetFutureTradingMonthsInUse WHERE strMonthName = @Month AND intFutureMarketId = @FutureMarketId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuRKGetFutureTradingMonthsInUse WHERE LEFT(strMonthName,3) = @Month AND intFutureMarketId = @FutureMarketId)
 		BEGIN
 			DELETE FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND LEFT(strFutureMonth,3) = @Month 
 		END
@@ -213,6 +213,8 @@ BEGIN TRY
 			SELECT strMonth = strMonthName + ' ' + RIGHT(strYear, 2)
 			FROM #FutTemp
 			WHERE intFutureMarketId = @FutureMarketId
+		) AND NOT EXISTS(
+			SELECT 1 FROM vyuRKGetFutureTradingMonthsInUse WHERE intFutureMarketId = @FutureMarketId
 		)
 	END
 	ELSE

@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuRKGetFutureTradingMonthsInUse]
 AS 
-SELECT DISTINCT strMonthName = LEFT(FUTM.strFutureMonth,3) 
+SELECT DISTINCT strMonthName = FUTM.strFutureMonth
 	,MARKET.intFutureMarketId
 	,MARKET.strFutMarketName
 FROM tblRKFutureMarket MARKET WITH(NOLOCK)

@@ -535,7 +535,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
-														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / A.intSubCurrencyCents ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
+														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / ISNULL(A.intSubCurrencyCents,1) ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
 														ELSE CAST(A.dblUnitCost AS DECIMAL(38,20)) END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
