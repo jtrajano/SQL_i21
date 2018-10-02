@@ -18,9 +18,16 @@ BEGIN TRY
 		FROM #tmpLoadCost
 
 		--If Posted Inventory Receipt is present with Inventory Cost enabled, use IR Qty, otherwise use Load Schedule Qty
+		--If Cost is not present in the original contract, do not update
 		UPDATE LGC
-		SET dblAmount = ISNULL(IRC.dblRate, LGC.dblRate) * CASE WHEN (LGC.strCostMethod = 'Amount') THEN 1 ELSE ISNULL(IRC.dblOpenReceive, LGD.dblQuantity) END
-			,dblRate = ISNULL(IRC.dblRate, LGC.dblRate)
+		SET dblAmount = CASE WHEN (CTC.intContractCostId IS NOT NULL)
+							THEN ISNULL(IRC.dblRate, LGC.dblRate) 
+								* CASE WHEN (LGC.strCostMethod = 'Amount') THEN 1 
+									ELSE ISNULL(IRC.dblOpenReceive, LGD.dblQuantity) END
+							ELSE LGC.dblAmount END
+			,dblRate = CASE WHEN (CTC.intContractCostId IS NOT NULL) 
+							THEN ISNULL(IRC.dblRate, LGC.dblRate)
+							ELSE LGC.dblRate END
 		FROM
 			tblLGLoadCost LGC
 			INNER JOIN tblLGLoad LG
