@@ -685,9 +685,9 @@ BEGIN
 		,dblUnits					= InventoryCostCharges.dblUnits
 		,dblCost				    = InventoryCostCharges.dblCost
 	FROM @InventoryCostCharges InventoryCostCharges
-	INNER JOIN @ItemGLAccounts ItemGLAccounts ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
-		AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
-	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
+	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+		AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 	CROSS APPLY dbo.fnGetDebitFunctional(InventoryCostCharges.dblCost, InventoryCostCharges.intCurrencyId, @intFunctionalCurrencyId, InventoryCostCharges.dblForexRate) Debit
 	CROSS APPLY dbo.fnGetCreditFunctional(InventoryCostCharges.dblCost, InventoryCostCharges.intCurrencyId, @intFunctionalCurrencyId, InventoryCostCharges.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
@@ -1279,7 +1279,6 @@ BEGIN
 		,[dblForeignRate]		
 		,[strRateType]
 	FROM @ChargesGLEntries
-
 END
 END TRY
 
