@@ -35,7 +35,10 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@intItemUOMId					INT 
 		,@newBalance					NUMERIC (38,20)
 		,@intInventoryAdjustmentId		INT
+		,@dblOrigQuantity				NUMERIC (38,20)
 		,@dblAdjustByQuantity			NUMERIC (38,20)
+		,@dblFinalQuantity				NUMERIC (38,20)
+		,@strTransactionId				NVARCHAR(100)
 		,@intOwnershipType				INT;
 		
 DECLARE @splitTable TABLE(
@@ -56,6 +59,7 @@ DECLARE @processTicket TABLE(
 	,[intStorageLocationId]			INT	
 	,[strLotNumber]					NVARCHAR(50)		
 	-- Parameters for the new values: 
+	,[dblOrigQuantity]				NUMERIC(38,20)
 	,[dblAdjustByQuantity]			NUMERIC(38,20)
 	,[dblNewUnitCost]				NUMERIC(38,20)
 	,[intItemUOMId]					INT 
@@ -126,6 +130,7 @@ BEGIN TRY
 		,[intSubLocationId]
 		,[intStorageLocationId]
 		,[strLotNumber]
+		,[dblOrigQuantity]
 		,[dblAdjustByQuantity]
 		,[dblNewUnitCost]
 		,[intItemUOMId]
@@ -138,7 +143,8 @@ BEGIN TRY
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
 		,[strLotNumber]						= ''
-		,[dblAdjustByQuantity]				= CASE WHEN @dblNetUnits > SC.dblNetUnits THEN SC.dblNetUnits - ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) ELSE ((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits END
+		,[dblOrigQuantity]					= SC.dblNetUnits
+		,[dblAdjustByQuantity]				= ROUND(((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits, @currencyDecimal)
 		,[dblNewUnitCost]					= 0
 		,[intItemUOMId]						= SC.intItemUOMIdTo
 		,[intOwnershipType]					= 2
@@ -155,7 +161,7 @@ BEGIN TRY
 	) SC
 	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 
-	DECLARE ticketCursor CURSOR FOR SELECT intItemId,dtmDate,intLocationId,intSubLocationId,intStorageLocationId,strLotNumber,dblAdjustByQuantity,intItemUOMId,intOwnershipType
+	DECLARE ticketCursor CURSOR FOR SELECT intItemId,dtmDate,intLocationId,intSubLocationId,intStorageLocationId,strLotNumber,dblOrigQuantity,dblAdjustByQuantity,intItemUOMId,intOwnershipType
 	FROM @processTicket
 	OPEN ticketCursor;  
 	FETCH NEXT FROM ticketCursor INTO  @intItemId
@@ -164,6 +170,7 @@ BEGIN TRY
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@strLotNumber
+			,@dblOrigQuantity
 			,@dblAdjustByQuantity 
 			,@intItemUOMId
 			,@intOwnershipType
@@ -185,6 +192,19 @@ BEGIN TRY
 			,@intUserId
 			,@intInventoryAdjustmentId OUTPUT
 			,'Delivery Sheet Posting'
+		
+		SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
+		EXEC dbo.uspSMAuditLog 
+		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
+		,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
+		,@entityId			= @intUserId						-- Entity Id.
+		,@actionType		= 'Post'							-- Action Type
+		,@changeDescription	= @strTransactionId					-- Description
+		,@fromValue			= @dblOrigQuantity					-- Old Value
+		,@toValue			= @dblFinalQuantity					-- New Value
+		,@details			= '';
 
 		FETCH NEXT FROM ticketCursor INTO @intItemId
 			,@dtmDate
@@ -192,6 +212,7 @@ BEGIN TRY
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@strLotNumber
+			,@dblOrigQuantity
 			,@dblAdjustByQuantity 
 			,@intItemUOMId
 			,@intOwnershipType;

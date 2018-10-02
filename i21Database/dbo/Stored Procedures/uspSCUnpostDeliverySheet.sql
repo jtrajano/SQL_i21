@@ -31,100 +31,119 @@ DECLARE @InventoryReceiptId INT
 		,@intInventoryTransferId AS INT
 		,@strBatchId NVARCHAR(40)
 		,@intInventoryAdjustmentId INT
+		,@dblAdjustByQuantity NUMERIC(38,20)
+		,@strLogDescription NVARCHAR(100)
 		,@InTransitTableType AS InTransitTableType;
 
 BEGIN TRY
 		
 		IF @strInOutFlag = 'I'
 			BEGIN
-				select @strTransactionId = strAdjustmentNo, @intInventoryAdjustmentId = intInventoryAdjustmentId from tblICInventoryAdjustment where intSourceId = @intDeliverySheetId and strDescription = 'Delivery Sheet Posting'
+				DECLARE ticketCursor CURSOR FOR
+				select strAdjustmentNo, intInventoryAdjustmentId from tblICInventoryAdjustment where intSourceId = @intDeliverySheetId and strDescription = 'Delivery Sheet Posting'
+				OPEN ticketCursor;  
+				FETCH NEXT FROM ticketCursor INTO @strTransactionId, @intInventoryAdjustmentId
+				WHILE @@FETCH_STATUS = 0  
+				BEGIN
+					EXEC uspICPostInventoryAdjustment 0, 0, @strTransactionId,@intUserId, @strBatchId OUTPUT
 
-				EXEC uspICPostInventoryAdjustment 0, 0, @strTransactionId,@intUserId, @strBatchId OUTPUT
+					SELECT @dblAdjustByQuantity = dblNewQuantity FROM tblICInventoryAdjustmentDetail WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+					
+					SET @strLogDescription = 'Quantity Adjustment : ' + @strTransactionId
+					EXEC dbo.uspSMAuditLog 
+						@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
+						,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
+						,@entityId			= @intUserId						-- Entity Id.
+						,@actionType		= 'Unpost'							-- Action Type
+						,@changeDescription	= @strLogDescription				-- Description
+						,@fromValue			= @dblAdjustByQuantity				-- Old Value
+						,@toValue			= '0'								-- New Value
+						,@details			= '';
 
-				DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
-				DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
-				
+
+					DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
+					DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+					FETCH NEXT FROM ticketCursor INTO @strTransactionId, @intInventoryAdjustmentId;
+					
+				END
+				CLOSE ticketCursor;  
+				DEALLOCATE ticketCursor;
+
 				DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM tblGRCustomerStorage WHERE intDeliverySheetId = @intDeliverySheetId) 
 				AND strSourceType = 'Storage'
 
-				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
-
-				--CREATE TABLE #tmpItemReceiptIds (
-				--	[intInventoryReceiptId] [INT] PRIMARY KEY,
-				--	[strReceiptNumber] [VARCHAR](100),
-				--	UNIQUE ([intInventoryReceiptId])
-				--);
-				--INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intDeliverySheetId AND strSourceType = 'Delivery Sheet'
+				CREATE TABLE #tmpItemReceiptIds (
+					[intInventoryReceiptId] [INT] PRIMARY KEY,
+					[strReceiptNumber] [VARCHAR](100),
+					UNIQUE ([intInventoryReceiptId])
+				);
+				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intDeliverySheetId AND strSourceType = 'Delivery Sheet'
 				
-				--DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-				--FOR
-				--SELECT intInventoryReceiptId,  strReceiptNumber
-				--FROM #tmpItemReceiptIds
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intInventoryReceiptId,  strReceiptNumber
+				FROM #tmpItemReceiptIds
 
-				--OPEN intListCursor;
+				OPEN intListCursor;
 
-				---- Initial fetch attempt
-				--FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId;
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId;
 
-				--WHILE @@FETCH_STATUS = 0
-				--BEGIN
-				--	SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
-				--	IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
-    --                    DROP TABLE #tmpVoucherDetail
-				--	CREATE TABLE #tmpVoucherDetail (
-				--		[intBillId] [INT] PRIMARY KEY,
-				--		UNIQUE ([intBillId])
-				--	);
-				--	INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
+					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
+                        DROP TABLE #tmpVoucherDetail
+					CREATE TABLE #tmpVoucherDetail (
+						[intBillId] [INT] PRIMARY KEY,
+						UNIQUE ([intBillId])
+					);
+					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 					
-				--	DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
-				--	FOR
-				--	SELECT intBillId FROM #tmpVoucherDetail
+					DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intBillId FROM #tmpVoucherDetail
 
-				--	OPEN voucherCursor;
+					OPEN voucherCursor;
 
-				--	FETCH NEXT FROM voucherCursor INTO @intBillId;
+					FETCH NEXT FROM voucherCursor INTO @intBillId;
 
-				--	WHILE @@FETCH_STATUS = 0
-				--	BEGIN
-				--		SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
-				--		IF @ysnPosted = 1
-				--		BEGIN
-				--			EXEC [dbo].[uspAPPostBill]
-				--			@post = 0
-				--			,@recap = 0
-				--			,@isBatch = 0
-				--			,@param = @intBillId
-				--			,@userId = @intUserId
-				--			,@success = @success OUTPUT
-				--			,@batchIdUsed = @batchIdUsed OUTPUT
-				--		END
-				--		IF ISNULL(@success, 0) = 0
-				--		BEGIN
-				--			SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
-				--			IF ISNULL(@ErrorMessage, '') != ''
-				--			BEGIN
-				--				RAISERROR(@ErrorMessage, 11, 1);
-				--				RETURN;
-				--			END
-				--		END
-				--		EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
-				--		FETCH NEXT FROM voucherCursor INTO @intBillId;
-				--	END
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+						IF @ysnPosted = 1
+						BEGIN
+							EXEC [dbo].[uspAPPostBill]
+							@post = 0
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @intBillId
+							,@userId = @intUserId
+							,@success = @success OUTPUT
+							,@batchIdUsed = @batchIdUsed OUTPUT
+						END
+						IF ISNULL(@success, 0) = 0
+						BEGIN
+							SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+							IF ISNULL(@ErrorMessage, '') != ''
+							BEGIN
+								RAISERROR(@ErrorMessage, 11, 1);
+								RETURN;
+							END
+						END
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+						FETCH NEXT FROM voucherCursor INTO @intBillId;
+					END
 
-				--	CLOSE voucherCursor  
-				--	DEALLOCATE voucherCursor 
+					CLOSE voucherCursor  
+					DEALLOCATE voucherCursor 
 
-				--	EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
-				--	EXEC [dbo].[uspSCReverseScheduleQty] @InventoryReceiptId, @intUserId
-				--	EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
-				--	EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
-
-				--	FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
-				--END
-				--CLOSE intListCursor  
-				--DEALLOCATE intListCursor 
-				--EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
+					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
+				END
+				CLOSE intListCursor  
+				DEALLOCATE intListCursor 
+				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
 
 				--INSERT INTO @InTransitTableType (
 				--	[intItemId]

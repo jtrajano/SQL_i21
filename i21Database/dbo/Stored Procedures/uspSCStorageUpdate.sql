@@ -280,7 +280,8 @@ BEGIN TRY
 
 	--CREATING OF CUSTOMER STORAGE
 	INSERT INTO @CustomerStorageStagingTable(
-		[intEntityId]
+		[strTransactionNumber]
+		,[intEntityId]
 		,[intItemId]
 		,[intCommodityId]
 		,[intCompanyLocationId]
@@ -302,8 +303,9 @@ BEGIN TRY
 		,[intCurrencyId]
 		,[intUserId]
 	)
-	SELECT 	
-		[intEntityId]							= @intEntityId
+	SELECT 
+		[strTransactionNumber]					= CASE WHEN ISNULL(SC.intDeliverySheetId,0) > 0 THEN SC.strDeliverySheetNumber ELSE SC.strTicketNumber END
+		,[intEntityId]							= @intEntityId
 		,[intItemId]							= SC.intItemId
 		,[intCommodityId]						= SC.intCommodityId
 		,[intCompanyLocationId]					= SC.intProcessingLocationId
@@ -324,7 +326,7 @@ BEGIN TRY
 		,[intItemUOMId]							= SC.intItemUOMIdTo
 		,[intCurrencyId]						= SC.intCurrencyId
 		,[intUserId]							= @intUserId
-	FROM dbo.tblSCTicket SC
+	FROM vyuSCTicketScreenView SC
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 	LEFT JOIN tblICItem ICFees ON ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = SC.intItemId AND UOM.intItemUOMId = SC.intItemUOMIdTo

@@ -696,6 +696,16 @@ BEGIN TRY
 				,@success = @success OUTPUT
 			END
 		END
+
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Updated'					-- Action Type
+			,@changeDescription	= 'Inventory Receipt'		-- Description
+			,@fromValue			= ''						-- Old Value
+			,@toValue			= @strTransactionId			-- New Value
+			,@details			= '';
 	END
 _Exit:
 
