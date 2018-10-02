@@ -438,6 +438,52 @@ BEGIN
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
 END
 
+UPDATE 
+    ARPD
+SET 
+     ARPD.dblAmountDue     = ((((ISNULL(C.dblInvoiceTotal, 0.00) + ISNULL(ARPD.dblInterest,0.00)) - ISNULL(ARPD.dblDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - ARPD.dblPayment)
+    ,ARPD.dblBaseAmountDue = ((((ISNULL(C.dblBaseInvoiceTotal, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - ARPD.dblBasePayment)
+FROM
+    tblARPaymentDetail ARPD
+INNER JOIN 
+	#ARPostPaymentDetail P
+        ON ARPD.[intPaymentDetailId] = P.[intTransactionDetailId] 
+INNER JOIN 
+    tblARInvoice C
+        ON P.intInvoiceId = C.intInvoiceId
+WHERE
+    ISNULL(P.[ysnInvoicePrepayment],0) = 0	
+
+UPDATE 
+    ARPD
+SET 
+     ARPD.dblAmountDue     = -((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount)))
+    ,ARPD.dblBaseAmountDue = [dbo].fnRoundBanker((-((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount))) * (CASE WHEN ISNULL(ARPD.[dblCurrencyExchangeRate], 0) =  0 THEN 1.000000 ELSE ARPD.[dblCurrencyExchangeRate] END)), [dbo].[fnARGetDefaultDecimal]())
+FROM
+    tblARPaymentDetail ARPD
+INNER JOIN 
+	#ARPostPaymentDetail P
+        ON ARPD.[intPaymentDetailId] = P.[intTransactionDetailId] 
+INNER JOIN 
+    tblAPBill C
+        ON P.intBillId = C.intBillId
+WHERE
+    ISNULL(P.[ysnInvoicePrepayment],0) = 0
+
+UPDATE
+    ARP 
+SET
+     ARP.strBatchId         = CASE WHEN @Post = ARPH.[ysnPost] THEN @BatchId ELSE NULL END
+    ,ARP.dtmBatchDate       = CASE WHEN @Post = ARPH.[ysnPost] THEN @PostDate ELSE NULL END
+    ,ARP.intPostedById      = CASE WHEN @Post = ARPH.[ysnPost] THEN @UserId ELSE NULL END
+	,ARP.intCurrentStatus   = NULL
+    ,ARP.ysnPosted          = ARPH.[ysnPost]
+FROM
+	tblARPayment ARP
+INNER JOIN
+	#ARPostPaymentHeader ARPH
+		ON ARP.[intPaymentId] = ARPH.[intTransactionId]
+
 --UPDATE CUSTOMER AR BALANCE
 --UPDATE CUSTOMER
 --SET dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
@@ -527,20 +573,6 @@ FROM
 	#ARPostPaymentHeader
 
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @IPaymentLog
-
-UPDATE
-    ARP 
-SET
-     ARP.strBatchId         = CASE WHEN @Post = ARPH.[ysnPost] THEN @BatchId ELSE NULL END
-    ,ARP.dtmBatchDate       = CASE WHEN @Post = ARPH.[ysnPost] THEN @PostDate ELSE NULL END
-    ,ARP.intPostedById      = CASE WHEN @Post = ARPH.[ysnPost] THEN @UserId ELSE NULL END
-	,ARP.intCurrentStatus   = NULL
-    ,ARP.ysnPosted          = ARPH.[ysnPost]
-FROM
-	tblARPayment ARP
-INNER JOIN
-	#ARPostPaymentHeader ARPH
-		ON ARP.[intPaymentId] = ARPH.[intTransactionId]
 
 --Call integration 
 			
