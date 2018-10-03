@@ -269,10 +269,17 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
+
+SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+FROM (
+	SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
+	FROM #CUSTOMERS
+	FOR XML PATH ('')
+) C (intEntityCustomerId)
 	
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerName = @strCustomerNameLocal
+										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
 										  , @ysnFromBalanceForward = 0
@@ -306,7 +313,7 @@ WHERE intEntityUserId = @intEntityUserIdLocal
 
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
 										  , @strCompanyLocation = @strLocationNameLocal											
-										  , @strCustomerName = @strCustomerNameLocal
+										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
 										  , @ysnFromBalanceForward = 1
@@ -702,11 +709,14 @@ IF @ysnIncludeBudgetLocal = 1
 
 IF @ysnPrintFromCFLocal = 1
 	BEGIN
+		DECLARE @dblTotalFuture NUMERIC(18, 6) = 0
+
 		UPDATE @temp_balanceforward_table SET dblTotalAR = dblTotalAR - dblFuture
 
 		UPDATE AGINGREPORT
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
+		  , @dblTotalFuture = ISNULL(CF.dblTotalFuture, 0)
 		FROM @temp_aging_table AGINGREPORT
 		INNER JOIN (
 			SELECT intEntityCustomerId
@@ -736,9 +746,9 @@ IF @ysnPrintFromCFLocal = 1
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dblFuture = 0.000000
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblFuture, 0)
+				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(@dblTotalFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(@dblTotalFuture, 0)
 				FROM @temp_aging_table AGINGREPORT
-				WHERE ISNULL(AGINGREPORT.dblFuture, 0) <> 0
 			END
 	END
 ELSE 
