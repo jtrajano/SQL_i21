@@ -2,6 +2,7 @@
 AS 
 SELECT 
 	voucher.intBillId
+	,voucher.intEntityVendorId
 	,voucher.intTransactionType
 	,voucher.ysnReadyForPayment
 	,voucher.dtmDueDate

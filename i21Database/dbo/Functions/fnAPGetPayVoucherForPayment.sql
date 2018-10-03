@@ -9,6 +9,7 @@ RETURNS TABLE AS RETURN
 (
 	SELECT
 		forPay.intBillId
+		,forPay.intEntityVendorId
 		,forPay.intTransactionType
 		,forPay.intPayToAddressId
 		,forPay.ysnReadyForPayment
