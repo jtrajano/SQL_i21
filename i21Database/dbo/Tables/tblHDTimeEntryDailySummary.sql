@@ -10,6 +10,7 @@
 	[strJiraStatusIconUrl] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strTicketId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strTicketNumber] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strTicketNumbersDisplay] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateStarted] [datetime] NULL,
 	[dtmDateEnded] [datetime] NULL,
 	[dblTimeSpent] [numeric](18,6) NULL,
