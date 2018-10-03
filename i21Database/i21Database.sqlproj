@@ -7090,6 +7090,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostPaymentRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspARPrePostPaymentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
