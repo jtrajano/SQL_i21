@@ -7104,6 +7104,7 @@
     <Build Include="dbo\Views\vyuRKGetOptionTradingMonthsInUse.sql" />
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRecalculateLoadCosts.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
