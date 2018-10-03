@@ -752,7 +752,9 @@ WHERE
         (
             I.[intItemId] IS NOT NULL
             AND
-            I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
+            I.[strTransactionType] <> 'Debit Memo' 
+			AND 
+			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
         )		
         )
     AND (
