@@ -30,7 +30,11 @@ BEGIN
 END
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit
-SELECT @ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0) from tblRKCompanyPreference
+		,@ysnHideNetPayableAndReceivable bit
+
+SELECT @ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0)
+		,@ysnHideNetPayableAndReceivable = isnull(ysnHideNetPayableAndReceivable,0) 
+FROM tblRKCompanyPreference
 
 DECLARE @Commodity AS TABLE 
 (
@@ -1028,12 +1032,14 @@ BEGIN
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)		
+	
+				
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intBillId,strBillId,strCustomerReference)
 	SELECT @strDescription, 'Net Payable  ($)' [strType],dblTotal dblTotal,
 		intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,strDistributionOption,dblUnitCost1,
 		dblQtyReceived,intCommodityId,strCurrency,intBillId,strBillId,strCustomerReference
-	 FROM(	
+		FROM(	
 		SELECT DISTINCT B.intBillId,B.strBillId,	
 				strLocationName
 				,t.strTicketNumber
@@ -1065,6 +1071,7 @@ BEGIN
 									ELSE isnull(ysnLicensed, 0) END
 									) 			
 			)t  where dblTotal <> 0
+	
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
 		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
@@ -1179,6 +1186,8 @@ BEGIN
 			FROM @Final f 
 			join tblICCommodity c on c.intCommodityId= f.intCommodityId
 			where dblTotal <> 0 
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId
 END
 ELSE IF(@strByType = 'ByLocation')
@@ -1187,6 +1196,8 @@ BEGIN
 			FROM @Final f 
 			JOIN tblICCommodity c on c.intCommodityId= f.intCommodityId
 			WHERE dblTotal <> 0
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId,strLocationName
 END
 ELSE 
@@ -1199,7 +1210,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			FROM @Final f 
 			JOIN tblICCommodity c on c.intCommodityId= f.intCommodityId			
 			where dblTotal <> 0 
-		
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 		ELSE
@@ -1211,6 +1223,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			FROM @Final f 
 			JOIN tblICCommodity c on c.intCommodityId= f.intCommodityId			
 			where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 END
