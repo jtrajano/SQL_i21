@@ -414,3 +414,52 @@ IF NOT EXISTS (
 	SELECT 'BG'
 		,'BAG'
 Go
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '703'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '703'
+		,'CBE'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '490'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '490'
+		,'Cococa Butter'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '430'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '430'
+		,'Cococa Butter'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '507'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '507'
+		,'Cocoa Powder'
+GO
