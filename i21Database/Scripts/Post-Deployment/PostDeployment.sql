@@ -440,11 +440,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\08_Checkout_Radiant_FGM.sql
 :r .\ST\09_Checkout_Radiant_MSM.sql
 :r .\ST\10_Checkout_Commander_Translog.sql
-:r .\ST\11_FileFieldMapping_Passport_ISM.sql
-:r .\ST\12_FileFieldMapping_Passport_FGM.sql
-:r .\ST\13_FileFieldMapping_Passport_MCM.sql
-:r .\ST\14_FileFieldMapping_Passport_MSM.sql
-:r .\ST\15_FileFieldMapping_Passport_TLM.sql
+:r .\ST\11_FileFieldMapping_Passport_ISM_330.sql
+:r .\ST\12_FileFieldMapping_Passport_FGM_330.sql
+:r .\ST\13_FileFieldMapping_Passport_MCM_330.sql
+:r .\ST\14_FileFieldMapping_Passport_MSM_330.sql
+:r .\ST\15_FileFieldMapping_Passport_TLM_330.sql
 :r .\ST\16_FileFieldMapping_Passport_TLM_340.sql
 :r .\ST\17_FileFieldMapping_Passport_FGM_340.sql
 :r .\ST\18_FileFieldMapping_Passport_ISM_340.sql

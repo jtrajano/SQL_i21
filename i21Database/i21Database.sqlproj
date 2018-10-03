@@ -6745,14 +6745,14 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
-    <None Include="Scripts\Post-Deployment\ST\11_FileFieldMapping_Passport_ISM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\11_FileFieldMapping_Passport_ISM_330.sql" />
+    <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM_330.sql" />
+    <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
@@ -6868,7 +6868,7 @@
     <Build Include="dbo\Tables\tblSTStoreAppUploadHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
-    <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
     <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
     <None Include="dbo\Tables\tblARPOSDrawer.sql" />
