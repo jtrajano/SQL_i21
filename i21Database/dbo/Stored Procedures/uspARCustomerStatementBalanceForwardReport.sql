@@ -71,6 +71,7 @@ DECLARE @temp_aging_table TABLE(
     ,[dblCredits]               NUMERIC(18,6)
 	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
+	,[dblTempFuture]			NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
 	,[strSourceTransaction]		NVARCHAR(100)
@@ -303,6 +304,7 @@ SELECT strCustomerName
         , dblCredits
 	    , dblPrepayments
         , dblPrepaids
+		, 0
         , dtmAsOfDate
         , strSalespersonName
 	    , strSourceTransaction
@@ -687,14 +689,12 @@ IF @ysnIncludeBudgetLocal = 1
 
 IF @ysnPrintFromCFLocal = 1
 	BEGIN
-		DECLARE @dblTotalFuture NUMERIC(18, 6) = 0
-
 		UPDATE @temp_balanceforward_table SET dblTotalAR = dblTotalAR - dblFuture
 
 		UPDATE AGINGREPORT
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
-		  , @dblTotalFuture = ISNULL(CF.dblTotalFuture, 0)
+		  , AGINGREPORT.dblTempFuture = ISNULL(CF.dblTotalFuture, 0)
 		FROM @temp_aging_table AGINGREPORT
 		INNER JOIN (
 			SELECT intEntityCustomerId
@@ -724,8 +724,8 @@ IF @ysnPrintFromCFLocal = 1
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dblFuture = 0.000000
-				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(@dblTotalFuture, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(@dblTotalFuture, 0)
+				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(AGINGREPORT.dblTempFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblTempFuture, 0)
 				FROM @temp_aging_table AGINGREPORT
 			END
 	END
