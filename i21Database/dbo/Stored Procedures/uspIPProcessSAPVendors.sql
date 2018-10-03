@@ -507,11 +507,11 @@ BEGIN TRY
 				SELECT @strAddress = strAddress
 					,@strAddress1 = strAddress1
 					,@strCity = strCity
-					,@strCountry = strCountry
+					--,@strCountry = strCountry
 					,@strZipCode = strZipCode
 					,@strTaxNo = strTaxNo
 					,@strFLOId = strFLOId
-					,@strState = strState
+					--,@strState = strState
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
