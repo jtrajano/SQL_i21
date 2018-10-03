@@ -117,30 +117,28 @@ BEGIN
 		, dblPhysicalCount)
 	SELECT
 		intInventoryCountId = @intInventoryCountId
-		, intItemId = stock.intItemId
-		, intItemLocationId = stock.intItemLocationId
-		, intSubLocationId = stock.intSubLocationId
-		, intStorageLocationId = stock.intStorageLocationId
+		, intItemId = summary.intItemId
+		, intItemLocationId = summary.intItemLocationId
+		, intSubLocationId = summary.intSubLocationId
+		, intStorageLocationId = summary.intStorageLocationId
 		, intLotId = NULL
-		, dblSystemCount = ISNULL(stock.dblUnitOnHand, 0)
-		, dblLastCost = stock.dblLastCost
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY stock.intKey ASC) AS NVARCHAR(50))
-		, intItemUOMId = stock.intStockUOMId
+		, dblSystemCount = ISNULL(summary.dblOnHand, 0)
+		, dblLastCost = summary.dblLastCost
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY summary.intKey ASC) AS NVARCHAR(50))
+		, intItemUOMId = summary.intItemUOMId
 		, ysnRecount = 0
 		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
 		, intSort = 1
 		, NULL	
-	FROM vyuICStockDetail stock
-		LEFT JOIN vyuICGetItemStockSummary summary ON summary.intItemId=  stock.intItemId
-			AND summary.intItemLocationId = stock.intItemLocationId
-			AND summary.intItemUOMId = stock.intStockUOMId
-	WHERE stock.intLocationId = @intLocationId
-		AND ((stock.dblUnitOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND (stock.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
-		AND (stock.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
-		AND (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-		AND (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
-		AND stock.strLotTracking = 'No'
+	FROM vyuICGetItemStockSummary summary
+	WHERE summary.intLocationId = @intLocationId
+		AND (dbo.fnDateLessThanEquals(summary.dtmDate, @AsOfDate) = 1 OR (@AsOfDate IS NULL))
+		AND ((summary.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND (summary.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
+		AND (summary.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
+		AND (summary.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
+		AND (summary.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
+		AND summary.strLotTracking = 'No'
 END
