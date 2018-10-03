@@ -405,3 +405,12 @@ WHERE stri21Location NOT IN (
 		,'130-Coman'
 		)
 Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblIPSAPUOM
+		WHERE strSAPUOM = 'BG'
+		)
+	INSERT INTO tblIPSAPUOM
+	SELECT 'BG'
+		,'BAG'
+Go
