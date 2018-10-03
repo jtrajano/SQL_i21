@@ -66,14 +66,14 @@ BEGIN
 			,intQuarter = @intQuarter
 			,strTradeName = ISNULL((SELECT TOP 1 strTradeName FROM tblPRForm941 WHERE strTradeName IS NOT NULL), '')
 			,intEmployees = ISNULL(PCHK.intEmployees, 0)
-			,dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
+			,dblAdjustedGross = ISNULL(TXBLFIT.dblTotal, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
 			,ysnNoTaxable = CASE WHEN (ISNULL(FIT.dblTotal, 0) + ISNULL(SSTAX.dblTotal, 0) + ISNULL(MEDTAX.dblTotal, 0) <= 0) THEN 1 ELSE 0 END
-			,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+			,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0) - (ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent)
 			,dblSSTax = SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)
-			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+			,dblTaxableSSTips = ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent
 			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
-			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
+			,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
 			,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 			,dblTaxableAddMed = ISNULL(ADDMED.dblTotal, 0) / 0.009
 			,dblAddMedTax = ISNULL(ADDMED.dblTotal, 0)
@@ -114,16 +114,10 @@ BEGIN
 			,intConcurrencyId = 1
 		FROM 
 			/* Taxable Amount */
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnFITTaxable = 1 AND ysnVoid = 0) [TXBLFIT],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) [TXBLSS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) [TXBLSSTIPS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnMedTaxable = 1 AND ysnVoid = 0) [TXBLMED],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLFIT],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLSS],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLMED],
 
-			/* Taxable Pretax Deductions */
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) [PRTXFIT],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) [PRTXSS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) [PRTXMED],
-			
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
 			(SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],
@@ -157,14 +151,14 @@ BEGIN
 		/* If it exists, update the values */
 		UPDATE tblPRForm941 
 		SET intEmployees = ISNULL(PCHK.intEmployees, 0)
-			,dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
+			,dblAdjustedGross = ISNULL(TXBLFIT.dblTotal, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
 			,ysnNoTaxable = CASE WHEN (ISNULL(FIT.dblTotal, 0) + ISNULL(SSTAX.dblTotal, 0) + ISNULL(MEDTAX.dblTotal, 0) <= 0) THEN 1 ELSE 0 END
-			,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+			,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0) - (ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent)
 			,dblSSTax = SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)
-			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+			,dblTaxableSSTips = ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent
 			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
-			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
+			,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
 			,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 			,dblTaxableAddMed = ISNULL(ADDMED.dblTotal, 0) / 0.009
 			,dblAddMedTax = ISNULL(ADDMED.dblTotal, 0)
@@ -172,18 +166,11 @@ BEGIN
 			,dblMonth2 = ISNULL(MONTH2.dblMonthTotal, 0)
 			,dblMonth3 = ISNULL(MONTH3.dblMonthTotal, 0)
 		FROM 
-		
 			/* Taxable Amount */
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnFITTaxable = 1 AND ysnVoid = 0) [TXBLFIT],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) [TXBLSS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) [TXBLSSTIPS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnMedTaxable = 1 AND ysnVoid = 0) [TXBLMED],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLFIT],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLSS],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLMED],
 
-			/* Taxable Pretax Deductions */
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) [PRTXFIT],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) [PRTXSS],
-			(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) [PRTXMED],
-			
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
 			(SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],

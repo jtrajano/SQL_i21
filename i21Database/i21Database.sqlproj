@@ -7052,6 +7052,8 @@
     <Build Include="dbo\Stored Procedures\uspGRCustomerStorageBalance.sql" />
     <None Include="Scripts\Post-Deployment\GR\FixStorageHistoryData.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateDiscountandShrink.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessDeliverySheetSummaryToTicket.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
@@ -7079,6 +7081,7 @@
     <Build Include="dbo\Views\vyuGRTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblARInvoiceReportStagingTable.sql" />
     <Build Include="dbo\User Defined Types\TFInventoryDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
     <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
@@ -7104,6 +7107,7 @@
     <Build Include="dbo\Views\vyuRKGetOptionTradingMonthsInUse.sql" />
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRecalculateLoadCosts.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

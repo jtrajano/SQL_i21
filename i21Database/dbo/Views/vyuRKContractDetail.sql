@@ -110,7 +110,7 @@ WITH Pricing AS
 		,cl.strLocationName,
 		CDT.dtmEndDate,
 		FM.strFutureMonth,
-		PRC.dblQuantity-dblPricedQuantity AS dblBalance,
+		(CDT.dblBalance - CDT.dblScheduleQty) - PRC.dblPricedQuantity AS dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
 		ch.intContractTypeId

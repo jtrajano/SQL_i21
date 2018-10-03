@@ -67,6 +67,13 @@ AS
 			IF(ISNULL(@dblCashOverShort,@ZeroDecimal) <> @ZeroDecimal)
 			BEGIN
 
+				--Update accounts of EOD before passing to tblGLDetail
+				UPDATE tblARPOSEndOfDay
+					SET
+						 intCashOverShortId = @intCashOverAccountId
+						,intUndepositedFundsId = @intUndepositedFundsId
+				WHERE intPOSEndOfDayId = @intPOSEndOfDayId
+
 				EXEC uspARPOSPostEOD
 						@intPOSEndOfDayId		= @intPOSEndOfDayId
 					   ,@intCashOverShortId		= @intCashOverAccountId
