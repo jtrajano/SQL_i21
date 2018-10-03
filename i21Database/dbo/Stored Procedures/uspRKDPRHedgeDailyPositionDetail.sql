@@ -827,6 +827,7 @@ BEGIN
 					FROM @tblGetStorageDetailByDate CH
 					WHERE ysnCustomerStorage = 1
 						AND strOwnedPhysicalStock = 'Company'
+						AND ysnDPOwnedType <> 1
 						AND CH.intCommodityId  = @intCommodityId
 						AND CH.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CH.intCompanyLocationId else @intLocationId end	
 				 )t WHERE intCompanyLocationId IN (
