@@ -21,14 +21,14 @@ END
 
 ;WITH r AS (
 SELECT trns.strTransactionId,
-
 CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ISNULL(strTransactionType,'Customer Prepayment')) = 1 THEN '7' ELSE '2' END Code from
 tblARPayment payment
 JOIN tblCMUndepositedFund uf ON uf.intSourceTransactionId  = payment.intPaymentId
 JOIN tblCMBankTransaction trns ON trns.intTransactionId = uf.intBankDepositId
 LEFT JOIN tblARInvoice invoice ON payment.intPaymentId = invoice.intPaymentId
 UNION
-SELECT trns.strTransactionId, CASE WHEN intTransactionType in (1,14) then '2' else '7' end Code
+SELECT trns.strTransactionId, 
+CASE WHEN payment.dblAmountPaid >=0 then '2' else '7' end Code
 FROM tblAPBill bill JOIN tblAPBillDetail billdetail on bill.intBillId = billdetail.intBillId
 JOIN tblAPPaymentDetail paymentdetail ON paymentdetail.intBillId = billdetail.intBillId
 JOIN tblAPPayment payment ON payment.intPaymentId = paymentdetail.intPaymentId
