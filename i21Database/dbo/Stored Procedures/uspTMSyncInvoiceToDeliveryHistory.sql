@@ -269,7 +269,7 @@ BEGIN
 			IF(@ysnLessThanLastDeliveryDate = 1)
 			BEGIN
 				PRINT 'Left Over Invoice'
-				IF(@dtmLastDeliveryDate = @dtmInvoiceDate)
+				IF(@dtmLastDeliveryDate = @dtmInvoiceDate AND EXISTS(SELECT TOP 1 1FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1))
 				BEGIN
 					PRINT 'Same date as the last delivery'
 					

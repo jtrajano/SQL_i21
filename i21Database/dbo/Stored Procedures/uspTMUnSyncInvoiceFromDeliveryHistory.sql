@@ -222,6 +222,7 @@ BEGIN
 				SET dblEstimatedPercentLeft = A.dblPercentAfterDelivery
 					,dblEstimatedGallonsLeft = ISNULL(A.dblPercentAfterDelivery,0.0) * tblTMSite.dblTotalCapacity /100
 					,dtmLastReadingUpdate = @dtmInvoiceDate
+					,intConcurrencyId = intConcurrencyId + 1
 				FROM(
 					SELECT   
 						dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
@@ -261,6 +262,7 @@ BEGIN
 									END)
 					,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
 					,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intSiteID = @intSiteId
 
 				----UPDATE Delivery history header for the new calc burnrate 
@@ -465,6 +467,7 @@ BEGIN
 							,dblDegreeDayBetweenDelivery = A.dblSiteDegreeDayBetweenDelivery
 							,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
 							,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
+							,intConcurrencyId = intConcurrencyId + 1
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
@@ -526,6 +529,7 @@ BEGIN
 																		THEN 0 ELSE (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) END)
 																)),0)
 							,dtmLastReadingUpdate = A.dtmInvoiceDate
+							,intConcurrencyId = intConcurrencyId + 1
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = (SELECT TOP 1 intDeliveryHistoryID
@@ -582,6 +586,7 @@ BEGIN
 						,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
 						,dtmForecastedDelivery = NULL
 						,dtmRunOutDate = NULL
+						,intConcurrencyId = intConcurrencyId + 1
 					FROM(
 						SELECT TOP 1 * FROM tblTMDeliveryHistory
 						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
