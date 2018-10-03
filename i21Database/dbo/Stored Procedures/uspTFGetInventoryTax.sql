@@ -34,9 +34,9 @@ BEGIN TRY
 		DELETE FROM tblTFTransaction
 	END
 
-	DELETE FROM tblTFTransaction
-	WHERE uniqTransactionGuid = @Guid 
-		AND strProductCode = 'No record found.'	
+	--DELETE FROM tblTFTransaction
+	--WHERE uniqTransactionGuid = @Guid 
+	--	AND strProductCode = 'No record found.'	
 	
 	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
