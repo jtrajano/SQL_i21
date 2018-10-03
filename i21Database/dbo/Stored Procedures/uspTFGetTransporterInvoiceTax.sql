@@ -858,18 +858,18 @@ BEGIN TRY
 				, strOriginCounty
 				, strOriginState
 				, strCustomerName
-				, strCustomerFEIN
+				, REPLACE(strCustomerFEIN, '-', '')
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strTransporterName
-				, strTransporterFEIN
+				, REPLACE(strTransporterFEIN, '-', '')
 				, strConsignorName
-				, strConsignorFEIN
+				, REPLACE(strConsignorFEIN, '-', '')
 				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
-				, strVendorFederalTaxId
+				, REPLACE(strVendorFederalTaxId, '-', '')
 				, strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
@@ -877,7 +877,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, REPLACE(strHeaderFederalTaxID, '-', '')
 				, @DateFrom
 				, @DateTo
 				, strTransporterIdType
