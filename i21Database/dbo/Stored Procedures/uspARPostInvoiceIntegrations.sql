@@ -756,7 +756,7 @@ BEGIN
 		([intInvoiceId] INT
         ,UNIQUE (intInvoiceId));
 								
-	INSERT INTO @TankDeliveryForSync
+	INSERT INTO @TankDeliveryForUnSync
 	SELECT DISTINCT
 		 [intInvoiceId] = PID.[intInvoiceId]
 	FROM
