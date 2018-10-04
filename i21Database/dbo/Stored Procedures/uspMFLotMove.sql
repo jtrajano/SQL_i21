@@ -566,11 +566,11 @@ BEGIN TRY
 		UPDATE T
 		SET intLotId = @intNewLotId
 			,intFromStorageLocationId = @intNewStorageLocationId
-			,intTaskStateId = CASE 
-				WHEN intToStorageLocationId = @intNewStorageLocationId
-					THEN 4
-				ELSE intTaskStateId
-				END
+			--,intTaskStateId = CASE 
+			--	WHEN intToStorageLocationId = @intNewStorageLocationId
+			--		THEN 4
+			--	ELSE intTaskStateId
+			--	END
 		FROM tblMFTask T
 		JOIN @ItemsToReserve SR ON SR.intTransactionId = T.intOrderHeaderId
 			AND SR.intLotId = T.intLotId
