@@ -1671,6 +1671,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1714,7 +1715,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1778,7 +1780,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1822,7 +1825,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1963,6 +1967,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
@@ -2008,7 +2013,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 1

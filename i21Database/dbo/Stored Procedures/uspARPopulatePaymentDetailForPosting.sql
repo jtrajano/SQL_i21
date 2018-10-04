@@ -426,7 +426,7 @@ FROM
 INNER JOIN
     (
     SELECT [intPaymentId] FROM tblARPaymentIntegrationLogDetail 
-    WHERE [ysnPost] IS NOT NULL AND [ysnPost] = @Post AND [ysnHeader] = 1 AND [intIntegrationLogId] = @IntegrationLogId
+    WHERE [ysnPost] IS NOT NULL AND [ysnPost] = @Post AND ISNULL([ysnPosted],0) <> @Post AND [ysnHeader] = 1 AND [intIntegrationLogId] = @IntegrationLogId
     ) ARPILD
         ON ARP.[intPaymentId] = ARPILD.[intPaymentId]
 INNER JOIN
@@ -620,6 +620,7 @@ FROM
     WHERE 
         NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader IH WHERE LD.[intHeaderId] = IH.[intTransactionId])
         AND LD.[ysnPost] IS NOT NULL 
+		AND LD.[ysnPost] = @Post
     ) P
 INNER JOIN
     tblARPayment ARP

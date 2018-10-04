@@ -685,8 +685,9 @@ FROM
     WHERE 
         LD.[intIntegrationLogId] = @IntegrationLogId
         AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
-        AND LD.[ysnHeader] = 1 
-        AND LD.[ysnPost] IS NOT NULL 
+        AND LD.[ysnHeader] = 1
+		AND ISNULL(LD.[ysnPosted],0) <> @Post
+        AND LD.[ysnPost] = @Post
     ) ARILD
 INNER JOIN
     tblARInvoice ARI
@@ -1006,7 +1007,8 @@ FROM
     SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
     WHERE 
         NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
-        AND LD.[ysnPost] IS NOT NULL 
+		AND LD.[ysnPost] IS NOT NULL 
+        AND LD.[ysnPost] = @Post
     ) ARILD
 INNER JOIN
     tblARInvoice ARI
