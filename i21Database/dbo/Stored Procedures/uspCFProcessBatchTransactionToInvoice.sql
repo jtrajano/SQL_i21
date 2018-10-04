@@ -422,82 +422,150 @@ SELECT * FROM #tmpForeignTransactionId
 		,@LogId				= @LogId OUTPUT
 
 
+	--================--
 	SET @SuccessfulCount = 0;
-
 	SELECT DISTINCT intInvoiceId, intSourceId, ysnPosted  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 --AND ISNULL(ysnPosted,0) = 1
-
 	SELECT @SuccessfulCount = Count(intInvoiceId) FROM #tmpCreatedInvoice WHERE ISNULL(ysnPosted,0) = 1
 
-	--IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
-	--	BEGIN
+	IF (ISNULL(@Recap,0) = 0 AND (@Post = 1))
+	BEGIN
 
-			IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
-			BEGIN
+		--========SET TRANS POSTED INDICATOR AND INVOICE ID==========--
+		UPDATE CFTran
+		SET 
+			 CFTran.ysnPosted	 = ARL.ysnPosted
+			,CFTran.intInvoiceId = ARL.intInvoiceId
+		FROM
+		tblCFTransaction CFTran
+		INNER JOIN tblARInvoice ARL
+		ON CFTran.intTransactionId = ARL.intTransactionId
+		INNER JOIN @EntriesForInvoice EFI
+		ON CFTran.intTransactionId = EFI.intSourceId
+
+
+		--========SET CARD LAST USED DATE ==========--
+		UPDATE CFC
+		SET 
+			CFC.dtmLastUsedDated = CFT.dtmTransactionDate
+		FROM
+			tblCFCard CFC
+		INNER JOIN
+			(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
+				FROM
+				tblCFTransaction CFTran
+				INNER JOIN tblARInvoice ARL
+				ON CFTran.intTransactionId = ARL.intTransactionId 
+				INNER JOIN @EntriesForInvoice EFI
+				ON CFTran.intTransactionId = EFI.intSourceId
+				WHERE ARL.ysnPosted = 1
+				GROUP BY  CFTran.intCardId
+			) CFT
+				ON CFC.intCardId = CFT.intCardId					
+		WHERE 
+			(CFC.dtmLastUsedDated < CFT.dtmTransactionDate OR CFC.dtmLastUsedDated IS NULL)
+
+	END
+	ELSE
+	BEGIN
+		--========SET TRANS INVOICE ID==========--
+		UPDATE CFTran
+		SET 
+			CFTran.intInvoiceId = ARL.intInvoiceId
+		FROM
+		tblCFTransaction CFTran
+		INNER JOIN tblARInvoice ARL
+		ON CFTran.intTransactionId = ARL.intTransactionId
+		INNER JOIN @EntriesForInvoice EFI
+		ON CFTran.intTransactionId = EFI.intSourceId
+
+	END
+
+
+	SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
+
+	--================--
+
+
+
+
+	--SET @SuccessfulCount = 0;
+
+	
+
+	--SELECT DISTINCT intInvoiceId, intSourceId, ysnPosted  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 --AND ISNULL(ysnPosted,0) = 1
+
+	--SELECT @SuccessfulCount = Count(intInvoiceId) FROM #tmpCreatedInvoice WHERE ISNULL(ysnPosted,0) = 1
+
+	----IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
+	----	BEGIN
+
+	--		IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
+	--		BEGIN
 							
-				UPDATE CFTran
-				SET 
-					CFTran.ysnPosted	 = ARL.ysnPosted
-					,CFTran.intInvoiceId = ARL.intInvoiceId
-				FROM
-					tblCFTransaction CFTran
-				INNER JOIN
-					#tmpCreatedInvoice ARL
-						ON CFTran.intTransactionId = ARL.intSourceId
-						--AND ARL.ysnPosted = 1
+	--			UPDATE CFTran
+	--			SET 
+	--				CFTran.ysnPosted	 = ARL.ysnPosted
+	--				,CFTran.intInvoiceId = ARL.intInvoiceId
+	--			FROM
+	--				tblCFTransaction CFTran
+	--			INNER JOIN
+	--				#tmpCreatedInvoice ARL
+	--					ON CFTran.intTransactionId = ARL.intSourceId
+	--					--AND ARL.ysnPosted = 1
 
-				IF (@Post = 1)
-				BEGIN
-					UPDATE CFC
-						SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
-					FROM
-						tblCFCard CFC
-					INNER JOIN
-						(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
-							FROM
-								tblCFTransaction CFTran
-							INNER JOIN
-								#tmpCreatedInvoice ARL
-									ON CFTran.intTransactionId = ARL.intSourceId 
-									AND ARL.ysnPosted = 1
-								GROUP BY  CFTran.intCardId
-						) CFT
-							ON CFC.intCardId = CFT.intCardId					
-					WHERE 
-						(CFC.dtmLastUsedDated < CFT.dtmTransactionDate OR CFC.dtmLastUsedDated IS NULL)
-				END
-				ELSE
-				BEGIN
-					UPDATE CFC
-						SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
-					FROM
-						tblCFCard CFC
-					INNER JOIN
-						(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
-							FROM
-								tblCFTransaction CFTran
-							INNER JOIN
-								#tmpCreatedInvoice ARL
-									ON CFTran.intTransactionId = ARL.intSourceId 
-								GROUP BY CFTran.intCardId
-						) CFT
-							ON CFC.intCardId = CFT.intCardId					
-				END
+	--			IF (@Post = 1)
+	--			BEGIN
+	--				UPDATE CFC
+	--					SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
+	--				FROM
+	--					tblCFCard CFC
+	--				INNER JOIN
+	--					(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
+	--						FROM
+	--							tblCFTransaction CFTran
+	--						INNER JOIN
+	--							#tmpCreatedInvoice ARL
+	--								ON CFTran.intTransactionId = ARL.intSourceId 
+	--								AND ARL.ysnPosted = 1
+	--							GROUP BY  CFTran.intCardId
+	--					) CFT
+	--						ON CFC.intCardId = CFT.intCardId					
+	--				WHERE 
+	--					(CFC.dtmLastUsedDated < CFT.dtmTransactionDate OR CFC.dtmLastUsedDated IS NULL)
+	--			END
+	--			ELSE
+	--			BEGIN
+	--				UPDATE CFC
+	--					SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
+	--				FROM
+	--					tblCFCard CFC
+	--				INNER JOIN
+	--					(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
+	--						FROM
+	--							tblCFTransaction CFTran
+	--						INNER JOIN
+	--							#tmpCreatedInvoice ARL
+	--								ON CFTran.intTransactionId = ARL.intSourceId 
+	--							GROUP BY CFTran.intCardId
+	--					) CFT
+	--						ON CFC.intCardId = CFT.intCardId					
+	--			END
 
-			END 
-			ELSE IF (@Recap = 1)
-			BEGIN
-				UPDATE CFTran
-				SET 
-					CFTran.intInvoiceId = ARL.intInvoiceId
-				FROM
-					tblCFTransaction CFTran
-				INNER JOIN
-					#tmpCreatedInvoice ARL
-						ON CFTran.intTransactionId = ARL.intSourceId 
-			END
+	--		END 
+	--		ELSE IF (@Recap = 1)
+	--		BEGIN
+	--			UPDATE CFTran
+	--			SET 
+	--				CFTran.intInvoiceId = ARL.intInvoiceId
+	--			FROM
+	--				tblCFTransaction CFTran
+	--			INNER JOIN
+	--				#tmpCreatedInvoice ARL
+	--					ON CFTran.intTransactionId = ARL.intSourceId 
+	--		END
 
-		--TRANSACTION COUNT + FOREIGN TRANSACTION COUNT (ysnPostForeignTrans = 0)
-		SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
+	--	--TRANSACTION COUNT + FOREIGN TRANSACTION COUNT (ysnPostForeignTrans = 0)
+		--SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
 
 		--COMMIT TRANSACTION
 	--END
