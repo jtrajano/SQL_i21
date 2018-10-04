@@ -7110,6 +7110,7 @@
     <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
     <Build Include="dbo\Tables\tblSTRegisterSetup.sql" />
     <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetStockAsOfDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
