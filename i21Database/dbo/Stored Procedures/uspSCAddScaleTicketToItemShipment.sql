@@ -173,9 +173,8 @@ BEGIN
 														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 														AND CNT.dblRate IS NOT NULL 
 														AND CNT.intFXPriceUOMId IS NOT NULL 
-													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId, ICL.intItemUOMId, CNT.dblSeqPrice),0) 
-													WHEN ISNULL(SC.intContractId,0) > 0 THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId, ICL.intItemUOMId, LI.dblCost),0) 
-													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId, ICL.intItemUOMId, LI.dblCost), 0) 
+													THEN CNT.dblSeqPrice
+													ELSE LI.dblCost
 												END 
 												*
 												CASE 
@@ -183,9 +182,9 @@ BEGIN
 														 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 														 AND CNT.dblRate IS NOT NULL 
 														 AND CNT.intFXPriceUOMId IS NOT NULL 
-													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
+													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ICL.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
 													WHEN CNT.intPricingTypeId = 5 THEN 1
-													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ICL.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
 												END
 											ELSE 
 												CASE
