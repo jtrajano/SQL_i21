@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
+﻿CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
 	 @TransactionId				INT
 	,@UserId					INT	
 	,@Post						BIT	= NULL
@@ -253,10 +252,10 @@ SELECT
 	,[ysnResetDetails]						= 0
 	,[ysnPost]								= @Post
 	
-	,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+	,[intInvoiceDetailId]					= ISNULL((SELECT TOP 1 intInvoiceDetailId 
 												FROM tblARInvoiceDetail 
 												WHERE intInvoiceId = cfTrans.intInvoiceId
-												ORDER BY dblQtyShipped DESC)
+												ORDER BY dblQtyShipped DESC),@TransactionId)
 	,[intItemId]							= cfSiteItem.intARItemId
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
@@ -489,9 +488,9 @@ SELECT
 	,[ysnResetDetails]						= 0
 	,[ysnPost]								= @Post
 	
-	,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+	,[intInvoiceDetailId]					= ISNULL((SELECT TOP 1 intInvoiceDetailId 
 												FROM tblARInvoiceDetail 
-												WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0)
+												WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0),@TransactionId+1)
 	,[intItemId]							= cfSiteItem.intARItemId
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
@@ -534,7 +533,7 @@ SELECT
 	,[ysnLeaseBilling]						= NULL
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 0
-	,[intTempDetailIdForTaxes]				= @TransactionId
+	,[intTempDetailIdForTaxes]				= @TransactionId + 1
 	,[strType]								= 'CF Tran'
 	,[ysnUpdateAvailableDiscount]			= ISNULL(@UpdateAvailableDiscount,0)
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
@@ -772,7 +771,7 @@ FROM @EntriesForInvoice
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 INSERT INTO @TaxDetails
 	(
-	[intDetailId] 
+	 [intDetailId] 
 	,[intTaxGroupId]
 	,[intTaxCodeId]
 	,[intTaxClassId]
@@ -791,7 +790,7 @@ INSERT INTO @TaxDetails
 	,[intTempDetailIdForTaxes]
 	,[ysnClearExisting])
 SELECT
-[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId ORDER BY dblQtyShipped DESC)
+[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId ORDER BY dblQtyShipped DESC),@TransactionId)
 ,[intTaxGroupId]			= NULL
 ,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 ,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -807,7 +806,7 @@ SELECT
 ,[ysnTaxExempt]				= 0
 ,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
 ,[strNotes]					= ''
-,[intTempDetailIdForTaxes]	= @TransactionId
+,[intTempDetailIdForTaxes]	= @TransactionId 
 ,[ysnClearExisting]			= 1
 FROM 
 tblCFTransaction cfTransaction
@@ -843,7 +842,7 @@ BEGIN
 	,[intTempDetailIdForTaxes]
 	,[ysnClearExisting])
 SELECT
-[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ISNULL(dblQtyShipped,0) < 0)
+[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ISNULL(dblQtyShipped,0) < 0),@TransactionId +1)
 ,[intTaxGroupId]			= NULL
 ,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 ,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -859,7 +858,7 @@ SELECT
 ,[ysnTaxExempt]				= 0
 ,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
 ,[strNotes]					= ''
-,[intTempDetailIdForTaxes]	= @TransactionId
+,[intTempDetailIdForTaxes]	= @TransactionId + 1
 ,[ysnClearExisting]			= 1
 FROM 
 tblCFTransaction cfTransaction
@@ -874,12 +873,15 @@ END
 ----------INSERT TAX ENTRIES FOR EXPENSED TRANS-----------
 
 
-SELECT intInvoiceDetailId,intInvoiceId,dblQtyOrdered,dblQtyShipped,* FROM @InvoiceEntriesTEMP
+--SELECT intInvoiceDetailId,intInvoiceId,dblQtyOrdered,dblQtyShipped,* FROM @InvoiceEntriesTEMP
 
-SELECT SUM([dblPrice]) AS dblTotalAmount , SUM([dblQtyOrdered]) AS dblTotalQtyOrdered , SUM(dblQtyShipped) AS dblTotalQtyShipped , [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
-FROM @InvoiceEntriesTEMP
-GROUP BY [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+--SELECT SUM([dblPrice]) AS dblTotalAmount , SUM([dblQtyOrdered]) AS dblTotalQtyOrdered , SUM(dblQtyShipped) AS dblTotalQtyShipped , [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+--FROM @InvoiceEntriesTEMP
+--GROUP BY [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
 
+
+SELECT '@InvoiceEntriesTEMP',intInvoiceId,intInvoiceDetailId,intTempDetailIdForTaxes,* FROM @InvoiceEntriesTEMP
+SELECT '@TaxDetails',intTempDetailIdForTaxes,* FROM @TaxDetails
 
 EXEC [dbo].[uspARProcessInvoicesByBatch]
 		 @InvoiceEntries	= @InvoiceEntriesTEMP
