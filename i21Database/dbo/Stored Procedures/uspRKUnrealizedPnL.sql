@@ -12,6 +12,7 @@
 	,@intSubBookId int=NULL
 AS  
 
+
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate, getdate()), 110), 110)
 
@@ -54,16 +55,16 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	,ysnExpired
 	,dblVariationMargin
 	,0.0 dblInitialMargin
-	,LongWaitedPrice / dblLongTotalLotByMonth LongWaitedPrice
-	,ShortWaitedPrice / dblShortTotalLotByMonth ShortWaitedPrice
+	,LongWaitedPrice / case when isnull(dblLongTotalLotByMonth,0)=0 then 1 else dblLongTotalLotByMonth end LongWaitedPrice
+	,ShortWaitedPrice / case when isnull(dblShortTotalLotByMonth,0)=0 then 1 else dblShortTotalLotByMonth end ShortWaitedPrice
 FROM (
 	SELECT *
 		,(GrossPnL1 * (dblClosing - dblPrice) - dblFutCommission2) NetPnL
 		,intNet * dblVariationMargin1 dblVariationMargin
 		,GrossPnL1 * (dblClosing - dblPrice) GrossPnL
 		,- dblFutCommission2 dblFutCommission
-		,sum(dblShort) OVER (PARTITION BY intFutureMonthId) dblShortTotalLotByMonth
-		,sum(dblLong) OVER (PARTITION BY intFutureMonthId) dblLongTotalLotByMonth
+		,sum(dblShort) OVER (PARTITION BY intFutureMonthId,strName) dblShortTotalLotByMonth
+		,sum(dblLong) OVER (PARTITION BY intFutureMonthId,strName) dblLongTotalLotByMonth
 		,(dblLong*dblPrice) LongWaitedPrice,(dblShort*dblPrice) ShortWaitedPrice
 	FROM (
 		SELECT (convert(INT, isnull((Long1 - MatchLong), 0) - isnull(Sell1 - MatchShort, 0))) * dblContractSize / CASE 
