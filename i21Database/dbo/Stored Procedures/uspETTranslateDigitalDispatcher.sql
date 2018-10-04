@@ -110,7 +110,8 @@ BEGIN
    SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)      
       
    --Get Tax Group Id      
-   SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)      
+    SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE intTaxGroupId = @strTaxGroup) 
+    -- IET-349 - use INT - select is use to somehow validate the taxcode,  if returns null .. AR will default tax from customer setup (IET-321)
       
    --Get Item id      
    SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)      
