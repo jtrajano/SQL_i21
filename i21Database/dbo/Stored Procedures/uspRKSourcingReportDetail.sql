@@ -14,6 +14,8 @@
 	   @intCurrencyId int = null
 AS
 
+if @dtmAOPToDate='1900-01-01'
+set  @dtmAOPToDate= getdate()
 if @strEntityName = '-1'
 set @strEntityName = NULL
  if @strLocationName = '-1'
@@ -229,8 +231,7 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,						
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null))	dblPrice,
 							t.intCompanyLocationId, ca.dblRatio dblStandardRatio, 
-							ic.intItemId,
-							
+							ic.intItemId,						
 							
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
 							isnull((
@@ -264,5 +265,62 @@ LEFT JOIN(select intContractDetailId,sum(dbo.[fnCTConvertQuantityToTargetItemUOM
 		 SELECT isnull(intItemId,0) from tblCTComponentMap where ysnExcludeFromPPV=1) Group by intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
 LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
+where cd.intPricingTypeId<>6
+
+)t)t1
+union all
+select intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
+							null dblNoOfLots,null dblFuturesPrice,null dblSettlementPrice,null dblBasis,null dblRatio,dblPrice,dblBalanceQty*dblPrice dblTotPurchased, 
+							null dblStandardRatio, null dblStandardQty,intItemId,
+							dblStandardPrice,null dblPPVBasis,strLocationName,null dblNewPPVPrice,(dblBalanceQty*isnull(dblStandardPrice,0)) dblStandardValue,
+							(dblStandardPrice-dblPrice)*dblBalanceQty dblPPV,
+							null dblPPVNew,strPricingType,strItemNo,strProductType
+							,@strCurrency strCurrency ,@strUnitMeasure strUnitMeasure
+FROM(
+SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContractSeq,dblQty,dblReturnQty,dblBalanceQty,
+							  dblPrice, 
+							 intItemId,
+							dblStandardPrice,							
+							strLocationName,							
+							strPricingType,strItemNo,strProductType
+FROM(
+select intRowNum,
+t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
+					dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblQty) dblQty,
+					dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblReturnQty) dblReturnQty,
+						dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblBalanceQty) dblBalanceQty,
+							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,i.intUnitMeasureId,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null))	dblPrice,	
+							t.intCompanyLocationId, 
+							ic.intItemId,							
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
+							isnull((
+							SELECT sum(dbo.[fnCTConvertQuantityToTargetItemUOM](b.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,isnull(dblCost,0))) from tblCTAOP a
+							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId 
+							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 
+							 where a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
+							and b.intItemId=cd.intItemId
+							and a.intCommodityId=ic.intCommodityId
+							and a.intCompanyLocationId=cd.intCompanyLocationId
+							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
+							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
+							),0),null)  dblStandardPrice,
+							strLocationName	,strPricingType,strItemNo,ca.strDescription strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
+ FROM @GetStandardQty t
+JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
+LEFT JOIN tblRKFutureMarket m on cd.intFutureMarketId=m.intFutureMarketId
+LEFT JOIN tblICItemUOM i on cd.intPriceItemUOMId=i.intItemUOMId
+--LEFT JOIN tblICItemUOM j on cd.int=j.intItemUOMId
+LEFT JOIN tblCTPricingType pt on cd.intPricingTypeId=pt.intPricingTypeId
+LEFT JOIN tblSMCompanyLocation l on cd.intCompanyLocationId=l.intCompanyLocationId
+LEFT JOIN tblICItem ic ON ic.intItemId = cd.intItemId
+LEFT JOIN tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId
+LEFT JOIN(select intContractDetailId,sum(dbo.[fnCTConvertQuantityToTargetItemUOM](c1.intItemId,@intUnitMeasureId,i.intUnitMeasureId,isnull(dblRate,0))) dblRate 
+			FROM tblCTContractCost c1
+			JOIN tblICItemUOM i on c1.intItemUOMId=i.intItemUOMId  where ysnBasis=1 and c1.intItemId in(
+		 SELECT isnull(intItemId,0) from tblCTComponentMap where ysnExcludeFromPPV=1) Group by intContractDetailId) cost on cost.intContractDetailId=cd.intContractDetailId													
+LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
+where cd.intPricingTypeId=6
 
 )t)t1
