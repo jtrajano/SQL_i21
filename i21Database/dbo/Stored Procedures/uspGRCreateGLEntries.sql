@@ -196,7 +196,7 @@ BEGIN
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * CD.dblCashPrice) * -1)
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * CD.dblCashPrice)
 												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
@@ -251,7 +251,7 @@ BEGIN
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN ((QM.dblDiscountAmount * SS.dblCashPrice) * -1)
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * SS.dblCashPrice)
 												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount * -1
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
