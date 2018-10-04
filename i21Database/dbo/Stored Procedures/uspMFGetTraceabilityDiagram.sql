@@ -1942,12 +1942,13 @@ BEGIN
 	BEGIN
 		DECLARE @RCUR CURSOR SET @RCUR = CURSOR
 		FOR
-		SELECT DISTINCT intLotId
+		SELECT Top 1 intLotId
 			,intRecordId
 			,strType
 			,strTransactionName
 			,strLotNumber
 		FROM @tblTemp
+		Order by intRecordId 
 
 		OPEN @RCUR
 
@@ -2073,6 +2074,7 @@ BEGIN
 							,'Merge'
 							)
 				END
+				INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strText Like 'Merge Out%' 
 			END
 
 			-- Lot Split
