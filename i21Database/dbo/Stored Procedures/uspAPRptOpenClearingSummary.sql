@@ -146,7 +146,7 @@ SET @query = '
 		,SUM(dblVoucherAmount) dblVoucherAmount
 		,SUM(dblAmountDue) as dblAmountDue
 	FROM (
-		SELECT DISTINCT
+		SELECT 
 		--IR.strVendorId
 		--,IR.intInventoryReceiptId
 		--,IR.intBillId
