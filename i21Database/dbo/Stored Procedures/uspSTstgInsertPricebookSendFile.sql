@@ -34,11 +34,11 @@ BEGIN
 		-- Check if register has intImportFileHeaderId
 		DECLARE @strRegisterName NVARCHAR(200)
 				, @strRegisterClass NVARCHAR(200)
-				, @dblXmlVersion NUMERIC(4, 2)
+				, @strXmlVersion NVARCHAR(10)
 
 		SELECT @strRegisterClass = strRegisterClass
 			   , @strRegisterName = strRegisterName
-			   , @dblXmlVersion = dblXmlVersion
+			   , @strXmlVersion = strXmlVersion
 		FROM dbo.tblSTRegister 
 		WHERE intRegisterId = @intRegisterId
 
@@ -92,7 +92,7 @@ BEGIN
 
 		DECLARE @XMLGatewayVersion nvarchar(100)
 
-		SELECT @XMLGatewayVersion = dblXmlVersion 
+		SELECT @XMLGatewayVersion = strXmlVersion 
 		FROM dbo.tblSTRegister 
 		WHERE intRegisterId = @intRegisterId
 
@@ -132,7 +132,7 @@ BEGIN
 
 
 
-				IF(@dblXmlVersion = 3.40)
+				IF(@strXmlVersion = '3.4')
 					BEGIN
 						--Insert data into Procebook staging table	
 						IF(@ysnExportEntirePricebookFile = CAST(1 AS BIT))

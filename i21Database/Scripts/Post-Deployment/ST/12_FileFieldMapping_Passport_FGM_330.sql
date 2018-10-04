@@ -3,14 +3,14 @@ DECLARE @intImportFileHeaderId INT
 DECLARE @intImportFileColumnDetailId INT
 DECLARE @intTagAttributeId INT
 DECLARE @strLayoutTitle NVARCHAR(MAX)
-SET @strLayoutTitle = 'Passport - FGM'
+SET @strLayoutTitle = 'Passport - FGM 3.3'
 
 --START CHECK HEADER
 IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 BEGIN
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
   UPDATE [dbo].[tblSMImportFileHeader]
-  SET [strLayoutTitle] = 'Passport - FGM'
+  SET [strLayoutTitle] = 'Passport - FGM 3.3'
        ,[strFileType] = 'XML'
        ,[strFieldDelimiter] = NULL
        ,[strXMLType] = 'Inbound'
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Passport - FGM','XML',NULL,'Inbound','<?xml version="1.0" encoding="ISO-8859-1"?>',1,6)
+      ('Passport - FGM 3.3','XML',NULL,'Inbound','<?xml version="1.0" encoding="ISO-8859-1"?>',1,6)
 END
 --END CHECK HEADER
 

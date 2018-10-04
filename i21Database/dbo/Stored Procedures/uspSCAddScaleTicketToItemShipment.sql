@@ -1278,21 +1278,6 @@ EXEC dbo.uspICAddItemShipment
 --        @InventoryShipmentId
 --END
 
-IF @ticketStatus = 'O'
-	SET @ticketStatus = 'Open'
-ELSE IF @ticketStatus = 'R'
-	SET @ticketStatus = 'Reopen'
-
-EXEC dbo.uspSMAuditLog 
-	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
-	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
-	,@entityId			= @intUserId						-- Entity Id.
-	,@actionType		= 'Updated'							-- Action Type
-	,@changeDescription	= 'Ticket Status'					-- Description
-	,@fromValue			= @ticketStatus						-- Old Value
-	,@toValue			= 'Completed'						-- New Value
-	,@details			= '';
-
 DECLARE @ShipmentId INT
 		,@strTransactionId NVARCHAR(50);
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemShipmentResult) 

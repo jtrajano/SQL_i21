@@ -64,11 +64,11 @@ BEGIN
 		@intEntityEmployeeId
 		,@intYear
 		,strControlNumber = ''
-		,dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
+		,dblAdjustedGross = ISNULL(TXBLFIT.dblTotal, 0)
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
-		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
-		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+		,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0) - (ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent)
+		,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
+		,dblTaxableSSTips = ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,dblAllocatedTips = 0
@@ -95,14 +95,11 @@ BEGIN
 							ELSE
 								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 							END
-		,dblTaxableState = CASE WHEN (ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0) END
+		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
-		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0) END
-							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLSCHOOL.dblTotal, 0) - ISNULL(PRTXSCHOOL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSCHOOL.dblTotal, 0) - ISNULL(PRTXSCHOOL.dblTotal, 0) END
-							WHEN (ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0) END
+		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0)
+							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLSCHOOL.dblTotal, 0)
+							WHEN (ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLMUNI.dblTotal, 0)
 							ELSE 0 END
 		,dblLocalTax = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.dblTotal, 0) 
 							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(SCHOOLTAX.dblTotal, 0)
@@ -116,51 +113,36 @@ BEGIN
 		,dblTaxableState2 = 0
 		,dblStateTax2 = 0
 		,dblTaxableLocal2 = CASE WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '') 
-								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0)) <= 0 THEN 0 
-								ELSE ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0) END
+								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLMUNI.dblTotal, 0)
 							ELSE 0 END
 		,dblLocalTax2 = CASE WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '') 
 								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(MUNITAX.dblTotal, 0)
 							ELSE 0 END
 		,intConcurrencyId = 1
 	FROM 
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnFITTaxable = 1 AND ysnVoid = 0) TXBLFIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSSTIPS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1 AND ysnVoid = 0) TXBLMED OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1 AND ysnVoid = 0) TXBLSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnSchoolDistrictTaxable = 1 AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMunicipalityTaxable = 1 AND ysnVoid = 0) TXBLMUNI OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) PRTXFIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) PRTXSS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) PRTXMED OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnStateTaxable = 1 AND ysnVoid = 0) PRTXSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnLocalTaxable = 1 AND ysnVoid = 0) PRTXLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSchoolDistrictTaxable = 1 AND ysnVoid = 0) PRTXSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMunicipalityTaxable = 1 AND ysnVoid = 0) PRTXMUNI OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
+		/* Taxable Amount */
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0) TXBLSTATE OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
+			AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
+			AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) AND ysnVoid = 0) TXBLMUNI OUTER APPLY
+		
+		/* Tips Percentage */
+		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) > 0)
+										THEN (ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) ELSE 0 END
+			FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E1,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E2,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND strPaidBy = 'Employee' AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) D1
+		) [TIPS] OUTER APPLY
+
+		/* Tax Amounts */
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax 
 				INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
@@ -226,11 +208,11 @@ END
 ELSE /* If it exists, update the values */
 BEGIN
 	UPDATE tblPREmployeeW2
-	SET dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
+	SET dblAdjustedGross = ISNULL(TXBLFIT.dblTotal, 0)
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
-		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
-		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+		,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0) - (ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent)
+		,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
+		,dblTaxableSSTips = ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,strBox12a = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 1)
@@ -253,14 +235,11 @@ BEGIN
 							ELSE
 								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 							END
-		,dblTaxableState = CASE WHEN (ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0) END
+		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
-		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0) END
-							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLSCHOOL.dblTotal, 0) - ISNULL(PRTXSCHOOL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSCHOOL.dblTotal, 0) - ISNULL(PRTXSCHOOL.dblTotal, 0) END
-							WHEN (ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0) END
+		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0)
+							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLSCHOOL.dblTotal, 0)
+							WHEN (ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLMUNI.dblTotal, 0)
 							ELSE 0 END
 		,dblLocalTax = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.dblTotal, 0) 
 							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(SCHOOLTAX.dblTotal, 0)
@@ -274,51 +253,36 @@ BEGIN
 		,dblTaxableState2 = 0
 		,dblStateTax2 = 0
 		,dblTaxableLocal2 = CASE WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '') 
-								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
-								CASE WHEN (ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0)) <= 0 THEN 0 
-								ELSE ISNULL(TXBLMUNI.dblTotal, 0) - ISNULL(PRTXMUNI.dblTotal, 0) END
+								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLMUNI.dblTotal, 0)
 							ELSE 0 END
 		,dblLocalTax2 = CASE WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '') 
 								 AND ISNULL(MUNITAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(MUNITAX.dblTotal, 0)
 							ELSE 0 END
 		,intConcurrencyId = 1
 	FROM 
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnFITTaxable = 1 AND ysnVoid = 0) TXBLFIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSSTIPS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1 AND ysnVoid = 0) TXBLMED OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1 AND ysnVoid = 0) TXBLSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnSchoolDistrictTaxable = 1 AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMunicipalityTaxable = 1 AND ysnVoid = 0) TXBLMUNI OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) PRTXFIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) PRTXSS OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) PRTXMED OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnStateTaxable = 1 AND ysnVoid = 0) PRTXSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnLocalTaxable = 1 AND ysnVoid = 0) PRTXLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSchoolDistrictTaxable = 1 AND ysnVoid = 0) PRTXSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMunicipalityTaxable = 1 AND ysnVoid = 0) PRTXMUNI OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
+		/* Taxable Amount */
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0) TXBLSTATE OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
+			AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
+			AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) AND ysnVoid = 0) TXBLMUNI OUTER APPLY
+		
+		/* Tips Percentage */
+		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) > 0)
+										THEN (ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) ELSE 0 END
+			FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E1,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E2,
+				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND strPaidBy = 'Employee' AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) D1
+		) [TIPS] OUTER APPLY
+
+		/* Tax Amounts */
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax 
 				INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
@@ -373,7 +337,7 @@ BEGIN
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
-				dblGrossSum = SUM(dblGross) 
+				dblGrossSum = SUM(dblGross)
 		FROM tblPRPaycheck 
 		WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK
 	WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId

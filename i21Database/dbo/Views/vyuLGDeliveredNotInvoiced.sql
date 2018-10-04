@@ -53,3 +53,4 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = Load.intSubBookId
 WHERE LoadDetail.intLoadDetailId NOT IN (SELECT ISNULL(tblARInvoiceDetail.intLoadDetailId,0) FROM tblARInvoiceDetail)
   AND Load.intPurchaseSale IN (2,3)
   AND Load.intShipmentType = 1
+  AND Load.ysnPosted = 1

@@ -111,6 +111,8 @@ BEGIN TRY
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			strPrintableRemarks,
 			CH.strTerm
+		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref :' ELSE 'Customer Ref :' END
+		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
 
 	FROM	vyuCTContractHeaderView CH
 	LEFT

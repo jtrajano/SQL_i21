@@ -1428,7 +1428,7 @@ FROM
 		,[intShipmentId]							=	0--ISNULL(A.intInventoryShipmentItemId,0)
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
-		,[strUOM]									=	NULL
+		,[strUOM]									=	A.strCostUnitMeasure
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	A.intCostUnitMeasureId
 		,[dblNetWeight]								=	0      

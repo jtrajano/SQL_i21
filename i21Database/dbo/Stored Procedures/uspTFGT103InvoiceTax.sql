@@ -55,7 +55,7 @@ BEGIN TRY
 	BEGIN
 		DELETE FROM tblTFTransaction
 	END
-	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+	--DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
@@ -232,7 +232,7 @@ BEGIN TRY
 			SELECT @InvoiceDetailId = intInvoiceDetailId FROM @TFTransaction WHERE intId = @Count
 			
 			
-			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax, @TaxExempt = CASE WHEN tblARInvoiceDetailTax.dblTax > 0 THEN 0 ELSE tblARInvoiceDetail.dblQtyShipped END
+			SELECT @TaxAmount = tblARInvoiceDetailTax.dblAdjustedTax, @TaxExempt = CASE WHEN tblARInvoiceDetailTax.dblAdjustedTax > 0 THEN 0 ELSE tblARInvoiceDetail.dblQtyShipped END
 			FROM tblSMTaxCode
 			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
