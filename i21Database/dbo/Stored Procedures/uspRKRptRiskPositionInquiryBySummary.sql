@@ -938,7 +938,7 @@ else CONVERT(DATETIME,'01 '+strFutureMonth) END
 
 if @strReportName='Outright Coverage'
 		SELECT  intRowNumber ,replace(strGroup,'1.','') 	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,
-            		case when @strUomType='By Lot' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+            		case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
 			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract,  
    CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY NULL ORDER BY 
@@ -947,7 +947,7 @@ if @strReportName='Outright Coverage'
   FROM #temp1  where strGroup='1.Outright Coverage' and dblNoOfContract <>0
 ELSE IF @strReportName='Futures Required'
 		SELECT  intRowNumber ,	replace(strGroup,'2.','') 	strGroup    ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-            		case when @strUomType='By Lot' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+            		case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
 			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract,  
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
@@ -956,7 +956,7 @@ ELSE IF @strReportName='Futures Required'
 		  FROM #temp1  where strGroup='2.Futures Required' and dblNoOfContract <>0
 ELSE
 		SELECT  intRowNumber ,	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-   		case when @strUomType='By Lot' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+   		case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
 			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract,  
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
