@@ -1,4 +1,7 @@
-﻿-- CREATE VIEW [dbo].[vyuGRGetSettleContracts]
+﻿/*
+*  will be removed in 19.1
+*/
+-- CREATE VIEW [dbo].[vyuGRGetSettleContracts]
 -- AS
 -- SELECT 
 -- 	 intContractTypeId					= CH.intContractTypeId

@@ -14,7 +14,7 @@ SELECT TOP 100 PERCENT
 ,intStorageTypeId			  = CS.intStorageTypeId
 ,strStorageTypeDescription	  = ST.strStorageTypeDescription
 ,intCommodityId				  = CS.intCommodityId
-,strCommodityCode			  = ''
+,strCommodityCode			  = Commodity.strCommodityCode
 ,intItemId					  = CS.intItemId  
 ,strItemNo					  = Item.strItemNo   
 ,intCompanyLocationId		  = CS.intCompanyLocationId
@@ -59,6 +59,8 @@ JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
 JOIN tblICItem Item 
 	ON Item.intItemId = CS.intItemId
+JOIN tblICCommodity Commodity
+    ON Commodity.intCommodityId = CS.intCommodityId
 JOIN tblICItemUOM ItemUOM
 	ON ItemUOM.intItemId = Item.intItemId
 		AND ItemUOM.ysnStockUnit = 1
@@ -86,7 +88,7 @@ LEFT JOIN tblCTContractHeader CH
 LEFT JOIN tblGRTransferStorageSplit SS
 	ON SS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 WHERE ISNULL(CS.strStorageType,'') <> 'ITR' 
-	AND ST.ysnCustomerStorage = 0 
+	AND ST.ysnCustomerStorage = 0
 	--AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
 ORDER BY CS.intCustomerStorageId
 
