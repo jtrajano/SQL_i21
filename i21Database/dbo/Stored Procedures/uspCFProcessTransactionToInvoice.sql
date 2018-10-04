@@ -623,10 +623,20 @@ BEGIN
 
 DECLARE @intInvoiceId INT
 
-SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail where intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
+--SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail where intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
 
-UPDATE tblCFTransaction SET intInvoiceId = @intInvoiceId, ysnPosted = @Post 
-WHERE intTransactionId = @TransactionId
+--UPDATE tblCFTransaction SET intInvoiceId = @intInvoiceId, ysnPosted = @Post 
+--WHERE intTransactionId = @TransactionId
+
+UPDATE CFTran
+		SET 
+			 CFTran.ysnPosted	 = ARL.ysnPosted
+			,CFTran.intInvoiceId = ARL.intInvoiceId
+		FROM
+		tblCFTransaction CFTran
+		INNER JOIN tblARInvoice ARL
+		ON CFTran.intTransactionId = ARL.intTransactionId
+		WHERE CFTran.intTransactionId = @TransactionId
 
 
 	IF (@Post = 1)
