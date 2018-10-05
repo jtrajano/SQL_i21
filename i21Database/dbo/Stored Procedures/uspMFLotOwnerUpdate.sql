@@ -154,23 +154,26 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF @intNewItemOwnerId <> ISNULL(@intOldItemOwnerId, 0)
+		IF ISNULL(@intNewItemOwnerId, 0) <> ISNULL(@intOldItemOwnerId, 0)
 		BEGIN
 			UPDATE tblMFItemOwnerDetail
 			SET dtmToDate = @dtmDate
 			WHERE intLotId = @intLotId
 				AND dtmToDate IS NULL
 
-			INSERT INTO tblMFItemOwnerDetail (
-				intLotId
-				,intItemId
-				,intOwnerId
-				,dtmFromDate
-				)
-			SELECT @intLotId
-				,@intItemId
-				,@intOwnerId
-				,@dtmDate
+			IF @intOwnerId IS NOT NULL
+			BEGIN
+				INSERT INTO tblMFItemOwnerDetail (
+					intLotId
+					,intItemId
+					,intOwnerId
+					,dtmFromDate
+					)
+				SELECT @intLotId
+					,@intItemId
+					,@intOwnerId
+					,@dtmDate
+			END
 
 			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
 				,@intTransactionTypeId = 43
