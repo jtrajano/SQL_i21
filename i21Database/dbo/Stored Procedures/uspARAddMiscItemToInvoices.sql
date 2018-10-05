@@ -4,6 +4,7 @@
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -641,26 +642,29 @@ BEGIN TRY
 		[ysnSuccess] = 1
 		AND ISNULL([ysnRecomputeTax], 0) = 1
 
-	EXEC [dbo].[uspARReComputeInvoicesTaxes] @InvoiceIds = @RecomputeTaxIds
+	EXEC [dbo].[uspARReComputeInvoicesTaxes] @InvoiceIds = @RecomputeTaxIds, @SkipRecompute = @SkipRecompute
 
 
-	DECLARE @RecomputeAmountIds InvoiceId	
-	DELETE FROM @RecomputeAmountIds
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		DECLARE @RecomputeAmountIds InvoiceId	
+		DELETE FROM @RecomputeAmountIds
 
-	INSERT INTO @RecomputeAmountIds(
-		 [intHeaderId]
-		,[ysnUpdateAvailableDiscountOnly]
-		,[intDetailId])
-	SELECT 
-		 [intHeaderId]						= [intInvoiceId]
-		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
-		,[intDetailId]						= [intInvoiceDetailId]
-	 FROM @IntegrationLog 
-	 WHERE
-		[ysnSuccess] = 1
-		AND ISNULL([ysnRecomputeTax], 0) = 0
+		INSERT INTO @RecomputeAmountIds(
+			 [intHeaderId]
+			,[ysnUpdateAvailableDiscountOnly]
+			,[intDetailId])
+		SELECT 
+			 [intHeaderId]						= [intInvoiceId]
+			,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
+			,[intDetailId]						= [intInvoiceDetailId]
+		 FROM @IntegrationLog 
+		 WHERE
+			[ysnSuccess] = 1
+			AND ISNULL([ysnRecomputeTax], 0) = 0
 
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @RecomputeAmountIds
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @RecomputeAmountIds
+	END
 	
 END TRY
 BEGIN CATCH

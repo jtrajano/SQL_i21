@@ -77,7 +77,8 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
 		AND ISNULL((@QuantityToPost),0) <> 0
-
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -122,7 +123,7 @@ BEGIN
 		vyuICGetItemStock IST
 			ON SOSODC.intComponentItemId = IST.intItemId 
 			AND Header.intCompanyLocationId = IST.intLocationId 
-	WHERE 
+	WHERE  
 		Header.intSalesOrderId = @SalesOrderId
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId = TD.intItemId		
@@ -130,6 +131,8 @@ BEGIN
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyShipped))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
 		AND ISNULL((@QuantityToPost),0) <> 0
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -177,6 +180,8 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyOrdered <> dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyOrdered))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -224,6 +229,8 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR ((Detail.dblQtyOrdered - Detail.dblQtyShipped) <> (TD.dblQtyOrdered - TD.dblQtyShipped)))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -270,6 +277,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId <> TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -316,6 +325,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId <> TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -362,6 +373,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId <> TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -408,6 +421,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId <> TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 
@@ -625,6 +640,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND Header.strOrderStatus IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 	--Cancelled & Short Closed		--Component
@@ -670,6 +687,8 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND Header.strOrderStatus IN ('Cancelled', 'Short Closed')
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 	--Short Closed to Partial
@@ -716,6 +735,8 @@ BEGIN
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND TD.strTransactionStatus = 'Short Closed'
 		AND Header.strOrderStatus = 'Partial'
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
 
 	UNION ALL
 	--Short Closed to Partial		--Component
@@ -762,14 +783,102 @@ BEGIN
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND TD.strTransactionStatus = 'Short Closed'
 		AND Header.strOrderStatus = 'Partial'
-		
+		--
+		AND (isnull(Detail.[intSubLocationId],0) = isnull(TD.[intSubLocationId] ,0) AND isnull(Detail.[intStorageLocationId],0) = isnull(TD.[intStorageLocationId] ,0) )
+	-------	
+	UNION ALL
+	SELECT
+		[intItemId]					=	TD.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	TD.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	-1 * ISNULL(TD.dblQtyOrdered, 0)
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	TD.intSubLocationId 
+		,[intStorageLocationId]		=	TD.intStorageLocationId 
+	FROM 
+		tblSOSalesOrderDetail Detail
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON Detail.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND Header.strTransactionType = 'Order'		
+		--
+		AND (isnull(Detail.[intSubLocationId],0) <> isnull(TD.[intSubLocationId], 0)  OR isnull(Detail.[intStorageLocationId], 0) <> isnull(TD.[intStorageLocationId], 0)  )
+	
+	UNION ALL
+
+	SELECT
+		[intItemId]					=	Detail.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	Detail.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	Detail.dblQtyOrdered
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	Detail.intSubLocationId 
+		,[intStorageLocationId]		=	Detail.intStorageLocationId 
+	FROM 
+		tblSOSalesOrderDetail Detail
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON Detail.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND Header.strTransactionType = 'Order'		
+		--
+		AND (isnull(Detail.[intSubLocationId],0) <> isnull(TD.[intSubLocationId], 0)  OR isnull(Detail.[intStorageLocationId], 0) <> isnull(TD.[intStorageLocationId], 0)  )
+	--
 	UPDATE
 		@items
 	SET
-		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)	
-
-
+		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)		
+		
+			
 	EXEC uspICIncreaseOrderCommitted @items
 
 END
-GO

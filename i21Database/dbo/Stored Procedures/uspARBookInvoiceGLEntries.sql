@@ -102,8 +102,9 @@ FROM
 
 
 EXEC dbo.uspGLBookEntries
-         @GLEntries = @GLPost
-        ,@ysnPost   = @Post
+         @GLEntries         = @GLPost
+        ,@ysnPost           = @Post
+        ,@SkipValidation	= 1
 
 IF @Post = 0
     BEGIN

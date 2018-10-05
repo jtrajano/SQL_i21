@@ -16,6 +16,7 @@ DECLARE @tblACHPayments TABLE (
 	, intCurrencyId			INT
 	, intAccountId			INT
 	, intEntityCustomerId	INT
+	, strRecordNumber		NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
 	, dblAmountPaid			NUMERIC(18, 6)
 	, dtmDatePaid			DATETIME
 	, ysnVendorRefund		BIT
@@ -42,6 +43,7 @@ IF ISNULL(@strPaymentIds, '') != ''
 			 , intCurrencyId
 			 , intAccountId
 			 , intEntityCustomerId
+			 , strRecordNumber
 			 , dblAmountPaid
 			 , dtmDatePaid
 			 , CASE WHEN P.strReceivePaymentType = 'Vendor Refund' THEN 1 ELSE 0 END
@@ -114,6 +116,7 @@ FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 CROSS APPLY (
 	SELECT TOP 1 * FROM @tblACHPayments
 	WHERE UF.intSourceTransactionId = intPaymentId
+	  AND UF.strSourceTransactionId = strRecordNumber
 ) P
 GROUP BY UF.intBankAccountId
 	   , P.intCurrencyId
@@ -245,7 +248,8 @@ BEGIN
 				 , strDescription 
 			FROM dbo.tblGLAccount WITH (NOLOCK)
 		) GL ON GL.intAccountId = P.intPaymentId
-		WHERE UF.intSourceTransactionId = intPaymentId
+		WHERE UF.intSourceTransactionId = P.intPaymentId
+		  AND UF.strSourceTransactionId = P.strRecordNumber
 		  AND P.intCurrencyId = @DupCurrency
 		  AND P.dtmDatePaid = @DupDatePaid
 	) PAYMENTS 

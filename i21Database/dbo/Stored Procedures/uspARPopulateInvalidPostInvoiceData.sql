@@ -80,28 +80,29 @@ BEGIN
 	WHERE  
 		I.[ysnRecurring] = 1
 
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Fiscal Year
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
-	FROM 					
-		#ARPostInvoiceHeader I	
-	WHERE  
-		--ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
-		I.[ysnWithinAccountingDate] = 0
+--   This is being handled by [uspGLValidateGLEntries]
+	--INSERT INTO #ARInvalidInvoiceData
+	--	([intInvoiceId]
+	--	,[strInvoiceNumber]
+	--	,[strTransactionType]
+	--	,[intInvoiceDetailId]
+	--	,[intItemId]
+	--	,[strBatchId]
+	--	,[strPostingError])
+	----Fiscal Year
+	--SELECT
+	--	 [intInvoiceId]			= I.[intInvoiceId]
+	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+	--	,[strTransactionType]	= I.[strTransactionType]
+	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+	--	,[intItemId]			= I.[intItemId] 
+	--	,[strBatchId]			= I.[strBatchId]
+	--	,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
+	--FROM 					
+	--	#ARPostInvoiceHeader I	
+	--WHERE  
+	--	--ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
+	--	I.[ysnWithinAccountingDate] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2001,28 +2002,28 @@ BEGIN
 			join #ARPostInvoiceHeader c
 				on a.intSCInvoiceId = c.intInvoiceId
 			
-
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Fiscal Year
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
-	FROM 					
-		#ARPostInvoiceHeader I	
-	WHERE  
-		I.[ysnWithinAccountingDate] = 0
+--   This is being handled by [uspGLValidateGLEntries]
+	--INSERT INTO #ARInvalidInvoiceData
+	--	([intInvoiceId]
+	--	,[strInvoiceNumber]
+	--	,[strTransactionType]
+	--	,[intInvoiceDetailId]
+	--	,[intItemId]
+	--	,[strBatchId]
+	--	,[strPostingError])
+	----Fiscal Year
+	--SELECT
+	--	 [intInvoiceId]			= I.[intInvoiceId]
+	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+	--	,[strTransactionType]	= I.[strTransactionType]
+	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+	--	,[intItemId]			= I.[intItemId]
+	--	,[strBatchId]			= I.[strBatchId]
+	--	,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
+	--FROM 					
+	--	#ARPostInvoiceHeader I	
+	--WHERE  
+	--	I.[ysnWithinAccountingDate] = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

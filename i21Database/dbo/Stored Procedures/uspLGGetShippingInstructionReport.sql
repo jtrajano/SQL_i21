@@ -316,6 +316,7 @@ FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
 		,L.strLoadNumber
+		,L.intPurchaseSale
 		,L.dtmBLDate
 		,L.dtmDeliveredDate
 		,CASE 

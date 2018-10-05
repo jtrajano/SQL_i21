@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND strCommand = 'GlobalComponentEngine.view.EmailHistory?showSearch=true' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5907,9 +5907,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Set Permissions (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Set Permissions (Portal)', N'System Manager', @AccountPortalParentMenuId, N'Set Permissions (Portal)', N'Account', N'Screen', N'i21.view.UserRole?showSearch=true', N'small-menu-account', 1, 0, 0, 1, 3, 1)
+	VALUES (N'Set Permissions (Portal)', N'System Manager', @AccountPortalParentMenuId, N'Set Permissions (Portal)', N'Account', N'Screen', N'i21.view.PortalRole?showSearch=true', N'small-menu-account', 1, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'i21.view.UserRole?showSearch=true' WHERE strMenuName = 'Set Permissions (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'i21.view.PortalRole?showSearch=true' WHERE strMenuName = 'Set Permissions (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId
 
 DECLARE @SMSetPermissionsMenuId INT
 SELECT  @SMSetPermissionsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Set Permissions (Portal)' AND strModuleName = N'System Manager' AND intParentMenuID = @AccountPortalParentMenuId

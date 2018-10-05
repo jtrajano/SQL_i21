@@ -26,7 +26,7 @@ SELECT	DISTINCT
 			,bill.dtmDueDate
 			,ysnPosted
 			,ysnPaid
-			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
+			,bill.strTerm AS strTerm
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 			,dblQtyToReceive = dblReceiptQty
 			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
@@ -108,7 +108,7 @@ SELECT DISTINCT
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
-	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	, strTerm = Bill.strTerm
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
@@ -186,7 +186,7 @@ SELECT DISTINCT
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
-	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	, strTerm = Bill.strTerm 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(-ReceiptCharge.dblQuantity,-1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ReceiptCharge.dblQuantityPriced,-1) ELSE 0 END 
@@ -263,7 +263,7 @@ SELECT DISTINCT
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
-	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	, strTerm = Bill.strTerm
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
@@ -343,7 +343,7 @@ SELECT DISTINCT
 	, Bill.dtmDueDate
 	, Shipment.ysnPosted 
 	, Bill.ysnPaid
-	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	, strTerm = Bill.strTerm 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(ShipmentCharge.dblQuantity,1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ShipmentCharge.dblQuantityBilled,1) ELSE 0 END 

@@ -367,6 +367,8 @@ BEGIN TRY
 					,C.dblQuantity
 					,LC.intLoadId
 
+				EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
+
 				--SELECT intInventoryReceiptChargeId
 				--FROM tblICInventoryReceiptCharge C
 				--WHERE intInventoryReceiptId = @intMinInventoryReceiptId AND intEntityVendorId = @intVendorEntityId AND ysnInventoryCost = 1

@@ -57,6 +57,9 @@ SELECT
 		,strProducer = Producer.strName
 		,receiptItemLot.strCertificateId
 		,receiptItemLot.strTrackingNumber
+		,intGrossUOMDecimalPlaces = weightUOM.intDecimalPlaces
+	 	,intQtyUOMDecimalPlaces = uom.intDecimalPlaces
+		,intWeightUOMId = itemWeightUOM.intItemUOMId
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId

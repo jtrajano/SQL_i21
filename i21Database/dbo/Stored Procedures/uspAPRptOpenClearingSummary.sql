@@ -148,7 +148,7 @@ SET @query = '
 		,SUM(dblAmountDue) as dblAmountDue
 		,GETDATE() as dtmCurrentDate
 	FROM (
-		SELECT DISTINCT
+		SELECT 
 		--IR.strVendorId
 		--,IR.intInventoryReceiptId
 		--,IR.intBillId

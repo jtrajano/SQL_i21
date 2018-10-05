@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
-SELECT 
+ SELECT 
 	 intSettleStorageId			= SS.intSettleStorageId
 	,intEntityId				= SS.intEntityId
 	,strEntityName				= E.strName

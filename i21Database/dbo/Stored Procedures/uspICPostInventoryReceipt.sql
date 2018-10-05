@@ -396,6 +396,27 @@ BEGIN
 		EXEC uspICRaiseError 80190, @strItemNo
 		GOTO With_Rollback_Exit 	
 	END
+
+	/*Do not allow receiving of negative qty.*/ 
+	SET @intItemId = NULL
+
+	SELECT	@strItemNo = i.strItemNo
+			,@intItemId = i.intItemId
+	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
+				ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = ri.intItemId
+	WHERE	r.intInventoryReceiptId = @intTransactionId
+			AND ISNULL(ri.dblOpenReceive, 0) < 0 
+			AND r.strReceiptType <> 'Inventory Return'
+
+	IF @intItemId IS NOT NULL
+	BEGIN
+		-- 'Receiving a negative stock for {Item} is not allowed.'
+		EXEC uspICRaiseError 80223, @strItemNo
+		GOTO With_Rollback_Exit 	
+	END
+
 END
 
 -- Check if sub location and storage locations are valid. 

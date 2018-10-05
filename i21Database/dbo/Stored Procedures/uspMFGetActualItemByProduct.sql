@@ -65,6 +65,7 @@ BEGIN
 			,WO.dblQuantity
 			,WO.dblProducedQuantity
 			,I.intCategoryId
+			,I.strLotTracking
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
 			AND RC.intWorkOrderId = R.intWorkOrderId
@@ -130,6 +131,7 @@ BEGIN
 			,WO.dblQuantity
 			,WO.dblProducedQuantity
 			,I.intCategoryId
+			,I.strLotTracking
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId

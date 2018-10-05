@@ -184,7 +184,7 @@ SELECT
 	intContractHeaderId,
 	strContractNumber,
 	strLocationName,
-	dtmEndDate,
+	dtmEndDate = CASE  WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END,
 	dblBalance,
 	intUnitMeasureId,
 	intPricingTypeId,
@@ -833,8 +833,9 @@ WHERE intLocationId IN (
 	IF (@ysnDisplayAllStorage=1)
 	BEGIN
 		INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId)
-		SELECT 5,strStorageTypeDescription [Storage Type],@strDescription,strStorageTypeDescription,0.00,@intCommodityId
-		FROM tblGRStorageType  
+		SELECT DISTINCT 5,strStorageTypeDescription [Storage Type],@strDescription,strStorageTypeDescription,0.00,@intCommodityId
+		FROM tblGRStorageScheduleRule SSR 
+		INNER JOIN tblGRStorageType  ST ON SSR.intStorageType = ST.intStorageScheduleTypeId 
 		WHERE ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND ysnReceiptedStorage =0
 			  AND intStorageScheduleTypeId NOT IN(SELECT DISTINCT isnull(intStorageScheduleTypeId,0) FROM @Final WHERE intSeqId=5)
 	END
@@ -923,14 +924,7 @@ SELECT * FROM (
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
-IF (@ysnDisplayAllStorage=1)
-	BEGIN			 
-		INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId)
-		SELECT 10,strStorageTypeDescription [Storage Type],@strDescription,strStorageTypeDescription,0.00,@intCommodityId
-		FROM tblGRStorageType  
-		WHERE ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND ysnReceiptedStorage = 1
-				AND intStorageScheduleTypeId NOT IN(SELECT DISTINCT isnull(intStorageScheduleTypeId,0) FROM @Final WHERE intSeqId=5)
-	END
+	
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strLocationName)
 	select 11 AS intSeqId,'Total Receipted',@strDescription,'Collateral Purchase' AS [strType],-isnull(dblTotal, 0) dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strLocationName dblTotal from @Final where intSeqId=9
 	union
@@ -1025,7 +1019,7 @@ IF (@ysnDisplayAllStorage=1)
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber,strShipmentNumber,intInventoryReceiptId,intInventoryShipmentId ,intTicketId,strTicketNumber,dtmTicketDateTime)
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber,strShipmentNumber,intInventoryReceiptId,intInventoryShipmentId,intTicketId,strTicketNumber,dtmTicketDateTime 
 	FROM @Final where strSeqHeader='In-House' and strType='Receipt' and intCommodityId=@intCommodityId
-	and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END --Need to changes this checking in reference RM-1805
+	and ISNULL(strDistributionOption,'') <> 'DP' 
 
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strLocationName)
@@ -1059,7 +1053,7 @@ IF (@ysnDisplayAllStorage=1)
 			join tblICItem i on CH.intItemId=i.intItemId
 			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-			 WHERE ysnCustomerStorage = 1	AND strOwnedPhysicalStock = 'Company'
+			 WHERE ysnCustomerStorage = 1	AND strOwnedPhysicalStock = 'Company' AND ysnDPOwnedType <> 1
 			AND CH.intCommodityId  = @intCommodityId
 						AND CH.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CH.intCompanyLocationId else @intLocationId end	
 				 )t WHERE intCompanyLocationId IN (
@@ -1085,7 +1079,7 @@ IF (@ysnDisplayAllStorage=1)
 					WHERE 
 					
 					ch.intCommodityId  = @intCommodityId	
-					AND ysnDPOwnedType = 1 and strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
+					AND ysnDPOwnedType = 1
 						AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 					)t 	WHERE intCompanyLocationId  IN (
 								SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -1419,29 +1413,56 @@ DECLARE @intUnitMeasureId int
 DECLARE @strUnitMeasure nvarchar(250)
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 select @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-				intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-				strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-				dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,strTicketNumber,strShipmentNumber,
-				intInventoryShipmentId,intItemId
-)
 
-SELECT	intSeqId,strSeqHeader, strCommodityCode ,strType ,
-			    Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
-		case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
-			case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-		intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,t.intCommodityId,
-		strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
-		dblDiscDue ,[Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-		dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,
-		strTicketNumber,strShipmentNumber,intInventoryShipmentId,intItemId
-  
-FROM @Final  t
-	LEFT JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
-	LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
-	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-	WHERE t.intCommodityId= @intCommodityId	
-	ORDER BY intSeqId, dtmDeliveryDate
+	IF @ysnDisplayAllStorage = 0
+	BEGIN
+		INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+						intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+						strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+						dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,strTicketNumber,strShipmentNumber,
+						intInventoryShipmentId,intItemId
+		)
+		SELECT	intSeqId,strSeqHeader, strCommodityCode ,strType ,
+						Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
+				case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
+					case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+				intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,t.intCommodityId,
+				strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
+				dblDiscDue ,[Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+				dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,
+				strTicketNumber,strShipmentNumber,intInventoryShipmentId,intItemId
+		FROM @Final  t
+			LEFT JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
+			LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
+			LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
+			WHERE t.intCommodityId= @intCommodityId	AND ISNULL(dblTotal,0) <> 0
+			ORDER BY intSeqId, dtmDeliveryDate
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+						intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+						strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+						dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,strTicketNumber,strShipmentNumber,
+						intInventoryShipmentId,intItemId
+		)
+		SELECT	intSeqId,strSeqHeader, strCommodityCode ,strType ,
+						Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
+				case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
+					case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+				intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,t.intCommodityId,
+				strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
+				dblDiscDue ,[Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+				dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName,intInventoryReceiptId,strReceiptNumber,intTicketId,
+				strTicketNumber,strShipmentNumber,intInventoryShipmentId,intItemId
+		FROM @Final  t
+			LEFT JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
+			LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
+			LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
+			WHERE t.intCommodityId= @intCommodityId 
+			ORDER BY intSeqId, dtmDeliveryDate
+	END
+
 END
 
 SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber
@@ -1453,7 +1474,7 @@ BEGIN
 
 			SELECT strCommodityCode,strUnitMeasure,strSeqHeader,sum(dblTotal) dblTotal,intCommodityId,strLocationName
 			FROM @FinalTable 
-			where  strSeqHeader in('Company Titled Stock','In-House') and isnull(dblTotal,0) <>0 
+			where  strSeqHeader in('Company Titled Stock','In-House')
 			GROUP BY strCommodityCode,strUnitMeasure,strSeqHeader,intCommodityId,strLocationName
 END
 ELSE
@@ -1461,7 +1482,7 @@ IF(@strByType='ByCommodity')
 BEGIN
 			SELECT strCommodityCode,strUnitMeasure,strSeqHeader,SUM(dblTotal) dblTotal,intCommodityId
 			FROM @FinalTable 
-			where dblTotal <> 0 and strSeqHeader in('Company Titled Stock','In-House')  and isnull(dblTotal,0) <>0
+			where  strSeqHeader in('Company Titled Stock','In-House') 
 			GROUP BY strCommodityCode,strUnitMeasure,strSeqHeader,intCommodityId 
 END
 ELSE
@@ -1475,7 +1496,7 @@ BEGIN
 							intInventoryReceiptId,isnull(strReceiptNumber,'') strReceiptNumber,intTicketId,isnull(strShipmentNumber,'') strShipmentNumber,
 							intInventoryShipmentId,intItemId, isnull(strTicketNumber,'') strTicketNumber
 			
-		FROM @FinalTable where   isnull(dblTotal,0) <>0 
+		FROM @FinalTable
 		 ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC 
 		END
 		ELSE
@@ -1486,7 +1507,6 @@ BEGIN
 							dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName	,intInventoryReceiptId,isnull(strReceiptNumber,'') strReceiptNumber,intTicketId,isnull(strShipmentNumber,'') strShipmentNumber,
 							intInventoryShipmentId,intItemId, isnull(strTicketNumber,'') strTicketNumber
 		FROM @FinalTable WHERE strType <> 'Company Titled Stock'-- and strType not like '%'+@strPurchaseSales+'%'
-		  and isnull(dblTotal,0) <>0
 		 ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 		END
 END

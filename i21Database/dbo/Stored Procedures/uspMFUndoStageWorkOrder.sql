@@ -318,6 +318,17 @@ BEGIN TRY
 			ELSE IsNULL(intMachineId, 0)
 			END
 
+	DELETE
+	FROM tblMFProductionSummary
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intInputItemId
+		AND IsNULL(intMachineId, 0) = CASE 
+			WHEN intMachineId IS NOT NULL
+				THEN IsNULL(@intMachineId, 0)
+			ELSE IsNULL(intMachineId, 0)
+			END
+		AND dblInputQuantity = 0
+
 	SELECT @intLotId = NULL
 
 	SELECT TOP 1 @intLotId = intLotId

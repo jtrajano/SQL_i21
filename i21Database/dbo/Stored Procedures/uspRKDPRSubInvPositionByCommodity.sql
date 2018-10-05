@@ -829,7 +829,7 @@ BEGIN
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM @Final 
 	where strSeqHeader='In-House' and strType='Receipt' and intCommodityId =@intCommodityId
-	and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END --Need to changes this checking in reference RM-1805
+	and ISNULL(strDistributionOption,'') <> 'DP'
 	)t
 	group by intSeqId,strSeqHeader,strType,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 
@@ -853,7 +853,7 @@ BEGIN
 	BEGIN
 
 	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,intCommodityId,strLocationName,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT 15 intSeqId,'Company Titled Stock','Off-Site',	dblTotal,intCommodityId,strLocation,intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,
+	SELECT 15 intSeqId,'Company Titled Stock','Off-Site',dblTotal,intCommodityId,strLocation,intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,
 	intCompanyLocationId 
 		FROM  (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(Balance))  dblTotal,
@@ -864,7 +864,7 @@ BEGIN
 			join tblICItem i on CH.intItemId=i.intItemId
 			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-			 WHERE ysnCustomerStorage = 1	AND strOwnedPhysicalStock = 'Company'
+			 WHERE ysnCustomerStorage = 1	AND strOwnedPhysicalStock = 'Company' AND ysnDPOwnedType <> 1
 			AND CH.intCommodityId  =@intCommodityId
 						AND CH.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CH.intCompanyLocationId else @intLocationId end	
 						and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
@@ -884,7 +884,7 @@ BEGIN
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					,ch.intCompanyLocationId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName
 					FROM @tblGetStorageDetailByDate ch
-					WHERE ch.intCommodityId  =@intCommodityId	AND ysnDPOwnedType = 1 and strOwnedPhysicalStock <> 'Company' 
+					WHERE ch.intCommodityId  =@intCommodityId	AND ysnDPOwnedType = 1
 						AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 						and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 					)t 	WHERE intCompanyLocationId  IN (

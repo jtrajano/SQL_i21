@@ -16,11 +16,11 @@ BEGIN
 
 		DECLARE @strRegister NVARCHAR(200)
 				, @strRegisterClass NVARCHAR(200)
-				, @dblXmlVersion NUMERIC(4, 2)
+				, @strXmlVersion NVARCHAR(10)
 
 		SELECT @strRegister = strRegisterName 
 				, @strRegisterClass = strRegisterClass
-				, @dblXmlVersion = dblXmlVersion
+				, @strXmlVersion = strXmlVersion
 		FROM dbo.tblSTRegister 
 		WHERE intRegisterId = @intRegisterId
 
@@ -56,7 +56,7 @@ BEGIN
 				-- Table and Condition
 				DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookMixMatchMMT33~strUniqueGuid=''' + @strUniqueGuid + ''''
 
-				IF(@dblXmlVersion = 3.40)
+				IF(@strXmlVersion = '3.4')
 					BEGIN
 							INSERT INTO tblSTstgPassportPricebookMixMatchMMT33
 							(

@@ -205,7 +205,7 @@ BEGIN
 			BEGIN
 				SET @InvoiceNumber = NULL
 				
-				UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
+				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 

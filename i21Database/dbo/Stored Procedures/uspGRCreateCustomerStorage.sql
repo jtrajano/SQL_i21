@@ -12,11 +12,11 @@ SET ANSI_WARNINGS OFF
 DECLARE @intEntityId INT = NULL
 DECLARE @intItemId INT = NULL
 DECLARE @intLocationId INT = NULL
-DECLARE @dblBalance INT = 0
+DECLARE @dblBalance NUMERIC(38,20)
 DECLARE @intDeliverySheetId INT = NULL
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intHoldCustomerStorageId INT
-DECLARE @newBalance DECIMAL(18,6) = 0
+DECLARE @newBalance DECIMAL(38,20) = 0
 BEGIN TRY
 	--check if a storage already exists 
 	SELECT 
@@ -85,7 +85,7 @@ BEGIN TRY
 				,[intStorageScheduleId]				= CS.intStorageScheduleId
 				,[intStorageTypeId]					= CS.intStorageTypeId
 				,[intCompanyLocationId]				= CS.intCompanyLocationId
-				,[intTicketId]						= CS.intTicketId
+				,[intTicketId]						= CASE WHEN CS.intDeliverySheetId > 0 THEN NULL ELSE CS.intTicketId END
 				,[intDeliverySheetId]				= CS.intDeliverySheetId
 				,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 				,[dblTotalPriceShrink]				= 0

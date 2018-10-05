@@ -2,7 +2,7 @@
 CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
 	@intInventoryReceiptItemId AS INT
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS
 BEGIN 
 	DECLARE @totalOtherCharges AS NUMERIC(18,6)
@@ -54,7 +54,11 @@ BEGIN
 	WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 	IF ISNULL(@units, 0) <> 0 
-		RETURN ISNULL(@totalOtherCharges, 0) / @units;
+		RETURN 
+			dbo.fnDivide(
+				ISNULL(@totalOtherCharges, 0)
+				,@units
+			);
 		
 	RETURN 0;
 END

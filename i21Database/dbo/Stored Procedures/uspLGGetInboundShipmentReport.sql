@@ -147,6 +147,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				L.strDestinationPort,
 				L.strDestinationCity,
 				L.dtmBLDate,
+				L.strBLNumber,
 				L.dtmScheduledDate,
 				L.dtmETAPOL,
 				L.dtmETAPOD,
@@ -252,6 +253,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
 				@strInstoreTo AS strInstoreTo,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText,
+				PCH.strCustomerContract AS strPCustomerContract,
+				SCH.strContractNumber AS strSalesContractNumber,
 
 				'' AS strWarehouseVendorName,
 				'' AS strWarehouseVendorLocation,
@@ -286,7 +289,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN	tblCTContractHeader PCH ON PCH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
+		LEFT JOIN	tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
+		LEFT JOIN	tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
 		LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
@@ -334,6 +340,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				L.strDestinationPort,
 				L.strDestinationCity,
 				L.dtmBLDate,
+				L.strBLNumber,
 				L.dtmScheduledDate,
 				L.dtmETAPOL,
 				L.dtmETAPOD,

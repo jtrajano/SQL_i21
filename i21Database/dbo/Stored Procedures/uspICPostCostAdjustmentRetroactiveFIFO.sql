@@ -58,6 +58,8 @@ BEGIN
 			,@COST_ADJ_TYPE_Adjust_InTransit_Inventory AS INT = 7
 			,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
 			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
+			,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add AS INT = 11
+			,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce AS INT = 12
 
 	-- Create the variables for the internal transaction types used by costing. 
 	DECLARE
@@ -67,6 +69,7 @@ BEGIN
 			,@INV_TRANS_TYPE_Consume AS INT = 8
 			,@INV_TRANS_TYPE_Produce AS INT = 9
 			,@INV_TRANS_Inventory_Transfer AS INT = 12
+            ,@INV_TRANS_Inventory_Transfer_With_Shipment AS INT = 13
 			,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
 			,@INV_TRANS_TYPE_ADJ_Split_Lot AS INT = 17
 			,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
@@ -107,6 +110,8 @@ BEGIN
 			,@strDescription AS NVARCHAR(255)
 			,@strNewCost AS NVARCHAR(50) 
 			,@strItemNo AS NVARCHAR(50) 
+
+    DECLARE @strReceiptType AS NVARCHAR(50)
 END 
 
 -- Compute the cost adjustment
@@ -420,6 +425,14 @@ BEGIN
 
 		-- Log the cost adjustment 
 		BEGIN 
+            SET @strReceiptType = NULL 
+            IF @t_intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt 
+            BEGIN 
+                SELECT    @strReceiptType = strReceiptType
+                FROM    tblICInventoryReceipt r
+                WHERE    r.strReceiptNumber = @t_strTransactionId
+            END 
+
 			INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
 				[intInventoryFIFOId]
 				,[intInventoryTransactionId] 
@@ -453,10 +466,19 @@ BEGIN
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
-											WHEN @t_intInventoryTransactionId = @InventoryTransactionStartId AND @t_intLocationId IS NOT NULL THEN 
+											WHEN (
+												@t_intInventoryTransactionId = @InventoryTransactionStartId 
+												AND @t_intLocationId IS NOT NULL 
+                                                AND @strReceiptType <> 'Transfer Order'
+											) THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
+                                            WHEN (
+                                                @t_intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt 
+                                                AND @strReceiptType = 'Transfer Order' 
+                                            ) THEN 
+                                                @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
 									END
@@ -476,8 +498,13 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
-											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+                                            WHEN @t_intTransactionTypeId IN (@INV_TRANS_Inventory_Transfer, @INV_TRANS_Inventory_Transfer_With_Shipment) THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit_Inventory
+                                            WHEN (
+                                                @t_intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt 
+                                                AND @strReceiptType = 'Transfer Order' 
+                                            ) THEN 
+                                                @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 

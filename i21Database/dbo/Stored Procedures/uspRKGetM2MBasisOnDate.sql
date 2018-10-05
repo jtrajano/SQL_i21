@@ -152,7 +152,8 @@ SELECT
 	,strLocationName
 	,strMarketZoneCode
 	,strCurrency
-	,b.strPricingType
+	-- ,b.strPricingType
+	,strPricingType = CASE WHEN ISNULL(bd.intPricingTypeId, 0) <> 0 THEN  pt.strPricingType ELSE b.strPricingType END
 	,strContractInventory
 	,strContractType
 	,strUnitMeasure

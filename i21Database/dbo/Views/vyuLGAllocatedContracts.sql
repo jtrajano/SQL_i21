@@ -60,10 +60,12 @@ SELECT
 	,SCH.strContractNumber as strSalesContractNumber
 	,SCT.intContractSeq as intSContractSeq
 	,strSContractNumber = Cast(SCH.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
+	,strSCustomerRefNo = SCH.strCustomerContract
 	,SCT.intItemId as intSItemId
 	,U3.strUnitMeasure as strSItemUOM
 	,SIM.strItemNo as strSItemNo
 	,SIM.strDescription as strSItemDescription
+	,SIM.strDescription + ' - ' + ISNULL(SCT.strItemSpecification,'') as strSItemDescriptionSpecification
 	,PTS.strDescription AS strSProductType
 	,SCT.dblQuantity as dblSDetailQuantity
 	,SCH.dtmContractDate as dtmSContractDate

@@ -18,15 +18,18 @@ DECLARE @intInvoiceId			INT
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
 
+SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
+		   , @strTransactionType = strTransactionType
+FROM tblARInvoice 
+WHERE intInvoiceId = @InvoiceId
+
+IF @strTransactionType = 'Proforma Invoice'
+	RETURN
+
 EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
 
 IF @ForDelete = 1
 	BEGIN
-		SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
-				   , @strTransactionType = strTransactionType
-		FROM tblARInvoice 
-		WHERE intInvoiceId = @InvoiceId 
-
 		IF @strTransactionType IN ('Credit Memo', 'Credit Note') AND @intOriginalInvoiceId IS NOT NULL
 			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
 	END

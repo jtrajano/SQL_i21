@@ -17,34 +17,27 @@ BEGIN
 	SELECT @strTransactionId= SUBSTRING(@strTransactionId,1, LEN(@strTransactionId)-1)
 	SET @ysnVoid = 1
 END
+;WITH x AS (
+	SELECT strRecordNumber strTransactionId,dblAmountPaid , 'AR' strSource from tblARPayment  UNION
+	SELECT strPaymentRecordNum strTransactionId,dblAmountPaid , 'AP' strSource from tblAPPayment  UNION
+	SELECT  strPaycheckId strTransactionId,dblNetPayTotal dblAmountPaid, 'PR' strSource FROM tblPRPaycheck
+)
 
+SELECT   @Code = 
+CASE WHEN strSource = 'AR'
+	THEN
+		CASE WHEN	dblAmountPaid < 0 THEN '2' ELSE '7' END
+ELSE
+	CASE WHEN dblAmountPaid > 0 THEN '2' ELSE '7' END
+END
 
-;WITH r AS (
-SELECT trns.strTransactionId,
-CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ISNULL(strTransactionType,'Customer Prepayment')) = 1 THEN '7' ELSE '2' END Code from
-tblARPayment payment
-JOIN tblCMUndepositedFund uf ON uf.intSourceTransactionId  = payment.intPaymentId
-JOIN tblCMBankTransaction trns ON trns.intTransactionId = uf.intBankDepositId
-LEFT JOIN tblARInvoice invoice ON payment.intPaymentId = invoice.intPaymentId
-UNION
-SELECT trns.strTransactionId, 
-CASE WHEN payment.dblAmountPaid >=0 then '2' else '7' end Code
-FROM tblAPBill bill JOIN tblAPBillDetail billdetail on bill.intBillId = billdetail.intBillId
-JOIN tblAPPaymentDetail paymentdetail ON paymentdetail.intBillId = billdetail.intBillId
-JOIN tblAPPayment payment ON payment.intPaymentId = paymentdetail.intPaymentId
-JOIN tblCMBankTransaction trns ON trns.strTransactionId = payment.strPaymentRecordNum
-UNION
-SELECT  trns.strTransactionId,'2' Code FROM tblPRPaycheck pchk
-JOIN tblCMBankTransaction trns ON trns.strTransactionId = pchk.strPaycheckId
-)SELECT @Code=Code FROM r
+FROM x
 WHERE strTransactionId = @strTransactionId
 
-	-- Return the result of the function
 IF (@ysnVoid =1)
 BEGIN
 	SELECT @Code = CASE WHEN @Code = '7' THEN '2' ELSE '7' END
 END
-
 RETURN @Code
-
 END
+

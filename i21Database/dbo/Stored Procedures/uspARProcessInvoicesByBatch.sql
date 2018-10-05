@@ -494,6 +494,7 @@ BEGIN
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage
+				,@SkipRecompute     = 1
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -898,6 +899,7 @@ BEGIN
 			,@UserId			= @UserId
 			,@RaiseError		= @RaiseError
 			,@ErrorMessage		= @CurrentErrorMessage	OUTPUT
+			,@SkipRecompute     = 1
 
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1449,6 +1451,7 @@ BEGIN
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage
+				,@SkipRecompute     = 1
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -1668,6 +1671,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1711,7 +1715,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1775,7 +1780,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1819,7 +1825,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1960,6 +1967,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
@@ -2005,7 +2013,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 1

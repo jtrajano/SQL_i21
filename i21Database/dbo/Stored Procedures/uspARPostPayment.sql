@@ -17,33 +17,42 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@raiseError		AS BIT				= 0
 	,@bankAccountId	AS INT				= NULL
+
+WITH RECOMPILE
 AS
   
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS OFF
 
-IF @raiseError = 1
-	SET XACT_ABORT ON
-  
---------------------------------------------------------------------------------------------  
--- Initialize   
---------------------------------------------------------------------------------------------   
-
-DECLARE @ZeroDecimal		DECIMAL(18,6)
-		,@InitTranCount		INT
-		,@CurrentTranCount	INT
-		,@Savepoint			NVARCHAR(32)
-		,@CurrentSavepoint	NVARCHAR(32)
-
-SET @ZeroDecimal = 0.000000
-SET @InitTranCount = @@TRANCOUNT
-SET @Savepoint = SUBSTRING(('ARPostPayment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-DECLARE @CODE NVARCHAR(25) = 'AR', @DiscountAccount        INT
-SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
+DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
+DECLARE @PostDate AS DATETIME
+SET @PostDate = GETDATE()
+DECLARE @DateNow AS DATETIME
+SET @PostDate = CAST(@PostDate AS DATE)
+
+DECLARE @ZeroDecimal DECIMAL(18,6)
+SET @ZeroDecimal = 0.000000
+DECLARE @OneDecimal DECIMAL(18,6)
+SET @OneDecimal = 1.000000
+DECLARE @OneHundredDecimal DECIMAL(18,6)
+SET @OneHundredDecimal = 100.000000
+DECLARE @ZeroBit BIT
+SET @ZeroBit = CAST(0 AS BIT)
+DECLARE @OneBit BIT
+SET @OneBit = CAST(1 AS BIT)
+
+DECLARE  @InitTranCount				INT
+		,@CurrentTranCount			INT
+		,@Savepoint					NVARCHAR(32)
+		,@CurrentSavepoint			NVARCHAR(32)
+
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARPostPayment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 IF ISNULL(@raiseError,0) = 0	
 BEGIN
@@ -52,1197 +61,785 @@ BEGIN
 	ELSE
 		SAVE TRANSACTION @Savepoint
 END
- 
-DECLARE @ARReceivablePostData AS [dbo].[ReceivePaymentPostingTable]
-DECLARE @PaymentIds AS [dbo].[Id]
 
-DECLARE @ARReceivableInvalidData TABLE (
-     [intTransactionId]         INT             NOT NULL
-    ,[strTransactionId]         NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
-    ,[strTransactionType]       NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
-    ,[intTransactionDetailId]   INT             NULL
-    ,[strBatchId]               NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
-    ,[strError]                 NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
-);
-
-DECLARE @AROverpayment AS [dbo].[Id]
-DECLARE @ARPrepayment  AS [dbo].[Id]
-
-DECLARE @ZeroPayment AS [dbo].[ReceivePaymentPostingTable]
-
-DECLARE @PostDate AS DATETIME
-		,@DateNow AS DATETIME
-
-SET @PostDate = GETDATE()
-SET @DateNow = CAST(@PostDate AS DATE)
-
--- Create the gl entries variable 
-DECLARE @GLEntries AS RecapTableType
-
-
-DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
-DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
-
-
-DECLARE @DefaultCurrencyId INT		
-DECLARE @totalInvalid INT
-DECLARE @totalRecords INT
 DECLARE @ErrorMerssage NVARCHAR(MAX)
-		
-SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-
-DECLARE @UserEntityID			INT
-	,@AllowOtherUserToPost		BIT
-
-SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId)
-
-IF(@batchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	END
-
-SET @batchIdUsed = @batchId	
 
 SET @recapId = '1'
-SET @success = 1
+SET @success = @OneBit
+SET @post = ISNULL(@post, @ZeroBit)
+SET @recap = ISNULL(@recap, @ZeroBit)
 
--- Ensure @post and @recap is not NULL  
-SET @post = ISNULL(@post, 0)
-SET @recap = ISNULL(@recap, 0)  
- 
--- Get Transaction to Post
-IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
-	SET @transType = 'all'
+IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0) AND @recap = 0
+BEGIN
+	EXEC dbo.uspSMGetStartingNumber 3, @batchId OUT
+END
+SET @batchIdUsed = @batchId
 
-IF (@param IS NOT NULL) 
-	BEGIN
-		IF(@param = 'all')
-			BEGIN
-				DELETE FROM @PaymentIds
-				INSERT INTO @PaymentIds
-				SELECT [intPaymentId] FROM tblARPayment WHERE ysnPosted = 0
-				
-				INSERT INTO @ARReceivablePostData 
-				SELECT *
-				FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @batchIdUsed, @bankAccountId, @post, @recap, @userId, NULL)
-			END
-		ELSE
-			BEGIN
-				DELETE FROM @PaymentIds
-				INSERT INTO @PaymentIds
-				SELECT intID FROM fnGetRowsFromDelimitedValues(@param)
-				
-				INSERT INTO @ARReceivablePostData 
-				SELECT *
-				FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @batchIdUsed, @bankAccountId, @post, @recap, @userId, NULL)				
-			END
-	END
+IF(OBJECT_ID('tempdb..#ARPostPaymentHeader') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPostPaymentHeader
+END
+CREATE TABLE #ARPostPaymentHeader
+    ([intTransactionId]                 INT             NOT NULL PRIMARY KEY
+    ,[intTransactionDetailId]           INT             NULL
+    ,[strTransactionId]                 NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NOT NULL UNIQUE NONCLUSTERED
+    ,[strReceivePaymentType]            NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[intEntityCustomerId]              INT             NOT NULL
+    ,[strCustomerNumber]                NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[strCustomerName]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[intCompanyLocationId]             INT             NULL
+    ,[strLocationName]                  NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[intUndepositedFundsId]            INT             NULL
+    ,[intSalesAdvAcct]                  INT             NULL
+    ,[intCurrencyId]                    INT             NOT NULL
+    ,[intPaymentMethodId]               INT             NOT NULL
+    ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strNotes]                         NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[intExchangeRateTypeId]			INT												NULL
+	,[dblExchangeRate]					NUMERIC(18, 6)									NULL
+    ,[dtmDatePaid]                      DATETIME        NOT NULL
+    ,[dtmPostDate]                      DATETIME        NOT NULL
+    ,[intWriteOffAccountId]             INT             NULL
+    ,[intAccountId]                     INT             NULL
+    ,[intBankAccountId]                 INT             NULL
+    ,[intARAccountId]                   INT             NULL
+    ,[intDiscountAccount]               INT             NULL
+    ,[intInterestAccount]               INT             NULL
+    ,[intCFAccountId]                   INT             NULL
+    ,[intGainLossAccount]               INT             NULL
+    ,[intEntityCardInfoId]              INT             NULL
+	,[ysnPosted]                        BIT             NULL
+	,[ysnInvoicePrepayment]             BIT             NULL
+    ,[strBatchId]                       NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
+    ,[ysnPost]                          BIT             NULL
+    ,[ysnRecap]                         BIT             NULL
+    ,[intEntityId]                      INT             NOT NULL
+    ,[intUserId]                        INT             NOT NULL
+    ,[ysnUserAllowedToPostOtherTrans]   BIT             NULL
+    ,[ysnWithinAccountingDate]          BIT             NULL
+    ,[ysnForApproval]                   BIT             NULL
+    ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
-IF(@beginDate IS NOT NULL)
-	BEGIN
-		DELETE FROM @PaymentIds
-		INSERT INTO @PaymentIds
-		SELECT ARP.[intPaymentId] FROM tblARPayment ARP
-		WHERE
-			NOT EXISTS(SELECT NULL FROM @ARReceivablePostData PID WHERE PID.[intTransactionId] = ARP.[intPaymentId])
-			AND CAST(ISNULL(ARP.[dtmDatePaid], @DateNow) AS DATE) BETWEEN CAST(ISNULL(@beginDate, @DateNow) AS DATE) AND CAST(ISNULL(@endDate, @DateNow) AS DATE)
-			AND ARP.ysnPosted <> @post
+    ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
+    ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
+    ,[dblUnappliedAmount]               NUMERIC(18,6)   NULL
+    ,[dblBaseUnappliedAmount]           NUMERIC(18,6)   NULL
+    ,[dblPayment]                       NUMERIC(18,6)   NULL
+    ,[dblBasePayment]                   NUMERIC(18,6)   NULL
+    ,[dblDiscount]                      NUMERIC(18,6)   NULL
+    ,[dblBaseDiscount]                  NUMERIC(18,6)   NULL
+    ,[dblInterest]                      NUMERIC(18,6)   NULL
+    ,[dblBaseInterest]                  NUMERIC(18,6)   NULL
+    ,[dblInvoiceTotal]                  NUMERIC(18,6)   NULL
+    ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
+    ,[dblAmountDue]                     NUMERIC(18,6)   NULL
+    ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
 
-				
-		INSERT INTO @ARReceivablePostData 
-		SELECT *
-		FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @batchIdUsed, @bankAccountId, @post, @recap, @userId, NULL)
-	END
+    ,[intInvoiceId]                     INT             NULL
+    ,[ysnExcludedFromPayment]           BIT             NULL
+    ,[ysnForgiven]                      BIT             NULL
+	,[intBillId]                        INT             NULL
+    ,[strTransactionNumber]             NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strTransactionType]               NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strType]                          NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+	,[intTransactionAccountId]          INT             NULL
+    ,[ysnTransactionPosted]             BIT             NULL
+	,[ysnTransactionPaid]               BIT             NULL
+	,[ysnTransactionProcessed]          BIT             NULL    
+    ,[dtmTransactionPostDate]           DATETIME        NULL
+	,[dblTransactionDiscount]           NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionDiscount]       NUMERIC(18,6)   NULL
+    ,[dblTransactionInterest]           NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionInterest]       NUMERIC(18,6)   NULL
+    ,[dblTransactionAmountDue]          NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
+	,[intCurrencyExchangeRateTypeId]    INT             NULL
+    ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
+    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)
 
-IF(@beginTransaction IS NOT NULL)
-	BEGIN
-		DELETE FROM @PaymentIds
-		INSERT INTO @PaymentIds
-		SELECT ARP.[intPaymentId] FROM tblARPayment ARP
-		WHERE
-			NOT EXISTS(SELECT NULL FROM @ARReceivablePostData PID WHERE PID.[intTransactionId] = ARP.[intPaymentId])
-			AND ARP.intPaymentId BETWEEN @beginTransaction AND @endTransaction
-			AND ARP.ysnPosted <> @post
-				
-		INSERT INTO @ARReceivablePostData 
-		SELECT *
-		FROM [dbo].[fnARGetPaymentDetailsForPosting](@PaymentIds, @PostDate, @batchIdUsed, @bankAccountId, @post, @recap, @userId, NULL)
-	END
+IF(OBJECT_ID('tempdb..#ARPostPaymentDetail') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPostPaymentDetail
+END
+CREATE TABLE #ARPostPaymentDetail
+    ([intTransactionId]                 INT             NOT NULL
+    ,[intTransactionDetailId]           INT             NOT NULL  PRIMARY KEY
+    ,[strTransactionId]                 NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strReceivePaymentType]            NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[intEntityCustomerId]              INT             NOT NULL
+    ,[strCustomerNumber]                NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[strCustomerName]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[intCompanyLocationId]             INT             NULL
+    ,[strLocationName]                  NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[intUndepositedFundsId]            INT             NULL
+    ,[intSalesAdvAcct]                  INT             NULL
+    ,[intCurrencyId]                    INT             NOT NULL
+    ,[intPaymentMethodId]               INT             NOT NULL
+    ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strNotes]                         NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[intExchangeRateTypeId]			INT												NULL
+	,[dblExchangeRate]					NUMERIC(18, 6)									NULL
+    ,[dtmDatePaid]                      DATETIME        NOT NULL
+    ,[dtmPostDate]                      DATETIME        NOT NULL
+    ,[intWriteOffAccountId]             INT             NULL
+    ,[intAccountId]                     INT             NULL
+    ,[intBankAccountId]                 INT             NULL
+    ,[intARAccountId]                   INT             NULL
+    ,[intDiscountAccount]               INT             NULL
+    ,[intInterestAccount]               INT             NULL
+    ,[intCFAccountId]                   INT             NULL
+    ,[intGainLossAccount]               INT             NULL
+    ,[intEntityCardInfoId]              INT             NULL
+	,[ysnPosted]                        BIT             NULL
+	,[ysnInvoicePrepayment]             BIT             NULL
+    ,[strBatchId]                       NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
+    ,[ysnPost]                          BIT             NULL
+    ,[ysnRecap]                         BIT             NULL
+    ,[intEntityId]                      INT             NOT NULL
+    ,[intUserId]                        INT             NOT NULL
+    ,[ysnUserAllowedToPostOtherTrans]   BIT             NULL
+    ,[ysnWithinAccountingDate]          BIT             NULL
+    ,[ysnForApproval]                   BIT             NULL
+    ,[ysnProcessCreditCard]             BIT             NULL
+    ,[ysnApplytoBudget]                 BIT             NULL
 
---Removed excluded payments to post/unpost
+    ,[dblAmountPaid]                    NUMERIC(18,6)   NULL
+    ,[dblBaseAmountPaid]                NUMERIC(18,6)   NULL
+    ,[dblUnappliedAmount]               NUMERIC(18,6)   NULL
+    ,[dblBaseUnappliedAmount]           NUMERIC(18,6)   NULL
+    ,[dblPayment]                       NUMERIC(18,6)   NULL
+    ,[dblBasePayment]                   NUMERIC(18,6)   NULL
+    ,[dblDiscount]                      NUMERIC(18,6)   NULL
+    ,[dblBaseDiscount]                  NUMERIC(18,6)   NULL
+    ,[dblInterest]                      NUMERIC(18,6)   NULL
+    ,[dblBaseInterest]                  NUMERIC(18,6)   NULL
+    ,[dblInvoiceTotal]                  NUMERIC(18,6)   NULL
+    ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
+    ,[dblAmountDue]                     NUMERIC(18,6)   NULL
+    ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
+
+    ,[intInvoiceId]                     INT             NULL
+    ,[ysnExcludedFromPayment]           BIT             NULL
+    ,[ysnForgiven]                      BIT             NULL
+	,[intBillId]                        INT             NULL
+    ,[strTransactionNumber]             NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strTransactionType]               NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strType]                          NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+	,[intTransactionAccountId]          INT             NULL
+    ,[ysnTransactionPosted]             BIT             NULL
+	,[ysnTransactionPaid]               BIT             NULL
+	,[ysnTransactionProcessed]          BIT             NULL    
+    ,[dtmTransactionPostDate]           DATETIME        NULL
+	,[dblTransactionDiscount]           NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionDiscount]       NUMERIC(18,6)   NULL
+    ,[dblTransactionInterest]           NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionInterest]       NUMERIC(18,6)   NULL
+    ,[dblTransactionAmountDue]          NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
+	,[intCurrencyExchangeRateTypeId]    INT             NULL
+    ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
+    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)
+
+IF(OBJECT_ID('tempdb..#ARPostZeroPayment') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPostZeroPayment
+END
+CREATE TABLE #ARPostZeroPayment
+    ([intTransactionId]                 INT             NOT NULL PRIMARY KEY)
+
+DECLARE @PaymentIds AS [PaymentId]
+EXEC [dbo].[uspARPopulatePaymentDetailForPosting]
+     @Param             = @param
+    ,@BeginDate         = @beginDate
+    ,@EndDate           = @endDate
+    ,@BeginTransaction  = @beginTransaction
+    ,@EndTransaction    = @endTransaction
+    ,@IntegrationLogId  = NULL
+    ,@PaymemntIds       = @PaymentIds
+    ,@Post              = @post
+    ,@Recap             = @recap
+    ,@PostDate          = @PostDate
+    ,@BatchId           = @batchIdUsed
+    ,@UserId            = @userId
+
+ --Removed excluded payments to post/unpost
 IF(@exclude IS NOT NULL)
+BEGIN
+	DECLARE @PaymentsExclude TABLE(intPaymentId INT);
+	INSERT INTO @PaymentsExclude
+	SELECT intID FROM fnGetRowsFromDelimitedValues(@exclude)
+
+	DELETE FROM A
+	FROM #ARPostPaymentHeader A
+	WHERE EXISTS(SELECT * FROM @PaymentsExclude B WHERE A.[intTransactionId] = B.[intPaymentId])
+
+    DELETE FROM A
+	FROM #ARPostPaymentDetail A
+	WHERE EXISTS(SELECT * FROM @PaymentsExclude B WHERE A.[intTransactionId] = B.[intPaymentId])
+END
+
+IF(OBJECT_ID('tempdb..#ARPaymentAccount') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPaymentAccount
+END
+CREATE TABLE #ARPaymentAccount
+    ([intAccountId]         INT NOT NULL    PRIMARY KEY CLUSTERED
+    ,[strAccountId]         NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[strAccountCategory]	NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[ysnActive]            BIT                                             NOT NULL)
+
+IF @post = @OneBit
+     EXEC [dbo].[uspARPopulatePaymentAccountForPosting]
+
+IF(OBJECT_ID('tempdb..#ARInvalidPaymentData') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARInvalidPaymentData
+END
+CREATE TABLE #ARInvalidPaymentData
+    ([intTransactionId]         INT             NOT NULL
+    ,[strTransactionId]         NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strTransactionType]       NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[intTransactionDetailId]   INT             NULL
+    ,[strBatchId]               NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strError]                 NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL)
+		
+DECLARE @totalInvalid INT
+DECLARE @totalRecords INT
+
+EXEC [dbo].[uspARPopulateInvalidPostPaymentData]
+     @Post     = @post
+    ,@Recap    = @recap
+    ,@PostDate = @PostDate
+    ,@BatchId  = @batchIdUsed
+
+SET @totalInvalid = (SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARInvalidPaymentData)
+
+IF(@totalInvalid > 0)
+BEGIN
+    INSERT INTO 
+		tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT
+		 [strError]
+		,[strTransactionType]
+		,[strTransactionId]
+		,[strBatchId]
+		,[intTransactionId]
+	FROM
+		#ARInvalidPaymentData
+
+	SET @invalidCount = @totalInvalid
+
+    DELETE A
+    FROM
+        #ARPostPaymentHeader A
+    INNER JOIN 
+        #ARInvalidPaymentData I
+			ON A.intTransactionId = I.intTransactionId
+
+    DELETE A
+    FROM
+        #ARPostPaymentDetail A
+    INNER JOIN 
+        #ARInvalidPaymentData I
+			ON A.intTransactionId = I.intTransactionId
+																						
+    IF @raiseError = @OneBit
+    BEGIN
+        SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
+        RAISERROR(@ErrorMerssage, 11, 1)							
+        GOTO Post_Exit
+    END													
+
+END
+
+--Get all to be post record
+SELECT @totalRecords = (SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARPostPaymentHeader)
+
+IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
-		DECLARE @PaymentsExclude TABLE  (
-			intPaymentId INT
-		);
-
-		INSERT INTO @PaymentsExclude
-		SELECT intID FROM fnGetRowsFromDelimitedValues(@exclude)
-
-
-		DELETE FROM A
-		FROM @ARReceivablePostData A
-		WHERE EXISTS(SELECT * FROM @PaymentsExclude B WHERE A.[intTransactionId] = B.intPaymentId)
-	END
-	
-	
----- Get the next batch number
---IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
---	BEGIN
---		SELECT TOP 1
---			@batchId = GL.strBatchId
---		FROM
---			tblGLDetailRecap GL
---		INNER JOIN 
---			@ARReceivablePostData I
---				ON GL.intTransactionId = I.intPaymentId
---				AND GL.strTransactionId = I.strTransactionId
---		WHERE
---			GL.strTransactionType = @SCREEN_NAME
---			AND	GL.strModuleName = @MODULE_NAME
---	END
-	
-
-
---------------------------------------------------------------------------------------------  
--- Validations  
---------------------------------------------------------------------------------------------  
---IF @recap = 0
-	BEGIN
-	
-		-- Zero Payment
-		INSERT INTO @ZeroPayment
-		SELECT * 
-		FROM @ARReceivablePostData
-		WHERE
-			[intTransactionDetailId] IN (
-										SELECT
-											MIN(P.[intTransactionDetailId])
-										FROM
-											@ARReceivablePostData P
-										WHERE
-											P.[dblAmountPaid] = 0
-											AND P.[intTransactionDetailId] IS NOT NULL			
-										GROUP BY
-											P.[intTransactionId], P.[strTransactionId], P.[intWriteOffAccountId], P.[intEntityId], P.[intInterestAccount], P.[intDiscountAccount]
-										HAVING
-											SUM(P.[dblPayment]) = 0
-											AND SUM(P.[dblDiscount]) = 0			
-										)
-		
-		
-		
-		--Validation
-		INSERT INTO @ARReceivableInvalidData
-		SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@ARReceivablePostData, @post, @recap)
-
-		--POST VALIDATIONS
-		IF @post = 1
-			BEGIN
-
-				DELETE FROM @PaymentIds
-				INSERT INTO @PaymentIds
-				SELECT DISTINCT [intTransactionId]
-				FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL
-
-				--+overpayment
-				INSERT INTO
-					@AROverpayment
-				SELECT
-					DISTINCT
-					A.intPaymentId
-				FROM
-					tblARPayment A 
-				INNER JOIN
-					(
-					SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL
-					) P
-						ON A.intPaymentId = P.[intTransactionId]				
-				WHERE
-					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
-					AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)	
-					
-				--+prepayment
-				INSERT INTO
-					@ARPrepayment
-				SELECT
-					A.intPaymentId
-				FROM
-					tblARPayment A 
-				INNER JOIN
-					(
-					SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL
-					) P
-						ON A.intPaymentId = P.[intTransactionId]				
-				WHERE
-					(A.dblAmountPaid) <> 0
-					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0	
-					AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)											
-
-			END
-
-		--UNPOSTING VALIDATIONS
-		IF @post = 0 And @recap = 0
-			BEGIN							
-								
-				---overpayment
-				INSERT INTO
-					@AROverpayment
-				SELECT
-					A.intPaymentId
-				FROM
-					tblARPayment A 
-				INNER JOIN
-					(
-					SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL
-					) P
-						ON A.intPaymentId = P.[intTransactionId]
-				INNER JOIN
-					tblARInvoice I
-						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
-				WHERE
-					I.strTransactionType = 'Overpayment'
-					
-				---prepayment
-				INSERT INTO
-					@ARPrepayment
-				SELECT
-					A.intPaymentId
-				FROM
-					tblARPayment A 
-				INNER JOIN
-					(
-					SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL
-					) P
-						ON A.intPaymentId = P.[intTransactionId]
-				INNER JOIN
-					tblARInvoice I
-						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
-				WHERE
-					I.strTransactionType = 'Customer Prepayment'					
-					
-			END
-		
-	--Get all invalid		
-		SET @totalInvalid = (SELECT COUNT(DISTINCT [intTransactionId]) FROM @ARReceivableInvalidData)
-
-		IF(@totalInvalid > 0)
-			BEGIN
-
-				INSERT INTO 
-					tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					 [strError]
-					,[strTransactionType]
-					,[strTransactionId]
-					,[strBatchId]
-					,[intTransactionId]
-				FROM
-					@ARReceivableInvalidData
-
-				SET @invalidCount = @totalInvalid
-
-				--DELETE Invalid Transaction From temp table
-				DELETE 
-					@ARReceivablePostData
-				FROM
-					@ARReceivablePostData A
-				INNER JOIN 
-					@ARReceivableInvalidData I
-						ON A.[intTransactionId] = I.[intTransactionId]
-												
-						
-				DELETE 
-					A
-				FROM
-					@AROverpayment A
-				INNER JOIN 
-					@ARReceivableInvalidData I
-						ON A.[intId] = I.intTransactionId	
-						
-				DELETE 
-					A
-				FROM
-					@ARPrepayment A
-				INNER JOIN 
-					@ARReceivableInvalidData I
-						ON A.[intId] = I.intTransactionId
-						
-			IF @raiseError = 1
-				BEGIN
-					SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
-					RAISERROR(@ErrorMerssage, 11, 1)							
-					GOTO Post_Exit
-				END													
-
-			END
-
-	--Get all to be post record
-		SET @totalRecords = (SELECT COUNT(DISTINCT [intTransactionId]) FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL)
-
-		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
-			BEGIN
-				IF @raiseError = 0
-				BEGIN
-					IF @InitTranCount = 0
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION
-							IF (XACT_STATE()) = 1
-								COMMIT TRANSACTION
-						END		
-					ELSE
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION  @Savepoint
-							--IF (XACT_STATE()) = 1
-							--	COMMIT TRANSACTION  @Savepoint
-						END	
-				END
-
-				IF @raiseError = 1
-					BEGIN
-						SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
-						RAISERROR(@ErrorMerssage, 11, 1)							
-						GOTO Post_Exit
-					END	
-				GOTO Post_Exit
-			END			
-
-	END
-	
-	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1 AND @post = 1
-	BEGIN
-		DECLARE @DiscouuntedInvoices TABLE (
-				intInvoiceId int PRIMARY KEY,
-				UNIQUE (intInvoiceId)
-			);
-
-		INSERT INTO @DiscouuntedInvoices(intInvoiceId)
-		SELECT DISTINCT
-			PD.intInvoiceId 
-		FROM
-			tblARPaymentDetail PD 
-		INNER JOIN
-			@ARReceivablePostData P
-				ON PD.intPaymentId = P.[intTransactionId]
-				AND P.[intTransactionDetailId] IS NULL
-		WHERE
-			PD.dblPayment <> 0
-			AND (ISNULL(PD.dblDiscount,0) <> 0 OR ISNULL(PD.dblInterest,0) <> 0)
-		GROUP BY
-			PD.intInvoiceId
-		HAVING
-			COUNT(PD.intInvoiceId) > 1
-			
-		WHILE(EXISTS(SELECT TOP 1 NULL FROM @DiscouuntedInvoices))
+		IF @raiseError = @ZeroBit
 		BEGIN
-			DECLARE @DiscountedInvID INT
-					,@InvoiceDiscount NUMERIC(18,6) = 0
-					,@InvoiceInterest NUMERIC(18,6) = 0
-					,@DicountedInvoiceAmountDue NUMERIC(18,6) = 0
-					,@DicountedInvoicePayment NUMERIC(18,6) = 0	
-					
-			SELECT TOP 1 @DiscountedInvID = intInvoiceId FROM @DiscouuntedInvoices
-			
-			DECLARE @PaymentsWithDiscount TABLE(
-						intPaymentId INT,
-						intPaymentDetailId INT,
-						intInvoiceId INT,
-						dblInvoiceTotal NUMERIC(18,6),
-						dblAmountDue NUMERIC(18,6),
-						dblPayment NUMERIC(18,6),
-						dblDiscount  NUMERIC(18,6),
-						dblInterest NUMERIC(18,6)
-					);
-					
-			INSERT INTO @PaymentsWithDiscount(intPaymentId, intPaymentDetailId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, dblDiscount, dblInterest)
-			SELECT
-				 A.intPaymentId
-				,B.intPaymentDetailId
-				,C.intInvoiceId
-				,C.dblInvoiceTotal
-				,C.dblAmountDue
-				,B.dblPayment
-				,B.dblDiscount
-				,B.dblInterest 
-			FROM
-				tblARPayment A
-			INNER JOIN
-				tblARPaymentDetail B
-					ON A.intPaymentId = B.intPaymentId
-			INNER JOIN
-				tblARInvoice C
-					ON B.intInvoiceId = C.intInvoiceId
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.[intTransactionId]
-					AND P.[intTransactionDetailId] IS NULL
-			WHERE
-				C.intInvoiceId = @DiscountedInvID
-			ORDER BY
-				P.[intTransactionId]
-				
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @PaymentsWithDiscount)
-			BEGIN
-				DECLARE @DiscountepPaymetID INT
-						,@DiscountepPaymetDetailID INT
-				SELECT TOP 1 
-					@DiscountepPaymetID = intPaymentId
-					,@DiscountepPaymetDetailID = intPaymentDetailId
-					,@DicountedInvoiceAmountDue = dblAmountDue
-					,@InvoiceDiscount = @InvoiceDiscount + dblDiscount
-					,@InvoiceInterest = @InvoiceInterest + dblInterest
-					,@DicountedInvoicePayment = @DicountedInvoicePayment + dblPayment 
-				FROM
-					@PaymentsWithDiscount
-				ORDER BY intPaymentId
-				
-				IF @DicountedInvoiceAmountDue <> ((@DicountedInvoicePayment - @InvoiceInterest) + @InvoiceDiscount)
+			IF @InitTranCount = 0
 				BEGIN
-					UPDATE tblARPaymentDetail
-					SET
-						 dblDiscount = 0.00
-						,dblBaseDiscount = 0.00
-						,dblInterest = 0.00
-						,dblBaseInterest = 0.00
-					WHERE
-						intPaymentDetailId = @DiscountepPaymetDetailID
-						
-					SET @InvoiceDiscount = 0										
-					SET @InvoiceInterest = 0										
-				END									
-				SET @DicountedInvoiceAmountDue = @DicountedInvoiceAmountDue - ((@DicountedInvoicePayment - @InvoiceInterest) + @InvoiceDiscount)
-				DELETE FROM @PaymentsWithDiscount WHERE intPaymentId = @DiscountepPaymetID	
-			END 						
-			DELETE FROM @DiscouuntedInvoices WHERE intInvoiceId = @DiscountedInvID							
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION
+					IF (XACT_STATE()) = 1
+						COMMIT TRANSACTION
+				END		
+			ELSE
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION  @Savepoint
+					--IF (XACT_STATE()) = 1
+					--	COMMIT TRANSACTION  @Savepoint
+				END	
 		END
-	END
-		
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
--- Create a unique transaction name for recap. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Payment Transaction' + CAST(NEWID() AS NVARCHAR(100));
-if @recap = 1 AND @raiseError = 0
-	SAVE TRAN @TransactionName	
-
---------------------------------------------------------------------------------------------  
--- If POST, call the post routines  
---------------------------------------------------------------------------------------------  
-IF @post = 1  
-	BEGIN
-		---- Delete zero payment temporarily
-		--DELETE FROM A
-		--FROM @ARReceivablePostData A
-		--WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
-		
-	--BEGIN TRY
-
-	--IF (@bankAccountId IS NULL)
-	--		BEGIN
-	--		UPDATE 
-	--			tblARPayment
-	--		SET 
-	--			 intAccountId			= C.intUndepositedFundsId
-	--			,intWriteOffAccountId	= CASE WHEN ISNULL(P.intWriteOffAccountId,0) = 0 THEN @WriteOffAccount ELSE P.intWriteOffAccountId END
-	--		FROM
-	--			tblARPayment P								
-	--		INNER JOIN 
-	--			tblSMCompanyLocation C
-	--				ON P.intLocationId = C.intCompanyLocationId
-	--		WHERE
-	--			P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-	--			AND ISNULL(C.intUndepositedFundsId,0) <> 0
-	--			AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
-	--		END
-	--	ELSE
-	--		BEGIN
-	--		DECLARE @intNewAccountID INT 
-	--		SELECT @intNewAccountID = intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccountId
-
-	--			UPDATE 
-	--				tblARPayment
-	--			SET 
-	--				 intAccountId			= @intNewAccountID
-	--				,intWriteOffAccountId	= CASE WHEN ISNULL(intWriteOffAccountId,0) = 0 THEN @WriteOffAccount ELSE intWriteOffAccountId END
-	--			FROM
-	--				tblARPayment												
-	--			WHERE
-	--				intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)					
-	--		END
-					
-	--END TRY
-	--BEGIN CATCH	
-	--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--	GOTO Do_Rollback
-	--END CATCH
-		
-	BEGIN TRY
-			  		 
-		INSERT INTO @GLEntries
-			([dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[strDocument]
-			,[strComments]
-			,[strSourceDocumentId]
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			,[dblSourceUnitDebit]
-			,[dblSourceUnitCredit]
-			,[intCommodityId]
-			,[intSourceEntityId]
-			,[ysnRebuild])
-		SELECT
-		     [dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[strDocument]
-			,[strComments]
-			,[strSourceDocumentId]
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			,[dblSourceUnitDebit]
-			,[dblSourceUnitCredit]
-			,[intCommodityId]
-			,[intSourceEntityId]
-			,[ysnRebuild]
-		FROM [dbo].[fnARGenerateGLEntriesForPayments] (@ARReceivablePostData, @AROverpayment, @ARPrepayment)
-
-
-        DELETE FROM @PaymentIds
-        INSERT INTO @PaymentIds
-        SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NOT NULL AND [strTransactionType] = 'Claim'
-
-		INSERT INTO @GLEntries
-			([dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[strDocument]
-			,[strComments]
-			,[strSourceDocumentId]
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			,[dblSourceUnitDebit]
-			,[dblSourceUnitCredit]
-			,[intCommodityId]
-			,[intSourceEntityId]
-			,[ysnRebuild])
-		SELECT
-		     [dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-		FROM [dbo].[fnAPCreateClaimARGLEntries] (@PaymentIds, @userId, @batchIdUsed)
-
-	END TRY
-	BEGIN CATCH	
-		SELECT @ErrorMerssage = ERROR_MESSAGE()										
-		GOTO Do_Rollback
-	END CATCH
-					
-			
-	END   
-
---------------------------------------------------------------------------------------------  
--- If UNPOST, call the Unpost routines  
---------------------------------------------------------------------------------------------  
-IF @post = 0   
-	BEGIN   								
-		BEGIN TRY 
-			INSERT INTO @GLEntries(
-				 [dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-			)
-			SELECT	
-				 GL.dtmDate
-				,@batchId
-				,GL.intAccountId
-				,dblDebit						= GL.dblCredit
-				,dblCredit						= GL.dblDebit
-				,dblDebitUnit					= GL.dblCreditUnit
-				,dblCreditUnit					= GL.dblDebitUnit				
-				,GL.strDescription
-				,GL.strCode
-				,GL.strReference
-				,GL.intCurrencyId
-				,GL.dblExchangeRate
-				,dtmDateEntered					= @PostDate
-				,GL.dtmTransactionDate
-				,strJournalLineDescription		= REPLACE(GL.strJournalLineDescription, @POSTDESC, 'Unposted ')
-				,GL.intJournalLineNo 
-				,ysnIsUnposted					= 1
-				,intUserId						= @userId
-				,intEntityId					= @UserEntityID
-				,GL.strTransactionId
-				,GL.intTransactionId
-				,GL.strTransactionType
-				,GL.strTransactionForm
-				,GL.strModuleName
-				,GL.intConcurrencyId
-				,[dblDebitForeign]				= GL.dblCreditForeign
-				,[dblDebitReport]				= GL.dblCreditReport
-				,[dblCreditForeign]				= GL.dblDebitForeign
-				,[dblCreditReport]				= GL.dblDebitReport
-				,[dblReportingRate]				= GL.dblReportingRate 
-				,[dblForeignRate]				= GL.dblForeignRate 
-				,[strRateType]					= ''
-			FROM
-				tblGLDetail GL
-			INNER JOIN (
-				SELECT intTransactionId
-					 , strTransactionId
-				FROM @ARReceivablePostData P
-				WHERE P.[intTransactionDetailId] IS NULL
-				GROUP BY intTransactionId, strTransactionId
-			) P ON GL.intTransactionId = P.[intTransactionId]  
-					AND GL.strTransactionId = P.strTransactionId
-			WHERE
-				GL.ysnIsUnposted = 0
-			ORDER BY
-				GL.intGLDetailId		
-						
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH		
-	END   
-
---------------------------------------------------------------------------------------------  
--- If RECAP is TRUE, 
--- 1.	Store all the GL entries in a holding table. It will be used later as data  
---		for the recap screen.
---
--- 2.	Rollback the save point 
---------------------------------------------------------------------------------------------  
-IF @recap = 1
-	BEGIN
-		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName 
-
-		DELETE GLDR  
-		FROM 
-			@ARReceivablePostData B  
-		INNER JOIN 
-			dbo.tblGLPostRecap GLDR 
-				ON (B.strTransactionId = GLDR.strTransactionId OR B.[intTransactionId] = GLDR.intTransactionId)  
-				AND GLDR.strCode = @CODE
-				AND B.[intTransactionDetailId] IS NULL 			   
-		   
-	BEGIN TRY	
- 		INSERT INTO tblGLPostRecap(
-			 [strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[strJournalLineDescription]
-			,[strReference]	
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[dblDebitForeign]
-			,[dblCreditForeign]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]	
-			,[dblExchangeRate]
-			,[intUserId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strModuleName]
-			,[strTransactionForm]
-			,[strTransactionType]
-			,[strAccountId]
-			,[strAccountGroup]
-			,[strRateType]
-		)
-		SELECT
-			[strTransactionId]
-			,A.[intTransactionId]
-			,A.[intAccountId]
-			,[strDescription]					= B.strDescription
-			,A.[strJournalLineDescription]
-			,A.[strReference]	
-			,A.[dtmTransactionDate]
-			,Debit.Value
-			,Credit.Value
-			,A.[dblDebitUnit]
-			,A.[dblCreditUnit]
-			,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblDebitForeign] END
-			,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblCreditForeign] END 		
-			,A.[dtmDate]
-			,A.[ysnIsUnposted]
-			,A.[intConcurrencyId]	
-			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.dblForeignRate END 
-			,A.[intUserId]
-			,A.[dtmDateEntered]
-			,A.[strBatchId]
-			,A.[strCode]
-			,A.[strModuleName]
-			,A.[strTransactionForm]
-			,A.[strTransactionType]
-			,B.strAccountId
-			,C.strAccountGroup
-			,[strRateType]						= A.[strRateType] --CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN NULL ELSE A.[strRateType]	 END 
-		FROM @GLEntries A
-		INNER JOIN dbo.tblGLAccount B 
-			ON A.intAccountId = B.intAccountId
-		INNER JOIN dbo.tblGLAccountGroup C
-			ON B.intAccountGroupId = C.intAccountGroupId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
-		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
-	END TRY
-	BEGIN CATCH
-		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0
+		IF @raiseError = @OneBit
 			BEGIN
-				SET @CurrentTranCount = @@TRANCOUNT
-				SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+				SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
+				RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Post_Exit
+			END	
+		GOTO Post_Exit
+	END	
+
+IF(OBJECT_ID('tempdb..#ARPostOverPayment') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPostOverPayment
+END
+CREATE TABLE #ARPostOverPayment
+    ([intTransactionId]                 INT             NOT NULL PRIMARY KEY)
+
+IF(OBJECT_ID('tempdb..#ARPostPrePayment') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARPostPrePayment
+END
+CREATE TABLE #ARPostPrePayment
+    ([intTransactionId]                 INT             NOT NULL PRIMARY KEY)
+
+IF @post = @OneBit
+BEGIN
+	--+overpayment
+	INSERT INTO
+		#ARPostOverPayment
+	SELECT
+		DISTINCT
+		A.[intPaymentId]
+	FROM
+		tblARPayment A 
+	INNER JOIN
+		(
+		SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @OneBit
+		) P
+			ON A.[intPaymentId] = P.[intTransactionId]
+	WHERE
+		(A.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId])
+		AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)	
+					
+	--+prepayment
+	INSERT INTO
+		#ARPostPrePayment
+	SELECT
+		A.[intPaymentId]
+	FROM
+		tblARPayment A 
+	INNER JOIN
+		(
+		SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @OneBit
+		) P
+			ON A.[intPaymentId] = P.[intTransactionId]				
+	WHERE
+		(A.[dblAmountPaid]) <> @ZeroDecimal
+		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
+		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
+
+						 																
+END
+
+IF @post = @ZeroBit And @recap = @ZeroBit
+BEGIN
 			
-				IF @CurrentTranCount = 0
-					BEGIN TRANSACTION
-				ELSE
-					SAVE TRANSACTION @CurrentSavepoint
+	---overpayment
+	INSERT INTO
+		#ARPostOverPayment
+	SELECT
+		A.[intPaymentId]
+	FROM
+		tblARPayment A 
+	INNER JOIN
+		(
+		SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @ZeroBit
+		) P
+			ON A.[intPaymentId] = P.[intTransactionId]
+	INNER JOIN
+		tblARInvoice I
+			ON A.[strRecordNumber] = I.[strComments] OR A.[intPaymentId] = I.[intPaymentId] 				
+	WHERE
+		I.[strTransactionType] = 'Overpayment'
+					
+	---prepayment
+	INSERT INTO
+		#ARPostPrePayment
+	SELECT
+		A.[intPaymentId]
+	FROM
+		tblARPayment A 
+	INNER JOIN
+		(
+		SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @ZeroBit
+		) P
+			ON A.[intPaymentId] = P.[intTransactionId]
+	INNER JOIN
+		tblARInvoice I
+			ON A.[strRecordNumber] = I.[strComments] OR A.[intPaymentId] = I.[intPaymentId]				
+	WHERE
+		I.[strTransactionType] = 'Customer Prepayment'		
+					
+END
 
-				EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param						
+BEGIN TRY
 
-				IF @CurrentTranCount = 0
-					BEGIN
-						IF (XACT_STATE()) = -1
-							ROLLBACK TRANSACTION
-						IF (XACT_STATE()) = 1
-							COMMIT TRANSACTION
-					END		
-				ELSE
-					BEGIN
-						IF (XACT_STATE()) = -1
-							ROLLBACK TRANSACTION  @CurrentSavepoint
-						--IF (XACT_STATE()) = 1
-						--	COMMIT TRANSACTION  @Savepoint
-					END
+    IF @recap = 1
+    BEGIN
+        EXEC [dbo].[uspARPostPaymentRecap]
+		        @BatchId         = @batchIdUsed 
+		       ,@PostDate        = @PostDate
+		       ,@UserId          = @userId
+		       ,@raiseError      = @raiseError			   
+		       ,@BatchIdUsed     = @batchIdUsed OUT
+			   ,@Post			 = @post
+        GOTO Do_Commit
+    END
 
-			END			
-		IF @raiseError = 1
+    IF @post = 1
+        EXEC [dbo].[uspARPrePostPaymentIntegration]
+
+END TRY
+BEGIN CATCH
+    SELECT @ErrorMerssage = ERROR_MESSAGE()
+    IF @raiseError = @ZeroBit
+    BEGIN
+        IF @InitTranCount = 0
+            IF (XACT_STATE()) <> 0
+                ROLLBACK TRANSACTION
+        ELSE
+            IF (XACT_STATE()) <> 0
+                ROLLBACK TRANSACTION @Savepoint
+        SET @CurrentTranCount = @@TRANCOUNT
+        SET @CurrentSavepoint = SUBSTRING(('uspARPostPaymentNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+        IF @CurrentTranCount = 0
+            BEGIN TRANSACTION
+        ELSE
+            SAVE TRANSACTION @CurrentSavepoint
+											
+        EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param	
+
+        IF @CurrentTranCount = 0
+            BEGIN
+                IF (XACT_STATE()) = -1
+                    ROLLBACK TRANSACTION
+				IF (XACT_STATE()) = 1
+                    COMMIT TRANSACTION
+            END		
+        ELSE
+            BEGIN
+				IF (XACT_STATE()) = -1
+                    ROLLBACK TRANSACTION  @CurrentSavepoint
+            END
+    END			
+		IF @raiseError = @OneBit
 			RAISERROR(@ErrorMerssage, 11, 1)
 		GOTO Post_Exit
-	END CATCH	
-	END
-ELSE
-	BEGIN
-		DECLARE @tmpBatchId NVARCHAR(100)
-		SELECT @tmpBatchId = [strBatchId] 
-		FROM @GLEntries A
-		INNER JOIN dbo.tblGLAccount B 
-			ON A.intAccountId = B.intAccountId
-		INNER JOIN dbo.tblGLAccountGroup C
-			ON B.intAccountGroupId = C.intAccountGroupId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
+END CATCH
 
-		UPDATE tblGLPostRecap 
-		SET 
-			dblCreditForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
-			, dblDebitForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
-			, dblExchangeRate = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblExchangeRate END
-			, strRateType = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN NULL ELSE strRateType END
-		WHERE 			
-			tblGLPostRecap.strBatchId = @tmpBatchId
+BEGIN TRY
 
-	END	 
+IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
+    BEGIN
+        DROP TABLE #ARPaymentGLEntries
+    END
+	CREATE TABLE #ARPaymentGLEntries
+	([dtmDate]                  DATETIME         NOT NULL,
+	[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+	[intAccountId]              INT              NULL,
+	[dblDebit]                  NUMERIC (18, 6)  NULL,
+	[dblCredit]                 NUMERIC (18, 6)  NULL,
+	[dblDebitUnit]              NUMERIC (18, 6)  NULL,
+	[dblCreditUnit]             NUMERIC (18, 6)  NULL,
+	[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
+	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[intCurrencyId]             INT              NULL,
+	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
+	[dtmDateEntered]            DATETIME         NOT NULL,
+	[dtmTransactionDate]        DATETIME         NULL,
+	[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
+	[intJournalLineNo]			INT              NULL,
+	[ysnIsUnposted]             BIT              NOT NULL,    
+	[intUserId]                 INT              NULL,
+	[intEntityId]				INT              NULL,
+	[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+	[intTransactionId]          INT              NULL,
+	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
+	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
+	[dblDebitForeign]			NUMERIC (18, 9) NULL,
+	[dblDebitReport]			NUMERIC (18, 9) NULL,
+	[dblCreditForeign]			NUMERIC (18, 9) NULL,
+	[dblCreditReport]			NUMERIC (18, 9) NULL,
+	[dblReportingRate]			NUMERIC (18, 9) NULL,
+	[dblForeignRate]			NUMERIC (18, 9) NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
+	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS,
+	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
+	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
+	[strSourceDocumentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[intSourceLocationId]		INT NULL,
+	[intSourceUOMId]			INT NULL,
+	[dblSourceUnitDebit]		NUMERIC (18, 6)  NULL,
+	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
+	[intCommodityId]			INT NULL,
+	intSourceEntityId INT NULL,
+	ysnRebuild BIT NULL)
+	
+    DECLARE @GLEntries RecapTableType
 
---------------------------------------------------------------------------------------------  
--- If RECAP is FALSE,
--- 1. Book the G/L entries
--- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Commit the save point 
---------------------------------------------------------------------------------------------  
-IF @recap = 0
-	BEGIN
-		BEGIN TRY 
-			--SELECT * FROM @GLEntries
-			IF @post = 1
-			BEGIN
-				DECLARE @DetailId INT
-				SELECT TOP 1
-					@DetailId = GE.intJournalLineNo
-				FROM
-					@GLEntries GE
-				INNER JOIN
-					tblARPaymentDetail ARPD
-						ON GE.intJournalLineNo = ARPD.intPaymentDetailId
-						AND GE.intTransactionId = ARPD.intPaymentId
-				WHERE				
-					GE.intAccountId = @DiscountAccount
-					AND ARPD.dblDiscount = @ZeroDecimal
-					AND ARPD.dblBaseDiscount = @ZeroDecimal
+    EXEC [dbo].[uspARGeneratePaymentGLEntries]
+         @Post     = @post
+	    ,@Recap    = @recap
+        ,@PostDate = @PostDate
+        ,@BatchId  = @batchIdUsed
+        ,@UserId   = @userId
 
-				IF ISNULL(@DetailId,0) <> 0
-				BEGIN
-					SELECT @ErrorMerssage = 'Invalid Discount Entry(Record - ' + CAST(@DetailId AS NVARCHAR(30)) + ')!'								
-					GOTO Do_Rollback
-				END
+	INSERT INTO @GLEntries
+		([dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+		,[strRateType]
+		,[strDocument]
+		,[strComments]
+		,[strSourceDocumentId]
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		,[dblSourceUnitDebit]
+		,[dblSourceUnitCredit]
+		,[intCommodityId]
+		,[intSourceEntityId]
+		,[ysnRebuild])
+	SELECT
+		 [dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+		,[strRateType]
+		,[strDocument]
+		,[strComments]
+		,[strSourceDocumentId]
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		,[dblSourceUnitDebit]
+		,[dblSourceUnitCredit]
+		,[intCommodityId]
+		,[intSourceEntityId]
+		,[ysnRebuild]
+    FROM
+        #ARPaymentGLEntries
 
-				DECLARE @InvalidGLEntries AS TABLE
-					(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-					,strText			NVARCHAR(150)  COLLATE Latin1_General_CI_AS NULL
-					,intErrorCode		INT
-					,strModuleName		NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL)
+    DECLARE @InvalidGLEntries AS TABLE
+        ([strTransactionId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+        ,[strText]          NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
+        ,[intErrorCode]     INT
+        ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
 
-				INSERT INTO @InvalidGLEntries
-					(strTransactionId
-					,strText
-					,intErrorCode
-					,strModuleName)
-				SELECT DISTINCT
-					strTransactionId
-					,strText
-					,intErrorCode
-					,strModuleName
-				FROM
-					[dbo].[fnGetGLEntriesErrors](@GLEntries)
+    DECLARE @DiscountAccount INT
+    SET @DiscountAccount = (SELECT TOP 1 [intDiscountAccountId] FROM tblARCompanyPreference WHERE [intDiscountAccountId] IS NOT NULL AND [intDiscountAccountId] <> 0)
 
-				SET @invalidCount = @invalidCount + ISNULL((SELECT COUNT(strTransactionId) FROM @InvalidGLEntries), 0)
+	INSERT INTO @InvalidGLEntries
+        ([strTransactionId]
+        ,[strText]
+        ,[intErrorCode]
+        ,[strModuleName])
+    SELECT DISTINCT
+         [strTransactionId] = ARPD.[strTransactionId]
+        ,[strText]          = 'Invalid Discount Entry(Record - ' + ARPD.[strTransactionId] + ')!'	
+        ,[intErrorCode]     = ARPD.[intTransactionDetailId]
+        ,[strModuleName]    = GE.[strModuleName]
+	FROM
+		@GLEntries GE
+	INNER JOIN
+		#ARPostPaymentDetail ARPD
+			ON GE.[intJournalLineNo] = ARPD.[intTransactionDetailId]
+			AND GE.[intTransactionId] = ARPD.[intTransactionId]
+	WHERE				
+		GE.intAccountId = @DiscountAccount
+		AND ARPD.dblDiscount = @ZeroDecimal
+		AND ARPD.dblBaseDiscount = @ZeroDecimal
 
-				INSERT INTO 
-						tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT DISTINCT
-						 strError				= IGLE.strText
-						,strTransactionType		= GLE.strTransactionType 
-						,strTransactionId		= IGLE.strTransactionId
-						,strBatchNumber			= GLE.strBatchId
-						,intTransactionId		= GLE.intTransactionId 
-					FROM
-						@InvalidGLEntries IGLE
-					LEFT OUTER JOIN
-						@GLEntries GLE
-							ON IGLE.strTransactionId = GLE.strTransactionId
-					
+    DELETE FROM @GLEntries
+    WHERE
+		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
-				DELETE FROM @GLEntries
-				WHERE
-					strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
+    INSERT INTO @InvalidGLEntries
+        ([strTransactionId]
+        ,[strText]
+        ,[intErrorCode]
+        ,[strModuleName])
+    SELECT DISTINCT
+         [strTransactionId]
+        ,[strText]
+        ,[intErrorCode]
+        ,[strModuleName]
+    FROM
+        [dbo].[fnGetGLEntriesErrors](@GLEntries)
 
-				DELETE FROM @ARReceivablePostData
-				WHERE
-					strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-			END					
 
-			IF EXISTS(SELECT TOP 1 NULL FROM @GLEntries)
-				EXEC dbo.uspGLBookEntries @GLEntries, @post
-			ELSE
-				GOTO Do_Rollback
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH	
-		 
-		BEGIN TRY 
-		
-
-		EXEC [dbo].[uspARPostPaymentIntegration]
-					 @ARReceivablePostData	= @ARReceivablePostData
-					,@ZeroReceivable		= @ZeroPayment
-					,@Post					= @post
-					,@PostDate				= @PostDate
-					,@BatchId				= @batchId
-					,@UserId				= @userId
-
-		IF @post = 0
-			BEGIN
-			--DELETE Overpayment
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @AROverpayment)
-				BEGIN			
-					DECLARE @PaymentIdToDelete int		
-					SELECT TOP 1 @PaymentIdToDelete = [intId] FROM @AROverpayment
-					
-					EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, 1, @batchId ,@UserEntityID 
-					
-					DELETE FROM @AROverpayment WHERE [intId] = @PaymentIdToDelete
-				END	
+    DECLARE @invalidGLCount INT
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @totalRecords = @totalRecords - @invalidGLCount
 				
-			--DELETE Prepayment
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @ARPrepayment)
-				BEGIN			
-					DECLARE @PaymentIdToDeletePre int		
-					SELECT TOP 1 @PaymentIdToDeletePre = [intId] FROM @ARPrepayment
-					
-					EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, 1, @batchId ,@UserEntityID 
-					
-					DELETE FROM @ARPrepayment WHERE [intId] = @PaymentIdToDeletePre
-					
-				END				
+	IF(@invalidGLCount > 0)
+	BEGIN
 
-			END
-		ELSE
-			BEGIN
-			
-			--CREATE Overpayment
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @AROverpayment)
-				BEGIN
-					DECLARE @PaymentIdToAdd int
-					SELECT TOP 1 @PaymentIdToAdd = [intId] FROM @AROverpayment
-					
-					EXEC [dbo].[uspARCreateOverPayment] @PaymentIdToAdd, 1, @batchId ,@UserEntityID 
-					
-					DELETE FROM @AROverpayment WHERE [intId] = @PaymentIdToAdd
-				END
-				
-			--CREATE Prepayment
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @ARPrepayment)
-				BEGIN
-					DECLARE @PaymentIdToAddPre int
-					SELECT TOP 1 @PaymentIdToAddPre = [intId] FROM @ARPrepayment
-					
-					EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @batchId ,@UserEntityID 
-					
-					DELETE FROM @ARPrepayment WHERE [intId] = @PaymentIdToAddPre
-				END				
-
-		END
-
-		--Insert Successfully unposted transactions.
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		INSERT INTO 
+		    tblARPostResult([strMessage], [strTransactionType], [strTransactionId], [strBatchNumber], [intTransactionId])
 		SELECT
-			 strMessage			= CASE WHEN @post = 0 THEN @UnpostSuccessfulMsg ELSE @PostSuccessfulMsg END
-			,strTransactionType	= 'Receivable'
-			,strTransactionId	= A.strRecordNumber
-			,strBatchNumber		= @batchId
-			,intTransactionId	= A.intPaymentId
-		FROM tblARPayment A
-		WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NULL)					
+		     [strMessage]         = IGLE.[strText]
+		    ,[strTransactionType] = PPH.[strTransactionType]
+		    ,[strTransactionId]   = IGLE.[strTransactionId]
+		    ,[strBatchNumber]     = @batchIdUsed
+		    ,[intTransactionId]   = PPH.[intTransactionId]
+		FROM
+		    @InvalidGLEntries IGLE
+		LEFT OUTER JOIN
+			#ARPostPaymentHeader PPH
+				ON IGLE.[strTransactionId] = PPH.[strTransactionId]
 
-		--UPDATE 
-		--	tblARPaymentDetail
-		--SET 
-		--	dblAmountDue = ISNULL(C.dblAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
-		--	,dblBaseAmountDue = ISNULL(C.dblBaseAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
-		--FROM
-		--	tblARPaymentDetail A
-		--INNER JOIN
-		--	tblARPayment B
-		--		ON A.intPaymentId = B.intPaymentId
-		--		AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
-		--INNER JOIN 
-		--	tblARInvoice C
-		--		ON A.intInvoiceId = C.intInvoiceId
-		--WHERE
-		--	B.ysnPosted = 1
-		--	AND ISNULL(B.[ysnInvoicePrepayment],0) = 0		
-						
-		--UPDATE 
-		--	tblARPaymentDetail
-		--SET 
-		--	dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
-		--	,dblBasePayment = CASE WHEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblBasePayment THEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblBasePayment END
-		--FROM
-		--	tblARPaymentDetail A
-		--INNER JOIN
-		--	tblARPayment B
-		--		ON A.intPaymentId = B.intPaymentId
-		--		AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
-		--INNER JOIN 
-		--	tblARInvoice C
-		--		ON A.intInvoiceId = C.intInvoiceId
-		--WHERE
-		--	B.ysnPosted = 0
-		--	AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
-				
-		--UPDATE 
-		--	tblARPaymentDetail
-		--SET 
-		--	dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.dblPayment)
-		--	,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.dblBasePayment)
-		--FROM
-		--	tblARPaymentDetail A
-		--INNER JOIN
-		--	tblARPayment B
-		--		ON A.intPaymentId = B.intPaymentId
-		--		AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
-		--INNER JOIN 
-		--	tblARInvoice C
-		--		ON A.intInvoiceId = C.intInvoiceId
-		--WHERE
-		--	B.ysnPosted = 0
-		--	AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
-					
-		END TRY
-		BEGIN CATCH	
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
-				
+		DELETE A
+		FROM
+			#ARPostPaymentHeader A
+		INNER JOIN 
+			#ARInvalidPaymentData I
+				ON A.intTransactionId = I.intTransactionId
+
+		DELETE A
+		FROM
+			#ARPostPaymentDetail A
+		INNER JOIN 
+			#ARInvalidPaymentData I
+				ON A.intTransactionId = I.intTransactionId
+																						
+		IF @raiseError = @OneBit
+		BEGIN
+			SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
+			RAISERROR(@ErrorMerssage, 11, 1)							
+			GOTO Post_Exit
+		END													
+
 	END
 
-SET @successfulCount = @totalRecords
-SET @invalidCount = @totalInvalid	
-IF ISNULL(@raiseError,0) = 0
+    DELETE FROM @GLEntries
+    WHERE
+		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+
+    DELETE FROM #ARPostPaymentHeader
+    WHERE
+		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+
+    DELETE FROM #ARPostPaymentDetail
+    WHERE
+		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+
+    EXEC dbo.uspGLBookEntries
+             @GLEntries         = @GLEntries
+            ,@ysnPost           = @post
+            ,@SkipValidation	= 1
+
+    EXEC [dbo].[uspARPostPaymentIntegration]
+         @Post					= @post
+        ,@PostDate				= @PostDate
+        ,@BatchId				= @batchId
+        ,@UserId				= @userId
+        ,@IntegrationLogId		= NULL
+
+END TRY
+BEGIN CATCH
+    SELECT @ErrorMerssage = ERROR_MESSAGE()
+    IF @raiseError = @ZeroBit
+    BEGIN
+        IF @InitTranCount = 0
+            IF (XACT_STATE()) <> 0
+                ROLLBACK TRANSACTION
+        ELSE
+            IF (XACT_STATE()) <> 0
+                ROLLBACK TRANSACTION @Savepoint
+        SET @CurrentTranCount = @@TRANCOUNT
+        SET @CurrentSavepoint = SUBSTRING(('uspARPostPaymentNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+        IF @CurrentTranCount = 0
+            BEGIN TRANSACTION
+        ELSE
+            SAVE TRANSACTION @CurrentSavepoint
+											
+        EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param	
+
+        IF @CurrentTranCount = 0
+            BEGIN
+                IF (XACT_STATE()) = -1
+                    ROLLBACK TRANSACTION
+				IF (XACT_STATE()) = 1
+                    COMMIT TRANSACTION
+            END		
+        ELSE
+            BEGIN
+				IF (XACT_STATE()) = -1
+                    ROLLBACK TRANSACTION  @CurrentSavepoint
+            END
+    END			
+		IF @raiseError = @OneBit
+			RAISERROR(@ErrorMerssage, 11, 1)
+		GOTO Post_Exit
+END CATCH
+
+Do_Commit:
+IF ISNULL(@raiseError,0) = @ZeroBit
 BEGIN
 
 	IF @InitTranCount = 0
@@ -1261,8 +858,7 @@ BEGIN
 		END	
 END
 
-RETURN 1;
-
+	RETURN 1;
 Do_Rollback:
 	IF @raiseError = 0
 		BEGIN
