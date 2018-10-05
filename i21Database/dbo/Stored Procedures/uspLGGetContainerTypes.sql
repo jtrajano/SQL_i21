@@ -28,7 +28,8 @@ BEGIN
 		ELSE
 		BEGIN
 			SELECT *
-			FROM vyuLGContainerTypeNotMapped
+			FROM vyuLGContainerTypeNotMapped 
+			WHERE strOrigin = @strOrigin
 		END
 	END
 END
