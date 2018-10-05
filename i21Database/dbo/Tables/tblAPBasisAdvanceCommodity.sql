@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPBasisAdvanceCommodity]
 (
-	[intBasisAdvanceCommodityId] INT NOT NULL PRIMARY KEY,
+	[intBasisAdvanceCommodityId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intBasisAdvanceDummyHeaderId] INT NOT NULL,
 	[intCommodityId] INT NOT NULL,
 	[strCommodity] NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,

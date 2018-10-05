@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPBasisAdvanceFuture]
 (
-	[intBasisAdvanceFuturesId] INT NOT NULL PRIMARY KEY,
+	[intBasisAdvanceFuturesId] INT IDENTITY(1,1) PRIMARY KEY,
 	[intBasisAdvanceDummyHeaderId] INT NOT NULL,
 	[intFutureMarketId] INT NOT NULL,
 	[intMonthId] INT NOT NULL,
