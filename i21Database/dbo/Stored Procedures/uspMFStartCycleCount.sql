@@ -1092,7 +1092,7 @@ BEGIN TRY
 					ELSE WI.intMachineId
 					END
 				)
-			,WI.intItemUOMId
+			,I.intItemUOMId
 			,(
 				SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
 					PARTITION BY I.intItemId
