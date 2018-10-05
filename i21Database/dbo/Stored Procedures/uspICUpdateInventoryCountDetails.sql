@@ -173,12 +173,32 @@ BEGIN
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
-			-- Convert the last cost from Stock UOM to stock.intItemUOMId
-			dbo.fnCalculateCostBetweenUOM(
-				stockUOM.intItemUOMId
-				, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-				, COALESCE(stock.dblLastCost, p.dblLastCost)
-			)
+			---- Convert the last cost from Stock UOM to stock.intItemUOMId
+			CASE 
+				WHEN il.intCostingMethod = 1 THEN 
+					dbo.fnGetItemAverageCost(
+						i.intItemId
+						, il.intItemLocationId
+						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+					)
+				WHEN il.intCostingMethod = 2 THEN 
+					dbo.fnCalculateCostBetweenUOM(
+						COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
+						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						,COALESCE(FIFO.dblCost, p.dblLastCost)
+					)
+				ELSE 
+					dbo.fnCalculateCostBetweenUOM(
+						stockUOM.intItemUOMId
+						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						, COALESCE(stock.dblLastCost, p.dblLastCost)
+					)
+			END
+			--dbo.fnCalculateCostBetweenUOM(
+			--	stockUOM.intItemUOMId
+			--	, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+			--	, COALESCE(stock.dblLastCost, p.dblLastCost)
+			--)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, ysnRecount = 0
@@ -213,6 +233,17 @@ BEGIN
 		) stock ON stock.intItemId = i.intItemId
 			AND stockUOM.intItemUOMId = stock.intItemUOMId
 			AND stock.intItemLocationId = il.intItemLocationId
+		OUTER APPLY(
+			SELECT TOP 1
+					dblCost
+					,intItemUOMId
+			FROM	tblICInventoryFIFO FIFO 
+			WHERE	i.intItemId = FIFO.intItemId 
+					AND il.intItemLocationId = FIFO.intItemLocationId 
+					AND dblStockIn - dblStockOut > 0
+					AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 
+			ORDER BY dtmDate ASC
+		) FIFO 
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
