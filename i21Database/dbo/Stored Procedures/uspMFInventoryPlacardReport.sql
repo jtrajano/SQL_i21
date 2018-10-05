@@ -51,7 +51,7 @@ BEGIN TRY
 
 	SELECT @strLotNumber = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strLotNumber'
+	WHERE [fieldname] = 'strLotNo'
 
 	SELECT @strReceiptNo = [from]
 	FROM @temp_xml_table
@@ -158,11 +158,13 @@ BEGIN TRY
 	JOIN tblICInventoryReceiptItemLot RL ON RL.intLotId = LI.intLotId
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
-	JOIN tblICLot L ON L.intLotId = RL.intLotId
 	JOIN tblICItem I ON I.intItemId = RL.intInventoryReceiptItemId
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-	WHERE L.strLotNumber = @strLotNumber --'18247-04-01'
+	WHERE RL.strLotNumber IN (
+			SELECT x.Item COLLATE DATABASE_DEFAULT
+			FROM dbo.fnSplitString(@strLotNumber, '^') x
+			)
 		AND I.intItemId = @intItemID
 		AND R.strReceiptNumber = @strReceiptNo --'IR-25'
 END TRY
