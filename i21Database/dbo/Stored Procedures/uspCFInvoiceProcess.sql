@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
 	 @entityId					INT			   = NULL
 	,@username					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
@@ -91,7 +89,7 @@ BEGIN TRY
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND ISNULL(ysnExpensed,0) = 0) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
 	------------GROUP BY CUSTOMER-----------
@@ -881,7 +879,7 @@ BEGIN TRY
 	
 	UPDATE tblCFTransaction 
 	SET ysnInvoiced = 1
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) 
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND ISNULL(ysnExpensed,0) = 0) 
 
 
 	----------DROP TEMPORARY TABLE----------

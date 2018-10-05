@@ -164,6 +164,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
+		AND ISNULL(ysnExpensed,0) = 0
 		--------------------------------------
 
 		--select * From @EntriesForPayment

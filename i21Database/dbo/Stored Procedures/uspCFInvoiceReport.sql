@@ -431,6 +431,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd	BIT
 			,ysnDepartmentGrouping			BIT
 			,ysnPostForeignSales			BIT
+			,ysnExpensed					BIT
 
 		)
 

@@ -213,10 +213,10 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
 					,[ysnRecap]								= @Recap
-					,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+					,[intInvoiceDetailId]					= ISNULL((SELECT TOP 1 intInvoiceDetailId 
 																FROM tblARInvoiceDetail 
 																WHERE intInvoiceId = cfTrans.intInvoiceId
-																ORDER BY dblQtyShipped DESC)
+																ORDER BY dblQtyShipped DESC),cfTrans.intTransactionId)
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 
@@ -441,9 +441,9 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
 					,[ysnRecap]								= @Recap
-					,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+					,[intInvoiceDetailId]					= ISNULL((SELECT TOP 1 intInvoiceDetailId 
 																FROM tblARInvoiceDetail 
-																WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0)
+																WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0),cfTrans.intTransactionId+1)
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 
@@ -486,7 +486,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnLeaseBilling]						= NULL
 					,[ysnVirtualMeterReading]				= NULL
 					,[ysnClearDetailTaxes]					= 0
-					,[intTempDetailIdForTaxes]				= cfTrans.intTransactionId
+					,[intTempDetailIdForTaxes]				= cfTrans.intTransactionId + 1
 					,[strType]								= 'CF Tran'
 					,[dtmPostDate]							= cfTrans.dtmPostedDate
 					,[ysnImpactInventory]					= 
@@ -565,7 +565,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]
 					,[ysnClearExisting])
 				SELECT
-				[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC)
+				[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC),TI.RecordKey)
 				,[intTaxGroupId]			= NULL
 				,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 				,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -613,7 +613,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]
 					,[ysnClearExisting])
 				SELECT
-				[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = ISNULL(cfTransaction.intInvoiceId,0) AND ISNULL(dblQtyShipped,0) < 0)
+				[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = ISNULL(cfTransaction.intInvoiceId,0) AND ISNULL(dblQtyShipped,0) < 0),TI.RecordKey+1)
 				,[intTaxGroupId]			= NULL
 				,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 				,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -629,7 +629,7 @@ SELECT * FROM #tmpForeignTransactionId
 				,[ysnTaxExempt]				= 0
 				,[ysnTaxOnly]				= cfTaxCode.[ysnTaxOnly]
 				,[strNotes]					= ''
-				,[intTempDetailIdForTaxes]	= TI.RecordKey
+				,[intTempDetailIdForTaxes]	= TI.RecordKey+1
 				,[ysnClearExisting]			= 1
 				FROM 
 				tblCFTransaction cfTransaction
