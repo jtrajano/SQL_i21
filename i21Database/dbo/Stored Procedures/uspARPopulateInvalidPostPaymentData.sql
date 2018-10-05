@@ -207,7 +207,7 @@ BEGIN
 		#ARPostPaymentHeader P
     WHERE
             P.[ysnPost] = 1
-        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice', 'Cash')
+        AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice', 'Cash', 'Debit Card', 'Credit Card')
         AND P.[ysnInvoicePrepayment] = 0
         AND P.[dblAmountPaid] < @ZeroDecimal
 
