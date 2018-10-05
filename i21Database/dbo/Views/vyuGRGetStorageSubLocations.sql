@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuGRGetSettleSubLocations]
+﻿CREATE VIEW [dbo].[vyuGRGetStorageSubLocations]
 AS   
 SELECT DISTINCT   
  intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId

@@ -16,7 +16,7 @@ If Exists (Select 1 From vyuCTContractDetailView Where intItemId=@intItemId AND 
 Insert Into @tblCostSource
 Values(2,'Sales Contract')
 
-If Exists (Select 1 From vyuGRGetStorageTransferTicket Where intItemId=@intItemId AND intEntityId=@intEntityId)
+If Exists (Select 1 From vyuGRGetStorageTickets Where intItemId=@intItemId AND intEntityId=@intEntityId)
 Insert Into @tblCostSource
 Values(3,'Customer Storage')
 

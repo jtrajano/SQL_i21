@@ -79,7 +79,7 @@ BEGIN TRY
 	-- WHERE [intEntityId] = @intUserId
 
 	SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
-	FROM vyuGRGetStorageTransferTicket
+	FROM vyuGRGetStorageTickets
 	WHERE intEntityId = @intEntityId
 		AND intItemId = @intItemId
 		AND intStorageTypeId = @intStorageTypeId
@@ -96,7 +96,7 @@ BEGIN TRY
 	END
 	ELSE IF @dblUnitsConsumed > 0 AND @dblAvailableGrainOpenBalance > 0
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM vyuGRGetStorageTransferTicket WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0 
+		IF NOT EXISTS (SELECT 1 FROM vyuGRGetStorageTickets WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0 
 																		AND intCompanyLocationId = CASE 
 																										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
 																										ELSE intCompanyLocationId 
@@ -143,7 +143,7 @@ BEGIN TRY
 
 			SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId
 				,@dblStorageUnits = dblOpenBalance
-			FROM vyuGRGetStorageTransferTicket
+			FROM vyuGRGetStorageTickets
 			WHERE intEntityId = @intEntityId
 				AND intItemId = @intItemId
 				AND intStorageTypeId = @intStorageTypeId

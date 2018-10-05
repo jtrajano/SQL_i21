@@ -1,4 +1,4 @@
-﻿
+﻿--LLA: OBSOLETE; use vyuGRGetStorageItem
 -- CREATE VIEW [dbo].[vyuGRGetSettleItem]
 -- AS 
 -- SELECT DISTINCT

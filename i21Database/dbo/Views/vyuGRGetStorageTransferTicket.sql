@@ -1,3 +1,4 @@
+--LLA: replaced with vyuGRGetStorageTickets
 -- CREATE VIEW [dbo].[vyuGRGetStorageTransferTicket]  
 -- AS  
 -- SELECT TOP 100 PERCENT   

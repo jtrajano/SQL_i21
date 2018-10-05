@@ -3017,7 +3017,7 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
     <Build Include="dbo\Views\vyuGRGetSellStorageItems.sql" />
-    <Build Include="dbo\Views\vyuGRGetSettleSubLocations.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageSubLocations.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Functions\fnTRSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadPosting.sql" />
