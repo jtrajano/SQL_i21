@@ -17,27 +17,30 @@ BEGIN
 	SELECT @strTransactionId= SUBSTRING(@strTransactionId,1, LEN(@strTransactionId)-1)
 	SET @ysnVoid = 1
 END
-;WITH x AS (
-	SELECT strRecordNumber strTransactionId,dblAmountPaid , 'AR' strSource from tblARPayment  UNION
-	SELECT strPaymentRecordNum strTransactionId,dblAmountPaid , 'AP' strSource from tblAPPayment  UNION
-	SELECT  strPaycheckId strTransactionId,dblNetPayTotal dblAmountPaid, 'PR' strSource FROM tblPRPaycheck
-)
 
-SELECT   @Code = 
-CASE WHEN strSource = 'AR'
-	THEN
-		CASE WHEN	dblAmountPaid < 0 THEN '2' ELSE '7' END
-ELSE
-	CASE WHEN dblAmountPaid > 0 THEN '2' ELSE '7' END
-END
-
-FROM x
+;WITH r AS (
+SELECT trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+CASE WHEN payment.dblAmountPaid < 0 THEN '2' ELSE '7' END Code
+FROM tblARPayment payment JOIN
+vyuARPaymentBankTransaction trns on payment.intPaymentId = trns.intPaymentId
+UNION
+SELECT trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+CASE WHEN payment.dblAmountPaid > 0 THEN '2' ELSE '7' END Code
+FROM tblAPPayment payment
+JOIN tblCMBankTransaction trns ON trns.strTransactionId = payment.strPaymentRecordNum
+UNION
+SELECT  trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+'2' Code FROM tblPRPaycheck pchk
+JOIN tblCMBankTransaction trns ON trns.strTransactionId = pchk.strPaycheckId
+)SELECT @Code=Code FROM r
 WHERE strTransactionId = @strTransactionId
 
+	-- Return the result of the function
 IF (@ysnVoid =1)
 BEGIN
 	SELECT @Code = CASE WHEN @Code = '7' THEN '2' ELSE '7' END
 END
-RETURN @Code
-END
 
+RETURN @Code
+
+END
