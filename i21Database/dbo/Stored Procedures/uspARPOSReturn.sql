@@ -396,6 +396,47 @@ AS
 				,[strPONumber]
 				,[strComment]
 			FROM tblARPOS WHERE intPOSId = @intSourceId
+			--
+			DECLARE @NewPOS INT
+			SET @NewPOS = @@Identity
+			INSERT INTO tblARPOSDetail(
+				[intPOSId]
+				,[intItemId]
+				,[strItemNo]
+				,[strItemDescription]
+				,[dblQuantity]
+				,[intItemUOMId]
+				,[strItemUOM]
+				,[dblItemWeight]
+				,[intItemWeightUOMId]
+				,[dblDiscountPercent]
+				,[dblDiscount]
+				,[dblItemTermDiscount]
+				,[dblPrice]
+				,[dblTax]
+				,[dblExtendedPrice]
+				,[intConcurrencyId]
+			)
+			select 
+				@NewPOS
+				,[intItemId]
+				,[strItemNo]
+				,[strItemDescription]
+				,[dblQuantity]
+				,[intItemUOMId]
+				,[strItemUOM]
+				,[dblItemWeight]
+				,[intItemWeightUOMId]
+				,[dblDiscountPercent]
+				,[dblDiscount]
+				,[dblItemTermDiscount]
+				,-1 * [dblPrice]
+				,-1 * [dblTax]
+				,-1 * [dblExtendedPrice]
+				,[intConcurrencyId] FROM tblARPOSDetail where intPOSId = @intSourceId
+
+			--
+
 
 		EXEC uspARProcessInvoices
 			 @InvoiceEntries		= @EntriesForCreditMemo
