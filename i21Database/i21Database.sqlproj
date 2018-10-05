@@ -2984,10 +2984,9 @@
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendorEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
