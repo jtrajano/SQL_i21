@@ -722,7 +722,7 @@ select row_number() over(order by intRowNumber) intRowNumFinal ,intRowNumber ,st
             PriceStatus  ,  
             strFutureMonth ,  
             strAccountNumber ,  
-			case when @strUomType='By Lot' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+			case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
 			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract,  
             strTradeNo,  
             TransactionDate  ,  
