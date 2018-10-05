@@ -10,6 +10,7 @@ SELECT
 	,fm.dtmFirstNoticeDate
 	,fm.dtmLastTradingDate
 	,fom.strFutMarketName
+	,fom.ysnOptions
 	,strAccountNumber
 	,e.strName
 	,e1.strName as strSalespersonId
