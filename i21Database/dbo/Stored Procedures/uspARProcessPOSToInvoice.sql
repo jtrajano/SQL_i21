@@ -400,28 +400,22 @@ BEGIN
 			INNER JOIN #POSPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
 			--UPDATE POS ENDING BALANCE
-				UPDATE tblARPOSEndOfDay
-					SET
-						dblExpectedEndingBalance = ISNULL(EOD.dblExpectedEndingBalance, 0) + PAYMENT.dblAmount
-				FROM tblARPOSEndOfDay EOD
-				INNER JOIN(
-					SELECT
-						intPOSLogId,
-						intPOSEndOfDayId
-					FROM tblARPOSLog
-				)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
-				INNER JOIN(
-					SELECT
-						intPOSId,
+			UPDATE tblARPOSEndOfDay
+			SET
+				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + @dblTotalAmountPaid
+			FROM tblARPOSEndOfDay EOD
+			INNER JOIN(
+				SELECT
 						intPOSLogId
-					FROM tblARPOS
-				)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
-				INNER JOIN (
-					SELECT
-						dblAmount,
-						intPOSId,
-						strPaymentMethod
-					FROM tblARPOSPayment
-				)PAYMENT ON POS.intPOSId = PAYMENT.intPOSId
+					,intPOSEndOfDayId
+				FROM tblARPOSLog
+			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+			INNER JOIN(
+				SELECT
+						intPOSId
+					,intPOSLogId
+				FROM tblARPOS
+			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+			WHERE POS.intPOSId = @intPOSId
 		END
 END
