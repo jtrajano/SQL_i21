@@ -297,7 +297,7 @@ AS
 				ON 
 				r.strReceiptNumber = t.strTransactionId
 				AND r.intInventoryReceiptId = t.intTransactionId			
-			INNER JOIN tblICInventoryReceiptItem ri
+			LEFT JOIN tblICInventoryReceiptItem ri
 				ON 
 				ri.intInventoryReceiptId = r.intInventoryReceiptId
 				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId

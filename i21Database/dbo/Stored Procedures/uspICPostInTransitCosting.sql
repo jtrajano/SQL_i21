@@ -290,17 +290,27 @@ BEGIN
 	WHERE	dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
 			AND i.dblUnitOnHand = 0 
 
+	--SELECT	TOP 1 
+	--		@intInventoryTransactionId	= intInventoryTransactionId
+	--		,@intCurrencyId				= intCurrencyId
+	--		,@dtmDate					= dtmDate
+	--		--,@dblExchangeRate			= dblExchangeRate
+	--		,@intTransactionId			= intTransactionId
+	--		,@strTransactionId			= strTransactionId
+	--		,@strTransactionForm		= strTransactionForm
+	--FROM	dbo.tblICInventoryTransaction
+	--WHERE	strBatchId = @strBatchId
+	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+
 	SELECT	TOP 1 
-			@intInventoryTransactionId	= intInventoryTransactionId
-			,@intCurrencyId				= intCurrencyId
-			,@dtmDate					= dtmDate
-			--,@dblExchangeRate			= dblExchangeRate
-			,@intTransactionId			= intTransactionId
-			,@strTransactionId			= strTransactionId
-			,@strTransactionForm		= strTransactionForm
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	strBatchId = @strBatchId
-			AND ISNULL(ysnIsUnposted, 0) = 0 
+			@dtmDate					= i2p.dtmDate
+			,@intTransactionId			= i2p.intTransactionId
+			,@strTransactionId			= i2p.strTransactionId
+			,@intCurrencyId				= i2p.intCurrencyId
+	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
+				on i2p.intItemId = i.intItemId
+				AND i2p.intItemLocationId = i.intItemLocationId			
+	WHERE	ROUND(i.dblUnitOnHand, 6) = 0 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
 	BEGIN 
