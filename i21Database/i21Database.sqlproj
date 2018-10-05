@@ -7110,6 +7110,16 @@
     <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
     <Build Include="dbo\Tables\tblSTRegisterSetup.sql" />
     <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
+    <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
+    <Build Include="dbo\Tables\tblHDTicketForImport.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResourcesSource.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryDailySummary.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryTimeOffNotification.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryTimeOffNotification.sql" />
+    <Build Include="dbo\Views\vyuHDProjectTicketJIra.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7296,6 +7306,7 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
