@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSReturn]
 	@intInvoiceId AS INT,
 	@intEntityId AS INT,
+	@strPOSPaymentMethod AS VARCHAR(50) = NULL,
 	@strMessage AS VARCHAR(50) OUTPUT 
 AS
 	DECLARE	@ysnReturned AS BIT = 0,
@@ -15,7 +16,7 @@ AS
 			@createdCreditMemoType AS VARCHAR(50),
 			@createdCreditMemoTransactionType AS VARCHAR(20),
 			@intCompanyLocationId AS INT,
-			@strPOSPaymentMethod AS VARCHAR(50)
+			@intPaymentMethodID AS INT
 
 	SELECT @ysnReturned = ysnReturned, @intSourceId = intSourceId
 	FROM tblARInvoice
@@ -439,10 +440,12 @@ AS
 
 			EXEC uspARPostInvoice @param = @createdCreditMemoId, @post = 1
 
-			SELECT @strPOSPaymentMethod = posPayment.strPaymentMethod
-			FROM tblARPOSPayment posPayment
-			INNER JOIN tblARPOS pos ON posPayment.intPOSId = pos.intPOSId
-			WHERE pos.intInvoiceId = @intInvoiceId
+			-- SELECT @strPOSPaymentMethod = posPayment.strPaymentMethod
+			-- FROM tblARPOSPayment posPayment
+			-- INNER JOIN tblARPOS pos ON posPayment.intPOSId = pos.intPOSId
+			-- WHERE pos.intInvoiceId = @intInvoiceId
+			SELECT @intPaymentMethodID = intPaymentMethodID FROM tblSMPaymentMethod
+			WHERE strPaymentMethod = @strPOSPaymentMethod 
 
 			IF(@strPOSPaymentMethod != 'On Account')
 			BEGIN
@@ -450,6 +453,7 @@ AS
 						 @intInvoiceId			= @createdCreditMemoId
 						,@intUserId				= @intEntityId
 						,@intCompanyLocationId	= @intCompanyLocationId
+						,@intPaymentMethodID	= @intPaymentMethodID
 						,@strErrorMessage		= @strMessage	OUTPUT
 			END
 
