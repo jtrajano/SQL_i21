@@ -161,6 +161,7 @@
     <None Include="Scripts\Pre-Deployment\14_CT\CleanCostDataCorrection.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DeleteOld1099PATRData.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\00_DropTriggers.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\ChangePrimaryKeyToIdentity.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

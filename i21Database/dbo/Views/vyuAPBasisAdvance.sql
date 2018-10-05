@@ -310,4 +310,5 @@ SELECT TOP 100 PERCENT * FROM (
     ) taxes
     WHERE ctd.intPricingTypeId = 2
 ) basisAdvance
+WHERE dblQuantity != 0 --do not include unpriced qty is 0
 ORDER BY intTicketId DESC
