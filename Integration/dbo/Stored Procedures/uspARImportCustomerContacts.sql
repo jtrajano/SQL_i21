@@ -218,7 +218,8 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 				set @LoopCounter = 1
 				WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where strLocationName = @EntityLocationName)
 				BEGIN
-					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName
+					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName					
+					set @LoopCounter = @LoopCounter + 1
 				END
 				insert into tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
 				select @intEntityId, @EntityLocationName, 0
