@@ -142,6 +142,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblInvoicedQty] NUMERIC(18, 6) NULL, 
 	ysnPriceChanged BIT,
 	[intContractDetailRefId] INT,
+	ysnStockSale BIT,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
