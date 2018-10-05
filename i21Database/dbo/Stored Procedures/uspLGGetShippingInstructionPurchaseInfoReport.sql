@@ -42,16 +42,23 @@ BEGIN
 
 SELECT L.intLoadId,
 	   LD.intPContractDetailId AS intContractDetailId,
-	   CT.strContractNumber,
-	   CT.intContractSeq,
+	   CH.strContractNumber,
+	   CD.intContractSeq,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
-	   CASE WHEN ISNULL(CT.strContractItemName,'') = '' THEN CT.strItemDescription ELSE CT.strContractItemName END AS strItemDescription,
-	   CT.strCustomerContract AS strPCustomerContract
+	   CASE WHEN ISNULL(IC.strContractItemName,'') = '' THEN IM.strDescription ELSE IC.strContractItemName END AS strItemDescription,
+	   CH.strCustomerContract AS strPCustomerContract,
+	   CD.strItemSpecification,
+	   CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq) AS strContractNumberWithSeq,
+	   LTRIM(dbo.fnRemoveTrailingZeroes(LD.dblQuantity)) + ' ' + UM.strUnitMeasure AS strQtyInformation,
+	   CASE WHEN ISNULL(CD.strItemSpecification,'') = '' THEN '' ELSE CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq) + ' ;' + CD.strItemSpecification END AS strContractWithItemSpecification
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+LEFT JOIN tblICItemContract	IC ON IC.intItemContractId = CD.intItemContractId
 WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (1,3)
 END
