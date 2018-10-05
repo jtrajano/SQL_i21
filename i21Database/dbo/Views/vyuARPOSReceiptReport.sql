@@ -8,17 +8,17 @@ SELECT intPOSId				= POS.intPOSId
 	 , strItemDescription	= POSD.strItemDescription
 	 , strItemUOM			= POSD.strItemUOM
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
-	 , dblQuantity			= POSD.dblQuantity
+	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
      , dblPrice				= POSD.dblPrice
-	 , dblExtendedPrice		= POSD.dblExtendedPrice
+	 , dblExtendedPrice		= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblExtendedPrice * -1 ELSE POSD.dblExtendedPrice END
 	 , intItemUOMId			= POSD.intItemUOMId
 	 , intItemCount			= POS.intItemCount
-     , dblSubTotal			= POS.dblSubTotal
+     , dblSubTotal			= CASE WHEN POS.ysnReturn = 1 THEN POS.dblSubTotal * -1 ELSE POS.dblSubTotal END
 	 , dblShipping			= POS.dblShipping
-	 , dblTax				= POS.dblTax
+	 , dblTax				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTax * -1 ELSE POS.dblTax END
 	 , dblDiscountPercent	= POS.dblDiscountPercent
 	 , dblDiscount			= POS.dblDiscount
-	 , dblTotal				= POS.dblTotal
+	 , dblTotal				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTotal * -1 ELSE POS.dblTotal END
      , strCompanyName		= COMPANY.strCompanyName
      , strCompanyAddress	= COMPANY.strFullAddress
 	 , strReceiptNumber		= POS.strReceiptNumber
