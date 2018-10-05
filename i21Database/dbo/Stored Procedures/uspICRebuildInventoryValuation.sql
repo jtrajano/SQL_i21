@@ -872,6 +872,8 @@ BEGIN
 			SET @strAccountToCounterInventory = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									'Inventory Adjustment'
+								WHEN @strTransactionForm IN ('Inventory Count') THEN 
+									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
