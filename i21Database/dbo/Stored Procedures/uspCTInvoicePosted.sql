@@ -29,10 +29,13 @@ BEGIN TRY
 				@intCompanyLocationId			INT,
 				@intEntityId					INT,
 				@intPriceItemUOMId				INT,
-				@ysnBestPriceOnly					BIT,
+				@ysnBestPriceOnly				BIT,
 				@dblLowestPrice					NUMERIC(18,6),
 				@dblCashPrice					NUMERIC(18,6),
-				@ReduceBalance					BIT	=	1
+				@ReduceBalance					BIT	=	1,
+				@ysnDestWtGrd					BIT,
+				@dblShippedQty					NUMERIC(18,6),
+				@intShippedQtyUOMId				INT
 
 	--SELECT @strReceiptType = strReceiptType FROM @ItemsFromInvoice
 
@@ -47,7 +50,10 @@ BEGIN TRY
 		intContractHeaderId			INT,
 		intItemUOMId				INT,
 		intTicketId					INT,
-		dblQty						NUMERIC(18,6)	
+		dblQty						NUMERIC(18,6),
+		ysnDestWtGrd				BIT,
+		dblShippedQty				NUMERIC(18,6),
+		intShippedQtyUOMId			INT	
 	)
 
 	INSERT INTO @tblToProcess(
@@ -72,7 +78,39 @@ BEGIN TRY
 		AND I.[intShipmentPurchaseSalesContractId] IS NULL
 		AND ISNULL(I.[intLoadDetailId],0) = 0
 		AND ISNULL(I.[intTransactionId],0) = 0
+		AND intTicketId IS NULL
 
+	IF NOT EXISTS(SELECT * FROM @tblToProcess)
+	BEGIN
+		INSERT INTO @tblToProcess
+		(
+				 [intInvoiceDetailId]
+				,[intContractDetailId]
+				,[intContractHeaderId]
+				,[intItemUOMId]
+				,[dblQty]
+				,[intTicketId]
+				,[ysnDestWtGrd]
+				,[dblShippedQty]
+				,[intShippedQtyUOMId]
+		)
+		SELECT	 I.[intInvoiceDetailId]
+				,I.[intContractDetailId]
+				,I.[intContractHeaderId]
+				,I.[intItemUOMId]
+				,I.[dblQtyShipped]
+				,I.[intTicketId]
+				,1
+				,S.dblQuantity
+				,S.intItemUOMId
+		FROM	@ItemsFromInvoice	I
+		JOIN	tblSCTicket					T ON T.intTicketId		= I.intTicketId
+		JOIN	tblCTWeightGrade			W ON W.intWeightGradeId = T.intWeightId
+		JOIN	tblCTWeightGrade			G ON G.intWeightGradeId = T.intGradeId
+		JOIN	tblICInventoryShipmentItem	S ON S.intSourceId		= I.intTicketId
+		WHERE	I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
+											OR G.strWhereFinalized	= 'Destination')
+	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
@@ -85,14 +123,21 @@ BEGIN TRY
 				@intTicketId					=   NULL,
 				@intTicketTypeId				=	NULL,
 				@intTicketType					=   NULL,
-				@strInOutFlag					=   NULL
+				@strInOutFlag					=   NULL,
+				@ysnDestWtGrd					=	NULL,
+				@dblShippedQty					=	NULL,
+				@intShippedQtyUOMId				=	NULL
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
 				@dblQty							=	P.[dblQty],
 				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
+				@ysnDestWtGrd					=	P.[ysnDestWtGrd],
+				@dblShippedQty					=	P.[dblShippedQty],
+				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
+
 				@intTicketId					=   T.[intTicketId],
-				@intTicketTypeId				=   T.[intTicketTypeId],
+				@intTicketTypeId				=   T.[intTicketTypeId], --SELECT * FROM tblSCListTicketTypes
 				@intTicketType					=   T.[intTicketType],
 				@strInOutFlag					=   T.[strInOutFlag],
 
@@ -101,14 +146,14 @@ BEGIN TRY
 				@intCompanyLocationId			=	CD.intCompanyLocationId,
 				@intEntityId					=	CH.intEntityId,
 				@intPriceItemUOMId				=	CD.intPriceItemUOMId,
-				@ysnBestPriceOnly					=	CH.ysnBestPriceOnly,
+				@ysnBestPriceOnly				=	CH.ysnBestPriceOnly,
 				@dblCashPrice					=	CD.dblCashPrice
 
 		FROM	@tblToProcess P
 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		LEFT JOIN  tblSCTicket T ON T.intTicketId = P.intTicketId
-		WHERE	[intUniqueId]					=	 @intUniqueId
+   LEFT JOIN	tblSCTicket			T	ON	T.intTicketId			=	P.intTicketId
+		WHERE	[intUniqueId]		=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
@@ -134,8 +179,18 @@ BEGIN TRY
 		
 		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					
-		IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) OR (ISNULL(@intTicketTypeId, 0) = 2 AND (ISNULL(@intTicketType, 0) =1 AND ISNULL(@strInOutFlag, '') = 'O'))
-			BEGIN
+		IF	ISNULL(@ysnDestWtGrd,0) = 0 AND
+			(
+				(
+					ISNULL(@intTicketTypeId, 0) <> 9 AND 
+					(ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')
+				) OR 
+				(
+					ISNULL(@intTicketTypeId, 0) = 2 AND 
+					(ISNULL(@intTicketType, 0) =1 AND ISNULL(@strInOutFlag, '') = 'O')
+				)
+			)
+		BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
 					EXEC	uspCTUpdateSequenceBalance
@@ -152,7 +207,51 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice' 
+		END
+
+		IF @ysnDestWtGrd = 1
+		BEGIN
+			IF @dblQty > 0 -- Post
+			BEGIN
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) * -1	
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice' 
+
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice' 
 			END
+			ELSE --Unpost
+			BEGIN
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice'
+						
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice'  	
+			END
+		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
