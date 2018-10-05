@@ -243,7 +243,7 @@ BEGIN
 	INTO #POSPAYMENTS
 	FROM dbo.tblARPOSPayment WITH (NOLOCK)
 	WHERE intPOSId = @intPOSId
-	  AND ISNULL(strPaymentMethod, '') <> 'On Account'
+	  AND ISNULL(strPaymentMethod, '')  IN ('Cash', 'Check')
 
 	SELECT @dblTotalAmountPaid = SUM(dblAmount) FROM #POSPAYMENTS
 
