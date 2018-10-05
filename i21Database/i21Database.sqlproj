@@ -7123,6 +7123,9 @@
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
     <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPostHandlingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
