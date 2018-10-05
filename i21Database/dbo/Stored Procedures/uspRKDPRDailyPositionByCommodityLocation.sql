@@ -130,7 +130,7 @@ SELECT DISTINCT c.intCommodityId
 		FROM vyuICGetItemStockUOM s
 		JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
-		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
+		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND s.ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
 		) t)AS invQty
 	,isnull((
 			SELECT isnull(SUM(dblRemainingQuantity), 0) CollateralSale
