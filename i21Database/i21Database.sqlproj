@@ -7111,6 +7111,10 @@
     <Build Include="dbo\Tables\tblSTRegisterSetup.sql" />
     <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetStockAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPStageAllBasisAdvance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPostHandlingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

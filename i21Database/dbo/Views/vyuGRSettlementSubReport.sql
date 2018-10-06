@@ -27,7 +27,7 @@ FROM
 	,t3.dblGradeReading
 	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount	
 	,t3.intContractDetailId
-	,t3.dblTax
+	,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty)dblTax
 	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 	FROM (
 			 SELECT 
@@ -147,10 +147,10 @@ FROM
 	,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
 	,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
 	,t3.dblGradeReading
-	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount	
+	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
 	,t3.intContractDetailId
-	,t3.dblTax
-	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
+	,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
+	,t3.dblNetTotal * (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 	FROM (
 			 SELECT 
 			 BillDtl.intBillDetailId

@@ -102,13 +102,15 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Instruction Report Format - 2'
 		WHEN 3
 			THEN 'Shipping Instruction Report Format - 3'
+		WHEN 4
+			THEN 'Shipping Instruction Report Format - 4'
 		END AS strShippingInstructionReportFormat
 	,CP.intDeliveryOrderReportFormat
 	,CASE CP.intDeliveryOrderReportFormat
 		WHEN 1
 			THEN 'Delivery Order Report Format - 1'
 		WHEN 2
-			THEN ''
+			THEN 'Delivery Order Report Format - 2'
 		END strDeliveryOrderReportFormat
 	,CP.intInStoreLetterReportFormat
 	,CASE CP.intInStoreLetterReportFormat
@@ -125,6 +127,8 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Advice Report Format - 1'
 		WHEN 2
 			THEN 'Shipping Advice Report Format - 2'
+		WHEN 3
+			THEN 'Shipping Advice Report Format - 3'
 		END strShippingAdviceReportFormat
 	,CP.intInsuranceLetterReportFormat
 	,CASE CP.intInsuranceLetterReportFormat

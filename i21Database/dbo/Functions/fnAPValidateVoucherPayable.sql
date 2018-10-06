@@ -12,6 +12,8 @@ AS
 BEGIN
 
 	INSERT INTO @returnTable
+	--DO NOT ALLOW ZERO COST
+
 	--DO NOT ALLOW THE intItemId TO BE NULL IF UOM PROVIDED
 	SELECT TOP 1
 		'Payable id(' + CAST(A.intVoucherPayableId AS NVARCHAR) + ') did not provide an item id.'

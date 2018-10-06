@@ -1,8 +1,6 @@
-﻿CREATE PROCEDURE uspMFInventoryReceiptReport @xmlParam NVARCHAR(MAX) = NULL
+CREATE PROCEDURE uspMFInventoryReceiptDetailReport @intInventoryReceiptId INT = 25
 AS
 BEGIN
-	DECLARE @strReceiptNo NVARCHAR(50)
-		,@idoc INT
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
 		,@strContactName NVARCHAR(50)
@@ -12,40 +10,6 @@ BEGIN
 		,@strZip NVARCHAR(12)
 		,@strCountry NVARCHAR(25)
 		,@strPhone NVARCHAR(50)
-
-	IF LTRIM(RTRIM(@xmlParam)) = ''
-		SET @xmlParam = NULL
-
-	DECLARE @temp_xml_table TABLE (
-		[fieldname] NVARCHAR(50)
-		,[condition] NVARCHAR(20)
-		,[from] NVARCHAR(50)
-		,[to] NVARCHAR(50)
-		,[join] NVARCHAR(10)
-		,[begingroup] NVARCHAR(50)
-		,[endgroup] NVARCHAR(50)
-		,[datatype] NVARCHAR(50)
-		)
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@xmlParam
-
-	INSERT INTO @temp_xml_table
-	SELECT *
-	FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2) WITH (
-			[fieldname] NVARCHAR(50)
-			,condition NVARCHAR(20)
-			,[from] NVARCHAR(50)
-			,[to] NVARCHAR(50)
-			,[join] NVARCHAR(10)
-			,[begingroup] NVARCHAR(50)
-			,[endgroup] NVARCHAR(50)
-			,[datatype] NVARCHAR(50)
-			)
-
-	SELECT @strReceiptNo = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'strReceiptNo'
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 		,@strCompanyAddress = strAddress
@@ -118,7 +82,7 @@ BEGIN
 					END)) AS strReceivedFrom
 		,R.strReceiptNumber
 		,R.strWarehouseRefNo AS strOrderShipmentNo
-		,replace(convert(VARCHAR(11), R.dtmReceiptDate, 106), ' ', '-') AS dtmReceiptDate
+		,replace(convert(VARCHAR(11), R.dtmReceiptDate, 106), ' ', '-') AS dtmReceiptDate ---CONVERT(VARCHAR(10), R.dtmReceiptDate, 101) 
 		,R.strVendorRefNo AS strCustomerOrderNo
 		,S.strShipVia AS strCarrier
 		,R.strVessel AS strTrailer
@@ -143,20 +107,23 @@ BEGIN
 		,RIL.strVendorLotId AS strSupplierLotId
 		,RIL.strLotAlias AS strBatchNo
 		,R.intInventoryReceiptId
+		,R.strReceiptNumber
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 		,RIL.strGarden
 		,replace(convert(VARCHAR(11), RIL.dtmExpiryDate, 106), ' ', '-') dtmExpiryDate
 		,C.strCountry
+		,Ltrim(convert(NUMERIC(24, 2), (ISNULL(RIL.dblGrossWeight, 0) - ISNULL(RIL.dblTareWeight, 0)))) + ' ' + UOM.strUnitMeasure AS dblNetWeight_UOM
 	FROM tblICInventoryReceipt R
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = R.intLocationId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
-	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId and EL.intEntityLocationId=R.intShipFromId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+		AND EL.intEntityLocationId = R.intShipFromId
 	LEFT JOIN tblSMShipVia S ON S.intEntityId = R.intShipViaId
 	LEFT JOIN tblICItem I ON I.intItemId = RI.intItemId
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RIL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 	LEFT JOIN tblSMCountry C ON C.intCountryID = RIL.intOriginId
-	WHERE R.strReceiptNumber = @strReceiptNo
+	WHERE R.intInventoryReceiptId = @intInventoryReceiptId --25 
 END

@@ -277,13 +277,13 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ISNULL(Lot.intWeightUOMId, LoadDetail.intWeightItemUOMId)
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = - 1 * (
 				CASE 
 					WHEN Lot.intLotId IS NULL
-						THEN ISNULL(LoadDetail.dblNet, 0)
-					ELSE ISNULL(DetailLot.dblNet, 0)
+						THEN ISNULL(LoadDetail.dblQuantity, 0)
+					ELSE ISNULL(DetailLot.dblLotQuantity, 0)
 					END
 				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId,LoadDetail.intWeightItemUOMId), 1)
 			,dblUOMQty = CASE 

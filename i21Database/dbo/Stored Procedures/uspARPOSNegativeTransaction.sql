@@ -10,6 +10,7 @@ BEGIN
 	DECLARE  @EntriesForInvoice 	InvoiceIntegrationStagingTable
 			,@TaxDetails 			LineItemTaxDetailStagingTable
 			,@intNewInvoiceId		INT = NULL
+			,@intPaymentMethodID	INT = NULL
 
 
 	BEGIN TRANSACTION
@@ -30,9 +31,59 @@ BEGIN
 			, intConcurrencyId	= 1
 	END
 
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CHECK')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Check'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CREDIT CARD')
+		BEGIN
+			INSERT INTO tblSMPaymentMethod (
+				strPaymentMethod
+				, intNumber
+				, ysnActive
+				, intSort
+				, intConcurrencyId
+			)
+			SELECT strPaymentMethod = 'Credit Card'
+				, intNumber		 	= 1
+				, ysnActive			= 1
+				, intSort			= 0
+				, intConcurrencyId	= 1
+		END
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT CARD')
+		BEGIN
+			INSERT INTO tblSMPaymentMethod (
+				strPaymentMethod
+				, intNumber
+				, ysnActive
+				, intSort
+				, intConcurrencyId
+			)
+			SELECT strPaymentMethod = 'Debit Card'
+				, intNumber		 	= 1
+				, ysnActive			= 1
+				, intSort			= 0
+				, intConcurrencyId	= 1
+		END
+
 	SELECT TOP 1 @strPaymentMethod = strPaymentMethod
 	FROM tblARPOSPayment
 	WHERE intPOSId = @intPOSId
+
+	SELECT @intPaymentMethodID = intPaymentMethodID 
+	FROM tblSMPaymentMethod
+	WHERE strPaymentMethod = @strPaymentMethod
 
 --CREATE INVOICE *IF CASH PAYMENT THEN CASH REFUND ELSE CREDIT MEMO (On Account)
 
@@ -191,6 +242,7 @@ IF ISNULL(@ErrorMessage, '') = ''
 						 @intInvoiceId			= @createdCreditMemoId
 						,@intUserId				= @intEntityUserId
 						,@intCompanyLocationId	= @intCompanyLocationId
+						,@intPaymentMethodID	= @intPaymentMethodID
 						,@strErrorMessage		= @strMessage	OUTPUT
 		END
 

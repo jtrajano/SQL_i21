@@ -77,7 +77,7 @@ FROM (
 		JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 		JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = Bill.intBillId
 		JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
-		JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+		--JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 		LEFT JOIN (
 					 SELECT 
 					 QM.intTicketFileId

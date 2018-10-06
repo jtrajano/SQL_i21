@@ -13,6 +13,7 @@ BEGIN
 		  ,LOT.strLotNumber
 		  ,I.strItemNo
 		  ,I.strDescription AS strItemDescription
+		  ,I.strDescription  + ' ' + ISNULL(PCD.strItemSpecification,'') AS strItemDescriptionWithSpecification
 		  ,LDL.dblLotQuantity AS dblQty
 		  ,IU.strUnitMeasure AS strQtyUOM
 		  ,LDL.dblNet AS dblWeight
