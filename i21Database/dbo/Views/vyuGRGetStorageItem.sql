@@ -15,7 +15,7 @@ SELECT DISTINCT
     ,UOM.intItemUOMId AS intCommodityStockUomId
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
-    ON Item.intItemId = CS.intItemIdd
+    ON Item.intItemId = CS.intItemId
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 JOIN tblICCommodity Com 
