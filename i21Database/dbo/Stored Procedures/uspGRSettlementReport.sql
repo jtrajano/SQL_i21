@@ -551,7 +551,8 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END
 		,TotalDiscount					    =  ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
-		,NetDue								= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+		--,NetDue								= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+		,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 		,strId								= Bill.strBillId 
 		,intPaymentId						= PYMT.intPaymentId
 		,InboundNetWeight					= BillDtl.dblQtyOrdered
@@ -595,7 +596,7 @@ BEGIN
 	JOIN tblSCTicket SC ON SC.intTicketId = CS.intTicketId
 	LEFT JOIN vyuSCGetScaleDistribution SD ON CS.intCustomerStorageId = SD.intCustomerStorageId
 	LEFT JOIN (
-			SELECT A.intBillId,SUM(dblTotal) dblTotal
+			SELECT A.intBillId,SUM(dblTotal) dblTotal,SUM(dblTax) dblTax
 			FROM tblAPBillDetail A
 			JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 			GROUP BY A.intBillId
@@ -749,7 +750,8 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END
 		,TotalDiscount					   = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
-		,NetDue							   = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+		--,NetDue							   = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+		,NetDue							   = (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 		,strId							   = Bill.strBillId 
 		,intPaymentId					   = PYMT.intPaymentId
 		,InboundNetWeight				   = BillDtl.dblQtyOrdered
@@ -806,6 +808,7 @@ BEGIN
 			SELECT 
 				A.intBillId
 				,SUM(dblTotal) dblTotal
+				,SUM(dblTax) dblTax
 			FROM tblAPBillDetail A
 			JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 			GROUP BY A.intBillId
@@ -1253,7 +1256,8 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END 
 				,TotalDiscount			     = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
-				,NetDue					     = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				--,NetDue					     = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId					     = Bill.strBillId
 				,intPaymentId			     = PYMT.intPaymentId
 				,InboundNetWeight		     = BillDtl.dblQtyOrdered
@@ -1298,6 +1302,7 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTotal) dblTotal
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
@@ -1456,7 +1461,8 @@ BEGIN
 											       ELSE CNTRCT.strContractNumber
 											   END
 				,TotalDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue						 = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				--,NetDue						 = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId						 = Bill.strBillId
 				,intPaymentId				 = PYMT.intPaymentId
 				,InboundNetWeight			 = BillDtl.dblQtyOrdered
@@ -1513,6 +1519,7 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTotal) dblTotal
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
