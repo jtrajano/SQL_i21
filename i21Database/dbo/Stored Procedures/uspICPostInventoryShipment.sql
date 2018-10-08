@@ -238,7 +238,7 @@ BEGIN
 		INNER JOIN tblICLot l ON l.intLotId = sl.intLotId
 		LEFT OUTER JOIN tblICLotStatus stat ON stat.intLotStatusId = l.intLotStatusId
 	WHERE s.intInventoryShipmentId = @intTransactionId
-		AND stat.strPrimaryStatus = 'Active'
+		AND stat.strPrimaryStatus <> 'Active'
 		-- AND l.intLotStatusId <> 1
 
 	IF @strLotNo IS NOT NULL
