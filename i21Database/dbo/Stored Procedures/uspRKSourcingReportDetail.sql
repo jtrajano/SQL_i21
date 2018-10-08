@@ -81,7 +81,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
              ,((SELECT sum(
              det.dblQuantity*
                 (det.dblConvertedBasis+
-                (ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)))/
+                (ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,@dtmToDate),0)))/
 				case when isnull(mc.ysnSubCurrency,0) = 1 then 100 else 1 end
 				) 
              FROM tblCTContractDetail det
@@ -101,7 +101,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			    JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
 			    WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2)) dblUnPricedBasis
 				
-			,((SELECT 	iSNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)
+			,((SELECT 	iSNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,@dtmToDate),0)
 				/case when isnull(mc.ysnSubCurrency,0) = 1 then 100 else 1 end					
              FROM tblCTContractDetail det
               join tblICItemUOM ic on det.intBasisUOMId=ic.intItemUOMId               
@@ -113,7 +113,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
             ,(SELECT DISTINCT
                
 					((SUM(detcd.dblFixationPrice*detcd.dblLotsFixed) OVER (PARTITION BY det.intContractDetailId )  
-					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)
+					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,@dtmToDate),0)
 					 )/ cd.dblNoOfLots)
 					 +tcd.dblConvertedBasis)
 					 * 
@@ -143,7 +143,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  (SELECT DISTINCT
                
 					(((SUM(detcd.dblFixationPrice*detcd.dblLotsFixed) OVER (PARTITION BY det.intContractDetailId )  
-					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
+					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,@dtmToDate),0)))
 					 )/ cd.dblNoOfLots)
 				--/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
