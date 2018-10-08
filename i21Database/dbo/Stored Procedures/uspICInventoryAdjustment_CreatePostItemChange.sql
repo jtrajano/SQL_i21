@@ -322,20 +322,20 @@ BEGIN
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
 													ELSE 0 
 											END 
-			,dblAdjustByQuantity		= @dblAdjustByQuantity
+			,dblAdjustByQuantity		= NULL
 			,dblNewSplitLotQuantity		= NULL 
-			,dblNewQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
-													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
-													ELSE 0 
-											END 
-											+ @dblAdjustByQuantity
+			,dblNewQuantity				= ABS(@dblAdjustByQuantity) --CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+											--	WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+											--	ELSE 0 
+											-- END 
+											-- + @dblAdjustByQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= NULL 
-			,dblWeight					=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
+			,dblWeight					= Lot.dblWeight
+			,dblNewWeight				= CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
 													ELSE 0 
-											END 
-			,dblNewWeight				= NULL 
+											END  
 			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblNewWeightPerQty			= NULL 
 			,dblCost					= dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
