@@ -274,7 +274,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (135, N'Customer Contact List', N'Accounts Receivable', 131, N'Customer Contact List', N'Maintenance', N'Screen', N'AccountsReceivable.view.CustomerContactList', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (136, N'Sales Reps', N'Accounts Receivable', 131, N'Sales Reps', N'Maintenance', N'Screen', N'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntitySalesperson', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
+		VALUES (136, N'Sales Reps', N'Accounts Receivable', 131, N'Sales Reps', N'Maintenance', N'Screen', N'AccountsReceivable.view.EntitySalesperson?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (137, N'Market Zone', N'Accounts Receivable', 131, N'Market Zone', N'Maintenance', N'Screen', N'AccountsReceivable.view.MarketZone', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)		
 		/* WILL BE RENAME FROM Statement Footer Messages TO COMMENT MAINTENANCE */
@@ -850,7 +850,7 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.DocumentMaintenance?showSearch=true', intSort = 10 WHERE strMenuName = 'Report Messages' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntitySalesperson', intSort = 11 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+UPDATE tblSMMasterMenu SET strCommand = 'AccountsReceivable.view.EntitySalesperson?showSearch=true', intSort = 11 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'i21.view.EntityShipVia?showSearch=true', intSort = 12 WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId

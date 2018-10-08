@@ -982,6 +982,10 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Sales Reps', N'Sales Reps', N'AccountsReceivable.view.EntitySalesperson', N'Accounts Receivable', N'tblARSalesperson', 1, N'Accounts Receivable')
 	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET  [strScreenName] = 'Sales Reps', [strModule] = 'Accounts Receivable' WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson'
+	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor') 
 	BEGIN
