@@ -24,7 +24,7 @@
 --     ,ISNULL(CS.strDPARecieptNumber,'')strDPARecieptNumber  
 --     ,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOpenBalance)  dblOpenBalance
 --     ,ST.ysnDPOwnedType
---     ,SH.intContractHeaderId
+--     ,SH.intContractHeaderIds
 --     ,CH.strContractNumber   
 --     ,ISNULL(SH1.intTicketId,0) AS intTicketId
 --     ,ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0) AS dblDiscountUnPaid

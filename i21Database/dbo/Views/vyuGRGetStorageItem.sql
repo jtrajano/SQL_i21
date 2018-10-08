@@ -1,4 +1,4 @@
-﻿--LLA: FOR REVIEW
+﻿
 CREATE VIEW [dbo].[vyuGRGetStorageItem]
 AS  
 SELECT DISTINCT
@@ -6,6 +6,7 @@ SELECT DISTINCT
     ,CS.intCompanyLocationId    
     ,CS.intItemId  
     ,Item.strItemNo
+    ,Item.strDescription
     ,ST.ysnCustomerStorage
     ,Com.ysnExchangeTraded
     ,ISNULL(Com.intFutureMarketId,0) AS intFutureMarketId
