@@ -148,7 +148,7 @@ BEGIN TRY
 			,[intInventoryReceiptId]			= NULL
 			,[intInvoiceId]						= NULL
 			,[intContractHeaderId]				= CS.intContractHeaderId
-			,[dblUnits]							= CASE WHEN @newBalance > 0 THEN @newBalance ELSE CS.dblQuantity END
+			,[dblUnits]							= CS.dblQuantity
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
 			,[dblPaidAmount]					= 0
 			,[strPaidDescription]				= 'Generated From Scale'

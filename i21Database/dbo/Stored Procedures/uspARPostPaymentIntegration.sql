@@ -574,6 +574,20 @@ FROM
 
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @IPaymentLog
 
+--Insert Successfully unposted/posted transactions.
+IF ISNULL(@IntegrationLogId, 0) = 0
+    BEGIN
+        INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+        SELECT DISTINCT
+            CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
+            ,'Receive Payment'
+            ,[strTransactionId]
+            ,@BatchId
+            ,[intTransactionId]
+        FROM
+            #ARPostPaymentHeader
+    END
+
 --Call integration 
 			
 DECLARE @PaymentStaging PaymentIntegrationStagingTable
