@@ -46,6 +46,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Lot.strSubLocationName
 	, Lot.intStorageLocationId
 	, Lot.strStorageLocation
+	, Lot.dblQty AS dblLotQty
 	, ShipmentItemLot.dblQuantityShipped
 	, strLotUOM = Lot.strItemUOM
 	, ShipmentItemLot.dblGrossWeight
