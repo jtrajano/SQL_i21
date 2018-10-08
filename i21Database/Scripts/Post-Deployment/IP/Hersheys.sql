@@ -437,7 +437,7 @@ IF NOT EXISTS (
 		,stri21ProductType
 		)
 	SELECT '490'
-		,'Cococa Butter'
+		,'Cocoa Butter'
 GO
 IF NOT EXISTS (
 		SELECT *
@@ -449,7 +449,7 @@ IF NOT EXISTS (
 		,stri21ProductType
 		)
 	SELECT '430'
-		,'Cococa Butter'
+		,'Cocoa Butter'
 GO
 IF NOT EXISTS (
 		SELECT *
@@ -463,4 +463,5 @@ IF NOT EXISTS (
 	SELECT '507'
 		,'Cocoa Powder'
 GO
-
+UPDATE tblIPSAPProductType SET stri21ProductType = 'Cocoa Butter' where stri21ProductType = 'Cococa Butter'
+GO
