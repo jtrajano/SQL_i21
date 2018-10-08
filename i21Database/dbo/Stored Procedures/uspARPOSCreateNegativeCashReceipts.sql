@@ -14,7 +14,6 @@ BEGIN
 	DECLARE 
 		--payment headers
 			 @strReceivePaymentType	NVARCHAR(20) = 'Cash Receipts'
-			-- ,@intPaymentMethodId	INT = 10 --CASH
 			,@dblAmountPaid			NUMERIC(18,6)
 			,@strNotes				NVARCHAR(20) = 'POS Return'
 			,@intEntityCustomerId	INT
@@ -60,7 +59,6 @@ BEGIN
 				,intCurrencyExchangeRateId
 				,dblCurrencyExchangeRate
 				,ysnPost
-				,intBankAccountId
 				,strNotes
 			)
 			SELECT intId						= IFP.intInvoiceId
@@ -88,11 +86,9 @@ BEGIN
 				,intCurrencyExchangeRateId		= IFP.intCurrencyExchangeRateId
 				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
 				,1
-				,intBankAccountId				= BA.intBankAccountId
 				,strNotes						= @strNotes
 			FROM vyuARInvoicesForPaymentIntegration IFP
 			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
-			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			LEFT JOIN tblSMPaymentMethod SM ON SM.intPaymentMethodID = @intPaymentMethodID
 			WHERE IFP.intInvoiceId = @intInvoiceId
 
@@ -141,10 +137,6 @@ BEGIN
 											, @GroupingOption	= 5
 											, @RaiseError		= 1
 											, @ErrorMessage		= @strErrorMessage OUTPUT
-
-	--Refresh tblCMUndepositedFunds
-	--Insert negative cash receipt to tblCMUndepositedFund
-	EXEC uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId = @intBankAccountId, @intUserId = @intUserId
 END
 ELSE
 BEGIN
@@ -152,4 +144,3 @@ BEGIN
 	RAISERROR(@strErrorMessage, 16, 1) 
 	RETURN 0;
 END
-
