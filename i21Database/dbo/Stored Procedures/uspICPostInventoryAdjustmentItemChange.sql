@@ -491,7 +491,7 @@ BEGIN
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intNewItemId)
 										,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-										,Detail.dblNewCost
+										,ISNULL(Detail.dblNewCost, Detail.dblCost)
 									)
 			,dblValue				= 0
 			,dblSalesPrice			= 0
