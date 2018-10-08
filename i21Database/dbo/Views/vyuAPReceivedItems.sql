@@ -231,10 +231,10 @@ FROM
 	,[strDescription]			=	C.strDescription
 	,[intPurchaseTaxGroupId]	=	NULL
 	,[dblOrderQty]				=	B.dblQtyOrdered
-	,[dblPOOpenReceive]			=	B.dblQtyOrdered -B.dblQtyReceived
+	,[dblPOOpenReceive]			=	B.dblQtyOrdered -ISNULL(Billed.dblQty,0)
 	,[dblOpenReceive]			=	B.dblQtyOrdered
-	,[dblQuantityToBill]		=	B.dblQtyOrdered -B.dblQtyReceived
-	,[dblQuantityBilled]		=	B.dblQtyReceived
+	,[dblQuantityToBill]		=	B.dblQtyOrdered - ISNULL(Billed.dblQty,0)
+	,[dblQuantityBilled]		=	ISNULL(Billed.dblQty,0)
 	,[intLineNo]				=	B.intPurchaseDetailId
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
 	,[intInventoryReceiptChargeId]	= NULL
