@@ -4,6 +4,7 @@
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ItemsToPost AS ItemCostingTableType READONLY 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF

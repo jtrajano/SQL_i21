@@ -471,6 +471,9 @@ BEGIN
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 	)
 
+	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [intItemId] ASC);
+
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
 		--PRINT 'Rebuilding stock as periodic.'
@@ -858,7 +861,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId
+			--PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
 			
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -891,7 +894,7 @@ BEGIN
 								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement') THEN 
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Storage Measurement Reading' THEN
-									'Inventory Adjustment'																								
+									'Inventory Adjustment'
 								ELSE 
 									NULL 
 						END
@@ -1032,6 +1035,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1111,6 +1115,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1188,6 +1193,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1257,6 +1263,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1311,7 +1318,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -1429,6 +1437,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 				END 
@@ -1773,6 +1782,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 				END
 			END
 			
@@ -1890,6 +1900,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1935,6 +1946,7 @@ BEGIN
 					,@strGLDescription
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId 
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -2045,6 +2057,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@intItemId
+						,@strTransactionId 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2161,6 +2174,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -2321,6 +2335,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -2684,6 +2699,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 				END 
 				ELSE IF @strTransactionType = 'Inventory Return'
 				BEGIN 
@@ -2765,7 +2781,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId-- This is only used when rebuilding the stocks.
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2816,7 +2833,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId -- This is only used when rebuilding the stocks. 								
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2909,6 +2927,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 			END
 
 			-- Repost 'Outbound Shipment'
@@ -2980,6 +2999,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -3025,6 +3045,7 @@ BEGIN
 					,@strGLDescription
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId 
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3133,6 +3154,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@intItemId
+					,@strTransactionId 
 
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3292,6 +3314,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END 
@@ -3352,7 +3375,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,NULL 
-					,@intItemId-- This is only used when rebuilding the stocks. 								
+					,@intItemId-- This is only used when rebuilding the stocks.
+					,@strTransactionId 
 
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3475,7 +3499,7 @@ BEGIN
 		UPDATE	t
 		SET		t.dtmCreated = t_CreatedDate.dtmCreated
 		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransaction_BackupCreatedDate t_CreatedDate
-					ON t.strBatchId = t_CreatedDate.strBatchId				
+					ON t.strBatchId = t_CreatedDate.strBatchId
 	END 
 END 
 
