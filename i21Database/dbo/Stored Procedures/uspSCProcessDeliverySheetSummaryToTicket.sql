@@ -28,7 +28,9 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@dblSplitPercent			NUMERIC (38,20)
 		,@dblTempSplitQty			NUMERIC (38,20)
 		,@dblFinalSplitQty			NUMERIC (38,20)
-		,@intInventoryReceiptId		INT;
+		,@intInventoryReceiptId		INT
+		,@strFreightCostMethod		NVARCHAR(40)
+		,@strFeesCostMethod			NVARCHAR(40);
 
 BEGIN TRY
 	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
@@ -43,18 +45,27 @@ BEGIN TRY
 	);
 	DECLARE @processTicket TABLE(
 		[intTicketId] INT
+		,[intDeliverySheetId] INT
 		,[intEntityId] INT
 		,[dblNetUnits] NUMERIC(38,20)
+		,[dblFreight] NUMERIC(38,20) NULL
+		,[dblFees] NUMERIC(38,20) NULL
 	)
 	INSERT INTO @processTicket(
 		[intTicketId]
+		,[intDeliverySheetId]
 		,[intEntityId]
 		,[dblNetUnits]
+		,[dblFreight] 
+		,[dblFees] 
 	)
 	SELECT 
-		[intTicketId]	= intTicketId
-		,[intEntityId]	= intEntityId
-		,[dblNetUnits]	= dblNetUnits
+		[intTicketId]			= intTicketId
+		,[intDeliverySheetId]	= intDeliverySheetId
+		,[intEntityId]			= intEntityId
+		,[dblNetUnits]			= dblNetUnits
+		,[dblFreight]			= dblFreightRate
+		,[dblFees]				= dblTicketFees
 	FROM tblSCTicket 
 	WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
 	DECLARE ticketCursor CURSOR FOR SELECT intTicketId,intEntityId,dblNetUnits FROM @processTicket  
@@ -115,6 +126,23 @@ BEGIN TRY
 	END
 	CLOSE ticketCursor;  
 	DEALLOCATE ticketCursor;
+
+	SELECT TOP 1 @strFeesCostMethod = ICFee.strCostMethod, @strFreightCostMethod = SC.strCostMethod 
+	FROM tblSCTicket SC
+	INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
+	UPDATE CS
+	SET  CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit
+	FROM tblGRCustomerStorage CS
+	OUTER APPLY (
+		SELECT 
+		CASE WHEN @strFeesCostMethod = 'Amount' THEN (SUM(dblFees)/SUM(dblNetUnits)) ELSE SUM(dblFees) END AS dblFeesPerUnit 
+		,CASE WHEN @strFreightCostMethod = 'Amount' THEN (SUM(dblFreight)/SUM(dblNetUnits)) ELSE SUM(dblFreight) END AS dblFreightPerUnit 
+		FROM @processTicket WHERE intDeliverySheetId = @intDeliverySheetId
+	) SC
+
 END TRY
 
 BEGIN CATCH

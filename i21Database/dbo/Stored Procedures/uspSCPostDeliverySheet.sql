@@ -39,7 +39,9 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@dblAdjustByQuantity			NUMERIC (38,20)
 		,@dblFinalQuantity				NUMERIC (38,20)
 		,@strTransactionId				NVARCHAR(100)
-		,@intOwnershipType				INT;
+		,@intOwnershipType				INT
+		,@strFreightCostMethod			NVARCHAR(40)
+		,@strFeesCostMethod				NVARCHAR(40);
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -258,15 +260,29 @@ BEGIN TRY
 	INNER JOIN tblGRCustomerStorage GR ON GR.intDeliverySheetId = SD.intTicketFileId
 	WHERE SD.intTicketFileId = @intDeliverySheetId 
 	AND SD.strSourceType = 'Delivery Sheet'
-		
+	
+	SELECT TOP 1 @strFeesCostMethod = ICFee.strCostMethod, @strFreightCostMethod = SC.strCostMethod 
+	FROM tblSCTicket SC
+	INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
 	UPDATE CS
 	SET  CS.dblDiscountsDue=QM.dblDiscountsDue
 		,CS.dblDiscountsPaid=QM.dblDiscountsPaid
+		,CS.dblFeesDue=SC.dblFeesPerUnit
+		,CS.dblFreightDueRate=SC.dblFreightPerUnit
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
 		SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar'
 	) QM
-	WHERE CS.intCustomerStorageId = @intCustomerStorageId
+	OUTER APPLY (
+		SELECT 
+		CASE WHEN @strFeesCostMethod = 'Amount' THEN (SUM(dblTicketFees)/@dblNetUnits) ELSE SUM(dblTicketFees) END AS dblFeesPerUnit
+		,CASE WHEN @strFreightCostMethod = 'Amount' THEN (SUM(dblFreightRate)/@dblNetUnits) ELSE SUM(dblFreightRate) END AS dblFreightPerUnit
+		FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
+	) SC
+	WHERE CS.intDeliverySheetId = @intDeliverySheetId
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
 
