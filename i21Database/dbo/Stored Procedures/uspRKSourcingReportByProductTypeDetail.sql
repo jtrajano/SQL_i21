@@ -222,20 +222,20 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 						dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblBalanceQty) dblBalanceQty,
 							t.dblNoOfLots,
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,i.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null))	dblFuturesPrice,							
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null,null))	dblFuturesPrice,	
+													
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblSettlementPrice,0),null))	dblSettlementPrice,
+							dbo.[fnRKGetCurrencyConvertion](m.intCurrencyId,@intCurrencyId)*isnull(dblSettlementPrice,0))	dblSettlementPrice,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null))	dblBasis,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null,intBasisCurrencyId))	dblBasis,
 							
-							t.dblRatio,	dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,cost.dblRate,null) dblRate,
+							t.dblRatio,	dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,cost.dblRate,null,null) dblRate,
 							
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,						
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null))	dblPrice,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null,null))	dblPrice,
 							t.intCompanyLocationId, ca.dblRatio dblStandardRatio, 
-							ic.intItemId,
-							
+							ic.intItemId,						
 							
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
 							isnull((
@@ -248,11 +248,11 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							),0),null)  dblStandardPrice,
+							),0),null,null)  dblStandardPrice,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
-											isnull(cost.dblRate,t.dblBasis),null))	dblPPVBasis,
+											isnull(cost.dblRate,t.dblBasis),null,null))	dblPPVBasis,
 							strLocationName,strPricingType,strItemNo,strOrigin,strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
  FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
@@ -293,7 +293,7 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 					dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblReturnQty) dblReturnQty,
 						dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblBalanceQty) dblBalanceQty,
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,i.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null))	dblPrice,	
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null,null))	dblPrice,	
 							t.intCompanyLocationId, 
 							ic.intItemId,							
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
@@ -307,7 +307,7 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							),0),null)  dblStandardPrice,
+							),0),null,null)  dblStandardPrice,
 							strLocationName	,strPricingType,strItemNo,strOrigin,strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
  FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
