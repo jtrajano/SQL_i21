@@ -5,7 +5,7 @@ SELECT
     , TSS.intTransferStorageId
     , TSS.intTransferToCustomerStorageId
     , TSS.intEntityId
-    , TSS.intLocationId
+    , TSS.intCompanyLocationId
     , TSS.intStorageTypeId
     , TSS.intStorageScheduleId
     , TSS.intContractDetailId
@@ -21,7 +21,7 @@ INNER JOIN tblGRTransferStorage TS
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = TSS.intEntityId
 INNER JOIN tblSMCompanyLocation CL
-	ON CL.intCompanyLocationId = TSS.intLocationId
+	ON CL.intCompanyLocationId = TSS.intCompanyLocationId
 INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR

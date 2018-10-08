@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblGRTransferStorageSplit]
     [intTransferStorageId] INT NOT NULL,
     [intTransferToCustomerStorageId] INT NOT NULL,
     [intEntityId] INT NOT NULL,
-    [intLocationId] INT NOT NULL,
+    [intCompanyLocationId] INT NOT NULL,
     [intStorageTypeId] INT NOT NULL,
     [intStorageScheduleId] INT NOT NULL,
     [intContractDetailId] INT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE [dbo].[tblGRTransferStorageSplit]
     CONSTRAINT [PK_tblGRTransferStorageSplit_intTransferStorageSplitId] PRIMARY KEY ([intTransferStorageSplitId]), 
     CONSTRAINT [FK_tblGRTransferStorageSplit_intTransferStorageId_intTransferStorageId] FOREIGN KEY ([intTransferStorageId]) REFERENCES [dbo].tblGRTransferStorage ([intTransferStorageId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblGRTransferStorageSplit_intEntityId_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-    CONSTRAINT [FK_tblGRTransferStorageSplit_intLocationId_intCompanyLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId]),    
+    CONSTRAINT [FK_tblGRTransferStorageSplit_intCompanyLocationId_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId]),    
     CONSTRAINT [FK_tblGRTransferStorageSplit_intStorageTypeId_intStorageScheduleTypeId] FOREIGN KEY ([intStorageTypeId]) REFERENCES [dbo].tblGRStorageType ([intStorageScheduleTypeId]),
     CONSTRAINT [FK_tblGRTransferStorageSplit_intStorageScheduleId_intStorageScheduleRuleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].tblGRStorageScheduleRule ([intStorageScheduleRuleId]),
     CONSTRAINT [FK_tblGRTransferStorageSplit_intContractDetailId_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].tblCTContractDetail ([intContractDetailId])

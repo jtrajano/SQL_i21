@@ -24,7 +24,7 @@ GO
     (
         [strTransferStorageTicket]
         , [intEntityId]
-        , [intLocationId]
+        , [intCompanyLocationId]
         , [intStorageTypeId]
         , [intItemId]
         , [intItemUOMId]
@@ -34,7 +34,7 @@ GO
     SELECT
         [strTransferStorageTicket] = SH.strTransferTicket
         , [intEntityId] = CS.intEntityId
-        , [intLocationId] = CS.intCompanyLocationId
+        , [intCompanyLocationId] = CS.intCompanyLocationId
         , [intStorageTypeId] = CS.intStorageTypeId
         , [intItemId] =  CS.intItemId
         , [intItemUOMId] = CS.intItemUOMId
@@ -86,7 +86,7 @@ GO
         [intTransferStorageId]
         , [intTransferToCustomerStorageId]
         , [intEntityId]
-        , [intLocationId]
+        , [intCompanyLocationId]
         , [intStorageTypeId]
         , [intStorageScheduleId]
 		, [intContractDetailId]
@@ -98,7 +98,7 @@ GO
         [intTransferStorageId] = TS.intTransferStorageId
         , [intTransferToCustomerStorageId] = CS.intCustomerStorageId
         , [intEntityId] = CS.intEntityId
-        , [intLocationId] = CS.intCompanyLocationId
+        , [intCompanyLocationId] = CS.intCompanyLocationId
         , [intStorageTypeId] = CS.intStorageTypeId
         , [intStorageScheduleId] = CS.intStorageScheduleId
 		, [intContractDetailId] = 0
