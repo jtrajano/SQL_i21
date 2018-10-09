@@ -15,9 +15,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
-
-IF @RaiseError = 1
-	SET XACT_ABORT ON
+SET XACT_ABORT ON
 
 DECLARE @ZeroDecimal	NUMERIC(18, 6) = 0.000000
 		,@DateOnly		DATETIME = CAST(GETDATE() AS DATE)
@@ -309,28 +307,29 @@ SELECT
 FROM
 	@InvoiceEntries 
 
+IF(OBJECT_ID('tempdb..#ARInvalidInvoiceRecords') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARInvalidInvoiceRecords
+END
+CREATE TABLE #ARInvalidInvoiceRecords
+    ([intId]                INT
+    ,[strMessage]           NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strTransactionType]   NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strType]              NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strSourceTransaction] NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[intSourceId]          INT                                             NULL
+    ,[strSourceId]          NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NOT NULL
+    ,[intInvoiceId]         INT                                             NULL)
 
-DECLARE @InvalidRecords AS TABLE (
-	 [intId]				INT
-	,[strMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
-	,[strTransactionType]	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[strType]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strSourceTransaction]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
-	,[intSourceId]			INT												NULL
-	,[strSourceId]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
-	,[intInvoiceId]			INT												NULL
-)
-
-INSERT INTO @InvalidRecords(
-	 [intId]
-	,[strMessage]		
-	,[strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intInvoiceId]
-)
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -346,8 +345,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Transport Load'
 	AND  NOT EXISTS(SELECT NULL FROM tblTRLoadDistributionHeader WITH (NOLOCK) WHERE [intLoadDistributionHeaderId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -363,8 +369,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Inbound Shipment'
 	AND  NOT EXISTS(SELECT NULL FROM tblLGShipment WITH (NOLOCK) WHERE [intShipmentId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -382,8 +395,15 @@ WHERE
 		ISNULL([strSourceTransaction],'') = 'CF Tran')
 	AND  NOT EXISTS(SELECT NULL FROM tblCFTransaction WITH (NOLOCK) WHERE [intTransactionId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -399,8 +419,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Meter Billing'
 	AND  NOT EXISTS(SELECT NULL FROM tblMBMeterReading WITH (NOLOCK) WHERE [intMeterReadingId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -416,8 +443,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Provisional'
 	AND  NOT EXISTS(SELECT NULL FROM tblARInvoice WITH (NOLOCK) WHERE [intInvoiceId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -433,8 +467,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Inventory Shipment'
 	AND  NOT EXISTS(SELECT NULL FROM tblICInventoryShipment WITH (NOLOCK) WHERE [intInventoryShipmentId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -450,8 +491,15 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Sales Contract'
 	AND  NOT EXISTS(SELECT NULL FROM tblCTContractHeader WITH (NOLOCK) WHERE [intContractHeaderId] = ITG.[intSourceId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
@@ -467,10 +515,9 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Load Schedule'
 	AND  NOT EXISTS(SELECT NULL FROM tblLGLoad WITH (NOLOCK) WHERE [intLoadId] = ITG.[intSourceId])
 
-
 DELETE FROM V
 FROM @InvoicesToGenerate V
-WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
+WHERE EXISTS(SELECT NULL FROM #ARInvalidInvoiceRecords I WHERE V.[intId] = I.[intId])
 
 UPDATE
 	@InvoicesToGenerate
@@ -479,7 +526,6 @@ SET
 WHERE
 	ISNULL([strTransactionType], '') = ''
 
-
 UPDATE
 	@InvoicesToGenerate
 SET
@@ -487,16 +533,15 @@ SET
 WHERE
 	ISNULL([strType], '') = ''
 
-INSERT INTO @InvalidRecords(
-	 [intId]
-	,[strMessage]		
-	,[strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intInvoiceId]
-)
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The company location Id provided does not exists!'
@@ -511,8 +556,15 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The company location provided is not active!'
@@ -527,8 +579,15 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] IS NOT NULL AND SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId] AND SMCL.[ysnLocationActive] = 1)
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strTransactionType] + ' is not a valid transaction type!'
@@ -543,8 +602,15 @@ FROM
 WHERE
 	ITG.[strTransactionType] NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment')
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= ITG.[strType] + ' is not a valid invoice type!'
@@ -559,8 +625,15 @@ FROM
 WHERE
 	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice')
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The customer Id provided does not exists!'
@@ -575,8 +648,15 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The customer provided is not active!'
@@ -591,9 +671,15 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
-
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The entity Id provided does not exists!'
@@ -608,9 +694,15 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblEMEntity EME WITH (NOLOCK) WHERE EME.[intEntityId] = ITG.[intEntityId])
 
-
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'Transaction with Invoice Number - ' + [strInvoiceOriginId] + ' is already existing.'
@@ -628,8 +720,7 @@ WHERE
 
 DELETE FROM V
 FROM @InvoicesToGenerate V
-WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
-
+WHERE EXISTS(SELECT NULL FROM #ARInvalidInvoiceRecords I WHERE V.[intId] = I.[intId])
 
 UPDATE
 	@InvoicesToGenerate
@@ -660,17 +751,15 @@ SET
 WHERE
 	ISNULL([intCurrencyId], 0) = 0
 
-
-INSERT INTO @InvalidRecords(
-	 [intId]
-	,[strMessage]		
-	,[strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intInvoiceId]
-)
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'There is no setup for AR Account in the Company Configuration.'
@@ -686,9 +775,15 @@ WHERE
 	ITG.[intAccountId] IS NULL
 	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 
-
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The account id provided is not a valid account of category "AR Account".'
@@ -705,8 +800,15 @@ WHERE
 	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
@@ -725,9 +827,15 @@ WHERE
 	ITG.[intAccountId] IS NULL
 	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
 
-
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The account id provided is not a valid account of category "Undeposited Funds".'
@@ -747,8 +855,15 @@ WHERE
 	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Undeposited Funds' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
@@ -767,8 +882,15 @@ WHERE
 	ITG.[intAccountId] IS NULL
 	AND ITG.[strTransactionType] = 'Customer Prepayment'
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The account id provided is not a valid account of category "Customer Prepayments".'
@@ -788,8 +910,15 @@ WHERE
 	AND ITG.[strTransactionType] = 'Customer Prepayment'
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Customer Prepayments' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'The currency Id provided does not exists!'
@@ -805,8 +934,15 @@ WHERE
 	ITG.[intCurrencyId] IS NOT NULL
 	AND NOT EXISTS (SELECT NULL FROM tblSMCurrency SMC WITH (NOLOCK) WHERE SMC.[intCurrencyID] = ITG.[intCurrencyId])
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'There is no setup for default currency in the Company Configuration.'
@@ -822,8 +958,15 @@ WHERE
 	ITG.[intCurrencyId] IS NULL
 	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
 
-UNION ALL
-
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
 	,[strMessage]			= 'Customer has no Term setup!' 
@@ -841,12 +984,12 @@ WHERE
 	
 DELETE FROM V
 FROM @InvoicesToGenerate V
-WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
+WHERE EXISTS(SELECT NULL FROM #ARInvalidInvoiceRecords I WHERE V.[intId] = I.[intId])
 
 
-IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
+IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM #ARInvalidInvoiceRecords)
 BEGIN
-	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
+	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM #ARInvalidInvoiceRecords ORDER BY [intId])
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END
@@ -928,7 +1071,7 @@ SELECT
 	,[ysnHeader]							= 1
 	,[ysnSuccess]							= 0
 FROM
-	@InvalidRecords
+	#ARInvalidInvoiceRecords
 
 IF(OBJECT_ID('tempdb..#CustomerInvoice') IS NOT NULL)
 BEGIN
@@ -936,7 +1079,8 @@ BEGIN
 END
 
 CREATE TABLE #CustomerInvoice
-	([intInvoiceId]					INT												NULL
+	([intRowId]						INT				IDENTITY PRIMARY KEY CLUSTERED           
+    ,[intInvoiceId]					INT												NULL
 	,[strInvoiceNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strTransactionType]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strType]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
@@ -1134,7 +1278,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnRecap])
 SELECT
 	 [intInvoiceId]					= NULL
-	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 THEN ITG.strInvoiceOriginId ELSE NULL END
+	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 AND RTRIM(LTRIM(ISNULL(ITG.strInvoiceOriginId,''))) <> '' THEN RTRIM(LTRIM(ITG.strInvoiceOriginId)) ELSE NULL END
 	,[strTransactionType]			= ITG.strTransactionType
 	,[strType]						= ITG.strType
 	,[intEntityCustomerId]			= ARC.[intEntityId]
@@ -1147,7 +1291,7 @@ SELECT
 	,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
 	,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
 	,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
-	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, DATEADD(month, 1, ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)))
+	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, ISNULL(CAST(ITG.dtmPostDate AS DATE),@DateOnly))
 	,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
 	,[dtmCalculated]				= NULL
 	,[dblInvoiceSubtotal]			= @ZeroDecimal
@@ -1266,7 +1410,46 @@ LEFT OUTER JOIN
 		AND ITG.intBillToLocationId = BL.intEntityLocationId		
 LEFT OUTER JOIN
 	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
-		ON ARC.[intBillToId] = BL1.intEntityLocationId		
+		ON ARC.[intBillToId] = BL1.intEntityLocationId
+		
+WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
+BEGIN
+    DECLARE @RowId INT
+    DECLARE @CompanyLocationId INT
+    DECLARE @TransactionType NVARCHAR(25)
+    DECLARE @Type NVARCHAR(100)
+    DECLARE @InvoiceNumber NVARCHAR(25)
+    DECLARE @StartingNumberId INT
+    
+    SET @StartingNumberId = 19
+
+    SELECT TOP 1
+         @RowId             = [intRowId] 
+        ,@CompanyLocationId = [intCompanyLocationId]
+        ,@TransactionType   = [strTransactionType]
+        ,@Type              = [strType]
+    FROM
+        #CustomerInvoice
+    WHERE
+        RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = ''
+    ORDER BY [intRowId]
+
+    SELECT TOP 1
+        @StartingNumberId = intStartingNumberId 
+    FROM
+        tblSMStartingNumber 
+    WHERE
+        strTransactionType = CASE WHEN @TransactionType = 'Prepayment' THEN 'Customer Prepayment' 
+                                WHEN @TransactionType = 'Customer Prepayment' THEN 'Customer Prepayment' 
+                                WHEN @TransactionType = 'Overpayment' THEN 'Customer Overpayment'
+                                WHEN @TransactionType = 'Invoice' AND @Type = 'Service Charge' THEN 'Service Charge'
+                                WHEN @TransactionType = 'Invoice' AND @Type = 'Provisional' THEN 'Provisional'									 
+                                ELSE 'Invoice' END
+		
+    EXEC uspSMGetStartingNumber @StartingNumberId, @InvoiceNumber OUT, @CompanyLocationId
+	
+    UPDATE #CustomerInvoice SET [strInvoiceNumber] = @InvoiceNumber WHERE [intRowId] = @RowId
+END
 
 BEGIN TRY
 MERGE INTO tblARInvoice AS Target

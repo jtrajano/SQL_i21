@@ -256,7 +256,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -Detail.dblNewQuantity
+			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Lot.intItemId)
@@ -295,7 +295,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -Detail.dblNewQuantity
+			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
@@ -491,7 +491,7 @@ BEGIN
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intNewItemId)
 										,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-										,Detail.dblNewCost
+										,ISNULL(Detail.dblNewCost, Detail.dblCost)
 									)
 			,dblValue				= 0
 			,dblSalesPrice			= 0

@@ -121,25 +121,34 @@ SELECT @strPOUpdateIDOCHeader = dbo.fnIPGetSAPIDOCHeader('PO UPDATE')
 
 SELECT @strMessageCode = dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL', 'MESCOD')
 
+DECLARE @intToCurrencyId INT
+
+SELECT @intToCurrencyId = intCurrencyID
+FROM tblSMCurrency
+WHERE strCurrency = 'USD'
+
 UPDATE CF
 SET strRowState = 'MODIFIED'
 FROM tblCTContractFeed CF
-JOIN tblCTContractFeed CF1 on CF1.intContractHeaderId=CF.intContractHeaderId and CF1.strItemNo=CF.strItemNo and  ISNULL(CF1.strFeedStatus, '') <> ''
+JOIN tblCTContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
+	AND CF1.strItemNo = CF.strItemNo
+	AND ISNULL(CF1.strFeedStatus, '') <> ''
 WHERE ISNULL(CF.strFeedStatus, '') = ''
 	AND UPPER(CF.strRowState) = 'ADDED'
-	AND isNULL(CF.ysnMaxPrice,0)=1
+	AND isNULL(CF.ysnMaxPrice, 0) = 1
 
 UPDATE CF
 SET strERPPONumber = CD.strERPPONumber
 	,strERPItemNumber = CD.strERPItemNumber
 FROM tblCTContractFeed CF
-JOIN tblICItem I on I.strItemNo=CF.strItemNo
-JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId and CD.intItemId=I.intItemId
+JOIN tblICItem I ON I.strItemNo = CF.strItemNo
+JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CF.intContractHeaderId
+	AND CD.intItemId = I.intItemId
 WHERE ISNULL(CF.strFeedStatus, '') = ''
 	AND IsNULL(CF.strERPPONumber, '') = ''
 	AND CF.strRowState = 'MODIFIED'
 	AND CD.strERPPONumber <> ''
-	AND isNULL(CF.ysnMaxPrice,0)=1
+	AND isNULL(CF.ysnMaxPrice, 0) = 1
 
 UPDATE tblCTContractFeed
 SET strFeedStatus = ''
@@ -205,8 +214,9 @@ BEGIN
 		AND EXISTS (
 			SELECT *
 			FROM tblCTContractDetail CD
-			JOIN tblICItem I on I.intItemId=CD.intItemId
-			WHERE CD.intContractHeaderId = CF.intContractHeaderId and I.strItemNo=CF.strItemNo
+			JOIN tblICItem I ON I.intItemId = CD.intItemId
+			WHERE CD.intContractHeaderId = CF.intContractHeaderId
+				AND I.strItemNo = CF.strItemNo
 			)
 
 	INSERT INTO @tblCTFinalContractFeed (
@@ -930,7 +940,7 @@ SET CF.strFeedStatus = ''
 				SELECT *
 				FROM tblCTContractFeed CF1
 				WHERE CH.intContractHeaderId = CF1.intContractHeaderId
-					AND IsNULL(CF1.strERPPONumber,'') <> ''
+					AND IsNULL(CF1.strERPPONumber, '') <> ''
 				)
 			THEN CF.ysnMaxPrice
 		ELSE CH.ysnMaxPrice
@@ -949,8 +959,6 @@ WHERE EXISTS (
 			AND IsNULL(L.ysnEnabledERPFeed, 1) = 0
 		)
 	AND ISNULL(strFeedStatus, '') = ''
-
-
 
 --Get the Headers
 IF UPPER(@strRowState) = 'ADDED'
@@ -1169,11 +1177,15 @@ BEGIN
 				WHERE strUnitMeasure = strNetWeightUOM
 				)
 			,@dblCashPrice = dblCashPrice
-			,@dblUnitCashPrice = dblUnitCashPrice * 100
+			,@dblUnitCashPrice = CASE 
+				WHEN strCurrency = 'USD'
+					THEN dblUnitCashPrice * 100
+				ELSE [dbo].[fnIPGetSourcingCurrencyConversion](intContractDetailId, @intToCurrencyId, dblUnitCashPrice * 100)
+				END
 			,@dtmContractDate = dtmContractDate
 			,@dtmStartDate = dtmStartDate
 			,@dtmEndDate = dtmEndDate
-			,@strCurrency = strCurrency
+			,@strCurrency = 'USD'
 			,@strPriceUOM = (
 				SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
 				FROM tblICUnitMeasure
@@ -1214,11 +1226,17 @@ BEGIN
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
 				,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
-				,@dblUnitCashPrice = SUM(dblUnitCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
+				,@dblUnitCashPrice = SUM((
+						CASE 
+							WHEN strCurrency = 'USD'
+								THEN dblUnitCashPrice * 100
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](intContractDetailId, @intToCurrencyId, dblUnitCashPrice * 100)
+							END
+						) * dblNetWeight) / SUM(dblNetWeight)
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = Min(dtmStartDate)
 				,@dtmEndDate = MAX(dtmEndDate)
-				,@strCurrency = strCurrency
+				,@strCurrency = 'USD'
 				,@strPriceUOM = (
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
 					FROM tblICUnitMeasure
@@ -1268,11 +1286,17 @@ BEGIN
 					WHERE strUnitMeasure = strNetWeightUOM
 					)
 				,@dblCashPrice = SUM(dblCashPrice * dblNetWeight) / SUM(dblNetWeight)
-				,@dblUnitCashPrice = SUM(dblUnitCashPrice * 100 * dblNetWeight) / SUM(dblNetWeight)
+				,@dblUnitCashPrice = SUM((
+						CASE 
+							WHEN strCurrency = 'USD'
+								THEN dblUnitCashPrice * 100
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](intContractDetailId, @intToCurrencyId, dblUnitCashPrice * 100)
+							END
+						) * dblNetWeight) / SUM(dblNetWeight)
 				,@dtmContractDate = dtmContractDate
 				,@dtmStartDate = Min(dtmStartDate)
 				,@dtmEndDate = MAX(dtmEndDate)
-				,@strCurrency = strCurrency
+				,@strCurrency = 'USD'
 				,@strPriceUOM = (
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
 					FROM tblICUnitMeasure
@@ -1342,14 +1366,14 @@ BEGIN
 
 	SET @strSeq = ISNULL(@strSeq, '') + CONVERT(VARCHAR, @intContractSeq) + ','
 
-	--Convert price USC to USD
-	IF UPPER(@strCurrency) = 'USC'
-	BEGIN
-		SET @strCurrency = 'USD'
-		SET @dblBasis = ISNULL(@dblBasis, 0) / 100
-		SET @dblCashPrice = ISNULL(@dblCashPrice, 0) / 100
-		SET @dblUnitCashPrice = ISNULL(@dblUnitCashPrice, 0) / 100
-	END
+	----Convert price USC to USD
+	--IF UPPER(@strCurrency) = 'USC'
+	--BEGIN
+	--	SET @strCurrency = 'USD'
+	--	SET @dblBasis = ISNULL(@dblBasis, 0) / 100
+	--	SET @dblCashPrice = ISNULL(@dblCashPrice, 0) / 100
+	--	SET @dblUnitCashPrice = ISNULL(@dblUnitCashPrice, 0) / 100
+	--END
 
 	--Header Start Xml
 	IF ISNULL(@strXmlHeaderStart, '') = ''
@@ -1375,7 +1399,8 @@ BEGIN
 			SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 			SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
 			SET @strXmlHeaderStart += '<REF_1>' + ISNULL(RIGHT(@str12Zeros + @strContractNumber, 12), '') + '</REF_1>'
-			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
+			--SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
+			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS1>'
 			SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
 			SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
 		END
@@ -1415,7 +1440,8 @@ BEGIN
 			SET @strXmlHeaderStart += '<COMP_CODE>' + ISNULL(@strPurchasingGroup, '') + '</COMP_CODE>'
 			SET @strXmlHeaderStart += '<VPER_START>' + ISNULL(CONVERT(VARCHAR(10), @dtmStartDate, 112), '') + '</VPER_START>'
 			SET @strXmlHeaderStart += '<VPER_END>' + ISNULL(CONVERT(VARCHAR(10), @dtmEndDate, 112), '') + '</VPER_END>'
-			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
+			--SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL(@strContractBasis, '')) + '</INCOTERMS1>'
+			SET @strXmlHeaderStart += '<INCOTERMS1>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS1>'
 			SET @strXmlHeaderStart += '<INCOTERMS2>' + dbo.fnEscapeXML(ISNULL('', '')) + '</INCOTERMS2>'
 			SET @strXmlHeaderStart += '</E1BPMEOUTHEADER>'
 		END

@@ -85,7 +85,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARID.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]						= - ICIT.[dblQty] --ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ARID.[dblQtyShipped]), @ZeroDecimal)  --ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -137,7 +137,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARID.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]						= -ICIT.[dblQty] --ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ARID.[dblQtyShipped]), @ZeroDecimal) --
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -193,7 +193,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARID.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -242,7 +242,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARI.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]

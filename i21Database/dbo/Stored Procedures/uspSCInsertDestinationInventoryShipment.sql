@@ -34,9 +34,15 @@ DECLARE @DestinationItems AS DestinationShipmentItem
 		,@ysnPrice BIT
 		,@splitDistribution AS NVARCHAR(40)
 		,@intContractCostId INT
-		,@dtmScaleDate DATETIME;
+		,@dtmScaleDate DATETIME
+		,@dblQuantity NUMERIC(38,20)
+		,@currencyDecimal INT;
 
 BEGIN TRY
+	SELECT @dblQuantity = SUM(dblQuantity) FROM tblICInventoryShipmentItem ICSI 
+	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
+	WHERE ICSI.intSourceId = @intTicketId AND intSourceType = 1
+	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
 -- Insert the Inventory Shipment detail items 
 	SELECT @intFreightItemId = SCSetup.intFreightItemId
@@ -84,7 +90,7 @@ BEGIN TRY
 		,[intItemLocationId]			= SC.intProcessingLocationId
 		,[intItemUOMId]					= SC.intItemUOMIdTo
 		,[dtmDate]						= SC.dtmTicketDateTime
-		,[dblQty]						= SC.dblNetUnits
+		,[dblQty]						= CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits ELSE ICSI.dblQuantity END
 		,[dblUOMQty]					= SC.dblConvertedUOMQty
 		,[dblCost]						= ICSI.dblUnitPrice
 		,[intCurrencyId]				= SC.intCurrencyId
@@ -96,8 +102,12 @@ BEGIN TRY
 		,[intScaleSetupId]				= SC.intScaleSetupId
 		,[dblFreightRate]				= ISNULL(SC.dblFreightRate, 0)
 		,[dblTicketFees]				= SC.dblTicketFees
-		,[dblGross]						= SC.dblGrossUnits
-		,[dblTare]						= SC.dblShrink
+		,[dblGross]						= CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits ELSE ICSI.dblGross END
+		,[dblTare]						= CASE 
+											WHEN @dblQuantity != SC.dblNetUnits 
+												THEN (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits) - (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits)
+											ELSE ICSI.dblGross - ICSI.dblQuantity 
+										END
 		,[strChargesLink]				= ICSI.strChargesLink
 		,[ysnIsStorage]					= CASE WHEN ICSI.intOwnershipType = 1 THEN 1 ELSE 0 END
 	FROM tblSCTicket SC 
@@ -123,7 +133,7 @@ BEGIN TRY
 		,[intInventoryShipmentId]		= SC.intTransactionHeaderId
 		,[intInventoryShipmentItemId]	= SC.intTransactionDetailId
 		,[dblDestinationGross]			= SC.dblGross
-		,[dblDestinationNet]			= (SC.dblGross - SC.dblTare)
+		,[dblDestinationNet]			= SC.dblGross - SC.dblTare
 	FROM @scaleStaging SC 
 	INNER JOIN tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intItemLocationId 
 	WHERE SC.intTicketId = @intTicketId

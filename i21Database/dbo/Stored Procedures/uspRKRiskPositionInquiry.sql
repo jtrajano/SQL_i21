@@ -1319,24 +1319,48 @@ WHERE Selection IN ('Switch position', 'Futures required')
 FROM @List  WHERE strFutureMonth
  NOT IN (SELECT DISTINCT strFutureMonth FROM @List WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)')
 
-select * from ( 
+-- select * from ( 
+-- SELECT intRowNumber
+-- 	,Selection
+-- 	,PriceStatus
+-- 	,strFutureMonth
+-- 	,cast(CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
+-- 		WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+-- 		else CONVERT(DATETIME,'01 '+strFutureMonth) END as datetime)strFutureMonthOrder
+-- 	,strAccountNumber
+-- 	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
+-- 	,strTradeNo
+-- 	,TransactionDate
+-- 	,TranType
+-- 	,CustVendor
+-- 	,dblNoOfLot
+-- 	,dblQuantity
+-- 	,intOrderByHeading
+-- 	,intContractHeaderId
+-- 	,intFutOptTransactionHeaderId
+-- FROM @List
+-- 	)t  order by intOrderByHeading,strFutureMonthOrder
+
 SELECT intRowNumber
 	,Selection
 	,PriceStatus
 	,strFutureMonth
-	,cast(CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
-		WHEN  strFutureMonth ='Total' THEN '01/01/9999'
-		else CONVERT(DATETIME,'01 '+strFutureMonth) END as datetime)strFutureMonthOrder
 	,strAccountNumber
-	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
+	,dblNoOfContract = CONVERT(DOUBLE PRECISION, ROUND(ISNULL(dblNoOfContract, 0), ISNULL(@intDecimal,0)))
 	,strTradeNo
 	,TransactionDate
 	,TranType
 	,CustVendor
-	,dblNoOfLot
-	,dblQuantity
+	,dblNoOfLot = ISNULL(dblNoOfLot,0)
+	,dblQuantity = ISNULL(dblQuantity,0)
 	,intOrderByHeading
+	,intOrderBySubHeading
 	,intContractHeaderId
 	,intFutOptTransactionHeaderId
-FROM @List
-	)t  order by intOrderByHeading,strFutureMonthOrder
+ FROM @List
+ Order by intOrderByHeading
+	,CASE 
+		WHEN  strFutureMonth ='Previous' THEN '01/01/1900'
+		WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+		WHEN  strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME,REPLACE(strFutureMonth, ' ', ' 1, ')) 
+	END

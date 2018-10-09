@@ -2137,7 +2137,7 @@ INSERT INTO @PostInvoiceDataFromIntegration(
 				,[strType]						= PID.[strType]
 				,[dtmDate]						= PID.[dtmDate]
 				,[dtmPostDate]					= PID.[dtmPostDate]
-				,[dtmShipDate]					= PID.[dtmShipDate]
+				,[dtmShipDate]					= ISNULL(PID.[dtmShipDate], PID.[dtmPostDate])
 				,[intEntityCustomerId]			= PID.[intEntityCustomerId]
 				,[intCompanyLocationId]			= PID.[intCompanyLocationId]
 				,[intAccountId]					= PID.[intAccountId]

@@ -356,7 +356,7 @@ BEGIN
 		,[intTermId]						= IE.[intTermId]
 		,[dtmDate]							= CAST(ISNULL(IE.[dtmDate], @DateNow) AS DATE)
 		,[dtmDueDate]						= IE.[dtmDueDate]
-		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], @DateNow) AS DATE)
+		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], IE.[dtmPostDate]) AS DATE)
 		,[dtmPostDate]						= IE.[dtmPostDate]
 		,[intEntitySalespersonId]			= IE.[intEntitySalespersonId]
 		,[intFreightTermId]					= IE.[intFreightTermId]
@@ -493,7 +493,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	
@@ -1450,7 +1450,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	

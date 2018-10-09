@@ -4,6 +4,8 @@
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ItemsToPost AS ItemCostingTableType READONLY 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL 
+	,@ysnTransferOnSameLocation AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -753,6 +755,7 @@ END
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
+IF ISNULL(@ysnTransferOnSameLocation, 0) = 0 
 BEGIN 
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 

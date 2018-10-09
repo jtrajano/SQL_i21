@@ -15,7 +15,7 @@
 AS  
 
 DECLARE @dtmToDate DATETIME
-SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
+SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(@dtmPositionAsOf, GETDATE()), 110), 110)
 
 IF ISNULL(@intForecastWeeklyConsumptionUOMId,0) = 0
 BEGIN

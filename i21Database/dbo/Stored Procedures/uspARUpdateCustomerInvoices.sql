@@ -680,7 +680,7 @@ BEGIN TRY
 		  ,ARI.[intPeriodsToAccrue]				= ISNULL(ITG.[intPeriodsToAccrue], 1)
 		  ,ARI.[dtmDate]						= ITG.[dtmDate]
 		  ,ARI.[dtmDueDate]						= ISNULL(ITG.[dtmDueDate], (CAST(dbo.fnGetDueDateBasedOnTerm(ITG.[dtmDate], ISNULL(ISNULL(ITG.[intTermId], ARC.[intTermsId]),0)) AS DATE)))
-		  ,ARI.[dtmShipDate]					= ITG.[dtmShipDate]
+		  ,ARI.[dtmShipDate]					= ISNULL(ITG.[dtmShipDate], ITG.[dtmPostDate])
 		  ,ARI.[dtmPostDate]					= ITG.[dtmPostDate]
 		  --,ARI.[dtmCalculated]				= ARI.[dtmCalculated]
 		  --,ARI.[dblInvoiceSubtotal]			= ARI.[dblInvoiceSubtotal]

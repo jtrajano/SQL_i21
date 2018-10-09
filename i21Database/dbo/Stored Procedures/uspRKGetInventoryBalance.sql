@@ -41,7 +41,7 @@ FROM (
 		,(SELECT strReceiptNumber FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranReceiptNumber
 		,(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblQty) FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranRecQty
 		,(SELECT strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId) tranAdjNumber
-		,(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblQty) FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId) dblAdjustmentQty
+		,(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblQty) FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId ) dblAdjustmentQty
 		,(SELECT strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId) tranCountNumber
 		,(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblQty) FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId ) dblCountQty
 		,(SELECT top 1 strInvoiceNumber FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  WHERE ia.strInvoiceNumber=it.strTransactionId) tranInvoiceNumber
@@ -49,7 +49,7 @@ FROM (
 		,0.0 dblSalesInTransit
 		,0.0 tranDSInQty
 	FROM tblICInventoryTransaction it 
-	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 10, 23,33, 44)
+	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23,33, 44)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	--JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId

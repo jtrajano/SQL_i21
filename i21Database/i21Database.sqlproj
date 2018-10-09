@@ -7117,6 +7117,11 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPostHandlingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
+    <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

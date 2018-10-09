@@ -62,7 +62,11 @@ BEGIN TRY
 			@dtmM2MDate					DATETIME,
 			@dtmNewM2MDate				DATETIME,
 			@dtmM2MBatchDate			DATETIME,
-			@ysnM2MDateChanged			BIT
+			@ysnM2MDateChanged			BIT,
+			@strPricingQuantity			NVARCHAR(100),
+			@dblLotsFixed				NUMERIC(18,6),
+			@dblQtyFixed				NUMERIC(18,6),
+			@dblNewNoOfLots				NUMERIC(18,6)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -92,7 +96,8 @@ BEGIN TRY
 			@ysnSlice					=	ysnSlice,
 			@intNewShipperId			=	intShipperId,
 			@intNewShippingLineId		=	intShippingLineId,
-			@dtmNewM2MDate				=	dtmM2MDate
+			@dtmNewM2MDate				=	dtmM2MDate,
+			@dblNewNoOfLots				=	dblNoOfLots
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -123,8 +128,11 @@ BEGIN TRY
 			ysnSlice					BIT,
 			intShipperId				INT,
 			intShippingLineId			INT,
-			dtmM2MDate					DATETIME
+			dtmM2MDate					DATETIME,
+			dblNoOfLots					NUMERIC(18,6)
 	)  
+
+	SELECT @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
 
 	IF @intNewCompanyLocationId = 0 SET @intNewCompanyLocationId = NULL
 
@@ -170,7 +178,8 @@ BEGIN TRY
 				@intNewShippingLineId	=	ISNULL(@intNewShippingLineId,CD.intShippingLineId),
 				@dblAllocatedQty		=	CD.dblAllocatedQty,
 				@dtmM2MDate				=	CD.dtmM2MDate,
-				@ysnM2MDateChanged		=	CASE WHEN ISNULL(@dtmNewM2MDate,CD.dtmM2MDate) <> CD.dtmM2MDate THEN 1 ELSE 0 END
+				@ysnM2MDateChanged		=	CASE WHEN ISNULL(@dtmNewM2MDate,CD.dtmM2MDate) <> CD.dtmM2MDate THEN 1 ELSE 0 END,
+				@dblNewNoOfLots			=	ISNULL(@dblNewNoOfLots,CD.dblNoOfLots)
 
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
@@ -389,6 +398,31 @@ BEGIN TRY
 			BEGIN
 				SET @ErrMsg = 'Cannot change item for Sequence ' + LTRIM(@intContractSeq) + ', which is already in use.'
 				RAISERROR(@ErrMsg,16,1) 
+			END
+		END
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+		BEGIN
+			IF @strPricingQuantity = 'By Futures Contracts'
+			BEGIN
+				SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+				IF @dblNewNoOfLots < @dblLotsFixed
+				BEGIN
+					SET @ErrMsg = 'Cannot reduce the lots for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewNoOfLots)+', as '+dbo.fnRemoveTrailingZeroes(@dblLotsFixed)+' lots are price fixed.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
+			END
+			ELSE
+			BEGIN
+				SELECT	@dblQtyFixed = SUM(dblQuantity) FROM tblCTPriceFixation PF
+				JOIN	tblCTPriceFixationDetail FD ON FD.intPriceFixationId = PF.intPriceFixationId
+				WHERE	intContractDetailId = @intContractDetailId
+
+				IF @dblNewQuantity < @dblQtyFixed
+				BEGIN
+					SET @ErrMsg = 'Cannot reduce the quantity for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewQuantity)+', as '+dbo.fnRemoveTrailingZeroes(@dblQtyFixed)+' is price fixed.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
 			END
 		END
 	END

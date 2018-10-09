@@ -208,9 +208,9 @@ BEGIN
 			,Item.intLifeTime
 			,Item.strLifeTimeType
 			,TransferDetail.intFromSubLocationId
-			,strFromSubLocationName = FromSubLocation.strSubLocationName
+			,strFromSubLocationName = ISNULL(FromVendor.strName,FromSubLocation.strSubLocationName)
 			,TransferDetail.intToSubLocationId
-			,strToSubLocationName = ToSubLocation.strSubLocationName
+			,strToSubLocationName = ISNULL(ToVendor.strName,ToSubLocation.strSubLocationName)
 			,TransferDetail.intFromStorageLocationId
 			,strFromStorageLocationName = FromStorageLocation.strName
 			,TransferDetail.intToStorageLocationId

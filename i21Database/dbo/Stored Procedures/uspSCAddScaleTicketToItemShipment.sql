@@ -184,7 +184,7 @@ BEGIN
 														 AND CNT.intFXPriceUOMId IS NOT NULL 
 													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ICL.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
 													WHEN CNT.intPricingTypeId = 5 THEN 1
-													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ICL.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1) 
+													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ICL.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
 												END
 											ELSE 
 												CASE
@@ -238,11 +238,11 @@ BEGIN
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE 
 										WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossUnits))
-										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+										ELSE CASE WHEN SC.dblShrink > 0 THEN (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits ELSE LI.dblQty END
 									END
 		,dblTare					= CASE
 										WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, SC.dblShrink)
-										ELSE SC.dblShrink 
+										ELSE CASE WHEN SC.dblShrink > 0 THEN ((LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits) - LI.dblQty ELSE 0 END
 									END
 		,ysnDestinationWeightsAndGrades = CASE
 											WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' THEN 1

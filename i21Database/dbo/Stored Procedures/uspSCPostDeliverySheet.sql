@@ -178,35 +178,38 @@ BEGIN TRY
 			,@intOwnershipType
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
-		EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
-			@intItemId
-			,@dtmDate
-			,@intLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@strLotNumber
-			,@intOwnershipType
-			,@dblAdjustByQuantity 
-			,0
-			,@intItemUOMId
-			,@intDeliverySheetId --delivery sheet id
-			,53 --Delivery Sheet inventory transaction id
-			,@intUserId
-			,@intInventoryAdjustmentId OUTPUT
-			,'Delivery Sheet Posting'
+		IF ISNULL(@dblAdjustByQuantity,0) != 0
+		BEGIN
+			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
+				@intItemId
+				,@dtmDate
+				,@intLocationId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@strLotNumber
+				,@intOwnershipType
+				,@dblAdjustByQuantity 
+				,0
+				,@intItemUOMId
+				,@intDeliverySheetId --delivery sheet id
+				,53 --Delivery Sheet inventory transaction id
+				,@intUserId
+				,@intInventoryAdjustmentId OUTPUT
+				,'Delivery Sheet Posting'
 		
-		SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+			SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
-		SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
-		EXEC dbo.uspSMAuditLog 
-		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
-		,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
-		,@entityId			= @intUserId						-- Entity Id.
-		,@actionType		= 'Post'							-- Action Type
-		,@changeDescription	= @strTransactionId					-- Description
-		,@fromValue			= @dblOrigQuantity					-- Old Value
-		,@toValue			= @dblFinalQuantity					-- New Value
-		,@details			= '';
+			SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
+			EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
+			,@entityId			= @intUserId						-- Entity Id.
+			,@actionType		= 'Post'							-- Action Type
+			,@changeDescription	= @strTransactionId					-- Description
+			,@fromValue			= @dblOrigQuantity					-- Old Value
+			,@toValue			= @dblFinalQuantity					-- New Value
+			,@details			= '';
+		END
 
 		FETCH NEXT FROM ticketCursor INTO @intItemId
 			,@dtmDate
