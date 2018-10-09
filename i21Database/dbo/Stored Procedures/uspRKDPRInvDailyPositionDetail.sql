@@ -836,7 +836,8 @@ WHERE intLocationId IN (
 		SELECT DISTINCT 5,strStorageTypeDescription [Storage Type],@strDescription,strStorageTypeDescription,0.00,@intCommodityId
 		FROM tblGRStorageScheduleRule SSR 
 		INNER JOIN tblGRStorageType  ST ON SSR.intStorageType = ST.intStorageScheduleTypeId 
-		WHERE ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND ysnReceiptedStorage =0
+		WHERE SSR.intCommodity = @intCommodityId 
+			  AND ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND ysnReceiptedStorage =0
 			  AND intStorageScheduleTypeId NOT IN(SELECT DISTINCT isnull(intStorageScheduleTypeId,0) FROM @Final WHERE intSeqId=5)
 	END
 
