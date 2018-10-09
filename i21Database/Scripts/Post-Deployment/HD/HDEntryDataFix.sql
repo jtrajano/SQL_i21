@@ -653,5 +653,11 @@ GO
 		and b.ysnDefaultContact = convert(bit,1)
 
 GO
-	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
+	PRINT N'End updating Help Desk ticket type.';
+GO
+
+	update tblHDTicketType set intTicketTypeTypeId = (case when ysnTicket = convert(bit,1) then 2 else 1 end) where intTicketTypeTypeId is null;
+
+GO
+	PRINT N'End updating Help Desk ticket type.';
 GO
