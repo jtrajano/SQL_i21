@@ -27,6 +27,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ysnUpdateItemCostAndPrice AS BIT = 0
+	,@ysnTransferOnSameLocation AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -597,6 +598,7 @@ IF @intReturnValue < 0 RETURN @intReturnValue;
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
+IF ISNULL(@ysnTransferOnSameLocation, 0) = 0
 BEGIN 
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 

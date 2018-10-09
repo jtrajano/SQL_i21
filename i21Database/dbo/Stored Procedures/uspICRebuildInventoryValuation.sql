@@ -975,6 +975,15 @@ BEGIN
 			-- Repost 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer'))
 			BEGIN 
+				DECLARE @ysnTransferOnSameLocation AS BIT
+				SET @ysnTransferOnSameLocation = 0 
+				
+				SELECT	@ysnTransferOnSameLocation = 1 
+				FROM	tblICInventoryTransfer 
+				WHERE	intInventoryTransferId = @intTransactionId 
+						AND strTransferNo = @strTransactionId 
+						AND intFromLocationId <> intToLocationId
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -1040,6 +1049,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@ysnTransferOnSameLocation
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1109,18 +1119,13 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@ysnTransferOnSameLocation
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
 				-- Create the GL entries if transfer is between company locations. 
 				-- Do not create the GL entries if transfer if within the same company location. 
-				IF EXISTS (
-					SELECT	TOP 1 1 
-					FROM	tblICInventoryTransfer 
-					WHERE	intInventoryTransferId = @intTransactionId 
-							AND strTransferNo = @strTransactionId 
-							AND intFromLocationId <> intToLocationId
-				)
+				IF @ysnTransferOnSameLocation = 0 
 				BEGIN 
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
@@ -1163,7 +1168,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId-- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
