@@ -36,6 +36,7 @@ OUTER APPLY (
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail
 WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
+AND A.intTransactionReversed IS NULL --Remove if already reversed, negative part will be offset by the reversal transaction
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
@@ -43,7 +44,7 @@ UNION ALL
 --VENDOR PREPAYMENT PAYMENT TRANSACTION (this will remove the positive part and leave the negative part)
 SELECT 
 	  A.dtmDatePaid AS dtmDate 
-	, B.intBillId  
+	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
 	, C.strBillId
 	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
 	, dblTotal = 0 
@@ -160,24 +161,25 @@ AND NOT EXISTS (
 UNION ALL --PREPAYMENT REVERSAL
 SELECT
 	A.dtmDate	
-	, A.intBillId 
-	, A.strBillId 
+	, A.intBillId --Use the original prepaid primary key but display the bill id of reversal (-R)
+	, B.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblTotal
-	, CAST(A.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountDue
+	, CAST(B.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblTotal
+	, CAST(B.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountDue
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0
 	, dblPrepaidAmount = 0   
 	, C1.strVendorId 
 	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
-	, A.dtmDueDate
-	, A.ysnPosted 
-	, A.ysnPaid
-	, A.intAccountId
+	, B.dtmDueDate
+	, B.ysnPosted 
+	, B.ysnPaid
+	, B.intAccountId
 	, EC.strClass
 	, 2
 FROM dbo.tblAPBill A
+INNER JOIN tblAPBill B ON A.intTransactionReversed = B.intBillId
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
@@ -185,9 +187,9 @@ OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
 	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = A.intBillId
+	WHERE bd.intBillId = B.intBillId
 ) prepaidDetail	
-WHERE A.intTransactionType IN (12) AND A.ysnPosted = 1
+WHERE B.intTransactionType IN (12) AND A.ysnPosted = 1 AND B.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
