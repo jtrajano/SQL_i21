@@ -10,9 +10,9 @@ BEGIN TRY
 
     IF NOT EXISTS(SELECT 
                     intStorageHistoryTransactionId 
-                FROM tblGRStorageHistoryTransaction SHT 
+                FROM tblGRStorageHistoryTypeTransaction SHT 
                 INNER JOIN @StorageHistoryData SH 
-                    ON SH.intTypeId = SHT.intTypeId)
+                    ON SH.intTransactionTypeId = SHT.intTypeId)
     BEGIN
 		RAISERROR('Invalid storage transaction.', 16, 1);
 		RETURN;
@@ -40,7 +40,8 @@ BEGIN TRY
         [intUserId],
         [ysnPost],
         [dtmDistributionDate],
-        [intTransactionTypeId]
+        [intTransactionTypeId],
+        [intConcurrencyId]
     ) 
     SELECT 
         [intCustomerStorageId]      = SH.intCustomerStorageId,
@@ -54,7 +55,7 @@ BEGIN TRY
         [intBillId]                 = SH.intBillId,
         [intContractHeaderId]       = SH.intContractHeaderId,
         [intInventoryAdjustmentId]  = SH.intInventoryAdjustmentId,
-        [dblUnits]                  = SH.dlbUnits,
+        [dblUnits]                  = SH.dblUnits,
         [dtmHistoryDate]            = SH.dtmHistoryDate,
         [dblPaidAmount]             = SH.dblPaidAmount,
         [strPaidDescription]        = SH.strPaidDescription,
@@ -63,7 +64,8 @@ BEGIN TRY
         [intUserId]                 = SH.intUserId,
         [ysnPost]                   = SH.ysnPost,
         [dtmDistributionDate]       = GETDATE(),
-        [intTransactionTypeId]      = SH.intTransactionTypeId
+        [intTransactionTypeId]      = SH.intTransactionTypeId,
+        1
     FROM @StorageHistoryData SH
 
     SELECT @intStorageHistoryId = SCOPE_IDENTITY();
