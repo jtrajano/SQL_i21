@@ -1147,7 +1147,7 @@ SELECT
 	,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
 	,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
 	,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
-	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, DATEADD(month, 1, ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)))
+	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, ISNULL(CAST(ITG.dtmPostDate AS DATE),@DateOnly))
 	,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
 	,[dtmCalculated]				= NULL
 	,[dblInvoiceSubtotal]			= @ZeroDecimal
