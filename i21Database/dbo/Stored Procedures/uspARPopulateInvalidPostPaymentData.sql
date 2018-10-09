@@ -71,7 +71,7 @@ BEGIN
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
         ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[intTransactionDetailId]   = NULL--P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
         ,[strError]                 = 'There was no payment to receive.'
 	FROM
@@ -82,7 +82,7 @@ BEGIN
     GROUP BY
          P.[intTransactionId]
 		,P.[strTransactionId]
-        ,P.[intTransactionDetailId]
+        --,P.[intTransactionDetailId]
         ,P.[strBatchId]
     HAVING
             SUM(P.dblPayment) = @ZeroDecimal
