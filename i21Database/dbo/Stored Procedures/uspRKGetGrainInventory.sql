@@ -154,6 +154,54 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 		AND r.intSourceType = 1)a
 
+	UNION ALL --Inventory Adjustments
+	SELECT dtmDate,
+			'' strDistributionOption,
+			'' strShipDistributionOption,
+			'ADJ' as strAdjDistributionOption,
+			'' as strCountDistributionOption,
+			'' tranShipmentNumber,
+			0.0 tranShipQty,
+			'' tranReceiptNumber,
+			0.0 tranRecQty,
+			strAdjustmentNo tranAdjNumber,
+			dblAdjustmentQty,
+			'' tranCountNumber,
+			0.0 dblCountQty,
+			'' tranInvoiceNumber,
+			0.0 dblInvoiceQty,
+			null intInventoryReceiptId,
+			null intInventoryShipmentId,
+			intInventoryAdjustmentId,
+			null intInventoryCountId,
+			null intInvoiceId,
+			null intDeliverySheetId,
+			'' AS deliverySheetNumber,
+			null intTicketId,
+			'' AS ticketNumber    
+	FROM(
+		SELECT  
+			CONVERT(VARCHAR(10),IT.dtmDate,110) dtmDate
+			,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) ,6) dblAdjustmentQty
+			,IT.strTransactionId strAdjustmentNo
+			,IT.intTransactionId intInventoryAdjustmentId
+		FROM tblICInventoryTransaction IT 	
+			INNER JOIN tblICItem Itm ON IT.intItemId = Itm.intItemId
+			INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+			INNER JOIN tblICItemUOM u on Itm.intItemId=u.intItemId and u.ysnStockUnit=1
+			INNER JOIN tblICItemLocation il on IT.intItemLocationId=il.intItemLocationId
+											AND  il.intLocationId  IN (
+														SELECT intCompanyLocationId FROM tblSMCompanyLocation
+														WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+														WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+														ELSE isnull(ysnLicensed, 0) END)
+		WHERE IT.intTransactionTypeId IN (10,15)
+			AND IT.ysnIsUnposted = 0
+			AND convert(DATETIME, CONVERT(VARCHAR(10), IT.dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND IT.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IT.intItemId ELSE @intItemId END 
+			AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+		)a
 UNION ALL--IR came from Delivery Sheet
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
