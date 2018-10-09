@@ -17,6 +17,9 @@ DECLARE @intDeliverySheetId INT = NULL
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intHoldCustomerStorageId INT
 DECLARE @newBalance DECIMAL(38,20) = 0
+DECLARE @storageHistoryData AS [StorageHistoryStagingTable]
+DECLARE @intStorageHistoryId AS INT
+
 BEGIN TRY
 	--check if a storage already exists 
 	SELECT 
@@ -124,39 +127,33 @@ BEGIN TRY
 		RETURN;
 	END
 
-	--always insert a record in storage history
-	INSERT INTO [dbo].[tblGRStorageHistory]
-			([intConcurrencyId]
-			,[intCustomerStorageId]
+	--always insert a record in storage history	
+	INSERT INTO @storageHistoryData
+			([intCustomerStorageId]
 			,[intTicketId]
 			,[intDeliverySheetId]
-			,[intInventoryReceiptId]
-			,[intInvoiceId]
 			,[intContractHeaderId]
 			,[dblUnits]
 			,[dtmHistoryDate]
-			,[dblPaidAmount]
 			,[strPaidDescription]
 			,[dblCurrencyRate]
-			,[strType]
+			,[intTransactionTypeId]
 			,[intUserId]
-			,[intTransactionTypeId])
-	SELECT 	[intConcurrencyId]					= 1
-			,[intCustomerStorageId]				= @intCustomerStorageId				
+			,[ysnPost])
+	SELECT 	[intCustomerStorageId]				= @intCustomerStorageId				
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
-			,[intInventoryReceiptId]			= NULL
-			,[intInvoiceId]						= NULL
 			,[intContractHeaderId]				= CS.intContractHeaderId
 			,[dblUnits]							= CS.dblQuantity
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
-			,[dblPaidAmount]					= 0
-			,[strPaidDescription]				= 'Generated From Scale'
+			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Delivery Sheet' ELSE 'Generated From Scale' END
 			,[dblCurrencyRate]					= 1
-			,[strType]							= 'From Scale'
+			,[intTransactionTypeId]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 5 ELSE 1 END
 			,[intUserId]						= CS.intUserId --strUserName will be replaced by intUserId
-			,[intTransactionTypeId]				= 1
+			,[ysnPost]							= 1
 	FROM	@CustomerStorageStagingTable CS
+
+	EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, @intStorageHistoryId OUTPUT
 
 	--update the discounts due, storage due
 	--calculate total discounts for [dblDiscountsDue]
