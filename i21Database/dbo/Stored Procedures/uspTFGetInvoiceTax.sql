@@ -448,7 +448,7 @@ BEGIN TRY
 
 		IF(@TaxAuthorityCode = 'OR')
 		BEGIN
-			IF (@ScheduleCode = '5CRD' OR @ScheduleCode = '6CRD')
+			IF (@ScheduleCode = '5CRD')
 			BEGIN
 				-- Include CF Trans only
 				DELETE @tmpInvoiceTransaction WHERE intId IN (
@@ -459,6 +459,23 @@ BEGIN TRY
 					WHERE Trans.strTransactionType = 'Invoice'
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType <> 'CF Tran'
+				)
+			END
+			ELSE IF (@ScheduleCode = '6CRD')
+			BEGIN
+				-- Include CF Trans only
+				DELETE @tmpInvoiceTransaction WHERE intId IN (
+					SELECT Trans.intId
+					FROM @tmpInvoiceTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
+					LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
+
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND Invoice.strType <> 'CF Tran' 
+					AND (Invoice.strType = 'CF Tran' AND tblCFSite.ysnCaptiveSite = 1)
 				)
 			END
 			ELSE IF (@ScheduleCode IN ('5BLK', '6BLK', '5LO', '6', '7', '7E', '8', '10', '10AC', '10AD', '10D'))
