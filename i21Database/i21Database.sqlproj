@@ -7423,4 +7423,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MN_Minnesota.sql" />
+  </ItemGroup>
 </Project>

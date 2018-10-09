@@ -100,6 +100,31 @@ DELETE @TaxCategoryMI
 
 GO
 
+PRINT ('Deploying MN Tax Category')
+
+DECLARE @TaxCategoryMN AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMN(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax Gasoline/Alcohol', intMasterId = 23158
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax E-85', intMasterId = 23159
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax Diesel Clear', intMasterId = 23160
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax Aviation Gas', intMasterId = 23161
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax Jet Fuel', intMasterId = 23162
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax LPG (Propane)', intMasterId = 23164
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax CNG', intMasterId = 23165
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Excise Tax LNG', intMasterId = 23166
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MN', @TaxCategories = @TaxCategoryMN
+
+DELETE @TaxCategoryMN
+
+GO
+
 
 PRINT ('Deploying MS Tax Category')
 
