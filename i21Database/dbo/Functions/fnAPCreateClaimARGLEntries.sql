@@ -111,7 +111,12 @@ BEGIN
 			,[strRateType]					=	SMCERT.strCurrencyExchangeRateType	 	
 		FROM tblARPayment arPay
 		INNER JOIN @transactionIds ids ON arPay.intPaymentId = ids.intId
-		INNER JOIN tblARCustomer customer ON arPay.intEntityCustomerId = customer.intEntityId
+		INNER JOIN (
+			SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
+					(	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
+					SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
+			JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
+		)  customer ON arPay.intEntityCustomerId = customer.intEntityId
 		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId AND arPayDetail.dblPayment <> 0
 		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
 		LEFT OUTER JOIN
@@ -165,7 +170,12 @@ BEGIN
 			,[strRateType]					=	SMCERT.strCurrencyExchangeRateType	 	
 		FROM tblARPayment arPay
 		INNER JOIN @transactionIds ids ON arPay.intPaymentId = ids.intId
-		INNER JOIN tblARCustomer customer ON arPay.intEntityCustomerId = customer.intEntityId
+		INNER JOIN (
+			SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
+					(	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
+					SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
+			JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
+		)   customer ON arPay.intEntityCustomerId = customer.intEntityId
 		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId  AND arPayDetail.dblPayment <> 0
 		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
 		-- INNER JOIN tblCTContractHeader contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
