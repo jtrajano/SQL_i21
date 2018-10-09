@@ -7117,7 +7117,7 @@
     <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
-    <Build Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
