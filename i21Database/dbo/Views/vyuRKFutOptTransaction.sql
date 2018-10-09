@@ -48,6 +48,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,rm.strFutureMonth strRollingMonth
 			,ft.strBrokerTradeNo		
 			,ft.ysnPreCrush		
+			,fm.strFutureMonth  
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
