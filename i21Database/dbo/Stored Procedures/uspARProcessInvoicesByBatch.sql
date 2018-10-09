@@ -493,7 +493,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	
@@ -1450,7 +1450,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	
