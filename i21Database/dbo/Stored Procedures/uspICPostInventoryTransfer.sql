@@ -251,6 +251,12 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 END 
 
+-- Check the locations if GL entries will be required. 
+SELECT	@ysnGLEntriesRequired = 1
+FROM	tblICInventoryTransfer 
+WHERE	intInventoryTransferId = @intTransactionId 
+		AND intFromLocationId <> intToLocationId
+
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -269,7 +275,7 @@ BEGIN
 		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
 		WHERE @ysnShipmentRequired = 0
 	END
-	
+
 	-- Process the "From" Stock 
 	BEGIN 
 		DECLARE @CompanyOwnedStock AS ItemCostingTableType  
@@ -602,6 +608,9 @@ BEGIN
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 					,@intEntityUserSecurityId
+					,DEFAULT
+					,DEFAULT 
+					,@ysnGLEntriesRequired
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -621,7 +630,6 @@ BEGIN
 
 		-- Clear the GL entries 
 		DELETE FROM @GLEntries
-
 	END
 
 	-- Process the "To" Stock (Shipment is REQUIRED). 
@@ -728,13 +736,8 @@ BEGIN
 	END 
 
 	-- Check if From and To locations are the same. If not, then generate the GL entries. 
-	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
-	BEGIN 	
-		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
-		BEGIN 
-			SET @ysnGLEntriesRequired = 1
-		END 
-
+	IF @ysnGLEntriesRequired = 1
+	BEGIN
 		-----------------------------------------
 		-- Generate a new set of g/l entries
 		-----------------------------------------
@@ -830,19 +833,6 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 0   
 BEGIN   
-	-- Check if From and To locations are the same. If not, then generate the GL entries. 
-	IF EXISTS (
-		SELECT	TOP 1 1 
-		FROM	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
-					ON t.intInventoryTransferId = td.intInventoryTransferId
-		WHERE	t.intInventoryTransferId = @intTransactionId 
-				AND t.intFromLocationId <> t.intToLocationId
-				AND td.intOwnershipType = @ownershipType_Own
-	)
-	BEGIN 
-		SET @ysnGLEntriesRequired = 1;
-	END 
-	
 	-- Call the unpost routine 
 	BEGIN 
 		-- Call the post routine 
