@@ -314,33 +314,42 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
-			,strNewLotNumber			= Lot.strLotNumber
+			,strNewLotNumber			= NULL 
 			,intItemUOMId				= @intItemUOMId
 			,intNewItemUOMId			= NULL 
 			,intOwnershipType			= Lot.intOwnershipType
-			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+			,dblQuantity				=	
+											CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
 													ELSE 0 
 											END 
-			,dblAdjustByQuantity		= NULL
-			,dblNewSplitLotQuantity		= NULL 
-			,dblNewQuantity				= ABS(@dblAdjustByQuantity) --CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
-											--	WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
-											--	ELSE 0 
-											-- END 
-											-- + @dblAdjustByQuantity
+			,dblAdjustByQuantity		= @dblAdjustByQuantity
+			,dblNewSplitLotQuantity		= NULL  
+            ,dblNewQuantity             =    
+											CASE    WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+                                                    WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+                                                    ELSE 0 
+                                            END 
+                                            + @dblAdjustByQuantity
+
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= NULL 
-			,dblWeight					= Lot.dblWeight
-			,dblNewWeight				= CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
+            ,dblWeight                    =    
+											CASE    WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
 													ELSE 0 
-											END  
+											END 
+
+			,dblNewWeight				=  NULL 
+											--CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
+											--		WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
+											--		ELSE 0 
+											--END  
 			,dblWeightPerQty			= Lot.dblWeightPerQty
-			,dblNewWeightPerQty			= NULL 
+			,dblNewWeightPerQty			= NULL -- Lot.dblWeightPerQty
 			,dblCost					= dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
-			,dblNewCost					= NULL 
-			,intNewLocationId			= NULL  
+			,dblNewCost					= NULL --dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+			,intNewLocationId			= NULL -- @intLocationId  
 			,intNewSubLocationId		= @intNewSubLocationId
 			,intNewStorageLocationId	= @intNewStorageLocationId
 			,intSort					= 1
