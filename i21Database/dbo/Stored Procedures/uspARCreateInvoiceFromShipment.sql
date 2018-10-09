@@ -75,7 +75,7 @@ SELECT
 	,@Type						= 'Standard'
 	,@EntityCustomerId			= ICIS.[intEntityCustomerId]
 	,@CompanyLocationId			= ICIS.[intShipFromLocationId]	
-	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
+	,@CurrencyId				= ISNULL(ICIS.intCurrencyId, ISNULL((SHIPPEDITEM.intCurrencyId),ISNULL(ARC.[intCurrencyId], COMPANYPREF.intDefaultCurrencyId)))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
 	,@Date						= @DateOnly
@@ -100,6 +100,18 @@ INNER JOIN
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
+OUTER APPLY (
+	SELECT TOP 1 intCurrencyId 
+	FROM vyuARShippedItems 
+	WHERE intInventoryShipmentId = @ShipmentId 
+	  AND intInventoryShipmentChargeId IS NOT NULL 
+	  AND intCurrencyId IS NOT NULL
+) SHIPPEDITEM
+OUTER APPLY (
+	SELECT TOP 1 intDefaultCurrencyId 
+	FROM tblSMCompanyPreference 
+	WHERE ISNULL(intDefaultCurrencyId, 0) <> 0
+) COMPANYPREF
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 
