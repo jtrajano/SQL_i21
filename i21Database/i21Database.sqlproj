@@ -2718,6 +2718,7 @@
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
+	<Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
@@ -7046,6 +7047,7 @@
     <Build Include="dbo\Views\vyuICGetStockMovement.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
     <Build Include="dbo\User Defined Types\CustomerStorageStagingTable.sql" />
+	<Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateCustomerStorage.sql" />
@@ -7305,9 +7307,11 @@
     <Build Include="dbo\Tables\tblGRTransferStorageReference.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
+	<Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
+	<None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
