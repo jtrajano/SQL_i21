@@ -255,6 +255,7 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
+			AND cbOut.intRevalueLotId IS NULL 
 END 
 
 -- Remember the original cost from the cost bucket
