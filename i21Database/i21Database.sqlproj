@@ -825,10 +825,6 @@
     <Build Include="dbo\User Defined Types\EntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql">
-	<Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
-	<Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
-	<None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
-    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Tables\tblNRAdjustmentType.sql" />
@@ -7119,6 +7115,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPostHandlingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
+    <Build Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
