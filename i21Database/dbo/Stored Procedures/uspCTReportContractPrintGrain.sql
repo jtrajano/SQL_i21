@@ -88,9 +88,9 @@ BEGIN TRY
 			@strCompanyName AS	strE,
 			CH.strEntityName		AS	strF,
 			CASE	WHEN	CH.intContractTypeId  =	1	
-					THEN	'PURCHASE CONTRACT CONFIRMATION'
+					THEN	'PURCHASE '+ UPPER(CH.strPricingType) +' CONTRACT CONFIRMATION'
 					WHEN	CH.intContractTypeId  =	2
-					THEN	'SALES CONTRACT CONFIRMATION'
+					THEN	'SALES '+ UPPER(CH.strPricingType) +' CONTRACT CONFIRMATION'
 			END		AS	strHeading,
 			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'BUYER'
