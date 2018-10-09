@@ -7,7 +7,6 @@ GO
     --2. update tblGRStorageHistory with the intTransferStorageId and strTransferTicketNumber
     --3. set intTicketId in tblGRStorageHistory to NULL
     
-    --create temp table for the customer storages (transfer and from transfer)
     IF NOT EXISTS(  SELECT TOP 1 1 
                     FROM tblGRTransferStorageReference TSR
                     JOIN tblGRStorageHistory SH
@@ -32,14 +31,14 @@ GO
         , [intConcurrencyId]
     )
     SELECT
-        [strTransferStorageTicket] = SH.strTransferTicket
-        , [intEntityId] = CS.intEntityId
-        , [intCompanyLocationId] = CS.intCompanyLocationId
-        , [intStorageTypeId] = CS.intStorageTypeId
-        , [intItemId] =  CS.intItemId
-        , [intItemUOMId] = CS.intItemUOMId
-        , [dblTotalUnits] = ABS(SUM(dblUnits))
-        , [intConcurrencyId] = CS.intConcurrencyId
+        [strTransferStorageTicket]  = SH.strTransferTicket
+        , [intEntityId]             = CS.intEntityId
+        , [intCompanyLocationId]    = CS.intCompanyLocationId
+        , [intStorageTypeId]        = CS.intStorageTypeId
+        , [intItemId]               = CS.intItemId
+        , [intItemUOMId]            = CS.intItemUOMId
+        , [dblTotalUnits]           = ABS(SUM(dblUnits))
+        , [intConcurrencyId]        = CS.intConcurrencyId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
@@ -65,13 +64,13 @@ GO
         , [intConcurrencyId]
     )
     SELECT
-        [intTransferStorageId] = TS.intTransferStorageId
-        , [intSourceCustomerStorageId] = CS.intCustomerStorageId
-		, [intStorageTypeId] = CS.intStorageTypeId
-        , [intStorageScheduleId] = CS.intStorageScheduleId
-        , [dblOriginalUnits] = CS.dblOriginalBalance
-        , [dblDeductedUnits] = ABS(SUM(SH.dblUnits))
-        , [intConcurrencyId] = CS.intConcurrencyId
+        [intTransferStorageId]          = TS.intTransferStorageId
+        , [intSourceCustomerStorageId]  = CS.intCustomerStorageId
+		, [intStorageTypeId]            = CS.intStorageTypeId
+        , [intStorageScheduleId]        = CS.intStorageScheduleId
+        , [dblOriginalUnits]            = CS.dblOriginalBalance
+        , [dblDeductedUnits]            = ABS(SUM(SH.dblUnits))
+        , [intConcurrencyId]            = CS.intConcurrencyId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
@@ -95,22 +94,23 @@ GO
 		, [intConcurrencyId]
     )
     SELECT
-        [intTransferStorageId] = TS.intTransferStorageId
-        , [intTransferToCustomerStorageId] = CS.intCustomerStorageId
-        , [intEntityId] = CS.intEntityId
-        , [intCompanyLocationId] = CS.intCompanyLocationId
-        , [intStorageTypeId] = CS.intStorageTypeId
-        , [intStorageScheduleId] = CS.intStorageScheduleId
-		, [intContractDetailId] = 0
-		, [dblSplitPercent] = ROUND(((CS.dblOriginalBalance / TS.dblTotalUnits) * 100), 2)
-		, [dblUnits] = CS.dblOriginalBalance
-		, [intConcurrencyId] = CS.intConcurrencyId
+        [intTransferStorageId]              = TS.intTransferStorageId
+        , [intTransferToCustomerStorageId]  = CS.intCustomerStorageId
+        , [intEntityId]                     = CS.intEntityId
+        , [intCompanyLocationId]            = CS.intCompanyLocationId
+        , [intStorageTypeId]                = CS.intStorageTypeId
+        , [intStorageScheduleId]            = CS.intStorageScheduleId
+		, [intContractDetailId]             = 0
+		, [dblSplitPercent]                 = ROUND(((CS.dblOriginalBalance / TS.dblTotalUnits) * 100), 2)
+		, [dblUnits]                        = CS.dblOriginalBalance
+		, [intConcurrencyId]                = CS.intConcurrencyId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
 			AND SH.strType = 'From Transfer'
 	INNER JOIN tblGRTransferStorage TS
 		ON TS.strTransferStorageTicket = SH.strTransferTicket
+        
 	PRINT 'END Migrating Transfer Storage data to Main tables'
 	/****tblGRTransferStorageReference might no longer be needed*****/
 
