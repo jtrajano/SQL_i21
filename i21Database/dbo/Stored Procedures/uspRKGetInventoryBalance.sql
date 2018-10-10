@@ -107,28 +107,28 @@ WHERE  i.intCommodityId= @intCommodityId
 --		 and r.intLocationId = case when isnull(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
 --		 AND r.ysnPosted = 1)a
 
-UNION all --IR came from Delivery Sheet
-SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
-		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit 
-		, dblInQty tranDSInQty from(
-select  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) dblInQty,r.strReceiptNumber  
-FROM tblSCDeliverySheet DS
-		JOIN tblICItem i on i.intItemId=DS.intItemId 
-												AND  DS.intCompanyLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
-		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=DS.intDeliverySheetId
-		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
-		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityVendorId
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
-		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1 
-WHERE  i.intCommodityId= @intCommodityId
-		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId else @intLocationId end
-		 AND DS.ysnPost = 1 AND r.intSourceType = 5)a
+--UNION all --IR came from Delivery Sheet
+--SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+--		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit 
+--		, dblInQty tranDSInQty from(
+--select  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) dblInQty,r.strReceiptNumber  
+--FROM tblSCDeliverySheet DS
+--		JOIN tblICItem i on i.intItemId=DS.intItemId 
+--												AND  DS.intCompanyLocationId  IN (
+--													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+--													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+--													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+--													ELSE isnull(ysnLicensed, 0) END)
+--		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=DS.intDeliverySheetId
+--		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
+--		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityVendorId
+--		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
+--		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1 
+--WHERE  i.intCommodityId= @intCommodityId
+--		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+--		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
+--		 and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId else @intLocationId end
+--		 AND DS.ysnPost = 1 AND r.intSourceType = 5)a
 		 
 
 union 
@@ -177,73 +177,73 @@ WHERE  i.intCommodityId= @intCommodityId
 		and ri.intOwnershipType = 1
 		and r.intShipFromLocationId = case when isnull(@intLocationId,0)=0 then r.intShipFromLocationId  else @intLocationId end)a
 
-union all--IS came from Delivery Sheet
-SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
-		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
-		,0.0 tranDSInQty from(
-SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
-,ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0 
-	ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
-FROM tblSCDeliverySheet DS
-		JOIN tblICItem i on i.intItemId=DS.intItemId 
-												AND  DS.intCompanyLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
-		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=DS.intDeliverySheetId
-		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
-		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityId 
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
-		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
-WHERE  i.intCommodityId= @intCommodityId
-		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and gs.strOwnedPhysicalStock='Customer'
-		and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then  DS.intCompanyLocationId  else @intLocationId end)a
+--union all--IS came from Delivery Sheet
+--SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+--		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit 
+--		,0.0 tranDSInQty from(
+--SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
+--,ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0 
+--	ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
+--FROM tblSCDeliverySheet DS
+--		JOIN tblICItem i on i.intItemId=DS.intItemId 
+--												AND  DS.intCompanyLocationId  IN (
+--													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+--													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+--													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+--													ELSE isnull(ysnLicensed, 0) END)
+--		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=DS.intDeliverySheetId
+--		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
+--		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityId 
+--		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
+--		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
+--WHERE  i.intCommodityId= @intCommodityId
+--		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+--		and gs.strOwnedPhysicalStock='Customer'
+--		and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then  DS.intCompanyLocationId  else @intLocationId end)a
 
-UNION ALL --Delivery Sheet
-select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
-		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
-		,0.0 tranDSInQty 
-from(
-SELECT
-	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
-	DSS.strDistributionOption,
-	'' strShipDistributionOption,
-	'' as strAdjDistributionOption,
-	'' as strCountDistributionOption,
-	'' as tranShipmentNumber,
-	(CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END)  tranShipQty,
-	'' tranReceiptNumber,
-	(CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END) tranRecQty,
-	'' tranAdjNumber,
-	0.0 dblAdjustmentQty,
-	'' tranCountNumber,
-	0.0 dblCountQty,
-	'' tranInvoiceNumber,
-	0.0 dblInvoiceQty,
-	null intInventoryReceiptId,
-	NULL intInventoryShipmentId,
-	null intInventoryAdjustmentId,
-	null intInventoryCountId,
-	null intInvoiceId,
-	DS.intDeliverySheetId,
-	DS.strDeliverySheetNumber + '*' AS deliverySheetNumber,
-	null intTicketId,
-	'' AS ticketNumber  
-FROM tblSCTicket st
-	JOIN tblICItem i on i.intItemId=st.intItemId
-	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
-	JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
-WHERE i.intCommodityId= @intCommodityId
-	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
-	AND  st.intProcessingLocationId  IN (
-										SELECT intCompanyLocationId FROM tblSMCompanyLocation
-										WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-										ELSE isnull(ysnLicensed, 0) END)
-	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H')t
+--UNION ALL --Delivery Sheet
+--select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
+--		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+--		,0.0 tranDSInQty 
+--from(
+--SELECT
+--	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+--	DSS.strDistributionOption,
+--	'' strShipDistributionOption,
+--	'' as strAdjDistributionOption,
+--	'' as strCountDistributionOption,
+--	'' as tranShipmentNumber,
+--	(CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END)  tranShipQty,
+--	'' tranReceiptNumber,
+--	(CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END) tranRecQty,
+--	'' tranAdjNumber,
+--	0.0 dblAdjustmentQty,
+--	'' tranCountNumber,
+--	0.0 dblCountQty,
+--	'' tranInvoiceNumber,
+--	0.0 dblInvoiceQty,
+--	null intInventoryReceiptId,
+--	NULL intInventoryShipmentId,
+--	null intInventoryAdjustmentId,
+--	null intInventoryCountId,
+--	null intInvoiceId,
+--	DS.intDeliverySheetId,
+--	DS.strDeliverySheetNumber + '*' AS deliverySheetNumber,
+--	null intTicketId,
+--	'' AS ticketNumber  
+--FROM tblSCTicket st
+--	JOIN tblICItem i on i.intItemId=st.intItemId
+--	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
+--	JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+--WHERE i.intCommodityId= @intCommodityId
+--	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+--	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
+--	AND  st.intProcessingLocationId  IN (
+--										SELECT intCompanyLocationId FROM tblSMCompanyLocation
+--										WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+--										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+--										ELSE isnull(ysnLicensed, 0) END)
+--	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H')t
 	
 
 UNION ALL --On Hold without Delivery Sheet
