@@ -2,20 +2,27 @@ GO
 --BEGIN TRAN
     PRINT 'BEGIN Migrating Transfer Storage data to Main tables'
     --migrate all existing Transfer Storage to new tables
-    --USE WHILE TO LOOP UNTIL THERE'S NO MORE intTransferStorageId missing in tblGRStorageHistory table
     --1. insert in transfer storage tables
     --2. update tblGRStorageHistory with the intTransferStorageId and strTransferTicketNumber
     --3. set intTicketId in tblGRStorageHistory to NULL
     
     IF NOT EXISTS(  SELECT TOP 1 1 
-                    FROM tblGRTransferStorageReference TSR
-                    JOIN tblGRStorageHistory SH
-                        ON (TSR.intSourceCustomerStorageId = SH.intTicketId
-                            AND TSR.intTransferToCustomerStorageId = SH.intCustomerStorageId
-                            AND SH.strType = 'From Transfer') --TRANSFERRED TO
+                    FROM tblGRTransferStorage TS
+                    INNER JOIN tblGRTransferStorageSourceSplit TSource
+                        ON TSource.intTransferStorageId = TS.intTransferStorageId
+                    INNER JOIN tblGRTransferStorageSplit TSplit
+                        ON TSplit.intTransferStorageId = TS.intTransferStorageId
+                    INNER JOIN tblGRStorageHistory SH
+                        ON (
+                            TSource.intSourceCustomerStorageId = SH.intTicketId
+                                AND TSplit.intTransferToCustomerStorageId = SH.intCustomerStorageId
+                                AND SH.strType = 'From Transfer'
+                            ) --TRANSFERRED TO
                             OR
-                            (TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-                            AND SH.strType = 'Transfer')--SOURCE
+                            (
+                            TSource.intSourceCustomerStorageId = SH.intCustomerStorageId
+                                AND SH.strType = 'Transfer'
+                            ) --SOURCE
                 )
 
 	/*====TRANSFER STORAGE'S HEADER====*/
@@ -29,6 +36,7 @@ GO
         , [intItemUOMId]
         , [dblTotalUnits]
         , [intConcurrencyId]
+        , [intUserId]
     )
     SELECT
         [strTransferStorageTicket]  = SH.strTransferTicket
@@ -39,11 +47,12 @@ GO
         , [intItemUOMId]            = CS.intItemUOMId
         , [dblTotalUnits]           = ABS(SUM(dblUnits))
         , [intConcurrencyId]        = CS.intConcurrencyId
+        , [intUserId]               = SH.intUserId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
 			AND SH.strType = 'Transfer'
-	GROUP BY SH.strTransferTicket, CS.intEntityId, CS.intCompanyLocationId, CS.intStorageTypeId, CS.intItemId, CS.intItemUOMId, CS.intConcurrencyId
+	GROUP BY SH.strTransferTicket, CS.intEntityId, CS.intCompanyLocationId, CS.intStorageTypeId, CS.intItemId, CS.intItemUOMId, CS.intConcurrencyId, SH.intUserId
 
 	UPDATE TS 
 	SET [dtmTransferStorageDate] = [dbo].[fnRemoveTimeOnDate](SH.dtmDistributionDate) 
@@ -61,6 +70,7 @@ GO
         , [intStorageScheduleId]
         , [dblOriginalUnits]
         , [dblDeductedUnits]
+        , [dblSplitPercent]
         , [intConcurrencyId]
     )
     SELECT
@@ -70,6 +80,7 @@ GO
         , [intStorageScheduleId]        = CS.intStorageScheduleId
         , [dblOriginalUnits]            = CS.dblOriginalBalance
         , [dblDeductedUnits]            = ABS(SUM(SH.dblUnits))
+        , [dblSplitPercent]             = ABS(ROUND((SUM(SH.dblUnits) / CS.dblOriginalBalance) * 100, 2))
         , [intConcurrencyId]            = CS.intConcurrencyId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
@@ -100,7 +111,7 @@ GO
         , [intCompanyLocationId]            = CS.intCompanyLocationId
         , [intStorageTypeId]                = CS.intStorageTypeId
         , [intStorageScheduleId]            = CS.intStorageScheduleId
-		, [intContractDetailId]             = 0
+		, [intContractDetailId]             = 0 --O FOR NOW; APPLICATION OF DP CONTRACT IS NOT YET IMPLEMENTED
 		, [dblSplitPercent]                 = ROUND(((CS.dblOriginalBalance / TS.dblTotalUnits) * 100), 2)
 		, [dblUnits]                        = CS.dblOriginalBalance
 		, [intConcurrencyId]                = CS.intConcurrencyId
@@ -112,7 +123,6 @@ GO
 		ON TS.strTransferStorageTicket = SH.strTransferTicket
         
 	PRINT 'END Migrating Transfer Storage data to Main tables'
-	/****tblGRTransferStorageReference might no longer be needed*****/
 
 	/****update data in tblGRStorageHistoryId****/
 	PRINT 'START Updating intTransferStorageId.tblGRStorageHistory and intTicketId.tblGRStorageHistory'
@@ -139,16 +149,4 @@ GO
 
 
 	PRINT 'END Updating intTransferStorageId.tblGRStorageHistory and intTicketId.tblGRStorageHistory'
-
-	SELECT * FROM tblGRTransferStorage
-	SELECT * FROM tblGRTransferStorageSourceSplit
-	SELECT * FROM tblGRTransferStorageSplit
-
-	select intTransferStorageId, intTicketId, strTransferTicket, * from tblGRStorageHistory where strType like '%transfer%'
-	SELECT * FROM tblGRCustomerStorage
-
-    
---ROLLBACK TRAN
 GO
-
---EXEC [dbo].[uspGRDropCreateTransferTables]

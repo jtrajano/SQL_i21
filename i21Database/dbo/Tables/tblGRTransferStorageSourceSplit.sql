@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblGRTransferStorageSourceSplit]
 	[intStorageTypeId] INT NOT NULL,
     [intStorageScheduleId] INT NOT NULL,
     [intContractDetailId] INT NULL,
+    [dblSplitPercent] DECIMAL(18,6) NOT NULL,
     [dblOriginalUnits] NUMERIC(38,20) NOT NULL,
     [dblDeductedUnits] NUMERIC(38,20) NOT NULL,
     [intConcurrencyId] INT NOT NULL,

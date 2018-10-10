@@ -7118,7 +7118,6 @@
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
-    <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
     <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
@@ -7311,13 +7310,13 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
-    <Build Include="dbo\Tables\tblGRTransferStorage.sql" />
-    <Build Include="dbo\Tables\tblGRTransferStorageReference.sql" />
+	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
