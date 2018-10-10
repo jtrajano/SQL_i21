@@ -16,6 +16,7 @@ SELECT intPOSId				= POS.intPOSId
      , dblSubTotal			= CASE WHEN POS.ysnReturn = 1 THEN POS.dblSubTotal * -1 ELSE POS.dblSubTotal END
 	 , dblShipping			= POS.dblShipping
 	 , dblTax				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTax * -1 ELSE POS.dblTax END
+	 , dblItemDiscountPercent = POSD.dblDiscountPercent
 	 , dblDiscountPercent	= POS.dblDiscountPercent
 	 , dblDiscount			= POS.dblDiscount
 	 , dblTotal				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTotal * -1 ELSE POS.dblTotal END
