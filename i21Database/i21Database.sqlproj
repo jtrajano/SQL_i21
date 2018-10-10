@@ -7115,7 +7115,6 @@
     <Build Include="dbo\Stored Procedures\uspAPStageAllBasisAdvance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
-    <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
     <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
     <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
