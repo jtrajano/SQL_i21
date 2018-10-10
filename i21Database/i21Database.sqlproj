@@ -7125,7 +7125,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI4004.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3978.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMTMF32.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\MT_Montana.sql" />
     <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -7427,5 +7426,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MN_Minnesota.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MT_Montana.sql" />
   </ItemGroup>
 </Project>
