@@ -708,8 +708,8 @@ BEGIN
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId,strCurrency
 	
 	--Net Hedge Derivative Entry (Futures and Options)
-    INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
-    SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
+    INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intFutOptTransactionHeaderId,strInternalTradeNo)
+    SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intFutOptTransactionHeaderId,strInternalTradeNo 
     FROM @tempFinal
     WHERE intCommodityId=@intCommodityId 
         AND strType = 'Net Hedge' AND @ysnExchangeTraded = 1
