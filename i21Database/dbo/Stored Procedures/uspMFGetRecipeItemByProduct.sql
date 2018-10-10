@@ -53,7 +53,7 @@ BEGIN
 			,ri.intRecipeId
 			,Convert(NVARCHAR(50), 'I' + Ltrim(ROW_NUMBER() OVER (
 						ORDER BY ri.intRecipeItemId ASC
-						)))As strId
+						))) AS strId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
@@ -191,25 +191,67 @@ BEGIN
 
 		SELECT I.strItemNo
 			,I.strDescription
-			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
-					THEN Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				END AS dblCalculatedQuantity
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId = @intPMCategoryId
+										THEN Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									ELSE (ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedQuantity))
+								ELSE ri.dblCalculatedQuantity
+								END
+							)
+					END
+				) AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
-			,CASE 
-				WHEN I.intCategoryId <> @intPMCategoryId
-					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				END AS dblCalculatedUpperTolerance
-			,CASE 
-				WHEN I.intCategoryId <> @intPMCategoryId
-					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				END AS dblCalculatedLowerTolerance
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId <> @intPMCategoryId
+										THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedUpperTolerance))
+								ELSE ri.dblCalculatedUpperTolerance
+								END
+							)
+					END
+				) AS dblCalculatedUpperTolerance
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId <> @intPMCategoryId
+										THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedLowerTolerance))
+								ELSE ri.dblCalculatedLowerTolerance
+								END
+							)
+					END
+				) AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
 			,CM.strName AS strConsumptionMethodName
@@ -230,7 +272,7 @@ BEGIN
 			,ri.intRecipeId
 			,Convert(NVARCHAR(50), 'I' + Ltrim(ROW_NUMBER() OVER (
 						ORDER BY ri.intRecipeItemId ASC
-						))) As strId
+						))) AS strId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -270,25 +312,67 @@ BEGIN
 		
 		SELECT I.strItemNo
 			,I.strDescription
-			,CASE 
-				WHEN I.intCategoryId = @intPMCategoryId
-					THEN Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				ELSE (ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				END AS dblCalculatedQuantity
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId = @intPMCategoryId
+										THEN Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									ELSE (ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedQuantity))
+								ELSE ri.dblCalculatedQuantity
+								END
+							)
+					END
+				) AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
-			,CASE 
-				WHEN I.intCategoryId <> @intPMCategoryId
-					THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				END AS dblCalculatedUpperTolerance
-			,CASE 
-				WHEN I.intCategoryId <> @intPMCategoryId
-					THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
-				ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-				END AS dblCalculatedLowerTolerance
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId <> @intPMCategoryId
+										THEN (ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedUpperTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedUpperTolerance))
+								ELSE ri.dblCalculatedUpperTolerance
+								END
+							)
+					END
+				) AS dblCalculatedUpperTolerance
+			,(
+				CASE 
+					WHEN ri.ysnScaled = 1
+						THEN (
+								CASE 
+									WHEN I.intCategoryId <> @intPMCategoryId
+										THEN (ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									ELSE Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedLowerTolerance / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
+									END
+								)
+					ELSE (
+							CASE 
+								WHEN I.intCategoryId = @intPMCategoryId
+									THEN Convert(DECIMAL(18, 2), CEILING(ri.dblCalculatedLowerTolerance))
+								ELSE ri.dblCalculatedLowerTolerance
+								END
+							)
+					END
+				) AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
 			,CM.strName AS strConsumptionMethodName
