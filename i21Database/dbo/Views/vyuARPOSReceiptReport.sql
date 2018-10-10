@@ -8,7 +8,7 @@ SELECT intPOSId				= POS.intPOSId
 	 , strItemDescription	= POSD.strItemDescription
 	 , strItemUOM			= POSD.strItemUOM
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
-	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
+	 , dblQuantity			= POSD.dblQuantity
      , dblPrice				= POSD.dblPrice
 	 , dblExtendedPrice		= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblExtendedPrice * -1 ELSE POSD.dblExtendedPrice END
 	 , intItemUOMId			= POSD.intItemUOMId
