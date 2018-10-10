@@ -139,7 +139,7 @@ BEGIN TRY
 		END
 
 		SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
-		FROM vyuGRGetStorageTransferTicket
+		FROM vyuGRGetStorageTickets
 		WHERE intEntityId = @intEntityId
 			AND intItemId = @intItemId
 			AND intStorageTypeId = @intStorageTypeId

@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessUnpaidStorageFees]
 (	
-	@strXml NVARCHAR(MAX)
+	@intCreateUserId AS INT,
+	@BillFee AS [dbo].[BillFeesTableType] READONLY
 )
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @UserKey INT
 	DECLARE @intCustomerStorageId INT
 	DECLARE @EntityId INT
@@ -30,8 +30,6 @@ BEGIN TRY
 
 	SET @dtmDate = GETDATE()
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
 	DECLARE @BillFees AS TABLE 
 	(
 		 intBillFeeKey INT IDENTITY(1, 1)
@@ -47,8 +45,7 @@ BEGIN TRY
 		,IsProcessed BIT
 	)
 
-	SELECT @UserKey = intCreatedUserId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intCreatedUserId INT)
+	SET @UserKey = @intCreateUserId
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
 	FROM tblSMCompanyPreference
@@ -77,19 +74,7 @@ BEGIN TRY
 		,dblFeesUnpaid
 		,dblFeesTotal
 		,0
-	FROM OPENXML(@idoc, 'root/billfees', 2) 
-	WITH 
-	(
-			intCustomerStorageId INT
-			,intEntityId INT
-			,intItemId INT
-			,intCompanyLocationId INT
-			,dblOpenBalance DECIMAL(24, 10)
-			,dblFeesDue DECIMAL(24, 10)
-			,dblFeesPaid DECIMAL(24, 10)
-			,dblFeesUnpaid DECIMAL(24, 10)
-			,dblFeesTotal DECIMAL(24, 10)
-	)
+	FROM @BillFee
 
 	SELECT @intBillFeeKey = MIN(intBillFeeKey)
 	FROM @BillFees
@@ -350,15 +335,8 @@ BEGIN TRY
 		FROM @BillFees
 		WHERE intBillFeeKey > @intBillFeeKey AND IsProcessed = 0
 	END
-
-	EXEC sp_xml_removedocument @idoc
 END TRY
-
-BEGIN CATCH
-	
+BEGIN CATCH	
 	SET @ErrMsg = ERROR_MESSAGE()
-	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
-
 END CATCH

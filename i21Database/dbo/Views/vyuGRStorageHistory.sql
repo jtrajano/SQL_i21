@@ -1,54 +1,59 @@
 CREATE VIEW dbo.vyuGRStorageHistory
 AS
 SELECT 
- SH.intStorageHistoryId
-,SH.intCustomerStorageId 
-,SH.intTicketId
-,SH.intInvoiceId
-,SH.intSettleStorageId
-,SH.intBillId
-,SH.intContractHeaderId
-,SH.intDeliverySheetId
-,SH.intInventoryShipmentId
-,SH.strType
-,SH.dblUnits
-,SH.dtmHistoryDate
-,SH.dblPaidAmount
-,SH.strPaidDescription
-,SH.dblCurrencyRate
-,SH.strSettleTicket
-,SH.strVoucher
-,SH.intEntityId  
-,SH.intTransactionTypeId
-,SH.strTransferTicket
-,E.strName  
-,SH.intCompanyLocationId  
-,LOC.strLocationName
-,strContractNo = CH.strContractNumber
-,strInvoice = Inv.strInvoiceNumber
-,Bill.strBillId
-,SettleStorage.strStorageTicket
-,DS.strDeliverySheetNumber
-,intInventoryReceiptId  = CASE 
-								WHEN SH.intTransactionTypeId = 1 THEN SH.intInventoryReceiptId 
-								ELSE NULL 
-							END
-,strReceiptNumber		= Receipt.strReceiptNumber
-,strShipmentNumber      = Shipment.strShipmentNumber
-,strSplitNumber			= EMSplit.strSplitNumber
-,dblSplitPercent	    = CASE
-							WHEN SH.strType <> 'From Delivery Sheet' THEN ISNULL(SCTicketSplit.dblSplitPercent,100)
-							ELSE DSSplit.dblSplitPercent
-						END
-,strUserName			= US.strUserName
-,strScaleTicket = CASE WHEN ISNULL(SC.intTicketId,0) > 0 AND intTransactionTypeId = 3 THEN SC.strTicketNumber ELSE NULL END
+	 intStorageHistoryId				= SH.intStorageHistoryId
+	, intCustomerStorageId				= SH.intCustomerStorageId 
+	, intTicketId						= SH.intTicketId
+	, intInvoiceId						= SH.intInvoiceId
+	, intSettleStorageId				= SH.intSettleStorageId
+	, intBillId							= SH.intBillId
+	, intContractHeaderId				= SH.intContractHeaderId
+	, intDeliverySheetId				= SH.intDeliverySheetId
+	, intInventoryShipmentId			= SH.intInventoryShipmentId
+	, strType							= SH.strType
+	, dblUnits							= SH.dblUnits
+	, dtmHistoryDate					= SH.dtmHistoryDate
+	, dblPaidAmount						= SH.dblPaidAmount
+	, strPaidDescription				= SH.strPaidDescription
+	, dblCurrencyRate					= SH.dblCurrencyRate
+	, strSettleTicket					= SettleStorage.strStorageTicket
+	, strVoucher						= Bill.strBillId
+	, intEntityId						= CS.intEntityId  
+	, intTransactionTypeId				= SH.intTransactionTypeId
+	, strTransferTicket					= TS.strTransferStorageTicket
+	, intTransferStorageId				= SH.intTransferStorageId
+	, strName							= E.strName
+	, intCompanyLocationId				= CS.intCompanyLocationId
+	, strLocationName					= LOC.strLocationName
+	, strContractNo						= CH.strContractNumber
+	, strInvoice						= Inv.strInvoiceNumber
+	, strStorageTicket					= CS.strStorageTicketNumber
+	, strDeliverySheetNumber			= DS.strDeliverySheetNumber
+	, intInventoryReceiptId				= CASE 
+	 										WHEN SH.intTransactionTypeId = 1 THEN SH.intInventoryReceiptId 
+	 										ELSE NULL 
+	 									END
+	, strReceiptNumber					= Receipt.strReceiptNumber
+	, strShipmentNumber					= Shipment.strShipmentNumber
+	, strSplitNumber					= EMSplit.strSplitNumber
+	, dblSplitPercent					= CASE
+	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN ISNULL(SCTicketSplit.dblSplitPercent,100)
+	 										ELSE DSSplit.dblSplitPercent
+	 									END
+	, strUserName						= US.strUserName
+	, strScaleTicket					= CASE 
+											WHEN ISNULL(CS.intDeliverySheetId,0) > 0 AND SH.intTransactionTypeId = 3 THEN SC.strTicketNumber 
+											ELSE NULL 
+										END
+	, strAdjustmentNo					= IA.strAdjustmentNo
+	, intInventoryAdjustmentId			= IA.intInventoryAdjustmentId
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
 LEFT JOIN tblEMEntity E
-	ON E.intEntityId = SH.intEntityId
+	ON E.intEntityId = CS.intEntityId
 LEFT JOIN tblSMCompanyLocation LOC
-	ON LOC.intCompanyLocationId = SH.intCompanyLocationId
+	ON LOC.intCompanyLocationId = CS.intCompanyLocationId
 LEFT JOIN tblCTContractHeader CH
 	ON CH.intContractHeaderId = SH.intContractHeaderId
 LEFT JOIN tblARInvoice Inv
@@ -73,4 +78,8 @@ LEFT JOIN tblSCDeliverySheetSplit DSSplit
 	ON DS.intDeliverySheetId = DSSplit.intDeliverySheetId
 		AND CS.intEntityId = DSSplit.intEntityId
 LEFT JOIN tblSMUserSecurity US
-	ON US.intEntityId = SH.intEntityId
+	ON US.intEntityId = SH.intUserId
+LEFT JOIN tblICInventoryAdjustment IA
+	ON IA.intInventoryAdjustmentId = SH.intInventoryAdjustmentId
+LEFT JOIN tblGRTransferStorage TS
+	ON TS.intTransferStorageId = SH.intTransferStorageId

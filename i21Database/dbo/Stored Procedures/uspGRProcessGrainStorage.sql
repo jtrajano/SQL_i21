@@ -1,15 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessGrainStorage]
 (
-	@strXml NVARCHAR(MAX)
+	@dtmStorageChargeDate AS DATE,
+	@strPostType AS NVARCHAR(40),
+	@intCreateUserid AS INT,
+	@BillStorage AS [dbo].[BillStorageTableType] READONLY
 )
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @StorageChargeDate DATETIME
-	DECLARE @strPostType NVARCHAR(30)
 	DECLARE @UserKey INT
 	DECLARE @intCustomerStorageId INT
 	DECLARE @strProcessType NVARCHAR(30)
@@ -48,8 +49,6 @@ BEGIN TRY
 
 	DECLARE @intTicketId INT
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
 	DECLARE @BillDiscounts AS TABLE 
 	(
 		intBillDiscountKey INT IDENTITY(1, 1)
@@ -65,15 +64,8 @@ BEGIN TRY
 		,intOriginalUnitMeasureId INT
 	)
 
-	SELECT @UserKey = intCreatedUserId
-		,@StorageChargeDate = StorageChargeDate
-		,@strPostType = strPostType
-	FROM OPENXML(@idoc, 'root', 2) WITH 
-	(
-			intCreatedUserId INT
-			,StorageChargeDate DATETIME
-			,strPostType NVARCHAR(20)
-	 )
+	SET @UserKey = @intCreateUserid;
+	SET @StorageChargeDate = @dtmStorageChargeDate;
 
 	IF @strPostType = 'Calculate Test'
 	BEGIN
@@ -117,17 +109,7 @@ BEGIN TRY
 		,dblNewStorageDue
 		,intItemId
 		,0
-	FROM OPENXML(@idoc, 'root/billstorage', 2) WITH 
-	(
-			intCustomerStorageId INT
-			,intEntityId INT
-			,intCompanyLocationId INT
-			,intStorageTypeId INT
-			,intStorageScheduleId INT
-			,dblOpenBalance DECIMAL(24, 10)
-			,dblNewStorageDue DECIMAL(24, 10)
-			,intItemId INT
-	)
+	FROM @BillStorage
 
 	/*SELECT @intBillDiscountKey = MIN(intBillDiscountKey)
 	FROM @BillDiscounts
@@ -436,8 +418,7 @@ BEGIN TRY
 							,[dtmHistoryDate]
 							,[dblPaidAmount]							
 							,[strType]
-							,[strUserName]
-							,[intUserId]
+							,[strUserName]							
 						)
 						SELECT 
 							 [intConcurrencyId] = 1
@@ -446,9 +427,8 @@ BEGIN TRY
 							,[dblUnits] = ARD.dblQtyOrdered
 							,[dtmHistoryDate]=GetDATE()
 							,[dblPaidAmount]=ARD.dblPrice							
-							,[strType] = 'Generated Storage Invoice'
-							,[strUserName] = NULL
-							,[intUserId] = @UserKey
+							,[strType]='Generated Storage Invoice'
+							,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 							 FROM tblARInvoice AR
 							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 							 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
@@ -477,12 +457,9 @@ BEGIN TRY
 		END
 	END
 
-	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
