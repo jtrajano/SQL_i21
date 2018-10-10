@@ -21,7 +21,7 @@ GO
                     AND GRH.strSettleTicket IS NULL
             )
         UPDATE GRH
-        SET GRH.dtmHistoryDate = SC.dtmTicketDateTime
+        SET GRH.dtmHistoryDate = ISNULL(SC.dtmTicketDateTime,GRH.dtmHistoryDate)
         FROM tblGRStorageHistory GRH
         INNER JOIN tblGRCustomerStorage GR 
             ON GR.intCustomerStorageId = GRH.intCustomerStorageId
