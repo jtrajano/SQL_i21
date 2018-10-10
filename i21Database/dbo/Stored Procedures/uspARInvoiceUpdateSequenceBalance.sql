@@ -5,7 +5,14 @@
 AS
 BEGIN
 		DECLARE InvoiceTickets CURSOR
-		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped,dblQtyOrdered,intLoadDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId AND intTicketId IS NOT NULL and (intContractDetailId IS NOT NULL AND intContractHeaderId IS NOT NULL)
+		FOR SELECT intInvoiceId,intInvoiceDetailId,intTicketId,intInventoryShipmentItemId,intContractHeaderId,intContractDetailId,dblQtyShipped,dblQtyOrdered,intLoadDetailId 
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblICItem I ON ID.intItemId = I.intItemId 
+		WHERE intInvoiceId = @TransactionId 
+		  AND intTicketId IS NOT NULL 
+		  AND intContractDetailId IS NOT NULL 
+		  AND intContractHeaderId IS NOT NULL
+		  AND I.strType <> 'Other Charge'
 		OPEN InvoiceTickets
 		DECLARE @intInvoiceId INT,
 				@intInvoiceDetailId INT,
