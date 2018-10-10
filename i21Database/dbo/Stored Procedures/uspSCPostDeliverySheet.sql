@@ -16,7 +16,8 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 		,@jsonData NVARCHAR(MAX)
 
 
-DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
+DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
+		,@storageHistoryData			AS StorageHistoryStagingTable
 		,@currencyDecimal				INT
 		,@intEntityId					INT
 		,@intCustomerStorageId			INT
@@ -41,7 +42,8 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@strTransactionId				NVARCHAR(100)
 		,@intOwnershipType				INT
 		,@strFreightCostMethod			NVARCHAR(40)
-		,@strFeesCostMethod				NVARCHAR(40);
+		,@strFeesCostMethod				NVARCHAR(40)
+		,@dblTempAdjustByQuantity		NUMERIC (38,20);
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -106,7 +108,7 @@ BEGIN TRY
 		ELSE
 			SET @dblFinalSplitQty = @dblTempSplitQty
 
-		SELECT @intCustomerStorageId = intCustomerStorageId FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+		SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
 
 		UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -209,6 +211,57 @@ BEGIN TRY
 			,@fromValue			= @dblOrigQuantity					-- Old Value
 			,@toValue			= @dblFinalQuantity					-- New Value
 			,@details			= '';
+			SET @dblTempSplitQty = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
+			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
+			DELETE FROM @storageHistoryData
+
+			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent FROM @splitTable
+			OPEN splitCursor;  
+			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;  
+			WHILE @@FETCH_STATUS = 0  
+			BEGIN
+				SET @dblFinalSplitQty = ROUND((@dblTempAdjustByQuantity * @dblSplitPercent) / 100, @currencyDecimal);
+				IF @dblTempSplitQty > @dblFinalSplitQty
+					SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+				ELSE
+					SET @dblFinalSplitQty = @dblTempSplitQty
+
+					INSERT INTO @storageHistoryData
+					(
+						[intCustomerStorageId]
+						,[intTicketId]
+						,[intDeliverySheetId]
+						,[intInventoryAdjustmentId]
+						,[dblUnits]
+						,[dtmHistoryDate]
+						,[dblCurrencyRate]
+						,[strPaidDescription]
+						,[intTransactionTypeId]
+						,[intUserId]
+						,[strType]
+						,[ysnPost]
+					)
+					SELECT 	[intCustomerStorageId]				= GR.intCustomerStorageId				
+							,[intTicketId]						= NULL
+							,[intDeliverySheetId]				= GR.intDeliverySheetId
+							,[intInventoryAdjustmentId]			= @intInventoryAdjustmentId
+							,[dblUnits]							= (@dblFinalSplitQty * -1)
+							,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GR.dtmDeliveryDate)
+							,[dblCurrencyRate]					= 1
+							,[strPaidDescription]				= @strTransactionId
+							,[intTransactionTypeId]				= 9
+							,[intUserId]						= @intUserId
+							,[strType]							= 'From Inventory Adjustment'
+							,[ysnPost]							= 1
+					FROM tblGRCustomerStorage GR
+					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
+
+				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;
+			END
+			CLOSE splitCursor;  
+			DEALLOCATE splitCursor;
+			
+			EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
 		END
 
 		FETCH NEXT FROM ticketCursor INTO @intItemId
