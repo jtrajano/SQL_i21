@@ -31,7 +31,7 @@ GO
         [strTransferStorageTicket]
         , [intEntityId]
         , [intCompanyLocationId]
-        , [intStorageTypeId]
+        , [intStorageScheduleTypeId]
         , [intItemId]
         , [intItemUOMId]
         , [dblTotalUnits]
@@ -39,15 +39,15 @@ GO
         , [intUserId]
     )
     SELECT
-        [strTransferStorageTicket]  = SH.strTransferTicket
-        , [intEntityId]             = CS.intEntityId
-        , [intCompanyLocationId]    = CS.intCompanyLocationId
-        , [intStorageTypeId]        = CS.intStorageTypeId
-        , [intItemId]               = CS.intItemId
-        , [intItemUOMId]            = CS.intItemUOMId
-        , [dblTotalUnits]           = ABS(SUM(dblUnits))
-        , [intConcurrencyId]        = CS.intConcurrencyId
-        , [intUserId]               = SH.intUserId
+        [strTransferStorageTicket]      = SH.strTransferTicket
+        , [intEntityId]                 = CS.intEntityId
+        , [intCompanyLocationId]        = CS.intCompanyLocationId
+        , [intStorageScheduleTypeId]    = CS.intStorageTypeId
+        , [intItemId]                   = CS.intItemId
+        , [intItemUOMId]                = CS.intItemUOMId
+        , [dblTotalUnits]               = ABS(SUM(dblUnits))
+        , [intConcurrencyId]            = CS.intConcurrencyId
+        , [intUserId]                   = SH.intUserId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
@@ -112,7 +112,7 @@ GO
         , [intStorageTypeId]                = CS.intStorageTypeId
         , [intStorageScheduleId]            = CS.intStorageScheduleId
 		, [intContractDetailId]             = 0 --O FOR NOW; APPLICATION OF DP CONTRACT IS NOT YET IMPLEMENTED
-		, [dblSplitPercent]                 = ROUND(((CS.dblOriginalBalance / TS.dblTotalUnits) * 100), 2)
+		, [dblSplitPercent]                 = ROUND(((CS.dblOriginalBalance / TotalUnits.dblUnits) * 100), 2)
 		, [dblUnits]                        = CS.dblOriginalBalance
 		, [intConcurrencyId]                = CS.intConcurrencyId
     FROM tblGRCustomerStorage CS
@@ -121,6 +121,15 @@ GO
 			AND SH.strType = 'From Transfer'
 	INNER JOIN tblGRTransferStorage TS
 		ON TS.strTransferStorageTicket = SH.strTransferTicket
+	INNER JOIN (
+				SELECT 
+					A.intTransferStorageId,
+					SUM(dblOriginalUnits) dblUnits
+				FROM tblGRTransferStorageSourceSplit A 
+				INNER JOIN tblGRTransferStorage B 
+					ON B.intTransferStorageId = A.intTransferStorageId
+				GROUP BY A.intTransferStorageId
+        ) TotalUnits ON TotalUnits.intTransferStorageId = TS.intTransferStorageId
         
 	PRINT 'END Migrating Transfer Storage data to Main tables'
 

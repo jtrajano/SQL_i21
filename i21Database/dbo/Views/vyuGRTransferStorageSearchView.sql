@@ -24,7 +24,7 @@ SELECT
 	,dblOpenBalance				= CSSource.dblOpenBalance
 	,intContractNumer			= CD.intContractHeaderId
 	,strContractNumber			= CH.strContractNumber
-	,ysnPosted					= 1 --TS.ysnPosted
+	,ysnPosted					= CAST(1 AS BIT) --TS.ysnPosted
 	,intUserId					= TS.intUserId
 	,strUserName				= US.strUserName
 FROM tblGRTransferStorageSourceSplit TSource
@@ -78,7 +78,7 @@ SELECT
 	,dblOpenBalance				= CSSplit.dblOpenBalance
 	,intContractNumer			= CD.intContractHeaderId
 	,strContractNumber			= CH.strContractNumber
-	,ysnPosted					= 1 --TS.ysnPosted
+	,ysnPosted					= CAST(1 AS BIT) --TS.ysnPosted
 	,intUserId					= TS.intUserId
 	,strUserName				= USSplit.strUserName
 FROM tblGRTransferStorageSplit TSplit
