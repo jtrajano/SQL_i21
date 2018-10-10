@@ -89,7 +89,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 			,strStorageTypeDescription
 			,SUM(dblInQty) as dblInQty
 			,SUM(dblOutQty) as dblOutQty
-			,intStorageScheduleTypeId as intStorageTypeId
+			,intStorageScheduleTypeId as intStorageScheduleTypeId
 			,0 as dblSettleUnit
 		FROM (
 		select 
