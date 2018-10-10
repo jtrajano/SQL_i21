@@ -13,7 +13,7 @@ BEGIN TRY
 	DECLARE @intTransferContractDetailId INT
 	DECLARE @dblTransferUnits NUMERIC(18,6)
 	DECLARE @intSourceItemUOMId INT
-	DECLARE @intCustomerStorageId INT
+	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
 
 	BEGIN TRAN
@@ -89,8 +89,6 @@ BEGIN TRY
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 	END
-
-
 
 	--update the source's customer storage open balance
 	UPDATE A
@@ -175,27 +173,27 @@ BEGIN TRY
 		,[intStorageTypeId]				= TransferStorageSplit.intStorageTypeId
 		,[intCompanyLocationId]			= TransferStorageSplit.intCompanyLocationId
 		,[intDiscountScheduleId]		= CS.intDiscountScheduleId
-		,[dblTotalPriceShrink]			= CS.dblTotalPriceShrink		--??
-		,[dblTotalWeightShrink]			= CS.dblTotalWeightShrink		--??
+		,[dblTotalPriceShrink]			= CS.dblTotalPriceShrink		
+		,[dblTotalWeightShrink]			= CS.dblTotalWeightShrink		
 		,[dblQuantity]					= TransferStorageSplit.dblUnits
 		,[dtmDeliveryDate]				= GETDATE()
-		,[dtmZeroBalanceDate]			= CS.dtmZeroBalanceDate			--??
-		,[strDPARecieptNumber]			= CS.strDPARecieptNumber		--??
-		,[dtmLastStorageAccrueDate]		= CS.dtmLastStorageAccrueDate	--??
-		,[dblStorageDue]				= CS.dblStorageDue				--??
-		,[dblStoragePaid]				= CS.dblStoragePaid				--??
-		,[dblInsuranceRate]				= CS.dblInsuranceRate			--??
-		,[strOriginState]				= CS.strOriginState				--??
-		,[strInsuranceState]			= CS.strInsuranceState			--??
-		,[dblFeesDue]					= CS.dblFeesDue					--??
-		,[dblFeesPaid]					= CS.dblFeesPaid				--??
-		,[dblFreightDueRate]			= CS.dblFreightDueRate			--??
-		,[ysnPrinted]					= CS.ysnPrinted					--??
+		,[dtmZeroBalanceDate]			= CS.dtmZeroBalanceDate			
+		,[strDPARecieptNumber]			= CS.strDPARecieptNumber		
+		,[dtmLastStorageAccrueDate]		= CS.dtmLastStorageAccrueDate	
+		,[dblStorageDue]				= CS.dblStorageDue				--storage charge will have its own computation
+		,[dblStoragePaid]				= 0
+		,[dblInsuranceRate]				= 0
+		,[strOriginState]				= CS.strOriginState
+		,[strInsuranceState]			= CS.strInsuranceState
+		,[dblFeesDue]					= CS.dblFeesDue					
+		,[dblFeesPaid]					= CS.dblFeesPaid				
+		,[dblFreightDueRate]			= CS.dblFreightDueRate			
+		,[ysnPrinted]					= CS.ysnPrinted					
 		,[dblCurrencyRate]				= CS.dblCurrencyRate
-		,[strDiscountComment]			= CS.strDiscountComment			--??
-		,[dblDiscountsDue]				= CS.dblDiscountsDue			--??
-		,[dblDiscountsPaid]				= CS.dblDiscountsPaid			--??
-		,[strCustomerReference]			= CS.strCustomerReference		--??
+		,[strDiscountComment]			= CS.strDiscountComment			
+		,[dblDiscountsDue]				= CS.dblDiscountsDue			
+		,[dblDiscountsPaid]				= CS.dblDiscountsPaid			
+		,[strCustomerReference]			= CS.strCustomerReference		
 		,[intCurrencyId]				= CS.intCurrencyId
 		,[strTransactionNumber]			= TS.strTransferStorageTicket
 		,[intItemId]					= CS.intItemId
@@ -379,8 +377,59 @@ BEGIN TRY
 			,@intSourceItemUOMId	= @intSourceItemUOMId
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
-	END		
+	END
+	
+	--DISCOUNTS
+	DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR
+		SELECT storageId FROM @newCustomerStorageIds
+	OPEN c;
+	FETCH NEXT FROM c INTO @intCustomerStorageId
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		INSERT INTO [dbo].[tblQMTicketDiscount]
+		(
+			[intConcurrencyId]         
+			,[dblGradeReading]
+			,[strCalcMethod]
+			,[strShrinkWhat]
+			,[dblShrinkPercent]
+			,[dblDiscountAmount]
+			,[dblDiscountDue]
+			,[dblDiscountPaid]
+			,[ysnGraderAutoEntry]
+			,[intDiscountScheduleCodeId]
+			,[dtmDiscountPaidDate]
+			,[intTicketId]
+			,[intTicketFileId]
+			,[strSourceType]
+			,[intSort]
+			,[strDiscountChargeType]
+		)
+			SELECT 
+			[intConcurrencyId] 				= 1
+			,[dblGradeReading] 				= [dblGradeReading]
+			,[strCalcMethod] 				= [strCalcMethod]
+			,[strShrinkWhat] 				= [strShrinkWhat]
+			,[dblShrinkPercent] 			= [dblShrinkPercent]
+			,[dblDiscountAmount] 			= [dblDiscountAmount]
+			,[dblDiscountDue] 				= [dblDiscountDue]
+			,[dblDiscountPaid] 				= [dblDiscountPaid]
+			,[ysnGraderAutoEntry] 			= [ysnGraderAutoEntry]
+			,[intDiscountScheduleCodeId] 	= [intDiscountScheduleCodeId]
+			,[dtmDiscountPaidDate] 			= [dtmDiscountPaidDate]
+			,[intTicketId] 					= NULL
+			,[intTicketFileId] 				= @intCustomerStorageId
+			,[strSourceType] 				= 'Storage'
+			,[intSort] 						= [intSort]
+			,[strDiscountChargeType] 		= [strDiscountChargeType]
+		FROM tblQMTicketDiscount Discount
+		INNER JOIN tblGRTransferStorageSourceSplit SourceSplit
+			ON SourceSplit.intSourceCustomerStorageId = Discount.intTicketFileId
+	END
 	----END-----TRANSACTIONS FOR THE NEW CUSTOMER STORAGE
+
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
