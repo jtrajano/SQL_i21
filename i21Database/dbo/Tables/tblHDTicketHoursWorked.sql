@@ -6,6 +6,8 @@
 	[intAgentEntityId] [int] NULL,
 	[intHours] [numeric](18, 6) NOT NULL,
 	[dtmDate] [datetime] NULL,
+	[dtmStartTime] [datetime] NULL,
+	[dtmEndTime] [datetime] NULL,
 	[dblRate] [numeric](18, 6) NOT NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
