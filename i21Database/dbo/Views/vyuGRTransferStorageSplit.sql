@@ -1,20 +1,21 @@
 CREATE VIEW [dbo].[vyuGRTransferStorageSplit]
 AS
 SELECT 
-	TSS.intTransferStorageSplitId
-    , TSS.intTransferStorageId
-    , TSS.intTransferToCustomerStorageId
-    , TSS.intEntityId
-    , TSS.intCompanyLocationId
-    , TSS.intStorageTypeId
-    , TSS.intStorageScheduleId
-    , TSS.intContractDetailId
-    , TSS.dblSplitPercent
-    , TSS.dblUnits
-    , EM.strName
-    , CL.strLocationName
-    , ST.strStorageTypeDescription
-    , SR.strScheduleDescription
+	intTransferStorageSplitId		= TSS.intTransferStorageSplitId
+    , intTransferStorageId			= TSS.intTransferStorageId
+    , intTransferToCustomerStorageId= TSS.intTransferToCustomerStorageId
+    , intEntityId					= TSS.intEntityId
+    , intCompanyLocationId			= TSS.intCompanyLocationId
+    , intStorageTypeId				= TSS.intStorageTypeId
+    , intStorageScheduleId			= TSS.intStorageScheduleId
+    , intContractDetailId			= TSS.intContractDetailId
+    , dblSplitPercent				= TSS.dblSplitPercent
+    , dblUnits						= TSS.dblUnits
+    , strEntityName					= EM.strName
+    , strLocationName				= CL.strLocationName
+    , strStorageTypeDescription		= ST.strStorageTypeDescription
+    , strScheduleDescription		= SR.strScheduleDescription
+	, strContractNumber				= CH.strContractNumber
 FROM tblGRTransferStorageSplit TSS
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSS.intTransferStorageId
@@ -26,3 +27,8 @@ INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = TSS.intStorageScheduleId
+LEFT JOIN (
+			tblCTContractDetail CD
+			INNER JOIN tblCTContractHeader CH
+				ON CH.intContractHeaderId = CD.intContractHeaderId
+		) ON CD.intContractDetailId = TSS.intContractDetailId

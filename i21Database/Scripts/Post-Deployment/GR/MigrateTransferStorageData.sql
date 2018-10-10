@@ -125,6 +125,15 @@ GO
 			AND SH.strType = 'From Transfer'
 	INNER JOIN tblGRTransferStorage TS
 		ON TS.strTransferStorageTicket = SH.strTransferTicket
+	INNER JOIN (
+				SELECT 
+					A.intTransferStorageId,
+					SUM(dblOriginalUnits) dblUnits
+				FROM tblGRTransferStorageSourceSplit A 
+				INNER JOIN tblGRTransferStorage B 
+					ON B.intTransferStorageId = A.intTransferStorageId
+				GROUP BY A.intTransferStorageId
+        ) TotalUnits ON TotalUnits.intTransferStorageId = TS.intTransferStorageId
         
 	PRINT 'END Migrating Transfer Storage data to Main tables'
 
