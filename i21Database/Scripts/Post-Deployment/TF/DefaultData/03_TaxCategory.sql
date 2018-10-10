@@ -149,6 +149,26 @@ DELETE @TaxCategoryMS
 
 GO
 
+PRINT ('Deploying MT Tax Category')
+
+DECLARE @TaxCategoryMT AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMT(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', intMasterId = 26143
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Aviation', intMasterId = 26144
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Diesel Clear', intMasterId = 26145
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MT', @TaxCategories = @TaxCategoryMT
+
+DELETE @TaxCategoryMT
+
+GO
+
 
 PRINT ('Deploying NC Tax Category')
 
