@@ -52,6 +52,9 @@ DECLARE @ProductCodes AS TFProductCodes
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'ETHANOL - 100', strProductCodeGroup = '', strNote = NULL, intMasterId = 26944
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'BIODIESEL - DYED', strProductCodeGroup = '', strNote = NULL, intMasterId = 26945
 
+	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
+
+
 -- Reporting Component
 /* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.
 select 'UNION ALL SELECT intReportingComponentId = ' + CAST(0 AS NVARCHAR(10))
