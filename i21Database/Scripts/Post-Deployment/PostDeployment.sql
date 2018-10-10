@@ -475,6 +475,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\MT_Montana.sql
 :r .\TF\DefaultData\MN_Minnesota.sql
 :r .\TF\DefaultData\KS_Kansas.sql
+:r .\TF\DefaultData\KY_Kentucky.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

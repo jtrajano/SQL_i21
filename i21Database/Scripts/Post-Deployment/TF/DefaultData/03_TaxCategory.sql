@@ -77,6 +77,29 @@ DELETE @TaxCategoryKS
 GO
 
 
+PRINT ('Deploying KY Tax Category')
+
+DECLARE @TaxCategoryKY AS TFTaxCategory
+
+INSERT INTO @TaxCategoryKY(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Gasoline', intMasterId = 17108
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Diesel Clear', intMasterId = 17109
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Gasoline', intMasterId = 17167
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Special Fuels', intMasterId = 17168
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax LPG', intMasterId = 17169
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'KY', @TaxCategories = @TaxCategoryKY
+
+DELETE @TaxCategoryKY
+
+GO
+
+
 PRINT ('Deploying LA Tax Category')
 
 DECLARE @TaxCategoryLA AS TFTaxCategory
