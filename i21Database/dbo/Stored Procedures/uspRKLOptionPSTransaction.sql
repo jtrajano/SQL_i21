@@ -31,17 +31,18 @@ BEGIN TRY
 	WHERE CAST(FLOOR(CAST(dtmMatchDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 	GROUP BY AD.intLFutOptTransactionId
 
-	SELECT sp.intFutureMarketId
-		, spm.intOptionMonthId
-		, spm.dblStrike
-		, spm.intTypeId
-		, sp.dtmPriceDate
-		, dblMarketPremium = FIRST_VALUE(dblSettle) OVER (ORDER BY sp.dtmPriceDate DESC)
-		, dblDelta = FIRST_VALUE(dblDelta) OVER (ORDER BY sp.dtmPriceDate DESC)
-	INTO #MarketPremium
-	FROM tblRKFuturesSettlementPrice sp
-	JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
-		AND CAST(FLOOR(CAST(dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
+	-- Comment for now that FIRST_VALUE is not handled on SQL2008 instances. Will need to reimplement for performance improvements once we no longer support versions lower than sql2012.
+	--SELECT sp.intFutureMarketId
+	--	, spm.intOptionMonthId
+	--	, spm.dblStrike
+	--	, spm.intTypeId
+	--	, sp.dtmPriceDate
+	--	, dblMarketPremium = FIRST_VALUE(dblSettle) OVER (ORDER BY sp.dtmPriceDate DESC)
+	--	, dblDelta = FIRST_VALUE(dblDelta) OVER (ORDER BY sp.dtmPriceDate DESC)
+	--INTO #MarketPremium
+	--FROM tblRKFuturesSettlementPrice sp
+	--JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
+	--	AND CAST(FLOOR(CAST(dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 
 	SELECT ope.intFutOptTransactionId
 		, intExpiredLots = SUM(intLots)
@@ -128,12 +129,28 @@ BEGIN TRY
 				, cl.strLocationName
 				, strBook
 				, strSubBook
-				, dblMarketPremium = ISNULL(mp.dblMarketPremium, 0)
+				, dblMarketPremium = ISNULL((SELECT TOP 1 dblSettle
+											FROM tblRKFuturesSettlementPrice sp
+											JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
+											WHERE mp.intFutureMarketId = sp.intFutureMarketId
+												AND spm.intOptionMonthId = ot.intOptionMonthId
+												AND spm.dblStrike = mp.dblStrike
+												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
+											ORDER BY sp.dtmPriceDate DESC), 0)
 				, MarketValue = ''
 				, MTM = ''
 				, ot.intOptionMonthId
 				, ot.intFutureMarketId
-				, dblDelta = ISNULL(mp.dblDelta, 0)
+				, dblDelta = ISNULL((SELECT TOP 1 dblDelta
+											FROM tblRKFuturesSettlementPrice sp
+											JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
+											WHERE mp.intFutureMarketId = sp.intFutureMarketId
+												AND spm.intOptionMonthId = ot.intOptionMonthId
+												AND spm.dblStrike = mp.dblStrike
+												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
+											ORDER BY sp.dtmPriceDate DESC), 0)
 				, DeltaHedge = ''
 				, strHedgeUOM = um.strUnitMeasure
 				, strBuySell = CASE WHEN strBuySell = 'Buy' THEN 'B' ELSE 'S' END
@@ -163,10 +180,10 @@ BEGIN TRY
 			LEFT JOIN #SelectedLots sl ON sl.intLFutOptTransactionId = ot.intFutOptTransactionId
 			LEFT JOIN #ExpiredLots el ON el.intFutOptTransactionId = ot.intFutOptTransactionId
 			LEFT JOIN #AssignedLots al ON al.intFutOptTransactionId = ot.intFutOptTransactionId
-			LEFT JOIN #MarketPremium mp ON mp.intFutureMarketId = ot.intFutureMarketId
-				AND mp.intOptionMonthId = ot.intOptionMonthId
-				AND ot.dblStrike = mp.dblStrike
-				AND mp.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+			--LEFT JOIN #MarketPremium mp ON mp.intFutureMarketId = ot.intFutureMarketId
+			--	AND mp.intOptionMonthId = ot.intOptionMonthId
+			--	AND ot.dblStrike = mp.dblStrike
+			--	AND mp.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
 			WHERE ot.intInstrumentTypeId = 2 AND strBuySell = 'Buy'
 			) t
 		) t1
