@@ -720,7 +720,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId
+			--PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
 			
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -1652,7 +1652,7 @@ BEGIN
 						SELECT	TOP 1 1
 						FROM	tblICBackupDetailInventoryTransaction b
 						WHERE	b.intBackupId = @intBackupId 
-								AND b.intItemId = @intItemId
+								AND b.intItemId = ISNULL(@intItemId, b.intItemId) 
 								AND b.strTransactionId = @strTransactionId
 								AND b.intInTransitSourceLocationId IS NOT NULL 
 								AND b.ysnIsUnposted = 0 
@@ -1910,6 +1910,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@intItemId
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2180,58 +2181,62 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
 
-				EXEC @intReturnValue = dbo.uspICRepostCosting
-					@strBatchId
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,@ItemsToPost
+				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN 
+					EXEC @intReturnValue = dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@ItemsToPost
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+				
 
-				SET @intReturnValue = NULL 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]					
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm] 
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]
-						,[dblDebitReport]
-						,[dblCreditForeign]
-						,[dblCreditReport]
-						,[dblReportingRate]
-						,[dblForeignRate]
-						,[strRateType]
-				)			
-				EXEC @intReturnValue = dbo.uspICCreateGLEntries
-					@strBatchId 
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,NULL 
-					,@intItemId -- This is only used when rebuilding the stocks. 
-					,@strTransactionId -- This is only used when rebuilding the stocks. 
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnValue = dbo.uspICCreateGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId -- This is only used when rebuilding the stocks. 
+						,@strTransactionId -- This is only used when rebuilding the stocks. 
+				END
 						
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -2259,15 +2264,15 @@ BEGIN
 						,[intSourceTransactionId] 
 						,[strSourceTransactionId] 
 						,[intSourceTransactionDetailId] 
-						,[intFobPointId] 
-						,[intInTransitSourceLocationId]
+						--,[intFobPointId] 
+						,[intInTransitSourceLocationId]				
 				)
 				SELECT
 						[intItemId]					= t.intItemId
 						,[intItemLocationId]		= t.intItemLocationId
 						,[intItemUOMId]				= t.intItemUOMId
 						,[dtmDate]					= i.dtmShipDate
-						,[dblQty]					= -t.dblQty
+						,[dblQty]					= t.dblQty
 						,[dblUOMQty]				= t.dblUOMQty
 						,[dblCost]					= t.dblCost
 						,[dblValue]					= 0
@@ -2279,24 +2284,27 @@ BEGIN
 						,[strTransactionId]			= i.strInvoiceNumber
 						,[intTransactionTypeId]		= @intTransactionTypeId
 						,[intLotId]					= t.intLotId
-						,[intSourceTransactionId]	= t.intTransactionId
-						,[strSourceTransactionId]		= t.strTransactionId
-						,[intSourceTransactionDetailId] = t.intTransactionDetailId
-						,[intFobPointId]				= t.intFobPointId
+						,[intSourceTransactionId]	= s.intInventoryShipmentId
+						,[strSourceTransactionId]		= s.strShipmentNumber 
+						,[intSourceTransactionDetailId] = si.intInventoryShipmentItemId
+						--,[intFobPointId]				= t.intFobPointId
 						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-					FROM	
+				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
-						INNER JOIN tblICInventoryShipmentItem si 
-							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
-						INNER JOIN tblICInventoryTransaction t
-							ON t.intTransactionId = si.intInventoryShipmentId
-							AND t.intTransactionDetailId = si.intInventoryShipmentItemId
-							AND t.strTransactionId = t.strTransactionId
+						INNER JOIN #tmpICInventoryTransaction t
+							ON t.intTransactionId = i.intInvoiceId
+							AND t.intTransactionDetailId = id.intInvoiceDetailId 
+							AND t.strTransactionId = i.strInvoiceNumber 
 							AND t.ysnIsUnposted = 0 
-							AND t.dblQty > 0 
-				WHERE	--t.intFobPointId = @FOB_DESTINATION
-						i.strInvoiceNumber = @strTransactionId
+						INNER JOIN (
+							tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+								ON s.intInventoryShipmentId = si.intInventoryShipmentId
+						)
+							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
+							AND s.ysnPosted = 1
+
+				WHERE	i.strInvoiceNumber = @strTransactionId
 						AND t.intInTransitSourceLocationId IS NOT NULL 
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
@@ -2859,7 +2867,7 @@ BEGIN
 					
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntries - Outbound Shipment'
+					--PRINT 'Error found in uspICCreateGLEntries - Outbound Shipment'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
