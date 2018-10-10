@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Market Zone' AND strModuleName = N'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Balance Quantity' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Contract Management'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -2896,6 +2896,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reassign'
 	VALUES (N'Reassign', N'Contract Management', @ContractManagementActivitiesParentMenuId, N'Reassign', N'Activity', N'Screen', N'ContractManagement.view.Reassign?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 8, 0)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'ContractManagement.view.Reassign?showSearch=true',[strIcon] = 'small-menu-activity',[strCategory] = 'Activity' WHERE strMenuName = 'Reassign' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Balance Quantity' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Update Balance Quantity', N'Contract Management', @ContractManagementActivitiesParentMenuId, N'Update Balance Quantity', N'Activity', N'Screen', N'ContractManagement.view.ImportDataFromCsv?type=Balance&method=POST&title=Update Balance Quantity&allowOverwrite=false', N'small-menu-activity', 1, 1, 0, 1, 9, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'ContractManagement.view.ImportDataFromCsv?type=Balance&method=POST&title=Update Balance Quantity&allowOverwrite=false',[strIcon] = 'small-menu-activity',[strCategory] = 'Activity' WHERE strMenuName = 'Update Balance Quantity' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId
 
 DELETE tblSMMasterMenu WHERE strMenuName = 'Amendment' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId
 
