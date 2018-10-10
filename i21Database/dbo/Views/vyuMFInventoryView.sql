@@ -126,7 +126,8 @@ SELECT l.intLotId
 	,l.strTrackingNumber
 	,ISNULL(RC.strReportName, 'LotLabel') AS strReportName
 	,ISNULL(RC.intNoOfLabel, 1) AS intNoOfLabel
-	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName
+	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName -- 1 - Placard Report Name
+	,ISNULL(RCC1.strReportName, 'InventoryReceiptReport') AS strReceiptReportName -- 2 - Receipt Report Name
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -151,5 +152,8 @@ LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
 Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId
 LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
 LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId
+	AND RCC.intReportType = 1
+LEFT JOIN tblMFReportCategoryByCustomer RCC1 ON RCC1.intCategoryId = ic.intCategoryId
+	AND RCC1.intReportType = 2
 LEFT JOIN tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
 Left JOIN tblMFCompanyPreference CP on 1=1
