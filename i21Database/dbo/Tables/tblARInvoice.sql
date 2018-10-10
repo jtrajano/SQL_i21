@@ -78,6 +78,7 @@
 	[ysnImportedFromOrigin]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedFromOrigin] DEFAULT ((0)),		
 	[ysnImportedAsPosted]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedAsPosted] DEFAULT ((0)),		
 	[ysnExcludeFromPayment]				BIT                                             NOT NULL    CONSTRAINT [DF_tblARInvoice_ysnExcludeFromPayment] DEFAULT ((0)),        
+    [ysnFromProvisional]				BIT                                             NULL        CONSTRAINT [DF_tblARInvoice_ysnFromProvisional] DEFAULT ((0)),        
 	[ysnExported]						BIT												NULL,
 	[ysnCancelled]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCancelled] DEFAULT ((0)),
 	[ysnRejected]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRejected] DEFAULT ((0)),

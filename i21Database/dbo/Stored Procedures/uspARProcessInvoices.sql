@@ -206,8 +206,9 @@ DECLARE  @Id									INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
-		,@ImportedFromOrigin						BIT
+		,@ImportedFromOrigin					BIT
 		,@ImportedAsPosted						BIT
+		,@FromProvisional						BIT
 		,@UpdateAvailableDiscount				BIT
 		,@ImportFormat							NVARCHAR(50)
 
@@ -379,6 +380,7 @@ BEGIN
 		,@Post							= [ysnPost]
 		,@ImportedFromOrigin 			= ISNULL([ysnImportedFromOrigin],0)
 		,@ImportedAsPosted				= ISNULL([ysnImportedAsPosted],0)
+        ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ImportFormat					= [strImportFormat]
 
@@ -584,6 +586,7 @@ BEGIN
 			,@Posted						= @Post					
 			,@ImportedFromOrigin			= @ImportedFromOrigin 	
 			,@ImportedAsPosted   			= @ImportedAsPosted		
+			,@FromProvisional   			= @FromProvisional		
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 

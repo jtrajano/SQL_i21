@@ -30,6 +30,7 @@
 	,@Posted						BIT				= 0	
 	,@ImportedFromOrigin 			BIT				= 0
 	,@ImportedAsPosted				BIT				= 0
+	,@FromProvisional				BIT				= 0
 	,@Template						BIT				= 0			
 	,@Forgiven						BIT				= 0			
 	,@Calculated					BIT				= 0			
@@ -441,6 +442,7 @@ BEGIN TRY
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+		,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -520,7 +522,8 @@ BEGIN TRY
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
-		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)		
+		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)	
+		,[ysnFromProvisional]			= ISNULL(@FromProvisional, 0)	
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 

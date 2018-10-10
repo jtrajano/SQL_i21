@@ -63,6 +63,7 @@ INSERT INTO @InvoicesToUpdate (
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -116,6 +117,7 @@ SELECT DISTINCT
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
 	,[ysnImpactInventory]				= [ysnImpactInventory]
+    ,[ysnFromProvisional]               = [ysnFromProvisional]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= [intLoadDistributionHeaderId]
@@ -733,6 +735,7 @@ BEGIN TRY
 		  ,ARI.[ysnCalculated]					= ISNULL(ITG.[ysnCalculated], 0)
 		  ,ARI.[ysnSplitted]					= ISNULL(ITG.[ysnSplitted], 0)
 		  ,ARI.[ysnImpactInventory]				= ISNULL(ITG.[ysnImpactInventory], 0)
+          ,ARI.[ysnFromProvisional]             = ISNULL(ITG.[ysnFromProvisional], 0)
 		  --,ARI.[dblSplitPercent]				= ARI.[dblSplitPercent]
 		  --,ARI.[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 		  --,ARI.[ysnImportedFromOrigin]		= ARI.[ysnImportedFromOrigin]
@@ -995,6 +998,7 @@ BEGIN TRY
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -1133,6 +1137,7 @@ BEGIN TRY
 		,[ysnCalculated]						= ITG.[ysnCalculated]
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
+        ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]

@@ -62,6 +62,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -201,6 +202,7 @@ SELECT
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
 	,[ysnImpactInventory]				= [ysnImpactInventory]
+    ,[ysnFromProvisional]               = [ysnFromProvisional]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -1147,6 +1149,7 @@ CREATE TABLE #CustomerInvoice
 	,[ysnCalculated]				BIT												NULL
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
+    ,[ysnFromProvisional]           BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
 	,[ysnImportedAsPosted]			BIT												NULL
@@ -1246,6 +1249,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1351,6 +1355,7 @@ SELECT
 												CAST(1 AS BIT) 
 											END
 										ELSE CAST(0 AS BIT) END
+    ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
 	,[ysnImportedAsPosted]			= 0
@@ -1523,6 +1528,7 @@ USING
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[dblSplitPercent]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
@@ -1624,6 +1630,7 @@ INSERT(
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1713,6 +1720,7 @@ VALUES(
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1873,6 +1881,7 @@ BEGIN TRY
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -2011,6 +2020,7 @@ BEGIN TRY
 		,[ysnCalculated]						= ITG.[ysnCalculated]
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
+        ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
