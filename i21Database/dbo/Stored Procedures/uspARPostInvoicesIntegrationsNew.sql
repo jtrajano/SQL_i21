@@ -126,11 +126,12 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
 		 FROM tblARInvoiceDetail WITH (NOLOCK) ) ID 	
 			ON I.[intInvoiceId] = ID.[intInvoiceId]
 	LEFT JOIN
-		(SELECT intItemId, [strItemNo] FROM tblICItem WITH (NOLOCK) ) II 
+		(SELECT intItemId, [strItemNo], strType FROM tblICItem WITH (NOLOCK) ) II 
 			ON ID.intItemId = II.intItemId
 	LEFT JOIN
 		(SELECT intContractHeaderId, strContractNumber FROM tblCTContractHeader WITH (NOLOCK) ) CH
 			ON ID.intContractHeaderId = CH.intContractHeaderId
+	WHERE ISNULL(II.strType, '') <> 'Other Charge'
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 

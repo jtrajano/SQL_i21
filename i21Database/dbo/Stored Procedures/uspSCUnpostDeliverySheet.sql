@@ -79,7 +79,7 @@ BEGIN TRY
 						,@toValue			= '0'								-- New Value
 						,@details			= '';
 
-
+					DELETE FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
 

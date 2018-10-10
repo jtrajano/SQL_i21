@@ -475,7 +475,7 @@ BEGIN TRY
 					WHERE Trans.strTransactionType = 'Invoice'
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType <> 'CF Tran' 
-					AND (Invoice.strType = 'CF Tran' AND tblCFSite.ysnCaptiveSite = 1)
+					OR (Invoice.strType = 'CF Tran' AND tblCFSite.ysnCaptiveSite = 1)
 				)
 			END
 			ELSE IF (@ScheduleCode IN ('5BLK', '6BLK', '5LO', '6', '7', '7E', '8', '10', '10AC', '10AD', '10D'))
