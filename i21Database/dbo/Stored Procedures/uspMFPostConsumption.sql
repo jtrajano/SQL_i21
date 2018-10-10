@@ -266,10 +266,10 @@ BEGIN
 		)
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
-		,intItemUOMId = cl.intItemIssuedUOMId
+		,intItemUOMId = IU.intItemUOMId
 		,dtmDate = @dtmDate
-		,dblQty = (- cl.dblIssuedQuantity)
-		,dblUOMQty = ItemUOM.dblUnitQty
+		,dblQty = -dbo.fnMFConvertQuantityToTargetItemUOM(cl.intItemIssuedUOMId,IU.intItemUOMId,cl.dblIssuedQuantity)
+		,dblUOMQty = 1
 		,dblCost = IP.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
@@ -291,6 +291,7 @@ BEGIN
 		AND il.intLocationId = @intLocationId
 	INNER JOIN dbo.tblICItemPricing IP ON IP.intItemId = i.intItemId
 		AND IP.intItemLocationId = il.intItemLocationId
+	JOIN dbo.tblICItemUOM IU ON i.intItemId = IU.intItemId and IU.ysnStockUnit=1
 	LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
