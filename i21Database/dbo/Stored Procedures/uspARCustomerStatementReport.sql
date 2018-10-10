@@ -462,11 +462,6 @@ IF @ysnPrintZeroBalanceLocal = 0
 								AND strAgingType = 'Summary')
 	END
 
-IF @ysnPrintCreditBalanceLocal = 0
-	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
-	END
-
 INSERT INTO @temp_cf_table (
 	  intInvoiceId
 	, strInvoiceNumber
@@ -657,3 +652,17 @@ UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
+
+IF @ysnPrintCreditBalanceLocal = 0
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityUserId = @intEntityUserIdLocal 
+		  AND strStatementFormat = @strStatementFormatLocal
+		  AND intEntityCustomerId IN (
+			  SELECT DISTINCT intEntityCustomerId
+			  FROM tblARCustomerAgingStagingTable AGINGREPORT
+			  WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
+				AND AGINGREPORT.strAgingType = 'Summary'
+				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
+		  )
+	END

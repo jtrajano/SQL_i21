@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessUnpaidStorageDiscount]
 ( 
-  @strXml NVARCHAR(MAX)
+  	@intCreateUserId AS INT,
+	@BillDiscount AS [dbo].[BillDiscountTableType] READONLY
 )
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @UserKey INT
 	DECLARE @intCustomerStorageId INT
 	DECLARE @intBillDiscountKey INT
@@ -33,9 +33,7 @@ BEGIN TRY
 	
 
 	SET @dtmDate = GETDATE()
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
+	
 	DECLARE @BillDiscounts AS TABLE 
 	(
 		 intBillDiscountKey INT IDENTITY(1, 1)
@@ -53,8 +51,7 @@ BEGIN TRY
 		,IsProcessed BIT
 	 )
 
-	SELECT @UserKey = intCreatedUserId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intCreatedUserId INT)
+	SELECT @UserKey = @intCreateUserId
 	
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
 	
@@ -86,20 +83,7 @@ BEGIN TRY
 		,dblDiscountUnpaid
 		,dblDiscountTotal
 		,0
-	FROM OPENXML(@idoc, 'root/billdiscount', 2) WITH 
-	(
-			 intCustomerStorageId INT
-			,intEntityId INT
-			,intItemId INT
-			,intCompanyLocationId INT
-			,intDiscountScheduleCodeId INT
-			,intDiscountItemId INT
-			,dblOpenBalance DECIMAL(24, 10)
-			,dblDiscountDue DECIMAL(24, 10)
-			,dblDiscountPaid DECIMAL(24, 10)
-			,dblDiscountUnpaid DECIMAL(24, 10)
-			,dblDiscountTotal DECIMAL(24, 10)
-	 )
+	FROM @BillDiscounts
 
 	SELECT @intBillDiscountKey = MIN(intBillDiscountKey)
 	FROM @BillDiscounts
@@ -485,13 +469,9 @@ BEGIN TRY
 		FROM @BillDiscounts
 		WHERE intBillDiscountKey > @intBillDiscountKey AND IsProcessed = 0
 	END
-
-	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH

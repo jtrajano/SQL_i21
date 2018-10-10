@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
- SELECT 
+SELECT 
 	 intSettleStorageId			= SS.intSettleStorageId
 	,intEntityId				= SS.intEntityId
 	,strEntityName				= E.strName
@@ -31,12 +31,21 @@ AS
 	,strContractIds				= _strContractIds.strContractIds
 	,strContractNumbers          = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
 	,strUnits                   = CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
-	,intTicketId				= ISNULL(CS.intTicketId, CS.intDeliverySheetId)
-	,strTicketNumber			= CASE
-									WHEN CS.intTicketId IS NOT NULL THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = CS.intTicketId)
-									ELSE (SELECT strDeliverySheetNumber FROM tblSCDeliverySheet WHERE intDeliverySheetId = CS.intDeliverySheetId)
-								END
-	,ysnIsScaleTicket			= CAST(CASE WHEN CS.intTicketId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+	,intTransactionId			  = CASE 
+										WHEN CS.intDeliverySheetId IS NOT NULL THEN CS.intDeliverySheetId
+										WHEN CS.intTicketId IS NOT NULL THEN CS.intTicketId
+										ELSE TSS.intTransferStorageId
+									END
+	,strTransactionNumber		= CASE 
+										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
+										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
+										ELSE TS.strTransferStorageTicket
+									END
+	,strTransactionCode			  = CASE 
+										WHEN CS.intDeliverySheetId IS NOT NULL THEN 'DS' --DELIVERY SHEET
+										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
+										ELSE 'TS' --TRANSFER STORAGE
+									END
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -57,6 +66,17 @@ LEFT JOIN tblSMCompanyLocation L
 	ON L.intCompanyLocationId = SS.intCompanyLocationId
 LEFT JOIN tblAPBill Bill 
 	ON Bill.intBillId = SS.intBillId
+LEFT JOIN tblSCTicket SC
+	ON SC.intTicketId = CS.intTicketId
+LEFT JOIN (tblSCDeliverySheet DeliverySheet 
+			INNER JOIN tblSCDeliverySheetSplit DSS	
+				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+				AND DSS.intEntityId = E.intEntityId
+LEFT JOIN (tblGRTransferStorageSplit TSS
+			INNER JOIN tblGRTransferStorage TS
+				ON TS.intTransferStorageId = TSS.intTransferStorageId
+		) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 CROSS APPLY (
 	SELECT strContractNumbers = (
 		SELECT ',' + (CH.strContractNumber + '-' + CONVERT(VARCHAR(20), CD.intContractSeq))

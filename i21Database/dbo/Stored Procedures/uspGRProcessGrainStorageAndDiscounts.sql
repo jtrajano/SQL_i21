@@ -1,13 +1,15 @@
 CREATE PROCEDURE [dbo].[uspGRProcessGrainStorageAndDiscounts]
 (
-	@strXml NVARCHAR(MAX)
+	@intCreateUserId AS INT,
+	@dtmStorageChargeDate AS DATETIME,
+	@BillStorage AS [dbo].[BillStorageTableType] READONLY,
+	@BillDiscount AS [dbo].[BillDiscountTableType] READONLY	
 )
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE	@idoc INT
-			,@ErrMsg NVARCHAR(MAX)
+	DECLARE	@ErrMsg NVARCHAR(MAX)
 	DECLARE @UserKey INT
 	DECLARE @intCustomerStorageId INT
 	DECLARE @EntityId INT
@@ -38,9 +40,7 @@ BEGIN TRY
 	DECLARE @dblTotalDiscountUnpaid DECIMAL(24, 10)
 	DECLARE @dtmDate AS DATETIME = GETDATE()
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
-	DECLARE @BillStorage AS TABLE 
+	DECLARE @BillStorages AS TABLE 
 	(
 		intBillDiscountKey INT IDENTITY(1, 1)
 		,intCustomerStorageId INT
@@ -72,16 +72,11 @@ BEGIN TRY
 		,IsProcessed BIT
 	 )	
 	
-	SELECT @UserKey = intCreatedUserId
-		,@StorageChargeDate = StorageChargeDate
-	FROM OPENXML(@idoc, 'root', 2) WITH 
-	(
-			intCreatedUserId INT
-			,StorageChargeDate DATETIME
-	 )
+	SET @UserKey = @intCreateUserId
+	SET @StorageChargeDate = @dtmStorageChargeDate
 
 	 --bill storage
-	 INSERT INTO @BillStorage 
+	 INSERT INTO @BillStorages 
 	(
 		intCustomerStorageId
 		,intEntityId
@@ -102,17 +97,7 @@ BEGIN TRY
 		,dblNewStorageDue
 		,intItemId
 		,0
-	FROM OPENXML(@idoc, 'root/billstorage', 2) WITH 
-	(
-		intCustomerStorageId INT
-		,intEntityId INT
-		,intCompanyLocationId INT
-		,intStorageTypeId INT
-		,intStorageScheduleId INT
-		,dblOpenBalance DECIMAL(24, 10)
-		,dblNewStorageDue DECIMAL(24, 10)
-		,intItemId INT
-	)
+	FROM @BillStorage
 
 	--bill discount
 	INSERT INTO @BillDiscounts 
@@ -143,26 +128,13 @@ BEGIN TRY
 		,dblDiscountUnpaid
 		,dblDiscountTotal
 		,0
-	FROM OPENXML(@idoc, 'root/billdiscount', 2) WITH 
-	(
-		intCustomerStorageId INT
-		,intEntityId INT
-		,intItemId INT
-		,intCompanyLocationId INT
-		,intDiscountScheduleCodeId INT
-		,intDiscountItemId INT
-		,dblOpenBalance DECIMAL(24, 10)
-		,dblDiscountDue DECIMAL(24, 10)
-		,dblDiscountPaid DECIMAL(24, 10)
-		,dblDiscountUnpaid DECIMAL(24, 10)
-		,dblDiscountTotal DECIMAL(24, 10)
-	 )
+	FROM @BillDiscounts
 
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference
 
 	SELECT @BillDiscountKey = MIN(intBillDiscountKey) FROM @BillDiscounts WHERE IsProcessed = 0
 
-	SELECT @BillInvoiceKey = MIN(intBillDiscountKey) FROM @BillStorage WHERE IsInvoiced = 0
+	SELECT @BillInvoiceKey = MIN(intBillDiscountKey) FROM @BillStorages WHERE IsInvoiced = 0
 
 	WHILE @BillInvoiceKey > 0 OR @BillDiscountKey > 0
 	BEGIN
@@ -184,7 +156,7 @@ BEGIN TRY
 			,@LocationId = intCompanyLocationId				
 			,@dblNewStorageDue = dblNewStorageDue
 			,@ItemId=intItemId
-		FROM @BillStorage
+		FROM @BillStorages
 		WHERE intBillDiscountKey = @BillInvoiceKey
 
 		SELECT @IntCommodityId=intCommodityId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
@@ -224,10 +196,10 @@ BEGIN TRY
 			
 		UPDATE BD 
 		SET BD.intOriginalUnitMeasureId=CS.intUnitMeasureId 
-		FROM @BillStorage BD 
+		FROM @BillStorages BD 
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=BD.intCustomerStorageId
 			
-		UPDATE @BillStorage
+		UPDATE @BillStorages
 		SET dblOpenBalance=dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intOriginalUnitMeasureId,@intCommodityStockUOMId,dblOpenBalance)
 
 		SELECT @dblTotalDiscountUnpaid = SUM(ISNULL(dblDiscountUnpaid, 0))
@@ -388,7 +360,7 @@ BEGIN TRY
 				,[ysnLeaseBilling] = NULL
 				,[ysnVirtualMeterReading] = NULL
 				,[intCustomerStorageId]=BD.intCustomerStorageId
-				FROM @BillStorage BD
+				FROM @BillStorages BD
 				LEFT JOIN tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
 				WHERE BD.intEntityId = @EntityId AND BD.intCompanyLocationId=@LocationId AND BD.intItemId = @ItemId
 
@@ -624,7 +596,7 @@ BEGIN TRY
 				,[ysnLeaseBilling] = NULL
 				,[ysnVirtualMeterReading] = NULL
 				,[intCustomerStorageId]=BD.intCustomerStorageId
-				FROM @BillStorage BD
+				FROM @BillStorages BD
 				LEFT JOIN tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
 				WHERE BD.intEntityId = @EntityId AND BD.intCompanyLocationId=@LocationId AND BD.intItemId = @ItemId
 			END
@@ -717,23 +689,19 @@ BEGIN TRY
 		FROM @BillDiscounts
 		WHERE intBillDiscountKey > @BillDiscountKey AND IsProcessed = 0
 
-		UPDATE @BillStorage
+		UPDATE @BillStorages
 		SET IsInvoiced = 1 
 		WHERE intEntityId = @EntityId AND intCompanyLocationId=@LocationId AND intItemId = @ItemId
 			
 		SELECT @BillInvoiceKey = MIN(intBillDiscountKey)
-		FROM @BillStorage
+		FROM @BillStorages
 		WHERE intBillDiscountKey > @BillInvoiceKey AND IsInvoiced = 0
 
 
 	END
-
-	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
