@@ -7305,12 +7305,12 @@
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
 	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
-    <Build Include="dbo\Tables\tblGRTransferStorageReference.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
 	<Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
 	<None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
   </ItemGroup>
