@@ -2127,7 +2127,8 @@
     <Build Include="dbo\Views\vyuGRGetStorageCommodity.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
-    <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageTickets.sql" />
+	<Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
     <Build Include="dbo\Functions\fnQMGetTestNames.sql" />
     <Build Include="dbo\Views\vyuQMPropertyList.sql" />
     <Build Include="dbo\Functions\fnQMGetTemplateNames.sql" />
@@ -2717,6 +2718,7 @@
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
+	<Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
@@ -2983,10 +2985,9 @@
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendorEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
@@ -3017,7 +3018,7 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
     <Build Include="dbo\Views\vyuGRGetSellStorageItems.sql" />
-    <Build Include="dbo\Views\vyuGRGetSettleSubLocations.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageSubLocations.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Functions\fnTRSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadPosting.sql" />
@@ -7112,6 +7113,12 @@
     <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetStockAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspAPStageAllBasisAdvance.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
+    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
+    <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
+    <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7298,6 +7305,15 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
+	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorageReference.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
+	<Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
+    <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
+	<None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
