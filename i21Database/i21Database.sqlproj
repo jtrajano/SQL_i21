@@ -7430,4 +7430,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MT_Montana.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\KS_Kansas.sql" />
+  </ItemGroup>
 </Project>

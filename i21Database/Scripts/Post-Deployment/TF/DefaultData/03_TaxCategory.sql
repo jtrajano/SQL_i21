@@ -56,6 +56,27 @@ DELETE @TaxCategoryIN
 GO
 
 
+PRINT ('Deploying KS Tax Category')
+
+DECLARE @TaxCategoryKS AS TFTaxCategory
+
+INSERT INTO @TaxCategoryKS(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'KS', strTaxCategory = 'KS Excise Tax Gasoline', intMasterId = 16181
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KS', strTaxCategory = 'KS Excise Tax Gasohol', intMasterId = 16182
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KS', strTaxCategory = 'KS Excise Tax Diesel Clear', intMasterId = 16183
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'KS', @TaxCategories = @TaxCategoryKS
+
+DELETE @TaxCategoryKS
+
+GO
+
+
 PRINT ('Deploying LA Tax Category')
 
 DECLARE @TaxCategoryLA AS TFTaxCategory
