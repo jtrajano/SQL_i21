@@ -14,7 +14,7 @@ RETURNS TABLE AS RETURN
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
 		,CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
-			THEN  dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
+			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(loc.intItemLocationId, detailloc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
@@ -34,6 +34,8 @@ RETURNS TABLE AS RETURN
 		ON B.intItemId = B2.intItemId
 	LEFT JOIN tblICItemLocation loc
 		ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+	LEFT JOIN tblICItemLocation detailloc
+		ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
 	LEFT JOIN tblICItem F
 		ON B.intItemId = F.intItemId
 	WHERE A.intBillId = @billId
