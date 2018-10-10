@@ -76,6 +76,7 @@ FROM dbo.tblICItemBundle BUNDLE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
 		 , intLocationId
+		 , intStockUOMId
 		 , strItemNo
 		 , dblAvailable
 		 , dblSalePrice
@@ -87,4 +88,4 @@ INNER JOIN (
 		 , strUnitMeasure
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM WITH (NOLOCK)
-) UOM ON BUNDLE.intItemUnitMeasureId = UOM.intItemUOMId
+) UOM ON UOM.intItemUOMId = ISNULL(BUNDLE.intItemUnitMeasureId, I.intStockUOMId)
