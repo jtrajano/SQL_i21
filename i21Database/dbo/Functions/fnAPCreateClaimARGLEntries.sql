@@ -118,7 +118,7 @@ BEGIN
 			JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
 		)  customer ON arPay.intEntityCustomerId = customer.intEntityId
 		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId AND arPayDetail.dblPayment <> 0
-		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
+		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId and voucher.intTransactionType = 11
 		LEFT OUTER JOIN
 		(
 			SELECT
@@ -177,7 +177,7 @@ BEGIN
 			JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
 		)   customer ON arPay.intEntityCustomerId = customer.intEntityId
 		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId  AND arPayDetail.dblPayment <> 0
-		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
+		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId and voucher.intTransactionType = 11
 		-- INNER JOIN tblCTContractHeader contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
 		-- INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightGradeId = contractData.intWeightId
 		LEFT OUTER JOIN
