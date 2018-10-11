@@ -167,12 +167,12 @@ BEGIN TRY
 		,I.strDescription
 		,RL.strContainerNo AS strCustomerPO
 		,RL.strLotAlias AS strBatchNo
-		,Logo1 = @variable1
-		,Logo2 = @variable2
-		,Logo3 = @variable3
-		,Logo4 = @variable4
-		,Logo5 = @variable5
-		,Logo6 = @variable6
+		,Logo1 = strColumn1
+		,Logo2 = strColumn2
+		,Logo3 = strColumn3
+		,Logo4 = strColumn4
+		,Logo5 = strColumn5
+		,Logo6 = strColumn6
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 		,Ltrim(convert(NUMERIC(24, 2), (ISNULL(RL.dblGrossWeight, 0) - ISNULL(RL.dblTareWeight, 0)))) + ' ' + UOM.strUnitMeasure AS Weight_UOM
 	FROM tblMFLotInventory LI
