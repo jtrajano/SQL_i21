@@ -149,10 +149,10 @@ BEGIN TRY
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
 			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Delivery Sheet' ELSE 'Generated From Scale' END
 			,[dblCurrencyRate]					= 1
-			,[intTransactionTypeId]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 5 ELSE 1 END
+			,[intTransactionTypeId]				= 1
 			,[intUserId]						= CS.intUserId --strUserName will be replaced by intUserId
 			,[ysnPost]							= 1
-			,[strType]							= CASE WHEN CS.intDeliverySheetId > 0 THEN 'From Delivery Sheet' ELSE 'From Scale' END
+			,[strType]							= 'From Scale'
 	FROM	@CustomerStorageStagingTable CS
 
 	EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, @intStorageHistoryId OUTPUT
