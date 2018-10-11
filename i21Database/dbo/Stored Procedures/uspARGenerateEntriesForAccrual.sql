@@ -1066,15 +1066,9 @@ INSERT INTO @GLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intDeferredRevenueAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblBaseAdjustedTax] END)
-                                      END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblBaseAdjustedTax] END)
-                                      END
+    ,[intAccountId]                 = I.[intDeferredRevenueAccountId]    
+	,dblDebit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN ARITD.dblBaseAdjustedTax ELSE @ZeroDecimal END
+	,dblCredit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN @ZeroDecimal ELSE ARITD.dblBaseAdjustedTax END		
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -1095,22 +1089,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
+	,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN (ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN (ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END 
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1148,15 +1130,9 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = ARITD.[intSalesTaxAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblBaseAdjustedTax] END)
-                                      END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblBaseAdjustedTax] END)
-                                      END
-    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,dblDebit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN @ZeroDecimal ELSE ARITD.dblBaseAdjustedTax END
+	,dblCredit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN ARITD.dblBaseAdjustedTax ELSE @ZeroDecimal END		
+	,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
@@ -1176,22 +1152,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 0 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END )
-                                           ELSE (CASE WHEN ARITD.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END)
-                                      END
+	,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN (ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN (ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END 
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1317,5 +1281,3 @@ CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL
 CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
 
 GO
-
-
