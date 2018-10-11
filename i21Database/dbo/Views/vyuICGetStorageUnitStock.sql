@@ -19,6 +19,8 @@ SELECT
 	, dblResidualUnit		= StorageLocation.dblResidualUnit
 	, dblUnitPerFoot		= StorageLocation.dblUnitPerFoot
 	, dblPackFactor			= StorageLocation.dblPackFactor
+	, strUPC				= ItemUOM.strUpcCode
+	, strLongUPC			= ItemUOM.strLongUPCCode
 	--, intLotId				= Lot.intLotId
 	--, strLotNumber			= Lot.strLotNumber
 FROM tblICItemStockUOM StockUOM
