@@ -147,7 +147,7 @@ BEGIN TRY
 			,[intContractHeaderId]				= CS.intContractHeaderId
 			,[dblUnits]							= CS.dblQuantity
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
-			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Delivery Sheet' ELSE 'Generated From Scale' END
+			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Scale Ticket with Delivery Sheet' ELSE 'Generated From Scale' END
 			,[dblCurrencyRate]					= 1
 			,[intTransactionTypeId]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 5 ELSE 1 END
 			,[intUserId]						= CS.intUserId --strUserName will be replaced by intUserId

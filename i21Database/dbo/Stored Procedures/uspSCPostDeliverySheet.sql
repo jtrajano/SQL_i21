@@ -248,7 +248,7 @@ BEGIN TRY
 							,[dblUnits]							= (@dblFinalSplitQty * -1)
 							,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GR.dtmDeliveryDate)
 							,[dblCurrencyRate]					= 1
-							,[strPaidDescription]				= @strTransactionId
+							,[strPaidDescription]				= 'Quantity Adjustment From Delivery Sheet'
 							,[intTransactionTypeId]				= 9
 							,[intUserId]						= @intUserId
 							,[strType]							= 'From Inventory Adjustment'
