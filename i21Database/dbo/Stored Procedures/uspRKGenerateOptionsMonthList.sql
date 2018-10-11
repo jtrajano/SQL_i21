@@ -100,6 +100,37 @@ BEGIN TRY
 		ORDER BY intMonthCode
 	) tblMonths
 	
+	DECLARE @CurrentOptionMonthsCount INT
+	SELECT @CurrentOptionMonthsCount = COUNT(*) FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId;
+
+	IF(ISNULL(@OptMonthsToOpen,0) < @CurrentOptionMonthsCount)
+	BEGIN
+		DECLARE @ValidateCurrentOptionMonth TABLE(
+		  intOptionMonthId INT
+		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS);
+
+		INSERT INTO @ValidateCurrentOptionMonth(intOptionMonthId, strOptionMonth)
+		SELECT intMonthId, strMonth FROM dbo.fnRKGetFutureOptionMonthsNotInUse(@FutureMarketId, @OptMonthsToOpen, 0)
+	
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @ValidateCurrentOptionMonth)
+		BEGIN
+			DELETE FROM tblRKOptionsMonth 
+			WHERE intFutureMarketId = @FutureMarketId 
+			AND intFutureMonthId IN (
+				SELECT intFutureMonthId 
+				FROM @ValidateCurrentOptionMonth
+				WHERE intFutureMonthId NOT IN(
+					SELECT intFutureMonthId FROM vyuRKGetOptionTradingMonthsInUse WHERE intFutureMarketId = @FutureMarketId
+				)
+			)
+		END
+		ELSE
+		BEGIN
+			RAISERROR('You cannot generate Option Trading Months. Current Option Trading Months already in use.', 16, 1);
+		END
+
+	END
+	
 	IF OBJECT_ID('tempdb..##FinalOptMonths') IS NOT NULL DROP TABLE ##FinalOptMonths
 	
 	CREATE TABLE ##FinalOptMonths(
