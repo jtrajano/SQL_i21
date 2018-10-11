@@ -340,6 +340,30 @@ DELETE @TaxCategoryOH
 GO
 
 
+PRINT ('Deploying OK Tax Category')
+
+DECLARE @TaxCategoryOK AS TFTaxCategory
+
+INSERT INTO @TaxCategoryOK(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax Gasoline', intMasterId = 36175
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax E85', intMasterId = 36176
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax Diesel Clear', intMasterId = 36177
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax Biodiesel Clear', intMasterId = 36178
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax Aviation Gas', intMasterId = 36179
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Excise Tax Jet Fuel', intMasterId = 36180
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'OK', @TaxCategories = @TaxCategoryOK
+
+DELETE @TaxCategoryOK
+
+GO
+
+
 PRINT ('Deploying OR Tax Category')
 
 DECLARE @TaxCategoryOR AS TFTaxCategory
