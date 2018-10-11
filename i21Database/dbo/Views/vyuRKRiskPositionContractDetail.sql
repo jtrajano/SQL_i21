@@ -25,7 +25,7 @@ SELECT DISTINCT CT.strContractType
 	,CT.intContractTypeId,FM.strFutureMonth
 	,CD.intBookId
 	,CD.intSubBookId
-	,(isnull(CD.dblQuantity,0) -  isnull(CD.dblInvoicedQty,0) )* isnull(CD.dblRatio,0) dblRatioQty
+	,(isnull(CD.dblQuantity,0) -  isnull(CD.dblInvoicedQty,0) ) dblRatioQty
 	,isnull(CD.dtmM2MDate,getdate()) dtmTransactionDate
 	,CH.intPricingTypeId intPricingTypeIdHeader
 FROM tblCTContractHeader CH
