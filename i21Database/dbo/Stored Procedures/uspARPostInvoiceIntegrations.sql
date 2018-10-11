@@ -969,7 +969,7 @@ END
 --WHERE ISNULL(CUSTOMER.dblCreditLimit, @ZeroDecimal) > @ZeroDecimal
 --UPDATE tblARCustomer.dtmCreditLimitReached
 UPDATE CUSTOMER
-SET [dtmCreditLimitReached] =  CASE WHEN [dtmCreditLimitReached] IS NULL THEN CASE WHEN CUSTOMER.[dblARBalance] >= CUSTOMER.[dblCreditLimit] THEN INVOICE.[dtmPostDate] ELSE NULL END ELSE CUSTOMER.[dtmCreditLimitReached] END
+SET [dtmCreditLimitReached] =  CASE WHEN ISNULL(CUSTOMER.[dblARBalance], 0) >= ISNULL(CUSTOMER.[dblCreditLimit], 0) THEN ISNULL(CUSTOMER.[dtmCreditLimitReached], INVOICE.[dtmPostDate]) ELSE NULL END
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 CROSS APPLY (
 	SELECT TOP 1 I.[dtmPostDate]
