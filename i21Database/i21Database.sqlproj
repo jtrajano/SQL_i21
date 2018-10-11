@@ -7319,6 +7319,7 @@
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
+	<Build Include="dbo\Views\vyuGRTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />

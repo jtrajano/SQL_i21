@@ -12,6 +12,11 @@ SELECT TOP 100 PERCENT
 										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
 										ELSE 'TS' --TRANSFER STORAGE
 									END
+	,strTransaction			  	  = CASE 
+										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
+										WHEN CS.intTicketId IS NOT NULL THEN CS.strTicketNumber
+										ELSE TSS.strTransferStorageTicket
+									END
 	,intEntityId				  = CS.intEntityId
 	,strName					  = E.strName  
 	,strStorageTicketNumber		  = CS.strStorageTicketNumber
@@ -43,8 +48,9 @@ SELECT TOP 100 PERCENT
 	,dblDiscountUnPaid			  = ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
 	,dblStorageUnPaid			  = ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
 	,strSplitNumber				  = EMSplit.strSplitNumber
-	,intContractHeaderId		  = SC.intContractId
-	,strContractNumber			  = CH.strContractNumber
+	,intContractHeaderId          = CH.intContractHeaderId
+    ,intContractDetailId		  = SC.intContractId
+    ,strContractNumber			  = CH.strContractNumber   
 	,strDeliverySheetNumber		  = DeliverySheet.strDeliverySheetNumber
 	,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  = CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
@@ -86,8 +92,10 @@ LEFT JOIN tblSCTicketSplit SCTicketSplit
 LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
+LEFT JOIN tblCTContractDetail CD
+    ON CD.intContractDetailId = SC.intContractId  
 LEFT JOIN tblCTContractHeader CH 
-	ON CH.intContractHeaderId = SC.intContractId
+    ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN tblGRTransferStorageSplit TSS
 	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 WHERE ISNULL(CS.strStorageType,'') <> 'ITR' 
