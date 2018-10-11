@@ -3,7 +3,7 @@
 	@billBatchId		AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
-	@repost				AS BIT				= 0, -- do not validate if repost
+	@repost				AS BIT				= 0, -- do not validate if repost, this will use if you just fixing data gl entries and there's a fix on creating gl entries
 	@recap				AS BIT				= 0,
 	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
@@ -212,7 +212,7 @@ BEGIN
 	--if there is a value passed on batchId do not generate
 	IF @batchId IS NULL
 	BEGIN
-		SET @batchId = NEWID();
+		SET @batchId = NEWID(); --just use non standard batch id when posting failed for batch
 	END
 	SET @batchIdUsed = @batchId;
 	
@@ -235,11 +235,13 @@ BEGIN TRANSACTION
 
 IF(@batchId IS NULL)
 BEGIN
-	--DO NOT GENERATE IF UNPOST
-	IF NOT (@post = 0 AND @recap = 0)
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	ELSE
-		SET @batchId = NEWID()
+	-- --DO NOT GENERATE IF UNPOST
+	-- IF NOT (@post = 0 AND @recap = 0)
+	-- 	EXEC uspSMGetStartingNumber 3, @batchId OUT
+	-- ELSE
+	-- 	SET @batchId = NEWID()
+	
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 END
 
 SET @batchIdUsed = @batchId
@@ -607,6 +609,7 @@ BEGIN
 	INSERT INTO @Ids
 	SELECT intBillId FROM #tmpPostBillData
 
+	/*
 	IF @recap = 0
 	BEGIN
 		INSERT INTO @GLEntries (
@@ -766,8 +769,84 @@ BEGIN
 			,intSourceLocationId	
 		FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 	END
+	*/
 
-	
+	INSERT INTO @GLEntries (
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId		
+		,intCurrencyExchangeRateTypeId		
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate		
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
+	)
+	SELECT 
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId	
+		,intCurrencyExchangeRateTypeId			
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
+	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 
 	--NEGATE THE COST
 	UPDATE @adjustedEntries
@@ -1271,9 +1350,161 @@ BEGIN
 
 	BEGIN TRY
 	--UPDATE VOUCHER PAYABLE STAGING QTY
+	--FOR NOW, SUPPORT ONLY FOR MISC PO
 		DECLARE @voucherPayables VoucherPayable
-		INSERT INTO @voucherPayables
-		SELECT * FROM dbo.fnAPGetVoucherPayableFromBill(@voucherBillId);
+		INSERT INTO @voucherPayables(
+			[intEntityVendorId]				
+			,[intTransactionType]				
+			,[intLocationId]					
+			,[intShipToId]						
+			,[intShipFromId]					
+			,[intShipFromEntityId]				
+			,[intPayToAddressId]				
+			,[intCurrencyId]					
+			,[dtmDate]							
+			,[strVendorOrderNumber]				
+			,[strReference]						
+			,[strSourceNumber]					
+			,[intSubCurrencyCents]				
+			,[intShipViaId]						
+			,[intTermId]						
+			,[strBillOfLading]					
+			,[intAPAccount]						
+			,[strMiscDescription]				
+			,[intItemId]						
+			,[ysnSubCurrency]					
+			,[intAccountId]						
+			,[ysnReturn]						
+			,[intLineNo]						
+			,[intStorageLocationId]				
+			,[dblBasis]							
+			,[dblFutures]						
+			,[intPurchaseDetailId]				
+			,[intContractHeaderId]				
+			,[intContractCostId]				
+			,[intContractSeqId]					
+			,[intContractDetailId]				
+			,[intScaleTicketId]					
+			,[intInventoryReceiptItemId]		
+			,[intInventoryReceiptChargeId]		
+			,[intInventoryShipmentItemId]		
+			,[intInventoryShipmentChargeId]		
+			,[intLoadShipmentId]				
+			,[intLoadShipmentDetailId]			
+			,[intPaycheckHeaderId]				
+			,[intCustomerStorageId]				
+			,[intCCSiteDetailId]				
+			,[intInvoiceId]						
+			,[intBuybackChargeId]				
+			,[dblOrderQty]						
+			,[dblOrderUnitQty]					
+			,[intOrderUOMId]					
+			,[dblQuantityToBill]				
+			,[dblQtyToBillUnitQty]				
+			,[intQtyToBillUOMId]				
+			,[dblCost]							
+			,[dblOldCost]						
+			,[dblCostUnitQty]					
+			,[intCostUOMId]						
+			,[intCostCurrencyId]				
+			,[dblWeight]						
+			,[dblNetWeight]						
+			,[dblWeightUnitQty]					
+			,[intWeightUOMId]					
+			,[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate]					
+			,[intPurchaseTaxGroupId]			
+			,[dblTax]							
+			,[dblDiscount]						
+			,[dblDetailDiscountPercent]			
+			,[ysnDiscountOverride]				
+			,[intDeferredVoucherId]				
+			,[dblPrepayPercentage]				
+			,[intPrepayTypeId]					
+			,[dblNetShippedWeight]				
+			,[dblWeightLoss]					
+			,[dblFranchiseWeight]				
+			,[dblFranchiseAmount]				
+			,[dblActual]						
+			,[dblDifference]					
+		)
+		SELECT
+			[intEntityVendorId]				
+			,[intTransactionType]				
+			,[intLocationId]					
+			,[intShipToId]						
+			,[intShipFromId]					
+			,[intShipFromEntityId]				
+			,[intPayToAddressId]				
+			,[intCurrencyId]					
+			,[dtmDate]							
+			,[strVendorOrderNumber]				
+			,[strReference]						
+			,[strSourceNumber]					
+			,[intSubCurrencyCents]				
+			,[intShipViaId]						
+			,[intTermId]						
+			,[strBillOfLading]					
+			,[intAPAccount]						
+			,[strMiscDescription]				
+			,[intItemId]						
+			,[ysnSubCurrency]					
+			,[intAccountId]						
+			,[ysnReturn]						
+			,[intLineNo]						
+			,[intStorageLocationId]				
+			,[dblBasis]							
+			,[dblFutures]						
+			,[intPurchaseDetailId]				
+			,[intContractHeaderId]				
+			,[intContractCostId]				
+			,[intContractSeqId]					
+			,[intContractDetailId]				
+			,[intScaleTicketId]					
+			,[intInventoryReceiptItemId]		
+			,[intInventoryReceiptChargeId]		
+			,[intInventoryShipmentItemId]		
+			,[intInventoryShipmentChargeId]		
+			,[intLoadShipmentId]				
+			,[intLoadShipmentDetailId]			
+			,[intPaycheckHeaderId]				
+			,[intCustomerStorageId]				
+			,[intCCSiteDetailId]				
+			,[intInvoiceId]						
+			,[intBuybackChargeId]				
+			,[dblOrderQty]						
+			,[dblOrderUnitQty]					
+			,[intOrderUOMId]					
+			,[dblQuantityToBill]				
+			,[dblQtyToBillUnitQty]				
+			,[intQtyToBillUOMId]				
+			,[dblCost]							
+			,[dblOldCost]						
+			,[dblCostUnitQty]					
+			,[intCostUOMId]						
+			,[intCostCurrencyId]				
+			,[dblWeight]						
+			,[dblNetWeight]						
+			,[dblWeightUnitQty]					
+			,[intWeightUOMId]					
+			,[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate]					
+			,[intPurchaseTaxGroupId]			
+			,[dblTax]							
+			,[dblDiscount]						
+			,[dblDetailDiscountPercent]			
+			,[ysnDiscountOverride]				
+			,[intDeferredVoucherId]				
+			,[dblPrepayPercentage]				
+			,[intPrepayTypeId]					
+			,[dblNetShippedWeight]				
+			,[dblWeightLoss]					
+			,[dblFranchiseWeight]				
+			,[dblFranchiseAmount]				
+			,[dblActual]						
+			,[dblDifference]
+		FROM dbo.fnAPGetVoucherPayableFromBill(@voucherBillId)
+		WHERE intPurchaseDetailId > 0
 		EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @post = @post
 	END TRY
 	BEGIN CATCH
@@ -1297,7 +1528,7 @@ END
 ELSE
 	BEGIN
 
-		ROLLBACK TRANSACTION; --ROLLBACK CHANGES MADE FROM OTHER STORED PROCEDURE e.g. cost adjustment
+		ROLLBACK TRANSACTION; --ROLLBACK CHANGES MADE FROM OTHER STORED PROCEDURE e.g. cost adjustment, batch id
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLPostRecap

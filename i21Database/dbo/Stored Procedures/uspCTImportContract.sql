@@ -124,7 +124,9 @@ BEGIN TRY
 				--+' SELECT @XML' 
 				+' SELECT @XML = REPLACE(@XML,''tempExcelContractHeader'','''+@TableToImport+''') ' 
 				+' SELECT @XML = REPLACE(@XML,''</'+@TableToImport+'>'',''<intCreatedById>1</intCreatedById><dtmCreated>'+LTRIM(GETDATE())+'</dtmCreated></'+@TableToImport+'>'') ' 
-				+' EXEC ['+@ValidationSP+'] @XML,''Added'''
+				+ CASE WHEN ISNULL(@ValidationSP,'') <> '' THEN
+				 ' EXEC ['+@ValidationSP+'] @XML,''Added'''
+				ELSE ' ' END
 				+' EXEC uspCTInsertINTOTableFromXML '''+@TableToImport+''',@XML, @intId OUTPUT ' 
 			 
     --SELECT @Query

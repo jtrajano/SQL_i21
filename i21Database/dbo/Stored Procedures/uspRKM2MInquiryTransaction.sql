@@ -10,6 +10,19 @@
                   @intLocationId int= null,
                   @intMarketZoneId int= null
 AS
+--declare
+
+--  @intM2MBasisId int = 1,
+--                  @intFutureSettlementPriceId int = 2,
+--                  @intQuantityUOMId int = 1,
+--                  @intPriceUOMId int = 1,
+--                  @intCurrencyUOMId int= 3,
+--                  @dtmTransactionDateUpTo datetime= '2018-09-19T12:04:50',
+--                  @strRateType nvarchar(200)= 'Contract',
+--                  @intCommodityId int=1,
+--                  @intLocationId int= 0,
+--                  @intMarketZoneId int= 0
+--				  drop table #Temp
 
 DECLARE @ysnIncludeBasisDifferentialsInResults bit
 DECLARE @dtmPriceDate DATETIME    
@@ -1979,6 +1992,7 @@ INSERT INTO #Temp (
 	,dblOpenQty 
 	,dblResult
 )
+select * from(
 SELECT 
 	strContractOrInventoryType
 	,strCommodityCode
@@ -2040,7 +2054,7 @@ FROM(
 		LEFT JOIN tblICItemPricing p on iv.intItemId = p.intItemId and iv.intItemLocationId=p.intItemLocationId  
 	WHERE iv.intCommodityId= @intCommodityId and iv.strLotTracking='No' and iv.dblOnHand <> 0
 		AND strLocationName= case when isnull(@strLocationName,'')='' then strLocationName else @strLocationName end
-	)t1
+	)t1 
 GROUP BY
 	strContractOrInventoryType
 	,strCommodityCode
@@ -2057,7 +2071,7 @@ GROUP BY
 	,dblInvMarketBasis
 	,intToPriceUOM
 	,PriceSourceUOMId
-	,intFutMarketCurrency
+	,intFutMarketCurrency)t2 WHERE isnull(dblOpenQty,0) >0
 				
 END
 
@@ -2082,10 +2096,11 @@ ORDER BY
 SELECT  
 	CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum
 	,*
-	,dblResult = (dblMarketPrice - dblContractPrice) * (dblPricedQty + dblUnPricedQty)
-	,dblMarketFuturesResult = (dblFuturePrice - dblFutures) * (dblPricedQty + dblUnPricedQty)
+	,dblResult = (dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
+	,dblMarketFuturesResult = (dblFuturePrice - dblFutures) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
 	,dblResultRatio =  CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL THEN  
-							((dblMarketPrice - dblContractPrice) * (dblPricedQty + dblUnPricedQty)) - ((dblFuturePrice - dblFutures) * (dblPricedQty + dblUnPricedQty)) - dblResultBasis 
+							((dblMarketPrice - dblContractPrice) * dblOpenQty) -- (dblPricedQty + dblUnPricedQty)
+							- ((dblFuturePrice - dblFutures) * dblOpenQty) - dblResultBasis --(dblPricedQty + dblUnPricedQty)
 						ELSE 
 							0 
 					END

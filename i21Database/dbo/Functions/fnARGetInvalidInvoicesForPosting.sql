@@ -1714,29 +1714,6 @@ ELSE
 			,[intItemId]
 			,[strBatchId]
 			,[strPostingError])
-		SELECT 
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'You cannot Unpost transactions with Voucher.'
-		FROM
-			@Invoices I
-		INNER JOIN tblAPBill A
-			ON A.strVendorOrderNumber = I.strInvoiceNumber
-		WHERE
-			@Recap = 0
-
-		INSERT INTO @returntable(
-			 [intInvoiceId]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[strBatchId]
-			,[strPostingError])
 		--Payments from Pay Voucher
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
@@ -2160,7 +2137,7 @@ INSERT INTO @PostInvoiceDataFromIntegration(
 				,[strType]						= PID.[strType]
 				,[dtmDate]						= PID.[dtmDate]
 				,[dtmPostDate]					= PID.[dtmPostDate]
-				,[dtmShipDate]					= PID.[dtmShipDate]
+				,[dtmShipDate]					= ISNULL(PID.[dtmShipDate], PID.[dtmPostDate])
 				,[intEntityCustomerId]			= PID.[intEntityCustomerId]
 				,[intCompanyLocationId]			= PID.[intCompanyLocationId]
 				,[intAccountId]					= PID.[intAccountId]

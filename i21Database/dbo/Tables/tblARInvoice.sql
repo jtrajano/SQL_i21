@@ -78,6 +78,7 @@
 	[ysnImportedFromOrigin]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedFromOrigin] DEFAULT ((0)),		
 	[ysnImportedAsPosted]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedAsPosted] DEFAULT ((0)),		
 	[ysnExcludeFromPayment]				BIT                                             NOT NULL    CONSTRAINT [DF_tblARInvoice_ysnExcludeFromPayment] DEFAULT ((0)),        
+    [ysnFromProvisional]				BIT                                             NULL        CONSTRAINT [DF_tblARInvoice_ysnFromProvisional] DEFAULT ((0)),        
 	[ysnExported]						BIT												NULL,
 	[ysnCancelled]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCancelled] DEFAULT ((0)),
 	[ysnRejected]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRejected] DEFAULT ((0)),
@@ -180,7 +181,7 @@ DECLARE @intMaxCount INT = 0
 DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType, strType, intCompanyLocationId FROM INSERTED WHERE strInvoiceNumber IS NULL ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType, intCompanyLocationId FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strInvoiceNumber)), '') = '' ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
@@ -204,13 +205,8 @@ BEGIN
 		IF EXISTS (SELECT NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceNumber)
 			BEGIN
 				SET @InvoiceNumber = NULL
-				DECLARE @intStartIndex INT = 4
-				IF (@strTransactionType = 'Prepayment' OR @strTransactionType = 'Customer Prepayment') OR @strTransactionType = 'Overpayment'
-					SET @intStartIndex = 5
 				
-				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strInvoiceNumber, @intStartIndex, 10))) FROM tblARInvoice WHERE strTransactionType = @strTransactionType
-
-				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = @intStartingNumberId
+				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 
@@ -242,3 +238,8 @@ GO
 CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
 ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
 INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
+
+GO
+CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
+
+

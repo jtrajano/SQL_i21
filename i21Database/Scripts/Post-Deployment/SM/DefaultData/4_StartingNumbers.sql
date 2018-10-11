@@ -456,7 +456,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 45
 			,[strTransactionType]	= N'FutOpt Transaction'
-			,[strPrefix]			= N''
+			,[strPrefix]			= N'DER-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
@@ -1415,6 +1415,13 @@ GO
 		UPDATE tblSMStartingNumber
 		SET [strPrefix] = 'PK-'
 		WHERE strTransactionType = N'WarehouseBOLNo' and [strPrefix]='BOL-'
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'FutOpt Transaction')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET strTransactionType = 'Derivative Entry'
+		WHERE strTransactionType = N'FutOpt Transaction'
 	END
 GO
 	PRINT N'BEGIN RENAME S'

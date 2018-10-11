@@ -85,8 +85,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit] = Debit.Value 
 			,[dblCredit] = Credit.Value
-			,[dblDebitUnit]
-			,[dblCreditUnit]
+			,[dblDebitUnit] = DebitUnit.Value
+			,[dblCreditUnit] = CreditUnit.Value
 			,[strDescription]
 			,[strCode]
 			,[strReference]
@@ -117,6 +117,8 @@ BEGIN
 	FROM	@GLEntries GLEntries 
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
 	WHERE strTransactionId NOT IN (select strTransactionId from @FoundErrors)
 END
 ;

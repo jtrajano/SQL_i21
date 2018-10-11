@@ -236,10 +236,10 @@ FROM
 	,[strDescription]			=	C.strDescription
 	,[intPurchaseTaxGroupId]	=	NULL
 	,[dblOrderQty]				=	B.dblQtyOrdered
-	,[dblPOOpenReceive]			=	B.dblQtyOrdered -B.dblQtyReceived
+	,[dblPOOpenReceive]			=	B.dblQtyOrdered -ISNULL(Billed.dblQty,0)
 	,[dblOpenReceive]			=	B.dblQtyOrdered
-	,[dblQuantityToBill]		=	B.dblQtyOrdered -B.dblQtyReceived
-	,[dblQuantityBilled]		=	B.dblQtyReceived
+	,[dblQuantityToBill]		=	B.dblQtyOrdered - ISNULL(Billed.dblQty,0)
+	,[dblQuantityBilled]		=	ISNULL(Billed.dblQty,0)
 	,[intLineNo]				=	B.intPurchaseDetailId
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
 	,[intInventoryReceiptChargeId]	= NULL
@@ -531,11 +531,11 @@ FROM
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
-		,[intInventoryReceiptItemId]				=	ISNULL (A.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
+		,[intInventoryReceiptItemId]				=	ISNULL (J.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
-														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / A.intSubCurrencyCents ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
+														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / ISNULL(A.intSubCurrencyCents,100) ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
 														ELSE CAST(A.dblUnitCost AS DECIMAL(38,20)) END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
@@ -549,7 +549,7 @@ FROM
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
-		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
+		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,1)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -638,6 +638,12 @@ FROM
 		GROUP BY intEntityVendorId, BD.intInventoryReceiptChargeId
 
 	) Billed
+	OUTER APPLY
+    (
+        SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
+        WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+    ) J
+
 	--OUTER APPLY 
 	--(
 	--	SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
@@ -751,7 +757,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(0 AS BIT)
+		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -780,6 +786,7 @@ FROM
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
+	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND CC.ysnPrice = 1
 	UNION ALL
@@ -880,7 +887,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(0 AS BIT)
+		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -910,6 +917,7 @@ FROM
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
+	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	UNION ALL
 
@@ -1010,7 +1018,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(0 AS BIT)
+		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -1039,6 +1047,7 @@ FROM
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
+	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ISNULL(CC.strCostStatus,'Open') = 'Open'
 	
@@ -1139,7 +1148,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
-		,[ysnReturn]								=	CAST(0 AS BIT)
+		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -1169,6 +1178,7 @@ FROM
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
+	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	--AND ysnBilled = 0
 	
@@ -1422,7 +1432,7 @@ FROM
 		,[intShipmentId]							=	0--ISNULL(A.intInventoryShipmentItemId,0)
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
-		,[strUOM]									=	NULL
+		,[strUOM]									=	A.strCostUnitMeasure
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	A.intCostUnitMeasureId
 		,[dblNetWeight]								=	0      

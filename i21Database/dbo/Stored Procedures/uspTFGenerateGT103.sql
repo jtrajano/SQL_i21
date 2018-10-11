@@ -155,14 +155,14 @@ BEGIN TRY
 			IF @TemplateItemId = 'GT-103-Summary-001'
 			BEGIN
 			--1. Total Gallons Sold for Period
-				SET @QueryTransaction = 'SELECT SUM(dblQtyShipped) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+				SET @QueryTransaction = 'SELECT SUM(ISNULL(dblQtyShipped, 0)) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 				INSERT INTO @TFTransactionSummaryTotal
 				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-002'
 			BEGIN
 			--2. Total Exempt Gallons Sold for Period
-				SET @QueryTransaction = 'SELECT SUM(dblTaxExempt) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+				SET @QueryTransaction = 'SELECT SUM(ISNULL(dblTaxExempt, 0)) FROM vyuTFGetTransaction WHERE strScheduleCode IN (''' + @TemplateScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 				INSERT INTO @TFTransactionSummaryTotal
 				EXEC(@QueryTransaction)
 			END
@@ -343,9 +343,9 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @TotalGallonsSold = ISNULL(SUM(dblQtyShipped), 0),
-						@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
-						@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
+				SELECT @TotalGallonsSold = SUM(ISNULL(dblQtyShipped, 0)),
+						@TotalExemptGallonsSold = SUM(ISNULL(dblTaxExempt, 0)),
+						@GasolineUseTaxCollected = SUM(ISNULL(dblTax, 0))
 					FROM vyuTFGetTransaction 
 					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND strType = @Type 
@@ -376,8 +376,8 @@ BEGIN TRY
 		BEGIN
 			IF(@Type = 'Total Gallons of Fuel Purchased')
 			BEGIN
-				SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
-						@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0)
+				SELECT @ReceiptTotalGallsPurchased = SUM(ISNULL(dblGross, 0)),
+						@GasolineUseTaxPaid = SUM(ISNULL(dblTax, 0))
 					FROM vyuTFGetTransaction 
 					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND uniqTransactionGuid = @Guid 
@@ -385,8 +385,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
-						@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0) 
+				SELECT @ReceiptTotalGallsPurchased = SUM(ISNULL(dblGross, 0)),
+						@GasolineUseTaxPaid = SUM(ISNULL(dblTax, 0))
 					FROM vyuTFGetTransaction 
 					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND strType = @Type 
@@ -403,16 +403,16 @@ BEGIN TRY
 		SET @CountTemplateItem = @CountTemplateItem - 1
 	END
 
-	DECLARE @isTransactionEmpty NVARCHAR(20)
-	SELECT TOP 1 @isTransactionEmpty = strProductCode
-	FROM vyuTFGetTransaction
-	WHERE uniqTransactionGuid = @Guid
-		AND strFormCode = @FormCodeParam
+	--DECLARE @isTransactionEmpty NVARCHAR(20)
+	--SELECT TOP 1 @isTransactionEmpty = strProductCode
+	--FROM vyuTFGetTransaction
+	--WHERE uniqTransactionGuid = @Guid
+	--	AND strFormCode = @FormCodeParam
 		
-	IF(@isTransactionEmpty = 'No record found.')
-	BEGIN
-		UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
-	END
+	--IF(@isTransactionEmpty = 'No record found.')
+	--BEGIN
+	--	UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
+	--END
 
 END TRY
 BEGIN CATCH

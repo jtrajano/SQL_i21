@@ -13,7 +13,7 @@
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
-	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @ysnIncludeWriteOffPayment    AS BIT 				= 0
 	, @intEntityUserId				AS INT				= NULL
 AS
 
@@ -30,7 +30,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
@@ -105,7 +105,7 @@ SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
-SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
+SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
@@ -462,11 +462,6 @@ IF @ysnPrintZeroBalanceLocal = 0
 								AND strAgingType = 'Summary')
 	END
 
-IF @ysnPrintCreditBalanceLocal = 0
-	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
-	END
-
 INSERT INTO @temp_cf_table (
 	  intInvoiceId
 	, strInvoiceNumber
@@ -657,3 +652,17 @@ UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
+
+IF @ysnPrintCreditBalanceLocal = 0
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityUserId = @intEntityUserIdLocal 
+		  AND strStatementFormat = @strStatementFormatLocal
+		  AND intEntityCustomerId IN (
+			  SELECT DISTINCT intEntityCustomerId
+			  FROM tblARCustomerAgingStagingTable AGINGREPORT
+			  WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
+				AND AGINGREPORT.strAgingType = 'Summary'
+				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
+		  )
+	END

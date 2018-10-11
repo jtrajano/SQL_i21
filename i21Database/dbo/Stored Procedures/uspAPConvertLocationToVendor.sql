@@ -10,6 +10,7 @@ AS
 	DECLARE @EntityName AS NVARCHAR(100)
 	DECLARE @DefaultLocation AS BIT
 	DECLARE @CurrentEntityId AS INT
+	DECLARE @LocationId INT = @EntityLocationId;
 	DECLARE @LocationCurrentyId AS INT
 	SELECT 
 			@EntityName = strCheckPayeeName, 
@@ -94,7 +95,7 @@ AS
 	
 	--RAISERROR('No 1099 setup for vendor', 16, 1);
 	 
-	EXEC uspAPCreateVendor1099Adjustment @UserId, @CurrentEntityId, @EntityNewId			
+	EXEC uspAPCreateVendor1099Adjustment @UserId, @CurrentEntityId, @EntityNewId, @LocationId			
 	--rollback transaction
 
 	SET @EntityIdReturn = @EntityNewId

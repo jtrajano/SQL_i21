@@ -97,7 +97,7 @@ BEGIN TRY
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
 			AND LD.intPCompanyLocationId = IL.intLocationId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

@@ -217,8 +217,9 @@ BEGIN
 		,[intCompanyLocationId]				= b.intCompanyLocationId
 		,[ysnStorageScheduleLocationActive] = 1
 		,[intConcurrencyId]					= 1
-	FROM dbo.gachrmst a
+	FROM gachrmst a
 	JOIN tblSMCompanyLocation b ON b.strLocationNumber = a.gachr_loc_no COLLATE Latin1_General_CS_AS
+	JOIN @tblStorageSchedule c ON  a.A4GLIdentity = c.IdentityKey 
 
 	INSERT INTO tblGRStorageSchedulePeriod 
 	(

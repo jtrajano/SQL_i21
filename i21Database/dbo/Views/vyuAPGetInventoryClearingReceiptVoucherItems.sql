@@ -63,7 +63,10 @@ FROM	tblICInventoryReceipt Receipt
 									WHEN ISNULL(ri.dblNet, 0) = 0 THEN 
 										ISNULL(dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, ri.intWeightUOMId, ri.dblOpenReceive), 0)
 									ELSE 
-										ISNULL(ri.dblNet, 0) 
+										CASE WHEN intSourceType = 2 
+												THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId,ri.intUnitMeasureId , ri.dblNet), 0) AS DECIMAL(18,2))
+											ELSE ISNULL(ri.dblNet, 0) 
+										END
 								END 
 						END
 					,dblVoucherQty = 
@@ -79,7 +82,10 @@ FROM	tblICInventoryReceipt Receipt
 										WHEN ISNULL(ri.dblNet, 0) = 0 THEN 
 											ISNULL(dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, ri.intWeightUOMId, ri.dblOpenReceive), 0)
 										ELSE 
-											ISNULL(ri.dblNet, 0) 
+											CASE WHEN intSourceType = 2 
+												THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId,ri.intUnitMeasureId , ri.dblNet), 0) AS DECIMAL(18,2))
+											ELSE ISNULL(ri.dblNet, 0) 
+											END
 									END 
 							END
 							* dbo.fnCalculateCostBetweenUOM(ISNULL(ri.intCostUOMId, ri.intUnitMeasureId), ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId), ri.dblUnitCost)

@@ -42,6 +42,13 @@ BEGIN TRY
 	DECLARE @tblEntityContactIdOutput TABLE (intEntityId INT)
 	DECLARE @strCustomerCode NVARCHAR(50)
 	DECLARE @strState NVARCHAR(MAX)
+	DECLARE @strDetails NVARCHAR(MAX) = ''
+	DECLARE @tblEMEntity TABLE (
+		strColumnName NVARCHAR(50)
+		,strColumnDescription nvarchar(50)
+		,strOldValue NVARCHAR(MAX)
+		,strNewValue NVARCHAR(MAX)
+		)
 
 	SELECT @strCustomerCode = strCustomerCode
 	FROM tblIPCompanyPreference
@@ -462,6 +469,11 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblEMEntity
 					SET ysnActive = 0
+					OUTPUT 'ysnActive'
+							,'Active'
+							,deleted.ysnActive
+							,Inserted.ysnActive
+						INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 					UPDATE tblAPVendor
@@ -475,6 +487,11 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblEMEntity
 					SET ysnActive = 1
+					OUTPUT 'ysnActive'
+							,'Active'
+							,deleted.ysnActive
+							,Inserted.ysnActive
+						INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 					UPDATE tblAPVendor
@@ -490,11 +507,11 @@ BEGIN TRY
 				SELECT @strAddress = strAddress
 					,@strAddress1 = strAddress1
 					,@strCity = strCity
-					,@strCountry = strCountry
+					--,@strCountry = strCountry
 					,@strZipCode = strZipCode
 					,@strTaxNo = strTaxNo
 					,@strFLOId = strFLOId
-					,@strState = strState
+					--,@strState = strState
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
@@ -530,6 +547,11 @@ BEGIN TRY
 
 					UPDATE tblEMEntityLocation
 					SET strAddress = @strAddress
+					OUTPUT 'strAddress'
+							,'Address'
+							,deleted.strAddress
+							,Inserted.strAddress
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 				END
 
@@ -538,27 +560,52 @@ BEGIN TRY
 					SET strLocationName = @strCity
 						,strCity = @strCity
 						,strCheckPayeeName = Left(@strCity, 50)
+					OUTPUT 'strCity'
+							,'City'
+							,deleted.strCity
+							,Inserted.strCity
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strCountry, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strCountry = @strCountry
+					OUTPUT 'strCountry'
+							,'Country'
+							,deleted.strCountry
+							,Inserted.strCountry
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strState, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strState = @strState
+					OUTPUT 'strState'
+							,'State'
+							,deleted.strState
+							,Inserted.strState
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strZipCode, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strZipCode = @strZipCode
+					OUTPUT 'strZipCode'
+							,'Zip Code'
+							,deleted.strZipCode
+							,Inserted.strZipCode
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strTerm, '/') <> '/'
 				BEGIN
 					UPDATE tblEMEntityLocation
 					SET intTermsId = @intTermId
+					OUTPUT 'intTermsId'
+							,'Terms Id'
+							,deleted.intTermsId
+							,Inserted.intTermsId
+						INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 					UPDATE tblAPVendor
@@ -587,12 +634,22 @@ BEGIN TRY
 					UPDATE tblEMEntity
 					SET strName = @strVendorName
 						,strContactNumber = @strVendorName
+					OUTPUT 'strName'
+							,'Name'
+							,deleted.strName
+							,Inserted.strName
+						INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 				--Vendor table update
 				IF ISNULL(@strCurrency, '/') <> '/'
 					UPDATE tblAPVendor
 					SET intCurrencyId = @intCurrencyId
+					OUTPUT 'intCurrencyId'
+							,'Currency Id'
+							,deleted.intCurrencyId
+							,Inserted.intCurrencyId
+						INTO @tblEMEntity
 					WHERE [intEntityId] = @intEntityId
 
 				IF ISNULL(@strFLOId, '/') <> '/'
@@ -687,6 +744,29 @@ BEGIN TRY
 					FROM tblIPEntityContactStage
 					WHERE intStageEntityId = @intStageEntityId
 					) t2 ON t1.intRowNo = t2.intRowNo
+
+					IF EXISTS (
+							SELECT *
+							FROM @tblEMEntity 
+							)
+					BEGIN
+						SELECT @strDetails += '{"change":"'+strColumnName+'","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue,'')) + '","to":"' + Ltrim(IsNULL(strNewValue,'')) + '","leaf":true,"changeDescription":"'+strColumnDescription+'"},'
+						FROM @tblEMEntity EM
+						Where  IsNULL(strOldValue,'') <> IsNULL(strNewValue,'')
+
+					END
+
+					IF (LEN(@strDetails) > 1)
+					BEGIN
+						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+						EXEC uspSMAuditLog @keyValue = @intEntityId
+							,@screenName = 'EntityManagement.view.Entity'
+							,@entityId = @intUserId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @strDetails
+					END
 			END
 
 			MOVE_TO_ARCHIVE:

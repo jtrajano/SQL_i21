@@ -7,12 +7,12 @@ SELECT	RR.intRefundTypeId,
 		PC.strDescription,
 		PC.strCategoryCode,
 		RRD.dblRate,
-		dblVolume = CV.dblVolume,
-		dblRefundAmount = ROUND((RRD.dblRate * CV.dblVolume),2)
+		dblVolume = (CV.dblVolume - CV.dblVolumeProcessed),
+		dblRefundAmount = ROUND((RRD.dblRate * (CV.dblVolume - CV.dblVolumeProcessed)),2)
 FROM tblPATRefundRate RR
 INNER JOIN tblPATRefundRateDetail RRD
 	ON RRD.intRefundTypeId = RR.intRefundTypeId
 INNER JOIN tblPATPatronageCategory PC
 	ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 INNER JOIN tblPATCustomerVolume CV
-	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1 AND CV.dblVolume <> 0
+	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.dblVolume > CV.dblVolumeProcessed

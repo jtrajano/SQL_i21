@@ -115,11 +115,19 @@ BEGIN TRY
 		--PO Create
 		IF @strMesssageType = 'PURCONTRACT_CREATE'
 		BEGIN
+			IF IsNumeric(@strTrackingNo) = 1
+			BEGIN
+				SELECT @strTrackingNo = dbo.fnRemoveTrailingZeroes(@strTrackingNo)
+			END
+
 			SELECT @intContractHeaderId = intContractHeaderId
-				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
-			WHERE strContractNumber = @strRefNo
+			WHERE RIGHT('000000000000' + strContractNumber, 12) = @strRefNo
 				AND intContractTypeId = 1
+
+			SELECT TOP 1 @ysnMaxPrice = ysnMaxPrice
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
 
 			SELECT @intItemId = intItemId
 			FROM tblCTContractDetail
@@ -207,7 +215,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -243,11 +254,19 @@ BEGIN TRY
 		--PO Update
 		IF @strMesssageType = 'PURCONTRACT_CHANGE'
 		BEGIN
+			IF IsNumeric(@strTrackingNo) = 1
+			BEGIN
+				SELECT @strTrackingNo = dbo.fnRemoveTrailingZeroes(@strTrackingNo)
+			END
+
 			SELECT @intContractHeaderId = intContractHeaderId
-				,@ysnMaxPrice = ysnMaxPrice
 			FROM tblCTContractHeader
-			WHERE strContractNumber = @strRefNo
+			WHERE RIGHT('000000000000' + strContractNumber, 12) = RIGHT('000000000000' + @strRefNo, 12)
 				AND intContractTypeId = 1
+
+			SELECT TOP 1 @ysnMaxPrice = ysnMaxPrice
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
 
 			SELECT @intItemId = intItemId
 			FROM tblCTContractDetail
@@ -280,6 +299,7 @@ BEGIN TRY
 							)
 						AND intItemId = @intItemId
 
+				-- To update Item Change, Delete entries
 				UPDATE tblCTContractFeed
 				SET strFeedStatus = 'Ack Rcvd'
 					,strMessage = 'Success'
@@ -291,11 +311,8 @@ BEGIN TRY
 							ELSE intContractSeq
 							END
 						)
-					AND strItemNo = @strItemNo
-					AND ISNULL(strFeedStatus, '') IN (
-						'Awt Ack'
-						,'Ack Rcvd'
-						)
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+					AND ISNULL(strERPPONumber, '') = @strParam
 
 				INSERT INTO @tblMessage (
 					strMessageType
@@ -311,7 +328,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
@@ -328,6 +348,21 @@ BEGIN TRY
 						)
 					AND strItemNo = @strItemNo
 					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+				-- To update Item Change, Delete entries
+				UPDATE tblCTContractFeed
+				SET strFeedStatus = 'Ack Rcvd'
+					,strMessage = @strMessage
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+					AND ISNULL(strERPPONumber, '') = @strParam
 
 				INSERT INTO @tblMessage (
 					strMessageType
@@ -375,7 +410,10 @@ BEGIN TRY
 					)
 			END
 
-			IF @strStatus NOT IN (53) --Error
+			IF @strStatus NOT IN (
+					53
+					,64
+					) --Error
 			BEGIN
 				SET @strMessage = @strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 

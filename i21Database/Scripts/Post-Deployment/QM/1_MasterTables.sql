@@ -877,14 +877,14 @@ GO
 IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 5)
 BEGIN
 	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
-	VALUES('ArrivalForm',5,1)
+	VALUES('',5,1)
 END
 GO
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 10)
 BEGIN
 	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
-	VALUES('ArrivalForm',10,1)
+	VALUES('',10,1)
 END
 ELSE
 BEGIN
@@ -1198,4 +1198,8 @@ GO
 UPDATE tblQMCompanyPreference
 SET ysnShowItemDescriptionOnly = 0
 WHERE ysnShowItemDescriptionOnly IS NULL
+GO
+UPDATE tblQMCompanyPreference
+SET ysnAllowReversalSampleEntry = 0
+WHERE ysnAllowReversalSampleEntry IS NULL
 GO

@@ -387,10 +387,11 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		AND	CA1.strType						 = 'ProductType'
 		LEFT JOIN tblICCommodityAttribute		CA2				 ON CA2.intCommodityAttributeId		 = Item.intGradeId
 		AND	CA2.strType						 = 'Grade'
-		LEFT JOIN tblAPBillDetail BillDetail					 ON BillDetail.intContractDetailId = CD.intContractDetailId 
-																	AND   BillDetail.intItemId     = CD.intItemId
+		LEFT JOIN tblAPBillDetail BillDetail					 ON BillDetail.intContractDetailId   = CD.intContractDetailId 
+																	AND   BillDetail.intItemId       = CD.intItemId
 		
-        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID						=	CA.intCountryID
+		LEFT JOIN tblAPBill Bill								 ON Bill.intBillId					 = BillDetail.intBillId 
+        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 = CA.intCountryID
 		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
 		LEFT JOIN tblCTPriceFixation			PF				 ON PF.intContractDetailId			 = CD.intContractDetailId
 		LEFT JOIN tblCTBook						Book			 ON Book.intBookId					 = CD.intBookId
@@ -430,6 +431,7 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 					GROUP BY intContractDetailId
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
+		AND   ISNULL(Bill.intTransactionType,0) = 1
 	
 	UNION ALL
 	

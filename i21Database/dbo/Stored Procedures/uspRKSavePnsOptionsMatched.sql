@@ -282,7 +282,7 @@ BEGIN
 ----------------- Created Future Transaction Based on the Option Transaction ----------------------------------  
 
  SELECT @intInternalTradeNo = intNumber
-							  from tblSMStartingNumber  where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
+							  from tblSMStartingNumber  where  intStartingNumberId=45
  INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,intSelectedInstrumentTypeId,  
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
          intFutureMarketId,intInstrumentTypeId,intCommodityId,  
@@ -314,7 +314,7 @@ SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();
 		   FROM tblRKFutOptTransaction Where intFutOptTransactionId=@NewFutOptTransactionId  
 
 	--SELECT @intInternalTradeNo1 = Max(convert(numeric(24,10),REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H',''))) + 1  from tblRKFutOptTransaction
-	UPDATE tblSMStartingNumber set intNumber = isnull(intNumber,0)+ 1 where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
+	UPDATE tblSMStartingNumber set intNumber = isnull(intNumber,0)+ 1 where intStartingNumberId=45
 	UPDATE tblRKFutOptTransaction  set strBuySell=@NewBuySell,strOptionType=null,intOptionMonthId=null Where intFutOptTransactionId = @NewFutOptTransactionId   
 	UPDATE tblRKOptionsPnSExercisedAssigned set intFutTransactionId= @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
 	SELECT @mRowNumber = MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber>@mRowNumber    

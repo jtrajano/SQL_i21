@@ -49,11 +49,11 @@ BEGIN
 		-- Check if register has intImportFileHeaderId
 		DECLARE @strRegisterName nvarchar(200)
 				, @strRegisterClass NVARCHAR(200)
-				, @dblXmlVersion NUMERIC(4, 2)
+				, @strXmlVersion NVARCHAR(10)
 
 		SELECT @strRegisterName = strRegisterName 
 			   , @strRegisterClass = strRegisterClass
-			   , @dblXmlVersion = dblXmlVersion
+			   , @strXmlVersion = strXmlVersion
 		FROM dbo.tblSTRegister 
 		Where intRegisterId = @intRegisterId
 
@@ -78,11 +78,11 @@ BEGIN
 
 
 		DECLARE @XMLGatewayVersion nvarchar(100)
-		SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @intRegisterId
+		SELECT @XMLGatewayVersion = strXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @intRegisterId
 
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
-				IF(@dblXmlVersion = 3.40)
+				IF(@strXmlVersion = '3.4')
 					BEGIN
 						-- Create Unique Identifier
 						-- Handles multiple Update of registers by different Stores

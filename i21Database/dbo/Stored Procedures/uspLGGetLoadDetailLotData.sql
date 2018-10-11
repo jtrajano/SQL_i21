@@ -23,6 +23,7 @@ BEGIN
 		,ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo) AS strWarehouseRefNo
 		,CLSL.strSubLocationName
 		,SL.strName AS strStorageLocation
+		,LDL.intConcurrencyId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId

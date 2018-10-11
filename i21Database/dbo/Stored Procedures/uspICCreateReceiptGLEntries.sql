@@ -5,6 +5,7 @@
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraInventory_ItemLocationId AS INT = NULL 
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -56,6 +57,7 @@ FROM	(
 						, intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t 
 				WHERE	t.strBatchId = @strBatchId
+						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 				UNION ALL 
 				SELECT	DISTINCT 
@@ -64,8 +66,9 @@ FROM	(
 						, intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t 
 				WHERE	t.strBatchId = @strBatchId
+						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-						AND t.intInTransitSourceLocationId IS NOT NULL 
+						AND t.intInTransitSourceLocationId IS NOT NULL 						
 			) InnerQuery
 		) Query
 
@@ -297,7 +300,7 @@ AS
 				ON 
 				r.strReceiptNumber = t.strTransactionId
 				AND r.intInventoryReceiptId = t.intTransactionId			
-			INNER JOIN tblICInventoryReceiptItem ri
+			LEFT JOIN tblICInventoryReceiptItem ri
 				ON 
 				ri.intInventoryReceiptId = r.intInventoryReceiptId
 				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId

@@ -10,6 +10,7 @@ WITH Pricing AS
 	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,strLocationName,
 		dtmEndDate,
+		FM.strFutureMonth,
 		SUM(PFD.dblQuantity) dblPricedQuantity,
 		SUM(CDT.dblBalance) dblBalanceQuantity,
 		CDT.intUnitMeasureId
@@ -23,6 +24,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
 		,max(CDT.dblQuantity-CDT.dblBalance) dblRecQty
@@ -30,6 +32,9 @@ WITH Pricing AS
 	FROM    tblCTPriceFixationDetail  PFD
     JOIN    tblCTPriceFixation   PFX ON PFX.intPriceFixationId   = PFD.intPriceFixationId
     JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2)
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
@@ -45,6 +50,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
     GROUP BY c.strCommodityCode,
 						c.intCommodityId,
@@ -52,6 +58,7 @@ WITH Pricing AS
 						strContractNumber ,intContractSeq
 						,strLocationName,
 						dtmEndDate,		
+						FM.strFutureMonth,
 						CDT.intUnitMeasureId
 						,CDT.intPricingTypeId,
 						ch.intContractTypeId
@@ -62,7 +69,8 @@ WITH Pricing AS
 						CDT.intContractDetailId,
 						CDT.intContractStatusId,
 						ch.intEntityId
-						,CDT.intCurrencyId,	
+						,CDT.intCurrencyId,
+						CUR.strCurrency,	
 						IM.intItemId
 						,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract)
 
@@ -74,6 +82,7 @@ WITH Pricing AS
 	    strContractNumber
 		,strLocationName,
 		dtmEndDate,
+		strFutureMonth,
 		dblPricedQuantity - dblRecQty  dblBalance,
 		intUnitMeasureId
 		,intPricingTypeId,
@@ -86,6 +95,7 @@ WITH Pricing AS
 		intContractStatusId,
 		intEntityId
 		,intCurrencyId
+		,strCurrency
 		,strContractType+' Priced' AS strType	
 		,intItemId
 		,strItemNo,dtmContractDate,strEntityName,strCustomerContract
@@ -99,7 +109,8 @@ WITH Pricing AS
 	   ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,cl.strLocationName,
 		CDT.dtmEndDate,
-		PRC.dblQuantity-dblPricedQuantity AS dblBalance,
+		FM.strFutureMonth,
+		(CDT.dblBalance - CDT.dblScheduleQty) - PRC.dblPricedQuantity AS dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
 		ch.intContractTypeId
@@ -111,11 +122,15 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Basis' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
@@ -131,6 +146,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity >= dblRecQty
 
 	UNION ALL
@@ -141,6 +157,7 @@ WITH Pricing AS
 	   ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,cl.strLocationName,
 		CDT.dtmEndDate,
+		FM.strFutureMonth,
 		PRC.dblPricedQuantity-dblRecQty AS dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
@@ -153,10 +170,14 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Priced' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
@@ -173,6 +194,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity > dblRecQty
 
 	UNION ALL
@@ -183,6 +205,7 @@ WITH Pricing AS
 	   ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,cl.strLocationName,
 		CDT.dtmEndDate,
+		FM.strFutureMonth,
 		CDT.dblQuantity-dblRecQty AS dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
@@ -195,10 +218,14 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' Basis' AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
@@ -215,6 +242,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE  dblPricedQuantity < dblRecQty
 
     UNION ALL
@@ -226,6 +254,7 @@ WITH Pricing AS
 	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,strLocationName,
 		dtmEndDate,
+		FM.strFutureMonth,
 		CDT.dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
@@ -238,10 +267,14 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,case when pt.intPricingTypeId=1 then ct.strContractType+' Priced'  else  ct.strContractType+' Basis' end AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
@@ -257,6 +290,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
    
 	UNION 
@@ -268,6 +302,7 @@ WITH Pricing AS
 	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,strLocationName,
 		dtmEndDate,
+		FM.strFutureMonth,
 		CDT.dblBalance dblBalance,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
@@ -280,10 +315,14 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
+		,CUR.strCurrency
 		,ct.strContractType+' '+strPricingType AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM tblCTContractDetail CDT
+	LEFT JOIN(
+		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
+	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
@@ -299,6 +338,7 @@ WITH Pricing AS
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
+	JOIN tblSMCurrency CUR on CDT.intCurrencyId = CUR.intCurrencyID
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
     AND CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
 ) t

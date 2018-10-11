@@ -64,6 +64,7 @@
 	[strAllInvoiceIdList] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[strXml] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[strMarkUpDownBatchNo] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
+	[intIntegrationLogId] INT NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),
@@ -74,5 +75,6 @@
     CONSTRAINT [FK_tblSTCheckoutHeader_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 	CONSTRAINT [FK_tblSTCheckoutHeader_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]),
+	CONSTRAINT [FK_tblSTCheckoutHeader_tblARInvoiceIntegrationLog] FOREIGN KEY ([intIntegrationLogId]) REFERENCES [tblARInvoiceIntegrationLog]([intIntegrationLogId]),
     CONSTRAINT [AK_tblSTCheckoutHeader_intStoreId_dtmCheckoutDate_intShiftNo_strCheckoutType] UNIQUE ([intStoreId], [dtmCheckoutDate], [intShiftNo], [strCheckoutType]),     
 )

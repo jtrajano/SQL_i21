@@ -6,6 +6,7 @@
 	[strJIRAType] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strIcon] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnTicket] [bit] NULL,
+	[intTicketTypeTypeId] [int] NULL ,
 	[ysnDefaultTicket] [bit] NULL,
 	[ysnActivity] [bit] NULL,
 	[ysnOpportunity] [bit] NULL,

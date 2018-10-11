@@ -38,7 +38,7 @@ SELECT DISTINCT L.intLoadId
 	,receipt.ysnPosted
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	AND L.intPurchaseSale = 1
+	AND L.intPurchaseSale IN (1,3)
 	AND ISNULL(L.ysnPosted, 0) = 1
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId

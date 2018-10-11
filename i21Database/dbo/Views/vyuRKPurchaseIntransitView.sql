@@ -12,7 +12,8 @@ SELECT
               sum(LD.dblNet) as dblPurchaseContractShippedNetWt,
               sum(ISNULL(LD.dblDeliveredQuantity, 0)) as dblPurchaseContractReceivedQty,
               CH.intCommodityId,CH.intEntityId,e.strName,
-              PCT.intContractDetailId,
+              CH.intContractHeaderId,
+			  PCT.intContractDetailId,
               CH.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
                        intCommodityUnitMeasureId as intUnitMeasureId 
               ,L.intPurchaseSale
@@ -38,5 +39,6 @@ GROUP BY   PCT.intCompanyLocationId ,
               C.strCommodityCode,
               PCT.intItemId,
               IM.strItemNo,CH.intCommodityId,CH.intEntityId,e.strName,
+			  CH.intContractHeaderId,
               PCT.intContractDetailId,
               CH.strContractNumber,intContractSeq,intCommodityUnitMeasureId,L.intPurchaseSale,L1.strLoadNumber, LD1.intPContractDetailId, LD.intPContractDetailId

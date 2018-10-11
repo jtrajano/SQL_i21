@@ -88,9 +88,9 @@ BEGIN TRY
 			@strCompanyName AS	strE,
 			CH.strEntityName		AS	strF,
 			CASE	WHEN	CH.intContractTypeId  =	1	
-					THEN	'PURCHASE CONTRACT CONFIRMATION'
+					THEN	'PURCHASE '+ UPPER(CH.strPricingType) +' CONTRACT CONFIRMATION'
 					WHEN	CH.intContractTypeId  =	2
-					THEN	'SALES CONTRACT CONFIRMATION'
+					THEN	'SALES '+ UPPER(CH.strPricingType) +' CONTRACT CONFIRMATION'
 			END		AS	strHeading,
 			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'BUYER'
@@ -111,6 +111,8 @@ BEGIN TRY
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			strPrintableRemarks,
 			CH.strTerm
+		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref :' ELSE 'Customer Ref :' END
+		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
 
 	FROM	vyuCTContractHeaderView CH
 	LEFT

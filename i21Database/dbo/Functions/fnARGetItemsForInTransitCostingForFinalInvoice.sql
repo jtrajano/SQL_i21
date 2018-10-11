@@ -75,7 +75,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARI.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
 	,[dblQty]						= -ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -128,7 +128,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ARI.[dtmShipDate]
+	,[dtmDate]						= ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
 	,[dblQty]						= -ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -152,7 +152,7 @@ FROM
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [dtmPostDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId]
 	 FROM @Invoices INV
 	 WHERE
 		INV.[strType] <> 'Provisional' 

@@ -26,8 +26,8 @@ SELECT	Total.intCustomerId,
 			SELECT	intCustomerId = B.intCustomerPatronId,
 				B.intFiscalYear,
 				RR.intRefundTypeId,
-				dblRefundAmount = ROUND(RRD.dblRate * dblVolume,2),
-				dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),2),
+				dblRefundAmount = ROUND(RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed),2),
+				dblCashRefund = ROUND((RRD.dblRate * (B.dblVolume - B.dblVolumeProcessed)) * (RR.dblCashPayout/100),2),
 				RRD.intPatronageCategoryId
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -35,7 +35,7 @@ SELECT	Total.intCustomerId,
 			INNER JOIN tblPATRefundRate RR
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			CROSS APPLY ComPref
-			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
+			WHERE B.dblVolume > B.dblVolumeProcessed
 		) Total
 		INNER JOIN tblARCustomer AC
 				ON AC.[intEntityId] = Total.intCustomerId

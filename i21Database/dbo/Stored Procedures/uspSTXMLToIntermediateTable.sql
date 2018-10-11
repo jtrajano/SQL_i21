@@ -360,7 +360,8 @@ BEGIN
 					-- Add to error logging
 					INSERT INTO tblSTCheckoutErrorLogs 
 					(
-						strErrorMessage 
+						strErrorType
+						, strErrorMessage 
 						, strRegisterTag
 						, strRegisterTagValue
 						, intCheckoutId
@@ -368,7 +369,8 @@ BEGIN
 					)
 					VALUES
 					(
-						@strStatusMsg
+						'XML VERSION'
+						, @strStatusMsg
 						, ''
 						, ''
 						, @intCheckoutId

@@ -44,6 +44,7 @@ BEGIN TRY
 			,@strSourceContractNo	NVARCHAR(50)
 			,@strWashoutContractNo	NVARCHAR(50)
 			,@dblFXPrice			NUMERIC(18,6)
+			,@strEntityName			NVARCHAR(150)
 
 	SELECT   @intSourceHeaderId		=	intSourceHeaderId
 			,@intSourceDetailId		=   intSourceDetailId
@@ -63,6 +64,7 @@ BEGIN TRY
 	SELECT  @strSequenceNumber		=	strSequenceNumber,
 			@dblCashPrice			=	dblCashPrice,
 			@intEntityId			=	intEntityId,
+			@strEntityName			=	strEntityName,
 			@intCompanyLocationId	=	intCompanyLocationId,
 			@intLocationId			=	intCompanyLocationId
 	FROM	vyuCTContractSequence 
@@ -276,6 +278,15 @@ END TRY
 
 BEGIN CATCH
     SELECT @ErrMsg = ERROR_MESSAGE()
+	IF @ErrMsg = 'The customer Id provided does not exists!'
+	BEGIN
+		SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a customer.'
+	END
+	IF @ErrMsg = 'Vendor does not exists.'
+	BEGIN
+		SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a vendor.'
+	END
+
     RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  	
 END CATCH
 GO

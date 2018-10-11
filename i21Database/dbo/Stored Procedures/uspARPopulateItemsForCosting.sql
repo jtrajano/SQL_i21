@@ -92,7 +92,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ARID.[dtmShipDate]
+	,[dtmDate]					= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -206,7 +206,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ARID.[dtmShipDate]
+	,[dtmDate]					= CASE WHEN ARID.[strItemType] = 'Finished Good' AND ARID.[ysnBlended] = 1 THEN ARID.[dtmPostDate] ELSE ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate]) END
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -318,7 +318,7 @@ SELECT
 	 [intItemId]				= ARIC.[intComponentItemId]
 	,[intItemLocationId]		= IST.intItemLocationId
 	,[intItemUOMId]				= ARIC.[intItemUnitMeasureId] 
-	,[dtmDate]					= ARID.[dtmShipDate]
+	,[dtmDate]					= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
 	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
@@ -353,7 +353,8 @@ FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
 	#ARPostInvoiceDetail ARID
-		ON ARIC.[intItemId] = ARID.[intItemId]	
+		ON ARIC.[intItemId] = ARID.[intItemId]
+		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
 INNER JOIN
 	(SELECT [intItemId], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 		ON ARIC.[intComponentItemId] = ICI.[intItemId]

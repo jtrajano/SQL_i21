@@ -167,7 +167,7 @@ BEGIN TRY
 			,intContractDetailId = SSC.intContractDetailId
 			,dblContractUnits = SSC.dblUnits
 			,ContractEntityId = CD.intEntityId
-			,dblCashPrice = CD.dblCashPriceInCommodityStockUOM
+			,dblCashPrice = CD.dblCashPriceInItemStockUOM
 		FROM tblGRSellContract SSC
 		JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId
 		WHERE intSellOffsiteId = @intSellOffsiteId AND SSC.dblUnits > 0

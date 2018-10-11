@@ -115,7 +115,7 @@ SELECT
 	 [strTransactionType]					= @strTransactionType
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
-	,[intSourceId]							= POS.intPOSId
+	,[intSourceId]							= @intPOSId
 	,[strSourceId]							= POS.strReceiptNumber
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
@@ -150,7 +150,7 @@ SELECT TOP 1
 	 [strTransactionType]					= @strTransactionType
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
-	,[intSourceId]							= POS.intPOSId
+	,[intSourceId]							= @intPOSId
 	,[strSourceId]							= POS.strReceiptNumber
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
@@ -243,7 +243,7 @@ BEGIN
 	INTO #POSPAYMENTS
 	FROM dbo.tblARPOSPayment WITH (NOLOCK)
 	WHERE intPOSId = @intPOSId
-	  AND ISNULL(strPaymentMethod, '') <> 'On Account'
+	  AND ISNULL(strPaymentMethod, '')  <> 'On Account'
 
 	SELECT @dblTotalAmountPaid = SUM(dblAmount) FROM #POSPAYMENTS
 
@@ -400,28 +400,22 @@ BEGIN
 			INNER JOIN #POSPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
 			--UPDATE POS ENDING BALANCE
-				UPDATE EOD
-				--SET dblEndingBalance = ISNULL(POSLOG.dblEndingBalance,0) + POSTPAYMENT.dblAmount
-				SET dblExpectedEndingBalance = ISNULL(EOD.dblExpectedEndingBalance, 0) + POSTPAYMENT.dblAmount
-				FROM tblARPOSEndOfDay EOD
-				INNER JOIN(   
-					SELECT
+			UPDATE tblARPOSEndOfDay
+			SET
+				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + @dblTotalAmountPaid
+			FROM tblARPOSEndOfDay EOD
+			INNER JOIN(
+				SELECT
 						intPOSLogId
-						,intPOSEndOfDayId
-					FROM tblARPOSLog
-				) POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
-				INNER JOIN (
-					SELECT intPOSLogId
-						, intPOSId
-					FROM tblARPOS
-				) POS ON POS.intPOSLogId = POSLOG.intPOSLogId
-				CROSS APPLY (
-					SELECT dblAmount = SUM(ISNULL(dblAmount, 0))
-					FROM tblARPOSPayment PAY
-					WHERE ISNULL(PAY.strPaymentMethod, '') <> 'On Account'
-					  AND PAY.intPOSId = POS.intPOSId 
-					GROUP BY intPOSId
-				) POSTPAYMENT
-				WHERE POS.intPOSId = @intPOSId 
+					,intPOSEndOfDayId
+				FROM tblARPOSLog
+			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+			INNER JOIN(
+				SELECT
+						intPOSId
+					,intPOSLogId
+				FROM tblARPOS
+			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+			WHERE POS.intPOSId = @intPOSId
 		END
 END

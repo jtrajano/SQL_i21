@@ -85,7 +85,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBillId]						=	@voucherId,
 		[intItemId]						=	A.intItemId,
 		[strMiscDescription]			=	item.strDescription,
-		[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
+		[intInventoryReceiptItemId]  	= 	J.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
@@ -117,7 +117,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	A.intContractDetailId,
 		[intContractSeq]				=	A.intContractSeq,
 		[intContractHeaderId]			=	A.intContractHeaderId,
-		[intUnitOfMeasureId]			=	(CASE WHEN A.intContractDetailId IS NOT NULL THEN cd.intItemUOMId ELSE A.intCostUnitMeasureId END),
+		[intUnitOfMeasureId]			=	A.intCostUnitMeasureId,  --CASE WHEN A.intContractDetailId IS NOT NULL THEN cd.intItemUOMId ELSE A.intCostUnitMeasureId END),
 		[intCostUOMId]              	=   A.intCostUnitMeasureId,
 		[intWeightUOMId]				=	NULL,
 		[intLineNo]						=	1,
@@ -166,6 +166,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
 		WHERE IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	)  IRCT
+	OUTER APPLY
+	(
+		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
+		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	) J
 	WHERE A.intEntityVendorId = @voucherVendor --PARAMETER TO DISTINGUISH CORRECT CHARGES PER VENDOR
 	-- OUTER APPLY(
 	-- 	SELECT ysnPrice FROM #tmpReceiptChargeData RC

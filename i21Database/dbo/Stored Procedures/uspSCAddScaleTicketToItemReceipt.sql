@@ -75,13 +75,7 @@ BEGIN
 	)
 END 
 
---IF(@batchId IS NULL)
---	EXEC uspSMGetStartingNumber 105, @batchId OUT
-
---SET @ticketBatchId = @batchId
-
--- Insert Entries to Stagging table that needs to processed to Transport Load
-INSERT into @ReceiptStagingTable(
+INSERT INTO @ReceiptStagingTable(
 		-- Header
 		strReceiptType
 		,intEntityVendorId
@@ -119,6 +113,7 @@ INSERT into @ReceiptStagingTable(
 		,dblGross
 		,dblNet
 		,intFreightTermId
+		,intLoadReceive
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -223,6 +218,7 @@ SELECT
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= CNT.intFreightTermId
+		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -247,7 +243,9 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
+			,CTH.ysnLoad
 			FROM tblCTContractDetail CTD 
+			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
@@ -1379,21 +1377,6 @@ BEGIN
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
-
-IF @ticketStatus = 'O'
-	SET @ticketStatus = 'Open'
-ELSE IF @ticketStatus = 'R'
-	SET @ticketStatus = 'Reopen'
-
-EXEC dbo.uspSMAuditLog 
-	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
-	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
-	,@entityId			= @intUserId						-- Entity Id.
-	,@actionType		= 'Updated'							-- Action Type
-	,@changeDescription	= 'Ticket Status'					-- Description
-	,@fromValue			= @ticketStatus						-- Old Value
-	,@toValue			= 'Completed'						-- New Value
-	,@details			= '';
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

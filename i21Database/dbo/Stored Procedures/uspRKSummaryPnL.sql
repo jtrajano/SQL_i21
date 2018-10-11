@@ -190,9 +190,7 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@strBuySell = @strBuySell,
 	@intBookId = @intBookId,
 	@intSubBookId = @intSubBookId
-
 BEGIN
-
 
 DECLARE @Summary AS TABLE (
 			intFutureMarketId int,
@@ -212,22 +210,27 @@ DECLARE @Summary AS TABLE (
 			dblVariationMargin NUMERIC(24, 10),
 			strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 			strAccountNumber VARCHAR(100) COLLATE Latin1_General_CI_AS,
-			dblTotal NUMERIC(24, 10)	
+			dblTotal NUMERIC(24, 10),
+			ysnExpired BIT,
+			dtmTradeDate datetime	
 	)
+
+	
 	INSERT INTO @Summary (intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,intLongContracts,dblLongAvgPrice ,intShortContracts ,dblShortAvgPrice ,dblNet,
-					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal)
+					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,dblTotal,ysnExpired,dtmTradeDate)
 	SELECT intFutureMarketId ,intFutureMonthId,strFutMarketName,strFutureMonth ,isnull(intLongContracts,0) intLongContracts,dblLongAvgPrice ,isnull(intShortContracts,0) intShortContracts  ,dblShortAvgPrice ,isnull(dblNet,0) dblNet,
 					dblUnrealized ,dblClosing ,dblFutCommission ,dblPrice ,dblRealized ,dblVariationMargin,strName ,strAccountNumber,
-		dblUnrealized + dblRealized AS dblTotal
+		dblUnrealized + dblRealized AS dblTotal,ysnExpired,dtmTradeDate
 	FROM (
 		SELECT distinct intFutureMarketId,
 			intFutureMonthId,
 			strFutMarketName,
 			strFutureMonth,
 			SUM(ISNULL(dblLong, 0)) intLongContracts,
-			isnull(CASE WHEN SUM(LongWaitedPrice) = 0 THEN NULL ELSE SUM(LongWaitedPrice) / isnull(SUM(ISNULL(dblLong, 0)), NULL) END, 0) dblLongAvgPrice,
+			sum(LongWaitedPrice)  dblLongAvgPrice,
 			SUM(ISNULL(dblShort, 0)) intShortContracts,
-			isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0) dblShortAvgPrice,
+			--isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0)
+			sum(ShortWaitedPrice)  dblShortAvgPrice,
 			SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS dblNet,
 			isnull(SUM(dblNetPnL), 0) dblUnrealized,
 			isnull(max(dblClosing), 0) dblClosing,
@@ -240,7 +243,7 @@ DECLARE @Summary AS TABLE (
 					), 0) AS dblRealized,
 			isnull(SUM(dblVariationMargin), 0) AS dblVariationMargin,
 			strName,
-			strAccountNumber
+			strAccountNumber,ysnExpired,dtmTradeDate
 		FROM (
 			SELECT dblGrossPnL,
 				LongWaitedPrice,
@@ -261,16 +264,16 @@ DECLARE @Summary AS TABLE (
 				dblNetPnL,
 				dblVariationMargin,				
 				strName,
-				strAccountNumber
+				strAccountNumber,ysnExpired
 			FROM @UnRelaized
 			
 			UNION
 			
-			SELECT DISTINCT dblGrossPnL,
-				LongWaitedPrice,
-				dblLong,
-				dblShort,
-				ShortWaitedPrice,
+			SELECT DISTINCT dblGrossPL dblGrossPnL,
+				null LongWaitedPrice,
+				null dblLong,
+				null dblShort,
+				null ShortWaitedPrice,
 				t.dblFutCommission,
 				dblNet,
 				t.intFutOptTransactionId,
@@ -285,7 +288,7 @@ DECLARE @Summary AS TABLE (
 				null dblNetPnL,
 				dblVariationMargin,				
 				t.strName,
-				t.strAccountNumber
+				t.strAccountNumber,isnull(t.ysnExpired,p.ysnExpired) as ysnExpired
 			FROM @Relaized t
 			LEFT JOIN @UnRelaized p ON t.intFutureMarketId = p.intFutureMarketId AND t.intFutureMonthId = p.intFutureMonthId
 			WHERE t.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN t.intCommodityId ELSE @intCommodityId END 
@@ -298,10 +301,12 @@ DECLARE @Summary AS TABLE (
 			strFutMarketName,
 			strFutureMonth,
 			strName,
-			strAccountNumber
+			strAccountNumber,ysnExpired,dtmTradeDate
 		) t
 
-		select intFutureMarketId,
+	
+
+		select  intFutureMarketId,
 			intFutureMonthId,
 			strFutMarketName,
 			strFutureMonth,
@@ -311,17 +316,18 @@ DECLARE @Summary AS TABLE (
 			sum(dblShortAvgPrice) dblShortAvgPrice,
 			sum(dblNet) dblNet,
 			sum(dblUnrealized) dblUnrealized,
-			sum(dblClosing) dblClosing,
+			max(dblClosing) dblClosing,
 			sum(dblFutCommission) dblFutCommission,
 			sum(dblPrice) dblPrice,
-			sum(dblRealized) dblRealized,
+			max(dblRealized) dblRealized,
 			sum(dblVariationMargin) dblVariationMargin,
 			strName ,
 			'' strAccountNumber,
 			sum(dblTotal) dblTotal,
 			sum(dblInitialMargin) dblInitialMargin,
 			'' strBook,
-			'' strSubBook
+			'' strSubBook,
+			ysnExpired
 			 from(
 	SELECT intFutureMarketId,
 			intFutureMonthId,
@@ -344,12 +350,21 @@ DECLARE @Summary AS TABLE (
 		CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 					WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 					ELSE dblContractMargin END end) as dblInitialMargin
-		FROM(
-		SELECT t.*,dblMinAmount,dblMaxAmount,dblPercenatage,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
-		dblPerFutureContract from @Summary t 
+			,ysnExpired
+		FROM(select *,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin from(
+		SELECT DISTINCT t.*,fm.dblContractSize,(select dblMinAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMinAmount,
+		(select dblMaxAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMaxAmount,
+		(select dblPercenatage from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPercenatage,
+		(select dblPerFutureContract from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPerFutureContract from @Summary t 
 		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
-		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId )t1)t2
-		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName
+
+		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId)t )t1)t2
+		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName,ysnExpired
+		ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC
 		END

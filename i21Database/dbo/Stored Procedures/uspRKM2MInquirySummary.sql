@@ -10,6 +10,7 @@
 		@intLocationId int= null,
 		@intMarketZoneId int= null
 AS
+
 DECLARE @ysnIncludeBasisDifferentialsInResults BIT
 DECLARE @dtmPriceDate DATETIME
 
@@ -88,7 +89,15 @@ DECLARE @tblFinalDetail TABLE (
 							,dblResultRatio NUMERIC(24, 10)
 						)
 
-INSERT INTO @#tempSummary 
+INSERT INTO @#tempSummary (intRowNum ,intConcurrencyId ,	intContractHeaderId ,	intContractDetailId ,	
+strContractOrInventoryType,
+strContractSeq,strEntityName,intEntityId ,intFutureMarketId ,strFutMarketName,	intFutureMonthId ,strFutureMonth,
+dblOpenQty ,strCommodityCode,intCommodityId ,intItemId ,	strItemNo,	strOrgin,strPosition,		strPeriod,
+strPeriodTo ,strPriOrNotPriOrParPriced,intPricingTypeId ,strPricingType,dblContractRatio ,dblContractBasis ,dblFutures ,
+dblCash , dblCosts ,dblMarketBasis ,dblMarketRatio, dblFuturePrice ,intContractTypeId ,dblAdjustedContractPrice ,dblCashPrice , dblMarketPrice ,
+dblResultBasis , dblResultCash ,dblContractPrice,intQuantityUOMId ,intCommodityUnitMeasureId ,intPriceUOMId 
+,intCent ,dtmPlannedAvailabilityDate ,dblPricedQty ,dblUnPricedQty ,dblPricedAmount ,intCompanyLocationId ,intMarketZoneId   ,
+strMarketZoneCode ,strLocationName ,dblResult ,dblMarketFuturesResult ,dblResultRatio)
 EXEC uspRKM2MInquiryTransaction @intM2MBasisId= @intM2MBasisId,@intFutureSettlementPriceId= @intFutureSettlementPriceId,@intQuantityUOMId= @intQuantityUOMId,@intPriceUOMId= @intPriceUOMId,@intCurrencyUOMId= @intCurrencyUOMId,@dtmTransactionDateUpTo= @dtmTransactionDateUpTo, @strRateType=@strRateType,@intCommodityId= @intCommodityId,@intLocationId= @intLocationId,@intMarketZoneId= @intMarketZoneId 
 
 INSERT INTO @tblRow (intCommodityId)
@@ -168,7 +177,103 @@ BEGIN
 		WHERE s.intCommodityId = @intCommodityId1
 		GROUP BY intCommodityId
 			,strCommodityCode
-			,strContractOrInventoryType		
+			,strContractOrInventoryType	
+			
+			
+DECLARE @UnRelaized AS TABLE (
+	intFutOptTransactionId INT,
+	dblGrossPnL NUMERIC(24, 10),
+	dblLong NUMERIC(24, 10),
+	dblShort NUMERIC(24, 10),
+	dblFutCommission NUMERIC(24, 10),
+	strFutMarketName NVARCHAR(100),
+	strFutureMonth NVARCHAR(100),
+	dtmTradeDate DATETIME,
+	strInternalTradeNo NVARCHAR(100),
+	strName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strBook NVARCHAR(100),
+	strSubBook NVARCHAR(100),
+	strSalespersonId NVARCHAR(100),
+	strCommodityCode NVARCHAR(100),
+	strLocationName NVARCHAR(100),
+	dblLong1 INT,
+	dblSell1 INT,
+	dblNet INT,
+	dblActual NUMERIC(24, 10),
+	dblClosing NUMERIC(24, 10),
+	dblPrice NUMERIC(24, 10),
+	dblContractSize NUMERIC(24, 10),
+	dblFutCommission1 NUMERIC(24, 10),
+	dblMatchLong NUMERIC(24, 10),
+	dblMatchShort NUMERIC(24, 10),
+	dblNetPnL NUMERIC(24, 10),
+	intFutureMarketId INT,
+	intFutureMonthId INT,
+	intOriginalQty INT,
+	intFutOptTransactionHeaderId INT,
+	strMonthOrder NVARCHAR(100),
+	RowNum INT,
+	intCommodityId INT,
+	ysnExpired BIT,
+	dblVariationMargin NUMERIC(24, 10),
+	dblInitialMargin NUMERIC(24, 10),
+	LongWaitedPrice NUMERIC(24, 10),
+	ShortWaitedPrice NUMERIC(24, 10)
+	)
+	INSERT INTO @UnRelaized (
+	RowNum,
+	strMonthOrder,
+	intFutOptTransactionId,
+	dblGrossPnL,
+	dblLong,
+	dblShort,
+	dblFutCommission,
+	strFutMarketName,
+	strFutureMonth,
+	dtmTradeDate,
+	strInternalTradeNo,
+	strName,
+	strAccountNumber,
+	strBook,
+	strSubBook,
+	strSalespersonId,
+	strCommodityCode,
+	strLocationName,
+	dblLong1,
+	dblSell1,
+	dblNet,
+	dblActual,
+	dblClosing,
+	dblPrice,
+	dblContractSize,
+	dblFutCommission1,
+	dblMatchLong,
+	dblMatchShort,
+	dblNetPnL,
+	intFutureMarketId,
+	intFutureMonthId,
+	intOriginalQty,
+	intFutOptTransactionHeaderId,
+	intCommodityId,
+	ysnExpired,
+	dblVariationMargin,
+	dblInitialMargin,
+	LongWaitedPrice,
+	ShortWaitedPrice
+	)
+
+exec uspRKUnrealizedPnL  @dtmFromDate ='01-01-1900',
+		@dtmToDate = @dtmTransactionDateUpTo,
+	@intCommodityId  = @intCommodityId,
+	@ysnExpired ='false',
+	@intFutureMarketId  = NULL,
+	@intEntityId  = NULL,
+	@intBrokerageAccountId  = NULL,
+	@intFutureMonthId  = NULL,
+	@strBuySell  = NULL,
+	@intBookId  = NULL,
+	@intSubBookId  = NULL				
 		INSERT INTO @tblFinalDetail (
 		strSummary
 		,intCommodityId
@@ -179,8 +284,7 @@ BEGIN
 		,dblFutures
 		,dblBasis
 		,dblCash
-		)
-		
+		)	
 		SELECT 'Derivatives' strSummary
 			,intCommodityId
 			,'' strCommodityCode
@@ -193,9 +297,8 @@ BEGIN
 		FROM (
 			SELECT DISTINCT intCommodityId
 				,strCommodityCode
-				,sum((ISNULL(GrossPnL, 0) * (isnull(dbo.fnRKGetLatestClosingPrice(vp.intFutureMarketId, vp.intFutureMonthId, @dtmPriceDate), 0) - isnull(dblPrice, 0))) - isnull(dblFutCommission, 0)) pnl
-			FROM vyuRKUnrealizedPnL vp
-			WHERE intCommodityId = @intCommodityId1 and ysnExpired = 0
+				,sum(dblGrossPnL) pnl
+			FROM @UnRelaized 
 			GROUP BY intCommodityId
 				,strCommodityCode
 			) t
@@ -214,4 +317,4 @@ END
 	strSummary = 'Total'
 	
 SELECT RowNumber,strSummary,intCommodityId,strCommodityCode,strContractOrInventoryType,dblQty,dblTotal,convert(decimal,dblFutures) as dblFutures,dblBasis,dblCash,0 as intConcurrencyId  
-FROM @tblFinalDetail	
+FROM @tblFinalDetail

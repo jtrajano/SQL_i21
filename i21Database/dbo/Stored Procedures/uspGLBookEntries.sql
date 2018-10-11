@@ -1,20 +1,20 @@
 ﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
-	,@XACT_ABORT_ON BIT = 1
+	,@SkipValidation BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
-IF (@XACT_ABORT_ON  = 1) SET XACT_ABORT ON -- DEFAULT IS OFF
 
 --=====================================================================================================================================
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
+IF (ISNULL(@SkipValidation,0)  = 0)
 BEGIN 
 	DECLARE @errorCode INT
-	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries,@XACT_ABORT_ON;
+	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries;
 	IF @errorCode > 0	RETURN @errorCode
 END 
 ;
@@ -123,7 +123,7 @@ BEGIN
 END
 ;
 
-EXEC uspGLInsertAuditLog @ysnPost, @GLEntries, @XACT_ABORT_ON
+EXEC uspGLInsertAuditLog @ysnPost, @GLEntries
 --=====================================================================================================================================
 -- 	UPSERT DATA TO THE SUMMARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------

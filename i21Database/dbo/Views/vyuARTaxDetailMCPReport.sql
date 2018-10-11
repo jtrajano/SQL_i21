@@ -10,6 +10,10 @@ SELECT strTaxCode			= TC.strTaxCode
 	 , intInvoiceId			= DETAIL.intInvoiceId
 	 , intCategoryId		= ICI.[intCategoryId]
 FROM dbo.tblARInvoiceDetail DETAIL WITH (NOLOCK)
+INNER JOIN (
+	SELECT DISTINCT intInvoiceId
+	FROM tblARInvoiceReportStagingTable
+) STAGING ON DETAIL.intInvoiceId = STAGING.intInvoiceId
 LEFT OUTER JOIN (
 	SELECT [intItemId]
 		 , [intCategoryId]

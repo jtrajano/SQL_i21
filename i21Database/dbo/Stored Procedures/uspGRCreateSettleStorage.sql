@@ -132,9 +132,9 @@ BEGIN TRY
 		 intSettleContractId = SSC.intSettleContractId
 		,intContractDetailId = SSC.intContractDetailId
 		,dblContractUnits	 = SSC.dblUnits
-		,dblCashPrice		 = CD.dblCashPriceInCommodityStockUOM
+		,dblCashPrice		 = CD.dblCashPriceInItemStockUOM
 		,intPricingTypeId	 = CD.intPricingTypeId
-		,dblBasis			 = CD.dblBasisInCommodityStockUOM
+		,dblBasis			 = CD.dblBasisInItemStockUOM
 	FROM tblGRSettleContract SSC
 	JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId
 	WHERE intSettleStorageId = @intSettleStorageId AND SSC.dblUnits > 0
@@ -354,7 +354,7 @@ BEGIN TRY
 		WHERE intSettleVoucherKey = @intSettleVoucherKey
 
 		SELECT @dblDiscountUnpaid = dblDiscountUnPaid
-		FROM vyuGRGetStorageTransferTicket
+		FROM vyuGRGetStorageTickets
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
 		IF @strOrderType = 'Direct'

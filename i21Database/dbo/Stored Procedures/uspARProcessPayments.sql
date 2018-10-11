@@ -294,7 +294,8 @@ BEGIN
 				,@GroupingOption	= @GroupingOption
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
+				,@SkipRecompute     = 1
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -479,6 +480,7 @@ BEGIN
 			,@UserId			= @UserId
 			,@RaiseError		= @RaiseError
 			,@ErrorMessage		= @CurrentErrorMessage	OUTPUT
+			,@SkipRecompute     = 1
 
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -519,6 +521,24 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
+
+--Recompute Payments
+DECLARE @CreatedPaymentIds PaymentId			
+DELETE FROM @CreatedPaymentIds
+
+INSERT INTO @CreatedPaymentIds
+	([intHeaderId]
+	,[intDetailId])
+SELECT 
+		[intHeaderId]	= EFP.[intPaymentId]
+	,[intDetailId]	= EFP.[intPaymentDetailId]
+FROM
+	#EntriesForProcessing EFP
+INNER JOIN
+	@PaymentEntries IE
+		ON EFP.[intPaymentId] = IE.[intPaymentId] 
+
+EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 
 --UnPosting posted Payments for update
 BEGIN TRY
@@ -648,7 +668,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -711,7 +732,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -793,7 +815,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -856,7 +879,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1011,7 +1035,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1075,7 +1100,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 1

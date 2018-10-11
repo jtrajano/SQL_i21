@@ -23,7 +23,8 @@ DECLARE @strShipmentNumber AS NVARCHAR(50)
 		,@intLocationId AS INT	
 		,@intSubLocationId AS INT	
 		,@intStorageLocationId AS INT	
-		,@strLotNumber AS NVARCHAR(50)		
+		,@strLotNumber AS NVARCHAR(50)
+		,@intOwnershipType AS INT
 
 		-- Parameters for the new values: 
 		,@dblAdjustByQuantity AS NUMERIC(38,20)
@@ -85,6 +86,7 @@ BEGIN
 				, stockUOM.intItemUOMId
 				, CASE WHEN @ysnPost = 1 THEN (si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) ELSE -(si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) END 
 			) 
+			, si.intOwnershipType
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItem i 
@@ -138,6 +140,7 @@ BEGIN
 			,@intItemUOMId  
 			,@intSourceTransactionTypeId
 			,@dblAdjustByQuantity
+			,@intOwnershipType
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -150,6 +153,7 @@ BEGIN
 				,@intSubLocationId 
 				,@intStorageLocationId 
 				,@strLotNumber 
+				,@intOwnershipType 
 
 				-- Parameters for the new values: 
 				,@dblAdjustByQuantity
@@ -193,6 +197,7 @@ BEGIN
 				,@intItemUOMId  
 				,@intSourceTransactionTypeId
 				,@dblAdjustByQuantity
+				,@intOwnershipType
 	END
 
 	GOTO _EndLoop

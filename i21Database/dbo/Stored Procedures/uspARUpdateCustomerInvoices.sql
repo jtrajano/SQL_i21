@@ -5,6 +5,7 @@
 	,@RaiseError		BIT					= 0
 	,@BatchId			NVARCHAR(40)		= NULL
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -62,6 +63,7 @@ INSERT INTO @InvoicesToUpdate (
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+    ,[ysnFromProvisional]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -115,6 +117,7 @@ SELECT DISTINCT
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
 	,[ysnImpactInventory]				= [ysnImpactInventory]
+    ,[ysnFromProvisional]               = [ysnFromProvisional]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= [intLoadDistributionHeaderId]
@@ -356,7 +359,7 @@ SELECT
 FROM
 	@InvoicesToUpdate ITG --WITH (NOLOCK)
 WHERE
-	ISNULL(ITG.[strType],'') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice')
+	ISNULL(ITG.[strType],'') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
 
 UNION ALL
 
@@ -679,7 +682,7 @@ BEGIN TRY
 		  ,ARI.[intPeriodsToAccrue]				= ISNULL(ITG.[intPeriodsToAccrue], 1)
 		  ,ARI.[dtmDate]						= ITG.[dtmDate]
 		  ,ARI.[dtmDueDate]						= ISNULL(ITG.[dtmDueDate], (CAST(dbo.fnGetDueDateBasedOnTerm(ITG.[dtmDate], ISNULL(ISNULL(ITG.[intTermId], ARC.[intTermsId]),0)) AS DATE)))
-		  ,ARI.[dtmShipDate]					= ITG.[dtmShipDate]
+		  ,ARI.[dtmShipDate]					= ISNULL(ITG.[dtmShipDate], ITG.[dtmPostDate])
 		  ,ARI.[dtmPostDate]					= ITG.[dtmPostDate]
 		  --,ARI.[dtmCalculated]				= ARI.[dtmCalculated]
 		  --,ARI.[dblInvoiceSubtotal]			= ARI.[dblInvoiceSubtotal]
@@ -732,6 +735,7 @@ BEGIN TRY
 		  ,ARI.[ysnCalculated]					= ISNULL(ITG.[ysnCalculated], 0)
 		  ,ARI.[ysnSplitted]					= ISNULL(ITG.[ysnSplitted], 0)
 		  ,ARI.[ysnImpactInventory]				= ISNULL(ITG.[ysnImpactInventory], 0)
+          ,ARI.[ysnFromProvisional]             = ISNULL(ITG.[ysnFromProvisional], 0)
 		  --,ARI.[dblSplitPercent]				= ARI.[dblSplitPercent]
 		  --,ARI.[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 		  --,ARI.[ysnImportedFromOrigin]		= ARI.[ysnImportedFromOrigin]
@@ -994,6 +998,7 @@ BEGIN TRY
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -1132,6 +1137,7 @@ BEGIN TRY
 		,[ysnCalculated]						= ITG.[ysnCalculated]
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
+        ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
@@ -1475,7 +1481,10 @@ END CATCH
 
 	
 BEGIN TRY
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @UpdatedInvoiceIds
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @UpdatedInvoiceIds
+	END	
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog

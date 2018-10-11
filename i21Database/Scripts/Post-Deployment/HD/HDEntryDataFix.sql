@@ -482,8 +482,11 @@ GO
 	set @intUnitMeasureId = (select top 1 intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'Hour');
 
 	/*Create Service Category*/
-
+	
 	declare @intCategoryId int;
+
+	/*Comment this block as Item does not require Category*/
+	/*
 
 	if not exists (select * from tblICCategory where strCategoryCode = 'Category' and strInventoryType = 'Service')
 	begin
@@ -498,6 +501,7 @@ GO
 				   ,'Service'
 				   ,1)
 	end
+	*/
 	
 	set @intCategoryId = (select top 1 intCategoryId from tblICCategory where strCategoryCode = 'Category' and strInventoryType = 'Service');
 
@@ -511,7 +515,7 @@ GO
 				   ([strItemNo]
 				   ,[strType]
 				   ,[strDescription]
-				   ,[intCategoryId]
+				   --,[intCategoryId]
 				   ,[ysnBillable]
 				   ,[intLifeTime]
 					,[ysnLandedCost]
@@ -524,7 +528,7 @@ GO
 				   ('HDNonBillable'
 				   ,'Service'
 				   ,'HDNonBillable item for Help Desk non-billable Hours Worked'
-				   ,@intCategoryId
+				   --,@intCategoryId
 				   ,convert(bit,0)
 				   ,0
 					,convert(bit,0)
@@ -555,6 +559,19 @@ GO
 		set @intItemUOMId = (select top 1 intItemUOMId from tblICItemUOM where intItemId = @intItemId and intUnitMeasureId = @intUnitMeasureId);
 
 	update tblHDJobCode set intItemId = @intItemId, intItemUOMId = @intItemUOMId, intUnitMeasureId = @intUnitMeasureId where intItemId is null;
+
+	if not exists (select * from tblHDJobCode where intItemId = @intItemId)
+	begin
+		delete from tblICItemUOM where intItemUOMId = @intItemUOMId;
+		delete from tblICItem where intItemId = @intItemId;
+		
+		 begin try 
+			 delete from tblICCategory where intCategoryId = @intCategoryId;
+		 end try
+		 begin catch
+			  -- what you want to do in catch
+		 end catch 
+	end
 
 GO
 	PRINT N'End creating Non-Billable Inventory Item.';
@@ -636,5 +653,11 @@ GO
 		and b.ysnDefaultContact = convert(bit,1)
 
 GO
-	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
+	PRINT N'End updating Help Desk ticket type.';
+GO
+
+	update tblHDTicketType set intTicketTypeTypeId = (case when ysnTicket = convert(bit,1) then 2 else 1 end) where intTicketTypeTypeId is null;
+
+GO
+	PRINT N'End updating Help Desk ticket type.';
 GO

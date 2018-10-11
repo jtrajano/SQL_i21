@@ -139,10 +139,10 @@ BEGIN TRY
 		,CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END AS dblFranchiseWeight
 		,(ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END) AS dblQtyReceived
 		,WCD.dblUnitPrice
-		,1 AS dblCostUnitQty
-		,1 AS dblWeightUnitQty
+		,ISNULL(IU.dblUnitQty,1)
+		,ISNULL(WeightItemUOM.dblUnitQty,1)
 		,dblClaimAmount
-		,1 AS dblUnitQty
+		,ISNULL(ItemUOM.dblUnitQty,1)
 		,(
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
@@ -175,6 +175,8 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = WCD.intItemId AND ItemUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
+	LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = CD.intNetWeightUOMId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
@@ -189,10 +191,10 @@ BEGIN TRY
 		,0 AS dblFranchiseWeight
 		,WCOC.dblQuantity AS dblQtyReceived
 		,WCOC.dblRate
-		,1 AS dblCostUnitQty
-		,1 AS dblWeightUnitQty
+		,ISNULL(IU.dblUnitQty,1) AS dblCostUnitQty
+		,ISNULL(WeightItemUOM.dblUnitQty,1) AS dblWeightUnitQty
 		,WCOC.dblAmount
-		,1 AS dblUnitQty
+		,ISNULL(ItemUOM.dblUnitQty,1) AS dblUnitQty
 		,(
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
@@ -218,6 +220,8 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCOC.intRateUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = WCOC.intItemUOMId
+	LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = WCOC.intWeightUOMId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	SELECT @intVoucherType = CASE 
@@ -302,7 +306,7 @@ BEGIN TRY
 		WHERE intPartyEntityId = @intVendorEntityId
 
 		EXEC uspAPCreateBillData 
-			 @userId = @intEntityUserSecurityId
+			 @userId = @intEntityUserSecurityId	
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailClaim = @VoucherDetailClaim
 			,@type = @intVoucherType
@@ -320,9 +324,8 @@ BEGIN TRY
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
 				dblClaimAmount = vdd.dblClaimAmount,
-				dblTotal = vdd.dblClaimAmount,
-				dbl1099 = vdd.dblClaimAmount,
-				dblNetWeight = vdd.dblNetWeight
+				dblTotal = ROUND(vdd.dblClaimAmount,2),
+				dblNetWeight = ROUND(vdd.dblNetWeight,2)
 			FROM @voucherDetailData vdd
 			JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
 			WHERE intBillId = @intBillId
@@ -337,10 +340,9 @@ BEGIN TRY
 			SET intLoadId = @intLoadId,
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount,
-				dbl1099 = @dblClaimAmount,
-				dblNetWeight = @dblNetWeight
+				dblClaimAmount = ROUND(@dblClaimAmount,2),
+				dblTotal = ROUND(@dblClaimAmount,2),
+				dblNetWeight = ROUND(@dblNetWeight,2)
 			WHERE intBillId = @intBillId AND intContractDetailId IS NOT NULL
 		END
 
@@ -368,9 +370,8 @@ BEGIN TRY
 	UPDATE BD
 	SET intCurrencyId = WCD.intCurrencyId
 		,ysnSubCurrency = 1
-		,dblClaimAmount = WCD.dblClaimAmount
-		,dblTotal = WCD.dblClaimAmount
-		,dbl1099 = WCD.dblClaimAmount
+		,dblClaimAmount = ROUND(WCD.dblClaimAmount,2)
+		,dblTotal = ROUND(WCD.dblClaimAmount,2)
 		,dblNetWeight = WCD.dblToNet
 		,intLoadId = WC.intLoadId
 		,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')

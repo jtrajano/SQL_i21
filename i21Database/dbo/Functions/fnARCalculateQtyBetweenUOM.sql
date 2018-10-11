@@ -12,7 +12,10 @@ BEGIN
 	
 	IF ISNULL(@dblQty, 0) = 0 
 		RETURN 0;
-	DECLARE @isStockTracking BIT 
+	DECLARE @isStockTracking BIT
+
+	IF ISNULL(@strType, '') = 'Bundle'
+		RETURN @dblQty;
 
 	if isnull(@intItemId, 0) <> 0 or isnull(@strType, '') <> ''
 	begin

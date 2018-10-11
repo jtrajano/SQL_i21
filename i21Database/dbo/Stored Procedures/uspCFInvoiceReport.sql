@@ -349,6 +349,7 @@ BEGIN
 			,intInvoiceId					INT
 			,intCustomerGroupId				INT
 			,intOdometerAging				INT
+			,intVehicleId					INT
 			----------------------------------------------------
 			,dtmTransactionDate				DATETIME
 			,dtmInvoiceDate					DATETIME
@@ -446,7 +447,8 @@ BEGIN
 			,intInvoiceCycle			
 			,intInvoiceId				
 			,intCustomerGroupId			
-			,intOdometerAging			
+			,intOdometerAging		
+			,intVehicleId	
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -539,7 +541,8 @@ BEGIN
 			,intInvoiceCycle			
 			,intInvoiceId				
 			,intCustomerGroupId			
-			,intOdometerAging			
+			,intOdometerAging		
+			,intVehicleId			
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -636,6 +639,7 @@ BEGIN
 			,intInvoiceId				
 			,intCustomerGroupId			
 			,intOdometerAging			
+			,intVehicleId		
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -728,7 +732,8 @@ BEGIN
 			,intInvoiceCycle			
 			,intInvoiceId				
 			,intCustomerGroupId			
-			,intOdometerAging			
+			,intOdometerAging		
+			,intVehicleId			
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -880,7 +885,7 @@ BEGIN
 			EXEC (@tblCFTempTableQuery)
 
 			--SELECT '@tblCFTableTransationIds',* FROM @tblCFTableTransationIds
-			SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds -- HERE
+			--SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds -- HERE
 
 			---------GET DISTINCT TRANSACTION ID---------
 
@@ -1008,6 +1013,7 @@ BEGIN
 		,intTransactionId			
 		,intOdometer				
 		,intOdometerAging			
+		,intVehicleId		
 		,intInvoiceId				
 		,intProductId				
 		,intCardId					
@@ -1094,8 +1100,8 @@ BEGIN
 		on main.intAccountId = cfInvRptNo.intAccountId
 
 
-		SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary -- HERE
-		SELECT * FROM tblCFInvoiceReportTempTable -- HERE
+		--SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary -- HERE
+		--SELECT * FROM tblCFInvoiceReportTempTable -- HERE
 
 
 		INSERT INTO tblCFInvoiceReportTempTable (
@@ -1103,6 +1109,7 @@ BEGIN
 		,intTransactionId			
 		,intOdometer				
 		,intOdometerAging			
+		,intVehicleId		
 		,intInvoiceId				
 		,intProductId				
 		,intCardId					
@@ -1189,7 +1196,8 @@ BEGIN
 		 intCustomerGroupId			
 		,intTransactionId			
 		,intOdometer				
-		,intOdometerAging			
+		,intOdometerAging	
+		,intVehicleId				
 		,intInvoiceId				
 		,intProductId				
 		,intCardId					
@@ -1274,7 +1282,7 @@ BEGIN
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
-		SELECT * FROM tblCFInvoiceReportTempTable -- HERE
+		--SELECT * FROM tblCFInvoiceReportTempTable -- HERE
 
 	END
     

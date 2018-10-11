@@ -10,6 +10,8 @@
  BEGIN TRY
 	DECLARE	 @ErrMsg	NVARCHAR(MAX),
 			 @Query		NVARCHAR(MAX)
+	
+	SELECT	@ValidationSP = CASE WHEN ISNULL(@ValidationSP,'') = '' THEN '''''' ELSE @ValidationSP END
 
     SELECT @Query = '
     IF NOT EXISTS(SELECT *FROM sysobjects SO Inner Join syscolumns SC ON SO.id=SC.id WHERE SO.type=''U'' AND SO.name='''+@TableFromImport+''' and SC.name=''intRowId'')	

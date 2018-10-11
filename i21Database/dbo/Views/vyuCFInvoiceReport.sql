@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -108,6 +110,7 @@ SELECT
 ----------------------------------------------
 ,cfVehicle.strVehicleNumber
 ,cfVehicle.strVehicleDescription
+,cfVehicle.intVehicleId
 ----------------------------------------------
 
 --SPECIAL CASE--------------------------------
@@ -159,13 +162,64 @@ SELECT
                         ELSE 'Unknown' 
                     END)
 
-,intOdometerAging = cfOdom.intOdometer
+,intOdometerAging = 0 
+					--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
+					--(CASE 
+					--	WHEN cfAccount.strPrimarySortOptions = 'Card' 
+					--	THEN cfCardOdom.intOdometer
+     --                   WHEN cfAccount.strPrimarySortOptions = 'Vehicle' 
+					--		THEN 
+					--			CASE 
+					--			WHEN ISNULL(cfVehicle.intVehicleId, 0) =  0
+					--				THEN cfCardOdom.intOdometer
+					--			ELSE cfVehicleOdom.intOdometer
+					--			END
+					--	 WHEN cfAccount.strPrimarySortOptions = 'Miscellaneous' 
+					--		THEN 
+					--			CASE 
+					--			WHEN ISNULL(strMiscellaneous, '') =  ''
+					--				THEN cfCardOdom.intOdometer
+					--			ELSE cfMiscOdom.intOdometer
+					--			END
+					--	ELSE 0
+					--END)
+					--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
 
-,dblTotalMiles = (	CASE 
-						WHEN  ISNULL (cfOdom.intOdometer, 0)   > 0 
-						THEN cfTrans.intOdometer -	ISNULL (cfOdom.intOdometer, 0) 
-						ELSE 0 
-					END)       
+--,cfMiscOdom.intOdometer as x
+,dblTotalMiles = 0
+					--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
+					--(CASE 
+					--	WHEN cfAccount.strPrimarySortOptions = 'Card' 
+					--	THEN
+					--		CASE
+					--			WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
+					--			THEN cfTrans.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
+					--			ELSE 0 
+					--		END
+     --                   WHEN cfAccount.strPrimarySortOptions = 'Vehicle' 
+					--		THEN 
+					--			CASE 
+					--				WHEN ISNULL(cfVehicle.intVehicleId, 0) =  0
+					--				THEN 
+					--					CASE WHEN ISNULL(cfCardType.ysnDualCard, 0) =  0
+					--						THEN 
+					--							CASE
+					--								WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
+					--								THEN cfTrans.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
+					--								ELSE 0 
+					--							END
+					--						ELSE 0
+					--					END
+					--				ELSE 
+					--					CASE
+					--						WHEN  ISNULL (cfVehicleOdom.intOdometer, 0)   > 0 
+					--						THEN cfTrans.intOdometer -	ISNULL (cfVehicleOdom.intOdometer, 0) 
+					--						ELSE 0 
+					--					END
+					--			END
+					--	ELSE 0
+					--END)
+					--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
 
 ,strCompanyName				= smCompSetup.strCompanyName
 ,strCompanyAddress			= smCompSetup.strCompanyAddress
@@ -215,6 +269,9 @@ LEFT JOIN tblCFInvoiceCycle AS cfInvCycle
 LEFT JOIN tblCFCard AS cfCard 
 	ON cfCard.intCardId = cfTrans.intCardId 
 -------------------------------------------------------------
+LEFT JOIN tblCFCardType AS cfCardType
+	ON cfCard.intCardTypeId = cfCardType.intCardTypeId
+-------------------------------------------------------------
 LEFT JOIN tblCFVehicle AS cfVehicle 
 	ON cfVehicle.intVehicleId = cfTrans.intVehicleId 
 -------------------------------------------------------------
@@ -232,17 +289,50 @@ LEFT JOIN tblCFItem AS cfItem
 -------------------------------------------------------------
 LEFT JOIN tblICItem AS icItem
 	ON cfItem.intARItemId = icItem.intItemId
+
+--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
 -------------------------------------------------------------
-OUTER APPLY (
-	SELECT TOP (1) intOdometer 
-		  FROM   dbo.tblCFTransaction 
-		  WHERE  ( dtmTransactionDate < cfTrans.dtmTransactionDate ) 
-				  AND ( intCardId = cfTrans.intCardId ) 
-			  AND ( intVehicleId = cfTrans.intVehicleId ) 
-			  AND ( intProductId = cfTrans.intProductId ) 
-		  ORDER  BY dtmTransactionDate DESC
-) AS cfOdom
+--OUTER APPLY (
+--	SELECT TOP (1) intOdometer 
+--		  FROM   dbo.tblCFTransaction as iocftran
+--		  LEFT JOIN tblCFItem as iocfitem
+--		  ON iocftran.intProductId = iocfitem.intItemId
+--		  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+--		  AND ( dtmTransactionDate < cfTrans.dtmTransactionDate ) 
+--		  AND ( intCardId = cfTrans.intCardId ) 
+--		  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
+--		  ORDER  BY dtmTransactionDate DESC
+--) AS cfCardOdom
 -------------------------------------------------------------
+--OUTER APPLY (
+--	SELECT TOP (1) intOdometer 
+--		  FROM   dbo.tblCFTransaction as iocftran
+--		  LEFT JOIN tblCFItem as iocfitem
+--		  ON iocftran.intProductId = iocfitem.intItemId
+--		  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+--		  AND ( dtmTransactionDate < cfTrans.dtmTransactionDate ) 
+--		  AND ( intVehicleId = cfTrans.intVehicleId ) 
+--		  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
+--		  ORDER  BY dtmTransactionDate DESC
+--) AS cfVehicleOdom
+-------------------------------------------------------------
+--OUTER APPLY (
+--	SELECT TOP 1 intOdometer FROM (
+--		SELECT iocftran.*  
+--			FROM   dbo.tblCFTransaction as iocftran
+--			LEFT JOIN tblCFItem as iocfitem
+--			ON iocftran.intProductId = iocfitem.intItemId
+--			WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
+--			AND strMiscellaneous IS NOT NULL
+--			AND strMiscellaneous != ''
+--		) as miscBase
+--	WHERE  (dtmTransactionDate < cfTrans.dtmTransactionDate ) 
+--	AND ( strMiscellaneous = cfTrans.strMiscellaneous ) 
+--	ORDER  BY dtmTransactionDate DESC
+--) AS cfMiscOdom
+-------------------------------------------------------------
+--MOVED TO INSERT PART OF uspCFInsertToStagingTable--
+
 OUTER APPLY (
 	SELECT TOP 1 
 		strCompanyName 

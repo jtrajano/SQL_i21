@@ -15,6 +15,12 @@ SELECT SSH.intStockSalesHeaderId
 	,CD.intCurrencyId AS intCurrencyId
 	,C.strCurrency AS strCurrency
 	,(
+		SELECT TOP 1 U2.intUnitMeasureId
+		FROM tblICItemUOM PU
+		LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
+		WHERE PU.intItemUOMId = CD.intPriceItemUOMId
+		) AS intPriceUnitMeasureId
+	,(
 		SELECT TOP 1 U2.strUnitMeasure
 		FROM tblICItemUOM PU
 		LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId

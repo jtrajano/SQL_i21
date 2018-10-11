@@ -4,6 +4,7 @@
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+	,@SkipRecompute     BIT                 = 0
 AS
 
 BEGIN
@@ -917,21 +918,26 @@ END CATCH
 BEGIN TRY
 
 	DECLARE @CreatedPaymentIds PaymentId	
-	DELETE FROM @CreatedPaymentIds
+	
+	IF ISNULL(@SkipRecompute, 0) = 0
+	BEGIN
+		DELETE FROM @CreatedPaymentIds
 
-	INSERT INTO @CreatedPaymentIds(
-		 [intHeaderId]
-		,[intDetailId])
-	SELECT 
-		 [intHeaderId]						= ARPD.[intPaymentId]
-		,[intDetailId]						= NULL
-	 FROM
-		(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 0 AND ISNULL([ysnSuccess], 0) = 1) ARPD
-	INNER JOIN
-		(SELECT [intId], [intPaymentId] FROM @ItemEntries) IFI
-			ON IFI. [intPaymentId] = ARPD.[intPaymentId] 
+		INSERT INTO @CreatedPaymentIds(
+			 [intHeaderId]
+			,[intDetailId])
+		SELECT 
+			 [intHeaderId]						= ARPD.[intPaymentId]
+			,[intDetailId]						= NULL
+		 FROM
+			(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 0 AND ISNULL([ysnSuccess], 0) = 1) ARPD
+		INNER JOIN
+			(SELECT [intId], [intPaymentId] FROM @ItemEntries) IFI
+				ON IFI. [intPaymentId] = ARPD.[intPaymentId]
 
-	EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
+		EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
+	END
+		
 
 	--DECLARE @InsertedPaymentIds Id	
 	--DELETE FROM @InsertedPaymentIds

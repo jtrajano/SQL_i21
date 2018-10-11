@@ -22,6 +22,7 @@ BEGIN
 		,[intContractDetailId]
 		,[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]
+		,[intSubLocationId]
 		,[intOwnershipTypeId]
 		,[intConcurrencyId])
 	SELECT
@@ -41,6 +42,7 @@ BEGIN
 		,[intContractDetailId]				= SOD.[intContractDetailId]		
 		,[intCompanyLocationSubLocationId]	= SOD.[intSubLocationId]
 		,[intStorageLocationId]				= SOD.[intStorageLocationId] 
+		,[intSubLocationId]					= SOD.[intSubLocationId] 
 		,[intOwnershipTypeId]				= NULL
 		,[intConcurrencyId]					= 1
 	FROM

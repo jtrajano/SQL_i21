@@ -39,6 +39,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, intCurrencyId = Currency.intCurrencyID
 	, Currency.strCurrency
 	, strWeightUOM = WeightUOM.strUnitMeasure
+	, intWeightUOMId = ItemWeightUOM.intItemUOMId
+	, intGrossUOMDecimalPlaces = WeightUOM.intDecimalPlaces
 	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
 	, dblUnitCost = ShipmentItemSource.dblCost
 	, dblQtyOrdered = ISNULL(ShipmentItemSource.dblQtyOrdered, 0)
@@ -73,6 +75,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, UOM.strUnitMeasure) 
 	, dblPriceUOMConv = ISNULL(ItemPriceUOM.dblUnitQty, ItemUOM.dblUnitQty)
 	, ShipmentItemSource.strFieldNo
+	, intItemId = ShipmentItem.intItemId
+	, ItemUOM.intItemUOMId
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId

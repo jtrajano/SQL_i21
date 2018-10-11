@@ -13,6 +13,10 @@ FROM (
 		 , strTaxTransactionType		= 'Invoice'
 	FROM tblARInvoiceDetailTax IDT 	
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
+	INNER JOIN (
+		SELECT DISTINCT intInvoiceId
+		FROM tblARInvoiceReportStagingTable
+	) STAGING ON ID.intInvoiceId = STAGING.intInvoiceId
 	WHERE IDT.dblAdjustedTax <> 0 
 	  AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
 

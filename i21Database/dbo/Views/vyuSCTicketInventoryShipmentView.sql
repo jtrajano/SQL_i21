@@ -33,6 +33,6 @@
 		END) AS strDistributionOption
 	FROM tblSCTicket SC
 	INNER JOIN vyuICGetInventoryShipmentItem ICSI ON SC.strTicketNumber = ICSI.strSourceNumber
-	LEFT JOIN vyuGRGetStorageTransferTicket GRSC ON SC.intTicketId = GRSC.intTicketId
+	LEFT JOIN vyuGRGetStorageTickets GRSC ON SC.intTicketId = GRSC.intTicketId
 	LEFT JOIN tblGRStorageType GRST ON GRST.strStorageTypeCode = SC.strDistributionOption
 	

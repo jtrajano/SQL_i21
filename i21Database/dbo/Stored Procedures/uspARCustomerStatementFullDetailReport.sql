@@ -24,6 +24,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @dtmDateFromLocal					AS DATETIME			= NULL
+	  , @dtmBalanceForwardDateLocal			AS DATETIME			= NULL
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= 0
 	  , @ysnPrintCreditBalanceLocal			AS BIT				= 1
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
@@ -53,6 +54,7 @@ SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
 SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
 SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 
 IF (@@version NOT LIKE '%2008%')
 	BEGIN
@@ -183,11 +185,12 @@ IF ISNULL(@strCustomerIdsLocal, '') = ''
 	END
 
 --BEGINNING BALANCE
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateFromLocal 
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal 
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
+										  , @ysnFromBalanceForward = 1
 
 SELECT *
 INTO #BEGINNINGBALANCE
@@ -195,18 +198,28 @@ FROM dbo.tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
+UPDATE #BEGINNINGBALANCE
+SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0) 
+  , dblFuture = 0.000000
+
 --AGING SUMMARY
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal 
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
+										  , @ysnFromBalanceForward = 0
+										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
 
 SELECT *
 INTO #AGINGSUMMARY
 FROM dbo.tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
+
+UPDATE #AGINGSUMMARY
+SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0) 
+  , dblFuture = 0.000000
 
 --STATEMENT TRANSACTIONS
 SELECT intEntityCustomerId		= C.intEntityCustomerId
@@ -221,6 +234,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , dblQuantity				= TRANSACTIONS.dblQuantity	     
 	 , dblInvoiceDetailTotal	= TRANSACTIONS.dblInvoiceDetailTotal
 	 , strTransactionType		= CAST(TRANSACTIONS.strTransactionType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
+	 , strType					= CAST(TRANSACTIONS.strType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
 	 , strPONumber				= TRANSACTIONS.strPONumber
 	 , strItemNo				= TRANSACTIONS.strItemNo
 	 , strItemDescription		= TRANSACTIONS.strItemDescription	 
@@ -235,6 +249,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= I.strInvoiceNumber
 		 , strPONumber				= NULL
 		 , strTransactionType		= 'Invoice Detail'
+		 , strType					= I.strType
 		 , strItemNo				= ITEM.strItemNo
 		 , strItemDescription		= DETAIL.strItemDescription
 		 , dblAmount				= I.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
@@ -250,20 +265,7 @@ LEFT JOIN (
 			 , strItemDescription	= ID.strItemDescription
 			 , dblQuantity			= ISNULL(dblQtyShipped, 0)
 			 , dblLineTotal			= ISNULL(dblTotal, 0) + ISNULL(dblTotalTax, 0)
-		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-		WHERE ID.intItemId IS NULL OR ID.intItemId NOT IN (SELECT DISTINCT intARItemId FROM dbo.tblCFItem WITH (NOLOCK))
-
-		UNION ALL
-
-		SELECT intInvoiceId			= ID.intInvoiceId
-			 , intInvoiceDetailId	= MAX(ID.intInvoiceDetailId)
-			 , intItemId			= NULL
-			 , strItemDescription	= 'CARD LOCK ITEMS'
-			 , dblQuantity			= SUM(ISNULL(dblQtyShipped, 0))
-			 , dblLineTotal			= SUM(ISNULL(dblTotal, 0)) + SUM(ISNULL(dblTotalTax, 0))
-		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-		WHERE ID.intItemId IN (SELECT DISTINCT intARItemId FROM dbo.tblCFItem WITH (NOLOCK))
-		GROUP BY ID.intInvoiceId
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)		
 	) DETAIL ON I.intInvoiceId = DETAIL.intInvoiceId
 	LEFT JOIN (
 		SELECT intItemId
@@ -275,6 +277,7 @@ LEFT JOIN (
 	AND I.ysnRejected = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType NOT IN ('Customer Prepayment', 'Overpayment')
+	AND I.strType NOT IN ('CF Tran', 'CF Invoice')
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 	UNION ALL
@@ -286,6 +289,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= I.strInvoiceNumber
 		 , strPONumber				= I.strPONumber
 		 , strTransactionType		= 'Invoices'
+		 , strType					= I.strType
 		 , strItemNo				= 'INVOICE TOTAL'
 		 , strItemDescription		= NULL
 		 , dblAmount				= I.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
@@ -298,6 +302,7 @@ LEFT JOIN (
 	AND I.ysnCancelled = 0
 	AND I.ysnRejected = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+	AND I.strType <> 'CF Tran'
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	
 	UNION ALL
@@ -309,6 +314,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= NULL
 		 , strPONumber				= NULL
 		 , strTransactionType		= 'Payment'
+		 , strType					= NULL
 		 , strItemNo				= NULL
 		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
 		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
@@ -329,6 +335,7 @@ LEFT JOIN (
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 	  AND P.intPaymentId NOT IN (SELECT I.intPaymentId FROM dbo.tblARInvoice I WITH (NOLOCK) WHERE I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId IS NOT NULL AND I.ysnPosted = 1)
+	  AND ISNULL(NULLIF(P.strPaymentInfo, ''), '') NOT LIKE 'CFSI-%'
 
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
@@ -348,6 +355,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dblQuantity				= 0.000000
 			 , dblInvoiceDetailTotal	= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , strTransactionType		= 'Customer Budget'
+			 , strType					= NULL
 			 , strPONumber				= NULL
 			 , strItemNo				= NULL
 			 , strItemDescription		= 'Budget for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
@@ -376,6 +384,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , dblQuantity				= NULL
 	 , dblInvoiceDetailTotal	= ISNULL(BB.dblTotalAR, 0.000000)
 	 , strTransactionType		= 'Beginning Balance'
+	 , strType					= NULL
 	 , strPONumber				= NULL
 	 , strItemNo				= NULL
 	 , strItemDescription		= 'BEGINNING BALANCE'
@@ -468,7 +477,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
-	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType = ''Invoices'' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
+	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType = ''Invoices'' AND STATEMENTREPORT.strType <> ''CF Invoice'' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
 	, dblTotalAR				= ISNULL(AGING.dblTotalAR, 0.000000)
 	, dblFuture					= ISNULL(AGING.dblFuture, 0.000000)
 	, dbl0Days					= ISNULL(AGING.dbl0Days, 0.000000)

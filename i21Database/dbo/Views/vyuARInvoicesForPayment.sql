@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoicesForPayment]
 AS
 
+SELECT EOD.ysnClosed, vyuARInvoicesForPayments.* FROM (
 SELECT 
 	 [intTransactionId]					= ARIFP.[intTransactionId]
 	,[strTransactionNumber]				= ARIFP.[strTransactionNumber]
@@ -63,6 +64,7 @@ SELECT
 										  END
 	,[ysnACHActive]						=  ISNULL(ysnACHActive, 0)
 	,[dblInvoiceDiscountAvailable]		= ARIFP.[dblInvoiceDiscountAvailable]
+ 	,ARIFP.intSourceId  
 FROM (
 		SELECT 
 			 [intTransactionId]					= ARI.[intInvoiceId]
@@ -118,6 +120,7 @@ FROM (
 			,[dblCurrencyExchangeRate]			= ISNULL(ARI.[dblCurrencyExchangeRate], FX.[dblCurrencyExchangeRate])
 			,[ysnACHActive]						= EFT.[ysnActive]
 			,[dblInvoiceDiscountAvailable]		= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
+			,ARI.intSourceId
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -259,11 +262,12 @@ FROM (
 			,[dblCurrencyExchangeRate]			= APB.[dblCurrencyExchangeRate]
 			,[ysnACHActive]						= APB.[ysnACHActive]
 			,[dblInvoiceDiscountAvailable]		= APB.[dblInvoiceDiscountAvailable]
+   			,[intSourceId] = NULL
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN (
 			SELECT intEntityId
-				 , strAccountNumber
-			 FROM dbo.tblARCustomer WITH (NOLOCK)
+				 , strAccountNumber = strVendorAccountNum
+			 FROM dbo.tblAPVendor WITH (NOLOCK)
 		) AS ARC ON APB.intEntityCustomerId = ARC.intEntityId
 		INNER JOIN (
 			SELECT intEntityId
@@ -289,3 +293,6 @@ LEFT OUTER JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
+) vyuARInvoicesForPayments
+LEFT JOIN tblARPOS POS on vyuARInvoicesForPayments.intSourceId = POS.intPOSId
+LEFT JOIN vyuARPOSEndOfDay EOD on POS.intPOSLogId = EOD.intPOSLogId

@@ -61,6 +61,12 @@
 					,dblNonBillableHours
 					,ysnReceivedDownPayment
 					,dblTotalOverShort = (dblQuotedHours - (dblActualHours + dblNonBillableHours))
+					,ysnEmailAlert
+					,strPhone
+					,intTargetVersionId
+					,strVersionNo
+					,strProduct
+					,intProductId
 		from 
 				(
 				select
@@ -108,6 +114,12 @@
 					,strParentProjectName = pp.strProjectName
 					,pnb.dblNonBillableHours
 					,proj.ysnReceivedDownPayment
+					,proj.ysnEmailAlert
+					,strPhone = (select top 1 cp.strPhone from tblEMEntityPhoneNumber cp where cp.intEntityId = proj.intCustomerContactId)
+					,proj.intTargetVersionId
+					,tv.strVersionNo
+					,strProduct = (select prod.strProduct from tblHDTicketProduct prod where prod.intTicketProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId))
+					,intProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId)
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -123,4 +135,5 @@
 					left join tblHDProjectDetail pd on pd.intDetailProjectId = proj.intProjectId
 					left join tblHDProject pp on pp.intProjectId = pd.intProjectId
 					left join tblEMEntity salesrep on salesrep.intEntityId = proj.intInternalSalesPerson
+					left join tblHDVersion tv on tv.intVersionId = proj.intTargetVersionId
 				) as query1

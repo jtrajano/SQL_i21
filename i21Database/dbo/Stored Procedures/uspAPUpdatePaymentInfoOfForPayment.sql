@@ -32,6 +32,11 @@ BEGIN TRY
 		FROM tblSMPaymentMethod payMethod
 		WHERE LOWER(payMethod.strPaymentMethod) = 'echeck'
 
+		IF(@prefix = '' OR @prefix IS NULL)
+		BEGIN 
+			SET @paymentInfo = CAST(@startNumber AS NVARCHAR);
+		END
+		ELSE 
 		SET @paymentInfo = @prefix + '-' + CAST(@startNumber AS NVARCHAR);
 
 		UPDATE payMethod

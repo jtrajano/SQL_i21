@@ -242,6 +242,7 @@ BEGIN
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -356,7 +357,7 @@ BEGIN
 		,[intTermId]						= IE.[intTermId]
 		,[dtmDate]							= CAST(ISNULL(IE.[dtmDate], @DateNow) AS DATE)
 		,[dtmDueDate]						= IE.[dtmDueDate]
-		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], @DateNow) AS DATE)
+		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], IE.[dtmPostDate]) AS DATE)
 		,[dtmPostDate]						= IE.[dtmPostDate]
 		,[intEntitySalespersonId]			= IE.[intEntitySalespersonId]
 		,[intFreightTermId]					= IE.[intFreightTermId]
@@ -374,6 +375,7 @@ BEGIN
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
 		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+        ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]
 		,[intLoadDistributionHeaderId]		= IE.[intLoadDistributionHeaderId]
@@ -493,7 +495,8 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
+				,@SkipRecompute     = 1
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -578,6 +581,7 @@ BEGIN
 			,[ysnCalculated]
 			,[ysnSplitted]
 			,[ysnImpactInventory]
+            ,[ysnFromProvisional]
 			,[intPaymentId]
 			,[intSplitId]
 			,[intLoadDistributionHeaderId]
@@ -717,6 +721,7 @@ BEGIN
 			,[ysnCalculated]						= ARI.[ysnCalculated]
 			,[ysnSplitted]							= ARI.[ysnSplitted]
 			,[ysnImpactInventory]					= ARI.[ysnImpactInventory]
+            ,[ysnFromProvisional]                   = ARI.[ysnFromProvisional]
 			,[intPaymentId]							= ARI.[intPaymentId]
 			,[intSplitId]							= ARI.[intSplitId]
 			,[intLoadDistributionHeaderId]			= ARI.[intLoadDistributionHeaderId]
@@ -873,6 +878,7 @@ BEGIN
 				,[ysnCalculated]
 				,[ysnSplitted]
 				,[ysnImpactInventory]
+                ,[ysnFromProvisional]
 				,[intPaymentId]
 				,[intSplitId]
 				,[intLoadDistributionHeaderId]
@@ -898,6 +904,7 @@ BEGIN
 			,@UserId			= @UserId
 			,@RaiseError		= @RaiseError
 			,@ErrorMessage		= @CurrentErrorMessage	OUTPUT
+			,@SkipRecompute     = 1
 
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1186,6 +1193,7 @@ BEGIN
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -1319,6 +1327,7 @@ BEGIN
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
 		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+        ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]
 		,[intLoadDistributionHeaderId]		= IE.[intLoadDistributionHeaderId]
@@ -1448,7 +1457,8 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
+				,@SkipRecompute     = 1
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -1668,6 +1678,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1711,7 +1722,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1775,7 +1787,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 0
@@ -1819,7 +1832,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
@@ -1960,6 +1974,7 @@ BEGIN TRY
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
@@ -2005,7 +2020,8 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
+		AND ISNULL([ysnPosted], 0) = 1
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 1

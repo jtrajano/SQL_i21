@@ -40,7 +40,7 @@ SELECT
 			,[dblBaseAmountDue]			= APB.[dblAmountDue]
 			,[dblPayment]				= APB.[dblPayment]
 			,[dblBasePayment]			= APB.[dblPayment]
-			,[ysnPosted]				= APB.[ysnPosted]
+			,[ysnPosted]				= case when APB.[intTransactionType] = 11 then cast(1 as bit) else APB.[ysnPosted] end
 			,[ysnPaid]					= APB.[ysnPaid]
 			,[intPaymentId]				= NULL
 			,[dblTotalTermDiscount]		= CAST(0 AS DECIMAL(18,6))
@@ -61,7 +61,7 @@ SELECT
 		INNER JOIN
 			tblEMEntityType EMET
 				ON APB.[intEntityVendorId] = EMET.[intEntityId]
-				AND EMET.[strType] = 'Customer'	
+				AND EMET.[strType] = 'Vendor'	
 		INNER JOIN
 			(SELECT 				
 				[intEntityId],

@@ -19,7 +19,7 @@ select
 	join tblETExportFilterDriver d
 		on a.[intEntityId] = d.intEntitySalesPersonId
 	where a.strType = 'Driver'
-
+and ysnDefaultLocation = 1
 
 union all
 

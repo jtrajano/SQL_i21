@@ -15,5 +15,12 @@ SELECT TOP 1 @intStartingNumberId = intStartingNumberId
 	FROM tblSMStartingNumber 
 	WHERE strTransactionType = 'Sales Receipt'
 
-IF(@intStartingNumberId <> 0)
+SELECT @strReceiptNumber = SN.strPrefix + CAST(SN.intNumber AS NVARCHAR) 
+FROM tblARPOS POS
+INNER JOIN tblSMStartingNumber SN 
+ON POS.strReceiptNumber = SN.strPrefix + CAST(SN.intNumber-1 AS NVARCHAR)
+
+IF(@intStartingNumberId <> 0 AND @strReceiptNumber IS NOT NULL)
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @strReceiptNumber OUT
+ELSE 
+	SELECT @strReceiptNumber = (SELECT strPrefix + CAST(intNumber-1 AS NVARCHAR) FROM tblSMStartingNumber WHERE strTransactionType = 'Sales Receipt')

@@ -62,6 +62,12 @@ AS
 											   when tic.intFeedbackWithRepresentativeId = 5 then 'Very Satisfied'
 											   else ''
 										  end)
+		,strTicketTypeType = (case when typ.intTicketTypeTypeId = 1 then 'No'
+								   when typ.intTicketTypeTypeId = 2 then 'Help Ticket'
+								   when typ.intTicketTypeTypeId = 3 then 'Upgrade Ticket'
+								   when typ.intTicketTypeTypeId = 4 then 'Statement of Work'
+								   else null
+							  end)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

@@ -3,6 +3,7 @@ AS
 SELECT intItemId						= ITEMS.intItemId
 	 , intStorageLocationId				= IL.intStorageLocationId
 	 , intIssueUOMId					= IUOM.intItemUOMId
+	 , intIssueUnitMeasureId			= IUOM.intUnitMeasureId
 	 , intCompanyLocationId				= CL.intCompanyLocationId
 	 , strItemNo						= ITEMS.strItemNo
 	 , strDescription					= ITEMS.strDescription
@@ -24,6 +25,9 @@ SELECT intItemId						= ITEMS.intItemId
 	 , dblDefaultFull					= ISNULL(ITEMS.dblDefaultFull, 0)
 	 , ysnListBundleSeparately			= ISNULL(ITEMS.ysnListBundleSeparately, CAST(0 AS BIT))
 	 , intDepositPLUId					= IL.intDepositPLUId
+	 , intDepositedItemId				= depositedItem.intItemId
+	 , strDepositedItemUpcCode			= depositedItem.strUpcCode
+	 , intDepositedItemUnitMeasureId	= depositedItem.intUnitMeasureId
 FROM (
 	SELECT intItemId		= ITEM.intItemId
 		 , strItemNo
@@ -65,3 +69,22 @@ INNER JOIN dbo.tblICUnitMeasure UM WITH (NOLOCK) ON IUOM.intUnitMeasureId = UM.i
 LEFT JOIN dbo.tblICItemPricing IP WITH (NOLOCK) ON IL.intItemId = IP.intItemId AND IL.intItemLocationId = IP.intItemLocationId
 LEFT JOIN dbo.tblICItemStock ISTOCK WITH (NOLOCK) ON ITEMS.intItemId = ISTOCK.intItemId AND IL.intItemLocationId = ISTOCK.intItemLocationId
 LEFT JOIN dbo.tblICStorageLocation SL WITH (NOLOCK) ON IL.intStorageLocationId = SL.intStorageLocationId
+OUTER APPLY (
+	SELECT TOP 1 addOn.intItemId, addOn.strUpcCode, addOn.intUnitMeasureId
+	FROM (
+		SELECT childItem.intItemId, childItem.strUpcCode, childItem.intUnitMeasureId
+		FROM tblICItemUOM childItem WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intItemId
+			FROM tblICItem
+		) parentItem ON childItem.intItemId = parentItem.intItemId
+		INNER JOIN(
+			SELECT  intUnitMeasureId
+					,strUnitMeasure					
+			FROM tblICUnitMeasure
+		) childItemUom ON childItem.intUnitMeasureId = childItemUom.intUnitMeasureId
+		WHERE childItem.intItemUOMId = IL.intDepositPLUId
+		GROUP BY childItem.intItemId, childItem.strUpcCode, childItem.intUnitMeasureId, parentItem.intItemId
+	) addOn (intItemId, strUpcCode, intUnitMeasureId)
+) depositedItem
+GO

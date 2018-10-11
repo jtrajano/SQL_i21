@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @intSettleStorageId INT
 	DECLARE @UserId INT
 	DECLARE @BillId INT
+	DECLARE @strBillId VARCHAR(MAX)
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @ItemId INT
 
@@ -30,6 +31,8 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	
+	DECLARE @isParentSettleStorage AS BIT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
@@ -55,6 +58,12 @@ BEGIN TRY
 
 	BEGIN
 		--1. Unpost the Voucher
+		
+		--check first if the settle storage being deleted is the parent, then its children should be deleted first
+		SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
+		FROM tblGRSettleStorage
+		WHERE intParentSettleStorageId =@intParentSettleStorageId
+
 		SELECT @BillId = intBillId
 			,@TicketNo = strStorageTicket
 			,@ItemId = intItemId
@@ -63,7 +72,9 @@ BEGIN TRY
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
-		IF ISNULL(@BillId,0) = 0
+		SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
+
+		IF ISNULL(@BillId,0) = 0 AND @isParentSettleStorage = 1
 		BEGIN
 			SELECT @intSettleStorageId = MIN(intSettleStorageId)
 			FROM tblGRSettleStorage
@@ -343,7 +354,6 @@ BEGIN TRY
 					,@strBatchId
 					,@UserId
 					,0
-						
 				UPDATE @GLEntries 
 				SET dblDebit = dblCredit
 				,dblCredit   = dblDebit
@@ -352,7 +362,6 @@ BEGIN TRY
 				BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, 0 
 				END
-
 			END
 
 			--4. Deleting History

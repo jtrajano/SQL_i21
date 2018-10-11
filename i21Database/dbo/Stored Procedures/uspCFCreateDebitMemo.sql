@@ -658,6 +658,10 @@ BEGIN
 		---------------------------------------
 		BEGIN
 			
+			SET @dblFeeAmount				= 0;
+			SET @dblTotalQuantity			= 0;
+			SET @dblAccountTotalDiscount	= 0;
+			SET @dblAccountTotalAmount		= 0;
 			
 			SET @executedLine = 11
 			SELECT	TOP 1 
@@ -689,12 +693,21 @@ BEGIN
 			,dtmInvoiceDate
 			,intSalesPersonId
 
+
+			
+
 			SET @executedLine = 14
 			SELECT TOP 1 
-			@dblFeeAmount = dblFeeTotalAmount
+			@dblFeeAmount = ISNULL(dblFeeTotalAmount,0)
 			FROM tblCFInvoiceFeeStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId
-			
+			AND strUserId = @username
+
+			--SELECT 'debit memo'
+			--,@intEntityCustomerId
+			--,@dblFeeAmount
+			--,@username
+
 			SET @executedLine = 15
 			UPDATE tblCFInvoiceProcessResult
 			SET 

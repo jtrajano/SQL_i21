@@ -31,7 +31,7 @@ BEGIN
 	DELETE FROM tblARInvoiceAccrual WHERE intInvoiceId = @intInvoiceId
 	
 	INSERT INTO tblARInvoiceAccrual(intInvoiceId,intInvoiceDetailId,dtmAccrualDate,dblAmount,intConcurrencyId)
-	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, ID.dblTotal/@intPeriodsToAccrue,1 
+	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, cast(ID.dblTotal/@intPeriodsToAccrue as numeric(16,2)),1 
 	FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
 			ON I.intInvoiceId = ID.intInvoiceId
@@ -43,8 +43,9 @@ BEGIN
 
 	IF (@ysnBalanceTotal != 1)
 	BEGIN
-		DECLARE @difference AS DECIMAL(16,1)
-		SELECT @difference = SUM(A.dblAmount) -  I.dblInvoiceSubtotal FROM tblARInvoiceAccrual A
+		DECLARE @difference AS DECIMAL(16,2)
+
+		SELECT @difference = SUM(A.dblAmount) -  cast(I.dblInvoiceSubtotal as numeric(16,2)) FROM tblARInvoiceAccrual A
 		INNER JOIN tblARInvoice I
 			ON I.intInvoiceId = A.intInvoiceId
 		WHERE I.intInvoiceId = @intInvoiceId

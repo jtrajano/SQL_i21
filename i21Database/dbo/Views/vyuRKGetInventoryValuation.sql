@@ -57,6 +57,27 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 										ELSE
 											''
 										END
+		,intSourceId			= CASE 
+										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
+											CASE	
+												WHEN receipt.intSourceType = 1 THEN ScaleView.intTicketId -- Scale
+												WHEN receipt.intSourceType = 2 THEN LogisticsView.intLoadContainerId -- Inbound Shipment
+												WHEN receipt.intSourceType = 3 THEN LoadHeader.intLoadHeaderId -- Transport
+												WHEN receipt.intSourceType = 4 THEN SettleStorage.intStorageScheduleId -- Settle Storage
+												WHEN receipt.intSourceType = 5 THEN DeliverySheet.intDeliverySheetId -- Delivery Sheet
+												ELSE ''
+											END
+										WHEN shipment.intInventoryShipmentId IS NOT NULL THEN
+											CASE	
+												WHEN shipment.intSourceType = 1 THEN ScaleView.intTicketId -- Scale
+												WHEN shipment.intSourceType = 2 THEN LogisticsView.intLoadContainerId -- Inbound Shipment
+												WHEN shipment.intSourceType = 3 THEN PickLot.intPickLotHeaderId -- Pick Lot
+												WHEN shipment.intSourceType = 4 THEN DeliverySheet.intDeliverySheetId -- Delivery Sheet
+												ELSE ''
+											END
+										ELSE
+											''
+										END
 		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
 		,t.strTransactionForm	
 		,t.intTransactionId	
@@ -70,6 +91,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,t.dtmCreated
+		,t.intCurrencyId
+		,cur.strCurrency
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
@@ -101,6 +124,9 @@ FROM 	tblICItem i
 			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
+
+		LEFT JOIN tblSMCurrency cur
+			ON cur.intCurrencyID = t.intCurrencyId
 		LEFT JOIN tblICCostingMethod CostingMethod
 			ON CostingMethod.intCostingMethodId = t.intCostingMethod
 		LEFT JOIN (

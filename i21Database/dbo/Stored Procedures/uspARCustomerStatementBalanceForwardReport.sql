@@ -14,7 +14,7 @@
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
-	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @ysnIncludeWriteOffPayment    AS BIT 				= 0
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 AS
@@ -33,7 +33,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
 	  , @ysnPrintFromCFLocal				AS BIT				= 0
 	  , @ysnReprintInvoiceLocal				AS BIT				= 1
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
@@ -71,6 +71,7 @@ DECLARE @temp_aging_table TABLE(
     ,[dblCredits]               NUMERIC(18,6)
 	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
+	,[dblTempFuture]			NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
 	,[strSourceTransaction]		NVARCHAR(100)
@@ -161,7 +162,7 @@ SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
-SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
+SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @ysnPrintFromCFLocal				= ISNULL(@ysnPrintFromCF, 0)
 SET @ysnReprintInvoiceLocal				= ISNULL(@ysnReprintInvoice, 1)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
@@ -269,10 +270,17 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
+
+SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+FROM (
+	SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
+	FROM #CUSTOMERS
+	FOR XML PATH ('')
+) C (intEntityCustomerId)
 	
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerName = @strCustomerNameLocal
+										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
 										  , @ysnFromBalanceForward = 0
@@ -297,6 +305,7 @@ SELECT strCustomerName
         , dblCredits
 	    , dblPrepayments
         , dblPrepaids
+		, 0
         , dtmAsOfDate
         , strSalespersonName
 	    , strSourceTransaction
@@ -306,7 +315,7 @@ WHERE intEntityUserId = @intEntityUserIdLocal
 
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
 										  , @strCompanyLocation = @strLocationNameLocal											
-										  , @strCustomerName = @strCustomerNameLocal
+										  , @strCustomerIds = @strCustomerIdsLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 										  , @intEntityUserId = @intEntityUserIdLocal
 										  , @ysnFromBalanceForward = 1
@@ -707,6 +716,7 @@ IF @ysnPrintFromCFLocal = 1
 		UPDATE AGINGREPORT
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
+		  , AGINGREPORT.dblTempFuture = ISNULL(CF.dblTotalFuture, 0)
 		FROM @temp_aging_table AGINGREPORT
 		INNER JOIN (
 			SELECT intEntityCustomerId
@@ -736,14 +746,21 @@ IF @ysnPrintFromCFLocal = 1
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dblFuture = 0.000000
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblFuture, 0)
+				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(AGINGREPORT.dblTempFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblTempFuture, 0)
 				FROM @temp_aging_table AGINGREPORT
-				WHERE ISNULL(AGINGREPORT.dblFuture, 0) <> 0
 			END
 	END
 ELSE 
 	BEGIN
-		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType IN ('Customer Prepayment', 'Payment')
+		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
+
+		UPDATE TSS
+		SET dblBalance = I.dblAmountDue
+		FROM @temp_statement_table TSS
+		INNER JOIN tblARInvoice I ON TSS.intInvoiceId = I.intInvoiceId
+		WHERE TSS.strTransactionType = 'Customer Prepayment'
+		
 		UPDATE @temp_statement_table SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 	END
 
@@ -805,11 +822,6 @@ IF @ysnPrintZeroBalanceLocal = 0
         DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') <> 'Balance Forward'
 		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
-
-IF @ysnPrintCreditBalanceLocal = 0
-	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
-	END
 
 INSERT INTO @temp_cf_table (
 	  intInvoiceId
@@ -1043,4 +1055,18 @@ IF @ysnPrintFromCFLocal = 0
 				AND intEntityUserId = @intEntityUserIdLocal
 				AND strStatementFormat = 'Balance Forward'
 			END
+	END
+
+IF @ysnPrintCreditBalanceLocal = 0
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityUserId = @intEntityUserIdLocal 
+		  AND strStatementFormat = 'Balance Forward'
+		  AND intEntityCustomerId IN (
+			  SELECT DISTINCT intEntityCustomerId
+			  FROM tblARCustomerAgingStagingTable AGINGREPORT
+			  WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
+				AND AGINGREPORT.strAgingType = 'Summary'
+				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
+		  )
 	END

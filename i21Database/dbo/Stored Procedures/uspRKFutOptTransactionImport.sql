@@ -1,4 +1,5 @@
 ﻿CREATE PROC uspRKFutOptTransactionImport
+	@intEntityUserId VARCHAR (100) = NULL
 AS
 BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
@@ -17,8 +18,7 @@ SELECT @ConvertYear=103
 DECLARE @strInternalTradeNo int= null
 DECLARE @intFutOptTransactionHeaderId int = null
 declare @MaxTranNumber int = null
-select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
-
+select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where intStartingNumberId=45
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
@@ -57,9 +57,9 @@ SELECT 1,* FROM #temp
 
 
 END
-select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
+SELECT @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 
-UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
+UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where intStartingNumberId=45
 COMMIT TRAN
 --SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 --		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
@@ -70,6 +70,16 @@ SELECT DE.strInternalTradeNo AS Result1,DE.strBrokerTradeNo AS Result2,DE.dtmFil
 FROM tblRKFutOptTransaction DE 
 WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 
+BEGIN
+EXEC	dbo.uspSMAuditLog 
+		@keyValue = @intFutOptTransactionHeaderId			  -- Primary Key Value of the Derivative Entry. 
+		,@screenName = 'RiskManagement.view.DerivativeEntry'  -- Screen Namespace
+		,@entityId = @intEntityUserId                   	  -- Entity Id
+		,@actionType = 'Imported'                             -- Action Type
+		,@changeDescription = ''							  -- Description
+		,@fromValue = ''									  -- Previous Value
+		,@toValue = ''										  -- New Value
+END
 
 DELETE FROM tblRKFutOptTransactionImport
 

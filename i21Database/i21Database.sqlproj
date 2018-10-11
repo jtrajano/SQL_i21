@@ -186,6 +186,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
+    <Folder Include="Scripts\Post-Deployment\PAT\18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1266,6 +1267,7 @@
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
     <Build Include="dbo\Views\vyuEMSearch.sql" />
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
+    <Build Include="dbo\Views\vyuARCustomerVendorSearch.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalPermission.sql" />
     <Build Include="dbo\Tables\tblEMEntityPortalMenu.sql" />
     <Build Include="dbo\Views\vyuEPContactMenu.sql" />
@@ -2125,6 +2127,7 @@
     <Build Include="dbo\Views\vyuGRGetStorageCommodity.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageTickets.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
     <Build Include="dbo\Functions\fnQMGetTestNames.sql" />
     <Build Include="dbo\Views\vyuQMPropertyList.sql" />
@@ -2715,6 +2718,7 @@
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
@@ -2981,10 +2985,9 @@
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendorEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
-    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
@@ -3015,7 +3018,7 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
     <Build Include="dbo\Views\vyuGRGetSellStorageItems.sql" />
-    <Build Include="dbo\Views\vyuGRGetSettleSubLocations.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageSubLocations.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Functions\fnTRSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadPosting.sql" />
@@ -6743,14 +6746,14 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
-    <None Include="Scripts\Post-Deployment\ST\11_FileFieldMapping_Passport_ISM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\11_FileFieldMapping_Passport_ISM_330.sql" />
+    <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM_330.sql" />
+    <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
@@ -6866,7 +6869,7 @@
     <Build Include="dbo\Tables\tblSTStoreAppUploadHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
-    <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM_330.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
     <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
     <None Include="dbo\Tables\tblARPOSDrawer.sql" />
@@ -7044,11 +7047,95 @@
     <Build Include="dbo\Views\vyuICGetStockMovement.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
     <Build Include="dbo\User Defined Types\CustomerStorageStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCustomerStorageBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GR\StorageHistoryUserId.sql" />
+    <None Include="Scripts\Post-Deployment\GR\FixStorageHistoryData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSNegativeTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateDiscountandShrink.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessDeliverySheetSummaryToTicket.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqWashoutInfo.sql" />
+    <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\APPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFBatchUnpost.sql" />
+    <Build Include="dbo\Tables\tblCFBatchUnpostStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddVoucherDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxCompleted.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeTaxes.sql" />
+    <Build Include="dbo\Functions\fnAPRecomputeStagingTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucher.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherData.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailStagingPOTax.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTax.sql" />
+    <Build Include="dbo\Views\vyuEMEntityVendorSearch.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureMonthId.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
+    <Build Include="dbo\Views\vyuGRCustomerStorage.sql" />
+    <Build Include="dbo\Views\vyuGRStorageHistory.sql" />
+    <Build Include="dbo\Views\vyuGRTicketDiscount.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceReportStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostDeliverySheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReport.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportOriginItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceHeaderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceItemDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInvoiceDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSPostEOD.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemUPC.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGInventoryTransferOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPrePostPaymentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPaymentRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulatePaymentDetailForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulatePaymentAccountForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvalidPostPaymentData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
+    <Build Include="dbo\Functions\fnAPValidateAPAccounts.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryTransferDetailFormat2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportFormat2.sql" />
+    <Build Include="dbo\Functions\fnICFormatTransferAddressFormat2.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureTradingMonthsInUse.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionTradingMonthsInUse.sql" />
+    <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRecalculateLoadCosts.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
+    <Build Include="dbo\Tables\tblSTRegisterSetup.sql" />
+    <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetStockAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
+    <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
+    <Build Include="dbo\Tables\tblHDTicketForImport.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResources.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryResourcesSource.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryDailySummary.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryTimeOffNotification.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryTimeOffNotification.sql" />
+    <Build Include="dbo\Views\vyuHDProjectTicketJIra.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI3992.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI4004.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI3978.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMTMF32.sql" />
+    <Build Include="dbo\Functions\fnIPGetSourcingCurrencyConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPStageAllBasisAdvance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPostHandlingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryPlacardReport.sql" />
+    <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
     <Build Include="dbo\Tables\tblTMManufacturer.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -7155,6 +7242,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
@@ -7236,6 +7324,17 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
+	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
+    <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
+    <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -7345,5 +7444,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\03_TaxCategory.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MN_Minnesota.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MT_Montana.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\KS_Kansas.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\KY_Kentucky.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\ID_Idaho.sql" />
   </ItemGroup>
 </Project>

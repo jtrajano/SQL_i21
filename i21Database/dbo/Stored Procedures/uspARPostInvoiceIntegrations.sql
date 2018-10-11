@@ -756,7 +756,7 @@ BEGIN
 		([intInvoiceId] INT
         ,UNIQUE (intInvoiceId));
 								
-	INSERT INTO @TankDeliveryForSync
+	INSERT INTO @TankDeliveryForUnSync
 	SELECT DISTINCT
 		 [intInvoiceId] = PID.[intInvoiceId]
 	FROM
@@ -1111,11 +1111,11 @@ LEFT JOIN
 	tblCTContractHeader CH
 		ON ID.intContractHeaderId = CH.intContractHeaderId
 WHERE
-	ID.[intInventoryShipmentItemId] IS NULL
-	AND	ID.[intInventoryShipmentChargeId] IS NULL
+	--ID.[intInventoryShipmentItemId] IS NULL AND
+	ID.[intInventoryShipmentChargeId] IS NULL
 	AND	ID.strTransactionType <> 'Credit Memo'
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
-    AND ID.[intTicketId] IS NULL
+    AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 

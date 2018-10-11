@@ -312,10 +312,14 @@ SELECT *
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+	,strShipmentPeriod
+	,strDestinationCity
+	,strMarkingInstruction
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
 		,L.strLoadNumber
+		,L.intPurchaseSale
 		,L.dtmBLDate
 		,L.dtmDeliveredDate
 		,CASE 
@@ -921,6 +925,7 @@ FROM (
 			FROM tblSMCity
 			WHERE strCity = L.strDestinationPort
 			) AS strContractText
+		,L.strDestinationCity
 		,CD.strERPPONumber
 		,Basis.strContractBasis
 		,Basis.strDescription AS strContractBasisDescription
@@ -929,6 +934,8 @@ FROM (
 		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo
 		,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
 		,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth			
+		,UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106)) AS strShipmentPeriod
+		,L.strMarks AS strMarkingInstruction			
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 

@@ -33,7 +33,7 @@ BEGIN TRY
 	BEGIN
 		DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 	END
-	DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
+	--DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 	
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
@@ -274,7 +274,7 @@ BEGIN TRY
 				, dblTax
 				, dtmReceiptDate
 				, strVendorName
-				, strVendorFEIN
+				, REPLACE(strVendorFEIN, '-', '')
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
@@ -286,7 +286,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, REPLACE(strHeaderFederalTaxID, '-', '')
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -294,7 +294,7 @@ BEGIN TRY
 				, strDestinationCity
 				, strDestinationCounty
 				, @CompanyName
-				, @CompanyEIN
+				, REPLACE(@CompanyEIN, '-', '')
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType

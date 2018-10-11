@@ -160,11 +160,6 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
-IF(OBJECT_ID('tempdb..#PROVISIONALINVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #PROVISIONALINVOICES
-END
-
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -222,21 +217,10 @@ INNER JOIN (SELECT intPaymentId
 ) APP ON APPD.intPaymentId = APP.intPaymentId
 WHERE intInvoiceId IS NOT NULL
 
---#PROVISIONALINVOICES
-SELECT intInvoiceId            = PROVI.intInvoiceId
-     , dblInvoiceTotal         = PROVI.dblInvoiceTotal
-INTO #PROVISIONALINVOICES
-FROM dbo.tblARInvoice PROVI
-WHERE PROVI.ysnPosted = 1
-  AND PROVI.strType = 'Provisional'
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PROVI.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
 --#POSTEDINVOICES
 SELECT I.intInvoiceId
 	 , I.intPaymentId
 	 , I.intEntityCustomerId
-	 , I.intOriginalInvoiceId
-     , I.intSourceId
 	 , I.dtmPostDate
 	 , I.dtmDueDate
 	 , I.strTransactionType
@@ -255,7 +239,7 @@ INNER JOIN (
 ) C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) )) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
@@ -316,8 +300,6 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 	 , strAgingType
-	 , dblTotalCustomerAR
-
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
@@ -344,7 +326,6 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
 	 , strAgingType			= 'Summary'
-	 , dblTotalCustomerAR	= CUSTAR.dblARBalance
 FROM
 (SELECT A.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
@@ -446,10 +427,7 @@ SELECT I.intInvoiceId
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit   = CASE WHEN I.strType = 'CF Tran' THEN 0
-								WHEN ISNULL(I.intSourceId, 0) = 2 AND ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN ISNULL(I.dblAmountDue, 0) + ISNULL(PD.dblPayment, 0)
-								ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) 
-                              END
+     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) END
 	 , dblPrepayments		= 0
 	 , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
@@ -483,7 +461,7 @@ WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepaym
 UNION ALL
             
 SELECT I.intInvoiceId
-    , dblAmountPaid         = CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) + ISNULL(PROVI.dblInvoiceTotal, 0) END
+    , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
     , dblInvoiceTotal		= 0
     , dblAmountDue			= 0
     , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
@@ -512,7 +490,6 @@ LEFT JOIN (
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
-LEFT JOIN #PROVISIONALINVOICES PROVI ON I.intOriginalInvoiceId = PROVI.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 
 UNION ALL
@@ -554,5 +531,4 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId 
 ORDER BY strCustomerName

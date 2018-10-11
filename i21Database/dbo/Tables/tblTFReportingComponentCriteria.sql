@@ -13,3 +13,6 @@ GO
 
 CREATE INDEX [IX_tblTFReportingComponentCriteria_intMasterId] ON [dbo].[tblTFReportingComponentCriteria] ([intMasterId])
 GO
+
+CREATE INDEX [IX_tblTFReportingComponentCriteria_intTaxCategoryId] ON [dbo].[tblTFReportingComponentCriteria] ([intTaxCategoryId])
+GO

@@ -82,15 +82,15 @@ BEGIN TRANSACTION
 	UPDATE tblSMCompanySetup 
 	SET ysnScreenControlListingUpdated = 1
 
-	UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN 
-	(	
-		'i21.view.UserRole',
-		'i21.view.Letters',
-		'i21.view.FileFieldMapping',
-		'i21.view.SecurityPolicy',
-		'i21.view.Signatures',
-		'i21.view.EntityUser'
-	)
+	--UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN 
+	--(	
+	--	'i21.view.UserRole',
+	--	'i21.view.Letters',
+	--	'i21.view.FileFieldMapping',
+	--	'i21.view.SecurityPolicy',
+	--	'i21.view.Signatures',
+	--	'i21.view.EntityUser'
+	--)
 
 	--*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--
 	DECLARE @intScreenId INT,
@@ -124,5 +124,7 @@ BEGIN TRANSACTION
 				END
 
 			DROP TABLE  #Temp
-			
+
+
 COMMIT TRANSACTION
+GO

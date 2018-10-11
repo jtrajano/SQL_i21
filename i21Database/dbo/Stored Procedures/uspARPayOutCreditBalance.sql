@@ -161,7 +161,6 @@ DECLARE @VendorId AS INT
         ,@CompanyLocationId AS INT
         ,@TotalAR AS NUMERIC(18,6)
 		,@Id AS INT
-        ,@IdList AS NVARCHAR(MAX)
 		,@PaymentMethodId AS INT
         ,@PaymentMethod AS NVARCHAR(100)
         ,@PostingSuccessful AS BIT
@@ -186,7 +185,6 @@ END
 
 IF ISNULL(@PayBalance,0) = 1
     BEGIN
-		SET @IdList = NULL
 		SET @PostingSuccessful = 0
 		DECLARE @EntityIds AS [Id]
 		INSERT INTO @EntityIds([intId])
@@ -213,59 +211,78 @@ IF ISNULL(@PayBalance,0) = 1
 					ON CB.[intInvoiceId] = ARI.[intInvoiceId]				
 			WHERE [ysnProcessed] = 0
 			
-            DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
-            DELETE FROM @VoucherDetailNonInventory
+			DECLARE @VoucherPayable				AS VoucherPayable
+			DECLARE @VoucherDetailTax			AS VoucherDetailTax
+			DECLARE @CreatedVouchers			AS Id
+			DECLARE @CreatedVouchersId			AS NVARCHAR(MAX)
+			DECLARE @strErrorMsg				AS NVARCHAR(MAX)
 
-            INSERT INTO @VoucherDetailNonInventory
-                ([intAccountId]
+            INSERT INTO @VoucherPayable (
+				 [intEntityVendorId]
+				,[intTransactionType]
+				,[intLocationId]
+				,[intShipToId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[dtmVoucherDate]
+				,[intShipViaId]
+				,[intTermId]
+				,[intAccountId]
                 ,[intItemId]
                 ,[strMiscDescription]
-                ,[dblQtyReceived]
+                ,[dblQuantityToBill]
                 ,[dblDiscount]
-                ,[dblCost]
-                ,[intTaxGroupId]
-				,[intInvoiceId])
+                ,[dblCost]                
+				,[intInvoiceId]
+			)
 			SELECT
-                 [intAccountId]         = @AccountId
+				 [intEntityVendorId]	= @VendorId
+				,[intTransactionType]	= 1
+				,[intLocationId]		= I.intCompanyLocationId
+				,[intShipToId]			= I.intShipToLocationId
+				,[intCurrencyId]		= I.intCurrencyId
+				,[dtmDate]				= @AsOfDate
+				,[dtmVoucherDate]		= @AsOfDate
+				,[intShipViaId]			= I.intShipViaId
+				,[intTermId]			= I.intTermId
+                ,[intAccountId]         = @AccountId				
                 ,[intItemId]            = NULL
-                ,[strMiscDescription]   = ''
-                ,[dblQtyReceived]       = 1.000000
+                ,[strMiscDescription]   = 'Pay Out Credit Balance'
+				,[dblQuantityToBill]    = 1.000000
                 ,[dblDiscount]          = @ZeroDecimal
-                ,[dblCost]              = @TotalAR
-                ,[intTaxGroupId]        = NULL
+                ,[dblCost]              = @TotalAR                
 				,[intInvoiceId]         = @InvoiceId
+			FROM tblARInvoice I 
+			WHERE intInvoiceId = @InvoiceId
 
+			EXEC [dbo].[uspAPCreateVoucher]
+				 @voucherPayables 		= @VoucherPayable
+				,@voucherPayableTax 	= @VoucherDetailTax
+				,@userId 				= @UserId
+				,@throwError 			= 1
+				,@error 				= @strErrorMsg OUT
+				,@createdVouchersId 	= @CreatedVouchersId OUT
 
-            EXEC [dbo].[uspAPCreateBillData]
-                 @userId                = @UserId
-                ,@vendorId              = @VendorId
-                ,@type                  = 3
-                ,@voucherNonInvDetails  = @VoucherDetailNonInventory
-                ,@voucherDate           = @DateNow
-				,@billId                = @BillId OUTPUT
-
-
-			IF ISNULL(@BillId,0) <> 0
+			INSERT INTO @CreatedVouchers
+			SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedVouchersId)
+            
+			IF EXISTS(SELECT TOP 1 intId FROM @CreatedVouchers)
 				BEGIN
-					UPDATE tblAPBill SET [intCurrencyId] = @CurrencyId WHERE [intBillId] = @BillId;
-					UPDATE tblAPBillDetail SET [intCurrencyId] = @CurrencyId WHERE [intBillId] = @BillId;
+					UPDATE tblAPBill SET [intCurrencyId] = @CurrencyId WHERE [intBillId] IN (SELECT intId FROM @CreatedVouchers);
+					UPDATE tblAPBillDetail SET [intCurrencyId] = @CurrencyId WHERE [intBillId] IN (SELECT intId FROM @CreatedVouchers);
 				END
-			
-
-
-            SET @IdList = ISNULL(@IdList,'') + ISNULL(CAST(@BillId AS NVARCHAR(100)) + ',','')
 
             UPDATE @CustomerBalances SET [ysnProcessed] = 1 WHERE [intId] = @Id				
 		END
 
-		IF LEN(LTRIM(RTRIM(ISNULL(@IdList,'')))) > 1
+		IF LEN(LTRIM(RTRIM(ISNULL(@CreatedVouchersId,'')))) > 1
 			BEGIN
 				EXEC [dbo].[uspAPPostBill]
                      @batchId   = NULL
                     ,@post      = 1
                     ,@recap     = 0
                     ,@isBatch   = 1
-                    ,@param     = @IdList
+                    ,@param     = @CreatedVouchersId
                     ,@userId    = @UserId
                     ,@success   = @PostingSuccessful OUTPUT;
             END
@@ -298,7 +315,7 @@ IF ISNULL(@PayBalance,0) = 1
 				tblAPBillDetail APBD
 					ON APB.[intBillId] = APBD.[intBillId]
 			WHERE
-				APB.[intBillId] IN (SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@IdList))
+				APB.[intBillId] IN (SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedVouchersId))
 		END
 
 

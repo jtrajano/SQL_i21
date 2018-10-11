@@ -84,99 +84,7 @@ BEGIN
         ,[dblSourceUnitCredit]
         ,[intCommodityId]
         ,[intSourceEntityId]
-        ,[ysnRebuild])
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= A.intAccountId
-	--	,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal ELSE @ZeroDecimal END
-	--	,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblBaseInvoiceTotal END
-	--	,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash')	THEN  
-	--																					(
-	--																					SELECT
-	--																						SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
-	--																					FROM
-	--																						tblARInvoiceDetail ARID 
-	--																					INNER JOIN
-	--																						tblARInvoice ARI
-	--																							ON ARID.intInvoiceId = ARI.intInvoiceId	
-	--																					LEFT OUTER JOIN
-	--																						tblICItem I
-	--																							ON ARID.intItemId = I.intItemId
-	--																					LEFT OUTER JOIN
-	--																						@ItemAccounts IST
-	--																							ON ARID.intItemId = IST.intItemId 
-	--																							AND ARI.intCompanyLocationId = IST.intLocationId 
-	--																					LEFT OUTER JOIN
-	--																						vyuICGetItemStock ICIS
-	--																							ON ARID.intItemId = ICIS.intItemId 
-	--																							AND ARI.intCompanyLocationId = ICIS.intLocationId 
-	--																					WHERE
-	--																						ARI.intInvoiceId = A.intInvoiceId
-	--																						AND ARID.dblTotal <> @ZeroDecimal  
-	--																					)
-	--																				ELSE 
-	--																					@ZeroDecimal
-	--																				END
-	--	,dblCreditUnit				=  CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash')	THEN  
-	--																					@ZeroDecimal
-	--																				ELSE 
-	--																					(
-	--																					SELECT
-	--																						SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
-	--																					FROM
-	--																						tblARInvoiceDetail ARID 
-	--																					INNER JOIN
-	--																						tblARInvoice ARI
-	--																							ON ARID.intInvoiceId = ARI.intInvoiceId	
-	--																					LEFT OUTER JOIN
-	--																						tblICItem I
-	--																							ON ARID.intItemId = I.intItemId
-	--																					LEFT OUTER JOIN
-	--																						@ItemAccounts IST
-	--																							ON ARID.intItemId = IST.intItemId 
-	--																							AND ARI.intCompanyLocationId = IST.intLocationId 
-	--																					LEFT OUTER JOIN
-	--																						vyuICGetItemStock ICIS
-	--																							ON ARID.intItemId = ICIS.intItemId 
-	--																							AND ARI.intCompanyLocationId = ICIS.intLocationId 
-	--																					WHERE
-	--																						ARI.intInvoiceId = A.intInvoiceId
-	--																						AND ARID.dblTotal <> @ZeroDecimal  
-	--																					)
-	--																				END				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @CODE
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= A.dblCurrencyExchangeRate
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @SCREEN_NAME 
-	--	,strModuleName				= @MODULE_NAME 
-	--	,intConcurrencyId			= 1
-	--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE @ZeroDecimal END
-	--	,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE @ZeroDecimal END	
-	--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal END
-	--	,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal END
-	--	,[dblReportingRate]			= A.dblCurrencyExchangeRate
-	--	,[dblForeignRate]			= A.dblCurrencyExchangeRate
-	--	,[strRateType]				= ''			 
-	--FROM
-	--	tblARInvoice A
-	--LEFT JOIN 
-	--	tblARCustomer C
-	--		ON A.[intEntityCustomerId] = C.[intEntityId] 			
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
+        ,[ysnRebuild])	
     SELECT
          [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
         ,[strBatchId]                   = I.[strBatchId]
@@ -236,121 +144,8 @@ BEGIN
     WHERE
         I.[intInvoiceId] = @InvoiceId
 
-
 	UNION ALL
-	----CREDIT Deferred Revenue
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= @DeferredRevenueAccountId
-	--	,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal END
-	--	,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal ELSE @ZeroDecimal END
-	--	,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal
-	--																				ELSE
-	--																					(
-	--																					SELECT
-	--																						SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
-	--																					FROM
-	--																						tblARInvoiceDetail ARID 
-	--																					INNER JOIN
-	--																						tblARInvoice ARI
-	--																							ON ARID.intInvoiceId = ARI.intInvoiceId	
-	--																					LEFT OUTER JOIN
-	--																						tblICItem I
-	--																							ON ARID.intItemId = I.intItemId
-	--																					LEFT OUTER JOIN
-	--																						@ItemAccounts IST
-	--																							ON ARID.intItemId = IST.intItemId 
-	--																							AND ARI.intCompanyLocationId = IST.intLocationId 
-	--																					LEFT OUTER JOIN
-	--																						vyuICGetItemStock ICIS
-	--																							ON ARID.intItemId = ICIS.intItemId 
-	--																							AND ARI.intCompanyLocationId = ICIS.intLocationId 
-	--																					WHERE
-	--																						ARI.intInvoiceId = A.intInvoiceId
-	--																						AND ARID.dblTotal <> @ZeroDecimal  
-	--																					)
-	--																				END
-	--	,dblCreditUnit				=  CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN (
-	--																					SELECT
-	--																						SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
-	--																					FROM
-	--																						tblARInvoiceDetail ARID
-	--																					INNER JOIN
-	--																						tblARInvoice ARI 
-	--																							ON ARID.intInvoiceId = ARI.intInvoiceId	
-	--																					LEFT OUTER JOIN
-	--																						tblICItem I
-	--																							ON ARID.intItemId = I.intItemId
-	--																					LEFT OUTER JOIN
-	--																						@ItemAccounts IST
-	--																							ON ARID.intItemId = IST.intItemId 
-	--																							AND ARI.intCompanyLocationId = IST.intLocationId 
-	--																					LEFT OUTER JOIN
-	--																						vyuICGetItemStock ICIS
-	--																							ON ARID.intItemId = ICIS.intItemId 
-	--																							AND ARI.intCompanyLocationId = ICIS.intLocationId 
-	--																					WHERE
-	--																						ARI.intInvoiceId = A.intInvoiceId 
-	--																						AND ARID.dblTotal <> @ZeroDecimal
-	--																					)																						
-	--																				ELSE
-	--																					@ZeroDecimal
-	--																				END				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @CODE
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= A.dblCurrencyExchangeRate
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @SCREEN_NAME 
-	--	,strModuleName				= @MODULE_NAME 
-	--	,intConcurrencyId			= 1
-	--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END
-	--	,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END	
-	--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE @ZeroDecimal END
-	--	,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE @ZeroDecimal END
-	--	,[dblReportingRate]			= A.dblCurrencyExchangeRate
-	--	,[dblForeignRate]			= A.dblCurrencyExchangeRate
-	--	,[strRateType]				= ''				 
-	--FROM
-	--	tblARInvoice A
-	--LEFT JOIN 
-	--	tblARCustomer C
-	--		ON A.[intEntityCustomerId] = C.[intEntityId] 		
-	--LEFT OUTER	JOIN
-	--	(
-	--		SELECT 
-	--			 intInvoiceId		= intInvoiceId
-	--			,dblDiscountTotal	= SUM(ISNULL([dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal))
-	--		FROM
-	--			tblARInvoiceDetail
-	--		GROUP BY
-	--			intInvoiceId 
-	--	)  DT
-	--		ON A.intInvoiceId = DT.intInvoiceId
-	--LEFT OUTER	JOIN
-	--	(
-	--		SELECT 
-	--			 intInvoiceId		= intInvoiceId
-	--			,dblDiscountTotal	= SUM(ISNULL([dbo].fnRoundBanker(((dblDiscount/100.00) * [dbo].fnRoundBanker((dblQtyShipped * dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal))
-	--		FROM
-	--			tblARInvoiceDetail
-	--		GROUP BY
-	--			intInvoiceId 
-	--	)  BASEDT
-	--		ON A.intInvoiceId = BASEDT.intInvoiceId
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
+	 
     SELECT
          [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
         ,[strBatchId]                   = I.[strBatchId]
@@ -427,35 +222,6 @@ BEGIN
         ,dblMaintenanceAmount
         ,dblLicenseAmount
         ,strMaintenanceType)
-    --SELECT
-    --	 intInvoiceId			= ARI.intInvoiceId
-    --	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-    --	,dblTotal				= ARID.dblTotal
-    --	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
-    --	,dblDiscount			= ARID.dblDiscount 
-    --	,dblQtyShipped			= ARID.dblQtyShipped
-    --	,dblPrice				= ARID.dblPrice
-    --	,dblMaintenanceAmount	= @ZeroDecimal
-    --	,dblLicenseAmount		= @ZeroDecimal
-    --	,strMaintenanceType		= ARID.strMaintenanceType
-    --FROM
-    --	tblARInvoiceDetail ARID
-    --INNER JOIN
-    --	 tblARInvoice ARI
-    --		ON ARI.intInvoiceId = ARID.intInvoiceId	
-    --LEFT OUTER JOIN
-    --	vyuICGetItemStock ICIS
-    --		ON ARID.intItemId = ICIS.intItemId 
-    --		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
-    --WHERE
-    --	ARI.intInvoiceId = @InvoiceId 
-    --	AND ARID.dblTotal <> @ZeroDecimal 
-    --	AND ((ARID.intItemId IS NULL OR ARID.intItemId = 0)
-    --		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = ARID.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
-    --	AND ARI.strType <> 'Debit Memo'
-    --ORDER BY
-    --	ARI.intInvoiceId
-    --	,ARID.intInvoiceDetailId
     SELECT
          [intInvoiceId]         = ARID.[intInvoiceId]
         ,[intInvoiceDetailId]   = ARID.[intInvoiceDetailId]
@@ -481,7 +247,6 @@ BEGIN
     ORDER BY
         ARID.[intInvoiceDetailId]
 
-
     --License/Maintenance
     INSERT INTO @InvoiceDetail
         ([intInvoiceId]
@@ -494,39 +259,6 @@ BEGIN
         ,[dblMaintenanceAmount]
         ,[dblLicenseAmount]
         ,[strMaintenanceType])
-    --SELECT
-    --	 intInvoiceId			= ARI.intInvoiceId
-    --	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-    --	,dblTotal				= ARID.dblTotal
-    --	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
-    --	,dblDiscount			= ARID.dblDiscount 
-    --	,dblQtyShipped			= ARID.dblQtyShipped
-    --	,dblPrice				= ARID.dblPrice
-    --	,dblMaintenanceAmount	= ARID.dblMaintenanceAmount
-    --	,dblLicenseAmount		= CASE WHEN @AccrueLicense = 1 THEN ARID.dblLicenseAmount ELSE @ZeroDecimal END
-    --	,strMaintenanceType		= ARID.strMaintenanceType
-    --FROM
-    --	tblARInvoiceDetail ARID
-    --INNER JOIN
-    --	 tblARInvoice ARI
-    --		ON ARI.intInvoiceId = ARID.intInvoiceId
-    --INNER JOIN
-    --	tblICItem ICI
-    --		ON ARID.intItemId = ICI.intItemId 	
-    --LEFT OUTER JOIN
-    --	vyuICGetItemStock ICIS
-    --		ON ARID.intItemId = ICIS.intItemId 
-    --		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
-    --WHERE
-    --	ARI.intInvoiceId = @InvoiceId 
-    --	AND (ARID.dblLicenseAmount <> @ZeroDecimal OR ARID.dblMaintenanceAmount <> @ZeroDecimal)
-    --	AND ARID.strMaintenanceType = 'License/Maintenance'
-    --	AND ICI.strType = 'Software'
-    --	AND ARI.strType <> 'Debit Memo'
-    --	--AND @AccrueLicense = 1
-    --ORDER BY
-    --	ARI.intInvoiceId
-    --	,ARID.intInvoiceDetailId
     SELECT
          [intInvoiceId]         = ARID.[intInvoiceId]
         ,[intInvoiceDetailId]   = ARID.[intInvoiceDetailId]
@@ -550,7 +282,6 @@ BEGIN
     ORDER BY
     ARID.[intInvoiceDetailId]
 
-
     --License
     INSERT INTO @InvoiceDetail
         ([intInvoiceId]
@@ -563,39 +294,6 @@ BEGIN
         ,[dblMaintenanceAmount]
         ,[dblLicenseAmount]
         ,[strMaintenanceType])
-    --SELECT
-    --	 intInvoiceId			= ARI.intInvoiceId
-    --	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-    --	,dblTotal				= ARID.dblTotal
-    --	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
-    --	,dblDiscount			= ARID.dblDiscount 
-    --	,dblQtyShipped			= ARID.dblQtyShipped
-    --	,dblPrice				= ARID.dblPrice
-    --	,dblMaintenanceAmount	= @ZeroDecimal
-    --	,dblLicenseAmount		= ARID.dblLicenseAmount
-    --	,strMaintenanceType		= ARID.strMaintenanceType
-    --FROM
-    --	tblARInvoiceDetail ARID
-    --INNER JOIN
-    --	 tblARInvoice ARI
-    --		ON ARI.intInvoiceId = ARID.intInvoiceId
-    --INNER JOIN
-    --	tblICItem ICI
-    --		ON ARID.intItemId = ICI.intItemId 	
-    --LEFT OUTER JOIN
-    --	vyuICGetItemStock ICIS
-    --		ON ARID.intItemId = ICIS.intItemId 
-    --		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
-    --WHERE
-    --	ARI.intInvoiceId = @InvoiceId 
-    --	AND ARID.dblLicenseAmount <> @ZeroDecimal 
-    --	AND ARID.strMaintenanceType = 'License Only'
-    --	AND ICI.strType = 'Software'
-    --	AND ARI.strType <> 'Debit Memo'
-    --	AND @AccrueLicense = 1
-    --ORDER BY
-    --	ARI.intInvoiceId
-    --	,ARID.intInvoiceDetailId
     SELECT
          [intInvoiceId]         = ARID.[intInvoiceId]
         ,[intInvoiceDetailId]   = ARID.[intInvoiceDetailId]
@@ -632,38 +330,6 @@ BEGIN
         ,[dblMaintenanceAmount]
         ,[dblLicenseAmount]
         ,[strMaintenanceType])
-    --SELECT
-    --	 intInvoiceId			= ARI.intInvoiceId
-    --	,intInvoiceDetailId		= ARID.intInvoiceDetailId
-    --	,dblTotal				= ARID.dblTotal
-    --	,dblUnits				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal))
-    --	,dblDiscount			= ARID.dblDiscount 
-    --	,dblQtyShipped			= ARID.dblQtyShipped
-    --	,dblPrice				= ARID.dblPrice
-    --	,dblMaintenanceAmount	= ARID.dblMaintenanceAmount
-    --	,dblLicenseAmount		= @ZeroDecimal
-    --	,strMaintenanceType		= ARID.strMaintenanceType
-    --FROM
-    --	tblARInvoiceDetail ARID
-    --INNER JOIN
-    --	 tblARInvoice ARI
-    --		ON ARI.intInvoiceId = ARID.intInvoiceId
-    --INNER JOIN
-    --	tblICItem ICI
-    --		ON ARID.intItemId = ICI.intItemId 	
-    --LEFT OUTER JOIN
-    --	vyuICGetItemStock ICIS
-    --		ON ARID.intItemId = ICIS.intItemId 
-    --		AND ARI.intCompanyLocationId = ICIS.intLocationId 	
-    --WHERE
-    --	ARI.intInvoiceId = @InvoiceId 
-    --	AND ARID.dblMaintenanceAmount <> @ZeroDecimal 
-    --	AND ARID.strMaintenanceType IN ('Maintenance Only', 'SaaS')
-    --	AND ICI.strType = 'Software'
-    --	AND ARI.strType <> 'Debit Memo'
-    --ORDER BY
-    --	ARI.intInvoiceId
-    --	,ARID.intInvoiceDetailId
     SELECT
          [intInvoiceId]         = ARID.[intInvoiceId]
         ,[intInvoiceDetailId]   = ARID.[intInvoiceDetailId]
@@ -681,7 +347,7 @@ BEGIN
         ARID.[intInvoiceId] = @InvoiceId 
         AND ARID.[dblMaintenanceAmount] <> @ZeroDecimal
         AND ARID.strMaintenanceType  IN ('Maintenance Only', 'SaaS')
-        AND ARID.[ysnAccrueLicense] = 1
+        -- AND ARID.[ysnAccrueLicense] = 1
         AND ARID.[intItemId] IS NOT NULL
         AND ARID.[strItemType] = 'Software'
         AND ARID.[strTransactionType] <> 'Debit Memo'
@@ -802,72 +468,6 @@ BEGIN
 		    ,[intCommodityId]
 		    ,[intSourceEntityId]
 		    ,[ysnRebuild])
-		--DEBIT Deffered Revenue	
-		--SELECT
-		--	 dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= @DeferredRevenueAccountId
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount ELSE @ZeroDecimal END)
-		--									* B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END)
-		--									* B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= @ZeroDecimal
-		--	,dblCreditUnit				= @ZeroDecimal
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId 			
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME 
-		--	,strModuleName				= @MODULE_NAME 
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount ELSE @ZeroDecimal END
-		--	,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount ELSE @ZeroDecimal END
-		--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END
-		--	,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-		--FROM
-		--	tblARInvoice A 
-		--LEFT JOIN
-		--	tblARInvoiceDetail B
-		--		ON A.intInvoiceId = B.intInvoiceId
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-		--LEFT OUTER JOIN 
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId
-		--WHERE
-		--	A.intInvoiceId = @InvoiceId 
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId
-		--	AND B.dblTotal <> @ZeroDecimal 
-		--	AND ((B.intItemId IS NULL OR B.intItemId = 0)
-		--		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
-		--	AND A.strType <> 'Debit Memo'
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -913,13 +513,11 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         WHERE
             I.[intInvoiceDetailId] = @InvoiceDetailId
-            --AND I.[intInvoiceId] = @InvoiceId
-            --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblTotal] <> @ZeroDecimal
             AND (
                 I.[intItemId] IS NULL
@@ -929,111 +527,8 @@ BEGIN
             AND I.[strTransactionType] <> 'Debit Memo'
 
 		UNION ALL
+
 		--CREDIT	
-		--SELECT
-		--	 dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
-		--										THEN
-		--											IST.intGeneralAccountId												
-		--										WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
-		--										THEN
-		--											IST.intOtherChargeIncomeAccountId
-		--										ELSE
-		--											ISNULL(ISNULL(B.intServiceChargeAccountId, B.intSalesAccountId), SMCL.intSalesAccount)
-		--									END)
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--								  END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--								  END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= 0
-		--	,dblCreditUnit				= 0
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId 			
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME 
-		--	,strModuleName				= @MODULE_NAME 
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--								  END
-		--	,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--								  END
-		--	,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--								  END
-		--	,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--								  END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-		--FROM
-		--	tblARInvoice A 
-		--LEFT JOIN
-		--	tblARInvoiceDetail B
-		--		ON A.intInvoiceId = B.intInvoiceId
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCompanyLocation SMCL
-		--		ON A.intCompanyLocationId = SMCL.intCompanyLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-		--LEFT OUTER JOIN
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId
-		--WHERE
-		--	A.intInvoiceId = @InvoiceId
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId 
-		--	AND B.dblTotal <> @ZeroDecimal 
-		--	AND ((B.intItemId IS NULL OR B.intItemId = 0)
-		--		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
-		--	AND A.strType <> 'Debit Memo'
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -1114,7 +609,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -1132,105 +627,10 @@ BEGIN
                 I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
                 )
             AND I.[strTransactionType] <> 'Debit Memo'
-
-		--DEBIT Software -- License
+		
 		UNION ALL 
-		--SELECT
-		--		dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= @DeferredRevenueAccountId
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= @ZeroDecimal
-		--	,dblCreditUnit				= @ZeroDecimal
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId				
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME
-		--	,strModuleName				= @MODULE_NAME
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType
-		--FROM
-		--	tblARInvoiceDetail B
-		--INNER JOIN
-		--	tblARInvoice A 
-		--		ON B.intInvoiceId = A.intInvoiceId
-		--INNER JOIN
-		--	tblICItem I
-		--		ON B.intItemId = I.intItemId 				
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-		--LEFT OUTER JOIN
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId
-		--WHERE
-		--	B.dblLicenseAmount <> @ZeroDecimal
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId 
-		--	AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
-		--	AND I.strType = 'Software'
-		--	AND A.strTransactionType <> 'Debit Memo'
-		--	AND @AccrueLicense = 1
+
+		--DEBIT Software -- License		
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -1308,7 +708,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -1324,107 +724,10 @@ BEGIN
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
-
 		
-
-		--CREDIT Software -- License
 		UNION ALL 
-		--SELECT
-		--		dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= IST.intGeneralAccountId
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= 0
-		--	,dblCreditUnit				= 0
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId				
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME
-		--	,strModuleName				= @MODULE_NAME
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType
-		--FROM
-		--	tblARInvoiceDetail B
-		--INNER JOIN
-		--	tblARInvoice A 
-		--		ON B.intInvoiceId = A.intInvoiceId
-		--INNER JOIN
-		--	tblICItem I
-		--		ON B.intItemId = I.intItemId 				
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId		
-		--LEFT OUTER JOIN
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId			
-		--WHERE
-		--	B.dblLicenseAmount <> @ZeroDecimal
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId 
-		--	AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
-		--	AND I.strType = 'Software'
-		--	AND A.strTransactionType <> 'Debit Memo'
-		--	AND @AccrueLicense = 1
+
+		--CREDIT Software -- License		
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -1502,7 +805,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -1518,106 +821,10 @@ BEGIN
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
-
-						
-
-		--DEBIT Software -- Maintenance
+		
 		UNION ALL 
-		--SELECT
-		--		dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= @DeferredRevenueAccountId
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= 0
-		--	,dblCreditUnit				= 0
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId				
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME
-		--	,strModuleName				= @MODULE_NAME
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType
-		--FROM
-		--	tblARInvoiceDetail B
-		--INNER JOIN
-		--	tblARInvoice A 
-		--		ON B.intInvoiceId = A.intInvoiceId
-		--INNER JOIN
-		--	tblICItem I
-		--		ON B.intItemId = I.intItemId 				
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-		--LEFT OUTER JOIN 
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId					
-		--WHERE
-		--	B.dblMaintenanceAmount <> @ZeroDecimal
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId 
-		--	AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-		--	AND I.strType = 'Software'
-		--	AND A.strTransactionType <> 'Debit Memo'
+
+		--DEBIT Software -- Maintenance		
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -1695,7 +902,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -1710,104 +917,10 @@ BEGIN
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
-
-		--CREDIT Software -- Maintenance
+		
 		UNION ALL 
-		--SELECT
-		--		dtmDate					= Accrual.dtmAccrualDate
-		--	,strBatchID					= @BatchId
-		--	,intAccountId				= IST.intMaintenanceSalesAccountId
-		--	,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-		--	,dblDebitUnit				= 0
-		--	,dblCreditUnit				= 0
-		--	,strDescription				= A.strComments
-		--	,strCode					= @CODE
-		--	,strReference				= C.strCustomerNumber
-		--	,intCurrencyId				= A.intCurrencyId 
-		--	,dblExchangeRate			= B.dblCurrencyExchangeRate
-		--	,dtmDateEntered				= @PostDate
-		--	,dtmTransactionDate			= A.dtmDate
-		--	,strJournalLineDescription	= B.strItemDescription 
-		--	,intJournalLineNo			= B.intInvoiceDetailId
-		--	,ysnIsUnposted				= 0
-		--	,intUserId					= @UserId
-		--	,intEntityId				= @UserEntityId				
-		--	,strTransactionId			= A.strInvoiceNumber
-		--	,intTransactionId			= A.intInvoiceId
-		--	,strTransactionType			= A.strTransactionType
-		--	,strTransactionForm			= @SCREEN_NAME
-		--	,strModuleName				= @MODULE_NAME
-		--	,intConcurrencyId			= 1
-		--	,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount END 
-		--									END
-		--	,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
-		--									THEN 
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN Accrual.dblAmount END
-		--									ELSE
-		--										CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE Accrual.dblAmount  END 
-		--									END
-		--	,[dblReportingRate]			= B.dblCurrencyExchangeRate
-		--	,[dblForeignRate]			= B.dblCurrencyExchangeRate
-		--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType
-		--FROM
-		--	tblARInvoiceDetail B
-		--INNER JOIN
-		--	tblARInvoice A 
-		--		ON B.intInvoiceId = A.intInvoiceId
-		--INNER JOIN
-		--	tblICItem I
-		--		ON B.intItemId = I.intItemId 				
-		--LEFT JOIN 
-		--	tblARCustomer C
-		--		ON A.[intEntityCustomerId] = C.[intEntityId]		
-		--LEFT OUTER JOIN
-		--	@ItemAccounts IST
-		--		ON B.intItemId = IST.intItemId 
-		--		AND A.intCompanyLocationId = IST.intLocationId
-		--LEFT OUTER JOIN
-		--	vyuICGetItemStock ICIS
-		--		ON B.intItemId = ICIS.intItemId 
-		--		AND B.intItemUOMId = ICIS.intStockUOMId
-		--		AND A.intCompanyLocationId = ICIS.intLocationId
-		--LEFT OUTER JOIN
-		--	tblSMCurrencyExchangeRateType SMCERT
-		--		ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId		
-		--LEFT OUTER JOIN
-		--	tblARInvoiceAccrual Accrual
-		--		ON Accrual.intInvoiceDetailId = B.intInvoiceDetailId				
-		--WHERE
-		--	B.dblMaintenanceAmount <> @ZeroDecimal
-		--	AND B.intInvoiceDetailId = @InvoiceDetailId 
-		--	AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-		--	AND I.strType = 'Software'
-		--	AND A.strTransactionType <> 'Debit Memo'
+
+		--CREDIT Software -- Maintenance		
         SELECT
              [dtmDate]                      = ARIA.[dtmAccrualDate]
             ,[strBatchId]                   = I.[strBatchId]
@@ -1885,7 +998,7 @@ BEGIN
             ,[ysnRebuild]                   = NULL
         FROM
             #ARPostInvoiceDetail I
-        LEFT OUTER JOIN
+        INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
@@ -1902,178 +1015,6 @@ BEGIN
             AND I.[strTransactionType] <> 'Debit Memo'
 
 		SET @LoopCounter = @LoopCounter + 1
-
-	---END
-
-	--DECLARE @InvoiceDetailTax AS TABLE(intInvoiceDetailId INT, intInvoiceDetailTaxId INT, dblAdjustedTax DECIMAL(18,6))
-	--DELETE FROM @InvoiceDetailTax
-	--INSERT INTO @InvoiceDetailTax
-	--	(intInvoiceDetailId
-	--	,intInvoiceDetailTaxId
-	--	,dblAdjustedTax)
-	--SELECT
-	--	 intInvoiceDetailId			= ARID.intInvoiceDetailId
-	--	,intInvoiceDetailTaxId		= ARIDT.intInvoiceDetailTaxId
-	--	,dblAdjustedTax				= ARIDT.dblAdjustedTax
-	--FROM
-	--	tblARInvoiceDetailTax ARIDT
-	--INNER JOIN
-	--	tblARInvoiceDetail ARID
-	--	ON ARIDT.intInvoiceDetailId = ARID.intInvoiceDetailId	
-	--WHERE
-	--	ARID.intInvoiceDetailId = @InvoiceDetailId 
-	--	AND ARIDT.dblAdjustedTax <> @ZeroDecimal 	
-	--ORDER BY
-	--	ARID.intInvoiceDetailId
-	--	,ARIDT.intInvoiceDetailTaxId
-	
-
-
-	--WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetailTax)
-	--BEGIN
-	--DECLARE @InvoiceDetailTaxId			INT
-	--		,@TaxTotal					DECIMAL(18,6)
-	--		,@TaxTotalPerPeriod			DECIMAL(18,6)
-	
-	--SELECT TOP 1 
-	--	@InvoiceDetailTaxId	= intInvoiceDetailTaxId
-	--	,@TaxTotal				= dblAdjustedTax
-	--	,@TaxTotalPerPeriod		= [dbo].fnRoundBanker((dblAdjustedTax/@AccrualPeriod),2)
-	--FROM 
-	--	@InvoiceDetailTax
-		
-	--SET @TaxRemainder = @ZeroDecimal
-	--SET @TaxRemainder = [dbo].fnRoundBanker(@TaxTotal,2) - [dbo].fnRoundBanker((@TaxTotalPerPeriod * @AccrualPeriod),2)
-	--SET @TaxLoopCounter = 0		
-
-	--WHILE @TaxLoopCounter < @AccrualPeriod
-	--BEGIN
-
-	--	--DEBIT AR
-	--	INSERT INTO @GLEntries (
-	--				[dtmDate] 
-	--				,[strBatchId]
-	--				,[intAccountId]
-	--				,[dblDebit]
-	--				,[dblCredit]
-	--				,[dblDebitUnit]
-	--				,[dblCreditUnit]
-	--				,[strDescription]
-	--				,[strCode]
-	--				,[strReference]
-	--				,[intCurrencyId]
-	--				,[dblExchangeRate]
-	--				,[dtmDateEntered]
-	--				,[dtmTransactionDate]
-	--				,[strJournalLineDescription]
-	--				,[intJournalLineNo]
-	--				,[ysnIsUnposted]
-	--				,[intUserId]
-	--				,[intEntityId]
-	--				,[strTransactionId]
-	--				,[intTransactionId]
-	--				,[strTransactionType]
-	--				,[strTransactionForm]
-	--				,[strModuleName]
-	--				,[intConcurrencyId]
-	--			)
-	--	--CREDIT Tax
-	--	SELECT
-	--			dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
-	--		,strBatchID					= @BatchId
-	--		,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-	--		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
-	--		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
-	--		,dblDebitUnit				= 0
-	--		,dblCreditUnit				= 0				
-	--		,strDescription				= A.strComments
-	--		,strCode					= @CODE
-	--		,strReference				= C.strCustomerNumber
-	--		,intCurrencyId				= A.intCurrencyId 
-	--		,dblExchangeRate			= 1
-	--		,dtmDateEntered				= @PostDate 
-	--		,dtmTransactionDate			= A.dtmDate
-	--		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--		,intJournalLineNo			= A.intInvoiceId
-	--		,ysnIsUnposted				= 0
-	--		,intUserId					= @UserId
-	--		,intEntityId				= @UserEntityId 				
-	--		,strTransactionId			= A.strInvoiceNumber
-	--		,intTransactionId			= A.intInvoiceId
-	--		,strTransactionType			= A.strTransactionType
-	--		,strTransactionForm			= @SCREEN_NAME 
-	--		,strModuleName				= @MODULE_NAME 
-	--		,intConcurrencyId			= 1				 
-	--	FROM
-	--		tblARInvoiceDetailTax DT
-	--	INNER JOIN
-	--		tblARInvoiceDetail D
-	--			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--	INNER JOIN			
-	--		tblARInvoice A 
-	--			ON D.intInvoiceId = A.intInvoiceId
-	--	INNER JOIN
-	--		tblARCustomer C
-	--			ON A.intEntityCustomerId = C.intEntityCustomerId			
-	--	LEFT OUTER JOIN
-	--		tblSMTaxCode TC
-	--			ON DT.intTaxCodeId = TC.intTaxCodeId	
-	--	WHERE
-	--		DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
-	--		AND DT.dblAdjustedTax <> @ZeroDecimal
-			
-	--	UNION ALL
-	--	--Debit Tax
-	--	SELECT
-	--		 dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
-	--		,strBatchID					= @BatchId
-	--		,intAccountId				= @DeferredRevenueAccountId
-	--		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
-	--		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
-	--		,dblDebitUnit				= 0
-	--		,dblCreditUnit				= 0				
-	--		,strDescription				= A.strComments
-	--		,strCode					= @CODE
-	--		,strReference				= C.strCustomerNumber
-	--		,intCurrencyId				= A.intCurrencyId 
-	--		,dblExchangeRate			= 1
-	--		,dtmDateEntered				= @PostDate 
-	--		,dtmTransactionDate			= A.dtmDate
-	--		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--		,intJournalLineNo			= A.intInvoiceId
-	--		,ysnIsUnposted				= 0
-	--		,intUserId					= @UserId
-	--		,intEntityId				= @UserEntityId 				
-	--		,strTransactionId			= A.strInvoiceNumber
-	--		,intTransactionId			= A.intInvoiceId
-	--		,strTransactionType			= A.strTransactionType
-	--		,strTransactionForm			= @SCREEN_NAME 
-	--		,strModuleName				= @MODULE_NAME 
-	--		,intConcurrencyId			= 1				 
-	--	FROM
-	--		tblARInvoiceDetailTax DT
-	--	INNER JOIN
-	--		tblARInvoiceDetail D
-	--			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--	INNER JOIN			
-	--		tblARInvoice A 
-	--			ON D.intInvoiceId = A.intInvoiceId
-	--	INNER JOIN
-	--		tblARCustomer C
-	--			ON A.intEntityCustomerId = C.intEntityCustomerId			
-	--	LEFT OUTER JOIN
-	--		tblSMTaxCode TC
-	--			ON DT.intTaxCodeId = TC.intTaxCodeId	
-	--	WHERE
-	--		DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
-	--		AND DT.dblAdjustedTax <> @ZeroDecimal	
-		
-	--	SET @TaxLoopCounter = @TaxLoopCounter + 1
-
-	--END
-
-	--DELETE FROM @InvoiceDetailTax WHERE intInvoiceDetailTaxId = @InvoiceDetailTaxId
-	--END
 
 	DELETE FROM @InvoiceDetail WHERE intInvoiceDetailId = @InvoiceDetailId
 END
@@ -2121,61 +1062,7 @@ INSERT INTO @GLEntries
     ,[dblSourceUnitCredit]
     ,[intCommodityId]
     ,[intSourceEntityId]
-    ,[ysnRebuild])
-	--Debit Tax
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= @DeferredRevenueAccountId
-	--	,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE @ZeroDecimal END
-	--	,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblBaseAdjustedTax END
-	--	,dblDebitUnit				= @ZeroDecimal
-	--	,dblCreditUnit				= @ZeroDecimal				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @CODE
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @SCREEN_NAME 
-	--	,strModuleName				= @MODULE_NAME 
-	--	,intConcurrencyId			= 1
-	--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
-	--	,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
-	--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-	--	,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-	--	,[dblReportingRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,[dblForeignRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType			 
-	--FROM
-	--	tblARInvoiceDetailTax DT
-	--INNER JOIN
-	--	tblARInvoiceDetail D
-	--		ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--INNER JOIN			
-	--	tblARInvoice A 
-	--		ON D.intInvoiceId = A.intInvoiceId
-	--INNER JOIN
-	--	tblARCustomer C
-	--		ON A.intEntityCustomerId = C.[intEntityId]			
-	--LEFT OUTER JOIN
-	--	tblSMTaxCode TC
-	--		ON DT.intTaxCodeId = TC.intTaxCodeId
-	--LEFT OUTER JOIN
-	--		tblSMCurrencyExchangeRateType SMCERT
-	--			ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
-	--	AND DT.dblAdjustedTax <> @ZeroDecimal	
+    ,[ysnRebuild])	
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
@@ -2257,60 +1144,6 @@ WHERE
 		
 UNION ALL
 	
-	--CREDIT Tax
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-	--	,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblBaseAdjustedTax END
-	--	,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE @ZeroDecimal END
-	--	,dblDebitUnit				= @ZeroDecimal
-	--	,dblCreditUnit				= @ZeroDecimal				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @CODE
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @SCREEN_NAME 
-	--	,strModuleName				= @MODULE_NAME 
-	--	,intConcurrencyId			= 1
-	--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-	--	,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-	--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-	--	,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-	--	,[dblReportingRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,[dblForeignRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
-	--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType			 
-	--FROM
-	--	tblARInvoiceDetailTax DT
-	--INNER JOIN
-	--	tblARInvoiceDetail D
-	--		ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--INNER JOIN			
-	--	tblARInvoice A 
-	--		ON D.intInvoiceId = A.intInvoiceId
-	--INNER JOIN
-	--	tblARCustomer C
-	--		ON A.intEntityCustomerId = C.[intEntityId]			
-	--LEFT OUTER JOIN
-	--	tblSMTaxCode TC
-	--		ON DT.intTaxCodeId = TC.intTaxCodeId
-	--LEFT OUTER JOIN
-	--		tblSMCurrencyExchangeRateType SMCERT
-	--			ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
-	--	AND DT.dblAdjustedTax <> @ZeroDecimal
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
@@ -2392,96 +1225,96 @@ WHERE
 
 END
 
---INSERT INTO #ARInvoiceGLEntries
---	([dtmDate]
---	,[strBatchId]
---	,[intAccountId]
---	,[dblDebit]
---	,[dblCredit]
---	,[dblDebitUnit]
---	,[dblCreditUnit]
---	,[strDescription]
---	,[strCode]
---	,[strReference]
---	,[intCurrencyId]
---	,[dblExchangeRate]
---	,[dtmDateEntered]
---	,[dtmTransactionDate]
---	,[strJournalLineDescription]
---	,[intJournalLineNo]
---	,[ysnIsUnposted]
---	,[intUserId]
---	,[intEntityId]
---	,[strTransactionId]
---	,[intTransactionId]
---	,[strTransactionType]
---	,[strTransactionForm]
---	,[strModuleName]
---	,[intConcurrencyId]
---	,[dblDebitForeign]
---	,[dblDebitReport]
---	,[dblCreditForeign]
---	,[dblCreditReport]
---	,[dblReportingRate]
---	,[dblForeignRate]
---	,[strRateType]
---	,[strDocument]
---	,[strComments]
---	,[strSourceDocumentId]
---	,[intSourceLocationId]
---	,[intSourceUOMId]
---	,[dblSourceUnitDebit]
---	,[dblSourceUnitCredit]
---	,[intCommodityId]
---	,[intSourceEntityId]
---	,[ysnRebuild])
---SELECT 
---     [dtmDate]                      = GLEntries.[dtmDate]
---    ,[strBatchId]                   = GLEntries.[strBatchId]
---    ,[intAccountId]                 = GLEntries.[intAccountId]
---    ,[dblDebit]                     = GLEntries.[dblDebit]
---    ,[dblCredit]                    = GLEntries.[dblCredit]
---    ,[dblDebitUnit]                 = DebitUnit.Value
---    ,[dblCreditUnit]                = CreditUnit.Value
---    ,[strDescription]               = GLEntries.[strDescription]
---    ,[strCode]                      = GLEntries.[strCode]
---    ,[strReference]                 = GLEntries.[strReference]
---    ,[intCurrencyId]                = GLEntries.[intCurrencyId]
---    ,[dblExchangeRate]              = GLEntries.[dblExchangeRate]
---    ,[dtmDateEntered]               = GLEntries.[dtmDateEntered]
---    ,[dtmTransactionDate]           = GLEntries.[dtmTransactionDate]
---    ,[strJournalLineDescription]    = GLEntries.[strJournalLineDescription]
---    ,[intJournalLineNo]             = GLEntries.[intJournalLineNo]
---    ,[ysnIsUnposted]                = GLEntries.[ysnIsUnposted]
---    ,[intUserId]                    = GLEntries.[intUserId]
---    ,[intEntityId]                  = GLEntries.[intEntityId]
---    ,[strTransactionId]             = GLEntries.[strTransactionId]
---    ,[intTransactionId]             = GLEntries.[intTransactionId]
---    ,[strTransactionType]           = GLEntries.[strTransactionType]
---    ,[strTransactionForm]           = GLEntries.[strTransactionForm]
---    ,[strModuleName]                = GLEntries.[strModuleName]
---    ,[intConcurrencyId]             = GLEntries.[intConcurrencyId]
---    ,[dblDebitForeign]              = GLEntries.[dblDebitForeign]
---    ,[dblDebitReport]               = GLEntries.[dblDebitReport]
---    ,[dblCreditForeign]             = GLEntries.[dblCreditForeign]
---    ,[dblCreditReport]              = GLEntries.[dblCreditReport]
---    ,[dblReportingRate]             = GLEntries.[dblReportingRate]
---    ,[dblForeignRate]               = GLEntries.[dblForeignRate]
---    ,[strRateType]                  = GLEntries.[strRateType]
---    ,[strDocument]                  = GLEntries.[strDocument]
---    ,[strComments]                  = GLEntries.[strComments]
---    ,[strSourceDocumentId]          = GLEntries.[strSourceDocumentId]
---    ,[intSourceLocationId]          = GLEntries.[intSourceLocationId]
---    ,[intSourceUOMId]               = GLEntries.[intSourceUOMId]
---    ,[dblSourceUnitDebit]           = GLEntries.[dblSourceUnitDebit]
---    ,[dblSourceUnitCredit]          = GLEntries.[dblSourceUnitCredit]
---    ,[intCommodityId]               = GLEntries.[intCommodityId]
---    ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
---    ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
---FROM
---	@GLEntries GLEntries
---CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
---CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
+INSERT INTO #ARInvoiceGLEntries
+	([dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+	,[strRateType]
+	,[strDocument]
+	,[strComments]
+	,[strSourceDocumentId]
+	,[intSourceLocationId]
+	,[intSourceUOMId]
+	,[dblSourceUnitDebit]
+	,[dblSourceUnitCredit]
+	,[intCommodityId]
+	,[intSourceEntityId]
+	,[ysnRebuild])
+SELECT 
+    [dtmDate]                      = GLEntries.[dtmDate]
+   ,[strBatchId]                   = GLEntries.[strBatchId]
+   ,[intAccountId]                 = GLEntries.[intAccountId]
+   ,[dblDebit]                     = GLEntries.[dblDebit]
+   ,[dblCredit]                    = GLEntries.[dblCredit]
+   ,[dblDebitUnit]                 = DebitUnit.Value
+   ,[dblCreditUnit]                = CreditUnit.Value
+   ,[strDescription]               = GLEntries.[strDescription]
+   ,[strCode]                      = GLEntries.[strCode]
+   ,[strReference]                 = GLEntries.[strReference]
+   ,[intCurrencyId]                = GLEntries.[intCurrencyId]
+   ,[dblExchangeRate]              = GLEntries.[dblExchangeRate]
+   ,[dtmDateEntered]               = GLEntries.[dtmDateEntered]
+   ,[dtmTransactionDate]           = GLEntries.[dtmTransactionDate]
+   ,[strJournalLineDescription]    = GLEntries.[strJournalLineDescription]
+   ,[intJournalLineNo]             = GLEntries.[intJournalLineNo]
+   ,[ysnIsUnposted]                = GLEntries.[ysnIsUnposted]
+   ,[intUserId]                    = GLEntries.[intUserId]
+   ,[intEntityId]                  = GLEntries.[intEntityId]
+   ,[strTransactionId]             = GLEntries.[strTransactionId]
+   ,[intTransactionId]             = GLEntries.[intTransactionId]
+   ,[strTransactionType]           = GLEntries.[strTransactionType]
+   ,[strTransactionForm]           = GLEntries.[strTransactionForm]
+   ,[strModuleName]                = GLEntries.[strModuleName]
+   ,[intConcurrencyId]             = GLEntries.[intConcurrencyId]
+   ,[dblDebitForeign]              = GLEntries.[dblDebitForeign]
+   ,[dblDebitReport]               = GLEntries.[dblDebitReport]
+   ,[dblCreditForeign]             = GLEntries.[dblCreditForeign]
+   ,[dblCreditReport]              = GLEntries.[dblCreditReport]
+   ,[dblReportingRate]             = GLEntries.[dblReportingRate]
+   ,[dblForeignRate]               = GLEntries.[dblForeignRate]
+   ,[strRateType]                  = GLEntries.[strRateType]
+   ,[strDocument]                  = GLEntries.[strDocument]
+   ,[strComments]                  = GLEntries.[strComments]
+   ,[strSourceDocumentId]          = GLEntries.[strSourceDocumentId]
+   ,[intSourceLocationId]          = GLEntries.[intSourceLocationId]
+   ,[intSourceUOMId]               = GLEntries.[intSourceUOMId]
+   ,[dblSourceUnitDebit]           = GLEntries.[dblSourceUnitDebit]
+   ,[dblSourceUnitCredit]          = GLEntries.[dblSourceUnitCredit]
+   ,[intCommodityId]               = GLEntries.[intCommodityId]
+   ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
+   ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
+FROM
+	@GLEntries GLEntries
+CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
+CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
 
 GO
 

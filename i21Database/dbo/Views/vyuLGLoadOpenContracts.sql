@@ -6,6 +6,7 @@ SELECT CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription strItemDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity AS dblDetailQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
@@ -49,7 +50,7 @@ SELECT CD.intContractDetailId
 			END 
 		END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
-	,CH.ysnLoad
+	,ISNULL(CH.ysnLoad, 0) AS ysnLoad
 	,CD.dblQuantityPerLoad
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
@@ -170,6 +171,7 @@ SELECT CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription strItemDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity AS dblDetailQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
@@ -215,7 +217,7 @@ SELECT CD.intContractDetailId
 				END 
 			END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
-	,CH.ysnLoad
+	,ISNULL(CH.ysnLoad, 0) AS ysnLoad
 	,CD.dblQuantityPerLoad
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
@@ -333,6 +335,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId

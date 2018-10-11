@@ -352,7 +352,7 @@ BEGIN TRY
 
 				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId,dblQtyReceived,dblCost)
 				SELECT intInventoryReceiptChargeId
-					,1
+					,C.dblQuantity
 					,LC.dblRate
 				FROM tblICInventoryReceiptCharge C
 				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = C.intContractDetailId
@@ -364,8 +364,10 @@ BEGIN TRY
 					AND  C.intEntityVendorId = @intVendorEntityId 
 				GROUP BY intInventoryReceiptChargeId
 					,LC.dblRate
-					,LD.dblQuantity
+					,C.dblQuantity
 					,LC.intLoadId
+
+				EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
 
 				--SELECT intInventoryReceiptChargeId
 				--FROM tblICInventoryReceiptCharge C

@@ -25,3 +25,21 @@
 	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId])
 );
 
+
+GO
+CREATE TRIGGER [dbo].[trgReceiptNumber] 
+   ON  [dbo].[tblARPOS]
+   AFTER INSERT
+AS 
+
+DECLARE @ReceiptNumber NVARCHAR(25) = NULL    
+
+BEGIN
+	SET NOCOUNT ON;
+	Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output    
+	UPDATE tblARPOS      
+	SET strReceiptNumber = @ReceiptNumber      
+	WHERE strReceiptNumber = ''     
+
+END
+GO

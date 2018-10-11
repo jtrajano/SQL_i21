@@ -24,6 +24,22 @@ INNER JOIN
         AND ARID.[intItemId] = ICSR.[intItemId]
 WHERE
 	ICSR.[ysnPosted] = 0
+UNION
+SELECT
+    [intHeaderId]  = ARID.[intInvoiceId]
+    ,[ysnPost]      = ARID.[ysnPost] 
+FROM
+    #ARPostInvoiceDetail ARID
+JOIN tblICItemBundle BDL
+    ON BDL.intItemId = ARID.intItemId
+INNER JOIN
+    tblICStockReservation ICSR
+        ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
+        AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
+        AND BDL.[intBundleItemId] = ICSR.[intItemId]
+WHERE
+    ICSR.[ysnPosted] = 0
+
 
 WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
 BEGIN

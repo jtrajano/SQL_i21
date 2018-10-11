@@ -46,6 +46,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Lot.strSubLocationName
 	, Lot.intStorageLocationId
 	, Lot.strStorageLocation
+	, Lot.dblQty AS dblLotQty
 	, ShipmentItemLot.dblQuantityShipped
 	, strLotUOM = Lot.strItemUOM
 	, ShipmentItemLot.dblGrossWeight
@@ -57,6 +58,12 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItemLot.strWarehouseCargoNumber 
 	, dblWeightPerQty = Lot.dblWeightPerQty
 	, ShipmentItemLot.intConcurrencyId
+	, intQtyUOMDecimalPlaces = ShipmentItem.intDecimalPlaces
+	, intGrossUOMDecimalPlaces = ShipmentItem.intGrossUOMDecimalPlaces
+	, intItemId = ShipmentItem.intItemId
+	, intItemUOMId = ShipmentItem.intItemUOMId
+	, intWeightUOMId = ShipmentItem.intWeightUOMId
+	, strShipQtyUOM = ShipmentItem.strUnitMeasure
 FROM tblICInventoryShipmentItemLot ShipmentItemLot
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId

@@ -66,12 +66,15 @@ SELECT
 							ELSE dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty) 
 						END
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
-	,Lot.dblLastCost
+	,dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, Lot.intItemUOMId, Lot.dblLastCost)
 	,intOwnershipType	= 1
 FROM	
 	tblICInventoryTransaction t
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
 	INNER JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
+	INNER JOIN tblICItemUOM iu 
+		ON iu.intItemId = t.intItemId
+		AND iu.ysnStockUnit = 1		
 WHERE	
 	t.intItemId = @intItemId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
