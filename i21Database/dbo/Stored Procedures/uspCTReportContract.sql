@@ -51,7 +51,10 @@ BEGIN TRY
 			@strIds						NVARCHAR(MAX),
 			@strGABShipDelv				NVARCHAR(MAX),
 			@intReportLogoHeight		INT,
-			@intReportLogoWidth			INT
+			@intReportLogoWidth			INT,
+			@intFirstHalfNoOfDocuments	INT,
+			@strFirstHalfDocuments		NVARCHAR(MAX),
+			@strSecondHalfDocuments		NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -72,7 +75,13 @@ BEGIN TRY
 	(
 	  intSequenceAmendmentLogId INT
 	)
-  
+	
+	DECLARE @tblContractDocument AS TABLE 
+	(
+		 intContractDocumentKey INT IDENTITY(1, 1)
+		,strDocumentName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+    )
+
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
 	INSERT INTO @temp_xml_table  
@@ -177,6 +186,32 @@ BEGIN TRY
 	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
 	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
+
+	INSERT INTO @tblContractDocument(strDocumentName)
+	SELECT 			
+		DM.strDocumentName
+	FROM tblCTContractDocument CD	
+	JOIN tblICDocument DM ON DM.intDocumentId = CD.intDocumentId	
+	WHERE CD.intContractHeaderId = @intContractHeaderId
+	ORDER BY DM.strDocumentName
+	
+	SELECT @intFirstHalfNoOfDocuments = CEILING(COUNT(1)/2.0) FROM @tblContractDocument	
+
+	SELECT @strFirstHalfDocuments = STUFF((
+										SELECT strDocumentName + CHAR(13) + CHAR(10)
+										FROM @tblContractDocument WHERE intContractDocumentKey < = @intFirstHalfNoOfDocuments
+										FOR XML PATH('')
+											,TYPE
+										).value('.', 'varchar(max)'), 1, 0, '')
+							    FROM @tblContractDocument
+
+	SELECT @strSecondHalfDocuments = STUFF((
+										SELECT strDocumentName + CHAR(13) + CHAR(10)
+										FROM @tblContractDocument WHERE intContractDocumentKey > @intFirstHalfNoOfDocuments
+										FOR XML PATH('')
+											,TYPE
+										).value('.', 'varchar(max)'), 1, 0, '')
+							    FROM @tblContractDocument
 
 	SELECT	@strContractDocuments = STUFF(								
 			   (SELECT			
@@ -376,6 +411,8 @@ BEGIN TRY
 			,strGrade								= dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) 
 			,strQaulityAndInspection				= @rtStrQaulityAndInspection1 + ' ' + ' - ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) + ' '+@rtStrQaulityAndInspection2+' ' + @strCompanyName + '''s '+@rtStrQaulityAndInspection3+'.'
 			,strContractDocuments					= @strContractDocuments
+			,strFirstHalfDocuments					= LTRIM(@strFirstHalfDocuments)
+			,strSecondHalfDocuments				    = LTRIM(@strSecondHalfDocuments)
 			,strArbitration							= @rtStrArbitration1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + '  '+@rtStrArbitration2+'. ' 
 														+ CHAR(13)+CHAR(10) +
 														@rtStrArbitration3 + ' ' + AB.strState +', '+ dbo.fnCTGetTranslation('i21.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
@@ -393,9 +430,17 @@ BEGIN TRY
 														CASE WHEN @ysnFairtrade = 1 THEN
 															ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 														ELSE '' END
+
+			,strAtlasOtherPartyAddress				=   LTRIM(RTRIM(EY.strEntityName)) +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')+ CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
+														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
+														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
 			
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
+			,strAtlasSeller							= CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'') END
 			,dblQuantity						    = CH.dblQuantity
 			,strCurrency						    = SQ.strCurrency
 			,strInsuranceBy						    = @rtStrInsuranceBy + ' ' + IB.strInsuranceBy			
@@ -408,12 +453,20 @@ BEGIN TRY
 			,strContractConditions				    = @strContractConditions
 			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN @rtLocation + ' :'					ELSE NULL END
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired + ' :'			ELSE NULL END
+			,lblAtlasContractDocuments				= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired			ELSE NULL END
+			,lblAtlasContractDocumentsColon			= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN ':'			ELSE NULL END
 			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN @rtContract2 + ' :'					ELSE NULL END
+			,lblAtlasArbitrationComment				= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN @rtContract2				ELSE NULL END
+			,lblAtlasArbitrationCommentColon		= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN ':'					ELSE NULL END
 			,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'							ELSE NULL END
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE NULL END
+			,lblAtlasPrintableRemarks				= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks			ELSE NULL END
+			,lblAtlasPrintableRemarksColon			= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN ':'				ELSE NULL END
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
 			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers + ' :'						ELSE NULL END
+			,lblAtlasContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers						ELSE NULL END
+			,lblAtlasContractTextColon						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN ':'						ELSE NULL END
 			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtCondition + ' :'					ELSE NULL END
 			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtProducer + ' :'					ELSE NULL END
 			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtShipper + ' :'						ELSE NULL END
@@ -423,10 +476,18 @@ BEGIN TRY
 			,lblShipper								= CASE WHEN ISNULL(SQ.strShipper,'') <>''			   THEN @rtShipper + ' :'					    ELSE NULL END 
 			,lblDestinationPoint					= CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'   ELSE NULL END
 			,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN @rtWeighing + ' :'					ELSE NULL END
+			,lblAtlasWeighing						= CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN @rtWeighing							ELSE NULL END
+			,lblAtlasWeighingColon					= CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN ':'									ELSE NULL END
 			,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN @rtPaymentTerms + ' :'				ELSE NULL END
+			,lblAtlasTerm							= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN @rtPaymentTerms						ELSE NULL END
+			,lblAtlasTermColon						= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN ':'									ELSE NULL END
 			,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN @rtApprovalterm + ' :'				ELSE NULL END
+			,lblAtlasGrade							= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN @rtApprovalterm						ELSE NULL END
+			,lblAtlasGradeColon						= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN ':'									ELSE NULL END
 			,lblInsurance							= CASE WHEN ISNULL(IB.strInsuranceBy,'') <>''		   THEN @rtInsurance + ':'					ELSE NULL END
 			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions + ':'					ELSE NULL END
+			,lblAtlasContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions				ELSE NULL END
+			,lblAtlasContractConditionColon					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN ':'					ELSE NULL END
 			--,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
 			,strLocationWithDate					= SQ.strLocationName+', '+DATENAME(dd,CH.dtmContractDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + DATENAME(yyyy,CH.dtmContractDate)
 			,strContractText						= ISNULL(TX.strText,'') 
@@ -447,6 +508,8 @@ BEGIN TRY
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
 			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing + ' :'		ELSE NULL END
+			,lblAtlasPricing						= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing ELSE NULL END
+			,lblAtlasPricingColon					= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN ':' ELSE NULL END
 			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s '+@rtCall+' ('+SQ.strFutMarketName+')' 
 			,strHersheyCaller						= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s '+@rtCall
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtBuyerRefNo + '. :'  ELSE NULL END

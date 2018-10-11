@@ -63,13 +63,15 @@ BEGIN TRY
 	SELECT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
 			strPeriod				= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
+			strAtlasPeriod			= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' -   ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
 			strQunatity				= LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' ' + UM.strUnitMeasure,
+			strAtlasQunatity		= LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' - ' + UM.strUnitMeasure,
 			dblQuantity				= CD.dblQuantity,
 			strPrice				= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
 									  END,
-			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblCashPrice,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) END  + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-											WHEN 	CD.intPricingTypeId = 2	THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblBasis,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) END + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
+			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 4))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+											WHEN 	CD.intPricingTypeId = 2		 THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 4))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
 									  END,
 			strBeGreenPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure + ' ' + MO.strFutureMonth  	
 											WHEN 	CD.intPricingTypeId = 2		 THEN LTRIM(ABS(CAST(CD.dblBasis AS NUMERIC(18, 2)))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure + CASE WHEN CD.dblBasis < 0 THEN ' under ' ELSE ' over ' END + MO.strFutureMonth  	
