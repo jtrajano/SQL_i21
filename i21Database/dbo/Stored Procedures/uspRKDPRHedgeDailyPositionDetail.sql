@@ -274,7 +274,7 @@ SELECT ROW_NUMBER() OVER (
 		strLocationName,
 		FOT.dblContractSize,
 		FOT.strFutMarketName,
-		FOT.strFutureMonthYear AS strFutureMonth,
+		FOT.strFutureMonth AS strFutureMonth,
 		FOT.strOptionMonthYear AS strOptionMonth,
 		dblStrike,
 		strOptionType,
@@ -299,7 +299,7 @@ SELECT ROW_NUMBER() OVER (
 		strLocationName,
 		FOT.dblContractSize,
 		FOT.strFutMarketName,
-		FOT.strFutureMonthYear AS strFutureMonth,
+		FOT.strFutureMonth AS strFutureMonth,
 		FOT.strOptionMonthYear AS strOptionMonth,
 		dblStrike,
 		strOptionType,
@@ -324,7 +324,7 @@ SELECT ROW_NUMBER() OVER (
 		strLocationName,
 		FOT.dblContractSize,
 		FOT.strFutMarketName,
-		FOT.strFutureMonthYear AS strFutureMonth,
+		FOT.strFutureMonth AS strFutureMonth,
 		FOT.strOptionMonthYear AS strOptionMonth,
 		dblStrike,
 		strOptionType,
@@ -349,7 +349,7 @@ SELECT ROW_NUMBER() OVER (
 		strLocationName,
 		FOT.dblContractSize,
 		FOT.strFutMarketName,
-		FOT.strFutureMonthYear AS strFutureMonth,
+		FOT.strFutureMonth AS strFutureMonth,
 		FOT.strOptionMonthYear AS strOptionMonth,
 		dblStrike,
 		strOptionType,
@@ -522,7 +522,7 @@ FROM vyuRKGetInventoryValuation s
 	LEFT JOIN tblSCTicket t on s.intSourceId=t.intTicketId		   		  
 WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
 			--and isnull(t.strDistributionOption,'') <> 'DP' and isnull(strTicketStatus,'') <> 'V'
-				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -708,8 +708,8 @@ BEGIN
 			GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId,strCurrency
 	
 	--Net Hedge Derivative Entry (Futures and Options)
-    INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
-    SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName 
+    INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intFutOptTransactionHeaderId,strInternalTradeNo)
+    SELECT strCommodityCode,'Price Risk',strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intFutOptTransactionHeaderId,strInternalTradeNo 
     FROM @tempFinal
     WHERE intCommodityId=@intCommodityId 
         AND strType = 'Net Hedge' AND @ysnExchangeTraded = 1
@@ -728,7 +728,7 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 	WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V'
 	AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate))t 
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate))t 
 	WHERE  intCompanyLocationId  IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -786,7 +786,7 @@ BEGIN
 	INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
 	WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 	AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 	and ISNULL(inv.ysnPosted,0) = 0
 	AND @ysnExchangeTraded = 1
 	and cl.intCompanyLocationId IN (

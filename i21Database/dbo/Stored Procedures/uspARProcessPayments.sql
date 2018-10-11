@@ -294,7 +294,7 @@ BEGIN
 				,@GroupingOption	= @GroupingOption
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	

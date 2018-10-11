@@ -69,7 +69,7 @@ SELECT
 	 [intItemId]					= ARID.[intItemId]  
 	,[intItemLocationId]			= IST.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ARI.[dtmShipDate]
+	,[dtmDate]					= ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
 	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @Post = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]					= ItemUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
@@ -113,7 +113,7 @@ FROM
 		[intStorageLocationId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId], [intStorageScheduleTypeId]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
-	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [dtmShipDate], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [intCompanyLocationId],
+	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [dtmShipDate], [dtmPostDate], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [intCompanyLocationId],
 		[strImportFormat], [ysnImpactInventory], [intPeriodsToAccrue], [intLoadId]
 	 FROM @Invoices) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL([intPeriodsToAccrue],0) <= 1 

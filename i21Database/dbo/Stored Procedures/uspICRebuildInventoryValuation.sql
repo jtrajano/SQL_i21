@@ -471,6 +471,9 @@ BEGIN
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 	)
 
+	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [intItemId] ASC);
+
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
 		--PRINT 'Rebuilding stock as periodic.'
@@ -858,7 +861,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId
+			--PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
 			
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -871,6 +874,8 @@ BEGIN
 			-- Setup the contra-gl account to use. 
 			SET @strAccountToCounterInventory = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
+									'Inventory Adjustment'
+								WHEN @strTransactionForm IN ('Inventory Count') THEN 
 									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
@@ -889,7 +894,7 @@ BEGIN
 								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement') THEN 
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Storage Measurement Reading' THEN
-									'Inventory Adjustment'																								
+									'Inventory Adjustment'
 								ELSE 
 									NULL 
 						END
@@ -1030,6 +1035,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1109,6 +1115,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1121,6 +1128,15 @@ BEGIN
 			-- Repost 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer'))
 			BEGIN 
+				DECLARE @ysnTransferOnSameLocation AS BIT
+				SET @ysnTransferOnSameLocation = 0 
+				
+				SELECT	@ysnTransferOnSameLocation = 1 
+				FROM	tblICInventoryTransfer 
+				WHERE	intInventoryTransferId = @intTransactionId 
+						AND strTransferNo = @strTransactionId 
+						AND intFromLocationId <> intToLocationId
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -1186,6 +1202,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
+					,@ysnTransferOnSameLocation
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1255,18 +1273,14 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
+					,@ysnTransferOnSameLocation
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
 				-- Create the GL entries if transfer is between company locations. 
 				-- Do not create the GL entries if transfer if within the same company location. 
-				IF EXISTS (
-					SELECT	TOP 1 1 
-					FROM	tblICInventoryTransfer 
-					WHERE	intInventoryTransferId = @intTransactionId 
-							AND strTransferNo = @strTransactionId 
-							AND intFromLocationId <> intToLocationId
-				)
+				IF @ysnTransferOnSameLocation = 0 
 				BEGIN 
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
@@ -1309,7 +1323,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -1427,6 +1442,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 				END 
@@ -1771,6 +1787,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 				END
 			END
 			
@@ -1785,7 +1802,7 @@ BEGIN
 						SELECT	TOP 1 1
 						FROM	tblICBackupDetailInventoryTransaction b
 						WHERE	b.intBackupId = @intBackupId 
-								AND b.intItemId = @intItemId
+								AND b.intItemId = ISNULL(@intItemId, b.intItemId) 
 								AND b.strTransactionId = @strTransactionId
 								AND b.intInTransitSourceLocationId IS NOT NULL 
 								AND b.ysnIsUnposted = 0 
@@ -1888,6 +1905,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1933,6 +1951,7 @@ BEGIN
 					,@strGLDescription
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId 
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -2043,6 +2062,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@intItemId
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2159,6 +2179,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -2313,58 +2334,63 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
 
-				EXEC @intReturnValue = dbo.uspICRepostCosting
-					@strBatchId
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,@ItemsToPost
+				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN 
+					EXEC @intReturnValue = dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,@ItemsToPost
+						,@strTransactionId
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+				
 
-				SET @intReturnValue = NULL 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]					
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm] 
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]
-						,[dblDebitReport]
-						,[dblCreditForeign]
-						,[dblCreditReport]
-						,[dblReportingRate]
-						,[dblForeignRate]
-						,[strRateType]
-				)			
-				EXEC @intReturnValue = dbo.uspICCreateGLEntries
-					@strBatchId 
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,NULL 
-					,@intItemId -- This is only used when rebuilding the stocks. 
-					,@strTransactionId -- This is only used when rebuilding the stocks. 
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnValue = dbo.uspICCreateGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId -- This is only used when rebuilding the stocks. 
+						,@strTransactionId -- This is only used when rebuilding the stocks. 
+				END
 						
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -2392,15 +2418,15 @@ BEGIN
 						,[intSourceTransactionId] 
 						,[strSourceTransactionId] 
 						,[intSourceTransactionDetailId] 
-						,[intFobPointId] 
-						,[intInTransitSourceLocationId]
+						--,[intFobPointId] 
+						,[intInTransitSourceLocationId]				
 				)
 				SELECT
 						[intItemId]					= t.intItemId
 						,[intItemLocationId]		= t.intItemLocationId
 						,[intItemUOMId]				= t.intItemUOMId
 						,[dtmDate]					= i.dtmShipDate
-						,[dblQty]					= -t.dblQty
+						,[dblQty]					= t.dblQty
 						,[dblUOMQty]				= t.dblUOMQty
 						,[dblCost]					= t.dblCost
 						,[dblValue]					= 0
@@ -2412,24 +2438,27 @@ BEGIN
 						,[strTransactionId]			= i.strInvoiceNumber
 						,[intTransactionTypeId]		= @intTransactionTypeId
 						,[intLotId]					= t.intLotId
-						,[intSourceTransactionId]	= t.intTransactionId
-						,[strSourceTransactionId]		= t.strTransactionId
-						,[intSourceTransactionDetailId] = t.intTransactionDetailId
-						,[intFobPointId]				= t.intFobPointId
+						,[intSourceTransactionId]	= s.intInventoryShipmentId
+						,[strSourceTransactionId]		= s.strShipmentNumber 
+						,[intSourceTransactionDetailId] = si.intInventoryShipmentItemId
+						--,[intFobPointId]				= t.intFobPointId
 						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-					FROM	
+				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
-						INNER JOIN tblICInventoryShipmentItem si 
-							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
-						INNER JOIN tblICInventoryTransaction t
-							ON t.intTransactionId = si.intInventoryShipmentId
-							AND t.intTransactionDetailId = si.intInventoryShipmentItemId
-							AND t.strTransactionId = t.strTransactionId
+						INNER JOIN #tmpICInventoryTransaction t
+							ON t.intTransactionId = i.intInvoiceId
+							AND t.intTransactionDetailId = id.intInvoiceDetailId 
+							AND t.strTransactionId = i.strInvoiceNumber 
 							AND t.ysnIsUnposted = 0 
-							AND t.dblQty > 0 
-				WHERE	--t.intFobPointId = @FOB_DESTINATION
-						i.strInvoiceNumber = @strTransactionId
+						INNER JOIN (
+							tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+								ON s.intInventoryShipmentId = si.intInventoryShipmentId
+						)
+							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
+							AND s.ysnPosted = 1
+
+				WHERE	i.strInvoiceNumber = @strTransactionId
 						AND t.intInTransitSourceLocationId IS NOT NULL 
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
@@ -2682,6 +2711,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 				END 
 				ELSE IF @strTransactionType = 'Inventory Return'
 				BEGIN 
@@ -2763,7 +2793,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId-- This is only used when rebuilding the stocks.
+						,@strTransactionId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2814,7 +2845,8 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId -- This is only used when rebuilding the stocks. 								
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2907,6 +2939,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 			END
 
 			-- Repost 'Outbound Shipment'
@@ -2978,6 +3011,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -3023,6 +3057,7 @@ BEGIN
 					,@strGLDescription
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId 
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3131,6 +3166,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@intItemId
+					,@strTransactionId 
 
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3290,6 +3326,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END 
@@ -3350,7 +3387,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,NULL 
-					,@intItemId-- This is only used when rebuilding the stocks. 								
+					,@intItemId-- This is only used when rebuilding the stocks.
+					,@strTransactionId 
 
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3473,7 +3511,7 @@ BEGIN
 		UPDATE	t
 		SET		t.dtmCreated = t_CreatedDate.dtmCreated
 		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransaction_BackupCreatedDate t_CreatedDate
-					ON t.strBatchId = t_CreatedDate.strBatchId				
+					ON t.strBatchId = t_CreatedDate.strBatchId
 	END 
 END 
 

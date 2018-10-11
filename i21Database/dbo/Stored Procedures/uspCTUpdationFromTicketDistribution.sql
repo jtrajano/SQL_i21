@@ -38,7 +38,18 @@ BEGIN TRY
 			@intCommodityId			INT,
 			@strSeqMonth			NVARCHAR(50),
 			@UseScheduleForAvlCalc	BIT = 1,
-			@dblScheduleQty			INT
+			@dblScheduleQty			INT,
+			@dblInreaseSchBy		NUMERIC(18,6)
+	
+	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
+					LTRIM(@intTicketId) +',' + 
+					LTRIM(@intEntityId) +',' +
+					LTRIM(ISNULL(@dblNetUnits,0)) +',' +
+					LTRIM(ISNULL(@intContractDetailId,0)) +',' +
+					LTRIM(ISNULL(@intUserId,0)) +',' +			
+					LTRIM(ISNULL(@ysnDP,0)) +',' +				
+					LTRIM(ISNULL(@ysnDeliverySheet,0))	
+	PRINT(@ErrMsg)
 
 	DECLARE @Processed TABLE
 	(
@@ -257,7 +268,7 @@ BEGIN TRY
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
 			IF @UseScheduleForAvlCalc = 0 AND  @dblScheduleQty < @dblNetUnits
 			BEGIN
-				DECLARE @dblInreaseSchBy NUMERIC(18,6) = @dblNetUnits - @dblScheduleQty
+				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
 				EXEC	uspCTUpdateScheduleQuantity 
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblInreaseSchBy,
@@ -272,9 +283,34 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
+			IF @UseScheduleForAvlCalc = 0
+			BEGIN
+				SET		@dblInreaseSchBy  = @dblNetUnits - @dblAvailable
 
-			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
+				EXEC	uspCTUpdateSequenceQuantity 
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblInreaseSchBy,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intTicketId,
+						@strScreenName			=	'Scale'
+
+				EXEC	uspCTUpdateScheduleQuantity 
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblInreaseSchBy,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intTicketId,
+						@strScreenName			=	'Auto - Scale'
+
+				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
+				SELECT	@dblNetUnits = 0
+				BREAK
+			END		
+			ELSE
+			BEGIN
+				INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
+			
+				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
+			END
 		END
 		
 		CONTINUEISH:
@@ -315,6 +351,14 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	
+	IF(		SELECT	MAX(dblUnitsRemaining) 
+			FROM	@Processed	PR
+			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0
+	BEGIN
+		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
+	END
+
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,
 			PR.dblUnitsRemaining,

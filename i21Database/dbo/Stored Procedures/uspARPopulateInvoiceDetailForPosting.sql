@@ -200,7 +200,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARC.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARC.[ysnActive]
@@ -538,7 +538,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARC.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARC.[ysnActive]
@@ -862,7 +862,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARC.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARC.[ysnActive]
@@ -1185,7 +1185,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARI.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARI.[ysnCustomerActive]
@@ -1528,7 +1528,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARI.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARI.[ysnCustomerActive]
@@ -1921,7 +1921,7 @@ SELECT
     ,[strType]                          = ARI.[strType]
     ,[dtmDate]                          = ARI.[dtmDate]
     ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ARI.[dtmShipDate]
+    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
     ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARI.[strCustomerNumber]
     ,[ysnCustomerActive]                = ARI.[ysnCustomerActive]

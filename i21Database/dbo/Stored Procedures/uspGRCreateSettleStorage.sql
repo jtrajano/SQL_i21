@@ -354,7 +354,7 @@ BEGIN TRY
 		WHERE intSettleVoucherKey = @intSettleVoucherKey
 
 		SELECT @dblDiscountUnpaid = dblDiscountUnPaid
-		FROM vyuGRGetStorageTransferTicket
+		FROM vyuGRGetStorageTickets
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
 		IF @strOrderType = 'Direct'

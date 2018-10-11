@@ -506,7 +506,7 @@ SET dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTo
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityCustomerId
-        , dblTotalPayment = ABS(SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END))
+        , dblTotalPayment = SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END)
     FROM dbo.#ARPostPaymentHeader P WITH (NOLOCK)
     LEFT JOIN (
         SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
@@ -573,6 +573,20 @@ FROM
 	#ARPostPaymentHeader
 
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @IPaymentLog
+
+--Insert Successfully unposted/posted transactions.
+IF ISNULL(@IntegrationLogId, 0) = 0
+    BEGIN
+        INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+        SELECT DISTINCT
+            CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
+            ,'Receive Payment'
+            ,[strTransactionId]
+            ,@BatchId
+            ,[intTransactionId]
+        FROM
+            #ARPostPaymentHeader
+    END
 
 --Call integration 
 			

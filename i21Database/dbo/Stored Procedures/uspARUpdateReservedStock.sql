@@ -79,7 +79,56 @@ BEGIN
 				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
-		
+	Union ALL
+	SELECT
+		 [intItemId]			= ICGIS.[intComponentItemId]
+		,[intItemLocationId]	= ICGIS.[intItemLocationId]
+		,[intItemUOMId]			= ICGIS.[intStockUOMId]
+		,[intLotId]				= NULL
+		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
+		,[intStorageLocationId]	= ARID.[intStorageLocationId]
+		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0) * isnull(ICGIS.dblComponentConvFactor,1) *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+		,[intTransactionId]		= @InvoiceId
+		,[strTransactionId]		= ARI.[strInvoiceNumber]
+		,[intTransactionTypeId]	= @TransactionTypeId
+		,[intOwnershipTypeId]	= @Ownership_Own
+	FROM 
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId]
+		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+	INNER JOIN
+		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
+			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN
+		(SELECT [intItemId], [strType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
+			ON ARID.[intItemId] = ICI.[intItemId]
+	INNER JOIN
+		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
+			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
+	LEFT OUTER JOIN
+		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
+			ON ARID.[intItemId] = ICGIS.[intBundleItemId] 
+			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
+	WHERE 
+		ISNULL(@FromPosting, 0 ) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 0
+		AND ARI.[intInvoiceId] = @InvoiceId
+		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
+		AND ARI.strType NOT IN ('Transport Delivery')
+		AND ARID.[intInventoryShipmentItemId] IS NULL
+		AND ARID.[intLoadDetailId] IS NULL
+		AND ARID.[intLotId] IS NULL
+		AND (
+				(
+					ICI.[strType] <> 'Finished Good'
+					OR
+					(ICI.[strType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+				)
+			OR 
+				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				
+			)
+		and ICGIS.[intComponentItemId] is not null
+
 
 	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
 	IF (ISNULL(@FromPosting, 0 ) = 0)
@@ -112,7 +161,8 @@ BEGIN
 	END
 
 	IF ISNULL(@FromPosting, 0 ) = 1
-		AND EXISTS	(
+		AND (
+				EXISTS	(
 					SELECT NULL 
 					FROM
 						tblARInvoice ARI
@@ -128,6 +178,26 @@ BEGIN
 						ARI.[intInvoiceId] = @InvoiceId
 						AND ICSR.[ysnPosted] = 0
 					)
+				OR
+				EXISTS(
+					SELECT NULL 
+					FROM
+						tblARInvoice ARI
+					INNER JOIN
+						tblARInvoiceDetail ARID
+							ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+					JOIN tblICItemBundle BDL
+						ON BDL.intItemId = ARID.intItemId
+					INNER JOIN
+						tblICStockReservation ICSR
+							ON ARI.[intInvoiceId] = ICSR.[intTransactionId] 
+							AND ARI.[strInvoiceNumber] = ICSR.[strTransactionId]
+							AND BDL.[intBundleItemId] = ICSR.[intItemId]
+					WHERE
+						ARI.[intInvoiceId] = @InvoiceId
+						AND ICSR.[ysnPosted] = 0
+				)
+			)
 		EXEC [dbo].[uspICPostStockReservation]
 			 @intTransactionId		= @InvoiceId
 			,@intTransactionTypeId	= @TransactionTypeId

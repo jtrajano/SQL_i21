@@ -242,6 +242,7 @@ BEGIN
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -356,7 +357,7 @@ BEGIN
 		,[intTermId]						= IE.[intTermId]
 		,[dtmDate]							= CAST(ISNULL(IE.[dtmDate], @DateNow) AS DATE)
 		,[dtmDueDate]						= IE.[dtmDueDate]
-		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], @DateNow) AS DATE)
+		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], IE.[dtmPostDate]) AS DATE)
 		,[dtmPostDate]						= IE.[dtmPostDate]
 		,[intEntitySalespersonId]			= IE.[intEntitySalespersonId]
 		,[intFreightTermId]					= IE.[intFreightTermId]
@@ -374,6 +375,7 @@ BEGIN
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
 		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+        ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]
 		,[intLoadDistributionHeaderId]		= IE.[intLoadDistributionHeaderId]
@@ -493,7 +495,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	
@@ -579,6 +581,7 @@ BEGIN
 			,[ysnCalculated]
 			,[ysnSplitted]
 			,[ysnImpactInventory]
+            ,[ysnFromProvisional]
 			,[intPaymentId]
 			,[intSplitId]
 			,[intLoadDistributionHeaderId]
@@ -718,6 +721,7 @@ BEGIN
 			,[ysnCalculated]						= ARI.[ysnCalculated]
 			,[ysnSplitted]							= ARI.[ysnSplitted]
 			,[ysnImpactInventory]					= ARI.[ysnImpactInventory]
+            ,[ysnFromProvisional]                   = ARI.[ysnFromProvisional]
 			,[intPaymentId]							= ARI.[intPaymentId]
 			,[intSplitId]							= ARI.[intSplitId]
 			,[intLoadDistributionHeaderId]			= ARI.[intLoadDistributionHeaderId]
@@ -874,6 +878,7 @@ BEGIN
 				,[ysnCalculated]
 				,[ysnSplitted]
 				,[ysnImpactInventory]
+                ,[ysnFromProvisional]
 				,[intPaymentId]
 				,[intSplitId]
 				,[intLoadDistributionHeaderId]
@@ -1188,6 +1193,7 @@ BEGIN
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+        ,[ysnFromProvisional]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -1321,6 +1327,7 @@ BEGIN
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
 		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+        ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]
 		,[intLoadDistributionHeaderId]		= IE.[intLoadDistributionHeaderId]
@@ -1450,7 +1457,7 @@ BEGIN
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
-				,@ErrorMessage		= @CurrentErrorMessage
+				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
 				,@SkipRecompute     = 1
 			
 	

@@ -55,7 +55,10 @@ BEGIN TRY
 	FROM tblMFLotInventory LI
 	JOIN tblICInventoryReceiptItemLot RL ON RL.intLotId = LI.intLotId
 	JOIN tblICLot L ON L.intLotId = RL.intLotId
-	WHERE L.strLotNumber = @strLotNumber
+	WHERE L.intLotId IN (
+			SELECT x.Item COLLATE DATABASE_DEFAULT
+			FROM dbo.fnSplitString(@strLotNumber, '^') x
+			)
 END TRY
 
 BEGIN CATCH

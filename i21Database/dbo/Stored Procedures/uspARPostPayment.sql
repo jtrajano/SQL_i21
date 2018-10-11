@@ -799,6 +799,12 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         ,@UserId				= @userId
         ,@IntegrationLogId		= NULL
 
+	SELECT @successfulCount = COUNT(*) 
+	FROM tblARPostResult 
+	WHERE strBatchNumber = @batchId 
+	  AND strTransactionType = 'Receive Payment'
+	  AND strMessage IN ('Transaction successfully posted.', 'Transaction successfully unposted.')
+
 END TRY
 BEGIN CATCH
     SELECT @ErrorMerssage = ERROR_MESSAGE()

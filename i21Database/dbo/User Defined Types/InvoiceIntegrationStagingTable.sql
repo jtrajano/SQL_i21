@@ -98,6 +98,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted]					BIT												NULL
+	,[ysnFromProvisional]					BIT												NULL
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)

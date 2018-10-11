@@ -44,8 +44,7 @@ END
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
 										, @strCompanyLocation 			= @strCompanyLocation
 										, @intEntityUserId 				= @intEntityUserId										
-										, @ysnIncludeCredits 			= @ysnPrintCreditBalanceLocal
-                                        , @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffLocal
+										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
@@ -79,7 +78,8 @@ OUTER APPLY (
 		AND ISNULL(CC.strEmail, '') <> '' 
 		AND CC.strEmailDistributionOption LIKE '%Statements%'
 ) EMAILSETUP
-WHERE  ( @ysnPrintZeroBalance = 1 or ( @ysnPrintZeroBalance = 0 and ISNULL(AGING.dblTotalAR, 0) <> 0 ) )
+WHERE (@ysnPrintZeroBalance = 1 OR (@ysnPrintZeroBalance = 0 and ISNULL(AGING.dblTotalAR, 0) <> 0 ))
+AND (@ysnPrintCreditBalanceLocal = 1 OR (@ysnPrintCreditBalanceLocal = 0 AND ISNULL(AGING.dblTotalAR, 0) > 0))
 AND AGING.intEntityUserId = @intEntityUserId
 AND AGING.strAgingType = 'Summary'
 

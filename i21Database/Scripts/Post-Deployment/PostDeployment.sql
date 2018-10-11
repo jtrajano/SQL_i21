@@ -247,6 +247,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
+:r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 
 --Accounts Payable
@@ -344,6 +345,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\1_MasterTables.sql
 :R .\GR\TicketTypes.sql
 :R .\GR\GRDataMigrations.sql
+:R .\GR\InsertStorageHistoryTypeTransaction.sql
+:R .\GR\FixStorageHistoryData.sql
+:R .\GR\MigrateTransferStorageData.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

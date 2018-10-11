@@ -16,7 +16,8 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 		,@jsonData NVARCHAR(MAX)
 
 
-DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
+DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
+		,@storageHistoryData			AS StorageHistoryStagingTable
 		,@currencyDecimal				INT
 		,@intEntityId					INT
 		,@intCustomerStorageId			INT
@@ -39,7 +40,10 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@dblAdjustByQuantity			NUMERIC (38,20)
 		,@dblFinalQuantity				NUMERIC (38,20)
 		,@strTransactionId				NVARCHAR(100)
-		,@intOwnershipType				INT;
+		,@intOwnershipType				INT
+		,@strFreightCostMethod			NVARCHAR(40)
+		,@strFeesCostMethod				NVARCHAR(40)
+		,@dblTempAdjustByQuantity		NUMERIC (38,20);
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -104,7 +108,7 @@ BEGIN TRY
 		ELSE
 			SET @dblFinalSplitQty = @dblTempSplitQty
 
-		SELECT @intCustomerStorageId = intCustomerStorageId FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+		SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
 
 		UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -176,35 +180,89 @@ BEGIN TRY
 			,@intOwnershipType
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
-		EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
-			@intItemId
-			,@dtmDate
-			,@intLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@strLotNumber
-			,@intOwnershipType
-			,@dblAdjustByQuantity 
-			,0
-			,@intItemUOMId
-			,@intDeliverySheetId --delivery sheet id
-			,53 --Delivery Sheet inventory transaction id
-			,@intUserId
-			,@intInventoryAdjustmentId OUTPUT
-			,'Delivery Sheet Posting'
+		IF ISNULL(@dblAdjustByQuantity,0) != 0
+		BEGIN
+			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
+				@intItemId
+				,@dtmDate
+				,@intLocationId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@strLotNumber
+				,@intOwnershipType
+				,@dblAdjustByQuantity 
+				,0
+				,@intItemUOMId
+				,@intDeliverySheetId --delivery sheet id
+				,53 --Delivery Sheet inventory transaction id
+				,@intUserId
+				,@intInventoryAdjustmentId OUTPUT
+				,'Delivery Sheet Posting'
 		
-		SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+			SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
-		SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
-		EXEC dbo.uspSMAuditLog 
-		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
-		,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
-		,@entityId			= @intUserId						-- Entity Id.
-		,@actionType		= 'Post'							-- Action Type
-		,@changeDescription	= @strTransactionId					-- Description
-		,@fromValue			= @dblOrigQuantity					-- Old Value
-		,@toValue			= @dblFinalQuantity					-- New Value
-		,@details			= '';
+			SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
+			EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
+			,@entityId			= @intUserId						-- Entity Id.
+			,@actionType		= 'Post'							-- Action Type
+			,@changeDescription	= @strTransactionId					-- Description
+			,@fromValue			= @dblOrigQuantity					-- Old Value
+			,@toValue			= @dblFinalQuantity					-- New Value
+			,@details			= '';
+			SET @dblTempSplitQty = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
+			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
+			DELETE FROM @storageHistoryData
+
+			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent FROM @splitTable
+			OPEN splitCursor;  
+			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;  
+			WHILE @@FETCH_STATUS = 0  
+			BEGIN
+				SET @dblFinalSplitQty = ROUND((@dblTempAdjustByQuantity * @dblSplitPercent) / 100, @currencyDecimal);
+				IF @dblTempSplitQty > @dblFinalSplitQty
+					SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+				ELSE
+					SET @dblFinalSplitQty = @dblTempSplitQty
+
+					INSERT INTO @storageHistoryData
+					(
+						[intCustomerStorageId]
+						,[intTicketId]
+						,[intDeliverySheetId]
+						,[intInventoryAdjustmentId]
+						,[dblUnits]
+						,[dtmHistoryDate]
+						,[dblCurrencyRate]
+						,[strPaidDescription]
+						,[intTransactionTypeId]
+						,[intUserId]
+						,[strType]
+						,[ysnPost]
+					)
+					SELECT 	[intCustomerStorageId]				= GR.intCustomerStorageId				
+							,[intTicketId]						= NULL
+							,[intDeliverySheetId]				= GR.intDeliverySheetId
+							,[intInventoryAdjustmentId]			= @intInventoryAdjustmentId
+							,[dblUnits]							= (@dblFinalSplitQty * -1)
+							,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GR.dtmDeliveryDate)
+							,[dblCurrencyRate]					= 1
+							,[strPaidDescription]				= @strTransactionId
+							,[intTransactionTypeId]				= 9
+							,[intUserId]						= @intUserId
+							,[strType]							= 'From Inventory Adjustment'
+							,[ysnPost]							= 1
+					FROM tblGRCustomerStorage GR
+					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
+
+				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;
+			END
+			CLOSE splitCursor;  
+			DEALLOCATE splitCursor;
+			
+			EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
+		END
 
 		FETCH NEXT FROM ticketCursor INTO @intItemId
 			,@dtmDate
@@ -258,15 +316,29 @@ BEGIN TRY
 	INNER JOIN tblGRCustomerStorage GR ON GR.intDeliverySheetId = SD.intTicketFileId
 	WHERE SD.intTicketFileId = @intDeliverySheetId 
 	AND SD.strSourceType = 'Delivery Sheet'
-		
+	
+	SELECT TOP 1 @strFeesCostMethod = ICFee.strCostMethod, @strFreightCostMethod = SC.strCostMethod 
+	FROM tblSCTicket SC
+	INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
 	UPDATE CS
 	SET  CS.dblDiscountsDue=QM.dblDiscountsDue
 		,CS.dblDiscountsPaid=QM.dblDiscountsPaid
+		,CS.dblFeesDue=SC.dblFeesPerUnit
+		,CS.dblFreightDueRate=SC.dblFreightPerUnit
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
 		SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' AND strDiscountChargeType = 'Dollar'
 	) QM
-	WHERE CS.intCustomerStorageId = @intCustomerStorageId
+	OUTER APPLY (
+		SELECT 
+		CASE WHEN @strFeesCostMethod = 'Amount' THEN (SUM(dblTicketFees)/@dblNetUnits) ELSE SUM(dblTicketFees) END AS dblFeesPerUnit
+		,CASE WHEN @strFreightCostMethod = 'Amount' THEN (SUM(dblFreightRate)/@dblNetUnits) ELSE SUM(dblFreightRate) END AS dblFreightPerUnit
+		FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
+	) SC
+	WHERE CS.intDeliverySheetId = @intDeliverySheetId
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
 

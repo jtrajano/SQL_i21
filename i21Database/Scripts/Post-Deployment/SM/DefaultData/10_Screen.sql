@@ -266,19 +266,20 @@ GO
 	UPDATE tblSMScreen SET strNamespace = 'ContractManagement.view.Amendments' WHERE strNamespace IN ('ContractManagement.view.ContractAmendments', 'ContractManagement.view.ContractAmendment')
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Contract', N'Contract Amendment ', N'ContractManagement.view.Amendments', N'Contract Management', N'tblCTContractHeader',  1,  1,  0, 'Contract Management')
-		END
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Contract', N'Amendment and Approvals ', N'ContractManagement.view.Amendments', N'Contract Management', N'tblCTContractHeader',  1,  1,  0, 'Contract Management')
+	END
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET strTableName = 'tblCTContractHeader',
-				ysnApproval = 1,
-				ysnActivity = 1,
-				strGroupName = N'Contract Management'
-			WHERE strNamespace = 'ContractManagement.view.Amendments'
-		END
+	BEGIN
+		UPDATE tblSMScreen
+		SET strScreenName = 'Amendment and Approvals',
+			strTableName = 'tblCTContractHeader',
+			ysnApproval = 1,
+			ysnActivity = 1,
+			strGroupName = N'Contract Management'
+		WHERE strNamespace = 'ContractManagement.view.Amendments'
+	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
     BEGIN
@@ -980,6 +981,10 @@ GO
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Sales Reps', N'Sales Reps', N'AccountsReceivable.view.EntitySalesperson', N'Accounts Receivable', N'tblARSalesperson', 1, N'Accounts Receivable')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET  [strScreenName] = 'Sales Reps', [strModule] = 'Accounts Receivable' WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson'
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor') 

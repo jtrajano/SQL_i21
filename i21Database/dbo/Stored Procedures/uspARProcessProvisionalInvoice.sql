@@ -122,6 +122,7 @@ BEGIN TRY
 		,[intEntityId]
 		,[ysnResetDetails]
 		,[ysnPost]
+		,[ysnFromProvisional]
 		,[intInvoiceDetailId]
 		,[intItemId]
 		,[ysnInventory]
@@ -218,6 +219,7 @@ BEGIN TRY
 		,[intEntityId]						= @UserEntityId
 		,[ysnResetDetails]					= 1
 		,[ysnPost]							= NULL
+		,[ysnFromProvisional]               = 1
 	
 		,[intInvoiceDetailId]				= NULL 
 		,[intItemId]						= ARSID.[intItemId] 
@@ -333,6 +335,7 @@ SELECT
 		,[intEntityId]						= @UserEntityId
 		,[ysnResetDetails]					= 1
 		,[ysnPost]							= NULL
+		,[ysnFromProvisional]               = 1
 	
 		,[intInvoiceDetailId]				= NULL 
 		,[intItemId]						= ISI.[intItemId] 
@@ -453,6 +456,8 @@ SELECT
 		,[intEntityId]						= @UserEntityId
 		,[ysnResetDetails]					= 1
 		,[ysnPost]							= NULL	
+		,[ysnFromProvisional]               = 1
+
 		,[intInvoiceDetailId]				= NULL 
 		,[intItemId]						= ARID.[intItemId] 
 		,[ysnInventory]						= 1

@@ -206,8 +206,9 @@ DECLARE  @Id									INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
-		,@ImportedFromOrigin						BIT
+		,@ImportedFromOrigin					BIT
 		,@ImportedAsPosted						BIT
+		,@FromProvisional						BIT
 		,@UpdateAvailableDiscount				BIT
 		,@ImportFormat							NVARCHAR(50)
 
@@ -341,7 +342,7 @@ BEGIN
 		,@TermId						= [intTermId]
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
 		,@DueDate						= [dtmDueDate]
-		,@ShipDate						= CAST(ISNULL([dtmShipDate], @DateNow) AS DATE)
+		,@ShipDate						= CAST(ISNULL([dtmShipDate], [dtmPostDate]) AS DATE)
 		,@CalculatedDate				= [dtmCalculated]
 		,@PostDate						= [dtmPostDate]
 		,@EntitySalespersonId			= [intEntitySalespersonId]
@@ -379,6 +380,7 @@ BEGIN
 		,@Post							= [ysnPost]
 		,@ImportedFromOrigin 			= ISNULL([ysnImportedFromOrigin],0)
 		,@ImportedAsPosted				= ISNULL([ysnImportedAsPosted],0)
+        ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ImportFormat					= [strImportFormat]
 
@@ -584,6 +586,7 @@ BEGIN
 			,@Posted						= @Post					
 			,@ImportedFromOrigin			= @ImportedFromOrigin 	
 			,@ImportedAsPosted   			= @ImportedAsPosted		
+			,@FromProvisional   			= @FromProvisional		
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
@@ -1430,7 +1433,7 @@ BEGIN TRY
 			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
-			,[dtmShipDate]				= @ShipDate
+			,[dtmShipDate]				= ISNULL(@ShipDate, @PostDate)
 			,[dtmCalculated]			= @CalculatedDate
 			,[dtmPostDate]				= @PostDate
 			,[dblInvoiceSubtotal]		= @ZeroDecimal

@@ -44,12 +44,19 @@ DECLARE @InventoryReceiptId				INT
 		,@intLocationId					INT	
 		,@intSubLocationId				INT	
 		,@newBalance					NUMERIC (38,20)
-		,@dblQuantity					NUMERIC (38,20);
+		,@dblQuantity					NUMERIC (38,20)
+		,@strFreightCostMethod			NVARCHAR(40)
+		,@strFeesCostMethod				NVARCHAR(40);
 
 BEGIN TRY
 		SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 		IF @strInOutFlag = 'I'
 			BEGIN
+				SELECT TOP 1 @strFeesCostMethod = ICFee.strCostMethod, @strFreightCostMethod = SC.strCostMethod  FROM tblSCTicket SC
+				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+				LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId
+				WHERE intDeliverySheetId = @intDeliverySheetId
+
 				SELECT @dblQuantity = dblGross, @dblTempSplitQty = dblGross FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
 				DECLARE ticketCursor CURSOR FOR
 				select strAdjustmentNo, intInventoryAdjustmentId from tblICInventoryAdjustment where intSourceId = @intDeliverySheetId and strDescription = 'Delivery Sheet Posting'
@@ -72,7 +79,7 @@ BEGIN TRY
 						,@toValue			= '0'								-- New Value
 						,@details			= '';
 
-
+					DELETE FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -216,6 +223,16 @@ BEGIN TRY
 				END
 				CLOSE intListCursor  
 				DEALLOCATE intListCursor 
+
+				UPDATE CS SET CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit  
+				FROM tblGRCustomerStorage CS
+				OUTER APPLY (
+					SELECT 
+						CASE WHEN @strFeesCostMethod = 'Amount' THEN (SUM(dblTicketFees)/@dblQuantity) ELSE SUM(dblTicketFees) END AS dblFeesPerUnit
+						,CASE WHEN @strFreightCostMethod = 'Amount' THEN (SUM(dblFreightRate)/@dblQuantity) ELSE SUM(dblFreightRate) END AS dblFreightPerUnit
+					FROM tblSCTicket SC WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SC.strTicketStatus = 'C'
+				) SC
+				WHERE CS.intDeliverySheetId = @intDeliverySheetId
 				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
 			END
 		ELSE
