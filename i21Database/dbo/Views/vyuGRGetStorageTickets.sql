@@ -20,7 +20,8 @@ SELECT TOP 100 PERCENT
     ,strDPARecieptNumber				= ISNULL(CS.strDPARecieptNumber,'')
     ,dblOpenBalance						= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance)  
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
-    ,intContractHeaderId				= SC.intContractId
+    ,intContractHeaderId                = CH.intContractHeaderId
+    ,intContractDetailId				= SC.intContractId
     ,strContractNumber					= CH.strContractNumber   
     ,intTicketId						= ISNULL(SC.intTicketId,0)
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
@@ -32,7 +33,7 @@ SELECT TOP 100 PERCENT
 												WHEN CS.intTicketId IS NOT NULL THEN 1
 												ELSE 0
 											END AS BIT
-										) 
+										)
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -51,8 +52,10 @@ LEFT JOIN tblSMCompanyLocationSubLocation SLOC
     ON SLOC.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
 LEFT JOIN tblSCTicket SC
 	ON SC.intTicketId = CS.intTicketId
+LEFT JOIN tblCTContractDetail CD
+    ON CD.intContractDetailId = SC.intContractId  
 LEFT JOIN tblCTContractHeader CH 
-    ON CH.intContractHeaderId = SC.intContractId  
+    ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN tblSCDeliverySheet DS
