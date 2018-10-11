@@ -127,6 +127,7 @@ BEGIN
 				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
+		and ICGIS.[intComponentItemId] is not null
 
 
 	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
