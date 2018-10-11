@@ -83,7 +83,7 @@ BEGIN
 	SELECT
 		 [intItemId]			= ICGIS.[intComponentItemId]
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
-		,[intItemUOMId]			= ICGIS.[intComponentUOMId]
+		,[intItemUOMId]			= ICGIS.[intStockUOMId]
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
@@ -105,7 +105,7 @@ BEGIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 	LEFT OUTER JOIN
-		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
+		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intBundleItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 	WHERE 
