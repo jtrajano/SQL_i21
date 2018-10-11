@@ -23,6 +23,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 																											-- "Meter Billing"
 																											-- "Store"
 																											-- "Card Fueling"
+																											-- "Store Checkout"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
