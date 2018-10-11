@@ -639,7 +639,6 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[ysnImpactInventory]
-		,[strDeliverPickup]
 	)
 	SELECT 
 		0 AS intId
@@ -719,7 +718,6 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[ysnImpactInventory]					= IE.ysnImpactInventory
-		,[strDeliverPickup]						= IE.strDeliverPickup
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
