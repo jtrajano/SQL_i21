@@ -7124,6 +7124,7 @@
     <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
     <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureOptionMonthsNotInUse.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
