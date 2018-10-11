@@ -3,6 +3,7 @@
 	@NewDiscountId INT OUTPUT
 AS
 BEGIN
+BEGIN TRY
 
 	--------------------------
 	-- Generate New Discount Table --
@@ -32,6 +33,10 @@ BEGIN
 	BEGIN
 		SET @counter = 1
 		SET @NewstrDiscountIdWithCounter = @NewstrDiscountId + (CAST(@counter AS NVARCHAR(50)))
+		IF(LEN(@NewDiscountDescriptionWithCounter) >= 50)
+			BEGIN
+				RAISERROR('Discount Description cannot be more than 50 characters',16,1)
+			END
 		WHILE EXISTS(SELECT TOP 1 1 FROM tblGRDiscountId WHERE strDiscountId = @NewstrDiscountIdWithCounter)
 		BEGIN
 			SET @counter += 1
@@ -44,6 +49,10 @@ BEGIN
 	BEGIN
 		SET @counter = 1
 		SET @NewDiscountDescriptionWithCounter = @NewDiscountDescription + (CAST(@counter AS NVARCHAR(50)))
+		IF(LEN(@NewDiscountDescriptionWithCounter) >= 50)
+			BEGIN
+				RAISERROR('Discount Description cannot be more than 50 characters',16,1)
+			END
 		WHILE EXISTS(SELECT TOP 1 1 FROM tblGRDiscountId WHERE strDiscountDescription = @NewDiscountDescriptionWithCounter)
 		BEGIN
 			SET @counter += 1
@@ -137,5 +146,14 @@ BEGIN
 	-------------------------------------------------------------
 	---- End duplication of Discount Schedule --
 	-------------------------------------------------------------
+END TRY
+BEGIN CATCH
 
+	IF (ERROR_MESSAGE() IS NOT NULL)
+	BEGIN	
+		DECLARE @err VARCHAR(MAX)
+		SET @err  = ERROR_MESSAGE()
+		RAISERROR(@err,16,1)
+	END
+END CATCH
 END
