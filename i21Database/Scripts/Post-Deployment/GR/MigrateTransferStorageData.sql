@@ -31,7 +31,7 @@ GO
         [strTransferStorageTicket]
         , [intEntityId]
         , [intCompanyLocationId]
-        , [intStorageTypeId]
+        , [intStorageScheduleTypeId]
         , [intItemId]
         , [intItemUOMId]
         , [dblTotalUnits]
