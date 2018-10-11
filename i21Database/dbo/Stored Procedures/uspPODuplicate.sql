@@ -14,8 +14,10 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 	DECLARE @transCount int = @@TRANCOUNT;
+	DECLARE @newPOId INT;
+
 	IF @transCount = 0
-		BEGIN TRANSACTION
+	BEGIN TRANSACTION
 
 		DECLARE @generatedPurchaseRecordId nvarchar(50);
 		DECLARE @startingNumId int = (SELECT TOP 1
@@ -50,7 +52,7 @@ BEGIN TRY
 			SELECT *
 			FROM #tmpDuplicatePO
 
-		SET @poIdCreated = SCOPE_IDENTITY();
+		SET @newPOId = SCOPE_IDENTITY();
 
 		IF @intDuplicateType = 2 OR @intDuplicateType = 3
 		BEGIN
@@ -82,7 +84,7 @@ BEGIN TRY
 			--ALTER TABLE #tmpDuplicateBillDetail DROP COLUMN intBillDetailId
 
 			UPDATE A
-			SET A.intPurchaseId = @poIdCreated,
+			SET A.intPurchaseId = @newPOId,
 				A.dblQtyReceived = 0,
 				A.dblQtyOrdered =	(CASE
 										WHEN @intDuplicateType = 2 
@@ -222,12 +224,24 @@ BEGIN TRY
 				WHERE intPurchaseDetailId = @purchaseDetailId
 			END
 
-			EXEC uspPOUpdateOnOrder @poIdCreated,
+			EXEC uspPOUpdateOnOrder @newPOId,
 									0
-				
 		END
-			IF @transCount = 0
-			COMMIT TRANSACTION
+
+		SET @poIdCreated = @newPOId;
+		DECLARE @poDetailsId AS Id
+		INSERT INTO @poDetailsId
+		SELECT
+			A.intPurchaseDetailId
+		FROM tblPOPurchaseDetail A
+		WHERE A.intPurchaseId = @newPOId;
+		IF EXISTS(SELECT 1 FROM @poDetailsId)
+		BEGIN
+			EXEC uspPOUpdateVoucherPayable @poDetailIds = @poDetailsId
+		END
+	
+		IF @transCount = 0
+		COMMIT TRANSACTION
 
 END TRY
 
