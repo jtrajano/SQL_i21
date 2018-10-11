@@ -8,6 +8,30 @@ select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(0 AS NVARCHAR(10))
 from tblTFTaxCategory
 where intTaxAuthorityId = @TaxAuthorityId
 */
+PRINT ('Deploying ID Tax Category')
+
+DECLARE @TaxCategoryID AS TFTaxCategory
+
+INSERT INTO @TaxCategoryID(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Diesel Clear', intMasterId = 12147
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Gasoline', intMasterId = 12148
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Propane', intMasterId = 12149
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax LNG', intMasterId = 12150
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax CNG', intMasterId = 12151
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Aviation Gasoline', intMasterId = 12152
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Jet Fuel', intMasterId = 12153
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'ID', @TaxCategories = @TaxCategoryID
+
+DELETE @TaxCategoryID
+
+GO
+
 
 PRINT ('Deploying IL Tax Category')
 

@@ -7436,4 +7436,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\KY_Kentucky.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\ID_Idaho.sql" />
+  </ItemGroup>
 </Project>
