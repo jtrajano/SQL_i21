@@ -191,20 +191,20 @@ BEGIN TRY
 
 	SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
 
-	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId
-		,@dtmDate
-		,@intLocationId
-		,@intSubLocationId
-		,@intStorageLocationId
-		,@strLotNumber
-		,@dblAdjustByQuantity
-		,@dblNewUnitCost
-		,@intAdjustItemUOMId
-		,@intSourceId
-		,@intSourceTransactionTypeId
-		,@intUserId
-		,@intInventoryAdjustmentId OUTPUT
-		,@strDescription
+	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId=@intItemId
+		,@dtmDate=@dtmDate
+		,@intLocationId=@intLocationId
+		,@intSubLocationId=@intSubLocationId
+		,@intStorageLocationId=@intStorageLocationId
+		,@strLotNumber=@strLotNumber
+		,@dblAdjustByQuantity=@dblAdjustByQuantity
+		,@dblNewUnitCost=@dblNewUnitCost
+		,@intItemUOMId=@intAdjustItemUOMId
+		,@intSourceId=@intSourceId
+		,@intSourceTransactionTypeId=@intSourceTransactionTypeId
+		,@intEntityUserSecurityId=@intUserId
+		,@intInventoryAdjustmentId=@intInventoryAdjustmentId OUTPUT
+		,@strDescription=@strDescription
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 10
