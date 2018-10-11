@@ -111,7 +111,7 @@ GO
         , [intCompanyLocationId]            = CS.intCompanyLocationId
         , [intStorageTypeId]                = CS.intStorageTypeId
         , [intStorageScheduleId]            = CS.intStorageScheduleId
-		, [intContractDetailId]             = 0 --O FOR NOW; APPLICATION OF DP CONTRACT IS NOT YET IMPLEMENTED
+		, [intContractDetailId]             = NULL --NULL FOR NOW; APPLICATION OF DP CONTRACT IS NOT YET IMPLEMENTED
 		, [dblSplitPercent]                 = ROUND(((CS.dblOriginalBalance / TotalUnits.dblUnits) * 100), 2)
 		, [dblUnits]                        = CS.dblOriginalBalance
 		, [intConcurrencyId]                = CS.intConcurrencyId
