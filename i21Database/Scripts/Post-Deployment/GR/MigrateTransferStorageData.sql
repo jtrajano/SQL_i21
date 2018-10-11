@@ -55,7 +55,7 @@ GO
 	GROUP BY SH.strTransferTicket, CS.intEntityId, CS.intCompanyLocationId, CS.intStorageTypeId, CS.intItemId, CS.intItemUOMId, CS.intConcurrencyId, SH.intUserId
 
 	UPDATE TS 
-	SET [dtmTransferStorageDate] = [dbo].[fnRemoveTimeOnDate](SH.dtmDistributionDate) 
+	SET [dtmTransferStorageDate] = ISNULL([dbo].[fnRemoveTimeOnDate](SH.dtmDistributionDate), [dtmTransferStorageDate]) 
 	FROM tblGRTransferStorage TS
 	INNER JOIN tblGRStorageHistory SH
 	ON SH.strTransferTicket = TS.strTransferStorageTicket
