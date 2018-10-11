@@ -39,7 +39,9 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_sls_acct
 	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 	and I.intItemId = inv.intItemId) as ac
-
+LEFT JOIN tblICItemAccount ItemAccount
+ON I.intItemId = ItemAccount.intItemId AND ac.intAccountCategoryId =  ItemAccount.intAccountCategoryId
+WHERE ItemAccount.intItemId IS NULL
 --cogs account	
 INSERT INTO tblICItemAccount (
 	intItemId
@@ -60,7 +62,9 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_pur_acct
 	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 	and I.intItemId = inv.intItemId) as ac
-	
+LEFT JOIN tblICItemAccount ItemAccount
+ON I.intItemId = ItemAccount.intItemId AND ac.intAccountCategoryId =  ItemAccount.intAccountCategoryId
+WHERE ItemAccount.intItemId IS NULL
 --inventory Adjustment account	
 INSERT INTO tblICItemAccount (
 	intItemId
@@ -81,7 +85,9 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_pur_acct
 	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 	and I.intItemId = inv.intItemId) as ac
-
+LEFT JOIN tblICItemAccount ItemAccount
+ON I.intItemId = ItemAccount.intItemId AND ac.intAccountCategoryId =  ItemAccount.intAccountCategoryId
+WHERE ItemAccount.intItemId IS NULL
 -- update accounts for type 'Other Charge' 
 --Sales account to Other Charge Income account
 INSERT INTO tblICItemAccount (
@@ -103,7 +109,9 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_sls_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
-
+LEFT JOIN tblICItemAccount ItemAccount
+ON I.intItemId = ItemAccount.intItemId AND ac.intAccountCategoryId =  ItemAccount.intAccountCategoryId
+WHERE ItemAccount.intItemId IS NULL
 --Purchase account to Other Charge Expense account
 INSERT INTO tblICItemAccount (
 	intItemId
@@ -124,6 +132,7 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_pur_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
-
+LEFT JOIN tblICItemAccount ItemAccount
+ON I.intItemId = ItemAccount.intItemId AND ac.intAccountCategoryId =  ItemAccount.intAccountCategoryId
+WHERE ItemAccount.intItemId IS NULL
 GO
-
