@@ -199,7 +199,7 @@ BEGIN TRY
 				,@intInventoryAdjustmentId OUTPUT
 				,'Delivery Sheet Posting'
 		
-			SELECT @strTransactionId =  CONCAT('Quantity Adjustment : ', strAdjustmentNo)  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+			SELECT @strTransactionId =  'Quantity Adjustment : ' + strAdjustmentNo  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 			SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
 			EXEC dbo.uspSMAuditLog 
