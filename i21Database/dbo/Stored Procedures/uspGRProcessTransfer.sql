@@ -89,6 +89,7 @@ BEGIN TRY
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 	END
+	CLOSE c; DEALLOCATE c;
 
 	--update the source's customer storage open balance
 	UPDATE A
@@ -168,7 +169,7 @@ BEGIN TRY
 	)	
 	SELECT 
 		[intEntityId]					= TransferStorageSplit.intEntityId
-		,[intCommodityId]				= CS.intCustomerStorageId
+		,[intCommodityId]				= CS.intCommodityId
 		,[intStorageScheduleId]			= TransferStorageSplit.intStorageScheduleId
 		,[intStorageTypeId]				= TransferStorageSplit.intStorageTypeId
 		,[intCompanyLocationId]			= TransferStorageSplit.intCompanyLocationId
@@ -378,13 +379,13 @@ BEGIN TRY
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 	END
-	
+	CLOSE c; DEALLOCATE c;
 	--DISCOUNTS
 	DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR
 		SELECT storageId FROM @newCustomerStorageIds
 	OPEN c;
-	FETCH NEXT FROM c INTO @intCustomerStorageId
+	FETCH NEXT FROM c INTO @intCustomerStorageId	
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -407,7 +408,7 @@ BEGIN TRY
 			,[intSort]
 			,[strDiscountChargeType]
 		)
-			SELECT 
+		SELECT 
 			[intConcurrencyId] 				= 1
 			,[dblGradeReading] 				= [dblGradeReading]
 			,[strCalcMethod] 				= [strCalcMethod]
@@ -427,7 +428,12 @@ BEGIN TRY
 		FROM tblQMTicketDiscount Discount
 		INNER JOIN tblGRTransferStorageSourceSplit SourceSplit
 			ON SourceSplit.intSourceCustomerStorageId = Discount.intTicketFileId
+				AND SourceSplit.intTransferStorageId = @intTransferStorageId
+				AND Discount.strSourceType = 'Storage'
+		
+		FETCH NEXT FROM c INTO @intCustomerStorageId
 	END
+	CLOSE c; DEALLOCATE c;
 	----END-----TRANSACTIONS FOR THE NEW CUSTOMER STORAGE
 
 	COMMIT TRANSACTION
