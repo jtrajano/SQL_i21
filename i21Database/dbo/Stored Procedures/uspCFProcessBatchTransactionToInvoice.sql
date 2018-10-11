@@ -187,7 +187,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTermId]							= @companyConfigTermId
 					,[dtmDate]								= cfTrans.dtmTransactionDate
 					,[dtmDueDate]							= NULL
-					,[dtmShipDate]							= cfTrans.dtmTransactionDate
+					,[dtmShipDate]							= cfTrans.dtmPostedDate
 					,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
 					,[intFreightTermId]						= @companyConfigFreightTermId--I.[intFreightTermId] 
 					,[intShipViaId]							= I.[intShipViaId] 
