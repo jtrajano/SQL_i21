@@ -4696,6 +4696,7 @@
     <Build Include="dbo\Tables\tblPATEquityPay.sql" />
     <Build Include="dbo\Views\vyuMFLotList.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKConvertProductType.sql" />
     <Build Include="dbo\Functions\fnRKRKConvertProductTypeKeyToName.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerSplit.sql" />
