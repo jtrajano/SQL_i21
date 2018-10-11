@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuGRGeVendorEntity
+﻿CREATE VIEW vyuGRGetVendorEntity
 AS
 SELECT	E.intEntityId,
 		E.strName			AS strEntityName,
