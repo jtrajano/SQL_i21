@@ -14,8 +14,8 @@ SELECT TOP 100 PERCENT
 									END
 	,strTransaction			  	  = CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
-										WHEN CS.intTicketId IS NOT NULL THEN CS.strTicketNumber
-										ELSE TSS.strTransferStorageTicket
+										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
+										ELSE TS.strTransferStorageTicket
 									END
 	,intEntityId				  = CS.intEntityId
 	,strName					  = E.strName  
@@ -96,9 +96,11 @@ LEFT JOIN tblCTContractDetail CD
     ON CD.intContractDetailId = SC.intContractId  
 LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
-LEFT JOIN tblGRTransferStorageSplit TSS
-	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
+LEFT JOIN (
+		tblGRTransferStorageSplit TSS
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = TSS.intTransferStorageId
+	) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 WHERE ISNULL(CS.strStorageType,'') <> 'ITR' 
 	AND ST.ysnCustomerStorage = 0
 ORDER BY CS.intCustomerStorageId
-
