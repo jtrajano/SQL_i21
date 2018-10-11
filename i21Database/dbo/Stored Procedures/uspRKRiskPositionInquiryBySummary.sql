@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
+﻿CREATE  PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
         @intCommodityId INTEGER,  
         @intCompanyLocationId INTEGER,  
         @intFutureMarketId INTEGER,  
@@ -744,20 +744,41 @@ CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'
 else CONVERT(DATETIME,'01 '+strFutureMonth) END
 declare @strAccountNumber nvarchar(max)
 select top 1 @strAccountNumber=strAccountNumber  from #temp where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
-INSERT INTO #temp
+
+declare @strMonth varchar(MAX)
+
+SELECT @strMonth= coalesce(@strMonth + ',''', '') + a.strFutureMonth +''''
+FROM (SELECT DISTINCT strFutureMonth FROM #temp WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)') a
+
+set  @strMonth=''''+@strMonth 
+--select @strMonth
+
+INSERT INTO #temp (strGroup,Selection ,  
+            PriceStatus  ,  
+            strFutureMonth ,  
+            strAccountNumber ,  dblNoOfContract,  
+            strTradeNo,  
+            TransactionDate  ,  
+            TranType,  
+            CustVendor,       
+            dblNoOfLot ,  
+            dblQuantity ,
+            intOrderByHeading ,
+            intContractHeaderId ,
+            intFutOptTransactionHeaderId )
 SELECT DISTINCT '1.Outright Coverage',
 'Outright Coverage'  ,
 '1.Priced / Outright - (Outright position)',strFutureMonth, @strAccountNumber,
 NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
 FROM #temp  WHERE strFutureMonth
-NOT IN (SELECT DISTINCT strFutureMonth FROM #temp WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)')
+NOT IN (@strMonth)
 
 
 SELECT row_number() over(order by intRowNumber) intRowNumFinal, intRowNumber ,strGroup,Selection ,  
             PriceStatus  ,  
             strFutureMonth ,  
             strAccountNumber ,  
-            case when CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))=0 then null else CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) end  dblNoOfContract,  
+            CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  dblNoOfContract,  
             strTradeNo,  
             TransactionDate  ,  
             TranType,  
