@@ -10,16 +10,16 @@ SELECT intPOSId				= POS.intPOSId
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
 	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 AND POSD.dblQuantity > 0 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
      , dblPrice				= POSD.dblPrice
-	 , dblExtendedPrice		= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblExtendedPrice * -1 ELSE POSD.dblExtendedPrice END
+	 , dblExtendedPrice		= CASE WHEN POS.ysnReturn = 1 AND POSD.dblExtendedPrice > 0 THEN POSD.dblExtendedPrice * -1 ELSE POSD.dblExtendedPrice END
 	 , intItemUOMId			= POSD.intItemUOMId
 	 , intItemCount			= POS.intItemCount
-     , dblSubTotal			= CASE WHEN POS.ysnReturn = 1 THEN POS.dblSubTotal * -1 ELSE POS.dblSubTotal END
+     , dblSubTotal			= CASE WHEN POS.ysnReturn = 1 AND POS.dblSubTotal > 0 THEN POS.dblSubTotal * -1 ELSE POS.dblSubTotal END
 	 , dblShipping			= POS.dblShipping
-	 , dblTax				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTax * -1 ELSE POS.dblTax END
+	 , dblTax				= CASE WHEN POS.ysnReturn = 1 AND POS.dblTax > 0 THEN POS.dblTax * -1 ELSE POS.dblTax END
 	 , dblItemDiscountPercent = POSD.dblDiscountPercent
 	 , dblDiscountPercent	= POS.dblDiscountPercent
 	 , dblDiscount			= POS.dblDiscount
-	 , dblTotal				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTotal * -1 ELSE POS.dblTotal END
+	 , dblTotal				= CASE WHEN POS.ysnReturn = 1 AND POS.dblTotal > 0 THEN POS.dblTotal * -1 ELSE POS.dblTotal END
      , strCompanyName		= COMPANY.strCompanyName
      , strCompanyAddress	= COMPANY.strFullAddress
 	 , strReceiptNumber		= POS.strReceiptNumber
