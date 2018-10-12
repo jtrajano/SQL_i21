@@ -7141,6 +7141,9 @@
     <Build Include="dbo\Tables\tblCMImportLog.sql" />
     <Build Include="dbo\Tables\tblCMImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectMilstoneSummary.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermError.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
