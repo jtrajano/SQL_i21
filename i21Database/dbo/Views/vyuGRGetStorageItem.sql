@@ -12,8 +12,8 @@ SELECT DISTINCT
     ,ISNULL(Com.intFutureMarketId,0) AS intFutureMarketId
     ,Com.dblPriceCheckMin
     ,Com.dblPriceCheckMax
-    ,Com.intCommodityId
-    ,UOM.intItemUOMId AS intCommodityStockUomId
+    ,CU.intCommodityUnitMeasureId AS intCommodityStockUomId
+    ,ISNULL(CS.intItemUOMId, UOM.intItemUOMId) AS intItemUOMId
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId
