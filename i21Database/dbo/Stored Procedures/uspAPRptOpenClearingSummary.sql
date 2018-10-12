@@ -101,6 +101,8 @@ SET @innerQuery =
 			,dtmDate
 			,dtmDueDate
 			,strContainer
+			,dblVoucherQty
+			,dblReceiptQty
 		FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -146,6 +148,7 @@ SET @query = '
 		,SUM(dblTotal) as dblTotal
 		,SUM(dblVoucherAmount) dblVoucherAmount
 		,SUM(dblAmountDue) as dblAmountDue
+		,SUM(dblClearingQty) dblClearingQty
 		,GETDATE() as dtmCurrentDate
 	FROM (
 		SELECT 
@@ -159,6 +162,7 @@ SET @query = '
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblVoucherAmount
 		,ISNULL(tmpAgingSummaryTotal.dblAmountDue,0) as dblAmountDue
+		,tmpAgingSummaryTotal.dblClearingQty
 		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 			THEN 0 
 			ELSE tmpAgingSummaryTotal.dblAmountDue 
@@ -201,7 +205,8 @@ SET @query = '
 			,tmpAPClearables.intBillId
 			,SUM(tmpAPClearables.dblTotal) AS dblTotal
 			,SUM(tmpAPClearables.dblVoucherAmount) AS dblVoucherAmount
-			,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
+			,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue,
+			(SUM(tmpAPClearables.dblReceiptQty)  -  SUM(tmpAPClearables.dblVoucherQty)) AS dblClearingQty
 			FROM (' 
 					+ @innerQuery +
 				') tmpAPClearables
@@ -209,6 +214,7 @@ SET @query = '
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 			ON A.intBillId = tmpAgingSummaryTotal.intBillId
+		WHERE tmpAgingSummaryTotal.dblClearingQty != 0
 ) SubQuery
 	GROUP BY 
 		--strVendorId
