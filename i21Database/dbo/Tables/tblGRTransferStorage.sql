@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblGRTransferStorage]
     [strTransferStorageTicket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     [intEntityId] INT NOT NULL,
     [intCompanyLocationId] INT NOT NULL,
-    [intStorageScheduleTypeId] INT NOT NULL,
+    [intStorageScheduleTypeId] INT NULL,
     [intItemId] INT NOT NULL,
     [intItemUOMId] INT NOT NULL,
     [dblTotalUnits] NUMERIC(38,20) NOT NULL,
