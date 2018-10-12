@@ -61,6 +61,7 @@ SELECT TOP 100 PERCENT
 										ELSE SCTicketSplit.dblSplitPercent
 									END
 	,intSplitId					   = EMSplit.intSplitId
+	,intItemUOMId				 = CS.intItemUOMId
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
