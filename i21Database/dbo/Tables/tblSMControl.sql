@@ -6,6 +6,7 @@
     [strControlName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strContainer] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strControlType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strTabName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMControl_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE
 )

@@ -55,6 +55,7 @@ BEGIN TRANSACTION
 		strControlType,
 		strContainer,
 		intScreenId,
+		strTabName,
 		intConcurrencyId
 	)
 	SELECT 
@@ -63,13 +64,20 @@ BEGIN TRANSACTION
 		A.strControlType,
 		A.strContainer,
 		C.intScreenId,
+		A.strTabName,
 		A.intConcurrencyId
 	FROM tblSMControlStage A
 	 INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
 	 INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
 	WHERE ISNULL(A.strChange, '') = 'Added'
-	
 
+	-- UPDATE TAB NAME
+	UPDATE D SET D.strTabName = A.strTabName
+	FROM tblSMControlStage A
+	INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
+	INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
+	INNER JOIN tblSMControl D ON C.intScreenId = D.intScreenId AND A.strControlId = D.strControlId
+	WHERE A.strTabName <> ''
 
 	-- UPDATE MODULE
 	UPDATE tblSMScreen SET strModule = 'Ticket Management'
