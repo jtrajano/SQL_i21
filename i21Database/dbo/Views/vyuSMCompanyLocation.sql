@@ -252,6 +252,8 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.ysnEnableCreditCardProcessing
 ,compLoc.strMerchantId
 ,compLoc.strMerchantPassword
+,freightTerms.intFreightTermId
+,freightTerms.strFreightTerm
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblCMBankAccount bankAccount ON compLoc.intCashAccount = bankAccount.intGLAccountId
@@ -300,3 +302,4 @@ LEFT JOIN tblICStorageLocation sanitizationDockDoorUnit ON compLoc.intSanitizati
 LEFT JOIN tblICStorageLocation sanitizationStagingUnit ON compLoc.intSanitizationStagingUnitId = sanitizationStagingUnit.intStorageLocationId
 LEFT JOIN tblICStorageLocation sanitizationStorageUnit ON compLoc.intSanitizationStorageUnitId = sanitizationStorageUnit.intStorageLocationId
 LEFT JOIN tblSMTaxGroup taxGroup ON compLoc.intTaxGroupId = taxGroup.intTaxGroupId
+LEFT JOIN tblSMFreightTerms freightTerms ON compLoc.intFreightTermId = freightTerms.intFreightTermId
