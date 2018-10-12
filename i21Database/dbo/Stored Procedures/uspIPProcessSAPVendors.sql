@@ -45,7 +45,7 @@ BEGIN TRY
 	DECLARE @strDetails NVARCHAR(MAX) = ''
 	DECLARE @tblEMEntity TABLE (
 		strColumnName NVARCHAR(50)
-		,strColumnDescription nvarchar(50)
+		,strColumnDescription NVARCHAR(50)
 		,strOldValue NVARCHAR(MAX)
 		,strNewValue NVARCHAR(MAX)
 		)
@@ -176,6 +176,19 @@ BEGIN TRY
 							)
 
 				IF ISNULL(@intTermId, 0) = 0
+					RAISERROR (
+							'Term not found.'
+							,16
+							,1
+							)
+
+				IF EXISTS (
+						SELECT *
+						FROM tblIPEntityTermStage S
+						LEFT JOIN tblSMTerm T ON S.strTerm = T.strTermCode
+						WHERE S.intStageEntityId = @intStageEntityId
+							AND T.intTermID IS NULL
+						)
 					RAISERROR (
 							'Term not found.'
 							,16
@@ -357,6 +370,16 @@ BEGIN TRY
 						,@intTermId
 						)
 
+				INSERT INTO tblAPVendorTerm (
+					intEntityVendorId
+					,intTermId
+					)
+				SELECT @intEntityId
+					,intTermID
+				FROM tblIPEntityTermStage S
+				JOIN tblSMTerm T ON S.strTerm = T.strTermCode
+				WHERE S.intStageEntityId = @intStageEntityId
+
 				--Add Contacts to Entity table
 				INSERT INTO tblEMEntity (
 					strName
@@ -470,10 +493,10 @@ BEGIN TRY
 					UPDATE tblEMEntity
 					SET ysnActive = 0
 					OUTPUT 'ysnActive'
-							,'Active'
-							,deleted.ysnActive
-							,Inserted.ysnActive
-						INTO @tblEMEntity
+						,'Active'
+						,deleted.ysnActive
+						,Inserted.ysnActive
+					INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 					UPDATE tblAPVendor
@@ -488,10 +511,10 @@ BEGIN TRY
 					UPDATE tblEMEntity
 					SET ysnActive = 1
 					OUTPUT 'ysnActive'
-							,'Active'
-							,deleted.ysnActive
-							,Inserted.ysnActive
-						INTO @tblEMEntity
+						,'Active'
+						,deleted.ysnActive
+						,Inserted.ysnActive
+					INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 					UPDATE tblAPVendor
@@ -511,13 +534,26 @@ BEGIN TRY
 					,@strZipCode = strZipCode
 					,@strTaxNo = strTaxNo
 					,@strFLOId = strFLOId
-					--,@strState = strState
+				--,@strState = strState
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
 				--Update Address details
 				IF ISNULL(@strTerm, '/') <> '/'
 					AND ISNULL(@intTermId, 0) = 0
+					RAISERROR (
+							'Term not found.'
+							,16
+							,1
+							)
+
+				IF EXISTS (
+						SELECT *
+						FROM tblIPEntityTermStage S
+						LEFT JOIN tblSMTerm T ON S.strTerm = T.strTermCode
+						WHERE S.intStageEntityId = @intStageEntityId
+							AND T.intTermID IS NULL
+						)
 					RAISERROR (
 							'Term not found.'
 							,16
@@ -548,10 +584,10 @@ BEGIN TRY
 					UPDATE tblEMEntityLocation
 					SET strAddress = @strAddress
 					OUTPUT 'strAddress'
-							,'Address'
-							,deleted.strAddress
-							,Inserted.strAddress
-						INTO @tblEMEntity
+						,'Address'
+						,deleted.strAddress
+						,Inserted.strAddress
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 				END
 
@@ -561,40 +597,40 @@ BEGIN TRY
 						,strCity = @strCity
 						,strCheckPayeeName = Left(@strCity, 50)
 					OUTPUT 'strCity'
-							,'City'
-							,deleted.strCity
-							,Inserted.strCity
-						INTO @tblEMEntity
+						,'City'
+						,deleted.strCity
+						,Inserted.strCity
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strCountry, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strCountry = @strCountry
 					OUTPUT 'strCountry'
-							,'Country'
-							,deleted.strCountry
-							,Inserted.strCountry
-						INTO @tblEMEntity
+						,'Country'
+						,deleted.strCountry
+						,Inserted.strCountry
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strState, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strState = @strState
 					OUTPUT 'strState'
-							,'State'
-							,deleted.strState
-							,Inserted.strState
-						INTO @tblEMEntity
+						,'State'
+						,deleted.strState
+						,Inserted.strState
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strZipCode, '/') <> '/'
 					UPDATE tblEMEntityLocation
 					SET strZipCode = @strZipCode
 					OUTPUT 'strZipCode'
-							,'Zip Code'
-							,deleted.strZipCode
-							,Inserted.strZipCode
-						INTO @tblEMEntity
+						,'Zip Code'
+						,deleted.strZipCode
+						,Inserted.strZipCode
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 				IF ISNULL(@strTerm, '/') <> '/'
@@ -602,10 +638,10 @@ BEGIN TRY
 					UPDATE tblEMEntityLocation
 					SET intTermsId = @intTermId
 					OUTPUT 'intTermsId'
-							,'Terms Id'
-							,deleted.intTermsId
-							,Inserted.intTermsId
-						INTO @tblEMEntity
+						,'Terms Id'
+						,deleted.intTermsId
+						,Inserted.intTermsId
+					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
 
 					UPDATE tblAPVendor
@@ -627,6 +663,16 @@ BEGIN TRY
 							@intEntityId
 							,@intTermId
 							)
+
+					INSERT INTO tblAPVendorTerm (
+						intEntityVendorId
+						,intTermId
+						)
+					SELECT @intEntityId
+						,intTermID
+					FROM tblIPEntityTermStage S
+					JOIN tblSMTerm T ON S.strTerm = T.strTermCode
+					WHERE S.intStageEntityId = @intStageEntityId
 				END
 
 				--Entity table Update
@@ -635,10 +681,10 @@ BEGIN TRY
 					SET strName = @strVendorName
 						,strContactNumber = @strVendorName
 					OUTPUT 'strName'
-							,'Name'
-							,deleted.strName
-							,Inserted.strName
-						INTO @tblEMEntity
+						,'Name'
+						,deleted.strName
+						,Inserted.strName
+					INTO @tblEMEntity
 					WHERE intEntityId = @intEntityId
 
 				--Vendor table update
@@ -646,10 +692,10 @@ BEGIN TRY
 					UPDATE tblAPVendor
 					SET intCurrencyId = @intCurrencyId
 					OUTPUT 'intCurrencyId'
-							,'Currency Id'
-							,deleted.intCurrencyId
-							,Inserted.intCurrencyId
-						INTO @tblEMEntity
+						,'Currency Id'
+						,deleted.intCurrencyId
+						,Inserted.intCurrencyId
+					INTO @tblEMEntity
 					WHERE [intEntityId] = @intEntityId
 
 				IF ISNULL(@strFLOId, '/') <> '/'
@@ -745,28 +791,27 @@ BEGIN TRY
 					WHERE intStageEntityId = @intStageEntityId
 					) t2 ON t1.intRowNo = t2.intRowNo
 
-					IF EXISTS (
-							SELECT *
-							FROM @tblEMEntity 
-							)
-					BEGIN
-						SELECT @strDetails += '{"change":"'+strColumnName+'","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue,'')) + '","to":"' + Ltrim(IsNULL(strNewValue,'')) + '","leaf":true,"changeDescription":"'+strColumnDescription+'"},'
-						FROM @tblEMEntity EM
-						Where  IsNULL(strOldValue,'') <> IsNULL(strNewValue,'')
+				IF EXISTS (
+						SELECT *
+						FROM @tblEMEntity
+						)
+				BEGIN
+					SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
+					FROM @tblEMEntity EM
+					WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
+				END
 
-					END
+				IF (LEN(@strDetails) > 1)
+				BEGIN
+					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
-					IF (LEN(@strDetails) > 1)
-					BEGIN
-						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-
-						EXEC uspSMAuditLog @keyValue = @intEntityId
-							,@screenName = 'EntityManagement.view.Entity'
-							,@entityId = @intUserId
-							,@actionType = 'Updated'
-							,@actionIcon = 'small-tree-modified'
-							,@details = @strDetails
-					END
+					EXEC uspSMAuditLog @keyValue = @intEntityId
+						,@screenName = 'EntityManagement.view.Entity'
+						,@entityId = @intUserId
+						,@actionType = 'Updated'
+						,@actionIcon = 'small-tree-modified'
+						,@details = @strDetails
+				END
 			END
 
 			MOVE_TO_ARCHIVE:
@@ -828,6 +873,21 @@ BEGIN TRY
 				,strLastName
 				,strPhone
 			FROM tblIPEntityContactStage
+			WHERE intStageEntityId = @intStageEntityId
+
+			INSERT INTO tblIPEntityTermArchive (
+				intStageEntityId
+				,strEntityName
+				,strLocation
+				,strTerm
+				,strCurrency
+				)
+			SELECT @intNewStageEntityId
+				,strEntityName
+				,strLocation
+				,strTerm
+				,strCurrency
+			FROM tblIPEntityTermStage
 			WHERE intStageEntityId = @intStageEntityId
 
 			DELETE
@@ -906,6 +966,21 @@ BEGIN TRY
 				,strLastName
 				,strPhone
 			FROM tblIPEntityContactStage
+			WHERE intStageEntityId = @intStageEntityId
+
+			INSERT INTO tblIPEntityTermError (
+				intStageEntityId
+				,strEntityName
+				,strLocation
+				,strTerm
+				,strCurrency
+				)
+			SELECT @intNewStageEntityId
+				,strEntityName
+				,strLocation
+				,strTerm
+				,strCurrency
+			FROM tblIPEntityTermStage
 			WHERE intStageEntityId = @intStageEntityId
 
 			DELETE
