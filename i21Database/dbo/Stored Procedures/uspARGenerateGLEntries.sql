@@ -67,7 +67,6 @@ DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 IF @Post = 1 AND EXISTS(SELECT NULL FROM #ARPostInvoiceHeader WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
 BEGIN
-    --SET @HasImpactForProvisional = 1
     INSERT INTO #ARInvoiceGLEntries
         ([dtmDate]
         ,[strBatchId]
@@ -209,8 +208,6 @@ BEGIN
         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
     ORDER BY GL.intGLDetailId				
 END
---ELSE
---SET @HasImpactForProvisional = 0
 
 IF @Post = 1
 EXEC [dbo].[uspARGenerateGLEntriesForInvoices]

@@ -303,6 +303,16 @@ BEGIN
     UPDATE tblARInvoiceDetail SET ysnBlended = 1 WHERE intInvoiceDetailId = @intInvoiceDetailId
 
     DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
-END	
+END
+
+UPDATE ARI
+SET
+    ARI.[ysnProvisionalWithGL] = ARI1.[ysnProvisionalWithGL]
+FROM
+    tblARInvoice ARI
+INNER JOIN
+    #ARPostInvoiceHeader ARI1
+		ON ARI.[intInvoiceId] = ARI1.[intInvoiceId]
+		AND ARI.[strType] = 'Provisional'
 
 RETURN 1

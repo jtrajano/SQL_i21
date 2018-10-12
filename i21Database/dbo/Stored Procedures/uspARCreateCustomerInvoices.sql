@@ -1007,6 +1007,11 @@ END
 
 DECLARE  @AddDetailError NVARCHAR(MAX)
 		,@IntegrationLog InvoiceIntegrationLogStagingTable
+        ,@ImpactForProvisional BIT
+
+SELECT TOP 1
+	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 INSERT INTO @IntegrationLog
 	([intIntegrationLogId]
@@ -1150,6 +1155,7 @@ CREATE TABLE #CustomerInvoice
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
     ,[ysnFromProvisional]           BIT                                             NULL
+    ,[ysnProvisionalWithGL]         BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
 	,[ysnImportedAsPosted]			BIT												NULL
@@ -1250,6 +1256,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1356,6 +1363,7 @@ SELECT
 											END
 										ELSE CAST(0 AS BIT) END
     ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]         = @ImpactForProvisional
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
 	,[ysnImportedAsPosted]			= 0

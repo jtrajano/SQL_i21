@@ -62,7 +62,8 @@
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
+	,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 

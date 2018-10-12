@@ -124,9 +124,9 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARID.[strType] <> 'Provisional' AND (ARID.[intOriginalInvoiceId] IS NULL OR ARID.[intSourceId] <> 2))
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnProvisionalWithGL] = 0)
 		OR
-			(ARID.[strType] = 'Provisional' AND ARID.[ysnImpactForProvisional] = 1)
+			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
@@ -179,9 +179,10 @@ LEFT OUTER JOIN
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
 	ICIT.[intFobPointId] IS NOT NULL
-	AND ((ARID.[strType] <> 'Provisional' AND (ARID.[intOriginalInvoiceId] IS NULL OR ARID.[intSourceId] <> 2))
-			OR
-		(ARID.[strType] = 'Provisional' AND ARID.[ysnImpactForProvisional] = 1)
+	AND (
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnProvisionalWithGL] = 0)
+		OR
+			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0

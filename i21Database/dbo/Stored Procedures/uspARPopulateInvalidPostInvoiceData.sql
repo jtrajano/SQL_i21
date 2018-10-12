@@ -722,7 +722,7 @@ BEGIN
 		#ARPostInvoiceHeader I					
 	WHERE
 		I.[strType] = 'Provisional'
-		AND I.[ysnImpactForProvisional] = 0
+		AND I.[ysnProvisionalWithGL] = 0
 
 
 	INSERT INTO #ARInvalidInvoiceData

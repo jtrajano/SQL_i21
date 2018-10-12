@@ -49,6 +49,7 @@ ELSE
 			  AND intInvoiceId = @InvoiceId
 		) I ON RT.intTransactionId = I.intInvoiceId
 		   AND RT.strTransactionNumber = I.strInvoiceNumber
+
 	END
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId

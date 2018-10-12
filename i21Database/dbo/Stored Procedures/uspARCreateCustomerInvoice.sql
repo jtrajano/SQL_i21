@@ -379,6 +379,12 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
+DECLARE	@ImpactForProvisional BIT
+
+SELECT TOP 1
+	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+
 DECLARE  @NewId INT
 		,@NewDetailId INT
 		,@AddDetailError NVARCHAR(MAX)
@@ -443,6 +449,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
 		,[ysnFromProvisional]
+        ,[ysnProvisionalWithGL]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -523,7 +530,8 @@ BEGIN TRY
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
 		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)	
-		,[ysnFromProvisional]			= ISNULL(@FromProvisional, 0)	
+		,[ysnFromProvisional]			= ISNULL(@FromProvisional, 0)
+		,[ysnProvisionalWithGL]			= ISNULL(@ImpactForProvisional, 0)	
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 
