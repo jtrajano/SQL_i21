@@ -59,57 +59,81 @@ BEGIN
 		SET @strLayoutTitle = ''Passport - TLM''
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 			BEGIN
-				SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
-				-- ALTER
-				UPDATE tblSMImportFileHeader
-				SET strLayoutTitle = @strLayoutTitle + '' 3.3''
-				WHERE strLayoutTitle = @strLayoutTitle
+				IF NOT EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle + '' 3.3'')
+					BEGIN
+						SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+
+						-- ALTER
+						UPDATE tblSMImportFileHeader
+						SET strLayoutTitle = @strLayoutTitle + '' 3.3''
+						WHERE strLayoutTitle = @strLayoutTitle
+					END
 			END
 
 		SET @strLayoutTitle = ''Passport - MSM''
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 			BEGIN
-				SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+				
+				IF NOT EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle + '' 3.3'')
+					BEGIN
+						SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
-				-- ALTER
-				UPDATE tblSMImportFileHeader
-				SET strLayoutTitle = @strLayoutTitle + '' 3.3''
-				WHERE strLayoutTitle = @strLayoutTitle
+						-- ALTER
+						UPDATE tblSMImportFileHeader
+						SET strLayoutTitle = @strLayoutTitle + '' 3.3''
+						WHERE strLayoutTitle = @strLayoutTitle
+					END
+
 			END
 
 		SET @strLayoutTitle = ''Passport - MCM''
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 			BEGIN
-				SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+				
+				IF NOT EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle + '' 3.3'')
+					BEGIN
+						SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
-				-- ALTER
-				UPDATE tblSMImportFileHeader
-				SET strLayoutTitle = @strLayoutTitle + '' 3.3''
-				WHERE strLayoutTitle = @strLayoutTitle
+						-- ALTER
+						UPDATE tblSMImportFileHeader
+						SET strLayoutTitle = @strLayoutTitle + '' 3.3''
+						WHERE strLayoutTitle = @strLayoutTitle
+					END
+
 			END
 
 		SET @strLayoutTitle = ''Passport - FGM''
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 			BEGIN
-				SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+				
+				IF NOT EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle + '' 3.3'')
+					BEGIN
+						SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
-				-- ALTER
-				UPDATE tblSMImportFileHeader
-				SET strLayoutTitle = @strLayoutTitle + '' 3.3''
-				WHERE strLayoutTitle = @strLayoutTitle
+						-- ALTER
+						UPDATE tblSMImportFileHeader
+						SET strLayoutTitle = @strLayoutTitle + '' 3.3''
+						WHERE strLayoutTitle = @strLayoutTitle
+					END
+
 			END
 
 		SET @strLayoutTitle = ''Passport - ISM''
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
-		BEGIN
-			SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+			BEGIN
+			
+				IF NOT EXISTS(SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle + '' 3.3'')
+					BEGIN
+						SELECT @intImportFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
-			-- ALTER
-			UPDATE tblSMImportFileHeader
-			SET strLayoutTitle = @strLayoutTitle + '' 3.3''
-			WHERE strLayoutTitle = @strLayoutTitle
-		END
+						-- ALTER
+						UPDATE tblSMImportFileHeader
+						SET strLayoutTitle = @strLayoutTitle + '' 3.3''
+						WHERE strLayoutTitle = @strLayoutTitle
+					END
+
+			END
 	')
 	PRINT('End: File Field Mapping Alter')
 END
