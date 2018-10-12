@@ -259,7 +259,7 @@ BEGIN TRY
 				CLOSE intListCursor  
 				DEALLOCATE intListCursor 
 
-				UPDATE CS SET CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit  
+				UPDATE CS SET CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit, CS.dblDiscountsDue = 0
 				FROM tblGRCustomerStorage CS
 				OUTER APPLY (
 					SELECT 
