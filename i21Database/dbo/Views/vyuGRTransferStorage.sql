@@ -1,24 +1,24 @@
 CREATE VIEW [dbo].[vyuGRTransferStorage]
 AS
 SELECT 
-	TS.intTransferStorageId
-    ,TS.strTransferStorageTicket
-    ,TS.intEntityId
-    ,TS.intCompanyLocationId
-    ,TS.intStorageScheduleTypeId
-    ,TS.intItemId
-    ,TS.intItemUOMId
-	,TS.intTransferLocationId
-    ,TS.dblTotalUnits
-    ,TS.dtmTransferStorageDate
-    ,TS.intConcurrencyId
-    ,TS.intUserId
-	,strEntityName = EM.strName
-	,CL.strLocationName
-	,ST.strStorageTypeDescription
-	,Item.strItemNo
-	,strUnitMeasure = UOM.strUnitMeasure
-	,strTransferLocationName = (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = TS.intCompanyLocationId)
+	  intTransferStorageId 		= TS.intTransferStorageId
+    , strTransferStorageTicket 	= TS.strTransferStorageTicket
+    , intEntityId 				= TS.intEntityId
+    , intCompanyLocationId 		= TS.intCompanyLocationId
+    , intStorageScheduleTypeId 	= TS.intStorageScheduleTypeId
+    , intItemId 				= TS.intItemId
+    , intItemUOMId 				= TS.intItemUOMId
+	, intTransferLocationId 	= TS.intTransferLocationId
+    , dblTotalUnits 			= TS.dblTotalUnits
+    , dtmTransferStorageDate 	= TS.dtmTransferStorageDate
+    , intConcurrencyId 			= TS.intConcurrencyId
+    , intUserId 				= TS.intUserId
+	, strEntityName 			= EM.strName
+	, strLocationName 			= CL.strLocationName
+	, strStorageTypeDescription = ST.strStorageTypeDescription
+	, strItemNo 				= Item.strItemNo
+	, strUnitMeasure 			= UOM.strUnitMeasure
+	, strTransferLocationName 	= CLTransfer.strLocationName
 FROM tblGRTransferStorage TS
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = TS.intEntityId

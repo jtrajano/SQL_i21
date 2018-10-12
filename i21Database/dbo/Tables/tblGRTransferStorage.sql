@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[tblGRTransferStorage]
 (
 	[intTransferStorageId] INT NOT NULL IDENTITY(1,1),
+<<<<<<< HEAD
     [strTransferStorageTicket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intEntityId] INT NOT NULL,
     [intCompanyLocationId] INT NOT NULL,
@@ -8,9 +9,18 @@ CREATE TABLE [dbo].[tblGRTransferStorage]
     [intItemId] INT NOT NULL,
     [intItemUOMId] INT NOT NULL,
     [dblTotalUnits] NUMERIC(38,20) NOT NULL,
+=======
+    [strTransferStorageTicket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+    [intEntityId] INT NULL,
+    [intCompanyLocationId] INT NULL,
+    [intStorageScheduleTypeId] INT NULL,
+    [intItemId] INT NULL,
+    [intItemUOMId] INT NULL,
+    [dblTotalUnits] NUMERIC(38,20) NOT NULL DEFAULT 0,
+>>>>>>> e5d20947c1... GRN-1238 (Error upgrading to build 18.31.1012.93)
     [dtmTransferStorageDate] DATETIME NOT NULL DEFAULT GETDATE(),
-    [intConcurrencyId] INT NOT NULL,
-    [intUserId] INT NOT NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT 1,
+    [intUserId] INT NULL,
     [intTransferLocationId] INT NULL,
     CONSTRAINT [PK_tblGRTransferStorage_intTransferStorageId] PRIMARY KEY CLUSTERED ([intTransferStorageId] ASC), 
     CONSTRAINT [FK_tblGRTransferStorage_intEntityId_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
