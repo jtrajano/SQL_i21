@@ -73,8 +73,6 @@ BEGIN TRY
 				,strAccountNo
 				,dtmCreated
 				,strMarkForDeletion
-				,strTerm
-				,strCurrency
 				)
 			SELECT NAME1
 				,STRAS
@@ -85,8 +83,6 @@ BEGIN TRY
 				,LIFNR
 				,@dtmCreatedDate
 				,LOEVM
-				,ZTERM
-				,WAERS
 			FROM OPENXML(@idoc, 'CREMAS05/IDOC/E1LFA1M', 2) WITH (
 					NAME1 NVARCHAR(100)
 					,STRAS NVARCHAR(MAX)
@@ -96,9 +92,19 @@ BEGIN TRY
 					,PSTLZ NVARCHAR(MAX)
 					,LIFNR NVARCHAR(50)
 					,LOEVM NVARCHAR(50)
-					,ZTERM NVARCHAR(100) 'E1LFM1M/ZTERM'
-					,WAERS NVARCHAR(50) 'E1LFM1M/WAERS'
 					)
+
+			UPDATE @tblVendor
+			SET strTerm = x.ZTERM
+				,strCurrency = x.WAERS
+			FROM OPENXML(@idoc, 'CREMAS05/IDOC/E1LFA1M/E1LFM1M', 2) WITH (
+					LIFNR NVARCHAR(50) COLLATE Latin1_General_CI_AS '../LIFNR'
+					,ZTERM NVARCHAR(100)
+					,WAERS NVARCHAR(50)
+					,EKORG NVARCHAR(6)
+					) x
+			JOIN @tblVendor v ON x.LIFNR = v.strAccountNo
+			WHERE x.EKORG = '130'
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strAccountNo, '') + ','
 			FROM @tblVendor
