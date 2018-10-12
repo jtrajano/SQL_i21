@@ -7140,6 +7140,7 @@
     <Build Include="dbo\Tables\tblCMConfig.sql" />
     <Build Include="dbo\Tables\tblCMImportLog.sql" />
     <Build Include="dbo\Tables\tblCMImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuHDProjectMilstoneSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7327,7 +7328,7 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
-	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorage.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
