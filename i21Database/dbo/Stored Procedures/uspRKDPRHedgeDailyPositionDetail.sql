@@ -1189,6 +1189,8 @@ BEGIN
 			where dblTotal <> 0 
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId
 END
 ELSE IF(@strByType = 'ByLocation')
@@ -1199,6 +1201,8 @@ BEGIN
 			WHERE dblTotal <> 0
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId,strLocationName
 END
 ELSE 
@@ -1213,6 +1217,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			where dblTotal <> 0 
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 		ELSE
@@ -1226,6 +1232,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 END
