@@ -23,7 +23,7 @@ SELECT
 	,ysnForgiven					= I.ysnForgiven
 	,ysnCalculated					= I.ysnCalculated
 	,ysnRecurring					= I.ysnRecurring
-	,dblInvoiceTotal				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblInvoiceTotal, 0)  ELSE  ISNULL(I.dblInvoiceTotal, 0) * -1 END
+	,dblInvoiceTotal				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblInvoiceTotal, 0)  ELSE  ISNULL(I.dblInvoiceTotal, 0) * -1 END
 	,dblDiscount					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	,dblDiscountAvailable			= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	,dblInterest					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
