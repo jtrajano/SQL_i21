@@ -279,7 +279,7 @@ FROM(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='O' THEN ri.dblQuantity ELSE 0 END) ,6) dblOutQty,
 r.strShipmentNumber,
-		strDistributionOption ,r.intInventoryShipmentId
+		CASE WHEN ri.intStorageScheduleTypeId IS NULL AND ri.intOrderId IS NULL THEN 'SPT' WHEN ri.intOrderId IS NOT NULL THEN st.strDistributionOption ELSE gs.strStorageTypeCode END strDistributionOption,r.intInventoryShipmentId
 FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 
 									AND  st.intProcessingLocationId  IN (
@@ -289,7 +289,7 @@ FROM tblSCTicket st
 													ELSE isnull(ysnLicensed, 0) END)
 		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+		LEFT JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=ri.intStorageScheduleTypeId  
 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
