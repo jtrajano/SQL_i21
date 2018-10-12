@@ -960,6 +960,11 @@ WHERE EXISTS (
 		)
 	AND ISNULL(strFeedStatus, '') = ''
 
+UPDATE tblCTContractFeed
+SET strFeedStatus = 'IGNORE'
+WHERE IsNULL(strERPItemNumber,'') <>'00010' and IsNULL(strERPPONumber,'') <>''
+	AND ISNULL(strFeedStatus, '') = ''
+
 --Get the Headers
 IF UPPER(@strRowState) = 'ADDED'
 BEGIN
