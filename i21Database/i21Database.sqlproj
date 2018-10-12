@@ -2128,7 +2128,7 @@
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTickets.sql" />
-	<Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
     <Build Include="dbo\Functions\fnQMGetTestNames.sql" />
     <Build Include="dbo\Views\vyuQMPropertyList.sql" />
     <Build Include="dbo\Functions\fnQMGetTemplateNames.sql" />
@@ -2718,7 +2718,7 @@
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
-	<Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRInsertStorageHistoryRecord.sql" />
     <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
@@ -7122,6 +7122,7 @@
     <Build Include="dbo\Tables\tblIPEntityTermError.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
+    <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7311,13 +7312,13 @@
     <Build Include="dbo\Tables\tblGRTransferStorage.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
-	<Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
-	<None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

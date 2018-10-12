@@ -101,7 +101,7 @@ BEGIN TRY
 	) tblMonths
 	
 	DECLARE @CurrentOptionMonthsCount INT
-	SELECT @CurrentOptionMonthsCount = COUNT(*) FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId;
+	SELECT @CurrentOptionMonthsCount = COUNT(*) FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId;
 
 	IF(ISNULL(@OptMonthsToOpen,0) < @CurrentOptionMonthsCount)
 	BEGIN
@@ -116,19 +116,18 @@ BEGIN TRY
 		BEGIN
 			DELETE FROM tblRKOptionsMonth 
 			WHERE intFutureMarketId = @FutureMarketId 
-			AND intFutureMonthId IN (
-				SELECT intFutureMonthId 
-				FROM @ValidateCurrentOptionMonth
-				WHERE intFutureMonthId NOT IN(
-					SELECT intFutureMonthId FROM vyuRKGetOptionTradingMonthsInUse WHERE intFutureMarketId = @FutureMarketId
-				)
+			AND strOptionMonth NOT IN (
+				SELECT strOptionMonth FROM vyuRKGetOptionTradingMonthsInUse WHERE intFutureMarketId = @FutureMarketId
+			)
+			AND intOptionMonthId NOT IN(
+				SELECT TOP(@OptMonthsToOpen) intOptionMonthId FROM tblRKOptionsMonth
+				ORDER BY CONVERT(DATETIME, REPLACE(strOptionMonth, ' ',  ' 1, '),103)  ASC
 			)
 		END
 		ELSE
 		BEGIN
 			RAISERROR('You cannot generate Option Trading Months. Current Option Trading Months already in use.', 16, 1);
 		END
-
 	END
 	
 	IF OBJECT_ID('tempdb..##FinalOptMonths') IS NOT NULL DROP TABLE ##FinalOptMonths
@@ -139,19 +138,52 @@ BEGIN TRY
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonthCode NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
-		, intMonthCode INT)
+		, intMonthCode INT
+		, strFuturesMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, intFutureMonthId INT
+		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS)
 		
 	WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @OptMonthsToOpen
 	BEGIN
 		SELECT @Top = @OptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
 		
-		INSERT INTO ##FinalOptMonths
-		SELECT TOP (@Top) YEAR(@Date) + @Count, LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode, strMonth, strMonthCode, strSymbol, intMonthCode
+		INSERT INTO ##FinalOptMonths(intYear, strMonth, strMonthName, strMonthCode, strSymbol, intMonthCode, strFuturesMonth, intFutureMonthId, strOptionMonth)
+		SELECT TOP (@Top) YEAR(@Date) + @Count
+				,LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode
+				,strMonth
+				,strMonthCode
+				,strSymbol
+				,intMonthCode
+				,CAST(DATENAME(month, CONVERT(DATETIME, CONVERT(NVARCHAR, dbo.fnRKGetClosestFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)) + '-1-' + CONVERT(nvarchar, YEAR(@Date) + @Count))) AS CHAR(3)) + ' ' + RIGHT(CONVERT(nvarchar, YEAR(@Date) + @Count), 2)
+				,dbo.fnRKGetFutureMonthId(@FutureMarketId, CAST(DATENAME(month, CONVERT(DATETIME, CONVERT(NVARCHAR, dbo.fnRKGetClosestFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)) + '-1-' + CONVERT(nvarchar, YEAR(@Date) + @Count))) AS CHAR(3)) + ' ' + RIGHT(CONVERT(nvarchar, YEAR(@Date) + @Count), 2))
+				,LTRIM(RTRIM(strMonth)) + ' ' + Right(LTRIM(YEAR(@Date) + @Count),2)
 		FROM ##AllowedOptMonths
 		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
 		ORDER BY intMonthCode
 		
 		SET @Count = @Count + 1
+	END
+
+	DECLARE @MissingFutureMonths VARCHAR(4000)
+	SELECT @MissingFutureMonths = COALESCE(@MissingFutureMonths + ', ', '') + strFuturesMonth 
+	FROM ##FinalOptMonths
+	WHERE intFutureMonthId IS NULL
+	GROUP BY strFuturesMonth
+
+	DECLARE @OrphanOptionMonths VARCHAR(4000)
+	SELECT @OrphanOptionMonths = COALESCE(@OrphanOptionMonths + ', ', '') + strOptionMonth 
+	FROM ##FinalOptMonths
+	WHERE intFutureMonthId IS NULL
+	GROUP BY strOptionMonth
+
+	IF ISNULL(@MissingFutureMonths,'') <> '' AND ISNULL(@OrphanOptionMonths,'') <> ''
+	BEGIN
+		DECLARE @ErrorMsg NVARCHAR(4000)
+		SET @ErrorMsg = 'You need to create Futures Month: ' + @MissingFutureMonths +' to generate Option Months: ' + @OrphanOptionMonths;
+
+		BEGIN
+			RAISERROR(@ErrorMsg, 16, 1);
+		END
 	END
 	
 	IF OBJECT_ID('tempdb..#OptTemp') IS NOT NULL DROP TABLE #OptTemp
@@ -170,6 +202,7 @@ BEGIN TRY
 		, dtmSpotDate = CONVERT(DATETIME, NULL) 
 		, ysnExpired = 0
 		, intMonthCode
+		, intFutureMonthId
 	INTO #OptTemp
 	FROM  ##FinalOptMonths
 	WHERE ISNULL(strMonth,'') <> ''
@@ -193,7 +226,7 @@ BEGIN TRY
 			, intCommodityMarketId = @intCommodityMarketId
 			, strOMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear,2)
 			, strYear = Right(strYear,2)
-			, intFutureMonthId = dbo.fnRKGetFutureMonthId(@FutureMarketId, strYear, strMonthCode)
+			, t.intFutureMonthId
 			, ysnExpired = 0
 			, dtmExpirationDate = NULL
 			, strSymbol = @strOptSymbol + '' + strSymbol + '' + Right(strYear,2)
