@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[tblGRTransferStorage]
 (
-	[intTransferStorageId] INT NOT NULL IDENTITY,
+	[intTransferStorageId] INT NOT NULL IDENTITY(1,1),
     [strTransferStorageTicket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     [intEntityId] INT NOT NULL,
     [intCompanyLocationId] INT NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[tblGRTransferStorage]
     [intConcurrencyId] INT NOT NULL,
     [intUserId] INT NOT NULL,
     [intTransferLocationId] INT NULL,
-    CONSTRAINT [PK_tblGRTransferStorage_intTransferStorageId] PRIMARY KEY ([intTransferStorageId]), 
+    CONSTRAINT [PK_tblGRTransferStorage_intTransferStorageId] PRIMARY KEY CLUSTERED ([intTransferStorageId] ASC), 
     CONSTRAINT [FK_tblGRTransferStorage_intEntityId_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblGRTransferStorage_intCompanyLocationId_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId]),    
     CONSTRAINT [FK_tblGRTransferStorage_intStorageScheduleTypeId_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].tblGRStorageType (intStorageScheduleTypeId),
