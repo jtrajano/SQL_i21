@@ -62,7 +62,7 @@ BEGIN
 		SELECT intMonthId, @intFutureMarketId 
 		FROM @ValidateCurrentMonth V
 		INNER JOIN (
-			SELECT * FROM vyuRKGetFutureTradingMonthsInUse 
+			SELECT * FROM vyuRKGetOptionTradingMonthsInUse 
 			WHERE intFutureMarketId = @intFutureMarketId
 		)FUT ON V.strMonth = FUT.strMonthName
 
