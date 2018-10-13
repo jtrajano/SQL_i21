@@ -180,6 +180,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 			null intTicketId,
 			'' AS ticketNumber    
 	FROM(
+		--Own
 		SELECT  
 			CONVERT(VARCHAR(10),IT.dtmDate,110) dtmDate
 			,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) ,6) dblAdjustmentQty
@@ -201,6 +202,19 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 			AND C.intCommodityId = @intCommodityId 
 			AND IT.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IT.intItemId ELSE @intItemId END 
 			AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+
+		--Storage
+		UNION ALL
+		SELECT
+			CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			,round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			,IA.strAdjustmentNo strAdjustmentNo
+			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
+		FROM tblICInventoryAdjustment IA
+			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+		WHERE IAD.intOwnershipType = 2 --Storage
+			AND IA.ysnPosted = 1
+
 		)a
 --UNION ALL--IR came from Delivery Sheet
 --SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
