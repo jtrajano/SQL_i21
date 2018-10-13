@@ -242,7 +242,10 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,i.strItemNo
 	,c.strLocationName
 	,ium.intCommodityUnitMeasureId as intCommodityUnitMeasureId
-	,i.intItemId as intItemId ,t.dtmTicketDateTime,t.intTicketId,t.strTicketNumber,a.strStorageTicketNumber strTicket
+	,i.intItemId as intItemId ,t.dtmTicketDateTime
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.intTransferStorageId else t.intTicketId end) intTicketId
+	,t.strTicketNumber
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket else a.strStorageTicketNumber end) strTicket
 	,gh.intInventoryReceiptId
 	,gh.intInventoryShipmentId
 	,ghm.strReceiptNumber
