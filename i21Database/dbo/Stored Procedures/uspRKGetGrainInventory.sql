@@ -604,8 +604,8 @@ FROM(
 			0.0 dblCountQty,
 			'' tranInvoiceNumber,
 			0.0 dblInvoiceQty,
-			intStorageHistoryId intInventoryReceiptId,
-			intStorageHistoryId intInventoryShipmentId,
+			intTransferStorageId intInventoryReceiptId,
+			intTransferStorageId intInventoryShipmentId,
 			null intInventoryAdjustmentId,
 			null intInventoryCountId,
 			null intInvoiceId,
@@ -625,7 +625,7 @@ FROM(
 					ABS(dblUnits)
 					ELSE 0 END AS dblOutQty
 				,S.intStorageScheduleTypeId
-				,SH.intStorageHistoryId
+				,SH.intTransferStorageId
 				,SH.strTransferTicket
 
 			from 
