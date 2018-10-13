@@ -63,6 +63,20 @@ FROM (
 	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end --and strTransactionId not like'%IS%'
 	and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
+UNION --Inventory Adjustment (Storage)
+SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,strAdjustmentNo  tranAdjNumber,
+		dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+		,0.0 tranDSInQty from(
+		SELECT
+			CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			,round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			,IA.strAdjustmentNo strAdjustmentNo
+			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
+		FROM tblICInventoryAdjustment IA
+			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+		WHERE IAD.intOwnershipType = 2 --Storage
+			AND IA.ysnPosted = 1)a
+
 UNION --Direct From Scale
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
