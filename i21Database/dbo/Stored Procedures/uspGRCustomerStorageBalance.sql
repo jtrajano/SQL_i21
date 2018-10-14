@@ -5,6 +5,8 @@ CREATE PROCEDURE uspGRCustomerStorageBalance
 	,@intDeliverySheetId INT = NULL
 	,@intCustomerStorageId INT = NULL
 	,@dblBalance DECIMAL(38,20)
+	,@intStorageTypeId INT = NULL
+	,@intStorageScheduleId INT = NULL
 	,@ysnDistribute BIT	
 	,@newBalance DECIMAL(38,20) OUTPUT
 AS
@@ -22,6 +24,8 @@ BEGIN TRY
 		UPDATE tblGRCustomerStorage
 		SET dblOpenBalance = dblOpenBalance + @dblBalance
 			, dblOriginalBalance = dblOriginalBalance + @dblBalance
+			, intStorageTypeId = @intStorageTypeId
+			, intStorageScheduleId = @intStorageScheduleId
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
 		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId

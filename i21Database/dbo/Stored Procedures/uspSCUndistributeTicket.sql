@@ -504,6 +504,8 @@ BEGIN TRY
 						,@intDeliverySheetId
 						,@intCustomerStorageId
 						,@dblBalance
+						,NULL
+						,NULL
 						,0
 						,@newBalance OUTPUT
 

@@ -19,15 +19,19 @@ DECLARE @intHoldCustomerStorageId INT
 DECLARE @newBalance DECIMAL(38,20) = 0
 DECLARE @storageHistoryData AS [StorageHistoryStagingTable]
 DECLARE @intStorageHistoryId AS INT
+DECLARE @intStorageTypeId AS INT
+DECLARE @intStorageScheduleId AS INT
 
 BEGIN TRY
 	--check if a storage already exists 
 	SELECT 
-		@intEntityId			= CS.intEntityId
-		, @intItemId			= CS.intItemId
-		, @intLocationId		= CS.intCompanyLocationId
-		, @dblBalance			= CS.dblQuantity
-		, @intDeliverySheetId	= CS.intDeliverySheetId
+		@intEntityId				= CS.intEntityId
+		, @intItemId				= CS.intItemId
+		, @intLocationId			= CS.intCompanyLocationId
+		, @dblBalance				= CS.dblQuantity
+		, @intDeliverySheetId		= CS.intDeliverySheetId
+		, @intStorageTypeId			= CS.intStorageTypeId
+		, @intStorageScheduleId		= CS.intStorageScheduleId
 	FROM @CustomerStorageStagingTable CS	
 
 	IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId)
@@ -41,6 +45,8 @@ BEGIN TRY
 				,@intDeliverySheetId = NULL
 				,@intCustomerStorageId = @intCustomerStorageId
 				,@dblBalance = @dblBalance
+				,@intStorageTypeId = @intStorageTypeId
+				,@intStorageScheduleId = @intStorageScheduleId
 				,@ysnDistribute = 1
 				,@newBalance = @newBalance OUT
 	END
