@@ -47,10 +47,10 @@ SELECT
 	,klcus_meter_prod_no
 	,klcus_consignment_group
 	,A4GLIdentity
-	,klcus_conv_factor
-	,klcus_qty_var_warn
-	,klcus_tank_serial_no
-	,klcus_tie_breaker
+	--,klcus_conv_factor
+	--,klcus_qty_var_warn
+	--,klcus_tank_serial_no
+	--,klcus_tie_breaker
 	,intItemId = ITEM.intItemId 
 	INTO #tmpOriginAllKeyLock
 FROM dbo.klcusmst  A
