@@ -8,6 +8,7 @@
 			,strTicketNumber = a.strTicketNumber
 			,strAgent = ltrim(rtrim(entityCreator.strName))
 			,intHours = b.intHours
+			,dblHours = b.intHours
 			,dtmDateCreated = b.dtmDate
 			,strJobCode = c.strItemNo
 			,ysnBillable = b.ysnBillable

@@ -6,6 +6,7 @@
 			,a.intAgentId
 			,a.intAgentEntityId
 			,a.intHours
+			,dblHours = a.intHours
 			,a.dtmDate
 			,a.dblRate
 			,a.strDescription
