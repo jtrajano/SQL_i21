@@ -6,7 +6,10 @@
 			,a.intAgentId
 			,a.intAgentEntityId
 			,a.intHours
+			,dblHours = a.intHours
 			,a.dtmDate
+			,a.dtmStartTime
+			,a.dtmEndTime
 			,a.dblRate
 			,a.strDescription
 			,a.strJIRALink
