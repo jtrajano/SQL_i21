@@ -20,6 +20,7 @@ AS
  CL.strLocationName,MO.ysnExpired,
  B.strBook,
  SB.strSubBook
+ ,CD.intContractStatusId
  FROM tblCTContractDetail CD  
  JOIN tblCTContractHeader CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CD.intContractStatusId <> 3 
  JOIN tblCTContractType CT on CT.intContractTypeId=CH.intContractTypeId 
@@ -53,7 +54,9 @@ AS
 		 CL.strLocationName,MO.ysnExpired,
 		 B.strBook,
 		 SB.strSubBook
+		 ,CD.intContractStatusId
  FROM tblCTContractHeader CH
+ INNER JOIN (SELECT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
  JOIN tblCTContractType CT on CT.intContractTypeId=CH.intContractTypeId 
  JOIN tblEMEntity E on E.intEntityId=CH.intEntityId 
  JOIN tblICCommodity COM on COM.intCommodityId=CH.intCommodityId
@@ -65,3 +68,4 @@ AS
  LEFT JOIN tblCTSubBook SB on SB.intSubBookId = (SELECT TOP 1 intSubBookId from tblCTContractDetail CD where CD.intContractHeaderId=CH.intContractHeaderId)
  WHERE  isnull(CH.ysnMultiplePriceFixation, 0) = 1 
  AND intContractHeaderId <> (SELECT top 1 intContractHeaderId FROM tblCTContractDetail CCD where  CCD.intContractStatusId <> 3 ))t  )t1
+ WHERE intContractStatusId <> 5
