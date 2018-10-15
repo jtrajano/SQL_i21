@@ -27,7 +27,7 @@ INSERT INTO @invalidPayables
 SELECT 
 	intVoucherPayableId
 	,strError
-FROM dbo.fnAPValidateVoucherPayableQty(@voucherPayables)
+FROM dbo.fnAPValidateVoucherPayableQty(@voucherPayable)
 
 SET @invalidCount = @@ROWCOUNT;
 
