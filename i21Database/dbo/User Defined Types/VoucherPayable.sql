@@ -119,5 +119,5 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	/*1099 Info*/
 	[int1099Form]					INT NULL,
 	[int1099Category]				INT NULL,
-	[dbl1099]						INT NULL
+	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0)
 )
