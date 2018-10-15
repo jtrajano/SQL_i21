@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherPayableQty]
 	@voucherPayable AS VoucherPayable READONLY,
 	@voucherPayableTax AS VoucherDetailTax READONLY,
-	@post BIT = NULL
+	@post BIT = NULL,
+	@throwError BIT = 1,
+	@error NVARCHAR(1000) = NULL OUTPUT
 AS
 BEGIN
 
@@ -15,7 +17,51 @@ BEGIN TRY
 
 DECLARE @deleted TABLE(intVoucherPayableId INT);
 DECLARE @taxDeleted TABLE(intVoucherPayableId INT);
+DECLARE @invalidPayables TABLE(intVoucherPayableId INT, strError NVARCHAR(1000));
+DECLARE @validPayables AS VoucherPayable
+DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
+
+--VALIDATE
+INSERT INTO @invalidPayables
+SELECT 
+	intVoucherPayableId
+	,strError
+FROM dbo.fnAPValidateVoucherPayableQty(@voucherPayables)
+
+SET @invalidCount = @@ROWCOUNT;
+
+SELECT TOP 1
+	@error = strError
+FROM @invalidPayables
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherValidPayables')) DROP TABLE #tmpVoucherValidPayables
+
+SELECT
+*
+INTO #tmpVoucherValidPayables
+FROM @voucherPayable C
+WHERE NOT EXISTS (
+	SELECT 1 FROM @invalidPayables D
+	WHERE D.intVoucherPayableId = C.intVoucherPayableId
+)
+
+ALTER TABLE #tmpVoucherValidPayables DROP COLUMN intVoucherPayableId
+INSERT INTO @validPayables
+SELECT * FROM #tmpVoucherValidPayables
+
+IF @error IS NOT NULL
+BEGIN
+	IF @throwError = 1 
+	BEGIN
+		RAISERROR(@error, 16, 1);
+		RETURN;
+	END
+	--IF NO VALID PAYABLES
+	IF @invalidCount = (SELECT COUNT(*) FROM @voucherPayable)
+	RETURN;
+END
+
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
@@ -24,7 +70,7 @@ ELSE SAVE TRAN @SavePoint
 	IF NOT EXISTS(
 		SELECT TOP 1 1
 			FROM tblAPVoucherPayable A
-			INNER JOIN @voucherPayable C
+			INNER JOIN @validPayables C
 				ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
 				AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
 				AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
@@ -33,11 +79,12 @@ ELSE SAVE TRAN @SavePoint
 				--AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
 				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
 				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1))
+				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
+		)
 		AND NOT EXISTS(
 			SELECT TOP 1 1
 			FROM tblAPVoucherPayableCompleted A
-			INNER JOIN @voucherPayable C
+			INNER JOIN @validPayables C
 				ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
 				AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
 				AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
@@ -46,9 +93,10 @@ ELSE SAVE TRAN @SavePoint
 				--AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
 				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
 				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1))
+				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
+		)
 	BEGIN
-		EXEC uspAPAddVoucherPayable @voucherPayable = @voucherPayable, @voucherPayableTax = @voucherPayableTax, @throwError = 1
+		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 		RETURN;
 	END
 
@@ -60,7 +108,7 @@ ELSE SAVE TRAN @SavePoint
 			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
 										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
-		INNER JOIN @voucherPayable C
+		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 			AND ISNULL(C.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
@@ -76,7 +124,7 @@ ELSE SAVE TRAN @SavePoint
 		UPDATE A
 			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
-		INNER JOIN @voucherPayable B
+		INNER JOIN @validPayables B
 			ON A.intVoucherPayableId = B.intVoucherPayableId
 		INNER JOIN tblAPVoucherPayable C
 			ON B.intVoucherPayableId = C.intVoucherPayableId
@@ -158,13 +206,13 @@ ELSE SAVE TRAN @SavePoint
 				,B.[strBillOfLading]				
 				,B.[int1099Form]					
 				,B.[str1099Form]					
-				,B.[int1099Category]				
+				,B.[int1099Category]
 				,B.[dbl1099]
 				,B.[str1099Type]					
 				,B.[ysnReturn]	
 				,B.[intVoucherPayableId]
 			FROM tblAPVoucherPayable B
-			INNER JOIN @voucherPayable C
+			INNER JOIN @validPayables C
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 				AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
 				AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
@@ -247,7 +295,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strBillOfLading]				
 			,[int1099Form]					
 			,[str1099Form]					
-			,[int1099Category]				
+			,[int1099Category]	
 			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]		
@@ -320,7 +368,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strBillOfLading]				
 			,[int1099Form]					
 			,[str1099Form]					
-			,[int1099Category]				
+			,[int1099Category]	
 			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]			
@@ -482,7 +530,7 @@ ELSE SAVE TRAN @SavePoint
 			-- FROM tblAPBillDetail A
 			-- INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
-			FROM @voucherPayable B
+			FROM @validPayables B
 			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
 					ON ISNULL(D.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 			AND ISNULL(D.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
@@ -564,7 +612,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strBillOfLading]				
 			,[int1099Form]					
 			,[str1099Form]					
-			,[int1099Category]				
+			,[int1099Category]	
 			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]	
@@ -637,7 +685,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strBillOfLading]				
 			,[int1099Form]					
 			,[str1099Form]					
-			,[int1099Category]				
+			,[int1099Category]		
 			,[dbl1099]		
 			,[str1099Type]					
 			,[ysnReturn]	
@@ -716,7 +764,7 @@ ELSE SAVE TRAN @SavePoint
 			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
 										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
-		INNER JOIN @voucherPayable C
+		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
 			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
 			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
@@ -732,7 +780,7 @@ ELSE SAVE TRAN @SavePoint
 		UPDATE A
 			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
-		INNER JOIN @voucherPayable B
+		INNER JOIN @validPayables B
 			ON A.intVoucherPayableId = B.intVoucherPayableId
 		INNER JOIN tblAPVoucherPayable C
 			ON B.intVoucherPayableId = C.intVoucherPayableId
@@ -799,8 +847,8 @@ ELSE SAVE TRAN @SavePoint
 			-- 	RETURN;
 			-- END
 
-			EXEC uspAPRemoveVoucherPayable @voucherPayable = @voucherPayable, @throwError = 1
-			EXEC uspAPAddVoucherPayable @voucherPayable = @voucherPayable, @throwError = 1
+			EXEC uspAPRemoveVoucherPayable @voucherPayable = @validPayables, @throwError = 1
+			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @throwError = 1
 		END
 
 	END

@@ -100,34 +100,49 @@ USING
 		,intUnitOfMeasureId					=	CASE WHEN A.intTransactionType = 1 
 													THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
 												ELSE A.intQtyToBillUOMId END
-		,dblUnitQty							=	A.dblQtyToBillUnitQty
-		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1 
-													THEN ISNULL(ctDetail.dblDetailQuantity, ISNULL(A.dblOrderQty, A.dblQtyToBillUnitQty))
-												ELSE A.dblOrderQty END
+		,dblUnitQty							=	CASE WHEN A.intTransactionType = 1
+													THEN 
+													(
+														CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+															THEN contractItemQtyUOM.dblUnitQty
+														ELSE A.dblQtyToBillUnitQty END
+													)
+												ELSE A.dblQtyToBillUnitQty END
+		/*Ordered and Received should always the same*/
+		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1
+													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
+														ELSE A.dblQuantityToBill END)
+												ELSE A.dblQuantityToBill END
 		,dblQtyReceived						=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
 		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
 		,dblContractCost					=	ISNULL(ctDetail.dblSeqPrice,0)
 		/*1099 info*/						
-		,int1099Form						=	(CASE WHEN patron.intEntityId IS NOT NULL 
-														AND item.intItemId > 0
-														AND item.ysn1099Box3 = 1
-														AND patron.ysnStockStatusQualified = 1 
-														THEN 4
-													WHEN entity.str1099Form = '1099-MISC' THEN 1
-													WHEN entity.str1099Form = '1099-INT' THEN 2
-													WHEN entity.str1099Form = '1099-B' THEN 3
-												ELSE 0 END)
-		,int1099Category					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
-														AND item.intItemId > 0
-														AND item.ysn1099Box3 = 1
-														AND patron.ysnStockStatusQualified = 1 
-														THEN 3
-												ELSE ISNULL(category1099.int1099CategoryId, 0) END
+		,int1099Form						=	ISNULL(A.int1099Form,
+													(CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.intItemId > 0
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 4
+														WHEN entity.str1099Form = '1099-MISC' THEN 1
+														WHEN entity.str1099Form = '1099-INT' THEN 2
+														WHEN entity.str1099Form = '1099-B' THEN 3
+													ELSE 0 END)
+												)
+		,int1099Category					=	ISNULL(A.int1099Category,
+													CASE 	WHEN patron.intEntityId IS NOT NULL 
+															AND item.intItemId > 0
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 3
+													ELSE ISNULL(category1099.int1099CategoryId, 0) END
+												)
+		,dbl1099							=	ISNULL(A.dbl1099, 0)
 		,ysn1099Printed						=	0
 		/*Exchange rate info*/				
 		,intCurrencyExchangeRateTypeId		=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId --if foreign currency
@@ -184,6 +199,18 @@ USING
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 	LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
+	LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractQtyItemUOM.intItemUOMId = ctDetail.intItemUOMId
+	--we should expect that if creating voucher, their record should exists in Add Payables
+	--if payable is fully vouchered, it should trap with fnAPValidateVoucherPayableQty
+	LEFT JOIN tblAPVoucherPayable vp 
+		ON ISNULL(vp.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
+			AND ISNULL(vp.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
+			AND ISNULL(vp.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
+			AND ISNULL(vp.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
+			AND ISNULL(vp.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
+			AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
+			AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
+			AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
 	ORDER BY A.intBillId ASC
 ) AS SourceData
 ON (1=0)
@@ -253,7 +280,7 @@ INSERT
 	,dblContractCost					
 	/*1099 info*/						
 	,int1099Form						
-	,int1099Category					
+	,int1099Category		
 	,dbl1099			
 	,ysn1099Printed						
 	/*Exchange rate info*/				
@@ -335,7 +362,7 @@ VALUES
 	,dblContractCost					
 	/*1099 info*/						
 	,int1099Form						
-	,int1099Category					
+	,int1099Category	
 	,dbl1099				
 	,ysn1099Printed						
 	/*Exchange rate info*/				

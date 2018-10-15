@@ -7133,6 +7133,7 @@
     <Build Include="dbo\Views\vyuARInvoiceScaleDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
     <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayableQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
