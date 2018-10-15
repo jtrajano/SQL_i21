@@ -107,6 +107,8 @@ BEGIN
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
 		WHERE B.intTransferStorageId = @intTransferStorageId
+		
+		DELETE FROM @StorageHistoryStagingTable
 		--insert history for the old (source) customer storage		
 		INSERT INTO @StorageHistoryStagingTable
 		(
@@ -122,8 +124,8 @@ BEGIN
 			,[strType]
 		)
 		SELECT
-			[intCustomerStorageId]	= intSourceCustomerStorageId
-			,[intTransferStorageId]	= intTransferStorageId
+			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
+			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
 			,[intContractHeaderId]	= CD.intContractHeaderId
 			,[dblUnits]				= -(SourceSplit.dblDeductedUnits)
 			,[dtmHistoryDate]		= GETDATE()
@@ -135,12 +137,14 @@ BEGIN
 		FROM tblGRTransferStorageSourceSplit SourceSplit
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = SourceSplit.intContractDetailId
-		WHERE intTransferStorageId = @intTransferStorageId
-		
+		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
+
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 		----END----TRANSACTIONS FOR THE SOURCE---------
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
+		DELETE FROM @StorageHistoryStagingTable
+		
 		INSERT INTO @CustomerStorageStagingTable
 		(
 			[intEntityId]				
@@ -309,6 +313,7 @@ BEGIN
 		INNER JOIN @newCustomerStorageIds B
 			ON B.transferSplitId = A.intTransferStorageSplitId
 		
+		DELETE FROM @StorageHistoryStagingTable
 		--for new customer storage
 		INSERT INTO @StorageHistoryStagingTable
 		(
