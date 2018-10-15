@@ -7136,6 +7136,7 @@
     <Build Include="dbo\Functions\fnAPValidateVoucherPayableQty.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCostTable.sql" />
     <Build Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
