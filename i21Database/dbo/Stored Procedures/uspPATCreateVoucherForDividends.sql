@@ -26,6 +26,11 @@ SET ANSI_WARNINGS OFF
 		dblLessFWT NUMERIC(18,6),
 		dblCheckAmount NUMERIC(18,6)
 	);
+	
+	CREATE TABLE #tempVoucherReference(
+		[intBillId] INT NOT NULL,
+		[intPatronageId] INT NOT NULL
+	)
 
 	BEGIN TRANSACTION
 
@@ -60,7 +65,8 @@ SET ANSI_WARNINGS OFF
 		WHERE DC.intDividendCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@dividendsCustomer)) AND DC.dblDividendAmount <> 0
 	END
 
-	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
+	DECLARE @voucherPayable AS VoucherPayable;
+	DECLARE @createdVouchersId AS NVARCHAR(MAX);
 	DECLARE @dtmDate DATETIME = GETDATE();
 	DECLARE @intDivCustId INT;
 	DECLARE @intPatronageItemId INT;
@@ -79,50 +85,52 @@ SET ANSI_WARNINGS OFF
 	INSERT INTO @dividendCustomerIds
 	SELECT intDividendCustomerId FROM #tempDivCust
 	
-	BEGIN TRY
-
 	SELECT TOP 1 @intAPClearingId = intAPClearingGLAccount FROM tblPATCompanyPreference;
+	
+	BEGIN TRY
+	
+		INSERT INTO @voucherPayable(
+				[intPartitionId]
+				,[intEntityVendorId]
+				,[intTransactionType]
+				,[strVendorOrderNumber]
+				,[strSourceNumber]
+				,[strMiscDescription]
+				,[intAccountId]
+				,[dblQuantityToBill]
+				,[dblCost]
+				,[int1099Form]
+				,[int1099Category]
+				,[dbl1099]
+		)
+		SELECT	Dividends.intDividendCustomerId
+				,Dividends.intCustomerId
+				,intTransactionType = 1
+				,strVendorOrderNumbe = '' + Dividends.strDividendNo + '-' + CONVERT(NVARCHAR(MAX),Dividends.intDividendCustomerId)
+				,Dividends.strDividendNo
+				,strMiscDescription = 'Patronage Dividend'
+				,intAccountId = @intAPClearingId
+				,dblQtyToBill = 1
+				,dblCost = ROUND(Dividends.dblDividendAmount, 2)
+				,int1099Form = 5
+				,int1099Category = 0
+				,dbl1099 = ROUND(Dividends.dblDividendAmount, 2)
+		FROM #tempDivCust Dividends
 
-	WHILE EXISTS(SELECT 1 FROM @dividendCustomerIds)
-	BEGIN
-		
-		SELECT TOP 1 
-			@intDivCustId = T.intDividendCustomerId,
-			@intCustomerId = T.intCustomerId, 
-			@dblDividentAmt = ROUND(T.dblDividendAmount, 2),
-			@strVenderOrderNumber = '' + T.strDividendNo + '-' + CONVERT(NVARCHAR(MAX),T.intDividendCustomerId)
-			FROM @dividendCustomerIds Div INNER JOIN #tempDivCust T ON T.intDividendCustomerId = Div.intId
+		EXEC [dbo].[uspAPCreateVoucher]
+			@voucherPayables = @voucherPayable
+			,@userId = @intUserId
+			,@throwError = 0
+			,@error = @strErrorMessage OUT
+			,@createdVouchersId = @createdVouchersId OUT
 
-		INSERT INTO @voucherDetailNonInventory([intAccountId],[intItemId],[strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost],[intTaxGroupId])
-			VALUES(@intAPClearingId,NULL,'Patronage Dividend', 1, 0, @dblDividentAmt, NULL)
-			
-		EXEC [dbo].[uspAPCreateBillData]
-			@userId	= @intUserId
-			,@vendorId = @intCustomerId
-			,@type = 1	
-			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = @shipToLocation
-			,@vendorOrderNumber = @strVenderOrderNumber
-			,@voucherDate = @dtmDate
-			,@billId = @intCreatedBillId OUTPUT
-
-			
-		UPDATE tblPATDividendsCustomer SET intBillId = @intCreatedBillId WHERE intDividendCustomerId = @intDivCustId;
-		UPDATE tblAPBillDetail SET int1099Form = 5, int1099Category = 0, dbl1099 = @dblDividentAmt WHERE intBillId = @intCreatedBillId;
-
-		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		IF (@strErrorMessage != '')
 		BEGIN
-			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
-
-			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
-
-			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-
-			EXEC [dbo].[uspAPUpdateVoucherTotal] @voucherId;
-			DELETE FROM @voucherId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
 		END
-		
+
+
 		IF(@batchId IS NULL)
 			EXEC uspSMGetStartingNumber 3, @batchId OUT
 
@@ -133,21 +141,31 @@ SET ANSI_WARNINGS OFF
 			@post = 1,
 			@recap = 0,
 			@isBatch = 0,
-			@param = NULL,
+			@param = @createdVouchersId,
 			@userId = @intUserId,
-			@beginTransaction = @intCreatedBillId,
-			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT
 
+		IF(@bitSuccess = 0)
+		BEGIN
+			SELECT TOP 1 @strErrorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intCreatedBillId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
+		END
 
-		DELETE FROM @dividendCustomerIds WHERE intId = @intDivCustId;
-		DELETE FROM @voucherDetailNonInventory;
-		SET @intCreatedBillId = NULL;
+		INSERT INTO #tempVoucherReference(intBillId, intPatronageId)
+		SELECT	intBillId
+				,CAST(SUBSTRING([strVendorOrderNumber], CHARINDEX('-', [strVendorOrderNumber], CHARINDEX('-',[strVendorOrderNumber])+1) + 1, CHARINDEX('-',REVERSE([strVendorOrderNumber]))) AS INT)
+		FROM tblAPBill Bill
+		WHERE intBillId IN (SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVouchersId))
 
-		SET @totalRecords = @totalRecords + 1;
-	END
-	
-	IF @@ERROR <> 0	GOTO Post_Rollback;
+		UPDATE DividendsCustomer
+		SET DividendsCustomer.intBillId = VoucherRef.intBillId
+		FROM tblPATDividendsCustomer DividendsCustomer
+		INNER JOIN #tempVoucherReference VoucherRef
+			ON VoucherRef.intPatronageId = DividendsCustomer.intDividendCustomerId
+
+		SELECT @totalRecords = COUNT(*)
+		FROM #tempDivCust
 
 	END TRY
 

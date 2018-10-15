@@ -351,50 +351,53 @@ BEGIN
 	--------------------- RETIRED STOCKS ------------------	
 		IF(@ysnPosted = 1)
 		BEGIN
-			DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
+			DECLARE @voucherPayable AS VoucherPayable;
 			DECLARE @intCustomerId AS INT;
 			DECLARE @dblNoOfShares AS NUMERIC(18,6);
 			DECLARE @dblPARValue AS NUMERIC(18,6);
 			DECLARE @strVenderOrderNumber AS NVARCHAR(50);
 			DECLARE @apClearing AS INT;
+			DECLARE @createdVouchersId NVARCHAR(MAX);
 
-			SELECT 
-				@intCustomerId = tempCS.intCustomerPatronId,
-				@dblNoOfShares = ROUND(tempCS.dblSharesNo,2),
-				@dblPARValue = ROUND(tempCS.dblParValue,2),
-				@strVenderOrderNumber = tempCS.strCertificateNo,
+			SELECT TOP 1
 				@apClearing = ComPref.intAPClearingGLAccount
-			FROM #tempCustomerStock tempCS
-			CROSS APPLY tblPATCompanyPreference ComPref
+			FROM tblPATCompanyPreference ComPref
 
-			INSERT INTO @voucherDetailNonInventory([intAccountId], [strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost])
-			VALUES(@apClearing, 'Patronage Retired Stock', @dblNoOfShares, 0, @dblPARValue);
+			INSERT INTO @voucherPayable(
+				[intEntityVendorId]
+				,[intTransactionType]
+				,[strVendorOrderNumber]
+				,[strSourceNumber]
+				,[strMiscDescription]
+				,[intAccountId]
+				,[dblQuantityToBill]
+				,[dblCost]
+			)
+			SELECT	intCustomerPatronId
+					,intTransactionType = 1
+					,strCertificateNo
+					,strRetireNo
+					,'Patronage Retired Stock'
+					,intAccountId = @apClearing
+					,ROUND(dblSharesNo, 2)
+					,ROUND(dblParValue, 2)
+			FROM #tempCustomerStock RetireStock
 
-			EXEC [dbo].[uspAPCreateBillData]
-				@userId	= @intUserId
-				,@vendorId = @intCustomerId
-				,@type = 1	
-				,@voucherNonInvDetails = @voucherDetailNonInventory
-				,@shipTo = NULL
-				,@vendorOrderNumber = @strVenderOrderNumber
-				,@voucherDate = @dateToday
-				,@billId = @intCreatedId OUTPUT
 
-			UPDATE tblPATRetireStock SET intBillId = @intCreatedId WHERE intRetireStockId = @intRetireStockId;
-			UPDATE tblAPBillDetail set intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedId;
+			EXEC  [dbo].[uspAPCreateVoucher]
+				@voucherPayables = @voucherPayable
+				,@userId = @intUserId
+				,@throwError = 0
+				,@error  = @error OUTPUT
+				,@createdVouchersId = @createdVouchersId OUTPUT
 
-			IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedId))
+			IF (@error != '')
 			BEGIN
-				INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedId;
-
-				EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
-
-				UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-				UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-
-				EXEC uspAPUpdateVoucherTotal @voucherId;
-				DELETE FROM @voucherId;
+				GOTO Post_Rollback;
 			END
+
+			UPDATE tblPATRetireStock SET intBillId = @createdVouchersId 
+			WHERE intRetireStockId = @intRetireStockId;
 
 			EXEC [dbo].[uspAPPostBill]
 				@batchId = @batchId2,
@@ -405,8 +408,8 @@ BEGIN
 				@isBatch = 0,
 				@param = NULL,
 				@userId = @intUserId,
-				@beginTransaction = @intCreatedId,
-				@endTransaction = @intCreatedId,
+				@beginTransaction = @createdVouchersId,
+				@endTransaction = @createdVouchersId,
 				@success = @success OUTPUT
 
 				UPDATE tblPATCustomerStock
