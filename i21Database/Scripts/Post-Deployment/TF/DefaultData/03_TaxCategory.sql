@@ -8,6 +8,30 @@ select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(0 AS NVARCHAR(10))
 from tblTFTaxCategory
 where intTaxAuthorityId = @TaxAuthorityId
 */
+
+PRINT ('Deploying AR Tax Category')
+
+DECLARE @TaxCategoryAR AS TFTaxCategory
+
+INSERT INTO @TaxCategoryAR(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Excise Tax Gasoline', intMasterId = 4170
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Excise Tax Diesel Clear', intMasterId = 4171
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Excise Tax LPG', intMasterId = 4172
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Excise Tax CNG', intMasterId = 4173
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Excise Tax Diesel Dyed', intMasterId = 4174
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'AR', @TaxCategories = @TaxCategoryAR
+
+DELETE @TaxCategoryAR
+
+GO
+
+
 PRINT ('Deploying ID Tax Category')
 
 DECLARE @TaxCategoryID AS TFTaxCategory

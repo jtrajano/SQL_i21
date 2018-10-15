@@ -7473,4 +7473,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\TX_Texas.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\AR_Arkansas.sql" />
+  </ItemGroup>
 </Project>
