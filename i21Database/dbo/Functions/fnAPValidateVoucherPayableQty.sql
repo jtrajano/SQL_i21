@@ -13,8 +13,8 @@ BEGIN
 	INSERT INTO @returnTable
 	--CHECK IF PAYABLE WAS FULLY VOUCHERED
 	SELECT TOP 1
-		'Payable id(' + CAST(A.intVoucherPayableId AS NVARCHAR) + ') do not have an available quantity to voucher.'
-		,A.intVoucherPayableId
+		'Payable id(' + CAST(C.intVoucherPayableId AS NVARCHAR) + ') do not have an available quantity to voucher.'
+		,C.intVoucherPayableId
 	FROM @voucherPayables C
 	WHERE 
 	NOT EXISTS (
