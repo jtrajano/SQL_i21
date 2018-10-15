@@ -81,8 +81,6 @@ FROM (
 		,strProducer = Shipment.strProducer
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
-		,dtmInvAsOn = GETDATE()
-		,dtmFtClsDate = CAST(NULL AS datetime)
 	FROM vyuLGInboundShipmentView Shipment
 	LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -158,8 +156,6 @@ FROM (
 		,strProducer = Spot.strProducer
 		,strCertification = Spot.strCertification
 		,strCertificationId = Spot.strCertificationId
-		,dtmInvAsOn = GETDATE()
-		,dtmFtClsDate = CAST(NULL AS datetime)
 	FROM vyuLGPickOpenInventoryLots Spot
 	LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
