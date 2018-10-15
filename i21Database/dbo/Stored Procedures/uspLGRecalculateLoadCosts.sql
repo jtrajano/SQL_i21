@@ -20,11 +20,20 @@ BEGIN TRY
 		--If Posted Inventory Receipt is present with Inventory Cost enabled, use IR Qty, otherwise use Load Schedule Qty
 		--If Cost is not present in the original contract, do not update
 		UPDATE LGC
-		SET dblAmount = CASE WHEN (CTC.intContractCostId IS NOT NULL)
-							THEN ISNULL(IRC.dblRate, LGC.dblRate) 
-								* CASE WHEN (LGC.strCostMethod = 'Amount') THEN 1 
-									ELSE ISNULL(IRC.dblOpenReceive, LGD.dblQuantity) END
+		SET dblAmount = ROUND (CASE WHEN (CTC.intContractCostId IS NOT NULL)
+							THEN 
+								CASE WHEN (IRC.dblAmount IS NOT NULL) 
+									THEN IRC.dblAmount
+									ELSE 		
+										LGC.dblRate 
+										* dbo.fnCalculateQtyBetweenUOM(
+											ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId), 
+											dbo.fnGetMatchingItemUOMId(LGD.intItemId, LGC.intItemUOMId), 
+											CASE WHEN LGD.intWeightItemUOMId IS NOT NULL THEN ISNULL(LGD.dblNet, 0) ELSE ISNULL(LGD.dblQuantity, 0) END 
+										)
+									END
 							ELSE LGC.dblAmount END
+						 ,2)
 			,dblRate = CASE WHEN (CTC.intContractCostId IS NOT NULL) 
 							THEN ISNULL(IRC.dblRate, LGC.dblRate)
 							ELSE LGC.dblRate END
@@ -41,17 +50,25 @@ BEGIN TRY
 					,IRC.strCostMethod 
 					,IRC.dblAmount
 					,IRC.ysnInventoryCost
-					,IRI.dblReceived
-					,IRI.dblOpenReceive
+					,IR.dblReceived
+					,IR.dblOpenReceive
+					,IR.dblNet
+					,IR.ysnPosted
 					FROM tblICInventoryReceiptCharge IRC
-					INNER JOIN tblICInventoryReceipt IR 
+					INNER JOIN 
+						(SELECT TOP 1 
+								IR.intInventoryReceiptId
+								,IRI.dblReceived
+								,IRI.dblOpenReceive
+								,IRI.dblNet
+								,IR.ysnPosted 
+							FROM tblICInventoryReceiptItem IRI
+							INNER JOIN tblICInventoryReceipt IR 
+								ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+							WHERE ysnPosted = 1 AND intSourceId IN (
+							SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId)
+						) IR
 						ON IR.intInventoryReceiptId = IRC.intInventoryReceiptId
-					INNER JOIN (SELECT TOP 1 * FROM tblICInventoryReceiptItem
-								WHERE intSourceId IN (
-								SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId)
-							) IRI
-						ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-					WHERE IR.ysnPosted = 1
 				) [IRC] --Join with Posted IR Costs on the same Item, Vendor, and Cost Method
 				ON LGC.intItemId = IRC.intChargeId
 				AND LGC.intVendorId = IRC.intEntityVendorId
@@ -80,6 +97,10 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadDetail LGD
 				ON LGD.intPContractDetailId = CTC.intContractDetailId
 				AND LGD.intLoadId = @intLoadId
+			LEFT JOIN tblICItemUOM IU
+				ON IU.intItemUOMId = LGD.intItemUOMId
+			LEFT JOIN tblICItemUOM WU
+				ON WU.intWeightUOMId = LGD.intWeightItemUOMId
 		WHERE LGC.intLoadCostId = @intLoadCostId
 
 		DELETE FROM #tmpLoadCost WHERE intLoadCostId = @intLoadCostId
