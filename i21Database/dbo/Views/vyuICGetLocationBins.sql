@@ -129,7 +129,7 @@ FROM
 						ELSE 
 							NULL 
 					END 						
-		FROM	tblICStorageLocation sl LEFT JOIN tblICItemStockUOM ItemStockUOM 
+		FROM	tblICItemStockUOM ItemStockUOM LEFT JOIN tblICStorageLocation sl
 					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
 		WHERE	ItemStockUOM.intItemId = Item.intItemId 
 				AND ItemStockUOM.intItemUOMId = StockUOM.intItemUOMId

@@ -28,10 +28,10 @@ SELECT
 FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
-	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
-	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId	
 	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
+	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
 	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
