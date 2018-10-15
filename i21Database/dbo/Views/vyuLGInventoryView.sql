@@ -33,6 +33,7 @@ FROM (
 		,strItemDescription = Shipment.strItemDescription
 		,strItemType = Shipment.strType
 		,strItemSpecification = Shipment.strItemSpecification
+		,strGrade = Shipment.strGrade
 		,strOrigin = Shipment.strOrigin
 		,strVessel = Shipment.strMVessel
 		,strDestinationCity = Shipment.strDestinationCity
@@ -80,6 +81,8 @@ FROM (
 		,strProducer = Shipment.strProducer
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
+		,dtmInvAsOn = GETDATE()
+		,dtmFtClsDate = CAST(NULL AS datetime)
 	FROM vyuLGInboundShipmentView Shipment
 	LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -112,6 +115,7 @@ FROM (
 		,strItemDescription = Spot.strItemDescription
 		,strItemType = Spot.strItemType
 		,strItemSpecification = Spot.strItemSpecification
+		,strGrade = Spot.strGrade
 		,strOrigin = Spot.strOrigin
 		,strVessel = '' COLLATE Latin1_General_CI_AS
 		,strDestinationCity = '' COLLATE Latin1_General_CI_AS
@@ -154,6 +158,8 @@ FROM (
 		,strProducer = Spot.strProducer
 		,strCertification = Spot.strCertification
 		,strCertificationId = Spot.strCertificationId
+		,dtmInvAsOn = GETDATE()
+		,dtmFtClsDate = CAST(NULL AS datetime)
 	FROM vyuLGPickOpenInventoryLots Spot
 	LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
