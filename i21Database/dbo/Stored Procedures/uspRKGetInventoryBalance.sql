@@ -74,8 +74,12 @@ SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,0.0 tr
 			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
 		FROM tblICInventoryAdjustment IA
 			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+			INNER JOIN tblICItem i on i.intItemId=IAD.intItemId
 		WHERE IAD.intOwnershipType = 2 --Storage
-			AND IA.ysnPosted = 1)a
+			AND IA.ysnPosted = 1
+			AND i.intCommodityId=@intCommodityId  
+			AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end
+			)a
 
 UNION --Direct From Scale
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
