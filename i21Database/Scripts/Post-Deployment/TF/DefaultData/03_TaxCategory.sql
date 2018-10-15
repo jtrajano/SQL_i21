@@ -467,6 +467,27 @@ DELETE @TaxCategorySC
 GO
 
 
+PRINT ('Deploying TX Tax Category')
+
+DECLARE @TaxCategoryTX AS TFTaxCategory
+
+INSERT INTO @TaxCategoryTX(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'TX', strTaxCategory = 'TX Excise Tax Diesel', intMasterId = 43129
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TX', strTaxCategory = 'TX Excise Tax Gasoline', intMasterId = 43130
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TX', strTaxCategory = 'TX Excise Tax CNG LNG', intMasterId = 43131
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TX', @TaxCategories = @TaxCategoryTX
+
+DELETE @TaxCategoryTX
+
+GO
+
+
 PRINT ('Deploying WA Tax Category')
 
 DECLARE @TaxCategoryWA AS TFTaxCategory
