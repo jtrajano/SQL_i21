@@ -212,8 +212,14 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
 		FROM tblICInventoryAdjustment IA
 			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+			INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
+			INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
 		WHERE IAD.intOwnershipType = 2 --Storage
 			AND IA.ysnPosted = 1
+			AND convert(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND IAD.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
+			--AND Itm.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
 
 		)a
 --UNION ALL--IR came from Delivery Sheet
