@@ -199,7 +199,7 @@ USING
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 	LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
-	LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractQtyItemUOM.intItemUOMId = ctDetail.intItemUOMId
+	LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractItemQtyUOM.intItemUOMId = ctDetail.intItemUOMId
 	--we should expect that if creating voucher, their record should exists in Add Payables
 	--if payable is fully vouchered, it should trap with fnAPValidateVoucherPayableQty
 	LEFT JOIN tblAPVoucherPayable vp 
