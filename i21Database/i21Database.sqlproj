@@ -7134,6 +7134,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
     <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
     <Build Include="dbo\Functions\fnAPValidateVoucherPayableQty.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCostTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

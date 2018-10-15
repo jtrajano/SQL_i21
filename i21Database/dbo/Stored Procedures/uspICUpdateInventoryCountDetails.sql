@@ -127,11 +127,7 @@ BEGIN
 			---- Convert the last cost from Stock UOM to stock.intItemUOMId
 			CASE 
 				WHEN il.intCostingMethod = 1 THEN 
-					dbo.fnGetItemAverageCost(
-						i.intItemId
-						, il.intItemLocationId
-						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-					)
+					AVERAGE.dblCost
 				WHEN il.intCostingMethod = 2 THEN 
 					dbo.fnCalculateCostBetweenUOM(
 						COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
@@ -195,6 +191,10 @@ BEGIN
 					AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 
 			ORDER BY dtmDate ASC
 		) FIFO 
+		OUTER APPLY(
+			SELECT MAX(dblAverageCost) dblCost
+			FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
+		) AVERAGE
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
