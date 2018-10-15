@@ -115,5 +115,9 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblFranchiseWeight]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblFranchiseAmount]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblActual]						DECIMAL(18,6) NOT NULL DEFAULT(0),
-	[dblDifference]					DECIMAL(18,6) NOT NULL DEFAULT(0)
+	[dblDifference]					DECIMAL(18,6) NOT NULL DEFAULT(0),
+	/*1099 Info*/
+	[int1099Form]					INT NULL,
+	[int1099Category]				INT NULL,
+	[dbl1099]						INT NULL
 )

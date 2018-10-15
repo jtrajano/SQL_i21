@@ -247,6 +247,7 @@ ELSE SAVE TRAN @SavePoint
 			,[int1099Form]					
 			,[str1099Form]					
 			,[int1099Category]				
+			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]		
 		)
@@ -319,6 +320,7 @@ ELSE SAVE TRAN @SavePoint
 			,[int1099Form]					
 			,[str1099Form]					
 			,[int1099Category]				
+			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]			
 		)
@@ -561,6 +563,7 @@ ELSE SAVE TRAN @SavePoint
 			,[int1099Form]					
 			,[str1099Form]					
 			,[int1099Category]				
+			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]	
 		)
@@ -633,6 +636,7 @@ ELSE SAVE TRAN @SavePoint
 			,[int1099Form]					
 			,[str1099Form]					
 			,[int1099Category]				
+			,[dbl1099]		
 			,[str1099Type]					
 			,[ysnReturn]	
 		)

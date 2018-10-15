@@ -254,6 +254,7 @@ INSERT
 	/*1099 info*/						
 	,int1099Form						
 	,int1099Category					
+	,dbl1099			
 	,ysn1099Printed						
 	/*Exchange rate info*/				
 	,intCurrencyExchangeRateTypeId		
@@ -335,6 +336,7 @@ VALUES
 	/*1099 info*/						
 	,int1099Form						
 	,int1099Category					
+	,dbl1099				
 	,ysn1099Printed						
 	/*Exchange rate info*/				
 	,intCurrencyExchangeRateTypeId		
