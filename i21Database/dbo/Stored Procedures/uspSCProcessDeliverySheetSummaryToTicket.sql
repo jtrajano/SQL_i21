@@ -121,7 +121,19 @@ BEGIN TRY
 		END
 		CLOSE splitCursor;  
 		DEALLOCATE splitCursor;
-		UPDATE tblSCTicket SET strTicketStatus = 'C' WHERE intTicketId = @intTicketId
+
+		UPDATE SC  
+		SET SC.strTicketStatus = 'C' 
+		,SC.intStorageScheduleTypeId = CASE WHEN StagingTable.splitCount > 1 THEN -4 ELSE StagingTable.intStorageScheduleTypeId END
+		,SC.strDistributionOption = CASE WHEN StagingTable.splitCount > 1 THEN 'SPL' ELSE StagingTable.strDistributionOption END
+		,SC.intStorageScheduleId = CASE WHEN StagingTable.splitCount > 1 THEN NULL ELSE StagingTable.intStorageScheduleId END
+		FROM tblSCTicket SC
+		OUTER APPLY(
+			SELECT (SELECT COUNT(intTicketId) FROM @splitTable) AS splitCount,intStorageScheduleTypeId,intStorageScheduleId,strDistributionOption
+			FROM @splitTable WHERE intTicketId = @intTicketId
+		) StagingTable
+		WHERE SC.intTicketId = @intTicketId
+
 		FETCH NEXT FROM ticketCursor INTO @intTicketId, @intEntityId, @dblNetUnits;
 	END
 	CLOSE ticketCursor;  
