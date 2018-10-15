@@ -7,7 +7,8 @@ SELECT
 	,strCustomerNumber				= C.strCustomerNumber
 	,intEntityCustomerId			= C.intEntityId
 	,strTransactionType				= I.strTransactionType
-	,strType						= CASE WHEN (I.strType = 'POS') THEN ISNULL(ISNULL(POS.strEODNo,POSINVOICE.strEODNo),'Standard') ELSE  ISNULL(I.strType, 'Standard') END
+	--,strType						= CASE WHEN (I.strType = 'POS') THEN ISNULL(ISNULL(POS.strEODNo,POSINVOICE.strEODNo),'Standard') ELSE  ISNULL(I.strType, 'Standard') END
+	,strType						= CASE WHEN (I.strType = 'POS') THEN ISNULL(POS.strEODNo,'Standard') ELSE  ISNULL(I.strType, 'Standard') END
 	,strPONumber					= I.strPONumber
 	,strTerm						= T.strTerm
 	,strBOLNumber					= I.strBOLNumber
@@ -209,33 +210,36 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
-OUTER APPLY (
-	SELECT TOP 1 strEODNo
-	FROM (
-		SELECT EOD.strEODNo
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-				  ,intSourceId
-			FROM tblARInvoice
-		) HD ON ID.intInvoiceId = HD.intInvoiceId
-		INNER JOIN (
-			SELECT intPOSId
-				  ,intInvoiceId
-				  ,intPOSLogId
-			FROM tblARPOS
-		) POS ON HD.intSourceId = POS.intPOSId
-		INNER JOIN(
-			SELECT intPOSLogId
-				  ,intPOSEndOfDayId
-			FROM tblARPOSLog
-		) POSLOG ON POSLOG.intPOSLogId = POS.intPOSLogId
-		INNER JOIN(
-			SELECT intPOSEndOfDayId
-				  ,strEODNo
-			FROM tblARPOSEndOfDay
-		) EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		GROUP BY ID.intInvoiceId, EOD.strEODNo
-	) EODNO (strEODNo)
-) POSINVOICE
+--OUTER APPLY (
+--	SELECT TOP 1 strEODNo
+--	FROM (
+--		SELECT EOD.strEODNo
+--		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
+--		INNER JOIN (
+--			SELECT intInvoiceId
+--				  ,intSourceId
+--			FROM tblARInvoice
+--		) HD ON ID.intInvoiceId = HD.intInvoiceId
+--		INNER JOIN (
+--			SELECT intPOSId
+--				  ,intInvoiceId
+--				  ,intPOSLogId
+--			FROM tblARPOS
+--		) POS ON HD.intSourceId = POS.intPOSId
+--		INNER JOIN(
+--			SELECT intPOSLogId
+--				  ,intPOSEndOfDayId
+--			FROM tblARPOSLog
+--		) POSLOG ON POSLOG.intPOSLogId = POS.intPOSLogId
+--		INNER JOIN(
+--			SELECT intPOSEndOfDayId
+--				  ,strEODNo
+--			FROM tblARPOSEndOfDay
+--		) EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+--		WHERE ID.intInvoiceId = I.intInvoiceId
+--		GROUP BY ID.intInvoiceId, EOD.strEODNo
+--	) EODNO (strEODNo)
+--) POSINVOICE
+
+
+
