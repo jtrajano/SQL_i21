@@ -1040,6 +1040,7 @@ BEGIN
 							,[ysnLeakCheckRequired]
 							,[dblOriginalPercentLeft]		
 							,[dtmReceivedDate]
+							,intPaymentId
 						)	
 						SELECT TOP 1 
 							[intDispatchId]				= [intDispatchID]
@@ -1083,6 +1084,7 @@ BEGIN
 							,[ysnLeakCheckRequired]
 							,[dblOriginalPercentLeft]
 							,[dtmReceivedDate]
+							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
 					END

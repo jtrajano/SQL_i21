@@ -321,6 +321,7 @@ BEGIN
 							,[ysnLeakCheckRequired]		
 							,[dblOriginalPercentLeft]
 							,[dtmReceivedDate]
+							,intPaymentId
 						)	
 						SELECT TOP 1 
 							[intDispatchID]				= [intDispatchId]
@@ -363,6 +364,7 @@ BEGIN
 							,[ysnLeakCheckRequired]
 							,[dblOriginalPercentLeft]		
 							,[dtmReceivedDate]
+							,intPaymentId
 						FROM tblTMDispatchHistory
 						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
 
@@ -676,6 +678,7 @@ BEGIN
 							,[ysnLeakCheckRequired]	
 							,dblOriginalPercentLeft	
 							,[dtmReceivedDate]
+							,intPaymentId
 						)	
 						SELECT TOP 1 
 							[intDispatchID]				= [intDispatchId]
@@ -718,6 +721,7 @@ BEGIN
 							,[ysnLeakCheckRequired]		
 							,dblOriginalPercentLeft
 							,[dtmReceivedDate]
+							,intPaymentId
 						FROM tblTMDispatchHistory
 						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
 
