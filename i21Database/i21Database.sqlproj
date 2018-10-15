@@ -7131,6 +7131,8 @@
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
     <Build Include="dbo\Views\vyuARInvoiceScaleDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
