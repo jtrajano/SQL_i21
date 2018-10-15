@@ -14,7 +14,10 @@
 			,a.strDescription
 			,a.strJIRALink
 			,a.intInvoiceId
+			,dtmInvoiceDate = c.dtmDate
+			,a.intBillId
 			,a.ysnBillable
+			,a.ysnReimburseable
 			,a.ysnBilled
 			,a.dtmBilled
 			,a.intCreatedUserId
@@ -29,11 +32,13 @@
 			,a.intItemUOMId
 			,strAgent = b.strName
 			,strInvoiceNumber = c.strInvoiceNumber
+			,strVoucherNumber = l.strVendorOrderNumber
 			,strCreatedUserName = d.strName
 			,strJobCode = e.strJobCode
 			,strCurrency = f.strCurrency
 			,strCurrencyExchangeRateType = g.strCurrencyExchangeRateType
 			,strDate = convert(nvarchar(20), a.dtmDate, 101)
+			,strInvoiceDate = convert(nvarchar(20), c.dtmDate, 101)
 			,strItemNo = h.strItemNo
 			,intTimeEntryId = 1
 			,i.strTicketNumber
@@ -53,3 +58,4 @@
 			left join tblHDTicket i on i.intTicketId = a.intTicketId
 			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
 			left join tblHDProject k on k.intProjectId = j.intProjectId
+			left join tblAPBill l on l.intBillId = a.intBillId
