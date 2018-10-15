@@ -243,9 +243,9 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,c.strLocationName
 	,ium.intCommodityUnitMeasureId as intCommodityUnitMeasureId
 	,i.intItemId as intItemId ,t.dtmTicketDateTime
-	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.intTransferStorageId else t.intTicketId end) intTicketId
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.intTransferStorageId when gh.strType = 'Settlement' then gh.intSettleStorageId else t.intTicketId end) intTicketId
 	,t.strTicketNumber
-	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket else a.strStorageTicketNumber end) strTicket
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket  when gh.strType = 'Settlement' then gh.strSettleTicket else a.strStorageTicketNumber end) strTicket
 	,gh.intInventoryReceiptId
 	,gh.intInventoryShipmentId
 	,ghm.strReceiptNumber
@@ -731,7 +731,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -829,7 +829,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -880,7 +880,7 @@ WHERE intLocationId IN (
 		[Delivery Date],
 		 Ticket,
 		strLocationName,r.strItemNo, @intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId
-		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicketNumber,dtmTicketDateTime
+		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicket,dtmTicketDateTime
 	FROM #tblGetStorageDetailByDate  r
 	WHERE ysnReceiptedStorage = 0
 		AND strOwnedPhysicalStock = 'Customer'
