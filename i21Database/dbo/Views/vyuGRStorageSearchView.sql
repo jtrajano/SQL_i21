@@ -65,7 +65,7 @@ SELECT TOP 100 PERCENT
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
-JOIN tblGRStorageType ST
+LEFT JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
 JOIN tblICItem Item 
 	ON Item.intItemId = CS.intItemId
@@ -76,7 +76,7 @@ JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 JOIN tblEMEntity E
 	ON E.intEntityId = CS.intEntityId
-JOIN tblGRStorageScheduleRule SR
+LEFT JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
 JOIN tblGRDiscountSchedule DS 
 	ON DS.intDiscountScheduleId = CS.intDiscountScheduleId
@@ -102,6 +102,4 @@ LEFT JOIN (
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
 	) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
-WHERE ISNULL(CS.strStorageType,'') <> 'ITR' 
-	AND ST.ysnCustomerStorage = 0
 ORDER BY CS.intCustomerStorageId
