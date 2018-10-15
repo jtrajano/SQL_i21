@@ -1011,7 +1011,8 @@ DECLARE  @AddDetailError NVARCHAR(MAX)
 
 SELECT TOP 1
 	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
-FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+FROM 
+	tblARCompanyPreference
 
 INSERT INTO @IntegrationLog
 	([intIntegrationLogId]
@@ -1363,7 +1364,7 @@ SELECT
 											END
 										ELSE CAST(0 AS BIT) END
     ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
-    ,[ysnProvisionalWithGL]         = @ImpactForProvisional
+    ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
 	,[ysnImportedAsPosted]			= 0

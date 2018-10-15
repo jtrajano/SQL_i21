@@ -120,6 +120,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -272,6 +274,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL

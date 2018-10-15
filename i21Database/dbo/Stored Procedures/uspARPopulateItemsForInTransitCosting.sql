@@ -124,7 +124,7 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARID.[strType] <> 'Provisional' AND ARID.[ysnProvisionalWithGL] = 0)
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
 		OR
 			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
@@ -180,7 +180,7 @@ LEFT OUTER JOIN
 WHERE
 	ICIT.[intFobPointId] IS NOT NULL
 	AND (
-			(ARID.[strType] <> 'Provisional' AND ARID.[ysnProvisionalWithGL] = 0)
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
 		OR
 			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
@@ -230,7 +230,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND [ysnIsUnposted] = 0			 
 WHERE
-	ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note')
+	(ARID.[strTransactionType] = 'Credit Note' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnFromProvisional] = 0))
 	AND ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intOriginalInvoiceId] IS NOT NULL 
@@ -271,7 +271,7 @@ INNER JOIN
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmPostDate], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
 	 FROM #ARPostInvoiceHeader INV
 	 WHERE
-		INV.[strTransactionType] IN ('Credit Memo', 'Credit Note')
+		(INV.[strTransactionType] = 'Credit Note' OR (INV.[strTransactionType] = 'Credit Memo' AND INV.[ysnFromProvisional] = 0))
 		AND INV.[intOriginalInvoiceId] IS NOT NULL 
 		AND INV.[intOriginalInvoiceId] <> 0
 			) ARI 

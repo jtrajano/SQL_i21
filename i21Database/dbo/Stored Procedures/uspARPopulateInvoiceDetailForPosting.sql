@@ -82,6 +82,8 @@ INSERT #ARPostInvoiceHeader
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -228,6 +230,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
     ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -258,7 +262,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnProvisionalWithGL]             = @ImpactForProvisional
+    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = @OneDecimal THEN @OneBit ELSE @ZeroBit END)
 
@@ -422,6 +426,8 @@ INSERT #ARPostInvoiceHeader
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -568,6 +574,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
     ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -598,7 +606,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnProvisionalWithGL]             = @ImpactForProvisional
+    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
@@ -748,6 +756,8 @@ INSERT #ARPostInvoiceHeader
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -894,6 +904,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
     ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -924,7 +936,7 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnProvisionalWithGL]             = @ImpactForProvisional
+    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
@@ -1073,6 +1085,8 @@ INSERT #ARPostInvoiceDetail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1219,6 +1233,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]         = ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1418,6 +1434,8 @@ INSERT #ARPostInvoiceDetail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1564,6 +1582,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]         = ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1817,6 +1837,8 @@ INSERT #ARPostInvoiceDetail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1959,6 +1981,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]         = ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]

@@ -65,7 +65,7 @@ DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 --DECLARE @PostingGLEntries AS RecapTableType
 
-IF @Post = 1 AND EXISTS(SELECT NULL FROM #ARPostInvoiceHeader WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
+IF @Post = 1 --AND EXISTS(SELECT NULL FROM #ARPostInvoiceHeader WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
 BEGIN
     INSERT INTO #ARInvoiceGLEntries
         ([dtmDate]
@@ -165,9 +165,10 @@ BEGIN
 			#ARPostInvoiceHeader
         WHERE
 			[intOriginalInvoiceId] IS NOT NULL
-			AND [intSourceId] IS NOT NULL 
-			AND intOriginalInvoiceId <> 0 
-			AND [intSourceId] = 2
+			AND [ysnFromProvisional] = 1
+			AND [ysnProvisionalWithGL] = 1 
+            AND [ysnPost] = 1
+			AND [strTransactionType] <> 'Credit Memo'
     ) P
     INNER JOIN (
         SELECT 

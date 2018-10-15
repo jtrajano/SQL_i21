@@ -41,6 +41,8 @@ RETURNS @returntable TABLE
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -219,6 +221,8 @@ BEGIN
         ,[dblBaseAmountDue]
         ,[dblPayment]
         ,[dblBasePayment]
+        ,[dblProvisionalAmount]
+        ,[dblBaseProvisionalAmount]
         ,[strComments]
         ,[strImportFormat]
         ,[intSourceId]
@@ -365,6 +369,8 @@ BEGIN
         ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
         ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
         ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+        ,[dblProvisionalAmount]				= ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+        ,[dblBaseProvisionalAmount]			= ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
         ,[strComments]                      = ARI.[strComments]
         ,[strImportFormat]                  = ARI.[strImportFormat]
         ,[intSourceId]                      = ARI.[intSourceId]
@@ -550,6 +556,8 @@ INSERT @Header
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -696,6 +704,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
     ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+    ,[dblProvisionalAmount]				= ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+    ,[dblBaseProvisionalAmount]			= ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -872,6 +882,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1018,6 +1030,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1217,6 +1231,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1363,6 +1379,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1616,6 +1634,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1758,6 +1778,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]

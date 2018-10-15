@@ -382,8 +382,9 @@ END
 DECLARE	@ImpactForProvisional BIT
 
 SELECT TOP 1
-	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
-FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+	 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
+FROM
+	tblARCompanyPreference
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
