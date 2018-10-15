@@ -224,7 +224,7 @@ FROM	tblICInventoryReceipt Receipt
 			SELECT	TOP 1 
 					b.strBillId
 					,b.intBillId
-					,b.dtmBillDate
+					,b.dtmDate as dtmBillDate
 			FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 						ON b.intBillId = bd.intBillId
 			WHERE	bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
