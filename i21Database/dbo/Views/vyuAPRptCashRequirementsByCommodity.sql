@@ -4,7 +4,7 @@ AS
 	SELECT
 		 CAST ( SUM(dblAmountDue) + SUM(dblTax) AS DECIMAL (18,2)) AS dblCommodityTotal,
 		 CAST (SUM(dblNetUnits) AS DECIMAL (18,2)) AS dblNetUnits,
-		 ISNULL(strCommodityCode, 'Non - Commodity'),
+		 ISNULL(strCommodityCode, 'Non - Commodity') as strCommodityCode,
 		 strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup),
 		  strCompanyAddress = (SELECT TOP 1 
 				   ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
