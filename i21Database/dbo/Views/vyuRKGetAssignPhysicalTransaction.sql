@@ -68,4 +68,4 @@ AS
  LEFT JOIN tblCTSubBook SB on SB.intSubBookId = (SELECT TOP 1 intSubBookId from tblCTContractDetail CD where CD.intContractHeaderId=CH.intContractHeaderId)
  WHERE  isnull(CH.ysnMultiplePriceFixation, 0) = 1 
  AND CH.intContractHeaderId <> (SELECT top 1 intContractHeaderId FROM tblCTContractDetail CCD where  CCD.intContractStatusId <> 3 ))t  )t1
- WHERE intContractStatusId <> 5
+ WHERE intContractStatusId NOT IN(3,5,6) 
