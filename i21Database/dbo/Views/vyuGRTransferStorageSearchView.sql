@@ -74,7 +74,7 @@ SELECT
 	,strStorageTicketNumber		= CSSplit.strStorageTicketNumber
 	,dblOriginalUnits			= TSplit.dblUnits
 	,dblDeductedUnits			= 0
-	,dblSplitPercent			= TSplit.dblSplitPercent
+	,dblSplitPercent			= 0
 	,dblOpenBalance				= CSSplit.dblOpenBalance
 	,intContractNumer			= CD.intContractHeaderId
 	,strContractNumber			= CH.strContractNumber
