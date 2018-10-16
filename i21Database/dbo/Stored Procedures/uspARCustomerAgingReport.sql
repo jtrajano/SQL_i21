@@ -140,12 +140,6 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
 							, @intEntityUserId = @intEntityUserId
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
-											 AND intEntityUserId = @intEntityUserId
-											 AND strAgingType = 'Summary'
-
 IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
 BEGIN
     DROP TABLE #AGEDBALANCES
@@ -159,12 +153,15 @@ WHERE	[fieldname] = 'strAgedBalances'
 IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
 	BEGIN
 		UPDATE tblARCustomerAgingStagingTable 
-		SET dbl0Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current') THEN ISNULL(dbl0Days, 0) ELSE 0 END
+		SET dblFuture   = 0
+		  , dbl0Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current') THEN ISNULL(dbl0Days, 0) ELSE 0 END
 		  , dbl10Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days') THEN ISNULL(dbl10Days, 0) ELSE 0 END
 		  , dbl30Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days') THEN ISNULL(dbl30Days, 0) ELSE 0 END
 		  , dbl60Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days') THEN ISNULL(dbl60Days, 0) ELSE 0 END
 		  , dbl90Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days') THEN ISNULL(dbl90Days, 0) ELSE 0 END
 		  , dbl91Days	= CASE WHEN EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days') THEN ISNULL(dbl91Days, 0) ELSE 0 END
+		  , dblCredits 	= 0
+		  , dblPrepayments	= 0
 		WHERE intEntityUserId = @intEntityUserId 
 		AND strAgingType = 'Summary'
 
@@ -187,6 +184,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 		WHERE intEntityUserId = @intEntityUserId 
 	END
 
+DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
+											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
+											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
+											 AND intEntityUserId = @intEntityUserId
+											 AND strAgingType = 'Summary'
 
 IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 	BEGIN
