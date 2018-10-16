@@ -248,6 +248,10 @@ BEGIN TRY
 		AND ysnLock = 1
 
 	DELETE
+	FROM dbo.tblMFWorkOrderRecipeSubstituteItem
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	DELETE
 	FROM dbo.tblMFWorkOrderRecipe
 	WHERE intWorkOrderId = @intWorkOrderId
 
