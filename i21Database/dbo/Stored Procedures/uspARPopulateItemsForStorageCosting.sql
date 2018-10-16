@@ -80,7 +80,7 @@ SELECT
 	 [intItemId]					= ARID.[intItemId]  
 	,[intItemLocationId]			= ARID.[intItemLocationId]
 	,[intItemUOMId]					= ARID.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]					= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
