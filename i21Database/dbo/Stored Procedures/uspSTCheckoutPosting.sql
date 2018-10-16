@@ -1222,7 +1222,6 @@ BEGIN
 
 
 
-
 				----------------------------------------------------------------------
 				-------------------------- PAYMENT OPTIONS --------------------------
 				----------------------------------------------------------------------
@@ -1443,7 +1442,7 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CPO.intCheckoutId = @intCheckoutId
-								AND CPO.dblAmount > 0						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
+								AND ISNULL(CPO.dblAmount, 0) > 0						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
@@ -2386,6 +2385,9 @@ BEGIN
 									SET @CreatedIvoices = ''
 
 									BEGIN TRY
+										--TEST
+										SELECT * FROM @EntriesForInvoice
+
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
 													@InvoiceEntries				= @EntriesForInvoice
