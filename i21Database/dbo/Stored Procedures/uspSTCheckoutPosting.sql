@@ -819,7 +819,7 @@ BEGIN
 											--,[ysnImportedFromOrigin]
 											--,[ysnImportedAsPosted]
 										)
-										SELECT 
+										SELECT DISTINCT
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
 											,[strType]					= @strInvoiceType
@@ -872,41 +872,54 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= CASE 
 																				-- PUMP TOTALS
-																				WHEN DT.intCategoryId = CPT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount
-																					  THEN 1
-																				WHEN DT.intCategoryId = CPT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount
-																					  THEN -1
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																					THEN 0
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																					THEN 1
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
+																					THEN -1
 
 																				-- ITEM MOVEMENTS
-																				ELSE 
-																					CASE
-																						WHEN (
-																								CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
-																																	SELECT SUM(dblTotalSales)
+																			    WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
 																																	FROM tblSTCheckoutItemMovements IM
 																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
 																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
 																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																	WHERE intCheckoutId = @intCheckoutId
+																																	WHERE IM.intCheckoutId = @intCheckoutId
 																																	AND CATT.intCategoryId = DT.intCategoryId
 																															   ),0)
 																								) AS NUMERIC(18, 6))
 																							) >= 1 
 																						THEN 1
-																					ELSE -1
-																					END
+																				ELSE -1 -- If not match on Pump Totals and Item Movements
 																		  END
 											,[dblDiscount]				= 0
 											,[dblPrice]					= CASE
 																				-- PUMP TOTALS
-																				WHEN DT.intCategoryId = CPT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount
-																					THEN DT.dblTotalSalesAmount - CPT.dblAmount
-																				WHEN DT.intCategoryId = CPT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount
-																					THEN CPT.dblAmount - DT.dblTotalSalesAmount
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																					THEN 0
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																					THEN DT.dblTotalSalesAmount - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
+																					THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount) - DT.dblTotalSalesAmount
 
 																				-- ITEM MOVEMENTS
-																				ELSE
-																					ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) >= 1 
+																						THEN (
+																								ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
 																																			SELECT SUM(dblTotalSales)
 																																			FROM tblSTCheckoutItemMovements IM
 																																			JOIN tblICItemUOM UOM 
@@ -919,6 +932,8 @@ BEGIN
 																																			AND CATT.intCategoryId = DT.intCategoryId
 																																		), 0)
 																																	) AS NUMERIC(18, 6)))
+																						)
+																				ELSE ISNULL(DT.dblTotalSalesAmount, 0) -- If not match on Pump Totals and Item Movements
 																		END
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
@@ -960,9 +975,9 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutDepartmetTotals DT
-								JOIN tblSTCheckoutPumpTotals CPT
-									ON DT.intCheckoutId = CPT.intCheckoutId
-									AND DT.intCategoryId = CPT.intCategoryId
+								--JOIN tblSTCheckoutPumpTotals CPT
+								--	ON DT.intCheckoutId = CPT.intCheckoutId
+									-- AND DT.intCategoryId = CPT.intCategoryId
 								JOIN tblICItem I 
 									ON DT.intItemId = I.intItemId
 								--JOIN tblICCategory CAT 
@@ -984,7 +999,7 @@ BEGIN
 								WHERE DT.intCheckoutId = @intCheckoutId
 								AND DT.dblTotalSalesAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
-								AND DT.dblTotalSalesAmount <> CPT.dblAmount -- This will Remove Department entry if it matches the amount and category of pump items
+								-- AND DT.dblTotalSalesAmount <> CPT.dblAmount -- This will Remove Department entry if it matches the amount and category of pump items
 
 								-- TRIAL for http://jira.irelyserver.com/browse/ST-1006
 								-- Rule: Remove Department entry if it matches the amount and category of pump items
