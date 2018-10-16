@@ -4,7 +4,7 @@ AS
 	SELECT
 		 CAST ( SUM(dblAmountDue) + SUM(dblTax) AS DECIMAL (18,2)) AS dblCommodityTotal,
 		 CAST (SUM(dblNetUnits) AS DECIMAL (18,2)) AS dblNetUnits,
-		 strCommodityCode,
+		 ISNULL(strCommodityCode, 'Non - Commodity'),
 		 strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup),
 		  strCompanyAddress = (SELECT TOP 1 
 				   ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
@@ -42,6 +42,6 @@ AS
 		APBD.intWeightUOMId,
 		APB.dblAmountDue
 	) commodityHeader 
-	WHERE strCommodityCode IS NOT NULL 
+	--WHERE strCommodityCode IS NOT NULL 
 	GROUP BY strCommodityCode
 GO
