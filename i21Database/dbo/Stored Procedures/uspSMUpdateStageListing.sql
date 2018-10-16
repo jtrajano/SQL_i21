@@ -125,6 +125,14 @@ BEGIN TRANSACTION
 	ON A.strControlId = B.strControlId AND A.strNamespace = B.strNamespace
 	WHERE ISNULL(B.strControlName, '') = '' 
 
+	-- Update Tab Name
+	UPDATE D SET D.strTabName = A.strTabName
+	FROM tblSMControlStage A
+	INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
+	INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
+	INNER JOIN tblSMControl D ON C.intScreenId = D.intScreenId AND A.strControlId = D.strControlId
+	WHERE A.strTabName <> ''
+
 	-- Delete control(s) staging that doesn't have conflicts
 	DELETE FROM tblSMControlStage WHERE ISNULL(strChange, '') = ''
 	
