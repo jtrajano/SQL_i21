@@ -13,8 +13,8 @@ SELECT	DISTINCT
 			,0 AS intBillId --Bill.intBillId 
 			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
 			,dblAmountPaid = ISNULL(bill.dblPayment,0)
-			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
-			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
+			,dblTotal = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN  ABS(ISNULL(dblReceiptLineTotal + dblReceiptTax,0)) ELSE ISNULL(dblReceiptLineTotal + dblReceiptTax,0)  END 
+			,dblAmountDue =  CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0)) ELSE ISNULL(dblItemsPayable + dblTaxesPayable,0) END
 			,dblVoucherAmount = CASE 
 								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
 								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
@@ -29,12 +29,12 @@ SELECT	DISTINCT
 			,ysnPaid
 			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-			,dblQtyToReceive = dblReceiptQty
+			,dblQtyToReceive = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(dblReceiptQty) ELSE dblReceiptQty END
 			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
-			,dblQtyToVoucher = dblOpenQty
+			,dblQtyToVoucher = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(dblOpenQty) ELSE dblOpenQty END 
 			,dblAmountToVoucher = CASE 
-									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - ISNULL((totalVouchered.dblTotal),0),0)
-									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
+									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN  ISNULL((totalVouchered.dblTotal),0)
+									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN  CASE WHEN bill.intTransactionType = 3 THEN  ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0)) ELSE ISNULL(dblItemsPayable + dblTaxesPayable,0) END
 									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
 			,dblChargeAmount = 0
 			,strContainer = strContainerNumber
@@ -66,7 +66,13 @@ SELECT	DISTINCT
 				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
 			OUTER APPLY (
-				SELECT strTerm,ysnPosted,ysnPaid,A.dtmDueDate,dblAmountDue,A.dblPayment FROM dbo.tblAPBill A 
+					SELECT strTerm,
+					   ysnPosted,
+					   ysnPaid,
+					   A.dtmDueDate,
+					   dblAmountDue,
+					   A.dblPayment,
+					   A.intTransactionType FROM dbo.tblAPBill A 
 				INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
@@ -76,6 +82,8 @@ SELECT	DISTINCT
 			OUTER APPLY (
 				SELECT 
 					SUM(dblTotal) + SUM(dblTax) AS dblTotal
+					,SUM(dblQtyReceived) AS dblQtyReceived
+					,SUM(dblQtyOrdered) AS dblQtyOrdered
 				FROM dbo.tblAPBillDetail A
 				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 				GROUP BY intInventoryReceiptItemId 
@@ -115,7 +123,7 @@ SELECT	DISTINCT
 			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
 			,dblQtyToVoucher = dblOpenQty
 			,dblAmountToVoucher = CASE 
-									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - ISNULL((totalVouchered.dblTotal),0),0)
+									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax)	,0)
 									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
 									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
 			,dblChargeAmount = 0
