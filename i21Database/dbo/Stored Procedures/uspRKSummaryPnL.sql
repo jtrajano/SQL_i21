@@ -352,18 +352,17 @@ DECLARE @Summary AS TABLE (
 					ELSE dblContractMargin END end) as dblInitialMargin
 			,ysnExpired
 		FROM(select *,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin from(
-		SELECT DISTINCT t.*,fm.dblContractSize,(select dblMinAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		SELECT DISTINCT t.*,fm.dblContractSize,(select top 1 dblMinAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
 		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMinAmount,
-		(select dblMaxAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		(select top 1 dblMaxAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
 		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMaxAmount,
-		(select dblPercenatage from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		(select top 1 dblPercenatage from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
 		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPercenatage,
-		(select dblPerFutureContract from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
+		(select top 1 dblPerFutureContract from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId 
 		and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPerFutureContract from @Summary t 
 		join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber
 		join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName
 		join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId
-
 		JOIN tblRKBrokerageCommission bc on bc.intBrokerageAccountId= ba.intBrokerageAccountId)t )t1)t2
 		group by intFutureMarketId,	intFutureMonthId,strFutMarketName,strFutureMonth,strName,ysnExpired
 		ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC
