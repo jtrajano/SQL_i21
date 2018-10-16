@@ -24,6 +24,9 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
+--MAKE SURE TO ADD FIRST TO THE PAYALBES THE VOUCHER DETAIL BEING ADDED
+EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @post = NULL, @throwError = @throwError, @error = @error OUT
+
 MERGE INTO tblAPBillDetail AS destination
 USING
 (
