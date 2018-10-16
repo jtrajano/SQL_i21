@@ -139,7 +139,7 @@ BEGIN
 			ON CD.intContractDetailId = SourceSplit.intContractDetailId
 		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId		
 		----END----TRANSACTIONS FOR THE SOURCE---------
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
@@ -179,6 +179,7 @@ BEGIN
 			,[intItemId]				
 			,[intItemUOMId]
 			,[intTransferStorageSplitId]
+			,[intUnitMeasureId]
 		)	
 		SELECT 
 			[intEntityId]					= TransferStorageSplit.intEntityId
@@ -213,6 +214,7 @@ BEGIN
 			,[intItemId]					= CS.intItemId
 			,[intItemUOMId]					= CS.intItemUOMId
 			,[intTransferStorageSplitId]	= TransferStorageSplit.intTransferStorageSplitId
+			,[intUnitMeasureId]				= (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CS.intItemUOMId)
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -264,6 +266,7 @@ BEGIN
 			,[strStorageTicketNumber]
 			,[intItemId]
 			,[intItemUOMId]
+			,[intUnitMeasureId]
 		)
 		VALUES
 		(
@@ -299,7 +302,8 @@ BEGIN
 			,[intCurrencyId]			
 			,[strTransactionNumber]		
 			,[intItemId]				
-			,[intItemUOMId]				
+			,[intItemUOMId]		
+			,[intUnitMeasureId]		
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
@@ -448,6 +452,9 @@ BEGIN
 			FETCH NEXT FROM c INTO @intCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;
+
+		--strTransferTicket is being used by RM, we need to update the strTransferTicket so that they won't to look at our table just to get its corresponding string
+		UPDATE tblGRStorageHistory SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId)
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION
