@@ -36,8 +36,8 @@ DECLARE @batchId NVARCHAR(40);
 --  VALIDATE REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
 DECLARE @invalidRefundCustomer TABLE(
-	[strErrorMsg] NVARCHAR(MAX),
-	[intRefundId] INT
+	[intRefundId] INT,
+	[strErrorMsg] NVARCHAR(MAX)
 )
 
 IF(@ysnPosted = 1)
@@ -64,8 +64,8 @@ BEGIN
 	IF(ISNULL(@ysnRecap, 0) = 0)
 	BEGIN
 	INSERT INTO @invalidRefundCustomer
-	SELECT	strError,
-			intTransactionId
+	SELECT	intTransactionId,
+			strError
 	FROM [dbo].[fnPATValidateAssociatedTransaction](@intRefundId, 5, default)
 	END
 END
