@@ -398,31 +398,45 @@ DECLARE @tblSettlementPrice TABLE (
 		,intFuturePriceCurrencyId INT
 )
 
+DECLARE @SpotMonthId INT,
+	@MarketId INT
+
+SELECT TOP 1 @MarketId = intFutureMarketId
+FROM tblRKCommodityMarketMapping
+WHERE intCommodityId = @intCommodityId
+
+SELECT TOP 1 @SpotMonthId = intFutureMonthId
+FROM tblRKFuturesMonth
+WHERE ysnExpired = 0  AND intFutureMarketId = @MarketId and CONVERT(DATETIME,'01 '+strFutureMonth) > getdate()
+ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC
+
+
+
 INSERT INTO @tblSettlementPrice 
 SELECT DISTINCT 
-	intContractDetailId
-	,case when isnull(ffm.ysnExpired,0)=0  then
+	intContractDetailId,
+	--,case when isnull(ffm.ysnExpired,0)=0  then
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId, 												
 												(	SELECT TOP 1  dblLastSettle
 												FROM tblRKFuturesSettlementPrice p
 												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-												WHERE p.intFutureMarketId = cd.intFutureMarketId AND pm.intFutureMonthId = cd.intFutureMonthId
+												WHERE p.intFutureMarketId = cd.intFutureMarketId AND pm.intFutureMonthId = CASE WHEN ISNULL(cd.ysnExpired, 0) = 1 THEN @SpotMonthId ELSE cd.intFutureMonthId END
 													AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
 												ORDER BY dtmPriceDate DESC)	/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-			else
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId,
-							case WHEN ffm.ysnExpired = 0 THEN cd.intFutureMonthId else (
-									SELECT TOP 1 intFutureMonthId
-									FROM tblRKFuturesMonth FuMo
-									WHERE dtmFutureMonthsDate > (
-											SELECT top 1 dtmFutureMonthsDate
-											FROM tblRKFuturesMonth mo
-											WHERE mo.intFutureMonthId = ffm.intFutureMonthId AND ffm.ysnExpired = 0 AND mo.intFutureMarketId = cd.intFutureMarketId
-											) AND FuMo.ysnExpired = 0 AND FuMo.intFutureMarketId = cd.intFutureMarketId
-									ORDER BY intFutureMarketId,dtmFutureMonthsDate ASC
-									) end
-			/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END) 
-	  end
+			--else
+			--	dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId,
+			--				case WHEN ffm.ysnExpired = 0 THEN cd.intFutureMonthId else (
+			--						SELECT TOP 1 intFutureMonthId
+			--						FROM tblRKFuturesMonth FuMo
+			--						WHERE dtmFutureMonthsDate > (
+			--								SELECT top 1 dtmFutureMonthsDate
+			--								FROM tblRKFuturesMonth mo
+			--								WHERE mo.intFutureMonthId = CASE WHEN ISNULL(ysnExpired, 0) = 1 THEN @SpotMonthId ELSE ffm.intFutureMonthId END AND ffm.ysnExpired = 0 AND mo.intFutureMarketId = cd.intFutureMarketId
+			--								) AND FuMo.ysnExpired = 0 AND FuMo.intFutureMarketId = cd.intFutureMarketId
+			--						ORDER BY intFutureMarketId,dtmFutureMonthsDate ASC
+			--						) end
+			--/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END) 
+	  --end
 	 ,dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, PUOM.intCommodityUnitMeasureId, 
 								cd.dblFutures / CASE WHEN c1.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 	 ,fm.intCurrencyId
