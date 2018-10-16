@@ -875,7 +875,7 @@ BEGIN
 				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,Cur.strCurrency,strName strCustomerReference
 				FROM tblAPBill B
 				JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-				JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL
+				JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
 				JOIN tblICCommodity c on I.intCommodityId = c.intCommodityId
 				JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
 				JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId = B.intShipToId
@@ -942,7 +942,7 @@ BEGIN
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency)
 
-	select strCommodityCode,'NP Un-Paid Quantity' strType,dblTotal/case when isnull(dblUnitCost,0)=0 then 1 else dblUnitCost end,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
+	select strCommodityCode,'NP Un-Paid Quantity' strType,dblQtyReceived,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency
 					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
@@ -1055,7 +1055,7 @@ BEGIN
 				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,Cur.strCurrency,strName strCustomerReference
 				FROM tblAPBill B
 					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL
+					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
 					JOIN tblICCommodity c on I.intCommodityId = c.intCommodityId
 					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
 					JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId = B.intShipToId
@@ -1125,7 +1125,7 @@ BEGIN
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId)
 
-	select strCommodityCode,'NP Un-Paid Quantity' strType,dblTotal/case when isnull(dblUnitCost,0)=0 then 1 else dblUnitCost end,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
+	select strCommodityCode,'NP Un-Paid Quantity' strType,dblQtyReceived,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId
 					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
