@@ -45,6 +45,7 @@ SELECT
 	,strComments			= SO.strComments
 	,strStatus				=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured' END	
 	,strSalesOrderOriginId  =  SO.strSalesOrderOriginId
+	,strBillToLocationName	= SO.strBillToLocationName
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT OUTER JOIN (
 	 SELECT intEntityId
