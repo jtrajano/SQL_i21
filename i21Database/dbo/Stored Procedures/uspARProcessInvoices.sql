@@ -306,7 +306,11 @@ BEGIN
 		,@ShipViaId					= [intShipViaId]			
 		,@EntitySalespersonId		= [intEntitySalespersonId]				
 		,@PONumber					= [strPONumber]				
-		,@BOLNumber					= [strBOLNumber]				
+		,@BOLNumber					= [strBOLNumber]
+		,@AccountId					= [intAccountId]
+		,@FreightTermId				= [intFreightTermId]
+		,@PaymentMethodId			= [intPaymentMethodId]
+		,@InvoiceOriginId			= [strInvoiceOriginId]					
 		
 	FROM 
 		#EntriesForProcessing
