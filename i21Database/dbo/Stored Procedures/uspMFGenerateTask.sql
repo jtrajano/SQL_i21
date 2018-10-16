@@ -1173,10 +1173,6 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		DELETE
-		FROM tblMFTask
-		WHERE intOrderHeaderId = @intOrderHeaderId
-
 		DECLARE @tblPutAwayLot TABLE (
 			intLotRecordId INT Identity(1, 1)
 			,intLotId INT
@@ -1191,6 +1187,13 @@ BEGIN TRY
 		FROM tblMFOrderManifest OM
 		JOIN tblICLot L ON L.intLotId = OM.intLotId
 		WHERE intOrderHeaderId = @intOrderHeaderId
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFTask T
+				JOIN tblICLot L1 on L1.intLotId=T.intLotId
+				WHERE T.intOrderHeaderId = @intOrderHeaderId
+					AND L1.strLotNumber = L.strLotNumber
+				)
 
 		SELECT @intLotRecordId = MIN(intLotRecordId)
 		FROM @tblPutAwayLot

@@ -1,1582 +1,473 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransfer]
 (
-	@strXml NVARCHAR(MAX)
+	@intTransferStorageId INT,
+	@intUserId INT
 )
 AS
-BEGIN TRY
-    SET NOCOUNT ON
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
-		
-	DECLARE @intCustomerStorageId INT
-	DECLARE @NewCustomerStorageId INT
-	DECLARE @ItemEntityid INT
-	DECLARE @ItemCompanyLocationId INT
-	DECLARE @ItemStorageType INT
-	DECLARE @ItemStorageSchedule INT	
-	DECLARE @ItemBalance DECIMAL(24,10)
-	DECLARE @ItemContractBalance DECIMAL(24,10)
-	DECLARE @TicketNo Nvarchar(20)
-	DECLARE @TransferTicketNumber Nvarchar(20)
-	DECLARE @ActionCustomer INT
-		,@Percent DECIMAL(24,10)
-		,@ActionOpenBalance DECIMAL(24,10)
-		,@ActionStorageTypeId INT
-		,@ActionStorageScheduleId INT
-		,@ActionCompanyLocationId INT
-		
-	DECLARE @UserKey INT
-	--DECLARE @UserName NVARCHAR(100)	
-	DECLARE @InventoryStockUOM Nvarchar(50)
-	DECLARE @ItemsToMoveKey INT
-	DECLARE @ActionKey INT
-	DECLARE @ItemLocationName NVARCHAR(100)
-	DECLARE @ItemCustomerName NVARCHAR(200)
-	DECLARE @ItemStorageTypeDescription NVARCHAR(50)
-	DECLARE @ItemStorageScheduleId NVARCHAR(50)
-	DECLARE @ItemContractHeaderId INT
-	DECLARE @ItemContractDetailId INT
-	DECLARE @ActionLocationName NVARCHAR(100)
-	DECLARE @ActionStorageTypeDescription NVARCHAR(50)
-	DECLARE @ActionCustomerName NVARCHAR(200)
-	DECLARE @UnitsToReduce DECIMAL(18,6)
-	DECLARE @CurrentItemOpenBalance DECIMAL(24,10)	
-	DECLARE @intItemId INT
-	DECLARE @intItemLocationId INT
-	DECLARE @intActionLocationId INT
-	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
-	DECLARE @dblStorageDueTotalPerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)	
-	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
-	DECLARE @ActionContractHeaderId INT
-	DECLARE @ActionontractDetailId INT
+BEGIN
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF	
 
-	DECLARE @intUnitMeasureId INT
+	DECLARE @ErrMsg AS NVARCHAR(MAX)
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @newCustomerStorageIds AS TABLE (storageId INT, transferSplitId INT)
+	DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
+	DECLARE @CurrentItemOpenBalance DECIMAL(38,20)
+	DECLARE @intTransferContractDetailId INT
+	DECLARE @dblTransferUnits NUMERIC(18,6)
 	DECLARE @intSourceItemUOMId INT
-	DECLARE @ItemId INT
-	
-	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
-	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
-	DECLARE @ErrorMessage NVARCHAR(250)
-	DECLARE @CreatedIvoices NVARCHAR(MAX)
-	DECLARE @UpdatedIvoices NVARCHAR(MAX)
-		   
-	DECLARE @intItemUOMId INT
-	DECLARE @IntCommodityId INT
-	
-	DECLARE @intStorageChargeItemId INT
-	DECLARE @InvoiceId INT
-	DECLARE @UserEntityId INT
-	DECLARE @intCurrencyId INT
-	DECLARE @intDefaultCurrencyId INT
-	DECLARE @intTermId INT
-	DECLARE @ItemDescription NVARCHAR(100)
+	DECLARE @intCustomerStorageId INT --new customer storage id
+	DECLARE @intStorageHistoryId INT = 0	
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
-	DECLARE @ItemsToMove AS TABLE 
-	(
-		 intItemsToMoveKey INT IDENTITY(1, 1)
-		,intCustomerStorageId INT
-		,intEntityId INT
-		,intCompanyLocationId INT
-		,intStorageTypeId INT
-		,intStorageScheduleId INT
-		,dblOpenBalance DECIMAL(24,10)
-		,intContractHeaderId INT		
-		,intOriginalUnitMeasureId INT
+	---START---TRANSACTIONS FOR THE SOURCE-----	
+	IF EXISTS(SELECT TOP 1 1 
+			FROM tblGRCustomerStorage A 
+			INNER JOIN tblGRTransferStorageSourceSplit B 
+				ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
+			WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
 	)
-		
-	DECLARE @Action AS TABLE 
-	(
-		intActionKey INT IDENTITY(1, 1)
-		,intEntityId INT
-		,dblPercent DECIMAL(24,10)
-		,dblOpenBalance DECIMAL(24,10)
-		,intStorageTypeId INT
-		,intStorageScheduleId INT
-		,intCompanyLocationId INT
-		,intContractHeaderId INT
-	)
-
-	SELECT @UserKey = intCreatedUserId		
-		,@ItemEntityid = intItemCustomerId
-		,@ItemCompanyLocationId = intItemLocation
-		,@ActionCompanyLocationId = intActionLocation	
-		,@TransferTicketNumber=strTransferTicketNumber		
-	FROM OPENXML(@idoc, 'root', 2) WITH 
-	(
-			 intCreatedUserId INT			
-			,intItemCustomerId INT
-			,intItemLocation INT
-			,intActionLocation INT
-			,strTransferTicketNumber NVARCHAR(20)
-			,intBillBeforeTransfer INT
-	)
-	
-	SELECT @ItemCustomerName = strName	FROM tblEMEntity	WHERE intEntityId = @ItemEntityid
-
-	SELECT @ItemLocationName = strLocationName	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @ItemCompanyLocationId
-
-	SELECT @ActionLocationName = strLocationName FROM tblSMCompanyLocation	WHERE intCompanyLocationId = @ActionCompanyLocationId
-
-	--SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityId] = @UserKey
-
-	INSERT INTO @ItemsToMove 
-	(
-		intCustomerStorageId
-		,intEntityId
-		,intCompanyLocationId
-		,intStorageTypeId
-		,intStorageScheduleId
-		,dblOpenBalance
-		,intContractHeaderId
-	)
-	SELECT intCustomerStorageId
-		,intEntityId
-		,intCompanyLocationId
-		,intStorageTypeId
-		,intStorageScheduleId
-		,dblOpenBalance
-		,intContractHeaderId
-	FROM OPENXML(@idoc, 'root/ItemsToTransfer', 2) WITH 
-	(
-			 intCustomerStorageId INT
-			,intEntityId INT
-			,intCompanyLocationId INT
-			,intStorageTypeId INT
-			,intStorageScheduleId INT
-			,dblOpenBalance DECIMAL(24,10)
-			,intContractHeaderId INT
-	)
-	
-	INSERT INTO @Action 
-	(
-		intEntityId
-		,dblPercent
-		,dblOpenBalance
-		,intStorageTypeId
-		,intStorageScheduleId
-		,intCompanyLocationId
-		,intContractHeaderId
-	)
-	SELECT intEntityId
-		,dblPercent
-		,dblOpenBalance
-		,intStorageTypeId
-		,intStorageScheduleId
-		,intCompanyLocationId
-		,intContractHeaderId
-	FROM OPENXML(@idoc, 'root/ActionTransfer', 2) WITH 
-	(
-			 intEntityId INT
-			,dblPercent DECIMAL(24,10)
-			,dblOpenBalance DECIMAL(24,10)
-			,intStorageTypeId INT
-			,intStorageScheduleId INT
-			,intCompanyLocationId INT
-			,intContractHeaderId INT
-	)
-	
-	UPDATE a 
-	SET a.dblOpenBalance=b.dblOpenBalance
-	FROM @ItemsToMove a
-	JOIN tblGRCustomerStorage b ON b.intCustomerStorageId=a.intCustomerStorageId
-	
-    SELECT @ItemId=intItemId from tblGRCustomerStorage WHERE intCustomerStorageId=(SELECT Top 1 intCustomerStorageId FROM @ItemsToMove)
-	
-	SELECT @intUnitMeasureId=a.intUnitMeasureId 
-	FROM tblICCommodityUnitMeasure a 
-	JOIN tblICItem b ON b.intCommodityId=a.intCommodityId
-	WHERE b.intItemId=@ItemId AND a.ysnStockUnit=1
-		
-    IF @intUnitMeasureId IS NULL 
 	BEGIN
-		RAISERROR('The stock UOM of the commodity must be set for item', 16, 1);
+		DECLARE @TicketNo VARCHAR(50)
+
+		SELECT @TicketNo = STUFF((
+			SELECT ',' + strStorageTicketNumber 
+			FROM tblGRCustomerStorage A 
+			INNER JOIN tblGRTransferStorageSourceSplit B 
+				ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
+			WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
+			FOR XML PATH('')
+		),1,1,'')
+		
+		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user.  Transfer process cannot proceed.'
+		
+		RAISERROR(@ErrMsg,16,1)
 		RETURN;
-	END	
-	
-	IF NOT EXISTS(SELECT 1 FROM tblICItemUOM WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId)
-	BEGIN
-		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
 	END
-	 			
-	SELECT @intSourceItemUOMId=intItemUOMId FROM tblICItemUOM UOM  WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 
-	SELECT @ItemsToMoveKey = MIN(intItemsToMoveKey)
-	FROM @ItemsToMove
-
-	SET @intCustomerStorageId = NULL
-	SET @ItemStorageType = NULL
-	SET @ItemStorageSchedule=NULL
-	SET @ItemBalance = NULL
-	SET @ItemStorageTypeDescription = NULL
-	SET @ItemStorageScheduleId=NULL	
-	SET @CurrentItemOpenBalance=NULL
-	SET @TicketNo=NULL
-	SET @intItemId=NULL
-	SET @intItemLocationId=NULL
-	SET @intActionLocationId=NULL	
-	SET @ItemContractHeaderId=NULL
-	SET @ItemContractDetailId=NULL
-	SET @ItemContractBalance=NULL  
-
+	BEGIN TRY
 	
-	WHILE @ItemsToMoveKey > 0
-	BEGIN
-		SELECT @intCustomerStorageId = intCustomerStorageId
-			,@ItemStorageType = intStorageTypeId
-			,@ItemStorageSchedule=intStorageScheduleId
-			,@ItemBalance = dblOpenBalance
-			,@ItemContractHeaderId=intContractHeaderId
-		FROM @ItemsToMove
-		WHERE intItemsToMoveKey = @ItemsToMoveKey
-		
-		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=strStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		DECLARE @transCount INT = @@TRANCOUNT;
+		IF @transCount = 0 BEGIN TRANSACTION
 
-		SELECT @ItemStorageTypeDescription = strStorageTypeDescription
-		FROM tblGRStorageType
-		WHERE intStorageScheduleTypeId = @ItemStorageType
-		
-		SELECT @ItemStorageScheduleId=strScheduleId FROM tblGRStorageScheduleRule Where intStorageScheduleRuleId=@ItemStorageSchedule
+		--integration to IC
+		DECLARE @cnt INT = 0
 
-		SELECT @ActionKey = MIN(intActionKey) FROM @Action
-		 
-		SET @ActionCustomer = NULL
-		SET @Percent = NULL
-		SET @ActionOpenBalance = NULL
-		SET @ActionStorageTypeId = NULL
-		SET @ActionStorageScheduleId = NULL
-		SET @ActionStorageTypeDescription = NULL
-		SET @ActionCustomerName = NULL
-		SET @NewCustomerStorageId=NULL
-		SET @ActionContractHeaderId=NULL
-		SET @ActionontractDetailId=NULL
+		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 
-		IF @CurrentItemOpenBalance <> @ItemBalance
-		BEGIN		 
-		 SELECT @TicketNo=strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
-		 SET @ErrMsg='The Open balance of ticket '+@TicketNo+' has been modified by another user.  Transfer Process cannot proceed.'
-		 RAISERROR(@ErrMsg,16,1)		 
-		END
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		WITH sourceStorageDetails (
+			intTransferContractDetailId 
+			,dblTransferUnits			
+			,intSourceItemUOMId			
+			,intCustomerStorageId
+		) AS (
+			SELECT intTransferContractDetailId	= SourceSplit.intContractDetailId,
+				dblTransferUnits				= -(SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits),
+				intSourceItemUOMId			= TransferStorage.intItemUOMId,
+				intCustomerStorageId			= SourceSplit.intSourceCustomerStorageId
+			FROM tblGRTransferStorageSourceSplit SourceSplit
+			INNER JOIN tblGRTransferStorage TransferStorage
+				ON TransferStorage.intTransferStorageId = SourceSplit.intTransferStorageId
+			WHERE SourceSplit.intTransferStorageId = @intTransferStorageId
+				AND SourceSplit.intContractDetailId IS NOT NULL
+		)
+		SELECT
+			intTransferContractDetailId 
+			,dblTransferUnits			
+			,intSourceItemUOMId			
+			,intCustomerStorageId
+		FROM ( SELECT * FROM sourceStorageDetails ) icParams
 		
-		IF ISNULL(@ItemContractHeaderId,0)>0
+		OPEN c;
+
+		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+
+		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
 		BEGIN
-		SELECT @ItemContractDetailId=intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId=@ItemContractHeaderId
-		SET @ItemContractBalance = -@ItemBalance
-
 			EXEC uspCTUpdateSequenceQuantityUsingUOM 
-				  @intContractDetailId=@ItemContractDetailId
-				 ,@dblQuantityToUpdate=@ItemContractBalance
-				 ,@intUserId=@UserKey
-				 ,@intExternalId=@intCustomerStorageId
-				 ,@strScreenName='Transfer Storage'
-				 ,@intSourceItemUOMId=@intSourceItemUOMId
+				@intContractDetailId	= @intTransferContractDetailId
+				,@dblQuantityToUpdate	= @dblTransferUnits
+				,@intUserId				= @intUserId
+				,@intExternalId			= @intCustomerStorageId
+				,@strScreenName			= 'Transfer Storage'
+				,@intSourceItemUOMId	= @intSourceItemUOMId
 
+			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
+		CLOSE c; DEALLOCATE c;
 
-		WHILE @ActionKey > 0
-		BEGIN
-			 SELECT @ActionCustomer = intEntityId
-				,@Percent = dblPercent
-				,@ActionOpenBalance = dblOpenBalance
-				,@ActionStorageTypeId = intStorageTypeId
-				,@ActionStorageScheduleId = intStorageScheduleId
-				,@ActionContractHeaderId=intContractHeaderId
-			FROM @Action
-			WHERE intActionKey = @ActionKey
-			
-			SELECT @ActionStorageTypeDescription = strStorageTypeDescription
-			FROM tblGRStorageType
-			WHERE intStorageScheduleTypeId = @ActionStorageTypeId
-
-			SELECT @ActionCustomerName = strName
-			FROM tblEMEntity
-			WHERE intEntityId = @ActionCustomer
-			
-			---CASE #1:Customer Match,Location Match, Storatype Mismatch
-			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]					
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket		
-				
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					 [intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]					
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,[intEntityId]
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,@ActionStorageTypeId
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]		
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,intItemId
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]	
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL 
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-			END
-			
-			---CASE #2:Customer Match,Location MisMatch,Storatype Match
-			
-			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]		
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)			
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					[intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,[intEntityId]
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,[intStorageTypeId]
-					,@ActionCompanyLocationId
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]	
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-			END
-			
-			---CASE #3:Customer Match,Location MisMatch,Storatype MisMatch
-			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					 [intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]	
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					 [intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,[intEntityId]
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,@ActionStorageTypeId
-					,@ActionCompanyLocationId
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]			
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]		
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-			END
-			
-			---CASE #4:Customer MisMatch,Location Match,Storatype Match			
-			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]	
-					,[strTransferTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					[intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,@ActionCustomer
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,intStorageTypeId
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]		
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]	
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-			END
-			
-			---CASE #5:Customer MisMatch,Location Match,Storatype MisMatch
-					
-			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]	
-					,[strTransferTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					[intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,@ActionCustomer
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,@ActionStorageTypeId
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]		
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]	
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-			END
-			
-			--CASE #6:Customer MisMatch,Location MisMatch,Storatype Match
-			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
-			BEGIN
-			
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-				
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					[intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,@ActionCustomer
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,intStorageTypeId
-					,@ActionCompanyLocationId
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]		
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]		
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-			
-			END
-			
-			--CASE #7:Customer MisMatch,Location MisMatch,Storatype MisMatch
-			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
-			BEGIN		
-				
-				SELECT @UnitsToReduce = @ActionOpenBalance --@ItemBalance * (@Percent / 100)
-
-				---Old Ticket
-				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]	
-					,[strTransferTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
-					,- @UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ActionCustomer
-					,@ActionCompanyLocationId
-					,@TransferTicketNumber
-					)
-
-				--New Ticket
-				INSERT INTO [dbo].[tblGRCustomerStorage] (
-					[intConcurrencyId]
-					,[intEntityId]
-					,[intCommodityId]
-					,[intStorageScheduleId]
-					,[intStorageTypeId]
-					,[intCompanyLocationId]
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
-					,[dblOpenBalance]
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]							
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-					)
-				SELECT 1
-					,@ActionCustomer
-					,[intCommodityId]
-					,CASE WHEN @ActionStorageScheduleId=0 THEN  intStorageScheduleId ELSE @ActionStorageScheduleId END
-					,intStorageTypeId
-					,@ActionCompanyLocationId
-					,[intTicketId]
-					,[intDiscountScheduleId]
-					,[dblTotalPriceShrink]
-					,[dblTotalWeightShrink]
-					,@UnitsToReduce
-					,@UnitsToReduce
-					,[dtmDeliveryDate]
-					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]		
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
-					,[strOriginState]
-					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
-					,[dblFreightDueRate]
-					,[ysnPrinted]
-					,[dblCurrencyRate]
-					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
-					,[strCustomerReference]
-					,[strStorageType]
-					,[intCurrencyId]
-					,[strStorageTicketNumber]
-					,[intItemId]
-					,[intUnitMeasureId]
-				FROM tblGRCustomerStorage
-				WHERE intCustomerStorageId = @intCustomerStorageId
-
-				SET @NewCustomerStorageId = SCOPE_IDENTITY()
-
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]
-					,[strTransferTicket]		
-					)
-				VALUES (
-					1
-					,@NewCustomerStorageId
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
-					,@UnitsToReduce
-					,GETDATE()
-					,NULL
-					,NULL
-					,NULL
-					,'From Transfer'
-					,NULL
-					,@UserKey
-					,3
-					,@ItemEntityid
-					,@ItemCompanyLocationId
-					,@TransferTicketNumber
-					)				
-			END
-			
-			IF ISNULL(@ActionContractHeaderId,0)>0
-			BEGIN
-			SELECT @ActionontractDetailId=intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId=@ActionContractHeaderId
-
-				EXEC uspCTUpdateSequenceQuantityUsingUOM 
-					  @intContractDetailId=@ActionontractDetailId
-					 ,@dblQuantityToUpdate=@ActionOpenBalance
-					 ,@intUserId=@UserKey
-					 ,@intExternalId=@intCustomerStorageId
-					 ,@strScreenName='Transfer Storage'
-					 ,@intSourceItemUOMId=@intSourceItemUOMId			
-			END
-			
-			---Discount Information
-			INSERT INTO [dbo].[tblQMTicketDiscount]
-			   (
-					[intConcurrencyId]         
-				   ,[dblGradeReading]
-				   ,[strCalcMethod]
-				   ,[strShrinkWhat]
-				   ,[dblShrinkPercent]
-				   ,[dblDiscountAmount]
-				   ,[dblDiscountDue]
-				   ,[dblDiscountPaid]
-				   ,[ysnGraderAutoEntry]
-				   ,[intDiscountScheduleCodeId]
-				   ,[dtmDiscountPaidDate]
-				   ,[intTicketId]
-				   ,[intTicketFileId]
-				   ,[strSourceType]
-				   ,[intSort]
-				   ,[strDiscountChargeType]
-			   )
-				 SELECT 
-				 [intConcurrencyId] = 1
-				,[dblGradeReading] = [dblGradeReading]
-				,[strCalcMethod] = [strCalcMethod]
-				,[strShrinkWhat] = [strShrinkWhat]
-				,[dblShrinkPercent] = [dblShrinkPercent]
-				,[dblDiscountAmount] = [dblDiscountAmount]
-				,[dblDiscountDue] = [dblDiscountDue]
-				,[dblDiscountPaid] = [dblDiscountPaid]
-				,[ysnGraderAutoEntry] = [ysnGraderAutoEntry]
-				,[intDiscountScheduleCodeId] = [intDiscountScheduleCodeId]
-				,[dtmDiscountPaidDate] = [dtmDiscountPaidDate]
-				,[intTicketId] = NULL
-				,[intTicketFileId] = @NewCustomerStorageId
-				,[strSourceType] = 'Storage'
-				,[intSort] = [intSort]
-				,[strDiscountChargeType] = [strDiscountChargeType]
-			FROM dbo.[tblQMTicketDiscount]
-			WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
-
-
-			SELECT @ActionKey = MIN(intActionKey)
-			FROM @Action
-			WHERE intActionKey > @ActionKey
-		END
-
-		SELECT @ItemsToMoveKey = MIN(intItemsToMoveKey)
-		FROM @ItemsToMove
-		WHERE intItemsToMoveKey > @ItemsToMoveKey	
+		--update the source's customer storage open balance
+		UPDATE A
+		SET A.dblOpenBalance = B.dblOriginalUnits - B.dblDeductedUnits
+		FROM tblGRCustomerStorage A 
+		INNER JOIN tblGRTransferStorageSourceSplit B 
+			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+		WHERE B.intTransferStorageId = @intTransferStorageId
 		
-	END
-	
-	EXEC sp_xml_removedocument @idoc
-	
-END TRY
+		DELETE FROM @StorageHistoryStagingTable
+		--insert history for the old (source) customer storage		
+		INSERT INTO @StorageHistoryStagingTable
+		(
+			[intCustomerStorageId]
+			,[intTransferStorageId]
+			,[intContractHeaderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[intUserId]
+			,[ysnPost]
+			,[intTransactionTypeId]
+			,[strPaidDescription]
+			,[strType]
+		)
+		SELECT
+			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
+			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
+			,[intContractHeaderId]	= CD.intContractHeaderId
+			,[dblUnits]				= -(SourceSplit.dblDeductedUnits)
+			,[dtmHistoryDate]		= GETDATE()
+			,[intUserId]			= @intUserId
+			,[ysnPost]				= 1
+			,[intTransactionTypeId]	= 3
+			,[strPaidDescription]	= 'Generated from Transfer Storage'
+			,[strType]				= 'Transfer'
+		FROM tblGRTransferStorageSourceSplit SourceSplit
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = SourceSplit.intContractDetailId
+		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
 
-BEGIN CATCH
-	SET @ErrMsg = ERROR_MESSAGE()	 
-	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
-END CATCH
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		----END----TRANSACTIONS FOR THE SOURCE---------
+
+		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
+		DELETE FROM @StorageHistoryStagingTable
+		
+		INSERT INTO @CustomerStorageStagingTable
+		(
+			[intEntityId]				
+			,[intCommodityId]			
+			,[intStorageScheduleId]		
+			,[intStorageTypeId]			
+			,[intCompanyLocationId]		
+			,[intDiscountScheduleId]	
+			,[dblTotalPriceShrink]		
+			,[dblTotalWeightShrink]		
+			,[dblQuantity]				
+			,[dtmDeliveryDate]			
+			,[dtmZeroBalanceDate]		
+			,[strDPARecieptNumber]		
+			,[dtmLastStorageAccrueDate]	
+			,[dblStorageDue]			
+			,[dblStoragePaid]			
+			,[dblInsuranceRate]			
+			,[strOriginState]			
+			,[strInsuranceState]		
+			,[dblFeesDue]				
+			,[dblFeesPaid]				
+			,[dblFreightDueRate]		
+			,[ysnPrinted]				
+			,[dblCurrencyRate]			
+			,[strDiscountComment]		
+			,[dblDiscountsDue]			
+			,[dblDiscountsPaid]			
+			,[strCustomerReference]		
+			,[intCurrencyId]			
+			,[strTransactionNumber]		
+			,[intItemId]				
+			,[intItemUOMId]
+			,[intTransferStorageSplitId]
+		)	
+		SELECT 
+			[intEntityId]					= TransferStorageSplit.intEntityId
+			,[intCommodityId]				= CS.intCommodityId
+			,[intStorageScheduleId]			= TransferStorageSplit.intStorageScheduleId
+			,[intStorageTypeId]				= TransferStorageSplit.intStorageTypeId
+			,[intCompanyLocationId]			= TransferStorageSplit.intCompanyLocationId
+			,[intDiscountScheduleId]		= CS.intDiscountScheduleId
+			,[dblTotalPriceShrink]			= CS.dblTotalPriceShrink		
+			,[dblTotalWeightShrink]			= CS.dblTotalWeightShrink		
+			,[dblQuantity]					= TransferStorageSplit.dblUnits
+			,[dtmDeliveryDate]				= GETDATE()
+			,[dtmZeroBalanceDate]			= CS.dtmZeroBalanceDate			
+			,[strDPARecieptNumber]			= CS.strDPARecieptNumber		
+			,[dtmLastStorageAccrueDate]		= CS.dtmLastStorageAccrueDate	
+			,[dblStorageDue]				= CS.dblStorageDue				--storage charge will have its own computation
+			,[dblStoragePaid]				= 0
+			,[dblInsuranceRate]				= 0
+			,[strOriginState]				= CS.strOriginState
+			,[strInsuranceState]			= CS.strInsuranceState
+			,[dblFeesDue]					= CS.dblFeesDue					
+			,[dblFeesPaid]					= CS.dblFeesPaid				
+			,[dblFreightDueRate]			= CS.dblFreightDueRate			
+			,[ysnPrinted]					= CS.ysnPrinted					
+			,[dblCurrencyRate]				= CS.dblCurrencyRate
+			,[strDiscountComment]			= CS.strDiscountComment			
+			,[dblDiscountsDue]				= CS.dblDiscountsDue			
+			,[dblDiscountsPaid]				= CS.dblDiscountsPaid			
+			,[strCustomerReference]			= CS.strCustomerReference		
+			,[intCurrencyId]				= CS.intCurrencyId
+			,[strTransactionNumber]			= TS.strTransferStorageTicket
+			,[intItemId]					= CS.intItemId
+			,[intItemUOMId]					= CS.intItemUOMId
+			,[intTransferStorageSplitId]	= TransferStorageSplit.intTransferStorageSplitId
+		FROM tblGRCustomerStorage CS
+		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
+			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = SourceStorage.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
+			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId		
+		WHERE SourceStorage.intTransferStorageId = @intTransferStorageId
+
+		MERGE INTO tblGRCustomerStorage AS destination
+		USING
+		(
+			SELECT * FROM @CustomerStorageStagingTable
+		) AS SourceData
+		ON (1=0)
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+			[intConcurrencyId]
+			,[intEntityId]
+			,[intCommodityId]
+			,[intStorageScheduleId]
+			,[intStorageTypeId]
+			,[intCompanyLocationId]
+			,[intDiscountScheduleId]
+			,[dblTotalPriceShrink]
+			,[dblTotalWeightShrink]
+			,[dblOriginalBalance]
+			,[dblOpenBalance]
+			,[dtmDeliveryDate]
+			,[dtmZeroBalanceDate]
+			,[strDPARecieptNumber]
+			,[dtmLastStorageAccrueDate]					
+			,[dblStorageDue]
+			,[dblStoragePaid]
+			,[dblInsuranceRate]
+			,[strOriginState]
+			,[strInsuranceState]
+			,[dblFeesDue]
+			,[dblFeesPaid]
+			,[dblFreightDueRate]
+			,[ysnPrinted]
+			,[dblCurrencyRate]
+			,[strDiscountComment]
+			,[dblDiscountsDue]
+			,[dblDiscountsPaid]
+			,[strCustomerReference]
+			,[intCurrencyId]
+			,[strStorageTicketNumber]
+			,[intItemId]
+			,[intItemUOMId]
+		)
+		VALUES
+		(
+			1
+			,[intEntityId]				
+			,[intCommodityId]			
+			,[intStorageScheduleId]		
+			,[intStorageTypeId]			
+			,[intCompanyLocationId]		
+			,[intDiscountScheduleId]	
+			,[dblTotalPriceShrink]		
+			,[dblTotalWeightShrink]		
+			,[dblQuantity]				
+			,[dblQuantity]
+			,[dtmDeliveryDate]			
+			,[dtmZeroBalanceDate]		
+			,[strDPARecieptNumber]		
+			,[dtmLastStorageAccrueDate]	
+			,[dblStorageDue]			
+			,[dblStoragePaid]			
+			,[dblInsuranceRate]			
+			,[strOriginState]			
+			,[strInsuranceState]		
+			,[dblFeesDue]				
+			,[dblFeesPaid]				
+			,[dblFreightDueRate]		
+			,[ysnPrinted]				
+			,[dblCurrencyRate]			
+			,[strDiscountComment]		
+			,[dblDiscountsDue]			
+			,[dblDiscountsPaid]			
+			,[strCustomerReference]		
+			,[intCurrencyId]			
+			,[strTransactionNumber]		
+			,[intItemId]				
+			,[intItemUOMId]				
+		)
+		OUTPUT
+			inserted.intCustomerStorageId,
+			SourceData.intTransferStorageSplitId
+		INTO @newCustomerStorageIds;
+		
+		--update tblGRTransferStorageSplit's intCustomerStorageId
+		UPDATE A
+		SET A.intTransferToCustomerStorageId = B.storageId
+		FROM tblGRTransferStorageSplit A
+		INNER JOIN @newCustomerStorageIds B
+			ON B.transferSplitId = A.intTransferStorageSplitId
+		
+		DELETE FROM @StorageHistoryStagingTable
+		--for new customer storage
+		INSERT INTO @StorageHistoryStagingTable
+		(
+			[intCustomerStorageId]
+			,[intTransferStorageId]
+			,[intContractHeaderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[intUserId]
+			,[ysnPost]
+			,[intTransactionTypeId]
+			,[strPaidDescription]
+			,[strType]
+		)
+		SELECT
+			[intCustomerStorageId]	= A.storageId
+			,[intTransferStorageId]	= TransferStorageSplit.intTransferStorageId
+			,[intContractHeaderId]	= CD.intContractHeaderId
+			,[dblUnits]				= TransferStorageSplit.dblUnits
+			,[dtmHistoryDate]		= GETDATE()
+			,[intUserId]			= @intUserId
+			,[ysnPost]				= 1
+			,[intTransactionTypeId]	= 3
+			,[strPaidDescription]	= 'Generated from Transfer Storage'
+			,[strType]				= 'From Transfer'
+		FROM tblGRTransferStorageSplit TransferStorageSplit
+		INNER JOIN @newCustomerStorageIds A
+			ON A.transferSplitId = TransferStorageSplit.intTransferStorageSplitId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
+		
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+
+		--integration to IC
+		SET @cnt = 0
+
+		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
+
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		WITH storageDetails (
+			intTransferContractDetailId 
+			,dblTransferUnits			
+			,intSourceItemUOMId			
+			,intCustomerStorageId
+		) AS (
+			SELECT intTransferContractDetailId	= TransferStorageSplit.intContractDetailId,
+				dblTransferUnits				= TransferStorageSplit.dblUnits,
+				intSourceItemUOMId			= TransferStorage.intItemUOMId,
+				intCustomerStorageId			= TransferStorageSplit.intTransferToCustomerStorageId
+			FROM tblGRTransferStorageSplit TransferStorageSplit
+			INNER JOIN tblGRTransferStorage TransferStorage
+				ON TransferStorage.intTransferStorageId = TransferStorageSplit.intTransferStorageId
+			WHERE TransferStorageSplit.intTransferStorageId = @intTransferStorageId
+				AND TransferStorageSplit.intContractDetailId IS NOT NULL
+		)
+		SELECT
+			intTransferContractDetailId 
+			,dblTransferUnits			
+			,intSourceItemUOMId			
+			,intCustomerStorageId
+		FROM ( SELECT * FROM storageDetails ) icParams
+		
+		OPEN c;
+
+		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+
+		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
+		BEGIN
+			EXEC uspCTUpdateSequenceQuantityUsingUOM 
+				@intContractDetailId	= @intTransferContractDetailId
+				,@dblQuantityToUpdate	= @dblTransferUnits
+				,@intUserId				= @intUserId
+				,@intExternalId			= @intCustomerStorageId
+				,@strScreenName			= 'Transfer Storage'
+				,@intSourceItemUOMId	= @intSourceItemUOMId
+
+			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+		END
+		CLOSE c; DEALLOCATE c;
+		--DISCOUNTS
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT storageId FROM @newCustomerStorageIds
+		OPEN c;
+		FETCH NEXT FROM c INTO @intCustomerStorageId	
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			INSERT INTO [dbo].[tblQMTicketDiscount]
+			(
+				[intConcurrencyId]         
+				,[dblGradeReading]
+				,[strCalcMethod]
+				,[strShrinkWhat]
+				,[dblShrinkPercent]
+				,[dblDiscountAmount]
+				,[dblDiscountDue]
+				,[dblDiscountPaid]
+				,[ysnGraderAutoEntry]
+				,[intDiscountScheduleCodeId]
+				,[dtmDiscountPaidDate]
+				,[intTicketId]
+				,[intTicketFileId]
+				,[strSourceType]
+				,[intSort]
+				,[strDiscountChargeType]
+			)
+			SELECT 
+				[intConcurrencyId] 				= 1
+				,[dblGradeReading] 				= [dblGradeReading]
+				,[strCalcMethod] 				= [strCalcMethod]
+				,[strShrinkWhat] 				= [strShrinkWhat]
+				,[dblShrinkPercent] 			= [dblShrinkPercent]
+				,[dblDiscountAmount] 			= [dblDiscountAmount]
+				,[dblDiscountDue] 				= [dblDiscountDue]
+				,[dblDiscountPaid] 				= [dblDiscountPaid]
+				,[ysnGraderAutoEntry] 			= [ysnGraderAutoEntry]
+				,[intDiscountScheduleCodeId] 	= [intDiscountScheduleCodeId]
+				,[dtmDiscountPaidDate] 			= [dtmDiscountPaidDate]
+				,[intTicketId] 					= NULL
+				,[intTicketFileId] 				= @intCustomerStorageId
+				,[strSourceType] 				= 'Storage'
+				,[intSort] 						= [intSort]
+				,[strDiscountChargeType] 		= [strDiscountChargeType]
+			FROM tblQMTicketDiscount Discount
+			INNER JOIN tblGRTransferStorageSourceSplit SourceSplit
+				ON SourceSplit.intSourceCustomerStorageId = Discount.intTicketFileId
+					AND SourceSplit.intTransferStorageId = @intTransferStorageId
+					AND Discount.strSourceType = 'Storage'
+			
+			FETCH NEXT FROM c INTO @intCustomerStorageId
+		END
+		CLOSE c; DEALLOCATE c;
+
+		DONE:
+		IF @transCount = 0 COMMIT TRANSACTION
+	
+	END TRY
+	BEGIN CATCH
+		DECLARE @ErrorSeverity INT,
+				@ErrorNumber   INT,
+				@ErrorMessage nvarchar(4000),
+				@ErrorState INT,
+				@ErrorLine  INT,
+				@ErrorProc nvarchar(200);
+		-- Grab error information from SQL functions
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorNumber   = ERROR_NUMBER()
+		SET @ErrorMessage  = ERROR_MESSAGE()
+		SET @ErrorState    = ERROR_STATE()
+		SET @ErrorLine     = ERROR_LINE()
+		IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	END CATCH	
+	
+END

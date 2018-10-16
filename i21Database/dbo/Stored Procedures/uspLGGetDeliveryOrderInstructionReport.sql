@@ -8,4 +8,4 @@ SELECT L.strLoadNumber
 FROM tblLGLoad L
 JOIN tblLGLoadWarehouse LW ON L.intLoadId = LW.intLoadId
 JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
-WHERE L.strLoadNumber = @strLoadNumber
+WHERE L.strLoadNumber = @strLoadNumber AND ISNULL(LWS.ysnPrint,0) = 1

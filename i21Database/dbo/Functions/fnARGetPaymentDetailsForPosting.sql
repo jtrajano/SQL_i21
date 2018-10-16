@@ -17,7 +17,7 @@ RETURNS @returntable TABLE
     ,[strReceivePaymentType]            NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[intEntityCustomerId]              INT             NOT NULL
     ,[strCustomerNumber]                NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
-	,[strCustomerName]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strCustomerName]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[intCompanyLocationId]             INT             NULL
     ,[strLocationName]                  NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
     ,[intUndepositedFundsId]            INT             NULL
@@ -123,6 +123,7 @@ BEGIN
         ,[strReceivePaymentType]
         ,[intEntityCustomerId]
         ,[strCustomerNumber]
+        ,[strCustomerName]
         ,[intCompanyLocationId]
         ,[strLocationName]
         ,[intUndepositedFundsId]
@@ -195,6 +196,7 @@ BEGIN
         ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
         ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
         ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+        ,[strCustomerName]                  = ARC.[strName]
         ,[intCompanyLocationId]             = ARP.[intLocationId]
         ,[strLocationName]                  = SMCL.[strLocationName]
         ,[intUndepositedFundsId]            = CASE WHEN @BankAccountId IS NULL
@@ -280,7 +282,8 @@ BEGIN
             ON ARP.[intPaymentId] = ARPILD.[intPaymentId]
     INNER JOIN
         (
-        SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH(NoLock)
+        SELECT C.[intEntityId], EM.[strName], [strCustomerNumber] FROM tblARCustomer C WITH (NOLOCK)
+        INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
         ) ARC
             ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
     LEFT OUTER JOIN
@@ -305,6 +308,7 @@ BEGIN
         ,[strReceivePaymentType]
         ,[intEntityCustomerId]
         ,[strCustomerNumber]
+        ,[strCustomerName]
         ,[intCompanyLocationId]
         ,[strLocationName]
         ,[intUndepositedFundsId]
@@ -377,6 +381,7 @@ BEGIN
         ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
         ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
         ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+        ,[strCustomerName]                  = ARP.[strCustomerName]
         ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
         ,[strLocationName]                  = ARP.[strLocationName]
         ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]
@@ -469,6 +474,7 @@ BEGIN
         ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
         ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
         ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+        ,[strCustomerName]                  = ARP.[strCustomerName]
         ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
         ,[strLocationName]                  = ARP.[strLocationName]
         ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]
@@ -592,6 +598,7 @@ INSERT @Header
     ,[strReceivePaymentType]
     ,[intEntityCustomerId]
     ,[strCustomerNumber]
+    ,[strCustomerName]
     ,[intCompanyLocationId]
     ,[strLocationName]
     ,[intUndepositedFundsId]
@@ -666,6 +673,7 @@ SELECT
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+    ,[strCustomerName]                  = ARC.[strName]
     ,[intCompanyLocationId]             = ARP.[intLocationId]
     ,[strLocationName]                  = SMCL.[strLocationName]
     ,[intUndepositedFundsId]            = CASE WHEN @BankAccountId IS NULL
@@ -748,9 +756,12 @@ FROM
 INNER JOIN
     @DistinctPaymentIds P
         ON ARP.[intPaymentId] = P.[intId]
-LEFT JOIN
+INNER JOIN
     (
-    SELECT [intEntityId], [strCustomerNumber] = strVendorId FROM tblAPVendor WITH(NoLock)
+        SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
+                (	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
+                SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
+        JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -776,6 +787,7 @@ INSERT @Detail
     ,[strReceivePaymentType]
     ,[intEntityCustomerId]
     ,[strCustomerNumber]
+    ,[strCustomerName]
     ,[intCompanyLocationId]
     ,[strLocationName]
     ,[intUndepositedFundsId]
@@ -850,6 +862,7 @@ SELECT
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+    ,[strCustomerName]                  = ARP.[strCustomerName]
     ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
     ,[strLocationName]                  = ARP.[strLocationName]
     ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]
@@ -941,6 +954,7 @@ SELECT
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
     ,[strCustomerNumber]                = ARP.[strCustomerNumber]
+    ,[strCustomerName]                  = ARP.[strCustomerName]
     ,[intCompanyLocationId]             = ARP.[intCompanyLocationId]
     ,[strLocationName]                  = ARP.[strLocationName]
     ,[intUndepositedFundsId]            = ARP.[intUndepositedFundsId]

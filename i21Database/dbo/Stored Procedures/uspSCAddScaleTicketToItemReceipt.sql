@@ -39,17 +39,25 @@ DECLARE @intScaleStationId AS INT
 		,@ticketStatus AS NVARCHAR(10)
 		,@intContractCostId AS INT
 		,@currencyDecimal AS INT
-		,@ysnRequireProducerQty AS BIT;
-		
-	SELECT @intTicketItemUOMId = UM.intItemUOMId
-	, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId
-	, @splitDistribution = SC.strDistributionOption
-	, @intItemId = SC.intItemId 
-	, @ticketStatus = SC.strTicketStatus
-	, @intContractCostId = SC.intContractCostId
-	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+		,@ysnRequireProducerQty AS BIT
+		,@intDeliverySheetId INT
+		,@intFreightItemId INT;
+	
+	SELECT @intFreightItemId = SCSetup.intFreightItemId
+		, @intHaulerId = SC.intHaulerId
+		, @ysnDeductFreightFarmer = SC.ysnFarmerPaysFreight 
+		, @ysnDeductFeesCusVen = SC.ysnCusVenPaysFees
+		, @intTicketItemUOMId = SC.intItemUOMIdTo
+		, @intLoadId = SC.intLoadId
+		, @intContractDetailId = SC.intContractId
+		, @splitDistribution = SC.strDistributionOption
+		, @intItemId = SC.intItemId 
+		, @ticketStatus = SC.strTicketStatus
+		, @intContractCostId = SC.intContractCostId
+		, @intDeliverySheetId = SC.intDeliverySheetId
+	FROM tblSCTicket SC 
+	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId 
+	WHERE SC.intTicketId = @intTicketId
 
 IF @ticketStatus = 'C'
 BEGIN
@@ -63,9 +71,7 @@ SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@ReceiptItemLotStagingTable AS ReceiptItemLotStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
-        @total as int,
-		@intSurchargeItemId as int,
-		@intFreightItemId as int;
+        @total as int;
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -75,13 +81,7 @@ BEGIN
 	)
 END 
 
---IF(@batchId IS NULL)
---	EXEC uspSMGetStartingNumber 105, @batchId OUT
-
---SET @ticketBatchId = @batchId
-
--- Insert Entries to Stagging table that needs to processed to Transport Load
-INSERT into @ReceiptStagingTable(
+INSERT INTO @ReceiptStagingTable(
 		-- Header
 		strReceiptType
 		,intEntityVendorId
@@ -269,13 +269,6 @@ BEGIN
 	EXEC uspICRaiseError 80004; 
 	RETURN;
 END
-
-SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId
-	, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
-	, @ysnDeductFeesCusVen = SCTicket.ysnCusVenPaysFees
-FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
-WHERE SCTicket.intTicketId = @intTicketId
-
 	--FOR DISCOUNT CHARGES
 	INSERT INTO @OtherCharges
 	(
@@ -1377,27 +1370,13 @@ BEGIN
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
-	WHERE SH.[strType] = 'From Scale' AND IR.intInventoryReceiptId=@InventoryReceiptId 
+	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
+	AND IR.intInventoryReceiptId=@InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
-
-IF @ticketStatus = 'O'
-	SET @ticketStatus = 'Open'
-ELSE IF @ticketStatus = 'R'
-	SET @ticketStatus = 'Reopen'
-
-EXEC dbo.uspSMAuditLog 
-	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
-	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
-	,@entityId			= @intUserId						-- Entity Id.
-	,@actionType		= 'Updated'							-- Action Type
-	,@changeDescription	= 'Ticket Status'					-- Description
-	,@fromValue			= @ticketStatus						-- Old Value
-	,@toValue			= 'Completed'						-- New Value
-	,@details			= '';
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

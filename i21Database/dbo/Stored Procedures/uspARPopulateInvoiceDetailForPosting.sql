@@ -337,16 +337,17 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
-                                                ELSE ARI.[strComments]
+    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
+                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
+                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
     
 FROM
     tblARInvoice ARI
 INNER JOIN
     (
-    SELECT [intEntityId], [strCustomerNumber], [ysnActive], [dblCreditLimit] FROM tblARCustomer WITH(NoLock)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
+    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -674,9 +675,9 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
-                                                ELSE ARI.[strComments]
+    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
+                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
+                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
     
 FROM
@@ -694,7 +695,8 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT [intEntityId], [strCustomerNumber], [ysnActive], [dblCreditLimit] FROM tblARCustomer WITH(NoLock)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -997,9 +999,9 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
-                                                ELSE ARI.[strComments]
+    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
+                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
+                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName , '')
                                             END		
     
 FROM
@@ -1015,7 +1017,8 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT [intEntityId], [strCustomerNumber], [ysnActive], [dblCreditLimit] FROM tblARCustomer WITH(NoLock)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -1319,7 +1322,7 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = NULL		
+    ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
     
 FROM
     #ARPostInvoiceHeader ARI
@@ -1369,6 +1372,7 @@ LEFT OUTER JOIN
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
     ) SMCERT
         ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE
     [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
 
@@ -1721,7 +1725,7 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = NULL		
+    ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
     
 FROM
     #ARPostInvoiceHeader ARI
@@ -1765,6 +1769,7 @@ LEFT OUTER JOIN
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
     ) SMCERT
         ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE
     [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
 
@@ -2049,7 +2054,7 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = NULL		
+    ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
     
 FROM
     #ARPostInvoiceHeader ARI
@@ -2061,6 +2066,7 @@ LEFT OUTER JOIN
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
     ) SMCERT
         ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE
     ARID.[intItemId] IS NULL
     OR ARID.[intItemId] = 0

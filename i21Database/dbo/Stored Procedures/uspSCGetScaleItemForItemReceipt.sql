@@ -1,6 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSCGetScaleItemForItemReceipt] --uspSCGetScaleItemForItemReceipt 8, 'Direct'
+﻿CREATE PROCEDURE [dbo].[uspSCGetScaleItemForItemReceipt]
 	 @intTicketId AS INT
-	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
 	,@dblNetUnits AS DECIMAL (13,3)
 	,@dblCost AS DECIMAL (9,5)

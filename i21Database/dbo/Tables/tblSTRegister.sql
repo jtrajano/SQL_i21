@@ -59,7 +59,7 @@
     [intPCIriqForComPort] INT NULL, 
     [strWaynePassWord] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
     [intWayneSequenceNo] INT NULL, 
-    [dblXmlVersion] NUMERIC(4, 2) NULL, 
+    [strXmlVersion] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,  
     [strRegisterInboxPath] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL, 
     [strRegisterOutboxPath] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL, 
     [strRegisterStoreId] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 

@@ -182,37 +182,20 @@ BEGIN
 	USING (
 		SELECT	i.intItemId
 				,il.intItemLocationId
-				,dblInTransitOutbound = SUM(ISNULL(Shipment.dblQuantity, 0) - ISNULL(SalesInvoice.dblQuantity, 0)) 
+				,dblInTransitOutbound = ISNULL(t.dblQuantity, 0)
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
 				OUTER APPLY (
-					SELECT  dblQuantity = SUM(dbo.fnCalculateStockUnitQty(d.dblQuantity, u.dblUnitQty))
-					FROM	tblICInventoryShipment h INNER JOIN tblICInventoryShipmentItem d
-								ON h.intInventoryShipmentId = d.intInventoryShipmentId
-							INNER JOIN tblICItemUOM u
-								ON u.intItemId = d.intItemId
-								AND u.intItemUOMId = d.intItemUOMId						
-					WHERE	h.ysnPosted = 1
-							AND h.intShipFromLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-							
-				) Shipment 
-				OUTER APPLY (
-					SELECT  dblQuantity = SUM(dbo.fnCalculateStockUnitQty(d.dblQtyShipped, u.dblUnitQty)) 
-					FROM	tblARInvoice h INNER JOIN tblARInvoiceDetail d
-								on h.intInvoiceId = d.intInvoiceId
-							INNER JOIN tblICItemUOM u
-								ON u.intItemId = d.intItemId
-								AND u.intItemUOMId = d.intItemUOMId
-							INNER JOIN tblICInventoryShipmentItem shipmentItem
-								ON shipmentItem.intInventoryShipmentId = d.intInventoryShipmentItemId 
-					WHERE	h.ysnPosted = 1
-							AND h.intCompanyLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-				) SalesInvoice 
-		GROUP BY il.intItemLocationId, i.intItemId
+					SELECT	dblQuantity = SUM(dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)) 
+					FROM	tblICInventoryTransaction t
+					WHERE	t.intItemId = i.intItemId 
+							AND t.intInTransitSourceLocationId = il.intItemLocationId
+							AND t.strTransactionForm IN (
+								'Inventory Shipment'
+								,'Outbound Shipment'
+								,'Invoice'
+							)
+				) t 
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -249,9 +232,9 @@ BEGIN
 		SELECT	i.intItemId
 				,il.intItemLocationId
 				,StockUOM.intItemUOMId
-				,SubLocation.intSubLocationId
-				,StorageLocation.intStorageLocationId
-				,dblInTransitOutbound = SUM(ISNULL(Shipment.dblQuantity, 0) - ISNULL(SalesInvoice.dblQuantity, 0)) 
+				,intSubLocationId = null 
+				,intStorageLocationId = null 
+				,dblInTransitOutbound = SUM(ISNULL(t.dblQuantity, 0)) 
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
 				CROSS APPLY (
@@ -261,51 +244,17 @@ BEGIN
 							AND stockUOM.ysnStockUnit = 1
 				) StockUOM
 				OUTER APPLY (
-					SELECT	intSubLocationId = intCompanyLocationSubLocationId
-					FROM	tblSMCompanyLocationSubLocation sub
-					WHERE	sub.intCompanyLocationId = il.intLocationId 
-					UNION ALL	
-					SELECT	intSubLocationId = NULL
-				) SubLocation 
-				OUTER APPLY (
-					SELECT	intStorageLocationId 
-					FROM	tblICStorageLocation storage 
-					WHERE	storage.intLocationId = il.intLocationId
-							AND storage.intSubLocationId = SubLocation.intSubLocationId  
-					UNION ALL	
-					SELECT	intSubLocationId = NULL
-				) StorageLocation
- 				OUTER APPLY (
-					SELECT  dblQuantity = SUM(dbo.fnCalculateStockUnitQty(d.dblQuantity, u.dblUnitQty))
-					FROM	tblICInventoryShipment h INNER JOIN tblICInventoryShipmentItem d
-								ON h.intInventoryShipmentId = d.intInventoryShipmentId
-							INNER JOIN tblICItemUOM u
-								ON u.intItemId = d.intItemId
-								AND u.intItemUOMId = d.intItemUOMId						
-					WHERE	h.ysnPosted = 1
-							AND h.intShipFromLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-							AND ISNULL(d.intSubLocationId, 0) = ISNULL(SubLocation.intSubLocationId, 0) 
-							AND ISNULL(d.intStorageLocationId, 0) = ISNULL(StorageLocation.intStorageLocationId, 0) 							
-				) Shipment 
-				OUTER APPLY (
-					SELECT  dblQuantity = SUM(dbo.fnCalculateStockUnitQty(d.dblQtyShipped, u.dblUnitQty))
-					FROM	tblARInvoice h INNER JOIN tblARInvoiceDetail d
-								on h.intInvoiceId = d.intInvoiceId
-							INNER JOIN tblICItemUOM u
-								ON u.intItemId = d.intItemId
-								AND u.intItemUOMId = d.intItemUOMId
-							INNER JOIN tblICInventoryShipmentItem shipmentItem
-								ON shipmentItem.intInventoryShipmentId = d.intInventoryShipmentItemId 
-					WHERE	h.ysnPosted = 1
-							AND h.intCompanyLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-							AND ISNULL(d.intSubLocationId, 0) = ISNULL(SubLocation.intSubLocationId, 0) 
-							AND ISNULL(d.intStorageLocationId, 0) = ISNULL(StorageLocation.intStorageLocationId, 0) 
-				) SalesInvoice 
-			GROUP BY i.intItemId, il.intItemLocationId, StockUOM.intItemUOMId, SubLocation.intSubLocationId, StorageLocation.intStorageLocationId
+					SELECT	dblQuantity = dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
+					FROM	tblICInventoryTransaction t
+					WHERE	t.intItemId = i.intItemId 
+							AND t.intInTransitSourceLocationId = il.intItemLocationId
+							AND t.strTransactionForm IN (
+								'Inventory Shipment'
+								,'Outbound Shipment'
+								,'Invoice'
+							)
+				) t 
+			GROUP BY i.intItemId, il.intItemLocationId, StockUOM.intItemUOMId
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId
 		AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
@@ -349,56 +298,27 @@ BEGIN
 		SELECT	i.intItemId
 				,il.intItemLocationId
 				,uom.intItemUOMId 
-				,SubLocation.intSubLocationId
-				,StorageLocation.intStorageLocationId
-				,dblInTransitOutbound = SUM(ISNULL(Shipment.dblQuantity, 0) - ISNULL(SalesInvoice.dblQuantity, 0)) 
+				,intSubLocationId = null 
+				,intStorageLocationId = null 
+				,dblInTransitOutbound = SUM(t.dblQuantity) 
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
 				INNER JOIN tblICItemUOM uom
 					ON uom.intItemId = i.intItemId
 					AND ISNULL(uom.ysnStockUnit, 0) = 0
 				OUTER APPLY (
-					SELECT	intSubLocationId = intCompanyLocationSubLocationId
-					FROM	tblSMCompanyLocationSubLocation sub
-					WHERE	sub.intCompanyLocationId = il.intLocationId 
-					UNION ALL	
-					SELECT	intSubLocationId = NULL
-				) SubLocation 
-				OUTER APPLY (
-					SELECT	intStorageLocationId 
-					FROM	tblICStorageLocation storage 
-					WHERE	storage.intLocationId = il.intLocationId
-							AND storage.intSubLocationId = SubLocation.intSubLocationId  
-					UNION ALL	
-					SELECT	intSubLocationId = NULL
-				) StorageLocation
- 				OUTER APPLY (
-					SELECT  dblQuantity = SUM(d.dblQuantity)
-					FROM	tblICInventoryShipment h INNER JOIN tblICInventoryShipmentItem d
-								ON h.intInventoryShipmentId = d.intInventoryShipmentId
-					WHERE	h.ysnPosted = 1
-							AND h.intShipFromLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-							AND d.intItemUOMId = uom.intItemUOMId
-							AND ISNULL(d.intSubLocationId, 0) = ISNULL(SubLocation.intSubLocationId, 0) 
-							AND ISNULL(d.intStorageLocationId, 0) = ISNULL(StorageLocation.intStorageLocationId, 0) 							
-				) Shipment 
-				OUTER APPLY (
-					SELECT  dblQuantity = SUM(d.dblQtyShipped)
-					FROM	tblARInvoice h INNER JOIN tblARInvoiceDetail d
-								on h.intInvoiceId = d.intInvoiceId
-							INNER JOIN tblICInventoryShipmentItem shipmentItem
-								ON shipmentItem.intInventoryShipmentId = d.intInventoryShipmentItemId 
-					WHERE	h.ysnPosted = 1
-							AND h.intCompanyLocationId = il.intLocationId
-							AND d.intItemId = i.intItemId 
-							AND d.intItemId = il.intItemId 
-							AND d.intItemUOMId = uom.intItemUOMId
-							AND ISNULL(d.intSubLocationId, 0) = ISNULL(SubLocation.intSubLocationId, 0) 
-							AND ISNULL(d.intStorageLocationId, 0) = ISNULL(StorageLocation.intStorageLocationId, 0) 
-				) SalesInvoice 
-			GROUP BY i.intItemId, il.intItemLocationId, uom.intItemUOMId, SubLocation.intSubLocationId, StorageLocation.intStorageLocationId
+					SELECT	dblQuantity = dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
+					FROM	tblICInventoryTransaction t
+					WHERE	t.intItemId = i.intItemId 
+							AND t.intItemUOMId = uom.intItemUOMId 
+							AND t.intInTransitSourceLocationId = il.intItemLocationId
+							AND t.strTransactionForm IN (
+								'Inventory Shipment'
+								,'Outbound Shipment'
+								,'Invoice'
+							)
+				) t 
+			GROUP BY i.intItemId, il.intItemLocationId, uom.intItemUOMId
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId
 		AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId

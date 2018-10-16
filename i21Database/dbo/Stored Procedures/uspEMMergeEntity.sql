@@ -93,8 +93,8 @@ BEGIN
 				SET @CurTableName = 'tblAPVendor'
 				SET @CurTableKey = 'intEntityId'
 
-				INSERT INTO @EntityRelationShips(stment)
-				VALUES('DELETE FROM tblAPImportedVendors WHERE strVendorId in (select strVendorId from tblAPVendor WHERE intEntityId = ' + @CurMergeId + ' )')
+				--INSERT INTO @EntityRelationShips(stment)
+				--VALUES('DELETE FROM tblAPImportedVendors WHERE strVendorId in (select strVendorId from tblAPVendor WHERE intEntityId = ' + @CurMergeId + ' )')
 								
 				IF @PrimaryType = 'Customer'
 				BEGIN

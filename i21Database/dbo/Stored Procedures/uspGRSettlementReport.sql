@@ -293,8 +293,8 @@ BEGIN
 				,strAccountNumber		    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    = BNKTRN.strReferenceNo
 				,strEntityName			    = ENTITY.strName
-				,strVendorAddress		    = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-				,dtmDeliveryDate		    = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime) 
+				,strVendorAddress			= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+				,dtmDeliveryDate		    = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
 				,strReceiptNumber		    = SC.strElevatorReceiptNumber
@@ -406,8 +406,8 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = Bill.intEntityVendorId AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
@@ -495,8 +495,8 @@ BEGIN
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
-				,strVendorAddress     		 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode) 
-				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)		
+				,strVendorAddress			 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
 				,strReceiptNumber			 = SC.strElevatorReceiptNumber
@@ -551,7 +551,8 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END 
 				,TotalDiscount			     = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
-				,NetDue					     = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				--,NetDue					     = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId					     = Bill.strBillId
 				,intPaymentId			     = PYMT.intPaymentId
 				,InboundNetWeight		     = BillDtl.dblQtyOrdered
@@ -597,6 +598,7 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTotal) dblTotal
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
@@ -700,7 +702,7 @@ BEGIN
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
 				,strVendorAddress			 = dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)		
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 				,intTicketId				 = DS.intDeliverySheetId		
 				,strTicketNumber			 = DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 				,strReceiptNumber			 = ''
@@ -755,7 +757,8 @@ BEGIN
 											       ELSE CNTRCT.strContractNumber
 											   END
 				,TotalDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue						 = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				--,NetDue						 = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId						 = Bill.strBillId
 				,intPaymentId				 = PYMT.intPaymentId
 				,InboundNetWeight			 = BillDtl.dblQtyOrdered
@@ -813,6 +816,7 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTotal) dblTotal
+						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId

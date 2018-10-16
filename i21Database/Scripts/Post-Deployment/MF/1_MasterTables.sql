@@ -3542,3 +3542,7 @@ UPDATE tblMFCompanyPreference
 SET ysnConcatenateParentLotonProduction =0
 Where ysnConcatenateParentLotonProduction IS NULL
 GO
+UPDATE tblMFReportCategoryByCustomer
+SET intReportType = 1
+Where intReportType IS NULL
+GO

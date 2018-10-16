@@ -12,19 +12,26 @@ SET ANSI_WARNINGS OFF
 DECLARE @intEntityId INT = NULL
 DECLARE @intItemId INT = NULL
 DECLARE @intLocationId INT = NULL
-DECLARE @dblBalance INT = 0
+DECLARE @dblBalance NUMERIC(38,20)
 DECLARE @intDeliverySheetId INT = NULL
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intHoldCustomerStorageId INT
-DECLARE @newBalance DECIMAL(18,6) = 0
+DECLARE @newBalance DECIMAL(38,20) = 0
+DECLARE @storageHistoryData AS [StorageHistoryStagingTable]
+DECLARE @intStorageHistoryId AS INT
+DECLARE @intStorageTypeId AS INT
+DECLARE @intStorageScheduleId AS INT
+
 BEGIN TRY
 	--check if a storage already exists 
 	SELECT 
-		@intEntityId			= CS.intEntityId
-		, @intItemId			= CS.intItemId
-		, @intLocationId		= CS.intCompanyLocationId
-		, @dblBalance			= CS.dblQuantity
-		, @intDeliverySheetId	= CS.intDeliverySheetId
+		@intEntityId				= CS.intEntityId
+		, @intItemId				= CS.intItemId
+		, @intLocationId			= CS.intCompanyLocationId
+		, @dblBalance				= CS.dblQuantity
+		, @intDeliverySheetId		= CS.intDeliverySheetId
+		, @intStorageTypeId			= CS.intStorageTypeId
+		, @intStorageScheduleId		= CS.intStorageScheduleId
 	FROM @CustomerStorageStagingTable CS	
 
 	IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId)
@@ -38,6 +45,8 @@ BEGIN TRY
 				,@intDeliverySheetId = NULL
 				,@intCustomerStorageId = @intCustomerStorageId
 				,@dblBalance = @dblBalance
+				,@intStorageTypeId = @intStorageTypeId
+				,@intStorageScheduleId = @intStorageScheduleId
 				,@ysnDistribute = 1
 				,@newBalance = @newBalance OUT
 	END
@@ -85,7 +94,7 @@ BEGIN TRY
 				,[intStorageScheduleId]				= CS.intStorageScheduleId
 				,[intStorageTypeId]					= CS.intStorageTypeId
 				,[intCompanyLocationId]				= CS.intCompanyLocationId
-				,[intTicketId]						= CS.intTicketId
+				,[intTicketId]						= CASE WHEN CS.intDeliverySheetId > 0 THEN NULL ELSE CS.intTicketId END
 				,[intDeliverySheetId]				= CS.intDeliverySheetId
 				,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 				,[dblTotalPriceShrink]				= 0
@@ -124,39 +133,35 @@ BEGIN TRY
 		RETURN;
 	END
 
-	--always insert a record in storage history
-	INSERT INTO [dbo].[tblGRStorageHistory]
-			([intConcurrencyId]
-			,[intCustomerStorageId]
+	--always insert a record in storage history	
+	INSERT INTO @storageHistoryData
+			([intCustomerStorageId]
 			,[intTicketId]
 			,[intDeliverySheetId]
-			,[intInventoryReceiptId]
-			,[intInvoiceId]
 			,[intContractHeaderId]
 			,[dblUnits]
 			,[dtmHistoryDate]
-			,[dblPaidAmount]
 			,[strPaidDescription]
 			,[dblCurrencyRate]
-			,[strType]
+			,[intTransactionTypeId]
 			,[intUserId]
-			,[intTransactionTypeId])
-	SELECT 	[intConcurrencyId]					= 1
-			,[intCustomerStorageId]				= @intCustomerStorageId				
+			,[ysnPost],
+			[strType])
+	SELECT 	[intCustomerStorageId]				= @intCustomerStorageId				
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
-			,[intInventoryReceiptId]			= NULL
-			,[intInvoiceId]						= NULL
 			,[intContractHeaderId]				= CS.intContractHeaderId
-			,[dblUnits]							= CASE WHEN @newBalance > 0 THEN @newBalance ELSE CS.dblQuantity END
+			,[dblUnits]							= CS.dblQuantity
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
-			,[dblPaidAmount]					= 0
-			,[strPaidDescription]				= 'Generated From Scale'
+			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Scale Ticket with Delivery Sheet' ELSE 'Generated From Scale' END
 			,[dblCurrencyRate]					= 1
-			,[strType]							= 'From Scale'
+			,[intTransactionTypeId]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 5 ELSE 1 END
 			,[intUserId]						= CS.intUserId --strUserName will be replaced by intUserId
-			,[intTransactionTypeId]				= 1
+			,[ysnPost]							= 1
+			,[strType]							= CASE WHEN CS.intDeliverySheetId > 0 THEN 'From Delivery Sheet' ELSE 'From Scale' END
 	FROM	@CustomerStorageStagingTable CS
+
+	EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, @intStorageHistoryId OUTPUT
 
 	--update the discounts due, storage due
 	--calculate total discounts for [dblDiscountsDue]

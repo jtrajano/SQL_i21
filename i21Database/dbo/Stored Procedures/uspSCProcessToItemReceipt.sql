@@ -1,9 +1,8 @@
 CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	 @intSourceTransactionId AS INT
-	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
 	,@dblNetUnits AS DECIMAL (38,20)
-	,@dblCost AS DECIMAL (9,5)
+	,@dblCost AS DECIMAL (38, 20)
 	,@intEntityId AS INT
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
@@ -248,7 +247,6 @@ BEGIN TRY
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
-					,@strSourceType
 					,@intUserId
 					,@dblRemainingUnits
 					,@dblCost
@@ -286,7 +284,6 @@ BEGIN TRY
 			)
 			EXEC dbo.uspSCGetScaleItemForItemReceipt 
 				 @intTicketId
-				,@strSourceType
 				,@intUserId
 				,@dblNetUnits
 				,@dblCost
@@ -332,7 +329,6 @@ BEGIN TRY
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
-					,@strSourceType
 					,@intUserId
 					,@dblNetUnits
 					,@dblCost
@@ -383,25 +379,25 @@ BEGIN TRY
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
 							INSERT INTO @ItemsForItemReceipt (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
-							,strSourceTransactionId  
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId
+								,ysnIsStorage
+								,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
@@ -441,8 +437,6 @@ BEGIN TRY
 		END
 	END
 
-	-- Add the items to the item receipt 
-	--IF @strSourceType = @SourceType_Direct
 	BEGIN 
 		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 	END
@@ -702,6 +696,16 @@ BEGIN TRY
 				,@success = @success OUTPUT
 			END
 		END
+
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Updated'					-- Action Type
+			,@changeDescription	= 'Inventory Receipt'		-- Description
+			,@fromValue			= ''						-- Old Value
+			,@toValue			= @strTransactionId			-- New Value
+			,@details			= '';
 	END
 _Exit:
 

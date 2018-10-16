@@ -150,6 +150,9 @@ BEGIN
 			,LC.dblTareWt AS dblContainerTareWt
 			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
 			,CD.strCommodityCode
+			,LDCL.dblQuantity AS dblContainerLinkQty
+			,LDCL.dblLinkGrossWt AS dblContainerLinkGrossWt
+			,LDCL.dblLinkNetWt AS dblContainerLinkNetWt
 		FROM vyuLGLoadDetailView LDV
 		JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId

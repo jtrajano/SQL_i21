@@ -4,7 +4,7 @@ AS
 
 SELECT 
 	   rectrans.intRecurringId
-	  ,ent.strName
+	  ,strName = case when rectrans.strTransactionType = 'Sales Order' then oent.strName else ent.strName end
 	  ,'' as strAssignedUser
       ,rectrans.intTransactionId
       ,rectrans.strTransactionNumber
@@ -31,3 +31,5 @@ SELECT
 	FROM tblSMRecurringTransaction rectrans
 	LEFT JOIN tblARInvoice inv ON rectrans.strTransactionNumber = inv.strInvoiceNumber
 	LEFT JOIN tblEMEntity ent ON inv.intEntityCustomerId  = ent.intEntityId
+	LEFT JOIN tblSOSalesOrder so ON rectrans.strTransactionNumber = so.strSalesOrderNumber
+	LEFT JOIN tblEMEntity oent ON so.intEntityCustomerId  = oent.intEntityId

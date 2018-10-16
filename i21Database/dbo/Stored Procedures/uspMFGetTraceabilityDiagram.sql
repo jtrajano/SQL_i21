@@ -1929,7 +1929,8 @@ BEGIN
 			,strType
 		FROM @tblNodeData
 		WHERE strType NOT IN (
-				'SO'
+				'OS'
+				,'SO'
 				,'IN'
 				,'S'
 				)

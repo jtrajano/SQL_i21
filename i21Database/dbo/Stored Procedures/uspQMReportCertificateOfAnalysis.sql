@@ -88,7 +88,7 @@ BEGIN TRY
 
 	SELECT Case When @ysnShowItemDescriptionOnly=1 Then I.strDescription Else strItemNo + '-' + I.strDescription End AS strItemNo
 		,strLoadNumber
-		,CONVERT(VARCHAR(8), dtmScheduledDate, 1) AS [dtmScheduledDate]
+		,CONVERT(VARCHAR(8), IsNULL(L.dtmDeliveredDate,dtmScheduledDate), 1) AS [dtmScheduledDate]
 		,(CL.strLocationName + CHAR(13) + CHAR(10) + CL.strAddress + CHAR(13) + CHAR(10) + CL.strCity + ',  ' + strStateProvince + '  ' + strZipPostalCode) AS strShipperAddress --- + CHAR(13) + CHAR(10) + 'Phone : ' + CL.strPhone
 		,E.strName + CHAR(13) + CHAR(10) + EL.strLocationName + CHAR(13) + CHAR(10) + EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ',' + strState AS [To Address]
 		,strPropertyName
@@ -132,7 +132,7 @@ BEGIN TRY
 	GROUP BY strItemNo
 		,I.strDescription
 		,strLoadNumber
-		,dtmScheduledDate
+		,IsNULL(L.dtmDeliveredDate,dtmScheduledDate)
 		,CL.strAddress
 		,CL.strCity
 		,strStateProvince

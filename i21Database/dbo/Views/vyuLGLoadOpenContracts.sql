@@ -6,6 +6,7 @@ SELECT CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription strItemDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity AS dblDetailQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
@@ -170,6 +171,7 @@ SELECT CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription strItemDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity AS dblDetailQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
@@ -333,6 +335,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intItemId
 	,Item.strDescription
 	,Item.strItemNo
+	,Item.intCommodityId
 	,CD.dblQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId

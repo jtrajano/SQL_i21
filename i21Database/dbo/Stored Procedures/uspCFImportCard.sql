@@ -116,9 +116,9 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																    WHERE arAcct.strCustomerNumber = LTRIM(RTRIM(cfcus_ar_cus_no))
 																    COLLATE Latin1_General_CI_AS),0)
 				--,@strCardForOwnUse						   = LTRIM(RTRIM())
-				,@intExpenseItemId						   = (SELECT intAccountId 
-																	FROM tblGLAccount 
-																	WHERE strAccountId = LTRIM(RTRIM(cfcus_exp_itm_no))
+				,@intExpenseItemId						   = (SELECT intItemId 
+																	FROM tblICItem 
+																	WHERE strItemNo = LTRIM(RTRIM(cfcus_exp_itm_no))
 																	COLLATE Latin1_General_CI_AS)
 				,@intDefaultFixVehicleNumber			   = ISNULL((SELECT intVehicleId 
 																	FROM tblCFVehicle 
@@ -179,15 +179,26 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				,@intCardvehicleControl					   = LTRIM(RTRIM(cfcus_card_veh_control))
 				,@intCardCustomPin						   = LTRIM(RTRIM(cfcus_card_custom_pin))
 				,@ysnCardForOwnUse						   = (case
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 'FALSE'
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 'TRUE'
+															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 0
+															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
 															 else 'FALSE'
 															 end)
-				,@ysnIgnoreCardTransaction				   = (case
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 'FALSE'
-															 when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 'TRUE'
-															 else 'FALSE'
-															 end)
+				,@ysnIgnoreCardTransaction				   = CASE WHEN cfcus_own_use_yn = 'B' 
+																THEN 1
+																ELSE	
+																	ISNULL((
+																		SELECT TOP 1 1 
+																		FROM cflocmst
+																		WHERE CAST(ISNULL(cfloc_ignore_card,0) AS INT)= CAST(ISNULL(cfcus_card_no,0) AS INT)
+																			AND  cfloc_network_id = cfcus_network_id
+																	),0)
+																END
+															
+															--(case
+															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'N' then 0
+															-- when RTRIM(LTRIM(cfcus_own_use_yn)) = 'Y' then 1
+															-- else 'FALSE'
+															-- end)
 				,@intCreatedUserId						   = 0		
 				,@dtmCreated							   = CONVERT(VARCHAR(10), GETDATE(), 120)				
 				,@intLastModifiedUserId					   = 0

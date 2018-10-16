@@ -362,7 +362,6 @@ BEGIN TRY
 				BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, 0 
 				END
-
 			END
 
 			--4. Deleting History
@@ -412,8 +411,6 @@ BEGIN TRY
 			END
 			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
 		
-			EXEC uspICUnpostCostAdjustment @BillId, @strBillId, @strBatchId, @UserId, DEFAULT
-			
 			--5. Removing Voucher
 			BEGIN
 				EXEC uspAPDeleteVoucher 

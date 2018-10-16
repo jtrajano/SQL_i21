@@ -305,6 +305,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\11_AdjustmentInventoryTerms.sql 
 :r .\IC\12_StockTypes.sql 
 :r .\IC\13_Add_Default_Edi_Mapping_Template.sql 
+:r .\IC\14_Add_Inventory_Report_Templates.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -343,6 +344,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\1_MasterTables.sql
 :R .\GR\TicketTypes.sql
 :R .\GR\GRDataMigrations.sql
+:R .\GR\InsertStorageHistoryTypeTransaction.sql
+:R .\GR\FixStorageHistoryData.sql
+:R .\GR\MigrateTransferStorageData.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -352,9 +356,9 @@ print 'BEGIN POST DEPLOYMENT'
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
 :r .\PR\DefaultData\2_ElectronicFileFormats.sql
-:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
-:r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
-:r .\PR\DataFixes\ResetEaningHoursToProcess.sql
+--:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
+--:r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
+--:r .\PR\DataFixes\ResetEaningHoursToProcess.sql
 :r .\PR\DataFixes\SynchronizePaycheckCheckNumber.sql
 :r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
 :r .\PR\DataFixes\UpdatePaycheckTotalHours.sql
@@ -439,11 +443,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\08_Checkout_Radiant_FGM.sql
 :r .\ST\09_Checkout_Radiant_MSM.sql
 :r .\ST\10_Checkout_Commander_Translog.sql
-:r .\ST\11_FileFieldMapping_Passport_ISM.sql
-:r .\ST\12_FileFieldMapping_Passport_FGM.sql
-:r .\ST\13_FileFieldMapping_Passport_MCM.sql
-:r .\ST\14_FileFieldMapping_Passport_MSM.sql
-:r .\ST\15_FileFieldMapping_Passport_TLM.sql
+:r .\ST\11_FileFieldMapping_Passport_ISM_330.sql
+:r .\ST\12_FileFieldMapping_Passport_FGM_330.sql
+:r .\ST\13_FileFieldMapping_Passport_MCM_330.sql
+:r .\ST\14_FileFieldMapping_Passport_MSM_330.sql
+:r .\ST\15_FileFieldMapping_Passport_TLM_330.sql
 :r .\ST\16_FileFieldMapping_Passport_TLM_340.sql
 :r .\ST\17_FileFieldMapping_Passport_FGM_340.sql
 :r .\ST\18_FileFieldMapping_Passport_ISM_340.sql

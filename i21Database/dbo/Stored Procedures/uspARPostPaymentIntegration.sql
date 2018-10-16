@@ -541,33 +541,7 @@ CROSS APPLY (
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
 --UPDATE CUSTOMER'S BUDGET
---UPDATE BUDGET
---SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
---  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
---FROM tblARCustomerBudget BUDGET
---CROSS APPLY (
---    SELECT intEntityCustomerId
---         , dblTotalAmountPaid = SUM(dblAmountPaid)
---    FROM tblARPayment P
---    INNER JOIN @PaymentIds TB ON P.intPaymentId = TB.intId
---    WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
---      AND P.ysnApplytoBudget = 1
---    GROUP BY P.intEntityCustomerId        
---) PAYMENT
---WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
-UPDATE BUDGET
-SET BUDGET.dblAmountPaid = BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)
-  , BUDGET.ysnUsedBudget = CASE WHEN (BUDGET.dblAmountPaid + (CASE WHEN @Post = 1 THEN 1 ELSE -1 END * PAYMENT.dblTotalAmountPaid)) > 0 THEN 1 ELSE 0 END
-FROM tblARCustomerBudget BUDGET
-CROSS APPLY (
-    SELECT intEntityCustomerId
-         , dblTotalAmountPaid = SUM(dblAmountPaid)
-    FROM #ARPostPaymentHeader P
-    WHERE P.dtmDatePaid BETWEEN BUDGET.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, BUDGET.dtmBudgetDate))
-      AND P.ysnApplytoBudget = 1
-    GROUP BY P.intEntityCustomerId        
-) PAYMENT
-WHERE BUDGET.intEntityCustomerId = PAYMENT.intEntityCustomerId 
+EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post
 
 --AUDIT LOG
 DECLARE @IPaymentLog dbo.[AuditLogStagingTable]

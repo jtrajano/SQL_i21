@@ -76,7 +76,10 @@ BEGIN
 	SELECT DISTINCT L.strLoadNumber
 		  ,L.intLoadId
 		  ,LW.strDeliveryNoticeNumber
-		  ,CLSL.strSubLocationName
+		  ,ISNULL(WHVendor.strName,CLSL.strSubLocationName) AS strSubLocationName
+		  ,ContactEntity.strEmail
+		  ,ContactEntity.strPhone
+		  ,ContactEntity.strInternalNotes
 		  ,CLSL.strAddress AS strSubLocationAddress
 		  ,CLSL.strCity AS strSubLocationCity
 		  ,CLSL.strState AS strSubLocationState
@@ -177,6 +180,17 @@ BEGIN
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			WHERE CD.intContractDetailId = LD.intSContractDetailId
 			) AS strBuyersPONo
+		  ,(SELECT TOP 1 CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq)
+			FROM tblCTContractDetail CD
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE CD.intContractDetailId = LD.intSContractDetailId
+			) AS strSalesContractNo
+		  ,(SELECT TOP 1 CB.strContractBasis
+			FROM tblCTContractHeader CH
+			JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+			JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+			WHERE CD.intContractDetailId = LD.intSContractDetailId
+			) AS strSalesContractIncoTerm
 		  ,(SELECT E1.strPhone
 			FROM tblEMEntity E
 			JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
@@ -197,13 +211,16 @@ BEGIN
 		  ,L.strComments
 		  ,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 		  ,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
-		  ,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo
+		  ,CASE WHEN ISNULL(CP.ysnFullHeaderLogo,0) = 1 THEN 'true' else 'false' END ysnFullHeaderLogo
 		  ,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
 		  ,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth		  
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblEMEntity WHVendor ON WHVendor.intEntityId = CLSL.intVendorId
+	LEFT JOIN tblEMEntityToContact WHVendorContact ON WHVendorContact.intEntityId = WHVendor.intEntityId
+	LEFT JOIN tblEMEntity ContactEntity ON ContactEntity.intEntityId = WHVendorContact.intEntityContactId
 	LEFT JOIN tblEMEntity EM ON EM.intEntityId = LD.intCustomerEntityId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity HEM ON HEM.intEntityId = LW.intHaulerEntityId

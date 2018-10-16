@@ -116,6 +116,7 @@ CROSS APPLY
 	) Total
 	WHERE intBillId = @billId
 	AND C.intContractHeaderId = B.intContractHeaderId
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
 AND A.intEntityVendorId = @vendorId
@@ -218,6 +219,7 @@ CROSS APPLY
 	AND C.intItemId = B.intItemId 
 	AND (B.intContractDetailId = C.intContractDetailId--FOR CONTRACT W/ ITEM
 		OR B.intScaleTicketId = C.intScaleTicketId)
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 ) CurrentBill 
 WHERE A.intTransactionType IN (2, 13)
 AND A.intEntityVendorId = @vendorId
@@ -312,6 +314,7 @@ CROSS APPLY
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 	--AND C.intContractHeaderId = B.intContractHeaderId
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
@@ -410,6 +413,7 @@ CROSS APPLY
 		intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 	/*AND C.intContractHeaderId = B.intContractHeaderId  AND C.intItemId = B.intItemId*/ --FOR CONTRACT W/ ITEM
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
@@ -537,6 +541,7 @@ CROSS APPLY
 	) DiscountTotal
 	WHERE intBillId = @billId
 	AND C.dblTotal > 0
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
 --AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
@@ -629,6 +634,7 @@ CROSS APPLY
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
 AND B.intContractHeaderId IS NULL
@@ -724,6 +730,7 @@ INNER JOIN
 	) Total
 	WHERE intBillId = @billId
 	AND C.intContractDetailId IS NULL   
+	AND C.intLoadDetailId IS NULL --EXLUDE LOAD SHIPMENT TRANSACTION
 ) CurrentBill ON B.intItemId = CurrentBill.intItemId
 WHERE A.intTransactionType IN (2)
 AND B.intItemId IS NOT NULL
@@ -737,6 +744,61 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
+)
+UNION ALL
+--=========================================================
+--PREPAYMENT FOR LOAD SHIPMENT RELATED TRANSACTION
+--=========================================================
+SELECT
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	NULL, 
+	[intLineApplied]		=	NULL, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	CurrentBillDetails.intItemId,
+	[strItemDescription]	=	CurrentBillDetails.strDescription,
+	[strItemNo]				=	CurrentBillDetails.strItemNo,
+	[intContractHeaderId]	=	CurrentBillDetails.intContractHeaderId,	
+	[strContractNumber]		=	CurrentBillDetails.strContractNumber,
+	[intPrepayType]			=	CurrentBillDetails.intPrepayTypeId,
+	[dblTotal]				=	A.dblTotal,
+	[dblBillAmount]			=	CurrentBill.dblTotal,
+	[dblBalance]			=	A.dblAmountDue,
+	[dblAmountApplied]		=	A.dblTotal - A.dblAmountDue, 
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+CROSS APPLY (
+	SELECT  SUM(dblTotal + dblTax) as dblTotal from tblAPBillDetail  BD
+	INNER JOIN tblCTContractHeader D ON BD.intContractHeaderId = D.intContractHeaderId
+	WHERE BD.intBillId = @billId 
+	AND BD.intLoadDetailId > 0
+	AND BD.intContractHeaderId > 0
+
+) CurrentBill
+OUTER APPLY (
+	SELECT TOP 1 BD.intItemId, 
+				 BD.intContractHeaderId,
+				 D.strContractNumber,
+				 E.strDescription,
+				 E.strItemNo,
+				 BD.intLoadDetailId,
+				 BD.intPrepayTypeId FROM tblAPBillDetail BD
+	LEFT JOIN tblICItem E ON BD.intItemId = E.intItemId --FOR CONTRACT W/ ITEM
+	LEFT JOIN tblCTContractHeader D ON BD.intContractHeaderId = D.intContractHeaderId
+	WHERE BD.intBillId = @billId 
+) CurrentBillDetails
+WHERE A.intTransactionType IN (2)
+AND A.intEntityVendorId = @vendorId
+AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND CurrentBillDetails.intLoadDetailId > 0
+AND EXISTS
+(
+	--get prepayment record only if it has payment posted
+	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
+	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
+	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
 )
 -- UNION ALL
 --=========================================================

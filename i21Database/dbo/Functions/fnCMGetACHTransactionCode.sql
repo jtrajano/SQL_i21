@@ -18,23 +18,19 @@ BEGIN
 	SET @ysnVoid = 1
 END
 
-
 ;WITH r AS (
-SELECT trns.strTransactionId,
-CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ISNULL(strTransactionType,'Customer Prepayment')) = 1 THEN '7' ELSE '2' END Code from
-tblARPayment payment
-JOIN tblCMUndepositedFund uf ON uf.intSourceTransactionId  = payment.intPaymentId
-JOIN tblCMBankTransaction trns ON trns.intTransactionId = uf.intBankDepositId
-LEFT JOIN tblARInvoice invoice ON payment.intPaymentId = invoice.intPaymentId
+SELECT trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+CASE WHEN payment.dblAmountPaid < 0 THEN '2' ELSE '7' END Code
+FROM tblARPayment payment JOIN
+vyuARPaymentBankTransaction trns on payment.intPaymentId = trns.intPaymentId
 UNION
-SELECT trns.strTransactionId, 
-CASE WHEN payment.dblAmountPaid >=0 then '2' else '7' end Code
-FROM tblAPBill bill JOIN tblAPBillDetail billdetail on bill.intBillId = billdetail.intBillId
-JOIN tblAPPaymentDetail paymentdetail ON paymentdetail.intBillId = billdetail.intBillId
-JOIN tblAPPayment payment ON payment.intPaymentId = paymentdetail.intPaymentId
+SELECT trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+CASE WHEN payment.dblAmountPaid > 0 THEN '2' ELSE '7' END Code
+FROM tblAPPayment payment
 JOIN tblCMBankTransaction trns ON trns.strTransactionId = payment.strPaymentRecordNum
 UNION
-SELECT  trns.strTransactionId,'2' Code FROM tblPRPaycheck pchk
+SELECT  trns.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
+'2' Code FROM tblPRPaycheck pchk
 JOIN tblCMBankTransaction trns ON trns.strTransactionId = pchk.strPaycheckId
 )SELECT @Code=Code FROM r
 WHERE strTransactionId = @strTransactionId

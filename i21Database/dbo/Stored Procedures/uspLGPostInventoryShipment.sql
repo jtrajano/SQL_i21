@@ -277,13 +277,13 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ISNULL(Lot.intWeightUOMId, LoadDetail.intWeightItemUOMId)
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = - 1 * (
 				CASE 
 					WHEN Lot.intLotId IS NULL
-						THEN ISNULL(LoadDetail.dblNet, 0)
-					ELSE ISNULL(DetailLot.dblNet, 0)
+						THEN ISNULL(LoadDetail.dblQuantity, 0)
+					ELSE ISNULL(DetailLot.dblLotQuantity, 0)
 					END
 				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId,LoadDetail.intWeightItemUOMId), 1)
 			,dblUOMQty = CASE 
@@ -739,9 +739,10 @@ END
 --------------------------------------------------------------------------------------------  
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
--- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Call any stored procedure for the intergrations with the other modules. 
--- 4. Commit the save point 
+-- 2. Update the ysnPosted flag and Del Qty in the transaction. Increase the concurrency. 
+-- 3. Update the Delivered Qty, Gross, Tare, and Net in the details
+-- 4. Call any stored procedure for the intergrations with the other modules. 
+-- 5. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN
@@ -768,6 +769,18 @@ BEGIN
 		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,intShipmentStatus = 6
 		,dtmPostedDate = GETDATE()
+		,dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN 
+									(SELECT SUM(dblDeliveredQuantity) FROM tblLGLoadDetail WHERE intLoadId = tblLGLoad.intLoadId)
+								ELSE 0 END
+	WHERE strLoadNumber = @strTransactionId
+
+	UPDATE Detail
+	SET dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN Detail.dblQuantity ELSE 0 END
+		,dblDeliveredGross = CASE WHEN (@ysnPost = 1) THEN Detail.dblGross ELSE 0 END
+		,dblDeliveredTare = CASE WHEN (@ysnPost = 1) THEN Detail.dblTare ELSE 0 END
+		,dblDeliveredNet = CASE WHEN (@ysnPost = 1) THEN Detail.dblNet ELSE 0 END
+	FROM dbo.tblLGLoadDetail Detail
+		INNER JOIN dbo.tblLGLoad Header ON Detail.intLoadId = Header.intLoadId 
 	WHERE strLoadNumber = @strTransactionId
 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType

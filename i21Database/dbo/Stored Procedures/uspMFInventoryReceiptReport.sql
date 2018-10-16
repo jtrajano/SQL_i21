@@ -118,7 +118,7 @@ BEGIN
 					END)) AS strReceivedFrom
 		,R.strReceiptNumber
 		,R.strWarehouseRefNo AS strOrderShipmentNo
-		,CONVERT(VARCHAR(10), R.dtmReceiptDate, 101) AS dtmReceiptDate
+		,replace(convert(VARCHAR(11), R.dtmReceiptDate, 106), ' ', '-') AS dtmReceiptDate
 		,R.strVendorRefNo AS strCustomerOrderNo
 		,S.strShipVia AS strCarrier
 		,R.strVessel AS strTrailer
@@ -137,6 +137,16 @@ BEGIN
 		,(ISNULL(RIL.dblGrossWeight, 0) - ISNULL(RIL.dblTareWeight, 0)) AS dblNetWeight
 		,RIL.dblQuantity
 		,UOM.strUnitMeasure
+		,RIL.strContainerNo AS strCustomerPO
+		,RIL.strCondition
+		,RIL.strRemarks
+		,RIL.strVendorLotId AS strSupplierLotId
+		,RIL.strLotAlias AS strBatchNo
+		,R.intInventoryReceiptId
+		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+		,RIL.strGarden
+		,replace(convert(VARCHAR(11), RIL.dtmExpiryDate, 106), ' ', '-') dtmExpiryDate
+		,C.strCountry
 	FROM tblICInventoryReceipt R
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
@@ -147,5 +157,6 @@ BEGIN
 	LEFT JOIN tblICItem I ON I.intItemId = RI.intItemId
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RIL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+	LEFT JOIN tblSMCountry C ON C.intCountryID = RIL.intOriginId
 	WHERE R.strReceiptNumber = @strReceiptNo
 END

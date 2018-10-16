@@ -273,3 +273,111 @@ EXEC ('
 	END
 ')
 END
+
+/*
+* Paycheck Tax
+* 1. Attempt to Populate Taxable Amount and Taxable Amount YTD fields (2015 and up)
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblPRPaycheckTax') AND name = 'dblTaxableAmount')
+BEGIN
+	EXEC ('
+	UPDATE PaycheckTax
+	SET dblTaxableAmount = CASE WHEN (PaycheckTax.dblTotal > 0) THEN
+						CASE WHEN (strCalculationType = ''USA Social Security'') THEN
+								 CASE WHEN (Taxable.dblTaxableYTD > (CASE YEAR(PC.dtmPayDate) 
+																		WHEN 2015 THEN 118500 
+																		WHEN 2016 THEN 118500 
+																		WHEN 2017 THEN 127200 
+																		WHEN 2018 THEN 128400 
+																		ELSE 0
+																	END)) 
+							  			THEN Taxable.dblTaxable - (dblTaxableYTD - (CASE YEAR(PC.dtmPayDate) 
+																							WHEN 2015 THEN 118500 
+																							WHEN 2016 THEN 118500 
+																							WHEN 2017 THEN 127200 
+																							WHEN 2018 THEN 128400 
+																							ELSE 0
+																						END)) 
+								 ELSE Taxable.dblTaxable END
+							 WHEN (strCalculationType IN (''USA FUTA'', ''USA SUTA'')) THEN
+								CASE WHEN (Taxable.dblTaxableYTD > dblLimit) 
+							  			THEN Taxable.dblTaxable - (dblTaxableYTD - dblLimit) 
+								 ELSE Taxable.dblTaxable END
+						 ELSE Taxable.dblTaxable END
+					  ELSE 0 END
+		,dblTaxableAmountYTD = CASE WHEN strCalculationType = ''USA Social Security'' THEN
+								CASE WHEN (Taxable.dblTaxableYTD > (CASE YEAR(PC.dtmPayDate) 
+																		WHEN 2015 THEN 118500 
+																		WHEN 2016 THEN 118500 
+																		WHEN 2017 THEN 127200 
+																		WHEN 2018 THEN 128400 
+																		ELSE 0
+																	END)) THEN 
+									(CASE YEAR(PC.dtmPayDate) 
+										WHEN 2015 THEN 118500 
+										WHEN 2016 THEN 118500 
+										WHEN 2017 THEN 127200 
+										WHEN 2018 THEN 128400 
+										ELSE 0
+									END) 
+								ELSE Taxable.dblTaxableYTD END
+							 WHEN (strCalculationType IN (''USA FUTA'', ''USA SUTA'')) THEN
+								CASE WHEN (Taxable.dblTaxableYTD > dblLimit) THEN dblLimit 
+								ELSE Taxable.dblTaxableYTD END
+						 ELSE Taxable.dblTaxableYTD END
+	FROM 
+	tblPRPaycheckTax PaycheckTax
+	INNER JOIN
+		(SELECT
+			PT.intPaycheckTaxId
+			,dblTaxable = ISNULL(dblTotalEarning, 0) - ISNULL(dblTotalDeduction, 0)
+			,dblTaxableYTD = ISNULL((SELECT dblTotalEarning = SUM(dblTotal)
+									FROM tblPRPaycheckEarning E1
+									LEFT JOIN tblPRPaycheck E3
+										ON E1.intPaycheckId = E3.intPaycheckId
+									LEFT JOIN (SELECT DISTINCT intPaycheckEarningId, intTypeTaxId FROM tblPRPaycheckEarningTax) E2 
+										ON E1.intPaycheckEarningId = E2.intPaycheckEarningId
+									WHERE E1.strCalculationType <> ''Reimbursement''
+										AND E3.ysnPosted = 1 
+										AND YEAR(E3.dtmPayDate) = YEAR(PC.dtmPayDate)
+										AND E3.dtmPayDate <= PC.dtmPayDate
+										AND E2.intTypeTaxId = PT.intTypeTaxId
+										AND E3.intEntityEmployeeId = PC.intEntityEmployeeId), 0) 
+							- ISNULL((SELECT dblTotalDeduction = SUM(dblTotal)
+									FROM tblPRPaycheckDeduction D1 
+									LEFT JOIN tblPRPaycheck D3
+										ON D1.intPaycheckId = D3.intPaycheckId
+									LEFT JOIN (SELECT DISTINCT intPaycheckDeductionId, intTypeTaxId FROM tblPRPaycheckDeductionTax) D2 
+										ON D1.intPaycheckDeductionId = D2.intPaycheckDeductionId
+									WHERE D1.strDeductFrom = ''Gross Pay'' AND D1.strPaidBy = ''Employee''
+											AND D3.ysnPosted = 1
+											AND YEAR(D3.dtmPayDate) = YEAR(PC.dtmPayDate)
+											AND D3.dtmPayDate <= PC.dtmPayDate
+											AND D2.intTypeTaxId = PT.intTypeTaxId
+											AND D3.intEntityEmployeeId = PC.intEntityEmployeeId), 0)
+			FROM tblPRPaycheckTax PT
+			LEFT JOIN tblPRPaycheck PC
+				ON PC.intPaycheckId = PT.intPaycheckId
+			LEFT JOIN 
+				(SELECT intPaycheckId, intTypeTaxId, dblTotalEarning = SUM(dblTotal)
+					FROM tblPRPaycheckEarning E1 
+					LEFT JOIN (SELECT DISTINCT intPaycheckEarningId, intTypeTaxId FROM tblPRPaycheckEarningTax) E2 
+						ON E1.intPaycheckEarningId = E2.intPaycheckEarningId
+					GROUP BY intPaycheckId, intTypeTaxId) PE
+				ON PE.intTypeTaxId = PT.intTypeTaxId AND PT.intPaycheckId = PE.intPaycheckId
+			LEFT JOIN
+				(SELECT intPaycheckId, intTypeTaxId, dblTotalDeduction = SUM(dblTotal)
+					FROM tblPRPaycheckDeduction D1 
+					LEFT JOIN (SELECT DISTINCT intPaycheckDeductionId, intTypeTaxId FROM tblPRPaycheckDeductionTax) D2 
+					ON D1.intPaycheckDeductionId = D2.intPaycheckDeductionId
+					WHERE D1.strDeductFrom = ''Gross Pay'' AND D1.strPaidBy = ''Employee''
+					GROUP BY intPaycheckId, intTypeTaxId) PD
+				ON PD.intTypeTaxId = PT.intTypeTaxId AND PT.intPaycheckId = PD.intPaycheckId
+			) Taxable
+		ON PaycheckTax.intPaycheckTaxId = Taxable.intPaycheckTaxId
+	INNER JOIN tblPRPaycheck PC
+		ON PaycheckTax.intPaycheckId = PC.intPaycheckId
+	WHERE dblTaxableAmount IS NULL OR dblTaxableAmountYTD IS NULL
+	')
+END

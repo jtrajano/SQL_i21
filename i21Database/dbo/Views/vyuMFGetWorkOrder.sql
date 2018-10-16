@@ -75,6 +75,7 @@ SELECT C.intManufacturingCellId
 	,W.intCountStatusId
 	,I.intLayerPerPallet
 	,I.intUnitPerLayer
+	,I.strLotTracking
 	,csl.strSubLocationName
 	,cs.strName AS strCustomerName
 	,d.strName AS strDepartmentName

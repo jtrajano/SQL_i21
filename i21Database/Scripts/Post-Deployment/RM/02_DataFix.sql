@@ -154,5 +154,31 @@ FROM tblRKCommodityMarketMapping
 WHERE strCommodityAttributeId IS NOT NULL
 AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
 GO
+
+--- Cleaned up/delete the account ids in the GL Account Set up of Risk Management for 18.1 Customer  RM-1312
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+BEGIN 
+	UPDATE tblRKCompanyPreference
+	SET intUnrealizedGainOnBasisId = NULL
+		,intUnrealizedGainOnFuturesId = NULL
+		,intUnrealizedGainOnCashId = NULL
+		,intUnrealizedGainOnRatioId = NULL
+		,intUnrealizedLossOnBasisId = NULL
+		,intUnrealizedLossOnFuturesId = NULL
+		,intUnrealizedLossOnCashId = NULL
+		,intUnrealizedLossOnRatioId = NULL
+		,intUnrealizedGainOnInventoryBasisIOSId = NULL
+		,intUnrealizedGainOnInventoryFuturesIOSId = NULL
+		,intUnrealizedGainOnInventoryCashIOSId = NULL
+		,intUnrealizedGainOnInventoryRatioIOSId = NULL
+		,intUnrealizedLossOnInventoryBasisIOSId = NULL
+		,intUnrealizedLossOnInventoryFuturesIOSId = NULL
+		,intUnrealizedLossOnInventoryCashIOSId = NULL
+		,intUnrealizedLossOnInventoryRatioIOSId = NULL
+		,intUnrealizedGainOnInventoryIntransitIOSId = NULL
+		,intUnrealizedLossOnInventoryIntransitIOSId = NULL
+END 
+GO
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

@@ -309,6 +309,15 @@ ELSE
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 	END
 
+	EXEC dbo.uspSMAuditLog 
+		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+		,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+		,@entityId			= @intUserId				-- Entity Id.
+		,@actionType		= 'Updated'					-- Action Type
+		,@changeDescription	= 'Inventory Shipment'		-- Description
+		,@fromValue			= ''						-- Old Value
+		,@toValue			= @strTransactionId			-- New Value
+		,@details			= '';
 _Exit:
 	
 END TRY

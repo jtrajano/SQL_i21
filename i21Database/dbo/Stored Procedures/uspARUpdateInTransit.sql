@@ -51,8 +51,11 @@ BEGIN
 					ON I.intFreightTermId = ft.intFreightTermId
 				LEFT JOIN tblICFobPoint fp
 					ON fp.strFobPoint = ft.strFobPoint
+				LEFT JOIN tblSCTicket TICKET
+					ON TICKET.intTicketId = ID.intTicketId
 			WHERE ID.intInvoiceId = @TransactionId 
 			AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+			AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') <> 'O' AND ISNULL(TICKET.intStorageScheduleTypeId, 0) <> 1))
 			AND (
 					(I.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId]))
 				OR

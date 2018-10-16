@@ -37,7 +37,19 @@ BEGIN TRY
 			@intContractTypeId		INT,
 			@intCommodityId			INT,
 			@strSeqMonth			NVARCHAR(50),
-			@UseScheduleForAvlCalc	BIT = 1
+			@UseScheduleForAvlCalc	BIT = 1,
+			@dblScheduleQty			INT,
+			@dblInreaseSchBy		NUMERIC(18,6)
+	
+	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
+					LTRIM(@intTicketId) +',' + 
+					LTRIM(@intEntityId) +',' +
+					LTRIM(ISNULL(@dblNetUnits,0)) +',' +
+					LTRIM(ISNULL(@intContractDetailId,0)) +',' +
+					LTRIM(ISNULL(@intUserId,0)) +',' +			
+					LTRIM(ISNULL(@ysnDP,0)) +',' +				
+					LTRIM(ISNULL(@ysnDeliverySheet,0))	
+	PRINT(@ErrMsg)
 
 	DECLARE @Processed TABLE
 	(
@@ -219,7 +231,8 @@ BEGIN TRY
 											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
-				@intItemUOMId	=	CD.intItemUOMId
+				@intItemUOMId	=	CD.intItemUOMId,
+				@dblScheduleQty	=	ISNULL(CD.dblScheduleQty,0)
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
  CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -253,6 +266,16 @@ BEGIN TRY
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
+			IF @UseScheduleForAvlCalc = 0 AND  @dblScheduleQty < @dblNetUnits
+			BEGIN
+				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+				EXEC	uspCTUpdateScheduleQuantity 
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblInreaseSchBy,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intTicketId,
+						@strScreenName			=	'Auto - Scale'
+			END
 
 			SELECT	@dblNetUnits = 0
 
@@ -260,9 +283,34 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
+			IF @UseScheduleForAvlCalc = 0
+			BEGIN
+				SET		@dblInreaseSchBy  = @dblNetUnits - @dblAvailable
 
-			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
+				EXEC	uspCTUpdateSequenceQuantity 
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblInreaseSchBy,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intTicketId,
+						@strScreenName			=	'Scale'
+
+				EXEC	uspCTUpdateScheduleQuantity 
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblInreaseSchBy,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intTicketId,
+						@strScreenName			=	'Auto - Scale'
+
+				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
+				SELECT	@dblNetUnits = 0
+				BREAK
+			END		
+			ELSE
+			BEGIN
+				INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
+			
+				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
+			END
 		END
 		
 		CONTINUEISH:

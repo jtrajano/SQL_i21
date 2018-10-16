@@ -23,6 +23,7 @@
 	[intSiteId]								INT				NULL,
 	[intCompanyLocationSubLocationId]		INT				NULL,
 	[intStorageLocationId]					INT				NULL,
+	[intSubLocationId]						INT				NULL,
 	[intOwnershipTypeId]					INT				NULL,
 	[intStorageScheduleTypeId]				INT				NULL,
 	[intCurrencyId]							INT				NULL,

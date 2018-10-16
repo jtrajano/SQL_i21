@@ -60,6 +60,8 @@ BEGIN TRY
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
 	)  
+	
+	DELETE FROM @temp_xml_table WHERE strFieldName = 'intSrCurrentUserId'
 
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @strMappingXML  
 

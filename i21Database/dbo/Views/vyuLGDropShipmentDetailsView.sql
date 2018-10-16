@@ -31,10 +31,12 @@ SELECT
 	,Alloc.strSItemUOM
 	,Alloc.strSContractNumber
 	,Alloc.strSalesContractNumber
+	,Alloc.strSCustomerRefNo
 	,Alloc.intSContractSeq
 	,Alloc.strBuyer
 	,Alloc.strSItemNo
 	,Alloc.strSItemDescription
+	,Alloc.strSItemDescriptionSpecification
 	,Alloc.intSContractDetailId
 	,Alloc.intSUnitMeasureId
 	,Alloc.dblSCashPrice

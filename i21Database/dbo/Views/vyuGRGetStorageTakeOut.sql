@@ -8,7 +8,7 @@ SELECT
 ,intItemId
 ,strItemNo
 ,SUM(dblOpenBalance) dblOpenBalance
-FROM vyuGRGetStorageTransferTicket
+FROM vyuGRGetStorageTickets
 WHERE ysnCustomerStorage=0 AND ysnDPOwnedType=0  
 GROUP BY 
 intStorageTypeId

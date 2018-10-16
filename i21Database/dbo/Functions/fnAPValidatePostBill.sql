@@ -424,8 +424,10 @@ BEGIN
 			A.intBillId,
 			32
 		FROM tblAPBill A 
-		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
-			A.dblTotalController != 0 AND A.dblTotal <> A.dblTotalController
+		CROSS APPLY tblAPCompanyPreference pref
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+			AND A.dblTotal <> A.dblTotalController
+			AND pref.ysnEnforceControlTotal = 1
 	END
 	ELSE
 	BEGIN

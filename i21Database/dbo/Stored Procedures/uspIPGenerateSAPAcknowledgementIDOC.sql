@@ -69,18 +69,18 @@ Declare @tblOutput AS Table
 If @strMsgType='Item'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
 	SELECT intStageItemId,'MATMAS','53','Success','S','Material Number',strItemNo,strItemNo,'','tblIPItemArchive','intStageItemId','strImportStatus','',strItemNo,strItemType
-	FROM tblIPItemArchive Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
+	FROM tblIPItemArchive Where ISNULL(strImportStatus,'')<>'Ack Sent' --AND strSessionId=@strSessionId
 	UNION
 	SELECT intStageItemId,'MATMAS','51',strErrorMessage,'E','Material Number',strItemNo,strItemNo,'','tblIPItemError','intStageItemId','strImportStatus','',strItemNo,strItemType
-	FROM tblIPItemError Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
+	FROM tblIPItemError Where ISNULL(strImportStatus,'')<>'Ack Sent' --AND strSessionId=@strSessionId
 
 If @strMsgType='Vendor'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
 	SELECT intStageEntityId,'CREMAS','53','Success','S','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityArchive','intStageEntityId','strImportStatus','',strAccountNo,strName
-	FROM tblIPEntityArchive Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
+	FROM tblIPEntityArchive Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' --AND strSessionId=@strSessionId
 	UNION
 	SELECT intStageEntityId,'CREMAS','51',strErrorMessage,'E','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityError','intStageEntityId','strImportStatus','',strAccountNo,strName
-	FROM tblIPEntityError Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
+	FROM tblIPEntityError Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' --AND strSessionId=@strSessionId
 
 If @strMsgType='PreShipment Sample'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)

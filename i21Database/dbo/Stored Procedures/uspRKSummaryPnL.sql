@@ -190,6 +190,7 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@strBuySell = @strBuySell,
 	@intBookId = @intBookId,
 	@intSubBookId = @intSubBookId
+
 BEGIN
 
 DECLARE @Summary AS TABLE (
@@ -269,7 +270,7 @@ DECLARE @Summary AS TABLE (
 			
 			UNION
 			
-			SELECT DISTINCT dblGrossPL dblGrossPnL,
+			SELECT DISTINCT dblGrossPnL,
 				null LongWaitedPrice,
 				null dblLong,
 				null dblShort,
@@ -319,7 +320,7 @@ DECLARE @Summary AS TABLE (
 			max(dblClosing) dblClosing,
 			sum(dblFutCommission) dblFutCommission,
 			sum(dblPrice) dblPrice,
-			max(dblRealized) dblRealized,
+			sum(dblRealized) dblRealized,
 			sum(dblVariationMargin) dblVariationMargin,
 			strName ,
 			'' strAccountNumber,

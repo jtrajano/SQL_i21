@@ -15,13 +15,24 @@ BEGIN
 	IF @status IS NOT NULL
 	BEGIN
 		UPDATE A SET A.ysnPost = 
-		CASE
-			WHEN @status = 1 THEN 0
-		END
+		(CASE	
+			WHEN ISNULL(@status, 0) = 0
+				THEN 1 --Post
+			WHEN @status = 1
+				THEN 0 --Unpost
+		END)
 		FROM tblSCDeliverySheet A
 		WHERE A.intDeliverySheetId = @dsId
 
-		UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 0 WHERE intDeliverySheetId = @dsId;
+		UPDATE tblSCTicket SET ysnDeliverySheetPost = 
+		(CASE	
+			WHEN ISNULL(@status, 0) = 0
+				THEN 1 --Post
+			WHEN @status = 1
+				THEN 0 --Unpost
+		END) 
+		WHERE intDeliverySheetId = @dsId
+		AND strTicketStatus = 'C'
 	END
 	ELSE
 	BEGIN
