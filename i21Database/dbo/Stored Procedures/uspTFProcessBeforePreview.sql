@@ -231,7 +231,13 @@ BEGIN TRY
 				) AS PvtTbl
 			) UnCommonField 
 			CROSS JOIN tblTFTransaction
+		END
+		ELSE IF (@TaxAuthorityCode = 'MN' AND @ScheduleCode = 'PDA-46H')
+		BEGIN
 
+			INSERT INTO tblTFTransactionDynamicMN 
+			SELECT trans.intTransactionId, Item.strDescription FROM #tmpTransaction trans INNER JOIN tblICItem Item ON Item.intItemId = trans.intItemId
+		
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId

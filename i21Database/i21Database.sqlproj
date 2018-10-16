@@ -7144,6 +7144,7 @@
     <Build Include="dbo\Tables\tblIPEntityTermError.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicMN.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
