@@ -570,7 +570,7 @@ BEGIN TRY
 				,dblExchangeRate = 1
 				,intTransactionId = cl.intBatchId
 				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-				,strTransactionId = cl.strBatchId
+				,strTransactionId = @strTransactionId--cl.strBatchId
 				,intTransactionTypeId = @INVENTORY_CONSUME
 				,intLotId = l.intLotId
 				,intSubLocationId = ISNULL(l.intSubLocationId, cl.intSubLocationId)
