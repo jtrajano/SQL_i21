@@ -146,7 +146,9 @@ BEGIN
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 															
-			
+	DECLARE @TaxableByOtherTaxesTable TABLE
+		([intTaxCodeId] INT PRIMARY KEY,
+		UNIQUE ([intTaxCodeId]));	
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
 		BEGIN
@@ -163,6 +165,7 @@ BEGIN
 					,@CheckoffTax		BIT
 					,@TaxExempt			BIT
 					,@TaxOnly			BIT
+					,@TaxableByOther    NVARCHAR(MAX)
 				
 					
 			SELECT TOP 1 
@@ -185,10 +188,13 @@ BEGIN
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
 				,@TaxOnly			= ISNULL([ysnTaxOnly],0)
 				,@OtherTaxAmount	= @ZeroDecimal
+				,@TaxableByOther    = ISNULL(strTaxableByOtherTaxes, '')
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
-							
+
+			DELETE FROM @TaxableByOtherTaxesTable
+			INSERT INTO @TaxableByOtherTaxesTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TaxableByOther)		
 			
 			DECLARE @TaxableByOtherTaxes AS TABLE(
 				 [Id]						INT
@@ -214,21 +220,21 @@ BEGIN
 				,ysnTaxOnly
 				)
 			SELECT
-				 Id
-				,intTaxCodeId
-				,strTaxableByOtherTaxes
-				,strCalculationMethod
-				,dblRate
-				,dblAdjustedTax
-				,ysnTaxAdjusted
-				,ysnTaxExempt
-				,ysnTaxOnly
+				 IT.[Id]
+				,IT.[intTaxCodeId]
+				,IT.[strTaxableByOtherTaxes]
+				,IT.[strCalculationMethod]
+				,IT.[dblRate]
+				,IT.[dblAdjustedTax]
+				,IT.[ysnTaxAdjusted]
+				,IT.[ysnTaxExempt]
+				,IT.[ysnTaxOnly]
 			FROM
-				@ItemTaxes
+				@ItemTaxes IT
 			WHERE
-				Id <> @Id 
-				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))
-				AND ysnTaxExempt = 0
+				IT.[Id] <> @Id 
+				AND EXISTS(SELECT NULL FROM @TaxableByOtherTaxesTable TBO WHERE TBO.[intTaxCodeId] = IT.[intTaxCodeId])
+				AND IT.[ysnTaxExempt] = 0
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)

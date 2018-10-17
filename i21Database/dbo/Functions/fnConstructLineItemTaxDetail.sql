@@ -290,6 +290,10 @@ BEGIN
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
+			DECLARE @TBOTTaxCodesTable TABLE
+				([intTaxCodeId] INT PRIMARY KEY,
+				UNIQUE ([intTaxCodeId]));
+
 			SET @TaxableByOtherUnitTax = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
 				BEGIN
@@ -311,15 +315,21 @@ BEGIN
 					WHERE
 						[ysnComputed] = 0
 
+					DELETE FROM @TBOTTaxCodesTable
+					INSERT INTO @TBOTTaxCodesTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TBOTTaxCodes)
 
 					SELECT
-						@TBOTRegularRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+						@TBOTRegularRate = SUM((@TBOTRate * @Quantity) * (ISNULL(IT.[dblRate], @ZeroDecimal)/100.00))
 					FROM
-						@ItemTaxes
+						@ItemTaxes IT
+					INNER JOIN
+						@TBOTTaxCodesTable TBO
+							ON IT.[intTaxCodeId] = TBO.[intTaxCodeId]
 					WHERE
-						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
-						--AND [ysnCheckoffTax] = 0
-						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+						--[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
+						--AND IT.[ysnCheckoffTax] = 0
+						--AND 
+						LOWER(RTRIM(LTRIM(IT.[strCalculationMethod]))) = 'percentage'	
 
 					--SELECT
 					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
@@ -429,6 +439,10 @@ BEGIN
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
 
+			DECLARE @TBOTTaxCodesRTable TABLE
+				([intTaxCodeId] INT PRIMARY KEY,
+				UNIQUE ([intTaxCodeId]));
+
 			SET @TaxableByOtherRate = @ZeroDecimal
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
 				BEGIN
@@ -450,15 +464,21 @@ BEGIN
 					WHERE
 						[ysnComputed] = 0
 
+					DELETE FROM @TBOTTaxCodesRTable
+					INSERT INTO @TBOTTaxCodesRTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TBOTTaxCodesR)
 
 					SELECT
-						@TBOTRegularRateR = SUM((@TBOTRateR) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+						@TBOTRegularRateR = SUM((@TBOTRateR) * (ISNULL(IT.[dblRate], @ZeroDecimal)/100.00))
 					FROM
-						@ItemTaxes
+						@ItemTaxes IT
+					INNER JOIN
+						@TBOTTaxCodesRTable TBOR
+							ON IT.[intTaxCodeId] = TBOR.[intTaxCodeId]
 					WHERE
-						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodesR))
-						AND NOT ([ysnCheckoffTax] = 1 AND @ExcludeCheckOff = 1)
-						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+						--IT.[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodesR))
+						--AND 
+						NOT (IT.[ysnCheckoffTax] = 1 AND @ExcludeCheckOff = 1)
+						AND LOWER(RTRIM(LTRIM(IT.[strCalculationMethod]))) = 'percentage'	
 
 					--SELECT
 					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
@@ -482,23 +502,27 @@ BEGIN
 		END		
 	
 		
-		
+	
+	DECLARE @TaxableByOtherTaxesTable TABLE
+		([intTaxCodeId] INT PRIMARY KEY,
+		UNIQUE ([intTaxCodeId]));	
 
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
 		BEGIN
-			DECLARE  @Id				INT
-					,@TaxableAmount		NUMERIC(18,6)
-					,@OtherTaxAmount	NUMERIC(18,6)
-					,@TaxCodeId			INT
-					,@TaxAdjusted		BIT
-					,@AdjustedTax		NUMERIC(18,6)
-					,@Tax				NUMERIC(18,6)
-					,@Rate				NUMERIC(18,6)
-					,@ExemptionPercent	NUMERIC(18,6)
-					,@CalculationMethod	NVARCHAR(30)
-					,@CheckoffTax		BIT
-					,@TaxExempt			BIT
+			DECLARE  @Id					INT
+					,@TaxableAmount			NUMERIC(18,6)
+					,@OtherTaxAmount		NUMERIC(18,6)
+					,@TaxCodeId				INT
+					,@TaxAdjusted			BIT
+					,@AdjustedTax			NUMERIC(18,6)
+					,@Tax					NUMERIC(18,6)
+					,@Rate					NUMERIC(18,6)
+					,@ExemptionPercent		NUMERIC(18,6)
+					,@CalculationMethod		NVARCHAR(30)
+					,@CheckoffTax			BIT
+					,@TaxExempt				BIT
+					,@TaxableByOther    	NVARCHAR(MAX)
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
@@ -518,10 +542,13 @@ BEGIN
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
+				,@TaxableByOther    = ISNULL(strTaxableByOtherTaxes, '')
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
-							
+
+			DELETE FROM @TaxableByOtherTaxesTable
+			INSERT INTO @TaxableByOtherTaxesTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TaxableByOther)
 			
 			DECLARE @TaxableByOtherTaxes AS TABLE(
 				 [Id]						INT
@@ -547,20 +574,21 @@ BEGIN
 				,[ysnTaxOnly]	
 				)
 			SELECT
-				 Id
-				,intTaxCodeId
-				,strTaxableByOtherTaxes
-				,strCalculationMethod
-				,dblRate
-				,dblAdjustedTax
-				,ysnTaxAdjusted
-				,ysnTaxExempt
-				,[ysnTaxOnly]
+				 IT.[Id]
+				,IT.[intTaxCodeId]
+				,IT.[strTaxableByOtherTaxes]
+				,IT.[strCalculationMethod]
+				,IT.[dblRate]
+				,IT.[dblAdjustedTax]
+				,IT.[ysnTaxAdjusted]
+				,IT.[ysnTaxExempt]
+				,IT.[ysnTaxOnly]
 			FROM
-				@ItemTaxes
+				@ItemTaxes IT
 			WHERE
-				Id <> @Id 
-				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
+				IT.[Id] <> @Id 
+				AND EXISTS(SELECT NULL FROM @TaxableByOtherTaxesTable TBO WHERE TBO.[intTaxCodeId] = IT.[intTaxCodeId])
+				--AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
