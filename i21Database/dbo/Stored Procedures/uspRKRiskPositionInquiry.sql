@@ -657,6 +657,7 @@ BEGIN
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+			AND ft.strStatus = 'Filled'
 			) t
 		
 		UNION
@@ -699,6 +700,7 @@ BEGIN
 			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 
+			AND ft.strStatus = 'Filled'
 			) t
 		
 		UNION
@@ -772,6 +774,7 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 				SELECT intFutOptTransactionId
 				FROM tblRKOptionsPnSExpired
 				)
+		AND ft.strStatus = 'Filled'
 		) t
 	
 	UNION
@@ -826,6 +829,7 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 
 			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			AND ft.strStatus = 'Filled'
 			) t
 		
 		UNION
@@ -899,6 +903,7 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 				SELECT intFutOptTransactionId
 				FROM tblRKOptionsPnSExpired
 				)
+		AND ft.strStatus = 'Filled'
 		) t
 	
 	UNION
@@ -953,6 +958,7 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			AND ft.strStatus = 'Filled'
 			) t
 		
 		UNION
@@ -1000,6 +1006,7 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			AND ft.strStatus = 'Filled'
 			) t
 		) T
 		
