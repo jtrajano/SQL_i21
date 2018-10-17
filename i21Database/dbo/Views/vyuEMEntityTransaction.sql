@@ -17,7 +17,9 @@
 		dtmDatePaid = null
 	from vyuARCustomerHistory a	
 		left join tblARInvoice b on a.strTransactionNumber = b.strInvoiceNumber
-			where (b.intInvoiceId is null or  b.strType <> 'CF Tran')
+		left join tblARPayment c on a.strTransactionNumber = c.strRecordNumber
+			where (b.intInvoiceId is null or  b.strType <> 'CF Tran')			
+				and (isnull(c.intPaymentMethodId, 0) <> 9)
 	union all
 	select 
 		intEntityId = intEntityVendorId,
