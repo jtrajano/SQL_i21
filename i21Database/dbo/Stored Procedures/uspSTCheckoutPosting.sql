@@ -1846,7 +1846,6 @@ BEGIN
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND CC.dblAmount > 0
-								----AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
@@ -2420,7 +2419,7 @@ BEGIN
 																															  -- then create 1 invoice for both
 
 																															  -- if  row 1 = Customer 1, Invoice = 1234
-																															  -- and row 2 = Customer 1, Invoice = 235689
+																															  -- and row 2 = Customer 1, Invoice = 12345
 																															  -- then create 1 invoice for each
 											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
@@ -2503,8 +2502,11 @@ BEGIN
 								JOIN tblICItemPricing IP 
 									ON I.intItemId = IP.intItemId
 									AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN tblSTStore ST 
+									ON IL.intLocationId = ST.intCompanyLocationId
+									AND CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND CC.dblAmount > 0
 					END
