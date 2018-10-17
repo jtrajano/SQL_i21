@@ -4,7 +4,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , intPOSLogId					= POSLOG.intPOSLogId
 	 , strEODNo						= EOD.strEODNo
 	 , dblOpeningBalance			= EOD.dblOpeningBalance
-	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + EOD.dblExpectedEndingBalance) - ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
+	 , dblExpectedEndingBalance		= (EOD.dblOpeningBalance + CASHSALES.dblTotalCashReceipt) - ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
 	 , dblFinalEndingBalance		= EOD.dblFinalEndingBalance
 	 , dblCashReturn				= ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
 	 , intCompanyLocationPOSDrawerId= EOD.intCompanyLocationPOSDrawerId
@@ -22,7 +22,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , dtmClose						= EOD.dtmClose
 	 , ysnClosed					= EOD.ysnClosed
 	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
-	 , dblTotalCashReceipt          = EOD.dblExpectedEndingBalance
+	 , dblTotalCashReceipt          = CASHSALES.dblTotalCashReceipt
 FROM tblARPOSEndOfDay EOD
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
@@ -71,4 +71,12 @@ OUTER APPLY (
 	  AND intPOSLogId = POSLOG.intPOSLogId
 	  AND dblTotal < 0
 ) CASHRETURN
+OUTER APPLY (
+	SELECT dblTotalCashReceipt = SUM(dblTotal)
+	FROM dbo.tblARPOS P WITH (NOLOCK)
+	INNER JOIN tblARPOSPayment POSP ON P.intPOSId = POSP.intPOSId
+	WHERE POSP.strPaymentMethod IN ('Cash','Check')
+	AND P.intPOSLogId = POSLOG.intPOSLogId
+	AND P.dblTotal > 0
+) CASHSALES
 GO

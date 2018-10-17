@@ -17,7 +17,7 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , Tax					= ISNULL(POS.dblTax, 0)
 	 , Total				= ISNULL(POS.dblTotal, 0)
 	 , NumberOfSales		= ISNULL(POS.intTotalSales, 0)
-	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+	 , dblEndingBalance		= ISNULL(EOD.dblOpeningBalance, 0) + ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
 	 , dblOpeningBalance	= ISNULL(EOD.dblOpeningBalance, 0)
 	 , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
 	 , CashCount			= ISNULL(PAYMENT.intCashCount, 0)
@@ -29,6 +29,8 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
+	 , dblCashReturn		= ISNULL(CASHRETURN.dblCashReturn,0) * -1
+	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -70,6 +72,7 @@ OUTER APPLY (
 		 , intTotalSales	= COUNT(intPOSId)
 	FROM dbo.tblARPOS WITH (NOLOCK)
 	WHERE intInvoiceId IS NOT NULL
+	  AND dblTotal > 0
 	  AND intPOSLogId = POSLOG.intPOSLogId 
 ) POS
 OUTER APPLY (
@@ -92,3 +95,10 @@ OUTER APPLY (
 		  AND intPOSLogId = POSLOG.intPOSLogId 
 	) ARPOS ON POSP.intPOSId = ARPOS.intPOSId		  
 ) PAYMENT
+OUTER APPLY (
+	SELECT dblCashReturn = SUM(dblTotal),intReturnCount = COUNT(intPOSId)	
+	FROM dbo.tblARPOS WITH (NOLOCK)
+	WHERE ysnReturn = 1
+	  AND intPOSLogId = POSLOG.intPOSLogId
+	  AND dblTotal < 0
+) CASHRETURN
