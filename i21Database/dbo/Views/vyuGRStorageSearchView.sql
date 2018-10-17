@@ -62,7 +62,7 @@ SELECT TOP 100 PERCENT
 									END
 	,intSplitId					   = EMSplit.intSplitId
 	,intItemUOMId				 = CS.intItemUOMId
-	,ysnDeliverySheetPost 	  	 = DeliverySheet.ysnPost
+	,ysnDeliverySheetPost 	  	 = ISNULL(DeliverySheet.ysnPost,1)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
