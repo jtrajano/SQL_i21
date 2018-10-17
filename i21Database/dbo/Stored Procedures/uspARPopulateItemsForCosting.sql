@@ -92,7 +92,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -206,7 +206,7 @@ SELECT
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
-	,[dtmDate]					= CASE WHEN ARID.[strItemType] = 'Finished Good' AND ARID.[ysnBlended] = 1 THEN ARID.[dtmPostDate] ELSE ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate]) END
+	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -318,7 +318,7 @@ SELECT
 	 [intItemId]				= ARIC.[intComponentItemId]
 	,[intItemLocationId]		= IST.intItemLocationId
 	,[intItemUOMId]				= ARIC.[intItemUnitMeasureId] 
-	,[dtmDate]					= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 

@@ -71,7 +71,7 @@ BEGIN
 		DECLARE @strField	NVARCHAR(MAX)
 
 
-		SET @whereClause = ' WHERE (ISNULL(ysnPosted,0) = 1) AND (ISNULL(ysnInvoiced,0) = 0) '
+		SET @whereClause = ' WHERE (ISNULL(ysnPosted,0) = 1) AND (ISNULL(ysnInvoiced,0) = 0)  AND (ISNULL(ysnPostedCSV,0) = 0) '
 
 		WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
 			BEGIN
@@ -91,12 +91,12 @@ BEGIN
 				BEGIN
 					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+					' (' + 't.' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+					' (' + 't.' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 				END
 				
 			END
@@ -106,12 +106,12 @@ BEGIN
 				BEGIN
 					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
 				END
 			END
 			ELSE IF (UPPER(@Condition) = 'IN')
@@ -120,12 +120,12 @@ BEGIN
 				BEGIN
 					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
 							SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+					' (' + 't.' +  @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+					' (' + 't.' +  @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 				END
 			END
 			ELSE IF (UPPER(@Condition) = 'GREATER THAN')
@@ -134,12 +134,12 @@ BEGIN
 				BEGIN
 					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
 				END
 			END
 			ELSE IF (UPPER(@Condition) = 'LESS THAN')
@@ -148,12 +148,12 @@ BEGIN
 				BEGIN
 					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+					' (' + 't.' +  @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
 				END
 			END
 
@@ -175,17 +175,47 @@ BEGIN
 		
 		INSERT INTO tblCFBatchUnpostStagingTable
 		(
-		 intTransactionId
-		,strTransactionId
-		,strGuid
-		,strResult
+			 intTransactionId
+			,strTransactionId
+			,dtmTransactionDate
+			,dtmPostedDate
+			,intNetworkId
+			,strNetworkId
+			,intSiteId
+			,strSiteId
+			,intCustomerId
+			,strCustomerNumber
+			,strCustomerName
+			,intItemId
+			,strItemId
+			,strGuid
+			,strResult
 		)
 		SELECT
-		 intTransactionId
-		,strTransactionId
-		,@guid
-		,''Ready''
-		FROM tblCFTransaction' + @whereClause)
+			intTransactionId
+			,strTransactionId
+			,dtmTransactionDate
+			,dtmPostedDate
+			,n.intNetworkId
+			,n.strNetwork
+			,s.intSiteId
+			,s.strSiteNumber
+			,c.intCustomerId
+			,c.strCustomerNumber
+			,c.strName
+			,i.intItemId
+			,i.strProductNumber
+			,@guid
+			,''Ready''
+		FROM tblCFTransaction as t
+		INNER JOIN tblCFNetwork as n
+		ON t.intNetworkId = n.intNetworkId
+		INNER JOIN tblCFSite as s
+		ON t.intSiteId = s.intSiteId
+		INNER JOIN tblCFItem as i
+		ON t.intProductId = i.intItemId
+		INNER JOIN vyuCFAccountCustomer c
+		ON t.intCustomerId = c.intCustomerId' + @whereClause)
 
 		EXEC(@q)
 

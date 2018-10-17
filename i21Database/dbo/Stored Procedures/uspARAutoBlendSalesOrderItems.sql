@@ -37,7 +37,7 @@ INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 INNER JOIN tblICItem ITEM ON ITEM.intItemId = SOD.intItemId		
 WHERE SOD.intSalesOrderId = @intSalesOrderId
 	AND ISNULL(SOD.ysnBlended, 0) = CASE WHEN @ysnDelete = 0 THEN 0 ELSE 1 END
-	AND ITEM.strType = 'Finished Good'
+	AND ITEM.strType IN ('Inventory', 'Finished Good')
 	AND ITEM.ysnAutoBlend = 1
 		
 WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)

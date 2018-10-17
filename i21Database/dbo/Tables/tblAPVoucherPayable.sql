@@ -69,6 +69,7 @@
 	[int1099Form]					INT NULL,
 	[str1099Form]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[int1099Category]				INT NULL,
+	[dbl1099]						DECIMAL(18,6) DEFAULT(0),
 	[str1099Type]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,

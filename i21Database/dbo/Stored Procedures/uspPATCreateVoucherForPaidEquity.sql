@@ -28,6 +28,10 @@ CREATE TABLE #tempEquityPayments(
 	[dblEquityPaid] NUMERIC(18,6)
 )
 
+CREATE TABLE #tempVoucherReference(
+	[intBillId] INT NOT NULL,
+	[intPatronageId] INT NOT NULL
+)
 
 IF(@equityPaymentIds = 'all')
 BEGIN
@@ -72,7 +76,8 @@ BEGIN
 	WHERE EPS.intEquityPaySummaryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityPaymentIds))
 END
 
-	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
+	DECLARE @voucherPayable AS VoucherPayable;
+	DECLARE @createdVouchersId AS NVARCHAR(MAX);
 	DECLARE @dtmDate DATETIME = GETDATE();
 	DECLARE @intEquityPaySummaryId INT;
 	DECLARE @intCustomerPatronId INT;
@@ -106,48 +111,55 @@ END
 	BEGIN TRAN;
 
 	BEGIN TRY 
-	WHILE EXISTS(SELECT 1 FROM @equityPayments)
-	BEGIN 
-		SELECT TOP 1
-			@intEquityPaySummaryId = tEP.intEquityPaySummaryId,
-			@intCustomerPatronId = tEP.intCustomerPatronId,
-			@dblEquityPay = ROUND(tEP.dblEquityPaid,2),
-			@qualified = tEP.ysnQualified,
-			@strVenderOrderNumber = tEP.strPaymentNumber + '-' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)
-		FROM @equityPayments dEP INNER JOIN #tempEquityPayments tEP ON tEP.intEquityPaySummaryId = dEP.intId
 
-		INSERT INTO @voucherDetailNonInventory([intAccountId],[intItemId],[strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost],[intTaxGroupId])
-				VALUES(@intAPClearing,NULL,'Patronage Equity Payment', 1, 0, @dblEquityPay, NULL);
+		INSERT INTO @voucherPayable(
+				[intPartitionId]
+				,[intEntityVendorId]
+				,[intTransactionType]
+				,[strVendorOrderNumber]
+				,[strSourceNumber]
+				,[strMiscDescription]
+				,[intAccountId]
+				,[dblQuantityToBill]
+				,[dblCost]
+				,[int1099Form]
+				,[int1099Category]
+				,[dbl1099]
+		)
+		SELECT	EquityPay.intEquityPaySummaryId
+				,EquityPay.intCustomerPatronId
+				,intTransactionType = 1
+				,strVendorOrderNumber = EquityPay.strPaymentNumber + '-' + CONVERT(NVARCHAR(MAX), EquityPay.intEquityPaySummaryId)
+				,strSourceNumber = EquityPay.strPaymentNumber
+				,strMiscDescription = 'Patronage Equity Payment'
+				,intAccountId = @intAPClearing
+				,dblQtyToBill = 1
+				,dblCost = ROUND(EquityPay.dblEquityPaid, 2)
+				,int1099Form = CASE 
+									WHEN EquityPay.ysnQualified = 1 THEN 4
+									ELSE 0
+								END
+				,int1099Category = CASE 
+									WHEN EquityPay.ysnQualified = 1 THEN 5
+									ELSE 0
+								END
+				,dbl1099 = CASE 
+								WHEN EquityPay.ysnQualified = 1 THEN ROUND(EquityPay.dblEquityPaid, 2)
+								ELSE 0
+							END
+		FROM #tempEquityPayments EquityPay
 
-		EXEC [dbo].[uspAPCreateBillData]
-			@userId	= @intUserId
-			,@vendorId = @intCustomerPatronId
-			,@type = 1	
-			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = @shipToLocation
-			,@vendorOrderNumber = @strVenderOrderNumber
-			,@voucherDate = @dtmDate
-			,@billId = @intCreatedBillId OUTPUT;
+		EXEC [dbo].[uspAPCreateVoucher]
+			@voucherPayables = @voucherPayable
+			,@userId = @intUserId
+			,@throwError = 0
+			,@error = @strErrorMessage OUT
+			,@createdVouchersId = @createdVouchersId OUT
 
-		UPDATE tblAPBillDetail SET intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedBillId;
-		IF(@qualified = 0)
+		IF (@strErrorMessage != '')
 		BEGIN
-			UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 5, dbl1099 = ROUND(@dblEquityPay, 2) WHERE intBillId = @intCreatedBillId;
-		END
-		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
-
-		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
-		BEGIN
-			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
-
-			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
-
-			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-
-			EXEC [dbo].[uspAPUpdateVoucherTotal] @voucherId;
-
-			DELETE FROM @voucherId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
 		END
 
 		IF(@batchId IS NULL)
@@ -160,18 +172,32 @@ END
 			@post = 1,
 			@recap = 0,
 			@isBatch = 0,
-			@param = NULL,
+			@param = @createdVouchersId,
 			@userId = @intUserId,
-			@beginTransaction = @intCreatedBillId,
-			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT;
 
+		IF(@bitSuccess = 0)
+		BEGIN
+			SELECT TOP 1 @strErrorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intCreatedBillId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
+		END
 
-		DELETE FROM @equityPayments WHERE intId = @intEquityPaySummaryId;
-		DELETE FROM @voucherDetailNonInventory;
-		SET @intCreatedBillId = NULL;
-		SET @totalRecords = @totalRecords + 1;
-	END
+		INSERT INTO #tempVoucherReference(intBillId, intPatronageId)
+		SELECT	intBillId
+				,CAST(SUBSTRING([strVendorOrderNumber], CHARINDEX('-', [strVendorOrderNumber], CHARINDEX('-',[strVendorOrderNumber])+1) + 1, CHARINDEX('-',REVERSE([strVendorOrderNumber]))) AS INT)
+		FROM tblAPBill Bill
+		WHERE intBillId IN (SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVouchersId))
+
+
+		UPDATE EquityPayment
+		SET EquityPayment.intBillId = VoucherRef.intBillId
+		FROM tblPATEquityPaySummary EquityPayment
+		INNER JOIN #tempVoucherReference VoucherRef
+			ON VoucherRef.intPatronageId = EquityPayment.intEquityPaySummaryId
+
+		SELECT @totalRecords = COUNT(*)
+		FROM #tempEquityPayments
 
 	END TRY
 

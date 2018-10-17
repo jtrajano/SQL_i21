@@ -224,6 +224,8 @@ SELECT compLoc.[intCompanyLocationId]
 ,compLoc.ysnEnableCreditCardProcessing
 ,compLoc.strMerchantId
 ,compLoc.strMerchantPassword
+,freightTerms.intFreightTermId
+,freightTerms.strFreightTerm
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblGLAccount cash ON compLoc.intCashAccount = cash.intAccountId
@@ -254,3 +256,4 @@ LEFT JOIN tblGLAccount discountAccountId ON compLoc.intDiscountAccountId = disco
 LEFT JOIN tblGLAccount interestAccountId ON compLoc.intInterestAccountId = interestAccountId.intAccountId
 LEFT JOIN tblGLAccount prepaidAccountId ON compLoc.intPrepaidAccountId = prepaidAccountId.intAccountId
 LEFT JOIN tblGLAccount undepositedFundsId ON compLoc.intUndepositedFundsId = undepositedFundsId.intAccountId
+LEFT JOIN tblSMFreightTerms freightTerms ON compLoc.intFreightTermId = freightTerms.intFreightTermId

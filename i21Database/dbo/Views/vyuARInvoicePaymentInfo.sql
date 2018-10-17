@@ -40,6 +40,8 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strUserEntered			= USERENTERED.strName
 	 , intCurrencyId			= I.intCurrencyId
 	 , strCurrency				= CUR.strCurrency
+	 , strPaymentInfo			= P.strPaymentInfo
+	 , strNotes					= P.strNotes
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 LEFT JOIN (
 	SELECT AP.intPaymentId
@@ -51,6 +53,8 @@ LEFT JOIN (
 		 , AP.strBatchId
 		 , AP.strRecordNumber
 		 , AP.dtmDatePaid
+		 , AP.strPaymentInfo
+		 , AP.strNotes
 	FROM tblARPayment AP
 	LEFT JOIN (
 		SELECT intPaymentId

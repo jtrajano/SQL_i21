@@ -127,7 +127,10 @@ INSERT INTO @INVOICETABLE (
 SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , intEntityUserId		= @intEntityUserId
 	 , strType				= INVOICE.strType
-	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
+	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
+	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard') 
+											 ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') 
+										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
 								   ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
@@ -139,8 +142,15 @@ OUTER APPLY (
 			   , strCreditMemoReportName
 			   , strTankDeliveryInvoiceFormat
 			   , strTransportsInvoiceFormat
+			   , strGrainInvoiceFormat
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREFERENCE
+OUTER APPLY (
+	SELECT TOP 1 intTicketId
+	FROM dbo.tblARInvoiceDetail DETAIL
+	WHERE DETAIL.intInvoiceId = INVOICE.intInvoiceId
+	  AND DETAIL.intTicketId IS NOT NULL
+) TICKET
 WHERE INVOICE.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
   AND INVOICE.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo
   AND ((@strTransactionType IS NOT NULL AND INVOICE.strTransactionType = @strTransactionType) OR @strTransactionType IS NULL)

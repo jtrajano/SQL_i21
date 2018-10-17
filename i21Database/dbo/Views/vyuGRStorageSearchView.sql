@@ -12,6 +12,11 @@ SELECT TOP 100 PERCENT
 										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
 										ELSE 'TS' --TRANSFER STORAGE
 									END
+	,strTransaction			  	  = CASE 
+										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
+										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
+										ELSE TS.strTransferStorageTicket
+									END
 	,intEntityId				  = CS.intEntityId
 	,strName					  = E.strName  
 	,strStorageTicketNumber		  = CS.strStorageTicketNumber
@@ -43,8 +48,9 @@ SELECT TOP 100 PERCENT
 	,dblDiscountUnPaid			  = ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
 	,dblStorageUnPaid			  = ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
 	,strSplitNumber				  = EMSplit.strSplitNumber
-	,intContractHeaderId		  = SC.intContractId
-	,strContractNumber			  = CH.strContractNumber
+	,intContractHeaderId          = CH.intContractHeaderId
+    ,intContractDetailId		  = SC.intContractId
+    ,strContractNumber			  = CH.strContractNumber   
 	,strDeliverySheetNumber		  = DeliverySheet.strDeliverySheetNumber
 	,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  = CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
@@ -55,10 +61,12 @@ SELECT TOP 100 PERCENT
 										ELSE SCTicketSplit.dblSplitPercent
 									END
 	,intSplitId					   = EMSplit.intSplitId
+	,intItemUOMId				 = CS.intItemUOMId
+	,ysnDeliverySheetPost 	  	 = ISNULL(DeliverySheet.ysnPost,1)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
-JOIN tblGRStorageType ST
+LEFT JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
 JOIN tblICItem Item 
 	ON Item.intItemId = CS.intItemId
@@ -69,7 +77,7 @@ JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 JOIN tblEMEntity E
 	ON E.intEntityId = CS.intEntityId
-JOIN tblGRStorageScheduleRule SR
+LEFT JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
 JOIN tblGRDiscountSchedule DS 
 	ON DS.intDiscountScheduleId = CS.intDiscountScheduleId
@@ -86,11 +94,13 @@ LEFT JOIN tblSCTicketSplit SCTicketSplit
 LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
+LEFT JOIN tblCTContractDetail CD
+    ON CD.intContractDetailId = SC.intContractId  
 LEFT JOIN tblCTContractHeader CH 
-	ON CH.intContractHeaderId = SC.intContractId
-LEFT JOIN tblGRTransferStorageSplit TSS
-	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
-WHERE ISNULL(CS.strStorageType,'') <> 'ITR' 
-	AND ST.ysnCustomerStorage = 0
+    ON CH.intContractHeaderId = CD.intContractHeaderId  
+LEFT JOIN (
+		tblGRTransferStorageSplit TSS
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = TSS.intTransferStorageId
+	) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 ORDER BY CS.intCustomerStorageId
-

@@ -83,11 +83,11 @@ BEGIN
 	SELECT
 		 [intItemId]			= ICGIS.[intComponentItemId]
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
-		,[intItemUOMId]			= ICGIS.[intStockUOMId]
+		,[intItemUOMId]			= ICGIS.[intComponentUOMId]
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
-		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0) * isnull(ICGIS.dblComponentConvFactor,1) *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
 		,[strTransactionId]		= ARI.[strInvoiceNumber]
 		,[intTransactionTypeId]	= @TransactionTypeId

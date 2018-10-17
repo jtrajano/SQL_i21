@@ -30,6 +30,11 @@ BEGIN
 		[intBillId] INT
 	)
 
+	CREATE TABLE #tempVoucherReference(
+		[intBillId] INT NOT NULL,
+		[intPatronageId] INT NOT NULL
+	)
+
 	IF(@refundCustomerIds = 'all')
 	BEGIN
 		INSERT INTO #tempRefundCustomer
@@ -75,8 +80,8 @@ BEGIN
 		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds)) AND RC.ysnEligibleRefund = 1
 	END
 	
-
-	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
+	DECLARE @voucherPayable AS VoucherPayable;
+	DECLARE @createdVouchersId AS NVARCHAR(MAX);
 	DECLARE @dtmDate DATETIME = GETDATE();
 	DECLARE @intRefundCustomerId INT;
 	DECLARE @intCustomerId INT;
@@ -132,56 +137,80 @@ BEGIN
 	BEGIN TRAN;
 
 	BEGIN TRY
-	WHILE EXISTS(SELECT 1 FROM @refundProcessed)
-	BEGIN
-		SELECT TOP 1
-			@intRefundCustomerId = tempRC.intRefundCustomerId,
-			@strVendorOrderNumber = tempRC.strRefundNo + '-' + CONVERT(NVARCHAR(MAX), tempRC.intRefundCustomerId),
-			@intCustomerId = tempRC.intCustomerId,
-			@dblCashRefund = ROUND(tempRC.dblCashRefund, 2),
-			@dbl1099Amount = CASE WHEN tempRC.ysnQualified = 1 THEN tempRC.dblRefundAmount ELSE tempRC.dblCashRefund END
-		FROM @refundProcessed rp 
-		INNER JOIN #tempRefundCustomer tempRC ON rp.intId = tempRC.intRefundCustomerId
 
-		INSERT INTO @voucherDetailNonInventory
-			([intAccountId], [intItemId], [strMiscDescription], [dblQtyReceived], [dblDiscount], [dblCost], [intTaxGroupId])
-		VALUES
-			(@intAPClearingGLAccount, 0, 'Patronage Refund', 1, 0, ROUND(@dblCashRefund, 2), NULL),
-			(@intServiceFeeIncomeId, 0, 'Service Fee', 1, 0, (@dblServiceFee * -1), NULL)
-		
-		-- DELETE SERVICE FEE IF COST IS 0
-		DELETE FROM @voucherDetailNonInventory
-		WHERE [strMiscDescription] = N'Service Fee' AND @dblServiceFee = 0;
+		INSERT INTO @voucherPayable(
+			[intPartitionId]
+			,[intEntityVendorId]
+			,[intTransactionType]
+			,[strVendorOrderNumber]
+			,[strSourceNumber]
+			,[strMiscDescription]
+			,[intAccountId]
+			,[intLineNo]
+			,[dblQuantityToBill]
+			,[dblCost]
+			,[int1099Form]
+			,[int1099Category]
+			,[dbl1099]
+		)
+		SELECT	intRefundCustomerId
+				,intCustomerId
+				,intTransactionType
+				,strVendorOrderNumber
+				,strRefundNo
+				,strMiscDescription
+				,intAccountId
+				,intLineNo
+				,dblQuantityToBill
+				,dblCost
+				,int1099Form
+				,int1099Category
+				,dbl1099
+		FROM (
+			SELECT	RefundCustomer.intRefundCustomerId
+					,RefundCustomer.intCustomerId
+					,[intTransactionType] = 1
+					,[strVendorOrderNumber] = RefundCustomer.strRefundNo + '-' + CONVERT(NVARCHAR(MAX), RefundCustomer.intRefundCustomerId)
+					,RefundCustomer.strRefundNo
+					,[strMiscDescription] = 'Patronage Refund'
+					,[intAccountId] = @intAPClearingGLAccount
+					,[intLineNo] = 1
+					,[dblQuantityToBill] = 1
+					,[dblCost] = ROUND(RefundCustomer.dblCashRefund, 2)
+					,[int1099Form] = 4
+					,[int1099Category] = 1
+					,[dbl1099] = CASE WHEN RefundCustomer.ysnQualified = 1 THEN RefundCustomer.dblRefundAmount ELSE RefundCustomer.dblCashRefund END
+			FROM #tempRefundCustomer RefundCustomer
+			UNION ALL
+			SELECT	RefundCustomer.intRefundCustomerId
+					,RefundCustomer.intCustomerId
+					,[intTransactionType] = 1
+					,[strVendorOrderNumber] = RefundCustomer.strRefundNo + '-' + CONVERT(NVARCHAR(MAX), RefundCustomer.intRefundCustomerId)
+					,RefundCustomer.strRefundNo
+					,[strMiscDescription] = 'Service Fee'
+					,[intAccountId] = @intServiceFeeIncomeId
+					,[intLineNo] = 2
+					,[dblQuantityToBill] = 1
+					,[dblCost] = - ROUND(RefundCustomer.dblServiceFee, 2)
+					,[int1099Form] = 0
+					,[int1099Category] = 0
+					,[dbl1099] = 0
+			FROM #tempRefundCustomer RefundCustomer
+			WHERE RefundCustomer.dblServiceFee > 0
+		) RefundVoucher
+		ORDER BY intRefundCustomerId, intLineNo
 
-		EXEC [dbo].[uspAPCreateBillData]
-			@userId	= @intUserId
-			,@vendorId = @intCustomerId
-			,@type = 1	
-			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = @shipToLocation
-			,@vendorOrderNumber = @strVendorOrderNumber
-			,@voucherDate = @dtmDate
-			,@billId = @intCreatedBillId OUTPUT;
+		EXEC [dbo].[uspAPCreateVoucher]
+			@voucherPayables = @voucherPayable
+			,@userId = @intUserId
+			,@throwError = 0
+			,@error = @strErrorMessage OUT
+			,@createdVouchersId = @createdVouchersId OUT
 
-		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category = 1, dbl1099 = ROUND(@dbl1099Amount, 2), intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
-		WHERE intBillId = @intCreatedBillId AND strMiscDescription != N'Service Fee';
-
-		UPDATE tblAPBillDetail SET int1099Form = 0, int1099Category = 0, intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
-		WHERE intBillId = @intCreatedBillId AND strMiscDescription = N'Service Fee';
-
-		UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
-
-		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		IF (@strErrorMessage != '')
 		BEGIN
-			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
-
-			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
-
-			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-
-			EXEC uspAPUpdateVoucherTotal @voucherId;
-			DELETE FROM @voucherId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
 		END
 
 		IF(@batchId IS NULL)
@@ -194,10 +223,8 @@ BEGIN
 			@post = 1,
 			@recap = 0,
 			@isBatch = 0,
-			@param = NULL,
+			@param = @createdVouchersId,
 			@userId = @intUserId,
-			@beginTransaction = @intCreatedBillId,
-			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT;
 
 		IF(@bitSuccess = 0)
@@ -207,12 +234,21 @@ BEGIN
 			GOTO Post_Rollback;
 		END
 
-		DELETE FROM @refundProcessed WHERE intId = @intRefundCustomerId;
-		DELETE FROM @voucherDetailNonInventory;
-		SET @intCreatedBillId = NULL;
-		SET @totalRecords = @totalRecords + 1;
+		INSERT INTO #tempVoucherReference(intBillId, intPatronageId)
+		SELECT	intBillId
+				,CAST(SUBSTRING([strVendorOrderNumber], CHARINDEX('-', [strVendorOrderNumber], CHARINDEX('-',[strVendorOrderNumber])+1) + 1, CHARINDEX('-',REVERSE([strVendorOrderNumber]))) AS INT)
+		FROM tblAPBill Bill
+		WHERE intBillId IN (SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVouchersId))
+	
 
-	END
+		UPDATE RefundCustomer
+		SET RefundCustomer.intBillId = VoucherRef.intBillId
+		FROM tblPATRefundCustomer RefundCustomer
+		INNER JOIN #tempVoucherReference VoucherRef
+			ON VoucherRef.intPatronageId = RefundCustomer.intRefundCustomerId
+
+		SELECT @totalRecords = COUNT(*)
+		FROM #tempRefundCustomer
 
 	END TRY
 

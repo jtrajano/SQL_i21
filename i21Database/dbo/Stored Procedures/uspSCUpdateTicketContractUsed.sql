@@ -25,33 +25,67 @@ BEGIN TRY
 		BEGIN
 			IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL')
 			BEGIN
-				UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL'
-				UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+				UPDATE tblSCTicket SET 
+				intContractId = CT.intContractDetailId
+				, strContractNumber = CT.strContractNumber
 				, intContractSequence = CT.intContractSeq
 				, strContractLocation = CT.strLocationName
-				, dblScheduleQty = @dblScheduleQty
+				, dblScheduleQty = CASE WHEN ISNULL(CT.intContractDetailId,0) > 0 THEN @dblScheduleQty ELSE 0 END
 				, dblUnitPrice = CT.dblFutures
 				, dblUnitBasis = CT.dblBasis
-				, dblFreightRate = ISNULL(CTCost.dblRate,SC.dblFreightRate)
-                , intHaulerId = ISNULL(CTCost.intVendorId,SC.intHaulerId)
-                , ysnFarmerPaysFreight = ISNULL(CTCost.ysnPrice,SC.ysnFarmerPaysFreight)
+				, dblFreightRate = ISNULL(CT.dblRate,SC.dblFreightRate)
+                , intHaulerId = ISNULL(CT.intVendorId,SC.intHaulerId)
+                , ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
 				FROM tblSCTicket SC 
 				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
-				INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
-				LEFT JOIN tblCTContractCost CTCost ON CT.intContractDetailId = CTCost.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
-				WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
+				OUTER APPLY(
+					SELECT 
+					CTD.intContractHeaderId
+					,CTD.intContractDetailId
+					,CTH.strContractNumber 
+					,SM.strLocationName 
+					,CTD.intContractSeq 
+					,CTD.dblFutures 
+					,CTD.dblBasis 
+					,CTCost.dblRate
+					,CTCost.intVendorId
+					,CTCost.ysnPrice
+					FROM tblCTContractDetail CTD 
+					INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+					INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
+					LEFT JOIN tblCTContractCost CTCost ON CTCost.intContractDetailId = CTD.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
+					WHERE CTD.intContractDetailId = @intContractDetailId
+				) CT
+				WHERE intTicketId = @intTicketId AND SC.strDistributionOption != 'SPL'
 			END
 			ELSE
 			BEGIN 
-				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty WHERE intTicketId = @intTicketId AND intContractId = @intContractDetailId
+				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL'
 			END
 		END
 	ELSE
 	BEGIN
-		UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-		UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber , intContractSequence = CT.intContractSeq, strContractLocation = CT.strLocationName
-		FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
-		WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
+		UPDATE tblSCTicket SET 
+		intContractId = CT.intContractDetailId
+		, strContractNumber = CT.strContractNumber
+		, intContractSequence = CT.intContractSeq
+		, strContractLocation = CT.strLocationName
+		FROM tblSCTicket SC 
+			OUTER APPLY(
+				SELECT 
+				CTD.intContractHeaderId
+				,CTD.intContractDetailId
+				,CTH.strContractNumber 
+				,SM.strLocationName 
+				,CTD.intContractSeq 
+				,CTD.dblFutures 
+				,CTD.dblBasis 
+				FROM tblCTContractDetail CTD 
+				INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+				INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
+				WHERE CTD.intContractDetailId = @intContractDetailId
+			) CT
+		WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
 	END
 END TRY
 BEGIN CATCH

@@ -120,6 +120,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -139,7 +141,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnRecurring]                         BIT             NULL	
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
-	,[ysnImportedFromOrigin]                BIT             NULL	
+	,[ysnImportedFromOrigin]                BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -149,7 +152,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
@@ -271,6 +274,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -291,6 +296,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
 	,[ysnImportedFromOrigin]                BIT             NULL	
+    ,[ysnFromProvisional]                   BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -300,7 +306,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 

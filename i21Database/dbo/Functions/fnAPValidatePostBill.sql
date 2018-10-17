@@ -263,7 +263,9 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN B.dblNetWeight ELSE  B.dblQtyReceived END) END)) > C.dblOpenReceive
+		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN  
+																																CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId , B.intUnitOfMeasureId, B.dblNetWeight) AS DECIMAL (18,2)) 
+																																ELSE  B.dblQtyReceived END) END)) > C.dblOpenReceive
 
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

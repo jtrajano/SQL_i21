@@ -819,7 +819,7 @@ BEGIN
 											--,[ysnImportedFromOrigin]
 											--,[ysnImportedAsPosted]
 										)
-										SELECT 
+										SELECT DISTINCT
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
 											,[strType]					= @strInvoiceType
@@ -869,49 +869,72 @@ BEGIN
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0
-											--,[dblQtyOrdered]			= CASE 
-											--								WHEN 
-											--									(
-											--										CAST((DT.dblTotalSalesAmount - (
-											--																			SELECT SUM(dblTotalSales)
-											--																			FROM tblSTCheckoutItemMovements IM
-											--																			JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-											--																			JOIN tblICItem I ON UOM.intItemId = I.intItemId
-											--																			JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-											--																			WHERE intCheckoutId = @intCheckoutId
-											--																			AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
-											--															           )
-											--									) > 1 THEN 1
-											--								ELSE -1
-											--							  END
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= CASE 
-																			WHEN 
-																				(
-																					CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
-																																	SELECT SUM(dblTotalSales)
+																				-- PUMP TOTALS
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																					THEN 0
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																					THEN 1
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
+																					THEN -1
+
+																				-- ITEM MOVEMENTS
+																			    WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
 																																	FROM tblSTCheckoutItemMovements IM
 																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
 																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
 																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																	WHERE intCheckoutId = @intCheckoutId
+																																	WHERE IM.intCheckoutId = @intCheckoutId
 																																	AND CATT.intCategoryId = DT.intCategoryId
 																															   ),0)
-																						) AS NUMERIC(18, 6))
-																				) >= 1 THEN 1
-																			ELSE -1
+																								) AS NUMERIC(18, 6))
+																							) >= 1 
+																						THEN 1
+																				ELSE -1 -- If not match on Pump Totals and Item Movements
 																		  END
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
-																															SELECT SUM(dblTotalSales)
-																															FROM tblSTCheckoutItemMovements IM
-																															JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																															JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																															JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																															WHERE intCheckoutId = @intCheckoutId
-																															AND CATT.intCategoryId = DT.intCategoryId
-																														 ), 0)
-																					) AS NUMERIC(18, 6)))
+											,[dblPrice]					= CASE
+																				-- PUMP TOTALS
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																					THEN 0
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																					THEN DT.dblTotalSalesAmount - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
+																					THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount) - DT.dblTotalSalesAmount
+
+																				-- ITEM MOVEMENTS
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) >= 1 
+																						THEN (
+																								ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																			SELECT SUM(dblTotalSales)
+																																			FROM tblSTCheckoutItemMovements IM
+																																			JOIN tblICItemUOM UOM 
+																																				ON IM.intItemUPCId = UOM.intItemUOMId
+																																			JOIN tblICItem I 
+																																				ON UOM.intItemId = I.intItemId
+																																			JOIN tblICCategory CATT 
+																																				ON I.intCategoryId = CATT.intCategoryId 
+																																			WHERE intCheckoutId = @intCheckoutId
+																																			AND CATT.intCategoryId = DT.intCategoryId
+																																		), 0)
+																																	) AS NUMERIC(18, 6)))
+																						)
+																				ELSE ISNULL(DT.dblTotalSalesAmount, 0) -- If not match on Pump Totals and Item Movements
+																		END
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -952,19 +975,41 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutDepartmetTotals DT
-								JOIN tblICItem I ON DT.intItemId = I.intItemId
-								--JOIN tblICCategory CAT ON I.intCategoryId = CAT.intCategoryId
-								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
-								JOIN tblSTCheckoutHeader CH ON DT.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-														AND IL.intItemLocationId = IP.intItemLocationId
-								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-													AND CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+								--JOIN tblSTCheckoutPumpTotals CPT
+								--	ON DT.intCheckoutId = CPT.intCheckoutId
+									-- AND DT.intCategoryId = CPT.intCategoryId
+								JOIN tblICItem I 
+									ON DT.intItemId = I.intItemId
+								--JOIN tblICCategory CAT 
+								--	ON I.intCategoryId = CAT.intCategoryId
+								JOIN tblICItemUOM UOM 
+									ON I.intItemId = UOM.intItemId
+								JOIN tblSTCheckoutHeader CH 
+									ON DT.intCheckoutId = CH.intCheckoutId
+								JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+								JOIN tblICItemPricing IP 
+									ON I.intItemId = IP.intItemId
+									AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN tblSTStore ST 
+									ON IL.intLocationId = ST.intCompanyLocationId
+									AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC 
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
 								AND DT.dblTotalSalesAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+								-- AND DT.dblTotalSalesAmount <> CPT.dblAmount -- This will Remove Department entry if it matches the amount and category of pump items
+
+								-- TRIAL for http://jira.irelyserver.com/browse/ST-1006
+								-- Rule: Remove Department entry if it matches the amount and category of pump items
+								--AND DT.intCategoryId NOT IN 
+								--(
+								--	SELECT CPT.intCategoryId
+								--	FROM tblSTCheckoutPumpTotals CPT
+								--	WHERE CPT.intCheckoutId = @intCheckoutId
+								--	AND CPT.dblAmount = DT.dblTotalSalesAmount
+								--)
 					END
 				END
 				--ELSE 
@@ -1192,7 +1237,6 @@ BEGIN
 
 
 
-
 				----------------------------------------------------------------------
 				-------------------------- PAYMENT OPTIONS --------------------------
 				----------------------------------------------------------------------
@@ -1339,9 +1383,23 @@ BEGIN
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
-											,[dblQtyShipped]			= 1
+
+											,[dblQtyShipped]			= CASE
+																				WHEN ISNULL(CPO.dblAmount, 0) > 0
+																					THEN -1
+																				WHEN ISNULL(CPO.dblAmount, 0) < 0 
+																					THEN 1
+																		END
+
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ISNULL(CPO.dblAmount, 0)
+
+											,[dblPrice]					= CASE
+																				WHEN ISNULL(CPO.dblAmount, 0) > 0
+																					THEN ISNULL(CPO.dblAmount, 0)
+																				WHEN ISNULL(CPO.dblAmount, 0) < 0 
+																					THEN ISNULL(CPO.dblAmount, 0) * -1
+																		END
+
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1382,17 +1440,24 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutPaymentOptions CPO
-								JOIN tblICItem I ON CPO.intItemId = I.intItemId
-								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
-								JOIN tblSTCheckoutHeader CH ON CPO.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-														AND IL.intItemLocationId = IP.intItemLocationId
-								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-													AND CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+								JOIN tblICItem I 
+									ON CPO.intItemId = I.intItemId
+								JOIN tblICItemUOM UOM 
+									ON I.intItemId = UOM.intItemId
+								JOIN tblSTCheckoutHeader CH 
+									ON CPO.intCheckoutId = CH.intCheckoutId
+								JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+								JOIN tblICItemPricing IP 
+									ON I.intItemId = IP.intItemId
+									AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN tblSTStore ST 
+									ON IL.intLocationId = ST.intCompanyLocationId
+									AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC 
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CPO.intCheckoutId = @intCheckoutId
-								AND CPO.dblAmount > 0
+								AND ISNULL(CPO.dblAmount, 0) > 0						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
@@ -1984,9 +2049,23 @@ BEGIN
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
-											,[dblQtyShipped]			= 1
+
+											,[dblQtyShipped]			= CASE
+																				WHEN ISNULL(CH.dblCashOverShort,0) > 0
+																					THEN 1
+																				WHEN ISNULL(CH.dblCashOverShort,0) < 0
+																					THEN -1
+																		END
+
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ISNULL(CH.dblCashOverShort,0)
+
+											,[dblPrice]					= CASE
+																				WHEN ISNULL(CH.dblCashOverShort,0) > 0
+																					THEN ISNULL(CH.dblCashOverShort,0)
+																				WHEN ISNULL(CH.dblCashOverShort,0) < 0
+																					THEN ISNULL(CH.dblCashOverShort,0) * -1
+																		END
+
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -2027,14 +2106,23 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTStore ST
-								JOIN tblICItem I ON ST.intOverShortItemId = I.intItemId 
-								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
-								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-								--						AND IL.intItemLocationId = IP.intItemLocationId
-								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
-								JOIN tblSTCheckoutHeader CH ON ST.intStoreId = CH.intStoreId
+								JOIN tblICItem I 
+									ON ST.intOverShortItemId = I.intItemId 
+								JOIN tblICItemLocation IL
+									ON I.intItemId = IL.intItemId
+									AND ST.intCompanyLocationId = IL.intLocationId
+								JOIN tblICItemUOM UOM 
+									ON I.intItemId = UOM.intItemId
+								JOIN tblICItemPricing IP 
+									ON I.intItemId = IP.intItemId
+									AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN vyuEMEntityCustomerSearch vC 
+									ON ST.intCheckoutCustomerId = vC.intEntityId
+								JOIN tblSTCheckoutHeader CH 
+									ON ST.intStoreId = CH.intStoreId
 								WHERE CH.intCheckoutId = @intCheckoutId
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+								AND ISNULL(CH.dblCashOverShort,0) <> 0
 					END
 				END
 				--ELSE 
@@ -2312,6 +2400,9 @@ BEGIN
 									SET @CreatedIvoices = ''
 
 									BEGIN TRY
+										--TEST
+										SELECT * FROM @EntriesForInvoice
+
 										-- POST Main Checkout Invoice
 										EXEC [dbo].[uspARProcessInvoices]
 													@InvoiceEntries				= @EntriesForInvoice

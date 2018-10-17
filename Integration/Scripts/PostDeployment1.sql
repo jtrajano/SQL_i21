@@ -105,3 +105,7 @@ GO
 GO
 :r "..\Scripts\IC\uspICDCRecipeFormulaMigrationPt.sql"
 GO
+
+-- Meter Billing
+:r "..\Scripts\MB\uspMBDCMeterAccountMigration.sql"
+GO	

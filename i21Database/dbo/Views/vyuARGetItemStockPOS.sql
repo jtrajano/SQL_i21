@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARGetItemStockPOS]
 AS 
-SELECT intItemId						= ITEMS.intItemId
+SELECT DISTINCT intItemId				= ITEMS.intItemId
 	 , intStorageLocationId				= IL.intStorageLocationId
 	 , intIssueUOMId					= IUOM.intItemUOMId
 	 , intIssueUnitMeasureId			= IUOM.intUnitMeasureId
@@ -28,6 +28,7 @@ SELECT intItemId						= ITEMS.intItemId
 	 , intDepositedItemId				= depositedItem.intItemId
 	 , strDepositedItemUpcCode			= depositedItem.strUpcCode
 	 , intDepositedItemUnitMeasureId	= depositedItem.intUnitMeasureId
+	 , ysnHasAddOnItem					= CAST(CASE WHEN ADDON.intAddOnItemId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
 FROM (
 	SELECT intItemId		= ITEM.intItemId
 		 , strItemNo
@@ -69,8 +70,18 @@ INNER JOIN dbo.tblICUnitMeasure UM WITH (NOLOCK) ON IUOM.intUnitMeasureId = UM.i
 LEFT JOIN dbo.tblICItemPricing IP WITH (NOLOCK) ON IL.intItemId = IP.intItemId AND IL.intItemLocationId = IP.intItemLocationId
 LEFT JOIN dbo.tblICItemStock ISTOCK WITH (NOLOCK) ON ITEMS.intItemId = ISTOCK.intItemId AND IL.intItemLocationId = ISTOCK.intItemLocationId
 LEFT JOIN dbo.tblICStorageLocation SL WITH (NOLOCK) ON IL.intStorageLocationId = SL.intStorageLocationId
+LEFT JOIN(
+	SELECT
+		intItemAddOnId,
+		intItemId,
+		intAddOnItemId,
+		dblQuantity,
+		ysnAutoAdd
+	FROM tblICItemAddOn
+	WHERE ysnAutoAdd = 1
+) ADDON ON ITEMS.intItemId = ADDON.intItemId
 OUTER APPLY (
-	SELECT TOP 1 addOn.intItemId, addOn.strUpcCode, addOn.intUnitMeasureId
+	SELECT TOP 1 PLU.intItemId, PLU.strUpcCode, PLU.intUnitMeasureId
 	FROM (
 		SELECT childItem.intItemId, childItem.strUpcCode, childItem.intUnitMeasureId
 		FROM tblICItemUOM childItem WITH(NOLOCK)
@@ -85,6 +96,6 @@ OUTER APPLY (
 		) childItemUom ON childItem.intUnitMeasureId = childItemUom.intUnitMeasureId
 		WHERE childItem.intItemUOMId = IL.intDepositPLUId
 		GROUP BY childItem.intItemId, childItem.strUpcCode, childItem.intUnitMeasureId, parentItem.intItemId
-	) addOn (intItemId, strUpcCode, intUnitMeasureId)
+	) PLU (intItemId, strUpcCode, intUnitMeasureId)
 ) depositedItem
 GO

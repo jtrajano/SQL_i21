@@ -4696,6 +4696,7 @@
     <Build Include="dbo\Tables\tblPATEquityPay.sql" />
     <Build Include="dbo\Views\vyuMFLotList.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKConvertProductType.sql" />
     <Build Include="dbo\Functions\fnRKRKConvertProductTypeKeyToName.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerSplit.sql" />
@@ -7145,6 +7146,15 @@
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMN.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureOptionMonthsNotInUse.sql" />
+    <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceScaleDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayableQty.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCostTable.sql" />
+    <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7339,6 +7349,7 @@
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />

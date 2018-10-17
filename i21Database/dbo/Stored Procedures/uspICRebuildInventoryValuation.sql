@@ -636,13 +636,6 @@ BEGIN
 END 
 
 --------------------------------------------------------------------
--- Retroactively compute the stocks on Stock-UOM and Stock tables. 
---------------------------------------------------------------------
-BEGIN 
-	EXEC dbo.uspICFixStockQuantities
-END 
-
---------------------------------------------------------------------
 -- Retroactively compute the lot Qty and Weight. 
 --------------------------------------------------------------------
 BEGIN 
@@ -703,6 +696,13 @@ BEGIN
 				ON l.intItemId = i.intItemId
 	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+END 
+
+--------------------------------------------------------------------
+-- Retroactively compute the stocks on Stock-UOM and Stock tables. 
+--------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICFixStockQuantities
 END 
 
 ------------------------------------------------------------------------------

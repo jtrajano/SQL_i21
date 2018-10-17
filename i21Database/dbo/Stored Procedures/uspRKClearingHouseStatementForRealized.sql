@@ -59,11 +59,14 @@ exec uspRKRealizedPnL 	 @dtmFromDate =@dtmTransactionFromDate
 	,@intBookId =NULL
 	,@intSubBookId =NULL
 
-SELECT strFutMarketName,Left(replace(convert(varchar(9), dtmLTransDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmLTransDate, 8),9) dtmLTransDate,
+SELECT fm.strFutMarketName,Left(replace(convert(varchar(9), dtmLTransDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmLTransDate, 8),9) dtmLTransDate,
 	   Left(replace(convert(varchar(9), dtmSTransDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmSTransDate, 8),9) dtmSTransDate,
 	   strFutureMonth,convert(int,dblMatchQty) dblMatchQty,dblLPrice,dblSPrice,-dblGrossPL dblGrossPL,dblFutCommission,
-	   isnull(dblLPrice,0)-isnull(dblSPrice,0) dblPriceDiff,isnull(dblGrossPL,0)-isnull(abs(dblFutCommission),0) dblTotal	  
-FROM @Realized 
+	   isnull(dblLPrice,0)-isnull(dblSPrice,0) dblPriceDiff,isnull(dblGrossPL,0)-isnull(abs(dblFutCommission),0) dblTotal
+	   ,strCurrency as strCurrency	  
+FROM @Realized p
+join tblRKFutureMarket fm on p.intFutureMarketId=fm.intFutureMarketId
+join tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
 WHERE  strName=isnull(@strName,strName) 
 AND strAccountNumber = isnull(@strAccountNumber,strAccountNumber)
 ORDER BY dtmLTransDate

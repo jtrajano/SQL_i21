@@ -745,7 +745,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I					
 		WHERE
 			I.[strType] = 'Provisional'
-			AND ISNULL(I.[ysnImpactForProvisional],0) = 0
+			AND ISNULL(I.[ysnProvisionalWithGL],0) = 0
 
 
 		INSERT INTO @returntable(

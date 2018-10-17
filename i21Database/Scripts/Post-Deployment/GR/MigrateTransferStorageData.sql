@@ -24,7 +24,7 @@ GO
                                 AND SH.strType = 'Transfer'
                             ) --SOURCE
                 )
-
+    BEGIN
 	/*====TRANSFER STORAGE'S HEADER====*/
     INSERT INTO [dbo].[tblGRTransferStorage]
     (
@@ -37,6 +37,7 @@ GO
         , [dblTotalUnits]
         , [intConcurrencyId]
         , [intUserId]
+        , [intTransferLocationId]
     )
     SELECT
         [strTransferStorageTicket]      = SH.strTransferTicket
@@ -47,13 +48,16 @@ GO
         , [intItemUOMId]                = CS.intItemUOMId
         , [dblTotalUnits]               = ABS(SUM(dblUnits))
         , [intConcurrencyId]            = CS.intConcurrencyId
-        , [intUserId]                   = SH.intUserId
+        , [intUserId]                   = ISNULL(SH.intUserId, US.intEntityId)
+        , [intTransferLocationId]       = CS.intCompanyLocationId
     FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageHistory SH
 		ON SH.intCustomerStorageId = CS.intCustomerStorageId
 			AND SH.strType = 'Transfer'
-	GROUP BY SH.strTransferTicket, CS.intEntityId, CS.intCompanyLocationId, CS.intStorageTypeId, CS.intItemId, CS.intItemUOMId, CS.intConcurrencyId, SH.intUserId
-
+	LEFT JOIN tblSMUserSecurity US
+		ON US.strUserName = SH.strUserName
+	GROUP BY SH.strTransferTicket, CS.intEntityId, CS.intCompanyLocationId, CS.intStorageTypeId, CS.intItemId, CS.intItemUOMId, CS.intConcurrencyId, SH.intUserId,US.intEntityId
+    
 	UPDATE TS 
 	SET [dtmTransferStorageDate] = ISNULL([dbo].[fnRemoveTimeOnDate](SH.dtmDistributionDate), [dtmTransferStorageDate]) 
 	FROM tblGRTransferStorage TS
@@ -156,6 +160,7 @@ GO
 				)
 		ON SS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 
+    END
 
 	PRINT 'END Updating intTransferStorageId.tblGRStorageHistory and intTicketId.tblGRStorageHistory'
 GO

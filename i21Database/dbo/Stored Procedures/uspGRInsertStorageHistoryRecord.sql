@@ -41,6 +41,7 @@ BEGIN TRY
         [ysnPost],
         [dtmDistributionDate],
         [intTransactionTypeId],
+		[strTransactionId],
         [intConcurrencyId]
     ) 
     SELECT 
@@ -65,6 +66,7 @@ BEGIN TRY
         [ysnPost]                   = SH.ysnPost,
         [dtmDistributionDate]       = GETDATE(),
         [intTransactionTypeId]      = SH.intTransactionTypeId,
+		[strTransactionId]			= SH.strTransactionId,
         1
     FROM @StorageHistoryData SH
 

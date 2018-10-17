@@ -122,6 +122,7 @@ AS SELECT
 	,SC.intSalesOrderId
 	,SC.intDeliverySheetId
 	,SC.dtmTransactionDateTime
+	,SC.strDriverName
 	,ISNULL (tblGRStorageType.strStorageTypeDescription, 
 	(CASE WHEN
 		SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
@@ -153,7 +154,7 @@ AS SELECT
 	,tblEMEntity.strName
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
-	,EMDriver.strName AS strDriverName
+	--,EMDriver.strName AS strDriverName
 	
 	,tblSMCompanyLocation.strLocationName
 	,tblSMCompanyLocationSubLocation.strSubLocationName
@@ -207,7 +208,7 @@ AS SELECT
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
   LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
-  LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
+  --LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
   LEFT JOIN tblEMEntitySignature EM ON EM.intEntityId = SC.intEntityScaleOperatorId
   LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId

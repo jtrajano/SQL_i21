@@ -9,6 +9,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , dblCashReturn				= ISNULL(ABS(CASHRETURN.dblCashReturn), 0)
 	 , intCompanyLocationPOSDrawerId= EOD.intCompanyLocationPOSDrawerId
 	 , intCompanyLocationId			= DRAWER.intCompanyLocationId
+	 , intFreightTermId				= LOC.intFreightTermId
 	 , intStoreId					= EOD.intStoreId
 	 , intEntityId					= POSLOG.intEntityId
 	 , strUsername					= CRED.strUserName
@@ -33,6 +34,7 @@ INNER JOIN (
 		,strCity
 		,strStateProvince
 		,strCountry
+		,intFreightTermId
 	FROM tblSMCompanyLocation
 ) LOC ON DRAWER.intCompanyLocationId = LOC.intCompanyLocationId
 INNER JOIN (

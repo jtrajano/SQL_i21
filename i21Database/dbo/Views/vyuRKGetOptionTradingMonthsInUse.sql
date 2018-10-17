@@ -21,10 +21,10 @@ WHERE EXISTS(
 	)FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 	INNER JOIN (
 		SELECT intOptionMonthId
-			,strMonth = LEFT(strOptionMonth,3) 
+			,strMonth = strOptionMonth
 		FROM tblRKOptionsMonth WITH(NOLOCK)
 	)OM ON FOT.intOptionMonthId = OM.intOptionMonthId
 	WHERE FOT.intOptionMonthId IS NOT NULL 
 		AND FOT.intFutureMarketId = MARKET.intFutureMarketId
-		AND OM.strMonth = OPTM.strMonthName
+		AND OM.strMonth = OPTM.strOptionMonth
 )

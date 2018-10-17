@@ -23,6 +23,10 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblMarkUpOrDown			= 0.00
 	 , dtmBeginDate				= NULL
 	 , dtmEndDate				= NULL
+	 , intStorageLocationId 	= b.intStorageLocationId
+	 , intSubLocationId 		= b.intSubLocationId
+	 , strStorageUnit			= d.strSubLocationName
+	 , strStorageLocation		= c.strName
 FROM vyuICGetItemStock I WITH (NOLOCK)
 INNER JOIN (
 	SELECT RI.*
@@ -46,7 +50,12 @@ INNER JOIN (
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM
 ) UOM ON RECIPE.intItemUOMId = UOM.intItemUOMId
-
+left join tblICItemLocation b
+	on I.intItemLocationId = b.intItemLocationId
+left join tblICStorageLocation c
+	on c.intStorageLocationId = b.intStorageLocationId
+left join tblSMCompanyLocationSubLocation d
+	on d.intCompanyLocationSubLocationId = b.intSubLocationId
 UNION ALL
 
 SELECT intRecipeId				= NULL
@@ -72,6 +81,10 @@ SELECT intRecipeId				= NULL
 	 , dblMarkUpOrDown			= ISNULL(BUNDLE.dblMarkUpOrDown, 0)
 	 , dtmBeginDate				= BUNDLE.dtmBeginDate
 	 , dtmEndDate				= BUNDLE.dtmEndDate
+	 , intStorageLocationId 	= b.intStorageLocationId
+	 , intSubLocationId 		= b.intSubLocationId
+	 , strStorageUnit			= d.strSubLocationName
+	 , strStorageLocation		= c.strName
 FROM dbo.tblICItemBundle BUNDLE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -80,6 +93,9 @@ INNER JOIN (
 		 , strItemNo
 		 , dblAvailable
 		 , dblSalePrice
+		 , intItemLocationId
+		 , intStorageLocationId
+		 , intSubLocationId
 	FROM dbo.vyuICGetItemStock WITH (NOLOCK)
 ) I ON BUNDLE.intBundleItemId = I.intItemId
 INNER JOIN (
@@ -89,3 +105,9 @@ INNER JOIN (
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM WITH (NOLOCK)
 ) UOM ON UOM.intItemUOMId = ISNULL(BUNDLE.intItemUnitMeasureId, I.intStockUOMId)
+left join tblICItemLocation b
+		on I.intItemLocationId = b.intItemLocationId
+left join tblICStorageLocation c
+	on c.intStorageLocationId = b.intStorageLocationId
+left join tblSMCompanyLocationSubLocation d
+	on d.intCompanyLocationSubLocationId = b.intSubLocationId

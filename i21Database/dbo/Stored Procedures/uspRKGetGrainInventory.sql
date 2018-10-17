@@ -180,6 +180,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 			null intTicketId,
 			'' AS ticketNumber    
 	FROM(
+		--Own
 		SELECT  
 			CONVERT(VARCHAR(10),IT.dtmDate,110) dtmDate
 			,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) ,6) dblAdjustmentQty
@@ -201,6 +202,25 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 			AND C.intCommodityId = @intCommodityId 
 			AND IT.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IT.intItemId ELSE @intItemId END 
 			AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+
+		--Storage
+		UNION ALL
+		SELECT
+			CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			,round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			,IA.strAdjustmentNo strAdjustmentNo
+			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
+		FROM tblICInventoryAdjustment IA
+			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+			INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
+			INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+		WHERE IAD.intOwnershipType = 2 --Storage
+			AND IA.ysnPosted = 1
+			AND convert(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND IAD.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
+			--AND Itm.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+
 		)a
 --UNION ALL--IR came from Delivery Sheet
 --SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
@@ -590,8 +610,8 @@ FROM(
 			0.0 dblCountQty,
 			'' tranInvoiceNumber,
 			0.0 dblInvoiceQty,
-			intStorageHistoryId intInventoryReceiptId,
-			intStorageHistoryId intInventoryShipmentId,
+			intTransferStorageId intInventoryReceiptId,
+			intTransferStorageId intInventoryShipmentId,
 			null intInventoryAdjustmentId,
 			null intInventoryCountId,
 			null intInvoiceId,
@@ -611,7 +631,7 @@ FROM(
 					ABS(dblUnits)
 					ELSE 0 END AS dblOutQty
 				,S.intStorageScheduleTypeId
-				,SH.intStorageHistoryId
+				,SH.intTransferStorageId
 				,SH.strTransferTicket
 
 			from 

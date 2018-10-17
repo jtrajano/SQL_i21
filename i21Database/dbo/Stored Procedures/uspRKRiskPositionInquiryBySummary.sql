@@ -258,6 +258,7 @@ DECLARE @PricedContractList AS TABLE (
        ,dblRatioContractSize DECIMAL(24, 10)
        ,dblRatioQty DECIMAL(24, 10)
 	   ,intPricingTypeIdHeader int
+	   ,ysnMultiplePriceFixation bit
        )
 
 INSERT INTO @PricedContractList
@@ -283,7 +284,7 @@ SELECT fm.strFutureMonth
        ,intContractStatusId
        ,dblDeltaPercent,cv.intContractDetailId,um.intCommodityUnitMeasureId
 	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um2.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,ffm.dblContractSize) dblRatioContractSize
-       ,dblRatioQty,intPricingTypeIdHeader
+       ,dblRatioQty,intPricingTypeIdHeader,ysnMultiplePriceFixation
 FROM vyuRKRiskPositionContractDetail cv
 JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 --JOIN tblICCommodityUnitMeasure um1 ON um1.intCommodityId = cv.intCommodityId AND um1.intUnitMeasureId = ffm.intUnitMeasureId
@@ -372,13 +373,15 @@ FROM (
                      ,isnull((
                                   SELECT sum(dblLotsFixed) dblNoOfLots
                                   FROM tblCTPriceFixation pf
-                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
+                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation,0) = 1 
+                                                                           THEN cv.intContractDetailId else pf.intContractDetailId end
                                   ), 0) dblFixedLots
                      ,isnull((
                                   SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, sum(dblQuantity)) dblQuantity
                                   FROM tblCTPriceFixation pf
                                   JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
-                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
+                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation,0) = 1 
+                                                                           THEN cv.intContractDetailId else pf.intContractDetailId end
                                   ), 0) dblFixedQty,intCommodityUnitMeasureId
                                   ,dblRatioContractSize,intPricingTypeIdHeader
               FROM @PricedContractList cv
@@ -430,13 +433,15 @@ FROM (
                      ,isnull((
                                   SELECT sum(dblLotsFixed) dblNoOfLots
                                   FROM tblCTPriceFixation pf
-                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
+                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation,0) = 1 
+                                                                           THEN cv.intContractDetailId else pf.intContractDetailId end
                                   ), 0) dblFixedLots
                      ,isnull((
                                   SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, sum(pd.dblQuantity)) dblQuantity
                                   FROM tblCTPriceFixation pf
                                   JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
-                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
+                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation,0) = 1 
+                                                                           THEN cv.intContractDetailId else pf.intContractDetailId end
                                   ), 0) dblFixedQty
                      ,isnull(dblDeltaPercent,0) dblDeltaPercent,intCommodityUnitMeasureId,dblRatioContractSize,intPricingTypeIdHeader
               FROM @PricedContractList cv

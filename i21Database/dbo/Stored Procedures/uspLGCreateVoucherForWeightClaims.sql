@@ -160,11 +160,15 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,NULL AS intInventoryReceiptItemId
 		,WCD.intContractDetailId
-		,CASE 
-		 WHEN CU.ysnSubCurrency = 1
-			THEN (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt / 100
-		 ELSE (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt
-		 END
+		,dblFranchiseAmount = ROUND(CASE 
+				 WHEN CU.ysnSubCurrency = 1
+					THEN (dbo.fnCTConvertQtyToTargetItemUOM(
+						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),
+						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt / 100
+				 ELSE (dbo.fnCTConvertQtyToTargetItemUOM(
+						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId), 
+						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt
+			   END, 2)
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -287,9 +291,9 @@ BEGIN TRY
 			,intContractDetailId
 			,dblFranchiseAmount)
 		SELECT dblNetShippedWeight
-			,ROUND(dblWeightLoss,2)
-			,ROUND(dblFranchiseWeight,2)
-			,ROUND((dblWeightLoss-ISNULL(dblFranchiseWeight,0)),2)
+			,dblWeightLoss
+			,dblFranchiseWeight
+			,(dblWeightLoss-ISNULL(dblFranchiseWeight,0))
 			,dblCost
 			,dblCostUnitQty
 			,dblWeightUnitQty
@@ -323,9 +327,9 @@ BEGIN TRY
 				SET intLoadId = @intLoadId,
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = vdd.dblClaimAmount,
+				dblClaimAmount = ROUND(vdd.dblClaimAmount, 2),
 				dblTotal = ROUND(vdd.dblClaimAmount,2),
-				dblNetWeight = ROUND(vdd.dblNetWeight,2)
+				dblNetWeight = vdd.dblNetWeight
 			FROM @voucherDetailData vdd
 			JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
 			WHERE intBillId = @intBillId
@@ -342,7 +346,7 @@ BEGIN TRY
 				ysnSubCurrency = @ysnSubCurrency,
 				dblClaimAmount = ROUND(@dblClaimAmount,2),
 				dblTotal = ROUND(@dblClaimAmount,2),
-				dblNetWeight = ROUND(@dblNetWeight,2)
+				dblNetWeight = @dblNetWeight
 			WHERE intBillId = @intBillId AND intContractDetailId IS NOT NULL
 		END
 
@@ -368,8 +372,8 @@ BEGIN TRY
 	WHERE intBillId = @intBillId
 
 	UPDATE BD
-	SET intCurrencyId = WCD.intCurrencyId
-		,ysnSubCurrency = 1
+	SET intCurrencyId = @intCurrencyId
+		,ysnSubCurrency = @ysnSubCurrency
 		,dblClaimAmount = ROUND(WCD.dblClaimAmount,2)
 		,dblTotal = ROUND(WCD.dblClaimAmount,2)
 		,dblNetWeight = WCD.dblToNet

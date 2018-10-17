@@ -15,7 +15,8 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 		,@ErrorState INT
 		,@jsonData NVARCHAR(MAX);
 
-DECLARE @InventoryReceiptId				INT
+DECLARE @storageHistoryData				AS StorageHistoryStagingTable
+		,@InventoryReceiptId			INT
 		,@intInventoryReceiptItemId		INT
 		,@InventoryShipmentId			INT
 		,@intInventoryShipmentItemId	INT
@@ -35,6 +36,7 @@ DECLARE @InventoryReceiptId				INT
 		,@currencyDecimal				INT
 		,@intCustomerStorageId			INT
 		,@strDistributionOption			NVARCHAR(3)
+		,@intStorageScheduleTypeId		INT
 		,@intStorageScheduleId			INT
 		,@dblSplitPercent				NUMERIC (38,20)
 		,@dblTempSplitQty				NUMERIC (38,20)
@@ -79,7 +81,39 @@ BEGIN TRY
 						,@toValue			= '0'								-- New Value
 						,@details			= '';
 
-					DELETE FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+					INSERT INTO @storageHistoryData
+					(
+						[intCustomerStorageId]
+						,[intTicketId]
+						,[intDeliverySheetId]
+						,[intInventoryAdjustmentId]
+						,[dblUnits]
+						,[dtmHistoryDate]
+						,[dblCurrencyRate]
+						,[strPaidDescription]
+						,[intTransactionTypeId]
+						,[intUserId]
+						,[strType]
+						,[ysnPost]
+						,[strTransactionId]	
+					)
+					SELECT 	
+						[intCustomerStorageId]				= intCustomerStorageId				
+						,[intTicketId]						= NULL
+						,[intDeliverySheetId]				= intDeliverySheetId
+						,[intInventoryAdjustmentId]			= NULL
+						,[dblUnits]							= (dblUnits * -1)
+						,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GETDATE())
+						,[dblCurrencyRate]					= 1
+						,[strPaidDescription]				= 'Quantity Adjustment Reversal ' + @strTransactionId + ' From Delivery Sheet'
+						,[intTransactionTypeId]				= 9
+						,[intUserId]						= @intUserId
+						,[strType]							= 'From Inventory Adjustment'
+						,[ysnPost]							= 1
+						,[strTransactionId]					= @strTransactionId
+					FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+					UPDATE tblGRStorageHistory SET intInventoryAdjustmentId = null WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -88,6 +122,8 @@ BEGIN TRY
 				END
 				CLOSE ticketCursor;  
 				DEALLOCATE ticketCursor;
+
+				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
 
 				DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM tblGRCustomerStorage WHERE intDeliverySheetId = @intDeliverySheetId) 
 				AND strSourceType = 'Storage'
@@ -123,9 +159,9 @@ BEGIN TRY
 				INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
 				WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 
-				DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId FROM @splitTable
+				DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId,intStorageScheduleTypeId FROM @splitTable
 				OPEN splitCursor;  
-				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId;  
+				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;  
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
 					SET @dblFinalSplitQty =  ROUND((@dblQuantity * @dblSplitPercent) / 100, @currencyDecimal);
@@ -145,10 +181,12 @@ BEGIN TRY
 							,@intDeliverySheetId = NULL
 							,@intCustomerStorageId = @intCustomerStorageId
 							,@dblBalance = @dblFinalSplitQty
+							,@intStorageTypeId = @intStorageScheduleTypeId
+							,@intStorageScheduleId = @intStorageScheduleId
 							,@ysnDistribute = 1
 							,@newBalance = @newBalance OUT
 
-					FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId;
+					FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;
 				END
 				CLOSE splitCursor;  
 				DEALLOCATE splitCursor;
@@ -158,7 +196,10 @@ BEGIN TRY
 					[strReceiptNumber] [VARCHAR](100),
 					UNIQUE ([intInventoryReceiptId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intDeliverySheetId AND strSourceType = 'Delivery Sheet'
+				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) 
+				SELECT DISTINCT(IR.intInventoryReceiptId),IR.strReceiptNumber FROM vyuICGetInventoryReceiptItem IR
+				INNER JOIN tblSCTicket SC ON SC.intTicketId = IR.intSourceId
+				WHERE SC.intDeliverySheetId = @intDeliverySheetId AND IR.strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
@@ -172,6 +213,38 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
+					IF EXISTS (
+							SELECT 1
+							FROM tblGRCustomerStorage CS
+							JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+							WHERE SH.strType IN ('From Scale', 'From Delivery Sheet')
+							AND SH.intInventoryReceiptId = @InventoryReceiptId
+							)
+					BEGIN
+						SELECT @intCustomerStorageId = CS.intCustomerStorageId
+						FROM tblGRCustomerStorage CS
+						JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+						WHERE SH.strType IN ('From Scale', 'From Delivery Sheet')
+						AND SH.intInventoryReceiptId = @InventoryReceiptId
+			
+						IF EXISTS(SELECT 1 FROM tblARInvoiceDetail WHERE intCustomerStorageId = @intCustomerStorageId)
+						BEGIN
+							RAISERROR('Invoice exists for the Grain Ticket for this receipt.',16, 1);
+						END
+						ELSE IF EXISTS(SELECT 1 FROM [tblAPBillDetail] WHERE [intCustomerStorageId] = @intCustomerStorageId)
+						BEGIN
+							RAISERROR('Voucher exists for this Delivery Sheet.',16, 1);
+						END
+						ELSE IF EXISTS(SELECT 1 FROM [tblGRStorageHistory] WHERE [intCustomerStorageId] = @intCustomerStorageId AND strType = 'Transfer')
+						BEGIN
+							RAISERROR('The Grain Ticket of this receipt has transferred.',16, 1);
+						END
+						ELSE IF EXISTS(SELECT 1 FROM [tblGRCustomerStorage] WHERE [intCustomerStorageId] = @intCustomerStorageId AND dblOriginalBalance < > dblOpenBalance)
+						BEGIN
+							RAISERROR('There is mismatch between the original balance and open balance of the grain ticket of this receipt.',16, 1);
+						END
+					END		
+
 					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
 					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
                         DROP TABLE #tmpVoucherDetail
@@ -224,7 +297,7 @@ BEGIN TRY
 				CLOSE intListCursor  
 				DEALLOCATE intListCursor 
 
-				UPDATE CS SET CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit  
+				UPDATE CS SET CS.dblFeesDue=SC.dblFeesPerUnit,CS.dblFreightDueRate=SC.dblFreightPerUnit, CS.dblDiscountsDue = 0
 				FROM tblGRCustomerStorage CS
 				OUTER APPLY (
 					SELECT 

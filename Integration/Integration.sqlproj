@@ -72,6 +72,7 @@
     <Folder Include="Scripts\SM" />
     <Folder Include="Scripts\GL" />
     <Folder Include="Scripts\IC" />
+    <Folder Include="Scripts\MB" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -464,5 +465,6 @@
     <None Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
     <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
+    <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
   </ItemGroup>
 </Project>

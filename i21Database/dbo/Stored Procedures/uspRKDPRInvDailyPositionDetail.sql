@@ -242,7 +242,10 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,i.strItemNo
 	,c.strLocationName
 	,ium.intCommodityUnitMeasureId as intCommodityUnitMeasureId
-	,i.intItemId as intItemId ,t.dtmTicketDateTime,t.intTicketId,t.strTicketNumber,a.strStorageTicketNumber strTicket
+	,i.intItemId as intItemId ,t.dtmTicketDateTime
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.intTransferStorageId when gh.strType = 'Settlement' then gh.intSettleStorageId else t.intTicketId end) intTicketId
+	,t.strTicketNumber
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket  when gh.strType = 'Settlement' then gh.strSettleTicket else a.strStorageTicketNumber end) strTicket
 	,gh.intInventoryReceiptId
 	,gh.intInventoryShipmentId
 	,ghm.strReceiptNumber
@@ -699,6 +702,22 @@ WHERE intLocationId IN (
 	FROM #invQty where intCommodityId=@intCommodityId and strTransactionType = 'Inventory Adjustment - Quantity Change')t
 	group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strTransactionId,intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime 
 
+	--From Work Order
+    INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber, intInventoryReceiptId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime )
+    select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime  from(
+    SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],isnull(dblTotal,0) dblTotal,strLocationName,intItemId,strItemNo,
+            @intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId, strTransactionId, intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime 
+    FROM #invQty where intCommodityId=@intCommodityId and strTransactionType IN ('Consume','Produce'))t
+    group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strTransactionId,intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime 
+
+	--From Outbound Shipment
+    INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber, intInventoryReceiptId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime )
+    select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime  from(
+    SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],isnull(dblTotal,0) dblTotal,strLocationName,intItemId,strItemNo,
+            @intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId, strTransactionId, intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime 
+    FROM #invQty where intCommodityId=@intCommodityId and strTransactionType IN ('Outbound Shipment'))t
+    group by intSeqId,strSeqHeader,strCommodityCode,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strTransactionId,intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime 
+
 	--IR from Settlement
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strReceiptNumber, intInventoryReceiptId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime )
 	select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal) dblTotal,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strTransactionId, intTransactionId, dtmDeliveryDate,strTicketNumber,intTicketId ,dtmTicketDateTime  from(
@@ -712,7 +731,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -810,7 +829,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -861,7 +880,7 @@ WHERE intLocationId IN (
 		[Delivery Date],
 		 Ticket,
 		strLocationName,r.strItemNo, @intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId
-		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicketNumber,dtmTicketDateTime
+		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicket,dtmTicketDateTime
 	FROM #tblGetStorageDetailByDate  r
 	WHERE ysnReceiptedStorage = 0
 		AND strOwnedPhysicalStock = 'Customer'

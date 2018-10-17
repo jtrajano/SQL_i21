@@ -354,6 +354,11 @@ BEGIN
 		WHERE t2.intEntityId IS NULL
 	)
 	PRINT 'End checking intEntityId'
+
+	UPDATE SCS SET SCS.intEntityScaleOperatorId = ISNULL(SM.intEntityScaleOperatorId , SCS.intEntityId)
+	FROM tblSCLastScaleSetup SCS
+	LEFT JOIN tblSMUserSecurity SM ON SM.intEntityId = SCS.intEntityId
+	WHERE SCS.intEntityScaleOperatorId IS NULL
 END
 GO
 

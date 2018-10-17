@@ -63,6 +63,24 @@ FROM (
 	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end --and strTransactionId not like'%IS%'
 	and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
+UNION --Inventory Adjustment (Storage)
+SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,strAdjustmentNo  tranAdjNumber,
+		dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+		,0.0 tranDSInQty from(
+		SELECT
+			CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			,round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			,IA.strAdjustmentNo strAdjustmentNo
+			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
+		FROM tblICInventoryAdjustment IA
+			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+			INNER JOIN tblICItem i on i.intItemId=IAD.intItemId
+		WHERE IAD.intOwnershipType = 2 --Storage
+			AND IA.ysnPosted = 1
+			AND i.intCommodityId=@intCommodityId  
+			AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end
+			)a
+
 UNION --Direct From Scale
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
@@ -81,9 +99,51 @@ FROM tblSCTicket st
 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1  
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
+		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 and st.intDeliverySheetId IS NULL
 		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 		 and r.intSourceType = 1)a
+
+UNION --Delivery Sheet
+SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit
+		,0.0 tranDSInQty from(
+select  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty,r.strReceiptNumber  
+FROM tblSCTicket st
+		JOIN tblICItem i on i.intItemId=st.intItemId 
+												AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
+		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1  
+WHERE  i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 and st.intDeliverySheetId IS NOT NULL 
+		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+		 and r.intSourceType = 1
+
+UNION ALL --Delivery Sheet Split
+SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ELSE 0 END dblInQty,r.strReceiptNumber  
+FROM tblSCTicket st
+		JOIN tblICItem i on i.intItemId=st.intItemId 
+												AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
+		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId 
+		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1  
+WHERE  i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		 and ri.intOwnershipType = 2 and  st.intStorageScheduleTypeId = -4 and st.intDeliverySheetId IS NOT NULL 
+		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+		 and r.intSourceType = 1
+		 
+		 )a
 
 --UNION ALL--Spot
 --SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,

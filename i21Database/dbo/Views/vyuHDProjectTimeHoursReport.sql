@@ -17,6 +17,7 @@
 					,result.strCustomerName
 					,intEstimatedHours = estimatedhours.intEstimatedHours
 					,intHours = sum(result.intHours)
+					,dblHours = sum(result.dblHours)
 					,intBillableHours = sum(result.intBillableHours)
 					,intNonBillableHours = sum(result.intNonBillableHours)
 					,dblTotalBilled = isnull(sum(result.intTotalBilled),0)
