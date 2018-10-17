@@ -145,14 +145,16 @@ BEGIN TRY
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
+				, a.intUnitMeasureId = b.intUnitMeasureId
+				, a.strUnitMeasure = UOM.strUnitMeasure
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
-			AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
-			AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
-			AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
-			AND ISNULL(a.intUnitMeasureId, 0) = ISNULL(b.intUnitMeasureId, 0)
-			AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
-			AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
+				AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
+				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
+				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
+				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intM2MBasisId
 		END
 	END
@@ -232,14 +234,16 @@ BEGIN TRY
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
+				, a.intUnitMeasureId = b.intUnitMeasureId
+				, a.strUnitMeasure = UOM.strUnitMeasure
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
-			AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
-			AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
-			AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
-			AND ISNULL(a.intUnitMeasureId, 0) = ISNULL(b.intUnitMeasureId, 0)
-			AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
-			AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
+				AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
+				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
+				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
+				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intM2MBasisId
 		END
 	END
