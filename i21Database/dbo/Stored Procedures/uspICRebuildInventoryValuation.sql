@@ -1129,9 +1129,9 @@ BEGIN
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer'))
 			BEGIN 
 				DECLARE @ysnTransferOnSameLocation AS BIT
-				SET @ysnTransferOnSameLocation = 0 
+				SET @ysnTransferOnSameLocation = 1 
 				
-				SELECT	@ysnTransferOnSameLocation = 1 
+				SELECT	@ysnTransferOnSameLocation = 0 
 				FROM	tblICInventoryTransfer 
 				WHERE	intInventoryTransferId = @intTransactionId 
 						AND strTransferNo = @strTransactionId 
