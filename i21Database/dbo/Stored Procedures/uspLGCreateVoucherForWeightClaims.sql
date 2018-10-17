@@ -162,8 +162,12 @@ BEGIN TRY
 		,WCD.intContractDetailId
 		,dblFranchiseAmount = ROUND(CASE 
 				 WHEN CU.ysnSubCurrency = 1
-					THEN (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt / 100
-				 ELSE (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt
+					THEN (dbo.fnCTConvertQtyToTargetItemUOM(
+						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),
+						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt / 100
+				 ELSE (dbo.fnCTConvertQtyToTargetItemUOM(
+						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId), 
+						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt
 			   END, 2)
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
