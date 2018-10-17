@@ -15,7 +15,8 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 		,@ErrorState INT
 		,@jsonData NVARCHAR(MAX);
 
-DECLARE @InventoryReceiptId				INT
+DECLARE @storageHistoryData				AS StorageHistoryStagingTable
+		,@InventoryReceiptId			INT
 		,@intInventoryReceiptItemId		INT
 		,@InventoryShipmentId			INT
 		,@intInventoryShipmentItemId	INT
@@ -80,7 +81,39 @@ BEGIN TRY
 						,@toValue			= '0'								-- New Value
 						,@details			= '';
 
-					DELETE FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+					INSERT INTO @storageHistoryData
+					(
+						[intCustomerStorageId]
+						,[intTicketId]
+						,[intDeliverySheetId]
+						,[intInventoryAdjustmentId]
+						,[dblUnits]
+						,[dtmHistoryDate]
+						,[dblCurrencyRate]
+						,[strPaidDescription]
+						,[intTransactionTypeId]
+						,[intUserId]
+						,[strType]
+						,[ysnPost]
+						,[strTransactionId]	
+					)
+					SELECT 	
+						[intCustomerStorageId]				= intCustomerStorageId				
+						,[intTicketId]						= NULL
+						,[intDeliverySheetId]				= intDeliverySheetId
+						,[intInventoryAdjustmentId]			= NULL
+						,[dblUnits]							= (dblUnits * -1)
+						,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GETDATE())
+						,[dblCurrencyRate]					= 1
+						,[strPaidDescription]				= 'Quantity Adjustment Reversal ' + @strTransactionId + ' From Delivery Sheet'
+						,[intTransactionTypeId]				= 9
+						,[intUserId]						= @intUserId
+						,[strType]							= 'From Inventory Adjustment'
+						,[ysnPost]							= 1
+						,[strTransactionId]					= @strTransactionId
+					FROM tblGRStorageHistory WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+					UPDATE tblGRStorageHistory SET intInventoryAdjustmentId = null WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustmentDetail where intInventoryAdjustmentId = @intInventoryAdjustmentId
 					DELETE FROM tblICInventoryAdjustment where intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -89,6 +122,8 @@ BEGIN TRY
 				END
 				CLOSE ticketCursor;  
 				DEALLOCATE ticketCursor;
+
+				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
 
 				DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM tblGRCustomerStorage WHERE intDeliverySheetId = @intDeliverySheetId) 
 				AND strSourceType = 'Storage'
@@ -146,6 +181,8 @@ BEGIN TRY
 							,@intDeliverySheetId = NULL
 							,@intCustomerStorageId = @intCustomerStorageId
 							,@dblBalance = @dblFinalSplitQty
+							,@intStorageTypeId = @intStorageScheduleTypeId
+							,@intStorageScheduleId = @intStorageScheduleId
 							,@ysnDistribute = 1
 							,@newBalance = @newBalance OUT
 

@@ -40,7 +40,8 @@ DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
 		,@dblOrigQuantity				NUMERIC (38,20)
 		,@dblAdjustByQuantity			NUMERIC (38,20)
 		,@dblFinalQuantity				NUMERIC (38,20)
-		,@strTransactionId				NVARCHAR(100)
+		,@strTransactionId				NVARCHAR(40)
+		,@strDescription				NVARCHAR(100)
 		,@intOwnershipType				INT
 		,@strFreightCostMethod			NVARCHAR(40)
 		,@strFeesCostMethod				NVARCHAR(40)
@@ -202,7 +203,8 @@ BEGIN TRY
 				,@intInventoryAdjustmentId OUTPUT
 				,'Delivery Sheet Posting'
 		
-			SELECT @strTransactionId =  'Quantity Adjustment : ' + strAdjustmentNo  FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+			SELECT @strDescription =  'Quantity Adjustment : ' + strAdjustmentNo, @strTransactionId = strAdjustmentNo  
+			FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 			SET @dblFinalQuantity = @dblOrigQuantity + @dblAdjustByQuantity;
 			EXEC dbo.uspSMAuditLog 
@@ -210,7 +212,7 @@ BEGIN TRY
 			,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace
 			,@entityId			= @intUserId						-- Entity Id.
 			,@actionType		= 'Post'							-- Action Type
-			,@changeDescription	= @strTransactionId					-- Description
+			,@changeDescription	= @strDescription					-- Description
 			,@fromValue			= @dblOrigQuantity					-- Old Value
 			,@toValue			= @dblFinalQuantity					-- New Value
 			,@details			= '';
@@ -229,8 +231,7 @@ BEGIN TRY
 				ELSE
 					SET @dblFinalSplitQty = @dblTempSplitQty
 
-					INSERT INTO @storageHistoryData
-					(
+					INSERT INTO @storageHistoryData(
 						[intCustomerStorageId]
 						,[intTicketId]
 						,[intDeliverySheetId]
@@ -243,19 +244,22 @@ BEGIN TRY
 						,[intUserId]
 						,[strType]
 						,[ysnPost]
+						,[strTransactionId]
 					)
-					SELECT 	[intCustomerStorageId]				= GR.intCustomerStorageId				
-							,[intTicketId]						= NULL
-							,[intDeliverySheetId]				= GR.intDeliverySheetId
-							,[intInventoryAdjustmentId]			= @intInventoryAdjustmentId
-							,[dblUnits]							= (@dblFinalSplitQty * -1)
-							,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(@dtmDate)
-							,[dblCurrencyRate]					= 1
-							,[strPaidDescription]				= 'Quantity Adjustment From Delivery Sheet'
-							,[intTransactionTypeId]				= 9
-							,[intUserId]						= @intUserId
-							,[strType]							= 'From Inventory Adjustment'
-							,[ysnPost]							= 1
+					SELECT 	
+						[intCustomerStorageId]				= GR.intCustomerStorageId				
+						,[intTicketId]						= NULL
+						,[intDeliverySheetId]				= GR.intDeliverySheetId
+						,[intInventoryAdjustmentId]			= @intInventoryAdjustmentId
+						,[dblUnits]							= (@dblFinalSplitQty * -1)
+						,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(@dtmDate)
+						,[dblCurrencyRate]					= 1
+						,[strPaidDescription]				= 'Quantity Adjustment From Delivery Sheet'
+						,[intTransactionTypeId]				= 9
+						,[intUserId]						= @intUserId
+						,[strType]							= 'From Inventory Adjustment'
+						,[ysnPost]							= 1
+						,[strTransactionId]					= @strTransactionId
 					FROM tblGRCustomerStorage GR
 					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
 

@@ -20,5 +20,6 @@ CREATE TYPE [dbo].[StorageHistoryStagingTable] AS TABLE
     [ysnPost] BIT NOT NULL,
     [intTransactionTypeId] INT NOT NULL,
     [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-    [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+    [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
