@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuGRStorageSearchView]
 AS    
-SELECT TOP 100 PERCENT  
+
+SELECT
 	intCustomerStorageId		  = CS.intCustomerStorageId
 	,intTransactionId			  = CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL THEN CS.intDeliverySheetId
@@ -29,7 +30,7 @@ SELECT TOP 100 PERCENT
 	,intCompanyLocationId		  = CS.intCompanyLocationId
 	,strLocationName			  = LOC.strLocationName
 	,intStorageScheduleId		  = CS.intStorageScheduleId
-	,strScheduleId				  = SR.strScheduleId
+	,strScheduleId				  = SR.strScheduleDescription
 	,strDPARecieptNumber		  = CS.strDPARecieptNumber
 	,strCustomerReference		  = ISNULL(CS.strCustomerReference,'')  
 	,dblOriginalBalance			  = dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
@@ -55,8 +56,10 @@ SELECT TOP 100 PERCENT
 	,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  = CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
 										THEN 
-											CASE WHEN DSS.dblSplitPercent IS NOT NULL
-												THEN DSS.dblSplitPercent ELSE 100
+											CASE 
+												WHEN DSS.dblSplitPercent IS NOT NULL THEN DSS.dblSplitPercent 
+												WHEN TSS.dblSplitPercent IS NOT NULL THEN TSS.dblSplitPercent
+												ELSE 100
 											END
 										ELSE SCTicketSplit.dblSplitPercent
 									END
@@ -103,4 +106,3 @@ LEFT JOIN (
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
 	) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
-ORDER BY CS.intCustomerStorageId
