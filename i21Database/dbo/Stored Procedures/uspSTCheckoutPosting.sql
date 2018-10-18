@@ -38,7 +38,15 @@ BEGIN
 		DECLARE @intTaxGroupId INT
 		DECLARE @intStoreId INT
 		DECLARE @strComments NVARCHAR(MAX) = 'Store Checkout' -- All comments should be same to create a single Invoice
-		DECLARE @strInvoiceType AS NVARCHAR(50) = 'Store Checkout'
+		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store Checkout'
+		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store Checkout'
+		DECLARE @strInvoiceTypeCustomerCharges AS NVARCHAR(100) --= 'Store Checkout'
+		DECLARE @strInvoicePaymentMethodMain AS NVARCHAR(100) = 'Cash'
+		DECLARE @intPaymentMethodIdMain AS INT = (
+													SELECT intPaymentMethodID 
+													FROM vyuARPaymentMethodForReceivePayments 
+													WHERE strPaymentMethod = @strInvoicePaymentMethodMain
+												 )
 
 		SELECT @intCompanyLocationId = intCompanyLocationId
 			   , @intEntityCustomerId = intCheckoutCustomerId
@@ -67,12 +75,39 @@ BEGIN
 		DECLARE @intCurrentInvoiceId INT
 		DECLARE @strCurrentAllInvoiceIdList NVARCHAR(1000)
 		DECLARE @dtmCheckoutDate AS DATETIME
+		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
+		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @strCurrentAllInvoiceIdList = strAllInvoiceIdList
 				, @dtmCheckoutDate = dtmCheckoutDate 
+				, @dblCheckoutTotalDeposited = dblTotalDeposits
+				, @dblCheckoutCustomerChargeAmount = dblTotalDeposits
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
+
+
+		------------------------------------------------------------------------------
+		-- Set Invoice Type for MAIN
+		IF(@dblCheckoutTotalDeposited >= 0)
+			BEGIN
+				SET @strInvoiceTransactionTypeMain = 'Cash'
+			END
+		ELSE
+			BEGIN
+				SET @strInvoiceTransactionTypeMain = 'Cash Refund'
+			END
+
+		-- Set Invoice Type for CUSTOMER CHARGES
+		IF(@dblCheckoutCustomerChargeAmount > 0)
+			BEGIN
+				SET @strInvoiceTypeCustomerCharges = 'Invoice'
+			END
+		ELSE 
+			BEGIN
+				SET @strInvoiceTypeCustomerCharges = 'Credit Memo'
+			END
+		------------------------------------------------------------------------------
 
 
 		DECLARE @intCreatedInvoiceId INT = NULL
@@ -372,8 +407,8 @@ BEGIN
 									)
 									SELECT 
 										 [strSourceTransaction]		= 'Invoice'
-										,[strTransactionType]		= 'Invoice'
-										,[strType]					= @strInvoiceType
+										,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										,[strType]					= @strInvoiceTypeMain
 										,[intSourceId]				= @intCheckoutId
 										,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 										,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -389,7 +424,7 @@ BEGIN
 										,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 										,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 										,[intShipViaId]				= vC.intShipViaId					--ADDED
-										,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+										,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 										,[strInvoiceOriginId]		= NULL -- not sure
 										,[strPONumber]				= NULL -- not sure
 										,[strBOLNumber]				= NULL -- not sure
@@ -586,8 +621,8 @@ BEGIN
 									)
 									SELECT 
 										 [strSourceTransaction]		= 'Invoice'
-										,[strTransactionType]		= 'Invoice'
-										,[strType]					= @strInvoiceType
+										,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										,[strType]					= @strInvoiceTypeMain
 										,[intSourceId]				= @intCheckoutId
 										,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 										,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -603,7 +638,7 @@ BEGIN
 										,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 										,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 										,[intShipViaId]				= vC.intShipViaId					--ADDED
-										,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+										,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 										,[strInvoiceOriginId]		= NULL -- not sure
 										,[strPONumber]				= NULL -- not sure
 										,[strBOLNumber]				= NULL -- not sure
@@ -809,8 +844,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -826,7 +861,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -1023,8 +1058,8 @@ BEGIN
 										)
 										SELECT DISTINCT
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1040,7 +1075,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -1300,8 +1335,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1317,7 +1352,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -1508,8 +1543,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1525,7 +1560,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -1738,8 +1773,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1755,7 +1790,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -1953,8 +1988,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1970,7 +2005,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -2162,8 +2197,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -2179,7 +2214,7 @@ BEGIN
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
@@ -2393,8 +2428,8 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= 'Invoice'
-											,[strType]					= @strInvoiceType
+											,[strTransactionType]		= @strInvoiceTypeCustomerCharges
+										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
