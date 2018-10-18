@@ -1094,6 +1094,12 @@ BEGIN TRY
     FROM
         [dbo].[fnGetGLEntriesErrors](@GLEntries)
 
+	IF @raiseError = 1
+	BEGIN
+		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
+		RAISERROR(@ErrorMerssage, 11, 1)							
+		GOTO Post_Exit
+	END
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
