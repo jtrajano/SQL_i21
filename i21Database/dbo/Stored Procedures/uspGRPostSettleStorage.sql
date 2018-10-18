@@ -1127,7 +1127,8 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
 													ELSE 0 
 												END
-					,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
+					--,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
+					,[intInventoryReceiptItemId] = CASE WHEN (SELECT ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = CS.intStorageTypeId) > 0 THEN E2.intInventoryReceiptItemId ELSE NULL END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
