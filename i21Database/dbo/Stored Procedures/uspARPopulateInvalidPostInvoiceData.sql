@@ -239,7 +239,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]            = I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Customer - ' + I.[strCustomerNumber] + ' credit limit is blank! Only Cash Sale transaction is allowed.'
+		,[strPostingError]		= 'Customer credit limit is blank! Only Cash Sale transaction is allowed.'
 	FROM 
 		#ARPostInvoiceHeader I                       
 	WHERE
