@@ -34,5 +34,5 @@ Undep.intUndepositedFundId NOT IN(
 	SELECT intUndepositedFundId 
 	FROM tblCMBankTransactionDetail BTDtl
 	INNER JOIN tblCMBankTransaction BT ON BTDtl.intTransactionId = BT.intTransactionId 
-	WHERE BT.intBankAccountId = Undep.intBankAccountId AND BTDtl.intUndepositedFundId IS NOT NULL 
+	WHERE BTDtl.intUndepositedFundId IS NOT NULL 
 )
