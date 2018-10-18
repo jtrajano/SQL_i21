@@ -2,6 +2,7 @@
      @Post              BIT				= 0
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
+	,@IntegrationLogId	INT             = NULL
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -1154,15 +1155,16 @@ INNER JOIN
 WHERE ysnApplied = 0
 
 --Insert Successfully unposted transactions.
-INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-SELECT 
-	  CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
-	,[strTransactionType]
-	,[strInvoiceNumber]
-	,[strBatchId]
-	,[intInvoiceId]
-FROM
-	#ARPostInvoiceHeader
+IF @IntegrationLogId IS NULL
+	INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT 
+		  CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
+		,[strTransactionType]
+		,[strInvoiceNumber]
+		,[strBatchId]
+		,[intInvoiceId]
+	FROM
+		#ARPostInvoiceHeader
 
 
 ----Audit Log          
