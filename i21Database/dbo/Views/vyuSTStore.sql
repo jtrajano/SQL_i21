@@ -10,7 +10,7 @@ SELECT ST.*
 	   , TG.strTaxGroup
 	   , EM.strName
 	   , ItemCustomerCharges.strItemNo AS strCustomerChargesItemNo
-	   , ItemCustomerPayment.strItemNo AS strCustomerPaymentItemNo
+	   --, ItemCustomerPayment.strItemNo AS strCustomerPaymentItemNo
 	   , ItemOverShort.strItemNo AS strOverShortItemNo
 	   , CAT.intCategoryId
 	   , CAT.strCategoryCode
@@ -18,16 +18,28 @@ SELECT ST.*
 	   , CL.strLocationType
 	   , EM.strEntityNo AS strVendorId
 FROM tblSTStore ST
-LEFT JOIN tblSTPaymentOption PO ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
-LEFT JOIN tblSTPaymentOption CustomerCharge ON ST.intCustomerChargeMopId = CustomerCharge.intPaymentOptionId
-LEFT JOIN tblSTPaymentOption CashTransaction ON ST.intCashTransctionMopId = CashTransaction.intPaymentOptionId
-LEFT JOIN tblSTPaymentOption LoyaltyDiscount ON ST.intLoyaltyDiscountMopId = LoyaltyDiscount.intPaymentOptionId
-LEFT JOIN tblSTPaymentOption RemoveProprietart ON ST.intRemovePropCardMopId = RemoveProprietart.intPaymentOptionId
-LEFT JOIN tblSTPaymentOption AddProprietart ON ST.intAddPropCardMopId = AddProprietart.intPaymentOptionId
-LEFT JOIN tblSMTaxGroup TG ON ST.intTaxGroupId = TG.intTaxGroupId
-LEFT JOIN tblEMEntity EM ON ST.intCheckoutCustomerId = EM.intEntityId
-LEFT JOIN tblICItem ItemCustomerCharges ON ST.intCustomerChargesItemId = ItemCustomerCharges.intItemId
-LEFT JOIN tblICItem ItemCustomerPayment ON ST.intCustomerPaymentItemId = ItemCustomerPayment.intItemId
-LEFT JOIN tblICItem ItemOverShort ON ST.intOverShortItemId = ItemOverShort.intItemId
-LEFT JOIN tblICCategory CAT ON ST.intLoyaltyDiscountCategoryId = CAT.intCategoryId
-LEFT JOIN tblSMCompanyLocation CL ON ST.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN tblSTPaymentOption PO 
+	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
+LEFT JOIN tblSTPaymentOption CustomerCharge 
+	ON ST.intCustomerChargeMopId = CustomerCharge.intPaymentOptionId
+LEFT JOIN tblSTPaymentOption CashTransaction 
+	ON ST.intCashTransctionMopId = CashTransaction.intPaymentOptionId
+LEFT JOIN tblSTPaymentOption LoyaltyDiscount 
+	ON ST.intLoyaltyDiscountMopId = LoyaltyDiscount.intPaymentOptionId
+LEFT JOIN tblSTPaymentOption RemoveProprietart 
+	ON ST.intRemovePropCardMopId = RemoveProprietart.intPaymentOptionId
+LEFT JOIN tblSTPaymentOption AddProprietart 
+	ON ST.intAddPropCardMopId = AddProprietart.intPaymentOptionId
+LEFT JOIN tblSMTaxGroup TG 
+	ON ST.intTaxGroupId = TG.intTaxGroupId
+LEFT JOIN tblEMEntity EM 
+	ON ST.intCheckoutCustomerId = EM.intEntityId
+LEFT JOIN tblICItem ItemCustomerCharges 
+	ON ST.intCustomerChargesItemId = ItemCustomerCharges.intItemId
+--LEFT JOIN tblICItem ItemCustomerPayment ON ST.intCustomerPaymentItemId = ItemCustomerPayment.intItemId
+LEFT JOIN tblICItem ItemOverShort 
+	ON ST.intOverShortItemId = ItemOverShort.intItemId
+LEFT JOIN tblICCategory CAT 
+	ON ST.intLoyaltyDiscountCategoryId = CAT.intCategoryId
+LEFT JOIN tblSMCompanyLocation CL 
+	ON ST.intCompanyLocationId = CL.intCompanyLocationId
