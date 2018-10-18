@@ -17,12 +17,22 @@ SET ANSI_WARNINGS OFF
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --create sublocation for each location. i21 requires a sublocation to be created if there are storage locations
 --origin does not have sublocations
-insert into tblSMCompanyLocationSubLocation
-(intCompanyLocationId, strSubLocationName, strSubLocationDescription, strClassification, intConcurrencyId)
-select distinct intCompanyLocationId, strLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
-from tblSMCompanyLocation L 
-join gaphymst os on os.gaphy_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
-where gaphy_bin_no is not null
+MERGE tblSMCompanyLocationSubLocation as [Target]
+USING (
+
+	SELECT DISTINCT intCompanyLocationId, strLocationName strSubLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
+	FROM tblSMCompanyLocation L 
+	INNER JOIN gaphymst os on os.gaphy_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gaphy_bin_no IS NOT NULL
+
+	) AS [Source] ( intCompanyLocationId, strSubLocationName, strDescription, strClassification , Concurrencyid)
+
+ON [Target].strSubLocationName = [Source].strSubLocationName COLLATE SQL_Latin1_General_CP1_CS_AS
+AND [Target].intCompanyLocationId = [Source].intCompanyLocationId
+
+WHEN NOT MATCHED THEN
+INSERT (intCompanyLocationId, strSubLocationName, strSubLocationDescription, strClassification, intConcurrencyId)
+VALUES ([Source].intCompanyLocationId, [Source].strSubLocationName, [Source].strDescription, [Source].strClassification, [Source].Concurrencyid);
 
 ----====================================STEP 1=============================================
 --import storage locations from origin and update the sub location required for i21 
@@ -45,4 +55,3 @@ VALUES ([Source].strName, [Source].strDescription, [Source].intLocationId, [Sour
 
 
 GO
-
