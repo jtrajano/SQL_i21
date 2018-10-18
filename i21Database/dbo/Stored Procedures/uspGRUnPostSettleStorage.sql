@@ -108,6 +108,12 @@ BEGIN TRY
 			FROM tblICItemUOM
 			WHERE intItemId = @ItemId AND ysnStockUnit=1
 
+			--5. NEW REQUIREMENT: include the payment when unposting the settle storage
+			IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @BillId)
+			BEGIN
+				EXEC uspAPDeletePayment @BillId, @UserId
+			END
+
 			IF EXISTS (
 						SELECT 1
 						FROM tblAPBill

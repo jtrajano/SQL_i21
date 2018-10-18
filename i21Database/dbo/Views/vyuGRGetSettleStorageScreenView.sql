@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGRGetSettleStorageScreenView]
 AS     
- SELECT 
+SELECT 
 	 SS.intSettleStorageId
 	,SS.intEntityId
 	,E.strName AS strEntityName  
@@ -30,9 +30,15 @@ AS
 	,SS.intItemUOMId
 	,UOM.strUnitMeasure
 	,SS.intConcurrencyId
+	,ysnBillIsPaid = dbo.fnGRCheckBillPaymentOfSettleStorage(SS.intSettleStorageId)
 FROM tblGRSettleStorage SS
-JOIN tblEMEntity E ON E.intEntityId = SS.intEntityId
-LEFT JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId  
-JOIN tblICItem Item ON Item.intItemId = SS.intItemId
-JOIN tblICItemUOM ItemUOM ON ISNULL(SS.intItemUOMId, SS.intCommodityStockUomId) = ItemUOM.intItemUOMId
-LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+JOIN tblEMEntity E 
+	ON E.intEntityId = SS.intEntityId
+LEFT JOIN tblSMCompanyLocation L 
+	ON L.intCompanyLocationId= SS.intCompanyLocationId  
+JOIN tblICItem Item 
+	ON Item.intItemId = SS.intItemId
+JOIN tblICItemUOM ItemUOM 
+	ON ISNULL(SS.intItemUOMId, SS.intCommodityStockUomId) = ItemUOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure UOM 
+	ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
