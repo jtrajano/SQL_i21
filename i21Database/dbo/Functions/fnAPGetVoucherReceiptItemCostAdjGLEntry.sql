@@ -83,7 +83,8 @@ RETURNS TABLE AS RETURN
 			)
 	) usingOldCost
 	WHERE A.intBillId = @billId
-	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL --WILL CONSIDER COST ADJUSTMENT FOR RECEIPT ALL TRANSACTION 
+	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost 
+	--WILL CONSIDER COST ADJUSTMENT FOR RECEIPT ALL TRANSACTION 
 	--AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 
 	--		WHEN B.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes
 )
