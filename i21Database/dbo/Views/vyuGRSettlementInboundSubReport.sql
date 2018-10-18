@@ -31,7 +31,7 @@ FROM (
 			,dblDiscountAmount = BillDtl.dblTotal
 			,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
 			,dblGradeReading =  ISNULL(ScaleDiscount.dblGradeReading, 0)			
-			,dblAmount = BillDtl.dblTotal 
+			,dblAmount = BillDtl.dblTotal + BillDtl.dblTax
 			,dblTax = BillDtl.dblTax
 			,Net = PYMTDTL.dblTotal
 		
@@ -59,7 +59,7 @@ FROM (
 				 WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL AND Item.strType = 'Other Charge'
         UNION ALL
 		
-		SELECT
+		SELECT DISTINCT
 			 intPaymentId = PYMT.intPaymentId
 			,strId = Bill.strBillId
 			,intBillId = BillDtl.intBillId
@@ -69,7 +69,7 @@ FROM (
 			,dblDiscountAmount = BillDtl.dblCost
 			,dblShrinkPercent = ISNULL(StorageDiscount.dblShrinkPercent, 0)
 			,dblGradeReading =  ISNULL(StorageDiscount.dblGradeReading, 0)			
-			,dblAmount = BillDtl.dblTotal 
+			,dblAmount = BillDtl.dblTotal + BillDtl.dblTax
 			,dblTax = BillDtl.dblTax
 			,Net = PYMTDTL.dblTotal
 		FROM tblAPPayment PYMT
@@ -77,7 +77,7 @@ FROM (
 		JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 		JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = Bill.intBillId
 		JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
-		--JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+		JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 		LEFT JOIN (
 					 SELECT 
 					 QM.intTicketFileId
