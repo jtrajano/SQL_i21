@@ -988,9 +988,10 @@ BEGIN TRY
 		   ,@UserId  = @UserId
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
-	        @Post    = @Post
-           ,@BatchId = @BatchIdUsed
-		   ,@UserId  = @UserId
+	        @Post             = @Post
+           ,@BatchId          = @BatchIdUsed
+		   ,@UserId           = @UserId
+		   ,@IntegrationLogId = @IntegrationLogId
 
 	UPDATE ILD
 	SET
