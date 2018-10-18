@@ -32,7 +32,7 @@
 			,a.intItemUOMId
 			,strAgent = b.strName
 			,strInvoiceNumber = c.strInvoiceNumber
-			,strVoucherNumber = l.strVendorOrderNumber
+			,strVoucherNumber = l.strBillId
 			,strCreatedUserName = d.strName
 			,strJobCode = e.strJobCode
 			,strCurrency = f.strCurrency
@@ -46,6 +46,7 @@
 			,dblExtendedRate = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) then 0.00 else a.intHours * a.dblRate end)
 			,k.strProjectName
 			,k.intProjectId
+			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId

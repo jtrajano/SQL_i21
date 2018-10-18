@@ -9,7 +9,8 @@
 		ysnDisabled = us.ysnDisabled,
 		strPhone = en.strPhone,
 		strMobile = en.strMobile,
-		us.strJIRAUserName
+		us.strJIRAUserName,
+		ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType where intEntityId = us.intEntityId and strType = 'Vendor')
 	from
 		tblSMUserSecurity us
 		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityId] and en.ysnDefaultContact = 1
@@ -29,7 +30,8 @@
 		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end),
 		strPhone = en.strPhone,
 		strMobile = en.strMobile,
-		strJIRAUserName = (select strJIRAUserName from tblSMUserSecurity where intEntityId = us.intEntityId)
+		strJIRAUserName = (select strJIRAUserName from tblSMUserSecurity where intEntityId = us.intEntityId),
+		ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType where intEntityId = us.intEntityId and strType = 'Vendor')
 	from
 		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
 	where

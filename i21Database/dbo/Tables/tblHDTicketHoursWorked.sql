@@ -12,7 +12,6 @@
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intInvoiceId] [int] NULL,
-	[dtmInvoiceDate] [datetime] NULL,
 	[intBillId] [int] NULL,
 	[ysnBillable] [bit] NOT NULL,
 	[ysnReimburseable] [bit] NOT NULL default convert(bit,0),

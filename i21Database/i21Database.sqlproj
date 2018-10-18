@@ -7155,6 +7155,7 @@
     <Build Include="dbo\Functions\fnGetItemAverageCostTable.sql" />
     <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
