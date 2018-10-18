@@ -490,7 +490,10 @@ BEGIN
 							AND CPT.dblAmount > 0
 							
 
-						-- Insert all pump totals with category that do not exists in Department Totals using negative amount
+						-- Insert Department Total Item with Pump Total negative amount 
+						-- If DT.intCategoryId = PT.intCategoryId AND DT.dblTotalSalesAmount = 0 AND CPT.dblAmount > 0
+						--   Use Department Totals Item
+						--   Use Pump Total Amount as negative
 						INSERT INTO @EntriesForInvoice(
 										 [strSourceTransaction]
 										,[strTransactionType]
@@ -676,13 +679,18 @@ BEGIN
 										,[dblSubCurrencyRate]		= 1.000000
 										--,0
 										--,1
-							FROM tblSTCheckoutPumpTotals CPT
-							JOIN tblICItemUOM UOM 
-								ON CPT.intPumpCardCouponId = UOM.intItemUOMId
-							JOIN tblSTCheckoutHeader CH 
-								ON CPT.intCheckoutId = CH.intCheckoutId
+							FROM tblSTCheckoutDepartmetTotals DT
+							JOIN tblSTCheckoutPumpTotals CPT
+								ON DT.intCategoryId = CPT.intCategoryId
+								AND DT.dblTotalSalesAmount = 0
+								AND CPT.dblAmount > 0
 							JOIN tblICItem I 
-								ON UOM.intItemId = I.intItemId
+								ON DT.intItemId = I.intItemId
+							JOIN tblICItemUOM UOM 
+								ON I.intItemId = UOM.intItemId
+							JOIN tblSTCheckoutHeader CH 
+								ON DT.intCheckoutId = CH.intCheckoutId
+								AND CPT.intCheckoutId = CH.intCheckoutId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 							JOIN tblICItemPricing IP 
@@ -690,18 +698,12 @@ BEGIN
 								AND IL.intItemLocationId = IP.intItemLocationId
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
-								AND CH.intStoreId = ST.intStoreId	
+								AND CH.intStoreId = ST.intStoreId
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
-							WHERE CPT.intCheckoutId = @intCheckoutId
-							AND CPT.dblAmount > 0
-							AND CPT.intCategoryId NOT IN 
-							(
-								SELECT intCategoryId
-								FROM tblSTCheckoutDepartmetTotals
-								WHERE intCheckoutId = @intCheckoutId
-								AND dblTotalSalesAmount <> 0
-							)
+							WHERE CH.intCheckoutId = @intCheckoutId
+							AND UOM.ysnStockUnit = CAST(1 AS BIT)
+
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
