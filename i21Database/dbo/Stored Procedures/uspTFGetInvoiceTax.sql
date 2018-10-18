@@ -455,9 +455,11 @@ BEGIN TRY
 					FROM @tmpInvoiceTransaction Trans
 					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intInvoiceDetailId
 					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 					WHERE Trans.strTransactionType = 'Invoice'
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType <> 'CF Tran'
+					OR (Invoice.strType = 'CF Tran' AND tblCFTransaction.strTransactionType = 'Extended Remote')
 				)
 			END
 			ELSE IF (@ScheduleCode = '6CRD')
@@ -470,11 +472,11 @@ BEGIN TRY
 					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 					LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 					LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
-
 					WHERE Trans.strTransactionType = 'Invoice'
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType <> 'CF Tran' 
 					OR (Invoice.strType = 'CF Tran' AND tblCFSite.ysnCaptiveSite = 1)
+					OR (Invoice.strType = 'CF Tran' AND tblCFTransaction.strTransactionType = 'Extended Remote')
 				)
 			END
 			ELSE IF (@ScheduleCode IN ('5BLK', '6BLK', '5LO', '6', '7', '7E', '8', '10', '10AC', '10AD', '10D'))
