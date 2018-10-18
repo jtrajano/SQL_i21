@@ -1132,7 +1132,6 @@ BEGIN TRY
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId
-				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
