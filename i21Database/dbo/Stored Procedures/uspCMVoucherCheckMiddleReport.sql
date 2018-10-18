@@ -117,7 +117,7 @@ SELECT
 		,CHK.dblAmount
 		,strPayee = CASE
 					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
-						ISNULL(CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName
+						ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT ' and ' + strName
                              FROM tblAPVendorLien LIEN
 							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
 							 WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
