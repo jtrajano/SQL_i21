@@ -4,6 +4,7 @@
 	[intEntityId] [int] not null,
 	[strName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strFirstName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strDepartment] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intClosedCalls] [int] not null default 0,
 	[intOpenCalls] [int] not null default 0,
 	[intTotalCalls] [int] not null default 0,
