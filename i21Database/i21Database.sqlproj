@@ -7138,6 +7138,7 @@
     <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummaryByUOM.sql" />
+    <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
