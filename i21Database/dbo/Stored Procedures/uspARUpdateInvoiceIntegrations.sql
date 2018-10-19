@@ -54,9 +54,8 @@ ELSE
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
-EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 0
+EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
 EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
-EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 1
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
