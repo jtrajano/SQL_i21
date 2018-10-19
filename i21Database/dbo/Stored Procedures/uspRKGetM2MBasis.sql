@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKGetM2MBasis
-	@strCopyData NVARCHAR(50) = NULL
+	@intCopyBasisId INT = NULL
 
 AS
 
@@ -14,15 +14,6 @@ DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
 BEGIN TRY
-	
-	IF (ISNULL(@strCopyData, '') <> '')
-	BEGIN
-		DECLARE @dtmCopyData DATETIME
-			, @intM2MBasisId INT
-		
-		SET @dtmCopyData = CONVERT(DATETIME, @strCopyData)
-		SELECT @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis WHERE CAST(FLOOR(CAST(dtmM2MBasisDate AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(@dtmCopyData AS FLOAT)) AS DATETIME)
-	END
 	
 	DECLARE @ysnIncludeInventoryM2M BIT
 		, @ysnIncludeBasisDifferentialsInResults BIT
@@ -140,7 +131,7 @@ BEGIN TRY
 			FROM vyuRKGetM2MBasis
 		END
 		
-		IF ISNULL(@strCopyData, '') <> '' AND @intM2MBasisId IS NOT NULL
+		IF (ISNULL(@intCopyBasisId, 0) <> 0)
 		BEGIN
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
@@ -155,7 +146,7 @@ BEGIN TRY
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
-			WHERE b.intM2MBasisId = @intM2MBasisId
+			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
 	END
 	ELSE IF(@strEvaluationBy = 'Item')
@@ -229,7 +220,7 @@ BEGIN TRY
 			FROM vyuRKGetM2MBasis
 		END
 		
-		IF (ISNULL(@strCopyData, '') <> '' AND @intM2MBasisId IS NOT NULL)
+		IF (ISNULL(@intCopyBasisId, 0) <> 0)
 		BEGIN
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
@@ -244,7 +235,7 @@ BEGIN TRY
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
-			WHERE b.intM2MBasisId = @intM2MBasisId
+			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
 	END
 	
