@@ -62,9 +62,9 @@ BEGIN TRY
 
 	-- Set insMasterId to 0 for records that are not exist in default data
 	DELETE tblTFFilingPacket
-	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpFP)
-	AND intTaxAuthorityId = @TaxAuthorityId
+	WHERE intTaxAuthorityId = @TaxAuthorityId
 	AND intReportingComponentId IN (SELECT intReportingComponentId FROM tblTFReportingComponent WHERE intTaxAuthorityId = @TaxAuthorityId)
+	AND (intMasterId NOT IN (SELECT intMasterId FROM #tmpFP) OR intMasterId IS NULL)
 
 	DROP TABLE #tmpFP
 
