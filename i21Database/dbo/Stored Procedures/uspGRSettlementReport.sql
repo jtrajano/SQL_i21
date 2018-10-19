@@ -349,7 +349,8 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END
 				,TotalDiscount				= ISNULL(BillByReceipt.dblTotal, 0) 
-				,NetDue						= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
+				--,NetDue						= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
+				,NetDue						= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId						= Bill.strBillId
 				,intPaymentId				= PYMT.intPaymentId
 				,InboundNetWeight			= CASE 
@@ -552,7 +553,7 @@ BEGIN
 											  END 
 				,TotalDiscount			     = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
 				--,NetDue					     = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
-				,NetDue								= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
+				,NetDue						 = (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
 				,strId					     = Bill.strBillId
 				,intPaymentId			     = PYMT.intPaymentId
 				,InboundNetWeight		     = BillDtl.dblQtyOrdered
