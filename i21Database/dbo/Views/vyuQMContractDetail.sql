@@ -20,7 +20,7 @@ SELECT CD.intContractDetailId
 	,IU.intUnitMeasureId
 	,IM.strItemNo
 	,IM.strDescription AS strItemDescription
-	,IM.intOriginId
+	,CA.intCountryID AS intOriginId
 	,CA.strDescription AS strItemOrigin
 	,IC.strContractItemName
 	,IC.intCountryId AS intItemContractOriginId
