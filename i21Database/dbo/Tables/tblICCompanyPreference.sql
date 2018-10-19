@@ -18,6 +18,7 @@
 	[strBOLReportFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'BOL Report Format - 1', 
 	[strTransferReportFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Transfer Report Format - 1', 
 	[strCountSheetReportFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Count Sheet Report Format -1', 
+	[strCalculateTaxOnItems] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Compute Tax on Zero Cost or Price', 
     [dtmDateCreated] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,
