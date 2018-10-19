@@ -235,7 +235,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContra
 	 
 INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId
 					,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot)
-       SELECT strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, strFutureMonth,dtmFutureMonthsDate,HedgedQty,intUnitMeasureId
+       SELECT strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, RIGHT(CONVERT(VARCHAR(11),strFutureMonth,106),8) strFutureMonth,RIGHT(CONVERT(VARCHAR(11),dtmFutureMonthsDate,106),8) dtmFutureMonthsDate ,HedgedQty,intUnitMeasureId
        ,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot
        FROM (
          SELECT distinct t.strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,th.intCommodityId,dtmFutureMonthsDate,
@@ -379,7 +379,7 @@ declare @strContractEndMonth nvarchar(max)
 
 IF isnull(@intVendorId,0) = 0
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType ,strEntityName 
+SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType ,strEntityName 
 FROM @List where dblTotal is null or dblTotal <> 0
 ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END, intSeqNo, strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
@@ -388,7 +388,7 @@ ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(
 END
 ELSE
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  ,strEntityName
+SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  ,strEntityName
 FROM @List where dblTotal is null or dblTotal <> 0 and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
 ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END ,intSeqNo, strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
