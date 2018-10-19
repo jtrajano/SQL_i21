@@ -1094,7 +1094,7 @@ BEGIN TRY
     FROM
         [dbo].[fnGetGLEntriesErrors](@GLEntries)
 
-	IF @raiseError = 1
+	IF @raiseError = 1 AND EXISTS (SELECT TOP 1 NULL FROM @InvalidGLEntries)
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
 		RAISERROR(@ErrorMerssage, 11, 1)							
