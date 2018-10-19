@@ -138,9 +138,9 @@ BEGIN TRY
 					, tblARInvoice.strPONumber
 					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblTMSite.strState ELSE tblARInvoice.strShipToState END AS strDestinationState
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strState ELSE tblARInvoice.strShipToState END AS strDestinationState
 					, CASE WHEN SupplyPointLoc.strCity IS NOT NULL THEN SupplyPointLoc.strCity WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strSiteCity ELSE tblSMCompanyLocation.strCity END AS strOriginCity
 					, NULL AS strOriginCounty
 					, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strTaxState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
@@ -229,12 +229,14 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoiceDetail.intSiteId IS NULL AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 						)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoiceDetail.intSiteId IS NULL AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 						)
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARCustomer.intEntityId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
@@ -332,9 +334,9 @@ BEGIN TRY
 					, tblARInvoice.strPONumber
 					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
-					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince WHEN tblARInvoice.strType = 'Tank Delivery' THEN tblTMSite.strState ELSE tblARInvoice.strShipToState END AS strDestinationState
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
+					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strState ELSE tblARInvoice.strShipToState END AS strDestinationState
 					, CASE WHEN SupplyPointLoc.strCity IS NOT NULL THEN SupplyPointLoc.strCity WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strSiteCity ELSE tblSMCompanyLocation.strCity END AS strOriginCity
 					, NULL AS strOriginCounty
 					, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strTaxState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
@@ -422,12 +424,14 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoiceDetail.intSiteId IS NULL AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 						)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoiceDetail.intSiteId IS NULL AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 						)
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARCustomer.intEntityId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
