@@ -13,6 +13,7 @@ SELECT
 	strContractNumber,
 	strLocationName,
 	dtmEndDate,
+	strFutureMonth,
 	dblBalance,
 	intUnitMeasureId,
 	intPricingTypeId,
