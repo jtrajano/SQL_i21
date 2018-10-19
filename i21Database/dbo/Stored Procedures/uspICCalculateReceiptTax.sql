@@ -20,8 +20,6 @@ DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
-		,@strCalculateTaxOnItems AS NVARCHAR(100)
-
 DECLARE	@ItemId				INT
 		,@LocationId		INT
 		,@TransactionDate	DATETIME
@@ -58,9 +56,6 @@ DECLARE @Taxes AS TABLE (
 	,[strNotes]				NVARCHAR(500)
 )
 
--- Get the company preference for computing the item tax. 
-SELECT TOP 1 @strCalculateTaxOnItems = ISNULL(strCalculateTaxOnItems, 'Compute Tax on Zero Cost or Price') FROM tblICCompanyPreference
-
 -- Clear the tax details 
 DELETE	tblICInventoryReceiptItemTax 
 FROM	tblICInventoryReceiptItemTax tax INNER JOIN tblICInventoryReceiptItem ri
@@ -82,17 +77,11 @@ SELECT  ReceiptItem.intItemId
 		,TaxUOM.intUnitMeasureId
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		LEFT OUTER JOIN tblICItemUOM TaxUOM 
-			ON TaxUOM.intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+			LEFT OUTER JOIN tblICItemUOM TaxUOM ON TaxUOM.intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
 		AND ISNULL(ReceiptItem.intCostingMethod, 0) <> 6 -- Do not compute tax if stock is Category-Managed. 
 		AND Receipt.strReceiptType <> 'Transfer Order' -- Do not compute tax for Transfer Orders. 
-		
-		AND (
-			(@strCalculateTaxOnItems = 'Do not compute tax if Cost or Price is zero' AND ISNULL(ReceiptItem.dblUnitCost, 0) <> 0) -- Do not compute tax if the cost is zero. 
-			OR @strCalculateTaxOnItems = 'Compute Tax on Zero Cost or Price'
-		)
 
 OPEN loopReceiptItems;
 
@@ -326,4 +315,3 @@ _EXIT:
 
 CLOSE loopReceiptItems;
 DEALLOCATE loopReceiptItems;
-GO
