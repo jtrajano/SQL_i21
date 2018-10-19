@@ -72,7 +72,7 @@ OUTER APPLY (
 	  AND dblTotal < 0
 ) CASHRETURN
 OUTER APPLY (
-	SELECT dblTotalCashReceipt = SUM(dblTotal)
+	SELECT dblTotalCashReceipt = SUM(dblAmount)
 	FROM dbo.tblARPOS P WITH (NOLOCK)
 	INNER JOIN tblARPOSPayment POSP ON P.intPOSId = POSP.intPOSId
 	WHERE POSP.strPaymentMethod IN ('Cash','Check')
