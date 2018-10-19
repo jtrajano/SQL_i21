@@ -185,9 +185,9 @@ BEGIN TRY
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 					INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
-					LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
-					LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
-					LEFT JOIN tblTMSite ON tblTMSite.intSiteID = tblTMDeliveryHistory.intSiteID
+					--LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
+					--LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
+					LEFT JOIN tblTMSite ON tblTMSite.intSiteID = tblARInvoiceDetail.intSiteId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
 					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
@@ -229,12 +229,12 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 						)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 						)
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARCustomer.intEntityId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
@@ -379,9 +379,9 @@ BEGIN TRY
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 					INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
-					LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
-					LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
-					LEFT JOIN tblTMSite ON tblTMSite.intSiteID = tblTMDeliveryHistory.intSiteID
+					--LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
+					--LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
+					LEFT JOIN tblTMSite ON tblTMSite.intSiteID = tblARInvoiceDetail.intSiteId
 				INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
 					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 						LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
@@ -422,12 +422,12 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 						)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 							OR (tblARInvoice.strType != 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-							OR (tblARInvoice.strType = 'Tank Delivery' AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR (tblARInvoice.strType = 'Tank Delivery' AND ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblTMSite.strState IS NOT NULL AND tblTMSite.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 						)
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARCustomer.intEntityId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
