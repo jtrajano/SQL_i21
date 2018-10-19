@@ -110,7 +110,7 @@ BEGIN TRY
 			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 				--LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
 				--LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
-				LEFT JOIN tblTMSite ON tblTMSite.intSiteID = tblARInvoiceDetail.intSiteId
+				LEFT JOIN tblTMSite ON tblTMSite.intSiteID = InvoiceDetail.intSiteId
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
 			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
