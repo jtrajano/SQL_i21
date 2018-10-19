@@ -469,7 +469,7 @@ BEGIN
 							,dblDegreeDayBetweenDelivery = A.dblSiteDegreeDayBetweenDelivery
 							,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
 							,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
-							,intConcurrencyId = intConcurrencyId + 1
+							,intConcurrencyId = A.intConcurrencyId + 1
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
@@ -531,7 +531,7 @@ BEGIN
 																		THEN 0 ELSE (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) END)
 																)),0)
 							,dtmLastReadingUpdate = A.dtmInvoiceDate
-							,intConcurrencyId = intConcurrencyId + 1
+							,intConcurrencyId = A.intConcurrencyId + 1
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = (SELECT TOP 1 intDeliveryHistoryID
@@ -588,7 +588,7 @@ BEGIN
 						,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
 						,dtmForecastedDelivery = NULL
 						,dtmRunOutDate = NULL
-						,intConcurrencyId = intConcurrencyId + 1
+						,intConcurrencyId = A.intConcurrencyId + 1
 					FROM(
 						SELECT TOP 1 * FROM tblTMDeliveryHistory
 						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
