@@ -152,6 +152,8 @@ SET
 	,[dblProvisionalAmount]					= ISNULL([dblProvisionalAmount], @ZeroDecimal)
 	,[dblBaseProvisionalAmount]				= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
 	,[dblSplitPercent] 						= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
+	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 

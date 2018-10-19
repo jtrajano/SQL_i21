@@ -148,7 +148,6 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
 	,[ysnImportedFromOrigin]                BIT             NULL
-    ,[ysnFromProvisional]                   BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -158,6 +157,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
     ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
@@ -302,7 +302,6 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
 	,[ysnImportedFromOrigin]                BIT             NULL
-    ,[ysnFromProvisional]                   BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -312,6 +311,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
     ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
