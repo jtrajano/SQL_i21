@@ -158,6 +158,7 @@ BEGIN
 		,[dblCost]
 		,[strTransactionId]
 		,[intTransactionId]
+		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
@@ -175,6 +176,7 @@ BEGIN
 		,@dblCost
 		,@strTransactionId
 		,@intTransactionId
+		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1	
