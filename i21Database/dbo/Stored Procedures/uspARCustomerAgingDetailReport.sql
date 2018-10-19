@@ -163,7 +163,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 		SELECT intEntityCustomerId 
 		INTO #CUSTOMERWITHBALANCES
 		FROM tblARCustomerAgingStagingTable
-		WHERE intEntityUserId = 1
+		WHERE intEntityUserId = @intEntityUserId
 		AND strAgingType = 'Detail'
 		AND (
 			   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
