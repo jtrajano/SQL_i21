@@ -1289,8 +1289,16 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 													ELSE NULL
 												END
-					--,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
-					,[intInventoryReceiptItemId] = CASE WHEN (SELECT ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = CS.intStorageTypeId) > 0 THEN E2.intInventoryReceiptItemId ELSE NULL END
+					,[intInventoryReceiptItemId] = CASE 
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+															(SELECT intInventoryReceiptItemId 
+															FROM tblICInventoryReceiptItem 
+															WHERE intInventoryReceiptId =	(SELECT intInventoryReceiptId 
+																							FROM tblGRStorageHistory 
+																							WHERE intCustomerStorageId = CS.intCustomerStorageId
+																								AND intInventoryReceiptId IS NOT NULL))
+													END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -1304,18 +1312,8 @@ BEGIN TRY
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId and DSC.intItemId = a.intItemId
-				LEFT  JOIN (
-					tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-						ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-					LEFT JOIN tblICItemLocation sourceLocation
-						ON sourceLocation.intItemId = E2.intItemId
-						AND sourceLocation.intLocationId = E1.intLocationId
-					LEFT JOIN tblSMFreightTerms ft
-						ON ft.intFreightTermId = E1.intFreightTermId
-					LEFT JOIN tblICFobPoint fp
-						ON fp.strFobPoint = ft.strFreightTerm
-				)
-					ON CS.intTicketId= E2.intSourceId
+				JOIN tblGRStorageType ST
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
