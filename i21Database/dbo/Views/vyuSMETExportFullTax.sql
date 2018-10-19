@@ -65,7 +65,48 @@ SELECT ItemNumber
 , Locale6EFT
 , ISNULL(MAX(Locale6SSTOnLC6), 'N') AS Locale6SSTOnLC6
 , Locale6LC6OnFET
-
+, ISNULL(MAX(Locale7Description), 'Locale 7 Tax') AS Locale7Description
+, CASE WHEN ISNULL(MAX(Locale7Method), 'U') = 'U' THEN ISNULL(MAX(Locale7Rate), 0.000000) ELSE ISNULL(MAX(Locale7Rate), 0.000000) / 100 END AS Locale7Rate
+, Locale7GLAccount
+, ISNULL(MAX(Locale7Method), 'U') AS Locale7Method
+, Locale7EFT
+, ISNULL(MAX(Locale7SSTOnLC7), 'N') AS Locale7SSTOnLC7
+, Locale7LC7OnFET
+, ISNULL(MAX(Locale8Description), 'Locale 8 Tax') AS Locale8Description
+, CASE WHEN ISNULL(MAX(Locale8Method), 'U') = 'U' THEN ISNULL(MAX(Locale8Rate), 0.000000) ELSE ISNULL(MAX(Locale8Rate), 0.000000) / 100 END AS Locale8Rate
+, Locale8GLAccount
+, ISNULL(MAX(Locale8Method), 'U') AS Locale8Method
+, Locale8EFT
+, ISNULL(MAX(Locale8SSTOnLC8), 'N') AS Locale8SSTOnLC8
+, Locale8LC8OnFET
+, ISNULL(MAX(Locale9Description), 'Locale 9 Tax') AS Locale9Description
+, CASE WHEN ISNULL(MAX(Locale9Method), 'U') = 'U' THEN ISNULL(MAX(Locale9Rate), 0.000000) ELSE ISNULL(MAX(Locale9Rate), 0.000000) / 100 END AS Locale9Rate
+, Locale9GLAccount
+, ISNULL(MAX(Locale9Method), 'U') AS Locale9Method
+, Locale9EFT
+, ISNULL(MAX(Locale9SSTOnLC9), 'N') AS Locale9SSTOnLC9
+, Locale9LC9OnFET
+, ISNULL(MAX(Locale10Description), 'Locale 10 Tax') AS Locale10Description
+, CASE WHEN ISNULL(MAX(Locale10Method), 'U') = 'U' THEN ISNULL(MAX(Locale10Rate), 0.000000) ELSE ISNULL(MAX(Locale10Rate), 0.000000) / 100 END AS Locale10Rate
+, Locale10GLAccount
+, ISNULL(MAX(Locale10Method), 'U') AS Locale10Method
+, Locale10EFT
+, ISNULL(MAX(Locale10SSTOnLC10), 'N') AS Locale10SSTOnLC10
+, Locale10LC10OnFET
+, ISNULL(MAX(Locale11Description), 'Locale 11 Tax') AS Locale11Description
+, CASE WHEN ISNULL(MAX(Locale11Method), 'U') = 'U' THEN ISNULL(MAX(Locale11Rate), 0.000000) ELSE ISNULL(MAX(Locale11Rate), 0.000000) / 110 END AS Locale11Rate
+, Locale11GLAccount
+, ISNULL(MAX(Locale11Method), 'U') AS Locale11Method
+, Locale11EFT
+, ISNULL(MAX(Locale11SSTOnLC11), 'N') AS Locale11SSTOnLC11
+, Locale11LC11OnFET
+, ISNULL(MAX(Locale12Description), 'Locale 12 Tax') AS Locale12Description
+, CASE WHEN ISNULL(MAX(Locale12Method), 'U') = 'U' THEN ISNULL(MAX(Locale12Rate), 0.000000) ELSE ISNULL(MAX(Locale12Rate), 0.000000) / 120 END AS Locale12Rate
+, Locale12GLAccount
+, ISNULL(MAX(Locale12Method), 'U') AS Locale12Method
+, Locale12EFT
+, ISNULL(MAX(Locale12SSTOnLC12), 'N') AS Locale12SSTOnLC12
+, Locale12LC12OnFET
 ,MAX(FETTaxCodeId) FETTaxCodeId
 ,MAX(SETTaxCodeId) SETTaxCodeId
 ,MAX(SSTTaxCodeId) SSTTaxCodeId
@@ -76,6 +117,12 @@ SELECT ItemNumber
 ,MAX(Locale4TaxCodeId) Locale4TaxCodeId
 ,MAX(Locale5TaxCodeId) Locale5TaxCodeId
 ,MAX(Locale6TaxCodeId) Locale6TaxCodeId
+,MAX(Locale7TaxCodeId) Locale7TaxCodeId
+,MAX(Locale8TaxCodeId) Locale8TaxCodeId
+,MAX(Locale9TaxCodeId) Locale9TaxCodeId
+,MAX(Locale10TaxCodeId) Locale10TaxCodeId
+,MAX(Locale11TaxCodeId) Locale11TaxCodeId
+,MAX(Locale12TaxCodeId) Locale12TaxCodeId
 FROM
 (
 	SELECT 
@@ -259,6 +306,138 @@ FROM
 		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
 	)
 	, Locale6LC6OnFET		= 'N'
+	, Locale7TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7')
+	, Locale7Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7')
+    , Locale7Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale7GLAccount		= '00000000'	
+	, Locale7Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale7EFT			= 'N'	
+	, Locale7SSTOnLC7		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC7'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale7LC7OnFET		= 'N'
+	, Locale8TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8')
+	, Locale8Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8')
+    , Locale8Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale8GLAccount		= '00000000'	
+	, Locale8Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale8EFT			= 'N'	
+	, Locale8SSTOnLC8		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC8'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale8LC8OnFET		= 'N'
+	, Locale9TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9')
+	, Locale9Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9')
+    , Locale9Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale9GLAccount		= '00000000'	
+	, Locale9Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale9EFT			= 'N'	
+	, Locale9SSTOnLC9		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC9'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale9LC9OnFET		= 'N'
+	, Locale10TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10')
+	, Locale10Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10')
+    , Locale10Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale10GLAccount		= '00000000'	
+	, Locale10Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale10EFT			= 'N'	
+	, Locale10SSTOnLC10		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC10'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale10LC10OnFET		= 'N'
+	, Locale11TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11')
+	, Locale11Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11')
+    , Locale11Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale11GLAccount		= '00000000'	
+	, Locale11Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale11EFT			= 'N'	
+	, Locale11SSTOnLC11		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC11'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale11LC11OnFET		= 'N'
+	, Locale12TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12')
+	, Locale12Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12')
+    , Locale12Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12' 
+	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
+	, Locale12GLAccount		= '00000000'	
+	, Locale12Method			= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END 
+	                           FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12' 
+							   AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
+							   ORDER BY dtmEffectiveDate DESC)
+	, Locale12EFT			= 'N'	
+	, Locale12SSTOnLC12		= 
+	(
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC12'
+		INNER JOIN tblSMTaxGroupCode aG ON b.intID = aG.intTaxCodeId
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		AND aG.intTaxGroupId = TaxGroup.intTaxGroupId
+	)
+	, Locale12LC12OnFET		= 'N'
 	FROM tblICItem Item 
 	INNER JOIN tblICCategory Category ON Item.intCategoryId = Category.intCategoryId AND Item.strStatus = 'Active'
 	INNER JOIN tblICCategoryTax CategoryTax ON Category.intCategoryId = CategoryTax.intCategoryId
@@ -273,4 +452,6 @@ FROM
 
 GROUP BY ItemNumber, [state], Authority1, Authority1Description, Authority2, Authority2Description, [Description], FETGLAccount, EFTonFET, SETGLAccount, 
 EFTonSET, SSTGLAccount, EFTOnSST, PSTGLAccount, Locale1GLAccount, Locale1EFT, Locale1LC1OnFET, Locale2GLAccount, Locale2EFT, Locale2LC2OnFET, Locale3GLAccount, 
-Locale3EFT, Locale3LC3OnFET, Locale4GLAccount, Locale4EFT, Locale4LC4OnFET, Locale5GLAccount, Locale5EFT, Locale5LC5OnFET, Locale6GLAccount, Locale6EFT, Locale6LC6OnFET
+Locale3EFT, Locale3LC3OnFET, Locale4GLAccount, Locale4EFT, Locale4LC4OnFET, Locale5GLAccount, Locale5EFT, Locale5LC5OnFET, Locale6GLAccount, Locale6EFT, Locale6LC6OnFET,
+Locale7GLAccount, Locale7EFT, Locale7LC7OnFET, Locale8GLAccount, Locale8EFT, Locale8LC8OnFET, Locale9GLAccount, Locale9EFT, Locale9LC9OnFET, Locale10GLAccount, Locale10EFT, Locale10LC10OnFET,
+Locale11GLAccount, Locale11EFT, Locale11LC11OnFET, Locale12GLAccount, Locale12EFT, Locale12LC12OnFET
