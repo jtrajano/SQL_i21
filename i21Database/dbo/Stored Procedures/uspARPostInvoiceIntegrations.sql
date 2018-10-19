@@ -408,9 +408,9 @@ BEGIN
 	--	,@type				= 2
 	--	,@successfulCount	= @successfulCount OUTPUT
 	--Patronage
-	DECLARE @IdsP TABLE([intInvoiceId] INT, [intLoadId] INT)
-	INSERT INTO @IdsP([intInvoiceId], [intLoadId])
-	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader
+	DECLARE @IdsP TABLE([intInvoiceId] INT, [intLoadId] INT, [ysnFromProvisional] BIT, [ysnProvisionalWithGL] BIT)
+	INSERT INTO @IdsP([intInvoiceId], [intLoadId], [ysnFromProvisional], [ysnProvisionalWithGL])
+	SELECT [intInvoiceId], [intLoadId], [ysnFromProvisional], [ysnProvisionalWithGL] FROM #ARPostInvoiceHeader
 	DECLARE	@successfulCountP INT
 		,@strId NVARCHAR(MAX)
 
@@ -431,7 +431,9 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDP INT
 		DECLARE @LoadIDP INT
-		SELECT TOP 1 @InvoiceIDP = [intInvoiceId], @LoadIDP = [intLoadId] FROM @IdsP ORDER BY [intInvoiceId]
+        DECLARE @FromProvisionalP BIT
+        DECLARE @ProvisionalWithGLP BIT
+		SELECT TOP 1 @InvoiceIDP = [intInvoiceId], @LoadIDP = [intLoadId], @FromProvisionalP = [ysnFromProvisional], @ProvisionalWithGLP = [ysnProvisionalWithGL] FROM @IdsP ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
 		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
@@ -467,7 +469,8 @@ BEGIN
 		--	,@UserId	= @intUserId
 
 		--Update LG - Load Shipment
-		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
+        IF @FromProvisionalP = 0 OR @ProvisionalWithGLP = 0
+		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] 
 			@InvoiceId	= @InvoiceIDP
 			,@Post		= 1
 			,@LoadId	= @LoadIDP
@@ -887,9 +890,9 @@ BEGIN
 	--	,@type				= 2
 	--	,@successfulCount	= @successfulCount OUTPUT
 	--Patronage
-	DECLARE @IdsU TABLE([intInvoiceId] INT, [intLoadId] INT)
-	INSERT INTO @IdsU([intInvoiceId], [intLoadId])
-	SELECT [intInvoiceId], [intLoadId] FROM #ARPostInvoiceHeader
+	DECLARE @IdsU TABLE([intInvoiceId] INT, [intLoadId] INT, [ysnFromProvisional] BIT, [ysnProvisionalWithGL] BIT)
+	INSERT INTO @IdsU([intInvoiceId], [intLoadId], [ysnFromProvisional], [ysnProvisionalWithGL])
+	SELECT [intInvoiceId], [intLoadId], [ysnFromProvisional], [ysnProvisionalWithGL] FROM #ARPostInvoiceHeader
 	DECLARE	@successfulCountU INT
 		,@strIdU NVARCHAR(MAX)
 
@@ -909,7 +912,9 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDU INT
 		DECLARE @LoadIDU INT
-		SELECT TOP 1 @InvoiceIDU = [intInvoiceId], @LoadIDU = [intLoadId] FROM @IdsU ORDER BY [intInvoiceId]
+		DECLARE @FromProvisionalU BIT
+		DECLARE @ProvisionalWithGLU BIT
+		SELECT TOP 1 @InvoiceIDU = [intInvoiceId], @LoadIDU = [intLoadId], @FromProvisionalU = [ysnFromProvisional], @ProvisionalWithGLU = [ysnProvisionalWithGL] FROM @IdsU ORDER BY [intInvoiceId]
 		
         -- Update CT - Sequence Balance
 		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 1, @UserId = @UserId
@@ -945,6 +950,7 @@ BEGIN
 		--	,@UserId	= @intUserId
 
 		--Update LG - Load Shipment
+        IF @FromProvisionalU = 0 OR @ProvisionalWithGLU = 0
 		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
 			@InvoiceId	= @InvoiceIDU
 			,@Post		= 0
