@@ -7139,6 +7139,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummaryByUOM.sql" />
     <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7336,7 +7337,6 @@
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
-    <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
