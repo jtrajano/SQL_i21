@@ -63,6 +63,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -202,7 +203,8 @@ SELECT
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
 	,[ysnImpactInventory]				= [ysnImpactInventory]
-    ,[ysnFromProvisional]               = [ysnFromProvisional]
+    ,[ysnFromProvisional]               = ISNULL([ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]						= ISNULL([ysnExported], CAST(0 AS BIT))
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -1156,6 +1158,7 @@ CREATE TABLE #CustomerInvoice
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
     ,[ysnFromProvisional]           BIT                                             NULL
+	,[ysnExported]					BIT                                             NULL
     ,[ysnProvisionalWithGL]         BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
@@ -1257,6 +1260,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
     ,[ysnProvisionalWithGL]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
@@ -1363,7 +1367,8 @@ SELECT
 												CAST(1 AS BIT) 
 											END
 										ELSE CAST(0 AS BIT) END
-    ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
+    ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
     ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
@@ -1538,6 +1543,7 @@ USING
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+		,[ysnExported]
 		,[dblSplitPercent]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
@@ -1640,6 +1646,7 @@ INSERT(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1730,6 +1737,7 @@ VALUES(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1891,6 +1899,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+		,[ysnExported]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -2030,6 +2039,7 @@ BEGIN TRY
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
         ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
+		,[ysnExported]							= ITG.[ysnExported]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
