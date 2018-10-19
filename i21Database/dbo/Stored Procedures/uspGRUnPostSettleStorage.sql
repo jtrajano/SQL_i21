@@ -91,7 +91,7 @@ BEGIN TRY
 				FROM tblGRSettleStorage
 				WHERE intParentSettleStorageId =@intParentSettleStorageId AND intSettleStorageId > @intSettleStorageId
 			END
-			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intParentSettleStorageId
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId=@intParentSettleStorageId
 		END
 		ELSE
 		BEGIN
@@ -415,8 +415,20 @@ BEGIN TRY
 				UPDATE tblGRStorageHistory SET intSettleStorageId=NULL,intBillId=NULL WHERE intSettleStorageId=@intSettleStorageId
 
 			END
-			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
-		
+
+			--get first the parent settle storage id before the deletion
+			IF @isParentSettleStorage = 0
+			BEGIN
+				SELECT @intParentSettleStorageId = intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
+			END
+
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
+			
+			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
+			BEGIN
+				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+			END
+
 			--5. Removing Voucher
 			BEGIN
 				EXEC uspAPDeleteVoucher 
