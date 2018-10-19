@@ -7140,6 +7140,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummaryByUOM.sql" />
     <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
     <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
