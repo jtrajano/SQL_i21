@@ -349,8 +349,7 @@ BEGIN
 											      ELSE CNTRCT.strContractNumber
 											  END
 				,TotalDiscount				= ISNULL(BillByReceipt.dblTotal, 0) 
-				--,NetDue						= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
-				,NetDue						= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)*tblOtherCharge.dblTax) + (ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty))
+				,NetDue						= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
 				,strId						= Bill.strBillId
 				,intPaymentId				= PYMT.intPaymentId
 				,InboundNetWeight			= CASE 
@@ -420,7 +419,7 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 			LEFT JOIN vyuSCGetScaleDistribution SD ON INVRCPTITEM.intInventoryReceiptItemId = SD.intInventoryReceiptItemId
 			LEFT JOIN (
-						SELECT intBillDetailId,SUM(dblAmount) dblTotal 
+						SELECT intBillDetailId,SUM(dblAmount) dblTotal,SUM(dblTax) dblTax 
 						FROM vyuGRSettlementSubReport 
 						GROUP BY intBillDetailId
 					  )BillByReceipt ON BillByReceipt.intBillDetailId=BillDtl.intBillDetailId
