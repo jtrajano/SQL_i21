@@ -20,9 +20,7 @@ BEGIN
 		FROM tblGRSettleStorage SS
 		INNER JOIN tblAPBill AP
 			ON AP.intBillId = SS.intBillId
-		INNER JOIN vyuAPBillPayment PD
-			ON PD.intBillId = SS.intBillId
-		WHERE intParentSettleStorageId = @intSettleStorageId
+		WHERE intParentSettleStorageId = @intSettleStorageId AND AP.dblPayment > 0
 	END
 	ELSE
 	BEGIN
@@ -30,9 +28,7 @@ BEGIN
 		FROM tblGRSettleStorage SS
 		INNER JOIN tblAPBill AP
 			ON AP.intBillId = SS.intBillId
-		INNER JOIN vyuAPBillPayment PD
-			ON PD.intBillId = SS.intBillId
-		WHERE SS.intSettleStorageId = @intSettleStorageId
+		WHERE SS.intSettleStorageId = @intSettleStorageId AND AP.dblPayment > 0
 	END
 
 	RETURN @ysnBillIsPaid
