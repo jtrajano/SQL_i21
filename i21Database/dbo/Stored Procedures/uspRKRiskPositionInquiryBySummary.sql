@@ -722,7 +722,7 @@ declare @strAccountNumber nvarchar(max)
 select top 1 @strAccountNumber=strAccountNumber  from @ListFinal where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
 
 DECLARE @MonthList as Table (  
-     strFuturemonth nvarchar(100) COLLATE Latin1_General_CI_AS)
+     strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS)
 
 insert into @MonthList(strFutureMonth)
 SELECT DISTINCT strFutureMonth FROM @ListFinal 
