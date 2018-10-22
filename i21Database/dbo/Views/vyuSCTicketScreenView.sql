@@ -222,6 +222,7 @@
 	,SO.intCompanyLocationId AS intSOCompanyLocation
 	,Basis.intBillId AS intBasisAdvancedId
 	,Basis.ysnRestricted AS ysnBasisAdvancedRestricted
+	,APPayment.dblPayment
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -294,3 +295,8 @@
 	LEFT JOIN (
 		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
+	OUTER APPLY(
+		SELECT TOP 1 AP.dblPayment, APD.intScaleTicketId FROM tblAPBillDetail APD
+		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId AND AP.dblPayment > 0
+		WHERE APD.intScaleTicketId = SCT.intTicketId
+	) APPayment 

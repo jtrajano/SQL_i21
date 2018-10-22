@@ -172,6 +172,7 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
+								EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
 								SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 								IF @ysnPosted = 1
 									BEGIN
