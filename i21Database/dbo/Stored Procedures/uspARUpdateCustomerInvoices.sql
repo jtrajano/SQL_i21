@@ -116,7 +116,7 @@ SELECT DISTINCT
 	,[ysnForgiven]						= [ysnForgiven]
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
-	,[ysnImpactInventory]				= [ysnImpactInventory]
+	,[ysnImpactInventory]				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnFromProvisional]               = [ysnFromProvisional]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
@@ -734,7 +734,7 @@ BEGIN TRY
 		  ,ARI.[ysnForgiven]					= ISNULL(ITG.[ysnForgiven], 0)
 		  ,ARI.[ysnCalculated]					= ISNULL(ITG.[ysnCalculated], 0)
 		  ,ARI.[ysnSplitted]					= ISNULL(ITG.[ysnSplitted], 0)
-		  ,ARI.[ysnImpactInventory]				= ISNULL(ITG.[ysnImpactInventory], 0)
+		  ,ARI.[ysnImpactInventory]				= ISNULL(ITG.[ysnImpactInventory], CAST(1 AS BIT))
           ,ARI.[ysnFromProvisional]             = ISNULL(ITG.[ysnFromProvisional], 0)
 		  --,ARI.[dblSplitPercent]				= ARI.[dblSplitPercent]
 		  --,ARI.[ysnImpactInventory]			= ARI.[ysnImpactInventory]
@@ -1136,7 +1136,7 @@ BEGIN TRY
 		,[ysnForgiven]							= ITG.[ysnForgiven]
 		,[ysnCalculated]						= ITG.[ysnCalculated]
 		,[ysnSplitted]							= ITG.[ysnSplitted]
-		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
+		,[ysnImpactInventory]					= ISNULL(ITG.[ysnImpactInventory], CAST(1 AS BIT))
         ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]

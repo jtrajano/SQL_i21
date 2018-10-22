@@ -17,6 +17,13 @@ FROM
 	tblARInvoice ARI1	
 WHERE
 	EXISTS(SELECT NULL FROM tblARInvoice ARI2 WHERE ARI1.[intOriginalInvoiceId] = ARI2.[intInvoiceId] AND ARI2.[strType] = 'Provisional')
+
+
+UPDATE tblARInvoice
+SET
+	[ysnImpactInventory] = CAST(1 AS BIT)
+WHERE
+	[ysnImpactInventory] IS NULL AND [ysnPosted] = CAST(0 AS BIT)
 			
 GO
 print('/*******************  END Update  Invoice From Provisional  *******************/')

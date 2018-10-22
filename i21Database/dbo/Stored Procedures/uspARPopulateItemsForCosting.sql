@@ -21,7 +21,11 @@ DECLARE	@AVERAGECOST 	AS INT	= 1
 	
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000		
+SET @ZeroDecimal = 0.000000	
+DECLARE @ZeroBit BIT
+SET @ZeroBit = CAST(0 AS BIT)	
+DECLARE @OneBit BIT
+SET @OneBit = CAST(1 AS BIT)
 
 --IF(OBJECT_ID('tempdb..#ARItemsForCosting') IS NULL)
 --BEGIN
@@ -97,11 +101,11 @@ SELECT
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
-								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
+								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = 1 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
 																	THEN (
 																		SELECT SUM(ICIT.[dblCost]) 
 																		FROM
@@ -112,7 +116,7 @@ SELECT
 																				AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
 																		WHERE
 																			MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.[intWorkOrderId])FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.[intInvoiceDetailId] = ARID.[intInvoiceDetailId])
-																			AND ICIT.[ysnIsUnposted] = 0
+																			AND ICIT.[ysnIsUnposted] = @ZeroBit
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
 																	ELSE
@@ -139,10 +143,10 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
+    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = 1
+	,[ysnForValidation]         = @OneBit
 FROM
     #ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -160,7 +164,7 @@ LEFT OUTER JOIN
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
-    AND 1 = CASE WHEN ARID.[strTransactionType] = 'Credit Memo' THEN ARID.[ysnImpactInventory] ELSE 1 END					 				
+    AND ARID.[ysnImpactInventory] = @OneBit
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
@@ -211,11 +215,11 @@ SELECT
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
-								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
+								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = 1 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
 																	THEN (
 																		SELECT SUM(ICIT.[dblCost]) 
 																		FROM
@@ -226,7 +230,7 @@ SELECT
 																				AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
 																		WHERE
 																			MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.[intWorkOrderId])FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.[intInvoiceDetailId] = ARID.[intInvoiceDetailId])
-																			AND ICIT.[ysnIsUnposted] = 0
+																			AND ICIT.[ysnIsUnposted] = @ZeroBit
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
 																	ELSE
@@ -256,7 +260,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = 0
+	,[ysnForValidation]         = @ZeroBit
 FROM
     #ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -274,12 +278,12 @@ LEFT OUTER JOIN
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
-    AND 1 = CASE WHEN ARID.[strTransactionType] = 'Credit Memo' THEN ARID.[ysnImpactInventory] ELSE 1 END					 				
+    AND ARID.[ysnImpactInventory] = @OneBit
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL
-	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
@@ -319,7 +323,7 @@ SELECT
 	,[intItemLocationId]		= IST.intItemLocationId
 	,[intItemUOMId]				= ARIC.[intItemUnitMeasureId] 
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
+	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
@@ -345,7 +349,7 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
+    ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblQtyShipped] * ARID.[dblPrice] ELSE NULL END
 	,[ysnForValidation]         = NULL
@@ -371,6 +375,7 @@ LEFT OUTER JOIN
 WHERE
 	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+    AND ARID.[ysnImpactInventory] = @OneBit
 	AND ISNULL(ARID.[intLoadDetailId],0) = 0
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0

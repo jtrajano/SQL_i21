@@ -18,7 +18,8 @@
 																	-- 12 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId]
 																	-- 13 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]
 																	-- 14 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]
-																	-- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+																    -- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+                                                                    -- 16 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]
 	,@RaiseError					BIT								= 0
 	,@BatchId						NVARCHAR(40)					= NULL
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
@@ -91,6 +92,7 @@ BEGIN TRY
 		,[intFreightTermId]				INT												NULL
 		,[intPaymentMethodId]			INT												NULL
 		,[strInvoiceOriginId]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
+        ,[ysnImpactInventory]           BIT                                             NULL
 		,[strInvoiceNumber]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[intInvoiceId]					INT												NULL
 		,[intInvoiceDetailId]			INT												NULL
@@ -122,6 +124,7 @@ BEGIN TRY
 						WHEN @GroupingOption =13 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]'
 						WHEN @GroupingOption =14 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]'
 						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
+						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
 					END)
 					
 				
@@ -374,7 +377,7 @@ BEGIN
 		,[ysnForgiven]						= IE.[ysnForgiven]
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
-		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+		,[ysnImpactInventory]				= ISNULL(IE.[ysnImpactInventory], CAST(1 AS BIT))
         ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]
@@ -848,6 +851,7 @@ BEGIN
 				AND (ISNULL(ITG.[intFreightTermId],0) = ISNULL(EFP.[intFreightTermId],0) OR (EFP.[intFreightTermId] IS NULL AND @GroupingOption < 13))
 				AND (ISNULL(ITG.[intPaymentMethodId],0) = ISNULL(EFP.[intPaymentMethodId],0) OR (EFP.[intPaymentMethodId] IS NULL AND @GroupingOption < 14))            
 				AND (ISNULL(ITG.[strInvoiceOriginId],'') = ISNULL(EFP.[strInvoiceOriginId],'') OR (EFP.[strInvoiceOriginId] IS NULL AND @GroupingOption < 15))
+				AND (ISNULL(ITG.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(EFP.[ysnImpactInventory], CAST(1 AS BIT)) OR (EFP.[ysnImpactInventory] IS NULL AND @GroupingOption < 16))
 		INNER JOIN
 			(SELECT
 				 [strTransactionType]
@@ -1326,7 +1330,7 @@ BEGIN
 		,[ysnForgiven]						= IE.[ysnForgiven]
 		,[ysnCalculated]					= IE.[ysnCalculated]
 		,[ysnSplitted]						= IE.[ysnSplitted]
-		,[ysnImpactInventory]				= IE.[ysnImpactInventory]
+		,[ysnImpactInventory]				= ISNULL(IE.[ysnImpactInventory], CAST(1 AS BIT))
         ,[ysnFromProvisional]               = IE.[ysnFromProvisional]
 		,[intPaymentId]						= IE.[intPaymentId]
 		,[intSplitId]						= IE.[intSplitId]

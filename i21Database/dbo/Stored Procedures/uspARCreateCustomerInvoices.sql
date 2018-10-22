@@ -201,8 +201,9 @@ SELECT
 	,[ysnForgiven]						= [ysnForgiven]
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
-	,[ysnImpactInventory]				= [ysnImpactInventory]
-    ,[ysnFromProvisional]               = [ysnFromProvisional]
+	,[ysnImpactInventory]				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+    ,[ysnFromProvisional]               = ISNULL([ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]						= ISNULL([ysnExported], CAST(0 AS BIT))
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -1362,8 +1363,14 @@ SELECT
 											ELSE
 												CAST(1 AS BIT) 
 											END
+<<<<<<< HEAD
 										ELSE CAST(0 AS BIT) END
     ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
+=======
+										ELSE CAST(1 AS BIT) END
+    ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
+>>>>>>> 27645d50cc... AR-9134 Sales > Enforce Impact Inventory to other transaction types other than Credit Memo
     ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
