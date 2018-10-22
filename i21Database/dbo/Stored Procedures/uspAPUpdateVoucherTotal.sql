@@ -58,7 +58,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE HEADER TOTAL
 	UPDATE A
 		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2)) 
-		,A.dblTotalController = CASE WHEN A.dblTotalController != 0 THEN CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2)) ELSE A.dblTotalController END
+		,A.dblTotalController = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2))
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblTax = DetailTotal.dblTotalTax

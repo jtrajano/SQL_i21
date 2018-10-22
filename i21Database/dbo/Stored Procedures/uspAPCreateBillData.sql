@@ -47,6 +47,7 @@ BEGIN TRY
 
 DECLARE @startingRecordId INT;
 DECLARE @APAccount INT;
+DECLARE @voucherIds AS Id;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -239,6 +240,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill Voucher
 	WHERE Voucher.intBillId = @billId
 
+	INSERT INTO @voucherIds
+	SELECT @billId
+	EXEC uspAPUpdateVoucherTotal @voucherIds
+
 	--UPDATE THE PROFIT AND SUB BOOK FROM RECEIPT
 	IF EXISTS (SELECT 1 FROM tblAPBillDetail A WHERE A.intBillId = @billId AND A.intInventoryReceiptItemId IS NOT NULL)
 	BEGIN
@@ -251,6 +256,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		WHERE BD.intBillId = @billId
 	END 
+
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
