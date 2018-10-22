@@ -56,6 +56,7 @@ BEGIN
 		ON R.intFiscalYearId = CV.intFiscalYear
 		AND RC.intCustomerId = CV.intCustomerPatronId
 		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
+		AND R.ysnPosted <> 1
 	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
 
 END
