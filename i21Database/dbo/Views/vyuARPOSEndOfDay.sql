@@ -65,9 +65,11 @@ LEFT JOIN (
 	FROM tblSTStore
 ) ST ON EOD.intStoreId = ST.intStoreId
 OUTER APPLY (
-	SELECT dblCashReturn = SUM(dblTotal)
-	FROM dbo.tblARPOS WITH (NOLOCK)
+	SELECT dblCashReturn = SUM(dblAmount)
+	FROM dbo.tblARPOS POS WITH (NOLOCK)
+	INNER JOIN  tblARPOSPayment PAY ON POS.intPOSId = PAY.intPOSId
 	WHERE ysnReturn = 1
+	  AND strPaymentMethod IN ('Check','Cash')
 	  AND intPOSLogId = POSLOG.intPOSLogId
 	  AND dblTotal < 0
 ) CASHRETURN
