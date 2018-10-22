@@ -11,6 +11,7 @@ SELECT
 	,intCurrencyId				= AR.intCurrencyID
 	,AR.strCurrency
 	,AR.strCurrencyDescription
+	,AR.strPostingType
 FROM
 	--(SELECT DISTINCT
 	--	  strBatchId
@@ -138,3 +139,4 @@ GROUP BY
 	,AR.intCurrencyID
 	,AR.strCurrency
 	,AR.strCurrencyDescription
+	,AR.strPostingType
