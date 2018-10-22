@@ -1094,13 +1094,6 @@ BEGIN TRY
     FROM
         [dbo].[fnGetGLEntriesErrors](@GLEntries)
 
-	IF @raiseError = 1 AND EXISTS (SELECT TOP 1 NULL FROM @InvalidGLEntries)
-	BEGIN
-		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		RAISERROR(@ErrorMerssage, 11, 1)							
-		GOTO Post_Exit
-	END
-
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -1123,7 +1116,13 @@ BEGIN TRY
     LEFT OUTER JOIN
         @GLEntries GLE
         ON IGLE.[strTransactionId] = GLE.[strTransactionId]
-					
+
+	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
+	BEGIN
+		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
+		RAISERROR(@ErrorMerssage, 11, 1)							
+		GOTO Post_Exit
+	END					
 
     DELETE FROM #ARInvoiceGLEntries
     WHERE
