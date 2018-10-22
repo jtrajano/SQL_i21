@@ -146,7 +146,7 @@ BEGIN TRY
 			, 0 AS dblTaxExempt
 			, tblARInvoice.strInvoiceNumber
 			, tblARInvoice.strPONumber
-			, tblARInvoice.strBOLNumber
+			, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 			, tblARInvoice.dtmDate
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE Destination.strCounty END) AS strDestinationCounty 
