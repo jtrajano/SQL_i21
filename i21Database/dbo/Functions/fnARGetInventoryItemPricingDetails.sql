@@ -72,7 +72,7 @@ BEGIN
 					
 	--Item Promotional Pricing 
 	SELECT TOP 1
-		@Price			= @UOMQuantity *
+		@Price			= --@UOMQuantity *
 							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblUnitAfterDiscount
 							ELSE
 								(CASE
@@ -152,7 +152,8 @@ BEGIN
 		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId)
 			BEGIN
 				SELECT TOP 1 
-					@Price			= @UOMQuantity * PL.dblUnitPrice
+					--@Price			= @UOMQuantity * PL.dblUnitPrice
+					@Price			= PL.dblUnitPrice
 					,@PriceBasis	= PL.dblUnitPrice		
 					,@Deviation		= @ZeroDecimal		
 					,@Pricing		= 'Inventory - Pricing Level'		
@@ -183,7 +184,8 @@ BEGIN
 
 	SET @Price = @ZeroDecimal
 	SELECT TOP 1 
-		@Price			= @UOMQuantity * ICPL.dblUnitPrice
+		--@Price			= @UOMQuantity * ICPL.dblUnitPrice
+		@Price			= ICPL.dblUnitPrice
 		,@PriceBasis	= ICPL.dblUnitPrice		
 		,@Deviation		= @ZeroDecimal		
 		,@Pricing		= 'Inventory - Pricing Level'		
