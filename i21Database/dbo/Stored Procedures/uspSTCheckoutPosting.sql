@@ -2902,7 +2902,7 @@ BEGIN
 											,[ysnInvoicePrepayment]					= 0
 											,[ysnImportedFromOrigin]				= NULL
 											,[ysnImportedAsPosted]					= NULL
-											,[ysnAllowPrepayment]					= 0
+											,[ysnAllowPrepayment]					= 1
 											,[ysnPost]								= 1			-- 1. Post, 0. UnPost
 											,[ysnRecap]								= @ysnRecap
 											,[ysnUnPostAndUpdate]					= NULL
@@ -3402,6 +3402,7 @@ BEGIN
 
 											-- After Un-Posting is successfull delete the recieve payment record
 
+											-- ROLLBACK Transaction if theres error on UnPosting from Receive Payments
 										END
 							END
 					END
