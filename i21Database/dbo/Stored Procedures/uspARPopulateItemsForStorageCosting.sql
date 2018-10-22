@@ -126,7 +126,7 @@ LEFT OUTER JOIN
 		ON LGL.[intLoadId] = ARID.[intLoadId]
 WHERE	
 	ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL(ARID.[intPeriodsToAccrue],0) <= 1 
-	AND 1 = CASE WHEN [strTransactionType] = 'Credit Memo' THEN ARID.[ysnImpactInventory] ELSE 1 END			
+	AND ARID.[ysnImpactInventory] = CAST(1 AS BIT)			
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)

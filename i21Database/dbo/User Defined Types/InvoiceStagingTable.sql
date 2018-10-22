@@ -72,7 +72,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnForgiven]							BIT												NULL		
 	,[ysnCalculated]						BIT												NULL		
 	,[ysnSplitted]							BIT												NULL	
-	,[ysnImpactInventory]					BIT												NULL	
+	,[ysnImpactInventory]					BIT												NULL        -- Default(1) Impact Inventory
 	,[ysnFromProvisional]					BIT												NULL
 	,[ysnExported]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Customer Prepayment/Overpayment) 

@@ -202,7 +202,7 @@ SELECT
 	,[ysnForgiven]						= [ysnForgiven]
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
-	,[ysnImpactInventory]				= [ysnImpactInventory]
+	,[ysnImpactInventory]				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnFromProvisional]               = ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnExported]						= ISNULL([ysnExported], CAST(0 AS BIT))
 	,[intPaymentId]						= [intPaymentId]
@@ -1366,7 +1366,7 @@ SELECT
 											ELSE
 												CAST(1 AS BIT) 
 											END
-										ELSE CAST(0 AS BIT) END
+										ELSE CAST(1 AS BIT) END
     ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
     ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)

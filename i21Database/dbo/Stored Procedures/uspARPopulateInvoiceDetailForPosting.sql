@@ -249,7 +249,7 @@ SELECT
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
+    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
@@ -593,7 +593,7 @@ SELECT
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
+    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
@@ -923,7 +923,7 @@ SELECT
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
+    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
@@ -1252,7 +1252,7 @@ SELECT
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
+    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]

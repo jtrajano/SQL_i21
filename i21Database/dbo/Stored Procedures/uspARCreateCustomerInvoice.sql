@@ -530,7 +530,7 @@ BEGIN TRY
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
-		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)	
+		,[ysnImpactInventory]			= ISNULL(@ImpactInventory, CAST(1 AS BIT))	
 		,[ysnFromProvisional]			= ISNULL(@FromProvisional, 0)
 		,[ysnProvisionalWithGL]			= ISNULL(@ImpactForProvisional, 0)	
 		,[intPaymentId]					= @PaymentId 
