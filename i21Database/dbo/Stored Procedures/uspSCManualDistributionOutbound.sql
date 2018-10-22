@@ -50,7 +50,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@batchIdUsed AS INT
 		,@recapId AS INT
 		,@strWhereFinalizedWeight NVARCHAR(20)
-		,@strWhereFinalizedGrade NVARCHAR(20);
+		,@strWhereFinalizedGrade NVARCHAR(20)
+		,@ysnCustomerStorage BIT;
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -79,9 +80,9 @@ OPEN intListCursor;
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
-				SELECT	@ysnDPStorage = ST.ysnDPOwnedType FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
+				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
-			IF @ysnIsStorage = 0
+			IF @ysnIsStorage = 0 AND @intStorageScheduleTypeId < 0
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
@@ -179,7 +180,7 @@ OPEN intListCursor;
 					END
 					EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemShipment; 
 				END
-			IF @ysnIsStorage = 1
+			IF @ysnIsStorage = 1 OR ISNULL(@ysnCustomerStorage, 0) = 1
 			BEGIN
 				IF @ysnDPStorage = 1
 					BEGIN
