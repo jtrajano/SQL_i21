@@ -66,6 +66,8 @@ BEGIN TRY
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
 
+		DECLARE @intMaxId INT = 0
+
 		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
 		DELETE FROM @TFTransaction
 		INSERT INTO @TFTransaction(intId
@@ -75,8 +77,8 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
-			, intProductCode
-			, strProductCode
+			--, intProductCode
+			--, strProductCode
 			, intItemId
 			, dblQtyShipped
 			, dblGross
@@ -124,7 +126,7 @@ BEGIN TRY
 			, strTransactionType
 			, intTransactionNumberId
 			, strContactName)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
+		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId DESC) AS intId
 			, *
 		FROM (
 		SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
@@ -133,8 +135,8 @@ BEGIN TRY
 			, tblTFReportingComponent.intReportingComponentId
 			, tblTFReportingComponent.strScheduleCode
 			, tblTFReportingComponent.strType
-			, tblTFReportingComponentProductCode.intProductCodeId
-			, tblTFProductCode.strProductCode
+			--, tblTFReportingComponentProductCode.intProductCodeId
+			--, tblTFProductCode.strProductCode
 			, tblARInvoiceDetail.intItemId
 			, tblARInvoiceDetail.dblQtyShipped
 			, tblARInvoiceDetail.dblQtyShipped AS dblGross
@@ -265,6 +267,9 @@ BEGIN TRY
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentConfiguration.intReportingComponentId 
 		WHERE strTemplateItemId IN ('GT-103-2DGasohol', 'GT-103-2DGasoline') AND tblTFReportingComponent.intReportingComponentId = @RCId
 
+		-- GET MAX intId
+		SELECT @intMaxId = MAX(ISNULL(intId,0)) FROM @TFTransaction	
+
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId
 			, intTaxAuthorityId
@@ -272,8 +277,8 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
-			, intProductCode
-			, strProductCode
+			--, intProductCode
+			--, strProductCode
 			, intItemId
 			, dblQtyShipped
 			, dblGross
@@ -325,7 +330,7 @@ BEGIN TRY
 			, strTransactionType
 			, intTransactionNumberId
 			, strContactName)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
+		SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intInventoryTransferDetailId, intTaxAuthorityId DESC) + @intMaxId) AS intId
 			, *
 		FROM (
 		SELECT DISTINCT tblICInventoryTransferDetail.intInventoryTransferDetailId
@@ -334,8 +339,8 @@ BEGIN TRY
 			, tblTFReportingComponent.intReportingComponentId
 			, tblTFReportingComponent.strScheduleCode
 			, tblTFReportingComponent.strType
-			, tblTFReportingComponentProductCode.intProductCodeId
-			, tblTFProductCode.strProductCode
+			--, tblTFReportingComponentProductCode.intProductCodeId
+			--, tblTFProductCode.strProductCode
 			, tblICInventoryTransferDetail.intItemId
 			, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
 			, tblICInventoryTransferDetail.dblQuantity AS dblGross
@@ -427,6 +432,7 @@ BEGIN TRY
 		)tblTransactions
 
 		-- INVENTORY TRANSFERS USING IC SCREEN --
+		SELECT @intMaxId = MAX(ISNULL(intId,0)) FROM @TFTransaction	
 
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId
@@ -435,8 +441,8 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
-			, intProductCode
-			, strProductCode
+			--, intProductCode
+			--, strProductCode
 			, intItemId
 			, dblQtyShipped
 			, dblGross
@@ -475,7 +481,7 @@ BEGIN TRY
 			, strTransactionType
 			, intTransactionNumberId
 			, strContactName)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
+		SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intInventoryTransferDetailId, intTaxAuthorityId DESC) + @intMaxId) AS intId
 			, *
 		FROM (
 			SELECT DISTINCT tblICInventoryTransferDetail.intInventoryTransferDetailId
@@ -484,8 +490,8 @@ BEGIN TRY
 				, tblTFReportingComponent.intReportingComponentId
 				, tblTFReportingComponent.strScheduleCode
 				, tblTFReportingComponent.strType
-				, tblTFReportingComponentProductCode.intProductCodeId
-				, tblTFProductCode.strProductCode
+				--, tblTFReportingComponentProductCode.intProductCodeId
+				--, tblTFProductCode.strProductCode
 				, tblICInventoryTransferDetail.intItemId
 				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
 				, tblICInventoryTransferDetail.dblQuantity AS dblGross
@@ -616,8 +622,14 @@ BEGIN TRY
 				, strContactName)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
-				, intProductCode
-				, strProductCode
+				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
+					FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+					ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+					WHERE intReportingComponentId = TRANS.intReportingComponentId and tblICItemMotorFuelTax.intItemId = TRANS.intItemId)
+				, strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
+					FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+					ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+					WHERE intReportingComponentId = TRANS.intReportingComponentId and tblICItemMotorFuelTax.intItemId = TRANS.intItemId)
 				, intItemId
 				, dblQtyShipped
 				, dblGross
@@ -673,8 +685,6 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 			FROM @TFTransaction TRANS
-			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
-
 		END
 		
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
