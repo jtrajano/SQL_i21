@@ -236,7 +236,7 @@ BEGIN
 
 	SELECT intPOSId			= intPOSId
 		 , intPOSPaymentId	= intPOSPaymentId
-		 , strPaymentMethod	= strPaymentMethod
+		 , strPaymentMethod	= CASE WHEN strPaymentMethod ='Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
 		 , strReferenceNo	= strReferenceNo
 		 , dblAmount		= dblAmount
 		 , ysnComputed		= CAST(0 AS BIT)
@@ -355,7 +355,7 @@ BEGIN
 				SELECT TOP 1 intPaymentMethodID
 						   , strPaymentMethod
 				FROM tblSMPaymentMethod WITH (NOLOCK)
-				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod LIKE '%debit%') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
 			) PM
 			WHERE IFP.ysnExcludeForPayment = 0
 			  AND IFP.ysnPosted = 1
