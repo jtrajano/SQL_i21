@@ -920,7 +920,7 @@ BEGIN
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-					EXEC('UPDATE tblCFTransaction SET ' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE ISNULL(strInvoiceReportNumber,'''') = ''''')
+					EXEC('UPDATE tblCFTransaction SET ' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE ISNULL(strInvoiceReportNumber,'''') = '''' AND intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					
@@ -983,7 +983,7 @@ BEGIN
 					--EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					--EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
-					EXEC('UPDATE tblCFTransaction SET ' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE ISNULL(strInvoiceReportNumber,'''') = ''''')
+					EXEC('UPDATE tblCFTransaction SET ' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE ISNULL(strInvoiceReportNumber,'''') = '''' AND intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					
