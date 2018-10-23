@@ -2,7 +2,7 @@
 
 AS
 	SELECT
-		 CAST ( SUM(dblAmountDue) + SUM(dblTax) AS DECIMAL (18,2)) AS dblCommodityTotal,
+		 CAST ( SUM(dblTotal) + SUM(dblTax) AS DECIMAL (18,2)) AS dblCommodityTotal, --SUM THE LINE ITEM OF THE BILL PER COMMODITY
 		 CAST (SUM(dblNetUnits) AS DECIMAL (18,2)) AS dblNetUnits,
 		 ISNULL(strCommodityCode, 'Non - Commodity') as strCommodityCode,
 		 strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup),
@@ -42,6 +42,5 @@ AS
 		APBD.intWeightUOMId,
 		APB.dblAmountDue
 	) commodityHeader 
-	--WHERE strCommodityCode IS NOT NULL 
 	GROUP BY strCommodityCode
 GO
