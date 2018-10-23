@@ -45,6 +45,7 @@ BEGIN TRY
 		, strContractType NVARCHAR(50)
 		, dblCashOrFuture NUMERIC(16, 10)
 		, dblBasisOrDiscount NUMERIC(16, 10)
+		, dblRatio NUMERIC(16, 10)
 		, strUnitMeasure NVARCHAR(50)
 		, intCommodityId INT
 		, intItemId INT
@@ -138,6 +139,7 @@ BEGIN TRY
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
+				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
@@ -227,6 +229,7 @@ BEGIN TRY
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
+				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
