@@ -264,7 +264,7 @@ WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
-AND B.ysnApplied = 1
+AND B.ysnApplied = 1 AND A.ysnPosted = 1
 
 UNION ALL
 --PAYMENT MADE TO AR TO OFFSET THE PREPAYMENT
