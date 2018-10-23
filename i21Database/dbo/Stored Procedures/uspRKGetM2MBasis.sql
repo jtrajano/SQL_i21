@@ -81,6 +81,7 @@ BEGIN TRY
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture
 				, dblBasisOrDiscount
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId = NULL
@@ -115,6 +116,7 @@ BEGIN TRY
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture
 				, dblBasisOrDiscount
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId = NULL
@@ -171,6 +173,7 @@ BEGIN TRY
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture
 				, dblBasisOrDiscount
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId
@@ -205,6 +208,7 @@ BEGIN TRY
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture
 				, dblBasisOrDiscount
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId
