@@ -26,6 +26,8 @@ DECLARE @PreviousErrMsg nvarchar(max)
 DECLARE @dtmCreateDateTime NVARCHAR(100)
 DECLARE @strDateTimeFormat nvarchar(50)
 DECLARE @ConvertYear int
+DECLARE @dblPrice DECIMAL(24, 10) = NULL
+DECLARE @dblStrike DECIMAL(24, 10) = NULL
 
 
 SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
@@ -75,6 +77,8 @@ WHILE @mRowNumber > 0
 		SET @strSubBook =NULL
 		SET @dtmCreateDateTime = NULL
 		SET @strBrokerTradeNo = NULL
+		SET @dblPrice = NULL
+		SET @dblStrike = NULL
 
 		SET @counter = @counter + 1
 
@@ -93,17 +97,62 @@ WHILE @mRowNumber > 0
 			@strOptionMonth = strOptionMonth,
 			@strOptionType = strOptionType,
 			@strStatus = strStatus,
-			@dtmFilledDate = dtmCreateDateTime,
+			@dtmFilledDate = dtmFilledDate,
 			@strBook = strBook,
 			@strSubBook = strSubBook,
-			@dtmCreateDateTime = dtmCreateDateTime
+			@dtmCreateDateTime = dtmCreateDateTime,
+			@dblPrice = dblPrice,
+			@dblStrike = dblStrike
 		FROM tblRKFutOptTransactionImport 
 		WHERE intFutOptTransactionId = @mRowNumber
 	
-
+	IF((LTRIM(RTRIM(@strInstrumentType)) = ''
+		OR LTRIM(RTRIM(@strFutMarketName)) = ''
+		OR LTRIM(RTRIM(@strCurrency)) = ''
+		OR LTRIM(RTRIM(@strCommodityCode)) = ''
+		OR LTRIM(RTRIM(@strLocationName)) = ''
+		OR LTRIM(RTRIM(@strName)) = ''
+		OR LTRIM(RTRIM(@strAccountNumber)) = ''
+		OR LTRIM(RTRIM(@strSalespersonId)) = ''
+		OR LTRIM(RTRIM(@strBuySell)) = ''
+		OR LTRIM(RTRIM(@strFutureMonth)) = ''
+		OR @dblPrice IS NULL
+		OR LTRIM(RTRIM(@strStatus)) = ''
+		OR @dtmFilledDate IS NULL)
+		AND (LTRIM(RTRIM(@strInstrumentType)) = 'Futures' OR LTRIM(RTRIM(@strInstrumentType)) = '')
+	)
+	BEGIN
+		SET @ErrMsg =  ' Instrument Type, Futures Market, Currency, Commodity, Location, Broker, Broker Account, Salesperson, Buy/Sell, Futures Month, Price, Status, Filled Date is required.'
+	END
+	
+	IF(LTRIM(RTRIM(@strInstrumentType)) = 'Options')
+	BEGIN
+		IF((LTRIM(RTRIM(@strInstrumentType)) = ''
+		OR LTRIM(RTRIM(@strFutMarketName)) = ''
+		OR LTRIM(RTRIM(@strCurrency)) = ''
+		OR LTRIM(RTRIM(@strCommodityCode)) = ''
+		OR LTRIM(RTRIM(@strLocationName)) = ''
+		OR LTRIM(RTRIM(@strName)) = ''
+		OR LTRIM(RTRIM(@strAccountNumber)) = ''
+		OR LTRIM(RTRIM(@strSalespersonId)) = ''
+		OR LTRIM(RTRIM(@strBuySell)) = ''
+		OR LTRIM(RTRIM(@strFutureMonth)) = ''
+		OR @dblPrice IS NULL
+		OR LTRIM(RTRIM(@strStatus)) = ''
+		OR @dtmFilledDate IS NULL)
+		OR LTRIM(RTRIM(@strOptionMonth)) = ''
+		OR LTRIM(RTRIM(@strOptionType)) = ''
+		OR @dblStrike IS NULL
+	)
+	BEGIN
+		SET @ErrMsg =  ' Instrument Type, Futures Market, Currency, Commodity, Location, Broker, Broker Account, Salesperson, Buy/Sell, Futures Month, Option Month, Option Type, Strike, Price, Status, Filled Date is required.'
+	END
+	END
+	
+	
 	IF NOT EXISTS(SELECT * FROM tblEMEntity WHERE strName = @strName)
 	BEGIN
-		SET @ErrMsg =  ' Invalid Broker.'
+		SET @ErrMsg =  ' Broker does not exists in the system.'
 	END
 	ELSE
 	BEGIN
@@ -127,12 +176,12 @@ WHILE @mRowNumber > 0
 	END
 	IF NOT EXISTS(SELECT * FROM tblRKBrokerageAccount WHERE strAccountNumber = @strAccountNumber)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Account Number.'
+		SET @ErrMsg = @ErrMsg + ' Broker Account does not exists in the system.'
 	END
 
 	IF NOT EXISTS(SELECT * FROM tblRKFutureMarket WHERE strFutMarketName = @strFutMarketName)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Futures Market.'
+		SET @ErrMsg = @ErrMsg + ' Futures Market does not exists in the system.'
 	END
 	ELSE
 	BEGIN
@@ -197,17 +246,31 @@ WHILE @mRowNumber > 0
 			SET @NotConfiguredErrMsg = @NotConfiguredErrMsg +  CASE WHEN @NotConfiguredErrMsg <> '' THEN ', Currency' ELSE ' Currency' END
 		END
 
-		IF @strInstrumentType = 'Futures' AND EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth = REPLACE(@strFutureMonth,'-',' ')) AND 
+		IF @strInstrumentType = 'Futures' AND (NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth = REPLACE(@strFutureMonth,'-',' ') COLLATE Latin1_General_CS_AS)
+			OR PATINDEX ('[A-z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0
+		)
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Futures Month, format should be in mmm-yy (Jan-18).'
+		END
+
+		ELSE IF @strInstrumentType = 'Futures' AND EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth = REPLACE(@strFutureMonth,'-',' ')) AND 
 			NOT EXISTS(SELECT 1
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName 
 				join tblRKFuturesMonth m on fm.intFutureMarketId=m.intFutureMarketId and m.strFutureMonth=replace(ti.strFutureMonth,'-',' ')
 				WHERE intFutOptTransactionId =@mRowNumber)
 		BEGIN
-			SET @NotConfiguredErrMsg = @NotConfiguredErrMsg +  CASE WHEN @NotConfiguredErrMsg <> '' THEN ', Futures Month' ELSE ' Futures Month' END
+			--SET @NotConfiguredErrMsg = @NotConfiguredErrMsg +  CASE WHEN @NotConfiguredErrMsg <> '' THEN ', Futures Month' ELSE ' Futures Month' END
+			SET @ErrMsg = 'Futures Month does not exist for Future Market: ' + @strFutMarketName + '.'
 		END
 
-		IF @strInstrumentType = 'Options' AND NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth = REPLACE(@strOptionMonth,'-',' ') ) AND
+		IF @strInstrumentType = 'Options' AND (NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth = REPLACE(@strOptionMonth,'-',' ') COLLATE Latin1_General_CS_AS)
+			OR PATINDEX ('[A-z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strOptionMonth))) = 0
+		)
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Options Month, format should be in mmm-yy (Jan-18).'
+		END
+		ELSE IF @strInstrumentType = 'Options' AND
 			NOT EXISTS(SELECT 1
 				FROM tblRKFutOptTransactionImport ti
 			JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName 
@@ -225,93 +288,142 @@ WHILE @mRowNumber > 0
 
 	IF @strInstrumentType NOT IN('Futures','Options')
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Instrument Type.'
+		SET @ErrMsg = @ErrMsg + ' Instrument Type is case sensitive it must be in exact word Futures or Options.'
 	END
 
 	IF NOT EXISTS(SELECT * FROM tblICCommodity WHERE strCommodityCode = @strCommodityCode)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Commodity Code.'
+		SET @ErrMsg = @ErrMsg + ' Commodity Code does not exists in the system.'
 	END
 
 	IF NOT EXISTS(SELECT * FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Location Name.'
+		SET @ErrMsg = @ErrMsg + ' Location Name does not exists in the system.'
 	END
 
 	IF NOT EXISTS(SELECT * FROM vyuHDSalesPerson WHERE strName = @strSalespersonId)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Salesperson.'
+		SET @ErrMsg = @ErrMsg + ' Salesperson does not exists in the system.'
 	END
 
 	IF NOT EXISTS(SELECT * FROM tblSMCurrency WHERE strCurrency = @strCurrency)
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Currency.'
+		SET @ErrMsg = @ErrMsg + ' Currency does not exists in the system.'
 	END
 
 	IF @strBuySell NOT IN('Buy','Sell')
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Buy/Sell.'
-	END
-
-	IF @strInstrumentType = 'Futures' AND NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth = REPLACE(@strFutureMonth,'-',' '))
-	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Futures Month.'
-	END
-
-	IF @strInstrumentType = 'Options' AND NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth = REPLACE(@strOptionMonth,'-',' ') )
-	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Option Month.'
+		SET @ErrMsg = @ErrMsg + ' Buy/Sell is case sensitive it must be in exact word Buy or Sell.'
 	END
 
 	IF @strInstrumentType = 'Options' AND @strOptionType NOT IN('Call','Put')
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Option Type.'
+		SET @ErrMsg = @ErrMsg + ' Option Type is case sensitive it must be in exact word Put or Call.'
 	END
 
 	IF @strStatus NOT IN('Filled','Unfilled','Cancelled')
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Status.'
+		SET @ErrMsg = @ErrMsg + ' Status is case sensitive it must be in exact word Filled, Unfilled or Cancelled.'
 	END
 
-	BEGIN TRY	
-		SELECT  @dtmFilledDate=convert(datetime,@dtmFilledDate,@ConvertYear) 
+	DECLARE @isValidFilledDate BIT = 0
+	BEGIN
+		DECLARE @tempStrDate NVARCHAR(100)
+		SELECT  @tempStrDate = dtmFilledDate 
+		FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 
-		-- Reconciled Validation 
-		IF EXISTS(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
-						JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
-						JOIN tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
-						JOIN tblICCommodity c on c.intCommodityId=t.intCommodityId
-						JOIN tblEMEntity e on e.intEntityId= t.intEntityId
-					WHERE m.strFutMarketName=strFutMarketName AND b.strAccountNumber=@strAccountNumber
-						AND c.strCommodityCode=strCommodityCode AND e.strName=@strName AND ysnFreezed = 1
-						AND convert(datetime,dtmFilledDate,@ConvertYear) = convert(datetime,@dtmFilledDate,@ConvertYear))
+		EXEC uspRKStringDateValidate @tempStrDate, @isValidFilledDate OUTPUT
+
+		IF(@isValidFilledDate = 1)
 		BEGIN
-			SET @ErrMsg = @ErrMsg + ' The selected filled date already reconciled.'
+			SELECT  @dtmFilledDate=convert(datetime,@dtmFilledDate,@ConvertYear)
+		
+			-- Reconciled Validation 
+			IF EXISTS(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
+							JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
+							JOIN tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
+							JOIN tblICCommodity c on c.intCommodityId=t.intCommodityId
+							JOIN tblEMEntity e on e.intEntityId= t.intEntityId
+						WHERE m.strFutMarketName=strFutMarketName AND b.strAccountNumber=@strAccountNumber
+							AND c.strCommodityCode=strCommodityCode AND e.strName=@strName AND ysnFreezed = 1
+							AND convert(datetime,dtmFilledDate,@ConvertYear) = convert(datetime,@dtmFilledDate,@ConvertYear))
+			BEGIN
+				SET @ErrMsg = @ErrMsg + ' The selected filled date already reconciled.'
+			END
 		END
-
-	END TRY
-	BEGIN CATCH
-		SET @ErrMsg = @ErrMsg + ' Invalid Filled Date.'
-		SET @dtmFilledDate = NULL
-	END CATCH
-
-	IF ISNULL(@strBook,'') <> '' AND NOT EXISTS(SELECT * FROM tblCTBook WHERE strBook = @strBook)
-	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Book.'
+		ELSE
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Filled Date, format should be in ' + @strDateTimeFormat + '.'
+			SET @dtmFilledDate = NULL
+		END
 	END
 
-	IF ISNULL(@strSubBook,'') <> '' AND NOT EXISTS(SELECT * FROM tblCTSubBook WHERE strSubBook = @strSubBook)
+
+	--BEGIN TRY	
+	--	DECLARE @tempDate datetime
+	--	SELECT  @tempDate=convert(datetime,dtmFilledDate,@ConvertYear) 
+	--	FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
+
+	--	SELECT  @dtmFilledDate=convert(datetime,@dtmFilledDate,@ConvertYear)
+		
+	--	-- Reconciled Validation 
+	--	IF EXISTS(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
+	--					JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
+	--					JOIN tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
+	--					JOIN tblICCommodity c on c.intCommodityId=t.intCommodityId
+	--					JOIN tblEMEntity e on e.intEntityId= t.intEntityId
+	--				WHERE m.strFutMarketName=strFutMarketName AND b.strAccountNumber=@strAccountNumber
+	--					AND c.strCommodityCode=strCommodityCode AND e.strName=@strName AND ysnFreezed = 1
+	--					AND convert(datetime,dtmFilledDate,@ConvertYear) = convert(datetime,@dtmFilledDate,@ConvertYear))
+	--	BEGIN
+	--		SET @ErrMsg = @ErrMsg + ' The selected filled date already reconciled.'
+	--	END
+
+	--END TRY
+	--BEGIN CATCH
+	--	SET @ErrMsg = @ErrMsg + ' Invalid Filled Date, format should be in ' + @strDateTimeFormat + '.'
+	--	SET @dtmFilledDate = NULL
+	--END CATCH
+
+	DECLARE @intBook INT
+	SELECT @intBook = intBookId FROM tblCTBook WHERE strBook = @strBook
+
+	IF ISNULL(@strBook,'') <> '' AND ISNULL(@intBook,0) = 0
 	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Invalid Sub-Book.'
+		SET @ErrMsg = @ErrMsg + ' Book does not exist in the system.'
+	END
+	
+	IF ISNULL(@strSubBook,'') <> '' AND NOT EXISTS(SELECT * FROM tblCTSubBook WHERE strSubBook = @strSubBook AND intBookId = ISNULL(@intBook,0)) AND ISNULL(@intBook,0) <> 0
+	BEGIN
+		SET @ErrMsg = @ErrMsg + ' Sub-Book does not exist in Book: ' + @strBook + '.'
+	END
+	ELSE IF(ISNULL(@strSubBook,'') <> '' AND ISNULL(@strBook,'') = '')
+	BEGIN
+		SET @ErrMsg = @ErrMsg + ' Book must exists for Sub-Book: ' + @strSubBook + '.'
 	END
 
-	BEGIN TRY	
-		SELECT  @dtmCreateDateTime=convert(datetime,@dtmCreateDateTime,@ConvertYear) 
-	END TRY
-	BEGIN CATCH
-		SET @ErrMsg = @ErrMsg + ' Invalid Create Date Time.'
-		SET @dtmCreateDateTime = NULL
-	END CATCH
+	DECLARE @isValidmCreateDateTime BIT = 0
+	BEGIN
+		DECLARE @strCreateDateTime NVARCHAR(100)
+		SELECT  @strCreateDateTime = dtmCreateDateTime 
+		FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
+
+		EXEC uspRKStringDateValidate @strCreateDateTime, @isValidmCreateDateTime OUTPUT
+
+		IF(@isValidmCreateDateTime = 0)
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Create Date Time, format should be in ' + @strDateTimeFormat + '.'
+			SET @dtmCreateDateTime = NULL
+		END
+	END
+
+	--BEGIN TRY	
+	--	SELECT  @dtmCreateDateTime=convert(datetime,@dtmCreateDateTime,@ConvertYear) 
+	--END TRY
+	--BEGIN CATCH
+	--	SET @ErrMsg = @ErrMsg + ' Invalid Create Date Time.'
+	--	SET @dtmCreateDateTime = NULL
+	--END CATCH
 
 
 	IF @ErrMsg <> ''
@@ -389,7 +501,7 @@ BEGIN CATCH
  IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
  SET @ErrMsg = ERROR_MESSAGE()  
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
-END CATCH	
+END CATCH		
 
 
 EXIT_ROUTINE:

@@ -7132,7 +7132,8 @@
     <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
     <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
+</ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
