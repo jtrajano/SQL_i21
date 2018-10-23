@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCMGetClearedDeposits
+CREATE PROCEDURE [dbo].[uspCMGetClearedDeposits]
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
 AS
@@ -15,6 +15,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@MISC_CHECKS INT = 3
 		,@BANK_TRANSFER INT = 4
 		,@BANK_TRANSACTION INT = 5
+		,@BANK_INTEREST INT = 51
 		,@CREDIT_CARD_CHARGE INT = 6
 		,@CREDIT_CARD_RETURNS INT = 7
 		,@CREDIT_CARD_PAYMENTS INT = 8
@@ -58,7 +59,7 @@ WHERE	ysnPosted = 1
 		AND (
 			-- Filter for all the bank deposits and credits:
 			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @VOID_CHECK, @VOID_MISC_CHECKS, @VOID_AP_PAYMENT, @VOID_PAYCHECK, @VOID_ACH, @VOID_DIRECT_DEPOSIT)
-			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
+			OR ( dblAmount > 0 AND intBankTransactionTypeId in ( @BANK_TRANSACTION, @BANK_INTEREST ))
 		)
 		--AND dbo.fnIsDepositEntry(strLink) = 0
 		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry

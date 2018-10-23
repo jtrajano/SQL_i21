@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCMGetClearedPayments
+CREATE PROCEDURE [dbo].[uspCMGetClearedPayments]
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
 AS
@@ -15,6 +15,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@MISC_CHECKS INT = 3
 		,@BANK_TRANSFER INT = 4
 		,@BANK_TRANSACTION INT = 5
+		,@BANK_INTEREST INT = 51
 		,@CREDIT_CARD_CHARGE INT = 6
 		,@CREDIT_CARD_RETURNS INT = 7
 		,@CREDIT_CARD_PAYMENTS INT = 8
@@ -55,7 +56,7 @@ WHERE	ysnPosted = 1
 		AND (
 			-- Filter for all the bank payments and debits:
 			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
-			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
+			OR ( dblAmount < 0 AND intBankTransactionTypeId in ( @BANK_TRANSACTION, @BANK_INTEREST ))
 		)
 		AND 1 = CASE 
 			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
