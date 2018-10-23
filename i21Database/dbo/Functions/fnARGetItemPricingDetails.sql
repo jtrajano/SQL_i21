@@ -197,7 +197,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 											AND P.intItemLocationId = @ItemLocationId
 										)
 
-				IF @Price <= @ContractPrice
+				IF @Price < @ContractPrice
 				BEGIN
 					SET @Pricing = @ContractPricing + '-Max Price'
 					SET @ContractMaxPrice = @Price
@@ -235,13 +235,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 						,@CurrencyId
 					);
 
-				IF 'Inventory - Pricing Level' = @Pricing AND @Price <= @ContractPrice
+				IF 'Inventory - Pricing Level' = @Pricing AND @Price < @ContractPrice
 				BEGIN
 					SET @Pricing = @ContractPricing + '-Pricing Level'
 					SET @UnitPrice = @Price
 					SET @PriceUOMQuantity = 1.000000
 				END
-				ELSE IF ISNULL(@IsMaxPrice,0) = 1 AND @ContractMaxPrice <= @ContractPrice
+				ELSE IF ISNULL(@IsMaxPrice,0) = 1 AND @ContractMaxPrice < @ContractPrice
 				BEGIN 
 					SET @Pricing = @ContractPricing + '-Max Price'
 					SET @Price = @ContractMaxPrice
