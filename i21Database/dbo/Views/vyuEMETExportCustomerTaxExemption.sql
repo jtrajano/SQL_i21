@@ -111,7 +111,12 @@ CustomerNumber
 ,Locale4Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC4' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
 ,Locale5Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC5' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
 ,Locale6Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC6' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-
+,Locale7Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC7' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Locale8Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC8' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Locale9Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC9' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Locale10Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC10' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Locale11Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC11' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Locale12Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC12' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
 
 --,SETCharge		= CASE WHEN SUM(ISNULL(SETCharge,0)) > 0 THEN 'Y' ELSE 'N' END
 --,SSTCharge		= CASE WHEN SUM(ISNULL(SSTCharge,0)) > 0 THEN 'Y' ELSE 'N' END

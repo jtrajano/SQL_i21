@@ -2,21 +2,20 @@
 
 AS
 
-SELECT
-	intCurrencyExposureId,
-	strBatchName,
-	dtmBatchDate,
-	intWeightUnit,
-	dtmCurrencyExposureAsOn,
-	e.intCompanyId,
-	dtmMarketPremiumAsOn,
-	e.intCommodityId,
-	dtmFutureClosingDate,
-	intCurrencyId ,
-	c.strCommodityCode,
-	ic.strUnitMeasure,
-	cur.strCurrency
+SELECT intCurrencyExposureId
+	, strBatchName
+	, dtmBatchDate
+	, dtmCurrencyExposureAsOn
+	, intWeightUnit
+	, ic.strUnitMeasure
+	, e.intCompanyId
+	, dtmMarketPremiumAsOn
+	, e.intCommodityId
+	, c.strCommodityCode
+	, dtmFutureClosingDate
+	, intCurrencyId
+	, cur.strCurrency
 FROM tblRKCurrencyExposure e
-JOIN tblICCommodity c on c.intCommodityId=e.intCommodityId
-JOIN tblICUnitMeasure ic on ic.intUnitMeasureId=e.intWeightUnit
-JOIN tblSMCurrency cur on cur.intCurrencyID=e.intCurrencyId
+LEFT JOIN tblICCommodity c ON c.intCommodityId = e.intCommodityId
+LEFT JOIN tblICUnitMeasure ic ON ic.intUnitMeasureId = e.intWeightUnit
+LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = e.intCurrencyId

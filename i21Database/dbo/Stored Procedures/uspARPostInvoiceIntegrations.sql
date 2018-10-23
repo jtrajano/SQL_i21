@@ -1114,7 +1114,7 @@ SELECT
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
 FROM
 	#ARPostInvoiceDetail ID	
-LEFT JOIN
+JOIN
 	tblCTContractHeader CH
 		ON ID.intContractHeaderId = CH.intContractHeaderId
 WHERE

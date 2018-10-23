@@ -22,6 +22,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , ysnHold					= POS.ysnHold
 	 , ysnReturn				= POS.ysnReturn
 	 , ysnPaid					= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	 , ysnTaxExempt				= ISNULL(POS.ysnTaxExempt,0)
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityCustomerId

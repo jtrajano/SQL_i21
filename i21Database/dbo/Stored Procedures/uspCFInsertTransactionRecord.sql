@@ -1221,7 +1221,9 @@ BEGIN
 		----------POSTED DATE----------
 		--SELECT @strLaggingDate
 
-		IF (@dtmTransactionDate <= @strLaggingDate)
+		
+
+		IF (DATEADD(dd, DATEDIFF(dd, 0, @dtmTransactionDate), 0) <= DATEADD(dd, DATEDIFF(dd, 0, @strLaggingDate), 0))
 		BEGIN
 			SET @strPostedDate = @strPostedDate
 		END

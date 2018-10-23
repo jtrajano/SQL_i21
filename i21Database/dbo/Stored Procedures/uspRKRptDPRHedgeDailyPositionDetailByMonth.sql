@@ -163,6 +163,7 @@ DECLARE @tblGetOpenContractDetail TABLE (
 	    strContractNumber  nvarchar(100),
 		strLocationName  nvarchar(100),
 		dtmEndDate datetime,
+		strFutureMonth NVARCHAR(100),
 		dblBalance DECIMAL(24,10),
 		intUnitMeasureId int, 	
 		intPricingTypeId int,
@@ -185,7 +186,7 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		,intFutureMonthId	int
 		)
 
-INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
+INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,strFutureMonth,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
 	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
 	   	,intFutureMarketId,intFutureMonthId)	
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate

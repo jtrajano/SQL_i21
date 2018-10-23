@@ -12,12 +12,18 @@ BEGIN
 
 	DECLARE @FutureMonth INT
 	
-	SELECT TOP 1 @FutureMonth = DATEPART(mm,dtmFutureMonthsDate)
-	FROM tblRKFuturesMonth
+	SELECT TOP 1 @FutureMonth = DATEPART(mm,dtmFutureMonthsDate) FROM tblRKFuturesMonth 
 	WHERE intFutureMarketId = @FutureMarketId
-		AND dtmFutureMonthsDate >= CONVERT(DATETIME,LTRIM(RTRIM(@Year))+'-'+REPLACE(@Month,' ','')+'-01')
-	ORDER BY 
-		ABS (DATEPART(mm,dtmFutureMonthsDate) - DATEPART(mm, CONVERT(DATETIME,LTRIM(RTRIM(@Year))+'-'+REPLACE(@Month,' ','')+'-01'))) ASC
-		,intYear ASC
+		AND DATEPART(mm,dtmFutureMonthsDate) >= @Month
+	ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
+
+	IF(ISNULL(@FutureMonth, 0) = 0)
+	BEGIN
+		SELECT TOP 1 @FutureMonth = DATEPART(mm,dtmFutureMonthsDate) FROM tblRKFuturesMonth 
+		WHERE intFutureMarketId = @FutureMarketId
+			AND DATEPART(mm,dtmFutureMonthsDate) <= @Month
+		ORDER BY DATEPART(mm,dtmFutureMonthsDate) DESC
+	END
+
 	RETURN @FutureMonth
 END

@@ -236,7 +236,7 @@ IF ISNULL(@ErrorMessage, '') = ''
 		FROM tblARInvoice
 		WHERE intInvoiceId = @createdCreditMemoId
 			
-		IF(@strPaymentMethod = 'Cash')
+		IF(@strPaymentMethod != 'On Account')
 		BEGIN
 			EXEC uspARPOSCreateNegativeCashReceipts 
 						 @intInvoiceId			= @createdCreditMemoId

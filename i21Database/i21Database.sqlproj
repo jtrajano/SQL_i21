@@ -7148,6 +7148,11 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateVoucher.sql" />
     <Build Include="dbo\Tables\tblHDTicketSQLQuery.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMSummaryByUOM.sql" />
+    <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -46,6 +46,7 @@ BEGIN TRY
 		, @ScheduleCode NVARCHAR(50) = NULL
 		, @TaxAuthorityCode NVARCHAR(50) = NULL
 		, @Type NVARCHAR(100) = NULL
+		, @intMaxId INT = 0
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
@@ -610,18 +611,10 @@ BEGIN TRY
 			END
 
 		END
-		--ELSE
-		--BEGIN
-		--	-- NO TAX CRITERIA SETUP
-		--	-- REMOVE ALL INVOICE WITH ZERO TAX
-		--	DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
-		--		SELECT DISTINCT InvTran.intInvoiceDetailId 
-		--		FROM @tmpInvoiceTransaction InvTran
-		--			INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId 
-		--		WHERE ISNULL(tblARInvoiceDetailTax.dblTax, 0) = 0
-		--	)
-		--END
-				
+			
+		-- GET MAX intId
+		SELECT @intMaxId = MAX(intId) FROM @tmpInvoiceTransaction	
+
 		--INVENTORY TRANSFER - Track MFT Activity
 		INSERT INTO @tmpInvoiceTransaction(intId
 			, intInvoiceDetailId
@@ -685,7 +678,7 @@ BEGIN TRY
 			, intTransactionNumberId
 			, strContactName
 			, strEmail)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) AS intId, *
+		SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) + @intMaxId) AS intId, *
 		FROM (SELECT DISTINCT NULL AS intInvoiceDetailId
 				, tblTFReportingComponent.intTaxAuthorityId
 				, tblTFReportingComponent.strFormCode

@@ -430,6 +430,40 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 			AND A.dblTotal <> A.dblTotalController
 			AND pref.ysnEnforceControlTotal = 1
+
+		--VALIDATE APPLIED PREPAID/DEBIT MEMO OUTDATED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Applied payment for ' + A.strBillId + ' is invalid or outdated. Please refresh while on prepaid tab.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			33
+		FROM tblAPBill A
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND
+		EXISTS
+		(
+			SELECT 1
+			FROM tblAPAppliedPrepaidAndDebit B 
+			LEFT JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+			WHERE 
+				B.intBillId = A.intBillId
+			--AND B.intTransactionId = A.intBillId 
+			AND B.ysnApplied = 1
+			AND 
+			(
+				C.ysnPosted = 0 --VPRE/DM is unposted
+			OR	(C.ysnPrepayHasPayment = 0 AND C.intTransactionType = 2) --VPRE's PAYMENT WAS VOIDED/UNPOSTED
+			OR	(C.dblAmountDue < 0 AND C.ysnPosted = 1) --VPRE/DM amount applied is greater than the remaining amount
+			--OR	(C.dblAmountDue < B.dblAmountApplied) --VPRE WAS APPLIED TO OTHER, AMOUNT DUE IS NOT ENOUGH
+			OR	(C.intTransactionType = 2 AND C.intTransactionReversed > 0) --VPRE WAS REVERSED
+			OR	C.intBillId IS NULL --DELETED
+			)
+		)--Prepay and Debit Memo transactions
+		
+
 	END
 	ELSE
 	BEGIN

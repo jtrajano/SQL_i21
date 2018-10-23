@@ -34,7 +34,7 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..##AllowedFutMonth') IS NOT NULL DROP TABLE ##AllowedFutMonth
 	
-	SELECT TOP (@FutMonthsToOpen) * 
+	SELECT TOP (@FutMonthsToOpen) *, intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode) 
 	INTO ##AllowedFutMonth
 	FROM (
 		SELECT TOP 100 PERCENT REPLACE(strMonth,'ysnFut' ,'') strMonth
@@ -184,10 +184,13 @@ BEGIN TRY
 		, strMonthCode NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, intMonthCode INT)
-		
-	WHILE (SELECT COUNT(*) FROM ##FinalFutMonths) < @FutMonthsToOpen
+	
+	DECLARE @intTempFutMontsToOpen INT
+	SET @intTempFutMontsToOpen = @FutMonthsToOpen * 2
+
+	WHILE (SELECT COUNT(*) FROM ##FinalFutMonths) < @intTempFutMontsToOpen
 	BEGIN
-		SELECT @Top = @FutMonthsToOpen - COUNT(*) FROM ##FinalFutMonths
+		SELECT @Top = @intTempFutMontsToOpen - COUNT(*) FROM ##FinalFutMonths
 		
 		INSERT INTO ##FinalFutMonths
 		SELECT TOP (@Top) YEAR(@Date) + @Count, LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode, strMonth, strMonthCode, strSymbol, intMonthCode
@@ -197,7 +200,56 @@ BEGIN TRY
 		
 		SET @Count = @Count + 1
 	END
+
+	DECLARE @intIndex INT = 0;
+	DECLARE @intRowId INT;
+	DECLARE @intCountAllowedMonths INT
+	DECLARE @ProjectedFutureMonths TABLE(
+		  intRowId INT
+		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, ysnProcessed BIT DEFAULT 0);
+	DECLARE @intSelectCount INT = 0;
+	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedFutMonth
+
+	INSERT INTO @ProjectedFutureMonths(intRowId, strMonthName)
+	SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode), strMonth FROM ##AllowedFutMonth
+
+	IF(@intCountAllowedMonths < @FutMonthsToOpen)
+	BEGIN
+		INSERT INTO @ProjectedFutureMonths(intRowId, strMonthName)
+		SELECT TOP(@FutMonthsToOpen - @intCountAllowedMonths) 
+			intRowId = @intCountAllowedMonths + ROW_NUMBER() OVER (ORDER BY intMonthCode), 
+			strMonth 
+		FROM ##AllowedFutMonth
+	END
+
+	DECLARE @intSelectedRow INT
+	DECLARE @strSelectedMonth NVARCHAR(10)
 	
+	WHILE EXISTS(SELECT TOP 1 1 FROM @ProjectedFutureMonths WHERE ysnProcessed = 0)
+	BEGIN
+		SELECT TOP 1 @intSelectedRow = intRowId, @strSelectedMonth = strMonthName FROM @ProjectedFutureMonths WHERE ysnProcessed = 0
+		
+		UPDATE @ProjectedFutureMonths
+		SET strMonth = (
+				SELECT TOP 1 strMonth 
+				FROM ##FinalFutMonths
+				WHERE strMonthName = @strSelectedMonth
+				AND strMonth NOT IN(
+					SELECT strMonth FROM @ProjectedFutureMonths
+					WHERE strMonthName = @strSelectedMonth
+					AND strMonth IS NOT NULL
+				)
+				ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01')
+			),
+			ysnProcessed = 1
+		WHERE intRowId = @intSelectedRow
+	END
+
+	DELETE FROM ##FinalFutMonths
+	WHERE strMonth NOT IN (SELECT strMonth FROM @ProjectedFutureMonths)
+
 	SELECT RowNumber = ROW_NUMBER() OVER (ORDER BY strMonth)
 		, intConcurrencyId = 1
 		, strMonth

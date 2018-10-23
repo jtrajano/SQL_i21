@@ -34,7 +34,8 @@
 		WHEN SC.strDistributionOption = 'SPT' THEN 'Spot Sale'
 		WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
 		WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
-	END) AS strDistributionOption
+	END) AS strDistributionOption,
+	SC.intScaleSetupId
 	FROM tblSCTicket SC 
 	INNER JOIN tblICInventoryReceipt ICR ON SC.intInventoryReceiptId = ICR.intInventoryReceiptId
 	INNER JOIN vyuICGetInventoryReceiptItem ICRI ON SC.strTicketNumber = ICRI.strSourceNumber

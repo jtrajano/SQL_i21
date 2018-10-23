@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspMFInventoryReceiptDetailReport @intInventoryReceiptId INT = 25
+CREATE PROCEDURE uspMFInventoryReceiptDetailReport @intInventoryReceiptId INT 
 AS
 BEGIN
 	DECLARE @strCompanyName NVARCHAR(100)
@@ -10,6 +10,7 @@ BEGIN
 		,@strZip NVARCHAR(12)
 		,@strCountry NVARCHAR(25)
 		,@strPhone NVARCHAR(50)
+		,@Qty DECIMAL(16, 9)
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 		,@strCompanyAddress = strAddress
@@ -22,7 +23,13 @@ BEGIN
 		,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
-	SELECT @strCompanyName AS strCompanyName
+	SELECT @Qty = sum(dblQuantity)
+	FROM tblICInventoryReceipt R
+	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+	WHERE R.intInventoryReceiptId = @intInventoryReceiptId
+
+	SELECT DISTINCT @strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCountry AS strCompanyCountry
 		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
@@ -96,10 +103,10 @@ BEGIN
 				END
 			) AS strContainerSealNo
 		,RIL.strParentLotNumber
-		,RIL.strLotNumber
-		,RIL.dblGrossWeight
-		,(ISNULL(RIL.dblGrossWeight, 0) - ISNULL(RIL.dblTareWeight, 0)) AS dblNetWeight
-		,RIL.dblQuantity
+		--,RIL.strLotNumber
+		--,RIL.dblGrossWeight
+		--,(ISNULL(RIL.dblGrossWeight, 0) - ISNULL(RIL.dblTareWeight, 0)) AS dblNetWeight
+		--,RIL.dblQuantity
 		,UOM.strUnitMeasure
 		,RIL.strContainerNo AS strCustomerPO
 		,RIL.strCondition
@@ -112,7 +119,7 @@ BEGIN
 		,RIL.strGarden
 		,replace(convert(VARCHAR(11), RIL.dtmExpiryDate, 106), ' ', '-') dtmExpiryDate
 		,C.strCountry
-		,Ltrim(convert(NUMERIC(24, 2), (ISNULL(RIL.dblGrossWeight, 0) - ISNULL(RIL.dblTareWeight, 0)))) + ' ' + UOM.strUnitMeasure AS dblNetWeight_UOM
+		,Ltrim(convert(NUMERIC(24, 2), @Qty)) + ' ' + UOM.strUnitMeasure AS dblNetWeight_UOM
 	FROM tblICInventoryReceipt R
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
@@ -125,5 +132,5 @@ BEGIN
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RIL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 	LEFT JOIN tblSMCountry C ON C.intCountryID = RIL.intOriginId
-	WHERE R.intInventoryReceiptId = @intInventoryReceiptId --25 
+	WHERE R.intInventoryReceiptId = @intInventoryReceiptId
 END

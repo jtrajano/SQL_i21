@@ -12,7 +12,18 @@ SELECT ST.intStoreId
 	   , I.strItemNo AS strItemNo
 	   , I.strDescription AS strItemDescription
 	   , '' AS strCheckNo
-FROM tblSTStore ST
-LEFT JOIN tblICItem I ON ST.intCustomerPaymentItemId = I.intItemId
-LEFT JOIN tblEMEntity EM ON ST.intCheckoutCustomerId = EM.intEntityId
-LEFT JOIN tblARCustomer ARC ON ST.intCheckoutCustomerId = ARC.intEntityId
+	   , CH.intCheckoutId
+FROM tblSTCheckoutCustomerPayments CCP
+JOIN tblSTCheckoutHeader CH
+	ON CCP.intCheckoutId = CH.intCheckoutId
+JOIN tblSTStore ST
+	ON CH.intStoreId = ST.intStoreId
+LEFT JOIN tblICItem I 
+	ON CCP.intItemId = I.intItemId
+JOIN tblICItemLocation IL
+	ON I.intItemId = IL.intItemId
+	AND ST.intCompanyLocationId = IL.intLocationId
+LEFT JOIN tblEMEntity EM 
+	ON CCP.intCustomerId = EM.intEntityId
+LEFT JOIN tblARCustomer ARC 
+	ON CCP.intCustomerId = ARC.intEntityId

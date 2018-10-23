@@ -11,6 +11,7 @@
     [dblEmptyWeight] NUMERIC(18, 6) NULL, 
     [dblGrossWeight] NUMERIC(18, 6) NULL, 
     [intWeightUnitMeasureId] INT NULL, 
+	CONSTRAINT [AK_tblLGContainerType_strContainerType] UNIQUE ([strContainerType]),
     CONSTRAINT [PK_tblLGContainerType_intContainerTypeId] PRIMARY KEY ([intContainerTypeId]), 
     CONSTRAINT [FK_tblLGContainerType_tblICUnitMeasure_intDimensionUnitMeasureId] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGContainerType_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

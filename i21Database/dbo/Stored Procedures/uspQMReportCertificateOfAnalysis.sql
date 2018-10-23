@@ -93,6 +93,11 @@ BEGIN TRY
 		,E.strName + CHAR(13) + CHAR(10) + EL.strLocationName + CHAR(13) + CHAR(10) + EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ',' + strState AS [To Address]
 		,strPropertyName
 		,strPropertyValue
+		,CASE 
+			WHEN strResult = 'Failed'
+				THEN ' OOS'
+			ELSE ''
+			END AS strResult
 		,('       ' + strTestMethod) strTestMethod
 		,@companyLogo CompanyLogo
 		,S.strMarks
@@ -156,6 +161,7 @@ BEGIN TRY
 		,CL.strLocationName
 		,PRD.strNote
 		,TR.intSequenceNo
+		,strResult
 	ORDER BY TR.intSequenceNo
 END TRY
 

@@ -1260,7 +1260,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,ItemLocation.intItemLocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
@@ -1289,7 +1289,16 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 													ELSE NULL
 												END
-					,[intInventoryReceiptItemId] = CASE WHEN CS.intStorageTypeId = 1 AND a.intItemId = E2.intItemId THEN E2.intInventoryReceiptItemId ELSE NULL END
+					,[intInventoryReceiptItemId] = CASE 
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+															(SELECT intInventoryReceiptItemId 
+															FROM tblICInventoryReceiptItem 
+															WHERE intInventoryReceiptId =	(SELECT intInventoryReceiptId 
+																							FROM tblGRStorageHistory 
+																							WHERE intCustomerStorageId = CS.intCustomerStorageId
+																								AND intInventoryReceiptId IS NOT NULL))
+													END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -1299,27 +1308,15 @@ BEGIN TRY
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
-				LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = a.intItemId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId and DSC.intItemId = a.intItemId
-				LEFT  JOIN (
-					tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-						ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-					LEFT JOIN tblICItemLocation sourceLocation
-						ON sourceLocation.intItemId = E2.intItemId
-						AND sourceLocation.intLocationId = E1.intLocationId
-					LEFT JOIN tblSMFreightTerms ft
-						ON ft.intFreightTermId = E1.intFreightTermId
-					LEFT JOIN tblICFobPoint fp
-						ON fp.strFobPoint = ft.strFreightTerm
-				)
-					ON CS.intTicketId= E2.intSourceId
+				JOIN tblGRStorageType ST
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
-					AND ItemLocation.intLocationId = @LocationId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.

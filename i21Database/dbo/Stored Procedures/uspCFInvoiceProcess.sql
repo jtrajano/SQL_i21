@@ -733,16 +733,16 @@ BEGIN TRY
 		,strInvoiceNumberHistory
 	)
 	SELECT 
-		dis.intCustomerId
+		 dis.intCustomerId
 		,dis.intAccountId
-		,intFromQty
-		,intThruQty
-		,dblRate
+		,dis.intFromQty
+		,dis.intThruQty
+		,dis.dblRate
 		,dis.intDiscountScheduleId
-		,intDiscountSchedDetailId
+		,dis.intDiscountSchedDetailId
 		,inv.strTempInvoiceReportNumber
 	FROM vyuCFDiscountSchedule as dis 
-	INNER JOIN tblCFInvoiceStagingTable as inv
+	INNER JOIN (SELECT DISTINCT strTempInvoiceReportNumber, intDiscountScheduleId , intAccountId, strUserId FROM tblCFInvoiceStagingTable) as inv
 	ON dis.intDiscountScheduleId = inv.intDiscountScheduleId
 	AND dis.intAccountId = inv.intAccountId
 	WHERE strUserId = @username

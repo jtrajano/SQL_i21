@@ -15,7 +15,7 @@
 AS  
 
 DECLARE @dtmToDate DATETIME
-SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(@dtmPositionAsOf, GETDATE()), 110), 110)
+SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 
 IF ISNULL(@intForecastWeeklyConsumptionUOMId,0) = 0
 BEGIN
@@ -461,7 +461,7 @@ SELECT
               strTradeNo,TransactionDate,TranType,CustVendor,
               dblNoOfLot dblNoOfLot,  
               case when strContractType='Purchase' then dblQuantity else -(abs(dblQuantity)) end as dblQuantity, 
-              1 intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ContractTransaction    
+              1 intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId  FROM @ContractTransaction    
     WHERE intPricingTypeId =1 AND intCommodityId=@intCommodityId  
     AND intCompanyLocationId= CASE WHEN isnull(@intCompanyLocationId,0)=0 then intCompanyLocationId else @intCompanyLocationId end
     AND intFutureMarketId=@intFutureMarketId AND ISNULL(dblNoOfContract,0) <> 0 
@@ -492,20 +492,48 @@ GROUP BY strAccountNumber
 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
+select * from (
 SELECT intRowNumber,grpname,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,dblQuantity) as dblNoOfContract,  
-  strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfContract as 
-  dblNoOfLot, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,dblQuantity) dblQuantity
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,
+  case when strBuySell='Sell' then -abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) else abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) end *@dblContractSize) as dblNoOfContract,  
+  strTradeNo,TransactionDate,TranType,CustVendor,case when strBuySell='Sell' then -abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) else abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) end as  dblNoOfLot,
+   dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,case when strBuySell='Sell' then -abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) else abs(isnull(Long1+Sell1,0) - isnull(MatchLong+MatchShort,0)) end*@dblContractSize) dblQuantity
   ,2 intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId  from  
 (  
 SELECT DISTINCT 2 intRowNumber,'1.Outright Coverage' grpname,'Outright Coverage' Selection,'2.Terminal Position' PriceStatus, 
-   strFutureMonth strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,
-  intOpenContract as dblNoOfContract,  
+   strFutureMonth strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,strBuySell,
+  --intOpenContract as dblNoOfContract,  
+  isnull(CASE 
+						WHEN ft.strBuySell = 'Buy'
+							THEN isnull(ft.intNoOfContract, 0)
+						ELSE NULL
+						END, 0) Long1
+				,isnull(CASE 
+						WHEN ft.strBuySell = 'Sell'
+							THEN isnull(ft.intNoOfContract, 0)
+						ELSE NULL
+						END, 0) Sell1			
+				,ISNULL((
+						SELECT SUM(dblMatchQty)
+						FROM tblRKMatchFuturesPSDetail psd
+						JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+						WHERE psd.intLFutOptTransactionId = ft.intFutOptTransactionId
+							AND h.strType = 'Realize'
+							AND convert(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate
+						), 0) AS MatchLong
+				,ISNULL((
+						SELECT sum(dblMatchQty)
+						FROM tblRKMatchFuturesPSDetail psd
+						JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+						WHERE psd.intSFutOptTransactionId = ft.intFutOptTransactionId
+							AND h.strType = 'Realize'
+							AND convert(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate
+						), 0) AS MatchShort,
   ft.strInternalTradeNo as strTradeNo, ft.dtmFilledDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
-  intOpenContract*@dblContractSize dblQuantity,um.intCommodityUnitMeasureId  
+  --intOpenContract*@dblContractSize dblQuantity
+  um.intCommodityUnitMeasureId  
   , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
-FROM vyuRKGetOpenContract tc
-JOIN tblRKFutOptTransaction ft  on tc.intFutOptTransactionId=ft.intFutOptTransactionId
+FROM  tblRKFutOptTransaction ft  
 JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId and ft.strStatus='Filled'
 JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  and ft.intInstrumentTypeId = 1  and ft.intCommodityId=@intCommodityId 
                                                        and ft.intFutureMarketId=@intFutureMarketId
@@ -518,7 +546,7 @@ AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,
 AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) <= @dtmToDate
 and CONVERT(DATETIME,'01 '+strFutureMonth) >= @dtmFutureMonthsDate
-)t 
+)t )t1 where dblNoOfContract<>0
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 
@@ -693,6 +721,12 @@ DECLARE @MonthOrder as Table (
 declare @strAccountNumber nvarchar(max)
 select top 1 @strAccountNumber=strAccountNumber  from @ListFinal where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
 
+DECLARE @MonthList as Table (  
+     strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS)
+
+insert into @MonthList(strFutureMonth)
+SELECT DISTINCT strFutureMonth FROM @ListFinal 
+		WHERE strGroup = '1.Outright Coverage' and PriceStatus in('1.Priced / Outright - (Outright position)')
 
 INSERT INTO @MonthOrder (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate ,  
                                            TranType,CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
@@ -701,8 +735,7 @@ SELECT DISTINCT 0,'1.Outright Coverage',
 '1.Priced / Outright - (Outright position)',strFutureMonth, @strAccountNumber,
 NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
 FROM @ListFinal  WHERE strFutureMonth
-NOT IN (SELECT DISTINCT strFutureMonth FROM @ListFinal 
-		WHERE strGroup = '1.Outright Coverage' and PriceStatus in('1.Priced / Outright - (Outright position)'))
+NOT IN (SELECT DISTINCT strFutureMonth FROM @MonthList)
 
 INSERT INTO @MonthOrder  (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate ,  
                                            TranType,CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)

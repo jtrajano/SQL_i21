@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKGetM2MBasis
-	@strCopyData NVARCHAR(50) = NULL
+	@intCopyBasisId INT = NULL
 
 AS
 
@@ -14,15 +14,6 @@ DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
 BEGIN TRY
-	
-	IF (ISNULL(@strCopyData, '') <> '')
-	BEGIN
-		DECLARE @dtmCopyData DATETIME
-			, @intM2MBasisId INT
-		
-		SET @dtmCopyData = CONVERT(DATETIME, @strCopyData)
-		SELECT @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis WHERE CAST(FLOOR(CAST(dtmM2MBasisDate AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(@dtmCopyData AS FLOAT)) AS DATETIME)
-	END
 	
 	DECLARE @ysnIncludeInventoryM2M BIT
 		, @ysnIncludeBasisDifferentialsInResults BIT
@@ -54,6 +45,7 @@ BEGIN TRY
 		, strContractType NVARCHAR(50)
 		, dblCashOrFuture NUMERIC(16, 10)
 		, dblBasisOrDiscount NUMERIC(16, 10)
+		, dblRatio NUMERIC(16, 10)
 		, strUnitMeasure NVARCHAR(50)
 		, intCommodityId INT
 		, intItemId INT
@@ -140,13 +132,14 @@ BEGIN TRY
 			FROM vyuRKGetM2MBasis
 		END
 		
-		IF ISNULL(@strCopyData, '') <> '' AND @intM2MBasisId IS NOT NULL
+		IF (ISNULL(@intCopyBasisId, 0) <> 0)
 		BEGIN
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
+				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
@@ -155,7 +148,7 @@ BEGIN TRY
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
-			WHERE b.intM2MBasisId = @intM2MBasisId
+			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
 	END
 	ELSE IF(@strEvaluationBy = 'Item')
@@ -229,13 +222,14 @@ BEGIN TRY
 			FROM vyuRKGetM2MBasis
 		END
 		
-		IF (ISNULL(@strCopyData, '') <> '' AND @intM2MBasisId IS NOT NULL)
+		IF (ISNULL(@intCopyBasisId, 0) <> 0)
 		BEGIN
 			UPDATE a
 			SET  a.dblCashOrFuture = b.dblCashOrFuture
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
+				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
@@ -244,7 +238,7 @@ BEGIN TRY
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
-			WHERE b.intM2MBasisId = @intM2MBasisId
+			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
 	END
 	

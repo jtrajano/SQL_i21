@@ -247,7 +247,7 @@ BEGIN
 			SELECT intAccountId
 				 , strDescription 
 			FROM dbo.tblGLAccount WITH (NOLOCK)
-		) GL ON GL.intAccountId = P.intPaymentId
+		) GL ON GL.intAccountId = P.intAccountId
 		WHERE UF.intSourceTransactionId = P.intPaymentId
 		  AND UF.strSourceTransactionId = P.strRecordNumber
 		  AND P.intCurrencyId = @DupCurrency
