@@ -67,6 +67,7 @@ BEGIN
 		,[intRelatedInventoryTransactionId] INT NULL 
 		,[intFobPointId] TINYINT NULL 
 		,[intInTransitSourceLocationId] INT NULL 
+		,[dblNewAverageCost] NUMERIC(38,20) NULL
 	)
 END 
 
@@ -96,6 +97,7 @@ DECLARE @intId AS INT
 		,@intFobPointId AS TINYINT
 		,@intInTransitSourceLocationId INT 
 		,@intOtherChargeItemId INT 
+		,@dblNewAverageCost AS NUMERIC(38, 20) 
 
 		,@strTransactionId_Batch AS NVARCHAR(40) 
 
@@ -146,6 +148,7 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 			,[intOtherChargeItemId]
+			,[dblNewAverageCost]
 	)
 	SELECT 
 			[intItemId] 
@@ -174,6 +177,7 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 			,[intOtherChargeItemId]
+			,[dblNewAverageCost]
 	FROM	@ItemsToAdjust 
 	ORDER BY	
 		[intItemId]
@@ -216,6 +220,7 @@ SELECT  intId
 		,intFobPointId
 		,intInTransitSourceLocationId
 		,intOtherChargeItemId
+		,dblNewAverageCost
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -247,6 +252,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intFobPointId
 	,@intInTransitSourceLocationId
 	,@intOtherChargeItemId
+	,@dblNewAverageCost
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -498,6 +504,7 @@ BEGIN
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
+			,@dblNewAverageCost
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -559,6 +566,7 @@ BEGIN
 		,@intFobPointId
 		,@intInTransitSourceLocationId
 		,@intOtherChargeItemId
+		,@dblNewAverageCost
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -622,6 +630,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[dblNewAverageCost]
 	)
 	SELECT 
 			[intItemId] 
@@ -649,6 +658,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[dblNewAverageCost]
 	FROM	#tmpRevalueProducedItems
 	ORDER BY [intItemId]
 			,[intItemLocationId]
