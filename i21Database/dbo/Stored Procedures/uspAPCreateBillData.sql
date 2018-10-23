@@ -47,6 +47,7 @@ BEGIN TRY
 
 DECLARE @startingRecordId INT;
 DECLARE @APAccount INT;
+DECLARE @APTerm INT;
 DECLARE @voucherIds AS Id;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -85,6 +86,23 @@ IF @transCount = 0 BEGIN TRANSACTION
 			RAISERROR(@error, 16, 1);
 		END
 		RETURN;
+	END
+		
+	SET @APTerm = (SELECT TOP 1 ISNULL(ISNULL(ISNULL(B2.intTermsId, ISNULL(B.intTermsId,A.intTermsId)),
+								(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),0)
+		FROM tblAPVendor A
+		LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId AND B.ysnDefaultLocation = 1
+		LEFT JOIN [tblEMEntityLocation] B2 ON B2.intEntityLocationId = @shipFrom AND B2.ysnDefaultLocation = 1
+		LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
+		WHERE A.[intEntityId]= @vendorId)
+	IF (@APTerm <= 0) 
+	BEGIN
+		SET @error =  'Please setup default Term Due on Receipt.';
+
+		BEGIN
+			RAISERROR(@error, 16, 1);
+			RETURN;
+		END
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
