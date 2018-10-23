@@ -84,15 +84,7 @@ BEGIN
 							END)
 				 
 		,@PriceBasis	= ICISP.dblUnitAfterDiscount	
-		,@Deviation		= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount
-							ELSE
-								(CASE
-									WHEN ICISP.strDiscountBy = 'Amount'
-										THEN ISNULL(ICISP.dblDiscount, @ZeroDecimal)
-									ELSE	
-										(ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, @ZeroDecimal)/100.000000) )
-								END)
-							END) 									
+		,@Deviation		= ICISP.dblUnitAfterDiscount							
 		,@DiscountBy	= ICISP.strDiscountBy
 		,@PromotionType	= ICISP.strPromotionType
 		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, @ZeroDecimal)/ISNULL(ICISP.dblUnit, @ZeroDecimal)) * @UOMQuantity, @ZeroDecimal) ELSE @ZeroDecimal END)
