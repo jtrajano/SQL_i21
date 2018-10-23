@@ -72,6 +72,8 @@ BEGIN
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		DECLARE @LineItemTaxEntries AS LineItemTaxDetailStagingTable
 		DECLARE @PaymentsForInsert AS PaymentIntegrationStagingTable	
+		DECLARE @EntriesForInvoiceBatchPost AS InvoiceStagingTable -- For Batch Posting 
+		DECLARE @tblIds AS Id
 
 		DECLARE @GLEntries AS RecapTableType 
 		DECLARE @ysnPost BIT = NULL
@@ -132,6 +134,11 @@ BEGIN
 		(
 			intItemId INT
 			, strItemNo NVARCHAR(100)
+		)
+
+		DECLARE @tblTempInvoiceIds TABLE
+		(
+			intInvoiceId INT
 		)
 
 		-- Create the temp table for the intInvoiceId's.
@@ -277,16 +284,23 @@ BEGIN
 							,[intHeaderId] = @intCheckoutId
 							,[dtmDate] = GETDATE()
 						FROM tblSTCheckoutPumpTotals CPT
-							JOIN tblICItemUOM UOM ON CPT.intPumpCardCouponId = UOM.intItemUOMId
-							JOIN tblSTCheckoutHeader CH ON CPT.intCheckoutId = CH.intCheckoutId
-							JOIN tblICItem I ON UOM.intItemId = I.intItemId
-							JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-							JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-													AND IL.intItemLocationId = IP.intItemLocationId
-							JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-												AND CH.intStoreId = ST.intStoreId	
-							JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
-							OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+						JOIN tblICItemUOM UOM 
+							ON CPT.intPumpCardCouponId = UOM.intItemUOMId
+						JOIN tblSTCheckoutHeader CH 
+							ON CPT.intCheckoutId = CH.intCheckoutId
+						JOIN tblICItem I 
+							ON UOM.intItemId = I.intItemId
+						JOIN tblICItemLocation IL 
+							ON I.intItemId = IL.intItemId
+						JOIN tblICItemPricing IP 
+							ON I.intItemId = IP.intItemId
+							AND IL.intItemLocationId = IP.intItemLocationId
+						JOIN tblSTStore ST 
+							ON IL.intLocationId = ST.intCompanyLocationId
+							AND CH.intStoreId = ST.intStoreId	
+						JOIN vyuEMEntityCustomerSearch vC 
+							ON ST.intCheckoutCustomerId = vC.intEntityId
+						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
 																			ISNULL(CPT.dblQuantity, 0)						-- Qty
 																			, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
 																			, @LineItems
@@ -710,7 +724,7 @@ BEGIN
 										,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 										,[strImportFormat]			= 'Not Familiar'
 										,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-										,[intTempDetailIdForTaxes]  = CPT.intPumpTotalsId
+										,[intTempDetailIdForTaxes]  = NULL
 										,[intConversionAccountId]	= NULL -- not sure
 										,[intCurrencyExchangeRateTypeId]	= NULL
 										,[intCurrencyExchangeRateId]		= NULL
@@ -936,7 +950,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -1207,7 +1221,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -1422,7 +1436,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -1644,7 +1658,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -1860,7 +1874,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -1894,213 +1908,6 @@ BEGIN
 				----------------------------------------------------------------------
 
 
-
-
-				------------------------------------------------------------------------
-				---------------------------- CUSTOMER PAYMENTS -------------------------
-				------------------------------------------------------------------------
-				--IF EXISTS(SELECT * FROM tblSTCheckoutCustomerPayments WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intItemId IS NOT NULL)
-				--	BEGIN
-				--			INSERT INTO @EntriesForInvoice(
-				--							 [strSourceTransaction]
-				--							,[strTransactionType]
-				--							,[strType]
-				--							,[intSourceId]
-				--							,[strSourceId]
-				--							,[intInvoiceId]
-				--							,[intEntityCustomerId]
-				--							,[intCompanyLocationId]
-				--							,[intCurrencyId]
-				--							,[intTermId]
-				--							,[dtmDate]
-				--							,[dtmDueDate]
-				--							,[dtmShipDate]
-				--							,[dtmCalculated]
-				--							,[dtmPostDate]
-				--							,[intEntitySalespersonId]
-				--							,[intFreightTermId]
-				--							,[intShipViaId]
-				--							,[intPaymentMethodId]
-				--							,[strInvoiceOriginId]
-				--							,[strPONumber]
-				--							,[strBOLNumber]
-				--							,[strComments]
-				--							,[intShipToLocationId]
-				--							,[intBillToLocationId]
-				--							,[ysnTemplate]
-				--							,[ysnForgiven]
-				--							,[ysnCalculated]
-				--							,[ysnSplitted]
-				--							,[intPaymentId]
-				--							,[intSplitId]
-				--							,[intLoadDistributionHeaderId]
-				--							,[strActualCostId]
-				--							,[intShipmentId]
-				--							,[intTransactionId]
-				--							,[intEntityId]
-				--							,[ysnResetDetails]
-				--							,[ysnRecap] -- RECAP
-				--							,[ysnPost]
-				--							,[intInvoiceDetailId]
-				--							,[intItemId]
-				--							,[ysnInventory]
-				--							,[strItemDescription]
-				--							,[intOrderUOMId]
-				--							,[dblQtyOrdered]
-				--							,[intItemUOMId]
-				--							,[dblQtyShipped]
-				--							,[dblDiscount]
-				--							,[dblPrice]
-				--							,[ysnRefreshPrice]
-				--							,[strMaintenanceType]
-				--							,[strFrequency]
-				--							,[dtmMaintenanceDate]
-				--							,[dblMaintenanceAmount]
-				--							,[dblLicenseAmount]
-				--							,[intTaxGroupId]
-				--							,[ysnRecomputeTax]
-				--							,[intSCInvoiceId]
-				--							,[strSCInvoiceNumber]
-				--							,[intInventoryShipmentItemId]
-				--							,[strShipmentNumber]
-				--							,[intSalesOrderDetailId]
-				--							,[strSalesOrderNumber]
-				--							,[intContractHeaderId]
-				--							,[intContractDetailId]
-				--							,[intShipmentPurchaseSalesContractId]
-				--							,[intTicketId]
-				--							,[intTicketHoursWorkedId]
-				--							,[intSiteId]
-				--							,[strBillingBy]
-				--							,[dblPercentFull]
-				--							,[dblNewMeterReading]
-				--							,[dblPreviousMeterReading]
-				--							,[dblConversionFactor]
-				--							,[intPerformerId]
-				--							,[ysnLeaseBilling]
-				--							,[ysnVirtualMeterReading]
-				--							,[strImportFormat]
-				--							,[dblCOGSAmount]
-				--							,[intTempDetailIdForTaxes]
-				--							,[intConversionAccountId]
-				--							,[intCurrencyExchangeRateTypeId]
-				--							,[intCurrencyExchangeRateId]
-				--							,[dblCurrencyExchangeRate]
-				--							,[intSubCurrencyId]
-				--							,[dblSubCurrencyRate]
-				--							--,[ysnImportedFromOrigin]
-				--							--,[ysnImportedAsPosted]
-				--						)
-				--						SELECT 
-				--							 [strSourceTransaction]		= 'Invoice'
-				--							,[strTransactionType]		= @strInvoiceTransactionTypeMain
-				--						    ,[strType]					= @strInvoiceTypeMain
-				--							,[intSourceId]				= @intCheckoutId
-				--							,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
-				--							,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
-				--							,[intEntityCustomerId]		= @intEntityCustomerId
-				--							,[intCompanyLocationId]		= @intCompanyLocationId
-				--							,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-				--							,[intTermId]				= vC.intTermsId						--ADDED
-				--							,[dtmDate]					= @dtmCheckoutDate --GETDATE()
-				--							,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
-				--							,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
-				--							,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
-				--							,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-				--							,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
-				--							,[intFreightTermId]			= vC.intFreightTermId				--ADDED
-				--							,[intShipViaId]				= vC.intShipViaId					--ADDED
-				--							,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
-				--							,[strInvoiceOriginId]		= NULL -- not sure
-				--							,[strPONumber]				= NULL -- not sure
-				--							,[strBOLNumber]				= NULL -- not sure
-				--							,[strComments]				= @strComments
-				--							,[intShipToLocationId]		= vC.intShipToId					--ADDED
-				--							,[intBillToLocationId]		= NULL
-				--							,[ysnTemplate]				= 0
-				--							,[ysnForgiven]				= 0
-				--							,[ysnCalculated]			= 0 -- not sure
-				--							,[ysnSplitted]				= 0
-				--							,[intPaymentId]				= NULL
-				--							,[intSplitId]				= NULL
-				--							,[intLoadDistributionHeaderId]	= NULL
-				--							,[strActualCostId]			= NULL
-				--							,[intShipmentId]			= NULL
-				--							,[intTransactionId]			= NULL
-				--							,[intEntityId]				= @intCurrentUserId
-				--							,[ysnResetDetails]			= CASE
-				--															WHEN @intCurrentInvoiceId IS NOT NULL
-				--																THEN CAST(0 AS BIT)
-				--															ELSE CAST(1 AS BIT)
-				--													      END
-				--							,[ysnRecap]					= @ysnRecap
-				--							,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
-				--							,[intInvoiceDetailId]		= NULL
-				--							,[intItemId]				= I.intItemId
-				--							,[ysnInventory]				= 1
-				--							,[strItemDescription]		= I.strDescription
-				--							,[intOrderUOMId]			= UOM.intItemUOMId
-				--							,[dblQtyOrdered]			= 0 -- 1
-				--							,[intItemUOMId]				= UOM.intItemUOMId
-				--							,[dblQtyShipped]			= 1
-				--							,[dblDiscount]				= 0
-				--							,[dblPrice]					= ISNULL(CP.dblAmount, 0)
-				--							,[ysnRefreshPrice]			= 0
-				--							,[strMaintenanceType]		= NULL
-				--							,[strFrequency]				= NULL
-				--							,[dtmMaintenanceDate]		= NULL
-				--							,[dblMaintenanceAmount]		= NULL
-				--							,[dblLicenseAmount]			= NULL
-				--							,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-				--							,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
-				--							,[intSCInvoiceId]			= NULL
-				--							,[strSCInvoiceNumber]		= NULL
-				--							,[intInventoryShipmentItemId] = NULL
-				--							,[strShipmentNumber]		= NULL
-				--							,[intSalesOrderDetailId]	= NULL
-				--							,[strSalesOrderNumber]		= NULL
-				--							,[intContractHeaderId]		= NULL
-				--							,[intContractDetailId]		= NULL
-				--							,[intShipmentPurchaseSalesContractId]	= NULL
-				--							,[intTicketId]				= NULL
-				--							,[intTicketHoursWorkedId]	= NULL
-				--							,[intSiteId]				= NULL -- not sure
-				--							,[strBillingBy]				= NULL -- not sure
-				--							,[dblPercentFull]			= NULL
-				--							,[dblNewMeterReading]		= NULL
-				--							,[dblPreviousMeterReading]	= NULL -- not sure
-				--							,[dblConversionFactor]		= NULL -- not sure
-				--							,[intPerformerId]			= NULL -- not sure
-				--							,[ysnLeaseBilling]			= NULL
-				--							,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-				--							,[strImportFormat]			= 'Not Familiar'
-				--							,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-				--							,[intTempDetailIdForTaxes]  = I.intItemId
-				--							,[intConversionAccountId]	= NULL -- not sure
-				--							,[intCurrencyExchangeRateTypeId]	= NULL
-				--							,[intCurrencyExchangeRateId]		= NULL
-				--							,[dblCurrencyExchangeRate]	= 1.000000
-				--							,[intSubCurrencyId]			= NULL
-				--							,[dblSubCurrencyRate]		= 1.000000
-				--							--,0
-				--							--,1
-				--				FROM tblSTCheckoutCustomerPayments CP
-				--				JOIN tblICItem I ON CP.intItemId = I.intItemId
-				--				JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
-				--				JOIN tblSTCheckoutHeader CH ON CP.intCheckoutId = CH.intCheckoutId
-				--				JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-				--				JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-				--										AND IL.intItemLocationId = IP.intItemLocationId
-				--				JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-				--								AND CH.intStoreId = ST.intStoreId
-				--				JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
-				--				WHERE CP.intCheckoutId = @intCheckoutId
-				--				AND CP.dblAmount > 0
-				--				AND UOM.ysnStockUnit = CAST(1 AS BIT)
-				--	END
-				------------------------------------------------------------------------
-				------------------------- END CUSTOMER PAYMENTS ------------------------
-				------------------------------------------------------------------------
 
 
 
@@ -2298,7 +2105,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -2523,7 +2330,7 @@ BEGIN
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
 											,[intCurrencyExchangeRateId]		= NULL
@@ -2564,7 +2371,7 @@ BEGIN
 				------------------------------- POST ---------------------------------
 				----------------------------------------------------------------------
 				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
-				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
+				DECLARE @CreatedIvoices AS NVARCHAR(MAX)
 				
 
 				-- Filter dblPrice should not be 0 and null
@@ -2609,24 +2416,253 @@ BEGIN
 								END
 							ELSE
 								BEGIN
-									-- CLEAR
-									SET @CreatedIvoices = ''
 
 									BEGIN TRY
-										--TEST
+										
+										-- Insert to table for Batch Posting
+										INSERT INTO @EntriesForInvoiceBatchPost(
+											[intId]
+											,[strTransactionType]
+											,[strSourceTransaction]
+											,[intSourceId]
+											,[strSourceId]
+											,[intInvoiceId]
+											,[intEntityCustomerId]
+											,[intCompanyLocationId]
+											,[intCurrencyId]
+											,[intTermId]
+											,[dtmDate]
+											,[dtmDueDate]
+											,[dtmShipDate]
+											,[intEntitySalespersonId]
+											,[intFreightTermId]
+											,[intShipViaId]
+											,[intPaymentMethodId]
+											,[strInvoiceOriginId]
+											,[ysnUseOriginIdAsInvoiceNumber]
+											,[strPONumber]
+											,[strBOLNumber]
+											,[strComments]
+											,[intShipToLocationId]
+											,[intBillToLocationId]
+											,[ysnTemplate]
+											,[ysnForgiven]
+											,[ysnCalculated]
+											,[ysnSplitted]
+											,[intPaymentId]
+											,[intSplitId]
+											,[intLoadDistributionHeaderId]
+											,[strActualCostId]
+											,[intShipmentId]
+											,[intTransactionId]
+											,[intEntityId]
+											,[ysnResetDetails]
+											,[ysnPost]
+											,[intInvoiceDetailId]
+											,[intItemId]
+											,[ysnInventory]
+											,[strItemDescription]
+											,[intItemUOMId]
+											,[dblQtyOrdered]
+											,[dblQtyShipped]
+											,[dblDiscount]
+											,[dblPrice]
+											,[ysnRefreshPrice]
+											,[strMaintenanceType]
+											,[strFrequency]
+											,[dtmMaintenanceDate]
+											,[dblMaintenanceAmount]
+											,[dblLicenseAmount]
+											,[intTaxGroupId]
+											,[ysnRecomputeTax]
+											,[intSCInvoiceId]
+											,[strSCInvoiceNumber]
+											,[intInventoryShipmentItemId]
+											,[strShipmentNumber]
+											,[intSalesOrderDetailId]
+											,[strSalesOrderNumber]
+											,[intContractHeaderId]
+											,[intContractDetailId]
+											,[intShipmentPurchaseSalesContractId]
+											,[intTicketId]
+											,[intTicketHoursWorkedId]
+											,[intSiteId]
+											,[strBillingBy]
+											,[dblPercentFull]
+											,[dblNewMeterReading]
+											,[dblPreviousMeterReading]
+											,[dblConversionFactor]
+											,[intPerformerId]
+											,[ysnLeaseBilling]
+											,[ysnVirtualMeterReading]
+											,[ysnClearDetailTaxes]					
+											,[intTempDetailIdForTaxes]
+											,[strType]
+											,[ysnUpdateAvailableDiscount]
+											,[strItemTermDiscountBy]
+											,[dblItemTermDiscount]
+											,[dtmPostDate]
+											,[ysnImpactInventory]
+											,[dblCOGSAmount]
+											,[strImportFormat]
+											,[dblSubCurrencyRate]
+											,[dblCurrencyExchangeRate])
+										SELECT 
+											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
+											,[strTransactionType]
+											,[strSourceTransaction]
+											,[intSourceId]
+											,[strSourceId]
+											,[intInvoiceId]
+											,[intEntityCustomerId]
+											,[intCompanyLocationId]
+											,[intCurrencyId]
+											,[intTermId]
+											,[dtmDate]
+											,[dtmDueDate]
+											,[dtmShipDate]
+											,[intEntitySalespersonId]
+											,[intFreightTermId]
+											,[intShipViaId]
+											,[intPaymentMethodId]
+											,[strInvoiceOriginId]
+											,[ysnUseOriginIdAsInvoiceNumber]
+											,[strPONumber]
+											,[strBOLNumber]
+											,[strComments]
+											,[intShipToLocationId]
+											,[intBillToLocationId]
+											,[ysnTemplate]
+											,[ysnForgiven]
+											,[ysnCalculated]
+											,[ysnSplitted]
+											,[intPaymentId]
+											,[intSplitId]
+											,[intLoadDistributionHeaderId]
+											,[strActualCostId]
+											,[intShipmentId]
+											,[intTransactionId]
+											,[intEntityId]
+											,[ysnResetDetails]
+											,[ysnPost]
+											,[intInvoiceDetailId]
+											,[intItemId]
+											,[ysnInventory]
+											,[strItemDescription]
+											,[intItemUOMId]
+											,[dblQtyOrdered]
+											,[dblQtyShipped]
+											,[dblDiscount]
+											,[dblPrice]
+											,[ysnRefreshPrice]
+											,[strMaintenanceType]
+											,[strFrequency]
+											,[dtmMaintenanceDate]
+											,[dblMaintenanceAmount]
+											,[dblLicenseAmount]
+											,[intTaxGroupId]
+											,[ysnRecomputeTax]
+											,[intSCInvoiceId]
+											,[strSCInvoiceNumber]
+											,[intInventoryShipmentItemId]
+											,[strShipmentNumber]
+											,[intSalesOrderDetailId]
+											,[strSalesOrderNumber]
+											,[intContractHeaderId]
+											,[intContractDetailId]
+											,[intShipmentPurchaseSalesContractId]
+											,[intTicketId]
+											,[intTicketHoursWorkedId]
+											,[intSiteId]
+											,[strBillingBy]
+											,[dblPercentFull]
+											,[dblNewMeterReading]
+											,[dblPreviousMeterReading]
+											,[dblConversionFactor]
+											,[intPerformerId]
+											,[ysnLeaseBilling]
+											,[ysnVirtualMeterReading]
+											,[ysnClearDetailTaxes]					
+											,[intTempDetailIdForTaxes]
+											,[strType]
+											,[ysnUpdateAvailableDiscount]
+											,[strItemTermDiscountBy]
+											,[dblItemTermDiscount]
+											,[dtmPostDate]
+											,[ysnImpactInventory]
+											,[dblCOGSAmount]
+											,[strImportFormat]
+											,[dblSubCurrencyRate]
+											,[dblCurrencyExchangeRate]
+										FROM @EntriesForInvoice
+
 										--SELECT * FROM @EntriesForInvoice
 
-										-- POST Invoice
-										EXEC [dbo].[uspARProcessInvoices]
-													@InvoiceEntries				= @EntriesForInvoice
+										SELECT * FROM @LineItemTaxEntries
+
+										SELECT * FROM @EntriesForInvoiceBatchPost
+
+										-- POST Main Checkout Invoice (Batch Posting)
+										EXEC [dbo].[uspARProcessInvoicesByBatch]
+													@InvoiceEntries				= @EntriesForInvoiceBatchPost
 													,@LineItemTaxEntries		= @LineItemTaxEntries
 													,@UserId					= @intCurrentUserId
 		 											,@GroupingOption			= 11
 													,@RaiseError				= 1
-													--,@BatchId					= @strCreateGuidBatch
 													,@ErrorMessage				= @ErrorMessage OUTPUT
-													,@CreatedIvoices			= @CreatedIvoices OUTPUT
-													,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
+													,@LogId					    = @intIntegrationLogId OUTPUT
+
+										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId)
+											BEGIN
+												
+												UPDATE tblSTCheckoutHeader
+												SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
+												WHERE intCheckoutId = @intCheckoutId
+
+												SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
+												FROM tblARInvoiceIntegrationLog
+												WHERE intIntegrationLogId = @intIntegrationLogId
+
+												-- Insert to Temp Table
+												DELETE FROM @tblTempInvoiceIds
+
+												INSERT INTO @tblTempInvoiceIds
+												(
+													intInvoiceId
+												)
+												SELECT DISTINCT 
+													intInvoiceId
+												FROM tblARInvoiceIntegrationLogDetail
+												WHERE intIntegrationLogId = (
+																				SELECT intSalesInvoiceIntegrationLogId
+																				FROM tblSTCheckoutHeader
+																				WHERE intCheckoutId =  @intCheckoutId
+																			)
+
+												-- Populate variable with Invoice Ids
+												SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+												FROM @tblTempInvoiceIds
+
+											END
+										--ELSE IF (@ErrorMessage IS NOT NULL AND @ErrorMessage <> '')
+										--	BEGIN
+										--		SET @strStatusMsg = 'Post Sales Invoice error: ' + @ErrorMessage
+
+										--		GOTO ExitWithRollback
+										--		RETURN
+										--	END
+
+										---- POST Invoice
+										--EXEC [dbo].[uspARProcessInvoices]
+										--			@InvoiceEntries				= @EntriesForInvoice
+										--			,@LineItemTaxEntries		= @LineItemTaxEntries
+										--			,@UserId					= @intCurrentUserId
+		 							--				,@GroupingOption			= 11
+										--			,@RaiseError				= 1
+										--			--,@BatchId					= @strCreateGuidBatch
+										--			,@ErrorMessage				= @ErrorMessage OUTPUT
+										--			,@CreatedIvoices			= @CreatedIvoices OUTPUT
+										--			,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
 										
 
 										-- Check if Recap
@@ -2752,8 +2788,6 @@ BEGIN
 
 								-- Invoice MAIN Checkout
 								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList ORDER BY intInvoiceId ASC)
-----TEST
---PRINT '@intCreatedInvoiceId: ' + CAST(@intCreatedInvoiceId AS NVARCHAR(50))
 
 								-- Invoice remaining will be used for Customer CHarges
 								DELETE FROM #tmpCustomerInvoiceIdList WHERE intInvoiceId = @intCreatedInvoiceId
@@ -2794,7 +2828,7 @@ BEGIN
 								GOTO ExitWithRollback
 								RETURN
 							END
-							END
+					END
 				ELSE 
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
@@ -2879,7 +2913,7 @@ BEGIN
 											,[strSourceTransaction]					= 'Invoice'
 											,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
 											,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
-											,[intPaymentId]							= NULL		-- Payment Id(Insert new Invoice if NULL, else Update existing) 
+											,[intPaymentId]							= NULL									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
 											,[intEntityCustomerId]					= CCP.intCustomerId
 											,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
 											,[intCurrencyId]						= @intCurrencyId
@@ -2909,7 +2943,7 @@ BEGIN
 											,[intEntityId]							= @intCurrentUserId
 											--Detail																																															
 											,[intPaymentDetailId]					= NULL		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
-											,[intInvoiceId]							= @intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
+											,[intInvoiceId]							= NULL --@intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
 											,[strTransactionType]					= NULL
 											,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
 											,[strTransactionNumber]					= NULL		-- Transaction Number 
@@ -2968,16 +3002,20 @@ BEGIN
 								,@ErrorMessage		= @ErrorMessage OUTPUT
 								,@LogId				= @intIntegrationLogId OUTPUT
 
+
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId)
 							BEGIN
+								--TEST
+								SELECT * FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+								 
 								-- Posting to Recieve Payments is successfull
 								UPDATE tblSTCheckoutHeader
 								SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId
 								WHERE intCheckoutId = @intCheckoutId
+
 							END
 						ELSE
 							BEGIN
-								SET @ErrorMessage = @ErrorMessage
 								SET @strStatusMsg = 'Post Recieve Payments error: ' + @ErrorMessage
 
 								-- ROLLBACK
@@ -2996,6 +3034,30 @@ BEGIN
 				----------------------------------------------------------------------
 				--------------- START UN-POST SALES INVOICE --------------------------
 				----------------------------------------------------------------------
+
+				SET @strCurrentAllInvoiceIdList = NULL
+
+				-- Insert to Temp Table
+				DELETE FROM @tblTempInvoiceIds
+
+				INSERT INTO @tblTempInvoiceIds
+				(
+					intInvoiceId
+				)
+				SELECT DISTINCT 
+					intInvoiceId
+				FROM tblARInvoiceIntegrationLogDetail
+				WHERE intIntegrationLogId = (
+												SELECT intSalesInvoiceIntegrationLogId
+												FROM tblSTCheckoutHeader
+												WHERE intCheckoutId =  @intCheckoutId
+											)
+
+				-- Populate variable with Invoice Ids
+				SELECT @strCurrentAllInvoiceIdList = COALESCE(@strCurrentAllInvoiceIdList + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+				FROM @tblTempInvoiceIds
+
+
 				IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
 					BEGIN
 
@@ -3256,138 +3318,141 @@ BEGIN
 
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = 1)
 							BEGIN
-								INSERT INTO @PaymentsForInsert(
-										 [intId]
-										,[strSourceTransaction]
-										,[intSourceId]
-										,[strSourceId]
-										,[intPaymentId]
-										,[intEntityCustomerId]
-										,[intCompanyLocationId]
-										,[intCurrencyId]
-										,[dtmDatePaid]
-										,[intPaymentMethodId]
-										,[strPaymentMethod]
-										,[strPaymentInfo]
-										,[strNotes]
-										,[intAccountId]
-										,[intBankAccountId]
-										,[intWriteOffAccountId]		
-										,[dblAmountPaid]
-										,[intExchangeRateTypeId]
-										,[dblExchangeRate]
-										,[strReceivePaymentType]
-										,[strPaymentOriginalId]
-										,[ysnUseOriginalIdAsPaymentNumber]
-										,[ysnApplytoBudget]
-										,[ysnApplyOnAccount]
-										,[ysnInvoicePrepayment]
-										,[ysnImportedFromOrigin]
-										,[ysnImportedAsPosted]
-										,[ysnAllowPrepayment]		
-										,[ysnPost]
-										,[ysnRecap]
-										,[ysnUnPostAndUpdate]
-										,[intEntityId]
-										--Detail																																															
-										,[intPaymentDetailId]
-										,[intInvoiceId]
-										,[strTransactionType]
-										,[intBillId]
-										,[strTransactionNumber]
-										,[intTermId]
-										,[intInvoiceAccountId]
-										,[ysnApplyTermDiscount]
-										,[dblDiscount]
-										,[dblDiscountAvailable]
-										,[dblInterest]
-										,[dblPayment]
-										,[strInvoiceReportNumber]
-										,[intCurrencyExchangeRateTypeId]
-										,[intCurrencyExchangeRateId]
-										,[dblCurrencyExchangeRate]
-										,[ysnAllowOverpayment]
-										,[ysnFromAP]
-									)								
-									SELECT		 	
-										 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
-										,[strSourceTransaction]					= 'Invoice'
-										,[intSourceId]							= CCP.intCustPaymentsId
-										,[strSourceId]							= CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
-										,[intPaymentId]							= NULL		-- Payment Id(Insert new Invoice if NULL, else Update existing) 
-										,[intEntityCustomerId]					= CCP.intCustomerId
-										,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
-										,[intCurrencyId]						= @intCurrencyId
-										,[dtmDatePaid]							= @dtmCheckoutDate
-										,[intPaymentMethodId]					= CCP.intPaymentMethodID
-										,[strPaymentMethod]						= PM.strPaymentMethod
-										,[strPaymentInfo]						= CCP.strCheckNo
-										,[strNotes]								= 'Store Payment ' + CCP.strComment
-										,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
-										,[intBankAccountId]						= NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])
-										,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
-										,[dblAmountPaid]						= CCP.dblAmount
-										,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
-										,[dblExchangeRate]						= NULL
-										,[strReceivePaymentType]				= 'Cash Receipts'
-										,[strPaymentOriginalId]					= NULL		-- Reference to the original/parent record
-										,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
-										,[ysnApplytoBudget]						= NULL
-										,[ysnApplyOnAccount]					= NULL
-										,[ysnInvoicePrepayment]					= NULL
-										,[ysnImportedFromOrigin]				= NULL
-										,[ysnImportedAsPosted]					= NULL
-										,[ysnAllowPrepayment]					= NULL
-										,[ysnPost]								= 0			-- 1. Post, 0. UnPost
-										,[ysnRecap]								= @ysnRecap
-										,[ysnUnPostAndUpdate]					= NULL
-										,[intEntityId]							= @intCurrentUserId
-										--Detail																																															
-										,[intPaymentDetailId]					= NULL		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
-										,[intInvoiceId]							= NULL		-- Key Value from tblARInvoice ([tblARInvoice].[intInvoiceId])	
-										,[strTransactionType]					= NULL
-										,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
-										,[strTransactionNumber]					= NULL		-- Transaction Number 
-										,[intTermId]							= NULL		-- Term Id(If NULL, customer's default will be used) 
-										,[intInvoiceAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])
-										,[ysnApplyTermDiscount]					= NULL
-										,[dblDiscount]							= NULL		-- Discount
-										,[dblDiscountAvailable]					= NULL		-- Discount 
-										,[dblInterest]							= NULL		-- Interest
-										,[dblPayment]							= NULL		-- Payment	
-										,[strInvoiceReportNumber]				= NULL		-- Transaction Number
-										,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
-										,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
-										,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
-										,[ysnAllowOverpayment]					= NULL
-										,[ysnFromAP]							= NULL 
-									FROM tblSTCheckoutCustomerPayments CCP
-									JOIN tblARPaymentIntegrationLogDetail PILD
-										ON CCP.intCustPaymentsId = PILD.intSourceId
-									JOIN tblICItem I 
-										ON CCP.intItemId = I.intItemId
-									JOIN tblICItemUOM UOM 
-										ON I.intItemId = UOM.intItemId
-									JOIN tblSTCheckoutHeader CH 
-										ON CCP.intCheckoutId = CH.intCheckoutId
-									JOIN tblICItemLocation IL 
-										ON I.intItemId = IL.intItemId
-									JOIN tblICItemPricing IP 
-										ON I.intItemId = IP.intItemId
-										AND IL.intItemLocationId = IP.intItemLocationId
-									JOIN tblSTStore ST 
-										ON IL.intLocationId = ST.intCompanyLocationId
-										AND CH.intStoreId = ST.intStoreId
-									JOIN vyuEMEntityCustomerSearch vC 
-										ON CCP.intCustomerId = vC.intEntityId
-									LEFT JOIN tblSMPaymentMethod PM	
-										ON CCP.intPaymentMethodID = PM.intPaymentMethodID
-									WHERE CCP.intCheckoutId = @intCheckoutId
-									AND CCP.dblAmount > 0
-									AND UOM.ysnStockUnit = CAST(1 AS BIT)
-									AND PILD.ysnPosted = 1
-									ORDER BY
-										[intId]
+									INSERT INTO @PaymentsForInsert(
+											[intId]
+											,[strSourceTransaction]
+											,[intSourceId]
+											,[strSourceId]
+											,[intPaymentId]
+											,[intEntityCustomerId]
+											,[intCompanyLocationId]
+											,[intCurrencyId]
+											,[dtmDatePaid]
+											,[intPaymentMethodId]
+											,[strPaymentMethod]
+											,[strPaymentInfo]
+											,[strNotes]
+											,[intAccountId]
+											,[intBankAccountId]
+											,[intWriteOffAccountId]		
+											,[dblAmountPaid]
+											,[intExchangeRateTypeId]
+											,[dblExchangeRate]
+											,[strReceivePaymentType]
+											,[strPaymentOriginalId]
+											,[ysnUseOriginalIdAsPaymentNumber]
+											,[ysnApplytoBudget]
+											,[ysnApplyOnAccount]
+											,[ysnInvoicePrepayment]
+											,[ysnImportedFromOrigin]
+											,[ysnImportedAsPosted]
+											,[ysnAllowPrepayment]		
+											,[ysnPost]
+											,[ysnRecap]
+											,[ysnUnPostAndUpdate]
+											,[intEntityId]
+											--Detail																																															
+											,[intPaymentDetailId]
+											,[intInvoiceId]
+											,[strTransactionType]
+											,[intBillId]
+											,[strTransactionNumber]
+											,[intTermId]
+											,[intInvoiceAccountId]
+											,[ysnApplyTermDiscount]
+											,[dblDiscount]
+											,[dblDiscountAvailable]
+											,[dblInterest]
+											,[dblPayment]
+											,[strInvoiceReportNumber]
+											,[intCurrencyExchangeRateTypeId]
+											,[intCurrencyExchangeRateId]
+											,[dblCurrencyExchangeRate]
+											,[ysnAllowOverpayment]
+											,[ysnFromAP]
+										)								
+										SELECT		 	
+											 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+											,[strSourceTransaction]					= 'Invoice'
+											,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
+											,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+											,[intPaymentId]							= Payment.intPaymentId									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
+											,[intEntityCustomerId]					= CCP.intCustomerId
+											,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
+											,[intCurrencyId]						= @intCurrencyId
+											,[dtmDatePaid]							= @dtmCheckoutDate
+											,[intPaymentMethodId]					= CCP.intPaymentMethodID
+											,[strPaymentMethod]						= PM.strPaymentMethod
+											,[strPaymentInfo]						= CCP.strCheckNo
+											,[strNotes]								= 'Store Payment ' + CCP.strComment
+											,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+											,[intBankAccountId]						= NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])
+											,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
+											,[dblAmountPaid]						= CCP.dblAmount
+											,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
+											,[dblExchangeRate]						= NULL
+											,[strReceivePaymentType]				= 'Cash Receipts'
+											,[strPaymentOriginalId]					= NULL		-- Reference to the original/parent record
+											,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
+											,[ysnApplytoBudget]						= 0
+											,[ysnApplyOnAccount]					= 0
+											,[ysnInvoicePrepayment]					= 0
+											,[ysnImportedFromOrigin]				= NULL
+											,[ysnImportedAsPosted]					= NULL
+											,[ysnAllowPrepayment]					= 1
+											,[ysnPost]								= 0			-- 1. Post, 0. UnPost
+											,[ysnRecap]								= @ysnRecap
+											,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
+											,[intEntityId]							= @intCurrentUserId
+											--Detail																																															
+											,[intPaymentDetailId]					= ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+											,[intInvoiceId]							= @intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
+											,[strTransactionType]					= NULL
+											,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
+											,[strTransactionNumber]					= NULL		-- Transaction Number 
+											,[intTermId]							= NULL		-- Term Id(If NULL, customer's default will be used) 
+											,[intInvoiceAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+											,[ysnApplyTermDiscount]					= 0
+											,[dblDiscount]							= 0.000000		-- Discount
+											,[dblDiscountAvailable]					= NULL		-- Discount 
+											,[dblInterest]							= 0.000000		-- Interest
+											,[dblPayment]							= CCP.dblAmount		-- Payment	
+											,[strInvoiceReportNumber]				= NULL		-- Transaction Number
+											,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
+											,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
+											,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
+											,[ysnAllowOverpayment]					= 0
+											,[ysnFromAP]							= NULL 
+										FROM tblSTCheckoutCustomerPayments CCP
+										JOIN tblICItem I 
+											ON CCP.intItemId = I.intItemId
+										JOIN tblICItemUOM UOM 
+											ON I.intItemId = UOM.intItemId
+										JOIN tblSTCheckoutHeader CH 
+											ON CCP.intCheckoutId = CH.intCheckoutId
+
+										JOIN tblARPaymentIntegrationLogDetail ILD
+											ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
+										JOIN tblARPayment Payment
+											ON ILD.intPaymentId = Payment.intPaymentId
+
+										JOIN tblICItemLocation IL 
+											ON I.intItemId = IL.intItemId
+										JOIN tblICItemPricing IP 
+											ON I.intItemId = IP.intItemId
+											AND IL.intItemLocationId = IP.intItemLocationId
+										JOIN tblSTStore ST 
+											ON IL.intLocationId = ST.intCompanyLocationId
+											AND CH.intStoreId = ST.intStoreId
+										JOIN vyuEMEntityCustomerSearch vC 
+											ON CCP.intCustomerId = vC.intEntityId
+										LEFT JOIN tblSMPaymentMethod PM	
+											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
+										WHERE CCP.intCheckoutId = @intCheckoutId
+										AND CCP.dblAmount > 0
+										AND UOM.ysnStockUnit = CAST(1 AS BIT)
+										ORDER BY
+											[intId]
 
 									IF EXISTS(SELECT TOP 1 1 FROM @PaymentsForInsert)
 										BEGIN
@@ -3401,6 +3466,49 @@ BEGIN
 													,@LogId				= @intIntegrationLogId OUTPUT
 
 											-- After Un-Posting is successfull delete the recieve payment record
+											IF(@ErrorMessage IS NULL) --AND EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId))
+												BEGIN
+													-- Un-Post Success 
+				
+													INSERT INTO @tblIds
+													(
+														intId
+													)
+													SELECT DISTINCT intPaymentId 
+													FROM tblARPaymentIntegrationLogDetail 
+													WHERE intIntegrationLogId = (
+																					SELECT intReceivePaymentsIntegrationLogId
+																					FROM tblSTCheckoutHeader
+																					WHERE intCheckoutId = @intCheckoutId
+																				)
+
+													-- Delete Recieve Payments
+													EXEC [dbo].[uspARDeletePayment]
+																  @PaymentIds	    =	@tblIds
+																, @intEntityUserId	=	@intCurrentUserId
+																, @ysnRaiseError    =	0
+																, @strErrorMessage  =	@ErrorMessage
+
+
+													IF(@ErrorMessage IS NOT NULL)
+														BEGIN
+															-- DELETE Failed
+
+															SET @strStatusMsg = 'Delete Receive Payments error: ' + @ErrorMessage
+
+															-- ROLLBACK
+															GOTO ExitWithRollback
+															RETURN
+														END
+												END
+											ELSE
+												BEGIN
+													SET @strStatusMsg = 'Unpost Receive Payments error: ' + @ErrorMessage
+
+													-- ROLLBACK
+													GOTO ExitWithRollback
+													RETURN
+												END
 
 											-- ROLLBACK Transaction if theres error on UnPosting from Receive Payments
 										END
@@ -3435,9 +3543,6 @@ BEGIN
 					BEGIN
 						SET @strNewCheckoutStatus = 'Open'
 					END
-
-				
-
 
 				IF(@ysnPost IS NULL)
 					BEGIN
@@ -3506,7 +3611,6 @@ BEGIN
 						WHERE intCheckoutId = @intCheckoutId
 					END
 			END
-
 			--DROP
 			IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
 				BEGIN
