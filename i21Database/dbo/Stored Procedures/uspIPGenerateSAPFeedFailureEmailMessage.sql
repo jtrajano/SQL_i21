@@ -81,6 +81,34 @@ Begin
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
 End
 
+If @strMessageType='PO1'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract No</th>
+						<th>&nbsp;Sequence No</th>
+						<th>&nbsp;Type</th>
+						<th>&nbsp;PO No</th>
+						<th>&nbsp;Commodity</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strContractNumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intContractSeq),'') + '</td>'
+		+ '<td>&nbsp;' + CASE WHEN UPPER(strRowState)='ADDED' THEN 'Create' When UPPER(strRowState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strERPPONumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strCommodityCode,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	From tblCTContractFeed 
+	Where ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(ysnMailSent,0)=0
+
+	Update tblCTContractFeed Set ysnMailSent=1
+	Where ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+End
+
 If @strMessageType='Shipment'
 Begin
 	SET @strHeader = '<tr>
