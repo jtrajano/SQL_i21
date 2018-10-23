@@ -56,6 +56,9 @@ DECLARE @intMinSeq INT
 	,@strTblRowState NVARCHAR(50)
 	,@strMessageCode NVARCHAR(50)
 	,@strFLOId NVARCHAR(50)
+	,@intItemId int
+	,@intUnitMeasureId int
+
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strContractFeedIds NVARCHAR(MAX)
@@ -1470,6 +1473,78 @@ BEGIN
 
 		GOTO NEXT_PO
 	END
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICUnitMeasure Where ISNULL(strSymbol, strUnitMeasure)=@strPriceUOM) or @strPriceUOM is null
+	BEGIN
+		IF @ysnMaxPrice = 0
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Invalid price UOM is configured in vendor configuration.'
+			WHERE intContractFeedId = @intContractFeedId
+				AND ISNULL(strFeedStatus, '') = ''
+		END
+		ELSE
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Invalid price UOM is configured in vendor configuration.'
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+		END
+
+		GOTO NEXT_PO
+	END
+
+	Select @intItemId=NULL
+	Select @intItemId=intItemId
+	from tblICItem
+	Where strItemNo=@strContractItemNo
+
+	SELECT @intUnitMeasureId=NULL
+	SELECT @intUnitMeasureId=intUnitMeasureId FROM dbo.tblICUnitMeasure Where ISNULL(strSymbol, strUnitMeasure)=@strPriceUOM
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM Where intItemId=@intItemId and intUnitMeasureId=@intUnitMeasureId)
+	BEGIN
+		IF @ysnMaxPrice = 0
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Configure vendor''s price UOM in the item level.'
+			WHERE intContractFeedId = @intContractFeedId
+				AND ISNULL(strFeedStatus, '') = ''
+		END
+		ELSE
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Configure vendor''s price UOM in the item level.'
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+		END
+
+		GOTO NEXT_PO
+	END
+	
+	IF @strFLOId not in ('1','10','100','1000')
+	BEGIN
+		IF @ysnMaxPrice = 0
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Invalid price per unit is configured in vendor configuration.'
+			WHERE intContractFeedId = @intContractFeedId
+				AND ISNULL(strFeedStatus, '') = ''
+		END
+		ELSE
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Invalid price per unit is configured in vendor configuration.'
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+		END
+		GOTO NEXT_PO
+	END
+
+
 
 	--Send Create Feed only Once
 	IF UPPER(@strRowState) = 'ADDED'
