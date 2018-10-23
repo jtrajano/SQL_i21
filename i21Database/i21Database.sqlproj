@@ -7131,6 +7131,7 @@
     <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
     <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
     <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
