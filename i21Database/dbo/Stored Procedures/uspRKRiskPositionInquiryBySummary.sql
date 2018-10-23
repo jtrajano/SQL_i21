@@ -1,4 +1,4 @@
-﻿CREATE  PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
+﻿CREATE PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
         @intCommodityId INTEGER,  
         @intCompanyLocationId INTEGER,  
         @intFutureMarketId INTEGER,  
@@ -239,16 +239,16 @@ INSERT INTO @PricedContractList
 SELECT fm.strFutureMonth
        ,strContractType + ' - ' + case when @strPositionBy= 'Product Type' then isnull(ca.strDescription, '') else isnull(cv.strEntityName, '') end AS strAccountNumber
        ,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN isnull(@ysnIncludeInventoryHedge,0) = 0 THEN isnull(dblBalance, 0) ELSE dblDetailQuantity END) AS dblNoOfContract
-       ,LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + convert(NVARCHAR, intContractSeq) AS strTradeNo
+       ,LEFT(strContractType, 1) + ' - ' + cv.strContractNumber + ' - ' + convert(NVARCHAR, intContractSeq) AS strTradeNo
        ,dtmStartDate AS TransactionDate
        ,strContractType AS TranType
        ,strEntityName AS CustVendor
-       ,dblNoOfLots AS dblNoOfLot
+       ,case when isnull(cv.ysnMultiplePriceFixation,0)=0 then  cv.dblNoOfLots else ch.dblNoOfLots end AS dblNoOfLot
        ,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, 
 			CASE WHEN isnull(@ysnIncludeInventoryHedge,0) = 0 THEN isnull(dblBalance, 0) ELSE dblDetailQuantity END) AS dblQuantity
        ,cv.intContractHeaderId
        ,NULL AS intFutOptTransactionHeaderId
-       ,intPricingTypeId
+       ,cv.intPricingTypeId
        ,cv.strContractType
        ,cv.intCommodityId
        ,cv.intCompanyLocationId
@@ -259,8 +259,9 @@ SELECT fm.strFutureMonth
        ,intContractStatusId
        ,dblDeltaPercent,cv.intContractDetailId,um.intCommodityUnitMeasureId
 ,dbo.fnCTConvertQuantityToTargetCommodityUOM(um2.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,ffm.dblContractSize) dblRatioContractSize
-       ,dblRatioQty,ysnMultiplePriceFixation
+       ,dblRatioQty,cv.ysnMultiplePriceFixation
 FROM vyuRKRiskPositionContractDetail cv
+join tblCTContractHeader ch on cv.intContractHeaderId=ch.intContractHeaderId
 JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 --JOIN tblICCommodityUnitMeasure um1 ON um1.intCommodityId = cv.intCommodityId AND um1.intUnitMeasureId = ffm.intUnitMeasureId
 JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId and um2.intCommodityId = cv.intCommodityId
@@ -407,7 +408,8 @@ FROM (
                      ,isnull((
                                   SELECT sum(dblLotsFixed) dblNoOfLots
                                   FROM tblCTPriceFixation pf
-                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = case when isnull(cv.ysnMultiplePriceFixation,0) = 1 
+                                  WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = 
+																		case when isnull(cv.ysnMultiplePriceFixation,0) = 1 
                                                                            then cv.intContractDetailId else pf.intContractDetailId end
                                   ), 0) dblFixedLots
                      ,isnull((
@@ -645,7 +647,8 @@ SELECT DISTINCT 'Futures Required' as Selection,'5.Avg Long Price' as PriceStatu
   ft.strFutureMonth, 'Avg Long Price' as strAccountNumber,
    dblWtAvgOpenLongPosition as dblNoOfContract,dblNoOfLot,dblQuantity*dblNoOfLot dblQuantity,strTradeNo,intFutOptTransactionHeaderId
 FROM @RollCost ft
-WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth))t  
+WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId 
+and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth))t  
  
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
@@ -776,7 +779,6 @@ SELECT DISTINCT '1.Outright Coverage',
 NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
 FROM #temp  WHERE strFutureMonth
 NOT IN (@strMonth)
-
 
 SELECT  intRowNumber ,strGroup,Selection ,  
             PriceStatus  ,  
