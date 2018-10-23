@@ -328,7 +328,7 @@ BEGIN
 				,dtmDatePaid					= GETDATE()
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
-				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card') THEN strReferenceNo ELSE NULL END
+				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount, 0)
 				,intEntityId					= @intEntityUserId
@@ -363,8 +363,8 @@ BEGIN
 
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
-											, @UserId			= 1
-											, @GroupingOption	= 5
+											, @UserId			= @intEntityUserId
+											, @GroupingOption	= 6
 											, @RaiseError		= 1
 											, @ErrorMessage		= @ErrorMessage OUTPUT
 											, @LogId			= @LogId OUTPUT
