@@ -63,6 +63,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+    ,[ysnExported]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -1157,6 +1158,7 @@ CREATE TABLE #CustomerInvoice
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
     ,[ysnFromProvisional]           BIT                                             NULL
+    ,[ysnExported]                  BIT                                             NULL
     ,[ysnProvisionalWithGL]         BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
@@ -1258,6 +1260,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+    ,[ysnExported]
     ,[ysnProvisionalWithGL]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
@@ -1363,14 +1366,9 @@ SELECT
 											ELSE
 												CAST(1 AS BIT) 
 											END
-<<<<<<< HEAD
-										ELSE CAST(0 AS BIT) END
-    ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
-=======
 										ELSE CAST(1 AS BIT) END
     ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
->>>>>>> 27645d50cc... AR-9134 Sales > Enforce Impact Inventory to other transaction types other than Credit Memo
     ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
@@ -1545,6 +1543,7 @@ USING
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+        ,[ysnExported]
 		,[dblSplitPercent]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
@@ -1647,6 +1646,7 @@ INSERT(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+    ,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1737,6 +1737,7 @@ VALUES(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+    ,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1898,6 +1899,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+        ,[ysnExported]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -2037,6 +2039,7 @@ BEGIN TRY
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
         ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
+        ,[ysnExported]                          = ITG.[ysnExported]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
