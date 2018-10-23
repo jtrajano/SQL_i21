@@ -7133,7 +7133,8 @@
     <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
-</ItemGroup>
+    <Build Include="dbo\Functions\fnCTConvertToSeqFXCurrency.sql" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
