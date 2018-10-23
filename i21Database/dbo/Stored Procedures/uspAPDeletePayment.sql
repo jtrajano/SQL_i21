@@ -21,76 +21,92 @@ BEGIN TRY
 	DECLARE @UserEntityID INT;
 	DECLARE @intPaymentId INT;
 	DECLARE @ysnPosted INT;
-	DECLARE @ysnClear INT;
+	DECLARE @ysnClear INT;	
+	DECLARE @ysnPrinted INT;
+	DECLARE @intPaymentMethodId INT;
+	DECLARE @count INT = 0; 
+	DECLARE @paymentCount INT;
 	DECLARE @createdPaymentIds AS NVARCHAR(MAX);
 
 	IF OBJECT_ID('tempdb..#tmpCreatedPayment') IS NOT NULL DROP TABLE #tmpCreatedPayment
-	CREATE TABLE #tmpCreatedPayment(intCreatePaymentId INT, intBillId INT, ysnClr INT, ysnPosted INT );
+	CREATE TABLE #tmpCreatedPayment(intCreatePaymentId INT, intBillId INT,intPaymentMethodId INT, ysnClr INT,ysnPrinted INT, ysnPosted INT );
 
-
-	INSERT INTO #tmpCreatedPayment (intCreatePaymentId, intBillId, ysnClr, ysnPosted)
-	SELECT	 intPaymentId 
-			,intBillId
-			,ysnCleared
-			,ysnPaymentPosted
-	FROM vyuAPBillPayment where intBillId = @intBillId
+	INSERT INTO #tmpCreatedPayment (intCreatePaymentId, intBillId,intPaymentMethodId, ysnClr, ysnPrinted, ysnPosted)
+	SELECT	 VAP.intPaymentId 
+			,VAP.intBillId
+			,P.intPaymentMethodId
+			,VAP.ysnCleared
+			,VAP.ysnPrinted
+			,VAP.ysnPaymentPosted
+	FROM vyuAPBillPayment VAP 
+	INNER JOIN tblAPPayment P ON P.intPaymentId = VAP.intPaymentId
+	where intBillId = @intBillId
 
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 	
 	SELECT	@intPaymentId = intCreatePaymentId 
 			,@ysnPosted = ysnPosted
 			,@ysnClear = ysnClr
+			,@ysnPrinted = ysnPrinted
+			,@intPaymentMethodId = intPaymentMethodId
 	FROM #tmpCreatedPayment where intBillId = @intBillId
 
-	SELECT @createdPaymentIds = COALESCE(@createdPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intCreatePaymentId)
-	FROM #tmpCreatedPayment
-	ORDER BY intCreatePaymentId
+	SELECT @paymentCount = (SELECT COUNT(intCreatePaymentId) FROM #tmpCreatedPayment)
+	WHILE @paymentCount !=  @count
 
-	--PAYMENT LOGIC FOR NOT POSTED / NOT CLEARED
-	IF (@ysnPosted = 0)
-	BEGIN 
-		DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
-
-		DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
-	END
-	--PAYMENT LOGIC FOR POSTED PAYMENT CLEARED
-	ELSE 
 	BEGIN
-		IF (@ysnClear = 1)
+		
+		--PAYMENT LOGIC FOR NOT POSTED / NOT CLEARED
+		IF (@ysnPosted = 0)
 		BEGIN 
-			EXEC uspAPRemovePaymentAndCreatePrepay @intBillId, @UserEntityID, @createdPaymentIds, @prepayCreatedIds OUT
+			DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
+
+			DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
 		END
-		ELSE
-		BEGIN	
-				EXEC uspAPPostPayment @userId = @UserEntityID,
-				@recap = 0,
-				@post = 0,
-				@param = @createdPaymentIds,
-				@success = @successPostPayment OUT,
-				@batchIdUsed = @batchIdUsed OUT,
-				@successfulCount = @totalPostedPayment OUT,
-				@invalidCount = @totalUnpostedPayment OUT
+		--PAYMENT LOGIC FOR POSTED PAYMENT / PRINTED CLEARED
+		ELSE 
+		BEGIN 
+			IF ( @ysnPrinted = 1 
+				OR @ysnClear = 1
+				OR (@ysnPosted = 1 AND @intPaymentMethodId = 10) --CASH
+				OR  @ysnPosted = 1 AND @intPaymentMethodId = 6) --ECHECK
+			BEGIN 
+				EXEC uspAPRemovePaymentAndCreatePrepay @intBillId, @UserEntityID, @intPaymentId, @prepayCreatedIds OUT
+				
+				SELECT * from tblAPPayment where intPaymentId = @intPaymentId
+			END
+			ELSE
+			BEGIN	
+					EXEC uspAPPostPayment @userId = @UserEntityID,
+					@recap = 0,
+					@post = 0,
+					@param = @intPaymentId,
+					@success = @successPostPayment OUT,
+					@batchIdUsed = @batchIdUsed OUT,
+					@successfulCount = @totalPostedPayment OUT,
+					@invalidCount = @totalUnpostedPayment OUT
 
-		DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
+			DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
 
-		DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+			DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+			END
 		END
-	END
-
-	BEGIN 
-		DELETE FROM dbo.tblSMTransaction
-		WHERE intRecordId = @intPaymentId 
-		AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PayVouchersDetail')
+		SET @count = @count + 1;
+			BEGIN 
+				DELETE FROM dbo.tblSMTransaction
+				WHERE intRecordId = @intPaymentId 
+				AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PayVouchersDetail')
 	
-		--Audit Log          
-		EXEC dbo.uspSMAuditLog 
-			 @keyValue			= @intPaymentId						-- Primary Key Value of the Invoice. 
-			,@screenName		= 'AccountsPayable.view.PayVouchersDetail'	-- Screen Namespace
-			,@entityId			= @UserEntityID						-- Entity Id.
-			,@actionType		= 'Deleted'							-- Action Type
-			,@changeDescription	= ''								-- Description
-			,@fromValue			= ''								-- Previous Value
-			,@toValue			= ''								-- New Value
+				--Audit Log          
+				EXEC dbo.uspSMAuditLog 
+					 @keyValue			= @intPaymentId						-- Primary Key Value of the Invoice. 
+					,@screenName		= 'AccountsPayable.view.PayVouchersDetail'	-- Screen Namespace
+					,@entityId			= @UserEntityID						-- Entity Id.
+					,@actionType		= 'Deleted'							-- Action Type
+					,@changeDescription	= ''								-- Description
+					,@fromValue			= ''								-- Previous Value
+					,@toValue			= ''								-- New Value
+			END
 	END
 
 END TRY
