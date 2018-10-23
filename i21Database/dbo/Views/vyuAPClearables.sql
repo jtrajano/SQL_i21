@@ -89,6 +89,7 @@ SELECT	DISTINCT
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
 WHERE receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+AND dblVoucherQty <> 0  --TO AVOID MULTIPLE TOTAL
 
 UNION ALL
 
