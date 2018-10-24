@@ -225,6 +225,8 @@ a.intCompanyLocationId
 ,a.ysnEnableCreditCardProcessing
 ,a.strMerchantId
 ,a.strMerchantPassword
+,a.intFreightTermId
+,a.strFreightTerm
 ,b.intEntityId
 FROM vyuSMGetCompanyLocationSearchList a
 INNER JOIN tblSMUserSecurityCompanyLocationRolePermission b ON a.intCompanyLocationId = b.intCompanyLocationId
