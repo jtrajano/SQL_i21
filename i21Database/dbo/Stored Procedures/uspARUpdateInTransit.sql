@@ -11,13 +11,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @tblItemsToUpdate InTransitTableType
-			,@HasImpactForProvisional   BIT
 	
-	SELECT TOP 1 
-		@HasImpactForProvisional = ISNULL(ysnImpactForProvisional,0)
-	FROM 
-		tblARCompanyPreference WITH (NOLOCK)
-
 	IF @IsShipped = 0
 		BEGIN
 			INSERT INTO @tblItemsToUpdate
@@ -51,14 +45,18 @@ BEGIN
 					ON I.intFreightTermId = ft.intFreightTermId
 				LEFT JOIN tblICFobPoint fp
 					ON fp.strFobPoint = ft.strFobPoint
+				LEFT JOIN tblSCTicket TICKET
+					ON TICKET.intTicketId = ID.intTicketId
 			WHERE ID.intInvoiceId = @TransactionId 
 			AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+			AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') <> 'O' AND ISNULL(TICKET.intStorageScheduleTypeId, 0) <> 1))
 			AND (
-					(I.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId]))
+				--	(I.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId]))
+				--OR
+					--(I.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId] AND ARI.[strType] = 'Provisional' AND ARI.[ysnPosted] = 0))
+					(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)
 				OR
-					(I.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId] AND ARI.[strType] = 'Provisional' AND ARI.[ysnPosted] = 0))
-				OR
-					(I.[strType] = 'Provisional' AND @HasImpactForProvisional = 1)
+					(I.[strType] = 'Provisional' AND I.[ysnProvisionalWithGL] = 1)
 				)
 	  END
 	ELSE

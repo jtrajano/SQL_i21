@@ -28,10 +28,15 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + 
 							' ' + UM.strUnitMeasure			AS	strQunatity,
 			CAST(SF.dblOriginalBasis AS NUMERIC(18, 6))		AS	dblOriginalBasis,
+			CAST(SF.dblOriginalBasis AS NUMERIC(18, 2))		AS	dblAtlasOriginalBasis,
 			CAST(SF.dblFutures AS NUMERIC(18, 6))			AS	dblFutures,
+			CAST(SF.dblFutures AS NUMERIC(18, 2))			AS	dblAtlasFutures,
 			CAST(SF.dblRollArb AS NUMERIC(18, 6))			AS	dblRollArb,
+			CAST(SF.dblRollArb AS NUMERIC(18, 2))			AS	dblAtlasRollArb,
 			CAST(SF.dblAdditionalCost AS NUMERIC(18, 6))	AS	dblAdditionalCost,
+			CAST(SF.dblAdditionalCost AS NUMERIC(18, 2))	AS	dblAtlasAdditionalCost,
 			CAST(SF.dblFinalPrice AS NUMERIC(18, 6))		AS	dblFinalPrice,
+			CAST(SF.dblFinalPrice AS NUMERIC(18, 2))		AS	dblAtlasFinalPrice,
 			CY.strCurrency + ' per ' + CM.strUnitMeasure	AS	strPricePerUOM
 	
 	FROM	tblCTPriceFixation			PF

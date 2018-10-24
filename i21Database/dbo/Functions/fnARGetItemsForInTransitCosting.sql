@@ -115,9 +115,9 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL 
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARI.[strType] <> 'Provisional' AND (ARI.[intOriginalInvoiceId] IS NULL OR ARI.[intSourceId] <> 2))
+			(ARI.[strType] <> 'Provisional' AND ARI.[ysnProvisionalWithGL] = 0)
 		OR
-			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
+			(ARI.[strType] = 'Provisional' AND ARI.[ysnProvisionalWithGL] = 1)
 		)
 	AND NOT (ARI.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARI.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
@@ -155,9 +155,9 @@ INNER JOIN
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [dtmPostDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
 	 FROM @Invoices INV
 	 WHERE
-		((INV.[strType] <> 'Provisional' AND (INV.[intOriginalInvoiceId] IS NULL OR INV.[intSourceId] <> 2))
+		((INV.[strType] <> 'Provisional' AND INV.[ysnProvisionalWithGL] = 0)
 			OR
-		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
+		(INV.[strType] = 'Provisional' AND INV.[ysnProvisionalWithGL] = 1)
 		)
 			) ARI 
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]

@@ -262,7 +262,7 @@ BEGIN TRY
 		SET @ReceiptDiesel_6 = @ReceiptDiesel_1 + @ReceiptDiesel_3 + @ReceiptDiesel_4 + @ReceiptDiesel_5
 
 		-- Disbursement Gasoline
-		SELECT @DisbursementGasoline_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Gasoline'
+		SELECT @DisbursementGasoline_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType IN ('Gasoline', 'Gasoline (to Own Bulk Plant)')
 		SELECT @DisbursementGasoline_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Gasoline'
 		SELECT @DisbursementGasoline_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Gasoline'
 		SELECT @DisbursementGasoline_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Gasoline'
@@ -270,7 +270,7 @@ BEGIN TRY
 		SET @DisbursementGasoline_12 = @DisbursementGasoline_7 + @DisbursementGasoline_8 + @DisbursementGasoline_9 + @DisbursementGasoline_10 + @DisbursementGasoline_11
 
 		-- Disbursement Aviation
-		SELECT @DisbursementAviation_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline'
+		SELECT @DisbursementAviation_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType IN ('Aviation Gasoline', 'Aviation Gasoline (to Own Bulk Plant)')
 		SELECT @DisbursementAviation_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Aviation Gasoline'
 		SELECT @DisbursementAviation_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Aviation Gasoline'
 		SELECT @DisbursementAviation_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Aviation Gasoline'
@@ -278,7 +278,7 @@ BEGIN TRY
 		SET @DisbursementAviation_12 = @DisbursementAviation_7 + @DisbursementAviation_8 + @DisbursementAviation_9 + @DisbursementAviation_10 + @DisbursementAviation_11
 
 		-- Disbursement Jet
-		SELECT @DisbursementJet_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Jet Fuel'
+		SELECT @DisbursementJet_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType IN ('Jet Fuel', 'Jet Fuel (to Own Bulk Plant)')
 		SELECT @DisbursementJet_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Jet Fuel'
 		SELECT @DisbursementJet_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Jet Fuel'
 		SELECT @DisbursementJet_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Jet Fuel'

@@ -63,6 +63,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -201,8 +202,9 @@ SELECT
 	,[ysnForgiven]						= [ysnForgiven]
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
-	,[ysnImpactInventory]				= [ysnImpactInventory]
-    ,[ysnFromProvisional]               = [ysnFromProvisional]
+	,[ysnImpactInventory]				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+    ,[ysnFromProvisional]               = ISNULL([ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]						= ISNULL([ysnExported], CAST(0 AS BIT))
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -625,7 +627,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice')
+	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -1007,6 +1009,12 @@ END
 
 DECLARE  @AddDetailError NVARCHAR(MAX)
 		,@IntegrationLog InvoiceIntegrationLogStagingTable
+        ,@ImpactForProvisional BIT
+
+SELECT TOP 1
+	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
+FROM 
+	tblARCompanyPreference
 
 INSERT INTO @IntegrationLog
 	([intIntegrationLogId]
@@ -1150,6 +1158,8 @@ CREATE TABLE #CustomerInvoice
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
     ,[ysnFromProvisional]           BIT                                             NULL
+	,[ysnExported]					BIT                                             NULL
+    ,[ysnProvisionalWithGL]         BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
 	,[ysnImportedAsPosted]			BIT												NULL
@@ -1250,6 +1260,8 @@ INSERT INTO #CustomerInvoice
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
+    ,[ysnProvisionalWithGL]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1354,8 +1366,10 @@ SELECT
 											ELSE
 												CAST(1 AS BIT) 
 											END
-										ELSE CAST(0 AS BIT) END
-    ,[ysnFromProvisional]           = ITG.[ysnFromProvisional]
+										ELSE CAST(1 AS BIT) END
+    ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
+	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
+    ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
 	,[dblSplitPercent]				= 1.000000		
 	,[ysnImportedFromOrigin]		= 0
 	,[ysnImportedAsPosted]			= 0
@@ -1529,6 +1543,7 @@ USING
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+		,[ysnExported]
 		,[dblSplitPercent]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
@@ -1631,6 +1646,7 @@ INSERT(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1721,6 +1737,7 @@ VALUES(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
+	,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1882,6 +1899,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
+		,[ysnExported]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -2021,6 +2039,7 @@ BEGIN TRY
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
         ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
+		,[ysnExported]							= ITG.[ysnExported]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]

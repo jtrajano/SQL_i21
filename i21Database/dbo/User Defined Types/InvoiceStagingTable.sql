@@ -23,6 +23,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 																											-- "Meter Billing"
 																											-- "Store"
 																											-- "Card Fueling"
+																											-- "Store Checkout"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
@@ -71,8 +72,9 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnForgiven]							BIT												NULL		
 	,[ysnCalculated]						BIT												NULL		
 	,[ysnSplitted]							BIT												NULL	
-	,[ysnImpactInventory]					BIT												NULL	
-	,[ysnFromProvisional]					BIT												NULL	
+	,[ysnImpactInventory]					BIT												NULL        -- Default(1) Impact Inventory
+	,[ysnFromProvisional]					BIT												NULL
+	,[ysnExported]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Customer Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
 	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 

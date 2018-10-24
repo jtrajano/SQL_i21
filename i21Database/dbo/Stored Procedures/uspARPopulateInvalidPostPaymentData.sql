@@ -430,7 +430,7 @@ BEGIN
         ,[strBatchId]               = P.[strBatchId]
         ,[strError]                 = 'The Customer Prepaid account in Company Location - ' + MAX(ISNULL(P.[strLocationName],''))  + ' was not set.'
 	FROM
-		#ARPostPaymentDetail P
+		#ARPostPaymentHeader P
     WHERE
             P.[ysnPost] = 1
     GROUP BY

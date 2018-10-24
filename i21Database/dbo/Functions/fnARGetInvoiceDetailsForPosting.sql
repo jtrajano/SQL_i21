@@ -41,6 +41,8 @@ RETURNS @returntable TABLE
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -70,7 +72,8 @@ RETURNS @returntable TABLE
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
+    ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
@@ -158,7 +161,6 @@ BEGIN
 
 DECLARE	@DiscountAccountId          INT
        ,@DeferredRevenueAccountId   INT
-       ,@HasImpactForProvisional    BIT
        ,@ExcludeInvoiceFromPayment	BIT
        ,@AllowOtherUserToPost       BIT
        ,@ZeroBit                    BIT
@@ -176,7 +178,6 @@ SET @ZeroBit = CAST(0 AS BIT)
 SELECT TOP 1
      @DiscountAccountId         = [intDiscountAccountId]
     ,@DeferredRevenueAccountId  = [intDeferredRevenueAccountId]
-    ,@HasImpactForProvisional   = ISNULL([ysnImpactForProvisional],0)
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice],0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
@@ -220,6 +221,8 @@ BEGIN
         ,[dblBaseAmountDue]
         ,[dblPayment]
         ,[dblBasePayment]
+        ,[dblProvisionalAmount]
+        ,[dblBaseProvisionalAmount]
         ,[strComments]
         ,[strImportFormat]
         ,[intSourceId]
@@ -249,7 +252,8 @@ BEGIN
         ,[ysnUserAllowedToPostOtherTrans]
         ,[ysnWithinAccountingDate]
         ,[ysnForApproval]
-        ,[ysnImpactForProvisional]
+        ,[ysnFromProvisional]
+        ,[ysnProvisionalWithGL]
         ,[ysnExcludeInvoiceFromPayment]
         ,[ysnIsInvoicePositive]
 
@@ -365,6 +369,8 @@ BEGIN
         ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
         ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
         ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+        ,[dblProvisionalAmount]				= ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+        ,[dblBaseProvisionalAmount]			= ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
         ,[strComments]                      = ARI.[strComments]
         ,[strImportFormat]                  = ARI.[strImportFormat]
         ,[intSourceId]                      = ARI.[intSourceId]
@@ -394,7 +400,8 @@ BEGIN
         ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
         ,[ysnWithinAccountingDate]          = ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
         ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-        ,[ysnImpactForProvisional]          = ISNULL(@HasImpactForProvisional, @ZeroBit)
+        ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
+        ,[ysnProvisionalWithGL]             = ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit)
         ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
         ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
@@ -475,7 +482,7 @@ BEGIN
         ,[strOptionType]                    = NULL
         ,[strSourceType]                    = NULL
         ,[strPostingMessage]                = NULL
-        ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+        ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
                                                    WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
                                                    ELSE ARI.[strComments]
                                               END		
@@ -549,6 +556,8 @@ INSERT @Header
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -578,7 +587,8 @@ INSERT @Header
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
@@ -694,6 +704,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
     ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
+    ,[dblProvisionalAmount]				= ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
+    ,[dblBaseProvisionalAmount]			= ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -723,7 +735,8 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnImpactForProvisional]          = ISNULL(@HasImpactForProvisional, @ZeroBit)
+    ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
+    ,[ysnProvisionalWithGL]             = ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
@@ -804,7 +817,7 @@ SELECT
     ,[strOptionType]                    = NULL
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
                                                 ELSE ARI.[strComments]
                                             END		
@@ -869,6 +882,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -898,7 +913,8 @@ INSERT @Detail
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
@@ -1014,6 +1030,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1043,7 +1061,8 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ARI.[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]          = ARI.[ysnWithinAccountingDate]
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
-    ,[ysnImpactForProvisional]          = ARI.[ysnImpactForProvisional]
+    ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 
@@ -1212,6 +1231,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1241,7 +1262,8 @@ INSERT @Detail
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
@@ -1357,6 +1379,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1386,7 +1410,8 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ARI.[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]          = ARI.[ysnWithinAccountingDate]
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
-    ,[ysnImpactForProvisional]          = ARI.[ysnImpactForProvisional]
+    ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 
@@ -1609,6 +1634,8 @@ INSERT @Detail
     ,[dblBaseAmountDue]
     ,[dblPayment]
     ,[dblBasePayment]
+    ,[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]
     ,[strComments]
     ,[strImportFormat]
     ,[intSourceId]
@@ -1638,7 +1665,8 @@ INSERT @Detail
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
@@ -1750,6 +1778,8 @@ SELECT
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]				= ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]			= ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -1779,7 +1809,8 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]	= ARI.[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]          = ARI.[ysnWithinAccountingDate]
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
-    ,[ysnImpactForProvisional]          = ARI.[ysnImpactForProvisional]
+    ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 

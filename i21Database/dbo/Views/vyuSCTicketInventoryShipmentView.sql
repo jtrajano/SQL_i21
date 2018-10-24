@@ -30,7 +30,8 @@
 			WHEN SC.strDistributionOption = 'SPT' THEN 'Spot Sale'
 			WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
 			WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
-		END) AS strDistributionOption
+		END) AS strDistributionOption,
+	SC.intScaleSetupId
 	FROM tblSCTicket SC
 	INNER JOIN vyuICGetInventoryShipmentItem ICSI ON SC.strTicketNumber = ICSI.strSourceNumber
 	LEFT JOIN vyuGRGetStorageTickets GRSC ON SC.intTicketId = GRSC.intTicketId

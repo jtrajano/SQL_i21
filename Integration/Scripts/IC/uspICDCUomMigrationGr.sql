@@ -23,8 +23,7 @@ IF NOT EXISTS (select strUnitMeasure from tblICUnitMeasure where strUnitMeasure 
 --import units of mesaure from the commodity setup. USe distinct to get unit uoms
 insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
 select distinct gacom_un_desc, gacom_un_desc, case gacom_un_desc when 'BU' then 'Volume' End, 1 from gacommst
-where NOT EXISTS (select strUnitMeasure from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS 
-					= upper(rtrim(gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS)
+where UPPER(RTRIM(gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS NOT IN (select strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure )
 
 
 GO

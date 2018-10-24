@@ -111,7 +111,7 @@
 	[intCheckoutCustomerId] int NULL,
 	[strDepartment] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerChargesItemId] int NULL,
-	[intCustomerPaymentItemId] int NULL,
+	--[intCustomerPaymentItemId] int NULL,
 	[intOverShortItemId] int NULL,
 	[strStoreAppWebUrl] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
@@ -135,6 +135,6 @@
 	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerPaymentItemId] FOREIGN KEY ([intCustomerPaymentItemId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerPaymentItemId] FOREIGN KEY ([intCustomerPaymentItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId])
   );

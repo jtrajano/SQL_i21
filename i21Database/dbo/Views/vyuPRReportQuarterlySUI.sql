@@ -65,6 +65,5 @@ GROUP BY
 	,vyuPRPaycheckTax.dblLimit
 	,vyuPRPaycheckTax.strTaxId
 	,tblPRPaycheck.intEntityEmployeeId
-HAVING SUM(vyuPRPaycheckTax.dblTotal) > 0
 
 GO

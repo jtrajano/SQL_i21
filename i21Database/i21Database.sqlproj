@@ -4696,6 +4696,7 @@
     <Build Include="dbo\Tables\tblPATEquityPay.sql" />
     <Build Include="dbo\Views\vyuMFLotList.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKConvertProductType.sql" />
     <Build Include="dbo\Functions\fnRKRKConvertProductTypeKeyToName.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerSplit.sql" />
@@ -5443,7 +5444,6 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetImportingTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepAndLob.sql" />
-    <Build Include="dbo\Functions\fnARGetInvalidInvoicesForPosting.sql" />
     <Build Include="dbo\User Defined Types\InvoicePostingTable.sql" />
     <Build Include="dbo\Functions\fnTMGetInvalidInvoicesForSync.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidInvoicesForInvoiceSplits.sql" />
@@ -5452,16 +5452,12 @@
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForCosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForInTransitCosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForItemStoragePosting.sql" />
-    <Build Include="dbo\Functions\fnARGetItemsForInTransitCosting.sql" />
-    <Build Include="dbo\Functions\fnARGetItemsForStoragePosting.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportProductionSummaryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportProductionSummary.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryEntity.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryItem.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryStorageType.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertLocationToVendor.sql" />
-    <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
-    <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVendor1099Adjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateInvoicePayment.sql" />
     <Build Include="dbo\Views\vyuRKBrokersAccountMarketMapping.sql" />
@@ -6408,8 +6404,6 @@
     <Build Include="dbo\Stored Procedures\uspLGPopulateLoadUpdateXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetAcknowledgementXML.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
-    <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForFinalInvoice.sql" />
-    <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForProvisionalReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessLogisticsAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
@@ -6990,9 +6984,6 @@
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSCreateNegativeCashReceipts.sql" />
     <Build Include="vyuEMSearchEntityBroker.sql" />
-    <Build Include="dbo\Functions\fnARGenerateGLEntriesForInvoices.sql" />
-    <Build Include="dbo\Functions\fnARGetInvoiceDetailsForPosting.sql" />
-    <Build Include="dbo\Functions\fnARGetItemAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspARBookInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateGLEntriesForInvoices.sql" />
@@ -7124,6 +7115,25 @@
     <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
     <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureOptionMonthsNotInUse.sql" />
+    <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermError.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
+    <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceScaleDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPayableQty.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCostTable.sql" />
+    <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStockMovement.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMSummaryByUOM.sql" />
+    <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchUserList.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
+    <Build Include="dbo\Functions\fnCTConvertToSeqFXCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7310,13 +7320,14 @@
     <None Include="Scripts\Post-Deployment\CT\ExcelAndTableColumnMap.sql" />
     <None Include="Scripts\Post-Deployment\IP\Hersheys.sql" />
     <Build Include="dbo\User Defined Types\TMSite.sql" />
-	<Build Include="dbo\Tables\tblGRTransferStorage.sql" />
+    <Build Include="dbo\Tables\tblGRTransferStorage.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Tables\tblGRTransferStorageSplit.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryTypeTransaction.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSourceSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSplit.sql" />
     <Build Include="dbo\Views\vyuGRTransferStorageSearchView.sql" />
+    <Build Include="dbo\Views\vyuGRTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />

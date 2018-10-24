@@ -40,6 +40,9 @@ BEGIN TRY
 	DECLARE @intSampleItemUOMId INT
 	DECLARE @strReasonCode NVARCHAR(50)
 	DECLARE @ysnAdjustInventoryQtyBySampleQty BIT
+	DECLARE @intRepresentingUOMId INT
+		,@dblRepresentingQty NUMERIC(18, 6)
+		,@dblConvertedSampleQty NUMERIC(18, 6)
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
@@ -52,6 +55,8 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@dblSampleQty = dblSampleQty
 		,@intSampleUOMId = intSampleUOMId
+		,@dblRepresentingQty = dblRepresentingQty
+		,@intRepresentingUOMId = intRepresentingUOMId
 		,@intPreviousSampleStatusId = intSampleStatusId
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
@@ -67,10 +72,28 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
+			,dblRepresentingQty NUMERIC(18, 6)
+			,intRepresentingUOMId INT
 			,intSampleStatusId INT
 			,intItemId INT
 			,intCreatedUserId INT
 			)
+
+	-- Quantity Check
+	IF ISNULL(@intSampleUOMId, 0) > 0
+		AND ISNULL(@intRepresentingUOMId, 0) > 0
+	BEGIN
+		SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intRepresentingUOMId, @intSampleUOMId, @dblSampleQty)
+
+		IF @dblConvertedSampleQty > @dblRepresentingQty
+		BEGIN
+			RAISERROR (
+					'Sample Qty cannot be greater than Representing Qty. '
+					,16
+					,1
+					)
+		END
+	END
 
 	-- If sample status is Approved / Rejected, setting default to Received
 	IF @intPreviousSampleStatusId = 3 OR @intPreviousSampleStatusId = 4

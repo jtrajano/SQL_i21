@@ -1,7 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuCMUndepositedPayment]
 AS 
 WITH ARReceiptAndInvoice as (
-	SELECT strRecordNumber strTransactionId,intCurrencyId FROM tblARPayment UNION
+	SELECT strRecordNumber strTransactionId,intCurrencyId FROM tblARPayment 
+	WHERE intPaymentMethodId <> 9 -- exclued CFInvoice GL-6725
+	UNION
 	SELECT strInvoiceNumber strTransactionId, intCurrencyId  FROM tblARInvoice UNION
 	SELECT strEODNo strTransactionId, intCurrencyId  FROM tblARPOSEndOfDay 
 )
@@ -34,5 +36,5 @@ Undep.intUndepositedFundId NOT IN(
 	SELECT intUndepositedFundId 
 	FROM tblCMBankTransactionDetail BTDtl
 	INNER JOIN tblCMBankTransaction BT ON BTDtl.intTransactionId = BT.intTransactionId 
-	WHERE BT.intBankAccountId = Undep.intBankAccountId AND BTDtl.intUndepositedFundId IS NOT NULL 
+	WHERE BTDtl.intUndepositedFundId IS NOT NULL 
 )

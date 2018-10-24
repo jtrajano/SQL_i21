@@ -83,8 +83,9 @@ BEGIN
 			,[strTaxGroup]					NVARCHAR(100)
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT
-			,[ysnComputed]					BIT
 			,[intUnitMeasureId]				INT
+			,[ysnComputed]					BIT
+			,[ysnTaxableFlagged]			BIT
 			)
 			
 			
@@ -118,7 +119,9 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
-		,[intUnitMeasureId] 
+		,[intUnitMeasureId]
+        ,[ysnComputed]
+        ,[ysnTaxableFlagged]
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -143,10 +146,41 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 		,[intUnitMeasureId]
+        ,CAST(0 AS BIT)
+        ,CAST(0 AS BIT)
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 															
-			
+    DECLARE @TaxableByOtherTaxesTable TABLE
+        ([intTaxCodeId] INT
+		,[intTaxableTaxCodeId] INT)
+
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnTaxableFlagged], 0) = 0 AND RTRIM(LTRIM(ISNULL(strTaxableByOtherTaxes, ''))) <> '' AND [ysnTaxExempt] = 0)
+	BEGIN
+		DECLARE @TaxableId INT
+				,@TaxableTaxCodeId INT
+				,@TaxableByOther    NVARCHAR(MAX)
+		SELECT TOP 1 
+			 @TaxableId         = [Id]
+			,@TaxableTaxCodeId  = [intTaxCodeId]
+			,@TaxableByOther    = RTRIM(LTRIM(ISNULL(strTaxableByOtherTaxes, '')))
+		FROM
+			@ItemTaxes
+		WHERE
+			ISNULL([ysnTaxableFlagged], 0) = 0 AND RTRIM(LTRIM(ISNULL(strTaxableByOtherTaxes, ''))) <> '' AND [ysnTaxExempt] = 0
+
+		INSERT INTO @TaxableByOtherTaxesTable
+			([intTaxCodeId]
+			,[intTaxableTaxCodeId])
+		SELECT DISTINCT
+			[intTaxCodeId]         = @TaxableTaxCodeId
+			,[intTaxableTaxCodeId] = [intID]
+		FROM
+			[dbo].fnGetRowsFromDelimitedValues(@TaxableByOther)		
+
+		UPDATE @ItemTaxes SET [ysnTaxableFlagged] = CAST(1 AS BIT) WHERE [Id] = @TaxableId
+	END
+
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
 		BEGIN
@@ -163,8 +197,8 @@ BEGIN
 					,@CheckoffTax		BIT
 					,@TaxExempt			BIT
 					,@TaxOnly			BIT
-				
 					
+				
 			SELECT TOP 1 
 				 @Id			= [Id]
 				,@TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)
@@ -188,7 +222,6 @@ BEGIN
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
-							
 			
 			DECLARE @TaxableByOtherTaxes AS TABLE(
 				 [Id]						INT
@@ -214,21 +247,22 @@ BEGIN
 				,ysnTaxOnly
 				)
 			SELECT
-				 Id
-				,intTaxCodeId
-				,strTaxableByOtherTaxes
-				,strCalculationMethod
-				,dblRate
-				,dblAdjustedTax
-				,ysnTaxAdjusted
-				,ysnTaxExempt
-				,ysnTaxOnly
+				 IT.[Id]
+				,IT.[intTaxCodeId]
+				,IT.[strTaxableByOtherTaxes]
+				,IT.[strCalculationMethod]
+				,IT.[dblRate]
+				,IT.[dblAdjustedTax]
+				,IT.[ysnTaxAdjusted]
+				,IT.[ysnTaxExempt]
+				,IT.[ysnTaxOnly]
 			FROM
-				@ItemTaxes
+				@ItemTaxes IT
+			INNER JOIN
+				@TaxableByOtherTaxesTable TBOT
+					ON IT.[intTaxCodeId] = TBOT.[intTaxCodeId]
 			WHERE
-				Id <> @Id 
-				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))
-				AND ysnTaxExempt = 0
+				TBOT.[intTaxableTaxCodeId] = @TaxCodeId 
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)

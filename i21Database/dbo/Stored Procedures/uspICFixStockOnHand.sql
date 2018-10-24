@@ -49,7 +49,7 @@ BEGIN
 						ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 					LEFT JOIN tblICItemUOM WeightUOM
 						ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
-			WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
+			--WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 			GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemLocationId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
@@ -112,8 +112,8 @@ BEGIN
 						,Qty = SUM(ItemTransactions.dblQty)
 				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
-				WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0						
-						AND ItemTransactions.intLotId IS NULL 
+				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
+						ItemTransactions.intLotId IS NULL 
 				GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -179,8 +179,8 @@ BEGIN
 				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
 							AND ISNULL(ItemUOM.ysnStockUnit, 0) = 0 
-				WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-						AND ItemTransactions.intLotId IS NULL 
+				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
+						ItemTransactions.intLotId IS NULL 
 				GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId

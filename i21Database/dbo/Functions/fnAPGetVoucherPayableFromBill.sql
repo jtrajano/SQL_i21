@@ -5,7 +5,8 @@
 RETURNS TABLE AS RETURN
 (
 	SELECT
-		[intEntityVendorId]				=	A.intEntityVendorId
+		[intBillId]							=	A.intBillId
+		,[intEntityVendorId]				=	A.intEntityVendorId
 		,[intTransactionType]				=	A.intTransactionType
 		,[intLocationId]					=	A.intStoreLocationId
 		,[intShipToId]						=	A.intShipToId

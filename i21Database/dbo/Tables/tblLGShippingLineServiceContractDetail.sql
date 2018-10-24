@@ -12,7 +12,7 @@
 	[dtmValidTo] DATETIME,
 	[intConcurrencyId] INT NOT NULL, 
 
-	CONSTRAINT [FK_tblLGShippingLineServiceContractDetail_tblLGShippingLineServiceContract_intShippingLineServiceContractId] FOREIGN KEY ([intShippingLineServiceContractId]) REFERENCES [tblLGShippingLineServiceContract]([intShippingLineServiceContractId]),
+	CONSTRAINT [FK_tblLGShippingLineServiceContractDetail_tblLGShippingLineServiceContract_intShippingLineServiceContractId] FOREIGN KEY ([intShippingLineServiceContractId]) REFERENCES [tblLGShippingLineServiceContract]([intShippingLineServiceContractId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblLGShippingLineServiceContractDetail_tblICCommodityAttribute_intOriginId] FOREIGN KEY ([intOriginId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId])
 
 )

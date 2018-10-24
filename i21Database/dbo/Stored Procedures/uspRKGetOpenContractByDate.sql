@@ -14,7 +14,7 @@ WHERE intCommodityId = @intCommodityId
 SELECT DISTINCT 
 	intFutOptTransactionId,
 	intOpenContract,
-	@strCommodityCode strCommodityCode,
+	strCommodityCode,
 	strInternalTradeNo,
 	strLocationName,
 	dblContractSize,

@@ -66,6 +66,7 @@ SET
 	,ARI.[dblBaseProvisionalAmount]	= CASE WHEN ISNULL(PRO.[ysnExcludeFromPayment],0) = 0 THEN PRO.[dblBasePayment] ELSE PRO.[dblBaseInvoiceTotal] END
 	,ARI.[strTransactionType]		= CASE WHEN (CASE WHEN ISNULL(PRO.[ysnExcludeFromPayment],0) = 0 THEN PRO.[dblPayment] ELSE PRO.[dblInvoiceTotal] END) > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
 	,ARI.[ysnExcludeFromPayment]	= PRO.[ysnExcludeFromPayment]
+	,ARI.[ysnProvisionalWithGL]     = PRO.[ysnProvisionalWithGL]
 FROM
 	tblARInvoice ARI
 INNER JOIN

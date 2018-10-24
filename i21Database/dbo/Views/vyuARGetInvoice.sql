@@ -72,6 +72,7 @@ SELECT
     INV.ysnImportedFromOrigin,
     INV.ysnImportedAsPosted,
 	INV.ysnExcludeFromPayment,
+	INV.ysnFromProvisional,
     INV.ysnReturned,
     INV.intPaymentId,
     INV.intSplitId,

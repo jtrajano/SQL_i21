@@ -250,7 +250,7 @@ FROM (
 		,I.strItemNo
 		,ABS(isnull(SI.dblQuantity, 0)) * -1 dblInQty
 		,0 AS dblOutQty
-		,ST.strDistributionOption
+		,CASE WHEN SI.intStorageScheduleTypeId IS NULL AND SI.intOrderId IS NULL THEN 'SPT' WHEN SI.intOrderId IS NOT NULL THEN ST.strDistributionOption ELSE STT.strStorageTypeCode END strDistributionOption
 		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN Inv.strInvoiceNumber ELSE  S.strShipmentNumber END AS strReceiptNumber
 		,CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN Inv.intInvoiceId ELSE  S.intInventoryShipmentId END  AS intReceiptId
 		--,Inv.strInvoiceNumber AS strReceiptNumber
@@ -261,6 +261,7 @@ FROM (
 	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
 	LEFT JOIN tblARInvoiceDetail ID ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
 	LEFT JOIN tblARInvoice Inv ON ID.intInvoiceId = Inv.intInvoiceId
+	LEFT JOIN tblGRStorageType STT ON SI.intStorageScheduleTypeId = STT.intStorageScheduleTypeId
 	WHERE ST.strTicketStatus = 'C'
 	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 	AND ST.intCommodityId = @intCommodityId 

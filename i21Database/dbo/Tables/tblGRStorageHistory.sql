@@ -26,6 +26,7 @@
 	[intSettleStorageId] INT NULL,
 	[intDeliverySheetId] INT NULL,
 	[dtmDistributionDate] DATETIME NULL DEFAULT GETDATE(), 
+	[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intTransferStorageId] INT NULL,
 	[ysnPost] BIT NULL DEFAULT 0,
 	[intInventoryAdjustmentId] INT NULL,

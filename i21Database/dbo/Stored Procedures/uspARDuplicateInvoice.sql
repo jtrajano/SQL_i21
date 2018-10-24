@@ -137,7 +137,7 @@ SELECT
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
 	,@OldInvoiceRecurring			= [ysnRecurring]
-	,@IsImpactInventory				= [ysnImpactInventory]
+	,@IsImpactInventory				= ISNULL([ysnImpactInventory], CAST( 1AS BIT))
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
 	,@TotalTermDiscount				= [dblTotalTermDiscount]	

@@ -172,6 +172,7 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
+								EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
 								SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 								IF @ysnPosted = 1
 									BEGIN
@@ -480,14 +481,15 @@ BEGIN TRY
 					,@totalShrinkPrice		NUMERIC (38,20)
 					,@dblShrinkPercent		NUMERIC(38,20)
 					,@finalShrinkUnits		NUMERIC(38,20)
-					,@strShrinkWhat			NVARCHAR(40);
-
+					,@strShrinkWhat			NVARCHAR(40)
+					,@currencyDecimal		INT;
+				SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
 				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
 				WHILE ISNULL(@intId,0) > 0
 				BEGIN
 					SELECT @strTransactionId = IR.strReceiptNumber, @InventoryReceiptId = IRI.intInventoryReceiptId, @EntitySplitId = IR.intEntityVendorId
-					, @dblBalance = IRI.dblOpenReceive FROM tblICInventoryReceiptItem IRI 
+					, @dblBalance = ROUND(IRI.dblOpenReceive, @currencyDecimal) FROM tblICInventoryReceiptItem IRI 
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intInventoryReceiptItemId = @intId
 					SELECT @intEntityId = intEntityId
@@ -503,10 +505,12 @@ BEGIN TRY
 						,@intDeliverySheetId
 						,@intCustomerStorageId
 						,@dblBalance
+						,NULL
+						,NULL
 						,0
 						,@newBalance OUTPUT
 
-					IF ISNULL(@newBalance, 0) > 0
+					IF ISNULL(ROUND(@newBalance, @currencyDecimal), 0) > 0
 						DELETE FROM tblGRStorageHistory WHERE intInventoryReceiptId = @InventoryReceiptId
 					ELSE
 						EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId

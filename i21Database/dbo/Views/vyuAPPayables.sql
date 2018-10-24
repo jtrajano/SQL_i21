@@ -114,7 +114,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 		 	(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment > 0
 				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
+				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
 					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
 				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
 	 dblTotal = 0 
@@ -206,7 +206,7 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1
+WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1 AND A.ysnPosted = 1
 UNION ALL
 SELECT --OVERPAYMENT
 	A.dtmDate

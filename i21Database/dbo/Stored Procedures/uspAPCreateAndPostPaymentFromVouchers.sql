@@ -402,7 +402,9 @@ BEGIN
 	FROM tblAPPayment A
 	INNER JOIN #tmpMultiVouchersCreatedPayment B ON A.intPaymentId = B.intCreatePaymentId
 	WHERE A.ysnPosted = 0
-	GOTO DONE;
+
+	IF @postedCount > 0 GOTO COMPLETEPROCESS;
+	ELSE GOTO DONE;
 
 	COMPLETEPROCESS:
 	--UPDATE BATCH PAY intNumber

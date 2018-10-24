@@ -14,6 +14,7 @@
 	[intShipViaId]						INT				NULL,
 	[intSiteId]							INT				NULL,
 	[intItemId]							INT				NULL,
+	[intTicketId]						INT				NULL,
 	[strCompanyName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyInfo]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -62,7 +63,9 @@
 	[strOrigin]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strComments]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strContractNo]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strInvoiceFormat]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,	
+	[strInvoiceFormat]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strBargeNumber]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,	
+	[strCommodity]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dblInvoiceSubtotal]				NUMERIC (18, 6)	NULL,
 	[dblShipping]						NUMERIC (18, 6)	NULL,
 	[dblTax]							NUMERIC (18, 6)	NULL,
@@ -94,5 +97,7 @@
 	[dtmPostDate]						DATETIME		NULL,
 	[dtmShipDate]						DATETIME		NULL,
 	[dtmDueDate]						DATETIME		NULL,
-	[blbLogo]							VARBINARY (MAX) NULL, 
+	[dtmLoadedDate]						DATETIME		NULL,
+	[dtmScaleDate]						DATETIME		NULL,
+	[blbLogo]							VARBINARY (MAX) NULL
 );

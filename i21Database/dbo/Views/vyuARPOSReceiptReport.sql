@@ -8,22 +8,22 @@ SELECT intPOSId				= POS.intPOSId
 	 , strItemDescription	= POSD.strItemDescription
 	 , strItemUOM			= POSD.strItemUOM
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
-	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 AND POSD.dblQuantity > 0 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
+	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 AND POSD.dblPrice < 0 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
      , dblPrice				= POSD.dblPrice
-	 , dblExtendedPrice		= CASE WHEN POS.ysnReturn = 1 THEN POSD.dblExtendedPrice * -1 ELSE POSD.dblExtendedPrice END
+	 , dblExtendedPrice		= POSD.dblExtendedPrice
 	 , intItemUOMId			= POSD.intItemUOMId
 	 , intItemCount			= POS.intItemCount
-     , dblSubTotal			= CASE WHEN POS.ysnReturn = 1 THEN POS.dblSubTotal * -1 ELSE POS.dblSubTotal END
+     , dblSubTotal			= POS.dblSubTotal
 	 , dblShipping			= POS.dblShipping
-	 , dblTax				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTax * -1 ELSE POS.dblTax END
+	 , dblTax				= CASE WHEN POS.ysnReturn = 1 AND POSD.dblPrice < 0 THEN POS.dblTax * -1 ELSE POS.dblTax END
 	 , dblItemDiscountPercent = POSD.dblDiscountPercent
 	 , dblDiscountPercent	= POS.dblDiscountPercent
-	 , dblDiscount			= POS.dblDiscount
-	 , dblTotal				= CASE WHEN POS.ysnReturn = 1 THEN POS.dblTotal * -1 ELSE POS.dblTotal END
+	 , dblDiscount			= CASE WHEN POS.ysnReturn = 1 AND POSD.dblPrice < 0 THEN POS.dblDiscount * -1 ELSE POS.dblDiscount END
+	 , dblTotal				= POS.dblTotal
      , strCompanyName		= COMPANY.strCompanyName
      , strCompanyAddress	= COMPANY.strFullAddress
 	 , strReceiptNumber		= POS.strReceiptNumber
-	 , strUserName			= USERNAME.strUserName
+	 , strUserName			= USERNAME.strName
 	 , strLocation			= LOCATION.strLocationName
 	 , strStore				= ISNULL(STORE.strDescription, '')
 	 , strPONumber			= POS.strPONumber
@@ -57,9 +57,9 @@ LEFT JOIN (
 ) INVOICE ON INVOICE.intInvoiceId = POS.intInvoiceId
 LEFT JOIN (
 	SELECT intEntityId
-		 , strUserName 
-	FROM dbo.tblEMEntityCredential WITH (NOLOCK)
-) USERNAME ON USERNAME.intEntityId = EOD.intEntityId
+		 , strName 
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+) USERNAME ON USERNAME.intEntityId = POS.intEntityUserId
 INNER JOIN (
 	SELECT
 		intCompanyLocationPOSDrawerId

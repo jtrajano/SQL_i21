@@ -528,9 +528,10 @@ BEGIN
 								,@TaxGroupId			= @intTaxGroupId
 								,@TaxCodeId				= @intTaxCodeId
 								,@TaxClassId			= @intTaxClassId
+								,@Tax					= @dblTotalTax
 								,@AdjustedTax			= @dblTotalTax
 								,@Notes					= @strItemDescriptionTax
-								,@TaxAdjusted		    = 1
+								,@TaxAdjusted		    = 0
 								,@ErrorMessage			= @strErrorMessage OUTPUT
 
 							delete from #tmpLineTax where intImportSDToInvoiceId =  @intImportSDToInvoiceIdTax

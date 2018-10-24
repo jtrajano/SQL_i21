@@ -85,7 +85,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= - ICIT.[dblQty] --ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ARID.[dblQtyShipped]), @ZeroDecimal)  --ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -124,9 +124,9 @@ WHERE
 	ICIT.[intFobPointId] IS NOT NULL
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARID.[strType] <> 'Provisional' AND (ARID.[intOriginalInvoiceId] IS NULL OR ARID.[intSourceId] <> 2))
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
 		OR
-			(ARID.[strType] = 'Provisional' AND ARID.[ysnImpactForProvisional] = 1)
+			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 
@@ -137,7 +137,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= -ICIT.[dblQty] --ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ARID.[dblQtyShipped]), @ZeroDecimal) --
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -179,9 +179,10 @@ LEFT OUTER JOIN
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
 	ICIT.[intFobPointId] IS NOT NULL
-	AND ((ARID.[strType] <> 'Provisional' AND (ARID.[intOriginalInvoiceId] IS NULL OR ARID.[intSourceId] <> 2))
-			OR
-		(ARID.[strType] = 'Provisional' AND ARID.[ysnImpactForProvisional] = 1)
+	AND (
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
+		OR
+			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
@@ -193,7 +194,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -229,7 +230,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND [ysnIsUnposted] = 0			 
 WHERE
-	ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note')
+	(ARID.[strTransactionType] = 'Credit Note' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnFromProvisional] = 0))
 	AND ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intOriginalInvoiceId] IS NOT NULL 
@@ -242,7 +243,7 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARI.[dtmPostDate], ARI.[dtmShipDate])
 	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -267,10 +268,10 @@ FROM
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmPostDate], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
 	 FROM #ARPostInvoiceHeader INV
 	 WHERE
-		INV.[strTransactionType] IN ('Credit Memo', 'Credit Note')
+		(INV.[strTransactionType] = 'Credit Note' OR (INV.[strTransactionType] = 'Credit Memo' AND INV.[ysnFromProvisional] = 0))
 		AND INV.[intOriginalInvoiceId] IS NOT NULL 
 		AND INV.[intOriginalInvoiceId] <> 0
 			) ARI 

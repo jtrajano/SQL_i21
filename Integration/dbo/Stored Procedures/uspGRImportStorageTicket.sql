@@ -425,7 +425,7 @@ BEGIN
 				JOIN  gastlmst GT ON GT.gastl_cus_no = a.gastr_cus_no		AND 
 									 GT.gastl_com_cd = a.gastr_com_cd		AND
 									 GT.gastl_tic_no = a.gastr_tic_no		AND
-									 GT.gastl_rec_type = a.gastr_stor_type
+									 GT.gastl_rec_type = CAST(a.gastr_stor_type AS CHAR(1))
 				LEFT JOIN tblICStorageLocation bin ON bin.strName=a.gastr_bin_no COLLATE  Latin1_General_CS_AS
 				WHERE a.gastr_un_bal = 0  AND GT.gastl_pd_yn <> 'Y' 
 

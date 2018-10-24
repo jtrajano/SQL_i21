@@ -17,7 +17,7 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , Tax					= ISNULL(POS.dblTax, 0)
 	 , Total				= ISNULL(POS.dblTotal, 0)
 	 , NumberOfSales		= ISNULL(POS.intTotalSales, 0)
-	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)--ISNULL(EOD.dblOpeningBalance, 0) + ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
 	 , dblOpeningBalance	= ISNULL(EOD.dblOpeningBalance, 0)
 	 , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
 	 , CashCount			= ISNULL(PAYMENT.intCashCount, 0)
@@ -29,6 +29,8 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
+	 , dblCashReturn		= ISNULL(CASHRETURN.dblCashReturn,0) * -1
+	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -70,25 +72,36 @@ OUTER APPLY (
 		 , intTotalSales	= COUNT(intPOSId)
 	FROM dbo.tblARPOS WITH (NOLOCK)
 	WHERE intInvoiceId IS NOT NULL
+	  AND dblTotal > 0
 	  AND intPOSLogId = POSLOG.intPOSLogId 
 ) POS
 OUTER APPLY (
-	SELECT dblCashAmount		= SUM(CASE WHEN POSP.strPaymentMethod = 'Cash' THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
-	     , intCashCount			= COUNT(CASE WHEN POSP.strPaymentMethod = 'Cash' THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
-		 , dblCheckAmount		= SUM(CASE WHEN POSP.strPaymentMethod = 'Check' THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
-		 , intCheckCount		= COUNT(CASE WHEN POSP.strPaymentMethod = 'Check' THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
-		 , dblCreditCardAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
-		 , intCreditCardCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
-		 , dblDebitCardAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'Debit Card' THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
-		 , intDebitCardCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'Debit Card' THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
-		 , dblOnAccountAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'On Account' THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
-		 , intOnAccountCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'On Account' THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
+	SELECT dblCashAmount		= SUM(CASE WHEN POSP.strPaymentMethod = 'Cash' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
+	     , intCashCount			= COUNT(CASE WHEN POSP.strPaymentMethod = 'Cash' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
+		 , dblCheckAmount		= SUM(CASE WHEN POSP.strPaymentMethod = 'Check' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
+		 , intCheckCount		= COUNT(CASE WHEN POSP.strPaymentMethod = 'Check' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
+		 , dblCreditCardAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'Credit Card' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
+		 , intCreditCardCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'Credit Card' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
+		 , dblDebitCardAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'Debit Card' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
+		 , intDebitCardCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'Debit Card' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
+		 , dblOnAccountAmount	= SUM(CASE WHEN POSP.strPaymentMethod = 'On Account' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
+		 , intOnAccountCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'On Account' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
 	FROM dbo.tblARPOSPayment POSP WITH (NOLOCK) 
 	INNER JOIN (
 		SELECT intPOSId
 		     , intPOSLogId 
+			 , dblTotal 
 		FROM dbo.tblARPOS WITH (NOLOCK)
 		WHERE intInvoiceId IS NOT NULL
 		  AND intPOSLogId = POSLOG.intPOSLogId 
 	) ARPOS ON POSP.intPOSId = ARPOS.intPOSId		  
 ) PAYMENT
+OUTER APPLY (
+	SELECT dblCashReturn = SUM(CASE WHEN strPaymentMethod IN ('Check','Cash') THEN dblAmount ELSE 0 END)
+		   ,intReturnCount = COUNT(POS.intPOSId)	
+	FROM dbo.tblARPOS POS WITH (NOLOCK)
+	INNER JOIN  tblARPOSPayment PAY ON POS.intPOSId = PAY.intPOSId
+	WHERE ysnReturn = 1
+	  AND intPOSLogId = POSLOG.intPOSLogId
+	  AND dblTotal < 0
+) CASHRETURN

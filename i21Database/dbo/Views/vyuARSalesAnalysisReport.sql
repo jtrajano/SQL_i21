@@ -98,6 +98,7 @@ SELECT
 	 , intInvoiceDetailId 		= SAR.intInvoiceDetailId
 	 , dblRebateAmount			= SAR.dblRebateAmount
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
+	 , strAccountStatusCode 	= dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId)
 FROM
 (
 --NON SOftware

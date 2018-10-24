@@ -132,9 +132,10 @@ BEGIN TRY
 				, dblMarketPremium = ISNULL((SELECT TOP 1 dblSettle
 											FROM tblRKFuturesSettlementPrice sp
 											JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
-											WHERE mp.intFutureMarketId = sp.intFutureMarketId
-												AND spm.intOptionMonthId = ot.intOptionMonthId
-												AND spm.dblStrike = mp.dblStrike
+											WHERE 
+												--mp.intFutureMarketId = sp.intFutureMarketId AND 
+												spm.intOptionMonthId = ot.intOptionMonthId
+												--AND spm.dblStrike = mp.dblStrike
 												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
 												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 											ORDER BY sp.dtmPriceDate DESC), 0)
@@ -145,9 +146,10 @@ BEGIN TRY
 				, dblDelta = ISNULL((SELECT TOP 1 dblDelta
 											FROM tblRKFuturesSettlementPrice sp
 											JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
-											WHERE mp.intFutureMarketId = sp.intFutureMarketId
-												AND spm.intOptionMonthId = ot.intOptionMonthId
-												AND spm.dblStrike = mp.dblStrike
+											WHERE 
+												--mp.intFutureMarketId = sp.intFutureMarketId AND
+												spm.intOptionMonthId = ot.intOptionMonthId
+												--AND spm.dblStrike = mp.dblStrike
 												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
 												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 											ORDER BY sp.dtmPriceDate DESC), 0)
@@ -197,7 +199,7 @@ BEGIN TRY
 	AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 
 	DROP TABLE #SelectedLots
-	DROP TABLE #MarketPremium
+	--DROP TABLE #MarketPremium
 	DROP TABLE #ExpiredLots
 	DROP TABLE #AssignedLots
 

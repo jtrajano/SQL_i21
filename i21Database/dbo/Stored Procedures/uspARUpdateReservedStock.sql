@@ -87,7 +87,7 @@ BEGIN
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
-		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0) * isnull(ICGIS.dblComponentConvFactor,1) *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
 		,[strTransactionId]		= ARI.[strInvoiceNumber]
 		,[intTransactionTypeId]	= @TransactionTypeId
@@ -105,7 +105,7 @@ BEGIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 	LEFT OUTER JOIN
-		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
+		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intBundleItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 	WHERE 
@@ -127,6 +127,7 @@ BEGIN
 				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
+		and ICGIS.[intComponentItemId] is not null
 
 
 	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)

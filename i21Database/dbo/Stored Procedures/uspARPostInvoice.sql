@@ -126,6 +126,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -145,7 +147,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnRecurring]                         BIT             NULL	
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
-	,[ysnImportedFromOrigin]                BIT             NULL	
+	,[ysnImportedFromOrigin]                BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -155,7 +157,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
+    ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
@@ -277,6 +280,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -296,7 +301,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnRecurring]                         BIT             NULL	
     ,[ysnImpactInventory]                   BIT             NULL	
 	,[ysnImportedAsPosted]                  BIT             NULL	
-	,[ysnImportedFromOrigin]                BIT             NULL	
+	,[ysnImportedFromOrigin]                BIT             NULL
     ,[dtmDatePosted]                        DATETIME        NULL
     ,[strBatchId]                           NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[ysnPost]                              BIT             NULL
@@ -306,7 +311,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
+    ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
@@ -1088,7 +1094,6 @@ BEGIN TRY
     FROM
         [dbo].[fnGetGLEntriesErrors](@GLEntries)
 
-
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -1111,7 +1116,13 @@ BEGIN TRY
     LEFT OUTER JOIN
         @GLEntries GLE
         ON IGLE.[strTransactionId] = GLE.[strTransactionId]
-					
+
+	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
+	BEGIN
+		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
+		RAISERROR(@ErrorMerssage, 11, 1)							
+		GOTO Post_Exit
+	END					
 
     DELETE FROM #ARInvoiceGLEntries
     WHERE

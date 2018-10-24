@@ -66,7 +66,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@intLotId INT
 		,@intContractDetailId INT
 		,@shipFromEntityId INT
-		,@intFarmFieldId INT;
+		,@intFarmFieldId INT
+		,@ysnCustomerStorage BIT;
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -97,9 +98,9 @@ OPEN intListCursor;
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
-				SELECT	@ysnDPStorage = ST.ysnDPOwnedType FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
+				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
-			IF @ysnIsStorage = 0 AND ISNULL(@ysnDPStorage,0) = 0
+			IF @ysnIsStorage = 0 AND ISNULL(@ysnDPStorage,0) = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
@@ -196,7 +197,7 @@ OPEN intListCursor;
 					END
 					EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 				END
-			IF @ysnIsStorage = 1
+			IF @ysnIsStorage = 1 OR ISNULL(@ysnCustomerStorage, 0) = 1
 			BEGIN
 				IF @ysnDPStorage = 1
 					BEGIN

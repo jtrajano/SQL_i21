@@ -20,6 +20,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @voucherIds AS Id;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -72,6 +73,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	BEGIN
 		EXEC uspAPCreateVoucherDetailDirectInventory  @billId, @voucherDetailDirect
 	END 
+
+	INSERT INTO @voucherIds
+	SELECT @billId
+	EXEC uspAPUpdateVoucherTotal @voucherIds
 
 IF @transCount = 0 COMMIT TRANSACTION
 

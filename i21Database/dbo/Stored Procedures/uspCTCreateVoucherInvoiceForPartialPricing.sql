@@ -105,13 +105,19 @@ BEGIN TRY
 
 		SELECT	@intBillId = NULL, @intBillDetailId = NULL, @intInvoiceId = NULL, @intInvoiceDetailId = NULL
 
-		SELECT	@dblPriceFixedQty	=	dblQuantity, 
-				@intBillId			=	intBillId,
-				@intBillDetailId	=	intBillDetailId, 
-				@intInvoiceId		=	intInvoiceId, 
-				@intInvoiceDetailId =	intInvoiceDetailId, 
-				@dblFinalPrice		=	dblFinalPrice 
-		FROM	tblCTPriceFixationDetail 
+		SELECT	@dblPriceFixedQty	=	FD.dblQuantity, 
+				@intBillId			=	FD.intBillId,
+				@intBillDetailId	=	FD.intBillDetailId, 
+				@intInvoiceId		=	FD.intInvoiceId, 
+				@intInvoiceDetailId =	FD.intInvoiceDetailId, 
+				@dblFinalPrice		=	[dbo].[fnCTConvertToSeqFXCurrency](PF.intContractDetailId,PC.intFinalCurrencyId,IU.intItemUOMId,FD.dblFinalPrice)
+		FROM	tblCTPriceFixationDetail	FD
+		JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
+		JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
+		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId
+		JOIN	tblICCommodityUnitMeasure	CO	ON	CO.intCommodityUnitMeasureId	=	FD.intPricingUOMId
+		JOIN	tblICItemUOM				IU	ON	IU.intItemId					=	CD.intItemId 
+												AND IU.intUnitMeasureId				=	CO.intUnitMeasureId
 		WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
 		IF @intContractTypeId = 1 

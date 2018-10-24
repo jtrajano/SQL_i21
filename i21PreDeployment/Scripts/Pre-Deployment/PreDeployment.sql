@@ -205,3 +205,5 @@
 --ST
 :r .\25_ST\0_CleanUp.sql
 
+--LG
+:r .\26_LG\0_DataCleanup.sql

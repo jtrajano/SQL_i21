@@ -31,4 +31,5 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intFobPointId] TINYINT NULL
 	,[intInTransitSourceLocationId] INT NULL 
 	,[intOtherChargeItemId] INT NULL
+	,[dblNewAverageCost] NUMERIC(38, 20) NULL
 )

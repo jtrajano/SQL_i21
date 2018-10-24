@@ -37,8 +37,8 @@ DECLARE @batchIdUsedInBill NVARCHAR(40);
 --  VALIDATE REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
 DECLARE @invalidRefundCustomer TABLE(
-	[strErrorMsg] NVARCHAR(MAX),
-	[intRefundId] INT
+	[intRefundId] INT,
+	[strErrorMsg] NVARCHAR(MAX)
 )
 
 IF(@ysnPosted = 1)
@@ -56,6 +56,7 @@ BEGIN
 		ON R.intFiscalYearId = CV.intFiscalYear
 		AND RC.intCustomerId = CV.intCustomerPatronId
 		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
+		AND R.ysnPosted <> 1
 	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
 
 END
@@ -65,8 +66,8 @@ BEGIN
 	IF(ISNULL(@ysnRecap, 0) = 0)
 	BEGIN
 	INSERT INTO @invalidRefundCustomer
-	SELECT	strError,
-			intTransactionId
+	SELECT	intTransactionId,
+			strError
 	FROM [dbo].[fnPATValidateAssociatedTransaction](@intRefundId, 5, default)
 	END
 END

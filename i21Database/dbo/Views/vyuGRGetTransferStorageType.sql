@@ -4,7 +4,8 @@ SELECT DISTINCT
     ST.intStorageScheduleTypeId  
     ,ST.strStorageTypeDescription
     ,SR.intCurrencyID
-    ,ST.ysnDPOwnedType  
+    ,ST.ysnDPOwnedType
+    ,SR.intCommodity
 FROM tblGRStorageType ST  
 JOIN tblGRStorageScheduleRule SR 
     ON SR.intStorageType = ST.intStorageScheduleTypeId  

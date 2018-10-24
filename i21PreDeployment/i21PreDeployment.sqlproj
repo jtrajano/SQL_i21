@@ -87,6 +87,7 @@
     <Folder Include="Scripts\Pre-Deployment\11_IC\" />
     <Folder Include="Scripts\Pre-Deployment\24_SC" />
     <Folder Include="Scripts\Pre-Deployment\25_ST" />
+    <Folder Include="Scripts\Pre-Deployment\26_LG" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -162,6 +163,7 @@
     <None Include="Scripts\Pre-Deployment\8_AP\DeleteOld1099PATRData.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\00_DropTriggers.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\ChangePrimaryKeyToIdentity.sql" />
+    <None Include="Scripts\Pre-Deployment\26_LG\0_DataCleanup.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

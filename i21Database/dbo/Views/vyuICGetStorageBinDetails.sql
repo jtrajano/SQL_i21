@@ -2,10 +2,10 @@
 AS
 SELECT
 	  intItemId					= sm.intItemId
-	, intCompanyLocationId		= sl.intLocationId
+	, intCompanyLocationId		= il.intLocationId
 	, intItemLocationId			= sm.intItemLocationId
 	, intSubLocationId			= sm.intSubLocationId
-	, strSubLocationName		= sc.strSubLocationName
+	, strSubLocationName		= sc.strSubLocationName 
 	, strLocation				= c.strLocationName
 	, strStorageLocation		= sl.strName
 	, strItemNo					= i.strItemNo
@@ -28,13 +28,17 @@ SELECT
 FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
-	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
-	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
-	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
+	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId	
+	INNER JOIN (
+		tblICItemLocation il INNER JOIN tblSMCompanyLocation c ON 
+			c.intCompanyLocationId = il.intLocationId
+	)
+		ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
+	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
 	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
-	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
+	
 	LEFT OUTER JOIN (
 		SELECT 
 			  dblAirSpaceReading						= SUM(ISNULL(mrc.dblAirSpaceReading, 0))
@@ -66,5 +70,5 @@ FROM tblICItemStockUOM sm
 	) smr ON smr.intLocationId = il.intLocationId
 		AND mrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
 	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
-WHERE i.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
-	AND sm.intStorageLocationId IS NOT NULL
+WHERE 
+	i.strType IN (N'Inventory',N'Finished Good',N'Raw Material')

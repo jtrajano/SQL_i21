@@ -236,7 +236,7 @@ IF ISNULL(@ErrorMessage, '') = ''
 		FROM tblARInvoice
 		WHERE intInvoiceId = @createdCreditMemoId
 			
-		IF(@strPaymentMethod = 'Cash')
+		IF(@strPaymentMethod != 'On Account')
 		BEGIN
 			EXEC uspARPOSCreateNegativeCashReceipts 
 						 @intInvoiceId			= @createdCreditMemoId
@@ -248,8 +248,11 @@ IF ISNULL(@ErrorMessage, '') = ''
 
 		IF(LEN(ISNULL(@strMessage, '')) <= 0)
 		BEGIN
+			DECLARE @InvoiceId AS INT = 0
+			SELECT @InvoiceId = intInvoiceId FROM tblARInvoice WHERE intSourceId = @intPOSId
+			
 			UPDATE tblARPOS
-			SET ysnReturn = 1
+			SET ysnReturn = 1, intInvoiceId = @InvoiceId
 			WHERE intPOSId = @intPOSId
 				
 			SET @strMessage = NULL

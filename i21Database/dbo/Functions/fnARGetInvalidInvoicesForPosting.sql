@@ -266,7 +266,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'Customer - ' + ARC.strCustomerNumber + ' credit limit is blank! Only Cash Sale transaction is allowed.'
+			,[strPostingError]		= 'Customer credit limit is blank! Only Cash Sale transaction is allowed.'
 		FROM 
 			@Invoices I	
 		INNER JOIN dbo.tblARCustomer  ARC
@@ -745,7 +745,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I					
 		WHERE
 			I.[strType] = 'Provisional'
-			AND ISNULL(I.[ysnImpactForProvisional],0) = 0
+			AND ISNULL(I.[ysnProvisionalWithGL],0) = 0
 
 
 		INSERT INTO @returntable(

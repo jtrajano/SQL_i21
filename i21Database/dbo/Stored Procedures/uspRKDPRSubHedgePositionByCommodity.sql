@@ -481,7 +481,7 @@ FROM vyuRKGetInventoryValuation s
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId  
 	LEFT JOIN tblSCTicket t on s.intSourceId=t.intTicketId		   		  
 WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
-				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -678,7 +678,7 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 	WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId  and strTicketStatus <> 'V'
 	AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate))t 
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate))t 
 	WHERE  intCompanyLocationId  IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -734,7 +734,7 @@ BEGIN
 	INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
 	WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 	AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 	and ISNULL(inv.ysnPosted,0) = 0
 	and cl.intCompanyLocationId IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation

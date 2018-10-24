@@ -80,7 +80,7 @@ SELECT
 	 [intItemId]					= ARID.[intItemId]  
 	,[intItemLocationId]			= ARID.[intItemLocationId]
 	,[intItemUOMId]					= ARID.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmShipDate], ARID.[dtmPostDate])
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]					= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
@@ -126,7 +126,7 @@ LEFT OUTER JOIN
 		ON LGL.[intLoadId] = ARID.[intLoadId]
 WHERE	
 	ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL(ARID.[intPeriodsToAccrue],0) <= 1 
-	AND 1 = CASE WHEN [strTransactionType] = 'Credit Memo' THEN ARID.[ysnImpactInventory] ELSE 1 END			
+	AND ARID.[ysnImpactInventory] = CAST(1 AS BIT)			
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)

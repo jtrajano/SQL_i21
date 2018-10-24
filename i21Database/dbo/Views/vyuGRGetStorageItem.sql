@@ -12,8 +12,9 @@ SELECT DISTINCT
     ,ISNULL(Com.intFutureMarketId,0) AS intFutureMarketId
     ,Com.dblPriceCheckMin
     ,Com.dblPriceCheckMax
-    ,Com.intCommodityId
+    ,CS.intCommodityId
     ,UOM.intItemUOMId AS intCommodityStockUomId
+    ,ISNULL(CS.intItemUOMId, UOM.intItemUOMId) AS intItemUOMId
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId
@@ -28,4 +29,3 @@ JOIN tblICItemUOM UOM
     ON UOM.intItemId = Item.intItemId 
         AND UOM.intUnitMeasureId = CU.intUnitMeasureId
 WHERE CS.dblOpenBalance > 0 
-    AND ISNULL(CS.strStorageType,'') <> 'ITR'

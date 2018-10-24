@@ -10,5 +10,5 @@
 	dblProfitMarkup NUMERIC(18,6),
 	intConcurrencyId INT NOT NULL, 
 
-	CONSTRAINT [FK_tblLGInsurancePremiumFactorDetail_tblLGInsurancePremiumFactor_intInsurancePremiumFactorId] FOREIGN KEY ([intInsurancePremiumFactorId]) REFERENCES [tblLGInsurancePremiumFactor]([intInsurancePremiumFactorId])
+	CONSTRAINT [FK_tblLGInsurancePremiumFactorDetail_tblLGInsurancePremiumFactor_intInsurancePremiumFactorId] FOREIGN KEY ([intInsurancePremiumFactorId]) REFERENCES [tblLGInsurancePremiumFactor]([intInsurancePremiumFactorId]) ON DELETE CASCADE
 )

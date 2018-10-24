@@ -236,7 +236,7 @@ BEGIN
 
 	SELECT intPOSId			= intPOSId
 		 , intPOSPaymentId	= intPOSPaymentId
-		 , strPaymentMethod	= strPaymentMethod
+		 , strPaymentMethod	= CASE WHEN strPaymentMethod ='Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
 		 , strReferenceNo	= strReferenceNo
 		 , dblAmount		= dblAmount
 		 , ysnComputed		= CAST(0 AS BIT)
@@ -328,7 +328,7 @@ BEGIN
 				,dtmDatePaid					= GETDATE()
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
-				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card') THEN strReferenceNo ELSE NULL END
+				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount, 0)
 				,intEntityId					= @intEntityUserId
@@ -355,7 +355,7 @@ BEGIN
 				SELECT TOP 1 intPaymentMethodID
 						   , strPaymentMethod
 				FROM tblSMPaymentMethod WITH (NOLOCK)
-				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod LIKE '%debit%') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
 			) PM
 			WHERE IFP.ysnExcludeForPayment = 0
 			  AND IFP.ysnPosted = 1
@@ -363,8 +363,8 @@ BEGIN
 
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
-											, @UserId			= 1
-											, @GroupingOption	= 5
+											, @UserId			= @intEntityUserId
+											, @GroupingOption	= 6
 											, @RaiseError		= 1
 											, @ErrorMessage		= @ErrorMessage OUTPUT
 											, @LogId			= @LogId OUTPUT
@@ -402,20 +402,28 @@ BEGIN
 			--UPDATE POS ENDING BALANCE
 			UPDATE tblARPOSEndOfDay
 			SET
-				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + @dblTotalAmountPaid
+				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + POSPAYMENT.dblAmount
 			FROM tblARPOSEndOfDay EOD
 			INNER JOIN(
 				SELECT
-						intPOSLogId
+					intPOSLogId
 					,intPOSEndOfDayId
 				FROM tblARPOSLog
 			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
 			INNER JOIN(
 				SELECT
-						intPOSId
+					intPOSId
 					,intPOSLogId
 				FROM tblARPOS
 			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+			INNER JOIN(
+				SELECT
+					intPOSId
+					,SUM(dblAmount) AS dblAmount
+				FROM tblARPOSPayment
+				WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
+				GROUP BY intPOSId, dblAmount
+			)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
 			WHERE POS.intPOSId = @intPOSId
 		END
 END

@@ -14,6 +14,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
 	 , strInvoiceNumber
+	 , strTransactionType
 	 , dtmDate
 	 , dtmDueDate
 	 , strBOLNumber
@@ -54,10 +55,16 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , blbLogo
 	 , intEntityUserId
 	 , strInvoiceFormat
+	 , intTicketId
+	 , strTicketNumbers
+	 , dtmLoadedDate
+	 , dtmScaleDate
+	 , strCommodity
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , strInvoiceNumber			= INV.strInvoiceNumber
+	 , strTransactionType		= INV.strTransactionType
 	 , dtmDate					= INV.dtmDate
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strBOLNumber				= INV.strBOLNumber
@@ -102,6 +109,11 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , blbLogo					= LOGO.blbLogo
 	 , intEntityUserId			= @intEntityUserId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
+	 , intTicketId				= ISNULL(TICKETDETAILS.intTicketId, 0)
+	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers
+	 , dtmLoadedDate			= TICKETDETAILS.dtmLoadedDate
+	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
+	 , strCommodity				= TICKETDETAILS.strCommodity	 
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
@@ -226,6 +238,18 @@ OUTER APPLY (
 	WHERE intInvoiceId = INVOICEDETAIL.intInvoiceId 
 	  AND ISNULL(ID.intSiteId, 0) <> 0
 ) CONSUMPTIONSITE
+OUTER APPLY (
+	SELECT TOP 1 intTicketId		= TICKET.intTicketId
+		       , strTicketNumbers	= TICKET.strTicketNumber
+		       , dtmLoadedDate		= TICKET.dtmTransactionDateTime
+		       , dtmScaleDate		= TICKET.dtmTicketDateTime
+		       , strCommodity		= COM.strDescription
+	FROM dbo.tblARInvoiceDetail DETAIL
+	INNER JOIN dbo.tblSCTicket TICKET ON DETAIL.intTicketId = TICKET.intTicketId
+	LEFT JOIN dbo.tblICCommodity COM ON TICKET.intCommodityId = COM.intCommodityId
+	WHERE DETAIL.intInvoiceId = INV.intInvoiceId
+		AND DETAIL.intTicketId IS NOT NULL
+) TICKETDETAILS
 OUTER APPLY (
 	SELECT blbLogo = blbFile 
 	FROM tblSMUpload 

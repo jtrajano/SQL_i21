@@ -11,9 +11,12 @@ SELECT
 	, strStorageLocation		= MAX(sl.strName)
 	, strItemNo					= i.strItemNo
 	, strItemDescription		= i.strDescription
-	, dblStock					= SUM((sm.dblOnHand + sm.dblUnitStorage))
-	, dblCapacity				= SUM(sl.dblEffectiveDepth *  sl.dblUnitPerFoot)
-	, dblAvailable				= SUM((sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sm.dblOnHand + sm.dblUnitStorage))
+	, dblStock					= SUM((ISNULL(sm.dblOnHand, 0) + ISNULL(sm.dblUnitStorage, 0)))
+	, dblCapacity				= SUM(ISNULL(sl.dblEffectiveDepth, 0) *  ISNULL(sl.dblUnitPerFoot, 0))
+	, dblAvailable				= SUM(
+									(ISNULL(sl.dblEffectiveDepth, 0) *  ISNULL(sl.dblUnitPerFoot, 0)) 
+									- (ISNULL(sm.dblOnHand, 0) + ISNULL(sm.dblUnitStorage, 0))
+								)
 	, strCommodityCode			= cd.strCommodityCode
 FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
@@ -21,7 +24,7 @@ FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
 	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
-	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
 	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId

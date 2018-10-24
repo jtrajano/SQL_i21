@@ -72,8 +72,8 @@ BEGIN
 		,C.strItemUOM AS strRepresentingUOM
 		,C.intEntityId
 		,C.strEntityName AS strPartyName
-		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
-		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,ISNULL(C.intItemContractOriginId, C.intOriginCountryId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOriginCountry) AS strCountry
 		,C.intContractTypeId
 		,C.strItemSpecification
 		,(
@@ -120,8 +120,8 @@ BEGIN
 		,C.strItemUOM AS strRepresentingUOM
 		,C.intEntityId
 		,C.strEntityName AS strPartyName
-		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
-		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,ISNULL(C.intItemContractOriginId, C.intOriginCountryId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOriginCountry) AS strCountry
 		,S.strMarks
 		,S.intPSubLocationId AS intCompanyLocationSubLocationId
 		,S.strSubLocationName
@@ -169,8 +169,8 @@ BEGIN
 		,C.strItemUOM AS strRepresentingUOM
 		,C.intEntityId
 		,C.strEntityName AS strPartyName
-		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
-		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,ISNULL(C.intItemContractOriginId, C.intOriginCountryId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOriginCountry) AS strCountry
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification

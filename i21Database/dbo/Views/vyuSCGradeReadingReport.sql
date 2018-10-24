@@ -2,8 +2,8 @@
 AS SELECT 
 GR.intDiscountScheduleCodeId
 , GR.intItemId
-, IC.strShortName AS strDiscountCode
-, IC.strItemNo AS strDiscountCodeDescription
+, IC.strShortName AS strDiscountCodeDescription
+, IC.strItemNo AS strDiscountCode
 , GR.intDiscountCalculationOptionId
 , GR.strDiscountChargeType
 , QM.dblGradeReading

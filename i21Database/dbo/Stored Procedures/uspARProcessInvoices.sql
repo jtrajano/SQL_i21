@@ -15,6 +15,11 @@
 																	-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
 																	-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
 																	-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+																	-- 12 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId]
+																	-- 13 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]
+																	-- 14 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]
+																    -- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
+                                                                    -- 16 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]
 	,@RaiseError					BIT								= 0
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
 	,@CreatedIvoices				NVARCHAR(MAX)					= NULL			OUTPUT
@@ -92,6 +97,7 @@ BEGIN TRY
 		,[intFreightTermId]				INT												NULL
 		,[intPaymentMethodId]			INT												NULL
 		,[strInvoiceOriginId]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
+        ,[ysnImpactInventory]           BIT                                             NULL
 		,[strInvoiceNumber]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[intInvoiceId]					INT												NULL
 		,[intInvoiceDetailId]			INT												NULL
@@ -124,6 +130,7 @@ BEGIN TRY
 						WHEN @GroupingOption =13 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]'
 						WHEN @GroupingOption =14 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]'
 						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
+						WHEN @GroupingOption =16 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
 					END)
 					
 	SET @intId = (CASE WHEN @GroupingOption = 0 THEN '' ELSE '[intId],' END)
@@ -316,7 +323,7 @@ BEGIN
 		,@FreightTermId				= [intFreightTermId]
 		,@PaymentMethodId			= [intPaymentMethodId]
 		,@InvoiceOriginId			= [strInvoiceOriginId]
-			
+        ,@ImpactInventory           = [ysnImpactInventory]
 		
 	FROM 
 		#EntriesForProcessing
@@ -361,7 +368,7 @@ BEGIN
 		,@Forgiven						= [ysnForgiven]
 		,@Calculated					= [ysnCalculated]
 		,@Splitted						= [ysnSplitted]
-		,@ImpactInventory				= [ysnImpactInventory]
+		,@ImpactInventory				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -482,6 +489,7 @@ BEGIN
 		AND (ISNULL([intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
 		AND (ISNULL([intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
 		AND (ISNULL([strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
+		AND (ISNULL([ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
 	ORDER BY
 		[intId]
 
@@ -776,6 +784,7 @@ BEGIN
 		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
 		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
 		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
+		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -1131,6 +1140,7 @@ BEGIN
 		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
 		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
 		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
+		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -1325,7 +1335,7 @@ BEGIN TRY
 			,@Forgiven						= [ysnForgiven]
 			,@Calculated					= [ysnCalculated]
 			,@Splitted						= [ysnSplitted]
-			,@ImpactInventory				= [ysnImpactInventory]
+			,@ImpactInventory				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
 			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]

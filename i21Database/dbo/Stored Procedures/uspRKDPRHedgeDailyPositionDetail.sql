@@ -522,7 +522,7 @@ FROM vyuRKGetInventoryValuation s
 	LEFT JOIN tblSCTicket t on s.intSourceId=t.intTicketId		   		  
 WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
 			--and isnull(t.strDistributionOption,'') <> 'DP' and isnull(strTicketStatus,'') <> 'V'
-				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -728,7 +728,7 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 	WHERE v.strTransactionType ='Inventory Receipt' and cd.intCommodityId = @intCommodityId  and isnull(strTicketStatus,'') <> 'V'
 	AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate))t 
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate))t 
 	WHERE  intCompanyLocationId  IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -786,7 +786,7 @@ BEGIN
 	INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
 	WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 	AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 	and ISNULL(inv.ysnPosted,0) = 0
 	AND @ysnExchangeTraded = 1
 	and cl.intCompanyLocationId IN (
@@ -875,7 +875,7 @@ BEGIN
 				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,Cur.strCurrency,strName strCustomerReference
 				FROM tblAPBill B
 				JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-				JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL
+				JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
 				JOIN tblICCommodity c on I.intCommodityId = c.intCommodityId
 				JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
 				JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId = B.intShipToId
@@ -942,7 +942,7 @@ BEGIN
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency)
 
-	select strCommodityCode,'NP Un-Paid Quantity' strType,dblTotal/case when isnull(dblUnitCost,0)=0 then 1 else dblUnitCost end,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
+	select strCommodityCode,'NP Un-Paid Quantity' strType,dblQtyReceived,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency
 					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
@@ -1055,7 +1055,7 @@ BEGIN
 				,c.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,Cur.strCurrency,strName strCustomerReference
 				FROM tblAPBill B
 					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL
+					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
 					JOIN tblICCommodity c on I.intCommodityId = c.intCommodityId
 					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
 					JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId = B.intShipToId
@@ -1125,7 +1125,7 @@ BEGIN
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId)
 
-	select strCommodityCode,'NP Un-Paid Quantity' strType,dblTotal/case when isnull(dblUnitCost,0)=0 then 1 else dblUnitCost end,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
+	select strCommodityCode,'NP Un-Paid Quantity' strType,dblQtyReceived,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId
 					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
@@ -1189,6 +1189,8 @@ BEGIN
 			where dblTotal <> 0 
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId
 END
 ELSE IF(@strByType = 'ByLocation')
@@ -1199,6 +1201,8 @@ BEGIN
 			WHERE dblTotal <> 0
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			GROUP BY c.strCommodityCode,strUnitMeasure,strType,c.intCommodityId,strLocationName
 END
 ELSE 
@@ -1213,6 +1217,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			where dblTotal <> 0 
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 		ELSE
@@ -1226,6 +1232,8 @@ BEGIN IF isnull(@intVendorId,0) = 0
 			where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
+			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 			ORDER BY intSeqNo,strType ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 		END
 END

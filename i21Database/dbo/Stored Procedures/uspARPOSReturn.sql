@@ -481,10 +481,6 @@ AS
 
 			EXEC uspARPostInvoice @param = @createdCreditMemoId, @post = 1
 
-			-- SELECT @strPOSPaymentMethod = posPayment.strPaymentMethod
-			-- FROM tblARPOSPayment posPayment
-			-- INNER JOIN tblARPOS pos ON posPayment.intPOSId = pos.intPOSId
-			-- WHERE pos.intInvoiceId = @intInvoiceId
 			SELECT @intPaymentMethodID = intPaymentMethodID FROM tblSMPaymentMethod
 			WHERE strPaymentMethod = @strPOSPaymentMethod 
 
@@ -508,7 +504,9 @@ AS
 				SET intInvoiceId = @createdCreditMemoId    
 				WHERE strReceiptNumber = @ReceiptNumber  
 				
-				SET @strMessage = NULL
+				SELECT @strMessage = intPOSId FROM tblARPOS
+				WHERE strReceiptNumber = @ReceiptNumber 
+				
 			END
 
 		END

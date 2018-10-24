@@ -138,20 +138,19 @@ BEGIN TRY
 				AND intCompanyLocationId = @intStorageLocationId
 				AND intStorageTypeId = @intStorageTypeId
 				AND ysnDPOwnedType = 0
-				AND ysnCustomerStorage = 0
 			IF (@dblAvailableGrainOpenBalance > 0)
 			BEGIN			  
 				WHILE @dblAvailableGrainOpenBalance > 0
 				BEGIN
 					SELECT	intItemId = ScaleTicket.intItemId
 							,intLocationId = ItemLocation.intItemLocationId 
-							,intItemUOMId = ItemUOM.intItemUOMId
+							,intItemUOMId = ScaleTicket.intItemUOMIdTo
 							,dtmDate = dbo.fnRemoveTimeOnDate(ScaleTicket.dtmTicketDateTime)
 							,dblQty = CASE
 										WHEN @dblUnits >= @dblAvailableGrainOpenBalance THEN @dblAvailableGrainOpenBalance
 										ELSE @dblUnits
 									END
-							,dblUOMQty = ItemUOM.dblUnitQty
+							,dblUOMQty = ScaleTicket.dblConvertedUOMQty
 							,dblCost = 0
 							,dblSalesPrice = 0
 							,intCurrencyId = ScaleTicket.intCurrencyId
@@ -163,13 +162,15 @@ BEGIN TRY
 							,intLotId = NULL 
 							,intSubLocationId = ScaleTicket.intSubLocationId
 							,intStorageLocationId = ScaleTicket.intStorageLocationId
-							,ysnIsStorage = 1
+							,ysnIsStorage = CASE WHEN GR.strOwnedPhysicalStock = 'Customer' THEN 1 ELSE 0 END
 							,intStorageScheduleTypeId = @intStorageTypeId
 					FROM	dbo.tblSCTicket ScaleTicket
-							INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-							INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-					WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+							INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ScaleTicket.intItemId 
+								AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+							OUTER APPLY(
+								SELECT * FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
+							)GR
+					WHERE	ScaleTicket.intTicketId = @intTicketId
 					SET @dblAvailableGrainOpenBalance = @dblAvailableGrainOpenBalance-@dblUnits
 					GOTO CONTINUEISH
 				END

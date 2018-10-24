@@ -127,7 +127,30 @@ BEGIN
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
 		AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
-						
+
+	--From Sales Order
+	INSERT INTO tblARInvoiceDetailComponent
+		([intInvoiceDetailId]
+		,[intComponentItemId]
+		,[strComponentType]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblUnitQuantity]
+		,[intConcurrencyId])
+	SELECT 
+		 [intInvoiceDetailId]	= ARID.intInvoiceDetailId
+		,[intComponentItemId]	= SOD.[intComponentItemId]
+		,[strComponentType]		= SOD.[strComponentType]
+		,[intItemUOMId]			= SOD.[intItemUOMId]
+		,[dblQuantity]			= SOD.[dblQuantity]
+		,[dblUnitQuantity]		= SOD.[dblUnitQuantity]
+		,[intConcurrencyId]		= 1
+	FROM
+		tblSOSalesOrderDetailComponent SOD
+	INNER JOIN
+		tblARInvoiceDetail ARID ON SOD.intSalesOrderDetailId = ARID.intSalesOrderDetailId
+	WHERE
+		ARID.[intInvoiceId] = @InvoiceId
 	 
 END
 

@@ -33,6 +33,8 @@
     ,[dblBaseAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblPayment]                           NUMERIC(18,6)   NULL
     ,[dblBasePayment]                       NUMERIC(18,6)   NULL
+    ,[dblProvisionalAmount]                 NUMERIC(18,6)   NULL
+    ,[dblBaseProvisionalAmount]             NUMERIC(18,6)   NULL
     ,[strComments]                          NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strImportFormat]                      NVARCHAR(50)    NULL
     ,[intSourceId]                          INT             NULL
@@ -62,7 +64,8 @@
     ,[ysnUserAllowedToPostOtherTrans]       BIT             NULL
     ,[ysnWithinAccountingDate]              BIT             NULL
     ,[ysnForApproval]                       BIT             NULL
-    ,[ysnImpactForProvisional]              BIT             NULL
+    ,[ysnFromProvisional]                   BIT             NULL
+	,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 

@@ -93,7 +93,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 			,0 as dblSettleUnit
 		FROM (
 		select 
-			CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+			CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 			,S.strStorageTypeDescription
 			,CASE WHEN strType = 'From Delivery Sheet' 
 					OR strType = 'From Scale'  

@@ -73,6 +73,7 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(PF.[dblLotsFixed]) AS dblLotsFixed,
 			(SELECT TOP 1 dtmFixationDate FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) AS dtmFixationDate,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
+			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' to ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strAtlasPeriod,
 			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 				ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 				ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
@@ -80,11 +81,19 @@ BEGIN TRY
 				ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 				ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
 			AS	strOtherPartyAddress,
+			strAtlasOtherPartyAddress	=   LTRIM(RTRIM(EY.strEntityName)) + CHAR(13)+CHAR(10) +
+											ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+											ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+											ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
+											ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
+											ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
+
 			(SELECT TOP 1 strNotes FROM tblCTPriceFixationDetail WHERE intPriceFixationId = 35) AS strNotes,
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
-			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-	
+			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			dtmContractDate  = CH.dtmContractDate
+
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(

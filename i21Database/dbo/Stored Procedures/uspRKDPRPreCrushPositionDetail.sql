@@ -163,6 +163,7 @@ SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				,strContractNumber NVARCHAR(100)
 				,strLocationName NVARCHAR(100)
 				,dtmEndDate DATETIME
+				,strFutureMonth NVARCHAR(100)
 				,dblBalance DECIMAL(24, 10)
 				,intUnitMeasureId INT
 				,intPricingTypeId INT
@@ -193,6 +194,7 @@ SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				,strContractNumber
 				,strLocationName
 				,dtmEndDate
+				,strFutureMonth
 				,dblBalance
 				,intUnitMeasureId
 				,intPricingTypeId
@@ -259,15 +261,15 @@ INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strC
 				,CD.strType [strType]
 				,strLocationName
 				,case when @strPositionBy ='Delivery Month' then RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-						else RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8) end strContractEndMonth
+						else RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) end strContractEndMonth
 				,case when @strPositionBy ='Delivery Month' then RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) 
-						else RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8) end strContractEndMonthNearBy
+						else RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8)  end strContractEndMonthNearBy
 				,CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) END AS dblTotal
 				,CD.intUnitMeasureId intFromCommodityUnitMeasureId
 				,CD.strEntityName
 			FROM @tblGetOpenContractDetail CD
 			JOIN tblCTContractDetail det on CD.intContractDetailId=det.intContractDetailId 
-			JOIN tblRKFuturesMonth fm on CD.intFutureMonthId=fm.intFutureMonthId and CD.intFutureMarketId=fm.intFutureMarketId
+			--JOIN tblRKFuturesMonth fm on CD.intFutureMonthId=fm.intFutureMonthId and CD.intFutureMarketId=fm.intFutureMarketId
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3 
 			AND CD.intCompanyLocationId IN (
 					SELECT intCompanyLocationId
@@ -980,4 +982,5 @@ SELECT intSeqNo
 		,dblDelta
 		,intBrokerageAccountId
 		,strInstrumentType
-		,strEntityName,intOrderId from @ListFinal where dblTotal <> 0 order by intSeqNo
+		,strEntityName,intOrderId from @ListFinal where dblTotal <> 0
+		ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END ,intSeqNo, strType

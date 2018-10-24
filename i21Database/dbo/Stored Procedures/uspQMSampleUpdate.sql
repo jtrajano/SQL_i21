@@ -34,16 +34,30 @@ BEGIN TRY
 		,@ysnAdjustInventoryQtyBySampleQty Bit
 		,@intLastModifiedUserId int
 		,@dblOldSampleQty NUMERIC(18, 6)
+	DECLARE @intRepresentingUOMId INT
+		,@dblRepresentingQty NUMERIC(18, 6)
+		,@dblConvertedSampleQty NUMERIC(18, 6)
+
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
 
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
 		,@intPreviousSampleStatusId = intSampleStatusId
+		,@dblSampleQty = dblSampleQty
+		,@intSampleUOMId = intSampleUOMId
+		,@dblRepresentingQty = dblRepresentingQty
+		,@intRepresentingUOMId = intRepresentingUOMId
+		,@intItemId = intItemId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
 			,intSampleStatusId INT
+			,dblSampleQty NUMERIC(18, 6)
+			,intSampleUOMId INT
+			,dblRepresentingQty NUMERIC(18, 6)
+			,intRepresentingUOMId INT
+			,intItemId INT
 			)
 
 	IF NOT EXISTS (
@@ -57,6 +71,22 @@ BEGIN TRY
 				,16
 				,1
 				)
+	END
+
+	-- Quantity Check
+	IF ISNULL(@intSampleUOMId, 0) > 0
+		AND ISNULL(@intRepresentingUOMId, 0) > 0
+	BEGIN
+		SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intRepresentingUOMId, @intSampleUOMId, @dblSampleQty)
+
+		IF @dblConvertedSampleQty > @dblRepresentingQty
+		BEGIN
+			RAISERROR (
+					'Sample Qty cannot be greater than Representing Qty. '
+					,16
+					,1
+					)
+		END
 	END
 
 	-- Shipper Entity Id

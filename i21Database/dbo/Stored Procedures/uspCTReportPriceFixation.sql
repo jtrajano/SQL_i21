@@ -135,22 +135,36 @@ BEGIN TRY
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
 			CH.strContractNumber,
+			CH.strContractNumber +'-'+LTRIM(CD.intContractSeq) AS strAtlasContractNumber,
 			CH.strCustomerContract,
 			strDescription = isnull(rtrt.strTranslation,IM.strDescription),
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) ,
 			--strPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
 			strPeriod = datename(dd,dtmStartDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmStartDate)),datename(mm,dtmStartDate)) + ' ' + datename(yyyy,dtmStartDate) + ' - ' + datename(dd,dtmEndDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmEndDate)),datename(mm,dtmEndDate)) + ' ' + datename(yyyy,dtmEndDate),
+			strAtlasPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' to ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
 			strStatus = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strStatus1
 								ELSE	@strStatus2
-						END,			
+						END,
+			strAtlasStatus = CASE	
+									WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 THEN	'This confirms that the above contract has been Fully fixed as follows:'
+									ELSE	'This confirms that the above contract has been Partially fixed as follows:'
+							 END,			
 			strOtherPartyAddress = LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
-			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),
+			
+			strAtlasOtherPartyAddress	=   LTRIM(RTRIM(EY.strEntityName)) + CHAR(13)+CHAR(10) +
+											ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+											ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+											ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
+											ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
+											ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
+
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
 			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
@@ -225,7 +239,7 @@ BEGIN TRY
 			CD.dblRatio,
 			CD.strContractCompanyName,
 			CD.strContractPrintSignOff
-
+		   ,dtmContractDate						= CH.dtmContractDate
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(

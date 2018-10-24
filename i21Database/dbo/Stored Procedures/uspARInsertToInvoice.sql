@@ -1119,27 +1119,6 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									[tblSOSalesOrderDetailTax]
 								WHERE
 									[intSalesOrderDetailId] = @ItemSalesOrderDetailId								
-
-								INSERT INTO tblARInvoiceDetailComponent
-									([intInvoiceDetailId]
-									,[intComponentItemId]
-									,[strComponentType]
-									,[intItemUOMId]
-									,[dblQuantity]
-									,[dblUnitQuantity]
-									,[intConcurrencyId])
-								SELECT 
-									 [intInvoiceDetailId]	= @NewDetailId
-									,[intComponentItemId]	= [intComponentItemId]
-									,[strComponentType]		= [strComponentType]
-									,[intItemUOMId]			= [intItemUOMId]
-									,[dblQuantity]			= [dblQuantity]
-									,[dblUnitQuantity]		= [dblUnitQuantity]
-									,[intConcurrencyId]		= 1
-								FROM
-									tblSOSalesOrderDetailComponent
-								WHERE
-									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 								
 								IF @ItemQtyOrdered <> @ItemQtyShipped
 									EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId, @DetailId = @NewDetailId								

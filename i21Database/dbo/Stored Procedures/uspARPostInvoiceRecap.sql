@@ -295,7 +295,8 @@ INSERT @Invoice
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
@@ -440,7 +441,8 @@ SELECT
     ,[ysnUserAllowedToPostOtherTrans]
     ,[ysnWithinAccountingDate]
     ,[ysnForApproval]
-    ,[ysnImpactForProvisional]
+    ,[ysnFromProvisional]
+    ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnIsInvoicePositive]
 
