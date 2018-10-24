@@ -13,6 +13,7 @@ EXECUTE sp_executesql @sql;
 	DECLARE @query nvarchar(max) = N'INSERT INTO tblSMDisconReplicationArticle (strTableName) ' +
 									'SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s on t.[schema_id] = s.[schema_id] WHERE t.name LIKE ''tbl%'' AND t.name NOT IN ' +
 									'(''tblSMStartingNumber'','+
+									 '''tblGLTempCOASegment'','+
 									 '''tblSMCompanySetup'','+
 									 '''tblSMConnectedUser'','+
 									 '''tblSMMultiCurrency'','+
