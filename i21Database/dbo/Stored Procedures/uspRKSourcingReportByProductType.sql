@@ -70,7 +70,7 @@ SELECT strName as strEntityName,
 	 end AS dblTotPurchased
 	 , strOrigin,strProductType
 FROM(
-SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
+SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,cd.intContractDetailId,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
 			 ,cd.dblNoOfLots
 			,(SELECT round(dblTotalCost,2) FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
@@ -109,7 +109,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
               WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2,8))) dblUnPricedSettlementPrice
 
-                      ,(SELECT sum(dblParPriced) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPriced,
+                ,(SELECT sum(dblParPriced) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPriced,
              (SELECT sum(dblParPricedBasis) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPricedBasis,
 			 (SELECT sum(dblParPricedAvgPrice) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPricedAvgPrice,
 
@@ -122,9 +122,8 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
 					 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-			  as dblReturn,
-			  strOrigin,strProductType,
-			   dblRatio,
+			  as dblReturn,strOrigin,strProductType,
+			  dblRatio,
 			  dblBasis
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
@@ -172,7 +171,7 @@ SELECT strName as strEntityName,
 				end
 	 end AS dblTotPurchased  , strOrigin,strProductType
 FROM(
-SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
+SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,cd.intContractDetailId,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
 			 ,cd.dblNoOfLots
 			,(SELECT round(dblTotalCost,2) FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
@@ -211,8 +210,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
               WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2,8))) dblUnPricedSettlementPrice
 
-         
-                      ,(SELECT sum(dblParPriced) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPriced,
+                ,(SELECT sum(dblParPriced) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPriced,
              (SELECT sum(dblParPricedBasis) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPricedBasis,
 			 (SELECT sum(dblParPricedAvgPrice) from #tempPartiallyPriced det WHERE det.intContractDetailId=cd.intContractDetailId) as dblParPricedAvgPrice,
 
@@ -225,8 +223,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
 					 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-			  as dblReturn,
-			  strOrigin,strProductType,
+			  as dblReturn,strOrigin,strProductType,
 			  dblRatio,
 			  dblBasis
 FROM tblCTContractHeader ch
