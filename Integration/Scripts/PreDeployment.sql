@@ -19,6 +19,7 @@
 :r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
 :r "..\dbo\Stored Procedures\uspSMImportShipVia.sql"
 :r "..\dbo\Stored Procedures\uspSMSyncShipVia.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTaxGroup.sql"
 
 -- GENERAL LEDGER
 --:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
