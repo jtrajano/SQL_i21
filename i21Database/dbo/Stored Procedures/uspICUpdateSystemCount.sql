@@ -70,6 +70,14 @@ FROM tblICInventoryCountDetail cd
 		AND lotted.strLotNumber = cd.strLotNo
 WHERE c.intImportFlagInternal = 1
 
+DECLARE @OriginalCost TABLE(intInventoryCountDetailId INT, dblLastCost NUMERIC(38, 20) NULL)
+
+INSERT INTO @OriginalCost(intInventoryCountDetailId , dblLastCost)
+SELECT d.intInventoryCountDetailId, d.dblLastCost
+FROM tblICInventoryCountDetail d
+	INNER JOIN tblICInventoryCount c ON d.intInventoryCountId = d.intInventoryCountId
+WHERE c.intImportFlagInternal = 1
+
 -- Update Last Cost, Calculate Physical Count, Physical Weight, & Qty Per Pallet
 UPDATE cd
 SET cd.dblLastCost = --ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0)),
@@ -124,6 +132,14 @@ FROM tblICInventoryCountDetail cd
 				AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1 
 		ORDER BY dtmDate ASC
 	) FIFO 
+WHERE c.intImportFlagInternal = 1
+
+
+UPDATE cd
+SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) THEN oc.dblLastCost ELSE cd.dblLastCost END
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
+	INNER JOIN @OriginalCost oc ON oc.intInventoryCountDetailId = cd.intInventoryCountDetailId
 WHERE c.intImportFlagInternal = 1
 
 -- Others
