@@ -1,6 +1,12 @@
 ﻿
 PRINT('MFT Cleanup - Start')
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFCompanyPreference') 
+BEGIN
+	PRINT('Clean tblTFCompanyPreference')
+    EXEC('DELETE tblTFCompanyPreference WHERE intCompanyPreferenceId IN (SELECT intCompanyPreferenceId FROM tblTFCompanyPreference WHERE ISNULL(strCompanyName, '''') = '''') AND ((SELECT COUNT(*) FROM tblTFCompanyPreference) > 1)')
+END
+
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactions') 
 BEGIN
 	-- Old table
