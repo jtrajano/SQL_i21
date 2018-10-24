@@ -34,7 +34,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblMatchContractUnits NUMERIC(38, 20)
 		,@intTicketItemUOMId INT
 		,@InventoryShipmentId INT
-		,@dblContractAvailableQty NUMERIC(38, 20);
+		,@dblContractAvailableQty NUMERIC(38, 20)
+		,@intPricingTypeId INT;
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -158,7 +159,11 @@ BEGIN TRY
 			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
 
 			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM vyuICGetInventoryShipmentItem where intSourceId = @intTicketId and strSourceType = 'Scale'
-			IF ISNULL(@InventoryShipmentId, 0) != 0
+			SELECT @intPricingTypeId = intPricingTypeId FROM tblSCTicket SC
+			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId
+			WHERE SC.intTicketId = @intTicketId
+
+			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
 				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 			END

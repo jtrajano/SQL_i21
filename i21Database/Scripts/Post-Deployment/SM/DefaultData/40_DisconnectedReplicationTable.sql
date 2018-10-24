@@ -11,7 +11,34 @@ EXECUTE sp_executesql @sql;
  IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMDisconReplicationArticle )
 	BEGIN
 	DECLARE @query nvarchar(max) = N'INSERT INTO tblSMDisconReplicationArticle (strTableName) ' +
-									'SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s on t.[schema_id] = s.[schema_id] WHERE t.name LIKE ''tbl%'' '
+									'SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s on t.[schema_id] = s.[schema_id] WHERE t.name LIKE ''tbl%'' AND t.name NOT IN ' +
+									'(''tblSMStartingNumber'','+
+									 '''tblSMCompanySetup'','+
+									 '''tblSMConnectedUser'','+
+									 '''tblSMMultiCurrency'','+
+									 '''tblMBILCompanyPreference'','+
+									 '''tblPATCompanyPreference'','+
+									 '''tblSMCompanyPreference'','+
+									 '''tblTFCompanyPreference'','+
+									 '''tblRKCompanyPreference'','+
+									 '''tblQMCompanyPreference'','+
+									 '''tblNRCompanyPreference'','+
+									 '''tblIPCompanyPreference'','+
+									 '''tblGRCompanyPreference'','+
+									 '''tblETCompanyPreference'','+
+									 '''tblCTCompanyPreference'','+
+									 '''tblCFCompanyPreference'','+
+									 '''tblARCompanyPreference'','+
+									 '''tblAPCompanyPreference'','+
+									 '''tblWHCompanyPreference'','+
+									 '''tblPRCompanyPreference'','+
+									 '''tblMFCompanyPreference'','+
+									 '''tblLGCompanyPreference'','+
+									 '''tblICCompanyPreference'','+
+									 '''tblTRCompanyPreference'')'
+
+ 
+									
 
 
 	exec sp_executesql @query

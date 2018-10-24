@@ -402,20 +402,28 @@ BEGIN
 			--UPDATE POS ENDING BALANCE
 			UPDATE tblARPOSEndOfDay
 			SET
-				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + @dblTotalAmountPaid
+				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + POSPAYMENT.dblAmount
 			FROM tblARPOSEndOfDay EOD
 			INNER JOIN(
 				SELECT
-						intPOSLogId
+					intPOSLogId
 					,intPOSEndOfDayId
 				FROM tblARPOSLog
 			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
 			INNER JOIN(
 				SELECT
-						intPOSId
+					intPOSId
 					,intPOSLogId
 				FROM tblARPOS
 			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+			INNER JOIN(
+				SELECT
+					intPOSId
+					,SUM(dblAmount) AS dblAmount
+				FROM tblARPOSPayment
+				WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
+				GROUP BY intPOSId, dblAmount
+			)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
 			WHERE POS.intPOSId = @intPOSId
 		END
 END
