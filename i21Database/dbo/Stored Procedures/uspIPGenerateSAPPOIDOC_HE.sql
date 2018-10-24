@@ -1498,7 +1498,7 @@ BEGIN
 	Select @intItemId=NULL
 	Select @intItemId=intItemId
 	from tblICItem
-	Where strItemNo=@strContractItemNo
+	Where strItemNo=@strItemNo
 
 	SELECT @intUnitMeasureId=NULL
 	SELECT @intUnitMeasureId=intUnitMeasureId FROM dbo.tblICUnitMeasure Where ISNULL(strSymbol, strUnitMeasure)=@strPriceUOM
