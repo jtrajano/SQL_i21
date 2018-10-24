@@ -60,6 +60,7 @@
 	ysnSendFeedOnPrice BIT,
 	[strBulkChangeFields] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnSendFeedOnSlice BIT,
+	ysnDisableLocationValidation BIT,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
