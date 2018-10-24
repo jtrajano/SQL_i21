@@ -467,5 +467,6 @@
     <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
   </ItemGroup>
 </Project>
