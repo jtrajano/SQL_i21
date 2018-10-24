@@ -136,7 +136,12 @@ BEGIN
 		,dtmInvoiceDate
 		,@accountId
 		,NULL
-		,dblAccountTotalAmount
+		,(SELECT SUM(dblTotalAmount) FROM tblCFInvoiceStagingTable cfTrans
+			LEFT OUTER JOIN tblARInvoice si
+			ON cfTrans.intInvoiceId = si.intInvoiceId
+			WHERE ISNULL(si.intInvoiceId,0) != 0
+			AND strUserId = @username
+			AND ISNULL(ysnExpensed,0) = 0) 
 		,(SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 		,'CF Invoice'
 		,strTempInvoiceReportNumber
