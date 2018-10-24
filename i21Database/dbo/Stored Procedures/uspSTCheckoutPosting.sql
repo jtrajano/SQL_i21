@@ -105,15 +105,15 @@ BEGIN
 				SET @strInvoiceTransactionTypeMain = 'Cash Refund'
 			END
 
-		-- Set Invoice Type for CUSTOMER CHARGES
-		IF(@dblCheckoutCustomerChargeAmount > 0)
-			BEGIN
-				SET @strInvoiceTypeCustomerCharges = 'Invoice'
-			END
-		ELSE 
-			BEGIN
-				SET @strInvoiceTypeCustomerCharges = 'Credit Memo'
-			END
+		---- Set Invoice Type for CUSTOMER CHARGES
+		--IF(@dblCheckoutCustomerChargeAmount > 0)
+		--	BEGIN
+		--		SET @strInvoiceTypeCustomerCharges = 'Invoice'
+		--	END
+		--ELSE 
+		--	BEGIN
+		--		SET @strInvoiceTypeCustomerCharges = 'Credit Memo'
+		--	END
 		------------------------------------------------------------------------------
 
 
@@ -1695,6 +1695,7 @@ BEGIN
 
 
 
+
 				----------------------------------------------------------------------
 				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
@@ -1835,15 +1836,80 @@ BEGIN
 											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
-											,[intItemId]				= I.intItemId
+
+											--,[intItemId]				= I.intItemId
+											,[intItemId]				= CASE
+																			WHEN I.intItemId IS NOT NULL
+																				THEN I.intItemId
+																			ELSE ST.intCustomerChargesItemId
+																		END
+
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= CC.intProduct --UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- -1
 											,[intItemUOMId]				= CC.intProduct --UOM.intItemUOMId
-											,[dblQtyShipped]			= -1
+
+											--,[dblQtyShipped]			= -1
+											,[dblQtyShipped]			= CASE
+																			-- IF Item is NOT Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																							THEN (CC.dblQuantity * -1)
+																					END
+
+																			-- IF Item is Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																							THEN (CC.dblQuantity * -1)
+																					END
+
+																			-- IF Item is BLANK
+																			WHEN (I.intItemId IS NULL)
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN -1
+																						WHEN (CC.dblAmount < 0)
+																							THEN 1
+																					END
+																		END
+
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ISNULL(CC.dblAmount,0)
+
+											--,[dblPrice]					= ISNULL(CC.dblAmount,0)
+											,[dblPrice]					= CASE
+																			-- IF Item is NOT Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																							THEN CC.dblUnitPrice
+																					END
+
+																			-- IF Item is Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																							THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																					END
+
+																			-- IF Item is BLANK
+																			WHEN (I.intItemId IS NULL)
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblAmount
+																						WHEN (CC.dblAmount < 0)
+																							THEN (CC.dblAmount * -1)
+																					END
+																		END
+
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1884,24 +1950,58 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutCustomerCharges CC
-								JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
-								JOIN tblICItem I 
-									ON UOM.intItemId = I.intItemId
 								JOIN tblSTCheckoutHeader CH 
 									ON CC.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItemLocation IL 
-									ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST 
-									ON IL.intLocationId = ST.intCompanyLocationId
-									AND CH.intStoreId = ST.intStoreId
+									ON CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
+								LEFT JOIN tblICItemUOM UOM 
+									ON CC.intProduct = UOM.intItemUOMId
+								LEFT JOIN tblICItem I 
+									ON UOM.intItemId = I.intItemId
+								LEFT JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblICItemPricing IP 
+									ON I.intItemId = IP.intItemId
+									AND IL.intItemLocationId = IP.intItemLocationId	
+								OUTER APPLY 
+								(
+									SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
+																			ISNULL(CC.dblQuantity, 0)						-- Qty
+																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, @LineItems
+																			, 1										-- is Reversal
+																			--, I.intItemId							-- Item Id
+																			, CASE
+																				WHEN I.intItemId IS NOT NULL 
+																					THEN I.intItemId
+																				ELSE ST.intCustomerChargesItemId
+																			END
+																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
+																			, ST.intCompanyLocationId				-- Company Location Id
+																			, ST.intTaxGroupId						-- Tax Group Id
+																			, 0										-- 0 Price if not reversal
+																			, GETDATE()
+																			, vC.intShipToId						-- Ship to Location
+																			, 1
+																			, NULL
+																			, vC.intFreightTermId					-- FreightTermId
+																			, NULL
+																			, NULL
+																			, 0
+																			, 0
+																			, UOM.intItemUOMId
+																			,NULL									--@CFSiteId
+																			,0										--@IsDeliver
+																			,0                                      --@IsCFQuote
+																			,NULL
+																			,NULL
+																			,NULL
+																		)
+								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
-								AND CC.dblAmount > 0
 					END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
@@ -2240,27 +2340,60 @@ BEGIN
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= @strInvoiceTypeCustomerCharges
+
+											--,[strTransactionType]		= @strInvoiceTypeCustomerCharges
+											,[strTransactionType]		= CASE
+																			-- IF Item is NOT Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN 'Invoice'
+																						WHEN (CC.dblAmount < 0)
+																							THEN 'Credit Memo'
+																					END
+
+																			-- IF Item is Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN 'Invoice'
+																						WHEN (CC.dblAmount < 0)
+																							THEN 'Credit Memo'
+																					END
+
+																			-- IF Item is BLANK
+																			WHEN (I.intItemId IS NULL)
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN 'Invoice'
+																						WHEN (CC.dblAmount < 0)
+																							THEN 'Credit Memo'
+																					END
+																		END
+
 										    ,[strType]					= @strInvoiceTypeMain
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
-											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
-											,[intEntityCustomerId]		= CC.intCustomerId -- This Customer should come from selected customer in Customer Charges tab, This will also create a separate Invoice
+											,[intInvoiceId]				= @intCurrentInvoiceId				-- NULL = New
+											,[intEntityCustomerId]		= CC.intCustomerId					-- This Customer should come from selected customer in Customer Charges tab, This will also create a separate Invoice
 											,[intCompanyLocationId]		= @intCompanyLocationId
-											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+											,[intCurrencyId]			= @intCurrencyId					-- Default 3(USD)
 											,[intTermId]				= vC.intTermsId						--ADDED
-											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
-											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
-											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
-											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
-											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate					--GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate					--GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate					--GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate					--GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate					--GETDATE()
 											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
 											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
 											,[intShipViaId]				= vC.intShipViaId					--ADDED
 											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
-											,[strInvoiceOriginId]		= NULL -- not sure
-											,[strPONumber]				= NULL -- not sure
-											,[strBOLNumber]				= NULL -- not sure
+											,[strInvoiceOriginId]		= NULL								-- not sure
+											,[strPONumber]				= NULL								-- not sure
+											,[strBOLNumber]				= NULL								-- not sure
 
 											,[strComments]				= @strComments + CAST(CC.intInvoice AS NVARCHAR(100)) -- to be able to create reparate Invoices (intCustomerId + intInvoice)
 																															  -- if  row 1 = Customer 1, Invoice = 1234
@@ -2291,15 +2424,88 @@ BEGIN
 											,[ysnRecap]					= @ysnRecap
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
-											,[intItemId]				= I.intItemId
+
+											--,[intItemId]				= I.intItemId
+											,[intItemId]				= CASE
+																			WHEN I.intItemId IS NOT NULL
+																				THEN I.intItemId
+																			ELSE ST.intCustomerChargesItemId
+																		END
+
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= CC.intProduct --UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- -1
 											,[intItemUOMId]				= CC.intProduct --UOM.intItemUOMId
-											,[dblQtyShipped]			= 1 -- If separate invoice change negative to positive Qty
+
+											--,[dblQtyShipped]			= 1 -- If separate invoice change negative to positive Qty
+											,[dblQtyShipped]			= CASE
+																			-- IF Item is NOT Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblQuantity
+																						WHEN (CC.dblAmount < 0)
+																							THEN (CC.dblQuantity * -1)
+																					END
+
+																			-- IF Item is Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblQuantity
+																						WHEN (CC.dblAmount < 0)
+																							THEN (CC.dblQuantity * -1)
+																					END
+
+																			-- IF Item is BLANK
+																			WHEN (I.intItemId IS NULL)
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN 1
+																						WHEN (CC.dblAmount < 0)
+																							THEN 1
+																					END
+																		END
+
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ISNULL(CC.dblAmount,0)
+
+											--,[dblPrice]					= ISNULL(CC.dblAmount,0)
+											,[dblPrice]					= CASE
+																			-- IF Item is NOT Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblUnitPrice
+																						WHEN (CC.dblAmount < 0)
+																							THEN CC.dblUnitPrice
+																					END
+
+																			-- IF Item is Fuel
+																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																						WHEN (CC.dblAmount < 0)
+																							THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																					END
+
+																			-- IF Item is BLANK
+																			WHEN (I.intItemId IS NULL)
+																				THEN
+																					CASE
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblAmount
+																						WHEN (CC.dblAmount < 0)
+																							THEN (CC.dblAmount * -1)
+																					END
+																		END
+
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -2340,24 +2546,78 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutCustomerCharges CC
-								JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
-								JOIN tblICItem I 
-									ON UOM.intItemId = I.intItemId
 								JOIN tblSTCheckoutHeader CH 
 									ON CC.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItemLocation IL 
-									ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST 
-									ON IL.intLocationId = ST.intCompanyLocationId
-									AND CH.intStoreId = ST.intStoreId
+									ON CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
+								LEFT JOIN tblICItemUOM UOM 
+									ON CC.intProduct = UOM.intItemUOMId
+								LEFT JOIN tblICItem I 
+									ON UOM.intItemId = I.intItemId
+								LEFT JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblICItemPricing IP 
+									ON I.intItemId = IP.intItemId
+									AND IL.intItemLocationId = IP.intItemLocationId	
+								OUTER APPLY 
+								(
+									SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
+																			ISNULL(CC.dblQuantity, 0)						-- Qty
+																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, @LineItems
+																			, 1										-- is Reversal
+																			--, I.intItemId							-- Item Id
+																			, CASE
+																				WHEN I.intItemId IS NOT NULL 
+																					THEN I.intItemId
+																				ELSE ST.intCustomerChargesItemId
+																			END
+																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
+																			, ST.intCompanyLocationId				-- Company Location Id
+																			, ST.intTaxGroupId						-- Tax Group Id
+																			, 0										-- 0 Price if not reversal
+																			, GETDATE()
+																			, vC.intShipToId						-- Ship to Location
+																			, 1
+																			, NULL
+																			, vC.intFreightTermId					-- FreightTermId
+																			, NULL
+																			, NULL
+																			, 0
+																			, 0
+																			, UOM.intItemUOMId
+																			,NULL									--@CFSiteId
+																			,0										--@IsDeliver
+																			,0                                      --@IsCFQuote
+																			,NULL
+																			,NULL
+																			,NULL
+																		)
+								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
-								AND CC.dblAmount > 0
+
+								--FROM tblSTCheckoutCustomerCharges CC
+								--JOIN tblICItemUOM UOM 
+								--	ON CC.intProduct = UOM.intItemUOMId
+								--JOIN tblICItem I 
+								--	ON UOM.intItemId = I.intItemId
+								--JOIN tblSTCheckoutHeader CH 
+								--	ON CC.intCheckoutId = CH.intCheckoutId
+								--JOIN tblICItemLocation IL 
+								--	ON I.intItemId = IL.intItemId
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+								--JOIN tblSTStore ST 
+								--	ON IL.intLocationId = ST.intCompanyLocationId
+								--	AND CH.intStoreId = ST.intStoreId
+								--JOIN vyuEMEntityCustomerSearch vC 
+								--	ON ST.intCheckoutCustomerId = vC.intEntityId
+								--WHERE CC.intCheckoutId = @intCheckoutId
+								--AND CC.dblAmount > 0
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
