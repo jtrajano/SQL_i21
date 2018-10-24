@@ -7134,6 +7134,7 @@
     <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
     <Build Include="dbo\Functions\fnCTConvertToSeqFXCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateLotInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
