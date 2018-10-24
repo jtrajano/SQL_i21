@@ -1733,7 +1733,7 @@ BEGIN
 
 	IF @ysnUpdateFeedStatusOnRead = 1
 	BEGIN
-		DECLARE @strSql NVARCHAR(max) = 'Update tblCTContractFeed Set strFeedStatus=''Awt Ack'' Where intContractFeedId IN (' + @strContractFeedIds + ')'
+		DECLARE @strSql NVARCHAR(max) = 'Update tblCTContractFeed Set strFeedStatus=''Awt Ack'',ysnMailSent = 0, strMessage='''' Where intContractFeedId IN (' + @strContractFeedIds + ')'
 
 		EXEC sp_executesql @strSql
 	END
