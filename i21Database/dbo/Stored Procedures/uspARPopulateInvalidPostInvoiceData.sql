@@ -1631,34 +1631,7 @@ BEGIN
 	INSERT INTO
 		@PostInvoiceDataFromIntegration
 	SELECT
-<<<<<<< HEAD
-		PID.[intInvoiceId] ,PID.PID.[strInvoiceNumber],PID.PID.[strTransactionType],PID.PID.[strType],PID.PID.[dtmDate],PID.PID.[dtmPostDate],PID.PID.[dtmShipDate],PID.PID.[intEntityCustomerId]
-,PID.PID.[strCustomerNumber],PID.PID.[ysnCustomerActive],PID.PID.[dblCustomerCreditLimit],PID.PID.[intCompanyLocationId],PID.PID.[strCompanyLocationName],PID.PID.[intAccountId]
-,PID.PID.[intAPAccount],PID.PID.[intFreightIncome],PID.PID.[intDeferredRevenueAccountId],PID.PID.[intUndepositedFundsId],PID.PID.[intProfitCenter],PID.PID.[intLocationSalesAccountId]
-,PID.PID.[intCurrencyId],PID.PID.[dblAverageExchangeRate],PID.PID.[intTermId],PID.PID.[dblInvoiceTotal],PID.PID.[dblBaseInvoiceTotal],PID.PID.[dblShipping],PID.PID.[dblBaseShipping]
-,PID.PID.[dblTax],PID.PID.[dblBaseTax],PID.PID.[dblAmountDue],PID.PID.[dblBaseAmountDue],PID.PID.[dblPayment],PID.PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
-=======
-		PID.[intInvoiceId] ,PID.[strInvoiceNumber],PID.[strTransactionType],PID.[strType],PID.[dtmDate],PID.[dtmPostDate],PID.[dtmShipDate],PID.[intEntityCustomerId]
-,PID.[strCustomerNumber],PID.[ysnCustomerActive],PID.[dblCustomerCreditLimit],PID.[intCompanyLocationId],PID.[strCompanyLocationName],PID.[intAccountId]
-,PID.[intAPAccount],PID.[intFreightIncome],PID.[intDeferredRevenueAccountId],PID.[intUndepositedFundsId],PID.[intProfitCenter],PID.[intLocationSalesAccountId]
-,PID.[intCurrencyId],PID.[dblAverageExchangeRate],PID.[intTermId],PID.[dblInvoiceTotal],PID.[dblBaseInvoiceTotal],PID.[dblShipping],PID.[dblBaseShipping]
-,PID.[dblTax],PID.[dblBaseTax],PID.[dblAmountDue],PID.[dblBaseAmountDue],PID.[dblPayment],PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
->>>>>>> 18.3Dev
-,PID.[strComments],PID.[strImportFormat],PID.[intSourceId],PID.[intOriginalInvoiceId],PID.[strInvoiceOriginId],PID.[intDistributionHeaderId],PID.[intLoadDistributionHeaderId]
-,PID.[intLoadId],PID.[intFreightTermId],PID.[strActualCostId],PID.[intPeriodsToAccrue],PID.[ysnAccrueLicense],PID.[intSplitId],PID.[dblSplitPercent],PID.[ysnSplitted]
-,PID.[ysnPosted],PID.[ysnRecurring],PID.[ysnImpactInventory],PID.[ysnImportedAsPosted],PID.[ysnImportedFromOrigin],PID.[dtmDatePosted],PID.[strBatchId],PID.[ysnPost],PID.[ysnRecap]
-,PID.[intEntityId],PID.[intUserId],PID.[ysnUserAllowedToPostOtherTrans],PID.[ysnWithinAccountingDate],PID.[ysnForApproval],PID.[ysnFromProvisional],PID.[ysnProvisionalWithGL]
-,PID.[ysnExcludeInvoiceFromPayment],PID.[ysnIsInvoicePositive],PID.[intInvoiceDetailId],PID.[intItemId],PID.[strItemNo],PID.[strItemType],PID.[strItemDescription],PID.[intItemUOMId]
-,PID.[intItemWeightUOMId],PID.[intItemAccountId],PID.[intServiceChargeAccountId],PID.[intSalesAccountId],PID.[intCOGSAccountId],PID.[intInventoryAccountId],PID.[intLicenseAccountId]
-,PID.[intMaintenanceAccountId],PID.[intConversionAccountId],PID.[dblQtyShipped],PID.[dblUnitQtyShipped],PID.[dblShipmentNetWt],PID.[dblUnitQty],PID.[dblUnitOnHand],PID.[intAllowNegativeInventory]
-,PID.[ysnStockTracking],PID.[intItemLocationId],PID.[dblLastCost],PID.[intCategoryId],PID.[ysnRetailValuation],PID.[dblPrice],PID.[dblBasePrice],PID.[dblUnitPrice],PID.[dblBaseUnitPrice],PID.[strPricing]
-,PID.[dblDiscount],PID.[dblDiscountAmount],PID.[dblBaseDiscountAmount],PID.[dblTotal],PID.[dblBaseTotal],PID.[dblLineItemGLAmount],PID.[dblBaseLineItemGLAmount],PID.[intCurrencyExchangeRateTypeId]
-,PID.[dblCurrencyExchangeRate],PID.[strCurrencyExchangeRateType],PID.[intLotId],PID.[strMaintenanceType],PID.[strFrequency],PID.[dtmMaintenanceDate],PID.[dblLicenseAmount],PID.[dblBaseLicenseAmount]
-,PID.[dblLicenseGLAmount],PID.[dblBaseLicenseGLAmount],PID.[dblMaintenanceAmount],PID.[dblBaseMaintenanceAmount],PID.[dblMaintenanceGLAmount],PID.[dblBaseMaintenanceGLAmount]
-,PID.[ysnTankRequired],PID.[ysnLeaseBilling],PID.[intSiteId],PID.[intPerformerId],PID.[intContractHeaderId],PID.[intContractDetailId],PID.[intInventoryShipmentItemId]
-,PID.[intInventoryShipmentChargeId],PID.[intSalesOrderDetailId],PID.[intLoadDetailId],PID.[intShipmentId],PID.[intTicketId],PID.[intDiscountAccountId],PID.[intCustomerStorageId]
-,PID.[intStorageScheduleTypeId],PID.[intSubLocationId],PID.[intStorageLocationId],PID.[ysnAutoBlend],PID.[ysnBlended],PID.[dblQuantity],PID.[dblMaxQuantity],PID.[strOptionType],PID.[strSourceType]
-,PID.[strPostingMessage],PID.[strDescription]
+	     *
 	FROM
 		#ARPostInvoiceHeader PID
 	WHERE
@@ -1690,34 +1663,7 @@ BEGIN
 	INSERT INTO
 		@PostInvoiceDataFromIntegration
 	SELECT
-<<<<<<< HEAD
-		PID.[intInvoiceId] ,PID.PID.[strInvoiceNumber],PID.PID.[strTransactionType],PID.PID.[strType],PID.PID.[dtmDate],PID.PID.[dtmPostDate],PID.PID.[dtmShipDate],PID.PID.[intEntityCustomerId]
-,PID.PID.[strCustomerNumber],PID.PID.[ysnCustomerActive],PID.PID.[dblCustomerCreditLimit],PID.PID.[intCompanyLocationId],PID.PID.[strCompanyLocationName],PID.PID.[intAccountId]
-,PID.PID.[intAPAccount],PID.PID.[intFreightIncome],PID.PID.[intDeferredRevenueAccountId],PID.PID.[intUndepositedFundsId],PID.PID.[intProfitCenter],PID.PID.[intLocationSalesAccountId]
-,PID.PID.[intCurrencyId],PID.PID.[dblAverageExchangeRate],PID.PID.[intTermId],PID.PID.[dblInvoiceTotal],PID.PID.[dblBaseInvoiceTotal],PID.PID.[dblShipping],PID.PID.[dblBaseShipping]
-,PID.PID.[dblTax],PID.PID.[dblBaseTax],PID.PID.[dblAmountDue],PID.PID.[dblBaseAmountDue],PID.PID.[dblPayment],PID.PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
-=======
-		PID.[intInvoiceId] ,PID.[strInvoiceNumber],PID.[strTransactionType],PID.[strType],PID.[dtmDate],PID.[dtmPostDate],PID.[dtmShipDate],PID.[intEntityCustomerId]
-,PID.[strCustomerNumber],PID.[ysnCustomerActive],PID.[dblCustomerCreditLimit],PID.[intCompanyLocationId],PID.[strCompanyLocationName],PID.[intAccountId]
-,PID.[intAPAccount],PID.[intFreightIncome],PID.[intDeferredRevenueAccountId],PID.[intUndepositedFundsId],PID.[intProfitCenter],PID.[intLocationSalesAccountId]
-,PID.[intCurrencyId],PID.[dblAverageExchangeRate],PID.[intTermId],PID.[dblInvoiceTotal],PID.[dblBaseInvoiceTotal],PID.[dblShipping],PID.[dblBaseShipping]
-,PID.[dblTax],PID.[dblBaseTax],PID.[dblAmountDue],PID.[dblBaseAmountDue],PID.[dblPayment],PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
->>>>>>> 18.3Dev
-,PID.[strComments],PID.[strImportFormat],PID.[intSourceId],PID.[intOriginalInvoiceId],PID.[strInvoiceOriginId],PID.[intDistributionHeaderId],PID.[intLoadDistributionHeaderId]
-,PID.[intLoadId],PID.[intFreightTermId],PID.[strActualCostId],PID.[intPeriodsToAccrue],PID.[ysnAccrueLicense],PID.[intSplitId],PID.[dblSplitPercent],PID.[ysnSplitted]
-,PID.[ysnPosted],PID.[ysnRecurring],PID.[ysnImpactInventory],PID.[ysnImportedAsPosted],PID.[ysnImportedFromOrigin],PID.[dtmDatePosted],PID.[strBatchId],PID.[ysnPost],PID.[ysnRecap]
-,PID.[intEntityId],PID.[intUserId],PID.[ysnUserAllowedToPostOtherTrans],PID.[ysnWithinAccountingDate],PID.[ysnForApproval],PID.[ysnFromProvisional],PID.[ysnProvisionalWithGL]
-,PID.[ysnExcludeInvoiceFromPayment],PID.[ysnIsInvoicePositive],PID.[intInvoiceDetailId],PID.[intItemId],PID.[strItemNo],PID.[strItemType],PID.[strItemDescription],PID.[intItemUOMId]
-,PID.[intItemWeightUOMId],PID.[intItemAccountId],PID.[intServiceChargeAccountId],PID.[intSalesAccountId],PID.[intCOGSAccountId],PID.[intInventoryAccountId],PID.[intLicenseAccountId]
-,PID.[intMaintenanceAccountId],PID.[intConversionAccountId],PID.[dblQtyShipped],PID.[dblUnitQtyShipped],PID.[dblShipmentNetWt],PID.[dblUnitQty],PID.[dblUnitOnHand],PID.[intAllowNegativeInventory]
-,PID.[ysnStockTracking],PID.[intItemLocationId],PID.[dblLastCost],PID.[intCategoryId],PID.[ysnRetailValuation],PID.[dblPrice],PID.[dblBasePrice],PID.[dblUnitPrice],PID.[dblBaseUnitPrice],PID.[strPricing]
-,PID.[dblDiscount],PID.[dblDiscountAmount],PID.[dblBaseDiscountAmount],PID.[dblTotal],PID.[dblBaseTotal],PID.[dblLineItemGLAmount],PID.[dblBaseLineItemGLAmount],PID.[intCurrencyExchangeRateTypeId]
-,PID.[dblCurrencyExchangeRate],PID.[strCurrencyExchangeRateType],PID.[intLotId],PID.[strMaintenanceType],PID.[strFrequency],PID.[dtmMaintenanceDate],PID.[dblLicenseAmount],PID.[dblBaseLicenseAmount]
-,PID.[dblLicenseGLAmount],PID.[dblBaseLicenseGLAmount],PID.[dblMaintenanceAmount],PID.[dblBaseMaintenanceAmount],PID.[dblMaintenanceGLAmount],PID.[dblBaseMaintenanceGLAmount]
-,PID.[ysnTankRequired],PID.[ysnLeaseBilling],PID.[intSiteId],PID.[intPerformerId],PID.[intContractHeaderId],PID.[intContractDetailId],PID.[intInventoryShipmentItemId]
-,PID.[intInventoryShipmentChargeId],PID.[intSalesOrderDetailId],PID.[intLoadDetailId],PID.[intShipmentId],PID.[intTicketId],PID.[intDiscountAccountId],PID.[intCustomerStorageId]
-,PID.[intStorageScheduleTypeId],PID.[intSubLocationId],PID.[intStorageLocationId],PID.[ysnAutoBlend],PID.[ysnBlended],PID.[dblQuantity],PID.[dblMaxQuantity],PID.[strOptionType],PID.[strSourceType]
-,PID.[strPostingMessage],PID.[strDescription]
+		PID.*
 	FROM
 		#ARPostInvoiceDetail PID
 	INNER JOIN
@@ -1748,34 +1694,7 @@ BEGIN
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
 	SELECT
-<<<<<<< HEAD
-		PID.[intInvoiceId] ,PID.PID.[strInvoiceNumber],PID.PID.[strTransactionType],PID.PID.[strType],PID.PID.[dtmDate],PID.PID.[dtmPostDate],PID.PID.[dtmShipDate],PID.PID.[intEntityCustomerId]
-,PID.PID.[strCustomerNumber],PID.PID.[ysnCustomerActive],PID.PID.[dblCustomerCreditLimit],PID.PID.[intCompanyLocationId],PID.PID.[strCompanyLocationName],PID.PID.[intAccountId]
-,PID.PID.[intAPAccount],PID.PID.[intFreightIncome],PID.PID.[intDeferredRevenueAccountId],PID.PID.[intUndepositedFundsId],PID.PID.[intProfitCenter],PID.PID.[intLocationSalesAccountId]
-,PID.PID.[intCurrencyId],PID.PID.[dblAverageExchangeRate],PID.PID.[intTermId],PID.PID.[dblInvoiceTotal],PID.PID.[dblBaseInvoiceTotal],PID.PID.[dblShipping],PID.PID.[dblBaseShipping]
-,PID.PID.[dblTax],PID.PID.[dblBaseTax],PID.PID.[dblAmountDue],PID.PID.[dblBaseAmountDue],PID.PID.[dblPayment],PID.PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
-=======
-		PID.[intInvoiceId] ,PID.[strInvoiceNumber],PID.[strTransactionType],PID.[strType],PID.[dtmDate],PID.[dtmPostDate],PID.[dtmShipDate],PID.[intEntityCustomerId]
-,PID.[strCustomerNumber],PID.[ysnCustomerActive],PID.[dblCustomerCreditLimit],PID.[intCompanyLocationId],PID.[strCompanyLocationName],PID.[intAccountId]
-,PID.[intAPAccount],PID.[intFreightIncome],PID.[intDeferredRevenueAccountId],PID.[intUndepositedFundsId],PID.[intProfitCenter],PID.[intLocationSalesAccountId]
-,PID.[intCurrencyId],PID.[dblAverageExchangeRate],PID.[intTermId],PID.[dblInvoiceTotal],PID.[dblBaseInvoiceTotal],PID.[dblShipping],PID.[dblBaseShipping]
-,PID.[dblTax],PID.[dblBaseTax],PID.[dblAmountDue],PID.[dblBaseAmountDue],PID.[dblPayment],PID.[dblBasePayment],PID.[dblProvisionalAmount],PID.[dblBaseProvisionalAmount]
->>>>>>> 18.3Dev
-,PID.[strComments],PID.[strImportFormat],PID.[intSourceId],PID.[intOriginalInvoiceId],PID.[strInvoiceOriginId],PID.[intDistributionHeaderId],PID.[intLoadDistributionHeaderId]
-,PID.[intLoadId],PID.[intFreightTermId],PID.[strActualCostId],PID.[intPeriodsToAccrue],PID.[ysnAccrueLicense],PID.[intSplitId],PID.[dblSplitPercent],PID.[ysnSplitted]
-,PID.[ysnPosted],PID.[ysnRecurring],PID.[ysnImpactInventory],PID.[ysnImportedAsPosted],PID.[ysnImportedFromOrigin],PID.[dtmDatePosted],PID.[strBatchId],PID.[ysnPost],PID.[ysnRecap]
-,PID.[intEntityId],PID.[intUserId],PID.[ysnUserAllowedToPostOtherTrans],PID.[ysnWithinAccountingDate],PID.[ysnForApproval],PID.[ysnFromProvisional],PID.[ysnProvisionalWithGL]
-,PID.[ysnExcludeInvoiceFromPayment],PID.[ysnIsInvoicePositive],PID.[intInvoiceDetailId],PID.[intItemId],PID.[strItemNo],PID.[strItemType],PID.[strItemDescription],PID.[intItemUOMId]
-,PID.[intItemWeightUOMId],PID.[intItemAccountId],PID.[intServiceChargeAccountId],PID.[intSalesAccountId],PID.[intCOGSAccountId],PID.[intInventoryAccountId],PID.[intLicenseAccountId]
-,PID.[intMaintenanceAccountId],PID.[intConversionAccountId],PID.[dblQtyShipped],PID.[dblUnitQtyShipped],PID.[dblShipmentNetWt],PID.[dblUnitQty],PID.[dblUnitOnHand],PID.[intAllowNegativeInventory]
-,PID.[ysnStockTracking],PID.[intItemLocationId],PID.[dblLastCost],PID.[intCategoryId],PID.[ysnRetailValuation],PID.[dblPrice],PID.[dblBasePrice],PID.[dblUnitPrice],PID.[dblBaseUnitPrice],PID.[strPricing]
-,PID.[dblDiscount],PID.[dblDiscountAmount],PID.[dblBaseDiscountAmount],PID.[dblTotal],PID.[dblBaseTotal],PID.[dblLineItemGLAmount],PID.[dblBaseLineItemGLAmount],PID.[intCurrencyExchangeRateTypeId]
-,PID.[dblCurrencyExchangeRate],PID.[strCurrencyExchangeRateType],PID.[intLotId],PID.[strMaintenanceType],PID.[strFrequency],PID.[dtmMaintenanceDate],PID.[dblLicenseAmount],PID.[dblBaseLicenseAmount]
-,PID.[dblLicenseGLAmount],PID.[dblBaseLicenseGLAmount],PID.[dblMaintenanceAmount],PID.[dblBaseMaintenanceAmount],PID.[dblMaintenanceGLAmount],PID.[dblBaseMaintenanceGLAmount]
-,PID.[ysnTankRequired],PID.[ysnLeaseBilling],PID.[intSiteId],PID.[intPerformerId],PID.[intContractHeaderId],PID.[intContractDetailId],PID.[intInventoryShipmentItemId]
-,PID.[intInventoryShipmentChargeId],PID.[intSalesOrderDetailId],PID.[intLoadDetailId],PID.[intShipmentId],PID.[intTicketId],PID.[intDiscountAccountId],PID.[intCustomerStorageId]
-,PID.[intStorageScheduleTypeId],PID.[intSubLocationId],PID.[intStorageLocationId],PID.[ysnAutoBlend],PID.[ysnBlended],PID.[dblQuantity],PID.[dblMaxQuantity],PID.[strOptionType],PID.[strSourceType]
-,PID.[strPostingMessage],PID.[strDescription]
+		PID.*
 	FROM
 		#ARPostInvoiceDetail PID
 	WHERE
