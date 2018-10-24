@@ -296,7 +296,7 @@ OUTER APPLY (
 ) LoadReceipt
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId 
-	AND intPurchaseDetailId = ReceiptItem.intLineNo
+	AND POView.intPurchaseDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo

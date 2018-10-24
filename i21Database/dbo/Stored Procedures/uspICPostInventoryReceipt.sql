@@ -916,10 +916,19 @@ BEGIN
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					INNER JOIN (
 						tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
-							ON td.intInventoryTransferId = th.intInventoryTransferId					
+							ON td.intInventoryTransferId = th.intInventoryTransferId
 					)
-						ON td.intInventoryTransferDetailId = ri.intSourceId
-						AND td.intInventoryTransferId = ri.intOrderId
+						ON 
+							(
+								td.intInventoryTransferDetailId = ri.intSourceId
+								AND td.intInventoryTransferId = ri.intOrderId
+								AND ri.intInventoryTransferDetailId IS NULL 
+								AND ri.intInventoryTransferId IS NULL 
+							)
+							OR (
+								td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+								AND td.intInventoryTransferId = ri.intInventoryTransferId
+							)
 					INNER JOIN tblICInventoryTransaction t 
 						ON t.strTransactionId = th.strTransferNo
 						AND t.intTransactionDetailId = td.intInventoryTransferDetailId

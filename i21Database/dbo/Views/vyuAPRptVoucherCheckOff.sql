@@ -7,7 +7,7 @@ SELECT	DISTINCT
 			,VendorName =  ISNULL(V.strVendorId,'') + ' ' + E.strName
 			,strDescription = C.strCommodityCode 
 			,strItem = IE.strItemNo 
-			,intTicketId
+			,SC.intTicketId
 			,strTicketNumber = SC.strTicketNumber
 			,APB.strVendorOrderNumber
 			--,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
