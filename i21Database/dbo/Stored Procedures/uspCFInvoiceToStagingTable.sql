@@ -388,7 +388,7 @@ BEGIN TRY
 	,dtmPostedDate
 	,dtmDiscountDate
 	,dtmDueDate
-	,dtmInvoiceDate
+	,@dtmInvoiceDate
 	,dblTotalMiles = (CASE 
 						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
 						THEN
