@@ -138,7 +138,7 @@ BEGIN TRY
 		,V.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
-		,dblCost = ISNULL(V.dblPrice,V.dblTotal)
+		,dblCost = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN ISNULL(V.dblTotal, V.dblPrice) ELSE ISNULL(V.dblPrice, V.dblTotal) END 
 		,V.intPriceItemUOMId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
