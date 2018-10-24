@@ -998,7 +998,7 @@ BEGIN
 				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
 				AND ISNULL(ARIILD.[intInvoiceDetailId], 0) <> 0
 				AND ISNULL(ARIILD.[ysnInsert], 0) = 1
-		INNER JOIN
+		LEFT OUTER JOIN
 			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForInsert) IFI
 				ON IFI. [intId] = ARIILD.[intId]
 
