@@ -112,7 +112,7 @@ BEGIN CATCH
 	SET @dtmPriceDate = NULL
 END CATCH
 
-IF NOT EXISTS(SELECT * FROM tblRKFutureMarket WHERE strFutMarketName= @strFutureMarket) AND ISNULL(ISNULL(LTRIM(RTRIM(@strFutureMarket)), ''), '') = ''
+IF NOT EXISTS(SELECT * FROM tblRKFutureMarket WHERE strFutMarketName= @strFutureMarket) AND ISNULL(@strFutureMarket,'') <> ''
 BEGIN
 	--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where strFutureMarket=@strFutureMarket)
 		--BEGIN
@@ -141,8 +141,11 @@ END
 
 	IF @strInstrumentType='Futures' AND ISNULL(@intFutureMarketId,0) <> 0
 	BEGIN	
-		IF NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId) 
-			OR PATINDEX ('[A-z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0
+		IF(ISNULL(@strFutureMonth,'') <> '' AND PATINDEX('[A-Z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0)
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Futures Month, format should be in mmm-yy (Jan-18).'
+		END
+		ELSE IF NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId)
 		BEGIN
 			--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where intImportSettlementPriceId=@mRowNumber and strFutureMarket=@strFutureMarket)
 			--	BEGIN
@@ -159,14 +162,17 @@ END
 			--			and strFutureMarket=@strFutureMarket
 			--	END
 
-			SET @ErrMsg = @ErrMsg + ' Invalid Futures Month, format should be in mmm-yy (Jan-18).'
+			SET @ErrMsg = @ErrMsg + ' Futures Month does not exist for Future Market: ' + @strFutureMarket + '.'
 		END
 	END
 
 	ELSE IF @strInstrumentType='Options' AND ISNULL(@intFutureMarketId,0) <> 0
 	BEGIN
-		
-	IF NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId)
+		IF(ISNULL(@strFutureMonth,'') <> '' AND PATINDEX('[A-Z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0)
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Invalid Options Month, format should be in mmm-yy (Jan-18).'
+		END
+		ELSE IF NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId)
 		BEGIN
 
 			--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where intImportSettlementPriceId=@mRowNumber AND strFutureMarket=@strFutureMarket)
@@ -184,13 +190,13 @@ END
 			--							AND strFutureMarket=@strFutureMarket
 			--	END
 
-			SET @ErrMsg = @ErrMsg + ' Invalid Option Month, format should be in mmm-yy (Jan-18).'
+			SET @ErrMsg = @ErrMsg + ' Options Month does not exist for Future Market: ' + @strFutureMarket + '.'
 		END
 
-	IF(@strType NOT IN('Call', 'Put'))
-	BEGIN
-		SET @ErrMsg = @ErrMsg + ' Option Type is case sensitive it must be in exact word Put or Call.'
-	END
+		IF(@strType NOT IN('Call', 'Put'))
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Option Type is case sensitive it must be in exact word Put or Call.'
+		END
 
 	END
 
