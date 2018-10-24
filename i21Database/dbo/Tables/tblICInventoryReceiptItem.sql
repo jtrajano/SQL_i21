@@ -62,6 +62,13 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
+		[intTicketId] INT NULL, -- Scale Ticket Id
+		[intInventoryTransferId] INT NULL, -- Inventory Transfer Header Id
+		[intInventoryTransferDetailId] INT NULL, -- Inventory Transfer Detail Id
+		[intPurchaseId] INT NULL, -- Purchase Order Header Id
+		[intPurchaseDetailId] INT NULL, -- Purchase Order Detail Id
+		[intContractHeaderId] INT NULL, -- Contract Header Id
+		[intContractDetailId] INT NULL, -- Contract Detail Id
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

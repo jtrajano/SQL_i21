@@ -816,6 +816,13 @@ BEGIN
 				,strChargesLink
 				,intLoadReceive
 				,intCostingMethod
+				,intTicketId
+				,intInventoryTransferId
+				,intInventoryTransferDetailId
+				,intPurchaseId
+				,intPurchaseDetailId
+				,intContractHeaderId
+				,intContractDetailId
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -904,6 +911,13 @@ BEGIN
 											ELSE
 												ItemLocation.intCostingMethod
 										END
+				,intTicketId					= RawData.intTicketId
+				,intInventoryTransferId			= RawData.intInventoryTransferId
+				,intInventoryTransferDetailId	= RawData.intInventoryTransferDetailId
+				,intPurchaseId					= RawData.intPurchaseId
+				,intPurchaseDetailId			= RawData.intPurchaseDetailId
+				,intContractHeaderId			= RawData.intContractHeaderId
+				,intContractDetailId			= RawData.intContractDetailId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -954,7 +968,7 @@ BEGIN
 				-- 1. Purchase Order
 				LEFT JOIN vyuPODetails POView
 					ON POView.intPurchaseId = RawData.intContractHeaderId -- intOrderId
-					AND intPurchaseDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
+					AND POView.intPurchaseDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
 					AND RawData.strReceiptType = 'Purchase Order'
 
 				-- 2. Contracts
