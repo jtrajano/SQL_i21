@@ -21,6 +21,11 @@ BEGIN TRY
 			SET @ErrMsg = 'Ticket No is missing.'
 			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
 	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strData,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Data Column in import file cannot be blank. It should be Header or Detail.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
 	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strTicketType,'') = '')
 	BEGIN
 			SET @ErrMsg = 'Type is missing.'
@@ -372,7 +377,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.strSubLocationName = CI.strStorageLocation
 		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber AND Bin.intSubLocationId=SubLocation.intCompanyLocationSubLocationId
 		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CI.strDistributionOption
-		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule
+		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule AND SS.intCommodity = IM.intCommodityId 
 		LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = CI.strDeliverySheet
 		LEFT JOIN tblCTContractHeader CH ON CH.strContractNumber = CI.strContractNumber
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = CI.intContractSequence
