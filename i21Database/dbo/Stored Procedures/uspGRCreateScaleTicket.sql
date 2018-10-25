@@ -65,7 +65,17 @@ BEGIN TRY
 	BEGIN
 			SET @ErrMsg = 'Invalid Location.'
 			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
-	END  
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND ISNULL(strScaleStationImport,'') = '')
+	BEGIN
+			SET @ErrMsg = 'Scale Station is missing.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
+	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND strScaleStationImport NOT IN (SELECT strStationShortDescription FROM tblSCScaleSetup))
+	BEGIN
+			SET @ErrMsg = 'Invalid Scale Station.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END    
 	ELSE IF EXISTS(SELECT 1 FROM tblSCTicketLVStaging WHERE intTicketLVStagingId = @intExternalId AND dtmTicketDateTime IS NULL)
 	BEGIN
 			SET @ErrMsg = 'Scale Date is missing.'
