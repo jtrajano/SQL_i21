@@ -1701,6 +1701,7 @@ BEGIN
 				----------------------------------------------------------------------
 				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
+				--http://jira.irelyserver.com/browse/ST-1020
 				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
 							INSERT INTO @EntriesForInvoice(
@@ -2004,6 +2005,7 @@ BEGIN
 																		)
 								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
+								AND ISNULL(CC.dblAmount, 0) != 0
 					END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
@@ -2249,7 +2251,8 @@ BEGIN
 				----------------------------------------------------------------------
 				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intProduct IS NOT NULL)
+				--http://jira.irelyserver.com/browse/ST-1020
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
 						INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
@@ -2601,6 +2604,7 @@ BEGIN
 																		)
 								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
+								AND ISNULL(CC.dblAmount, 0) != 0
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
