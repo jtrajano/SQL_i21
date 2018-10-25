@@ -696,7 +696,7 @@ BEGIN TRY
 				, NULL AS dblTaxExempt
 				, NULL AS strInvoiceNumber
 				, NULL AS strPONumber
-				, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
+				, CASE WHEN ISNULL(tblTRLoadReceipt.strBillOfLading, '') = '' THEN tblICInventoryTransfer.strTransferNo ELSE tblTRLoadReceipt.strBillOfLading END AS strBOLNumber
 				, CASE WHEN tblTRLoadHeader.dtmLoadDateTime IS NULL THEN tblICInventoryTransfer.dtmTransferDate ELSE tblTRLoadHeader.dtmLoadDateTime END AS dtmDate
 				, tblSMCompanyLocation.strCity AS strDestinationCity
 				, NULL AS strDestinationCounty
