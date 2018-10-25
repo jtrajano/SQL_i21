@@ -112,12 +112,12 @@ BEGIN
 				, intCompanyLocationId			= INVOICE.intCompanyLocationId
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= GETDATE()
-				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' THEN @intPaymentMethodId ELSE 11 END
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
 				, strPaymentMethod				= ISNULL(@strCreditCardNumber, 'ACH')
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
-				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' THEN BA.intBankAccountId ELSE NULL END
+				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN BA.intBankAccountId ELSE NULL END
 				, dblAmountPaid					= dblAmountDue
 				, ysnPost						= NULL
 				, intEntityId					= @intUserId
@@ -181,7 +181,7 @@ BEGIN
 					GOTO Exit_Routine
 				END
 
-			IF ISNULL(@intBankAccountId, 0) = 0 AND ISNULL(@strCreditCardNumber, '') = ''
+			IF ISNULL(@intBankAccountId, 0) = 0 AND ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
 				BEGIN
 					SET @ErrorMessage = 'Bank Account is required for payment with ACH payment method!'
 					RAISERROR(@ErrorMessage, 16, 1);
@@ -217,8 +217,8 @@ BEGIN
 				, intCompanyLocationId			= @intCompanyLocationId
 				, intCurrencyId					= C.intCurrencyId
 				, dtmDatePaid					= GETDATE()
-				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' THEN @intPaymentMethodId ELSE 11 END
-				, strPaymentMethod				= ISNULL(@strCreditCardNumber, 'ACH')
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN 'ACH' ELSE @strCreditCardNumber END
 				, strPaymentInfo				= NULL
 				, strNotes						= 'Prepayment from Portal.'
 				, intAccountId					= @intUndepositedFundId
