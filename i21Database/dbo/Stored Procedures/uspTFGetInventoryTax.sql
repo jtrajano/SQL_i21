@@ -429,30 +429,28 @@ BEGIN TRY
 		END
 		
 		-- TR Billed Qty
-		INSERT INTO @tmpDistReceiptDetail (intId, intInventoryReceiptItemId, dblReceived, dblBillQty) 
-		SELECT DISTINCT intId, intInventoryReceiptItemId, dblReceived, dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId IN (SELECT DISTINCT intInventoryReceiptItemId FROM @TFTransaction)	
+		--INSERT INTO @tmpDistReceiptDetail (intId, intInventoryReceiptItemId, dblReceived, dblBillQty) 
+		--SELECT DISTINCT intId, intInventoryReceiptItemId, dblReceived, dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId IN (SELECT DISTINCT intInventoryReceiptItemId FROM @TFTransaction)
+		--WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
+		--BEGIN
+		--	DECLARE @ReceiptDetailId INT = NULL, @ReceiptDetailItemId INT = NULL, @ReceiptDetailItemReceived NUMERIC(18,6) = NULL, @ReceiptDetailItemBillQty NUMERIC(18,6) = NULL, @RemainingBillQty NUMERIC(18,6) = NULL
+		--	DECLARE @TRDetail TFTransaction 
 
-		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
-		BEGIN
-			DECLARE @ReceiptDetailId INT = NULL, @ReceiptDetailItemId INT = NULL, @ReceiptDetailItemReceived NUMERIC(18,6) = NULL, @ReceiptDetailItemBillQty NUMERIC(18,6) = NULL, @RemainingBillQty NUMERIC(18,6) = NULL
-			DECLARE @TRDetail TFTransaction 
+		--	SELECT TOP 1 @ReceiptDetailId = intId, @ReceiptDetailItemId = intInventoryReceiptItemId, @ReceiptDetailItemReceived = dblReceived, @ReceiptDetailItemBillQty = dblBillQty FROM @tmpDistReceiptDetail
 
-			SELECT TOP 1 @ReceiptDetailId = intId, @ReceiptDetailItemId = intInventoryReceiptItemId, @ReceiptDetailItemReceived = dblReceived, @ReceiptDetailItemBillQty = dblBillQty FROM @tmpDistReceiptDetail
+		--	IF(@ReceiptDetailItemBillQty >= @ReceiptDetailItemReceived)
+		--	BEGIN
+		--		UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intId = @ReceiptDetailId
+		--		SET @RemainingBillQty =  @ReceiptDetailItemBillQty - @ReceiptDetailItemReceived
+		--		UPDATE @tmpDistReceiptDetail SET dblBillQty = @RemainingBillQty
+		--	END
+		--	ELSE
+		--	BEGIN
+		--		UPDATE @TFTransaction SET dblBillQty = 0 WHERE intId = @ReceiptDetailId
+		--	END
 
-			IF(@ReceiptDetailItemBillQty >= @ReceiptDetailItemReceived)
-			BEGIN
-				UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intId = @ReceiptDetailId
-				SET @RemainingBillQty =  @ReceiptDetailItemBillQty - @ReceiptDetailItemReceived
-				UPDATE @tmpDistReceiptDetail SET dblBillQty = @RemainingBillQty
-			END
-			ELSE
-			BEGIN
-				UPDATE @TFTransaction SET dblBillQty = 0 WHERE intId = @ReceiptDetailId
-			END
-
-			DELETE FROM @tmpDistReceiptDetail WHERE intId = @ReceiptDetailId
-
-		END
+		--	DELETE FROM @tmpDistReceiptDetail WHERE intId = @ReceiptDetailId
+		--END
 
 		-- TAX CRITERIA
 		IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId))
