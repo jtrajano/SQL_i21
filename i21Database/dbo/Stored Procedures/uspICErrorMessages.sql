@@ -733,5 +733,5 @@ SET @strmessage = 'Bundle contracts has to be received using "Add Orders" in the
 EXEC sp_addmessage 80163,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80224) EXEC sp_dropmessage 80224, 'us_english'
-SET @strmessage = 'If the cost method of the charge is "Amount", the rate must be greater than zero.'
+SET @strmessage = 'If the cost method of the charge is not "Amount", the rate must be greater than zero.'
 EXEC sp_addmessage 80224,11,@strmessage,'us_english','False'
