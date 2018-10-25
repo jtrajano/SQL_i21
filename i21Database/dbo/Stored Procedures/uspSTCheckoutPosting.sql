@@ -220,6 +220,7 @@ BEGIN
 				----------------------------------------------------------------------
 				---------------------------- PUMP TOTALS -----------------------------
 				----------------------------------------------------------------------
+				--http://jira.irelyserver.com/browse/ST-1006
 				IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)	
 					BEGIN
 						
@@ -1466,8 +1467,9 @@ BEGIN
 
 
 				----------------------------------------------------------------------
-				-------------------------- PAYMENT OPTIONS --------------------------
+				-------------------------- PAYMENT OPTIONS ---------------------------
 				----------------------------------------------------------------------
+				--http://jira.irelyserver.com/browse/ST-1007
 				IF EXISTS(SELECT * FROM tblSTCheckoutPaymentOptions WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
 					BEGIN
 							INSERT INTO @EntriesForInvoice(
@@ -1625,7 +1627,7 @@ BEGIN
 																				WHEN ISNULL(CPO.dblAmount, 0) > 0
 																					THEN ISNULL(CPO.dblAmount, 0)
 																				WHEN ISNULL(CPO.dblAmount, 0) < 0 
-																					THEN ISNULL(CPO.dblAmount, 0) * -1
+																					THEN (ISNULL(CPO.dblAmount, 0) * -1)
 																		END
 
 											,[ysnRefreshPrice]			= 0
@@ -1685,7 +1687,7 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CPO.intCheckoutId = @intCheckoutId
-								AND ISNULL(CPO.dblAmount, 0) > 0						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
+								AND (ISNULL(CPO.dblAmount, 0) != 0)						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
