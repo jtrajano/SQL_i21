@@ -101,6 +101,23 @@ BEGIN
 	END 
 END 
 
+DECLARE @ChargeId INT
+
+SELECT TOP 1 
+	@ChargeId = rc.intChargeId,
+	@strItemNo = CASE WHEN ISNULL(i.strItemNo, '') = '' THEN '(Item id: ' + CAST(i.intItemId AS NVARCHAR(10)) + ')' ELSE i.strItemNo END 
+	FROM tblICInventoryReceiptCharge rc
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = rc.intInventoryReceiptChargeId
+		INNER JOIN tblICItem i ON i.intItemId = rc.intChargeId
+	WHERE rc.strCostMethod <> 'Amount'
+		AND rc.dblRate <= 0
+
+IF @ChargeId IS NOT NULL
+BEGIN
+	EXEC uspICRaiseError 80224, @strItemNo;
+	GOTO _Exit
+END
+
 -- Validate 
 BEGIN 
 	-- Price cannot be checked if Accrue is checked for Receipt vendor.
