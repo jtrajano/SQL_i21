@@ -51,10 +51,10 @@ BEGIN TRY
 			strTaxCategory NVARCHAR(500),
 			strCriteria NVARCHAR(100),
 			intTaxCodeId INT)
+		DECLARE @intMaxId INT = 0
 
 		DECLARE @intCriteriaId INT = NULL, @strCriteriaTaxCodeId NVARCHAR(10) = NULL, @strCriteria NVARCHAR(10) = NULL, @intTaxCategoryId INT = NULL, @intTransTaxCategoryId INT = NULL
 				
-
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 			
 		-- INVOICE
@@ -589,6 +589,9 @@ BEGIN TRY
 			DELETE FROM @tmpInvoiceDetail WHERE intInvoiceDetailId = @InvoiceDetailId
 
 		END
+		
+		-- GET MAX intId
+		SELECT @intMaxId = MAX(intId) FROM @tmpInvoiceTransaction
 				
 		--INVENTORY TRANSFER - Track MFT Activity
 		INSERT INTO @tmpInvoiceTransaction(intId
@@ -653,7 +656,7 @@ BEGIN TRY
 			, intTransactionNumberId
 			, strContactName
 			, strEmail)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) AS intId, *
+		SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) + @intMaxId) AS intId, *
 		FROM (SELECT DISTINCT NULL AS intInvoiceDetailId
 				, tblTFReportingComponent.intTaxAuthorityId
 				, tblTFReportingComponent.strFormCode
