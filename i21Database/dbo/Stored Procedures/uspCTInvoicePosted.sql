@@ -104,12 +104,17 @@ BEGIN TRY
 				,S.dblQuantity
 				,S.intItemUOMId
 		FROM	@ItemsFromInvoice	I
-		JOIN	tblSCTicket					T ON T.intTicketId		= I.intTicketId
-		JOIN	tblCTWeightGrade			W ON W.intWeightGradeId = T.intWeightId
-		JOIN	tblCTWeightGrade			G ON G.intWeightGradeId = T.intGradeId
-		JOIN	tblICInventoryShipmentItem	S ON S.intSourceId		= I.intTicketId
+		JOIN	tblSCTicket					T	ON	T.intTicketId		=	I.intTicketId
+		JOIN	tblCTWeightGrade			W	ON	W.intWeightGradeId	=	T.intWeightId
+		JOIN	tblCTWeightGrade			G	ON	G.intWeightGradeId	=	T.intGradeId
+		JOIN	tblICInventoryShipmentItem	S	ON	S.intSourceId		=	I.intTicketId
+												AND S.intLineNo IS NOT NULL
 		WHERE	I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
 											OR G.strWhereFinalized	= 'Destination')
+		AND		I.intContractDetailId IS NOT NULL
+		AND		I.[intShipmentPurchaseSalesContractId] IS NULL
+		AND		ISNULL(I.[intLoadDetailId],0) = 0
+		AND		ISNULL(I.[intTransactionId],0) = 0
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
