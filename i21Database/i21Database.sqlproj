@@ -7135,6 +7135,10 @@
     <Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
     <Build Include="dbo\Functions\fnCTConvertToSeqFXCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateLotInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessBillStorage.sql" />
+    <Build Include="dbo\Functions\fnGRGetBillStorageDetails.sql" />
+    <Build Include="dbo\User Defined Types\StorageSchedulePeriodTableType.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
