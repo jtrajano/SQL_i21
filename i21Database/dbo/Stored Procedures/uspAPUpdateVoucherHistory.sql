@@ -54,6 +54,7 @@ BEGIN
 			ON B.intUnitOfMeasureId = uom.intItemUOMId
 	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
 			ON B.intCostUOMId = costuom.intItemUOMId
+	WHERE A.intTransactionType IN (1, 3)
 
 	INSERT INTO tblAPVoucherHistory (
 		[intBillId]				
@@ -140,7 +141,7 @@ BEGIN
 			ON voucherDetail.intUnitOfMeasureId = uom.intItemUOMId
 	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
 			ON voucherDetail.intCostUOMId = costuom.intItemUOMId
-
+	WHERE A.intTransactionType IN (1, 3)
 
 	INSERT INTO tblAPVoucherHistory (
 		[intBillId]				
