@@ -2251,6 +2251,7 @@ BEGIN
 				----------------------------------------------------------------------
 				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
+				--http://jira.irelyserver.com/browse/ST-1019
 				--http://jira.irelyserver.com/browse/ST-1020
 				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
@@ -3099,7 +3100,7 @@ BEGIN
 					----------------------------------------------------------------------
 					-------------------------- CUSTOMER PAYMENTS -------------------------
 					----------------------------------------------------------------------
-					IF EXISTS(SELECT * FROM tblSTCheckoutCustomerPayments WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intItemId IS NOT NULL)
+					IF EXISTS(SELECT * FROM tblSTCheckoutCustomerPayments WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
 						BEGIN
 								-- Use Recieve Payment UDP
 								INSERT INTO @PaymentsForInsert(
@@ -3208,27 +3209,27 @@ BEGIN
 											,[ysnAllowOverpayment]					= 0
 											,[ysnFromAP]							= NULL 
 										FROM tblSTCheckoutCustomerPayments CCP
-										JOIN tblICItem I 
-											ON CCP.intItemId = I.intItemId
-										JOIN tblICItemUOM UOM 
-											ON I.intItemId = UOM.intItemId
+										--JOIN tblICItem I 
+										--	ON CCP.intItemId = I.intItemId
+										--JOIN tblICItemUOM UOM 
+										--	ON I.intItemId = UOM.intItemId
 										JOIN tblSTCheckoutHeader CH 
 											ON CCP.intCheckoutId = CH.intCheckoutId
-										JOIN tblICItemLocation IL 
-											ON I.intItemId = IL.intItemId
-										JOIN tblICItemPricing IP 
-											ON I.intItemId = IP.intItemId
-											AND IL.intItemLocationId = IP.intItemLocationId
+										--JOIN tblICItemLocation IL 
+										--	ON I.intItemId = IL.intItemId
+										--JOIN tblICItemPricing IP 
+										--	ON I.intItemId = IP.intItemId
+										--	AND IL.intItemLocationId = IP.intItemLocationId
 										JOIN tblSTStore ST 
-											ON IL.intLocationId = ST.intCompanyLocationId
-											AND CH.intStoreId = ST.intStoreId
+											--ON IL.intLocationId = ST.intCompanyLocationId
+											ON CH.intStoreId = ST.intStoreId
 										JOIN vyuEMEntityCustomerSearch vC 
 											ON CCP.intCustomerId = vC.intEntityId
 										LEFT JOIN tblSMPaymentMethod PM	
 											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 										WHERE CCP.intCheckoutId = @intCheckoutId
 										AND CCP.dblAmount > 0
-										AND UOM.ysnStockUnit = CAST(1 AS BIT)
+										--AND UOM.ysnStockUnit = CAST(1 AS BIT)
 										ORDER BY
 											[intId]
 						END
@@ -3253,7 +3254,7 @@ BEGIN
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId)
 							BEGIN
 								--TEST
-								SELECT * FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+								--SELECT * FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
 								 
 								-- Posting to Recieve Payments is successfull
 								UPDATE tblSTCheckoutHeader
@@ -3671,10 +3672,10 @@ BEGIN
 											,[ysnAllowOverpayment]					= 0
 											,[ysnFromAP]							= NULL 
 										FROM tblSTCheckoutCustomerPayments CCP
-										JOIN tblICItem I 
-											ON CCP.intItemId = I.intItemId
-										JOIN tblICItemUOM UOM 
-											ON I.intItemId = UOM.intItemId
+										--JOIN tblICItem I 
+										--	ON CCP.intItemId = I.intItemId
+										--JOIN tblICItemUOM UOM 
+										--	ON I.intItemId = UOM.intItemId
 										JOIN tblSTCheckoutHeader CH 
 											ON CCP.intCheckoutId = CH.intCheckoutId
 
@@ -3683,21 +3684,21 @@ BEGIN
 										JOIN tblARPayment Payment
 											ON ILD.intPaymentId = Payment.intPaymentId
 
-										JOIN tblICItemLocation IL 
-											ON I.intItemId = IL.intItemId
-										JOIN tblICItemPricing IP 
-											ON I.intItemId = IP.intItemId
-											AND IL.intItemLocationId = IP.intItemLocationId
+										--JOIN tblICItemLocation IL 
+										--	ON I.intItemId = IL.intItemId
+										--JOIN tblICItemPricing IP 
+										--	ON I.intItemId = IP.intItemId
+										--	AND IL.intItemLocationId = IP.intItemLocationId
 										JOIN tblSTStore ST 
-											ON IL.intLocationId = ST.intCompanyLocationId
-											AND CH.intStoreId = ST.intStoreId
+											--ON IL.intLocationId = ST.intCompanyLocationId
+											ON CH.intStoreId = ST.intStoreId
 										JOIN vyuEMEntityCustomerSearch vC 
 											ON CCP.intCustomerId = vC.intEntityId
 										LEFT JOIN tblSMPaymentMethod PM	
 											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 										WHERE CCP.intCheckoutId = @intCheckoutId
 										AND CCP.dblAmount > 0
-										AND UOM.ysnStockUnit = CAST(1 AS BIT)
+										--AND UOM.ysnStockUnit = CAST(1 AS BIT)
 										ORDER BY
 											[intId]
 
