@@ -1470,7 +1470,7 @@ BEGIN
 				-------------------------- PAYMENT OPTIONS ---------------------------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1007
-				IF EXISTS(SELECT * FROM tblSTCheckoutPaymentOptions WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
+				IF EXISTS(SELECT * FROM tblSTCheckoutPaymentOptions WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0)
 					BEGIN
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
@@ -1701,7 +1701,7 @@ BEGIN
 				----------------------------------------------------------------------
 				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intProduct IS NOT NULL)
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
@@ -2017,6 +2017,7 @@ BEGIN
 				----------------------------------------------------------------------
 				--------------------------- CASH OVER SHORT --------------------------
 				----------------------------------------------------------------------
+				--http://jira.irelyserver.com/browse/ST-1008
 				IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NOT NULL)
 					BEGIN
 							INSERT INTO @EntriesForInvoice(
@@ -2600,26 +2601,6 @@ BEGIN
 																		)
 								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
-
-								--FROM tblSTCheckoutCustomerCharges CC
-								--JOIN tblICItemUOM UOM 
-								--	ON CC.intProduct = UOM.intItemUOMId
-								--JOIN tblICItem I 
-								--	ON UOM.intItemId = I.intItemId
-								--JOIN tblSTCheckoutHeader CH 
-								--	ON CC.intCheckoutId = CH.intCheckoutId
-								--JOIN tblICItemLocation IL 
-								--	ON I.intItemId = IL.intItemId
-								--JOIN tblICItemPricing IP 
-								--	ON I.intItemId = IP.intItemId
-								--	AND IL.intItemLocationId = IP.intItemLocationId
-								--JOIN tblSTStore ST 
-								--	ON IL.intLocationId = ST.intCompanyLocationId
-								--	AND CH.intStoreId = ST.intStoreId
-								--JOIN vyuEMEntityCustomerSearch vC 
-								--	ON ST.intCheckoutCustomerId = vC.intEntityId
-								--WHERE CC.intCheckoutId = @intCheckoutId
-								--AND CC.dblAmount > 0
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
