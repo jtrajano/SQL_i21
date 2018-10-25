@@ -448,6 +448,7 @@ BEGIN TRY
 			, dblGross
 			, dblNet
 			, dblBillQty	
+			, strBillOfLading
 			, dtmDate
 			, strDestinationCity
 			, strDestinationState
@@ -497,6 +498,7 @@ BEGIN TRY
 				, tblICInventoryTransferDetail.dblQuantity AS dblGross
 				, tblICInventoryTransferDetail.dblQuantity AS dblNet
 				, tblICInventoryTransferDetail.dblQuantity
+				, tblICInventoryTransfer.strTransferNo AS strBillOfLading
 				, tblICInventoryTransfer.dtmTransferDate AS dtmDate
 				, tblSMCompanyLocation.strCity AS strDestinationCity
 				, tblSMCompanyLocation.strStateProvince AS strDestinationState
