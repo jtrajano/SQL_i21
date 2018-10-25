@@ -17,7 +17,6 @@ DECLARE @InventoryReceiptId AS INT;
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
-		@ReceiptItemLotStagingTable AS ReceiptItemLotStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
 		@intSurchargeItemId as int,
@@ -26,20 +25,17 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@intItemUOMId as int,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
-		@ysnPrice AS BIT,
-		@intLotType AS INT,
-		@intItemId AS INT;
+		@ysnPrice AS BIT;
 
-	SELECT TOP 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
+SELECT TOP 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
 
-	SELECT @intSurchargeItemId = SCSetup.intDefaultFeeItemId
-		, @intItemUOMId = SCTicket.intItemUOMIdTo
-		, @intItemId = SCTicket.intItemId
-	FROM tblSCScaleSetup SCSetup 
-	LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
-	WHERE SCTicket.intTicketId = @intTicketId
-
-	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+SELECT @intFreightItemId = SCSetup.intFreightItemId
+	, @intHaulerId = SCTicket.intHaulerId
+	, @intSurchargeItemId = SCSetup.intDefaultFeeItemId
+	, @intItemUOMId = SCTicket.intItemUOMIdTo
+FROM tblSCScaleSetup SCSetup 
+LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
+WHERE SCTicket.intTicketId = @intTicketId
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -50,7 +46,7 @@ BEGIN
 END 
 BEGIN TRY
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
-	INSERT into @ReceiptStagingTable(
+	INSERT INTO @ReceiptStagingTable(
 			-- Header
 			strReceiptType
 			,intEntityVendorId
@@ -61,7 +57,6 @@ BEGIN TRY
 			,intShipFromId
 			,intShipViaId
 			,intDiscountSchedule
-				
 			-- Detail				
 			,intItemId
 			,intItemLocationId
@@ -79,61 +74,54 @@ BEGIN TRY
 			,intStorageLocationId
 			,ysnIsStorage
 			,dblFreightRate
-			,dblGross
-			,dblNet
 			,intSourceId
+			,intTicketId
+			,intInventoryTransferId
+			,intInventoryTransferDetailId
 			,intSourceType	
 			,strSourceScreenName
 	)	
 	SELECT 
-			strReceiptType				= 'Transfer Order'
-			,intEntityVendorId			= NULL
-			,intTransferorId			= SC.intProcessingLocationId
-			,strBillOfLadding			= NULL
-			,intCurrencyId				= SC.intCurrencyId
-			,intLocationId				= @intProcessingLocationId
-			,intShipFromId				= SC.intProcessingLocationId
-			,intShipViaId				= SC.intFreightCarrierId
-			,intDiscountSchedule		= SC.intDiscountId
-
+			strReceiptType					= 'Transfer Order'
+			,intEntityVendorId				= NULL
+			,intTransferorId				= SC.intProcessingLocationId
+			,strBillOfLadding				= NULL
+			,intCurrencyId					= SC.intCurrencyId
+			,intLocationId					= @intProcessingLocationId
+			,intShipFromId					= SC.intProcessingLocationId
+			,intShipViaId					= SC.intFreightCarrierId
+			,intDiscountSchedule			= SC.intDiscountId
 			--Detail
-			,intItemId					= SC.intItemId
-			,intItemLocationId			= SC.intProcessingLocationId
-			,intItemUOMId				= SC.intItemUOMIdTo
-			,intGrossNetUOMId			= CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
-											ELSE SC.intItemUOMIdTo
-										END
-			,intCostUOMId				= SC.intItemUOMIdTo
-			,intContractHeaderId		= NULL
-			,intContractDetailId		= NULL
-			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= SC.dblNetUnits
-			,dblCost					= SC.dblUnitPrice + SC.dblUnitBasis
-			,dblExchangeRate			= 1 -- Need to check this
-			,intLotId					= SC.intLotId
-			,intSubLocationId			= SC.intSubLocationId
-			,intStorageLocationId		= SC.intStorageLocationId
-			,ysnIsStorage				= 0
-			,dblFreightRate				= SC.dblFreightRate
-			,dblGross					=  CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SC.dblGrossWeight - SC.dblTareWeight)
-											ELSE SC.dblGrossUnits
-										END
-			,dblNet						= CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
-											ELSE SC.dblNetUnits 
-										END
-			,intSourceId				= SC.intTicketId
-			,intSourceType		 		= 1 -- Source type for scale is 1 
-			,strSourceScreenName		= 'Scale Ticket'
+			,intItemId						= SC.intItemId
+			,intItemLocationId				= SC.intProcessingLocationId
+			,intItemUOMId					= SC.intItemUOMIdTo
+			,intGrossNetUOMId				= NULL
+			,intCostUOMId					= SC.intItemUOMIdTo
+			,intContractHeaderId			= NULL
+			,intContractDetailId			= NULL
+			,dtmDate						= SC.dtmTicketDateTime
+			,dblQty							= SC.dblNetUnits
+			,dblCost						= ICTD.dblCost
+			,dblExchangeRate				= 1 -- Need to check this
+			,intLotId						= NULL --No LOTS from scale
+			,intSubLocationId				= SC.intSubLocationId
+			,intStorageLocationId			= SC.intStorageLocationId
+			,ysnIsStorage					= 0
+			,dblFreightRate					= SC.dblFreightRate
+			,intSourceId					= SC.intTicketId
+			,intTicketId					= SC.intTicketId
+			,intInventoryTransferId			= ICT.intInventoryTransferId
+			,intInventoryTransferDetailId	= ICTD.intInventoryTransferDetailId
+			,intSourceType		 			= 1 -- Source type for scale is 1 
+			,strSourceScreenName			= 'Scale Ticket'
 	FROM	tblSCTicket SC 
-	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+			INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
+			LEFT JOIN tblICInventoryTransfer ICT ON ICT.intInventoryTransferId = SCMatch.intInventoryTransferId
+			LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
 	--Fuel Freight
-	INSERT INTO @OtherCharges
-	(
+	INSERT INTO @OtherCharges(
 		[intEntityVendorId] 
 		,[strBillOfLadding] 
 		,[strReceiptType] 
@@ -141,56 +129,40 @@ BEGIN TRY
 		,[intShipViaId] 
 		,[intShipFromId] 
 		,[intCurrencyId]
-		,[intCostCurrencyId]  	
-		,[intChargeId]
-		,[intForexRateTypeId]
-		,[dblForexRate]	 
+		,[intCostCurrencyId]   	
+		,[intChargeId] 
 		,[ysnInventoryCost] 
 		,[strCostMethod] 
 		,[dblRate] 
 		,[intCostUOMId] 
 		,[intOtherChargeEntityVendorId] 
 		,[dblAmount] 
+		,[strAllocateCostBy] 
 		,[intContractHeaderId]
 		,[intContractDetailId] 
 		,[ysnAccrue]
-		,[ysnPrice]
-		,[strChargesLink]
 	) 
-	SELECT	
-		[intEntityVendorId]					= RE.intEntityVendorId
-		,[strBillOfLadding]					= RE.strBillOfLadding
-		,[strReceiptType]					= RE.strReceiptType
-		,[intLocationId]					= RE.intLocationId
-		,[intShipViaId]						= RE.intShipViaId
-		,[intShipFromId]					= RE.intShipFromId
-		,[intCurrencyId]  					= RE.intCurrencyId
-		,[intCostCurrencyId]				= RE.intCurrencyId
-		,[intChargeId]						= SCS.intFreightItemId
-		,[intForexRateTypeId]				= RE.intForexRateTypeId
-		,[dblForexRate]						= RE.dblForexRate
-		,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
-		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Amount' THEN 0
-												ELSE RE.dblFreightRate
-											END
-		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCS.intFreightItemId, RE.intItemUOMId)
-		,[intOtherChargeEntityVendorId]		= SC.intHaulerId
-		,[dblAmount]						=  CASE
-												WHEN IC.strCostMethod = 'Amount' THEN ROUND (((RE.dblQty / SC.dblNetUnits) * SC.dblFreightRate), 2)
-												ELSE 0
-											END
-		,[intContractHeaderId]				= NULL
-		,[intContractDetailId]				= NULL
-		,[ysnAccrue]						= CASE WHEN ISNULL(SC.intHaulerId , 0) > 0 THEN 1 ELSE 0 END
-		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
-		,[strChargesLink]					= RE.strChargesLink
-		FROM @ReceiptStagingTable RE 
-		LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
-		LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-		LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-		WHERE RE.dblFreightRate != 0
+   SELECT	[intEntityVendorId]					= NULL
+			,[strBillOfLadding]					= RE.strBillOfLadding
+			,[strReceiptType]					= RE.strReceiptType
+			,[intLocationId]					= RE.intLocationId
+			,[intShipViaId]						= RE.intShipViaId
+			,[intShipFromId]					= RE.intShipFromId
+			,[intCurrencyId]  					= RE.intCurrencyId
+			,[intCostCurrencyId]  				= RE.intCurrencyId
+			,[intChargeId]						= @intFreightItemId
+			,[ysnInventoryCost]					= 0
+			,[strCostMethod]					= 'Per Unit'
+			,[dblRate]							= RE.dblFreightRate
+			,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, RE.intItemUOMId)
+			,[intOtherChargeEntityVendorId]		= @intHaulerId
+			,[dblAmount]						= 0
+			,[strAllocateCostBy]				=  NULL
+			,[intContractHeaderId]				= RE.intContractHeaderId
+			,[intContractDetailId]				= RE.intContractDetailId
+			,[ysnAccrue]						= 1
+    FROM	@ReceiptStagingTable RE 
+	WHERE	RE.dblFreightRate != 0 
 
 	----Fuel Surcharge
 	--UNION ALL 
@@ -219,63 +191,11 @@ BEGIN TRY
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
 	   RETURN;
-	
-	IF @intLotType != 0
-	BEGIN 
-		INSERT INTO @ReceiptItemLotStagingTable(
-			[strReceiptType]
-			,[intItemId]
-			,[intLotId]
-			,[strLotNumber]
-			,[intLocationId]
-			,[intShipFromId]
-			,[intShipViaId]	
-			,[intSubLocationId]
-			,[intStorageLocationId] 
-			,[intCurrencyId]
-			,[intItemUnitMeasureId]
-			,[dblQuantity]
-			,[dblGrossWeight]
-			,[dblTareWeight]
-			,[dblCost]
-			,[intEntityVendorId]
-			,[dtmManufacturedDate]
-			,[strBillOfLadding]
-			,[intSourceType]
-		)
-		SELECT 
-			[strReceiptType]		= RE.strReceiptType
-			,[intItemId]			= RE.intItemId
-			,[intLotId]				= RE.intLotId
-			,[strLotNumber]			= CASE
-										WHEN SC.strLotNumber = '' THEN NULL
-										ELSE SC.strLotNumber
-									END
-			,[intLocationId]		= RE.intLocationId
-			,[intShipFromId]		= RE.intShipFromId
-			,[intShipViaId]			= RE.intShipViaId
-			,[intSubLocationId]		= RE.intSubLocationId
-			,[intStorageLocationId] = RE.intStorageLocationId
-			,[intCurrencyId]		= RE.intCurrencyId
-			,[intItemUnitMeasureId] = RE.intItemUOMId
-			,[dblQuantity]			= RE.dblQty
-			,[dblGrossWeight]		= RE.dblGross
-			,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
-			,[dblCost]				= RE.dblCost
-			,[intEntityVendorId]	= RE.intEntityVendorId
-			,[dtmManufacturedDate]	= RE.dtmDate
-			,[strBillOfLadding]		= ''
-			,[intSourceType]		= RE.intSourceType
-			FROM @ReceiptStagingTable RE 
-			INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
-			INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
-	END
 
     EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
 			,@OtherCharges
-			,@intUserId
-			,@ReceiptItemLotStagingTable;
+			,@intUserId;
 
 	-- Update the Inventory Receipt Key to the Transaction Table
 	UPDATE	SC
@@ -301,20 +221,7 @@ _PostOrUnPost:
 		FROM	tblICInventoryReceipt 
 		WHERE	intInventoryReceiptId = @ReceiptId
 
-		SELECT	TOP 1 @intEntityId = [intEntityId] 
-		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityId] = @intUserId
-		BEGIN
-		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
-		  
-			UPDATE	SC
-			SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
-			FROM	dbo.tblSCTicket SC 
-			INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
-			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
-			INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-			WHERE SC.intTicketId = @intTicketId			
-		END
+		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;			
 
 		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId
