@@ -2,8 +2,8 @@
 AS 
 SELECT DISTINCT intItemId				= ITEMS.intItemId
 	 , intStorageLocationId				= IL.intStorageLocationId
-	 , intIssueUOMId					= IUOM.intItemUOMId
-	 , intIssueUnitMeasureId			= IUOM.intUnitMeasureId
+	 , intIssueUOMId					= ITEMS.intItemUOMId
+	 , intIssueUnitMeasureId			= ITEMS.intUnitMeasureId
 	 , intCompanyLocationId				= CL.intCompanyLocationId
 	 , strItemNo						= ITEMS.strItemNo
 	 , strDescription					= ITEMS.strDescription
@@ -42,6 +42,8 @@ FROM (
 		 , dblMaintenanceRate
 		 , dblDefaultFull
 		 , ysnListBundleSeparately
+		 , IUOM.intUnitMeasureId
+		 , IUOM.intItemUOMId
 	FROM dbo.tblICItem ITEM WITH (NOLOCK)
 	INNER JOIN dbo.tblICItemUOM IUOM WITH (NOLOCK) ON ITEM.intItemId = IUOM.intItemId
 
@@ -59,14 +61,16 @@ FROM (
 		 , dblMaintenanceRate
 		 , dblDefaultFull
 		 , ysnListBundleSeparately
+		 , IUOM.intUnitMeasureId
+		 , IUOM.intItemUOMId
 	FROM dbo.tblICItem ITEM WITH (NOLOCK)
 	INNER JOIN dbo.tblICItemUOM IUOM WITH (NOLOCK) ON ITEM.intItemId = IUOM.intItemId
 	INNER JOIN dbo.tblICItemUomUpc ALTUPC WITH (NOLOCK) ON IUOM.intItemUOMId = ALTUPC.intItemUOMId
 ) ITEMS
 INNER JOIN dbo.tblICItemLocation IL WITH (NOLOCK) ON ITEMS.intItemId = IL.intItemId
 INNER JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON IL.intLocationId = CL.intCompanyLocationId
-INNER JOIN dbo.tblICItemUOM IUOM WITH (NOLOCK) ON ITEMS.intItemId = IUOM.intItemId
-INNER JOIN dbo.tblICUnitMeasure UM WITH (NOLOCK) ON IUOM.intUnitMeasureId = UM.intUnitMeasureId
+--INNER JOIN dbo.tblICItemUOM IUOM WITH (NOLOCK) ON ITEMS.intItemId = IUOM.intItemId
+INNER JOIN dbo.tblICUnitMeasure UM WITH (NOLOCK) ON ITEMS.intUnitMeasureId = UM.intUnitMeasureId
 LEFT JOIN dbo.tblICItemPricing IP WITH (NOLOCK) ON IL.intItemId = IP.intItemId AND IL.intItemLocationId = IP.intItemLocationId
 LEFT JOIN dbo.tblICItemStock ISTOCK WITH (NOLOCK) ON ITEMS.intItemId = ISTOCK.intItemId AND IL.intItemLocationId = ISTOCK.intItemLocationId
 LEFT JOIN dbo.tblICStorageLocation SL WITH (NOLOCK) ON IL.intStorageLocationId = SL.intStorageLocationId
