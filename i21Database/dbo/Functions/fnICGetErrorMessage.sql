@@ -237,7 +237,6 @@ BEGIN
 		WHEN @msgId = 80221 THEN 'Unable to Post. Cost is missing for %s for %s.'
 		WHEN @msgId = 80222 THEN 'Please check if there is enough stock to do the split.'
 		WHEN @msgId = 80223 THEN 'Receiving a negative stock for %s is not allowed.'
-		WHEN @msgId = 80224 THEN 'If the cost method of the charge "%s" is not "Amount", the rate must be greater than zero.'
 	END 
 
 	RETURN @msg
