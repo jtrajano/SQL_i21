@@ -90,6 +90,19 @@ BEGIN TRY
 				@strContractNumber	=   strContractNumber
 		FROM	tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
 		
+		IF NOT EXISTS(SELECT * from vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+		BEGIN
+			IF @intContractTypeId = 2 
+			BEGIN
+				SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a customer.'
+			END
+			ELSE
+			BEGIN
+				SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a vendor.'
+			END
+			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+		END
+
 		SELECT	@strNumber = CASE WHEN @intContractTypeId = 2 THEN 'SaleContract' ELSE 'PurchaseContract' END 
 
 		EXEC	uspCTGetStartingNumber @strNumber, @strNumber OUTPUT
