@@ -1,27 +1,60 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSReturn]
-	@intInvoiceId AS INT,
-	@intEntityId AS INT,
-	@strPOSPaymentMethod AS VARCHAR(50) = NULL,
+	@intPOSId AS INT,
 	@strMessage AS VARCHAR(50) OUTPUT 
 AS
-	DECLARE	@ysnReturned AS BIT = 0,
-			@intSourceId AS INT = 0,
-			@DateOnly	 AS DATETIME = CAST(GETDATE() AS DATE),
-			@EntriesForCreditMemo AS InvoiceIntegrationStagingTable,
-			@LineItemTaxes AS LineItemTaxDetailStagingTable,
-			@errorMessage AS NVARCHAR(250),
-			@createdCreditMemo NVARCHAR(MAX),
-			@updatedCreditMemo NVARCHAR(MAX),
-			@createdCreditMemoId AS INT = 0,
-			@createdCreditMemoType AS VARCHAR(50),
-			@createdCreditMemoTransactionType AS VARCHAR(20),
-			@intCompanyLocationId AS INT,
-			@intPaymentMethodID AS INT
 
-	SELECT @ysnReturned = ysnReturned, @intSourceId = intSourceId
+	DECLARE @intOriginalPOSTransactionId INT = NULL,
+			@intEntityId				 INT = NULL,
+			@intInvoiceId				 INT = NULL,
+			@intCompanyLocationId		 INT = NULL,
+			@intPaymentEntries			 INT = NULL,
+			@ysnReturned				 BIT = 0,
+			@DateOnly					 DATETIME = CAST(GETDATE() AS DATE),
+			@errorMessage				 NVARCHAR(250),
+			@createdCreditMemo			 NVARCHAR(MAX),
+			@updatedCreditMemo			 NVARCHAR(MAX),
+			@createdCreditMemoId		 INT = NULL,
+			@createdCreditMemoType		 VARCHAR(50),
+			@createdCreditMemoTransactionType	VARCHAR(20),
+
+			@EntriesForCreditMemo AS InvoiceIntegrationStagingTable,
+			@LineItemTaxes AS LineItemTaxDetailStagingTable
+
+	--SET Variables
+	SELECT TOP 1
+		@intOriginalPOSTransactionId = intOriginalPOSTransactionId,
+		@intEntityId				 = intEntityUserId
+	FROM tblARPOS
+	WHERE intPOSId = @intPOSId
+
+	SELECT TOP 1
+		@intInvoiceId = intInvoiceId
+	FROM tblARPOS
+	WHERE intPOSId = @intOriginalPOSTransactionId
+
+	SELECT TOP 1
+		@ysnReturned = ysnReturned
 	FROM tblARInvoice
 	WHERE intInvoiceId = @intInvoiceId
+	
+	IF(OBJECT_ID('tempdb..#POSRETURNPAYMENTS') IS NOT NULL)
+	BEGIN
+		DROP TABLE #POSRETURNPAYMENTS
+	END
 
+	SELECT intPOSId			= intPOSId
+		 , intPOSPaymentId	= intPOSPaymentId
+		 , strPaymentMethod	= CASE WHEN strPaymentMethod ='Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
+		 , strReferenceNo	= strReferenceNo
+		 , dblAmount		= dblAmount
+		 , ysnComputed		= CAST(0 AS BIT)
+	INTO #POSRETURNPAYMENTS
+	FROM dbo.tblARPOSPayment WITH (NOLOCK)
+	WHERE intPOSId = @intPOSId
+	  AND ISNULL(strPaymentMethod, '')  <> 'On Account'
+
+
+	--CREATE ENTRIES FOR INVOICE
 	IF(@ysnReturned = 0)
 	BEGIN
 	BEGIN TRANSACTION
@@ -162,8 +195,8 @@ AS
 		SELECT
 			[strTransactionType]					= 'Credit Memo'
 			,[strType]								= 'POS'
-			,[strSourceTransaction]					= 'POS'--'Invoice'
-			,[intSourceId]							= @intSourceId 
+			,[strSourceTransaction]					= 'POS'
+			,[intSourceId]							= @intPOSId 
 			,[strSourceId]							= ARI.[strInvoiceNumber]
 			,[intInvoiceId]							= NULL
 			,[intEntityCustomerId]					= ARI.[intEntityCustomerId]
@@ -189,7 +222,7 @@ AS
 			,[ysnForgiven]							= ARI.[ysnForgiven]
 			,[ysnCalculated]						= ARI.[ysnCalculated]
 			,[ysnSplitted]							= ARI.[ysnSplitted]
-			,[ysnImpactInventory]					= 1 --ARI.[ysnImpactInventory]
+			,[ysnImpactInventory]					= 1
 			,[intPaymentId]							= ARI.[intPaymentId]
 			,[intSplitId]							= ARI.[intSplitId]
 			,[intLoadDistributionHeaderId]			= ARI.[intLoadDistributionHeaderId]
@@ -199,13 +232,13 @@ AS
 			,[intMeterReadingId]					= ARI.[intMeterReadingId]
 			,[intContractHeaderId]					= ARI.[intContractHeaderId]
 			,[intLoadId]							= ARI.[intLoadId]
-			,[intOriginalInvoiceId]					= NULL--ARI.[intInvoiceId]
+			,[intOriginalInvoiceId]					= NULL
 			,[intEntityId]							= @intEntityId
 			,[intTruckDriverId]						= ARI.[intTruckDriverId]
 			,[intTruckDriverReferenceId]			= ARI.[intTruckDriverReferenceId]
 			,[ysnResetDetails]						= 0
-			,[ysnRecap]								= NULL
-			,[ysnPost]								= NULL
+			,[ysnRecap]								= 0
+			,[ysnPost]								= 1
 			,[ysnUpdateAvailableDiscount]			= 0
 			--Detail																																															
 			,[intInvoiceDetailId]					= NULL
@@ -342,102 +375,14 @@ AS
 			@EntriesForCreditMemo creditMemo
 		INNER JOIN
 			tblARInvoiceDetailTax ARIDT
-				ON creditMemo.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId] 
+				ON creditMemo.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId]
+		INNER JOIN tblARInvoiceDetail INVDETAIL
+				ON creditMemo.[intTempDetailIdForTaxes] = INVDETAIL.intInvoiceDetailId
+		WHERE INVDETAIL.intInvoiceId = @intInvoiceId
 		ORDER BY 
-			 creditMemo.[intInvoiceDetailId] ASC
+			 creditMemo.[intTempDetailIdForTaxes] ASC
 			,ARIDT.[intInvoiceDetailTaxId] ASC
-
-
-		Declare @ReceiptNumber NVARCHAR(25) = NULL
-		Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output
-
-		INSERT INTO tblARPOS (
-				 [strReceiptNumber]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intGLAccountId]
-				,[intCurrencyId]
-				,[dtmDate]
-				,[intItemCount]
-				,[dblShipping]
-				,[dblDiscountPercent]
-				,[dblDiscount]
-				,[dblTax]
-				,[dblSubTotal]
-				,[dblTotal]
-				,[intInvoiceId]
-				,[ysnHold]
-				,[intEntityUserId]
-				,[intPOSLogId]
-				,[intConcurrencyId]
-				,[ysnReturn]
-				,[strPONumber]
-				,[strComment]
-			)
-			SELECT 
-				@ReceiptNumber
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intGLAccountId]
-				,[intCurrencyId]
-				,[dtmDate]
-				,[intItemCount]
-				,[dblShipping]
-				,[dblDiscountPercent]
-				,[dblDiscount]
-				,-[dblTax]
-				,-[dblSubTotal]
-				,-[dblTotal]
-				,0
-				,[ysnHold]
-				,[intEntityUserId]
-				,[intPOSLogId]
-				,[intConcurrencyId]
-				,1
-				,[strPONumber]
-				,[strComment]
-			FROM tblARPOS WHERE intPOSId = @intSourceId
-			--
-			DECLARE @NewPOS INT
-			SET @NewPOS = @@Identity
-			INSERT INTO tblARPOSDetail(
-				[intPOSId]
-				,[intItemId]
-				,[strItemNo]
-				,[strItemDescription]
-				,[dblQuantity]
-				,[intItemUOMId]
-				,[strItemUOM]
-				,[dblItemWeight]
-				,[intItemWeightUOMId]
-				,[dblDiscountPercent]
-				,[dblDiscount]
-				,[dblItemTermDiscount]
-				,[dblPrice]
-				,[dblTax]
-				,[dblExtendedPrice]
-				,[intConcurrencyId]
-			)
-			select 
-				@NewPOS
-				,[intItemId]
-				,[strItemNo]
-				,[strItemDescription]
-				,[dblQuantity]
-				,[intItemUOMId]
-				,[strItemUOM]
-				,[dblItemWeight]
-				,[intItemWeightUOMId]
-				,[dblDiscountPercent]
-				,[dblDiscount]
-				,[dblItemTermDiscount]
-				,-1 * [dblPrice]
-				,-1 * [dblTax]
-				,-1 * [dblExtendedPrice]
-				,[intConcurrencyId] FROM tblARPOSDetail where intPOSId = @intSourceId
-
-			--
-
+		
 
 		EXEC uspARProcessInvoices
 			 @InvoiceEntries		= @EntriesForCreditMemo
@@ -479,18 +424,16 @@ AS
 			FROM tblARInvoice
 			WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@createdCreditMemo))
 
-			EXEC uspARPostInvoice @param = @createdCreditMemoId, @post = 1
+			UPDATE tblARPOS    
+			SET intInvoiceId = @createdCreditMemoId    
+			WHERE intPOSId = @intPOSId
 
-			SELECT @intPaymentMethodID = intPaymentMethodID FROM tblSMPaymentMethod
-			WHERE strPaymentMethod = @strPOSPaymentMethod 
-
-			IF(@strPOSPaymentMethod != 'On Account')
+			IF EXISTS(SELECT TOP 1 NULL FROM #POSRETURNPAYMENTS)
 			BEGIN
 				EXEC uspARPOSCreateNegativeCashReceipts 
 						 @intInvoiceId			= @createdCreditMemoId
 						,@intUserId				= @intEntityId
 						,@intCompanyLocationId	= @intCompanyLocationId
-						,@intPaymentMethodID	= @intPaymentMethodID
 						,@strErrorMessage		= @strMessage	OUTPUT
 			END
 
@@ -498,17 +441,8 @@ AS
 			BEGIN
 				UPDATE tblARPOS
 				SET ysnReturn = 1
-				WHERE intInvoiceId = @intInvoiceId
-
-				UPDATE tblARPOS    
-				SET intInvoiceId = @createdCreditMemoId    
-				WHERE strReceiptNumber = @ReceiptNumber  
-				
-				SELECT @strMessage = intPOSId FROM tblARPOS
-				WHERE strReceiptNumber = @ReceiptNumber 
-				
+				WHERE intPOSId = @intOriginalPOSTransactionId
 			END
-
 		END
 
 	END
@@ -517,3 +451,4 @@ AS
 		SET @strMessage = 'Sales Receipt is already returned'
 		RETURN 0;
 	END
+

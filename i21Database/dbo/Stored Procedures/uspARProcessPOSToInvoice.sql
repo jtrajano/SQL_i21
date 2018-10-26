@@ -110,6 +110,7 @@ INSERT INTO @EntriesForInvoice(
 	,[dblSubCurrencyRate]
 	,[intSalesAccountId]
 	,[strPONumber]
+	,[intFreightTermId]
 )
 SELECT
 	 [strTransactionType]					= @strTransactionType
@@ -133,15 +134,17 @@ SELECT
 	,[dblDiscount]							= DETAILS.dblDiscountPercent
 	,[dblPrice]								= DETAILS.dblPrice
 	,[ysnRefreshPrice]						= 0
-	,[ysnRecomputeTax]						= 1
+	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= NULL
 	,[strPONumber]							= POS.strPONumber
+	,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
+INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
 WHERE POS.intPOSId = @intPOSId
 
 UNION ALL
@@ -168,13 +171,14 @@ SELECT TOP 1
 	,[dblDiscount]							= NULL
 	,[dblPrice]								= POS.dblDiscount * -1
 	,[ysnRefreshPrice]						= 0
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
 	,[strPONumber]							= POS.strPONumber
+	,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
 FROM tblARPOS POS
 OUTER APPLY (
 	SELECT TOP 1 intDiscountAccountId 
@@ -183,6 +187,7 @@ OUTER APPLY (
 LEFT JOIN (
 	SELECT intDiscountAccountId
 	     , intCompanyLocationId
+		 , intFreightTermId
 	FROM tblSMCompanyLocation WITH (NOLOCK)
 ) COMPANYLOC ON POS.intCompanyLocationId = COMPANYLOC.intCompanyLocationId
 WHERE POS.intPOSId = @intPOSId
@@ -360,6 +365,7 @@ BEGIN
 			WHERE IFP.ysnExcludeForPayment = 0
 			  AND IFP.ysnPosted = 1
 			  AND IFP.ysnPaid = 0
+			  AND IFP.intInvoiceId = @intNewInvoiceId
 
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
