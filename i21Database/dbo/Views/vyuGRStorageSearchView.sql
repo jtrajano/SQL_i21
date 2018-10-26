@@ -66,6 +66,7 @@ SELECT
 	,intSplitId					   = EMSplit.intSplitId
 	,intItemUOMId				 = CS.intItemUOMId
 	,ysnDeliverySheetPosted		 = ISNULL(DeliverySheet.ysnPost,1)
+    ,ysnCustomerStorage          = ST.ysnCustomerStorage
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
