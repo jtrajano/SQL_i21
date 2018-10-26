@@ -100,4 +100,5 @@ OUTER APPLY(
 	SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = c.intGLAccountId
 )Account'
 )
+END
 GO
