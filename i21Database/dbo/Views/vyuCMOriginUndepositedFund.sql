@@ -9,7 +9,7 @@ AS
 WITH AR AS (
 	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId, 'Payment' strType FROM tblARPayment UNION
 	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, 'Invoice' strType FROM tblARInvoice UNION
-	SELECT intCashOverShortId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, 'EndOfDay' strType FROM tblARPOSEndOfDay
+	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, 'EndOfDay' strType FROM tblARPOSEndOfDay
 ),
 
 C AS (
