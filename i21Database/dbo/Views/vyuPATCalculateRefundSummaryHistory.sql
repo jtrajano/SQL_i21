@@ -27,7 +27,7 @@ WITH Refund AS (
 			ON RR.intRefundTypeId = RCus.intRefundTypeId
 )
 
-SELECT	NEWID() as id,
+SELECT	intRowId = ROW_NUMBER() OVER(ORDER BY intRefundTypeId),
 		intRefundId,
 		intFiscalYearId,
 		strStockStatus,

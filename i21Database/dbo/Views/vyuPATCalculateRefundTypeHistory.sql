@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateRefundTypeHistory]
 	AS
-SELECT	NEWID() AS id,
+SELECT	RCus.intRefundCustomerId,
 		R.intRefundId,
 		intCustomerId = RCus.intCustomerId,
 		EN.strEntityNo,
