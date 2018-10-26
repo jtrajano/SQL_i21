@@ -365,7 +365,7 @@ SELECT inv.intItemId
 	FROM tblICItem I 
 		JOIN ptitmmst p ON I.strItemNo = p.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		JOIN tblICItem IA ON IA.strItemNo = p.ptitm_alt_itm COLLATE SQL_Latin1_General_CP1_CS_AS
-		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUOM = 1
+		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUnit = 1
 	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
 
 GO
