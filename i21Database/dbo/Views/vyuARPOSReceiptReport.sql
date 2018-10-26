@@ -25,6 +25,7 @@ SELECT intPOSId				= POS.intPOSId
 	 , strReceiptNumber		= POS.strReceiptNumber
 	 , strUserName			= USERNAME.strName
 	 , strLocation			= LOCATION.strLocationName
+	 , strLocationAddress	= LOCATION.strLocationAddress
 	 , strStore				= ISNULL(STORE.strDescription, '')
 	 , strPONumber			= POS.strPONumber
 	 , strComment			= POS.strComment
@@ -68,7 +69,8 @@ INNER JOIN (
 ) DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 LEFT JOIN (
 	SELECT intCompanyLocationId
-		 , strLocationName 
+		 , strLocationName
+		 , strLocationAddress = dbo.fnConvertToFullAddress(strAddress, strCity, strStateProvince, strZipPostalCode), strPhone, strFax = strFax + ' Fax'
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 ) LOCATION ON LOCATION.intCompanyLocationId = DRAWER.intCompanyLocationId
 LEFT JOIN (
