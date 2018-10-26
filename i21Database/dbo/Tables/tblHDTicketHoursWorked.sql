@@ -5,6 +5,7 @@
 	[intAgentId] [int] NOT NULL,
 	[intAgentEntityId] [int] NULL,
 	[intHours] [numeric](18, 6) NOT NULL,
+	[dblEstimatedHours] [numeric](18, 6) NOT NULL default 0.00,
 	[dtmDate] [datetime] NULL,
 	[dtmStartTime] [datetime] NULL,
 	[dtmEndTime] [datetime] NULL,

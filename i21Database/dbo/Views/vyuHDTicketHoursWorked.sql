@@ -7,6 +7,7 @@
 			,a.intAgentEntityId
 			,a.intHours
 			,dblHours = a.intHours
+			,a.dblEstimatedHours
 			,a.dtmDate
 			,a.dtmStartTime
 			,a.dtmEndTime
