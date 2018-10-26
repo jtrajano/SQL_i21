@@ -677,7 +677,7 @@ BEGIN TRY
 				, strTaxCategory
 				, CONVERT(DECIMAL(18), dblGross)
 				, CONVERT(DECIMAL(18), dblNet)
-				, CONVERT(DECIMAL(18), dblBillQty)
+				, CONVERT(DECIMAL(18), dblReceived)
 				, dblTax
 				, dtmReceiptDate
 				, strShipVia
