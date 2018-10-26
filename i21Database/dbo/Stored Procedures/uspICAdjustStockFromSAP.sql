@@ -354,7 +354,6 @@ BEGIN
 							AND ICLot.intSubLocationId = @intSubLocationId 
 							AND ICLot.intItemLocationId = @intItemLocationId 							
 							AND (ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)) > 0
-					ORDER BY ICLot.dtmCreated ASC
 
 					IF @intStorageLocationId IS NULL
 					 	BEGIN
