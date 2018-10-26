@@ -7153,6 +7153,7 @@
     <Build Include="dbo\Views\vyuRKCurExpBankBalance.sql" />
     <Build Include="dbo\Functions\fnGRCheckBillPaymentOfSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
