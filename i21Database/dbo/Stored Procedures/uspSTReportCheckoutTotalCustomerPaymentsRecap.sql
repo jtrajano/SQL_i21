@@ -64,13 +64,27 @@ BEGIN TRY
     FROM	tblSMCompanySetup
 
 	
-    select @strCompanyName as CompanyName,D.intStoreNo as Store,CONVERT(VARCHAR(50),C.dtmCheckoutDate,101) as checkoutDate,
-    C.intShiftNo as ShiftNo,B.strCustomerNumber, A.strName, A.intInvoice,A.dblAmount ,A.strComment ,A.strType, A.strCheckNo,
-	SUM(case when A.strType = 'P' then A.dblAmount  else 0 end) over() as TotalCash, 
-	SUM(case when A.strType <> 'P' then A.dblAmount else 0 end) over() as TotalOther
-	from tblSTCheckoutCustomerPayments A JOIN tblARCustomer B ON B.[intEntityId] = A.intCustomerId  
-	JOIN tblSTCheckoutHeader C ON C.intCheckoutId = A.intCheckoutId JOIN tblSTStore D ON C.intStoreId = D.intStoreId
-	where A.intCheckoutId = @intCheckoutId
+    SELECT @strCompanyName AS CompanyName
+	     , D.intStoreNo AS Store
+		 , CONVERT(VARCHAR(50)
+		 , C.dtmCheckoutDate,101) AS checkoutDate
+		 , C.intShiftNo AS ShiftNo
+		 , B.strCustomerNumber
+		 , A.strName
+		 , A.intInvoice
+		 , A.dblPaymentAmount 
+		 , A.strComment 
+		 , A.strCheckNo
+		 , SUM(A.dblPaymentAmount) OVER() AS TotalCash
+	     , SUM(A.dblPaymentAmount) OVER() as TotalOther
+	FROM tblSTCheckoutCustomerPayments A 
+	JOIN tblARCustomer B 
+		ON B.[intEntityId] = A.intCustomerId  
+	JOIN tblSTCheckoutHeader C 
+		ON C.intCheckoutId = A.intCheckoutId 
+	JOIN tblSTStore D 
+		ON C.intStoreId = D.intStoreId
+	WHERE A.intCheckoutId = @intCheckoutId
     
 END TRY
 

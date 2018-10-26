@@ -3100,7 +3100,7 @@ BEGIN
 					----------------------------------------------------------------------
 					-------------------------- CUSTOMER PAYMENTS -------------------------
 					----------------------------------------------------------------------
-					IF EXISTS(SELECT * FROM tblSTCheckoutCustomerPayments WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
+					IF EXISTS(SELECT * FROM tblSTCheckoutCustomerPayments WHERE intCheckoutId = @intCheckoutId AND dblPaymentAmount > 0)
 						BEGIN
 								-- Use Recieve Payment UDP
 								INSERT INTO @PaymentsForInsert(
@@ -3173,7 +3173,7 @@ BEGIN
 											,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
 											,[intBankAccountId]						= NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])
 											,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
-											,[dblAmountPaid]						= CCP.dblAmount
+											,[dblAmountPaid]						= CCP.dblPaymentAmount
 											,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
 											,[dblExchangeRate]						= NULL
 											,[strReceivePaymentType]				= 'Cash Receipts'
@@ -3201,7 +3201,7 @@ BEGIN
 											,[dblDiscount]							= 0.000000		-- Discount
 											,[dblDiscountAvailable]					= NULL		-- Discount 
 											,[dblInterest]							= 0.000000		-- Interest
-											,[dblPayment]							= CCP.dblAmount		-- Payment	
+											,[dblPayment]							= CCP.dblPaymentAmount		-- Payment	
 											,[strInvoiceReportNumber]				= NULL		-- Transaction Number
 											,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
 											,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
@@ -3228,7 +3228,7 @@ BEGIN
 										LEFT JOIN tblSMPaymentMethod PM	
 											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 										WHERE CCP.intCheckoutId = @intCheckoutId
-										AND CCP.dblAmount > 0
+										AND CCP.dblPaymentAmount > 0
 										--AND UOM.ysnStockUnit = CAST(1 AS BIT)
 										ORDER BY
 											[intId]
@@ -3254,7 +3254,7 @@ BEGIN
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId)
 							BEGIN
 								--TEST
-								--SELECT * FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+								SELECT * FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
 								 
 								-- Posting to Recieve Payments is successfull
 								UPDATE tblSTCheckoutHeader
@@ -3636,7 +3636,7 @@ BEGIN
 											,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
 											,[intBankAccountId]						= NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])
 											,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
-											,[dblAmountPaid]						= CCP.dblAmount
+											,[dblAmountPaid]						= CCP.dblPaymentAmount
 											,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
 											,[dblExchangeRate]						= NULL
 											,[strReceivePaymentType]				= 'Cash Receipts'
@@ -3664,7 +3664,7 @@ BEGIN
 											,[dblDiscount]							= 0.000000		-- Discount
 											,[dblDiscountAvailable]					= NULL		-- Discount 
 											,[dblInterest]							= 0.000000		-- Interest
-											,[dblPayment]							= CCP.dblAmount		-- Payment	
+											,[dblPayment]							= CCP.dblPaymentAmount		-- Payment	
 											,[strInvoiceReportNumber]				= NULL		-- Transaction Number
 											,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
 											,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
@@ -3697,7 +3697,7 @@ BEGIN
 										LEFT JOIN tblSMPaymentMethod PM	
 											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 										WHERE CCP.intCheckoutId = @intCheckoutId
-										AND CCP.dblAmount > 0
+										AND CCP.dblPaymentAmount > 0
 										--AND UOM.ysnStockUnit = CAST(1 AS BIT)
 										ORDER BY
 											[intId]
