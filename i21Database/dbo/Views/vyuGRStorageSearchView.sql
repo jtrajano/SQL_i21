@@ -29,7 +29,7 @@ SELECT
 	,intCompanyLocationId		  = CS.intCompanyLocationId
 	,strLocationName			  = LOC.strLocationName
 	,intStorageScheduleId		  = CS.intStorageScheduleId
-	,strScheduleId				  = SR.strScheduleId
+	,strScheduleId				  = SR.strScheduleDescription
 	,strDPARecieptNumber		  = CS.strDPARecieptNumber
 	,strCustomerReference		  = ISNULL(CS.strCustomerReference,'')  
 	,dblOriginalBalance			  = dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
@@ -55,8 +55,10 @@ SELECT
 	,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  = CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
 										THEN 
-											CASE WHEN DSS.dblSplitPercent IS NOT NULL
-												THEN DSS.dblSplitPercent ELSE 100
+											CASE 
+												WHEN DSS.dblSplitPercent IS NOT NULL THEN DSS.dblSplitPercent 
+												WHEN TSS.dblSplitPercent IS NOT NULL THEN TSS.dblSplitPercent
+												ELSE 100
 											END
 										ELSE SCTicketSplit.dblSplitPercent
 									END
