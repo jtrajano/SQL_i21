@@ -36,6 +36,7 @@ USING (
 	AND ISNULL(stockMovement.intLotId, 0) = ISNULL(t.intLotId, 0)
 	AND ISNULL(stockMovement.intSubLocationId, 0) = ISNULL(t.intSubLocationId, 0)
 	AND ISNULL(stockMovement.intStorageLocationId, 0) = ISNULL(t.intStorageLocationId, 0)
+	AND stockMovement.intOwnershipType = @Ownership_Own
 
 -- If matched, update only the Qty
 WHEN MATCHED THEN 
@@ -146,6 +147,7 @@ USING (
 	AND ISNULL(stockMovement.intLotId, 0) = ISNULL(s.intLotId, 0)
 	AND ISNULL(stockMovement.intSubLocationId, 0) = ISNULL(s.intSubLocationId, 0)
 	AND ISNULL(stockMovement.intStorageLocationId, 0) = ISNULL(s.intStorageLocationId, 0)
+	AND stockMovement.intOwnershipType = @Ownership_Storage
 
 -- If matched, update only the Qty
 WHEN MATCHED THEN 
