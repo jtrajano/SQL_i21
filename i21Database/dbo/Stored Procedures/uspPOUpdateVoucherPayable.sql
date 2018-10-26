@@ -108,7 +108,10 @@ FROM tblPOPurchaseDetailTax A
 INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
 INNER JOIN @voucherPayables payables ON B.intPurchaseDetailId = payables.intPurchaseDetailId
 LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
-WHERE (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL) AND payables.dblTax != 0
+WHERE 
+	--(C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL) 
+	(dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
+AND payables.dblTax != 0
 
 IF @remove = 0
 BEGIN
