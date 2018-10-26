@@ -14,8 +14,9 @@ SELECT DISTINCT strCommodityCode
 	, strPricingType
 	, strContractInventory = 'Contract'
 	, strContractType
-	, dblCashOrFuture = NULL
-	, dblBasisOrDiscount = NULL
+	, dblCashOrFuture = 0
+	, dblBasisOrDiscount = 0
+	, dblRatio = 0
 	, strUnitMeasure = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.strUnitMeasure ELSE mum.strUnitMeasure END)
 	, ch.intCommodityId
 	, cd.intItemId
@@ -60,8 +61,9 @@ UNION SELECT DISTINCT strCommodityCode
 	, strPricingType
 	, strContractInventory = 'Contract'
 	, strContractType
-	, dblCashOrFuture = NULL
-	, dblBasisOrDiscount = NULL
+	, dblCashOrFuture = 0
+	, dblBasisOrDiscount = 0
+	, dblRatio = 0
 	, strUnitMeasure = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.strUnitMeasure ELSE mum.strUnitMeasure END)
 	, ch.intCommodityId
 	, cd.intItemId
@@ -107,8 +109,9 @@ UNION SELECT DISTINCT strCommodityCode
 	, strPricingType
 	, strContractInventory = 'Inventory'
 	, strContractType
-	, dblCashOrFuture = NULL
-	, dblBasisOrDiscount = NULL
+	, dblCashOrFuture = 0
+	, dblBasisOrDiscount = 0
+	, dblRatio = 0
 	, strUnitMeasure = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.strUnitMeasure ELSE mum.strUnitMeasure END)
 	, ch.intCommodityId
 	, cd.intItemId

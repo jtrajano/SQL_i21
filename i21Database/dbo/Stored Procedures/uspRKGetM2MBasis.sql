@@ -79,8 +79,9 @@ BEGIN TRY
 				, strPricingType
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
-				, dblCashOrFuture
-				, dblBasisOrDiscount
+				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
+				, dblBasisOrDiscount = ISNULL(dblBasisOrDiscount, 0)
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId = NULL
@@ -113,8 +114,9 @@ BEGIN TRY
 				, strPricingType
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
-				, dblCashOrFuture
-				, dblBasisOrDiscount
+				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
+				, dblBasisOrDiscount = ISNULL(dblBasisOrDiscount, 0)
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId = NULL
@@ -169,8 +171,9 @@ BEGIN TRY
 				, strPricingType
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
-				, dblCashOrFuture
-				, dblBasisOrDiscount
+				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
+				, dblBasisOrDiscount = ISNULL(dblBasisOrDiscount, 0)
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId
@@ -203,8 +206,9 @@ BEGIN TRY
 				, strPricingType
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
-				, dblCashOrFuture
-				, dblBasisOrDiscount
+				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
+				, dblBasisOrDiscount = ISNULL(dblBasisOrDiscount, 0)
+				, dblRatio = 0
 				, strUnitMeasure
 				, intCommodityId
 				, intItemId

@@ -18,7 +18,8 @@ AS
  ,strContractInventory nvarchar(50)  
  ,strContractType nvarchar(50)  
  ,dblCashOrFuture numeric(16,10)  
- ,dblBasisOrDiscount numeric(16,10)  
+ ,dblBasisOrDiscount numeric(16,10)
+ ,dblRatio numeric(16,10)  
  ,strUnitMeasure nvarchar(50)  
  ,intCommodityId int  
  ,intItemId int  
@@ -55,6 +56,7 @@ AS
            ,[intContractTypeId]
            ,[dblCashOrFuture]
            ,[dblBasisOrDiscount]
+		   ,[dblRatio]
            ,[intUnitMeasureId])
      SELECT
            @intM2MBasisId
@@ -73,6 +75,7 @@ AS
            ,intContractTypeId
            ,dblCashOrFuture
            ,dblBasisOrDiscount
+		   ,dblRatio
            ,intUnitMeasureId
 	FROM @tempBasis
 	WHERE intRowNumber NOT IN (SELECT * FROM dbo.[fnCommaSeparatedValueToTable](@intRowNumbers)) 
