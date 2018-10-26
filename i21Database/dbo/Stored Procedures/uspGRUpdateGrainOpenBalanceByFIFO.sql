@@ -84,7 +84,8 @@ BEGIN TRY
 		AND intItemId = @intItemId
 		AND intStorageTypeId = @intStorageTypeId
 		AND ysnDPOwnedType = 0
-		AND ysnCustomerStorage = 0
+		--AND ysnCustomerStorage = 0
+		AND ysnShowInStorage = 1
 		AND intCompanyLocationId = CASE 
 										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
 										ELSE intCompanyLocationId 
@@ -101,6 +102,7 @@ BEGIN TRY
 																										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
 																										ELSE intCompanyLocationId 
 																								   END
+																		AND ysnShowInStorage = 1
 				      )
 		BEGIN
 			RAISERROR ('There is no available grain balance for this Entity,Item and Storage Type.',16,1);
@@ -152,7 +154,8 @@ BEGIN TRY
 												ELSE intCompanyLocationId 
 										   END
 				AND ysnDPOwnedType = 0
-				AND ysnCustomerStorage = 0
+				--AND ysnCustomerStorage = 0
+				AND ysnShowInStorage = 1
 				AND dtmDeliveryDate IS NOT NULL
 				AND intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM @StorageTicketInfoByFIFO)
 			ORDER BY dtmDeliveryDate,intCustomerStorageId
