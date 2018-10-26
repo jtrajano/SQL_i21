@@ -457,7 +457,7 @@ SELECT
 												when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
 												else cfCardAccount.intCustomerId
 											  end)
-	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
+	,[intCompanyLocationId]					= cfTrans.intARLocationId
 	,[intCurrencyId]						= I.intCurrencyId
 	,[intTermId]							= @companyConfigTermId
 	,[dtmDate]								= cfTrans.dtmTransactionDate
@@ -491,21 +491,27 @@ SELECT
 	,[intInvoiceDetailId]					= ISNULL((SELECT TOP 1 intInvoiceDetailId 
 												FROM tblARInvoiceDetail 
 												WHERE intInvoiceId = cfTrans.intInvoiceId AND ISNULL(dblQtyShipped,0) < 0),@TransactionId+1)
-	,[intItemId]							= cfSiteItem.intARItemId
+	,[intItemId]							= cfTrans.intExpensedItemId
 	,[ysnInventory]							= 1
-	,[strItemDescription]					= cfSiteItem.strDescription 
-	,[intItemUOMId]							= cfSiteItem.intIssueUOMId
-	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity) * -1
-	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity) * -1
+	,[strItemDescription]					= icItem.strDescription 
+	,[intItemUOMId]							= iicItemLoc.intIssueUOMId
+	,[dblQtyOrdered]						= CASE WHEN cfTrans.dblQuantity < 0
+												THEN 1
+												ELSE -1
+											  END
+	,[dblQtyShipped]						= CASE WHEN cfTrans.dblQuantity < 0
+												THEN 1
+												ELSE -1
+											  END
 	,[dblDiscount]							= 0
-	,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
+	,[dblPrice]								= ABS(cfTrans.dblCalculatedTotalPrice)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
     ,[dtmMaintenanceDate]					= NULL
     ,[dblMaintenanceAmount]					= NULL
     ,[dblLicenseAmount]						= NULL
-	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
+	,[intTaxGroupId]						= NULL
 	,[ysnRecomputeTax]						= 0 
 											  -- (CASE 
 													--WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1 OR cfSiteItem.intTaxGroupId IS NULL
@@ -551,6 +557,7 @@ SELECT
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId
+
 LEFT JOIN (SELECT icfCards.intCardId
 				   ,icfAccount.intAccountId
 				   ,icfAccount.intSalesPersonId
@@ -561,33 +568,14 @@ LEFT JOIN (SELECT icfCards.intCardId
 			ON icfCards.intAccountId = icfAccount.intAccountId)
 			AS cfCardAccount
 ON cfTrans.intCardId = cfCardAccount.intCardId
-INNER JOIN (SELECT  icfSite.* 
-					,icfItem.intItemId
-					,icfItem.intARItemId
-					,iicItemLoc.intItemLocationId
-					,iicItemLoc.intIssueUOMId
-					,iicItem.strDescription
-			FROM tblCFSite icfSite
-			INNER JOIN tblCFNetwork icfNetwork
-			ON icfNetwork.intNetworkId = icfSite.intNetworkId
-			INNER JOIN tblCFItem icfItem
-			ON icfSite.intSiteId = icfItem.intSiteId 
-			OR icfNetwork.intNetworkId = icfItem.intNetworkId
-			INNER JOIN tblICItem iicItem
-			ON icfItem.intARItemId = iicItem.intItemId
-			LEFT JOIN tblICItemLocation iicItemLoc
-			ON iicItemLoc.intLocationId = icfSite.intARLocationId 
-			AND iicItemLoc.intItemId = icfItem.intARItemId)
-			AS cfSiteItem
-ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
-AND cfSiteItem.intItemId = cfTrans.intProductId
---INNER JOIN (SELECT * 
---			FROM tblCFTransactionPrice
---			WHERE strTransactionPriceId = 'Net Price')
---			AS cfTransPrice
---ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
---LEFT JOIN vyuCTContractDetailView ctContracts
---ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
+
+INNER JOIN tblICItem as icItem 
+ON cfTrans.intExpensedItemId = icItem.intItemId
+
+LEFT JOIN tblICItemLocation iicItemLoc
+ON iicItemLoc.intLocationId = cfTrans.intARLocationId
+AND iicItemLoc.intItemId = cfTrans.intExpensedItemId
+
 LEFT OUTER JOIN
 	tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
@@ -819,57 +807,57 @@ ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
 WHERE cfTransaction.intTransactionId = @TransactionId
 
 ----------INSERT TAX ENTRIES FOR EXPENSED TRANS-----------
-IF(ISNULL(@Post,0) = 1)
-BEGIN
-	INSERT INTO @TaxDetails
-	(
-	[intDetailId] 
-	,[intTaxGroupId]
-	,[intTaxCodeId]
-	,[intTaxClassId]
-	,[strTaxableByOtherTaxes]
-	,[strCalculationMethod]
-	,[dblRate]
-	,[intTaxAccountId]
-	,[dblTax]
-	,[dblAdjustedTax]
-	,[ysnTaxAdjusted]
-	,[ysnSeparateOnInvoice]
-	,[ysnCheckoffTax]
-	,[ysnTaxExempt]
-	,[ysnTaxOnly]
-	,[strNotes]
-	,[intTempDetailIdForTaxes]
-	,[ysnClearExisting])
-SELECT
-[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ISNULL(dblQtyShipped,0) < 0),@TransactionId +1)
-,[intTaxGroupId]			= NULL
-,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
-,[intTaxClassId]			= cfTaxCode.intTaxClassId
-,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
-,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
-,[dblRate]					= cfTransactionTax.dblTaxRate
-,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1
-,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1 --(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-,[ysnTaxAdjusted]			= 0
-,[ysnSeparateOnInvoice]		= 0 
-,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
-,[ysnTaxExempt]				= 0
-,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
-,[strNotes]					= ''
-,[intTempDetailIdForTaxes]	= @TransactionId + 1
-,[ysnClearExisting]			= 1
-FROM 
-tblCFTransaction cfTransaction
-INNER JOIN tblCFTransactionTax cfTransactionTax
-ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
-INNER JOIN tblSMTaxCode  cfTaxCode
-ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
---INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
---ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
-WHERE cfTransaction.intTransactionId = @TransactionId AND ISNULL(ysnExpensed,0) = 1
-END
+--IF(ISNULL(@Post,0) = 1)
+--BEGIN
+--	INSERT INTO @TaxDetails
+--	(
+--	[intDetailId] 
+--	,[intTaxGroupId]
+--	,[intTaxCodeId]
+--	,[intTaxClassId]
+--	,[strTaxableByOtherTaxes]
+--	,[strCalculationMethod]
+--	,[dblRate]
+--	,[intTaxAccountId]
+--	,[dblTax]
+--	,[dblAdjustedTax]
+--	,[ysnTaxAdjusted]
+--	,[ysnSeparateOnInvoice]
+--	,[ysnCheckoffTax]
+--	,[ysnTaxExempt]
+--	,[ysnTaxOnly]
+--	,[strNotes]
+--	,[intTempDetailIdForTaxes]
+--	,[ysnClearExisting])
+--SELECT
+--[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ISNULL(dblQtyShipped,0) < 0),@TransactionId +1)
+--,[intTaxGroupId]			= NULL
+--,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
+--,[intTaxClassId]			= cfTaxCode.intTaxClassId
+--,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
+--,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
+--,[dblRate]					= cfTransactionTax.dblTaxRate
+--,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
+--,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1
+--,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount) *-1 --(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+--,[ysnTaxAdjusted]			= 0
+--,[ysnSeparateOnInvoice]		= 0 
+--,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
+--,[ysnTaxExempt]				= 0
+--,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
+--,[strNotes]					= ''
+--,[intTempDetailIdForTaxes]	= @TransactionId + 1
+--,[ysnClearExisting]			= 1
+--FROM 
+--tblCFTransaction cfTransaction
+--INNER JOIN tblCFTransactionTax cfTransactionTax
+--ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
+--INNER JOIN tblSMTaxCode  cfTaxCode
+--ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+----INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+----ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+--WHERE cfTransaction.intTransactionId = @TransactionId AND ISNULL(ysnExpensed,0) = 1
+--END
 ----------INSERT TAX ENTRIES FOR EXPENSED TRANS-----------
 
 

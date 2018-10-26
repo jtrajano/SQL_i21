@@ -118,6 +118,7 @@
     [dblAPR]                          NUMERIC (18, 6) NULL,
     [dblFeeAmount]                    NUMERIC (18, 6) NULL,
     [dblFeeRate]                      NUMERIC (18, 6) NULL,
+    [dblTotalFuelExpensed]            NUMERIC (18, 6) NULL,
     [dblEligableGallon]               NUMERIC (18, 6) NULL,
     [ysnPrintMiscellaneous]           BIT             NULL,
     [ysnSummaryByCard]                BIT             NULL,
@@ -146,6 +147,8 @@
     [strUserId]                       NVARCHAR (100)  NULL,
     CONSTRAINT [UserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70)
 );
+
+
 
 
 
