@@ -61,7 +61,7 @@ BEGIN
 				,ysnPost
 				,strNotes
 			)
-			SELECT intId						= IFP.intInvoiceId
+			SELECT intId						= POSPAYMENT.intPOSPaymentId
 			    ,strSourceTransaction			= 'Direct'
 				,intSourceId					= IFP.intInvoiceId
 				,strSourceId					= IFP.strInvoiceNumber
@@ -69,9 +69,9 @@ BEGIN
 				,intCompanyLocationId			= IFP.intCompanyLocationId
 				,intCurrencyId					= IFP.intCurrencyId
 				,dtmDatePaid					= GETDATE()
-				,intPaymentMethodId				= @intPaymentMethodID
-				,strPaymentMethod				= SM.strPaymentMethod
-				,dblAmountPaid					= IFP.dblInvoiceTotal * -1
+				,intPaymentMethodId				= PM.intPaymentMethodID
+				,strPaymentMethod				= PM.strPaymentMethod
+				,dblAmountPaid					= ABS(ISNULL(POSPAYMENT.dblAmount,0)) * -1
 				,intEntityId					= @intUserId
 				,intInvoiceId					= IFP.intInvoiceId
 				,strTransactionType				= IFP.strTransactionType
@@ -80,17 +80,27 @@ BEGIN
 				,intInvoiceAccountId			= IFP.intAccountId
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * -1
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * -1
-				,dblPayment						= IFP.dblInvoiceTotal * -1
+				,dblPayment						= ABS(ISNULL(POSPAYMENT.dblAmount,0)) * -1
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
 				,intCurrencyExchangeRateTypeId	= IFP.intCurrencyExchangeRateTypeId
 				,intCurrencyExchangeRateId		= IFP.intCurrencyExchangeRateId
 				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
 				,1
 				,strNotes						= @strNotes
-			FROM vyuARInvoicesForPaymentIntegration IFP
-			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
-			LEFT JOIN tblSMPaymentMethod SM ON SM.intPaymentMethodID = @intPaymentMethodID
-			WHERE IFP.intInvoiceId = @intInvoiceId
+			FROM #POSRETURNPAYMENTS POSPAYMENT
+			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId
+			INNER JOIN vyuARInvoicesForPayment IFP ON POS.intInvoiceId = IFP.intInvoiceId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			CROSS APPLY (
+				SELECT TOP 1 intPaymentMethodID
+						   , strPaymentMethod
+				FROM tblSMPaymentMethod WITH (NOLOCK)
+				WHERE ((POSPAYMENT.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENT.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENT.strPaymentMethod))
+			) PM
+			WHERE IFP.ysnExcludeForPayment = 0
+			AND IFP.ysnPosted = 1
+			AND IFP.ysnPaid = 0
+			AND IFP.intInvoiceId = @intInvoiceId
 
 			SELECT
 				@strTransactionType = strTransactionType
