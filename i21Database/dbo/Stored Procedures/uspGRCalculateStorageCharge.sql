@@ -409,7 +409,7 @@ BEGIN TRY
 												--WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
 												--WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
 										  --END
-				,@dblFeeRate		    = dblFeeRate
+				,@dblFeeRate		    = CASE WHEN ISNULL(strFeeType,'') = 'Flat' THEN 0 ELSE dblFeeRate END 
 				,@strFeeType			= ISNULL(strFeeType,'')
 			FROM @tblGRStorageSchedulePeriod
 			WHERE intSchedulePeriodId   = @intSchedulePeriodId
@@ -1007,7 +1007,7 @@ BEGIN TRY
 													--WHEN ISNULL(strFeeType,'')='Flat'      THEN dblStorageRate 
 													--WHEN ISNULL(strFeeType,'')='Per Unit'  THEN dblStorageRate + dblFeeRate
 											  --END
-				,@dblFeeRate		    = dblFeeRate
+				,@dblFeeRate		    = CASE WHEN ISNULL(strFeeType,'') = 'Flat' THEN 0 ELSE dblFeeRate END
 				,@strFeeType			= ISNULL(strFeeType,'')
 			FROM @tblGRStorageSchedulePeriod
 			WHERE intSchedulePeriodId = @intSchedulePeriodId
