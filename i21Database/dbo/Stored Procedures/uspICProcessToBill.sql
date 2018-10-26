@@ -16,6 +16,7 @@ DECLARE @intEntityVendorId AS INT
 		,@billTypeToUse AS INT 
 		,@receiptType AS NVARCHAR(50) 
 		,@originalEntityVendorId AS INT 
+		,@strBillOfLading AS NVARCHAR(50)
 
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
@@ -43,6 +44,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intShipTo = r.intLocationId
 		,@intCurrencyId = r.intCurrencyId
 		,@receiptType = r.strReceiptType
+		,@strBillOfLading = r.strBillOfLading
 FROM	tblICInventoryReceipt r 
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -315,6 +317,7 @@ BEGIN
 			,@shipTo = @intShipTo
 			,@shipFrom = @intShipFrom
 			,@currencyId = @intCurrencyId
+			,@vendorOrderNumber = @strBillOfLading
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
 			,@billId = @intBillId OUTPUT
