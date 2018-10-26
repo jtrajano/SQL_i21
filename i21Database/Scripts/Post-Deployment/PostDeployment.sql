@@ -223,6 +223,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
+:r .\AR\DefaultData\2_CleanStagingTables.sql
 :r .\AR\DefaultData\5_UpdateOrderStatus.sql
 :r .\AR\DefaultData\9_FixServiceChargeStartingNumber.sql
 :r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql

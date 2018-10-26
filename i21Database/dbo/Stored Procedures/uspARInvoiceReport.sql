@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceReport]
-	  @tblInvoiceReport				AS InvoiceReportTable READONLY
-	, @intEntityUserId				AS INT	= NULL
+	  @tblInvoiceReport		AS InvoiceReportTable READONLY
+	, @intEntityUserId		AS INT	= NULL
+	, @strRequestId			AS NVARCHAR(MAX) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -9,7 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strInvoiceFormat <> 'Format 1 - MCP'
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat <> 'Format 1 - MCP'
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
@@ -88,6 +89,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strAddonDetailKey
 	 , ysnHasAddOnItem
 	 , intEntityUserId
+	 , strRequestId
 	 , strInvoiceFormat
 )
 SELECT intInvoiceId				= INV.intInvoiceId
@@ -199,6 +201,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intEntityUserId			= @intEntityUserId
+	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId

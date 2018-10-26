@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceMCPReport]
-	  @tblInvoiceReport				AS InvoiceReportTable READONLY
-	, @intEntityUserId				AS INT	= NULL
+	  @tblInvoiceReport		AS InvoiceReportTable READONLY
+	, @intEntityUserId		AS INT	= NULL
+	, @strRequestId			AS NVARCHAR(MAX) = NULL
 AS 
 
 SET QUOTED_IDENTIFIER OFF
@@ -9,7 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strInvoiceFormat = 'Format 1 - MCP'
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 1 - MCP'
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
@@ -54,6 +55,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strOrigin
 	 , blbLogo
 	 , intEntityUserId
+	 , strRequestId
 	 , strInvoiceFormat
 	 , intTicketId
 	 , strTicketNumbers
@@ -108,6 +110,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 								  END
 	 , blbLogo					= LOGO.blbLogo
 	 , intEntityUserId			= @intEntityUserId
+	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , intTicketId				= ISNULL(TICKETDETAILS.intTicketId, 0)
 	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers

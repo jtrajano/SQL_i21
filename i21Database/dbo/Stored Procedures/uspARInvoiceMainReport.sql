@@ -25,6 +25,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@dtmDateFrom					AS DATETIME
 		,@strInvoiceIds					AS NVARCHAR(MAX)
 		,@strTransactionType			AS NVARCHAR(MAX)
+		,@strRequestId					AS NVARCHAR(MAX)
 		,@intInvoiceIdTo				AS INT
 		,@intInvoiceIdFrom				AS INT
 		,@xmlDocumentId					AS INT
@@ -101,6 +102,10 @@ SELECT @strTransactionType = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strTransactionType'
 
+SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strRequestId'
+
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
 ELSE 			  
@@ -121,11 +126,13 @@ IF ISNULL(@intInvoiceIdFrom, 0) = 0
 INSERT INTO @INVOICETABLE (
 	intInvoiceId
   , intEntityUserId
+  , strRequestId
   , strType
   , strInvoiceFormat  
 )
 SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , intEntityUserId		= @intEntityUserId
+	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard') 
@@ -167,12 +174,12 @@ INSERT INTO @MCPINVOICES
 SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
-	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId
+	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId, @strRequestId
 
 INSERT INTO @STANDARDINVOICES
 SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
-	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId
+	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId, @strRequestId
 
 SELECT * FROM @INVOICETABLE
