@@ -22,6 +22,7 @@
 	[strPONumber]		   NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL,
 	[strComment]	       NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[ysnTaxExempt]		   BIT			   NULL,
+    [intOriginalPOSTransactionId] INT NULL, 
     CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC),
 	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId])
 );
@@ -40,7 +41,7 @@ BEGIN
 	Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output    
 	UPDATE tblARPOS      
 	SET strReceiptNumber = @ReceiptNumber      
-	WHERE strReceiptNumber = ''     
+	WHERE ISNULL(strReceiptNumber,'') = ''
 
 END
 GO

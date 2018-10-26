@@ -6,7 +6,6 @@
 AS
 BEGIN
 
-	DECLARE  @strPaymentMethod		VARCHAR(20)
 	DECLARE  @EntriesForInvoice 	InvoiceIntegrationStagingTable
 			,@TaxDetails 			LineItemTaxDetailStagingTable
 			,@intNewInvoiceId		INT = NULL
@@ -77,15 +76,8 @@ BEGIN
 				, intConcurrencyId	= 1
 		END
 
-	SELECT TOP 1 @strPaymentMethod = strPaymentMethod
-	FROM tblARPOSPayment
-	WHERE intPOSId = @intPOSId
 
-	SELECT @intPaymentMethodID = intPaymentMethodID 
-	FROM tblSMPaymentMethod
-	WHERE strPaymentMethod = @strPaymentMethod
-
---CREATE INVOICE *IF CASH PAYMENT THEN CASH REFUND ELSE CREDIT MEMO (On Account)
+--CREATE CREDIT MEMO
 
 INSERT INTO @EntriesForInvoice(
 [strTransactionType]
@@ -115,9 +107,10 @@ INSERT INTO @EntriesForInvoice(
 ,[dblSubCurrencyRate]
 ,[intSalesAccountId]
 ,[strPONumber]
+,[ysnPost]
 )
 SELECT
-	 [strTransactionType]					= 'Credit Memo'--CASE WHEN @strPaymentMethod = 'Cash' THEN 'Cash Refund' ELSE 'Credit Memo' END
+	 [strTransactionType]					= 'Credit Memo'
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
 	,[intSourceId]							= POS.intPOSId
@@ -137,13 +130,14 @@ SELECT
 	,[dblDiscount]							= DETAILS.dblDiscountPercent
 	,[dblPrice]								= DETAILS.dblPrice
 	,[ysnRefreshPrice]						= 0
-	,[ysnRecomputeTax]						= 1
+	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= NULL
 	,[strPONumber]							= POS.strPONumber
+	,[ysnPost]								= 1
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
 WHERE POS.intPOSId = @intPOSId
@@ -151,7 +145,7 @@ WHERE POS.intPOSId = @intPOSId
 UNION ALL
 
 SELECT TOP 1
-	 [strTransactionType]					= 'Credit Memo'--CASE WHEN @strPaymentMethod = 'Cash' THEN 'Cash Refund' ELSE 'Credit Memo' END
+	 [strTransactionType]					= 'Credit Memo'
 	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
 	,[intSourceId]							= POS.intPOSId
@@ -171,13 +165,14 @@ SELECT TOP 1
 	,[dblDiscount]							= NULL
 	,[dblPrice]								= POS.dblDiscount * -1
 	,[ysnRefreshPrice]						= 0
-	,[ysnRecomputeTax]						= 0
+	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
 	,[strPONumber]							= POS.strPONumber
+	,[ysnPost]								= 1
 FROM tblARPOS POS
 OUTER APPLY (
 	SELECT TOP 1 intDiscountAccountId 
@@ -196,7 +191,7 @@ WHERE POS.intPOSId = @intPOSId
 EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries		= @EntriesForInvoice
 								, @LineItemTaxEntries 	= @TaxDetails
 								, @UserId				= @intEntityUserId
-								, @GroupingOption		= 12
+								, @GroupingOption		= 11
 								, @RaiseError			= 1
 								, @ErrorMessage			= @ErrorMessage OUTPUT
 								, @CreatedIvoices		= @CreatedIvoices OUTPUT
@@ -229,32 +224,43 @@ IF ISNULL(@ErrorMessage, '') = ''
 		FROM tblARInvoice
 		WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 			
-		EXEC uspARPostInvoice @param = @createdCreditMemoId, @post = 1
+		
+		UPDATE tblARPOS
+		SET ysnReturn = 1, intInvoiceId = @createdCreditMemoId
+		WHERE intPOSId = @intPOSId
 		
 		UPDATE tblARInvoice
 		SET ysnProcessed = 1
 		FROM tblARInvoice
 		WHERE intInvoiceId = @createdCreditMemoId
-			
-		IF(@strPaymentMethod != 'On Account')
+		
+		IF(OBJECT_ID('tempdb..#POSRETURNPAYMENTS') IS NOT NULL)
+		BEGIN
+			DROP TABLE #POSRETURNPAYMENTS
+		END
+
+		SELECT intPOSId			= intPOSId
+			 , intPOSPaymentId	= intPOSPaymentId
+			 , strPaymentMethod	= CASE WHEN strPaymentMethod ='Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
+			 , strReferenceNo	= strReferenceNo
+			 , dblAmount		= dblAmount
+			 , ysnComputed		= CAST(0 AS BIT)
+		INTO #POSRETURNPAYMENTS
+		FROM dbo.tblARPOSPayment WITH (NOLOCK)
+		WHERE intPOSId = @intPOSId
+		AND ISNULL(strPaymentMethod, '')  <> 'On Account'
+
+		IF EXISTS(SELECT TOP 1 NULL FROM #POSRETURNPAYMENTS)
 		BEGIN
 			EXEC uspARPOSCreateNegativeCashReceipts 
 						 @intInvoiceId			= @createdCreditMemoId
 						,@intUserId				= @intEntityUserId
 						,@intCompanyLocationId	= @intCompanyLocationId
-						,@intPaymentMethodID	= @intPaymentMethodID
 						,@strErrorMessage		= @strMessage	OUTPUT
 		END
 
 		IF(LEN(ISNULL(@strMessage, '')) <= 0)
 		BEGIN
-			DECLARE @InvoiceId AS INT = 0
-			SELECT @InvoiceId = intInvoiceId FROM tblARInvoice WHERE intSourceId = @intPOSId
-			
-			UPDATE tblARPOS
-			SET ysnReturn = 1, intInvoiceId = @InvoiceId
-			WHERE intPOSId = @intPOSId
-				
 			SET @strMessage = NULL
 		END
 

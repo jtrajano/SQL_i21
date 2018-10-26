@@ -601,7 +601,7 @@ SELECT
 FROM
 	@ItemEntries IT
 WHERE
-	(IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + IT.[dblDiscount])
+	((IT.[dblAmountDue] > 0) AND (IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + IT.[dblDiscount]))
 	AND IT.[ysnFromAP] = 0
 
 --UNION ALL
