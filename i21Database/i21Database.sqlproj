@@ -7140,6 +7140,7 @@
     <Build Include="dbo\User Defined Types\StorageSchedulePeriodTableType.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageCharge.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_CleanStagingTables.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
