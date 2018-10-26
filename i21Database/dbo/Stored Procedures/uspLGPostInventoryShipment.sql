@@ -285,7 +285,7 @@ BEGIN
 						THEN ISNULL(LoadDetail.dblQuantity, 0)
 					ELSE ISNULL(DetailLot.dblLotQuantity, 0)
 					END
-				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId,LoadDetail.intWeightItemUOMId), 1)
+				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId)), 1)
 			,dblUOMQty = CASE 
 				WHEN Lot.intLotId IS NULL
 					THEN ItemUOM.dblUnitQty
@@ -320,7 +320,7 @@ BEGIN
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intWeightUOMId
+		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId))
 		WHERE LOAD.intLoadId = @intTransactionId
 
 		-- Call the post routine 
