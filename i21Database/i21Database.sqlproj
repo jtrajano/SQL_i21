@@ -7142,6 +7142,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_CleanStagingTables.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCalculateCustomerRefunds.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
