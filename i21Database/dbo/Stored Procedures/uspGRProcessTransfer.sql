@@ -180,41 +180,45 @@ BEGIN
 			,[intItemUOMId]
 			,[intTransferStorageSplitId]
 			,[intUnitMeasureId]
+			,[intCompanyLocationSubLocationId]
+			,[intStorageLocationId]			
 		)	
 		SELECT 
-			[intEntityId]					= TransferStorageSplit.intEntityId
-			,[intCommodityId]				= CS.intCommodityId
-			,[intStorageScheduleId]			= TransferStorageSplit.intStorageScheduleId
-			,[intStorageTypeId]				= TransferStorageSplit.intStorageTypeId
-			,[intCompanyLocationId]			= TransferStorageSplit.intCompanyLocationId
-			,[intDiscountScheduleId]		= CS.intDiscountScheduleId
-			,[dblTotalPriceShrink]			= CS.dblTotalPriceShrink		
-			,[dblTotalWeightShrink]			= CS.dblTotalWeightShrink		
-			,[dblQuantity]					= TransferStorageSplit.dblUnits
-			,[dtmDeliveryDate]				= GETDATE()
-			,[dtmZeroBalanceDate]			= CS.dtmZeroBalanceDate			
-			,[strDPARecieptNumber]			= CS.strDPARecieptNumber		
-			,[dtmLastStorageAccrueDate]		= CS.dtmLastStorageAccrueDate	
-			,[dblStorageDue]				= CS.dblStorageDue				--storage charge will have its own computation
-			,[dblStoragePaid]				= 0
-			,[dblInsuranceRate]				= 0
-			,[strOriginState]				= CS.strOriginState
-			,[strInsuranceState]			= CS.strInsuranceState
-			,[dblFeesDue]					= CS.dblFeesDue					
-			,[dblFeesPaid]					= CS.dblFeesPaid				
-			,[dblFreightDueRate]			= CS.dblFreightDueRate			
-			,[ysnPrinted]					= CS.ysnPrinted					
-			,[dblCurrencyRate]				= CS.dblCurrencyRate
-			,[strDiscountComment]			= CS.strDiscountComment			
-			,[dblDiscountsDue]				= CS.dblDiscountsDue			
-			,[dblDiscountsPaid]				= CS.dblDiscountsPaid			
-			,[strCustomerReference]			= CS.strCustomerReference		
-			,[intCurrencyId]				= CS.intCurrencyId
-			,[strTransactionNumber]			= TS.strTransferStorageTicket
-			,[intItemId]					= CS.intItemId
-			,[intItemUOMId]					= CS.intItemUOMId
-			,[intTransferStorageSplitId]	= TransferStorageSplit.intTransferStorageSplitId
-			,[intUnitMeasureId]				= (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CS.intItemUOMId)
+			[intEntityId]						= TransferStorageSplit.intEntityId
+			,[intCommodityId]					= CS.intCommodityId
+			,[intStorageScheduleId]				= TransferStorageSplit.intStorageScheduleId
+			,[intStorageTypeId]					= TransferStorageSplit.intStorageTypeId
+			,[intCompanyLocationId]				= TransferStorageSplit.intCompanyLocationId
+			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
+			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
+			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
+			,[dblQuantity]						= TransferStorageSplit.dblUnits
+			,[dtmDeliveryDate]					= GETDATE()
+			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
+			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
+			,[dtmLastStorageAccrueDate]			= CS.dtmLastStorageAccrueDate	
+			,[dblStorageDue]					= CS.dblStorageDue				--storage charge will have its own computation
+			,[dblStoragePaid]					= 0
+			,[dblInsuranceRate]					= 0
+			,[strOriginState]					= CS.strOriginState
+			,[strInsuranceState]				= CS.strInsuranceState
+			,[dblFeesDue]						= CS.dblFeesDue					
+			,[dblFeesPaid]						= CS.dblFeesPaid				
+			,[dblFreightDueRate]				= CS.dblFreightDueRate			
+			,[ysnPrinted]						= CS.ysnPrinted					
+			,[dblCurrencyRate]					= CS.dblCurrencyRate
+			,[strDiscountComment]				= CS.strDiscountComment			
+			,[dblDiscountsDue]					= CS.dblDiscountsDue			
+			,[dblDiscountsPaid]					= CS.dblDiscountsPaid			
+			,[strCustomerReference]				= CS.strCustomerReference		
+			,[intCurrencyId]					= CS.intCurrencyId
+			,[strTransactionNumber]				= TS.strTransferStorageTicket
+			,[intItemId]						= CS.intItemId
+			,[intItemUOMId]						= CS.intItemUOMId
+			,[intTransferStorageSplitId]		= TransferStorageSplit.intTransferStorageSplitId
+			,[intUnitMeasureId]					= (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CS.intItemUOMId)
+			,[intCompanyLocationSubLocationId]	= CASE WHEN CS.intCompanyLocationId = TransferStorageSplit.intCompanyLocationId THEN CS.intCompanyLocationSubLocationId ELSE NULL END
+			,[intStorageLocationId]				= CASE WHEN CS.intCompanyLocationId = TransferStorageSplit.intCompanyLocationId THEN CS.intStorageLocationId ELSE NULL END
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -267,6 +271,8 @@ BEGIN
 			,[intItemId]
 			,[intItemUOMId]
 			,[intUnitMeasureId]
+			,[intCompanyLocationSubLocationId]
+			,[intStorageLocationId]			
 		)
 		VALUES
 		(
@@ -303,7 +309,9 @@ BEGIN
 			,[strTransactionNumber]		
 			,[intItemId]				
 			,[intItemUOMId]		
-			,[intUnitMeasureId]		
+			,[intUnitMeasureId]
+			,[intCompanyLocationSubLocationId]
+			,[intStorageLocationId]			
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
