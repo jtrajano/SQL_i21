@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblCMConfig]
 (
 	[intConfigId] [int] IDENTITY(1,1) NOT NULL,
-	[strVoidIndicator] NVARCHAR(1) COLLATE Latin1_General_CI_AS NULL,
-	[strCheckIndicator] NVARCHAR(1) COLLATE Latin1_General_CI_AS NULL,
+	[strVoidIndicator] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[strCheckIndicator] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL
 )
 GO
