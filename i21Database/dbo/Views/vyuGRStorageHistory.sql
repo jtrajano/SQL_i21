@@ -1,6 +1,6 @@
 CREATE VIEW dbo.vyuGRStorageHistory
 AS
-SELECT 
+SELECT DISTINCT
 	 intStorageHistoryId				= SH.intStorageHistoryId
 	, intEntityId						= CS.intEntityId  
 	, strName							= E.strName
@@ -23,7 +23,7 @@ SELECT
 	, intInventoryShipmentId			= SH.intInventoryShipmentId
 	, strShipmentNumber					= Shipment.strShipmentNumber	
 	, intTransactionTypeId				= SH.intTransactionTypeId
-	, strTransferTicket					= TS.strTransferStorageTicket
+	, strTransferTicket					= (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = SH.intTransferStorageId)
 	, intTransferStorageId				= SH.intTransferStorageId
 	, intInventoryReceiptId				= CASE 
 	 										WHEN SH.intTransactionTypeId = 1 OR SH.intTransactionTypeId = 5 THEN SC.intInventoryReceiptId 
@@ -35,7 +35,12 @@ SELECT
 	, strSplitNumber					= EMSplit.strSplitNumber
 	, dblSplitPercent					= CASE
 	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN DSSplit.dblSplitPercent
-	 										ELSE ISNULL(SCTicketSplit.dblSplitPercent,100)
+	 										WHEN ISNULL(SCTicketSplit.dblSplitPercent,0) > 0 THEN SCTicketSplit.dblSplitPercent
+											WHEN ISNULL((SELECT intTransferStorageId FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = SH.intTransferStorageId),0) > 0
+												AND ISNULL((SELECT intTransferStorageId FROM tblGRTransferStorageSplit WHERE intTransferStorageId = SH.intTransferStorageId),0) > 0
+													THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = SH.intTransferStorageId)
+											WHEN ISNULL(TSplit.dblSplitPercent,0) > 0 AND ISNULL(SH.intTransferStorageId,0) > 0 THEN TSplit.dblSplitPercent
+											ELSE 100
 	 									END
 	, strUserName						= US.strUserName	
 	, strType							= SH.strType
@@ -43,7 +48,7 @@ SELECT
 	, dtmHistoryDate					= SH.dtmHistoryDate
 	, dblPaidAmount						= ISNULL(SH.dblPaidAmount, 0)
 	, strPaidDescription				= SH.strPaidDescription
-	, dblCurrencyRate					= SH.dblCurrencyRate	
+	, dblCurrencyRate					= SH.dblCurrencyRate
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -79,5 +84,8 @@ LEFT JOIN tblSMUserSecurity US
 	ON US.intEntityId = SH.intUserId
 LEFT JOIN tblICInventoryAdjustment IA
 	ON IA.intInventoryAdjustmentId = SH.intInventoryAdjustmentId
-LEFT JOIN tblGRTransferStorage TS
-	ON TS.intTransferStorageId = SH.intTransferStorageId
+LEFT JOIN (
+		tblGRTransferStorageSplit TSplit
+		INNER JOIN tblGRTransferStorage TS1
+			ON TS1.intTransferStorageId = TSplit.intTransferStorageId
+	) ON TSplit.intTransferToCustomerStorageId = CS.intCustomerStorageId
