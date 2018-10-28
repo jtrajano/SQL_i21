@@ -4,7 +4,7 @@
 	,@intUndepositedFundsId	AS INT = 0
 	,@intCurrencyId			AS INT = 0
 	,@intEntityUserId		AS INT = 0
-	,@dblCashOverShort		AS DECIMAL(16,8) = 0.000000
+	,@dblCashOverShort		AS DECIMAL(18,6) = 0.000000
 	,@strEODNumber			AS NVARCHAR(100) = NULL
 	,@strMessage			AS NVARCHAR(50)  = NULL OUTPUT
 AS
@@ -78,8 +78,8 @@ BEGIN
 			 [dtmDate]						=	GETDATE()
 			,[strBatchId]					=	@strGLEntryBatchId
 			,[intAccountId]					=	@intUndepositedFundsId
-			,[dblDebit]						=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @dblCashOverShort ELSE @ZeroDecimal END
-			,[dblCredit]					=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @ZeroDecimal ELSE @dblCashOverShort END
+			,[dblDebit]						=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN ABS(@dblCashOverShort) ELSE @ZeroDecimal END
+			,[dblCredit]					=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @ZeroDecimal ELSE ABS(@dblCashOverShort) END
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
 			,[strDescription]				=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN EOD.strEODNo + ' Cash Over' ELSE EOD.strEODNo + ' Cash Short' END
@@ -181,8 +181,8 @@ BEGIN
 			 [dtmDate]						=	GETDATE()
 			,[strBatchId]					=	@strGLEntryBatchId
 			,[intAccountId]					=	@intCashOverShortId
-			,[dblDebit]						=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @ZeroDecimal ELSE @dblCashOverShort END
-			,[dblCredit]					=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @dblCashOverShort ELSE @ZeroDecimal END
+			,[dblDebit]						=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN @ZeroDecimal ELSE ABS(@dblCashOverShort) END
+			,[dblCredit]					=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN ABS(@dblCashOverShort) ELSE @ZeroDecimal END
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
 			,[strDescription]				=	CASE WHEN @dblCashOverShort > @ZeroDecimal THEN EOD.strEODNo + ' Cash Over' ELSE EOD.strEODNo + ' Cash Short' END
