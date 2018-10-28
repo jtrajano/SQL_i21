@@ -7,7 +7,6 @@ AS
 			@intEntityId				 INT = NULL,
 			@intInvoiceId				 INT = NULL,
 			@intCompanyLocationId		 INT = NULL,
-			@intPaymentEntries			 INT = NULL,
 			@ysnReturned				 BIT = 0,
 			@DateOnly					 DATETIME = CAST(GETDATE() AS DATE),
 			@errorMessage				 NVARCHAR(250),
@@ -396,6 +395,12 @@ AS
 
 		IF (LEN(ISNULL(@errorMessage, '')) > 0)
 		BEGIN
+			DELETE FROM tblARPOS
+			WHERE intPOSId = @intPOSId
+
+			DELETE FROM tblARPOSPayment
+			WHERE intPOSId = @intPOSId
+
 			ROLLBACK TRANSACTION
 			SET @strMessage = @errorMessage
 			RETURN 0;
@@ -442,6 +447,38 @@ AS
 				UPDATE tblARPOS
 				SET ysnReturn = 1
 				WHERE intPOSId = @intOriginalPOSTransactionId
+
+				UPDATE tblARPOSEndOfDay
+				SET dblCashReturn = ISNULL(dblCashReturn,0) + POSPAYMENT.dblAmount
+				FROM tblARPOSEndOfDay EOD
+				INNER JOIN (
+					SELECT intPOSLogId
+							,intPOSEndOfDayId
+					FROM tblARPOSLog
+				)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+				INNER JOIN(
+					SELECT intPOSId
+							,intPOSLogId
+					FROM tblARPOS
+				)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+				INNER JOIN(
+					SELECT intPOSId
+					, SUM(dblAmount) AS dblAmount
+					FROM tblARPOSPayment
+					WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
+					GROUP BY intPOSId, dblAmount
+				)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
+				WHERE POS.intPOSId = @intPOSId
+			END
+			ELSE
+			BEGIN
+				DELETE FROM tblARPOS
+				WHERE intPOSId = @intPOSId
+
+				DELETE FROM tblARPOSPayment
+				WHERE intPOSId = @intPOSId
+
+				RETURN 0;
 			END
 		END
 
@@ -451,4 +488,3 @@ AS
 		SET @strMessage = 'Sales Receipt is already returned'
 		RETURN 0;
 	END
-

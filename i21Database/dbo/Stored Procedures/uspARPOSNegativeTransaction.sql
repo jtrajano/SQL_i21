@@ -262,13 +262,44 @@ IF ISNULL(@ErrorMessage, '') = ''
 		IF(LEN(ISNULL(@strMessage, '')) <= 0)
 		BEGIN
 			SET @strMessage = NULL
+
+			UPDATE tblARPOSEndOfDay
+			SET dblCashReturn = ISNULL(dblCashReturn,0) + POSPAYMENT.dblAmount
+			FROM tblARPOSEndOfDay EOD
+			INNER JOIN (
+				SELECT intPOSLogId
+						,intPOSEndOfDayId
+				FROM tblARPOSLog
+			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
+			INNER JOIN(
+				SELECT intPOSId
+						,intPOSLogId
+				FROM tblARPOS
+			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
+			INNER JOIN(
+				SELECT intPOSId
+				, SUM(ABS(dblAmount)) AS dblAmount
+				FROM tblARPOSPayment
+				WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
+				GROUP BY intPOSId, dblAmount
+			)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
+			WHERE POS.intPOSId = @intPOSId
+		END
+		ELSE
+		BEGIN
+			DELETE FROM tblARPOSPayment
+			WHERE intPOSId = @intPOSId
+			RETURN 0;
 		END
 
 
 	END
 ELSE
 	BEGIN
+		DELETE FROM tblARPOSPayment
+		WHERE intPOSId = @intPOSId
 		ROLLBACK TRANSACTION
+		RETURN 0;
 	END
 
 END
