@@ -161,11 +161,22 @@ BEGIN
 		,intPriceUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
 		,dblUnitPrice				= CASE
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
-										(
-											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
-											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,CNT.intCurrencyId)
-											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
-										)
+										CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+													AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+													AND CNT.dblRate IS NOT NULL 
+													AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN 
+												(SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice),0) + LI.dblCost
+												FROM dbo.fnRKGetFutureAndBasisPrice (2,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
+												LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId 
+												WHERE futureUOM.intItemId = LI.intItemId)
+											ELSE 
+												(SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
+												FROM dbo.fnRKGetFutureAndBasisPrice (2,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
+												LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId 
+												WHERE futureUOM.intItemId = LI.intItemId)
+										END 
 										ELSE
 											CASE WHEN ISNULL(SC.intLotId,0) > 0 THEN  
 												CASE 
