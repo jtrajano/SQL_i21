@@ -58,7 +58,7 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
+				OUTPUT $action, inserted.intInventoryTransactionId, inserted.intTransactionId, inserted.strTransactionId, inserted.intRelatedTransactionId, inserted.strRelatedTransactionId, inserted.intTransactionTypeId
 		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
 WHERE	Changes.Action = 'UPDATE'
 ;
