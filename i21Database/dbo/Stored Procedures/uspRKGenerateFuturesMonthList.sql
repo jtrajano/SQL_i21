@@ -34,7 +34,7 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..##AllowedFutMonth') IS NOT NULL DROP TABLE ##AllowedFutMonth
 	
-	SELECT TOP (@FutMonthsToOpen) *, intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode) 
+	SELECT *, intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode) 
 	INTO ##AllowedFutMonth
 	FROM (
 		SELECT TOP 100 PERCENT REPLACE(strMonth,'ysnFut' ,'') strMonth
@@ -183,7 +183,8 @@ BEGIN TRY
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonthCode NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
-		, intMonthCode INT)
+		, intMonthCode INT
+		, intSeqNo INT)
 	
 	DECLARE @intTempFutMontsToOpen INT
 	SET @intTempFutMontsToOpen = @FutMonthsToOpen * 2
@@ -192,7 +193,14 @@ BEGIN TRY
 	BEGIN
 		SELECT @Top = @intTempFutMontsToOpen - COUNT(*) FROM ##FinalFutMonths
 		
-		INSERT INTO ##FinalFutMonths
+		INSERT INTO ##FinalFutMonths(
+			 intYear
+			,strMonth
+			,strMonthName
+			,strMonthCode
+			,strSymbol
+			,intMonthCode
+		)
 		SELECT TOP (@Top) YEAR(@Date) + @Count, LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode, strMonth, strMonthCode, strSymbol, intMonthCode
 		FROM ##AllowedFutMonth
 		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
@@ -205,50 +213,46 @@ BEGIN TRY
 	DECLARE @intRowId INT;
 	DECLARE @intCountAllowedMonths INT
 	DECLARE @ProjectedFutureMonths TABLE(
-		  intRowId INT
+		  intRowId INT IDENTITY(1,1)
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, ysnProcessed BIT DEFAULT 0);
 	DECLARE @intSelectCount INT = 0;
 	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedFutMonth
 
-	INSERT INTO @ProjectedFutureMonths(intRowId, strMonthName)
-	SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode), strMonth FROM ##AllowedFutMonth
+	DECLARE @intIndex1 int = 0;
+	DECLARE @ProjectedMonthName NVARCHAR(10)
+	DECLARE @ProjectedMonth NVARCHAR(10)
 
-	IF(@intCountAllowedMonths < @FutMonthsToOpen)
+	WHILE (SELECT COUNT(*) FROM @ProjectedFutureMonths) < (@FutMonthsToOpen * 2)
 	BEGIN
-		INSERT INTO @ProjectedFutureMonths(intRowId, strMonthName)
-		SELECT TOP(@FutMonthsToOpen - @intCountAllowedMonths) 
-			intRowId = @intCountAllowedMonths + ROW_NUMBER() OVER (ORDER BY intMonthCode), 
-			strMonth 
+		SET @intIndex1 = @intIndex1 + 1;
+
+		SELECT @ProjectedMonthName= strMonth
 		FROM ##AllowedFutMonth
-	END
+		WHERE intRowId = @intIndex1;
 
-	DECLARE @intSelectedRow INT
-	DECLARE @strSelectedMonth NVARCHAR(10)
-	
-	WHILE EXISTS(SELECT TOP 1 1 FROM @ProjectedFutureMonths WHERE ysnProcessed = 0)
-	BEGIN
-		SELECT TOP 1 @intSelectedRow = intRowId, @strSelectedMonth = strMonthName FROM @ProjectedFutureMonths WHERE ysnProcessed = 0
-		
-		UPDATE @ProjectedFutureMonths
-		SET strMonth = (
-				SELECT TOP 1 strMonth 
-				FROM ##FinalFutMonths
-				WHERE strMonthName = @strSelectedMonth
-				AND strMonth NOT IN(
-					SELECT strMonth FROM @ProjectedFutureMonths
-					WHERE strMonthName = @strSelectedMonth
-					AND strMonth IS NOT NULL
-				)
-				ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01')
-			),
-			ysnProcessed = 1
-		WHERE intRowId = @intSelectedRow
+		SELECT TOP(1) @ProjectedMonth = strMonth
+		FROM ##FinalFutMonths
+		WHERE strMonthName = @ProjectedMonthName
+		AND strMonth NOT IN(SELECT strMonth FROM @ProjectedFutureMonths)
+
+		INSERT INTO @ProjectedFutureMonths(strMonthName,strMonth)
+		SELECT @ProjectedMonthName, @ProjectedMonth
+		 
+		IF(@intIndex = @intCountAllowedMonths)
+		BEGIN
+			SET @intIndex1 = 0;
+		END
 	END
 
 	DELETE FROM ##FinalFutMonths
 	WHERE strMonth NOT IN (SELECT strMonth FROM @ProjectedFutureMonths)
+	
+	UPDATE ##FinalFutMonths
+	SET intSeqNo = PM.intRowId
+	FROM ##FinalFutMonths FM
+	INNER JOIN @ProjectedFutureMonths PM ON FM.strMonth = PM.strMonth
 
 	SELECT RowNumber = ROW_NUMBER() OVER (ORDER BY strMonth)
 		, intConcurrencyId = 1
@@ -267,10 +271,6 @@ BEGIN TRY
 	INTO #FutTemp
 	FROM ##FinalFutMonths
 	WHERE ISNULL(strMonth,'') <> ''
-	ORDER BY strMonth
-
-	DROP TABLE ##AllowedFutMonth
-	DROP TABLE ##FinalFutMonths
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND dtmFutureMonthsDate IS NULL)
 	BEGIN
@@ -283,10 +283,9 @@ BEGIN TRY
 	BEGIN
 		DECLARE @FutMonthDate DATETIME
 		DECLARE @LastFutMonth NVARCHAR(100)
-
+		
 		SELECT TOP 1 @FutMonthDate = dtmFutureMonthsDate
-		FROM tblRKFuturesMonth
-		WHERE intFutureMarketId = @FutureMarketId
+		FROM #FutTemp
 		ORDER BY dtmFutureMonthsDate DESC
 
 		SELECT TOP 1 @LastFutMonth = CASE 
@@ -299,10 +298,9 @@ BEGIN TRY
 
 		UPDATE #FutTemp
 		SET dtmSpotDate = CASE 
-			WHEN strYear = DATEPART(YY, @LastFutMonth) 
-				THEN DATEADD(YEAR, -1, @LastFutMonth) 
 			WHEN (DATEDIFF(month, @FutMonthDate, dtmFutureMonthsDate) < 0) 
 				THEN CONVERT(DATETIME, LTRIM(RTRIM(strYear)) + '-' + REPLACE(CAST(DATEPART(month,@FutMonthDate) AS VARCHAR),' ','') + '-01') 
+			WHEN strYear = DATEPART(YY, @LastFutMonth) THEN DATEADD(YEAR, -1, @LastFutMonth) 
 			ELSE @FutMonthDate
 		END
 		FROM #FutTemp
@@ -366,7 +364,30 @@ BEGIN TRY
 			WHERE RowNumber = 1 
 		END
 	END
-	
+
+	IF(SELECT COUNT(*) FROM ##AllowedFutMonth) < @FutMonthsToOpen
+	BEGIN
+		DELETE FROM ##FinalFutMonths
+		WHERE intSeqNo NOT IN (SELECT TOP(@FutMonthsToOpen) intSeqNo FROM ##FinalFutMonths ORDER BY intSeqNo ASC)
+	END
+	ELSE 
+	BEGIN
+		DELETE FROM ##FinalFutMonths
+		WHERE intSeqNo NOT IN (SELECT TOP(@FutMonthsToOpen) intSeqNo FROM ##FinalFutMonths ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01') ASC)
+	END
+
+	DELETE FROM #FutTemp
+	WHERE strMonth NOT IN (SELECT strMonth FROM ##FinalFutMonths)
+
+	BEGIN TRY
+		DELETE FROM tblRKFuturesMonth
+		WHERE intFutureMarketId = @FutureMarketId 
+		AND strFutureMonth NOT IN(SELECT strFMonth = LTRIM(RTRIM(strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(strYear, 2) FROM #FutTemp)
+	END TRY
+	BEGIN CATCH
+		RAISERROR('You cannot generate Future Trading Months. Current Future Trading Months already in use.', 16, 1);
+	END CATCH
+
 	INSERT INTO tblRKFuturesMonth(intConcurrencyId
 		, strFutureMonth
 		, intFutureMarketId
@@ -394,7 +415,7 @@ BEGIN TRY
 		, t.ysnExpired
 	FROM #FutTemp t) t
 	WHERE t.strFMonth NOT IN(SELECT strFutureMonth COLLATE Latin1_General_CI_AS FROM tblRKFuturesMonth WHERE intCommodityMarketId = @intCommodityMarketId)
-	ORDER BY CONVERT(DATETIME,'01 ' + strFMonth) ASC
+	--ORDER BY CONVERT(DATETIME,'01 ' + strFMonth) ASC
 
 	SELECT @HasOptionMonths = CAST(ISNULL(ysnOptions,0) AS BIT) FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
 
@@ -410,6 +431,8 @@ BEGIN TRY
 		END
 	END
 
+	DROP TABLE ##AllowedFutMonth
+	DROP TABLE ##FinalFutMonths
 	DROP TABLE #FutTemp
 END TRY
 BEGIN CATCH
