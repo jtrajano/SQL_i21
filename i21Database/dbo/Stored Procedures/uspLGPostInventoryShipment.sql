@@ -277,19 +277,25 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ItemUOM.intItemUOMId
+			,intItemUOMId = CASE WHEN Lot.intLotId IS NULL THEN 
+									ISNULL(LoadDetail.intItemUOMId, 0)
+								ELSE 
+									ISNULL(DetailLot.intItemUOMId, 0)
+								END
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = - 1 * (
 				CASE 
-					WHEN Lot.intLotId IS NULL
-						THEN ISNULL(LoadDetail.dblQuantity, 0)
-					ELSE ISNULL(DetailLot.dblLotQuantity, 0)
+					WHEN Lot.intLotId IS NULL THEN 
+						ISNULL(LoadDetail.dblQuantity, 0)
+					ELSE 
+						ISNULL(DetailLot.dblLotQuantity, 0)
 					END
-				) * dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId)), 1)
+				) --* dbo.fnCTConvertQtyToTargetItemUOM(LoadDetail.intWeightItemUOMId, ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId)), 1)
 			,dblUOMQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
+				WHEN Lot.intLotId IS NULL THEN 
+					ItemUOM.dblUnitQty
+				ELSE 
+					LotItemUOM.dblUnitQty
 				END
 			,dblCost = ISNULL(CASE 
 					WHEN Lot.dblLastCost IS NULL
@@ -320,7 +326,7 @@ BEGIN
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId))
+		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId -- ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId))
 		WHERE LOAD.intLoadId = @intTransactionId
 
 		-- Call the post routine 
