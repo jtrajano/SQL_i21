@@ -240,7 +240,15 @@ BEGIN
 	-- Call the stored procedure that updates the on order qty. 
 	IF EXISTS(SELECT 1 FROM @ItemToUpdateOnOrderQty)
 	BEGIN
-		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
+		--NOTE: WE NEED TO REMOVE THIS WHEN WE ALLOW RECEIVING OF MISC ITEMS ON RECEIPT
+		BEGIN TRY
+			EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
+		END TRY
+		BEGIN CATCH
+			DECLARE @errorIncreaserOrderQty NVARCHAR(4000);
+			SET @errorIncreaserOrderQty  = 'Error occurred on uspICIncreaseOnOrderQty. ' + ERROR_MESSAGE()
+			RAISERROR(@errorIncreaserOrderQty, 16, 1);
+		END CATCH
 	END
 END
 

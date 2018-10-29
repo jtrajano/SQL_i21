@@ -7339,6 +7339,7 @@
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
+    <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

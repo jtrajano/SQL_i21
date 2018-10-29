@@ -7,9 +7,15 @@ BEGIN
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
+	-- SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
+
+	BEGIN TRY
+
+	DECLARE @SavePoint NVARCHAR(32) = 'uspPOReceivedMiscItem';
+	DECLARE @transCount INT = @@TRANCOUNT;
+	DECLARE @error NVARCHAR(MAX);
 	DECLARE @decreaseQty BIT = @decrease
 	DECLARE @purchaseId INT;
 	/*
@@ -81,6 +87,10 @@ BEGIN
 	B.intUnitOfMeasureId > 0
 	*/
 	
+	
+	IF @transCount = 0 BEGIN TRANSACTION
+	ELSE SAVE TRAN @SavePoint
+
 	DECLARE @counter INT = 0, @countReceivedMisc INT, @purchaseDetailId INT;
 	SET @countReceivedMisc = (SELECT COUNT(*) FROM @voucherPayables);
 
@@ -94,12 +104,34 @@ BEGIN
 	LEFT JOIN tblICItem C
 		ON A.intItemId = C.intItemId
 	WHERE (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
-	AND A.dblQtyReceived != 0 --DO NOT INCLUDE 0 QTY VOUCHERED
-
+	
 	--Validate
 	IF(@@ROWCOUNT != @countReceivedMisc)
 	BEGIN
 		RAISERROR('There was a problem on updating item quantity receive.', 16, 1);
+		RETURN;
+	END
+
+	DECLARE @po NVARCHAR(50);
+	DECLARE @itemDesc NVARCHAR(100);
+
+	--DO NOT ALLOW OVER BILL OF MISC ITEM
+	SELECT TOP 1
+		@po = A2.strPurchaseOrderNumber
+		,@itemDesc = ISNULL(C.strItemNo, A.strMiscDescription)
+	FROM tblPOPurchaseDetail A
+	INNER JOIN tblPOPurchase A2 ON A.intPurchaseId = A2.intPurchaseId
+	INNER JOIN @voucherPayables B
+		ON A.intPurchaseDetailId = B.intPurchaseDetailId
+	LEFT JOIN tblICItem C
+		ON A.intItemId = C.intItemId
+	WHERE (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
+	AND A.dblQtyReceived > A.dblQtyOrdered
+
+	IF @po IS NOT NULL
+	BEGIN
+		SET @error = 'You cannot over bill (' + @itemDesc + ') for ' + @po;
+		RAISERROR(@error, 16, 1);
 		RETURN;
 	END
 
@@ -117,8 +149,64 @@ BEGIN
 	BEGIN
 		SELECT TOP(1) 
 			@purchaseId = intPurchaseId
-		FROM tmpPurchaseId
+		FROM #tmpPurchaseId
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		DELETE FROM #tmpPurchaseId WHERE intPurchaseId = @purchaseId
 	END
+
+	IF @transCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+			BEGIN
+				ROLLBACK TRANSACTION
+			END
+			ELSE IF (XACT_STATE()) = 1
+			BEGIN
+				COMMIT TRANSACTION
+			END
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+			BEGIN
+				ROLLBACK TRANSACTION  @SavePoint
+			END
+		END	
+	END TRY
+	BEGIN CATCH
+	DECLARE @ErrorSeverity INT,
+			@ErrorNumber   INT,
+			@ErrorMessage nvarchar(4000),
+			@ErrorState INT,
+			@ErrorLine  INT,
+			@ErrorProc nvarchar(200);
+	-- Grab error information from SQL functions
+	SET @ErrorSeverity = ERROR_SEVERITY()
+	SET @ErrorNumber   = ERROR_NUMBER()
+	SET @ErrorMessage  = ERROR_MESSAGE()
+	SET @ErrorState    = ERROR_STATE()
+	SET @ErrorLine     = ERROR_LINE()
+
+	IF @transCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+			BEGIN
+				ROLLBACK TRANSACTION
+			END
+			ELSE IF (XACT_STATE()) = 1
+			BEGIN
+				COMMIT TRANSACTION
+			END
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+			BEGIN
+				ROLLBACK TRANSACTION  @SavePoint
+			END
+		END	
+
+	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	END CATCH
 
 END
