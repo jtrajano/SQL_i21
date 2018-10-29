@@ -113,7 +113,7 @@ BEGIN TRY
 					, strType = tblTFReportingComponent.strType
 					, tblICInventoryReceiptItem.intItemId
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblReceived
+					, tblICInventoryReceiptItem.dblOpenReceive
 					, tblICInventoryReceiptItem.dblGross
 					, tblICInventoryReceiptItem.dblNet
 					, tblICInventoryReceiptItem.dblBillQty
@@ -304,7 +304,7 @@ BEGIN TRY
 					, strType = tblTFReportingComponent.strType
 					, tblICInventoryReceiptItem.intItemId
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblReceived
+					, tblICInventoryReceiptItem.dblOpenReceive
 					, tblICInventoryReceiptItem.dblGross
 					, tblICInventoryReceiptItem.dblNet
 					, tblICInventoryReceiptItem.dblBillQty
