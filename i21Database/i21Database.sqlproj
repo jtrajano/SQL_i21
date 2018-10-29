@@ -7146,6 +7146,7 @@
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableFromDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeInputAndOutputItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

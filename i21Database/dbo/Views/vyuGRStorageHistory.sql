@@ -37,7 +37,7 @@ SELECT DISTINCT
 	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN DSSplit.dblSplitPercent
 	 										WHEN ISNULL(SCTicketSplit.dblSplitPercent,0) > 0 THEN SCTicketSplit.dblSplitPercent
 											WHEN ISNULL((SELECT intTransferStorageId FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = SH.intTransferStorageId),0) > 0
-												AND ISNULL((SELECT intTransferStorageId FROM tblGRTransferStorageSplit WHERE intTransferStorageId = SH.intTransferStorageId),0) > 0
+												AND ISNULL((SELECT DISTINCT intTransferStorageId FROM tblGRTransferStorageSplit WHERE intTransferStorageId = SH.intTransferStorageId),0) > 0
 													THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = SH.intTransferStorageId)
 											WHEN ISNULL(TSplit.dblSplitPercent,0) > 0 AND ISNULL(SH.intTransferStorageId,0) > 0 THEN TSplit.dblSplitPercent
 											ELSE 100
@@ -47,8 +47,9 @@ SELECT DISTINCT
 	, dblUnits							= SH.dblUnits
 	, dtmHistoryDate					= SH.dtmHistoryDate
 	, dblPaidAmount						= ISNULL(SH.dblPaidAmount, 0)
-	, strPaidDescription				= SH.strPaidDescription
+	, strPaidDescription				= ISNULL(SH.strPaidDescription, SH.strType)
 	, dblCurrencyRate					= SH.dblCurrencyRate
+	, SH.strTransactionId
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId

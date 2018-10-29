@@ -49,6 +49,7 @@ SELECT
 	, UOM.strUnitMeasure
 	, SL.strName strStorageLocation
 	, CS.strStorageType
+	, ysnDeliverySheetPosted = ISNULL(DeliverySheet.ysnPost,1)
 FROM tblGRCustomerStorage CS
 INNER JOIN tblSMCompanyLocation CL
 	ON CS.intCompanyLocationId = CL.intCompanyLocationId
@@ -68,3 +69,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL
 	ON CS.intCompanyLocationSubLocationId = CLSL.intCompanyLocationSubLocationId
 LEFT JOIN tblGRDiscountSchedule DS
 	ON CS.intDiscountScheduleId = DS.intDiscountScheduleId
+LEFT JOIN tblSCDeliverySheet DeliverySheet
+	ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
