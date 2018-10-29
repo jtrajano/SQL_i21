@@ -284,16 +284,21 @@ BEGIN TRY
 
 		IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
 		BEGIN
-			UPDATE tblICLot
-			SET strNotes = @strNotes
-			WHERE intLotId = @intLotId
+			EXEC uspICUpdateLotInfo
+				@strField = 'strNotes',
+				@strValue = @strNotes,
+				@intSecurityUserId = @intUserId,
+				@intLotId =@intLotId
 		END
 
 		IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
 		BEGIN
-			UPDATE tblICLot
-			SET strContainerNo = @strContainerNo
-			WHERE intLotId = @intLotId
+			EXEC uspICUpdateLotInfo
+				@strField = 'strContainerNo',
+				@strValue = @strContainerNo,
+				@intSecurityUserId = @intUserId,
+				@intLotId = @intLotId
+
 		END
 
 		IF IsNULL(@strLotAlias, '') <> IsNULL(@strNewLotAlias, '')
