@@ -76,44 +76,44 @@ END) AS dblCost
 ,ysnInvoiced = CAST((CASE WHEN ISNULL(cfTransaction.strInvoiceReportNumber,'') = '' THEN 0 ELSE 1 END) AS BIT)
 ,strSiteNumberName = cfSite.strSiteNumber + ' - ' + cfSite.strSiteName
 FROM         dbo.tblCFTransaction AS cfTransaction 
-			INNER JOIN tblCFSite cfSite
-			on cfSite.intSiteId = cfTransaction.intSiteId
-			--J1
-			LEFT OUTER JOIN  
-				 (SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo 
-				 FROM tblCFNetwork as cfNetwork
-				 INNER JOIN tblEMEntity emEntity 
-				 ON cfNetwork.intCustomerId = emEntity.intEntityId) 
-			 AS cfNetwork  
-			 on cfNetwork.intNetworkId = cfTransaction.intNetworkId
+INNER JOIN tblCFSite cfSite
+on cfSite.intSiteId = cfTransaction.intSiteId
+--J1
+LEFT OUTER JOIN  
+		(SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo 
+		FROM tblCFNetwork as cfNetwork
+		LEFT JOIN tblEMEntity emEntity 
+		ON cfNetwork.intCustomerId = emEntity.intEntityId) 
+	AS cfNetwork  
+	on cfNetwork.intNetworkId = cfTransaction.intNetworkId
 		
-			LEFT OUTER JOIN
-                (SELECT   cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription AS strItemDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost,iciItemPricing.dblStandardCost ,iciCat.strCategoryCode,iciCat.strDescription as strCategoryDescription
-                FROM         dbo.tblCFItem AS cfiItem 
-				LEFT OUTER JOIN 
-                    dbo.tblCFSite AS cfiSite ON cfiSite.intSiteId = cfiItem.intSiteId LEFT OUTER JOIN
-                    dbo.tblICItem AS iciItem ON cfiItem.intARItemId = iciItem.intItemId LEFT OUTER JOIN
-					dbo.tblICCategory AS iciCat ON iciItem.intCategoryId = iciCat.intCategoryId LEFT OUTER JOIN
-                    dbo.tblICItemLocation AS iciItemLocation ON cfiItem.intARItemId = iciItemLocation.intItemId AND
-                    iciItemLocation.intLocationId = cfiSite.intARLocationId LEFT OUTER JOIN
-                    dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND
-                    iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId AND iciItemLocation.intIssueUOMId = iciItemPricing.intUnitMeasureId) 
-				AS cfItem 
-				ON cfTransaction.intProductId = cfItem.intItemId 
-			--J4
+LEFT OUTER JOIN
+    (SELECT   cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription AS strItemDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost,iciItemPricing.dblStandardCost ,iciCat.strCategoryCode,iciCat.strDescription as strCategoryDescription
+    FROM         dbo.tblCFItem AS cfiItem 
+	LEFT OUTER JOIN 
+        dbo.tblCFSite AS cfiSite ON cfiSite.intSiteId = cfiItem.intSiteId LEFT OUTER JOIN
+        dbo.tblICItem AS iciItem ON cfiItem.intARItemId = iciItem.intItemId LEFT OUTER JOIN
+		dbo.tblICCategory AS iciCat ON iciItem.intCategoryId = iciCat.intCategoryId LEFT OUTER JOIN
+        dbo.tblICItemLocation AS iciItemLocation ON cfiItem.intARItemId = iciItemLocation.intItemId AND
+        iciItemLocation.intLocationId = cfiSite.intARLocationId LEFT OUTER JOIN
+        dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND
+        iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId AND iciItemLocation.intIssueUOMId = iciItemPricing.intUnitMeasureId) 
+	AS cfItem 
+	ON cfTransaction.intProductId = cfItem.intItemId 
+--J4
 			
-			--J5	
-			LEFT OUTER JOIN 
-                 (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strEntityNo, cfiCustomer.intEntityId, cfiCard.intCardId, cfiCard.strCardNumber,cfiCard.strCardDescription , cfiAccount.intSalesPersonId, cfiSalesPerson.strEntityNo as strSalespersonEntityNo, cfiSalesPerson.strName as strSalespersonName
-                 FROM         dbo.tblCFAccount AS cfiAccount 
-				 INNER JOIN 
-                 dbo.tblCFCard AS cfiCard ON cfiCard.intAccountId = cfiAccount.intAccountId 
-				 INNER JOIN
-				 dbo.tblEMEntity AS cfiCustomer ON cfiCustomer.intEntityId = cfiAccount.intCustomerId
-				 LEFT JOIN 
-				 dbo.tblEMEntity AS cfiSalesPerson ON cfiSalesPerson.intEntityId = cfiAccount.intSalesPersonId) 
-			AS cfCard 
-			ON cfTransaction.intCardId = cfCard.intCardId 
+--J5	
+LEFT OUTER JOIN 
+        (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strEntityNo, cfiCustomer.intEntityId, cfiCard.intCardId, cfiCard.strCardNumber,cfiCard.strCardDescription , cfiAccount.intSalesPersonId, cfiSalesPerson.strEntityNo as strSalespersonEntityNo, cfiSalesPerson.strName as strSalespersonName
+        FROM         dbo.tblCFAccount AS cfiAccount 
+		INNER JOIN 
+        dbo.tblCFCard AS cfiCard ON cfiCard.intAccountId = cfiAccount.intAccountId 
+		INNER JOIN
+		dbo.tblEMEntity AS cfiCustomer ON cfiCustomer.intEntityId = cfiAccount.intCustomerId
+		LEFT JOIN 
+		dbo.tblEMEntity AS cfiSalesPerson ON cfiSalesPerson.intEntityId = cfiAccount.intSalesPersonId) 
+AS cfCard 
+ON cfTransaction.intCardId = cfCard.intCardId 
 			--J5
 
 			--J6
@@ -144,12 +144,12 @@ FROM         dbo.tblCFTransaction AS cfTransaction
 			----J8
 
 			--J9
-			LEFT OUTER JOIN
-                (SELECT   intTransactionId, ISNULL(SUM(dblTaxOriginalAmount), 0) AS dblTaxOriginalAmount, ISNULL(SUM(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
-                FROM         dbo.tblCFTransactionTax AS tblCFTransactionTax 
-                GROUP BY intTransactionId) 
-			AS tblCFTransactionTax_1 
-			ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
+LEFT OUTER JOIN
+    (SELECT   intTransactionId, ISNULL(SUM(dblTaxOriginalAmount), 0) AS dblTaxOriginalAmount, ISNULL(SUM(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
+    FROM         dbo.tblCFTransactionTax AS tblCFTransactionTax 
+    GROUP BY intTransactionId) 
+AS tblCFTransactionTax_1 
+ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
 LEFT JOIN tblARInvoice arinvoice
 	ON cfTransaction.intInvoiceId = arinvoice.intInvoiceId
 
