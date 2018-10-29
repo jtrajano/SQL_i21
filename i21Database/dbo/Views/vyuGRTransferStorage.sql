@@ -18,7 +18,7 @@ SELECT
 	, strStorageTypeDescription = ST.strStorageTypeDescription
 	, strItemNo 				= Item.strItemNo
 	, strUnitMeasure 			= UOM.strUnitMeasure
-	,strTransferLocationName = (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = TS.intCompanyLocationId)
+	,strTransferLocationName 	= (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = TS.intTransferLocationId)
 FROM tblGRTransferStorage TS
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = TS.intEntityId
@@ -35,4 +35,3 @@ INNER JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.intItemUOMId = TS.intItemUOMId
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-
