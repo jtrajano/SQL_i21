@@ -466,5 +466,6 @@
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
     <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
   </ItemGroup>
 </Project>

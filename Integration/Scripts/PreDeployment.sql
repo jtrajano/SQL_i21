@@ -261,6 +261,7 @@
 :r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
 :r "..\dbo\Stored Procedures\uspGRImportFreightSettlement.sql"
 :r "..\dbo\Stored Procedures\uspGRImportReceiptandBill.sql"
+:r "..\dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql"
 
 --CONTRACT
 :r "..\dbo\Stored Procedures\uspCTImportContract.sql"

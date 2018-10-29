@@ -32,6 +32,13 @@ BEGIN
 	SELECT TOP 1 @intScaleSetupId = intScaleSetupId FROM tblSCScaleSetup
 	SELECT TOP 1 @intTicketPoolId = intTicketPoolId FROM tblSCTicketPool
 	
+	if( @intScaleSetupId IS NULL) 
+	BEGIN
+		EXEC uspGRImportCreateInitialScaleSetup
+		SELECT TOP 1 @intScaleSetupId = intScaleSetupId FROM tblSCScaleSetup
+		SELECT TOP 1 @intTicketPoolId = intTicketPoolId FROM tblSCTicketPool
+	END
+	
 	INSERT INTO tblSCTicket
 	(
 	 intConcurrencyId	
