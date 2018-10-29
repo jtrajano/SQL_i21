@@ -7143,6 +7143,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCalculateCustomerRefunds.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransfer.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableFromDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7340,6 +7342,7 @@
     <None Include="Scripts\Post-Deployment\GR\MigrateTransferStorageData.sql" />
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
+    <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

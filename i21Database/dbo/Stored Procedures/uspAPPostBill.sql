@@ -142,162 +142,6 @@ BEGIN
 	DECLARE @voucherBillId AS Id;
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
-	
-	INSERT INTO @voucherPayables(
-		[intBillId]
-		,[intEntityVendorId]				
-		,[intTransactionType]				
-		,[intLocationId]					
-		,[intShipToId]						
-		,[intShipFromId]					
-		,[intShipFromEntityId]				
-		,[intPayToAddressId]				
-		,[intCurrencyId]					
-		,[dtmDate]							
-		,[strVendorOrderNumber]				
-		,[strReference]						
-		,[strSourceNumber]					
-		,[intSubCurrencyCents]				
-		,[intShipViaId]						
-		,[intTermId]						
-		,[strBillOfLading]					
-		,[intAPAccount]						
-		,[strMiscDescription]				
-		,[intItemId]						
-		,[ysnSubCurrency]					
-		,[intAccountId]						
-		,[ysnReturn]						
-		,[intLineNo]						
-		,[intStorageLocationId]				
-		,[dblBasis]							
-		,[dblFutures]						
-		,[intPurchaseDetailId]				
-		,[intContractHeaderId]				
-		,[intContractCostId]				
-		,[intContractSeqId]					
-		,[intContractDetailId]				
-		,[intScaleTicketId]					
-		,[intInventoryReceiptItemId]		
-		,[intInventoryReceiptChargeId]		
-		,[intInventoryShipmentItemId]		
-		,[intInventoryShipmentChargeId]		
-		,[intLoadShipmentId]				
-		,[intLoadShipmentDetailId]			
-		,[intPaycheckHeaderId]				
-		,[intCustomerStorageId]				
-		,[intCCSiteDetailId]				
-		,[intInvoiceId]						
-		,[intBuybackChargeId]				
-		,[dblOrderQty]						
-		,[dblOrderUnitQty]					
-		,[intOrderUOMId]					
-		,[dblQuantityToBill]				
-		,[dblQtyToBillUnitQty]				
-		,[intQtyToBillUOMId]				
-		,[dblCost]							
-		,[dblOldCost]						
-		,[dblCostUnitQty]					
-		,[intCostUOMId]						
-		,[intCostCurrencyId]				
-		,[dblWeight]						
-		,[dblNetWeight]						
-		,[dblWeightUnitQty]					
-		,[intWeightUOMId]					
-		,[intCurrencyExchangeRateTypeId]	
-		,[dblExchangeRate]					
-		,[intPurchaseTaxGroupId]			
-		,[dblTax]							
-		,[dblDiscount]						
-		,[dblDetailDiscountPercent]			
-		,[ysnDiscountOverride]				
-		,[intDeferredVoucherId]				
-		,[dblPrepayPercentage]				
-		,[intPrepayTypeId]					
-		,[dblNetShippedWeight]				
-		,[dblWeightLoss]					
-		,[dblFranchiseWeight]				
-		,[dblFranchiseAmount]				
-		,[dblActual]						
-		,[dblDifference]					
-	)
-	SELECT
-		[intBillId]
-		,[intEntityVendorId]				
-		,[intTransactionType]				
-		,[intLocationId]					
-		,[intShipToId]						
-		,[intShipFromId]					
-		,[intShipFromEntityId]				
-		,[intPayToAddressId]				
-		,[intCurrencyId]					
-		,[dtmDate]							
-		,[strVendorOrderNumber]				
-		,[strReference]						
-		,[strSourceNumber]					
-		,[intSubCurrencyCents]				
-		,[intShipViaId]						
-		,[intTermId]						
-		,[strBillOfLading]					
-		,[intAPAccount]						
-		,[strMiscDescription]				
-		,[intItemId]						
-		,[ysnSubCurrency]					
-		,[intAccountId]						
-		,[ysnReturn]						
-		,[intLineNo]						
-		,[intStorageLocationId]				
-		,[dblBasis]							
-		,[dblFutures]						
-		,[intPurchaseDetailId]				
-		,[intContractHeaderId]				
-		,[intContractCostId]				
-		,[intContractSeqId]					
-		,[intContractDetailId]				
-		,[intScaleTicketId]					
-		,[intInventoryReceiptItemId]		
-		,[intInventoryReceiptChargeId]		
-		,[intInventoryShipmentItemId]		
-		,[intInventoryShipmentChargeId]		
-		,[intLoadShipmentId]				
-		,[intLoadShipmentDetailId]			
-		,[intPaycheckHeaderId]				
-		,[intCustomerStorageId]				
-		,[intCCSiteDetailId]				
-		,[intInvoiceId]						
-		,[intBuybackChargeId]				
-		,[dblOrderQty]						
-		,[dblOrderUnitQty]					
-		,[intOrderUOMId]					
-		,[dblQuantityToBill]				
-		,[dblQtyToBillUnitQty]				
-		,[intQtyToBillUOMId]				
-		,[dblCost]							
-		,[dblOldCost]						
-		,[dblCostUnitQty]					
-		,[intCostUOMId]						
-		,[intCostCurrencyId]				
-		,[dblWeight]						
-		,[dblNetWeight]						
-		,[dblWeightUnitQty]					
-		,[intWeightUOMId]					
-		,[intCurrencyExchangeRateTypeId]	
-		,[dblExchangeRate]					
-		,[intPurchaseTaxGroupId]			
-		,[dblTax]							
-		,[dblDiscount]						
-		,[dblDetailDiscountPercent]			
-		,[ysnDiscountOverride]				
-		,[intDeferredVoucherId]				
-		,[dblPrepayPercentage]				
-		,[intPrepayTypeId]					
-		,[dblNetShippedWeight]				
-		,[dblWeightLoss]					
-		,[dblFranchiseWeight]				
-		,[dblFranchiseAmount]				
-		,[dblActual]						
-		,[dblDifference]
-	FROM dbo.fnAPGetVoucherPayableFromBill(@voucherBillId)
-	WHERE intPurchaseDetailId > 0
 
 	--VALIDATIONS
 	INSERT INTO #tmpInvalidBillData (
@@ -1495,24 +1339,24 @@ BEGIN
 		EXEC uspPATGatherVolumeForPatronage @validBillIds, @post , 1 
 
 		--UPDATE PO Status
-		IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
-					ON A.intItemId = B.intItemId 
-					WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
-					AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-					AND A.[intPurchaseDetailId] > 0)
-		BEGIN
-			DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
-			DECLARE @miscItemId TABLE(intBillId INT);
-			INSERT INTO @miscItemId
-			SELECT intBillId FROM #tmpPostBillData
-			WHILE @countReceivedMisc != @totalRecords
-			BEGIN
-				SET @countReceivedMisc = @countReceivedMisc + 1;
-				SELECT TOP(1) @billIdReceived = intBillId FROM @miscItemId
-				EXEC [uspPOReceivedMiscItem] @billIdReceived
-				DELETE FROM @miscItemId WHERE intBillId = @billIdReceived
-			END
-		END
+		-- IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
+		-- 			ON A.intItemId = B.intItemId 
+		-- 			WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
+		-- 			AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		-- 			AND A.[intPurchaseDetailId] > 0)
+		-- BEGIN
+		-- 	DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
+		-- 	DECLARE @miscItemId TABLE(intBillId INT);
+		-- 	INSERT INTO @miscItemId
+		-- 	SELECT intBillId FROM #tmpPostBillData
+		-- 	WHILE @countReceivedMisc != @totalRecords
+		-- 	BEGIN
+		-- 		SET @countReceivedMisc = @countReceivedMisc + 1;
+		-- 		SELECT TOP(1) @billIdReceived = intBillId FROM @miscItemId
+		-- 		EXEC [uspPOReceivedMiscItem] @billIdReceived
+		-- 		DELETE FROM @miscItemId WHERE intBillId = @billIdReceived
+		-- 	END
+		-- END
 	END TRY
 	BEGIN CATCH
 		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()
@@ -1520,16 +1364,16 @@ BEGIN
 		GOTO Post_Rollback
 	END CATCH
 
-	BEGIN TRY
-		--UPDATE VOUCHER PAYABLE STAGING QTY
-		--FOR NOW, SUPPORT ONLY FOR MISC PO
-		EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @post = @post, @throwError = 0
-	END TRY
-	BEGIN CATCH
-		DECLARE @errorUpdateVoucherPayable NVARCHAR(200) = ERROR_MESSAGE()
-		RAISERROR('Error updating voucher staging data.', 16, 1);
-		GOTO Post_Rollback
-	END CATCH
+	-- BEGIN TRY
+	-- 	--UPDATE VOUCHER PAYABLE STAGING QTY
+	-- 	--FOR NOW, SUPPORT ONLY FOR MISC PO
+	-- 	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @post = @post, @throwError = 0
+	-- END TRY
+	-- BEGIN CATCH
+	-- 	DECLARE @errorUpdateVoucherPayable NVARCHAR(200) = ERROR_MESSAGE()
+	-- 	RAISERROR('Error updating voucher staging data.', 16, 1);
+	-- 	GOTO Post_Rollback
+	-- END CATCH
 	
 	BEGIN TRY
 		EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherBillId, @post = @post
