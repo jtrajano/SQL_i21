@@ -54,7 +54,9 @@ AS
 BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
+			,@HundredDecimal	NUMERIC(18, 6)
 	SET @ZeroDecimal = 0.000000
+	SET @HundredDecimal = 100.000000
 
 	DECLARE @ItemType NVARCHAR(50)
 	SET @ItemType = ISNULL((SELECT strType FROM tblICItem WHERE [intItemId] = @ItemId),'')
@@ -301,11 +303,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.000000) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN @ZeroDecimal ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/@HundredDecimal) END))
 									END
 								ELSE
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@QtyShipped * @TaxRate) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN @ZeroDecimal ELSE (@QtyShipped * @TaxRate) END))
 									END
 							END
 					END 					
@@ -320,17 +322,17 @@ BEGIN
 							
 			SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
 
-			DECLARE @ItemTaxAmount NUMERIC(18,6) = 0.00
+			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
 			IF(@CalculationMethod = 'Percentage')
-				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
+				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
 				SET @ItemTaxAmount = (@QtyShipped * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
-				SET @ItemTaxAmount = 0.00;
+			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal)
+				SET @ItemTaxAmount = @ZeroDecimal;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00)
-				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal)
+				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal) );
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
