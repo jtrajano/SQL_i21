@@ -1094,18 +1094,18 @@ BEGIN
 					)
 				BEGIN 
 					-- Assign the Source Location Id. 			
-					UPDATE	t
-					SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
-					FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
-								ON t.intItemId = UDT.intItemId
-								AND t.intItemLocationId = UDT.intItemLocationId
-								AND t.intItemUOMId = UDT.intItemUOMId
-								AND t.dblQty = UDT.dblQty
-								AND t.intTransactionId = UDT.intTransactionId
-								AND t.intTransactionDetailId = UDT.intTransactionDetailId
-								AND t.strTransactionId = UDT.strTransactionId
-					WHERE	t.dblQty > 0 
-							AND UDT.intInTransitSourceLocationId IS NOT NULL 
+					-- UPDATE	t
+					-- SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+					-- FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
+					-- 			ON t.intItemId = UDT.intItemId
+					-- 			AND t.intItemLocationId = UDT.intItemLocationId
+					-- 			AND t.intItemUOMId = UDT.intItemUOMId
+					-- 			AND t.dblQty = UDT.dblQty
+					-- 			AND t.intTransactionId = UDT.intTransactionId
+					-- 			AND t.intTransactionDetailId = UDT.intTransactionDetailId
+					-- 			AND t.strTransactionId = UDT.strTransactionId
+					-- WHERE	t.dblQty > 0 
+					-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
 
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
@@ -1242,19 +1242,19 @@ BEGIN
 					BEGIN 
 						SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 
-						-- Assign the Source Location Id. 			
-						UPDATE	t
-						SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
-						FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
-									ON t.intItemId = UDT.intItemId
-									AND t.intItemLocationId = UDT.intItemLocationId
-									AND t.intItemUOMId = UDT.intItemUOMId
-									AND t.dblQty = UDT.dblQty
-									AND t.intTransactionId = UDT.intTransactionId
-									AND t.intTransactionDetailId = UDT.intTransactionDetailId
-									AND t.strTransactionId = UDT.strTransactionId
-						WHERE	t.dblQty > 0 
-								AND UDT.intInTransitSourceLocationId IS NOT NULL 
+						-- -- Assign the Source Location Id. 			
+						-- UPDATE	t
+						-- SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+						-- FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
+						-- 			ON t.intItemId = UDT.intItemId
+						-- 			AND t.intItemLocationId = UDT.intItemLocationId
+						-- 			AND t.intItemUOMId = UDT.intItemUOMId
+						-- 			AND t.dblQty = UDT.dblQty
+						-- 			AND t.intTransactionId = UDT.intTransactionId
+						-- 			AND t.intTransactionDetailId = UDT.intTransactionDetailId
+						-- 			AND t.strTransactionId = UDT.strTransactionId
+						-- WHERE	t.dblQty > 0 
+						-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
 					END 
 
 					-- Create the GL entries specific for Inventory Receipt

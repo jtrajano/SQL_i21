@@ -1099,7 +1099,7 @@ BEGIN
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
-							,[intItemLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+							,[intItemLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 							,[intItemUOMId] = t.intItemUOMId
 							,[dtmDate] = t.dtmDate
 							,[dblQty] = -t.dblQty
@@ -1118,7 +1118,7 @@ BEGIN
 							,[strTransactionId] = t.strTransactionId
 							,[intTransactionDetailId] = t.intTransactionDetailId
 							,[intFobPointId] = t.intFobPointId
-							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN dbo.tblICInventoryTransaction t
