@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMApplyCheckChangeForCheckPrint]
 	@intBankAccountId INT = NULL,
 	@intBankTransactionTypeId INT = NULL,
-	@strTransactionId NVARCHAR(50) = NULL,
+	@strTransactionId NVARCHAR(MAX) = NULL,
 	@strProcessType NVARCHAR(100),
 	@ysnCheckToBePrinted BIT = 0
 AS
@@ -40,36 +40,39 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
 
 -- Mass update the ysnCheckToBePrinted
+
 IF(@strProcessType = 'ACH From Customer')
 BEGIN
 	UPDATE U
 	SET U.ysnToProcess =
 		CASE WHEN @ysnCheckToBePrinted = 1 AND ISNULL(U.ysnHold ,0)=0
-			THEN 1
-			ELSE 0
+			THEN 1 
+			ELSE 0 
 		END
 		,U.intConcurrencyId = U.intConcurrencyId + 1
 	FROM tblCMUndepositedFund U
 	INNER JOIN tblCMBankTransaction B ON U.intBankDepositId = B.intTransactionId
+	CROSS apply (
+		SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where B.intTransactionId = Item ) b
 	WHERE 
 	U.intBankAccountId = @intBankAccountId
-	AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
 	AND U.ysnCommitted is null
 	AND U.intBankDepositId IS NOT NULL
+	
 END
 ELSE
 BEGIN
-	UPDATE	[dbo].[tblCMBankTransaction]
-	SET		ysnCheckToBePrinted =
+	UPDATE	B 
+		SET		ysnCheckToBePrinted = 
 		CASE WHEN @ysnCheckToBePrinted = 1 AND ISNULL(ysnHold ,0) =0
-			THEN 1
-			ELSE 0
+			THEN 1 
+			ELSE 0 
 		END
 			,intConcurrencyId = intConcurrencyId + 1
+	FROM [dbo].[tblCMBankTransaction] B
+	CROSS apply (SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where intTransactionId = Item ) S
 	WHERE	intBankAccountId = @intBankAccountId
-			AND intBankTransactionTypeId = @intBankTransactionTypeId
-			--AND intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-			AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
+			AND ( intBankTransactionTypeId = @intBankTransactionTypeId OR intBankTransactionTypeId = @intBankTransactionTypeId + 100)
 			AND ysnPosted = 1
 			AND dtmCheckPrinted IS NULL
 			AND dblAmount <> 0
