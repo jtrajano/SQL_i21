@@ -7154,6 +7154,7 @@
     <Build Include="dbo\Stored Procedures\uspARDeletePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCalculateCustomerRefunds.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmailDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
