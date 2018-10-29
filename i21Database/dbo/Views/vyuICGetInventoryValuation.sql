@@ -46,7 +46,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strEntity					= e.strName										
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
-		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
+		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL AND [Location].intCompanyLocationId IS NULL THEN 1 ELSE 0 END AS BIT) 
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
@@ -76,6 +76,7 @@ FROM 	tblICItem i
 				ON InTransitLocation.intCompanyLocationId = InTransitItemLocation.intLocationId	
 		)
 			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
+			AND [Location].intCompanyLocationId IS NULL
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
 		LEFT JOIN tblICCostingMethod CostingMethod
