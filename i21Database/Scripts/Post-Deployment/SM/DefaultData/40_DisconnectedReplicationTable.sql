@@ -10,11 +10,23 @@ EXECUTE sp_executesql @sql;
 
  IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMDisconReplicationArticle )
 	BEGIN
-	DECLARE @query nvarchar(max) = N'INSERT INTO tblSMDisconReplicationArticle (strTableName) ' +
-									'SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s on t.[schema_id] = s.[schema_id] WHERE t.name LIKE ''tbl%'' AND t.name NOT IN ' +
+		DECLARE @query nvarchar(max) = N'INSERT INTO tblSMDisconReplicationArticle (strTableName) ' +
+										'select t.name as TableName ' +
+										'from ' +
+											'sys.schemas s ' +
+											'inner join sys.tables t   on s.schema_id=t.schema_id ' +
+											'inner join sys.indexes i  on t.object_id=i.object_id ' +
+											'inner join sys.index_columns ic on i.object_id=ic.object_id ' + 
+											'and i.index_id=ic.index_id ' +
+											'inner join sys.columns tc on ic.object_id=tc.object_id ' +
+																	 'and ic.column_id=tc.column_id ' +
+	
+										'where i.is_primary_key=1 and tc.is_identity = 1 ' +
+										'and t.name like ''tbl%'' AND t.name NOT IN ' + 
 									'(''tblSMStartingNumber'','+
 									 '''tblGLTempCOASegment'','+
 									 '''tblSMCompanySetup'','+
+									 '''tblSMUserLogin'','+
 									 '''tblSMConnectedUser'','+
 									 '''tblSMMultiCurrency'','+
 									 '''tblMBILCompanyPreference'','+
@@ -36,7 +48,35 @@ EXECUTE sp_executesql @sql;
 									 '''tblMFCompanyPreference'','+
 									 '''tblLGCompanyPreference'','+
 									 '''tblICCompanyPreference'','+
-									 '''tblTRCompanyPreference'')'
+									 '''tblTRCompanyPreference'')' ;
+	--DECLARE @query nvarchar(max) = N'INSERT INTO tblSMDisconReplicationArticle (strTableName) ' +
+	--								'SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s on t.[schema_id] = s.[schema_id] WHERE t.name LIKE ''tbl%'' AND t.name NOT IN ' +
+	--								'(''tblSMStartingNumber'','+
+	--								 '''tblGLTempCOASegment'','+
+	--								 '''tblSMCompanySetup'','+
+	--								 '''tblSMUserLogin'','+
+	--								 '''tblSMConnectedUser'','+
+	--								 '''tblSMMultiCurrency'','+
+	--								 '''tblMBILCompanyPreference'','+
+	--								 '''tblPATCompanyPreference'','+
+	--								 '''tblSMCompanyPreference'','+
+	--								 '''tblTFCompanyPreference'','+
+	--								 '''tblRKCompanyPreference'','+
+	--								 '''tblQMCompanyPreference'','+
+	--								 '''tblNRCompanyPreference'','+
+	--								 '''tblIPCompanyPreference'','+
+	--								 '''tblGRCompanyPreference'','+
+	--								 '''tblETCompanyPreference'','+
+	--								 '''tblCTCompanyPreference'','+
+	--								 '''tblCFCompanyPreference'','+
+	--								 '''tblARCompanyPreference'','+
+	--								 '''tblAPCompanyPreference'','+
+	--								 '''tblWHCompanyPreference'','+
+	--								 '''tblPRCompanyPreference'','+
+	--								 '''tblMFCompanyPreference'','+
+	--								 '''tblLGCompanyPreference'','+
+	--								 '''tblICCompanyPreference'','+
+	--								 '''tblTRCompanyPreference'')'
 
  
 									

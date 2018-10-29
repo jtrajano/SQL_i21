@@ -30,7 +30,7 @@
 			--DECLARE @totalRows INT = (SELECT COUNT(*) FROM #DisconArticles)
 			WHILE((SELECT COUNT(*) FROM #DisconArticles) > 0)
 				BEGIN
-					DECLARE @CURRENT_IDENT INT;
+					DECLARE @CURRENT_IDENT INT = @rangeStart;
 					DECLARE @ID INT = (SELECT TOP 1 id FROM #DisconArticles)
 					DECLARE @article NVARCHAR(MAX) = (SELECT TOP 1 strArticle FROM #DisconArticles)
 					DECLARE @IDENT_NAME NVARCHAR(MAX) = (SELECT name FROM sys.columns WHERE [object_id] = OBJECT_ID(@article) AND is_identity = 1)
