@@ -25,7 +25,6 @@ USING
 		  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
 		, strType					= CASE WHEN (min(ptitm_phys_inv_yno) = 'N') THEN 'Other Charge' ELSE 'Inventory' END COLLATE Latin1_General_CI_AS
 		, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
-		--, strStatus					= CASE WHEN (min(ptitm_phys_inv_yno) = 'O') THEN 'Discontinued' ELSE 'Active' END COLLATE Latin1_General_CI_AS
 		, strStatus					= 'Active'
 		, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
 		, strLotTracking			= 'No' COLLATE Latin1_General_CI_AS
