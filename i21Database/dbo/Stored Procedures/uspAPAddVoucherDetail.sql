@@ -20,6 +20,7 @@ BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPAddVoucherDetail';
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @voucherDetailIds AS Id;
 
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
@@ -381,7 +382,11 @@ VALUES
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
-);
+)
+OUTPUT inserted.intBillDetailId INTO @voucherDetailIds;
+
+--UPDATE AVAILABLE QTY
+EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
 
 IF @transCount = 0
 	BEGIN
