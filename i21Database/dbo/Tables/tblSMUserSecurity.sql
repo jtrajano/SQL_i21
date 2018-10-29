@@ -7,8 +7,6 @@
     [strUserName]					NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
 	[strJIRAUserName]				NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strFullName]					NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
-    [strPassword]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
-	[strOverridePassword]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 	[strDashboardRole]				NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strFirstName]					NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strMiddleName]					NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL DEFAULT (''),
@@ -111,24 +109,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMUserSecurity',
     @level2type = N'COLUMN',
     @level2name = N'strFullName'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Password',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMUserSecurity',
-    @level2type = N'COLUMN',
-    @level2name = N'strPassword'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Override Password',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMUserSecurity',
-    @level2type = N'COLUMN',
-    @level2name = N'strOverridePassword'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Dashboard Role',
