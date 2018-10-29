@@ -270,7 +270,7 @@ BEGIN TRY
 				, strProductCode
 				, dblGross
 				, dblNet
-				, dblBillQty
+				, dblGross
 				, dblTax
 				, dtmReceiptDate
 				, strVendorName
