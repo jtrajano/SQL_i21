@@ -151,9 +151,11 @@ BEGIN
 		END
 
 	DECLARE @ZeroDecimal		NUMERIC(18, 6)
+			,@HundredDecimal	NUMERIC(18, 6)
 			,@TaxAmount			NUMERIC(18,6)
 			
 	SET @ZeroDecimal = 0.000000
+	SET @HundredDecimal = 100.000000
 	SET @GrossAmount = ISNULL(@GrossAmount, @ZeroDecimal)
 	SET @Quantity = ISNULL(@Quantity, @ZeroDecimal)
 	SET @Price = ISNULL(@Price, @ZeroDecimal)
@@ -301,13 +303,14 @@ BEGIN
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnInvalidSetup] = 0
 
 			DECLARE @TBOTTaxCodesTable TABLE
 				([intTaxCodeId] INT PRIMARY KEY,
 				UNIQUE ([intTaxCodeId]));
 
 			SET @TaxableByOtherUnitTax = @ZeroDecimal
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0 AND [ysnInvalidSetup] = 0)
 				BEGIN
 					DECLARE  @TBOTID			INT
 							,@TBOTCheckOff		BIT
@@ -326,12 +329,13 @@ BEGIN
 						@TaxableByOtherTaxUnit
 					WHERE
 						[ysnComputed] = 0
+						AND [ysnInvalidSetup] = 0
 
 					DELETE FROM @TBOTTaxCodesTable
 					INSERT INTO @TBOTTaxCodesTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TBOTTaxCodes)
 
 					SELECT
-						@TBOTRegularRate = SUM((@TBOTRate * @Quantity) * (ISNULL(IT.[dblRate], @ZeroDecimal)/100.00))
+						@TBOTRegularRate = SUM((@TBOTRate * @Quantity) * (ISNULL(IT.[dblRate], @ZeroDecimal)/@HundredDecimal))
 					FROM
 						@ItemTaxes IT
 					INNER JOIN
@@ -341,10 +345,11 @@ BEGIN
 						--[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
 						--AND IT.[ysnCheckoffTax] = 0
 						--AND 
-						LOWER(RTRIM(LTRIM(IT.[strCalculationMethod]))) = 'percentage'	
+						LOWER(RTRIM(LTRIM(IT.[strCalculationMethod]))) = 'percentage'
+						AND IT.[ysnInvalidSetup] = 0
 
 					--SELECT
-					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/@HundredDecimal))
 					--FROM
 					--	@ItemTaxes
 					--WHERE
@@ -450,13 +455,14 @@ BEGIN
 				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
 				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND ([ysnTaxExempt] = 0 OR @DisregardExemptionSetup = 1)
+				AND [ysnInvalidSetup] = 0
 
 			DECLARE @TBOTTaxCodesRTable TABLE
 				([intTaxCodeId] INT PRIMARY KEY,
 				UNIQUE ([intTaxCodeId]));
 
 			SET @TaxableByOtherRate = @ZeroDecimal
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0 AND [ysnInvalidSetup] = 0)
 				BEGIN
 					DECLARE  @TBOTIDR			INT
 							,@TBOTCheckOffR		BIT
@@ -480,7 +486,7 @@ BEGIN
 					INSERT INTO @TBOTTaxCodesRTable SELECT DISTINCT [intID] AS [intTaxCodeId] FROM [dbo].fnGetRowsFromDelimitedValues(@TBOTTaxCodesR)
 
 					SELECT
-						@TBOTRegularRateR = SUM((@TBOTRateR) * (ISNULL(IT.[dblRate], @ZeroDecimal)/100.00))
+						@TBOTRegularRateR = SUM((@TBOTRateR) * (ISNULL(IT.[dblRate], @ZeroDecimal)/@HundredDecimal))
 					FROM
 						@ItemTaxes IT
 					INNER JOIN
@@ -493,7 +499,7 @@ BEGIN
 						AND LOWER(RTRIM(LTRIM(IT.[strCalculationMethod]))) = 'percentage'	
 
 					--SELECT
-					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/@HundredDecimal))
 					--FROM
 					--	@ItemTaxes
 					--WHERE
@@ -509,7 +515,7 @@ BEGIN
 			
 			----t = pq + (pqr)
 			----t/(q + qr) = p		
-			SET @ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (@TotalTaxRate/100.00)))
+			SET @ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (@TotalTaxRate/@HundredDecimal)))
 					
 		END		
 	
@@ -546,7 +552,7 @@ BEGIN
 	END	
 
 	-- Calculate Item Tax
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0 AND [ysnInvalidSetup] = 0)
 		BEGIN
 			DECLARE  @Id					INT
 					,@TaxableAmount			NUMERIC(18,6)
@@ -568,6 +574,7 @@ BEGIN
 				@ItemTaxes
 			WHERE
 				ISNULL([ysnComputed], 0) = 0
+				AND [ysnInvalidSetup] = 0
 															
 			SELECT 
 				 @TaxCodeId			= [intTaxCodeId]
@@ -623,7 +630,8 @@ BEGIN
 				@TaxableByOtherTaxesTable TBOT
 					ON IT.[intTaxCodeId] = TBOT.[intTaxCodeId]
 			WHERE
-				TBOT.[intTaxableTaxCodeId] = @TaxCodeId 
+				TBOT.[intTaxableTaxCodeId] = @TaxCodeId
+				AND IT.[ysnInvalidSetup] = 0
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
@@ -647,7 +655,7 @@ BEGIN
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
 						,@TaxTaxOnly				= ISNULL([ysnTaxOnly],0)
-						,@OtherTaxAmount			= 0.000000
+						,@OtherTaxAmount			= @ZeroDecimal
 					FROM
 						@TaxableByOtherTaxes
 					WHERE
@@ -670,11 +678,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@ItemPrice * @Quantity) * (@TaxRate/100.00) END))
+										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN @ZeroDecimal ELSE (@ItemPrice * @Quantity) * (@TaxRate/@HundredDecimal) END))
 									END
 								ELSE
 									BEGIN
-										SET @OtherTaxAmount = (@OtherTaxAmount) + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.00 ELSE (@Quantity * @TaxRate) END))
+										SET @OtherTaxAmount = (@OtherTaxAmount) + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN @ZeroDecimal ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
@@ -685,17 +693,17 @@ BEGIN
 				END
 				
 			
-			DECLARE @ItemTaxAmount NUMERIC(18,6) = 0.00
+			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
 			IF(@CalculationMethod = 'Percentage')
-				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
+				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00) AND @DisregardExemptionSetup = 0
-				SET @ItemTaxAmount = 0.00;
+			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
+				SET @ItemTaxAmount = @ZeroDecimal;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00) OR @DisregardExemptionSetup = 1
-				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
+				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal) );
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
