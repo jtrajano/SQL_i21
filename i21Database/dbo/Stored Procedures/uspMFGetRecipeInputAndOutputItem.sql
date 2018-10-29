@@ -69,10 +69,11 @@ BEGIN
 			AND intItemId = @intItemId
 
 		SELECT @dblQuantity = (@dblCalculatedOutputQuantity / @dblCalculatedInputQuantity) * @dblQuantity
-		SELECT @dblQuantity
 	END
 
-	SELECT I.strItemNo AS strActualItem
+	SELECT 
+		I.intItemId
+		,I.strItemNo AS strActualItem
 		,I.strDescription AS strActualDescription
 		,CASE 
 			WHEN C.strCategoryCode = @strPackagingCategory
@@ -135,6 +136,8 @@ BEGIN
 						END
 					)
 			END AS dblNumberOfUnits
+		,IU.intItemUOMId 
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure AS strUnitUOM
 		,'' AS strLotNumber
 		,'' AS strParentLotNumber
@@ -157,7 +160,9 @@ BEGIN
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 
-	SELECT '' AS strSourceUnit
+	SELECT 0 as intStorageLocationId 
+		,'' AS strStorageUnit
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,CASE 
@@ -221,6 +226,8 @@ BEGIN
 						END
 					)
 			END AS dblInputQty
+		,IU.intItemUOMId 
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,'' AS strInputLot
 		,0 AS dblAvailableQuantity
