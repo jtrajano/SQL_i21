@@ -486,5 +486,6 @@ AS
 	ELSE
 	BEGIN
 		SET @strMessage = 'Sales Receipt is already returned'
+		RAISERROR(@strMessage, 16, 1)
 		RETURN 0;
 	END
