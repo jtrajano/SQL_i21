@@ -3,7 +3,7 @@ AS
 SELECT *, ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId
 FROM
 (
-	SELECT DISTINCT CAST(TR.intCheckoutId AS NVARCHAR(MAX)) + '0' + CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) AS strUniqueId -- ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intUniqeId
+	SELECT DISTINCT CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) AS strUniqueId
        , TR.intTrlDeptNumber
 	   , TR.strTrlDept
 	   , TR.strTrlNetwCode
@@ -14,6 +14,8 @@ FROM
 	   , TR.dblTrlLineTot
 	   , TR.intTermMsgSN
 	FROM tblSTTranslogRebates TR
-	JOIN tblSTCheckoutHeader CH ON TR.intCheckoutId = CH.intCheckoutId
-	JOIN tblSTStore ST ON CH.intStoreId = ST.intStoreId 
+	JOIN tblSTCheckoutHeader CH 
+		ON TR.intCheckoutId = CH.intCheckoutId
+	JOIN tblSTStore ST 
+		ON CH.intStoreId = ST.intStoreId 
 ) x

@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSTTranslogRebates]
 (
-	[intTranslogId] int IDENTITY(1,1) NOT NULL PRIMARY KEY, 
+	--[intTranslogId] int IDENTITY(1,1) NOT NULL PRIMARY KEY, 
+	[intTranslogId] INT NOT NULL IDENTITY,
 
 	[dtmOpenedTime] datetime NULL,
 	[dtmClosedTime] datetime NULL,
@@ -151,4 +152,11 @@
 	[ysnPMMSubmitted] BIT NOT NULL DEFAULT ((0)),
 	[ysnRJRSubmitted] BIT NOT NULL DEFAULT ((0)),
 	[intConcurrencyId] int NOT NULL,
+	CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY ([intTranslogId])
+	--CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY NONCLUSTERED ([intTranslogId])
 )
+Go
+
+CREATE NONCLUSTERED INDEX [IDX_tblSTTranslogRebates]
+		ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC, [intTermMsgSN] ASC, [intTermMsgSNterm] ASC, [intStoreId] ASC, [intCheckoutId] ASC);
+
