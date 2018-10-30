@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARTaxStagingTable]
 (
 	[intEntityCustomerId]				INT				NULL,
+	[intEntitySalespersonId]			INT				NULL,
 	[intCurrencyId]						INT				NULL,
 	[intCompanyLocationId]				INT				NULL,
 	[intShipToLocationId]				INT				NULL,
@@ -17,6 +18,10 @@
 	[strCustomerNumber]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDisplayName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strTaxNumber]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSalespersonNumber]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSalespersonName]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSalespersonDisplayName]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCurrency]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
