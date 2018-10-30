@@ -125,7 +125,8 @@ BEGIN
 		--Parse strTransactionId to get strContractNumber and intContractSeq
 		--Before dash(-) is the contract number after that is the contract sequence
 		SET @strContractNumber = SUBSTRING(@strTransactionId,0,CHARINDEX('-',@strTransactionId))
-		SET @intContractSeq = SUBSTRING(@strTransactionId,CHARINDEX('-',@strTransactionId) + 1,LEN(@strTransactionId) - CHARINDEX('-',@strTransactionId)) 
+		-- SET @intContractSeq = SUBSTRING(@strTransactionId,CHARINDEX('-',@strTransactionId) + 1,LEN(@strTransactionId) - CHARINDEX('-',@strTransactionId)) 
+		SET @intContractSeq = RIGHT(@strTransactionId , CHARINDEX ('-',REVERSE(@strTransactionId))-1)
 
 		--Get the used Commodity and Location in the Contract
 		SELECT 
