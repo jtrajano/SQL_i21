@@ -314,7 +314,8 @@ UPDATE A
 							THEN @prepay
 						WHEN 3
 							THEN @debitMemo
-						END) + (CAST(B.intRecordNumber AS NVARCHAR))
+						END) + (CAST(B.intRecordNumber AS NVARCHAR)),
+		A.ysnDiscountOverride = CASE WHEN A.dblDiscount != 0 AND A.ysnPaid = 0 THEN 1 ELSE 0 END
 FROM tblAPBill A
 INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
