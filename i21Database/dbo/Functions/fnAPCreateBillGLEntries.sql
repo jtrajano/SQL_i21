@@ -102,8 +102,8 @@ BEGIN
 											-- 												ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 											CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
 													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11, 13) 
-																							THEN CAST((Details.dblTotal / A.dblTotal) * ISNULL(A.dblPayment,0) AS DECIMAL(18,2)) * -1 
-																							ELSE CAST((Details.dblTotal / A.dblTotal) * ISNULL(A.dblPayment,0) AS DECIMAL(18,2)) END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+																							THEN CAST((Details.dblTotal / A.dblTotal) * ISNULL(A.dblPayment,0) AS DECIMAL(18,6)) * -1 
+																							ELSE CAST((Details.dblTotal / A.dblTotal) * ISNULL(A.dblPayment,0) AS DECIMAL(18,6)) END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),--ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
