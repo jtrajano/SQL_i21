@@ -242,8 +242,8 @@ WHERE
     [ysnBlended] = 0
     AND [ysnAutoBlend] = 1
     AND [strTransactionType] NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-    AND [dblUnitOnHand] = @ZeroDecimal
-    AND [intAllowNegativeInventory] = 3
+    --AND [dblUnitOnHand] = @ZeroDecimal
+    --AND [intAllowNegativeInventory] = 3
 
 WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 BEGIN
