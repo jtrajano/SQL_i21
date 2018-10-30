@@ -53,6 +53,8 @@ BEGIN TRANSACTION
 		SELECT tblSMControlStage.strControlId, 
 			tblSMControlStage.strControlName, 
 			tblSMControlStage.strControlType, 
+			tblSMControlStage.strContainer, 
+			tblSMControlStage.strTabName, 
 			tblSMScreenStage.strNamespace,
 			tblSMControlStage.strChange  
 		FROM tblSMControlStage 
@@ -64,6 +66,8 @@ BEGIN TRANSACTION
 		SELECT tblSMControl.strControlId, 
 			tblSMControl.strControlName, 
 			tblSMControl.strControlType, 
+			tblSMControl.strContainer, 
+			tblSMControl.strTabName, 
 			tblSMScreen.strNamespace 
 		FROM tblSMControl 
 		INNER JOIN tblSMScreen
@@ -126,12 +130,33 @@ BEGIN TRANSACTION
 	WHERE ISNULL(B.strControlName, '') = '' 
 
 	-- Update Tab Name
-	UPDATE D SET D.strTabName = A.strTabName
-	FROM tblSMControlStage A
-	INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
-	INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
-	INNER JOIN tblSMControl D ON C.intScreenId = D.intScreenId AND A.strControlId = D.strControlId
-	WHERE A.strTabName <> ''
+	UPDATE A SET A.strContainer = B.strContainer, A.strTabName = B.strTabName
+	FROM
+	(
+		SELECT tblSMControl.strControlId, 
+			tblSMControl.strControlName, 
+			tblSMControl.strControlType,
+			tblSMControl.strContainer,
+			tblSMControl.strTabName,  
+			tblSMScreen.strNamespace 
+		FROM tblSMControl 
+		INNER JOIN tblSMScreen 
+			ON tblSMControl.intScreenId = tblSMScreen.intScreenId
+	) A
+	INNER JOIN 
+	(
+		SELECT tblSMControlStage.strControlId, 
+			tblSMControlStage.strControlName, 
+			tblSMControlStage.strControlType, 
+			tblSMControlStage.strContainer,
+			tblSMControlStage.strTabName, 
+			tblSMScreenStage.strNamespace
+		FROM tblSMControlStage 
+		INNER JOIN tblSMScreenStage 
+			ON tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId
+		WHERE tblSMControlStage.strContainer <> '' OR tblSMControlStage.strTabName <> ''--WHERE strNamespace = 'i21.view.CompanyLocation'
+	) B
+	ON A.strControlId = B.strControlId AND A.strNamespace = B.strNamespace
 
 	-- Delete control(s) staging that doesn't have conflicts
 	DELETE FROM tblSMControlStage WHERE ISNULL(strChange, '') = ''
