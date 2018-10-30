@@ -38,7 +38,7 @@ BEGIN
 					CASE	WHEN @dblUnitQtyTo <> 0 THEN 
 								CASE	WHEN	@dblQty = 1 
 										THEN	@dblUnitQtyFrom  / @dblUnitQtyTo 
-										ELSE	CAST(@dblQty * (@dblUnitQtyFrom  / @dblUnitQtyTo) AS NUMERIC(38,20))		
+										ELSE	CAST((@dblQty * @dblUnitQtyFrom) / @dblUnitQtyTo AS NUMERIC(38,20))		
 								END					
 							ELSE NULL 
 					END
