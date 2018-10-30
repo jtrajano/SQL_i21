@@ -38,7 +38,7 @@
 				
 				DECLARE @paramdef NVARCHAR(MAX) = N'@CURRENT_IDENT nvarchar(max) OUTPUT'
 
-				declare @query nvarchar(max) =	N'SELECT @CURRENT_IDENT = @IDENT_NAME FROM ' +
+				declare @query nvarchar(max) =	N'SELECT @CURRENT_IDENT = MAX(@IDENT_NAME) FROM ' +
 												' @article  WHERE ' +
 												' @IDENT_NAME BETWEEN  @IDENT_RANGE   AND  ((@IDENT_RANGE + 100000000) - 1)';
 
