@@ -196,7 +196,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 														WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 														WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 														ELSE isnull(ysnLicensed, 0) END)
-		WHERE IT.intTransactionTypeId IN (10,15)
+		WHERE IT.intTransactionTypeId IN (10,15,47)
 			AND IT.ysnIsUnposted = 0
 			AND convert(DATETIME, CONVERT(VARCHAR(10), IT.dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 			AND C.intCommodityId = @intCommodityId 
