@@ -7147,6 +7147,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeInputAndOutputItem.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
+    <Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
