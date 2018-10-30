@@ -7157,6 +7157,7 @@
     <Build Include="dbo\Views\vyuEMSearchEntityEmailDistribution.sql" />
     <None Include="Scripts\Post-Deployment\EM\1910_Set_Contact_Location.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeInputAndOutputItem.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGenerateMNPDA46.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
