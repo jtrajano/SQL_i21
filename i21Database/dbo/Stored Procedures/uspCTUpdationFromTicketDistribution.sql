@@ -39,7 +39,9 @@ BEGIN TRY
 			@strSeqMonth			NVARCHAR(50),
 			@UseScheduleForAvlCalc	BIT = 1,
 			@dblScheduleQty			INT,
-			@dblInreaseSchBy		NUMERIC(18,6)
+			@dblInreaseSchBy		NUMERIC(18,6),
+			@ysnLoad				BIT,
+			@ysnAutoIncreaseQty		BIT = 0
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -102,9 +104,12 @@ BEGIN TRY
 	IF	ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT	@ysnAllowedToShow	=	ysnAllowedToShow,
-				@strContractStatus	=	strContractStatus 
+				@strContractStatus	=	strContractStatus,
+				@ysnLoad			=	ysnLoad
 		FROM	vyuCTContractDetailView
 		WHERE	intContractDetailId =	@intContractDetailId
+
+		SELECT  @ysnAutoIncreaseQty = CASE WHEN intStorageScheduleTypeId = -6 AND @ysnLoad = 1 THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 		IF	ISNULL(@ysnAllowedToShow,0) = 0
 		BEGIN
@@ -266,7 +271,7 @@ BEGIN TRY
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
-			IF @UseScheduleForAvlCalc = 0 AND  @dblScheduleQty < @dblNetUnits
+			IF @ysnAutoIncreaseQty = 1 AND  @dblScheduleQty < @dblNetUnits
 			BEGIN
 				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
 				EXEC	uspCTUpdateScheduleQuantity 
@@ -283,7 +288,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			IF @UseScheduleForAvlCalc = 0
+			IF @ysnAutoIncreaseQty = 1
 			BEGIN
 				SET		@dblInreaseSchBy  = @dblNetUnits - @dblAvailable
 
