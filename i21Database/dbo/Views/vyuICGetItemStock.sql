@@ -157,7 +157,10 @@ SELECT
 	m.strModule,
 	Item.ysn1099Box3,
 	Item.ysnUseWeighScales,
-	Item.ysnLotWeightsRequired	
+	Item.ysnLotWeightsRequired,
+	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
+	ysnHasSubstitute = CAST(ISNULL(ItemSubstitute.ysnHasSubstitute, 0) AS BIT),
+	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
@@ -225,3 +228,20 @@ FROM
 
 	LEFT JOIN tblICCostingMethod CostingMethod
 		ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
+
+	OUTER APPLY (
+		SELECT TOP 1 1 as ysnHasAddOn FROM tblICItemAddOn ItemAddOn 
+		WHERE ItemAddOn.intItemId = Item.intItemId
+	) ItemAddOn
+
+	OUTER APPLY(
+		SELECT TOP 1 1 as ysnHasSubstitute FROM tblICItemSubstitute ItemSubstitute
+		WHERE ItemSubstitute.intItemId = Item.intItemId
+	) ItemSubstitute
+
+	OUTER APPLY(
+		SELECT TOP 1 1 as ysnHasAddOnOtherCharge FROM tblICItemAddOn ItemAddOn
+		INNER JOIN tblICItem ChargeItem ON ChargeItem.intItemId = ItemAddOn.intItemId
+		WHERE ItemAddOn.intItemId = Item.intItemId
+		AND ChargeItem.strType = 'Other Charge'
+	) AddOnOtherCharge

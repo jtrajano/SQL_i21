@@ -248,7 +248,7 @@ BEGIN
 											ELSE Detail.dblNewOnHand - Detail.dblOnHand
 										END
 			,dblUOMQty					= StockUOM.dblUnitQty
-			,dblCost					= ISNULL(LotDistribution.dblLastCost, ItemPricing.dblLastCost)--COALESCE(Detail.dblCashPrice, ISNULL(LotDistribution.dblLastCost, ItemPricing.dblLastCost))
+			,dblCost					= COALESCE(Detail.dblCashPrice, ItemPricing.dblLastCost)--ISNULL(LotDistribution.dblLastCost, ItemPricing.dblLastCost)
 			,dblValue					= 0
 			,dblSalesPrice				= 0
 			,intCurrencyId				= @DefaultCurrencyId
