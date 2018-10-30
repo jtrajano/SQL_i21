@@ -19,7 +19,12 @@ RETURNS TABLE AS RETURN
 		,forPay.dblTotal
 		,forPay.dblDiscount
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
-							THEN dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+									THEN 
+									(
+										CASE WHEN voucher.ysnDiscountOverride = 1 THEN voucher.dblDiscount
+											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+										END
+									) 
 							ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblInterest 
 		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 
