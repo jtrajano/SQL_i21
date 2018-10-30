@@ -1190,7 +1190,7 @@ BEGIN
 			,@dblCashPrice = CF.dblCashPrice
 			,@dblUnitCashPrice = CASE 
 				WHEN strCurrency = 'USD'
-					THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+					THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,  IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId),PU.intUnitMeasureId, (
 								CASE 
 									WHEN strFLOId = '10'
 										THEN CF.dblUnitCashPrice * 10
@@ -1201,7 +1201,7 @@ BEGIN
 									ELSE CF.dblUnitCashPrice
 									END
 								) * 100)
-				ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+				ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 								CASE 
 									WHEN strFLOId = '10'
 										THEN CF.dblUnitCashPrice * 10
@@ -1276,7 +1276,7 @@ BEGIN
 				,@dblUnitCashPrice = SUM((
 						CASE 
 							WHEN CF.strCurrency = 'USD'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1287,7 +1287,7 @@ BEGIN
 												ELSE CF.dblUnitCashPrice
 												END
 											) * 100)
-							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1374,7 +1374,7 @@ BEGIN
 				,@dblUnitCashPrice = SUM((
 						CASE 
 							WHEN CF.strCurrency = 'USD'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1385,7 +1385,7 @@ BEGIN
 												ELSE CF.dblUnitCashPrice
 												END
 											) * 100)
-							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, PU.intUnitMeasureId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), (
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
