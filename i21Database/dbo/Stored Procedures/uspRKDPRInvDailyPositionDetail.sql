@@ -1036,7 +1036,7 @@ SELECT * FROM (
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 			LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
-			INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+			LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
 			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
