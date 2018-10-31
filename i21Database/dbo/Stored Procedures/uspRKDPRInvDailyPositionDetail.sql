@@ -218,7 +218,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	a.intCustomerStorageId,
 	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
-	,CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
+	,[Delivery Date] = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME,CONVERT(VARCHAR(10),gh.dtmHistoryDate,110),110) ELSE CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate,110),110) END
 	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
@@ -273,7 +273,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	a.intCustomerStorageId,
 	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
-	,CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
+	,[Delivery Date] = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME,CONVERT(VARCHAR(10),gh.dtmHistoryDate,110),110) ELSE CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate,110),110) END
 	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
