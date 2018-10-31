@@ -413,7 +413,7 @@ BEGIN
 			AND strPaymentMethod IN ('Cash', 'Check')
 
 			UPDATE tblARPOSEndOfDay
-			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance ,0) + @dblCashReceipt
+			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance ,0) + ISNULL(@dblCashReceipt,0)
 			FROM tblARPOSEndOfDay EOD
 			INNER JOIN (
 				SELECT

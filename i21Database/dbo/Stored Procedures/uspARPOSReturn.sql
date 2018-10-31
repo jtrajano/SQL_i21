@@ -456,7 +456,7 @@ AS
 
 				
 				UPDATE tblARPOSEndOfDay
-				SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance ,0) + @dblCashReturns
+				SET dblCashReturn = ISNULL(dblCashReturn ,0) + ISNULL(@dblCashReturns,0)
 				FROM tblARPOSEndOfDay EOD
 				INNER JOIN (
 					SELECT
