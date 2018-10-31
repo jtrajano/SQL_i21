@@ -13,16 +13,16 @@ BEGIN
 	DECLARE @FutureMonth INT
 	
 	SELECT TOP 1 @FutureMonth = DATEPART(mm,dtmFutureMonthsDate) FROM tblRKFuturesMonth 
-	WHERE intFutureMarketId = @FutureMarketId
-		AND DATEPART(mm,dtmFutureMonthsDate) >= @Month
-	ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
+		WHERE intFutureMarketId = @FutureMarketId
+			AND DATEPART(mm,dtmFutureMonthsDate) >= @Month
+		ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
 
 	IF(ISNULL(@FutureMonth, 0) = 0)
 	BEGIN
 		SELECT TOP 1 @FutureMonth = DATEPART(mm,dtmFutureMonthsDate) FROM tblRKFuturesMonth 
 		WHERE intFutureMarketId = @FutureMarketId
 			AND DATEPART(mm,dtmFutureMonthsDate) <= @Month
-		ORDER BY DATEPART(mm,dtmFutureMonthsDate) DESC
+		ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
 	END
 
 	RETURN @FutureMonth
