@@ -45,10 +45,10 @@
 				SET @query = REPLACE(REPLACE(REPLACE(@query,'@IDENT_NAME', @IDENT_NAME),'@IDENT_RANGE',@IDENT_RANGE),'@article',@article) --REPLACE(REPLACE(REPLACE(REPLACE(@query,'@CURRENT_IDENT',@CURRENT_IDENT),'@article',@article),'@IDENT_NAME',@IDENT_NAME),'@IDENT_RANGE',@IDENT_RANGE)
 			    exec sp_executesql @query,@paramdef,@CURRENT_IDENT OUTPUT
 			
-				IF (@CURRENT_IDENT IS NULL)
+				IF (@CURRENT_IDENT IS NULL OR @CURRENT_IDENT = 0) -- 0 means no record
 					BEGIN
 						--SET IDENTITY
-					SET @seed_query = N' DBCC CHECKIDENT('+''+ @article +'' + N',''RESEED'','+ CAST(@IDENT_RANGE AS nvarchar(MAX)) + ' )'
+					SET @seed_query = N' DBCC CHECKIDENT('+''+ @article +'' + N',''RESEED'','+ CAST((@IDENT_RANGE + 1) AS nvarchar(MAX)) + ' )'
 					
 					END
 				ELSE 
