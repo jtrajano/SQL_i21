@@ -448,27 +448,31 @@ AS
 				SET ysnReturn = 1
 				WHERE intPOSId = @intOriginalPOSTransactionId
 
+				DECLARE @dblCashReturns DECIMAL(18,6) = 0.00000
+				SELECT @dblCashReturns = SUM(dblAmount)
+				FROM #POSRETURNPAYMENTS
+				WHERE intPOSId = @intPOSId
+				AND strPaymentMethod IN ('Cash', 'Check')
+
+				
 				UPDATE tblARPOSEndOfDay
-				SET dblCashReturn = ISNULL(dblCashReturn,0) + POSPAYMENT.dblAmount
+				SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance ,0) + @dblCashReturns
 				FROM tblARPOSEndOfDay EOD
 				INNER JOIN (
-					SELECT intPOSLogId
-							,intPOSEndOfDayId
+					SELECT
+							intPOSLogId,
+							intPOSEndOfDayId
 					FROM tblARPOSLog
 				)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
-				INNER JOIN(
-					SELECT intPOSId
-							,intPOSLogId
+				INNER JOIN (
+					SELECT
+						intPOSLogId,
+						intPOSId
 					FROM tblARPOS
-				)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
-				INNER JOIN(
-					SELECT intPOSId
-					, SUM(dblAmount) AS dblAmount
-					FROM tblARPOSPayment
-					WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
-					GROUP BY intPOSId, dblAmount
-				)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
-				WHERE POS.intPOSId = @intPOSId
+				)POS ON POSLOG.intPOSLogId  = POS.intPOSLogId
+				WHERE intPOSId = @intPOSId
+
+
 			END
 			ELSE
 			BEGIN

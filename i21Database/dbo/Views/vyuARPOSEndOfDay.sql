@@ -64,12 +64,4 @@ LEFT JOIN (
 		strDescription
 	FROM tblSTStore
 ) ST ON EOD.intStoreId = ST.intStoreId
-OUTER APPLY (
- 	SELECT dblTotalCashReceipt = SUM(dblAmount)
-	FROM dbo.tblARPOS P WITH (NOLOCK)
-	INNER JOIN tblARPOSPayment POSP ON P.intPOSId = POSP.intPOSId
-	WHERE POSP.strPaymentMethod IN ('Cash','Check')
-	AND P.intPOSLogId = POSLOG.intPOSLogId
-	AND P.dblTotal > 0
-) CASHSALES
 GO
