@@ -752,7 +752,7 @@ BEGIN
 
 	-- Calculate the value to book from the cost adjustment log. 
 	SET @CurrentValue = NULL 
-	SELECT	@CurrentValue = SUM(ISNULL(dblValue, 0)) 
+	SELECT	@CurrentValue = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
 	FROM	tblICInventoryFIFOCostAdjustmentLog	
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost

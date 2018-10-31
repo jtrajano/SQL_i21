@@ -566,11 +566,16 @@ END
 BEGIN 
 	-- Calculate the value to book. 
 	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
-	SELECT	@CurrentCostAdjustment = 
-				(cb.dblStockIn - cb.dblStockOut) * cb.dblCost 
-				- (cb.dblStockIn - cb.dblStockOut) * @CostBucketOriginalCost
-	FROM	tblICInventoryLIFO cb
-	WHERE	cb.intInventoryLIFOId = @CostBucketId
+	-- SELECT	@CurrentCostAdjustment = 
+	-- 			(cb.dblStockIn - cb.dblStockOut) * cb.dblCost 
+	-- 			- (cb.dblStockIn - cb.dblStockOut) * @CostBucketOriginalCost
+	-- FROM	tblICInventoryLIFO cb
+	-- WHERE	cb.intInventoryLIFOId = @CostBucketId
+	SET 	@CurrentCostAdjustment = NULL 
+	SELECT	@CurrentCostAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
+	FROM	tblICInventoryLIFOCostAdjustmentLog	
+	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost	
 
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
 
