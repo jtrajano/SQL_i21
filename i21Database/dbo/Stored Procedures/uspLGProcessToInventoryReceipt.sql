@@ -373,7 +373,7 @@ BEGIN TRY
 				ELSE LD.intVendorEntityId
 				END
 			AND EL.ysnDefaultLocation = 1
-		WHERE L.intLoadId = @intLoadId
+		WHERE CV.intLoadId = @intLoadId
 		GROUP BY CV.intEntityVendorId
 			,CV.intItemId
 			,CV.strCostMethod
@@ -916,7 +916,7 @@ BEGIN TRY
 				END
 			AND EL.ysnDefaultLocation = 1
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
-		WHERE L.intLoadId = @intLoadId
+		WHERE CV.intLoadId = @intLoadId
 		GROUP BY CV.intEntityVendorId
 			,CV.intItemId
 			,CV.strCostMethod
