@@ -253,38 +253,38 @@ BEGIN
 	SELECT @dblTotalAmountPaid = SUM(dblAmount) FROM #POSPAYMENTS
 
 	--UPDATE OVERPAYMENTS
-	IF ISNULL(@dblTotalAmountPaid, 0) > ISNULL(@dblInvoiceTotal, 0)
-		BEGIN
-			SET @dblCounter = 0
+	--IF ISNULL(@dblTotalAmountPaid, 0) > ISNULL(@dblInvoiceTotal, 0)
+	--	BEGIN
+	--		SET @dblCounter = 0
 
-			WHILE EXISTS (SELECT TOP 1 NULL FROM #POSPAYMENTS WHERE ysnComputed = 0)
-				BEGIN
-					DECLARE @intPOSPaymentId	INT
-						  , @dblAmount			NUMERIC(18, 6)	= 0
-						  , @dblDiscrepancy		NUMERIC(18, 6)	= 0
+	--		WHILE EXISTS (SELECT TOP 1 NULL FROM #POSPAYMENTS WHERE ysnComputed = 0)
+	--			BEGIN
+	--				DECLARE @intPOSPaymentId	INT
+	--					  , @dblAmount			NUMERIC(18, 6)	= 0
+	--					  , @dblDiscrepancy		NUMERIC(18, 6)	= 0
 
-					SELECT TOP 1 @intPOSPaymentId = intPOSPaymentId
-							   , @dblAmount		  = dblAmount
-					FROM #POSPAYMENTS
-					WHERE ysnComputed = 0
+	--				SELECT TOP 1 @intPOSPaymentId = intPOSPaymentId
+	--						   , @dblAmount		  = dblAmount
+	--				FROM #POSPAYMENTS
+	--				WHERE ysnComputed = 0
 
-					IF @dblCounter + @dblAmount <= @dblInvoiceTotal
-						BEGIN
-							SET @dblCounter = @dblCounter + @dblAmount
-							UPDATE #POSPAYMENTS SET ysnComputed = 1 WHERE intPOSPaymentId = @intPOSPaymentId
-						END
-					ELSE 
-						BEGIN
-							SET @dblDiscrepancy = (@dblCounter + @dblAmount) - @dblInvoiceTotal
+	--				IF @dblCounter + @dblAmount <= @dblInvoiceTotal
+	--					BEGIN
+	--						SET @dblCounter = @dblCounter + @dblAmount
+	--						UPDATE #POSPAYMENTS SET ysnComputed = 1 WHERE intPOSPaymentId = @intPOSPaymentId
+	--					END
+	--				ELSE 
+	--					BEGIN
+	--						SET @dblDiscrepancy = (@dblCounter + @dblAmount) - @dblInvoiceTotal
 
-							UPDATE #POSPAYMENTS SET ysnComputed = 1, dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
-							UPDATE tblARPOSPayment SET dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
+	--						UPDATE #POSPAYMENTS SET ysnComputed = 1, dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
+	--						UPDATE tblARPOSPayment SET dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
 
-							DELETE FROM tblARPOSPayment WHERE intPOSPaymentId IN (SELECT intPOSPaymentId FROM #POSPAYMENTS WHERE ysnComputed = 0)
-							DELETE FROM #POSPAYMENTS WHERE ysnComputed = 0
-						END
-				END 
-		END
+	--						DELETE FROM tblARPOSPayment WHERE intPOSPaymentId IN (SELECT intPOSPaymentId FROM #POSPAYMENTS WHERE ysnComputed = 0)
+	--						DELETE FROM #POSPAYMENTS WHERE ysnComputed = 0
+	--					END
+	--			END 
+	--	END
 	
 	IF EXISTS (SELECT TOP 1 NULL FROM #POSPAYMENTS)
 		BEGIN
@@ -406,30 +406,27 @@ BEGIN
 			INNER JOIN #POSPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
 			--UPDATE POS ENDING BALANCE
+			DECLARE @dblCashReceipt DECIMAL(18,6) = 0.00000
+			SELECT @dblCashReceipt = SUM(dblAmount)
+			FROM #POSPAYMENTS
+			WHERE intPOSId = @intPOSId
+			AND strPaymentMethod IN ('Cash', 'Check')
+
 			UPDATE tblARPOSEndOfDay
-			SET
-				dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance,0) + POSPAYMENT.dblAmount
+			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance ,0) + @dblCashReceipt
 			FROM tblARPOSEndOfDay EOD
-			INNER JOIN(
+			INNER JOIN (
 				SELECT
-					intPOSLogId
-					,intPOSEndOfDayId
+						intPOSLogId,
+						intPOSEndOfDayId
 				FROM tblARPOSLog
 			)POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
-			INNER JOIN(
+			INNER JOIN (
 				SELECT
+					intPOSLogId,
 					intPOSId
-					,intPOSLogId
 				FROM tblARPOS
-			)POS ON POSLOG.intPOSLogId = POS.intPOSLogId
-			INNER JOIN(
-				SELECT
-					intPOSId
-					,SUM(dblAmount) AS dblAmount
-				FROM tblARPOSPayment
-				WHERE strPaymentMethod = 'Cash' OR strPaymentMethod = 'Check'
-				GROUP BY intPOSId, dblAmount
-			)POSPAYMENT ON POS.intPOSId = POSPAYMENT.intPOSId
-			WHERE POS.intPOSId = @intPOSId
+			)POS ON POSLOG.intPOSLogId  = POS.intPOSLogId
+			WHERE intPOSId = @intPOSId
 		END
 END
