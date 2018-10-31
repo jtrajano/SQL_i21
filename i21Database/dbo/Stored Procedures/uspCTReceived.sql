@@ -136,8 +136,8 @@ BEGIN TRY
 				5 = 'Delivery Sheet'
 			*/
 
-			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return')  OR 
-			   (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
+			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
+			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
@@ -149,9 +149,11 @@ BEGIN TRY
 
 			IF(@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
 			BEGIN
+				DECLARE @ysnRejectContainer BIT
+				SELECT @ysnRejectContainer = CASE WHEN @dblConvertedQty < 0 THEN 1 ELSE 0 END
 				EXEC uspLGRejectContainer @intLoadContainerId = @intContainerId
 										 ,@intContractDetailId = @intContractDetailId
-										 ,@ysnRejectContainer = 1
+										 ,@ysnRejectContainer = @ysnRejectContainer
 										 ,@intEntityUserId = @intUserId
 										 ,@strScreenName = 'Inventory Return'
 			END
