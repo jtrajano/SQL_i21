@@ -300,6 +300,10 @@ BEGIN TRY
 		,@intWorkOrderId
 		,8
 
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,9
+
 	UPDATE WC
 	SET intBatchId = @intBatchId
 	FROM tblMFWorkOrderConsumedLot WC
