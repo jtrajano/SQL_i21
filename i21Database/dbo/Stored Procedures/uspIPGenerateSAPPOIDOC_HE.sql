@@ -7,7 +7,6 @@ DECLARE @intMinSeq INT
 	,@intContractDetailId INT
 	,@strContractBasis NVARCHAR(100)
 	,@strContractBasisDesc NVARCHAR(500)
-	,@strSubLocation NVARCHAR(50)
 	,@strEntityNo NVARCHAR(100)
 	,@strTerm NVARCHAR(100)
 	,@strPurchasingGroup NVARCHAR(150)
@@ -72,7 +71,6 @@ DECLARE @tblHeader AS TABLE (
 	,intContractHeaderId INT
 	,strCommodityCode NVARCHAR(50)
 	,intContractFeedId INT
-	,strSubLocation NVARCHAR(50)
 	,ysnMaxPrice BIT
 	,strPrintableRemarks NVARCHAR(MAX)
 	,strSalesPerson NVARCHAR(100)
@@ -977,7 +975,6 @@ BEGIN
 		intContractHeaderId
 		,strCommodityCode
 		,intContractFeedId
-		,strSubLocation
 		,ysnMaxPrice
 		,strPrintableRemarks
 		,strSalesPerson
@@ -986,7 +983,6 @@ BEGIN
 	SELECT DISTINCT CF.intContractHeaderId
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -999,7 +995,6 @@ BEGIN
 		AND Upper(strRowState) = 'ADDED'
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -1010,7 +1005,6 @@ BEGIN
 	SELECT DISTINCT CF.intContractHeaderId
 		,strCommodityCode
 		,intContractFeedId
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -1029,7 +1023,6 @@ BEGIN
 		intContractHeaderId
 		,strCommodityCode
 		,intContractFeedId
-		,strSubLocation
 		,ysnMaxPrice
 		,strPrintableRemarks
 		,strSalesPerson
@@ -1038,7 +1031,6 @@ BEGIN
 	SELECT DISTINCT CF.intContractHeaderId
 		,strCommodityCode
 		,MAX(intContractFeedId) AS intContractFeedId
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -1054,7 +1046,6 @@ BEGIN
 			)
 	GROUP BY CF.intContractHeaderId
 		,strCommodityCode
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -1065,7 +1056,6 @@ BEGIN
 	SELECT DISTINCT CF.intContractHeaderId
 		,strCommodityCode
 		,intContractFeedId
-		,strSubLocation
 		,IsNULL(CF.ysnMaxPrice, 0)
 		,CH.strPrintableRemarks
 		,E.strExternalERPId
@@ -1103,7 +1093,6 @@ BEGIN
 	SELECT @strTblRowState = ''
 
 	SELECT @intContractHeaderId = intContractHeaderId
-		,@strSubLocation = strSubLocation
 		,@intContractFeedId = intContractFeedId
 		,@ysnMaxPrice = ysnMaxPrice
 		,@strPrintableRemarks = strPrintableRemarks
@@ -1119,7 +1108,6 @@ BEGIN
 		SELECT @strContractFeedIds = @strContractFeedIds + CONVERT(VARCHAR, intContractFeedId) + ','
 		FROM tblCTContractFeed
 		WHERE intContractHeaderId = @intContractHeaderId
-			AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
 			AND ISNULL(strFeedStatus, '') = ''
 			AND strItemNo = @strContractItemNo
 
@@ -1135,7 +1123,6 @@ BEGIN
 				SELECT TOP 1 ISNULL(strERPPONumber, '')
 				FROM tblCTContractFeed
 				WHERE intContractHeaderId = @intContractHeaderId
-					AND ISNULL(strSubLocation, '') = ISNULL(@strSubLocation, '')
 					AND ISNULL(strFeedStatus, '') = ''
 					AND strItemNo = @strContractItemNo
 				) = ''
@@ -1172,7 +1159,6 @@ BEGIN
 			,@intContractHeaderId = CF.intContractHeaderId
 			,@intContractDetailId = CF.intContractDetailId
 			,@strContractBasis = CF.strContractBasis
-			,@strSubLocation = CF.strSubLocation
 			,@strEntityNo = CF.strVendorAccountNum
 			,@strPurchasingGroup = CF.strPurchasingGroup
 			,@strContractNumber = CF.strContractNumber
@@ -1257,7 +1243,6 @@ BEGIN
 			SELECT @intContractFeedId = MAX(CF.intContractFeedId)
 				,@intContractDetailId = MAX(CF.intContractDetailId)
 				,@strContractBasis = CF.strContractBasis
-				,@strSubLocation = CF.strSubLocation
 				,@strEntityNo = CF.strVendorAccountNum
 				,@strPurchasingGroup = CF.strPurchasingGroup
 				,@strContractNumber = CF.strContractNumber
@@ -1333,7 +1318,6 @@ BEGIN
 				AND IsNULL(strFeedStatus, '') = ''
 				AND UPPER(strRowState) <> 'DELETE'
 			GROUP BY CF.strContractBasis
-				,CF.strSubLocation
 				,CF.strVendorAccountNum
 				,CF.strPurchasingGroup
 				,CF.strContractNumber
@@ -1355,7 +1339,6 @@ BEGIN
 			SELECT @intContractFeedId = MAX(CF.intContractFeedId)
 				,@intContractDetailId = MAX(CF.intContractDetailId)
 				,@strContractBasis = CF.strContractBasis
-				,@strSubLocation = CF.strSubLocation
 				,@strEntityNo = CF.strVendorAccountNum
 				,@strPurchasingGroup = CF.strPurchasingGroup
 				,@strContractNumber = CF.strContractNumber
@@ -1430,7 +1413,6 @@ BEGIN
 				AND CF.strItemNo = @strContractItemNo
 				AND IsNULL(CF.strFeedStatus, '') = ''
 			GROUP BY CF.strContractBasis
-				,CF.strSubLocation
 				,CF.strVendorAccountNum
 				,CF.strPurchasingGroup
 				,CF.strContractNumber
@@ -1605,7 +1587,7 @@ BEGIN
 	BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEM>'
 		SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo, '-', ''), '')) + '</MATERIAL>'
-		SET @strItemXml += '<PLANT>' + ISNULL(@strSubLocation, '') + '</PLANT>'
+		SET @strItemXml += '<PLANT>' + ''+ '</PLANT>'
 		SET @strItemXml += '<TRACKINGNO>' + ISNULL(RIGHT('000' + CONVERT(VARCHAR, @intContractSeq), 3), '') + '</TRACKINGNO>'
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
