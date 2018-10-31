@@ -23,10 +23,7 @@ BEGIN TRY
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 	DECLARE @StorageChargeDate DATETIME
-	DECLARE @dblStorageUnits DECIMAL(24, 10)
-	DECLARE @intStorageChargeItemId INT
-	DECLARE @strStorageChargeItemNo NVARCHAR(MAX)
-	DECLARE @IntCommodityId INT
+	DECLARE @dblStorageUnits DECIMAL(24, 10)	
 	DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
 	--DECLARE @strUserName NVARCHAR(40)
@@ -84,7 +81,8 @@ BEGIN TRY
 		AND intItemId = @intItemId
 		AND intStorageTypeId = @intStorageTypeId
 		AND ysnDPOwnedType = 0
-		AND ysnCustomerStorage = 0
+		--AND ysnCustomerStorage = 0
+		AND ysnShowInStorage = 1
 		AND intCompanyLocationId = CASE 
 										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
 										ELSE intCompanyLocationId 
@@ -101,32 +99,11 @@ BEGIN TRY
 																										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
 																										ELSE intCompanyLocationId 
 																								   END
+																		AND ysnShowInStorage = 1
 				      )
 		BEGIN
 			RAISERROR ('There is no available grain balance for this Entity,Item and Storage Type.',16,1);
 		END
-		
-		SELECT @IntCommodityId = C.intCommodityId
-		FROM tblICCommodity C
-		JOIN tblICItem Item ON Item.intCommodityId = C.intCommodityId
-		WHERE  Item.intItemId = @intItemId
-		
-		IF EXISTS (SELECT 1 FROM tblICItem WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId = @IntCommodityId)
-		BEGIN
-			SELECT TOP 1 @intStorageChargeItemId = intItemId
-			FROM tblICItem
-			WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId = @IntCommodityId
-		END
-		ELSE IF EXISTS (SELECT 1 FROM tblICItem WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId IS NULL)
-		BEGIN
-			SELECT TOP 1 @intStorageChargeItemId = intItemId
-			FROM tblICItem
-			WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId IS NULL
-		END
-		
-		SELECT @strStorageChargeItemNo = strItemNo
-		FROM tblICItem
-		WHERE intItemId = @intStorageChargeItemId
 				
 		---1.Choosing the Grain Tickets Based ON FIFO(Delivery Date).
 		WHILE @dblUnitsConsumed > 0
@@ -152,7 +129,8 @@ BEGIN TRY
 												ELSE intCompanyLocationId 
 										   END
 				AND ysnDPOwnedType = 0
-				AND ysnCustomerStorage = 0
+				--AND ysnCustomerStorage = 0
+				AND ysnShowInStorage = 1
 				AND dtmDeliveryDate IS NOT NULL
 				AND intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM @StorageTicketInfoByFIFO)
 			ORDER BY dtmDeliveryDate,intCustomerStorageId
@@ -216,54 +194,6 @@ BEGIN TRY
 				FROM tblGRCustomerStorage a
 				JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
 				WHERE [intCustomerStorageId] = @intCustomerStorageId
-			END
-
-		 --2. Storage Charge Item
-		 
-			IF @dblStorageDueAmount + @dblStorageDueTotalAmount > 0 
-			BEGIN
-									
-				IF @intStorageChargeItemId IS NULL
-				RAISERROR ('There should be atleast One Storage charge Cost Type Item.',16,1);
-							
-			IF NOT EXISTS (
-						SELECT 1
-						FROM @StorageTicketInfoByFIFO
-						WHERE [intCustomerStorageId] = @intCustomerStorageId 
-							AND [strItemType] = 'Storage Charge'
-							AND [intItemId] = @intStorageChargeItemId						
-						)
-				BEGIN
-					DELETE FROM @StorageTicketInfoByFIFO WHERE [intItemId] = @intStorageChargeItemId
-					
-					INSERT INTO @StorageTicketInfoByFIFO 
-					(
-						[intCustomerStorageId]
-						,[strStorageTicketNumber]
-						,[dblOpenBalance]
-						,[intUnitMeasureId]
-						,[strUnitMeasure]
-						,[strItemType]
-						,[intItemId]
-						,[strItem]
-						,[dblCharge]
-						,[dblFlatFee]
-					)
-					SELECT 
-						 @intCustomerStorageId
-						,a.[strStorageTicketNumber]
-						,@dblStorageUnits
-						,a.[intUnitMeasureId]
-						,b.[strUnitMeasure]
-						,'Storage Charge'
-						,@intStorageChargeItemId
-						,@strStorageChargeItemNo
-						,@dblStorageDueAmount + @dblStorageDueTotalAmount --(Unpaid:@dblStorageDueAmount+ Additional :@dblStorageDueTotalAmount)
-						,@dblFlatFeeTotal				
-					FROM tblGRCustomerStorage a
-					JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
-					WHERE [intCustomerStorageId] = @intCustomerStorageId
-				END
 			END
 
 			--3. Fee Item

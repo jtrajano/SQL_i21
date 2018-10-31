@@ -15,6 +15,7 @@
 	[intSiteId]							INT				NULL,
 	[intItemId]							INT				NULL,
 	[intTicketId]						INT				NULL,
+	[strRequestId]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyInfo]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

@@ -72,14 +72,46 @@ AS
 			ItemUOM.ysnStockUnit,
 			ItemUOM.intItemId,
 			ItemUOM.intItemUOMId,
-			StockUnit.dblOnOrder,
-			StockUnit.dblConsignedPurchase,
-			StockUnit.dblConsignedSale,
-			StockUnit.dblInTransitInbound,
-			StockUnit.dblInTransitOutbound,
-			StockUnit.dblOrderCommitted,
-			StockUnit.dblUnitReserved,
-			StockUnit.dblUnitStorage,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblOnOrder - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblOnOrder)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblOnOrder
+			END AS dblOnOrder, 
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblConsignedPurchase - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblConsignedPurchase)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblConsignedPurchase
+			END AS dblConsignedPurchase,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblConsignedSale - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblConsignedSale)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblConsignedSale
+			END AS dblConsignedSale,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblInTransitInbound - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblInTransitInbound)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblInTransitInbound
+			END AS dblInTransitInbound,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblInTransitOutbound - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblInTransitOutbound)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblInTransitOutbound
+			END AS dblInTransitOutbound,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblOrderCommitted - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblOrderCommitted)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblOrderCommitted
+			END AS dblOrderCommitted,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblUnitReserved - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblUnitReserved)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblUnitReserved
+			END AS dblUnitReserved,
+			CASE WHEN ItemUOM.ysnStockUnit = 1 
+            THEN ROUND(StockUnit.dblUnitStorage - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
+                        StockUnit.intItemUOMId, StockUOM.dblUnitStorage)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)
+            ELSE StockUOM.dblUnitStorage
+			END AS dblUnitStorage,
 			CASE WHEN ItemUOM.ysnStockUnit = 1 
             THEN ROUND(StockUnit.dblOnHand - ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, 
                         StockUnit.intItemUOMId, StockUOM.dblOnHand)) OVER (PARTITION BY StockUnit.intItemLocationId), 0), 2)

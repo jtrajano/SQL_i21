@@ -347,11 +347,48 @@ BEGIN TRY
 				AND ysnInventoryCost = 1
 				AND intChargeId IN (SELECT DISTINCT intItemId FROM @voucherDetailData WHERE ysnInventoryCost = 1)
 
-			EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-				,@vendorId = @intVendorEntityId
-				,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
-				,@shipTo = @intShipTo
-				,@billId = @intBillId OUTPUT
+			IF EXISTS(SELECT TOP 1 1 FROM @voucherDetailReceiptCharge)
+			BEGIN
+				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
+					,@vendorId = @intVendorEntityId
+					,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
+					,@shipTo = @intShipTo
+					,@billId = @intBillId OUTPUT
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @VoucherDetailLoadNonInv (
+					intContractHeaderId
+					,intContractDetailId
+					,intItemId
+					,intAccountId
+					,intLoadDetailId
+					,dblQtyReceived
+					,dblCost
+					,intCostUOMId
+					,intItemUOMId
+					)
+				SELECT intContractHeaderId
+					,intContractDetailId
+					,intItemId
+					,ISNULL(intAccountId, 0)
+					,intLoadDetailId
+					,dblQtyReceived
+					,dblCost
+					,intCostUOMId
+					,intItemUOMId
+				FROM @voucherDetailData
+
+				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
+					,@vendorId = @intVendorEntityId
+					,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
+					,@shipTo = @intShipTo
+					,@billId = @intBillId OUTPUT
+			END
+
+			UPDATE tblAPBillDetail
+			SET intLoadId = @intLoadId
+			WHERE intBillId = @intBillId
 				
 			UPDATE tblLGLoadWarehouseServices
 			SET intBillId = @intBillId

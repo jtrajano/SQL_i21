@@ -184,6 +184,7 @@ BEGIN TRY
 		,dblBasis DECIMAL(24, 10)
 		,intContractUOMId INT NULL
 		,dblCostUnitQty DECIMAL(24, 10) NULL
+		,dblSettleContractUnits DECIMAL(24,10) NULL
 	)
 
 	/*	intItemType
@@ -417,6 +418,7 @@ BEGIN TRY
 					,intItemType
 					,IsProcessed
 					,intTicketDiscountId
+					,dblSettleContractUnits
 				)
 				SELECT 
 					 intCustomerStorageId  = CS.intCustomerStorageId
@@ -435,6 +437,7 @@ BEGIN TRY
 					,intItemType           = 3 
 					,IsProcessed           = 0
 					,intTicketDiscountId   = QM.intTicketDiscountId
+					,dblSettleContractUnits = SC.dblContractUnits
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -1226,7 +1229,7 @@ BEGIN TRY
 
 				SET @intCreatedBillId = 0
 				UPDATE a
-				SET a.dblUnits = ISNULL(b.dblSettleUnits,0)
+				SET a.dblUnits = CASE WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN a.dblSettleContractUnits ELSE ISNULL(b.dblSettleUnits,0)  END
 				FROM @SettleVoucherCreate a
 				LEFT JOIN 
 				(

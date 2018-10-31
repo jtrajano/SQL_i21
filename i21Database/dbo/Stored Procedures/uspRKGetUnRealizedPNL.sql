@@ -12,6 +12,10 @@ BEGIN TRY
   
   DECLARE @DefaultCompanyId	 INT
   DECLARE @DefaultCompanyName	 NVARCHAR(200)
+  DECLARE @ysnForwardCurveDifferential BIT
+
+  SELECT @ysnForwardCurveDifferential = ISNULL(ysnEnterForwardCurveForMarketBasisDifferential,0) 
+  FROM tblRKCompanyPreference
   
   IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
   BEGIN
@@ -55,8 +59,10 @@ BEGIN TRY
 	  
 	  DECLARE @tblContractCost TABLE 
 	  (
-	  	 intContractDetailId	 INT
-	  	,dblTotalCost		     NUMERIC(38,20)
+	  	   intContractDetailId	 INT
+		  ,dblRate				 NUMERIC(18, 6)
+		  ,ysnAccrue			 BIT
+	  	  ,dblTotalCost		     NUMERIC(38,20)
 	  )
 	  
 	  DECLARE @tblFutureMonthByMarket TABLE 
@@ -66,6 +72,12 @@ BEGIN TRY
 	  	 ,intFutureMonthId	  NUMERIC(38,20)
 	  )
 	  
+	  DECLARE @tblFutureSettlementMonth TABLE 
+	  (
+	  	  Row_Num			  INT
+		 ,intFutureMarketId	  INT
+	  	 ,intFutureMonthId	  NUMERIC(38,20)
+	  )
 
 	 DECLARE @tblUnRealizedPNL AS TABLE 
 	 (
@@ -188,6 +200,21 @@ BEGIN TRY
 		INSERT INTO @tblFutureMonthByMarket(Row_Num,intFutureMarketId,intFutureMonthId)
 		SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE WHERE Row_Num = 1
 
+		 ;WITH CTE1
+		AS (
+		SELECT ROW_NUMBER() OVER (
+							PARTITION BY intFutureMarketId ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC
+						) AS Row_Num
+		,intFutureMarketId
+		,intFutureMonthId
+		FROM tblRKFuturesMonth 
+		WHERE ysnExpired = 0
+		AND  CONVERT(DATETIME,'01 '+strFutureMonth) > GETDATE()
+		)
+		
+		INSERT INTO @tblFutureSettlementMonth (Row_Num,intFutureMarketId,intFutureMonthId)
+		SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE1 WHERE Row_Num = 1
+
 	INSERT INTO @tblUnRealizedPNL
 	(
 		 strType							
@@ -289,7 +316,7 @@ BEGIN TRY
 		,intCompanyId
 		,strCompanyName					
 	)
-		  ---Contract---
+		---Contract---
 		 SELECT 
 		 strType									= 'Unrealized'									
 		,intContractTypeId							= CH.intContractTypeId
@@ -371,7 +398,7 @@ BEGIN TRY
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
 		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
-		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strFuturesPriceUOM							= CY.strCurrency+'/'+PUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
 		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
@@ -400,7 +427,7 @@ BEGIN TRY
 		,intContractStatusId						= CD.intContractStatusId
 		,intPricingTypeId							= CD.intPricingTypeId
 		,strPricingType								= PT.strPricingType
-		,strPricingStatus							= CASE WHEN CD.intPricingTypeId = 1 THEN 'Priced'ELSE '' END
+		,strPricingStatus							= CASE WHEN CD.intPricingTypeId = 1 THEN 'Priced' ELSE '' END
 		,intCompanyId								= Company.intMultiCompanyId
 		,strCompanyName								= Company.strCompanyName
 
@@ -421,10 +448,11 @@ BEGIN TRY
 		JOIN tblICItem							Item			 ON Item.intItemId					 = CD.intItemId		
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
-																	AND	CA.strType						 = 'Origin'
-        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID						=	CA.intCountryID
+																	AND	CA.strType					 = 'Origin'
+        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 =	CA.intCountryID
 		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
 		LEFT JOIN tblCTPriceFixation			PF				 ON PF.intContractDetailId			 = CD.intContractDetailId
 		LEFT JOIN tblCTBook						Book			 ON Book.intBookId					 = CD.intBookId
@@ -458,9 +486,8 @@ BEGIN TRY
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
 								      END		
-		AND intContractStatusId NOT IN (2,3,6)
-		--AND dtmContractDate <= @dtmTransactionDateUpTo --@intCompanyId
-		AND (ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)) >0 --- Added Condition to  Check Balance minus Schedule Should be greater than Zero.
+		AND intContractStatusId NOT IN (2,3,6)		
+		AND (ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)) >0 
 		AND ISNULL(CH.intCompanyId,0) = CASE 
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
 										ELSE @intCompanyId
@@ -545,7 +572,7 @@ BEGIN TRY
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
 		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
-		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strFuturesPriceUOM							= CY.strCurrency+'/'+PUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
 		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
@@ -599,6 +626,7 @@ BEGIN TRY
 		JOIN tblICItem							Item			 ON  Item.intItemId					 = CD.intItemId
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
 		LEFT JOIN tblARInvoiceDetail			InvoiceDetail    ON InvoiceDetail.intLoadDetailId    = LD.intLoadDetailId
 		LEFT JOIN tblARInvoice				    Invoice			 ON Invoice.intInvoiceId			 = InvoiceDetail.intInvoiceId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
@@ -641,9 +669,354 @@ BEGIN TRY
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
 										ELSE @intCompanyId
 								       END								  		
-		----AND intContractStatusId NOT IN (2,3,6)
-		--AND dtmContractDate <= @dtmTransactionDateUpTo
+	  UNION
+	---Drop Ship Purchase-----		
+		SELECT 
+		 strType									= CASE WHEN ISNULL(Invoice.strType,'')='Provisional' THEN 'Realized Not Fixed' ELSE 'Unrealized' END									
+		,intContractTypeId							= CH.intContractTypeId
+		,intContractHeaderId						= CH.intContractHeaderId
+		,strContractType							= TP.strContractType
+		,strContractNumber							= CH.strContractNumber
+		,intContractBasisId							= CH.intContractBasisId
+		,intTransactionType							= 2
+		,strTransaction								= '2.In-transit'
+		,strTransactionType							= 'In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')'
+		,intContractDetailId						= CD.intContractDetailId
+		,intCurrencyId								= CD.intCurrencyId	
+		,intFutureMarketId							= CD.intFutureMarketId
+		,strFutureMarket							= Market.strFutMarketName
+		,intFutureMarketUOMId						= NULL
+		,intFutureMarketUnitMeasureId				= Market.intUnitMeasureId
+		,strFutureMarketUOM							= MarketUOM.strUnitMeasure
+		,intMarketCurrencyId						= Market.intCurrencyId
+		,intFutureMonthId							= FMonth.intFutureMonthId
+		,strFutureMonth								= FMonth.strFutureMonth
+		,intItemId									= CD.intItemId
+		,intBookId									= Book.intBookId
+		,strBook									= Book.strBook
+		,strSubBook									= SubBook.strSubBook
+		,intCommodityId								= Commodity.intCommodityId
+		,strCommodity								= Commodity.strDescription
+		,dtmReceiptDate								= NULL		
+		,dtmContractDate							= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
+		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
+		,intContractSeq								= CD.intContractSeq
+		,strEntityName								= Entity.strEntityName
+		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
+		,dblQuantity								= SUM(LD.dblQuantity)  OVER (PARTITION BY CD.intContractDetailId)
+		,intQuantityUOMId							= CD.intItemUOMId
+		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
+		,strQuantityUOM								= IUM.strUnitMeasure
+		,dblWeight									= CD.dblNetWeight
+		,intWeightUOMId								= CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
+		,strWeightUOM								= WUM.strUnitMeasure
+		,dblBasis									= CD.dblBasis
+		,intBasisUOMId								= CD.intBasisUOMId
+		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
+		,strBasisUOM								= BUOM.strUnitMeasure
+		,dblFutures									= ISNULL(CD.dblFutures,0)
+		,dblCashPrice								= ISNULL(CD.dblCashPrice,0)
+		,intPriceUOMId								= CD.intPriceItemUOMId
+		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
+		,strContractPriceUOM						= PUOM.strUnitMeasure
+		,intOriginId								= Item.intOriginId
+		,strOrigin									= ISNULL(RY.strCountry, OG.strCountry)
+		,strItemDescription							= Item.strDescription
+		,strCropYear								= CropYear.strCropYear
+		,strProductionLine							= CPL.strDescription
+		,strCertification							= NULL
+		,strTerms									= ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'') 
+		,strPosition								= PO.strPosition
+		,dtmStartDate								= CD.dtmStartDate
+		,dtmEndDate									= CD.dtmEndDate
+		,strBLNumber								= L.strBLNumber
+		,dtmBLDate									= L.dtmBLDate
+		,strAllocationRefNo							= NULL
+		,strAllocationStatus						= CASE
+													  	WHEN CH.intContractTypeId					 =   1	THEN 'L'
+													  	WHEN CH.intContractTypeId					 =   2	THEN 'S'
+													  END
+		,strPriceTerms								= CASE 
+														WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
+																								+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+
+														ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
+														+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
+														+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+													 END
+		,dblContractDifferential					= CD.dblBasis
+		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
+		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
+		,strFuturesPriceUOM							= CY.strCurrency+'/'+PUOM.strUnitMeasure
+		,strFixationDetails							= NULL
+		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
+		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
+		,dblContractInvoiceValue					= NULL
+		,dblSecondaryCosts							= 0
+		,dblCOGSOrNetSaleValue						= NULL
+		,dblInvoicePrice							= NULL
+		,dblInvoicePaymentPrice						= NULL
+		,strInvoicePriceUOM							= NULL
+		,dblInvoiceValue							= NULL
+		,strInvoiceCurrency							= NULL
+		,dblNetMarketValue							= NULL
+		,dtmRealizedDate							= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)
+		,dblRealizedQty								= NULL
+		,dblProfitOrLossValue						= NULL
+		,dblPAndLinMarketUOM						= NULL
+		,dblPAndLChangeinMarketUOM					= NULL
+		,strMarketCurrencyUOM						= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strTrader									= SP.strName 
+		,strFixedBy									= CD.strFixationBy
+		,strInvoiceStatus							= Invoice.strType
+		,strWarehouse								= NULL
+		,strCPAddress								= Entity.strEntityAddress 
+		,strCPCountry								= Entity.strEntityCountry	
+		,strCPRefNo									= CH.strCustomerContract
+		,intContractStatusId						= CD.intContractStatusId
+		,intPricingTypeId							= CD.intPricingTypeId
+		,strPricingType								= PT.strPricingType
+		,strPricingStatus							= CASE WHEN CD.intPricingTypeId = 1 THEN 'Priced'ELSE '' END
+		,intCompanyId								= Company.intMultiCompanyId
+		,strCompanyName								= Company.strCompanyName
+
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intPurchaseSale = 3
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId	= LD.intPContractDetailId
+		JOIN tblCTContractHeader				CH				 ON  CH.intContractHeaderId			 = CD.intContractHeaderId	
+		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = CH.intCommodityId
+		JOIN tblCTContractType					TP				 ON  TP.intContractTypeId			 = CH.intContractTypeId		
+		JOIN vyuCTEntity						Entity			 ON  Entity.intEntityId				 = CH.intEntityId
+																	 AND Entity.strEntityType = CASE 
+																								  WHEN CH.intContractTypeId=1 THEN 'Vendor'
+																								  WHEN CH.intContractTypeId=2 THEN 'Customer'
+																								END
+		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
+		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
+		JOIN tblSMCurrency						MarketCY		 ON	 MarketCY.intCurrencyID			 = Market.intCurrencyId
+		JOIN tblICUnitMeasure					MarketUOM		 ON	 MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId		
+		JOIN tblICItem							Item			 ON  Item.intItemId					 = CD.intItemId
+		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
+		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
+		LEFT JOIN tblARInvoiceDetail			InvoiceDetail    ON InvoiceDetail.intLoadDetailId    = LD.intLoadDetailId
+		LEFT JOIN tblARInvoice				    Invoice			 ON Invoice.intInvoiceId			 = InvoiceDetail.intInvoiceId
+		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
+		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
+																	AND	CA.strType					 = 'Origin'
+        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 =	CA.intCountryID
+		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
+		LEFT JOIN tblCTPriceFixation			PF				 ON PF.intContractDetailId			 = CD.intContractDetailId
+		LEFT JOIN tblCTBook						Book			 ON Book.intBookId					 = CD.intBookId
+		LEFT JOIN tblCTSubBook					SubBook			 ON SubBook.intSubBookId			 = CD.intSubBookId
+		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
+		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId	
+		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
+		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
+		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
+		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
+		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
+		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
+		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
+		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
+		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
+		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
+		LEFT JOIN	tblICItemContract			IC				 ON	IC.intItemContractId			 = CD.intItemContractId		
+		LEFT JOIN	tblSMCountry				RY				 ON	RY.intCountryID					 = IC.intCountryId
+		LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = L.intCompanyId		
+
+		WHERE CH.intCommodityId = CASE 																
+								  	WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
+								  	ELSE @intCommodityId
+								  END
+		AND CL.intCompanyLocationId = CASE 
+										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
+										ELSE @intLocationId
+								  END
+		AND ISNULL(L.intCompanyId,0) = CASE 
+										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
+										ELSE @intCompanyId
+								       END	
 	 UNION
+	---DROP SHIP SALE-----
+		SELECT 
+		 strType									= CASE WHEN ISNULL(Invoice.strType,'')='Provisional' THEN 'Realized Not Fixed' ELSE 'Unrealized' END									
+		,intContractTypeId							= CH.intContractTypeId
+		,intContractHeaderId						= CH.intContractHeaderId
+		,strContractType							= TP.strContractType
+		,strContractNumber							= CH.strContractNumber
+		,intContractBasisId							= CH.intContractBasisId
+		,intTransactionType							= 2
+		,strTransaction								= '2.In-transit'
+		,strTransactionType							= 'In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')'
+		,intContractDetailId						= CD.intContractDetailId
+		,intCurrencyId								= CD.intCurrencyId	
+		,intFutureMarketId							= CD.intFutureMarketId
+		,strFutureMarket							= Market.strFutMarketName
+		,intFutureMarketUOMId						= NULL
+		,intFutureMarketUnitMeasureId				= Market.intUnitMeasureId
+		,strFutureMarketUOM							= MarketUOM.strUnitMeasure
+		,intMarketCurrencyId						= Market.intCurrencyId
+		,intFutureMonthId							= FMonth.intFutureMonthId
+		,strFutureMonth								= FMonth.strFutureMonth
+		,intItemId									= CD.intItemId
+		,intBookId									= Book.intBookId
+		,strBook									= Book.strBook
+		,strSubBook									= SubBook.strSubBook
+		,intCommodityId								= Commodity.intCommodityId
+		,strCommodity								= Commodity.strDescription
+		,dtmReceiptDate								= NULL		
+		,dtmContractDate							= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
+		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
+		,intContractSeq								= CD.intContractSeq
+		,strEntityName								= Entity.strEntityName
+		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
+		,dblQuantity								= SUM(LD.dblQuantity)  OVER (PARTITION BY CD.intContractDetailId)
+		,intQuantityUOMId							= CD.intItemUOMId
+		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
+		,strQuantityUOM								= IUM.strUnitMeasure
+		,dblWeight									= CD.dblNetWeight
+		,intWeightUOMId								= CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
+		,strWeightUOM								= WUM.strUnitMeasure
+		,dblBasis									= CD.dblBasis
+		,intBasisUOMId								= CD.intBasisUOMId
+		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
+		,strBasisUOM								= BUOM.strUnitMeasure
+		,dblFutures									= ISNULL(CD.dblFutures,0)
+		,dblCashPrice								= ISNULL(CD.dblCashPrice,0)
+		,intPriceUOMId								= CD.intPriceItemUOMId
+		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
+		,strContractPriceUOM						= PUOM.strUnitMeasure
+		,intOriginId								= Item.intOriginId
+		,strOrigin									= ISNULL(RY.strCountry, OG.strCountry)
+		,strItemDescription							= Item.strDescription
+		,strCropYear								= CropYear.strCropYear
+		,strProductionLine							= CPL.strDescription
+		,strCertification							= NULL
+		,strTerms									= ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'') 
+		,strPosition								= PO.strPosition
+		,dtmStartDate								= CD.dtmStartDate
+		,dtmEndDate									= CD.dtmEndDate
+		,strBLNumber								= L.strBLNumber
+		,dtmBLDate									= L.dtmBLDate
+		,strAllocationRefNo							= NULL
+		,strAllocationStatus						= CASE
+													  	WHEN CH.intContractTypeId					 =   1	THEN 'L'
+													  	WHEN CH.intContractTypeId					 =   2	THEN 'S'
+													  END
+		,strPriceTerms								= CASE 
+														WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
+																								+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+
+														ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
+														+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
+														+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+													 END
+		,dblContractDifferential					= CD.dblBasis
+		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
+		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
+		,strFuturesPriceUOM							= CY.strCurrency+'/'+PUOM.strUnitMeasure
+		,strFixationDetails							= NULL
+		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
+		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
+		,dblContractInvoiceValue					= NULL
+		,dblSecondaryCosts							= 0
+		,dblCOGSOrNetSaleValue						= NULL
+		,dblInvoicePrice							= NULL
+		,dblInvoicePaymentPrice						= NULL
+		,strInvoicePriceUOM							= NULL
+		,dblInvoiceValue							= NULL
+		,strInvoiceCurrency							= NULL
+		,dblNetMarketValue							= NULL
+		,dtmRealizedDate							= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)
+		,dblRealizedQty								= NULL
+		,dblProfitOrLossValue						= NULL
+		,dblPAndLinMarketUOM						= NULL
+		,dblPAndLChangeinMarketUOM					= NULL
+		,strMarketCurrencyUOM						= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strTrader									= SP.strName 
+		,strFixedBy									= CD.strFixationBy
+		,strInvoiceStatus							= Invoice.strType
+		,strWarehouse								= NULL
+		,strCPAddress								= Entity.strEntityAddress 
+		,strCPCountry								= Entity.strEntityCountry	
+		,strCPRefNo									= CH.strCustomerContract
+		,intContractStatusId						= CD.intContractStatusId
+		,intPricingTypeId							= CD.intPricingTypeId
+		,strPricingType								= PT.strPricingType
+		,strPricingStatus							= CASE WHEN CD.intPricingTypeId = 1 THEN 'Priced'ELSE '' END
+		,intCompanyId								= Company.intMultiCompanyId
+		,strCompanyName								= Company.strCompanyName
+
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intPurchaseSale = 3
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+		JOIN tblCTContractHeader				CH				 ON  CH.intContractHeaderId			 = CD.intContractHeaderId	
+		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = CH.intCommodityId
+		JOIN tblCTContractType					TP				 ON  TP.intContractTypeId			 = CH.intContractTypeId		
+		JOIN vyuCTEntity						Entity			 ON  Entity.intEntityId				 = CH.intEntityId
+																	 AND Entity.strEntityType = CASE 
+																								  WHEN CH.intContractTypeId=1 THEN 'Vendor'
+																								  WHEN CH.intContractTypeId=2 THEN 'Customer'
+																								END
+		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
+		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
+		JOIN tblSMCurrency						MarketCY		 ON	 MarketCY.intCurrencyID			 = Market.intCurrencyId
+		JOIN tblICUnitMeasure					MarketUOM		 ON	 MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId		
+		JOIN tblICItem							Item			 ON  Item.intItemId					 = CD.intItemId
+		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
+		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
+		LEFT JOIN tblARInvoiceDetail			InvoiceDetail    ON InvoiceDetail.intLoadDetailId    = LD.intLoadDetailId
+		LEFT JOIN tblARInvoice				    Invoice			 ON Invoice.intInvoiceId			 = InvoiceDetail.intInvoiceId
+		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
+		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
+																	AND	CA.strType					 = 'Origin'
+        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 =	CA.intCountryID
+		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
+		LEFT JOIN tblCTPriceFixation			PF				 ON PF.intContractDetailId			 = CD.intContractDetailId
+		LEFT JOIN tblCTBook						Book			 ON Book.intBookId					 = CD.intBookId
+		LEFT JOIN tblCTSubBook					SubBook			 ON SubBook.intSubBookId			 = CD.intSubBookId
+		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
+		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId	
+		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
+		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
+		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
+		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
+		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
+		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
+		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
+		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
+		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
+		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
+		LEFT JOIN	tblICItemContract			IC	ON	IC.intItemContractId						 = CD.intItemContractId		
+		LEFT JOIN	tblSMCountry				RY	ON	RY.intCountryID								 = IC.intCountryId
+		LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = L.intCompanyId		
+
+		WHERE CH.intCommodityId = CASE 																
+								  	WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
+								  	ELSE @intCommodityId
+								  END
+		AND CL.intCompanyLocationId = CASE 
+										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
+										ELSE @intLocationId
+								  END
+		AND ISNULL(L.intCompanyId,0) = CASE 
+										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
+										ELSE @intCompanyId
+								       END								  		
+	  UNION									   		
+	
 	--Inventory
 	 SELECT 
 		 strType									= 'Unrealized'									
@@ -722,7 +1095,7 @@ BEGIN TRY
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
 		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
-		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strFuturesPriceUOM							= CY.strCurrency+'/'+PUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
 		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
@@ -787,6 +1160,7 @@ BEGIN TRY
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
 		JOIN tblSMCompanyLocationSubLocation	SubLocation		 ON	 SubLocation.intCompanyLocationSubLocationId = l.intSubLocationId
+		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
 																	AND	CA.strType					 = 'Origin'
@@ -954,10 +1328,11 @@ BEGIN TRY
 		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = MarketMapping.intFutureMarketId
 		JOIN tblSMCurrency						FCY				 ON	FCY.intCurrencyID				 = Market.intCurrencyId
 		JOIN tblICUnitMeasure					MarketUOM		 ON	 MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
-		JOIN @tblFutureMonthByMarket			CTE												 ON CTE.intFutureMarketId = Market.intFutureMarketId 
+		JOIN @tblFutureMonthByMarket			CTE				 ON CTE.intFutureMarketId			 = Market.intFutureMarketId 
 		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CTE.intFutureMonthId 
-												AND Market.intFutureMarketId = FMonth.intFutureMarketId AND CTE.intFutureMarketId =FMonth.intFutureMarketId
-		JOIN tblSMCompanyLocationSubLocation	SubLocation		 ON	 SubLocation.intCompanyLocationSubLocationId		 = Lot.intSubLocationId
+																 AND Market.intFutureMarketId		 = FMonth.intFutureMarketId 
+																 AND CTE.intFutureMarketId			 = FMonth.intFutureMarketId
+		JOIN tblSMCompanyLocationSubLocation	SubLocation		 ON	 SubLocation.intCompanyLocationSubLocationId		 = Lot.intSubLocationId		
 		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
 																	AND	CA.strType					 = 'Origin'
@@ -968,14 +1343,53 @@ BEGIN TRY
 												ELSE @intCompanyId
 										   END	
 
-
-	INSERT INTO @tblContractCost(intContractDetailId,dblTotalCost)
+	
+	INSERT INTO @tblContractCost
+	(
+		 intContractDetailId	
+		,dblRate				
+		,ysnAccrue			
+		,dblTotalCost		    
+	)
 	SELECT  
 			 intContractDetailId = CC.intContractDetailId
-			,dblTotalCost        = SUM(CASE WHEN CC.strCostStatus ='Closed' THEN ISNULL(CC.dblActualAmount,0) ELSE ISNULL(CC.dblActualAmount,0) + ISNULL(CC.dblAccruedAmount,0) END)
+			--,dblTotalCost        = SUM(CASE WHEN CC.strCostStatus ='Closed' THEN ISNULL(CC.dblActualAmount,0) ELSE ISNULL(CC.dblActualAmount,0) + ISNULL(CC.dblAccruedAmount,0) END)
+			 ,dblRate			   = CC.dblRate	
+			 ,ysnAccrue			   = CC.ysnAccrue	
+			 ,dblTotalCost        =  CASE 
+											WHEN CC.ysnAccrue = 1 THEN
+																		CASE 
+																			WHEN CC.strCostStatus ='Closed' THEN ISNULL(CC.dblActualAmount,0) 
+																			ELSE ISNULL(CC.dblActualAmount,0) + ISNULL(CC.dblAccruedAmount,0) 
+																		END 
+																		* (CASE WHEN intContractTypeId = 1 THEN 1 ELSE -1 END)
+                                          
+										   WHEN CC.ysnAccrue = 0 AND CC.strCostMethod = 'Per Unit' THEN 
+																			ISNULL(CC.dblRate,0) * ISNULL(CC.dblFX , 1)
+																			* dbo.fnGRConvertQuantityToTargetItemUOM
+																			(
+																			 CC.intItemId
+																			,RealizedPNL.intQuantityUnitMeasureId
+																			,ItemUOM.intUnitMeasureId
+																			,RealizedPNL.dblQuantity
+																			) * 
+																			  CASE 
+																					WHEN M2M.strAdjustmentType = 'Add'    THEN  1 
+																					WHEN M2M.strAdjustmentType = 'Reduce' THEN -1 
+																			  END 
+																			 / CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+										 
+										 WHEN CC.ysnAccrue = 0 AND CC.strCostMethod <> 'Per Unit' THEN 0
+									 END
+									 
+									 
 	FROM tblCTContractCost CC
 	JOIN @tblUnRealizedPNL RealizedPNL ON RealizedPNL.intContractDetailId = CC.intContractDetailId
-	GROUP BY CC.intContractDetailId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
+	LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
+	LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intItemId 
+								AND M2M.intContractBasisId = RealizedPNL.intContractBasisId 
+
 
     IF ISNULL(@intFutureSettlementPriceId,0) > 0
 	BEGIN
@@ -986,6 +1400,7 @@ BEGIN TRY
 				,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
+				JOIN tblRKFuturesMonth Mo ON Mo.intFutureMonthId =  MarketMap.intFutureMonthId AND ISNULL(Mo.ysnExpired,0) = 0
 				WHERE SettlementPrice.intFutureSettlementPriceId = @intFutureSettlementPriceId
 			
 			INSERT INTO @tblSettlementPrice(intFutureMarketId,intFutureMonthId,dblSettlementPrice)
@@ -995,9 +1410,9 @@ BEGIN TRY
 				,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
-				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)
-				--AND intFutureMarketId NOT IN(SELECT intFutureMarketId FROM @tblSettlementPrice)
-				AND intFutureMonthId  NOT IN(SELECT intFutureMonthId  FROM @tblSettlementPrice)
+				JOIN tblRKFuturesMonth Mo ON Mo.intFutureMonthId =  MarketMap.intFutureMonthId AND ISNULL(Mo.ysnExpired,0) = 0
+				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)				
+				AND MarketMap.intFutureMonthId  NOT IN(SELECT intFutureMonthId  FROM @tblSettlementPrice)
 	END
 	ELSE
 	BEGIN
@@ -1076,23 +1491,28 @@ BEGIN TRY
 	UPDATE RealizedPNL
 	SET  RealizedPNL.dblSecondaryCosts = ISNULL(CC.dblTotalCost,0)
 	FROM @tblUnRealizedPNL RealizedPNL
-	JOIN @tblContractCost CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
+	JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost,0)) dblTotalCost FROM @tblContractCost GROUP BY intContractDetailId) 
+	CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
+	
+	-----------------------------------------------------Settlement Price Updation--------------------------------------------
+	UPDATE CD
+	SET	   CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,dbo.fnCTGetLastSettlementPrice(CD.intFutureMarketId,SM.intFutureMonthId))        
+	
+	FROM   @tblUnRealizedPNL CD
+	LEFT JOIN   @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
+	LEFT JOIN   @tblFutureSettlementMonth SM ON SM.intFutureMarketId = CD.intFutureMarketId
+	WHERE  CD.intTransactionType <> 4 	
 	-----------------------------------------------------ContractInvoiceValue Updation--------------------------------------------
 	UPDATE CD
 	SET CD.dblContractInvoiceValue	
 	  =	  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
 		* dbo.fnGRConvertQuantityToTargetItemUOM(
-												 CD.intItemId
-												,CD.intFutureMarketUnitMeasureId
-												,CD.intPriceUnitMeasureId
-												,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,ISNULL(SP.dblSettlementPrice,0))
-		 										)
-		/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
-
-   ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
+												  CD.intItemId
+												 ,CD.intFutureMarketUnitMeasureId												
+												 ,CD.intPriceUnitMeasureId												
+												 ,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
+												)	
 	FROM @tblUnRealizedPNL CD
-	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
-	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
 	WHERE CD.intTransactionType <> 4
 
 	UPDATE CD
@@ -1105,12 +1525,10 @@ BEGIN TRY
 
 											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
 													  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intQuantityUnitMeasureId,CD.dblQuantity)
-													 * ISNULL(SP.dblSettlementPrice,0)
+													 * ISNULL(CD.dblSettlementPrice,0)
 													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
-								 END
-   ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
-	FROM @tblUnRealizedPNL CD
-	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
+								 END         
+	FROM @tblUnRealizedPNL CD	
 	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
 	WHERE CD.intTransactionType = 4
 	-----------------------------------------------------Net Market Updation--------------------------------------------	
@@ -1120,12 +1538,23 @@ BEGIN TRY
 		,dblNetMarketValue     = ISNULL(dblNetMarketValue,0)
 		,dblNetM2MPrice		   = ISNULL(dblNetM2MPrice,0)
 
-		UPDATE CD
-	    SET  CD.dblMarketDifferential   = ISNULL(BasisDetail.dblBasisOrDiscount,0)
-		FROM @tblUnRealizedPNL CD	
-		JOIN @tblRKM2MBasisDetail BasisDetail ON BasisDetail.intFutureMarketId = CD.intFutureMarketId AND BasisDetail.intItemId = CD.intItemId 
-		AND BasisDetail.strPeriodTo = RIGHT(CONVERT(VARCHAR(11),CD.dtmEndDate,106),8)
-		AND CD.intTransactionType <> 4 -- Update dblMarketDifferential Other than Inventory (FG)
+		IF @ysnForwardCurveDifferential = 1
+		BEGIN
+			UPDATE CD
+			SET  CD.dblMarketDifferential   = ISNULL(BasisDetail.dblBasisOrDiscount,0)
+			FROM @tblUnRealizedPNL CD	
+			JOIN @tblRKM2MBasisDetail BasisDetail ON BasisDetail.intFutureMarketId = CD.intFutureMarketId AND BasisDetail.intItemId = CD.intItemId 
+			AND BasisDetail.strPeriodTo = RIGHT(CONVERT(VARCHAR(11),CD.dtmEndDate,106),8)
+			AND CD.intTransactionType <> 4 -- Update dblMarketDifferential Other than Inventory (FG)
+		END
+		ELSE
+		BEGIN
+			UPDATE CD
+			SET  CD.dblMarketDifferential   = ISNULL(BasisDetail.dblBasisOrDiscount,0)
+			FROM @tblUnRealizedPNL CD	
+			JOIN @tblRKM2MBasisDetail BasisDetail ON BasisDetail.intFutureMarketId = CD.intFutureMarketId AND BasisDetail.intItemId = CD.intItemId 
+			AND CD.intTransactionType <> 4 -- Update dblMarketDifferential Other than Inventory (FG)
+		END
 
 		UPDATE CD
 	    SET  CD.dblMarketDifferential   = ISNULL(BasisDetail.dblBasisOrDiscount,0)
@@ -1145,7 +1574,7 @@ BEGIN TRY
 	UPDATE @tblUnRealizedPNL 
 	SET  dblCOGSOrNetSaleValue = (
 								   ISNULL(dblContractInvoiceValue,0) 
-								 + ISNULL(dblSecondaryCosts,0) * (CASE WHEN intContractTypeId = 1 THEN 1 ELSE -1 END)
+								 + ISNULL(dblSecondaryCosts,0)
 								 ) *
 								 CASE WHEN intContractTypeId =1 THEN 1 ELSE -1 END
 
@@ -1200,11 +1629,11 @@ BEGIN TRY
 	  ,intContractSeq						
 	  ,strEntityName						
 	  ,strInternalCompany					
-	  ,dblQuantity						
+	  ,dblQuantity = CAST (dblQuantity AS NUMERIC(38,20))						
 	  ,intQuantityUOMId					
 	  ,intQuantityUnitMeasureId			
 	  ,strQuantityUOM						
-	  ,dblWeight							
+	  ,dblWeight = CAST (dblWeight AS NUMERIC(38,20))							
 	  ,intWeightUOMId						
 	  ,intWeightUnitMeasureId				
 	  ,strWeightUOM						
@@ -1232,27 +1661,27 @@ BEGIN TRY
 	  ,strAllocationRefNo					
 	  ,strAllocationStatus				
 	  ,strPriceTerms						
-	  ,dblContractDifferential			
+	  ,dblContractDifferential = CAST (dblContractDifferential AS NUMERIC(38,20))			
 	  ,strContractDifferentialUOM			
-	  ,dblFuturesPrice					
+	  ,dblFuturesPrice = CAST (dblFuturesPrice AS NUMERIC(38,20))						
 	  ,strFuturesPriceUOM					
 	  ,strFixationDetails					
 	  ,dblFixedLots						
 	  ,dblUnFixedLots						
-	  ,dblContractInvoiceValue			
-	  ,dblSecondaryCosts					
-	  ,dblCOGSOrNetSaleValue				
-	  ,dblInvoicePrice					
-	  ,dblInvoicePaymentPrice				
+	  ,dblContractInvoiceValue = CAST (dblContractInvoiceValue AS NUMERIC(38,20))			
+	  ,dblSecondaryCosts = CAST (dblSecondaryCosts AS NUMERIC(38,20))						
+	  ,dblCOGSOrNetSaleValue = CAST (dblCOGSOrNetSaleValue AS NUMERIC(38,20))						
+	  ,dblInvoicePrice = CAST (dblInvoicePrice AS NUMERIC(38,20))					
+	  ,dblInvoicePaymentPrice = CAST (dblInvoicePaymentPrice AS NUMERIC(38,20))				
 	  ,strInvoicePriceUOM					
-	  ,dblInvoiceValue					
+	  ,dblInvoiceValue	 = CAST (dblInvoiceValue AS NUMERIC(38,20))					
 	  ,strInvoiceCurrency					
 	  ,dblNetMarketValue					
 	  ,dtmRealizedDate					
-	  ,dblRealizedQty						
-	  ,dblProfitOrLossValue				
-	  ,dblPAndLinMarketUOM				
-	  ,dblPAndLChangeinMarketUOM			
+	  ,dblRealizedQty	 = CAST (dblRealizedQty AS NUMERIC(38,20))									
+	  ,dblProfitOrLossValue	 = CAST (dblProfitOrLossValue AS NUMERIC(38,20))						
+	  ,dblPAndLinMarketUOM = CAST (dblPAndLinMarketUOM AS NUMERIC(38,20))									
+	  ,dblPAndLChangeinMarketUOM = CAST (dblPAndLChangeinMarketUOM AS NUMERIC(38,20))							
 	  ,strMarketCurrencyUOM				
 	  ,strTrader							
 	  ,strFixedBy							

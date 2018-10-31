@@ -7158,6 +7158,19 @@
     <None Include="Scripts\Post-Deployment\EM\1910_Set_Contact_Location.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeInputAndOutputItem.sql" />
 	<Build Include="dbo\Stored Procedures\uspTFGenerateMNPDA46.sql" />
+	<Build Include="dbo\Stored Procedures\uspRKStringDateValidate.sql" />
+	<Build Include="dbo\Functions\fnCTConvertToSeqFXCurrency.sql" />
+	<Build Include="dbo\Stored Procedures\uspICUpdateLotInfo.sql" />
+	<Build Include="dbo\Stored Procedures\uspGRProcessBillStorage.sql" />
+	<Build Include="dbo\Functions\fnGRGetBillStorageDetails.sql" />
+	<Build Include="dbo\User Defined Types\StorageSchedulePeriodTableType.sql" />
+	<Build Include="dbo\Functions\fnGRCalculateStorageCharge.sql" />
+	<None Include="Scripts\Post-Deployment\AR\DefaultData\2_CleanStagingTables.sql" />
+	<Build Include="dbo\Stored Procedures\uspGRUnpostTransfer.sql" />
+	<Build Include="dbo\Functions\fnAPCreateVoucherPayableFromDetail.sql" />
+	<Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
+	<Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
+	<Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7357,6 +7370,7 @@
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
+    <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

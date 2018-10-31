@@ -55,13 +55,13 @@ ST.intStoreId
 	INNER JOIN tblICItem IT ON IT.intItemId = CC.intProduct 
 	INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
 	WHERE CC.intCheckoutId = CH.intCheckoutId AND CC.dblAmount > 0) dblAmountCustomerCharges
-, (SELECT SUM(CT.dblAmount) 
+, (SELECT SUM(CT.dblPaymentAmount) 
 	FROM tblSTCheckoutCustomerPayments CT
 	INNER JOIN tblARCustomer Cust ON Cust.intEntityId = CT.intCustomerId
 	INNER JOIN tblEMEntity Entity ON Entity.intEntityId = Cust.intEntityId
-	INNER JOIN tblICItem IT ON IT.intItemId = CT.intItemId 
-	INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
-	WHERE CT.intCheckoutId = CH.intCheckoutId AND CT.dblAmount > 0) dblAmountCustomerPayment
+	--INNER JOIN tblICItem IT ON IT.intItemId = CT.intItemId 
+	--INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
+	WHERE CT.intCheckoutId = CH.intCheckoutId AND CT.dblPaymentAmount > 0) dblAmountCustomerPayment
 , (SELECT SUM(D.dblTotalDeposit) 
 	FROM tblSTCheckoutDeposits D 
 	WHERE D.intCheckoutId = CH.intCheckoutId AND D.dblTotalDeposit > 0) dblDeposit

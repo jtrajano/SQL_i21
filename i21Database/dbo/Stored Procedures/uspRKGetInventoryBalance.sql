@@ -49,7 +49,7 @@ FROM (
 		,0.0 dblSalesInTransit
 		,0.0 tranDSInQty
 	FROM tblICInventoryTransaction it 
-	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23,33, 44)
+	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23,33, 44,47)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId
@@ -93,8 +93,6 @@ FROM (
 	WHERE i.intCommodityId=@intCommodityId  
 	and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end --and strTransactionId not like'%IS%'
 	and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-	and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN
-		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	group by dtmDate, intTransactionTypeId,strTransactionId,ium.intCommodityUnitMeasureId
 
 

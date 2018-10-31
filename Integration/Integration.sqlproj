@@ -468,5 +468,6 @@
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
   </ItemGroup>
 </Project>

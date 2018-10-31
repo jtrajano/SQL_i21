@@ -15,6 +15,13 @@ SELECT DISTINCT
     ,CS.intCommodityId
     ,UOM.intItemUOMId AS intCommodityStockUomId
     ,ISNULL(CS.intItemUOMId, UOM.intItemUOMId) AS intItemUOMId
+    ,CAST(
+        CASE
+            WHEN ST.ysnCustomerStorage = 0 THEN 1
+            WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+            ELSE 0
+        END AS BIT
+    ) AS ysnShowInStorage
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId

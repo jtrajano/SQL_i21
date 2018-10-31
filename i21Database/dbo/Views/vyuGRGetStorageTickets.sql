@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGRGetStorageTickets]  
 AS  
-SELECT TOP 100 PERCENT   
+SELECT
     intCustomerStorageId				= CS.intCustomerStorageId  
     ,strStorageTicketNumber				= CS.strStorageTicketNumber
     ,intEntityId						= CS.intEntityId  
@@ -34,6 +34,13 @@ SELECT TOP 100 PERCENT
 												ELSE 0
 											END AS BIT
 										)
+    ,ysnShowInStorage			        = CAST(
+                                            CASE
+                                                WHEN ST.ysnCustomerStorage = 0 THEN 1
+                                                WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+                                                ELSE 0
+                                            END AS BIT
+                                        )
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -60,6 +67,4 @@ LEFT JOIN tblICInventoryReceipt IR
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN tblSCDeliverySheet DS
     ON DS.intDeliverySheetId = CS.intDeliverySheetId
-WHERE CS.dblOpenBalance > 0 
-    AND ISNULL(CS.strStorageType,'') <> 'ITR'
-ORDER BY CS.dtmDeliveryDate
+WHERE CS.dblOpenBalance > 0

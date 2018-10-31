@@ -1,7 +1,7 @@
 ﻿CREATE VIEW dbo.vyuSTTranslogHeader
 AS
-SELECT ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId 
-      , CAST(TRR.intCheckoutId AS NVARCHAR(MAX)) + '0' + CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) AS strUniqueId
+SELECT ROW_NUMBER() OVER (ORDER BY TRR.intTermMsgSN ASC) AS intId 
+      , CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TRR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TRR.intStoreId AS NVARCHAR(MAX)) AS strUniqueId
       , TRR.intTermMsgSN
 	  , TRR.intStoreId
 	  , TRR.intCheckoutId
@@ -10,18 +10,29 @@ SELECT ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId
 	  , TRR.strTransType
 	  , TRR.dtmDate
 	  , TRR.strCashier
-	  , TRR.dblTrValueTrTotWTax
+	  , TRR.dblTrpAmt
 	  , TRR.intCompanyLocationId
 FROM
 (   
-	SELECT TR.*
-	       , ST.intStoreNo
-		   , ST.strDescription AS strStoreDescription
-		   , ST.intCompanyLocationId
-		   , CH.dtmCheckoutDate
-		   , ROW_NUMBER() OVER (PARTITION BY TR.intTermMsgSN, TR.intStoreId, TR.intCheckoutId ORDER BY TR.intTermMsgSN ASC) AS rn
+	SELECT DISTINCT
+		 TR.intTermMsgSN
+		 , TR.intTermMsgSNterm
+		 , TR.intStoreId
+		 , TR.intCheckoutId 
+		 , TR.strTransType
+		 , TR.dtmDate
+		 , TR.strCashier
+		 , ST.intStoreNo
+		 , ST.strDescription AS strStoreDescription
+		 , ST.intCompanyLocationId
+		 , CH.dtmCheckoutDate
+		 , TR.dblTrpAmt
 	FROM tblSTTranslogRebates TR
-	JOIN tblSTCheckoutHeader CH ON TR.intCheckoutId = CH.intCheckoutId
-	JOIN tblSTStore ST ON CH.intStoreId = ST.intStoreId 
+	JOIN tblSTCheckoutHeader CH 
+		ON TR.intCheckoutId = CH.intCheckoutId
+	JOIN tblSTStore ST 
+		ON CH.intStoreId = ST.intStoreId
+	WHERE TR.strTrpPaycode = 'CASH'
+	AND TR.dblTrpAmt > 0
+	--ORDER BY TR.dtmDate OFFSET 0 ROWS
 ) TRR 
-WHERE TRR.rn = 1

@@ -75,7 +75,51 @@ BEGIN TRY
 						WHERE SH.intInvoiceId = @IntSourceKey AND SH.strType = 'Generated Fee Invoice'
 			END
 
-			DELETE FROM tblGRStorageHistory Where intInvoiceId=@IntSourceKey 
+			--Bill Storage
+			IF EXISTS (
+							SELECT 1
+							FROM tblARInvoiceDetail ARD
+							JOIN tblARInvoice Invoice 
+								ON Invoice.intInvoiceId = ARD.intInvoiceId
+							JOIN tblGRStorageHistory SH 
+								ON SH.intInvoiceId = Invoice.intInvoiceId
+							WHERE ARD.intInvoiceId = @IntSourceKey 
+								AND ARD.intCustomerStorageId IS NOT NULL
+								AND (SH.strType = 'Generated Storage Invoice' OR SH.strPaidDescription = 'Generated Storage Invoice')
+					   )
+			BEGIN
+
+				UPDATE CS
+				SET 
+					CS.dblStoragePaid				= CS.dblStoragePaid - SH.dblPaidAmount
+					,CS.dblStorageDue				= ISNULL(CS.dblStorageDue,0) + SH.dblPaidAmount
+					,dtmLastStorageAccrueDate	= CASE
+														WHEN (
+																SELECT TOP 1 MIN(intInvoiceId) 
+																FROM tblGRStorageHistory 
+																WHERE intInvoiceId > @IntSourceKey 
+																	AND (strType = 'Generated Storage Invoice' OR strPaidDescription = 'Generated Storage Invoice') 
+																	AND intCustomerStorageId = CS.intCustomerStorageId 
+															) IS NOT NULL
+															THEN (SELECT TOP 1 dtmHistoryDate FROM tblGRStorageHistory WHERE intInvoiceId > @IntSourceKey AND strType = 'Generated Storage Invoice' AND intCustomerStorageId = CS.intCustomerStorageId)
+														WHEN (
+																SELECT TOP 1 MAX(intInvoiceId) 
+																FROM tblGRStorageHistory 
+																WHERE intInvoiceId < @IntSourceKey 
+																	AND (strType = 'Generated Storage Invoice' OR strPaidDescription = 'Generated Storage Invoice') 
+																	AND intCustomerStorageId = CS.intCustomerStorageId 
+															) IS NOT NULL
+															THEN (SELECT TOP 1 dtmHistoryDate FROM tblGRStorageHistory WHERE intInvoiceId < @IntSourceKey AND strType = 'Generated Storage Invoice' AND intCustomerStorageId = CS.intCustomerStorageId)
+														ELSE NULL
+													END
+				FROM tblGRCustomerStorage CS
+				JOIN tblGRStorageHistory SH 
+					ON SH.intCustomerStorageId = CS.intCustomerStorageId
+				WHERE SH.intInvoiceId = @IntSourceKey 
+					AND (SH.strType = 'Generated Storage Invoice' OR SH.strPaidDescription = 'Generated Storage Invoice')
+			END
+
+			DELETE FROM tblGRStorageHistory WHERE intInvoiceId = @IntSourceKey 
 
 		END 
 

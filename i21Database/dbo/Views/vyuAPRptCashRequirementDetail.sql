@@ -42,13 +42,14 @@ SELECT DISTINCT
 	     ELSE 'None'
 		END)
 	,strLocation = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL))
-	,IR.strReceiptNumber
+	,ISNULL(IR.strReceiptNumber,IR2.strReceiptNumber) AS strReceiptNumber
 	,APB.intBillId
 	,APB.strBillId
 	,strFarmField = EML.strLocationName
 	,APB.dtmDueDate
-	,IR.dtmCreated
-	,dblNetWeight = (CASE WHEN APBD.intInventoryReceiptChargeId > 0 THEN APBD.dblQtyReceived ELSE  APBD.dblNetWeight END)
+	,ISNULL(IR.dtmCreated,IR2.dtmCreated) as dtmCreated
+	,dblNetWeight = (CASE WHEN APBD.intInventoryReceiptChargeId > 0 THEN APBD.dblQtyReceived ELSE  
+							(CASE WHEN APBD.intWeightUOMId > 0 THEN APBD.dblNetWeight ELSE APBD.dblQtyReceived END)  END)
 		--ISNULL((CASE 
 		--WHEN IR.intSourceType = 5 --DS
 		--THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR LEFT JOIN tblSCTicket SC ON IRI.intSourceId = SC.intDeliverySheetId )
@@ -81,6 +82,8 @@ SELECT DISTINCT
 		ON APBD.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt IR 
 		ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceipt IR2
+		ON IR2.intInventoryReceiptId = GRH.intInventoryReceiptId
 	LEFT JOIN tblCTContractHeader CH 
 		ON APBD.intContractHeaderId = CH.intContractHeaderId
 	LEFT JOIN tblAPVendor V 
@@ -98,7 +101,7 @@ SELECT DISTINCT
 	LEFT JOIN vyuSCGetScaleDistribution SD 
 		ON IR.intInventoryReceiptId = SD.intInventoryReceiptItemId
 	LEFT JOIN tblSCTicket SC 
-		ON SC.intTicketId = IRI.intSourceId
+		ON SC.intTicketId = ISNULL(IRI.intSourceId, GRH.intTicketId)
 	LEFT JOIN tblEMEntityLocation EML
 		ON V.intEntityId = EML.intEntityId and strLocationType = 'Farm' AND EML.intEntityLocationId = SC.intFarmFieldId
 	OUTER APPLY (

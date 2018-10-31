@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuGRStorageSearchView]
 AS    
-
 SELECT
 	intCustomerStorageId		  = CS.intCustomerStorageId
 	,intTransactionId			  = CASE 
@@ -66,6 +65,13 @@ SELECT
 	,intSplitId					   = EMSplit.intSplitId
 	,intItemUOMId				 = CS.intItemUOMId
 	,ysnDeliverySheetPosted		 = ISNULL(DeliverySheet.ysnPost,1)
+    ,ysnShowInStorage			 = CAST(
+										CASE
+											WHEN ST.ysnCustomerStorage = 0 THEN 1
+											WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+											ELSE 0
+										END AS BIT
+									)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  

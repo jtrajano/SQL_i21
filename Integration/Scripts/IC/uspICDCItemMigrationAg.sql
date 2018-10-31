@@ -73,13 +73,7 @@ FROM
 	,RTRIM(min(agitm_desc)) ItemName
 --** Items with physical count set to 'Obsolete' is classified as 'Status' = Discontinued and 
 --   Items with physical count set to 'Yes' or 'No' is classified as 'Status' = Active. **
-	,(
-		CASE 
-			WHEN (min(agitm_phys_inv_ynbo) = 'O')
-				THEN 'Discontinued'
-			ELSE 'Active'
-			END
-		) ItemStatus
+	,'Active' ItemStatus
 	,'Item Level' InvValuation
 	,case rtrim(min(agitm_lot_yns)) when 'Y' then 'Yes - Manual' else 'No' end LotTracking
 	,(
@@ -161,10 +155,12 @@ FROM
 			END
 		) Commisionable
 	,1 ConcurrencyId
-		FROM agitmmst AS inv GROUP BY agitm_no
+		FROM agitmmst AS inv 
+		WHERE agitm_phys_inv_ynbo <> 'O'
+		GROUP BY agitm_no
 ) ei
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = ei.ItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-	AND ei.ItemStatus <> 'Discontinued'
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = ei.ItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) --MSA todo : remove/change this after confirmation, will cause this not to import other item not yet imported.
+	--AND ei.ItemStatus <> 'Discontinued'
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
@@ -200,6 +196,7 @@ select intItemId, U.intUnitMeasureId, 1 dblUnitQty, 1 ysnStockUnit,1 ysnAllowPur
 from tblICItem I 
 join 
 (select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc from agitmmst 
+WHERE agitm_phys_inv_ynbo <> 'O'
 group by rtrim(agitm_no)) as oi 
 on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 join tblICUnitMeasure U 
@@ -297,6 +294,7 @@ SELECT
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 LEFT JOIN vyuEMEntity AS vnd ON (itm.agitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
 	 LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) and uom.ysnStockUnit = 1
+	 WHERE itm.agitm_phys_inv_ynbo <> 'O'
 ) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = a.intItemId AND intLocationId = a.intCompanyLocationId)
 

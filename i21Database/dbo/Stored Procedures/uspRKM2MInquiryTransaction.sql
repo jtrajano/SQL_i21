@@ -10,19 +10,6 @@
                   @intLocationId int= null,
                   @intMarketZoneId int= null
 AS
---declare
-
---  @intM2MBasisId int = 1,
---                  @intFutureSettlementPriceId int = 2,
---                  @intQuantityUOMId int = 1,
---                  @intPriceUOMId int = 1,
---                  @intCurrencyUOMId int= 3,
---                  @dtmTransactionDateUpTo datetime= '2018-09-19T12:04:50',
---                  @strRateType nvarchar(200)= 'Contract',
---                  @intCommodityId int=1,
---                  @intLocationId int= 0,
---                  @intMarketZoneId int= 0
---				  drop table #Temp
 
 DECLARE @ysnIncludeBasisDifferentialsInResults bit
 DECLARE @dtmPriceDate DATETIME    
@@ -648,6 +635,52 @@ FROM
 )t 
 GROUP BY intContractDetailId
 
+DECLARE @tblGetSettlementPrice TABLE (   
+		dblLastSettle numeric(24,10) , 
+        intFutureMonthId int,
+		intFutureMarketId int		
+)
+
+declare @ysnM2MAllowExpiredMonth bit=0
+select @ysnM2MAllowExpiredMonth=ysnM2MAllowExpiredMonth from tblRKCompanyPreference
+if (@ysnM2MAllowExpiredMonth=1)
+BEGIN
+insert into @tblGetSettlementPrice
+SELECT dblLastSettle,intFutureMonthId,intFutureMarketId FROM(
+	SELECT  	 ROW_NUMBER() OVER (
+			PARTITION BY pm.intFutureMonthId ORDER BY dtmPriceDate DESC
+			) intRowNum, dblLastSettle,fm.intFutureMonthId,p.intFutureMarketId,fm.ysnExpired ysnExpired,strFutureMonth
+			FROM tblRKFuturesSettlementPrice p
+			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+			join tblRKFuturesMonth fm on fm.intFutureMonthId= pm.intFutureMonthId			
+			WHERE 
+			p.intFutureMarketId =fm.intFutureMarketId    --and isnull(ysnExpired,0) =0 
+				AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)		
+				
+			)t WHERE t.intRowNum = 1 
+END
+ELSE
+BEGIN
+insert into @tblGetSettlementPrice
+SELECT  dblLastSettle,fm.intFutureMonthId,fm.intFutureMarketId
+			FROM tblRKFuturesSettlementPrice p
+			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+			join tblRKFuturesMonth fm on fm.intFutureMonthId= case when  isnull(fm.ysnExpired,0)=0 then pm.intFutureMonthId
+															  else 
+															  (SELECT TOP 1  intFutureMonthId
+																FROM tblRKFuturesMonth fm
+																WHERE ysnExpired = 0  AND fm.intFutureMarketId = p.intFutureMarketId 
+																and CONVERT(DATETIME,'01 '+strFutureMonth) > getdate()
+																ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC)
+															  end				
+			WHERE 
+			p.intFutureMarketId =fm.intFutureMarketId  
+				AND CONVERT(Nvarchar, dtmPriceDate, 111) = CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
+			ORDER BY dtmPriceDate DESC	
+			
+
+END
+-- Geting Settlement price 
 DECLARE @tblSettlementPrice TABLE (     
         intContractDetailId int
 		,dblFuturePrice NUMERIC(24, 10)
@@ -655,35 +688,12 @@ DECLARE @tblSettlementPrice TABLE (
 		,dblFutures NUMERIC(24, 10)
 		,intFuturePriceCurrencyId INT
 )
-
 INSERT INTO @tblSettlementPrice 
 SELECT DISTINCT 
-	intContractDetailId
-	,case when isnull(ffm.ysnExpired,0)=0  then
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId, 												
-												(	SELECT TOP 1  dblLastSettle
-												FROM tblRKFuturesSettlementPrice p
-												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-												WHERE p.intFutureMarketId = cd.intFutureMarketId AND pm.intFutureMonthId = cd.intFutureMonthId
-													AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
-												ORDER BY dtmPriceDate DESC)	/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-			else
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId,
-							case WHEN ffm.ysnExpired = 0 THEN cd.intFutureMonthId else (
-									SELECT TOP 1 intFutureMonthId
-									FROM tblRKFuturesMonth FuMo
-									WHERE dtmFutureMonthsDate > (
-											SELECT top 1 dtmFutureMonthsDate
-											FROM tblRKFuturesMonth mo
-											WHERE mo.intFutureMonthId = ffm.intFutureMonthId AND ffm.ysnExpired = 0 AND mo.intFutureMarketId = cd.intFutureMarketId
-											) AND FuMo.ysnExpired = 0 AND FuMo.intFutureMarketId = cd.intFutureMarketId
-									ORDER BY intFutureMarketId,dtmFutureMonthsDate ASC
-									) end
-			/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END) 
-	  end
-	 ,dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, PUOM.intCommodityUnitMeasureId, 
-								cd.dblFutures / CASE WHEN c1.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-	 ,fm.intCurrencyId
+	intContractDetailId,
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId,	dblLastSettle / CASE WHEN c.ysnSubCurrency = 1 then 100 else 1 end ),
+	dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,PUOM.intCommodityUnitMeasureId,cd.dblFutures/CASE WHEN c1.ysnSubCurrency = 1 then 100 else 1 end)
+	,fm.intCurrencyId
 FROM @GetContractDetailView cd
 	JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId and ffm.intFutureMarketId=cd.intFutureMarketId
 	JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
@@ -691,7 +701,8 @@ FROM @GetContractDetailView cd
 	JOIN tblSMCurrency c1 on cd.intCurrencyId=c1.intCurrencyID 
 	JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intMarketUOMId 
 	JOIN tblICCommodityUnitMeasure PUOM on cd.intCommodityId=PUOM.intCommodityId and PUOM.intUnitMeasureId=cd.intPriceUnitMeasureId 
-	JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId   
+	JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId  
+	JOIN @tblGetSettlementPrice sm on sm.intFutureMonthId=ffm.intFutureMonthId  
 WHERE   cd.intCommodityId= @intCommodityId 
 	
 

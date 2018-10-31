@@ -25,7 +25,7 @@ USING
 		  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
 		, strType					= CASE WHEN (min(ptitm_phys_inv_yno) = 'N') THEN 'Other Charge' ELSE 'Inventory' END COLLATE Latin1_General_CI_AS
 		, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
-		, strStatus					= CASE WHEN (min(ptitm_phys_inv_yno) = 'O') THEN 'Discontinued' ELSE 'Active' END COLLATE Latin1_General_CI_AS
+		, strStatus					= 'Active'
 		, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
 		, strLotTracking			= 'No' COLLATE Latin1_General_CI_AS
 		, intCategoryId				= (SELECT TOP 1 min(intCategoryId) FROM tblICCategory AS cls WHERE (cls.strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = min(inv.ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
@@ -50,6 +50,7 @@ USING
 		, intConcurrencyId			= 1
 		, ysnCommisionable			= CAST(CASE WHEN (min(ptitm_comm_ind_uag) = 'Y') THEN 1 ELSE 0 END AS BIT)
 	FROM ptitmmst AS inv 
+	where ptitm_phys_inv_yno <> 'O'
 	GROUP BY ptitm_itm_no
 ) AS [Source] (strItemNo, strType, strDescription, strStatus, strInventoryTracking, strLotTracking, intCategoryId, intPatronageCategoryId, intLifeTime, ysnLandedCost, ysnDropShip
 	,ysnSpecialCommission, ysnStockedItem, ysnDyedFuel, strBarcodePrint, ysnMSDSRequired, ysnAvailableTM, dblDefaultFull, ysnExtendPickTicket, ysnExportEDI, ysnHazardMaterial
@@ -74,7 +75,7 @@ where	C.intCategoryId = tblICItem.intCategoryId
 
 
 --====Delete obsolete items. It is not required in i21 as history is not imported===
-Delete from tblICItem where strStatus = 'Discontinued'
+--Delete from tblICItem where strStatus = 'Discontinued'
 --UPDATE tblICItem
 --SET strType = 'Other Charge'
 --WHERE strDescription LIKE '%CHARGE%'
@@ -98,6 +99,7 @@ SELECT ptitm_itm_no
 	  ,ptitm_pak_desc
 	  ,min(ptitm_pak_qty)
 FROM   ptitmmst
+where ptitm_phys_inv_yno <> 'O'
 group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
 
 OPEN itm_cursor
@@ -213,6 +215,7 @@ USING
 		INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
 		LEFT JOIN vyuEMEntity AS vnd ON (itm.ptitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
 		LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) WHERE uom.ysnStockUnit = 1	
+		AND ptitm_phys_inv_yno <> 'O'
 ) AS [Source] (intItemId, intLocationId, intVendorId, intCostingMethod, intIssueUOMId, intReceiveUOMId, intAllowNegativeInventory, intConcurrencyId)
 ON [Target].intItemId = [Source].intItemId
 	AND [Target].intLocationId = [Source].intLocationId
@@ -365,7 +368,7 @@ SELECT inv.intItemId
 	FROM tblICItem I 
 		JOIN ptitmmst p ON I.strItemNo = p.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		JOIN tblICItem IA ON IA.strItemNo = p.ptitm_alt_itm COLLATE SQL_Latin1_General_CP1_CS_AS
-		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUOM = 1
+		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUnit = 1
 	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
 
 GO

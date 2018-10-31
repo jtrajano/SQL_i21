@@ -8,15 +8,21 @@ BEGIN TRY
      DECLARE @ErrMsg NVARCHAR(MAX)
 
 
-    IF NOT EXISTS(SELECT 
-                    intStorageHistoryTransactionId 
-                FROM tblGRStorageHistoryTypeTransaction SHT 
-                INNER JOIN @StorageHistoryData SH 
-                    ON SH.intTransactionTypeId = SHT.intTypeId)
+    IF (SELECT COUNT(*) FROM @StorageHistoryData) > 0
     BEGIN
-		RAISERROR('Invalid storage transaction.', 16, 1);
-		RETURN;
-	END                
+        IF NOT EXISTS(SELECT 
+                            intStorageHistoryTransactionId 
+                        FROM tblGRStorageHistoryTypeTransaction SHT 
+                        INNER JOIN @StorageHistoryData SH 
+                            ON SH.intTransactionTypeId = SHT.intTypeId)
+            BEGIN
+                RAISERROR('Invalid storage transaction.', 16, 1);
+                RETURN;
+            END                
+    END
+    ELSE 
+        RETURN
+        
 
     INSERT INTO [dbo].[tblGRStorageHistory]
     (

@@ -128,7 +128,7 @@ SET @innerQuery = 'SELECT DISTINCT
 						,dblAmountPaid
 						,dblDiscount
 						,dblInterest
-						,(CASE WHEN dblQtyToVoucher = 0 THEN dtmReceiptDate ELSE dtmDate END) AS dtmDate
+						,(CASE WHEN dblQtyToVoucher <= 0 THEN dtmReceiptDate ELSE dtmDate END) AS dtmDate
 						,dtmDueDate
 						,dtmReceiptDate
 						,dblQtyToReceive
@@ -333,7 +333,7 @@ SELECT * FROM (
 	) AS tmpAgingSummaryTotal
 	--LEFT JOIN vyuICGetInventoryReceipt IR
 	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
-	WHERE tmpAgingSummaryTotal.dblClearingQty != 0
+	WHERE tmpAgingSummaryTotal.dblClearingQty > 0
 ) MainQuery'
 
 

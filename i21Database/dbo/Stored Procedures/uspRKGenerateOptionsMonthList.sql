@@ -29,7 +29,7 @@ BEGIN TRY
 	
 	IF OBJECT_ID('tempdb..##AllowedOptMonths') IS NOT NULL DROP TABLE ##AllowedOptMonths
 	
-	SELECT TOP (@OptMonthsToOpen) * 
+	SELECT *, intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode) 
 	INTO ##AllowedOptMonths
 	FROM (
 		SELECT TOP 100 PERCENT strMonth = REPLACE(strMonth, 'ysnOpt' , '')
@@ -141,11 +141,15 @@ BEGIN TRY
 		, intMonthCode INT
 		, strFuturesMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, intFutureMonthId INT
-		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS)
-		
-	WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @OptMonthsToOpen
+		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, intSeqNo INT)
+	
+	DECLARE @intTempOptMonthsToOpen INT
+	SET @intTempOptMonthsToOpen = @OptMonthsToOpen * 2
+
+	WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @intTempOptMonthsToOpen
 	BEGIN
-		SELECT @Top = @OptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
+		SELECT @Top = @intTempOptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
 		
 		INSERT INTO ##FinalOptMonths(intYear, strMonth, strMonthName, strMonthCode, strSymbol, intMonthCode, strFuturesMonth, intFutureMonthId, strOptionMonth)
 		SELECT TOP (@Top) YEAR(@Date) + @Count
@@ -162,6 +166,67 @@ BEGIN TRY
 		ORDER BY intMonthCode
 		
 		SET @Count = @Count + 1
+	END
+
+	DECLARE @intCountAllowedMonths INT
+	DECLARE @ProjectedOptionMonths TABLE(
+		  intRowId INT IDENTITY(1,1)
+		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, ysnProcessed BIT DEFAULT 0);
+	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedOptMonths
+
+	DECLARE @intIndex1 int = 0;
+	DECLARE @ProjectedMonthName NVARCHAR(10)
+	DECLARE @ProjectedMonth NVARCHAR(10)
+
+	WHILE (SELECT COUNT(*) FROM @ProjectedOptionMonths) < (@OptMonthsToOpen * 2)
+	BEGIN
+		SET @intIndex1 = @intIndex1 + 1;
+
+		SELECT @ProjectedMonthName= strMonth
+		FROM ##AllowedOptMonths
+		WHERE intRowId = @intIndex1;
+
+		SELECT TOP(1) @ProjectedMonth = strMonth
+		FROM ##FinalOptMonths
+		WHERE strMonthName = @ProjectedMonthName
+		AND strMonth NOT IN(SELECT strMonth FROM @ProjectedOptionMonths)
+
+		INSERT INTO @ProjectedOptionMonths(strMonthName,strMonth)
+		SELECT @ProjectedMonthName, @ProjectedMonth
+		 
+		IF(@intIndex1 = @intCountAllowedMonths)
+		BEGIN
+			SET @intIndex1 = 0;
+		END
+	END
+
+	UPDATE ##FinalOptMonths
+	SET intSeqNo = PM.intRowId
+	FROM ##FinalOptMonths FM
+	INNER JOIN @ProjectedOptionMonths PM ON FM.strMonth = PM.strMonth
+
+	IF @OptMonthsToOpen >= (SELECT COUNT(*) FROM ##AllowedOptMonths) 
+	BEGIN
+		DELETE FROM ##FinalOptMonths
+		WHERE strMonth NOT IN (SELECT strMonth FROM @ProjectedOptionMonths)
+	END
+	ELSE 
+	BEGIN
+		DELETE FROM ##FinalOptMonths
+		WHERE strMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM ##FinalOptMonths ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01') ASC)
+	END
+	
+	IF @OptMonthsToOpen >= (SELECT COUNT(*) FROM ##AllowedOptMonths) 
+	BEGIN
+		DELETE FROM ##FinalOptMonths
+		WHERE intSeqNo NOT IN (SELECT TOP(@OptMonthsToOpen) intSeqNo FROM ##FinalOptMonths ORDER BY intSeqNo ASC)
+	END
+	ELSE 
+	BEGIN
+		DELETE FROM ##FinalOptMonths
+		WHERE strMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM ##FinalOptMonths ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01') ASC)
 	END
 
 	DECLARE @MissingFutureMonths VARCHAR(4000)
@@ -207,6 +272,15 @@ BEGIN TRY
 	FROM  ##FinalOptMonths
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth
+
+	BEGIN TRY
+		DELETE FROM tblRKOptionsMonth
+		WHERE intFutureMarketId = @FutureMarketId 
+		AND strOptionMonth NOT IN(SELECT strOMonth = LTRIM(RTRIM(strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(strYear, 2) FROM #OptTemp)
+	END TRY
+	BEGIN CATCH
+		RAISERROR('You cannot generate Option Trading Months. Current Option Trading Months already in use.', 16, 1);
+	END CATCH
 	
 	DECLARE @strOptSymbol NVARCHAR(5)
 	SELECT @strOptSymbol = strOptSymbol FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
