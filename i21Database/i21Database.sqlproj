@@ -7148,6 +7148,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeInputAndOutputItem.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
     <Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpNonOpenSales.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
