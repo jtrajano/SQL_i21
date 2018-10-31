@@ -140,6 +140,12 @@ BEGIN TRY
 		WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	END
 
+	UPDATE	CD 
+	SET		CD.intProducerId	=	@intProducerId
+	FROM	tblCTContractDetail	CD
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		CD.intProducerId	IS NULL
+	AND		@intProducerId		IS NOT NULL
 	------------------------
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
