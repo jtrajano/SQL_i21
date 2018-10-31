@@ -232,9 +232,9 @@ BEGIN TRY
 						)
 						-- Query all the MarkUp/Down for Item & Category managed
 						SELECT		
-								intItemId				= ISNULL(i.intItemId, CategoryItem.intItemId)
-								,intItemLocationId		= ISNULL(il.intItemLocationId, CategoryItem.intItemLocationId)
-								,intItemUOMId			= ISNULL(iu.intItemUOMId, CategoryItem.intItemUOMId)
+								intItemId				= Item.intItemId --ISNULL(i.intItemId, CategoryItem.intItemId)
+								,intItemLocationId		= ItemLocation.intItemLocationId --ISNULL(il.intItemLocationId, CategoryItem.intItemLocationId)
+								,intItemUOMId			= ItemUOM.intItemUOMId --ISNULL(iu.intItemUOMId, CategoryItem.intItemUOMId)
 								,dtmDate				= MU.dtmMarkUpDownDate
 								,dblQty					= CASE
 															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN 0 ELSE MUD.intQty
@@ -257,32 +257,45 @@ BEGIN TRY
 								,dblAdjustCostValue		= MUD.dblTotalCostAmount
 								,dblAdjustRetailValue	= MUD.dblTotalRetailAmount
 						FROM tblSTMarkUpDownDetail MUD
-						INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
-					
-						--If Item Manage, query item fields that are needed
-						LEFT JOIN (
-							tblICItem i INNER JOIN tblICItemLocation il
-								ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
-							INNER JOIN tblICItemUOM iu
-								ON iu.intItemId = i.intItemId AND iu.intItemUOMId = il.intIssueUOMId-- Defaulted to issue uom id as per ST-313
-							INNER JOIN tblICItemPricing ItemPricing
-								ON ItemPricing.intItemId = i.intItemId AND ItemPricing.intItemLocationId = il.intItemLocationId
-						) ON i.intItemId = MUD.intItemId
+						INNER JOIN tblSTMarkUpDown MU 
+							ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
+						
+						--TEST
+						JOIN tblICCategory Category
+							ON MUD.intCategoryId = Category.intCategoryId
+						INNER JOIN tblICItem Item
+							ON MUD.intItemId = Item.intItemId
+						INNER JOIN tblICItemUOM ItemUOM
+							ON Item.intItemId = ItemUOM.intItemId
+						INNER JOIN tblICItemLocation ItemLocation
+							ON ItemLocation.intItemId = Item.intItemId 
+							AND ItemLocation.intLocationId = @intLocationId 
+							AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 
-						--Category Managed. Since item Ids are required, we'll fill those fields. This is just a temporary fix
-						OUTER APPLY ( 
-							SELECT TOP 1	Item.intItemId,
-											ItemLocation.intItemLocationId,
-											ItemUOM.intItemUOMId
-							FROM tblICCategoryPricing CategoryPricing
-							INNER JOIN tblICItem Item
-								ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
-							INNER JOIN tblICItemLocation ItemLocation
-								ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
-							INNER JOIN tblICItemUOM ItemUOM
-								ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
-							WHERE Item.intCategoryId = MUD.intCategoryId
-						) CategoryItem
+						----If Item Manage, query item fields that are needed
+						--LEFT JOIN (
+						--	tblICItem i INNER JOIN tblICItemLocation il
+						--		ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
+						--	INNER JOIN tblICItemUOM iu
+						--		ON iu.intItemId = i.intItemId AND iu.intItemUOMId = il.intIssueUOMId-- Defaulted to issue uom id as per ST-313
+						--	INNER JOIN tblICItemPricing ItemPricing
+						--		ON ItemPricing.intItemId = i.intItemId AND ItemPricing.intItemLocationId = il.intItemLocationId
+						--) ON i.intItemId = MUD.intItemId
+
+						----Category Managed. Since item Ids are required, we'll fill those fields. This is just a temporary fix
+						--OUTER APPLY ( 
+						--	SELECT TOP 1	Item.intItemId,
+						--					ItemLocation.intItemLocationId,
+						--					ItemUOM.intItemUOMId
+						--	FROM tblICCategoryPricing CategoryPricing
+						--	INNER JOIN tblICItem Item
+						--		ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
+						--	INNER JOIN tblICItemLocation ItemLocation
+						--		ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
+						--	INNER JOIN tblICItemUOM ItemUOM
+						--		ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
+						--	WHERE Item.intCategoryId = MUD.intCategoryId
+						--) CategoryItem
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
 
 				END
