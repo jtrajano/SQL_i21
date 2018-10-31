@@ -35,7 +35,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intSiteId,intNetworkId,intCustomerId,dtmTransactionDate,strTransactionId,intItemId',',') 
+		FROM [fnCFSplitString]('intSiteId,intNetworkId,intCustomerId,dtmTransactionDate,strTransactionId,intARItemId',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -170,6 +170,8 @@ BEGIN
 
 		DELETE tblCFBatchUnpostStagingTable
 		
+		--SELECT @whereClause
+
 		DECLARE @q NVARCHAR(MAX)
 		SET @q = ('DECLARE @guid AS NVARCHAR(MAX) = NEWID()
 		
