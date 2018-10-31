@@ -44,7 +44,10 @@ strLocationName  nvarchar(250),
 intFutureMarketId int,
 intCommodityId int,
 ysnExpired bit,intFutureMonthId int,strLInternalTradeNo  nvarchar(250),strSInternalTradeNo  nvarchar(250),strLRollingMonth  nvarchar(250),
-strSRollingMonth  nvarchar(250),intLFutOptTransactionHeaderId int,intSFutOptTransactionHeaderId int)
+strSRollingMonth  nvarchar(250),intLFutOptTransactionHeaderId int,intSFutOptTransactionHeaderId int,
+	strBook nvarchar(100),
+	strSubBook nvarchar(100)
+)
 
 INSERT INTO @Realized
 exec uspRKRealizedPnL 	 @dtmFromDate =@dtmTransactionFromDate

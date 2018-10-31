@@ -42,6 +42,7 @@ strLocationName,
 intFutureMarketId ,
 intCommodityId ,
 ysnExpired ,intFutureMonthId,strLInternalTradeNo,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
+,strBook,strSubBook
  from (
 SELECT * FROM(  
 SELECT   
@@ -76,7 +77,9 @@ SELECT psh.intMatchFuturesPSHeaderId,
 	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot.intRollingMonthId)   strLRollingMonth,   
 	(select strFutureMonth from tblRKFuturesMonth fm where fm.intFutureMonthId=ot1.intRollingMonthId)   strSRollingMonth   ,
 	 ot.intFutOptTransactionHeaderId intLFutOptTransactionHeaderId,  
-    ot1.intFutOptTransactionHeaderId intSFutOptTransactionHeaderId                      
+    ot1.intFutOptTransactionHeaderId intSFutOptTransactionHeaderId,
+	cb.strBook,
+	sb.strSubBook                      
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  
@@ -88,6 +91,8 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  
+ LEFT JOIN tblCTBook cb on ot.intBookId=cb.intBookId
+ LEFT JOIN tblCTSubBook sb on ot.intSubBookId=sb.intSubBookId
  WHERE  isnull(ot.intCommodityId,0)= CASE WHEN ISNULL(@intCommodityId,0)=0 then isnull(ot.intCommodityId,0) else @intCommodityId end
 	AND isnull(ot.intFutureMarketId,0)= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then isnull(ot.intFutureMarketId,0) else @intFutureMarketId end
 	AND isnull(ot.intBookId,0)= CASE WHEN ISNULL(@intBookId,0)=0 then isnull(ot.intBookId,0) else @intBookId end
