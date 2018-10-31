@@ -579,6 +579,7 @@ BEGIN
 		INSERT [dbo].[tblEMEntityLocation]    
 		([intEntityId], 
 		 [strLocationName], 
+		 [strCheckPayeeName],
 		 [strAddress], 
 		 [strCity], 
 		 [strCountry], 
@@ -592,6 +593,10 @@ BEGIN
 		select 				
 					--ssvnd_pay_to,
 					@EntityId, 
+					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
 						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
@@ -622,6 +627,7 @@ BEGIN
 		INSERT [dbo].[tblEMEntityLocation]    
 		([intEntityId], 
 		 [strLocationName], 
+		 [strCheckPayeeName],
 		 [strAddress], 
 		 [strCity], 
 		 [strCountry], 
@@ -640,7 +646,12 @@ BEGIN
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
 								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
 					, 0 , 100),
-								
+					SUBSTRING ( 
+						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
+					, 0 , 100),			
 								--+ CAST(A4GLIdentity AS NVARCHAR),
 					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 					ssvnd_city,
