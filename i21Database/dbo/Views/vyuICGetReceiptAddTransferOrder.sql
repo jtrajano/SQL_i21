@@ -15,9 +15,25 @@ FROM (
 			, strOrderNumber			= h.strTransferNo
 			, dblOrdered				= d.dblQuantity 
 			, dblReceived				= CAST(NULL AS NUMERIC(38, 20))
-			, intSourceType				= CAST(0 AS INT)
+			, intSourceType				= h.intSourceType
 			, intSourceId				= d.intInventoryTransferDetailId
-			, strSourceNumber			= CAST(NULL AS NVARCHAR(50))
+			, strSourceNumber			= CASE WHEN h.intSourceType = 1 -- Scale
+													THEN (SELECT TOP 1
+																strTicketNumber
+															FROM tblSCTicket
+															WHERE intTicketId = d.intSourceId)
+												WHEN h.intSourceType = 2 -- Inbound Shipment
+													THEN (SELECT TOP 1
+															CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
+															FROM tblLGShipment
+												WHERE intShipmentId = d.intSourceId)
+												WHEN h.intSourceType = 3 -- Transports
+													THEN (SELECT TOP 1
+															CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50))
+															FROM vyuTRGetLoadReceipt TransportView
+												WHERE TransportView.intLoadReceiptId = d.intSourceId)
+												ELSE NULL
+											END
 			, intItemId					= d.intItemId
 			, strItemNo					= item.strItemNo
 			, strItemDescription		= item.strDescription
