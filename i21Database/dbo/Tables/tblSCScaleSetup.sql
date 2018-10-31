@@ -67,6 +67,7 @@
 	[intEntityId] INT NULL,
 	[ysnActive] BIT NOT NULL,
 	[ysnMultipleWeights] BIT NOT NULL DEFAULT(0),
+    [ysnUseCurrentDate] BIT NOT NULL DEFAULT(0),
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
