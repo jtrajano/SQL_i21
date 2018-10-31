@@ -14,7 +14,6 @@ DECLARE @intMinSeq INT
 	,@strERPPONumber NVARCHAR(100)
 	,@intContractSeq INT
 	,@strItemNo NVARCHAR(100)
-	,@strStorageLocation NVARCHAR(50)
 	,@dblQuantity NUMERIC(18, 6)
 	,@strQuantityUOM NVARCHAR(50)
 	,@dblCashPrice NUMERIC(18, 6)
@@ -1166,7 +1165,6 @@ BEGIN
 			,@strERPItemNumber = CF.strERPItemNumber
 			,@intContractSeq = CF.intContractSeq
 			,@strItemNo = CF.strItemNo
-			,@strStorageLocation = CF.strStorageLocation
 			,@dblQuantity = CF.dblNetWeight
 			,@strQuantityUOM = (
 				SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
@@ -1250,7 +1248,6 @@ BEGIN
 				,@strERPItemNumber = CF.strERPItemNumber
 				,@intContractSeq = Min(CF.intContractSeq)
 				,@strItemNo = CF.strItemNo
-				,@strStorageLocation = CF.strStorageLocation
 				,@dblQuantity = SUM(CF.dblNetWeight)
 				,@strQuantityUOM = (
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
@@ -1324,7 +1321,6 @@ BEGIN
 				,CF.strERPPONumber
 				,CF.strERPItemNumber
 				,CF.strItemNo
-				,CF.strStorageLocation
 				,CF.strNetWeightUOM
 				,CF.dtmContractDate
 				,CF.strCurrency
@@ -1346,7 +1342,6 @@ BEGIN
 				,@strERPItemNumber = CF.strERPItemNumber
 				,@intContractSeq = Min(CF.intContractSeq)
 				,@strItemNo = CF.strItemNo
-				,@strStorageLocation = CF.strStorageLocation
 				,@dblQuantity = SUM(CF.dblNetWeight)
 				,@strQuantityUOM = (
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
@@ -1419,7 +1414,6 @@ BEGIN
 				,CF.strERPPONumber
 				,CF.strERPItemNumber
 				,CF.strItemNo
-				,CF.strStorageLocation
 				,CF.strNetWeightUOM
 				,CF.dtmContractDate
 				,CF.strCurrency
