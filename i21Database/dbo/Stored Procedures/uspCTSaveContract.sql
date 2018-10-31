@@ -43,14 +43,16 @@ BEGIN TRY
 			@intConcurrencyId			INT,
 			@intNoOfDays				INT,
 			@dtmPlannedAvalability		DATETIME,
-			@intFutureMarketId			INT
+			@intFutureMarketId			INT,
+			@intProducerId				INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
 			@dblFutures					=	dblFutures,
 			@intPricingTypeId			=	intPricingTypeId,
-			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0)
+			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
+			@intProducerId				=	intProducerId
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId			=	@intContractHeaderId
@@ -107,6 +109,13 @@ BEGIN TRY
 										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
 	WHERE	IU.intItemId			<>	CD.intItemId	
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	UPDATE	CD 
+	SET		CD.intProducerId	=	@intProducerId
+	FROM	tblCTContractDetail	CD
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		CD.intProducerId	IS NULL
+	AND		@intProducerId		IS NOT NULL
 
 	--End Correct if UOM are wrong
 
