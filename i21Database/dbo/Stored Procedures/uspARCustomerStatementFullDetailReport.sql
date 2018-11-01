@@ -352,13 +352,13 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dtmDate					= CB.dtmBudgetDate
 			 , dtmAsOfDate				= @dtmDateToLocal
 			 , dblAmount				= CB.dblBudgetAmount - CB.dblAmountPaid
-			 , dblQuantity				= 0.000000
+			 , dblQuantity				= NULL
 			 , dblInvoiceDetailTotal	= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , strTransactionType		= 'Customer Budget'
 			 , strType					= NULL
 			 , strPONumber				= NULL
 			 , strItemNo				= NULL
-			 , strItemDescription		= 'Budget for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
+			 , strItemDescription		= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 		FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN (

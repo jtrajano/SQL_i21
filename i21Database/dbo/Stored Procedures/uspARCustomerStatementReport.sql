@@ -369,7 +369,7 @@ EXEC sp_executesql @query
 IF @ysnIncludeBudgetLocal = 1
 	BEGIN
 		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
-			'SELECT strReferenceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
+			'SELECT strReferenceNumber			= ''Budget due for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
 				  , strTransactionType			= ''Customer Budget''
 				  , intEntityCustomerId			= C.intEntityCustomerId
 				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
