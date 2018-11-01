@@ -756,13 +756,13 @@ WHERE
     AND (
         (	I.[intItemId] IS NULL 
 			AND
-			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
+			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
 		)
         OR
         (
             I.[intItemId] IS NOT NULL
             AND
-            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
+            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
 			AND 
 			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
         )		
