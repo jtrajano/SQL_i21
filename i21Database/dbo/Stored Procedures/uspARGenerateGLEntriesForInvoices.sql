@@ -762,7 +762,7 @@ WHERE
         (
             I.[intItemId] IS NOT NULL
             AND
-            I.[strTransactionType] <> 'Debit Memo' 
+            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 			AND 
 			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
         )		
