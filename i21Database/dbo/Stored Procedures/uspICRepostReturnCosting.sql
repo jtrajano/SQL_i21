@@ -353,4 +353,4 @@ DEALLOCATE loopItems;
 IF @intReturnValue < 0 RETURN @intReturnValue;
 
 _Exit: 
-RETURN 1
+RETURN 0 
