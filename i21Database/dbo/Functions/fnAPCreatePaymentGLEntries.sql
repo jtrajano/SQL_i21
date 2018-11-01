@@ -193,6 +193,17 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+
+			UNION ALL
+			SELECT		DISTINCT
+					[intPaymentId]					=	A.intPaymentId,
+					[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+					[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
+			FROM	[dbo].tblAPPayment A 
+			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+			INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
+			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 	)MainQuery	
 	INNER JOIN tblAPPayment P on P.intPaymentId = MainQuery.intPaymentId
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
