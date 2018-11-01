@@ -2,6 +2,7 @@
 	@intUserId	INT
  AS
  BEGIN TRY
+
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@strTicketNo            Nvarchar(40),
 			@intTicketLVStagingId	INT,
@@ -34,6 +35,11 @@
 
 		BEGIN CATCH
 			SET @ErrMsg = ERROR_MESSAGE() 
+			
+			IF @ErrMsg LIKE '%Violation of UNIQUE KEY constraint%'
+			BEGIN 
+				SET @ErrMsg = 'Ticket '+LTRIM(@strTicketNo)+' is exist.' 
+			END
 			
 			UPDATE	tblSCTicketLVStaging
 			SET		ysnImported			=	0,
