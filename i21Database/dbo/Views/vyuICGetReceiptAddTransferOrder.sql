@@ -145,7 +145,7 @@ FROM (
 			, dblContainerWeightPerQty	= CAST(0 AS NUMERIC(18, 6))
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
-			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
+			, strSubCurrency			= SubCurrency.strCurrency--CAST(NULL AS NVARCHAR(50)) 
 			, dblGross					= ISNULL(d.dblGross - st.dblReceiptGross, 0) -- There is no gross from transfer
 			, dblNet					= ISNULL(d.dblNet-st.dblReceiptNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
@@ -225,6 +225,8 @@ FROM (
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
 			LEFT JOIN vyuICGetItemStockTransferred st ON st.intInventoryTransferId = h.intInventoryTransferId
+			
+			LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 			OUTER APPLY (
 				SELECT	LotItem.intLotId
