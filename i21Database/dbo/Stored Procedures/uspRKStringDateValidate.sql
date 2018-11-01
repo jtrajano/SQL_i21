@@ -15,10 +15,10 @@ BEGIN
 	SELECT @strDateTimeFormat = REPLACE(LEFT(LTRIM(RTRIM(strDateTimeFormat)),10), ' ', '-') FROM tblRKCompanyPreference;
 
 	SET @strDateRegex = CASE 
-		WHEN @strDateTimeFormat = 'MM-DD-YYYY' THEN '[0-1][0-2][^0-9][0-3][0-9][^0-9][0-9][0-9][0-9][0-9]'
+		WHEN @strDateTimeFormat = 'MM-DD-YYYY' THEN '[0-1][0-9][^0-9][0-3][0-9][^0-9][0-9][0-9][0-9][0-9]'
 		WHEN @strDateTimeFormat = 'DD-MM-YYYY' THEN '[0-3][0-9][^0-9][0-1][0-9][^0-9][0-9][0-9][0-9][0-9]'
-		WHEN @strDateTimeFormat = 'YYYY-MM-DD' THEN '[0-9][0-9][0-9][0-9][^0-9][0-1][0-2][^0-9][0-3][0-9]'
-		WHEN @strDateTimeFormat = 'YYYY-DD-MM' THEN '[0-9][0-9][0-9][0-9][^0-9][0-3][0-9][^0-9][0-1][0-2]'
+		WHEN @strDateTimeFormat = 'YYYY-MM-DD' THEN '[0-9][0-9][0-9][0-9][^0-9][0-1][0-9][^0-9][0-3][0-9]'
+		WHEN @strDateTimeFormat = 'YYYY-DD-MM' THEN '[0-9][0-9][0-9][0-9][^0-9][0-3][0-9][^0-9][0-1][0-9]'
 	END
 
 	IF(PATINDEX (@strDateRegex,@strDate) = 1)

@@ -15,10 +15,10 @@ SELECT @ConvertYear=101
 ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI' OR @strDateTimeFormat = 'DD MM YYYY' OR @strDateTimeFormat ='YYYY DD MM')
 SELECT @ConvertYear=103
 
-DECLARE @strInternalTradeNo int= null
+DECLARE @strInternalTradeNo nvarchar(50)= null
 DECLARE @intFutOptTransactionHeaderId int = null
 declare @MaxTranNumber int = null
-select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where intStartingNumberId=45
+
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
@@ -30,7 +30,7 @@ SELECT * INTO #temp FROM(
 SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
-	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
+	   cur.intCurrencyID, ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
 	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,ti.dtmFilledDate,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
@@ -48,18 +48,83 @@ where isnull(ti.strName,'') <> '' and isnull(ti.strFutMarketName,'') <> '' and i
 AND isnull(ti.strAccountNumber,'') <> '' and isnull(ti.strCommodityCode,'') <> '' and isnull(ti.strLocationName,'') <> '' and isnull(ti.strSalespersonId,'') <> ''
 )t order by strInternalTradeNo
 
-INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
-									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,
-									strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-									dtmFilledDate,intBookId,intSubBookId,dtmCreateDateTime)
 
-SELECT 1,* FROM #temp 
+WHILE EXISTS (SELECT TOP 1 * FROM #temp)
+BEGIN
+	DECLARE @id int
+
+	SELECT TOP 1 @id = strInternalTradeNo FROM #temp
+
+	EXEC uspSMGetStartingNumber 45, @strInternalTradeNo OUTPUT
+
+	INSERT INTO tblRKFutOptTransaction (
+		intSelectedInstrumentTypeId
+		,intFutOptTransactionHeaderId
+		,intConcurrencyId
+		,dtmTransactionDate
+		,intEntityId
+		,intBrokerageAccountId
+		,intFutureMarketId
+		,intInstrumentTypeId
+		,intCommodityId
+		,intLocationId
+		,intTraderId
+		,intCurrencyId
+		,strInternalTradeNo
+		,strBrokerTradeNo
+		,strBuySell
+		,intNoOfContract
+		,intFutureMonthId
+		,intOptionMonthId
+		,strOptionType
+		,dblStrike
+		,dblPrice
+		,strReference
+		,strStatus
+		,dtmFilledDate
+		,intBookId
+		,intSubBookId
+		,dtmCreateDateTime)
+
+	SELECT 1
+		,intFutOptTransactionHeaderId
+		,intConcurrencyId
+		,dtmTransactionDate
+		,intEntityId
+		,intBrokerageAccountId
+		,intFutureMarketId
+		,intInstrumentTypeId
+		,intCommodityId
+		,intCompanyLocationId
+		,intTraderId
+		,intCurrencyID
+		,@strInternalTradeNo
+		,strBrokerTradeNo
+		,strBuySell
+		,intNoOfContract
+		,intFutureMonthId
+		,intOptionMonthId
+		,strOptionType
+		,dblStrike
+		,dblPrice
+		,strReference
+		,strStatus
+		,dtmFilledDate
+		,intBookId
+		,intSubBookId
+		,dtmCreateDateTime 
+	FROM #temp 
+	WHERE strInternalTradeNo = @id
+	
+	DELETE FROM  #temp WHERE strInternalTradeNo = @id
+
+END
 
 
 END
-SELECT @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
+--SELECT @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 
-UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where intStartingNumberId=45
+--UPDATE tblSMStartingNumber SET intNumber= intNumber + 1 where intStartingNumberId=45
 COMMIT TRAN
 --SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 --		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
