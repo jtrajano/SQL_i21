@@ -5,6 +5,7 @@
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraInventory_ItemLocationId AS INT = NULL 
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -61,6 +62,7 @@ FROM	(
 				SELECT	intItemId, intItemLocationId, intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t 
 				WHERE	t.strBatchId = @strBatchId
+						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 				-- inventory-adj-qty-change transactions involved in the item return. 
 				UNION ALL 
@@ -68,6 +70,7 @@ FROM	(
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn 
 							ON t.intInventoryTransactionId = rtn.intInventoryTransactionId
 				WHERE	rtn.strBatchId = @strBatchId
+						AND rtn.strTransactionId = ISNULL(@strRebuildTransactionId, rtn.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
 			) t 			
 		) Query
