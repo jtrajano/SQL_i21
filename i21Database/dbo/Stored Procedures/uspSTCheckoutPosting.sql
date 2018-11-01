@@ -3387,11 +3387,12 @@ BEGIN
 								,@ErrorMessage		= @ErrorMessage OUTPUT
 								,@LogId				= @intIntegrationLogId OUTPUT
 
-
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
 							BEGIN
+
 								IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 									BEGIN
+
 										-- Posting to Recieve Payments is successfull
 										UPDATE tblSTCheckoutHeader
 										SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId
@@ -3399,9 +3400,10 @@ BEGIN
 									END
 								 ELSE
 									BEGIN
+
 										-- SELECT * FROM tblARPaymentIntegrationLogDetail
-										SET @ErrorMessage = (SELECT strMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-										SET @strStatusMsg = 'Receive Payments does not Post correctly. ' + ISNULL(@ErrorMessage, '')
+										SET @ErrorMessage = (SELECT strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+										SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 										-- ROLLBACK
 										GOTO ExitWithRollback
