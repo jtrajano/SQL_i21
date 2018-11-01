@@ -558,7 +558,7 @@ BEGIN
 	SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 	SELECT @strDescription = strCommodityCode, @ysnExchangeTraded = ysnExchangeTraded FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
 	SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
-IF  @intCommodityId >0 AND @ysnExchangeTraded = 1
+IF  @intCommodityId >0 --AND @ysnExchangeTraded = 1
 BEGIN
 	
 if isnull(@intVendorId,0) = 0
