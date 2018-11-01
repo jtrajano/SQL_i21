@@ -134,7 +134,7 @@ FROM (
 						WHERE bc.intFutureMarketId = ot.intFutureMarketId
 							AND bc.intBrokerageAccountId = ot.intBrokerageAccountId
 							AND ot.dtmTransactionDate BETWEEN bc.dtmEffectiveDate
-								AND bc.dtmEndDate
+								AND isnull(bc.dtmEndDate,getdate())
 						), 0)
 				,ISNULL((
 						SELECT SUM(dblMatchQty)
