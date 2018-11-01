@@ -1021,14 +1021,20 @@ SELECT * FROM (
 								,intInventoryReceiptId,strReceiptNumber
 	--
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,
-						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber)
-			select * from (
+						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber, strTicketNumber, intTicketId)
+			select intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference,strDistributionOption, 
+			intUnitMeasureId,intCompanyLocationId,strShipmentNumber,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber1, 
+			(select strTicketNumber from tblSCTicket st where st.intTicketId = intSourceId  AND strDistributionOption IN ('CNT')) strTicketNumber,
+			(select st.intTicketId from tblSCTicket st where st.intTicketId = intSourceId  AND strDistributionOption IN ('CNT')) intTicketId
+			
+			from (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
-			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
+			cd.intCommodityId,cl.strLocationName,cd.strItemNo,cd.strContractNumber strTicket,
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,r.strShipmentNumber,cd.intContractHeaderId,cd.strContractNumber
-			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1
+			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1, 
+			ri.intSourceId
 			FROM vyuRKGetInventoryValuation v 
 			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
