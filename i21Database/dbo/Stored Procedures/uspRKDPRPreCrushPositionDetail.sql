@@ -609,7 +609,7 @@ INSERT INTO @List (
 				,intCommodityId
 				,strInternalTradeNo
 				,intFutOptTransactionHeaderId
-				,'Pre-Crush'
+				,'Crush'
 				,strLocationName
 				,strFutureMonth
 				,dtmFutureMonthsDate
