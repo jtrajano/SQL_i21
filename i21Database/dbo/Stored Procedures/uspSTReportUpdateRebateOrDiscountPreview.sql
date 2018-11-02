@@ -403,7 +403,8 @@ BEGIN TRY
 		DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
 
 	   -- Query Preview display
-	   SELECT strLocation
+	   SELECT DISTINCT
+			  strLocation
 			  , strUpc
 			  , strItemDescription
 			  , strChangeDescription

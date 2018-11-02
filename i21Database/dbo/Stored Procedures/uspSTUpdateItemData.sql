@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateItemData]
-	-- Add the parameters for the stored procedure here
-	@XML varchar(max),
-	@strResultMsg NVARCHAR(1000) OUTPUT
-AS
+		-- Add the parameters for the stored procedure here
+		@XML varchar(max),
+		@strResultMsg NVARCHAR(1000) OUTPUT
+	AS
 BEGIN TRY
 	    
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
@@ -1146,7 +1146,9 @@ BEGIN TRY
 
 
 
-
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- START Query Preview -------------------------------------
+	   ---------------------------------------------------------------------------------------
 	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
 
 	   -- Query Preview display
@@ -1161,6 +1163,9 @@ BEGIN TRY
 	   ORDER BY strItemDescription, strChangeDescription ASC
     
 	   DELETE FROM @tblPreview
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- END Query Preview ---------------------------------------
+	   ---------------------------------------------------------------------------------------
 
 	   -- Clean up 
 		BEGIN
