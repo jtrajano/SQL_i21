@@ -412,6 +412,7 @@ BEGIN TRY
 		) SCS
 		LEFT JOIN	tblICItemUOM UN	ON	UN.intItemUOMId = SCS.intItemUOMId
 		WHERE strTicketNumber = @strTicketNo 
+		AND CI.intTicketLVStagingId = @intExternalId
 		AND CI.strData = 'Header' 
 		AND DiscountSchedule.intDiscountScheduleId IS NOT NULL
 		AND CI.ysnImported IS NULL
@@ -626,7 +627,7 @@ BEGIN TRY
 		
 	END
 
-
+	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 COMMIT TRANSACTION
 END TRY      
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      
