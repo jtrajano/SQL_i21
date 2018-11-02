@@ -47,14 +47,16 @@ BEGIN TRY
 			@ysnBasisComponent			BIT,
 			@intUnitMeasureId			INT,
 			@intCurrencyId				INT,
-			@intHeaderPricingTypeId		INT
+			@intHeaderPricingTypeId		INT,
+			@intProducerId				INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
 			@dblFutures					=	dblFutures,
 			@intHeaderPricingTypeId		=	intPricingTypeId,
-			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0)
+			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
+			@intProducerId				=	intProducerId
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId			=	@intContractHeaderId
