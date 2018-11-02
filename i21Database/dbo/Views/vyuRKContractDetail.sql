@@ -36,7 +36,7 @@ WITH Pricing AS
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
@@ -131,7 +131,7 @@ WITH Pricing AS
 	LEFT JOIN(
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
@@ -179,7 +179,7 @@ WITH Pricing AS
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
@@ -227,7 +227,7 @@ WITH Pricing AS
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
@@ -275,7 +275,7 @@ WITH Pricing AS
 	LEFT JOIN(
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
@@ -323,7 +323,7 @@ WITH Pricing AS
 	LEFT JOIN(
 		SELECT intFutureMonthId, strFutureMonth FROM tblRKFuturesMonth
 	)FM ON CDT.intFutureMonthId = FM.intFutureMonthId
-	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3)
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
 															CASE 
