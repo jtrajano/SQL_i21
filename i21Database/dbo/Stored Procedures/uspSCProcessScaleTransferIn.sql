@@ -32,7 +32,9 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 
 	SELECT TOP 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
 
-	SELECT @intSurchargeItemId = SCSetup.intDefaultFeeItemId
+	SELECT  @intFreightItemId = SCSetup.intFreightItemId
+		, @intHaulerId = SCTicket.intHaulerId
+		, @intSurchargeItemId = SCSetup.intDefaultFeeItemId
 		, @intItemUOMId = SCTicket.intItemUOMIdTo
 		, @intItemId = SCTicket.intItemId
 	FROM tblSCScaleSetup SCSetup 
@@ -61,7 +63,6 @@ BEGIN TRY
 			,intShipFromId
 			,intShipViaId
 			,intDiscountSchedule
-				
 			-- Detail				
 			,intItemId
 			,intItemLocationId
@@ -82,6 +83,9 @@ BEGIN TRY
 			,dblGross
 			,dblNet
 			,intSourceId
+			,intTicketId
+			,intInventoryTransferId
+			,intInventoryTransferDetailId
 			,intSourceType	
 			,strSourceScreenName
 	)	
@@ -109,7 +113,7 @@ BEGIN TRY
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
 			,dblQty						= SC.dblNetUnits
-			,dblCost					= SC.dblUnitPrice + SC.dblUnitBasis
+			,dblCost					= ICTran.dblCost
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId
@@ -124,12 +128,18 @@ BEGIN TRY
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
 											ELSE SC.dblNetUnits 
 										END
-			,intSourceId				= SC.intTicketId
-			,intSourceType		 		= 1 -- Source type for scale is 1 
-			,strSourceScreenName		= 'Scale Ticket'
+			,intSourceId                    = SC.intTicketId
+            ,intTicketId                    = SC.intTicketId
+            ,intInventoryTransferId         = ICTD.intInventoryTransferId
+            ,intInventoryTransferDetailId   = ICTD.intInventoryTransferDetailId
+            ,intSourceType                  = 1 -- Source type for scale is 1 
+            ,strSourceScreenName            = 'Scale Ticket'
 	FROM	tblSCTicket SC 
 	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
-	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
+	INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
+	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
+	LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId
+	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty > 0
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -301,20 +311,15 @@ _PostOrUnPost:
 		FROM	tblICInventoryReceipt 
 		WHERE	intInventoryReceiptId = @ReceiptId
 
-		SELECT	TOP 1 @intEntityId = [intEntityId] 
-		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityId] = @intUserId
-		BEGIN
-		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
-		  
-			UPDATE	SC
-			SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
-			FROM	dbo.tblSCTicket SC 
-			INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
-			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
-			INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-			WHERE SC.intTicketId = @intTicketId			
-		END
+		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;			
+
+		UPDATE	SC
+		SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
+		FROM	dbo.tblSCTicket SC 
+		INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
+		INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+		WHERE SC.intTicketId = @intTicketId	
 
 		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId
