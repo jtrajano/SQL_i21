@@ -92,7 +92,7 @@ BEGIN TRY
 		,[intShipViaId]					INT												NULL
 		,[strPONumber]					NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
 		,[strBOLNumber]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
-		,[strComments]					NVARCHAR (500)  COLLATE Latin1_General_CI_AS	NULL
+		,[strComments]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS	NULL
 		,[intAccountId]					INT												NULL
 		,[intFreightTermId]				INT												NULL
 		,[intPaymentMethodId]			INT												NULL
@@ -189,7 +189,8 @@ DECLARE  @Id									INT
 		,@MobileBillingShiftNo					NVARCHAR(50)
 		,@PONumber								NVARCHAR(25)
 		,@BOLNumber								NVARCHAR(50)
-		,@Comment								NVARCHAR(500)
+		,@Comment								NVARCHAR(MAX)
+		,@FooterComment							NVARCHAR(MAX)
 		,@ShipToLocationId						INT
 		,@BillToLocationId						INT
 		,@Template								BIT
@@ -362,6 +363,7 @@ BEGIN
 		,@PONumber						= [strPONumber]
 		,@BOLNumber						= [strBOLNumber]
 		,@Comment						= [strComments]
+		,@FooterComment					= [strFooterComments]
 		,@ShipToLocationId				= [intShipToLocationId]
 		,@BillToLocationId				= [intBillToLocationId]
 		,@Template						= [ysnTemplate]
@@ -610,6 +612,7 @@ BEGIN
 			,@PONumber						= @PONumber
 			,@BOLNumber						= @BOLNumber
 			,@Comment						= @Comment
+			,@FooterComment					= @FooterComment
 			,@ShipToLocationId				= @ShipToLocationId
 			,@BillToLocationId				= @BillToLocationId
 			,@Template						= @Template
@@ -1329,6 +1332,7 @@ BEGIN TRY
 			,@PONumber						= [strPONumber]
 			,@BOLNumber						= [strBOLNumber]
 			,@Comment						= [strComments]
+			,@FooterComment					= [strFooterComments]
 			,@ShipToLocationId				= [intShipToLocationId]
 			,@BillToLocationId				= [intBillToLocationId]
 			,@Template						= [ysnTemplate]

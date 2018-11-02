@@ -68,7 +68,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strMobileBillingShiftNo]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Mobile Billing Shift Number
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
-	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Comments		
+	,[strComments]							NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		-- Comments
+	,[strFooterComments]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		-- Footer Comments
 	,[intDocumentMaintenanceId]				INT												NULL		-- Combobox Comment in Invoice Header
 	,[intShipToLocationId]					INT												NULL		-- Customer Ship To Location Id(If NULL, customer's default location will be used)
 	,[intBillToLocationId]					INT												NULL		-- Customer Bill To Location Id(If NULL, customer's default location will be used)

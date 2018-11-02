@@ -24,7 +24,8 @@
 	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
-	,@Comment						NVARCHAR(500)	= ''			
+	,@Comment						NVARCHAR(MAX)	= ''
+	,@FooterComment					NVARCHAR(MAX)	= ''
 	,@ShipToLocationId				INT				= NULL
 	,@BillToLocationId				INT				= NULL
 	,@Posted						BIT				= 0	
@@ -157,8 +158,6 @@ SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTr
 SET @ZeroDecimal = 0.000000
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
-DECLARE @FooterComment NVARCHAR(MAX)
-
 IF ISNULL(@Comment, '') = ''
 	BEGIN
 		EXEC	[dbo].[uspARGetDefaultComment]
@@ -167,6 +166,16 @@ IF ISNULL(@Comment, '') = ''
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
 					@strHeaderComment = @Comment OUTPUT,
+					@DocumentMaintenanceId = @DocumentMaintenanceId
+	END
+
+IF ISNULL(@FooterComment, '') = ''
+	BEGIN
+		EXEC	[dbo].[uspARGetDefaultComment]
+					@intCompanyLocationId = @CompanyLocationId,
+					@intEntityCustomerId = @EntityCustomerId,
+					@strTransactionType = @TransactionType,
+					@strType = @Type,
 					@strFooterComment = @FooterComment OUTPUT,
 					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
