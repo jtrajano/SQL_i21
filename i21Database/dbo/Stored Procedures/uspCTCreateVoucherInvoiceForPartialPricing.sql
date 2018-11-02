@@ -296,7 +296,7 @@ BEGIN TRY
 								END
 							END
 
-							UPDATE tblAPBillDetail SET dblQtyOrdered = @dblQtyToCheck, dblQtyReceived = @dblQtyToCheck WHERE intBillDetailId = @intBillDetailId
+							--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblQtyToCheck, dblQtyReceived = @dblQtyToCheck WHERE intBillDetailId = @intBillDetailId
 
 							EXEC uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
@@ -448,6 +448,7 @@ BEGIN TRY
 				SELECT  @intInvoiceQtyUOMId =	intItemUOMId,
 						@dblTotalInvoiceQty =	dblQtyShipped,
 						@dblInvoicePrice	=	dblPrice,
+						@dblQtyShipped		=	dblQtyShipped,
 						@dblQtyToCheck		=	dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intInvoiceQtyUOMId,@dblPriceFixedQty)
 
 				FROM    tblARInvoiceDetail 
@@ -469,7 +470,7 @@ BEGIN TRY
 					EXEC	uspARUpdateInvoiceDetails	
 							@intInvoiceDetailId	=	@intInvoiceDetailId,
 							@intEntityId		=	@intUserId, 
-							@dblQtyShipped		=	@dblQtyToCheck
+							@dblQtyShipped		=	@dblQtyShipped
 
 					EXEC	uspARUpdateInvoicePrice 
 							 @InvoiceId			=	@intInvoiceId
