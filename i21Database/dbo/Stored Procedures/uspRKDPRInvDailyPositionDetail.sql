@@ -1024,8 +1024,8 @@ SELECT * FROM (
 						intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber, strTicketNumber, intTicketId)
 			select intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference,strDistributionOption, 
 			intUnitMeasureId,intCompanyLocationId,strShipmentNumber,intContractHeaderId,strContractNumber,intInventoryShipmentId,strShipmentNumber1, 
-			(select strTicketNumber from tblSCTicket st where st.intTicketId = intSourceId  AND strDistributionOption IN ('CNT')) strTicketNumber,
-			(select st.intTicketId from tblSCTicket st where st.intTicketId = intSourceId  AND strDistributionOption IN ('CNT')) intTicketId
+			(select strTicketNumber from tblSCTicket st where st.intTicketId = intSourceId) strTicketNumber,
+			(select st.intTicketId from tblSCTicket st where st.intTicketId = intSourceId) intTicketId
 			
 			from (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
