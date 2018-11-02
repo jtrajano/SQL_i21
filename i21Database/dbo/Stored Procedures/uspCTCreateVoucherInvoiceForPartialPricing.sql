@@ -64,7 +64,9 @@ BEGIN TRY
 			@dblInvoicePrice				NUMERIC(18,6),
 			@dblVoucherPrice				NUMERIC(18,6),
 			@dblQtyToCheck					NUMERIC(18,6),
-			@batchIdUsed					NVARCHAR(MAX)
+			@batchIdUsed					NVARCHAR(MAX),
+			@dblQtyShipped					NUMERIC(18,6),
+			@dblQtyReceived					NUMERIC(18,6)
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -188,7 +190,7 @@ BEGIN TRY
 
 					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
 					BEGIN
-						SELECT	@intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+						SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				    
 						SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
 						
@@ -200,13 +202,13 @@ BEGIN TRY
 						END
 
 						INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
-						SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
+						SELECT	2,@intInventoryReceiptItemId, @dblQtyReceived, @dblFinalPrice
 				    
 						EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
 				    
 						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
 				    
-						UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+						--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
@@ -378,7 +380,7 @@ BEGIN TRY
 
 						SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 
-						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
+						SELECT	@intInvoiceDetailId = intInvoiceDetailId,@dblQtyShipped = dblQtyShipped FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
@@ -389,7 +391,7 @@ BEGIN TRY
 									,@raiseError		= 1
 						END
 
-						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyToInvoice, @dblFinalPrice, @intUserId
+						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyShipped, @dblFinalPrice, @intUserId
 
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
