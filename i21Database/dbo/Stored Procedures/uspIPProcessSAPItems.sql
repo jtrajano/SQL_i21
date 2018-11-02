@@ -302,11 +302,37 @@ BEGIN TRY
 							FROM tblIPItemUOMStage
 							WHERE intStageItemId = @intStageItemId
 							)
-						RAISERROR (
-								'UOM is required.'
-								,16
-								,1
+					BEGIN
+						INSERT INTO tblIPItemUOMStage (
+							intStageItemId
+							,strItemNo
+							,strUOM
+							,dblNumerator
+							,dblDenominator
+							)
+						SELECT @intStageItemId
+							,strItemNo
+							,strStockUOM
+							,1
+							,1
+						FROM tblIPItemStage
+						WHERE strItemNo = @strItemNo
+							AND intStageItemId = @intStageItemId
+							AND IsNULL(strStockUOM, '') <> ''
+
+						IF NOT EXISTS (
+								SELECT 1
+								FROM tblIPItemUOMStage
+								WHERE intStageItemId = @intStageItemId
 								)
+						BEGIN
+							RAISERROR (
+									'UOM is required.'
+									,16
+									,1
+									)
+						END
+					END
 
 					INSERT INTO tblICItem (
 						strItemNo
@@ -643,7 +669,9 @@ BEGIN TRY
 						SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + strUnitMeasure + '","keyValue":' + ltrim(intItemUOMId) + ',"iconCls":"small-new-plus","leaf":true},'
 						FROM @tblICItemUOM IU
 						JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+
 						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
 						SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Unit of Measure"},'
 					END
 
