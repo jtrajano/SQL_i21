@@ -119,8 +119,20 @@ Else
 Begin --Inventory Item
 If ISNULL(@intItemId,0)=0 --Create
 Begin
+	
 	If Not Exists (Select 1 From tblIPItemUOMStage Where intStageItemId=@intStageItemId)
-	RaisError('UOM is required.',16,1)
+	Begin
+		Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
+		Select @intStageItemId,strItemNo,strStockUOM,1,1
+		From tblIPItemStage Where strItemNo=@strItemNo AND intStageItemId=@intStageItemId
+		and IsNULL(strStockUOM,'') <>''
+
+		If Not Exists (Select 1 From tblIPItemUOMStage Where intStageItemId=@intStageItemId)
+		Begin
+			RaisError('UOM is required.',16,1)
+		End
+
+	End
 
 	Insert Into tblICItem(strItemNo,strDescription,strShortName,strType,strLotTracking,strInventoryTracking,intCategoryId,intCommodityId,strStatus,intLifeTime)
 	Select strItemNo,strDescription,LEFT(strDescription,50),'Inventory','Yes - Manual/Serial Number','Lot Level',@intCategoryId,@intCommodityId,'Active',0
