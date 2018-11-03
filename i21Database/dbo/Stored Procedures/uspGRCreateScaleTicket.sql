@@ -14,7 +14,10 @@ BEGIN TRY
 			@intEntityId				INT,
 			@intTicketDiscountId		INT,
 			@intDiscountScheduleId		INT,
+			@strScaleOperatorUser       NVARCHAR(100),
 			@SQL						NVARCHAR(MAX)
+			
+	SELECT @strScaleOperatorUser = strName FROM tblEMEntity WHERE intEntityId = @intUserId
 
     IF ISNULL(@strTicketNo,'') = ''
 	BEGIN
@@ -339,7 +342,7 @@ BEGIN TRY
 			,[strInOutFlag] 			 = SCTicketType.strInOutIndicator
 			,[dtmTicketDateTime]		 = CI.dtmTicketDateTime
 			,[intProcessingLocationId]	 = CL.intCompanyLocationId
-			,[strScaleOperatorUser]		 = 1
+			,[strScaleOperatorUser]		 = @strScaleOperatorUser
 			,[intEntityScaleOperatorId]	 = @intUserId
 			,[strTruckName]				 = CI.strTruckName
 			,[strDriverName]			 = CI.strDriverName
