@@ -65,7 +65,7 @@
 	[intTicketId] INT,
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationNumber] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
-	[strDiscountId] NVARCHAR(4500) COLLATE Latin1_General_CI_AS NULL,
+	[strDiscountId] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strData] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strEntityName]  NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationName] NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,	
