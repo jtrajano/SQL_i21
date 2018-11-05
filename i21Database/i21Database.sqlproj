@@ -5814,7 +5814,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherApprovalStatus.sql" />
     <Build Include="dbo\Tables\tblSMCacheVersion.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreload.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransporterCustomerInvoiceTax.sql" />
     <Build Include="dbo\Views\vyuAPVendorInquiry.sql" />
     <Build Include="dbo\Views\vyuAPSearchVendorInquiry.sql" />
     <Build Include="dbo\Views\vyuCRMHoursWorked.sql" />
