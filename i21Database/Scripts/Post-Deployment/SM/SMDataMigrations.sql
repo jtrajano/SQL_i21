@@ -42,20 +42,32 @@ GO
 
 GO
 	-- Reset Demo User Roles and permissions
+	DECLARE @AdminId INT	
+	SELECT TOP 1 @AdminId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMIN' AND strDescription = 'Do not use in Production. For Demo Purposes Only.'
+	IF (SELECT COUNT(*) FROM vyuSMEntityRole WHERE intUserRoleId = @AdminId) > 0
+	BEGIN
+		DELETE FROM tblSMUserRoleMenu WHERE intUserRoleId = @AdminId
+		EXEC uspSMUpdateUserRoleMenus @AdminId
+		UPDATE tblSMUserRoleMenu
+		SET ysnVisible = 1
+		WHERE intUserRoleId IN (@AdminId)--, @UserId)
+	END
+	ELSE
+	BEGIN
+		DELETE FROM tblSMUserRole WHERE strName = 'ADMIN' AND strDescription = 'Do not use in Production. For Demo Purposes Only.'
+	END
 
-	DECLARE @AdminId INT
 	DECLARE @UserId INT
-
-	SELECT TOP 1 @AdminId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMIN'
-	--SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
-
-	EXEC uspSMUpdateUserRoleMenus @AdminId
-	--EXEC uspSMUpdateUserRoleMenus @UserId
-
-	UPDATE tblSMUserRoleMenu
-	SET ysnVisible = 1
-	WHERE intUserRoleId IN (@AdminId)--, @UserId)
-
+	SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
+	IF (SELECT COUNT(*) FROM vyuSMEntityRole WHERE intUserRoleId = @UserId) > 0
+	BEGIN
+		DELETE FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserId
+		EXEC uspSMUpdateUserRoleMenus @UserId
+	END
+	ELSE
+	BEGIN
+		DELETE FROM tblSMUserRole WHERE strName = 'USER' AND strDescription = 'Do not use in Production. For Demo Purposes Only.'
+	END
 GO
 	-- Add Help Desk role menus if not existing
 	DECLARE @helpDesk INT
