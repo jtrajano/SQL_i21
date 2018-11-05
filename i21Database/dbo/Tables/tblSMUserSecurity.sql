@@ -32,6 +32,7 @@
 
 	[dtmScaleDate]					DATE NULL,
 	[intEntityScaleOperatorId]		INT  NULL,
+	[ysnUnrestricted]				BIT NOT NULL DEFAULT(1),
 
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
