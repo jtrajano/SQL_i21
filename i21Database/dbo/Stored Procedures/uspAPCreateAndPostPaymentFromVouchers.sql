@@ -187,7 +187,7 @@ BEGIN
 			* 
 		FROM 
 		#tmpPartitionedVouchers
-	) sortedVouchers ORDER BY ' + @clientSort
+	) sortedVouchers ORDER BY ' + CASE WHEN @clientSort = 'undefined' THEN  'strBillId ASC' ELSE @clientSort END 
 	
 	EXECUTE sp_executesql @script
 	
