@@ -649,14 +649,14 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dtmDate						= dtmBudgetDate
 				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
 				  , dtmShipDate					= NULL
-				  , dblInvoiceTotal				= dblBudgetAmount
+				  , dblInvoiceTotal				= dblBudgetAmount - dblAmountPaid
 				  , intPaymentId				= CB.intCustomerBudgetId
 				  , strRecordNumber				= ''Budget due for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 				  , strTransactionType			= ''Customer Budget''
 				  , strPaymentInfo				= NULL
 				  , dtmDatePaid					= NULL
-				  , dblPayment					= dblAmountPaid
-				  , dblBalance					= dblBudgetAmount - dblAmountPaid
+				  , dblPayment					= 0.00
+				  , dblBalance					= 0.00
 				  , strSalespersonName			= NULL				  
 				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
@@ -819,7 +819,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') <> 'Balance Forward'
+        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
 		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 

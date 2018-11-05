@@ -477,7 +477,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
-	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType = ''Invoices'' AND STATEMENTREPORT.strType <> ''CF Invoice'' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
+	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'') AND ISNULL(STATEMENTREPORT.strType, '''') <> ''CF Invoice'' AND STATEMENTREPORT.intPaymentId IS NULL THEN 0 ELSE STATEMENTREPORT.dblInvoiceDetailTotal END) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
 	, dblTotalAR				= ISNULL(AGING.dblTotalAR, 0.000000)
 	, dblFuture					= ISNULL(AGING.dblFuture, 0.000000)
 	, dbl0Days					= ISNULL(AGING.dbl0Days, 0.000000)

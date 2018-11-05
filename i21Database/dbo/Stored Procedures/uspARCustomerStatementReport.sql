@@ -377,10 +377,10 @@ IF @ysnIncludeBudgetLocal = 1
 				  , intDaysDue					= DATEDIFF(DAY, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), '+ @strDateTo +')
 				  , dblTotalAmount				= dblBudgetAmount
 				  , dblAmountPaid				= dblAmountPaid
-				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
-				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
+				  , dblAmountDue				= 0.00
+				  , dblPastDue					= 0.00
 				  , dblMonthlyBudget			= dblBudgetAmount
-				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId'+ @queryRunningBalanceBudget +')
+				  , dblRunningBalance			= 0.00
 				  , strCustomerNumber			= C.strCustomerNumber
 				  , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strCustomerName ELSE ISNULL(CUST.strCheckPayeeName, C.strCustomerName) END
 				  , strName						= C.strCustomerName
@@ -451,7 +451,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE (((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0
+		DELETE FROM @temp_statement_table WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0) AND strTransactionType <> 'Customer Budget'
 		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 
 		DELETE from #CUSTOMERS 
