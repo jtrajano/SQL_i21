@@ -7171,6 +7171,7 @@
 	<Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
 	<Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
 	<Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
