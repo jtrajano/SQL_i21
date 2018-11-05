@@ -268,8 +268,7 @@ BEGIN TRY
 				FROM    tblAPBillDetail 
 				WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
 
-				IF  @dblQtyToCheck		<>	@dblTotalBillQty	OR
-					@dblVoucherPrice	<>	@dblFinalPrice
+				IF  @dblVoucherPrice	<>	@dblFinalPrice
 					
 				BEGIN
 					EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
@@ -454,8 +453,7 @@ BEGIN TRY
 				FROM    tblARInvoiceDetail 
 				WHERE   intInvoiceDetailId = @intInvoiceDetailId AND intInventoryShipmentChargeId IS NULL
 
-				IF	@dblQtyToCheck		<>	@dblTotalInvoiceQty OR
-					@dblInvoicePrice	<>	@dblFinalPrice
+				IF	@dblInvoicePrice	<>	@dblFinalPrice
 				BEGIN
 					
 					IF ISNULL(@ysnInvoicePosted,0) = 1
