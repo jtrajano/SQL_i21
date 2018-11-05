@@ -420,7 +420,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strPaymentInfo				= NULL
 				  , dtmDatePaid					= NULL
 				  , dblPayment					= dblAmountPaid
-				  , dblBalance					= dblBudgetAmount - dblAmountPaid
+				  , dblBalance					= 0.00
 				  , strSalespersonName			= NULL				  
 				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
@@ -478,7 +478,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE (((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0
+        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND strTransactionType <> 'Customer Budget'
 		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
     END
 	
@@ -665,17 +665,3 @@ UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strStatementFormat = 'Payment Activity'
-
-IF @ysnPrintCreditBalanceLocal = 0
-	BEGIN
-		DELETE FROM tblARCustomerStatementStagingTable 
-		WHERE intEntityUserId = @intEntityUserIdLocal 
-		  AND strStatementFormat = 'Payment Activity'
-		  AND intEntityCustomerId IN (
-			  SELECT DISTINCT intEntityCustomerId
-			  FROM tblARCustomerAgingStagingTable AGINGREPORT
-			  WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
-				AND AGINGREPORT.strAgingType = 'Summary'
-				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
-		  )
-	END

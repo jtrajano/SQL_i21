@@ -6,7 +6,6 @@
 	@intEntityUserId			INT = NULL,
 	@strSourceTransaction		NVARCHAR(100) = NULL,
 	@strCompanyLocation			NVARCHAR(100) = NULL,
-	@ysnIncludeBudget			BIT = 0,
 	@ysnIncludeCredits			BIT = 1,
 	@ysnIncludeWriteOffPayment	BIT = 0,
 	@strCustomerName			NVARCHAR(MAX) = NULL,
@@ -23,7 +22,6 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@intEntityUserIdLocal			INT				= NULL,
 		@strSourceTransactionLocal		NVARCHAR(100)	= NULL,
 		@strCompanyLocationLocal		NVARCHAR(100)	= NULL,
-		@ysnIncludeBudgetLocal			BIT				= 0,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
 		@intSalespersonId				INT				= NULL,
@@ -46,7 +44,6 @@ SET @intEntityCustomerIdLocal		= NULLIF(@intEntityCustomerId, 0)
 SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
 SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
 SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
-SET @ysnIncludeBudgetLocal			= @ysnIncludeBudget
 SET @ysnIncludeCreditsLocal			= @ysnIncludeCredits
 SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
@@ -355,31 +352,6 @@ FROM
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 
-UNION ALL
-
-SELECT intInvoiceId			= CB.intCustomerBudgetId
-     , intEntityCustomerId	= CB.intEntityCustomerId      
-     , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) <= 0 THEN 'Current'
-	 				WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
-	 				WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
-	 				WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) <= 60 THEN '31 - 60 Days'
-	 				WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
-	 				WHEN DATEDIFF(DAYOFYEAR, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateToLocal) > 90 THEN 'Over 90' END    
-FROM tblARCustomerBudget CB	
-INNER JOIN (
-	SELECT intEntityId
-		 , ysnCustomerBudgetTieBudget
-	FROM tblARCustomer 
-) CUST ON CB.intEntityCustomerId = CUST.intEntityId
-INNER JOIN (
-	SELECT intEntityCustomerId
-	FROM @tblCustomers
-) C ON CUST.intEntityId = C.intEntityCustomerId
-WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	AND CB.dblAmountPaid < CB.dblBudgetAmount
-	AND @ysnIncludeBudgetLocal = 1
-	--AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
-
 ) AS A  
 
 
@@ -491,32 +463,6 @@ LEFT JOIN (
 	GROUP BY PD.intInvoiceId
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
-
-UNION ALL
-
-SELECT intInvoiceId			= CB.intCustomerBudgetId
-     , dblAmountPaid		= CB.dblAmountPaid
-	 , dblInvoiceTotal		= CB.dblBudgetAmount
-     , dblAmountDue			= CB.dblBudgetAmount - CB.dblAmountPaid
-     , dtmDueDate			= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
-     , intEntityCustomerId	= CB.intEntityCustomerId
-     , dblAvailableCredit	= 0
-	 , dblPrepayments		= 0
-	 , strType				= ''
-FROM tblARCustomerBudget CB	
-LEFT JOIN (
-	SELECT intEntityId
-		 , ysnCustomerBudgetTieBudget
-	FROM tblARCustomer 
-) CUST ON CB.intEntityCustomerId = CUST.intEntityId
-INNER JOIN (
-	SELECT intEntityCustomerId
-	FROM @tblCustomers
-) C ON CUST.intEntityId = C.intEntityCustomerId
-WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	AND CB.dblAmountPaid < CB.dblBudgetAmount 
-	AND @ysnIncludeBudgetLocal = 1
-	--AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
 
 ) AS TBL) AS B
           
