@@ -36,7 +36,7 @@
 	,@Forgiven						BIT				= 0			
 	,@Calculated					BIT				= 0			
 	,@Splitted						BIT				= 0			
-	,@ImpactInventory				BIT				= 0			
+	,@ImpactInventory				BIT				= 1			
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
 	,@LoadDistributionHeaderId		INT				= NULL
@@ -332,8 +332,8 @@ IF @CurrencyId IS NOT NULL
 ELSE
 	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurrency](@EntityCustomerId)
 
-IF @TransactionType = 'Credit Memo'
-	SET @ImpactInventory = 1
+--IF @TransactionType = 'Credit Memo'
+--	SET @ImpactInventory = 1
 
 IF @ItemDescription like 'Washout net diff: Original Contract%' and @TransactionType = 'Credit Memo'
 BEGIN
