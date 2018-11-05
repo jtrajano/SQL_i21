@@ -20,7 +20,8 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMCompanyLocationSubLocation] PRIMARY KEY ([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblSMCompanyLocation] FOREIGN KEY (intCompanyLocationId) REFERENCES tblSMCompanyLocation(intCompanyLocationId) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblEMEntity] FOREIGN KEY ([intVendorId]) REFERENCES tblEMEntity([intEntityId])
+	CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblEMEntity] FOREIGN KEY ([intVendorId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [AK_tblSMCompanyLocationSubLocation_CompanyLocationSubLocationClassification] UNIQUE ([intCompanyLocationId], [strSubLocationName], [strClassification])
 )
 GO 
 
