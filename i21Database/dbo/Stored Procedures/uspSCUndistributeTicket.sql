@@ -492,11 +492,14 @@ BEGIN TRY
 					, @dblBalance = ROUND(IRI.dblOpenReceive, @currencyDecimal) FROM tblICInventoryReceiptItem IRI 
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intInventoryReceiptItemId = @intId
-					SELECT @intEntityId = intEntityId
-					, @intItemId = intItemId
+					
+					SELECT @intItemId = intItemId
 					, @intLocationId = intProcessingLocationId
 					, @intDeliverySheetId = intDeliverySheetId 
-					FROM tblSCTicket WHERE intTicketId = @intTicketId
+					, @intStorageScheduleTypeId = SCS.intStorageScheduleTypeId
+					FROM tblSCTicket SC
+					INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId
+					WHERE SC.intTicketId = @intTicketId AND SCS.intCustomerId = @EntitySplitId
 					
 					EXEC uspGRCustomerStorageBalance	
 						@EntitySplitId 
@@ -505,7 +508,7 @@ BEGIN TRY
 						,@intDeliverySheetId
 						,@intCustomerStorageId
 						,@dblBalance
-						,NULL
+						,@intStorageScheduleTypeId
 						,NULL
 						,0
 						,@newBalance OUTPUT
