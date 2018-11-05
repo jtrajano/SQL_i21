@@ -70,7 +70,7 @@ INNER JOIN (
 LEFT JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
-		 , strLocationAddress = dbo.fnConvertToFullAddress(strAddress, strCity, strStateProvince, strZipPostalCode), strPhone, strFax = strFax + ' Fax'
+		 , strLocationAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strStateProvince, strZipPostalCode, NULL, NULL, NULL), strPhone, strFax = strFax + ' Fax'
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 ) LOCATION ON LOCATION.intCompanyLocationId = DRAWER.intCompanyLocationId
 LEFT JOIN (
