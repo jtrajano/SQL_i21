@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCMBankReconClearedDepositsSubReport]
+﻿CREATE PROCEDURE [dbo].[uspCMBankReconClearedVoidedTransactionsSubReport]
 	@intBankAccountId AS INT
 	,@dtmStatementDate AS DATETIME
-	,@ysnCheckVoid BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,8 +31,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
-		,@VOID_ACH AS INT = 122
-
+		,@ACH AS INT = 22
+		,@DIRECT_DEPOSIT AS INT = 23
+		,@VOID_ACH AS INT= 122
 
 --SET @xmlparam = '
 --<xmlparam>
@@ -141,6 +141,7 @@ SELECT	intBankAccountId = BankTrans.intBankAccountId
 			OR BankTrans.dtmDateReconciled > @filterDate THEN 0
 			ELSE BankTrans.ysnClr 
 			END
+		,ysnCheckVoid
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
@@ -159,20 +160,26 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			ON BankTrans.intBankTransactionTypeId = BankTypes.intBankTransactionTypeId
 			
 WHERE	BankTrans.ysnPosted = 1
-		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
 		AND BankTrans.dtmDate <= ISNULL(@filterDate, BankTrans.dtmDate)
-
 		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL( @dtmStatementDate, BankTrans.dtmDateReconciled)
+
 		AND (
-		--	-- Filter for all the bank deposits and credits:
-			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT,@VOID_ACH)
-			OR ( dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
-			OR  (BankTrans.intBankTransactionTypeId = @VOID_AP_PAYMENT and @ysnCheckVoid = 1)
+			-- Filter for all the bank deposits and credits:
+			(
+				BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @VOID_AP_PAYMENT, @VOID_ACH)
+				AND 
+				dbo.fnIsDepositEntry(BankTrans.strLink) = 0
+				OR ( dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
+			)
+			OR
+			(
+				BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+				OR ( BankTrans.dblAmount < 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
+			)
 		)
-		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0
-		
+		AND (ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled )
 )
 SELECT * FROM R WHERE ysnClr = 1
-GO
+
