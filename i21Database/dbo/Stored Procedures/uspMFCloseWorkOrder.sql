@@ -50,6 +50,9 @@ BEGIN TRY
 		,@strPickLot NVARCHAR(50)
 		,@AccountCategory_Cost_Adjustment NVARCHAR(50)
 		,@dblOtherCharges NUMERIC(38, 20)
+		,@strAutoCycleCountOnWorkOrderClose NVARCHAR(50)
+		,@intSubLocationId INT
+		,@strXML2 nvarchar(MAX)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -81,6 +84,7 @@ BEGIN TRY
 		,@strWorkOrderNo = strWorkOrderNo
 		,@intManufacturingCellId = intManufacturingCellId
 		,@dblProducedQuantity = dblProducedQuantity
+		,@intSubLocationId = intSubLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -264,6 +268,33 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
+
+	SELECT @strAutoCycleCountOnWorkOrderClose = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 121 --Auto Cycle Count on Work Order Close
+
+	IF @strAutoCycleCountOnWorkOrderClose IS NULL
+		SELECT @strAutoCycleCountOnWorkOrderClose = 'False'
+
+	IF @strAutoCycleCountOnWorkOrderClose = 'True'
+	BEGIN
+		SELECT @strXML2 = '<root><intLocationId>' + Ltrim(@intLocationId) + '</intLocationId><intSubLocationId>' + Ltrim(@intSubLocationId) + '</intSubLocationId><intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId><intUserId>' + Ltrim(@intUserId) + '</intUserId><ysnIncludeOutputItem>False</ysnIncludeOutputItem><strExcludeItemType></strExcludeItemType><ysnAutoFill>1</ysnAutoFill></root>'
+
+		EXEC [dbo].uspMFStartCycleCount @strXML2
+
+		SELECT @strXML2 = '<root><CycleCounts>'
+
+		SELECT @strXML2 = @strXML2 + '<CycleCount><intCycleCountId>' + Ltrim(CC.intCycleCountId) + '</intCycleCountId><dblQuantity>0</dblQuantity><intUserId>' + Ltrim(@intUserId) + '</intUserId></CycleCount>'
+		FROM tblMFProcessCycleCount CC
+		JOIN tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
+		WHERE CS.intWorkOrderId = @intWorkOrderId
+
+		SELECT @strXML2 = @strXML2 + '</CycleCounts></root>'
+
+		EXEC uspMFUpdateCycleCount @strXML2
+	END
 
 	IF @strCycleCountMandatory = 'False'
 		AND @strInstantConsumption = 'False'

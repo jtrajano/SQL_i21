@@ -41,10 +41,11 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strUnitMeasure NVARCHAR(50)
 		,@strError NVARCHAR(MAX)
-		,@intRecipeTypeId int
-		,@intItemUOMId int
+		,@intRecipeTypeId INT
+		,@intItemUOMId INT
 		--,@intUnitMeasureId int
-
+		,@strAutoCycleCountOnWorkOrderClose NVARCHAR(50)
+		,@ysnAutoFill BIT
 	DECLARE @tblMFProcessCycleCount TABLE (
 		intItemId INT
 		,intMachineId INT
@@ -82,6 +83,7 @@ BEGIN TRY
 		,@intWorkOrderId = intWorkOrderId
 		,@ysnIncludeOutputItem = ysnIncludeOutputItem
 		,@strExcludeItemType = strExcludeItemType
+		,@ysnAutoFill = IsNULL(ysnAutoFill, 0)
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLocationId INT
 			,intSubLocationId INT
@@ -89,6 +91,7 @@ BEGIN TRY
 			,intWorkOrderId INT
 			,ysnIncludeOutputItem BIT
 			,strExcludeItemType NVARCHAR(MAX)
+			,ysnAutoFill BIT
 			)
 
 	DECLARE @intUserSecurityID INT
@@ -170,12 +173,21 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@strWorkOrderNo = strWorkOrderNo
-		,@intRecipeTypeId=intRecipeTypeId 
-		,@intItemUOMId=intItemUOMId
+		,@intRecipeTypeId = intRecipeTypeId
+		,@intItemUOMId = intItemUOMId
 		,@dblProducedQuantity = dblProducedQuantity
 	FROM dbo.tblMFWorkOrder W
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strAutoCycleCountOnWorkOrderClose = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 121 --Auto Cycle Count on Work Order Close
+
+	IF @strAutoCycleCountOnWorkOrderClose IS NULL
+		SELECT @strAutoCycleCountOnWorkOrderClose = 'False'
 
 	SELECT @intUnitMeasureId = intUnitMeasureId
 	FROM tblICItemUOM
@@ -268,7 +280,8 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS (
+	IF @strAutoCycleCountOnWorkOrderClose = 'False'
+		AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrder W
 			JOIN dbo.tblMFProcessCycleCountSession CS ON W.intWorkOrderId = CS.intWorkOrderId
@@ -339,7 +352,8 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS (
+	IF @strAutoCycleCountOnWorkOrderClose = 'False'
+		AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrder W
 			LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
@@ -463,7 +477,7 @@ BEGIN TRY
 		SELECT @intUnitMeasureId = intUnitMeasureId
 		FROM tblICItemUOM
 		WHERE intItemId = @intItemId
-			AND ysnStockUnit  = 1
+			AND ysnStockUnit = 1
 
 		IF EXISTS (
 				SELECT 1
@@ -549,8 +563,8 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnConsumptionReversed = 0
 
-		if @dblStagedQty is null
-		Select @dblStagedQty=0
+		IF @dblStagedQty IS NULL
+			SELECT @dblStagedQty = 0
 
 		IF @dblStagedQty > @dblProducedQty
 		BEGIN
@@ -1122,45 +1136,118 @@ BEGIN TRY
 		,intStorageLocationId INT
 		)
 
-	INSERT INTO @tblMFLot
-	SELECT I.intItemId
-		,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, I.intItemUOMId, S.dblOnHand), 0))
-		,I.intItemUOMId
-		,I.intStorageLocationId
-	FROM @tblICFinalItem I
-	JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId
-		AND I.strLotTracking = 'No'
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
-		AND IU.ysnStockUnit = 1
-	JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
-		AND S.intStorageLocationId = I.intStorageLocationId
-		AND S.dblOnHand > 0
-		AND IL.intLocationId = @intLocationId
-	GROUP BY I.intItemId
-		,I.intItemUOMId
-		,I.intStorageLocationId
+	IF @ysnAutoFill = 1
+	BEGIN
+		INSERT INTO @tblMFLot (
+			intItemId
+			,dblQty
+			,intItemUOMId
+			,intStorageLocationId
+			)
+		SELECT I.intItemId
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0))
+			,I.intItemUOMId
+			,I.intStorageLocationId
+		FROM @tblICFinalItem I
+		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			AND WI.intWorkOrderId = @intWorkOrderId
+			AND WI.ysnConsumptionReversed = 0
+		GROUP BY I.intItemId
+			,I.intItemUOMId
+			,I.intStorageLocationId
 
-	INSERT INTO @tblMFLot
-	SELECT I.intItemId
-		,SUM(IsNULL((
-					CASE 
-						WHEN L.intWeightUOMId IS NULL
-							THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty)
-						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, I.intItemUOMId, L.dblWeight)
-						END
-					), 0))
-		,I.intItemUOMId
-		,I.intStorageLocationId
-	FROM @tblICFinalItem I
-	JOIN tblICLot L ON L.intItemId = I.intItemId
-		AND I.strLotTracking <> 'No'
-		AND L.intLotStatusId = 1
-		AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-		AND L.dblQty > 0
-		AND L.intStorageLocationId = I.intStorageLocationId
-	GROUP BY I.intItemId
-		,I.intItemUOMId
-		,I.intStorageLocationId
+		INSERT INTO @tblMFLot
+		SELECT I.intItemId
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, I.intItemUOMId, S.dblOnHand), 0))
+			,I.intItemUOMId
+			,I.intStorageLocationId
+		FROM @tblICFinalItem I
+		JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId
+			AND I.strLotTracking = 'No'
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+			AND IU.ysnStockUnit = 1
+		JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+			AND S.intStorageLocationId = I.intStorageLocationId
+			AND S.dblOnHand > 0
+			AND IL.intLocationId = @intLocationId
+			AND NOT EXISTS (
+				SELECT *
+				FROM @tblMFLot L
+				WHERE L.intItemId = I.intItemId
+				)
+		GROUP BY I.intItemId
+			,I.intItemUOMId
+			,I.intStorageLocationId
+
+		INSERT INTO @tblMFLot
+		SELECT I.intItemId
+			,SUM(IsNULL((
+						CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty)
+							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, I.intItemUOMId, L.dblWeight)
+							END
+						), 0))
+			,I.intItemUOMId
+			,I.intStorageLocationId
+		FROM @tblICFinalItem I
+		JOIN tblICLot L ON L.intItemId = I.intItemId
+			AND I.strLotTracking <> 'No'
+			AND L.intLotStatusId = 1
+			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+			AND L.dblQty > 0
+			AND L.intStorageLocationId = I.intStorageLocationId
+			AND NOT EXISTS (
+				SELECT *
+				FROM @tblMFLot L
+				WHERE L.intItemId = I.intItemId
+				)
+		GROUP BY I.intItemId
+			,I.intItemUOMId
+			,I.intStorageLocationId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFLot
+		SELECT I.intItemId
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, I.intItemUOMId, S.dblOnHand), 0))
+			,I.intItemUOMId
+			,I.intStorageLocationId
+		FROM @tblICFinalItem I
+		JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId
+			AND I.strLotTracking = 'No'
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+			AND IU.ysnStockUnit = 1
+		JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+			AND S.intStorageLocationId = I.intStorageLocationId
+			AND S.dblOnHand > 0
+			AND IL.intLocationId = @intLocationId
+		GROUP BY I.intItemId
+			,I.intItemUOMId
+			,I.intStorageLocationId
+
+		INSERT INTO @tblMFLot
+		SELECT I.intItemId
+			,SUM(IsNULL((
+						CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty)
+							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, I.intItemUOMId, L.dblWeight)
+							END
+						), 0))
+			,I.intItemUOMId
+			,I.intStorageLocationId
+		FROM @tblICFinalItem I
+		JOIN tblICLot L ON L.intItemId = I.intItemId
+			AND I.strLotTracking <> 'No'
+			AND L.intLotStatusId = 1
+			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+			AND L.dblQty > 0
+			AND L.intStorageLocationId = I.intStorageLocationId
+		GROUP BY I.intItemId
+			,I.intItemUOMId
+			,I.intStorageLocationId
+	END
 
 	DECLARE @tblMFReservation TABLE (
 		intItemId INT
