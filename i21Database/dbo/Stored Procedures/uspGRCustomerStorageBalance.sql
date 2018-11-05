@@ -36,9 +36,18 @@ BEGIN TRY
 		UPDATE tblGRCustomerStorage
 		SET dblOpenBalance = dblOpenBalance - @dblBalance
 			, dblOriginalBalance = dblOriginalBalance - @dblBalance
-		WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+		WHERE intEntityId = @intEntityId AND intItemId = @intItemId 
+		AND intCompanyLocationId = @intLocationId 
+		AND intDeliverySheetId = @intDeliverySheetId
+		AND intStorageTypeId = @intStorageTypeId 
 
-		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage 
+		WHERE intEntityId = @intEntityId 
+		AND intItemId = @intItemId
+		AND intCompanyLocationId = @intLocationId 
+		AND intDeliverySheetId = @intDeliverySheetId
+		AND intStorageTypeId = @intStorageTypeId 
+
 	END
 END TRY
 BEGIN CATCH
