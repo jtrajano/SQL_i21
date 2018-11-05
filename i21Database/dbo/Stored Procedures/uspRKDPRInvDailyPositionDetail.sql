@@ -1031,7 +1031,7 @@ SELECT * FROM (
 			SELECT distinct 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,cd.strContractNumber strTicket,
-			cd.dtmContractDate as dtmTicketDateTime ,
+			v.dtmDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,r.strShipmentNumber,cd.intContractHeaderId,cd.strContractNumber
 			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1, 
 			ri.intSourceId
