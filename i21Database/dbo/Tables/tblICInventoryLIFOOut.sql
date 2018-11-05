@@ -28,6 +28,10 @@ GO
 	--	INCLUDE(intInventoryLIFOId);
 	--GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut]
-		ON [dbo].[tblICInventoryLIFOOut]([intInventoryLIFOId] ASC, [intInventoryTransactionId] ASC)
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut_intInventoryLIFOId]
+		ON [dbo].[tblICInventoryLIFOOut]([intInventoryLIFOId] ASC)
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOOut_intInventoryTransactionId]
+		ON [dbo].[tblICInventoryLIFOOut]([intInventoryTransactionId] ASC)
 GO
