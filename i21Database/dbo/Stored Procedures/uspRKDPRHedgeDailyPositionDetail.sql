@@ -1230,7 +1230,7 @@ BEGIN IF isnull(@intVendorId,0) = 0
 						,intInventoryReceiptId,isnull(strReceiptNumber,'') strReceiptNumber,intTicketId,isnull(strShipmentNumber,'') strShipmentNumber,intInventoryShipmentId,intItemId,isnull(strTicketNumber,'') strTicketNumber
 			FROM @Final f 
 			JOIN tblICCommodity c on c.intCommodityId= f.intCommodityId			
-			where dblTotal <> 0 --and strSubType NOT like '%'+@strPurchaseSales+'%'  
+			where dblTotal <> 0 and strSubType NOT like '%'+@strPurchaseSales+'%'  
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable  ($)' ELSE '' END
 			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
