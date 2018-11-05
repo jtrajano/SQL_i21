@@ -40,6 +40,7 @@ WHERE strName = @strCustomerName
 
 SELECT DT.strReceiptNumber AS [Receipt Number]
 	,DT.strBillOfLading AS [BOL]
+	,DT.strWarehouseRefNo As [Reference No]
 	,ROW_NUMBER() OVER (
 		PARTITION BY DT.strReceiptNumber ORDER BY DT.strReceiptNumber
 			,DT.strItemNo
@@ -57,6 +58,7 @@ SELECT DT.strReceiptNumber AS [Receipt Number]
 FROM (
 	SELECT IR.strReceiptNumber
 		,IR.strBillOfLading
+		,IR.strWarehouseRefNo
 		,I.strItemNo
 		,I.strDescription
 		,IRL.strVendorLotId
@@ -83,6 +85,7 @@ FROM (
 	) AS DT
 GROUP BY DT.strReceiptNumber
 	,DT.strBillOfLading
+	,DT.strWarehouseRefNo
 	,DT.strItemNo
 	,DT.strDescription
 	,DT.strVendorLotId
