@@ -370,7 +370,7 @@ FROM
 											THEN dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
 																						THEN B.intWeightUOMId ELSE B.intUnitMeasureId END),
 														 CD.intItemUOMId, (B.dblOpenReceive - B.dblBillQty)) 
-									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,2)) 
+									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
