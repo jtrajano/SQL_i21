@@ -5,6 +5,7 @@
 	@paymentMethod INT,
 	@datePaid DATETIME,
 	@voucherIds NVARCHAR(MAX),
+	@sort NVARCHAR(500),
 	@batchPaymentId NVARCHAR(255) OUTPUT,
 	@postedCount INT OUTPUT,
 	@unpostedCount INT OUTPUT,
@@ -18,6 +19,8 @@ BEGIN
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
+
+	BEGIN TRY
 
 	DECLARE @currentUser INT = @userId;
 	DECLARE @functionalCurrency INT;
@@ -41,23 +44,30 @@ BEGIN
 	DECLARE @successPostPayment BIT;
 	DECLARE @totalUnpostedPayment INT = 0;
 	DECLARE @totalPostedPayment INT = 0;
+	DECLARE @script NVARCHAR(MAX);
+	DECLARE @clientSort NVARCHAR(500) = @sort;
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchers') IS NOT NULL DROP TABLE #tmpMultiVouchers
-	CREATE TABLE #tmpMultiVouchers(intBillId INT,
-		 intPayToAddressId INT,
-		 intEntityVendorId INT,
-		 intPaymentId INT,
-		 dblAmountPaid DECIMAL(18,2),
-		 dblWithheld DECIMAL(18,2),
-		 strPaymentInfo NVARCHAR(50));
+	CREATE TABLE #tmpMultiVouchers
+	(
+		intBillId INT,
+		intPayToAddressId INT,
+		intEntityVendorId INT,
+		intPaymentId INT,
+		intPartitionId INT,
+		dblAmountPaid DECIMAL(18,2),
+		dblWithheld DECIMAL(18,2),
+		strPaymentInfo NVARCHAR(50),
+		intSortId INT IDENTITY(1,1)
+	);
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersCreatedPayment') IS NOT NULL DROP TABLE #tmpMultiVouchersCreatedPayment
-	CREATE TABLE #tmpMultiVouchersCreatedPayment(intPaymentId INT, intCreatePaymentId INT);
+	CREATE TABLE #tmpMultiVouchersCreatedPayment(intPartitionId INT, intCreatePaymentId INT);
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersAndPayment') IS NOT NULL DROP TABLE #tmpMultiVouchersAndPayment
 	CREATE TABLE #tmpMultiVouchersAndPayment(intBillId INT, intCreatePaymentId INT);
 
-	IF OBJECT_ID('tempdb.. #tmpPayableInvalidData') IS NOT NULL DROP TABLE  #tmpPayableInvalidData
+	IF OBJECT_ID('tempdb..#tmpPayableInvalidData') IS NOT NULL DROP TABLE  #tmpPayableInvalidData
 	CREATE TABLE #tmpPayableInvalidData (
 		[strError] [NVARCHAR](1000),
 		[strTransactionType] [NVARCHAR](50),
@@ -139,15 +149,51 @@ BEGIN
 		RETURN;
 	END
 
-	BEGIN TRY
-
-	DECLARE @transCount INT = @@TRANCOUNT;
-	IF @transCount = 0 BEGIN TRANSACTION
+	IF OBJECT_ID('tempdb..#tmpPartitionedVouchers') IS NOT NULL DROP TABLE  #tmpPartitionedVouchers
+	SELECT 
+		result.* 
+		,voucher.ysnReadyForPayment
+		,vendor.strVendorId
+		,entity.strName
+		,payTo.strCheckPayeeName
+		,voucher.dtmDueDate
+		,voucher.strBillId
+		,voucher.strVendorOrderNumber
+		,commodity.strCommodityCode
+		,term.strTerm
+		,voucher.dblTotal
+		,voucher.dblTempDiscount
+		,voucher.dblTempInterest
+		,voucher.dblAmountDue
+		,payMethod.strPaymentMethod
+	INTO #tmpPartitionedVouchers
+	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
+	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
+	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
+		ON vendor.intEntityId = voucher.intEntityVendorId
+	LEFT JOIN tblEMEntityLocation payTo ON voucher.intPayToAddressId = payTo.intEntityLocationId
+	LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
+	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
+	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
-	INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo)
-	SELECT * FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
+	SET @script = 
+	'INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo, intPartitionId)
+	SELECT
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, intPartitionId
+	FROM
+	(
+		SELECT 
+			* 
+		FROM 
+		#tmpPartitionedVouchers
+	) sortedVouchers ORDER BY ' + CASE WHEN @clientSort = 'undefined' THEN  'strBillId ASC' ELSE @clientSort END 
 	
+	EXECUTE sp_executesql @script
+	
+	DECLARE @transCount INT = @@TRANCOUNT;
+	IF @transCount = 0 BEGIN TRANSACTION
+	--SELECT * FROM #tmpMultiVouchers
 	-- --INVOICE
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchers)
@@ -174,7 +220,7 @@ BEGIN
 		MERGE INTO tblAPPayment AS destination
 		USING
 		(
-			SELECT
+			SELECT TOP 100 PERCENT
 				[intAccountId]						= 	@bankGLAccountId,
 				[intBankAccountId]					= 	@bankAccount,
 				[intPaymentMethodId]				= 	@paymentMethod,
@@ -195,7 +241,8 @@ BEGIN
 				[intEntityId]						= 	@currentUser,
 				[intConcurrencyId]					= 	0,
 				[strBatchId]						=	@batchId,
-				[intPaymentId]						=	vouchersPay.intPaymentId
+				[intPaymentId]						=	vouchersPay.intPaymentId,
+				[intPartitionId]					=	vouchersPay.intPartitionId
 				-- [strBillIds]						=	STUFF((
 				-- 											SELECT ',' + CAST(tbl.intBillId AS NVARCHAR)
 				-- 											FROM #tmpMultiVouchers tbl
@@ -203,12 +250,15 @@ BEGIN
 				-- 											FOR XML PATH('')),1,1,''
 				-- 										)
 			FROM #tmpMultiVouchers vouchersPay
-			GROUP BY vouchersPay.intPaymentId,
-			vouchersPay.dblAmountPaid,
-			vouchersPay.intPayToAddressId,
-			vouchersPay.intEntityVendorId,
-			vouchersPay.strPaymentInfo,
-			vouchersPay.dblWithheld
+			GROUP BY 
+				vouchersPay.intPaymentId,
+				vouchersPay.dblAmountPaid,
+				vouchersPay.intPayToAddressId,
+				vouchersPay.intEntityVendorId,
+				vouchersPay.strPaymentInfo,
+				vouchersPay.dblWithheld,
+				vouchersPay.intPartitionId
+			ORDER BY MIN(vouchersPay.intSortId)
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
@@ -257,7 +307,7 @@ BEGIN
 			[intConcurrencyId],
 			[strBatchId]
 		)
-		OUTPUT SourceData.intPaymentId, inserted.intPaymentId INTO #tmpMultiVouchersCreatedPayment;
+		OUTPUT SourceData.intPartitionId, inserted.intPaymentId INTO #tmpMultiVouchersCreatedPayment;
 
 		--UPDATE STARTING NUMBER
 		UPDATE pay
@@ -277,9 +327,8 @@ BEGIN
 			vouchers.intBillId
 			,tmpPay.intCreatePaymentId
 		FROM #tmpMultiVouchersCreatedPayment tmpPay
-		INNER JOIN #tmpMultiVouchers vouchers ON tmpPay.intPaymentId = vouchers.intPaymentId
-		-- CROSS APPLY dbo.fnGetRowsFromDelimitedValues(tmpPay.strBillIds) ids
-		
+		INNER JOIN #tmpMultiVouchers vouchers ON tmpPay.intPartitionId = vouchers.intPartitionId 
+
 		INSERT INTO tblAPPaymentDetail(
 			[intPaymentId],
 			[intBillId],
@@ -303,6 +352,7 @@ BEGIN
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
+
 	END
 
 	SET @batchPaymentId = @batchId;
@@ -356,7 +406,9 @@ BEGIN
 	FROM tblAPPayment A
 	INNER JOIN #tmpMultiVouchersCreatedPayment B ON A.intPaymentId = B.intCreatePaymentId
 	WHERE A.ysnPosted = 0
-	GOTO DONE;
+
+	IF @postedCount > 0 GOTO COMPLETEPROCESS;
+	ELSE GOTO DONE;
 
 	COMPLETEPROCESS:
 	--UPDATE BATCH PAY intNumber
