@@ -389,7 +389,7 @@ END
 ELSE
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  ,strEntityName
-FROM @List where dblTotal is null or dblTotal <> 0 and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
+FROM @List where (dblTotal is null or dblTotal <> 0) and strType NOT LIKE '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
 ORDER BY  CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END ,intSeqNo, strType
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
