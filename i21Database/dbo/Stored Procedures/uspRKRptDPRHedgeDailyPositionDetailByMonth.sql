@@ -184,12 +184,48 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strCustomerContract  nvarchar(100)
 		,intFutureMarketId int
 		,intFutureMonthId	int
-		)
+		, intCategoryId int
+		, strCategory nvarchar(100)
+		, strFutMarketName nvarchar(100))
 
 INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,strFutureMonth,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
 	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
-	   	,intFutureMarketId,intFutureMonthId)	
-EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
+	   	,intFutureMarketId,intFutureMonthId, intCategoryId , strCategory , strFutMarketName)	
+SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
+	, strCommodityCode
+	, intCommodityId
+	, intContractHeaderId
+	, strContractNumber
+	, strLocationName
+	, dtmEndDate
+	, strFutureMonth
+	, dblBalance
+	, intUnitMeasureId
+	, intPricingTypeId
+	, intContractTypeId
+	, intCompanyLocationId
+	, strContractType
+	, strPricingType
+	, intCommodityUnitMeasureId
+	, intContractDetailId
+	, intContractStatusId
+	, intEntityId
+	, intCurrencyId
+	, strType
+	, intItemId
+	, strItemNo
+	, dtmContractDate
+	, strEntityName
+	, strCustomerContract
+	, intFutureMarketId
+	, intFutureMonthId
+	, intCategoryId
+	, strCategory
+	, strFutMarketName
+FROM vyuRKContractDetail CD
+WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+	AND intCommodityId = @intCommodityId
+	AND CD.intContractStatusId <> 6
 
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
@@ -208,9 +244,11 @@ DECLARE @tblGetOpenFutureByDate TABLE (
 		strBroker nvarchar(100) COLLATE Latin1_General_CI_AS,
 		strNewBuySell nvarchar(100) COLLATE Latin1_General_CI_AS,
 		intFutOptTransactionHeaderId int 
-		)
+		, ysnPreCrush BIT
+		, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract,strCommodityCode,strInternalTradeNo,strLocationName,dblContractSize,
-			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId)
+			strFutureMarket,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId, ysnPreCrush, strNotes, strBrokerTradeNo)
 EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
 
 INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId,strEntityName)
