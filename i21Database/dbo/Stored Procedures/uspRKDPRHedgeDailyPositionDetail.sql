@@ -768,7 +768,7 @@ BEGIN
 	SELECT distinct 
 		strCommodityCode
 		,'Price Risk' as strType
-		,'Sls Basis Deliveries' as strContractType
+		,'Sales Basis Deliveries' as strContractType
 		,isnull(ri.dblQuantity, 0) AS dblTotal
 		,r.strShipmentNumber
 		,r.intInventoryShipmentId
@@ -843,7 +843,7 @@ BEGIN
 	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
 	SELECT strCommodityCode,'Basis Risk' strType, strContractType,sum(dblTotal),intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency 
-	FROM @tempFinal where strType='Price Risk' and strContractType in('Inventory','Collateral','DP','Sls Basis Deliveries','OffSite') AND @ysnExchangeTraded = 1
+	FROM @tempFinal where strType='Price Risk' and strContractType in('Inventory','Collateral','DP','Sales Basis Deliveries','OffSite') AND @ysnExchangeTraded = 1
 		group by strCommodityCode,strContractType,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency
 	
 	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency)
