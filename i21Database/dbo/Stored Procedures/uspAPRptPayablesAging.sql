@@ -353,7 +353,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblDiscount
 	,tmpAgingSummaryTotal.dblInterest
 	,tmpAgingSummaryTotal.dblAmountDue
-	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+	,ISNULL(B.strVendorId, C.strEntityNo) + '' - '' + isnull(C.strName,'''') as strVendorIdName 
 	,EC.strClass
 	,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 	, '+ @dtmDateFilter +' as dtmDateFilter

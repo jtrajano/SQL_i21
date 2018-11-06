@@ -21,7 +21,7 @@ FROM (
 		,tmpAgingSummaryTotal.dblDiscount
 		,tmpAgingSummaryTotal.dblInterest
 		,tmpAgingSummaryTotal.dblAmountDue
-		,ISNULL(B.strVendorId, '') + ' - ' + isnull(C.strName, '') AS strVendorIdName
+		,ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName, '') AS strVendorIdName
 		,NULL AS strReceiptNumber 
 		,NULL AS strTicketNumber
 		,NULL AS strShipmentNumber
