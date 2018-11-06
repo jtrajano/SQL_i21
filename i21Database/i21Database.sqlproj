@@ -7149,6 +7149,8 @@
     <Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
     <Build Include="dbo\Views\vyuRKCurExpNonOpenSales.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
