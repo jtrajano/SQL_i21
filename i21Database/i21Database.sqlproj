@@ -7149,6 +7149,8 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
     <Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
     <Build Include="dbo\Views\vyuRKCurExpNonOpenSales.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateStorageChargeFromImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateStorageFeeFromImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
