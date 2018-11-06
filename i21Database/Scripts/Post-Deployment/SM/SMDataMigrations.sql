@@ -103,40 +103,40 @@ GO
 
 	-- MIGRATE AR COMPANY PREFERENCES
 	EXEC uspARMigrateCompanyPreference
-GO
-	PRINT N'MIGRATING tblAPCompanyPreference to tblSMCompanyLocation'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPCompanyPreference' AND [COLUMN_NAME] IN ('intDefaultAccountId', 'intWithholdAccountId', 'intDiscountAccountId', 'intInterestAccountId'))
-	BEGIN
-		EXEC
-		('
-			IF EXISTS(SELECT TOP 1 1 FROM tblAPCompanyPreference)
-			BEGIN		
-				DECLARE @intDefaultAccountId INT,
-						@intWithholdAccountId INT, 
-						@intDiscountAccountId INT, 
-						@intInterestAccountId INT, 
-						@dblWithholdPercent DECIMAL(18, 6)
+--GO
+--	PRINT N'MIGRATING tblAPCompanyPreference to tblSMCompanyLocation'
+--	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPCompanyPreference' AND [COLUMN_NAME] IN ('intDefaultAccountId', 'intWithholdAccountId', 'intDiscountAccountId', 'intInterestAccountId'))
+--	BEGIN
+--		EXEC
+--		('
+--			IF EXISTS(SELECT TOP 1 1 FROM tblAPCompanyPreference)
+--			BEGIN		
+--				DECLARE @intDefaultAccountId INT,
+--						@intWithholdAccountId INT, 
+--						@intDiscountAccountId INT, 
+--						@intInterestAccountId INT, 
+--						@dblWithholdPercent DECIMAL(18, 6)
 
-				SELECT TOP 1 @intDefaultAccountId = intDefaultAccountId, @intWithholdAccountId = intWithholdAccountId, @intDiscountAccountId = intDiscountAccountId, @intInterestAccountId = intInterestAccountId, @dblWithholdPercent = dblWithholdPercent
-				FROM tblAPCompanyPreference
+--				SELECT TOP 1 @intDefaultAccountId = intDefaultAccountId, @intWithholdAccountId = intWithholdAccountId, @intDiscountAccountId = intDiscountAccountId, @intInterestAccountId = intInterestAccountId, @dblWithholdPercent = dblWithholdPercent
+--				FROM tblAPCompanyPreference
 
-				PRINT N''UPDATING intWithholdAccountId, intDiscountAccountId, intInterestAccountId, dblWithholdPercent''
-				UPDATE tblSMCompanyLocation 
-				SET intWithholdAccountId = @intWithholdAccountId, 
-				intDiscountAccountId = @intDiscountAccountId, 
-				intInterestAccountId = @intInterestAccountId, 
-				dblWithholdPercent = @dblWithholdPercent
+--				PRINT N''UPDATING intWithholdAccountId, intDiscountAccountId, intInterestAccountId, dblWithholdPercent''
+--				UPDATE tblSMCompanyLocation 
+--				SET intWithholdAccountId = @intWithholdAccountId, 
+--				intDiscountAccountId = @intDiscountAccountId, 
+--				intInterestAccountId = @intInterestAccountId, 
+--				dblWithholdPercent = @dblWithholdPercent
 
-				PRINT N''UPDATING intAPAccount Where intAPAccount is null''
-				UPDATE tblSMCompanyLocation 
-				SET intAPAccount = @intDefaultAccountId
-				WHERE intAPAccount IS NULL
+--				PRINT N''UPDATING intAPAccount Where intAPAccount is null''
+--				UPDATE tblSMCompanyLocation 
+--				SET intAPAccount = @intDefaultAccountId
+--				WHERE intAPAccount IS NULL
 
-				PRINT N''TRUNCATING tblAPCompanyPreference''
-				TRUNCATE TABLE tblAPCompanyPreference
-			END
-		')
-	END
+--				PRINT N''TRUNCATING tblAPCompanyPreference''
+--				TRUNCATE TABLE tblAPCompanyPreference
+--			END
+--		')
+--	END
 GO
 	-- MIGRATE DB PREFERENCES
 	EXEC uspDBMigrateUserPreference
