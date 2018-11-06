@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspTFGetTransporterCustomerInvoiceTax.sql]
+﻿CREATE PROCEDURE [dbo].[uspTFGetTransporterCustomerInvoiceTax]
 	@Guid NVARCHAR(50),
 	@ReportingComponentId NVARCHAR(MAX),
 	@DateFrom DATETIME,
