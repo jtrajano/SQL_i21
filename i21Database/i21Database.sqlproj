@@ -7153,6 +7153,8 @@
     <Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolumeStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
