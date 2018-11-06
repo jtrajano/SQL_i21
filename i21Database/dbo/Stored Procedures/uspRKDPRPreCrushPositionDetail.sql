@@ -421,7 +421,7 @@ SELECT strCommodityCode,dblTotal ,strLocationName ,intCommodityId,intFromCommodi
 -- OFfSite
 INSERT INTO @InventoryStock(strCommodityCode ,dblTotal ,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType)
 select strCommodityCode ,sum(dblTotal)  dblTotal,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType from(
-select  strCommodityCode,dblTotal ,strLocationName ,intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,'Sls Basis Deliveries' strInventoryType from (
+select  strCommodityCode,dblTotal ,strLocationName ,intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,'Sales Basis Deliveries' strInventoryType from (
 	SELECT strCommodityCode,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,cd.intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,cl.strLocationName
 	,cd.intCommodityId,cd.intCompanyLocationId
 	FROM vyuICGetInventoryValuation v 
