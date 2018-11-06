@@ -106,7 +106,9 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
 			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
-										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
+										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END,
+				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
+										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
@@ -762,7 +764,9 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
 			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
-										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END
+										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END,
+				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
+										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
