@@ -19,9 +19,9 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @tmpInvoiceTransaction TFInvoiceTransaction
+	DECLARE @tmpTransaction TFCommonTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
-	DECLARE @tmpInvoiceDetailTax TFInvoiceDetailTax
+	DECLARE @tmpDetailTax TFCommonDetailTax
 
 	IF @Refresh = 1
 	BEGIN
@@ -44,8 +44,8 @@ BEGIN TRY
 
 		IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId)) 
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpTransaction(intId
+				, intTransactionDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -67,14 +67,14 @@ BEGIN TRY
 				, strOriginCounty
 				, strOriginState
 				, strCustomerName
-				, strCustomerFEIN
+				, strCustomerFederalTaxId
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strTransporterName
-				, strTransporterFEIN
+				, strTransporterFederalTaxId
 				, strConsignorName
-				, strConsignorFEIN
+				, strConsignorFederalTaxId
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -84,8 +84,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, strHeaderStateTaxId
+				, strHeaderFederalTaxId
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType
@@ -125,14 +125,14 @@ BEGIN TRY
 						, NULL AS strOriginCounty
 						, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
-						, tblEMEntity.strFederalTaxId AS strCustomerFEIN
+						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
 						, tblSMShipVia.strTransporterLicense
 						, tblSMTransportationMode.strCode
 						, Transporter.strName AS strTransporterName
-						, Transporter.strFederalTaxId AS strTransporterFEIN
+						, Transporter.strFederalTaxId AS strTransporterFederalTaxId
 						, NULL AS strConsignorName
-						, NULL AS strConsignorFEIN
+						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, tblSMCompanySetup.strCompanyName AS strVendorName
 						, tblSMCompanySetup.strEin AS strVendorFederalTaxId
@@ -227,8 +227,8 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @tmpInvoiceTransaction(intId
-				, intInvoiceDetailId
+			INSERT INTO @tmpTransaction(intId
+				, intTransactionDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -250,14 +250,14 @@ BEGIN TRY
 				, strOriginCounty
 				, strOriginState
 				, strCustomerName
-				, strCustomerFEIN
+				, strCustomerFederalTaxId
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strTransporterName
-				, strTransporterFEIN
+				, strTransporterFederalTaxId
 				, strConsignorName
-				, strConsignorFEIN
+				, strConsignorFederalTaxId
 				, strTerminalControlNumber
 				, strVendorName
 				, strVendorFederalTaxId
@@ -267,8 +267,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, strHeaderStateTaxId
+				, strHeaderFederalTaxId
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType
@@ -308,14 +308,14 @@ BEGIN TRY
 						, NULL AS strOriginCounty
 						, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
-						, tblEMEntity.strFederalTaxId AS strCustomerFEIN
+						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
 						, tblSMShipVia.strTransporterLicense
 						, tblSMTransportationMode.strCode
 						, Transporter.strName AS strTransporterName
-						, Transporter.strFederalTaxId AS strTransporterFEIN
+						, Transporter.strFederalTaxId AS strTransporterFederalTaxId
 						, NULL AS strConsignorName
-						, NULL AS strConsignorFEIN
+						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, tblSMCompanySetup.strCompanyName AS strVendorName
 						, tblSMCompanySetup.strEin AS strVendorFederalTaxId
@@ -416,8 +416,8 @@ BEGIN TRY
 			UNIQUE NONCLUSTERED ([intId] ASC, [intInvoiceDetailId] ASC))
 		
 		INSERT INTO @tmpInvoiceDetailUniqueAccountStatusCode
-			SELECT MIN(intId) intId, intInvoiceDetailId FROM @tmpInvoiceTransaction 
-			GROUP BY intInvoiceDetailId HAVING (COUNT(intInvoiceDetailId) > 1)
+			SELECT MIN(intId) intId, intTransactionDetailId FROM @tmpTransaction 
+			GROUP BY intTransactionDetailId HAVING (COUNT(intTransactionDetailId) > 1)
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetailUniqueAccountStatusCode)
 		BEGIN
@@ -425,7 +425,7 @@ BEGIN TRY
 
 			SELECT TOP 1 @intIdUASC = intId, @intDetailInvoiceUASC = intInvoiceDetailId FROM @tmpInvoiceDetailUniqueAccountStatusCode
 
-			DELETE FROM @tmpInvoiceTransaction WHERE intId <> @intIdUASC AND intInvoiceDetailId = @intDetailInvoiceUASC
+			DELETE FROM @tmpTransaction WHERE intId <> @intIdUASC AND intTransactionDetailId = @intDetailInvoiceUASC
 
 			DELETE FROM @tmpInvoiceDetailUniqueAccountStatusCode WHERE intId = @intIdUASC
 		END
@@ -437,52 +437,52 @@ BEGIN TRY
 			-- TRANSACTION WITHOUT TAX CODE
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
 			BEGIN	
-				DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId IN (
-					SELECT DISTINCT InvTran.intInvoiceDetailId 
-					FROM @tmpInvoiceTransaction InvTran
-					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId
+				DELETE @tmpTransaction WHERE intTransactionDetailId IN (
+					SELECT DISTINCT InvTran.intTransactionDetailId 
+					FROM @tmpTransaction InvTran
+					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId
 					WHERE tblARInvoiceDetailTax.intTaxCodeId IS NULL	
 				)
 			END
 
 			-- TRANSACTION WITH TAX CODE
-			INSERT INTO @tmpInvoiceDetailTax (intInvoiceDetailId, intTaxCodeId, strCriteria, dblTax)
-			SELECT InvTran.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblARInvoiceDetailTax.dblTax
-			FROM @tmpInvoiceTransaction InvTran
-				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId
+			INSERT INTO @tmpDetailTax (intTransactionDetailId, intTaxCodeId, strCriteria, dblTax)
+			SELECT InvTran.intTransactionDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblARInvoiceDetailTax.dblTax
+			FROM @tmpTransaction InvTran
+				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId
 				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
 			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 
-			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetailTax)
+			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)
 			BEGIN		
 				DECLARE @InvoiceDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
 
-				SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpInvoiceDetailTax
+				SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
 				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
 				BEGIN
-					DELETE FROM @tmpInvoiceTransaction WHERE intInvoiceDetailId = @InvoiceDetailId										 
+					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
 				END
 				ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)
 				BEGIN
-					DELETE FROM @tmpInvoiceTransaction WHERE intInvoiceDetailId = @InvoiceDetailId										 
+					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
 				END
 
-				DELETE @tmpInvoiceDetailTax WHERE intInvoiceDetailId = @InvoiceDetailId AND intTaxCodeId = @intTaxCodeId
+				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InvoiceDetailId AND intTaxCodeId = @intTaxCodeId
 
 			END
 
-			DELETE @tmpInvoiceDetailTax
+			DELETE @tmpDetailTax
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
 			BEGIN 	
-				DELETE @tmpInvoiceTransaction WHERE intInvoiceDetailId NOT IN (
-					SELECT DISTINCT InvTran.intInvoiceDetailId
-					FROM @tmpInvoiceTransaction InvTran
-						INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intInvoiceDetailId 
+				DELETE @tmpTransaction WHERE intTransactionDetailId NOT IN (
+					SELECT DISTINCT InvTran.intTransactionDetailId
+					FROM @tmpTransaction InvTran
+						INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId 
 						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 						INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 						INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
@@ -492,164 +492,6 @@ BEGIN TRY
 
 		END
 			
-		-- GET MAX intId
-		SELECT @intMaxId = MAX(intId) FROM @tmpInvoiceTransaction
-
-		-- INVENTORY TRANSFER - Track MFT Activity
-		INSERT INTO @tmpInvoiceTransaction(intId
-			, intInvoiceDetailId
-			, intTaxAuthorityId
-			, strFormCode
-			, intReportingComponentId
-			, strScheduleCode
-			, strType
-			, intItemId
-			, dblQtyShipped
-			, dblGross
-			, dblNet
-			, dblBillQty
-			, dblTax
-			, dblTaxExempt
-			, strInvoiceNumber
-			, strPONumber
-			, strBillOfLading
-			, dtmDate
-			, strDestinationCity
-			, strDestinationCounty
-			, strDestinationState
-			, strOriginCity
-			, strOriginCounty
-			, strOriginState
-			, strCustomerName
-			, strCustomerFEIN
-			, strVendorName
-			, strVendorFederalTaxId
-			, strHeaderCompanyName
-			, strHeaderAddress
-			, strHeaderCity
-			, strHeaderState
-			, strHeaderZip
-			, strHeaderPhone
-			, strHeaderStateTaxID
-			, strHeaderFederalTaxID
-			, strTransporterIdType
-			, strVendorIdType
-			, strCustomerIdType
-			, strVendorInvoiceNumber
-			, strCustomerLicenseNumber
-			, strCustomerAccountStatusCode
-			, strCustomerStreetAddress
-			, strCustomerZipCode
-			, strReportingComponentNote
-			, strDiversionNumber
-			, strDiversionOriginalDestinationState
-			, strTransactionType
-			, intTransactionNumberId
-			, strContactName
-			, strEmail)
-		SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) + @intMaxId) AS intId, *
-		FROM (SELECT DISTINCT NULL AS intInvoiceDetailId
-				, tblTFReportingComponent.intTaxAuthorityId
-				, tblTFReportingComponent.strFormCode
-				, tblTFReportingComponent.intReportingComponentId
-				, tblTFReportingComponent.strScheduleCode
-				, tblTFReportingComponent.strType
-				, tblICInventoryTransferDetail.intItemId
-				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
-				, tblICInventoryTransferDetail.dblQuantity AS dblGross
-				, tblICInventoryTransferDetail.dblQuantity AS dblNet
-				, tblICInventoryTransferDetail.dblQuantity
-				, NULL AS dblTax
-				, NULL AS dblTaxExempt
-				, NULL AS strInvoiceNumber
-				, NULL AS strPONumber
-				, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
-				, CASE WHEN tblTRLoadHeader.dtmLoadDateTime IS NULL THEN tblICInventoryTransfer.dtmTransferDate ELSE tblTRLoadHeader.dtmLoadDateTime END AS dtmDate
-				, tblSMCompanyLocation.strCity AS strDestinationCity
-				, NULL AS strDestinationCounty
-				, tblSMCompanyLocation.strStateProvince AS strDestinationState
-				, ShipFromLoc.strCity AS strOriginCity
-				, ShipFromLoc.strCountry AS strOriginCounty
-				, ShipFromLoc.strStateProvince AS strOriginState
-				, tblSMCompanySetup.strCompanyName AS strCustomerName
-				, tblSMCompanySetup.strEin AS strCustomerFEIN
-				, EntityAPVendor.strName AS strVendorName
-				, EntityAPVendor.strFederalTaxId AS strVendorFEIN
-				, tblTFCompanyPreference.strCompanyName
-				, tblTFCompanyPreference.strTaxAddress
-				, tblTFCompanyPreference.strCity
-				, tblTFCompanyPreference.strState
-				, tblTFCompanyPreference.strZipCode
-				, tblTFCompanyPreference.strContactPhone
-				, tblSMCompanySetup.strStateTaxID
-				, tblSMCompanySetup.strEin
-				, strTransporterIdType = 'FEIN'
-				, strVendorIdType = 'FEIN'
-				, strCustomerIdType = 'FEIN'
-				, strVendorInvoiceNumber = NULL
-				, strCustomerLicenseNumber = NULL
-				, strCustomerAccountStatusCode = NULL
-				, strCustomerStreetAddress = NULL
-				, strCustomerZipCode = NULL
-				, strReportingComponentNote = tblTFReportingComponent.strNote
-				, strDiversionNumber = NULL
-				, strDiversionOriginalDestinationState = NULL
-				, strTransactionType = 'Transfer'
-				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
-				, strContactName = tblTFCompanyPreference.strContactName
-				, strEmail = tblTFCompanyPreference.strContactEmail
-			FROM tblTFReportingComponent
-			INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-			INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
-				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
-			INNER JOIN tblICInventoryTransferDetail ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId 	
-				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
-				INNER JOIN tblICCategoryTax ON tblICCategoryTax.intCategoryId = tblICItem.intCategoryId 
-					INNER JOIN tblSMTaxClass ON tblSMTaxClass.intTaxClassId = tblICCategoryTax.intTaxClassId
-						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxClassId = tblSMTaxClass.intTaxClassId
-			INNER JOIN tblICInventoryTransfer ON tblICInventoryTransfer.intInventoryTransferId = tblICInventoryTransferDetail.intInventoryTransferId
-				INNER JOIN tblSMCompanyLocation ShipFromLoc ON ShipFromLoc.intCompanyLocationId = tblICInventoryTransfer.intFromLocationId
-			INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadReceiptId = tblICInventoryTransferDetail.intSourceId
-				LEFT JOIN tblAPVendor ON tblAPVendor.intEntityId = tblTRLoadReceipt.intTerminalId
-				LEFT JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityId = EntityAPVendor.intEntityId
-				LEFT JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
-			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
-			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId	
-			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-				LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-				LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-			CROSS JOIN tblSMCompanySetup
-			CROSS JOIN tblTFCompanyPreference
-			WHERE tblTFReportingComponent.intReportingComponentId = @RCId
-				AND tblSMCompanyLocation.ysnTrackMFTActivity = 1
-				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
-				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
-				AND tblICInventoryTransfer.ysnPosted = 1
-
-				AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-						OR (ShipFromLoc.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
-				AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-						OR (ShipFromLoc.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))	
-				AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-						OR (tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
-					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-						OR (tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))			
-				AND (SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-				AND (SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-				AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-				AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-						OR tblAPVendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
-				AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-						OR tblAPVendor.intEntityId NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))			
-				AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
-						OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId) -- FOR TRACK MFT ACTIVITY
-						OR (TaxCodeCategory.intTaxCodeId IS NULL AND tblTFReportingComponentCriteria.strCriteria = '= 0') -- FOR NO TAX CODE MAPPED TO MFT CATEGORY
-					)
-				AND (tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Location'
-					OR tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Location')
-		) tblTransactions
-
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
@@ -735,14 +577,14 @@ BEGIN TRY
 				, strOriginCounty
 				, strOriginState
 				, strCustomerName
-				, REPLACE(strCustomerFEIN, '-', '')
+				, REPLACE(strCustomerFederalTaxId, '-', '')
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strTransporterName
-				, REPLACE(strTransporterFEIN, '-', '')
+				, REPLACE(strTransporterFederalTaxId, '-', '')
 				, strConsignorName
-				, REPLACE(strConsignorFEIN, '-', '')
+				, REPLACE(strConsignorFederalTaxId, '-', '')
 				, strTaxCode
 				, strTerminalControlNumber
 				, strVendorName
@@ -753,8 +595,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, REPLACE(strHeaderFederalTaxID, '-', '')
+				, strHeaderStateTaxId
+				, REPLACE(strHeaderFederalTaxId, '-', '')
 				, @DateFrom
 				, @DateTo
 				, strTransporterIdType
@@ -772,10 +614,10 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
-			FROM @tmpInvoiceTransaction Trans
+			FROM @tmpTransaction Trans
 		END
 		
-		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction WHERE intReportingComponentId = @RCId) AND @IsEdi = 0)
+		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpTransaction WHERE intReportingComponentId = @RCId) AND @IsEdi = 0)
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intReportingComponentId
@@ -793,7 +635,7 @@ BEGIN TRY
 				, 'Invoice')
 		END
 
-		DELETE FROM @tmpInvoiceTransaction
+		DELETE FROM @tmpTransaction
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
 		EXEC uspTFProcessBeforePreview @Guid = @Guid
