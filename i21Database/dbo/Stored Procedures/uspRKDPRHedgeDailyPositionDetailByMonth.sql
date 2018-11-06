@@ -658,67 +658,135 @@ BEGIN
 	WHERE strContractEndMonth <> 'Near By'
 	ORDER BY CONVERT(DATETIME, '01 ' + strContractEndMonth) ASC
 
-	INSERT INTO @List (strCommodityCode
-		, strContractNumber
-		, intContractHeaderId
-		, strInternalTradeNo
-		, intFutOptTransactionHeaderId
-		, strType
-		, strLocationName
-		, strContractEndMonth
-		, strContractEndMonthNearBy
-		, dblTotal
-		, strUnitMeasure
-		, strAccountNumber
-		, strTranType
-		, dblNoOfLot
-		, dblDelta
-		, intBrokerageAccountId
-		, strInstrumentType
-		, strEntityName
-		, intItemId
-		, strItemNo
-		, intCategoryId
-		, strCategory
-		, intFutureMarketId
-		, strFutMarketName
-		, intFutureMonthId
-		, strFutureMonth
-		, dtmDeliveryDate
-		, strBrokerTradeNo
-		, strNotes
-		, ysnPreCrush)
-	SELECT strCommodityCode
-		, strContractNumber
-		, intContractHeaderId
-		, strInternalTradeNo
-		, intFutOptTransactionHeaderId
-		, 'Position'
-		, strLocationName
-		, strContractEndMonth
-		, strContractEndMonthNearBy
-		, dblTotal = ISNULL(dblTotal,0)
-		, strUnitMeasure
-		, strAccountNumber
-		, strTranType
-		, dblNoOfLot
-		, dblDelta
-		, intBrokerageAccountId
-		, strInstrumentType
-		, strEntityName
-		, intItemId
-		, strItemNo
-		, intCategoryId
-		, strCategory
-		, intFutureMarketId
-		, strFutMarketName
-		, intFutureMonthId
-		, strFutureMonth
-		, dtmDeliveryDate
-		, strBrokerTradeNo
-		, strNotes
-		, ysnPreCrush
-	FROM @List
+	IF isnull(@intVendorId,0) = 0
+	BEGIN
+		INSERT INTO @List (strCommodityCode
+			, strContractNumber
+			, intContractHeaderId
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, strType
+			, strLocationName
+			, strContractEndMonth
+			, strContractEndMonthNearBy
+			, dblTotal
+			, strUnitMeasure
+			, strAccountNumber
+			, strTranType
+			, dblNoOfLot
+			, dblDelta
+			, intBrokerageAccountId
+			, strInstrumentType
+			, strEntityName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dtmDeliveryDate
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush)
+		SELECT strCommodityCode
+			, strContractNumber
+			, intContractHeaderId
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, 'Position'
+			, strLocationName
+			, strContractEndMonth
+			, strContractEndMonthNearBy
+			, dblTotal = ISNULL(dblTotal,0)
+			, strUnitMeasure
+			, strAccountNumber
+			, strTranType
+			, dblNoOfLot
+			, dblDelta
+			, intBrokerageAccountId
+			, strInstrumentType
+			, strEntityName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dtmDeliveryDate
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
+		FROM @List
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @List (strCommodityCode
+			, strContractNumber
+			, intContractHeaderId
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, strType
+			, strLocationName
+			, strContractEndMonth
+			, strContractEndMonthNearBy
+			, dblTotal
+			, strUnitMeasure
+			, strAccountNumber
+			, strTranType
+			, dblNoOfLot
+			, dblDelta
+			, intBrokerageAccountId
+			, strInstrumentType
+			, strEntityName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dtmDeliveryDate
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush)
+		SELECT strCommodityCode
+			, strContractNumber
+			, intContractHeaderId
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, 'Position'
+			, strLocationName
+			, strContractEndMonth
+			, strContractEndMonthNearBy
+			, dblTotal = ISNULL(dblTotal,0)
+			, strUnitMeasure
+			, strAccountNumber
+			, strTranType
+			, dblNoOfLot
+			, dblDelta
+			, intBrokerageAccountId
+			, strInstrumentType
+			, strEntityName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dtmDeliveryDate
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
+		FROM @List
+		WHERE strType NOT LIKE '%'+@strPurchaseSales+'%' AND  strType<>'Net Hedge'
+	END
 
 	--This is used to insert strType so that it will be displayed properly on Position Report Detail by Month (RM-1902)
 	INSERT INTO @List (strCommodityCode
