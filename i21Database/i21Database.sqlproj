@@ -7173,6 +7173,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedVoidedTransactionsSubReport.sql" />
 	<Build Include="dbo\Stored Procedures\uspTFGenerateMNPDA49.sql" />
+	<Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
