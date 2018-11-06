@@ -7151,6 +7151,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
     <Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateStorageChargeFromImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateStorageFeeFromImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
