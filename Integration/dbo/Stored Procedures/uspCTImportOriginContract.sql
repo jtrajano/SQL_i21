@@ -1,8 +1,8 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspCTImportContract]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspCTImportContract]; 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspCTImportOriginContract]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspCTImportOriginContract]; 
 GO 
 
-CREATE PROCEDURE [dbo].[uspCTImportContract]
+CREATE PROCEDURE [dbo].[uspCTImportOriginContract]
 	@Checking BIT = 0,
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT
@@ -31,6 +31,16 @@ SET ANSI_WARNINGS OFF
 
 	SELECT @MaxContractId = MAX(intContractHeaderId) FROM tblCTContractHeader 
 	SET @MaxContractId = ISNULL(@MaxContractId, 0)
+
+	IF NOT EXISTS(SELECT * FROM tblCTContractText)
+	BEGIN
+		EXEC uspCTImportContractText
+	END
+
+	IF NOT EXISTS(SELECT * FROM tblCTContractPlan)
+	BEGIN
+		EXEC uspCTImportContractPlanPt
+	END
 
 	IF(@Checking = 1)
 	BEGIN
