@@ -13,9 +13,16 @@ BEGIN TRY
   DECLARE @DefaultCompanyId	 INT
   DECLARE @DefaultCompanyName	 NVARCHAR(200)
   DECLARE @ysnForwardCurveDifferential BIT
+  DECLARE @intDefaultWeightUnitMeasureId INT
+  DECLARE @strWeightUOM 	 NVARCHAR(200)
 
   SELECT @ysnForwardCurveDifferential = ISNULL(ysnEnterForwardCurveForMarketBasisDifferential,0) 
   FROM tblRKCompanyPreference
+
+  SELECT @intDefaultWeightUnitMeasureId = ISNULL(intWeightUOMId,0) 
+  FROM tblLGCompanyPreference
+  
+  SELECT @strWeightUOM = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intDefaultWeightUnitMeasureId 		
   
   IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
   BEGIN
@@ -77,6 +84,13 @@ BEGIN TRY
 	  	  Row_Num			  INT
 		 ,intFutureMarketId	  INT
 	  	 ,intFutureMonthId	  NUMERIC(38,20)
+	  )
+	  
+	  DECLARE @tblPostedLoad TABLE 
+	  (
+	  	  intContractTypeId		  INT
+		 ,intContractDetailId	  INT
+	  	 ,dblPostedQuantity		  NUMERIC(38,20)
 	  )
 
 	 DECLARE @tblUnRealizedPNL AS TABLE 
@@ -214,6 +228,30 @@ BEGIN TRY
 		
 		INSERT INTO @tblFutureSettlementMonth (Row_Num,intFutureMarketId,intFutureMonthId)
 		SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE1 WHERE Row_Num = 1
+
+		INSERT INTO @tblPostedLoad(intContractTypeId,intContractDetailId,dblPostedQuantity)	
+		
+		SELECT 1 AS intContractTypeId,LD.intPContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity FROM 
+		tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intShipmentType = 1
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		GROUP BY LD.intPContractDetailId
+	
+		UNION
+
+		SELECT 2 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity FROM 
+		tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intShipmentType = 1 AND L.intPurchaseSale = 3
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+		GROUP BY LD.intSContractDetailId
+
+		UNION
+
+		SELECT 3 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity FROM 
+		tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6) AND L.intShipmentType = 1 AND L.intPurchaseSale = 2
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+		GROUP BY LD.intSContractDetailId
 
 	INSERT INTO @tblUnRealizedPNL
 	(
@@ -353,14 +391,14 @@ BEGIN TRY
 		,intContractSeq								= CD.intContractSeq
 		,strEntityName								= Entity.strEntityName
 		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
-		,dblQuantity								= ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)
+		,dblQuantity								= ISNULL(CD.dblBalance,0)+(ISNULL(L.dblPostedQuantity,0) * CASE WHEN L.intContractTypeId = 3 THEN 1 ELSE -1 END)
 		,intQuantityUOMId							= CD.intItemUOMId
 		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
-		,dblWeight									= CD.dblNetWeight
-		,intWeightUOMId								= CD.intNetWeightUOMId
-		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
-		,strWeightUOM								= WUM.strUnitMeasure
+		,dblWeight									= NULL ---CD.dblNetWeightr
+		,intWeightUOMId								= NULL ---CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= NULL ---WUM.intUnitMeasureId
+		,strWeightUOM								= NULL ---WUM.strUnitMeasure
 		,dblBasis									= CD.dblBasis
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BASISUOM.intUnitMeasureId
@@ -448,6 +486,8 @@ BEGIN TRY
 		JOIN tblICItem							Item			 ON Item.intItemId					 = CD.intItemId		
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN @tblPostedLoad                L				 ON  L.intContractTypeId			 = CH.intContractTypeId
+																 AND L.intContractDetailId			 = CD.intContractDetailId
 		LEFT JOIN tblSMCurrency					CY				 ON	CY.intCurrencyID				 = CD.intCurrencyId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
@@ -468,9 +508,9 @@ BEGIN TRY
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
-		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		--JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
 		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		--LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
 		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
 		LEFT JOIN	tblICItemContract			IC				 ON	IC.intItemContractId			 = CD.intItemContractId		
@@ -486,8 +526,8 @@ BEGIN TRY
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
 								      END		
-		AND intContractStatusId NOT IN (2,3,6)		
-		AND (ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)) >0 
+		AND intContractStatusId NOT IN (2,3,6)
+		AND ISNULL(CD.dblBalance,0)-ISNULL(L.dblPostedQuantity,0)>0
 		AND ISNULL(CH.intCompanyId,0) = CASE 
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
 										ELSE @intCompanyId
@@ -527,14 +567,14 @@ BEGIN TRY
 		,intContractSeq								= CD.intContractSeq
 		,strEntityName								= Entity.strEntityName
 		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
-		,dblQuantity								= SUM(LD.dblQuantity)  OVER (PARTITION BY CD.intContractDetailId)
+		,dblQuantity								= LD.dblQuantity --SUM(LD.dblQuantity)  OVER (PARTITION BY CD.intContractDetailId)
 		,intQuantityUOMId							= CD.intItemUOMId
 		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
-		,dblWeight									= CD.dblNetWeight
-		,intWeightUOMId								= CD.intNetWeightUOMId
-		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
-		,strWeightUOM								= WUM.strUnitMeasure
+		,dblWeight									= NULL ---CD.dblNetWeight
+		,intWeightUOMId								= NULL ---CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= NULL ---WUM.intUnitMeasureId
+		,strWeightUOM								= NULL ---WUM.strUnitMeasure
 		,dblBasis									= CD.dblBasis
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
@@ -648,9 +688,9 @@ BEGIN TRY
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
-		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		--JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
 		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		--LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
 		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
 		LEFT JOIN	tblICItemContract			IC	ON	IC.intItemContractId						 = CD.intItemContractId		
@@ -707,10 +747,10 @@ BEGIN TRY
 		,intQuantityUOMId							= CD.intItemUOMId
 		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
-		,dblWeight									= CD.dblNetWeight
-		,intWeightUOMId								= CD.intNetWeightUOMId
-		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
-		,strWeightUOM								= WUM.strUnitMeasure
+		,dblWeight									= NULL ---CD.dblNetWeight
+		,intWeightUOMId								= NULL ---CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= NULL ---WUM.intUnitMeasureId
+		,strWeightUOM								= NULL ---WUM.strUnitMeasure
 		,dblBasis									= CD.dblBasis
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
@@ -782,7 +822,8 @@ BEGIN TRY
 		,strCompanyName								= Company.strCompanyName
 
 		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intPurchaseSale = 3
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3)
+															  AND L.intPurchaseSale = 3 AND L.intShipmentType = 1 
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId	= LD.intPContractDetailId
 		JOIN tblCTContractHeader				CH				 ON  CH.intContractHeaderId			 = CD.intContractHeaderId	
 		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = CH.intCommodityId
@@ -821,9 +862,9 @@ BEGIN TRY
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
-		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		--JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
 		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		--LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
 		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
 		LEFT JOIN	tblICItemContract			IC				 ON	IC.intItemContractId			 = CD.intItemContractId		
@@ -880,10 +921,10 @@ BEGIN TRY
 		,intQuantityUOMId							= CD.intItemUOMId
 		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
-		,dblWeight									= CD.dblNetWeight
-		,intWeightUOMId								= CD.intNetWeightUOMId
-		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
-		,strWeightUOM								= WUM.strUnitMeasure
+		,dblWeight									= NULL ---CD.dblNetWeight
+		,intWeightUOMId								= NULL ---CD.intNetWeightUOMId
+		,intWeightUnitMeasureId						= NULL ---WUM.intUnitMeasureId
+		,strWeightUOM								= NULL ---WUM.strUnitMeasure
 		,dblBasis									= CD.dblBasis
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
@@ -955,7 +996,8 @@ BEGIN TRY
 		,strCompanyName								= Company.strCompanyName
 
 		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intPurchaseSale = 3
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) 
+															  AND L.intPurchaseSale = 3 AND L.intShipmentType = 1
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 		JOIN tblCTContractHeader				CH				 ON  CH.intContractHeaderId			 = CD.intContractHeaderId	
 		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = CH.intCommodityId
@@ -994,9 +1036,9 @@ BEGIN TRY
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
-		JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
+		--JOIN tblICItemUOM						WeightUOM		 ON WeightUOM.intItemUOMId		     = CD.intNetWeightUOMId		
 		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
+		--LEFT JOIN tblICUnitMeasure				WUM				 ON	WUM.intUnitMeasureId			 = WeightUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM					PriceUOM		 ON PriceUOM.intItemUOMId		     = CD.intPriceItemUOMId
 		LEFT JOIN tblICUnitMeasure				PUOM			 ON	PUOM.intUnitMeasureId			 = PriceUOM.intUnitMeasureId
 		LEFT JOIN	tblICItemContract			IC	ON	IC.intItemContractId						 = CD.intItemContractId		
@@ -1385,11 +1427,12 @@ BEGIN TRY
 									 
 	FROM tblCTContractCost CC
 	JOIN @tblUnRealizedPNL RealizedPNL ON RealizedPNL.intContractDetailId = CC.intContractDetailId
+	JOIN tblICItem Item ON Item.intItemId = CC.intItemId 
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
 	LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
 	LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intItemId 
 								AND M2M.intContractBasisId = RealizedPNL.intContractBasisId 
-
+	WHERE Item.strCostType <> 'Commission'
 
     IF ISNULL(@intFutureSettlementPriceId,0) > 0
 	BEGIN
@@ -1486,11 +1529,26 @@ BEGIN TRY
 			,dblBasisOrDiscount
 			FROM tblRKM2MBasisDetail WHERE intM2MBasisId = (SELECT MAX(intM2MBasisId) FROM tblRKM2MBasis)
 	END
-	-----------------------------------------------------SecondaryCosts Updation--------------------------------------------
-	---Contract
+	
+	-----------------------------------------------------Weight and Weight UOM Updation--------------------------------------------	
 	UPDATE RealizedPNL
-	SET  RealizedPNL.dblSecondaryCosts = ISNULL(CC.dblTotalCost,0)
+	SET  RealizedPNL.dblWeight =  dbo.fnGRConvertQuantityToTargetItemUOM
+								 (
+									 RealizedPNL.intItemId
+									,RealizedPNL.intQuantityUnitMeasureId
+									,@intDefaultWeightUnitMeasureId
+									,RealizedPNL.dblQuantity
+								 ) 
+		,RealizedPNL.intWeightUnitMeasureId	= @intDefaultWeightUnitMeasureId
+		,RealizedPNL.strWeightUOM			= @strWeightUOM
+	FROM @tblUnRealizedPNL RealizedPNL	
+	WHERE RealizedPNL.intTransactionType IN (1,2,3) AND @intDefaultWeightUnitMeasureId > 0 
+	
+	-----------------------------------------------------SecondaryCosts Updation--------------------------------------------	
+	UPDATE RealizedPNL
+	SET  RealizedPNL.dblSecondaryCosts = (ISNULL(CC.dblTotalCost,0)/CD.dblQuantity) * RealizedPNL.dblQuantity
 	FROM @tblUnRealizedPNL RealizedPNL
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = RealizedPNL.intContractDetailId
 	JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost,0)) dblTotalCost FROM @tblContractCost GROUP BY intContractDetailId) 
 	CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
 	
@@ -1511,8 +1569,10 @@ BEGIN TRY
 												 ,CD.intFutureMarketUnitMeasureId												
 												 ,CD.intPriceUnitMeasureId												
 												 ,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
-												)	
+												)
+				/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END	
 	FROM @tblUnRealizedPNL CD
+	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intCurrencyId
 	WHERE CD.intTransactionType <> 4
 
 	UPDATE CD
@@ -1699,7 +1759,7 @@ BEGIN TRY
 	  ,dblSettlementPrice
 	  ,ISNULL(intCompanyId,@DefaultCompanyId) intCompanyId					
 	  ,ISNULL(strCompanyName,@DefaultCompanyName)strCompanyName
-	  FROM @tblUnRealizedPNL 
+	  FROM @tblUnRealizedPNL
 	  ORDER BY strTransaction				
 	
 END TRY  
