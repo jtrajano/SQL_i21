@@ -1359,14 +1359,10 @@ SELECT
 	,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 
 	,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
 	,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
-	,[ysnImpactInventory]			= CASE WHEN ITG.strTransactionType = 'Credit Memo' 
-										THEN 
-											CASE WHEN ITG.strItemDescription like 'Washout net diff: Original Contract%' THEN
-												CAST(0 AS BIT) 
-											ELSE
-												CAST(1 AS BIT) 
-											END
-										ELSE CAST(1 AS BIT) END
+	,[ysnImpactInventory]			= CASE WHEN ITG.strTransactionType = 'Credit Memo' AND ITG.strItemDescription LIKE 'Washout net diff: Original Contract%'
+										THEN CAST(0 AS BIT) 
+										ELSE ISNULL(ITG.[ysnImpactInventory],CAST(1 AS BIT)) 
+									  END
     ,[ysnFromProvisional]           = ISNULL(ITG.[ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnExported]					= ISNULL(ITG.[ysnExported], CAST(0 AS BIT))
     ,[ysnProvisionalWithGL]         = (CASE WHEN ITG.strType = 'Provisional' THEN @ImpactForProvisional ELSE 0 END)
