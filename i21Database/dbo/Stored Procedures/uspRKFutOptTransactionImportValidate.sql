@@ -396,6 +396,16 @@ WHILE @mRowNumber > 0
 			SET @ErrMsg = @ErrMsg + ' Status is case sensitive it must be in exact word Filled, Unfilled or Cancelled.'
 		END
 
+		IF @strInstrumentType = 'Options' AND ISNULL(@dblStrike, 0) = 0
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Strike must not be equal to 0.'
+		END
+
+		IF ISNULL(@dblPrice, 0) = 0
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Price must not be equal to 0.'
+		END
+
 		DECLARE @isValidFilledDate BIT = 0
 		BEGIN
 			DECLARE @tempStrDate NVARCHAR(100)
