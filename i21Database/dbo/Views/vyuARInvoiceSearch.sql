@@ -67,12 +67,12 @@ SELECT
 									  END
 	,ysnMailSent					= CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
 	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	
-	,dtmForgiveDate					= I.dtmForgiveDate
-	,strSalesOrderNumber			= SO.strSalesOrderNumber
-	,intBookId						= I.intBookId
-	,intSubBookId					= I.intSubBookId
-	,strBook						= BOOK.strBook
-	,strSubBook						= SUBBOOK.strSubBook
+	,dtmForgiveDate					=I.dtmForgiveDate
+	,strSalesOrderNumber			=SO.strSalesOrderNumber
+	,intBookId						=I.intBookId
+	,intSubBookId					=I.intSubBookId
+	,strBook						=BOOK.strBook
+	,strSubBook						=SUBBOOK.strSubBook
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -138,7 +138,7 @@ LEFT OUTER JOIN (
 ) SUBBOOK ON SUBBOOK.intSubBookId = I.intSubBookId
 OUTER APPLY (
 	SELECT TOP 1 strBatchId 
-	FROM dbo.tblARPayment A WITH (NOLOCK)
+	FROM (select intPaymentId from dbo.tblARPayment WITH (NOLOCK))A 
 	INNER JOIN (SELECT intPaymentId
 					 , intInvoiceId 
 				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
@@ -159,41 +159,50 @@ LEFT OUTER JOIN (
 OUTER APPLY (
 	SELECT TOP 1 strName
 			   , strEmail
-			   , intEntityContactId 
-	FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
-	WHERE I.intEntityContactId = intEntityContactId
+			   , intEntityId 
+	--FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
+	FROM dbo.tblEMEntity WITH (NOLOCK) 
+	WHERE I.intEntityContactId = intEntityId
 ) EC
 OUTER APPLY (
-	SELECT intEmailSetupCount = COUNT(*) 
-	FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
-	WHERE intCustomerEntityId = I.intEntityCustomerId 
-	  AND ISNULL(strEmail, '') <> '' 
+	--SELECT intEmailSetupCount = COUNT(intCustomerEntityId) 
+	--FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
+	--WHERE intCustomerEntityId = I.intEntityCustomerId 
+	--  AND ISNULL(strEmail, '') <> '' 
+	--  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
+	select intEmailSetupCount  = count(a.intEntityId) from 
+		tblEMEntityToContact a 
+			join tblEMEntity b 
+				on a.intEntityContactId = b.intEntityId 
+		where a.intEntityId = I.intEntityCustomerId 
+		and (b.strEmail is not null and isnull(b.strEmail, '') <> '' )	
 	  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
 ) EMAILSETUP
 LEFT OUTER JOIN (
 	SELECT intSalesOrderId
 		 , strSalesOrderNumber
-	FROM dbo.tblSOSalesOrder 
-) SO ON I.intSalesOrderId = SO.intSalesOrderId
+	FROM dbo.tblSOSalesOrder  
+) SO ON I.intSalesOrderId = SO.intSalesOrderId 
 OUTER APPLY (
-	SELECT intTransactionCount = COUNT(*) 
+	SELECT intTransactionCount = COUNT(SMA.intTransactionId) 
 	FROM tblSMTransaction SMT 
 	INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
 	WHERE SMT.intRecordId = I.intInvoiceId 
 	  AND SMA.strType = 'Email' 
 	  AND SMA.strStatus = 'Sent'
+	  and SMT.intScreenId = 48
 ) EMAILSTATUS
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 	FROM (
 		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		
 		INNER JOIN (
 			SELECT intTicketId
 				 , strTicketNumber 
 			FROM dbo.tblSCTicket WITH(NOLOCK)
 		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = I.intInvoiceId
+		WHERE ID.intInvoiceId = I.intInvoiceId  and ID.intTicketId is not null
 		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
@@ -202,16 +211,17 @@ OUTER APPLY (
 	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
 	FROM (
 		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		
 		INNER JOIN (
 			SELECT intTicketId
 				 , strCustomerReference 
 			FROM dbo.tblSCTicket WITH(NOLOCK)
 			WHERE ISNULL(strCustomerReference, '') <> ''
-		) T ON ID.intTicketId = T.intTicketId
+		) T ON ID.intTicketId = T.intTicketId 
 		WHERE ID.intInvoiceId = I.intInvoiceId
 		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
+
 GO
