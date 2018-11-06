@@ -7151,6 +7151,8 @@
     <Build Include="dbo\Views\vyuRKCurExpNonOpenSales.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageChargeFromImport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageFeeFromImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
+    <Build Include="dbo\Tables\tblPATCustomerVolumeStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
