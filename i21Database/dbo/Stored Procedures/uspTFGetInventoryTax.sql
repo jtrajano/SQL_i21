@@ -174,7 +174,7 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
 					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
 					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
@@ -362,7 +362,7 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
 					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
 					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
@@ -476,32 +476,6 @@ BEGIN TRY
 					AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 					AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 				) tblTFTransaction
-		END
-		
-		-- TR Billed Qty
-		INSERT INTO @tmpDistReceiptDetail (intId, intInventoryReceiptItemId, dblReceived, dblBillQty) 
-		SELECT DISTINCT intId, intInventoryReceiptItemId, dblReceived, dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId IN (SELECT DISTINCT intInventoryReceiptItemId FROM @tmpInventoryReceiptDetail)	
-
-		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
-		BEGIN
-			DECLARE @ReceiptDetailId INT = NULL, @ReceiptDetailItemId INT = NULL, @ReceiptDetailItemReceived NUMERIC(18,6) = NULL, @ReceiptDetailItemBillQty NUMERIC(18,6) = NULL, @RemainingBillQty NUMERIC(18,6) = NULL
-			DECLARE @TRDetail TFTransaction 
-
-			SELECT TOP 1 @ReceiptDetailId = intId, @ReceiptDetailItemId = intInventoryReceiptItemId, @ReceiptDetailItemReceived = dblReceived, @ReceiptDetailItemBillQty = dblBillQty FROM @tmpDistReceiptDetail
-
-			IF(@ReceiptDetailItemBillQty >= @ReceiptDetailItemReceived)
-			BEGIN
-				UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intId = @ReceiptDetailId
-				SET @RemainingBillQty =  @ReceiptDetailItemBillQty - @ReceiptDetailItemReceived
-				UPDATE @tmpDistReceiptDetail SET dblBillQty = @RemainingBillQty
-			END
-			ELSE
-			BEGIN
-				UPDATE @TFTransaction SET dblBillQty = 0 WHERE intId = @ReceiptDetailId
-			END
-
-			DELETE FROM @tmpDistReceiptDetail WHERE intId = @ReceiptDetailId
-
 		END
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
@@ -667,7 +641,7 @@ BEGIN TRY
 				, strTaxCategory
 				, CONVERT(DECIMAL(18), dblGross)
 				, CONVERT(DECIMAL(18), dblNet)
-				, CONVERT(DECIMAL(18), dblBillQty)
+				, CONVERT(DECIMAL(18), dblReceived)
 				, dblTax
 				, dtmReceiptDate
 				, strShipVia
