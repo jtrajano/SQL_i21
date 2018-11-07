@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
+﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
 	@HandheldScannerId INT,
 	@UserId INT,
 	@NewInventoryCountId INT OUTPUT,
