@@ -46,7 +46,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,strLotNumber NVARCHAR(50)
 		,strParentLotNumber NVARCHAR(50)
-		,strContainerId NVARCHAR(50)
+		,intContainerId INT
 		,strReferenceNo NVARCHAR(50)
 		,strRemarks NVARCHAR(MAX)
 		)
@@ -78,7 +78,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,strLotNumber
 		,strParentLotNumber
-		,strContainerId
+		,intContainerId
 		,strReferenceNo
 		,strRemarks
 		)
@@ -95,7 +95,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,strLotNumber
 		,strParentLotNumber
-		,strContainerId
+		,intContainerId
 		,strReferenceNo
 		,strRemarks
 	FROM OPENXML(@idoc, 'root/Produces/Produce', 2) WITH (
@@ -112,7 +112,7 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,strLotNumber NVARCHAR(50)
 			,strParentLotNumber NVARCHAR(50)
-			,strContainerId NVARCHAR(50)
+			,intContainerId int
 			,strReferenceNo NVARCHAR(50)
 			,strRemarks NVARCHAR(MAX)
 			)
@@ -312,7 +312,8 @@ BEGIN TRY
 		,UM.strUnitMeasure AS strUnitUOM
 		,Prod.strLotNumber
 		,Prod.strParentLotNumber
-		,Prod.strContainerId
+		,Prod.intContainerId
+		,Cont.strContainerId
 		,Prod.dblTareWeight
 		,Prod.dblGrossWeight
 		,Prod.dblNetWeight
@@ -334,6 +335,7 @@ BEGIN TRY
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Prod.intStorageLocationId
 	LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = Prod.intWeightItemUOMId
 	LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+	LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Prod.intContainerId
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 
