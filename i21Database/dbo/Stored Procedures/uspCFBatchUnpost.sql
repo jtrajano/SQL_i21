@@ -89,9 +89,9 @@ BEGIN
 			BEGIN
 				IF(@Fieldname = 'strTransactionId')
 				BEGIN
-					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
+					SET @Fieldname = 'CONVERT(int,(REPLACE(t.strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + 't.' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 				END
 				ELSE
 				BEGIN
@@ -104,9 +104,9 @@ BEGIN
 			BEGIN
 				IF(@Fieldname = 'strTransactionId')
 				BEGIN
-					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
+					SET @Fieldname = 'CONVERT(int,(REPLACE(t.strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + 't.' +  @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+					' (' +  @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
 				END
 				ELSE
 				BEGIN
@@ -118,9 +118,9 @@ BEGIN
 			BEGIN
 				IF(@Fieldname = 'strTransactionId')
 				BEGIN
-					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
+					SET @Fieldname = 'CONVERT(int,(REPLACE(t.strTransactionId,''CFDT-'','''')))'
 							SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + 't.' +  @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+					' (' +  @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 				END
 				ELSE
 				BEGIN
@@ -132,9 +132,9 @@ BEGIN
 			BEGIN
 				IF(@Fieldname = 'strTransactionId')
 				BEGIN
-					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
+					SET @Fieldname = 'CONVERT(int,(REPLACE(t.strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + 't.' +  @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+					' (' +  @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
 				END
 				ELSE
 				BEGIN
@@ -146,9 +146,9 @@ BEGIN
 			BEGIN
 				IF(@Fieldname = 'strTransactionId')
 				BEGIN
-					SET @Fieldname = 'CONVERT(int,(REPLACE(strTransactionId,''CFDT-'','''')))'
+					SET @Fieldname = 'CONVERT(int,(REPLACE(t.strTransactionId,''CFDT-'','''')))'
 					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + 't.' +  @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+					' (' +  @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
 				END
 				ELSE
 				BEGIN
