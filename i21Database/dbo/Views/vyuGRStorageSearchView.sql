@@ -94,7 +94,9 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			INNER JOIN tblSCDeliverySheetSplit DSS	
 				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
 		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
-				AND DSS.intEntityId = E.intEntityId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
 LEFT JOIN tblSCTicket SC 
 	ON SC.intTicketId = CS.intTicketId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
