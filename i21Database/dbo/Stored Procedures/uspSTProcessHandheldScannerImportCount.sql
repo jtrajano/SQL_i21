@@ -1,7 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
+﻿ALTER PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
 	@HandheldScannerId INT,
 	@UserId INT,
-	@NewInventoryCountId INT OUTPUT
+	@NewInventoryCountId INT OUTPUT,
+	@ysnSuccess BIT OUTPUT,
+	@strStatusMsg NVARCHAR(1000) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -37,6 +39,30 @@ BEGIN TRY
 		, dblCountQty
 	FROM #ImportCounts
 
+	SET @strStatusMsg = ''
+
+
+	--------------------------------------------------------------------------------------
+	--------- Start Validate if items does not have intItemUOMId -------------------------
+	--------------------------------------------------------------------------------------
+	IF EXISTS (SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportCount WHERE intHandheldScannerId = @HandheldScannerId AND intItemUOMId IS NULL)
+		BEGIN
+			DECLARE @strItemNoHasNoUOM AS NVARCHAR(MAX)
+
+			SELECT @strItemNoHasNoUOM = COALESCE(@strItemNoHasNoUOM + ', ', '') + strItemNo
+			FROM vyuSTGetHandheldScannerImportCount
+			WHERE intHandheldScannerId = @HandheldScannerId
+			AND intItemUOMId IS NULL
+
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'Selected Item/s ' + @strItemNoHasNoUOM + ' has no default UOM'
+			SET @NewInventoryCountId = 0
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	--------- End Validate if items does not have intItemUOMId ---------------------------
+	--------------------------------------------------------------------------------------
 
 	EXEC uspICAddInventoryCount
 	-- Header fields 
@@ -68,14 +94,23 @@ BEGIN TRY
 
 	DROP TABLE #ImportCounts
 
+
 	SET @NewInventoryCountId = @NewId
 
+	-- Flag Success
+	SET @ysnSuccess = CAST(1 AS BIT)
+	SET @strStatusMsg = ''
 END TRY
 BEGIN CATCH
 	SELECT 
 		@ErrorMessage = ERROR_MESSAGE(),
 		@ErrorSeverity = ERROR_SEVERITY(),
 		@ErrorState = ERROR_STATE();
+
+	-- Flag Failed
+	SET @ysnSuccess = CAST(0 AS BIT)
+	SET @strStatusMsg = 'Catch error'
+	SET @NewInventoryCountId = 0
 
 	-- Use RAISERROR inside the CATCH block to return error
 	-- information about the original error that caused
