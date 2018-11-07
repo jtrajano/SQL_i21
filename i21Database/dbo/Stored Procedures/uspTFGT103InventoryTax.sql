@@ -115,7 +115,7 @@ BEGIN TRY
 			, tblTFProductCode.strProductCode
 			, tblICInventoryReceiptItem.intItemId
 			, tblICInventoryReceipt.strBillOfLading
-			, tblICInventoryReceiptItem.dblReceived
+			, tblICInventoryReceiptItem.dblOpenReceive
 			, strTaxCategory = ''
 			, tblICInventoryReceiptItem.dblGross
 			, tblICInventoryReceiptItem.dblNet
@@ -273,7 +273,7 @@ BEGIN TRY
 				, strProductCode
 				, dblGross
 				, dblNet
-				, dblBillQty
+				, dblGross
 				, dblTax
 				, dtmReceiptDate
 				, strVendorName
