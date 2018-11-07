@@ -174,6 +174,7 @@ BEGIN TRY
 			,@dblQuantity = dblQuantity
 			,@intQuantityItemUOMId = intQuantityItemUOMId
 			,@strType = 'I'
+			,@dblPartialQuantity=0
 		FROM @tblMFConsumeItem
 		WHERE ysnSelected = 1
 	END
