@@ -250,11 +250,11 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket  when gh.strType = 'Settlement' then gh.strSettleTicket else a.strStorageTicketNumber end) strTicket
 	,gh.intInventoryReceiptId
 	,gh.intInventoryShipmentId
-	,ghm.strReceiptNumber
-	,ghm.strShipmentNumber
+	,ISNULL((select strReceiptNumber from tblICInventoryReceipt where intInventoryReceiptId = gh.intInventoryReceiptId),'') strReceiptNumber
+	,ISNULL((select strShipmentNumber from tblICInventoryShipment where intInventoryShipmentId = gh.intInventoryShipmentId),'') strShipmentNumber 
 	,b.intStorageScheduleTypeId
 FROM tblGRStorageHistory gh
-JOIN vyuGRStorageHistoryNotMapped ghm on gh.intStorageHistoryId = ghm.intStorageHistoryId
+--JOIN vyuGRStorageHistoryNotMapped ghm on gh.intStorageHistoryId = ghm.intStorageHistoryId
 JOIN tblGRCustomerStorage a  on gh.intCustomerStorageId=a.intCustomerStorageId
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 JOIN tblICItem i on i.intItemId=a.intItemId
@@ -302,11 +302,11 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,i.intItemId as intItemId  ,null dtmTicketDateTime,null intTicketId,strStorageTicketNumber strTicketNumber,a.strStorageTicketNumber strTicket
 	,(case when gh.strType ='From Inventory Adjustment' then gh.intInventoryAdjustmentId else gh.intInventoryReceiptId end) intInventoryReceiptId
 	,gh.intInventoryShipmentId
-	,(case when gh.strType ='From Inventory Adjustment' then gh.strTransactionId else ghm.strReceiptNumber end) strReceiptNumber
-	,ghm.strShipmentNumber
+	,(case when gh.strType ='From Inventory Adjustment' then gh.strTransactionId else ISNULL((select strReceiptNumber from tblICInventoryReceipt where intInventoryReceiptId = gh.intInventoryReceiptId),'') end) strReceiptNumber
+	,ISNULL((select strShipmentNumber from tblICInventoryShipment where intInventoryShipmentId = gh.intInventoryShipmentId),'') strShipmentNumber 
 	,b.intStorageScheduleTypeId
 FROM tblGRStorageHistory gh
-JOIN vyuGRStorageHistoryNotMapped ghm on gh.intStorageHistoryId = ghm.intStorageHistoryId
+--JOIN vyuGRStorageHistoryNotMapped ghm on gh.intStorageHistoryId = ghm.intStorageHistoryId
 JOIN tblGRCustomerStorage a  on gh.intCustomerStorageId=a.intCustomerStorageId
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 JOIN tblICItem i on i.intItemId=a.intItemId
@@ -987,7 +987,7 @@ SELECT * FROM (
 			SELECT distinct 14 intSeqId,'Sales Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sales Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
 			cd.intCommodityId,cl.strLocationName,cd.strItemNo,cd.strContractNumber strTicket,
-			v.dtmDate as dtmTicketDateTime ,
+			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,r.strShipmentNumber,cd.intContractHeaderId,cd.strContractNumber
 			,r.intInventoryShipmentId,r.strShipmentNumber strShipmentNumber1, 
 			ri.intSourceId
