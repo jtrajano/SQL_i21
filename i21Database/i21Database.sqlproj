@@ -7177,6 +7177,7 @@
     <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolumeStaging.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGenerateMNPFA1.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
