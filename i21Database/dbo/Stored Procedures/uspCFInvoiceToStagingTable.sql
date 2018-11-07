@@ -728,6 +728,7 @@ BEGIN TRY
 		  from tblARCustomerStatementStagingTable
 		  where dblTotalAR IS NOT NULL
 		   AND intEntityCustomerId = STAGING.intEntityCustomerId
+		   AND intEntityUserId = STAGING.intEntityUserId
 		  group by 
 		  dblTotalAR 
 		  ,intEntityCustomerId
