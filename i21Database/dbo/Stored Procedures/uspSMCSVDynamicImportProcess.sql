@@ -51,7 +51,7 @@ BEGIN
 
 
 	INSERT INTO @Header(id, sv)
-	SELECT RecordKey, Record  
+	SELECT RecordKey, REPLACE(Record, '"', '')
 		FROM dbo.fnCFSplitString(@HeaderValue, ',')
 
 
