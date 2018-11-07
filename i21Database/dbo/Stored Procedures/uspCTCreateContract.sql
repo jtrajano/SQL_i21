@@ -135,6 +135,7 @@ BEGIN TRY
 												AND	CU.intUnitMeasureId =	QU.intUnitMeasureId	LEFT 
 		JOIN	tblSCTicketSplit			SP	ON	SP.intTicketId		=	SC.intTicketId
 												AND	SP.intCustomerId	=	ISNULL(@intEntityId,SC.intEntityId)
+												AND SP.strDistributionOption = 'DP'
 		WHERE	SC.intTicketId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
