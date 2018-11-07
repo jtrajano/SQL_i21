@@ -23,21 +23,23 @@ BEGIN TRY
 	DECLARE @ysnPosted INT;
 	DECLARE @ysnClear INT;	
 	DECLARE @ysnPrinted INT;
+	DECLARE @ysnVoid INT;
 	DECLARE @intPaymentMethodId INT;
 	DECLARE @count INT = 0; 
 	DECLARE @paymentCount INT;
 	DECLARE @createdPaymentIds AS NVARCHAR(MAX);
 
 	IF OBJECT_ID('tempdb..#tmpCreatedPayment') IS NOT NULL DROP TABLE #tmpCreatedPayment
-	CREATE TABLE #tmpCreatedPayment(intCreatePaymentId INT, intBillId INT,intPaymentMethodId INT, ysnClr INT,ysnPrinted INT, ysnPosted INT );
+	CREATE TABLE #tmpCreatedPayment(intCreatePaymentId INT, intBillId INT,intPaymentMethodId INT, ysnClr INT,ysnPrinted INT, ysnPosted INT, ysnVoid INT );
 
-	INSERT INTO #tmpCreatedPayment (intCreatePaymentId, intBillId,intPaymentMethodId, ysnClr, ysnPrinted, ysnPosted)
+	INSERT INTO #tmpCreatedPayment (intCreatePaymentId, intBillId,intPaymentMethodId, ysnClr, ysnPrinted, ysnPosted, ysnVoid)
 	SELECT	 VAP.intPaymentId 
 			,VAP.intBillId
 			,P.intPaymentMethodId
 			,VAP.ysnCleared
 			,VAP.ysnPrinted
 			,VAP.ysnPaymentPosted
+			,VAP.ysnVoid
 	FROM vyuAPBillPayment VAP 
 	INNER JOIN tblAPPayment P ON P.intPaymentId = VAP.intPaymentId
 	where intBillId = @intBillId
@@ -48,6 +50,7 @@ BEGIN TRY
 			,@ysnPosted = ysnPosted
 			,@ysnClear = ysnClr
 			,@ysnPrinted = ysnPrinted
+			,@ysnVoid = ysnVoid
 			,@intPaymentMethodId = intPaymentMethodId
 	FROM #tmpCreatedPayment where intBillId = @intBillId
 
@@ -64,15 +67,23 @@ BEGIN TRY
 			DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
 		END
 		--PAYMENT LOGIC FOR POSTED PAYMENT / PRINTED CLEARED
+		--CREATE ONLY ALL VALID PAYMENT TRANSACTIONS
 		ELSE 
 		BEGIN 
 			IF ( @ysnPrinted = 1 
-				OR @ysnClear = 1
+				OR (@ysnClear = 1 AND @ysnVoid = 0) --CHECK AND VOID
 				OR (@ysnPosted = 1 AND @intPaymentMethodId = 10) --CASH
 				OR  @ysnPosted = 1 AND @intPaymentMethodId = 6) --ECHECK
-			BEGIN 
-				EXEC uspAPRemovePaymentAndCreatePrepay @intBillId, @UserEntityID, @intPaymentId, @prepayCreatedIds OUT
-				
+			BEGIN
+				--VALIDATE IF PAYMENT EXIST
+				IF EXISTS(SELECT TOP 1 1 FROM tblAPPaymentDetail where intBillId =  @intBillId AND intPaymentId = @intPaymentId)
+				BEGIN
+					EXEC uspAPRemovePaymentAndCreatePrepay @intBillId, @UserEntityID, @intPaymentId, @prepayCreatedIds OUT
+				END
+				ELSE
+				BEGIN 
+					RAISERROR('Payment Does not exists', 16, 1);
+				END
 				SELECT * from tblAPPayment where intPaymentId = @intPaymentId
 			END
 			ELSE
