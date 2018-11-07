@@ -12,12 +12,9 @@ BEGIN TRY
 	DECLARE @intPurchaseSale INT
 
 	SELECT @intLoadId = intLoadId
+		,@intPurchaseSale = intPurchaseSale
 	FROM tblLGWeightClaim
 	WHERE intWeightClaimId = @intWeightClaimId
-
-	SELECT @intPurchaseSale = intPurchaseSale
-	FROM tblLGLoad
-	WHERE intLoadId = @intLoadId
 
 	SET @intMemoType = @intPurchaseSale
 
