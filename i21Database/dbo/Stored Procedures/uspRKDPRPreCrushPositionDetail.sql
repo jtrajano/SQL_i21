@@ -271,9 +271,9 @@ BEGIN
 				, strCategory
 				, strFutMarketName
 			FROM vyuRKContractDetail CD
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-				AND intCommodityId = @intCommodityId
-						AND CD.intContractStatusId <> 6
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
+				--AND intCommodityId = @intCommodityId
+				--		AND CD.intContractStatusId <> 6
 						
 			DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
 				, intOpenContract INT
@@ -666,11 +666,22 @@ BEGIN
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 					, strInventoryType = 'Sls Basis Deliveries'
 				FROM (
-					SELECT strCommodityCode
+					SELECT distinct strCommodityCode
 						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, cd.intCommodityUnitMeasureId, ISNULL(ri.dblQuantity, 0))
 						, cl.strLocationName
 						, cd.intCommodityId
 						, cd.intCompanyLocationId
+						,cd.strItemNo
+						,cd.strContractNumber strTicket
+						,cd.dtmContractDate as dtmTicketDateTime 
+						, cd.strCustomerContract as strCustomerReference
+						,cd.intUnitMeasureId
+						,r.strShipmentNumber
+						,cd.intContractHeaderId
+						,cd.strContractNumber
+						,r.intInventoryShipmentId
+						,r.strShipmentNumber strShipmentNumber1
+						, ri.intSourceId
 					FROM vyuICGetInventoryValuation v
 					JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 					INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -911,7 +922,7 @@ SELECT strCommodityCode
 	,'Company Titled Inventory'
 	,strInventoryType
 FROM @InventoryStock
-WHERE strInventoryType = 'Company Titled Inventory'
+WHERE strInventoryType IN ('Company Titled Inventory', 'Collateral', 'Sls Basis Deliveries')
 
 INSERT INTO @List (strCommodityCode
 	,dblTotal
