@@ -1007,7 +1007,7 @@ SELECT strCommodityCode
 	, intBrokerageAccountId
 	, strInstrumentType
 	, dblNoOfLot
-	, intOrderId = 8
+	, intOrderId = 7
 	, intFutureMarketId
 	, strFutureMarket
 	, intFutureMonthId
@@ -1096,7 +1096,7 @@ SELECT strCommodityCode
 	, intBrokerageAccountId
 	, strInstrumentType
 	, dblNoOfLot
-	, 9
+	, 8
 	, intItemId
 	, strItemNo
 	, intCategoryId
@@ -1109,7 +1109,7 @@ SELECT strCommodityCode
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
-FROM @List WHERE intOrderId IN (1,2,3,4,5,7,8)
+FROM @List WHERE intOrderId IN (1,2,3,4,5,7)
 GROUP BY strCommodityCode
 	, intCommodityId
 	, strInternalTradeNo
@@ -1156,7 +1156,7 @@ SELECT strCommodityCode
 	, dblTotal = CONVERT(NUMERIC(24,6), - SUM(dblTotal))
 	, intFromCommodityUnitMeasureId
 	, strTranType = 'Purchase Basis Delivery'
-	, intOrderId = 9
+	, intOrderId = 8
 	, strItemNo
 	, intCategoryId
 	, strCategory
@@ -1206,7 +1206,7 @@ BEGIN
 		, intBrokerageAccountId
 		, strInstrumentType
 		, dblNoOfLot
-		, 7 intOrderId
+		, 10 intOrderId
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush
@@ -1246,14 +1246,14 @@ BEGIN
 		WHERE f.intCommodityId IN (select distinct intCommodity from @Commodity c)
 			AND f.intLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN f.intLocationId ELSE @intLocationId END) t
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM @List WHERE intOrderId = 7)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM @List WHERE intOrderId = 10)
 	BEGIN
 		INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType)
-		SELECT 	TOP 1 strCommodityCode,0,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,7,'Crush','Buy' FROM @List
+		SELECT 	TOP 1 strCommodityCode,0,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,10,'Crush','Buy' FROM @List
 	END
 
 	INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType)
-	SELECT 	strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,11 intOrderId,'Overall Position' strType,strInventoryType from @List where intOrderId in(7, 9)
+	SELECT 	strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,11 intOrderId,'Overall Position' strType,strInventoryType from @List where intOrderId in(10, 8)
 END
 
 ----------------
@@ -1509,6 +1509,6 @@ SELECT intSeqNo = intOrderId
 	, strNotes
 	, ysnPreCrush
 FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
-ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
-	, intSeqNo
+ORDER BY intSeqNo
+	, CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
 	, strType
