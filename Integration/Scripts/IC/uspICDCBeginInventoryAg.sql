@@ -170,10 +170,11 @@ BEGIN
 				on uom.intItemId = inv.intItemId 
 			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
 					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-	WHERE	agitm_un_on_hand <> 0 
+			LEFT JOIN tblICItemLocation il ON il.intItemId = inv.intItemId
+	WHERE	(agitm_un_on_hand > 0 OR (agitm_un_on_hand < 0 AND il.intAllowNegativeInventory = 1))
 	AND agitm_loc_no = @adjLoc
 	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
-	
+
 	UNION ALL	
 	SELECT 
 		@intAdjustmentNo
