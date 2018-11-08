@@ -364,7 +364,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@detailcurrency = ''@detailcurrency@'',											@detailpaymentmethod = ''@detailpaymentmethod@'',
 		@detailterms = ''@detailterms@'',													@detailshipvia = ''@detailshipvia@'',
 		@detailsalesperson = ''@detailsalesperson@'',										@detailwarehouse = ''@detailwarehouse@'',
-		@detailstatus = ''@detailwarehouse@'',											@detailfloid = ''@detailfloid@'',
+		@detailstatus = ''@detailstatus@'',											@detailfloid = ''@detailfloid@'',
 		@detailpricing = ''@detailpricing@'',												@detailtaxno = ''@detailtaxno@'',
 		@detailexemptalltax = ''@detailexemptalltax@'',									@detailtaxcounty = ''@detailtaxcounty@'',
 		@detailvatnumber = ''@detailvatnumber@'',											@detailemployeecount = ''@detailemployeecount@'',
