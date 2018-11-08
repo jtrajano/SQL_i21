@@ -41,9 +41,9 @@ BEGIN TRY
 		IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1)
 			BEGIN
 				SELECT TOP 1 @strInvoiceNo = tblLGWeightClaim.strReferenceNumber 
-				FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1
+				FROM tblLGWeightClaim WHERE intLoadId = @intLoadId
 
-				SET @strMsg = 'Weight Claim ' + @strInvoiceNo + ' has been posted for ' + @strLoadNumber 
+				SET @strMsg = 'Weight Claim ' + @strInvoiceNo + ' has been created for ' + @strLoadNumber 
 								+ '. Cannot unpost. Please delete the claim and try again.'
 
 				RAISERROR (@strMsg,16,1);
