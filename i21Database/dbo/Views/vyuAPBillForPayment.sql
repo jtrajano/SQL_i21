@@ -33,7 +33,7 @@ SELECT
 	,vendor.ysnOneBillPerPayment
 	,vendor.ysnWithholding
 	,payMethod.strPaymentMethod
-	,ISNULL(vendor.strVendorId, entity.strEntityNo) as strVendorId
+	,vendor.strVendorId
 	,commodity.strCommodityCode
 	,term.strTerm
 	,entity.strName
