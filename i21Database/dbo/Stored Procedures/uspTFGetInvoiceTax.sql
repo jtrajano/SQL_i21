@@ -99,7 +99,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, strHeaderFederalTaxID
 				, strTransporterIdType
 				, strVendorIdType
@@ -293,7 +293,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, strHeaderFederalTaxID
 				, strTransporterIdType
 				, strVendorIdType
@@ -650,7 +650,7 @@ BEGIN TRY
 			, strHeaderState
 			, strHeaderZip
 			, strHeaderPhone
-			, strHeaderStateTaxID
+			, strHeaderStateTaxId
 			, strHeaderFederalTaxID
 			, strTransporterIdType
 			, strVendorIdType
@@ -882,7 +882,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, REPLACE(strHeaderFederalTaxID, '-', '')
 				, @DateFrom
 				, @DateTo
