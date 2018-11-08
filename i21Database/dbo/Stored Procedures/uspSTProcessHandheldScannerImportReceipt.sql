@@ -17,6 +17,20 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 
 BEGIN TRY
+	
+	--------------------------------------------------------------------------------------
+	-------------------- Start Validate if has record to Process -------------------------
+	--------------------------------------------------------------------------------------
+	IF NOT EXISTS(SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportReceipt WHERE intHandheldScannerId = @HandheldScannerId)
+		BEGIN
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'There are no records to process.'
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	-------------------- End Validate if has record to Process ---------------------------
+	--------------------------------------------------------------------------------------
 
 	SELECT DISTINCT intVendorId, intCompanyLocationId
 	INTO #Vendors
