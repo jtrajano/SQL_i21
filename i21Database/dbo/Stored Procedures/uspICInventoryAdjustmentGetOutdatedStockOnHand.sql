@@ -50,6 +50,7 @@ BEGIN
 							WHEN Detail.intOwnershipType = 1 THEN ItemStockUOM.dblOnHand 
 						END, 6)) THEN 1
 					ELSE 0
+				END
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
