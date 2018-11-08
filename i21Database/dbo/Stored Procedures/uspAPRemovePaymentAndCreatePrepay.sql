@@ -56,7 +56,7 @@ FROM tblAPPayment pay
 INNER JOIN tblAPPaymentDetail payDetail ON pay.intPaymentId = payDetail.intPaymentId
 INNER JOIN tblCMBankTransaction bankTran ON pay.strPaymentRecordNum = bankTran.strTransactionId
 WHERE payDetail.intBillId = @voucherKey AND pay.ysnPosted = 1 
-AND bankTran.ysnCheckVoid = 0 OR (bankTran.dtmCheckPrinted IS NOT NULL OR bankTran.ysnClr = 1) 
+AND bankTran.ysnCheckVoid = 0 AND (bankTran.dtmCheckPrinted IS NOT NULL OR bankTran.ysnClr = 1) 
 AND pay.intPaymentId = @paymentRecordId
 
 SET @transCount = @@TRANCOUNT;
