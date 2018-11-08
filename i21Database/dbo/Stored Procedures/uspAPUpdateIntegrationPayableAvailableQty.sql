@@ -173,82 +173,83 @@ FROM dbo.fnAPCreateVoucherPayableFromDetail(@billDetailIds)
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
---MISC PO ITEM
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpMiscPOPayables')) DROP TABLE #tmpMiscPOPayables
+BEGIN --MISC PO ITEM
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpMiscPOPayables')) DROP TABLE #tmpMiscPOPayables
 
-SELECT * 
-INTO #tmpMiscPOPayables
-FROM @voucherPayables WHERE intPurchaseDetailId > 0
+	SELECT * 
+	INTO #tmpMiscPOPayables
+	FROM @voucherPayables WHERE intPurchaseDetailId > 0 AND intInventoryReceiptItemId IS NULL
 
-IF @@ROWCOUNT > 0
-BEGIN
-	DECLARE @voucherPayablesMiscPO AS VoucherPayable;
-	ALTER TABLE #tmpMiscPOPayables DROP COLUMN intVoucherPayableId
-	INSERT INTO @voucherPayablesMiscPO
-	SELECT * FROM #tmpMiscPOPayables
-	EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @decreaseQty
-
-	--decrease on order qty for po misc item
-	DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
-	INSERT INTO @ItemToUpdateOnOrderQty (
-		dtmDate
-		,intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,intSubLocationId
-		,dblQty
-		,dblUOMQty
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-	)
-	SELECT
-		dtmDate						=	A.dtmDate
-		,intItemId					=	A.intItemId
-		,intItemLocationId			=	loc.intItemLocationId
-		,intItemUOMId				=	B.intUnitOfMeasureId
-		,intSubLocationId			=	B.intStorageLocationId
-		,dblQty						=	CASE WHEN @decreaseQty = 1 
-											THEN A.dblQuantityToBill
-										ELSE -A.dblQuantityToBill
-										END
-		,dblUOMQty					=	A.dblQtyToBillUnitQty
-		,intTransactionId			=	B.intBillId
-		,intTransactionDetailId		=	B.intBillDetailId
-		,strTransactionId			=	B2.strBillId
-		,intTransactionTypeId		=	-1
-	FROM @voucherPayables A
-	INNER JOIN tblAPBill B2 
-		ON A.intBillId = B2.intBillId
-	INNER JOIN tblAPBillDetail B
-		ON A.intBillId = B.intBillId
-	INNER JOIN tblICItemLocation loc
-		ON A.intItemId = loc.intItemId AND A.intShipToId = loc.intLocationId
-	LEFT JOIN tblICItem C
-		ON B.intItemId = C.intItemId
-	WHERE B.intPurchaseDetailId > 0
-	AND (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
-	AND EXISTS 
-	(
-		--MAKE SURE TO CALL THE SP IF PO MISC ITEM IS ALREADY VOUCHERED
-		SELECT 1
-		FROM tblAPBillDetail B3
-		WHERE B3.intPurchaseDetailId = B.intPurchaseDetailId
-		AND B3.intBillDetailId != B.intBillDetailId
-	)
-	-- Call the stored procedure that updates the on order qty. 
-	IF EXISTS(SELECT 1 FROM @ItemToUpdateOnOrderQty)
+	IF @@ROWCOUNT > 0
 	BEGIN
-		--NOTE: WE NEED TO REMOVE THIS WHEN WE ALLOW RECEIVING OF MISC ITEMS ON RECEIPT
-		BEGIN TRY
-			EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
-		END TRY
-		BEGIN CATCH
-			DECLARE @errorIncreaserOrderQty NVARCHAR(4000);
-			SET @errorIncreaserOrderQty  = 'Error occurred on uspICIncreaseOnOrderQty. ' + ERROR_MESSAGE()
-			RAISERROR(@errorIncreaserOrderQty, 16, 1);
-		END CATCH
+		DECLARE @voucherPayablesMiscPO AS VoucherPayable;
+		ALTER TABLE #tmpMiscPOPayables DROP COLUMN intVoucherPayableId
+		INSERT INTO @voucherPayablesMiscPO
+		SELECT * FROM #tmpMiscPOPayables
+		EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @decreaseQty
+
+		--decrease on order qty for po misc item
+		DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
+		INSERT INTO @ItemToUpdateOnOrderQty (
+			dtmDate
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intSubLocationId
+			,dblQty
+			,dblUOMQty
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+		)
+		SELECT
+			dtmDate						=	A.dtmDate
+			,intItemId					=	A.intItemId
+			,intItemLocationId			=	loc.intItemLocationId
+			,intItemUOMId				=	B.intUnitOfMeasureId
+			,intSubLocationId			=	B.intStorageLocationId
+			,dblQty						=	CASE WHEN @decreaseQty = 1 
+												THEN A.dblQuantityToBill
+											ELSE -A.dblQuantityToBill
+											END
+			,dblUOMQty					=	A.dblQtyToBillUnitQty
+			,intTransactionId			=	B.intBillId
+			,intTransactionDetailId		=	B.intBillDetailId
+			,strTransactionId			=	B2.strBillId
+			,intTransactionTypeId		=	-1
+		FROM @voucherPayables A
+		INNER JOIN tblAPBill B2 
+			ON A.intBillId = B2.intBillId
+		INNER JOIN tblAPBillDetail B
+			ON A.intBillId = B.intBillId
+		INNER JOIN tblICItemLocation loc
+			ON A.intItemId = loc.intItemId AND A.intShipToId = loc.intLocationId
+		LEFT JOIN tblICItem C
+			ON B.intItemId = C.intItemId
+		WHERE B.intPurchaseDetailId > 0
+		AND (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
+		AND EXISTS 
+		(
+			--MAKE SURE TO CALL THE SP IF PO MISC ITEM IS ALREADY VOUCHERED
+			SELECT 1
+			FROM tblAPBillDetail B3
+			WHERE B3.intPurchaseDetailId = B.intPurchaseDetailId
+			AND B3.intBillDetailId != B.intBillDetailId
+		)
+		-- Call the stored procedure that updates the on order qty. 
+		IF EXISTS(SELECT 1 FROM @ItemToUpdateOnOrderQty)
+		BEGIN
+			--NOTE: WE NEED TO REMOVE THIS WHEN WE ALLOW RECEIVING OF MISC ITEMS ON RECEIPT
+			BEGIN TRY
+				EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
+			END TRY
+			BEGIN CATCH
+				DECLARE @errorIncreaserOrderQty NVARCHAR(4000);
+				SET @errorIncreaserOrderQty  = 'Error occurred on uspICIncreaseOnOrderQty. ' + ERROR_MESSAGE()
+				RAISERROR(@errorIncreaserOrderQty, 16, 1);
+			END CATCH
+		END
 	END
 END
 
