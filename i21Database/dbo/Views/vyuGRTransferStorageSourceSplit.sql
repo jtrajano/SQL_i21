@@ -16,11 +16,19 @@ SELECT
 	, CS.dtmDeliveryDate
 	, CS.strDPARecieptNumber
 	, CH.strContractNumber
+	, EM.strName
+	, CL.strLocationName
+	, CS.intEntityId
+	, CS.intCompanyLocationId
 FROM tblGRTransferStorageSourceSplit TSS
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSS.intTransferStorageId
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = TSS.intSourceCustomerStorageId
+INNER JOIN tblEMEntity EM
+	ON EM.intEntityId = CS.intEntityId
+INNER JOIN tblSMCompanyLocation CL
+	ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR

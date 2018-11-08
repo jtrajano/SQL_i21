@@ -16,6 +16,7 @@ SELECT
     , strStorageTypeDescription		= ST.strStorageTypeDescription
     , strScheduleDescription		= SR.strScheduleDescription
 	, strContractNumber				= CH.strContractNumber
+    , CS.strStorageTicketNumber
 FROM tblGRTransferStorageSplit TSS
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSS.intTransferStorageId
@@ -27,6 +28,8 @@ INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = TSS.intStorageScheduleId
+INNER JOIN tblGRCustomerStorage CS
+    ON CS.intCustomerStorageId = TSS.intTransferToCustomerStorageId
 LEFT JOIN (
 			tblCTContractDetail CD
 			INNER JOIN tblCTContractHeader CH

@@ -3,18 +3,18 @@ AS
 SELECT
 	intCustomerStorageId		  = CS.intCustomerStorageId
 	,intTransactionId			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN CS.intDeliverySheetId
-										WHEN CS.intTicketId IS NOT NULL THEN CS.intTicketId
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
 										ELSE TSS.intTransferStorageId
 									END
 	,strTransactionCode			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN 'DS' --DELIVERY SHEET
-										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 										ELSE 'TS' --TRANSFER STORAGE
 									END
 	,strTransaction			  	  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
-										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 										ELSE TS.strTransferStorageTicket
 									END
 	,intEntityId				  = CS.intEntityId
