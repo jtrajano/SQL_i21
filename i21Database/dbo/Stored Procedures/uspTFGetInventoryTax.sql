@@ -20,11 +20,8 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	-- USER DEFINED TABLES
-	DECLARE @TFTransaction TFTransaction
-	--DECLARE @tmpInventoryReceiptDetail TFInventoryReceiptDetailTransaction
-	DECLARE @tmpDistReceiptDetail TFTransaction
-	DECLARE @tmpInventoryDetailTax TFInventoryDetailTax
+	DECLARE @tmpTransaction TFCommonTransaction
+	DECLARE @tmpDetailTax TFCommonDetailTax
 
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
@@ -32,8 +29,6 @@ BEGIN TRY
 	BEGIN
 		DELETE FROM tblTFTransaction
 	END
-
-	--DELETE FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.' 
 	
 	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -50,8 +45,8 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId)
 		BEGIN
-			INSERT INTO @TFTransaction(intId
-				, intInventoryReceiptItemId
+			INSERT INTO @tmpTransaction(intId
+				, intTransactionDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -63,14 +58,14 @@ BEGIN TRY
 				, dblGross
 				, dblNet
 				, dblBillQty
-				, dtmReceiptDate
+				, dtmDate
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strVendorName
 				, strTransporterName
-				, strVendorFEIN
-				, strTransporterFEIN
+				, strVendorFederalTaxId
+				, strTransporterFederalTaxId
 				, strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
@@ -117,20 +112,14 @@ BEGIN TRY
 					, tblICInventoryReceiptItem.dblGross
 					, tblICInventoryReceiptItem.dblNet
 					, tblICInventoryReceiptItem.dblBillQty
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
-					--, tblICInventoryReceiptItem.dblBillQty
-					--(CASE WHEN tblICInventoryReceiptItem.dblBillQty >= tblTRLoadDistributionDetail.dblUnits THEN tblTRLoadDistributionDetail.dblUnits ELSE 0 END) 
-					--ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
 					, Vendor.strName AS strVendorName
 					, Transporter.strName AS strTransporterName
-					, Vendor.strFederalTaxId AS strVendorFEIN
-					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, Vendor.strFederalTaxId AS strVendorFederalTaxId
+					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
 					, tblTFCompanyPreference.strCompanyName
 					, tblTFCompanyPreference.strTaxAddress
 					, tblTFCompanyPreference.strCity
@@ -143,16 +132,13 @@ BEGIN TRY
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
 					, tblSMCompanyLocation.strStateProvince strDestinationState
-					, tblSMCompanyLocation.strCity strDestinationCity
-					--, CASE WHEN DistributionDetail.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN DistributionDetail.strDestination = 'Customer' THEN CustomerLocation.strState ELSE tblSMCompanyLocation.strStateProvince END strDestinationState
-					--, CASE WHEN DistributionDetail.strDestination = 'Location' THEN BulkLocation.strCity WHEN DistributionDetail.strDestination = 'Customer' THEN CustomerLocation.strCity ELSE tblSMCompanyLocation.strCity END strDestinationCity
+					, tblSMCompanyLocation.strCity strDestinationCity	
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
 					, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
-					--, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
@@ -241,8 +227,8 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @TFTransaction(intId
-				, intInventoryReceiptItemId
+			INSERT INTO @tmpTransaction(intId
+				, intTransactionDetailId
 				, intTaxAuthorityId
 				, strFormCode
 				, intReportingComponentId
@@ -254,14 +240,14 @@ BEGIN TRY
 				, dblGross
 				, dblNet
 				, dblBillQty
-				, dtmReceiptDate
+				, dtmDate
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strVendorName
 				, strTransporterName
-				, strVendorFEIN
-				, strTransporterFEIN
+				, strVendorFederalTaxId
+				, strTransporterFederalTaxId
 				, strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
@@ -308,18 +294,14 @@ BEGIN TRY
 					, tblICInventoryReceiptItem.dblGross
 					, tblICInventoryReceiptItem.dblNet
 					, tblICInventoryReceiptItem.dblBillQty
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
-					--, tblICInventoryReceiptItem.dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode	
 					, Vendor.strName AS strVendorName
 					, Transporter.strName AS strTransporterName
-					, Vendor.strFederalTaxId AS strVendorFEIN
-					, Transporter.strFederalTaxId AS strTransporterFEIN
+					, Vendor.strFederalTaxId AS strVendorFederalTaxId
+					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
 					, tblTFCompanyPreference.strCompanyName
 					, tblTFCompanyPreference.strTaxAddress
 					, tblTFCompanyPreference.strCity
@@ -333,15 +315,12 @@ BEGIN TRY
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
 					, tblSMCompanyLocation.strStateProvince strDestinationState
 					, tblSMCompanyLocation.strCity strDestinationCity
-					--, CASE WHEN DistributionDetail.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN DistributionDetail.strDestination = 'Customer' THEN CustomerLocation.strState ELSE tblSMCompanyLocation.strStateProvince END strDestinationState
-					--, CASE WHEN DistributionDetail.strDestination = 'Location' THEN BulkLocation.strCity WHEN DistributionDetail.strDestination = 'Customer' THEN CustomerLocation.strCity ELSE tblSMCompanyLocation.strCity END strDestinationCity
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
 					, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
-					--, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
@@ -427,30 +406,6 @@ BEGIN TRY
 					AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 				) tblTFTransaction
 		END
-		
-		-- TR Billed Qty
-		--INSERT INTO @tmpDistReceiptDetail (intId, intInventoryReceiptItemId, dblReceived, dblBillQty) 
-		--SELECT DISTINCT intId, intInventoryReceiptItemId, dblReceived, dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId IN (SELECT DISTINCT intInventoryReceiptItemId FROM @TFTransaction)
-		--WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
-		--BEGIN
-		--	DECLARE @ReceiptDetailId INT = NULL, @ReceiptDetailItemId INT = NULL, @ReceiptDetailItemReceived NUMERIC(18,6) = NULL, @ReceiptDetailItemBillQty NUMERIC(18,6) = NULL, @RemainingBillQty NUMERIC(18,6) = NULL
-		--	DECLARE @TRDetail TFTransaction 
-
-		--	SELECT TOP 1 @ReceiptDetailId = intId, @ReceiptDetailItemId = intInventoryReceiptItemId, @ReceiptDetailItemReceived = dblReceived, @ReceiptDetailItemBillQty = dblBillQty FROM @tmpDistReceiptDetail
-
-		--	IF(@ReceiptDetailItemBillQty >= @ReceiptDetailItemReceived)
-		--	BEGIN
-		--		UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intId = @ReceiptDetailId
-		--		SET @RemainingBillQty =  @ReceiptDetailItemBillQty - @ReceiptDetailItemReceived
-		--		UPDATE @tmpDistReceiptDetail SET dblBillQty = @RemainingBillQty
-		--	END
-		--	ELSE
-		--	BEGIN
-		--		UPDATE @TFTransaction SET dblBillQty = 0 WHERE intId = @ReceiptDetailId
-		--	END
-
-		--	DELETE FROM @tmpDistReceiptDetail WHERE intId = @ReceiptDetailId
-		--END
 
 		-- TAX CRITERIA
 		IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId))
@@ -459,52 +414,52 @@ BEGIN TRY
 			-- TRANSACTION WITHOUT TAX CODE
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
 			BEGIN	
-				DELETE @TFTransaction WHERE intInventoryReceiptItemId IN (
-					SELECT DISTINCT InventoryTran.intInventoryReceiptItemId 
-					FROM @TFTransaction InventoryTran
-					LEFT JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intInventoryReceiptItemId
+				DELETE @tmpTransaction WHERE intTransactionDetailId IN (
+					SELECT DISTINCT InventoryTran.intTransactionDetailId 
+					FROM @tmpTransaction InventoryTran
+					LEFT JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId
 					WHERE tblICInventoryReceiptItemTax.intTaxCodeId IS NULL	
 				)
 			END
 
 			-- TRANSACTION WITH TAX CODE
-			INSERT INTO @tmpInventoryDetailTax (intInventoryDetailId, intTaxCodeId, strCriteria, dblTax)
-			SELECT InventoryTran.intInventoryReceiptItemId, tblICInventoryReceiptItemTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblICInventoryReceiptItemTax.dblTax
-			FROM @TFTransaction InventoryTran
-				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intInventoryReceiptItemId
+			INSERT INTO @tmpDetailTax (intTransactionDetailId, intTaxCodeId, strCriteria, dblTax)
+			SELECT InventoryTran.intTransactionDetailId, tblICInventoryReceiptItemTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblICInventoryReceiptItemTax.dblTax
+			FROM @tmpTransaction InventoryTran
+				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId
 				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
 			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 
-			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryDetailTax)
+			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)
 			BEGIN		
 				DECLARE @InventoryDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
 
-				SELECT TOP 1 @InventoryDetailId = intInventoryDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpInventoryDetailTax
+				SELECT TOP 1 @InventoryDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
 				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
 				BEGIN
-					DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryDetailId										 
+					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId										 
 				END
 				ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)
 				BEGIN
-					DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryDetailId										 
+					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId										 
 				END
 
-				DELETE @tmpInventoryDetailTax WHERE intInventoryDetailId = @InventoryDetailId AND intTaxCodeId = @intTaxCodeId
+				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InventoryDetailId AND intTaxCodeId = @intTaxCodeId
 
 			END
 
-			DELETE @tmpInventoryDetailTax
+			DELETE @tmpDetailTax
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
 			BEGIN 	
-				DELETE @TFTransaction WHERE intInventoryReceiptItemId NOT IN (
-					SELECT DISTINCT InventoryTran.intInventoryReceiptItemId
-					FROM @TFTransaction InventoryTran
-						INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intInventoryReceiptItemId 
+				DELETE @tmpTransaction WHERE intTransactionDetailId NOT IN (
+					SELECT DISTINCT InventoryTran.intTransactionDetailId
+					FROM @tmpTransaction InventoryTran
+						INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId 
 						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 						INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 						INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
@@ -513,95 +468,6 @@ BEGIN TRY
 			END
 
 		END
-
-		--WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
-		--BEGIN	
-			
-		--	DECLARE @InventoryReceiptItemId NVARCHAR(30) = NULL, @intDetailTaxCodeId INT = NULL
-
-		--	SELECT TOP 1 @InventoryReceiptItemId = intInventoryReceiptItemId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInventoryReceiptDetail
-
-		--	DECLARE @tblTaxCriteria TABLE (
-		--		intCriteriaId INT,
-		--		intTaxCategoryId INT,
-		--		strTaxCategory NVARCHAR(500),
-		--		strCriteria NVARCHAR(100),
-		--		intTaxCodeId INT)
-
-		--	-- Get MFT Tax Criteria
-		--	INSERT INTO @tblTaxCriteria
-		--		SELECT ROW_NUMBER() OVER(ORDER BY intTaxCategoryId, strTaxCategory) AS intCriteriaId, *
-		--		FROM (
-		--			SELECT tblTFTaxCategory.intTaxCategoryId , tblTFTaxCategory.strTaxCategory, tblTFReportingComponentCriteria.strCriteria, tblSMTaxCode.intTaxCodeId
-		--			FROM tblTFReportingComponent
-		--			INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-		--			INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-		--			LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-		--			WHERE tblTFReportingComponent.intReportingComponentId = @RCId
-		--		) Transactions
-
-
-		--	WHILE EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- LOOP ON TAX CATEGORY
-		--	BEGIN
-
-		--		DECLARE @intCriteriaId INT = NULL, @strCriteriaTaxCodeId NVARCHAR(10) = NULL, @strCriteria NVARCHAR(10) = NULL, @intTaxCategoryId INT = NULL, @intTransTaxCategoryId INT = NULL
-
-		--		SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @intTaxCategoryId = intTaxCategoryId FROM @tblTaxCriteria
-				
-		--		-- GET Tax Transaction Detail
-		--		SELECT TOP 1 @intTransTaxCategoryId = tblSMTaxCode.intTaxCategoryId 
-		--		FROM tblICInventoryReceiptItemTax 
-		--		LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId 
-		--		LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
-		--		WHERE tblICInventoryReceiptItemTax.intInventoryReceiptItemId = @InventoryReceiptItemId AND tblTFTaxCategory.intTaxCategoryId = @intTaxCategoryId
-
-		--		IF(@intDetailTaxCodeId IS NULL) -- DOES NOT HAVE THE TAX CODE
-		--		BEGIN
-		--			IF(@strCriteria = '<> 0')
-		--			BEGIN
-		--				DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
-		--				BREAK
-		--			END
-		--		END
-		--		ELSE IF (@intDetailTaxCodeId IS NOT NULL AND @intTransTaxCategoryId IS NULL) -- NOT MAPPED ON MFT TAX CATEGORY
-		--		BEGIN
-		--			IF(@strCriteria = '<> 0')
-		--			BEGIN
-		--				DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId									 
-		--				BREAK
-		--			END
-		--		END
-		--		ELSE
-		--		BEGIN
-		--			DECLARE @tblTempInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT)
-		--			DECLARE @QueryrReceiptItem NVARCHAR(MAX) = NULL
-		--			-- Check if satisfy the tax criteria
-		--			SET @QueryrReceiptItem = 'SELECT DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM tblICInventoryReceiptItem' 
-		--					+ ' INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId'
-		--					+ '	WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))' 
-		--					+ '	AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @strCriteriaTaxCodeId + ''')'
-		--					+ '	AND (tblICInventoryReceiptItemTax.dblTax ' + @strCriteria + ')'
-
-		--			INSERT INTO @tblTempInventoryReceiptDetail
-		--			EXEC(@QueryrReceiptItem)
-
-		--			IF NOT EXISTS (SELECT TOP 1 1 FROM @tblTempInventoryReceiptDetail) -- IF CATEGORY DOES NOT EXIST, EXIT LOOP
-		--			BEGIN
-		--				DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
-		--				BREAK
-		--			END
-
-		--			DELETE FROM @tblTempInventoryReceiptDetail
-
-		--		END
-
-		--		DELETE FROM @tblTaxCriteria WHERE intCriteriaId = @intCriteriaId
-
-		--	END	
-
-		--	DELETE FROM @tmpInventoryReceiptDetail WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
-			
-		--END
 			
 		IF (@ReportingComponentId <> '')
 		BEGIN
@@ -674,19 +540,19 @@ BEGIN TRY
 					WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
 				, strBillOfLading
 				, CONVERT(DECIMAL(18), dblReceived)
-				, strTaxCategory
+				, strTaxCode
 				, CONVERT(DECIMAL(18), dblGross)
 				, CONVERT(DECIMAL(18), dblNet)
 				, CONVERT(DECIMAL(18), dblReceived)
 				, dblTax
-				, dtmReceiptDate
+				, dtmDate
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
 				, strVendorName
 				, strTransporterName
-				, REPLACE(strVendorFEIN, '-', '')
-				, REPLACE(strTransporterFEIN, '-', '')
+				, REPLACE(strVendorFederalTaxId, '-', '')
+				, REPLACE(strTransporterFederalTaxId, '-', '')
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
@@ -698,7 +564,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, REPLACE(strHeaderFederalTaxID, '-', '')
+				, REPLACE(strHeaderFederalTaxId, '-', '')
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -724,10 +590,10 @@ BEGIN TRY
 				, CONVERT(DECIMAL(18), dblGross)
 				, strContactName
 				, strEmail
-			FROM @TFTransaction Trans
+			FROM @tmpTransaction Trans
 		END
 
-		IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction WHERE intReportingComponentId = @RCId ) AND @IsEdi = 0)
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM @tmpTransaction WHERE intReportingComponentId = @RCId ) AND @IsEdi = 0)
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intReportingComponentId
@@ -745,7 +611,7 @@ BEGIN TRY
 				, 'Receipt')
 		END
 		
-		DELETE FROM @TFTransaction
+		DELETE FROM @tmpTransaction
 		DELETE FROM @tmpRC WHERE @RCId = intReportingComponentId
 
 		EXEC uspTFProcessBeforePreview @Guid = @Guid
