@@ -379,21 +379,43 @@ BEGIN TRY
 	-------------------------------------------------------------------------------------------------
 
 
-
-
-	DECLARE @RecCount AS INT = 0
-	DECLARE @UpdateCount AS INT = 0
-
 	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE dblOldSalePrice != dblNewSalePrice OR dblOldStandardCost != dblNewStandardCost)
 	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog WHERE dblOldUnitAfterDiscount != dblNewUnitAfterDiscount OR dtmOldBeginDate != dtmNewBeginDate OR dtmOldEndDate != dtmNewEndDate)
 
 	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemPricingId) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
 	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemSpecialPricingId) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
 
-	SET @UpdateCount = (SELECT COUNT(*) FROM @tblPreview)
-	SET @RecCount = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
 
-	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
+	--DECLARE @RecCount AS INT = 0
+	--DECLARE @UpdateCount AS INT = 0
+
+	--SET @UpdateCount = (SELECT COUNT(*) FROM @tblPreview)
+	--SET @RecCount = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
+
+	--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
+
+
+	---------------------------------------------------------------------------------------
+	----------------------------- START Query Preview -------------------------------------
+	---------------------------------------------------------------------------------------
+	DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+
+	-- Query Preview display
+	SELECT DISTINCT 
+	          strLocation
+			  , strUpc
+			  , strItemDescription
+			  , strChangeDescription
+			  , strOldData
+			  , strNewData
+	FROM @tblPreview
+	ORDER BY strItemDescription, strChangeDescription ASC
+    
+	DELETE FROM @tblPreview
+	---------------------------------------------------------------------------------------
+	----------------------------- END Query Preview ---------------------------------------
+	---------------------------------------------------------------------------------------
+
 
 	-- Clean up 
 	BEGIN

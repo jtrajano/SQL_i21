@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportReceipt]
 	@HandheldScannerId INT,
-	@UserId INT
+	@UserId INT,
+	@ysnSuccess BIT OUTPUT,
+	@strStatusMsg NVARCHAR(1000) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,6 +35,30 @@ BEGIN TRY
 	FROM tblSMCompanyPreference
 	WHERE intCompanyPreferenceId = 1
 
+
+	--------------------------------------------------------------------------------------
+	--------- Start Validate if items does not have intItemUOMId -------------------------
+	--------------------------------------------------------------------------------------
+	IF EXISTS (SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportReceipt WHERE intHandheldScannerId = @HandheldScannerId AND intItemUOMId IS NULL)
+		BEGIN
+			DECLARE @strItemNoHasNoUOM AS NVARCHAR(MAX)
+
+			SELECT @strItemNoHasNoUOM = COALESCE(@strItemNoHasNoUOM + ', ', '') + strItemNo
+			FROM vyuSTGetHandheldScannerImportReceipt
+			WHERE intHandheldScannerId = @HandheldScannerId
+			AND intItemUOMId IS NULL
+
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'Selected Item/s ' + @strItemNoHasNoUOM + ' has no default UOM'
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	--------- End Validate if items does not have intItemUOMId ---------------------------
+	--------------------------------------------------------------------------------------
+
+
+
 	WHILE EXISTS (SELECT TOP 1 1 FROM #Vendors)
 	BEGIN
 		DELETE FROM @ReceiptStagingTable
@@ -45,6 +71,8 @@ BEGIN TRY
 			DECLARE @MSG NVARCHAR(250) = 'Vendor ' + @VendorNo + 'has no default Ship From!'
 			RAISERROR(@MSG, 16, 1)
 		END
+
+		
 
 		SELECT *
 		INTO #tmpImportReceipts
@@ -137,6 +165,10 @@ BEGIN TRY
 		DROP TABLE #tmpImportReceipts
 
 		DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
+
+		-- Flag Success
+		SET @ysnSuccess = CAST(1 AS BIT)
+		SET @strStatusMsg = ''
 	END	
 	DROP TABLE #Vendors
 

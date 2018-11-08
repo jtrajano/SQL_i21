@@ -120,9 +120,16 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '') 
-										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
-									ELSE A.[apivc_chk_no] END,
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL --IF NO PAYMENT, GENERATE CHECK NUMBER IF PAID
+										THEN
+											(
+												CASE WHEN NULLIF(A.apivc_chk_no,'') IS NULL AND A.apivc_status_ind = 'P'
+													THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+													ELSE A.apivc_chk_no
+												END
+											)
+									ELSE A.[apivc_chk_no]
+									END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
@@ -216,9 +223,16 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '')
-										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
-									ELSE A.[apivc_chk_no] END,
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL --IF NO PAYMENT, GENERATE CHECK NUMBER IF PAID
+										THEN
+											(
+												CASE WHEN NULLIF(A.apivc_chk_no,'') IS NULL AND A.apivc_status_ind = 'P'
+													THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+													ELSE A.apivc_chk_no
+												END
+											)
+									ELSE A.[apivc_chk_no]
+									END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,

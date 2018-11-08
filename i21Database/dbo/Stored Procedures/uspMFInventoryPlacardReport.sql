@@ -179,7 +179,7 @@ BEGIN TRY
 	JOIN tblICInventoryReceiptItemLot RL ON RL.intLotId = LI.intLotId
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
-	JOIN tblICItem I ON I.intItemId = RL.intInventoryReceiptItemId
+	JOIN tblICItem I ON I.intItemId = RI.intItemId
 	LEFT JOIN @tblMFCustomValue tbl ON tbl.intItemId = I.intItemId
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId

@@ -49,6 +49,10 @@ GO
 	--	INCLUDE([intInventoryActualCostId]);
 	--GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostOut]
-		ON [dbo].[tblICInventoryActualCostOut]([intInventoryActualCostId] ASC, [intInventoryTransactionId] ASC)
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostOut_intInventoryActualCostId]
+		ON [dbo].[tblICInventoryActualCostOut]([intInventoryActualCostId] ASC)
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostOut_intInventoryTransactionId]
+		ON [dbo].[tblICInventoryActualCostOut]([intInventoryTransactionId] ASC)
 GO

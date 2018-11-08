@@ -168,6 +168,7 @@
     <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportSettleScaleTicket.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportReceiptandBill.sql" />
+    <None Include="dbo\Stored Procedures\uspCTImportOriginContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -469,5 +470,6 @@
     <None Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
   </ItemGroup>
 </Project>

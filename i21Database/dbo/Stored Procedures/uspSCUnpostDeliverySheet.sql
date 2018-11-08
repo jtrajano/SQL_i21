@@ -191,6 +191,8 @@ BEGIN TRY
 				CLOSE splitCursor;  
 				DEALLOCATE splitCursor;
 
+				EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, 'DS', @intUserId
+
 				CREATE TABLE #tmpItemReceiptIds (
 					[intInventoryReceiptId] [INT] PRIMARY KEY,
 					[strReceiptNumber] [VARCHAR](100),
@@ -213,38 +215,6 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					IF EXISTS (
-							SELECT 1
-							FROM tblGRCustomerStorage CS
-							JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-							WHERE SH.strType IN ('From Scale', 'From Delivery Sheet')
-							AND SH.intInventoryReceiptId = @InventoryReceiptId
-							)
-					BEGIN
-						SELECT @intCustomerStorageId = CS.intCustomerStorageId
-						FROM tblGRCustomerStorage CS
-						JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-						WHERE SH.strType IN ('From Scale', 'From Delivery Sheet')
-						AND SH.intInventoryReceiptId = @InventoryReceiptId
-			
-						IF EXISTS(SELECT 1 FROM tblARInvoiceDetail WHERE intCustomerStorageId = @intCustomerStorageId)
-						BEGIN
-							RAISERROR('Invoice exists for the Grain Ticket for this receipt.',16, 1);
-						END
-						ELSE IF EXISTS(SELECT 1 FROM [tblAPBillDetail] WHERE [intCustomerStorageId] = @intCustomerStorageId)
-						BEGIN
-							RAISERROR('Voucher exists for this Delivery Sheet.',16, 1);
-						END
-						ELSE IF EXISTS(SELECT 1 FROM [tblGRStorageHistory] WHERE [intCustomerStorageId] = @intCustomerStorageId AND strType = 'Transfer')
-						BEGIN
-							RAISERROR('The Grain Ticket of this receipt has transferred.',16, 1);
-						END
-						ELSE IF EXISTS(SELECT 1 FROM [tblGRCustomerStorage] WHERE [intCustomerStorageId] = @intCustomerStorageId AND dblOriginalBalance < > dblOpenBalance)
-						BEGIN
-							RAISERROR('There is mismatch between the original balance and open balance of the grain ticket of this receipt.',16, 1);
-						END
-					END		
-
 					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
 					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
                         DROP TABLE #tmpVoucherDetail

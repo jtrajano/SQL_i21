@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRCreateScaleTicket]
 	@intExternalId			INT,
-	@strTicketNo			Nvarchar(40),	
+	@strTicketNo			NVARCHAR(40),	
 	@intUserId				INT,
 	@XML					NVARCHAR(MAX),
 	@intTicketId			INT	OUTPUT
@@ -14,7 +14,10 @@ BEGIN TRY
 			@intEntityId				INT,
 			@intTicketDiscountId		INT,
 			@intDiscountScheduleId		INT,
+			@strScaleOperatorUser       NVARCHAR(100),
 			@SQL						NVARCHAR(MAX)
+			
+	SELECT @strScaleOperatorUser = strName FROM tblEMEntity WHERE intEntityId = @intUserId
 
     IF ISNULL(@strTicketNo,'') = ''
 	BEGIN
@@ -121,6 +124,19 @@ BEGIN TRY
 			SET @ErrMsg = 'Invalid Distribution.'
 			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
 	END
+	ELSE IF NOT EXISTS(  
+						 SELECT 1 FROM tblSCTicketLVStaging CI
+						 JOIN tblGRDiscountId DiscountId ON DiscountId.strDiscountId = CI.strDiscountId
+						 JOIN	tblICItem IM ON	IM.strItemNo		=	CI.strItemNo
+						 JOIN tblGRDiscountCrossReference CRef ON CRef.intDiscountId = DiscountId.intDiscountId						 
+						 JOIN tblGRDiscountSchedule DiscountSchedule ON DiscountSchedule.intDiscountScheduleId = CRef.intDiscountScheduleId
+						 AND DiscountSchedule.intCommodityId = IM.intCommodityId
+						 WHERE CI.intTicketLVStagingId = @intExternalId
+						)
+	BEGIN
+			SET @ErrMsg = 'Discount Schedule With Commodity same as Item is missing in Discount Table mapping.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
+	END
 				
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML
 
@@ -169,24 +185,24 @@ BEGIN TRY
 	
 		CREATE TABLE #tmpExtracted
 		(
-			 [strData]							NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strType]							NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strEntityName]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strItemNo]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strLocationName]					NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,[strTicketStatus]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strTicketNumber]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			 [strData]							NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strType]							NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strEntityName]					NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strItemNo]						NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strLocationName]					NVARCHAR(500) COLLATE Latin1_General_CI_AS
+			,[strTicketStatus]					NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strTicketNumber]					NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intScaleSetupId]					INT
 			,[intTicketPoolId]					INT
 			,[intTicketLocationId]				INT
 			,[intTicketType]					INT
-			,[strInOutFlag]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strInOutFlag]						NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[dtmTicketDateTime]				DATETIME
 			,[intProcessingLocationId]			INT
-			,[strScaleOperatorUser]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strScaleOperatorUser]				NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intEntityScaleOperatorId]			INT
-			,[strTruckName]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strDriverName]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strTruckName]						NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strDriverName]					NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[dblGrossWeight]					DECIMAL(13, 3)
 			,[dblTareWeight]					DECIMAL(13, 3)
 			,[dblGrossUnits]					DECIMAL(13, 3)
@@ -194,23 +210,23 @@ BEGIN TRY
 			,[dblNetUnits]						DECIMAL(13, 3)
 			,[intSplitId]						INT
 			,[intStorageScheduleTypeId]			INT
-			,[strDistributionOption]			NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strDistributionOption]			NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intDiscountSchedule]				INT
-			,[strContractNumber]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strContractNumber]				NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intContractSequence]				INT
 			,[dblUnitPrice]						NUMERIC(38, 20)
 			,[dblUnitBasis]						NUMERIC(38, 20)
 			,[dblTicketFees]					NUMERIC(38, 20)
 			,[intCurrencyId]					INT
-			,[strTicketComment]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strCustomerReference]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strTicketComment]					NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strCustomerReference]				NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intHaulerId]						INT
 			,[dblFreightRate]					NUMERIC(38, 20)
 			,[ysnFarmerPaysFreight]				BIT
 			,[ysnCusVenPaysFees]				BIT
 			,[intAxleCount]						INT
-			,[strBinNumber]						NVARCHAR(40) COLLATE Latin1_General_CI_AS
-			,[strDiscountComment]				NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[strBinNumber]						NVARCHAR(400) COLLATE Latin1_General_CI_AS
+			,[strDiscountComment]				NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intCommodityId]					INT
 			,[intDiscountId] 					INT
 			,[intContractId] 					INT
@@ -326,7 +342,7 @@ BEGIN TRY
 			,[strInOutFlag] 			 = SCTicketType.strInOutIndicator
 			,[dtmTicketDateTime]		 = CI.dtmTicketDateTime
 			,[intProcessingLocationId]	 = CL.intCompanyLocationId
-			,[strScaleOperatorUser]		 = 1
+			,[strScaleOperatorUser]		 = @strScaleOperatorUser
 			,[intEntityScaleOperatorId]	 = @intUserId
 			,[strTruckName]				 = CI.strTruckName
 			,[strDriverName]			 = CI.strDriverName
@@ -398,7 +414,11 @@ BEGIN TRY
 			WHERE SCSetup.strStationShortDescription = CI.strScaleStationImport
 		) SCS
 		LEFT JOIN	tblICItemUOM UN	ON	UN.intItemUOMId = SCS.intItemUOMId
-		WHERE strTicketNumber = @strTicketNo AND CI.strData = 'Header' AND DiscountSchedule.intDiscountScheduleId IS NOT NULL
+		WHERE strTicketNumber = @strTicketNo 
+		AND CI.intTicketLVStagingId = @intExternalId
+		AND CI.strData = 'Header' 
+		AND DiscountSchedule.intDiscountScheduleId IS NOT NULL
+		AND CI.ysnImported IS NULL
 
 		INSERT INTO #tmpExtracted
 		(
@@ -609,8 +629,7 @@ BEGIN TRY
 		EXEC	uspCTInsertINTOTableFromXML 'tblQMTicketDiscount',@strTblXML,@intTicketDiscountId OUTPUT
 		
 	END
-
-
+		
 END TRY      
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      

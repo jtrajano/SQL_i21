@@ -138,8 +138,50 @@ BEGIN
 		@intAdjustmentNo
 		,inv.intItemId
 		,0
-		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
-		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
+		,agitm_un_on_hand
+		,agitm_un_on_hand
+		,uom.intItemUOMId
+		,uom.intItemUOMId
+		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+		,(select sl.intSubLocationId 
+			from 
+				tblICStorageLocation sl 
+				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
+				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
+		,(select sl.intSubLocationId 
+			from 
+				tblICStorageLocation sl 
+				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
+				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+
+				--,sl.intSubLocationId
+				--,sl.intStorageLocationId
+		,1
+		,NULL
+		,NULL
+
+	FROM	tblICItem inv INNER JOIN agitmmst itm 
+				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblICItemUOM uom 
+				on uom.intItemId = inv.intItemId 
+			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
+					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+			LEFT JOIN tblICItemLocation il ON il.intItemId = inv.intItemId
+	WHERE	(agitm_un_on_hand > 0 OR (agitm_un_on_hand < 0 AND il.intAllowNegativeInventory = 1))
+	AND agitm_loc_no = @adjLoc
+	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+
+	UNION ALL	
+	SELECT 
+		@intAdjustmentNo
+		,inv.intItemId
+		,0
+		,ISNULL(aglot_un_on_hand,0)
+		,ISNULL(aglot_un_on_hand,0)
 		,uom.intItemUOMId
 		,uom.intItemUOMId
 		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
@@ -170,16 +212,16 @@ BEGIN
 				on uom.intItemId = inv.intItemId 
 			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
 					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-			LEFT JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
-					--created duplicate storage location entries. converted into an inline sub query.	
-			--left join tblICStorageLocation sl 
-			--	on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
-	WHERE	agitm_un_on_hand <> 0 
+			INNER JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
+			
+	WHERE	ISNULL(agitm_un_on_hand,0) <> 0 
 	AND agitm_loc_no = @adjLoc
 	AND aglot_loc_no = @adjLoc
 	AND aglot_un_on_hand <> 0
 	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
-	
+	AND rtrim((agitm_lot_yns)) = 'Y'
+
+
 	-- Create an Audit Log
 	BEGIN 
 		DECLARE @strDescription AS NVARCHAR(100) 

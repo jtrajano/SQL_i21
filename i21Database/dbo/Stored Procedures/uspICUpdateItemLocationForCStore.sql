@@ -445,7 +445,7 @@ BEGIN
 						, inserted.dblReorderPoint
 						, inserted.strDescription
 			) AS [Changes] (
-				Action
+				action
 				, intItemId 
 				, intItemLocationId
 				-- Original values
@@ -513,7 +513,7 @@ BEGIN
 				, dblReorderPoint_New
 				, strDescription_New
 			)
-	WHERE	[Changes].Action = 'UPDATE'
+	WHERE	[Changes].action = 'UPDATE'
 	;
 END
 

@@ -44,6 +44,7 @@ BEGIN
 				,dtmDatePaid
 				,intPaymentMethodId
 				,strPaymentMethod
+				,intBankAccountId
 				,dblAmountPaid
 				,intEntityId
 				,intInvoiceId
@@ -71,6 +72,7 @@ BEGIN
 				,dtmDatePaid					= GETDATE()
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
+				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENT.dblAmount,0)) * -1
 				,intEntityId					= @intUserId
 				,intInvoiceId					= IFP.intInvoiceId
@@ -91,6 +93,7 @@ BEGIN
 			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId
 			INNER JOIN vyuARInvoicesForPayment IFP ON POS.intInvoiceId = IFP.intInvoiceId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			CROSS APPLY (
 				SELECT TOP 1 intPaymentMethodID
 						   , strPaymentMethod

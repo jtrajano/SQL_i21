@@ -3,7 +3,7 @@ AS
 SELECT
 	WC.intWeightClaimId,
 	WC.intPurchaseSale,
-	strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound' ELSE CASE WHEN Load.intPurchaseSale = 2 THEN 'Outbound'  ELSE 'Drop Ship' END END,
+	strType = CASE WHEN WC.intPurchaseSale = 1 THEN 'Inbound' ELSE CASE WHEN WC.intPurchaseSale = 2 THEN 'Outbound'  ELSE 'Drop Ship' END END,
 	WC.strReferenceNumber,
 	WC.dtmTransDate,
 	WC.intLoadId,

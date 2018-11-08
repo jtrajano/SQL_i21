@@ -85,6 +85,10 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strSiteNumber
 	 , dblEstimatedPercentLeft
 	 , dblPercentFull
+	 , strEntityContract
+	 , strTicketNumber
+	 , strCustomerReference
+	 , strLoadNumber
 	 , blbLogo
 	 , strAddonDetailKey
 	 , ysnHasAddOnItem
@@ -197,6 +201,10 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
+	 , strCustomerContract		= INVOICEDETAIL.strCustomerContract
+	 , strTicketNumber 			= INVOICEDETAIL.strTicketNumber
+	 , strCustomerReference		= INVOICEDETAIL.strCustomerReference
+	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -244,6 +252,7 @@ LEFT JOIN (
 		 , UOM.strUnitMeasure
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
+		 , CONTRACTS.strCustomerContract
 		 , TAX.intTaxCodeId
 		 , TAX.dblAdjustedTax
 		 , TAX.strTaxCode
@@ -255,9 +264,12 @@ LEFT JOIN (
 		 , ITEM.ysnListBundleSeparately
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
-		 , SITE.intSiteID
-		 , SITE.strSiteNumber
-		 , SITE.dblEstimatedPercentLeft
+		 , [SITE].intSiteID
+		 , [SITE].strSiteNumber
+		 , [SITE].dblEstimatedPercentLeft
+		 , SCALE.strTicketNumber
+		 , SCALE.strCustomerReference
+		 , SCALE.strLoadNumber
 		 , ID.dblPercentFull
 		 , ID.strAddonDetailKey
 		 , ID.ysnAddonParent
@@ -307,6 +319,7 @@ LEFT JOIN (
 			 , CD.intContractDetailId
 			 , CD.dblBalance
 			 , strContractNumber
+			 , strCustomerContract
 		FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
 		LEFT JOIN (
 			SELECT intContractHeaderId
@@ -321,10 +334,19 @@ LEFT JOIN (
 		FROM dbo.tblMFRecipe WITH (NOLOCK)
 	) RECIPE ON ID.intRecipeId = RECIPE.intRecipeId	
 	LEFT JOIN (
-		SELECT intSiteID,(CASE WHEN intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR,intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + strDescription strSiteNumber,dblEstimatedPercentLeft 
+		SELECT intSiteID
+		     , strSiteNumber = (CASE WHEN intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR,intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + strDescription
+			 , dblEstimatedPercentLeft 
 		FROM tblTMSite
-	) SITE
-		ON SITE.intSiteID = ID.intSiteId
+	) [SITE] ON [SITE].intSiteID = ID.intSiteId
+	LEFT JOIN (
+		SELECT SC.intTicketId
+			 , SC.strTicketNumber
+			 , SC.strCustomerReference
+			 , LG.strLoadNumber
+		FROM dbo.tblSCTicket SC WITH (NOLOCK)
+		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId
+	) SCALE ON ID.intTicketId = SCALE.intTicketId
 	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (

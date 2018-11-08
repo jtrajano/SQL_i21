@@ -318,16 +318,38 @@ BEGIN TRY
 		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 	)
 
-	DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+	
 	-------------------------------------------------------------------------------------------------
 	----------- Count Items -------------------------------------------------------------------------
 	-------------------------------------------------------------------------------------------------
 
+	--DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+	--DECLARE @RecCount AS INT = (SELECT COUNT(*) FROM @tblPreview)
+	--DECLARE @UpdateCount AS INT = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
 
-	DECLARE @RecCount AS INT = (SELECT COUNT(*) FROM @tblPreview)
-	DECLARE @UpdateCount AS INT = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
+	--SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemPrcicingCount	
 
-	SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemPrcicingCount	
+
+	---------------------------------------------------------------------------------------
+	----------------------------- START Query Preview -------------------------------------
+	---------------------------------------------------------------------------------------
+	DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+
+	-- Query Preview display
+	SELECT DISTINCT 
+	          strLocation
+			  , strUpc
+			  , strItemDescription
+			  , strChangeDescription
+			  , strOldData
+			  , strNewData
+	FROM @tblPreview
+	ORDER BY strItemDescription, strChangeDescription ASC
+    
+	DELETE FROM @tblPreview
+	---------------------------------------------------------------------------------------
+	----------------------------- END Query Preview ---------------------------------------
+	---------------------------------------------------------------------------------------
 
 END TRY
 

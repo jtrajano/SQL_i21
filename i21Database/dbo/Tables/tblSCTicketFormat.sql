@@ -9,6 +9,7 @@
     [intSuppressDiscountOptionId] INT NULL, 
     [strTicketHeader] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strTicketFooter] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnSuppressCashPrice] BIT NOT NULL DEFAULT((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketFormat_intTicketFormatId] PRIMARY KEY ([intTicketFormatId]), 
     CONSTRAINT [UK_tblSCTicketFormat_strTicketFormat] UNIQUE ([strTicketFormat]) 
