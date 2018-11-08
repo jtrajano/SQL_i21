@@ -294,15 +294,16 @@ FROM (
 		,I.strItemNo
 		,isnull(RI.dblNet, 0) dblInQty
 		,0 AS dblOutQty
-		,ST.strDistributionOption
+		,GST.strStorageTypeCode strDistributionOption
 		,R.strReceiptNumber AS strReceiptNumber
 		,R.intInventoryReceiptId AS intReceiptId
 		--,Inv.strInvoiceNumber AS strReceiptNumber
 		--,Inv.intInvoiceId AS intReceiptId
-	FROM vyuSCTicketView ST
+	FROM tblSCTicket ST
 	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
 	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
 	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+	INNER JOIN tblGRStorageType GST ON ST.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
 	WHERE ST.strTicketStatus = 'C'
 	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 	AND ST.intCommodityId = @intCommodityId 
@@ -314,7 +315,7 @@ FROM (
 			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 			)
 	AND RI.intOwnershipType = 1
-	AND ST.strDistributionOption IN ('DP','CNT', 'SPT')
+	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
 	AND RI.dblBillQty = 0
 	AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
 			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
@@ -322,6 +323,54 @@ FROM (
 	
 
 )t
+
+UNION 
+SELECT --Delivery Sheet
+ strItemNo
+	, dtmDate
+	,dblInQty AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,dblInQty AS dblUnpaidBalance
+	,0 as dblPaidBalance
+	,strDistributionOption
+	,strReceiptNumber
+	,intInventoryReceiptItemId
+FROM (
+	SELECT 
+		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+		,RI.dblUnitCost dblUnitCost1
+		,RI.intInventoryReceiptItemId
+		,I.strItemNo
+		,isnull(RI.dblNet, 0) dblInQty
+		,0 AS dblOutQty
+		,GST.strStorageTypeCode strDistributionOption
+		,R.strReceiptNumber AS strReceiptNumber
+		,R.intInventoryReceiptId AS intReceiptId
+		--,Inv.strInvoiceNumber AS strReceiptNumber
+		--,Inv.intInvoiceId AS intReceiptId
+	FROM tblSCDeliverySheetSplit DSS 
+	INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
+	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+	INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
+	WHERE ST.strTicketStatus = 'C'
+	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+	AND ST.intCommodityId = @intCommodityId 
+	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+	AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
+	AND ST.intProcessingLocationId IN (
+			SELECT intCompanyLocationId
+			FROM tblSMCompanyLocation
+			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+			)
+	AND RI.intOwnershipType = 1
+	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+	AND RI.dblBillQty = 0
+	
+
+)t
+
 
 UNION
 SELECT --Direct from Invoice
