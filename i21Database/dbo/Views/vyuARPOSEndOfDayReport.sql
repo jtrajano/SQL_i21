@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDayReport]
 AS 
-SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-	 , intPOSLogId			= POSLOG.intPOSLogId
+SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , intEntityUserId		= EOD.intEntityId
 	 , intCompanyLocationId	= CL.intCompanyLocationId
 	 , dtmLogin				= EOD.dtmOpen
@@ -17,7 +16,7 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , Tax					= ISNULL(POS.dblTax, 0)
 	 , Total				= ISNULL(POS.dblTotal, 0)
 	 , NumberOfSales		= ISNULL(POS.intTotalSales, 0)
-	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)--ISNULL(EOD.dblOpeningBalance, 0) + ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
 	 , dblOpeningBalance	= ISNULL(EOD.dblOpeningBalance, 0)
 	 , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
 	 , CashCount			= ISNULL(PAYMENT.intCashCount, 0)
@@ -29,7 +28,8 @@ SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
-	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0)
+	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0) * -1
+	 , dblCashSales			= ISNULL(EOD.dblExpectedEndingBalance,0)
 	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
@@ -70,10 +70,18 @@ OUTER APPLY (
 		 , dblTax			= SUM(ISNULL(dblTax, 0))
 		 , dblTotal			= SUM(ISNULL(dblTotal, 0))
 		 , intTotalSales	= COUNT(intPOSId)
-	FROM dbo.tblARPOS WITH (NOLOCK)
+	FROM dbo.tblARPOS IPOS WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intPOSLogId, intPOSEndOfDayId
+		FROM tblARPOSLog
+	)IPOSLOG ON IPOS.intPOSLogId = IPOSLOG.intPOSLogId
+	INNER JOIN(
+		SELECT intPOSEndOfDayId
+		FROM tblARPOSEndOfDay
+	)IEOD ON IPOSLOG.intPOSEndOfDayId = IEOD.intPOSEndOfDayId
 	WHERE intInvoiceId IS NOT NULL
 	  AND dblTotal > 0
-	  AND intPOSLogId = POSLOG.intPOSLogId 
+	  AND IEOD.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) POS
 OUTER APPLY (
 	SELECT dblCashAmount		= SUM(CASE WHEN POSP.strPaymentMethod = 'Cash' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.dblAmount, 0) ELSE 0 END)
@@ -88,20 +96,35 @@ OUTER APPLY (
 		 , intOnAccountCount	= COUNT(CASE WHEN POSP.strPaymentMethod = 'On Account' AND ARPOS.dblTotal > 0 THEN ISNULL(POSP.intPOSPaymentId, 0) ELSE NULL END)
 	FROM dbo.tblARPOSPayment POSP WITH (NOLOCK) 
 	INNER JOIN (
-		SELECT intPOSId
-		     , intPOSLogId 
+		SELECT PPOS.intPOSId
+		     , PPOS.intPOSLogId 
 			 , dblTotal 
-		FROM dbo.tblARPOS WITH (NOLOCK)
-		WHERE intInvoiceId IS NOT NULL
-		  AND intPOSLogId = POSLOG.intPOSLogId 
+		FROM dbo.tblARPOS PPOS WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intPOSLogId, intPOSEndOfDayId
+			FROM tblARPOSLog
+		)PPOSLOG ON PPOS.intPOSLogId = PPOSLOG.intPOSLogId
+		INNER JOIN(
+			SELECT intPOSEndOfDayId
+			FROM tblARPOSEndOfDay
+		)PEOD ON PPOSLOG.intPOSEndOfDayId = PEOD.intPOSEndOfDayId
+		WHERE PPOS.intInvoiceId IS NOT NULL
+			AND PEOD.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 	) ARPOS ON POSP.intPOSId = ARPOS.intPOSId		  
 ) PAYMENT
 OUTER APPLY (
-	SELECT dblCashReturn = SUM(CASE WHEN strPaymentMethod IN ('Check','Cash') THEN dblAmount ELSE 0 END)
-		   ,intReturnCount = COUNT(POS.intPOSId)	
-	FROM dbo.tblARPOS POS WITH (NOLOCK)
-	INNER JOIN  tblARPOSPayment PAY ON POS.intPOSId = PAY.intPOSId
+	SELECT intReturnCount = COUNT(RPOS.intPOSId)	
+	FROM dbo.tblARPOS RPOS WITH (NOLOCK)
+	INNER JOIN  tblARPOSPayment RPOSPAYMENT ON RPOS.intPOSId = RPOSPAYMENT.intPOSId
+	INNER JOIN (
+		SELECT intPOSLogId, intPOSEndOfDayId
+		FROM tblARPOSLog
+	)RPOSLOG ON RPOS.intPOSLogId = RPOSLOG.intPOSLogId
+	INNER JOIN(
+		SELECT intPOSEndOfDayId
+		FROM tblARPOSEndOfDay
+	)REOD ON RPOSLOG.intPOSEndOfDayId = REOD.intPOSEndOfDayId
 	WHERE ysnReturn = 1
-	  AND intPOSLogId = POSLOG.intPOSLogId
 	  AND dblTotal < 0
+	  AND REOD.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) CASHRETURN
