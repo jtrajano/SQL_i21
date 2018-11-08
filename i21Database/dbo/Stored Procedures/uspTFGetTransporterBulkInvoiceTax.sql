@@ -273,7 +273,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, strHeaderFederalTaxID
 				, strTransporterIdType
 				, strVendorIdType
