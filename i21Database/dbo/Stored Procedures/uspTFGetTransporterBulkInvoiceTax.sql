@@ -274,7 +274,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxId
-				, strHeaderFederalTaxID
+				, strHeaderFederalTaxId
 				, strTransporterIdType
 				, strVendorIdType
 				, strCustomerIdType
