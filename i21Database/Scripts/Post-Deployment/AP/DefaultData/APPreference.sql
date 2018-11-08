@@ -25,6 +25,16 @@ BEGIN
 		,[strClaimReportName]	= ''
 		,[intCheckPrintId]		= 1
 		,[intConcurrencyId]		= 1
+
+	--Audit Log          
+		EXEC dbo.uspSMAuditLog 
+					 @keyValue			= 1									-- Primary Key Value of the Invoice. 
+					,@screenName		= 'i21.view.CompanyPreferenceOption'	-- Screen Namespace
+					,@entityId			= 1									-- Entity Id.
+					,@actionType		= 'Added'							-- Action Type
+					,@changeDescription	= 'Updated APPreference'			-- Description
+					,@fromValue			= ''								-- Previous Value
+					,@toValue			= ''								-- New Value
 END
 ELSE
 BEGIN 
@@ -32,5 +42,16 @@ BEGIN
 	BEGIN
 		UPDATE tblAPCompanyPreference 
 		SET intCheckPrintId = 1
+		--Audit Log          
+		EXEC dbo.uspSMAuditLog 
+					 @keyValue			= 1						-- Primary Key Value of the Invoice. 
+					,@screenName		= 'i21.view.CompanyPreferenceOption'	-- Screen Namespace
+					,@entityId			= 1									-- Entity Id.
+					,@actionType		= 'Updated'							-- Action Type
+					,@changeDescription	= 'Updated APPreference'			-- Description
+					,@fromValue			= ''								-- Previous Value
+					,@toValue			= ''								-- New Value
 	END
+
+	
 END
