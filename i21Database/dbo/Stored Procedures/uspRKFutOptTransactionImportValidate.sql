@@ -3,6 +3,7 @@ AS
 BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
 DECLARE @ErrMsg nvarchar(Max)
+DECLARE @strRequiredFieldError  NVARCHAR(MAX)
 
 DECLARE @mRowNumber INT
 DECLARE @strName NVARCHAR(50)
@@ -58,6 +59,7 @@ WHILE @mRowNumber > 0
 	BEGIN
 		SELECT @PreviousErrMsg=''
 		SET @ErrMsg = ''
+		SET @strRequiredFieldError = ''
 		
 		SET @strName=NULL
 		SET @strAccountNumber=NULL
@@ -106,50 +108,105 @@ WHILE @mRowNumber > 0
 		FROM tblRKFutOptTransactionImport 
 		WHERE intFutOptTransactionId = @mRowNumber
 	
-	IF((LTRIM(RTRIM(@strInstrumentType)) = ''
-		OR LTRIM(RTRIM(@strFutMarketName)) = ''
-		OR LTRIM(RTRIM(@strCurrency)) = ''
-		OR LTRIM(RTRIM(@strCommodityCode)) = ''
-		OR LTRIM(RTRIM(@strLocationName)) = ''
-		OR LTRIM(RTRIM(@strName)) = ''
-		OR LTRIM(RTRIM(@strAccountNumber)) = ''
-		OR LTRIM(RTRIM(@strSalespersonId)) = ''
-		OR LTRIM(RTRIM(@strBuySell)) = ''
-		OR LTRIM(RTRIM(@strFutureMonth)) = ''
-		OR @dblPrice IS NULL
-		OR LTRIM(RTRIM(@strStatus)) = ''
-		OR @dtmFilledDate IS NULL)
-		AND (LTRIM(RTRIM(@strInstrumentType)) = 'Futures' OR LTRIM(RTRIM(@strInstrumentType)) = '')
-	)
+	
+
+	IF(LTRIM(RTRIM(@strInstrumentType)) = '')
 	BEGIN
-		SET @ErrMsg =  ' Instrument Type, Futures Market, Currency, Commodity, Location, Broker, Broker Account, Salesperson, Buy/Sell, Futures Month, Price, Status, Filled Date is required.'
+		SET @strRequiredFieldError = 'Instrument Type'
 	END
-	ELSE IF(LTRIM(RTRIM(@strInstrumentType)) = 'Futures') AND (LTRIM(RTRIM(@strOptionMonth)) <> ''
+
+	IF(LTRIM(RTRIM(@strFutMarketName)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Futures Market' ELSE 'Futures Market' END
+	END
+
+	IF(LTRIM(RTRIM(@strCurrency)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Currency' ELSE 'Currency' END
+	END
+
+	IF(LTRIM(RTRIM(@strCommodityCode)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Commodity' ELSE 'Commodity' END
+	END
+
+	IF(LTRIM(RTRIM(@strLocationName)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Location' ELSE 'Location' END
+	END
+
+	IF(LTRIM(RTRIM(@strName)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Broker' ELSE 'Broker' END
+	END
+
+	IF(LTRIM(RTRIM(@strAccountNumber)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Broker Account' ELSE 'Broker Account' END
+	END
+
+	IF(LTRIM(RTRIM(@strSalespersonId)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Salesperson' ELSE 'Salesperson' END
+	END
+
+	IF(LTRIM(RTRIM(@strBuySell)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Buy/Sell' ELSE 'Buy/Sell' END
+	END
+
+	IF(LTRIM(RTRIM(@strFutureMonth)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Futures Month' ELSE 'Futures Month' END
+	END
+
+	IF(@dblPrice IS NULL)
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Price' ELSE 'Price' END
+	END
+
+	IF(LTRIM(RTRIM(@strStatus)) = '')
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Status' ELSE 'Status' END
+	END
+
+	IF(@dtmFilledDate IS NULL)
+	BEGIN
+		SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Filled Date' ELSE 'Filled Date' END
+	END
+
+	IF(LTRIM(RTRIM(@strInstrumentType)) = 'Options')
+	BEGIN
+		IF (LTRIM(RTRIM(@strOptionMonth)) = '')
+		BEGIN
+			SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Option Month' ELSE 'Option Month' END
+		END
+
+		IF (LTRIM(RTRIM(@strOptionType)) = '')
+		BEGIN
+			SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Option Type' ELSE 'Option Type' END
+		END
+
+		IF (@dblStrike IS NULL)
+		BEGIN
+			SET @strRequiredFieldError =  @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Strike' ELSE 'Strike' END
+		END
+	END
+
+	IF(@strRequiredFieldError <> '')
+	BEGIN
+		SET @ErrMsg = @strRequiredFieldError + ' is required.'
+	END
+
+	IF(LTRIM(RTRIM(@strInstrumentType)) = 'Futures') AND (LTRIM(RTRIM(@strOptionMonth)) <> ''
 		OR LTRIM(RTRIM(@strOptionType)) <> ''
 	)
 	BEGIN
 		SET @ErrMsg = ' Instrument Type: Futures must not have Option Month or Option Type.'
 	END
-	ELSE IF(LTRIM(RTRIM(@strInstrumentType)) = 'Options') AND (LTRIM(RTRIM(@strInstrumentType)) = ''
-		OR LTRIM(RTRIM(@strFutMarketName)) = ''
-		OR LTRIM(RTRIM(@strCurrency)) = ''
-		OR LTRIM(RTRIM(@strCommodityCode)) = ''
-		OR LTRIM(RTRIM(@strLocationName)) = ''
-		OR LTRIM(RTRIM(@strName)) = ''
-		OR LTRIM(RTRIM(@strAccountNumber)) = ''
-		OR LTRIM(RTRIM(@strSalespersonId)) = ''
-		OR LTRIM(RTRIM(@strBuySell)) = ''
-		OR LTRIM(RTRIM(@strFutureMonth)) = ''
-		OR @dblPrice IS NULL
-		OR LTRIM(RTRIM(@strStatus)) = ''
-		OR @dtmFilledDate IS NULL
-		OR LTRIM(RTRIM(@strOptionMonth)) = ''
-		OR LTRIM(RTRIM(@strOptionType)) = ''
-		OR @dblStrike IS NULL)
-	BEGIN
-		SET @ErrMsg =  ' Instrument Type, Futures Market, Currency, Commodity, Location, Broker, Broker Account, Salesperson, Buy/Sell, Futures Month, Option Month, Option Type, Strike, Price, Status, Filled Date is required.'
-	END
-	ELSE 
+
+
+	IF @ErrMsg = ''
 	BEGIN
 		IF NOT EXISTS(SELECT * FROM tblEMEntity WHERE strName = @strName)
 		BEGIN
@@ -337,6 +394,16 @@ WHILE @mRowNumber > 0
 		IF @strStatus NOT IN('Filled','Unfilled','Cancelled')
 		BEGIN
 			SET @ErrMsg = @ErrMsg + ' Status is case sensitive it must be in exact word Filled, Unfilled or Cancelled.'
+		END
+
+		IF @strInstrumentType = 'Options' AND ISNULL(@dblStrike, 0) = 0
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Strike must not be equal to 0.'
+		END
+
+		IF ISNULL(@dblPrice, 0) = 0
+		BEGIN
+			SET @ErrMsg = @ErrMsg + ' Price must not be equal to 0.'
 		END
 
 		DECLARE @isValidFilledDate BIT = 0
