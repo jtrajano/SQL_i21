@@ -72,7 +72,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strOriginCity
@@ -254,7 +254,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strOriginCity
@@ -563,7 +563,7 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
+				, strHeaderStateTaxId
 				, REPLACE(strHeaderFederalTaxId, '-', '')
 				, strOriginState
 				, strOriginCity
