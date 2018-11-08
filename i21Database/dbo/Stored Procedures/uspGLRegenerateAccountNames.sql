@@ -5,12 +5,12 @@ CREATE PROCEDURE [dbo].[uspGLRegenerateAccountNames](@strDelimiter  NVARCHAR(1) 
 AS
 BEGIN
 	IF @strDelimiter = '' SET @strDelimiter = ' '
-	UPDATE tblGLAccountSegment SET strDescription = NULL WHERE RTRIM (strDescription) = ''
+	UPDATE tblGLAccountSegment SET strChartDesc = NULL WHERE RTRIM (strChartDesc) = ''
 	;WITH CTE(intAccountId,strDescription) 
 	AS(
 	SELECT A1.intAccountId,
 	   STUFF(( 
-	   SELECT  ' ' + @strDelimiter + ' ' +  RTRIM(S.strDescription)
+	   SELECT  ' ' + @strDelimiter + ' ' +  RTRIM(S.strChartDesc)
 		FROM         dbo.tblGLAccountSegment S INNER JOIN
 						  dbo.tblGLAccountSegmentMapping M ON S.intAccountSegmentId = M.intAccountSegmentId 
 						  JOIN tblGLAccountStructure St on S.intAccountStructureId = St.intAccountStructureId
