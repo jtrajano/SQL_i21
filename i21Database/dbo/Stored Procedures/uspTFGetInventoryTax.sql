@@ -73,7 +73,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxId
-				, strHeaderFederalTaxID
+				, strHeaderFederalTaxId
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -127,7 +127,7 @@ BEGIN TRY
 					, tblTFCompanyPreference.strZipCode
 					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
+					, strHeaderFederalTaxId = tblSMCompanySetup.strEin
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -255,7 +255,7 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxId
-				, strHeaderFederalTaxID
+				, strHeaderFederalTaxId
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -309,7 +309,7 @@ BEGIN TRY
 					, tblTFCompanyPreference.strZipCode
 					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
+					, strHeaderFederalTaxId = tblSMCompanySetup.strEin
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
