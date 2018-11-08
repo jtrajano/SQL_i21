@@ -308,7 +308,7 @@ JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 left join tblSCTicket t on t.intTicketId=gh.intTicketId
-WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V'
+WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 and a.intCommodityId in (select intCommodity from @Commodity)
 
@@ -352,7 +352,7 @@ LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorag
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0
+WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0 and gh.intTransactionTypeId IN (1,3,4,5)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 and a.intCommodityId in (select intCommodity from @Commodity)
 
