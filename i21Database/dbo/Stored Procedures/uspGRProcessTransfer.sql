@@ -181,7 +181,10 @@ BEGIN
 			,[intTransferStorageSplitId]
 			,[intUnitMeasureId]
 			,[intCompanyLocationSubLocationId]
-			,[intStorageLocationId]			
+			,[intStorageLocationId]
+			,[intTicketId]
+			,[intDeliverySheetId]
+			,[ysnTransferStorage]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -219,6 +222,9 @@ BEGIN
 			,[intUnitMeasureId]					= (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CS.intItemUOMId)
 			,[intCompanyLocationSubLocationId]	= CASE WHEN CS.intCompanyLocationId = TransferStorageSplit.intCompanyLocationId THEN CS.intCompanyLocationSubLocationId ELSE NULL END
 			,[intStorageLocationId]				= CASE WHEN CS.intCompanyLocationId = TransferStorageSplit.intCompanyLocationId THEN CS.intStorageLocationId ELSE NULL END
+			,[intTicketId]						= CS.intTicketId
+			,[intDeliverySheetId]				= CS.intDeliverySheetId
+			,[ysnTransferStorage]				= 1
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -272,7 +278,10 @@ BEGIN
 			,[intItemUOMId]
 			,[intUnitMeasureId]
 			,[intCompanyLocationSubLocationId]
-			,[intStorageLocationId]			
+			,[intStorageLocationId]
+			,[intTicketId]
+			,[intDeliverySheetId]
+			,[ysnTransferStorage]
 		)
 		VALUES
 		(
@@ -311,7 +320,10 @@ BEGIN
 			,[intItemUOMId]		
 			,[intUnitMeasureId]
 			,[intCompanyLocationSubLocationId]
-			,[intStorageLocationId]			
+			,[intStorageLocationId]
+			,[intTicketId]
+			,[intDeliverySheetId]
+			,[ysnTransferStorage]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,

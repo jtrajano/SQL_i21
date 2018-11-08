@@ -32,18 +32,18 @@ SELECT
 	,strContractNumbers          = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
 	,strUnits                   = CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
 	,intTransactionId			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN CS.intDeliverySheetId
-										WHEN CS.intTicketId IS NOT NULL THEN CS.intTicketId
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
 										ELSE TSS.intTransferStorageId
 									END
 	,strTransactionNumber		= CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
-										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 										ELSE TS.strTransferStorageTicket
 									END
 	,strTransactionCode			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN 'DS' --DELIVERY SHEET
-										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
+										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 										ELSE 'TS' --TRANSFER STORAGE
 									END
 FROM tblGRSettleStorage SS
@@ -72,7 +72,10 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			INNER JOIN tblSCDeliverySheetSplit DSS	
 				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
 		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
-				AND DSS.intEntityId = E.intEntityId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+            AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+
 LEFT JOIN (tblGRTransferStorageSplit TSS
 			INNER JOIN tblGRTransferStorage TS
 				ON TS.intTransferStorageId = TSS.intTransferStorageId

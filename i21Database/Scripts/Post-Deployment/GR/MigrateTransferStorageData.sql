@@ -150,8 +150,7 @@ GO
 
 	UPDATE CS
 	SET CS.strStorageTicketNumber = TS.strTransferStorageTicket
-		, CS.intTicketId = NULL
-		, CS.intDeliverySheetId = NULL
+		, CS.ysnTransferStorage = 1
 	FROM tblGRCustomerStorage CS
 	INNER JOIN (
 				tblGRTransferStorageSplit SS

@@ -42,4 +42,6 @@ LEFT JOIN (tblSCDeliverySheet DS
 			INNER JOIN tblSCDeliverySheetSplit DSS	
 				ON DSS.intDeliverySheetId = DS.intDeliverySheetId
 		) ON DS.intDeliverySheetId = CS.intDeliverySheetId
-				AND DSS.intEntityId = EM.intEntityId
+			AND DSS.intEntityId = EM.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
