@@ -7155,6 +7155,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
     <Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
+    <Build Include="dbo\Views\vyuSCDeliverySheetSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
