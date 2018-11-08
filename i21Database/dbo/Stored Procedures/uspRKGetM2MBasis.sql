@@ -76,7 +76,7 @@ BEGIN TRY
 				, strLocationName = (CASE WHEN @strEvaluationByZone = 'Location' THEN strLocationName ELSE NULL END)
 				, strMarketZoneCode = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN strMarketZoneCode ELSE NULL END)
 				, strCurrency
-				, strPricingType
+				, strPricingType = ''
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -91,7 +91,7 @@ BEGIN TRY
 				, intCompanyLocationId = (CASE WHEN @strEvaluationByZone = 'Location' THEN intCompanyLocationId ELSE NULL END)
 				, intMarketZoneId = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN intMarketZoneId ELSE NULL END)
 				, intCurrencyId
-				, intPricingTypeId
+				, intPricingTypeId  = NULL
 				, intContractTypeId = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN intContractTypeId ELSE NULL END)
 				, intUnitMeasureId
 				, intConcurrencyId
@@ -111,7 +111,7 @@ BEGIN TRY
 				, strLocationName = (CASE WHEN @strEvaluationByZone = 'Location' THEN strLocationName ELSE NULL END)
 				, strMarketZoneCode = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN strMarketZoneCode ELSE NULL END)
 				, strCurrency
-				, strPricingType
+				, strPricingType = ''
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -126,7 +126,7 @@ BEGIN TRY
 				, intCompanyLocationId = (CASE WHEN @strEvaluationByZone = 'Location' THEN intCompanyLocationId ELSE NULL END)
 				, intMarketZoneId = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN intMarketZoneId ELSE NULL END)
 				, intCurrencyId
-				, intPricingTypeId
+				, intPricingTypeId = NULL
 				, intContractTypeId = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN intContractTypeId ELSE NULL END)
 				, intUnitMeasureId
 				, intConcurrencyId
@@ -168,7 +168,7 @@ BEGIN TRY
 				, strLocationName = (CASE WHEN @strEvaluationByZone = 'Location' THEN strLocationName ELSE NULL END)
 				, strMarketZoneCode = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN strMarketZoneCode ELSE NULL END)
 				, strCurrency
-				, strPricingType
+				, strPricingType = ''
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -183,7 +183,7 @@ BEGIN TRY
 				, intCompanyLocationId = (CASE WHEN @strEvaluationByZone = 'Location' THEN intCompanyLocationId ELSE NULL END)
 				, intMarketZoneId = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN intMarketZoneId ELSE NULL END)
 				, intCurrencyId
-				, intPricingTypeId
+				, intPricingTypeId = NULL
 				, intContractTypeId = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN intContractTypeId ELSE NULL END)
 				, intUnitMeasureId
 				, intConcurrencyId
@@ -203,7 +203,7 @@ BEGIN TRY
 				, strLocationName = (CASE WHEN @strEvaluationByZone = 'Location' THEN strLocationName ELSE NULL END)
 				, strMarketZoneCode = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN strMarketZoneCode ELSE NULL END)
 				, strCurrency
-				, strPricingType
+				, strPricingType = ''
 				, strContractInventory
 				, strContractType = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN strContractType ELSE NULL END)
 				, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -218,7 +218,7 @@ BEGIN TRY
 				, intCompanyLocationId = (CASE WHEN @strEvaluationByZone = 'Location' THEN intCompanyLocationId ELSE NULL END)
 				, intMarketZoneId = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN intMarketZoneId ELSE NULL END)
 				, intCurrencyId
-				, intPricingTypeId
+				, intPricingTypeId = NULL
 				, intContractTypeId = (CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 THEN intContractTypeId ELSE NULL END)
 				, intUnitMeasureId
 				, intConcurrencyId
