@@ -9,7 +9,7 @@
     [intTaxCodeId]              INT            NULL,
     [intGLAccountExpenseId]     INT            NULL ,
     [intVendorType]             INT            NOT NULL,
-    [strVendorId]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [strVendorId]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strVendorAccountNum]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPymtCtrlActive]         BIT            DEFAULT 1 NOT NULL,
     [ysnPymtCtrlAlwaysDiscount] BIT            DEFAULT 0 NOT NULL,
