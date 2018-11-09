@@ -467,7 +467,10 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, strInvoiceNumber			= STATEMENTREPORT.strInvoiceNumber
 	, strPONumber				= STATEMENTREPORT.strPONumber
 	, strItemNo					= STATEMENTREPORT.strItemNo
-	, strItemDescription		= STATEMENTREPORT.strItemDescription
+	, strItemDescription		= CASE WHEN ISNULL(STATEMENTREPORT.strType, '''') = ''Service Charge'' AND STATEMENTREPORT.strTransactionType = ''Invoice Detail''
+										THEN ''Service Charge''  
+										ELSE STATEMENTREPORT.strItemDescription
+								  END
 	, strTransactionType		= STATEMENTREPORT.strTransactionType
 	, strFullAddress			= CUSTOMER.strFullAddress
 	, strStatementFooterComment = CUSTOMER.strStatementFooterComment
