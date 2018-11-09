@@ -15,9 +15,9 @@ BEGIN
 		,mt.strCategoryCode
 		,IA.dblQty AS dblQuantity
 		,um.strUnitMeasure AS strUOM
-		,l.dtmDateCreated AS dtmTransactionDate
+		,IA.dtmDate AS dtmTransactionDate
 		,l.intParentLotId
-		,'L'
+		,'LA'
 		,2 AS intImageTypeId
 		,'Qty Adjust ' + Ltrim(Convert(DECIMAL(24, 2), IA.dblQty)) + um.strUnitMeasure
 	FROM tblICLot l
