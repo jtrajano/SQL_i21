@@ -63,9 +63,9 @@ BEGIN TRY
 			 strItemNo					 = strItemNo
 			,dblDetailQuantity			 = dblDetailQuantity
 			,dblPrice					 = CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,2))
-													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,2))
-													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,2))
+													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
+													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
+													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
 													ELSE 0
 										   END
 			,dtmStartDate				 = dtmStartDate
@@ -115,13 +115,13 @@ BEGIN TRY
 			,dblDetailQuantity  = Item.strItemNo
 			,dblPrice			=	  CASE	
 											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' per '										
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' per '										
 											
 											WHEN CC.strCostMethod = 'Amount'   
-												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' '
+												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' '
 											
 											WHEN CC.strCostMethod = 'Percentage'   
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' %'
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' %'
 							          END  
             ,dtmStartDate			 = NULL
 		    ,dtmEndDate				 = NULL
