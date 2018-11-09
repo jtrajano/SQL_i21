@@ -1293,21 +1293,15 @@ BEGIN TRY
 													ELSE NULL
 												END
 					,[intInventoryReceiptItemId] = CASE 
-													WHEN ST.ysnDPOwnedType = 0 THEN NULL
-													ELSE
-														CASE
-															WHEN a.intItemType = 1 THEN
-																(
-																	SELECT intInventoryReceiptItemId 
-																	FROM tblICInventoryReceiptItem 
-																	WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId 
-																			FROM tblGRStorageHistory 
-																			WHERE intCustomerStorageId = CS.intCustomerStorageId
-																			AND intInventoryReceiptId IS NOT NULL)
-																)
-															ELSE NULL
-														END
-												END
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+															(SELECT intInventoryReceiptItemId 
+															FROM tblICInventoryReceiptItem 
+															WHERE intInventoryReceiptId =	(SELECT intInventoryReceiptId 
+																							FROM tblGRStorageHistory 
+																							WHERE intCustomerStorageId = CS.intCustomerStorageId
+																								AND intInventoryReceiptId IS NOT NULL))
+													END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -1327,61 +1321,158 @@ BEGIN TRY
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
-	 
+
 				DECLARE @VoucherDetailReceiptCharge as VoucherDetailReceiptCharge
-				---Adding Freight Charges.
-				INSERT INTO @VoucherDetailReceiptCharge 
-				(
-					 [intInventoryReceiptChargeId]	
-					,[dblQtyReceived]				
-					,[dblCost]						
-					,[intTaxGroupId]		
-				 )
-				 SELECT 
-					[intInventoryReceiptChargeId] = ReceiptCharge.intInventoryReceiptChargeId
-				   ,[dblQtyReceived]	  	= CASE WHEN ISNULL(Item.strCostMethod,'') = 'Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
-				   ,[dblCost] 				= CASE 
-												WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
-												WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-												WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-												WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-												WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-											END
-					,[intTaxGroupId]	   = ReceiptCharge.intTaxGroupId
-				FROM tblICInventoryReceiptCharge ReceiptCharge
-				JOIN tblICItem Item 
-					ON Item.intItemId = ReceiptCharge.intChargeId
-				JOIN tblGRStorageHistory SH 
-					ON SH.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId 
-						AND SH.strType = 'FROM Scale'
+				DECLARE @ysnDPOwnedType AS BIT = 0
+
+				SELECT TOP 1 @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) FROM @SettleVoucherCreate A
 				JOIN tblGRSettleStorageTicket SST 
-					ON SST.intCustomerStorageId = SH.intCustomerStorageId 
-						AND SST.dblUnits > 0
-				JOIN tblGRSettleStorage SS 
-					ON SS.intSettleStorageId = SST.intSettleStorageId 
-				JOIN tblSCTicket SC 
-					ON SC.intTicketId = SH.intTicketId
-				JOIN tblGRCustomerStorage CS 
-					ON CS.intCustomerStorageId = SST.intCustomerStorageId
-				JOIN tblICCommodityUnitMeasure CU 
-					ON CU.intCommodityId = CS.intCommodityId 
-						AND CU.ysnStockUnit = 1
-				JOIN tblSCScaleSetup ScaleSetup 
-					ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
-						AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+					ON SST.intCustomerStorageId = A.intCustomerStorageId
+				LEFT JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = A.intCustomerStorageId
+				JOIN tblGRStorageType ST
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE SST.intSettleStorageId = @intSettleStorageId
-				AND 
-				(
-				 (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0)
-				 OR
-				 (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
-				  OR
-				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
-				  OR
-				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
-				 OR
-				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
-				)
+
+				IF(@ysnDPOwnedType = 0)
+				BEGIN
+					INSERT INTO @voucherDetailStorage 
+					(
+							[intCustomerStorageId]
+						,[intItemId]
+						,[intAccountId]
+						,[dblQtyReceived]
+						,[strMiscDescription]
+						,[dblCost]
+						,[intContractHeaderId]
+						,[intContractDetailId]
+						,[intUnitOfMeasureId]
+						,[intCostUOMId]
+						,[dblWeightUnitQty]
+						,[dblCostUnitQty]
+						,[dblUnitQty]
+						,[dblNetWeight]
+						)
+						SELECT 
+							intCustomerStorageId 	= SST.intCustomerStorageId
+						,intItemId 				= ReceiptCharge.[intChargeId]
+						,[intAccountId] 		= NULL
+						,[dblQtyReceived]	  	= CASE WHEN ISNULL(Item.strCostMethod,'') = 'Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
+						,[strMiscDescription] 	= Item.[strItemNo]
+						,[dblCost] 				= CASE 
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+												END
+						,[intContractHeaderId] 	= NULL
+						,[intContractDetailId] 	= NULL
+						,[intUnitOfMeasureId] 	= CASE 
+													WHEN @dblSpotUnits > 0 THEN @intCashPriceUOMId 
+													ELSE ReceiptCharge.intCostUOMId 
+												END
+						,[intCostUOMId]			= CASE 
+													WHEN @dblSpotUnits > 0 THEN @intCashPriceUOMId 
+													ELSE ReceiptCharge.intCostUOMId 
+												END
+						,[dblWeightUnitQty] 	= 1
+						,[dblCostUnitQty] 		= 1
+						,[dblUnitQty]			= 1
+						,[dblNetWeight] 		= 0	
+					FROM tblICInventoryReceiptCharge ReceiptCharge
+					JOIN tblICItem Item 
+						ON Item.intItemId = ReceiptCharge.intChargeId
+					JOIN tblGRStorageHistory SH 
+						ON SH.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId 
+							AND SH.strType = 'FROM Scale'
+					JOIN tblGRSettleStorageTicket SST 
+						ON SST.intCustomerStorageId = SH.intCustomerStorageId 
+							AND SST.dblUnits > 0
+					JOIN tblGRSettleStorage SS 
+						ON SS.intSettleStorageId = SST.intSettleStorageId 
+					JOIN tblSCTicket SC 
+						ON SC.intTicketId = SH.intTicketId
+					JOIN tblGRCustomerStorage CS 
+						ON CS.intCustomerStorageId = SST.intCustomerStorageId
+					JOIN tblICCommodityUnitMeasure CU 
+						ON CU.intCommodityId = CS.intCommodityId 
+							AND CU.ysnStockUnit = 1
+					JOIN tblSCScaleSetup ScaleSetup 
+						ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
+							AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+					WHERE SST.intSettleStorageId = @intSettleStorageId
+					AND 
+					(
+						(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0)
+						OR
+						(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
+					)
+
+				END
+				ELSE
+				BEGIN
+					INSERT INTO @VoucherDetailReceiptCharge 
+					(
+							[intInventoryReceiptChargeId]	
+						,[dblQtyReceived]				
+						,[dblCost]						
+						,[intTaxGroupId]		
+						)
+						SELECT 
+						[intInventoryReceiptChargeId] = ReceiptCharge.intInventoryReceiptChargeId
+						,[dblQtyReceived]	  	= CASE WHEN ISNULL(Item.strCostMethod,'') = 'Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
+						,[dblCost] 				= CASE 
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+													WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+												END
+						,[intTaxGroupId]	   = ReceiptCharge.intTaxGroupId
+					FROM tblICInventoryReceiptCharge ReceiptCharge
+					JOIN tblICItem Item 
+						ON Item.intItemId = ReceiptCharge.intChargeId
+					JOIN tblGRStorageHistory SH 
+						ON SH.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId 
+							AND SH.strType = 'FROM Scale'
+					JOIN tblGRSettleStorageTicket SST 
+						ON SST.intCustomerStorageId = SH.intCustomerStorageId 
+							AND SST.dblUnits > 0
+					JOIN tblGRSettleStorage SS 
+						ON SS.intSettleStorageId = SST.intSettleStorageId 
+					JOIN tblSCTicket SC 
+						ON SC.intTicketId = SH.intTicketId
+					JOIN tblGRCustomerStorage CS 
+						ON CS.intCustomerStorageId = SST.intCustomerStorageId
+					JOIN tblICCommodityUnitMeasure CU 
+						ON CU.intCommodityId = CS.intCommodityId 
+							AND CU.ysnStockUnit = 1
+					JOIN tblSCScaleSetup ScaleSetup 
+						ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
+							AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+					WHERE SST.intSettleStorageId = @intSettleStorageId
+					AND 
+					(
+						(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0)
+						OR
+						(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
+						OR
+						(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1)
+					)
+				END
+				---Adding Freight Charges.
+				
 								
 				---Adding Contract Other Charges.
 				INSERT INTO @voucherDetailStorage 
