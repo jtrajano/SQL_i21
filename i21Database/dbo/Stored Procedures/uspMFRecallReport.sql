@@ -378,6 +378,35 @@ Begin
 					INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strTransactionName = 'Merge' 
 
 				End
+
+				IF @strType = 'L'
+				Begin
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,intParentLotId
+						,strType
+						,intImageTypeId
+						,strText
+						)
+					EXEC uspMFGetTraceabilityLotAdjustDetail @intId
+						,@intDirectionId
+						,@ysnParentLot
+						,1
+
+					INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strTransactionName = 'Qty Adjust' 
+
+				End
 			
 				-- Lot Split
 				If @strType='L'
