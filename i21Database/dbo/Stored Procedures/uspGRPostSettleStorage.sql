@@ -1565,6 +1565,7 @@ BEGIN TRY
 					,@vendorId = @EntityId
 					,@type = 1
 					,@voucherDetailStorage = @voucherDetailStorage
+					,@voucherDetailReceiptCharge = @VoucherDetailReceiptCharge
 					,@shipTo = @LocationId
 					,@shipFrom = @intShipFrom
 					,@shipFromEntityId = @shipFromEntityId
