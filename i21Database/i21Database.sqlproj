@@ -5474,6 +5474,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
+    <Build Include="dbo\Tables\tblSMExportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
