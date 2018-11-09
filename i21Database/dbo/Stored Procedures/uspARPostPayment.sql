@@ -313,7 +313,7 @@ EXEC [dbo].[uspARPopulateInvalidPostPaymentData]
     ,@PostDate = @PostDate
     ,@BatchId  = @batchIdUsed
 
-SET @totalInvalid = (SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARInvalidPaymentData)
+SET @totalInvalid = ISNULL((SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARInvalidPaymentData),0)
 
 IF(@totalInvalid > 0)
 BEGIN
@@ -733,7 +733,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
-	SET @totalRecords = @totalRecords - @invalidGLCount
+	SET @totalRecords = @totalRecords - @invalidGLCount    
 				
 	IF(@invalidGLCount > 0)
 	BEGIN
@@ -771,7 +771,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 			SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
 			RAISERROR(@ErrorMerssage, 11, 1)							
 			GOTO Post_Exit
-		END													
+		END	
 
 	END
 
@@ -798,12 +798,17 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         ,@BatchId				= @batchId
         ,@UserId				= @userId
         ,@IntegrationLogId		= NULL
-
-	SELECT @successfulCount = COUNT(*) 
-	FROM tblARPostResult 
-	WHERE strBatchNumber = @batchId 
-	  AND strTransactionType = 'Receive Payment'
-	  AND strMessage IN ('Transaction successfully posted.', 'Transaction successfully unposted.')
+	
+    SET @totalInvalid = ISNULL(@totalInvalid,0) + ISNULL(@invalidGLCount,0)
+	SET @invalidCount = @totalInvalid												
+	SET @successfulCount = ISNULL((SELECT COUNT(DISTINCT [strTransactionId]) FROM @GLEntries),0)
+	IF @successfulCount = 0
+		SET @success = @ZeroBit
+	--SELECT @successfulCount = COUNT(*) 
+	--FROM tblARPostResult 
+	--WHERE strBatchNumber = @batchId 
+	--  AND strTransactionType = 'Receive Payment'
+	--  AND strMessage IN ('Transaction successfully posted.', 'Transaction successfully unposted.')
 
 END TRY
 BEGIN CATCH
