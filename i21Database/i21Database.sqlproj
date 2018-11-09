@@ -7156,6 +7156,7 @@
     <Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolumeStaging.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetSummary.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
