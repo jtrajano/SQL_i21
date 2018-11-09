@@ -226,13 +226,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill Voucher
 	WHERE Voucher.intBillId = @billId
 
-	--UPDATE THE PROFIT AND SUB BOOK FROM RECEIPT
+	--UPDATE THE BOL FROM RECEIPT
 	IF EXISTS (SELECT 1 FROM tblAPBillDetail A WHERE A.intBillId = @billId AND A.intInventoryReceiptItemId IS NOT NULL)
 	BEGIN
 		UPDATE B
-		SET	 B.intBookId = IR.intBookId
-			,B.intSubBookId = IR.intSubBookId
-			,B.strReference = IR.strBillOfLading
+		SET B.strReference = IR.strBillOfLading
 		FROM tblAPBill B
 		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 		INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId 
