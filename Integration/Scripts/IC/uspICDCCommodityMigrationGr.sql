@@ -118,7 +118,7 @@ insert into tblICItemLocation
 (intItemId, intLocationId, intCostingMethod, intIssueUOMId, intReceiveUOMId, intAllowNegativeInventory, intConcurrencyId)
 (
 select I.intItemId, L.intCompanyLocationId, 1 CostingMethod, U.intItemUOMId DefaultIssueUOM, 
-U.intItemUOMId DefaultReceiveUOM, 0 AllowNegative, 1 ConcurrencyId
+U.intItemUOMId DefaultReceiveUOM, 1 AllowNegative, 1 ConcurrencyId
 from tblICItem I 
 join tblICCommodity C on I.intCommodityId = C.intCommodityId
 join gacommst oc on C.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS

@@ -299,7 +299,7 @@ SELECT
 	,1 intCostingMethod
 	,intItemUOMId intIssueUOMId
 	,intItemUOMId intReceiveUOMId
-	,3 intAllowNegativeInventory
+	,1 intAllowNegativeInventory
 	,1 intConcurrencyId
 	,itm.agitm_un_min_bal dblReorderPoint
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)

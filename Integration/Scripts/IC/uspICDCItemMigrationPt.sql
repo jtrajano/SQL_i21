@@ -208,7 +208,7 @@ USING
 		, intCostingMethod				= 1
 		, intIssueUOMId					= intItemUOMId
 		, intReceiveUOMId				= intItemUOMId
-		, intAllowNegativeInventory		= 3
+		, intAllowNegativeInventory		= 1
 		, intConcurrencyId				= 1
 	FROM ptitmmst AS itm
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
