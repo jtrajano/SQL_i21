@@ -7182,6 +7182,7 @@
 	<Build Include="dbo\Stored Procedures\uspGRUpdateStorageChargeFromImport.sql" />
 	<Build Include="dbo\Stored Procedures\uspGRUpdateStorageFeeFromImport.sql" />
 	<Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
+    <Build Include="dbo\Views\vyuEMEntityRequireApprovalFor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
