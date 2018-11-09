@@ -370,6 +370,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@detailvatnumber = ''@detailvatnumber@'',											@detailemployeecount = ''@detailemployeecount@'',
 		@detailrevenue = ''@detailrevenue@'',												@detailcurrentsystem = ''@detailcurrentsystem@'',
 
+		@misccreditlimit = ''@misccreditlimit@'',
 		@misccreditstopdays = ''@misccreditstopdays@'',									@misccreditcode = ''@misccreditcode@'',
 		@miscactive = ''@miscactive@'',													@miscporequired = ''@miscporequired@'',
 		@misccredithold = ''@misccredithold@'',											@miscbudgetbegindate = ''@miscbudgetbegindate@'',
@@ -1121,9 +1122,9 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'detailsalesperson', 'Detail Salesperson', 0
 	Union All
-	SELECT @NewHeaderId, 'detailwarehouse', 'Detail Warehouse', 0
-	Union All
 	SELECT @NewHeaderId, 'detailstatus', 'Detail Status', 0
+	Union All
+	SELECT @NewHeaderId, 'detailwarehouse', 'Detail Warehouse', 0
 	Union All
 	SELECT @NewHeaderId, 'detailfloid', 'Detail Flo Id', 0
 	Union All
