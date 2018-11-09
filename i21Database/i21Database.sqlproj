@@ -7157,6 +7157,7 @@
     <Build Include="dbo\Tables\tblPATCustomerVolumeStaging.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetSummary.sql" />
     <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotAdjustDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
