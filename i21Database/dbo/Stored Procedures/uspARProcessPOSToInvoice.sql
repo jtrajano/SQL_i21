@@ -131,8 +131,8 @@ SELECT
 	,[strItemDescription]					= DETAILS.strItemDescription 
 	,[intItemUOMId]							= DETAILS.intItemUOMId
 	,[dblQtyShipped]						= DETAILS.dblQuantity 
-	,[dblDiscount]							= DETAILS.dblDiscountPercent
-	,[dblPrice]								= DETAILS.dblPrice
+	,[dblDiscount]							= 0 --DETAILS.dblDiscountPercent
+	,[dblPrice]								= (DETAILS.dblExtendedPrice / DETAILS.dblQuantity)--DETAILS.dblPrice || Modification ||
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
