@@ -223,7 +223,9 @@ BEGIN
 			SELECT TOP 100 PERCENT
 				[intAccountId]						= 	@bankGLAccountId,
 				[intBankAccountId]					= 	@bankAccount,
-				[intPaymentMethodId]				= 	@paymentMethod,
+				[intPaymentMethodId]				= 	CASE WHEN (vouchersPay.dblAmountPaid - vouchersPay.dblWithheld) = 0 
+														THEN 3 --Debit Memos and Payments
+														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
 				[intCompanyLocationId]  			= 	@paymentCompanyLocation,
 				[intCurrencyId]						= 	@currency,
