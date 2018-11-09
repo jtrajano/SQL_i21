@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateInvoiceFromShipment]
-	 @ShipmentId		AS INT
-	,@UserId			AS INT
-	,@NewInvoiceId		AS INT			= NULL OUTPUT			
+	 @ShipmentId		   AS INT
+	,@UserId			   AS INT
+	,@NewInvoiceId		   AS INT			= NULL OUTPUT		
+	,@OnlyUseShipmentPrice AS BIT           = 0
 AS
 
 BEGIN
@@ -278,14 +279,14 @@ SELECT
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
 	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
-	,[intPriceUOMId]						= ARSI.[intPriceUOMId]
+	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
 	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
-	,[dblContractPriceUOMQty]				= ARSI.[dblPriceUOMQuantity]
+	,[dblContractPriceUOMQty]				= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblPriceUOMQuantity] ELSE ARSI.[dblQtyShipped] END 
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice]
-	,[dblUnitPrice]							= ARSI.[dblUnitPrice]
+	,[dblUnitPrice]							= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblUnitPrice] ELSE ARSI.[dblShipmentUnitPrice] END 
 	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
