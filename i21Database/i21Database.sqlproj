@@ -7183,6 +7183,7 @@
 	<Build Include="dbo\Stored Procedures\uspGRUpdateStorageFeeFromImport.sql" />
 	<Build Include="dbo\Stored Procedures\uspPATMergeImportVolume.sql" />
     <Build Include="dbo\Views\vyuEMEntityRequireApprovalFor.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotAdjustDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
