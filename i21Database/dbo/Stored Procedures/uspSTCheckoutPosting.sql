@@ -104,16 +104,6 @@ BEGIN
 			BEGIN
 				SET @strInvoiceTransactionTypeMain = 'Cash Refund'
 			END
-
-		---- Set Invoice Type for CUSTOMER CHARGES
-		--IF(@dblCheckoutCustomerChargeAmount > 0)
-		--	BEGIN
-		--		SET @strInvoiceTypeCustomerCharges = 'Invoice'
-		--	END
-		--ELSE 
-		--	BEGIN
-		--		SET @strInvoiceTypeCustomerCharges = 'Credit Memo'
-		--	END
 		------------------------------------------------------------------------------
 
 
@@ -2152,7 +2142,6 @@ BEGIN
 
 
 
-
 				----------------------------------------------------------------------
 				--------------------------- CASH OVER SHORT --------------------------
 				----------------------------------------------------------------------
@@ -2754,29 +2743,6 @@ BEGIN
 								) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND ISNULL(CC.dblAmount, 0) != 0
-
-
-								--TEST
-								SELECT CC.*
-								FROM tblSTCheckoutCustomerCharges CC
-								JOIN tblSTCheckoutHeader CH 
-									ON CC.intCheckoutId = CH.intCheckoutId
-								JOIN tblSTStore ST 
-									ON CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId
-								LEFT JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
-								LEFT JOIN tblICItem I 
-									ON UOM.intItemId = I.intItemId
-								LEFT JOIN tblICItemLocation IL 
-									ON I.intItemId = IL.intItemId
-									AND ST.intCompanyLocationId = IL.intLocationId
-								LEFT JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId	
-								WHERE CC.intCheckoutId = @intCheckoutId
-								AND ISNULL(CC.dblAmount, 0) != 0
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
@@ -3031,45 +2997,58 @@ BEGIN
 													,@ErrorMessage				= @ErrorMessage OUTPUT
 													,@LogId					    = @intIntegrationLogId OUTPUT
 
-										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId)
+										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
 											BEGIN
-												
-												UPDATE tblSTCheckoutHeader
-												SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
-												WHERE intCheckoutId = @intCheckoutId
+												IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+													BEGIN
+														-- Posting to Sales Invoice was successfull
+														UPDATE tblSTCheckoutHeader
+														SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
+														WHERE intCheckoutId = @intCheckoutId
 
-												SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
-												FROM tblARInvoiceIntegrationLog
-												WHERE intIntegrationLogId = @intIntegrationLogId
+														SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
+														FROM tblARInvoiceIntegrationLog
+														WHERE intIntegrationLogId = @intIntegrationLogId
 
-												-- Insert to Temp Table
-												DELETE FROM @tblTempInvoiceIds
+														-- Insert to Temp Table
+														DELETE FROM @tblTempInvoiceIds
 
-												INSERT INTO @tblTempInvoiceIds
-												(
-													intInvoiceId
-												)
-												SELECT DISTINCT 
-													intInvoiceId
-												FROM tblARInvoiceIntegrationLogDetail
-												WHERE intIntegrationLogId = (
-																				SELECT intSalesInvoiceIntegrationLogId
-																				FROM tblSTCheckoutHeader
-																				WHERE intCheckoutId =  @intCheckoutId
-																			)
+														INSERT INTO @tblTempInvoiceIds
+														(
+															intInvoiceId
+														)
+														SELECT DISTINCT 
+															intInvoiceId
+														FROM tblARInvoiceIntegrationLogDetail
+														WHERE intIntegrationLogId = (
+																						SELECT intSalesInvoiceIntegrationLogId
+																						FROM tblSTCheckoutHeader
+																						WHERE intCheckoutId =  @intCheckoutId
+																					)
 
-												-- Populate variable with Invoice Ids
-												SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
-												FROM @tblTempInvoiceIds
-
+														-- Populate variable with Invoice Ids
+														SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+														FROM @tblTempInvoiceIds
 											END
-										--ELSE IF (@ErrorMessage IS NOT NULL AND @ErrorMessage <> '')
-										--	BEGIN
-										--		SET @strStatusMsg = 'Post Sales Invoice error: ' + @ErrorMessage
+										ELSE
+											BEGIN
+												-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+												SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+												SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
-										--		GOTO ExitWithRollback
-										--		RETURN
-										--	END
+												-- ROLLBACK
+												GOTO ExitWithRollback
+												RETURN
+											END
+									END
+								ELSE
+									BEGIN
+										SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+
+										-- ROLLBACK
+										GOTO ExitWithRollback
+										RETURN
+									END
 
 										---- POST Invoice
 										--EXEC [dbo].[uspARProcessInvoices]
@@ -3436,7 +3415,7 @@ BEGIN
 									BEGIN
 
 										-- SELECT * FROM tblARPaymentIntegrationLogDetail
-										SET @ErrorMessage = (SELECT strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+										SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 										SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 										-- ROLLBACK
