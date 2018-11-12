@@ -6714,6 +6714,32 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@RKPositionReportMenuId, 1)
 END
 
+/* Inventory */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Inventory (Portal)', N'Inventory', 0, N'Inventory (Portal)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3, intRow = 2 WHERE strMenuName = 'Inventory (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = 0
+
+DECLARE @InventoryPortalParentMenuId INT
+SELECT @InventoryPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Inventory (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @InventoryPortalParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@InventoryPortalParentMenuId, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Receipts (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Inventory Receipts (Portal)', N'Inventory', @InventoryPortalParentMenuId, N'Inventory Receipts (Portal)', N'Portal Menu', N'Screen', N'Inventory.view.InventoryReceipt?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Inventory.view.InventoryReceipt?showSearch=true' WHERE strMenuName = 'Inventory Receipts (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryPortalParentMenuId
+
+DECLARE @PRInventoryReceiptsMenuId INT
+SELECT  @PRInventoryReceiptsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Receipts (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Receipts (Portal)' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRInventoryReceiptsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRInventoryReceiptsMenuId, 1)
+END
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
