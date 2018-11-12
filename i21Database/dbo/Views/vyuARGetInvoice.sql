@@ -111,7 +111,7 @@ SELECT
     strComments = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strComments END,
 	strDocumentCode = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE ISNULL(DOC.strCode, '') END,
 	strCode = ISNULL(DOC.strCode, ''),
-    strTitle = ISNULL(DOC.strTitle, ''),
+    strTitle = CASE WHEN INV.strType = 'POS' THEN ISNULL(INV.strComments, '') ELSE ISNULL(DOC.strTitle, '') END,
 	strLineOfBusiness = LOB.strLineOfBusiness,
 
 	strCustomerNumber = CUS.strCustomerNumber,
