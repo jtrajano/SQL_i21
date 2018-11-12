@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production History' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Ticket Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time / Hours (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Support (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -6210,6 +6210,20 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Projects (Po
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @HDProjectsMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@HDProjectsMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time / Hours (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Time / Hours (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'Time / Hours (Portal)', N'Support', N'Screen', N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport', N'small-menu-support', 1, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 4, strCategory = N'Support', strIcon = N'small-menu-support', strCommand = N'HelpDesk.view.TimeHoursReport?showSearch=true&searchCommand=TimeHoursReport' WHERE strMenuName = 'Time / Hours (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+
+DECLARE @HDTimeHoursMenuId INT
+SELECT  @HDTimeHoursMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Time / Hours (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Time / Hours (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @HDTimeHoursMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@HDTimeHoursMenuId, 1)
 END
 
 /* CRM */
