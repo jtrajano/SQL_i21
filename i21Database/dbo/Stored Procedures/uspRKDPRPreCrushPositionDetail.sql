@@ -664,7 +664,7 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, strInventoryType = 'Sls Basis Deliveries'
+					, strInventoryType = 'Sales Basis Deliveries'
 				FROM (
 					SELECT distinct strCommodityCode
 						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, cd.intCommodityUnitMeasureId, ISNULL(ri.dblQuantity, 0))
@@ -922,7 +922,7 @@ SELECT strCommodityCode
 	,'Company Titled Inventory'
 	,strInventoryType
 FROM @InventoryStock
-WHERE strInventoryType IN ('Company Titled Inventory', 'Collateral', 'Sls Basis Deliveries')
+WHERE strInventoryType IN ('Company Titled Inventory', 'Collateral', 'Sales Basis Deliveries')
 
 INSERT INTO @List (strCommodityCode
 	,dblTotal
