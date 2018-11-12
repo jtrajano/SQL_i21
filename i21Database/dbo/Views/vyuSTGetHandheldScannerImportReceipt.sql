@@ -5,7 +5,7 @@ SELECT IR.intHandheldScannerImportReceiptId
 	, HS.intStoreId
 	, Store.intStoreNo
 	, Store.intCompanyLocationId
-	, IR.strVendorComment
+	, IR.strReceiptRefNoComment
 	, IR.intVendorId
 	, Vendor.strVendorId
 	, Entity.strName
@@ -46,8 +46,8 @@ SELECT IR.intHandheldScannerImportReceiptId
 	, IR.dblReceivedQty
 	, IR.dblCaseCost
 	, IR.dblUnitRetail
-	, IR.strCostChange
-	, IR.strRetailChange
+	--, IR.strCostChange
+	--, IR.strRetailChange
 FROM tblSTHandheldScannerImportReceipt IR
 LEFT JOIN tblSTHandheldScanner HS 
 	ON HS.intHandheldScannerId = IR.intHandheldScannerId
