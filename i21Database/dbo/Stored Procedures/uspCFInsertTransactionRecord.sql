@@ -1737,6 +1737,99 @@ BEGIN
 						SET @dblCalcQuantity = @dblQuantity
 					END
 
+						
+				UPDATE tblCFTransaction 
+				SET dblQuantity = @dblQuantity
+				WHERE intTransactionId = @Pk
+
+
+				EXEC dbo.uspCFRecalculateTransaciton 
+				 @ProductId						=	@intProductId
+				,@CardId						=	@intCardId
+				,@VehicleId						=	@intVehicleId
+				,@SiteId						=	@intSiteId
+				,@TransactionDate				=	@dtmTransactionDate
+				,@Quantity						=	@dblQuantity
+				,@OriginalPrice					=	@dblOriginalGrossPrice
+				,@TransactionType				=	@strTransactionType
+				,@NetworkId						=	@intNetworkId
+				,@TransferCost					=	@dblTransferCost
+				,@TransactionId					=	@Pk
+				,@CreditCardUsed				=	@ysnCreditCardUsed
+				,@PostedOrigin					=	@ysnOriginHistory  
+				,@PostedCSV						=	@ysnPostedCSV  
+				,@PumpId						=	@intPumpNumber
+				,@IsImporting					=	1
+				,@TaxState						=	@TaxState						
+				,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
+				,@StateExciseTaxRate1         	=	@StateExciseTaxRate1         
+				,@StateExciseTaxRate2         	=	@StateExciseTaxRate2         
+				,@CountyExciseTaxRate         	=	@CountyExciseTaxRate         
+				,@CityExciseTaxRate           	=	@CityExciseTaxRate           
+				,@StateSalesTaxPercentageRate 	=	@StateSalesTaxPercentageRate 
+				,@CountySalesTaxPercentageRate	=	@CountySalesTaxPercentageRate
+				,@CitySalesTaxPercentageRate  	=	@CitySalesTaxPercentageRate  
+				,@OtherSalesTaxPercentageRate	=	@OtherSalesTaxPercentageRate 
+				,@FederalExciseTax1				=   @FederalExciseTax1	
+				,@FederalExciseTax2				=   @FederalExciseTax2	
+				,@StateExciseTax1				=   @StateExciseTax1	
+				,@StateExciseTax2				=   @StateExciseTax2	
+				,@StateExciseTax3				=   @StateExciseTax3	
+				,@CountyTax1					=   @CountyTax1		
+				,@CityTax1						=   @CityTax1			
+				,@StateSalesTax					=   @StateSalesTax		
+				,@CountySalesTax				=   @CountySalesTax	
+				,@CitySalesTax					=   @CitySalesTax		
+				,@strGUID						=   @strGUID		
+				,@strProcessDate				=	@strProcessDate
+				,@Tax1							=	@Tax1		
+				,@Tax2							=	@Tax2		
+				,@Tax3							=	@Tax3		
+				,@Tax4							=	@Tax4		
+				,@Tax5							=	@Tax5		
+				,@Tax6							=	@Tax6		
+				,@Tax7							=	@Tax7		
+				,@Tax8							=	@Tax8		
+				,@Tax9							=	@Tax9		
+				,@Tax10							=	@Tax10		
+				,@TaxValue1						=	@TaxValue1	
+				,@TaxValue2						=	@TaxValue2	
+				,@TaxValue3						=	@TaxValue3	
+				,@TaxValue4						=	@TaxValue4	
+				,@TaxValue5						=	@TaxValue5	
+				,@TaxValue6						=	@TaxValue6	
+				,@TaxValue7						=	@TaxValue7	
+				,@TaxValue8						=	@TaxValue8	
+				,@TaxValue9						=	@TaxValue9	
+				,@TaxValue10					=	@TaxValue10
+				,@ForeignCardId					=   @strCardId
+
+
+				SELECT
+				 @dblPrcPriceOut				= dblPrice
+				,@strPrcPricingOut				= strPriceMethod
+				,@dblPrcOriginalPrice			= dblOriginalPrice
+				,@strPrcPriceBasis				= strPriceBasis
+				,@strPriceMethod   				= strPriceMethod
+				,@strPriceBasis 				= strPriceBasis
+				,@intPriceProfileId 			= intPriceProfileId 	
+				,@intPriceIndexId				= intPriceIndexId	
+				,@intSiteGroupId				= intSiteGroupId		
+				,@strPriceProfileId				= strPriceProfileId	
+				,@strPriceIndexId				= strPriceIndexId	
+				,@strSiteGroup					= strSiteGroup		
+				,@dblPriceProfileRate			= dblPriceProfileRate
+				,@dblPriceIndexRate				= dblPriceIndexRate	
+				,@dtmPriceIndexDate				= dtmPriceIndexDate	
+				,@ysnDuplicate					= ysnDuplicate
+				,@ysnRecalculateInvalid			= ysnInvalid
+				,@dblInventoryCost				= dblInventoryCost
+				,@dblMargin						= dblMargin
+				,@dblGrossTransferCost			= dblGrossTransferCost
+				,@dblNetTransferCost			= dblNetTransferCost
+				,@dblAdjustmentRate				= dblAdjustmentRate
+				FROM tblCFTransactionPricingType
+
 					
 				UPDATE tblCFTransaction 
 				SET strPriceBasis = null 
