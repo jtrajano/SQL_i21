@@ -530,15 +530,15 @@ BEGIN
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							LEFT OUTER JOIN
 							(
-							SELECT 
-							 [dblAdjustedTax] = SUM ([dblAdjustedTax])
-							 ,[intTempDetailIdForTaxes]
-							FROM
-								@LineItemTaxEntries
-							GROUP BY
-								[intTempDetailIdForTaxes]
+								SELECT 
+								 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+								 ,[intTempDetailIdForTaxes]
+								FROM
+									@LineItemTaxEntries
+								GROUP BY
+									[intTempDetailIdForTaxes]
 							) Tax
-								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
+							ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							
@@ -1779,8 +1779,8 @@ BEGIN
 							ON I.intItemId = IP.intItemId
 							AND IL.intItemLocationId = IP.intItemLocationId	
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
-																			ISNULL(CC.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			ISNULL(CC.dblQuantity, 0)						    -- Qty
+																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)	-- Gross Amount CC.dblUnitPrice
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -1981,7 +1981,9 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																						WHEN (CC.dblAmount > 0)
+																							THEN CC.dblQuantity
+																						WHEN (CC.dblAmount < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
 
@@ -2014,7 +2016,7 @@ BEGIN
 																					CASE
 																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
 																							-- THEN (CC.dblUnitPrice)
-																							THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
 																					END
 
 																			-- IF Item is BLANK
@@ -2096,41 +2098,52 @@ BEGIN
 								LEFT JOIN tblICItemPricing IP 
 									ON I.intItemId = IP.intItemId
 									AND IL.intItemLocationId = IP.intItemLocationId	
-								OUTER APPLY 
+								LEFT OUTER JOIN
 								(
-									SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
-																			ISNULL(CC.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
-																			, @LineItems
-																			, 1										-- is Reversal
-																			--, I.intItemId							-- Item Id
-																			, CASE
-																				WHEN I.intItemId IS NOT NULL 
-																					THEN I.intItemId
-																				ELSE ST.intCustomerChargesItemId
-																			END
-																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
-																			, ST.intCompanyLocationId				-- Company Location Id
-																			, ST.intTaxGroupId						-- Tax Group Id
-																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
-																			, vC.intShipToId						-- Ship to Location
-																			, 1
-																			, NULL
-																			, vC.intFreightTermId					-- FreightTermId
-																			, NULL
-																			, NULL
-																			, 0
-																			, 0
-																			, UOM.intItemUOMId
-																			,NULL									--@CFSiteId
-																			,0										--@IsDeliver
-																			,0                                      --@IsCFQuote
-																			,NULL
-																			,NULL
-																			,NULL
-																		)
+									SELECT 
+									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 ,[intTempDetailIdForTaxes]
+									FROM
+										@LineItemTaxEntries
+									GROUP BY
+										[intTempDetailIdForTaxes]
 								) FuelTax
+								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+								--OUTER APPLY 
+								--(
+								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
+								--											ISNULL(CC.dblQuantity, 0)						-- Qty
+								--											, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+								--											, @LineItems
+								--											, 1										-- is Reversal
+								--											--, I.intItemId							-- Item Id
+								--											, CASE
+								--												WHEN I.intItemId IS NOT NULL 
+								--													THEN I.intItemId
+								--												ELSE ST.intCustomerChargesItemId
+								--											END
+								--											, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
+								--											, ST.intCompanyLocationId				-- Company Location Id
+								--											, ST.intTaxGroupId						-- Tax Group Id
+								--											, 0										-- 0 Price if not reversal
+								--											, GETDATE()
+								--											, vC.intShipToId						-- Ship to Location
+								--											, 1
+								--											, NULL
+								--											, vC.intFreightTermId					-- FreightTermId
+								--											, NULL
+								--											, NULL
+								--											, 0
+								--											, 0
+								--											, UOM.intItemUOMId
+								--											,NULL									--@CFSiteId
+								--											,0										--@IsDeliver
+								--											,0                                      --@IsCFQuote
+								--											,NULL
+								--											,NULL
+								--											,NULL
+								--										)
+								--) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND ISNULL(CC.dblAmount, 0) != 0
 					END
@@ -2623,7 +2636,7 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
-																							THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
 																							--THEN CC.dblUnitPrice
 																					END
 
@@ -2706,41 +2719,52 @@ BEGIN
 								LEFT JOIN tblICItemPricing IP 
 									ON I.intItemId = IP.intItemId
 									AND IL.intItemLocationId = IP.intItemLocationId	
-								OUTER APPLY 
+								LEFT OUTER JOIN
 								(
-									SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
-																			ISNULL(CC.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
-																			, @LineItems
-																			, 1										-- is Reversal
-																			--, I.intItemId							-- Item Id
-																			, CASE
-																				WHEN I.intItemId IS NOT NULL 
-																					THEN I.intItemId
-																				ELSE ST.intCustomerChargesItemId
-																			END
-																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
-																			, ST.intCompanyLocationId				-- Company Location Id
-																			, ST.intTaxGroupId						-- Tax Group Id
-																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
-																			, vC.intShipToId						-- Ship to Location
-																			, 1
-																			, NULL
-																			, vC.intFreightTermId					-- FreightTermId
-																			, NULL
-																			, NULL
-																			, 0
-																			, 0
-																			, UOM.intItemUOMId
-																			,NULL									--@CFSiteId
-																			,0										--@IsDeliver
-																			,0                                      --@IsCFQuote
-																			,NULL
-																			,NULL
-																			,NULL
-																		)
+									SELECT 
+									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 ,[intTempDetailIdForTaxes]
+									FROM
+										@LineItemTaxEntries
+									GROUP BY
+										[intTempDetailIdForTaxes]
 								) FuelTax
+								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+								--OUTER APPLY 
+								--(
+								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
+								--											ISNULL(CC.dblQuantity, 0)						-- Qty
+								--											, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+								--											, @LineItems
+								--											, 1										-- is Reversal
+								--											--, I.intItemId							-- Item Id
+								--											, CASE
+								--												WHEN I.intItemId IS NOT NULL 
+								--													THEN I.intItemId
+								--												ELSE ST.intCustomerChargesItemId
+								--											END
+								--											, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
+								--											, ST.intCompanyLocationId				-- Company Location Id
+								--											, ST.intTaxGroupId						-- Tax Group Id
+								--											, 0										-- 0 Price if not reversal
+								--											, GETDATE()
+								--											, vC.intShipToId						-- Ship to Location
+								--											, 1
+								--											, NULL
+								--											, vC.intFreightTermId					-- FreightTermId
+								--											, NULL
+								--											, NULL
+								--											, 0
+								--											, 0
+								--											, UOM.intItemUOMId
+								--											,NULL									--@CFSiteId
+								--											,0										--@IsDeliver
+								--											,0                                      --@IsCFQuote
+								--											,NULL
+								--											,NULL
+								--											,NULL
+								--										)
+								--) FuelTax
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND ISNULL(CC.dblAmount, 0) != 0
 					END
