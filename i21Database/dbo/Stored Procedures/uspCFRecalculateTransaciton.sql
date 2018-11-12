@@ -5559,57 +5559,63 @@ BEGIN
 	--FROM @tblTransactionPrice  
 	--WHERE strTransactionPriceId = 'Net Price'
 
-
-	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
+	IF (ISNULL(@dblCalculatedTotalPrice,0) != 0)
 	BEGIN
-		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
-	END
-	ELSE IF (@strTransactionType = 'Foreign Sale')
-	BEGIN
-		--Foreign Sale 
-		--would be NetTransfer Cost - Inventory Average Cost
-		--or if Avg Cost = 0, then Net Price - Net Transfer Cost
-		SELECT
-		@dblInventoryCost = dblAverageCost
-		FROM vyuICGetItemPricing 
-		WHERE intItemId = @intItemId
-		AND intLocationId = @intLocationId
-
-		SELECT
-		@dblInventoryCost = dblAverageCost
-		FROM vyuICGetItemPricing 
-		WHERE intItemId = @intItemId
-		AND intLocationId = @intLocationId
-
-		IF(ISNULL(@dblInventoryCost,0) = 0)
+		IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
 		BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
+		ELSE IF (@strTransactionType = 'Foreign Sale')
+		BEGIN
+			--Foreign Sale 
+			--would be NetTransfer Cost - Inventory Average Cost
+			--or if Avg Cost = 0, then Net Price - Net Transfer Cost
+			SELECT
+			@dblInventoryCost = dblAverageCost
+			FROM vyuICGetItemPricing 
+			WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+
+			SELECT
+			@dblInventoryCost = dblAverageCost
+			FROM vyuICGetItemPricing 
+			WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+
+			IF(ISNULL(@dblInventoryCost,0) = 0)
+			BEGIN
+				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
+			END
+			ELSE
+			BEGIN
+				SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
+			END
+		END
 		ELSE
 		BEGIN
-			SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
+			--Local Trans would be NetPrice - Inventory Average Cost.
+			--Or if Avg Cost = 0, then NetPrice - Net Transfer Cost
+
+			SELECT
+			@dblInventoryCost = dblAverageCost
+			FROM vyuICGetItemPricing 
+			WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+
+			IF(ISNULL(@dblInventoryCost,0) = 0)
+			BEGIN
+				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
+			END
+			ELSE
+			BEGIN
+				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
+			END
+
 		END
 	END
 	ELSE
 	BEGIN
-		--Local Trans would be NetPrice - Inventory Average Cost.
-		--Or if Avg Cost = 0, then NetPrice - Net Transfer Cost
-
-		SELECT
-		@dblInventoryCost = dblAverageCost
-		FROM vyuICGetItemPricing 
-		WHERE intItemId = @intItemId
-		AND intLocationId = @intLocationId
-
-		IF(ISNULL(@dblInventoryCost,0) = 0)
-		BEGIN
-			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
-		END
-		ELSE
-		BEGIN
-			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
-		END
-
+		SET @dblMargin = 0
 	END
 
 	---------------------------------------------------
