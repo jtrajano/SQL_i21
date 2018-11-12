@@ -1982,7 +1982,7 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0)
-																							THEN CC.dblQuantity
+																							THEN (CC.dblQuantity * -1)
 																						WHEN (CC.dblAmount < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
