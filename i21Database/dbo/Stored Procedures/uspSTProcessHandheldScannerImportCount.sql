@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
 	@HandheldScannerId INT,
 	@UserId INT,
+	@dtmCountDate DATETIME,
 	@NewInventoryCountId INT OUTPUT,
 	@ysnSuccess BIT OUTPUT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT
@@ -40,7 +41,7 @@ BEGIN TRY
 	WHERE intHandheldScannerId = @HandheldScannerId
 
 	DECLARE @NewId INT,
-		@CountDate DATETIME = GETDATE(),
+		--@CountDate DATETIME = @dtmCountDate,
 		@CompanyLocationId INT,
 		@CountRecords InventoryCountStagingTable
 
@@ -81,7 +82,7 @@ BEGIN TRY
 	EXEC uspICAddInventoryCount
 	-- Header fields 
 		@intLocationId = @CompanyLocationId
-		,@dtmCountDate = @CountDate
+		,@dtmCountDate = @dtmCountDate
 		,@intCategoryId	= NULL 
 		,@intCommodityId = NULL 
 		,@intCountGroupId = NULL  	
