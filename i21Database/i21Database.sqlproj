@@ -6410,6 +6410,9 @@
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
