@@ -268,6 +268,7 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @externalerpid							nvarchar(100)
 	declare @originationdate						nvarchar(100)
 	declare @internalnotes							nvarchar(100)
+	declare @detailcustomerno						nvarchar(100)
 	declare @detailtype								nvarchar(100)
 	declare @detailaccountno						nvarchar(100)
 	declare @detailcurrency							nvarchar(100)
@@ -359,7 +360,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@timezone = ''@timezone@'',														@language = ''@language@'',
 		@documentdelivery = ''@documentdelivery@'',										@externalerpid = ''@externalerpid@'',
 		@originationdate = ''@originationdate@'',											@internalnotes = ''@internalnotes@'',
-
+		@detailcustomerno = ''@detailcustomerno@'',
 		@detailtype = ''@detailtype@'',													@detailaccountno = ''@detailaccountno@'',
 		@detailcurrency = ''@detailcurrency@'',											@detailpaymentmethod = ''@detailpaymentmethod@'',
 		@detailterms = ''@detailterms@'',													@detailshipvia = ''@detailshipvia@'',
@@ -488,6 +489,16 @@ UPDATE tblSMCSVDynamicImport SET
 		else
 			set @originationdated = GETDATE()
 
+		if @detailcustomerno <> '''' and exists(select top 1 1 from tblARCustomer where strCustomerNumber = @detailcustomerno)
+		begin
+			
+			set @ValidationMessage = @ValidationMessage + '', Customer Number (''+  @detailcustomerno +'') already exists.''
+		end
+
+		if @detailcustomerno = ''''
+		begin
+			set @detailcustomerno = @entityno
+		end
 
 		if @detailtype = '''' or @detailtype not in (''Company'', ''Person'')
 		begin
@@ -957,7 +968,8 @@ UPDATE tblSMCSVDynamicImport SET
 
 
 
-				dblARBalance
+				dblARBalance,
+				strCustomerNumber
 				)
 
 			select @entityId, @detailtype, @detailaccountno, @defaultCurId, @detailPaymentMethodId, @detailTermsId, @detailSalespersonId, @detailfloid,
@@ -1030,7 +1042,8 @@ UPDATE tblSMCSVDynamicImport SET
 
 
 
-				0
+				0,
+				@detailcustomerno
 				
 
 
@@ -1110,7 +1123,8 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'originationdate', 'Origination Date', 0
 	Union All
 	SELECT @NewHeaderId, 'internalnotes', 'Internal Notes', 0
-	etail
+	Union All
+	SELECT @NewHeaderId, 'detailcustomerno', 'Detail Customer Number', 0
 	Union All
 	SELECT @NewHeaderId, 'detailtype', 'Detail Type', 0
 	Union All
