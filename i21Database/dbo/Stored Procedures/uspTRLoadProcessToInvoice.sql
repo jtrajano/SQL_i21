@@ -58,6 +58,18 @@ BEGIN TRY
 		,[strPONumber]							= DH.strPurchaseOrder
 		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, BlendIngredient.strBillOfLading)
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
+														(CASE 
+															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))
+															WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+														END))
+													ELSE (CASE
+														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))
+														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+													END) END
+		/*
+		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
 															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
 															WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
@@ -68,6 +80,8 @@ BEGIN TRY
 														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
 													END) END
+		*/
+		,[strFooterComments]					= rtrim(ltrim(isnull(DH.strComments,'')))
 		,[intShipToLocationId]					= DH.intShipToLocationId
 		,[intBillToLocationId]					= ISNULL(Customer.intBillToId, EL.intEntityLocationId)
 		,[ysnTemplate]							= 0
@@ -220,7 +234,7 @@ BEGIN TRY
 
 
 	-- Update multiple comment concatenation.
-	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strComments
+	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strComments, strFooterComments
 	INTO #tmpComment
 	FROM #tmpSourceTable
 	WHERE ISNULL(strComments, '') <> ''
@@ -584,6 +598,7 @@ BEGIN TRY
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
 		,[ysnTemplate]
@@ -662,6 +677,7 @@ BEGIN TRY
 		,[strPONumber]							= IE.strPONumber
 		,[strBOLNumber]							= IE.strBOLNumber
 		,[strComments]							= IE.strComments
+		,[strFooterComments]					= IE.strFooterComments
 		,[intShipToLocationId]					= IE.intShipToLocationId
 		,[intBillToLocationId]					= IE.intBillToLocationId
 		,[ysnTemplate]							= IE.ysnTemplate
@@ -742,6 +758,7 @@ BEGIN TRY
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
 		,[ysnTemplate]
@@ -821,6 +838,7 @@ BEGIN TRY
 		,[strPONumber]							= TR.strPONumber
 		,[strBOLNumber]							= TR.strBOLNumber
 		,[strComments]							= TR.strComments
+		,[strFooterComments]					= TR.strFooterComments
 		,[intShipToLocationId]					= TR.intShipToLocationId
 		,[intBillToLocationId]					= TR.intBillToLocationId
 		,[ysnTemplate]							= TR.ysnTemplate
@@ -906,6 +924,7 @@ BEGIN TRY
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strComments]
+			,[strFooterComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
 			,[ysnTemplate]
@@ -980,6 +999,7 @@ BEGIN TRY
 			,[strPONumber]							= IE.strPONumber
 			,[strBOLNumber]							= IE.strBOLNumber
 			,[strComments]							= IE.strComments
+			,[strFooterComments]					= IE.strFooterComments
 			,[intShipToLocationId]					= IE.intShipToLocationId
 			,[intBillToLocationId]					= IE.intBillToLocationId
 			,[ysnTemplate]							= IE.ysnTemplate
@@ -1060,6 +1080,7 @@ BEGIN TRY
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
 		,[ysnTemplate]
@@ -1129,6 +1150,7 @@ BEGIN TRY
 		,[strPONumber]							= IE.strPONumber
 		,[strBOLNumber]							= IE.strBOLNumber
 		,[strComments]							= IE.strComments
+		,[strFooterComments]					= IE.strFooterComments
 		,[intShipToLocationId]					= IE.intShipToLocationId
 		,[intBillToLocationId]					= IE.intBillToLocationId
 		,[ysnTemplate]							= IE.ysnTemplate
@@ -1196,6 +1218,7 @@ BEGIN TRY
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
 		,[ysnTemplate]
