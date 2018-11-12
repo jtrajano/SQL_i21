@@ -781,7 +781,7 @@ BEGIN TRY
 				,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
 				,[strTransactionId] = W.strWorkOrderNo
 				,[intTransactionTypeId] = 9
-				,[intLotId] = PL.intLotId
+				,[intLotId] = IsNULL(PL.intProducedLotId,PL.intLotId)
 				,[intSubLocationId] = L.intSubLocationId
 				,[intStorageLocationId] = L.intStorageLocationId
 				,[ysnIsStorage] = NULL

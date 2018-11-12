@@ -66,12 +66,21 @@ BEGIN TRY
 
 	IF @strInstantConsumption = 'False'
 	BEGIN
-		SELECT @intTransactionId = intBatchId
-			,@strConsumeBatchId = strBatchId
-		FROM tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
+		--SELECT @intTransactionId = intBatchId
+		--	,@strConsumeBatchId = strBatchId
+		--FROM tblMFWorkOrderConsumedLot
+		--WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @dblInputCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strConsumeBatchId)
+		--SELECT @dblInputCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strConsumeBatchId)
+
+		SELECT @dblInputCost = SUM([dbo].[fnMFGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
+			FROM (
+				SELECT DISTINCT intBatchId
+					,strBatchId
+				FROM tblMFWorkOrderConsumedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+				) AS DT
+
 	END
 	ELSE
 	BEGIN
@@ -212,7 +221,7 @@ BEGIN TRY
 		,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
 		,[strTransactionId] = W.strWorkOrderNo
 		,[intTransactionTypeId] = 9
-		,[intLotId] = PL.intLotId
+		,[intLotId] =  IsNULL(PL.intProducedLotId,PL.intLotId)
 		,[intSubLocationId] = L.intSubLocationId
 		,[intStorageLocationId] = L.intStorageLocationId
 		,[ysnIsStorage] = NULL
