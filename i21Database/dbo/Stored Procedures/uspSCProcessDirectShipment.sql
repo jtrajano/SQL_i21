@@ -165,7 +165,7 @@ BEGIN TRY
 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
 			END
 		END
 	END
