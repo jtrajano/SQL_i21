@@ -1293,15 +1293,21 @@ BEGIN TRY
 													ELSE NULL
 												END
 					,[intInventoryReceiptItemId] = CASE 
-														WHEN ST.ysnDPOwnedType = 0 THEN NULL
-														ELSE 
-															(SELECT intInventoryReceiptItemId 
-															FROM tblICInventoryReceiptItem 
-															WHERE intInventoryReceiptId =	(SELECT intInventoryReceiptId 
-																							FROM tblGRStorageHistory 
-																							WHERE intCustomerStorageId = CS.intCustomerStorageId
-																								AND intInventoryReceiptId IS NOT NULL))
-													END
+													WHEN ST.ysnDPOwnedType = 0 THEN NULL
+													ELSE
+														CASE
+															WHEN a.intItemType = 1 THEN
+																(
+																	SELECT intInventoryReceiptItemId 
+																	FROM tblICInventoryReceiptItem 
+																	WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId 
+																			FROM tblGRStorageHistory 
+																			WHERE intCustomerStorageId = CS.intCustomerStorageId
+																			AND intInventoryReceiptId IS NOT NULL)
+																)
+															ELSE NULL
+														END
+												END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
