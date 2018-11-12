@@ -19,6 +19,7 @@ BEGIN
 	CREATE FUNCTION [dbo].[fnTMGetContractForCustomer](
 		@strCustomerNumber AS NVARCHAR(20)
 		,@intSiteId INT
+		,@intItemId INT
 	)
 	RETURNS @tblSpecialPriceTableReturn TABLE(
 		strContractNumber NVARCHAR(20)
@@ -30,6 +31,11 @@ BEGIN
 	BEGIN 
 
 		DECLARE @returnValue NVARCHAR(20)
+		DECLARE @strItemNo NVARCHAR(50)
+
+		SELECT TOP 1 
+			@strItemNo = vwitm_no 
+		FROM vwitmmst WHERE A4GLIdentity = @intItemId
 
 		INSERT INTO @tblSpecialPriceTableReturn(
 			strContractNumber
@@ -53,6 +59,7 @@ BEGIN
 										AND intContractID NOT IN (SELECT DISTINCT intContractID
 																  FROM tblTMSiteLink
 																  WHERE intSiteID = @intSiteId))
+			AND vwcnt_itm_or_cls = @strItemNo
 		RETURN
 	END
 	')
