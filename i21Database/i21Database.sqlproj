@@ -7159,6 +7159,9 @@
     <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotAdjustDetail.sql" />
     <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
