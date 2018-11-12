@@ -172,7 +172,7 @@ BEGIN TRY
 			,dtmDate				= dtmReceiptDate
 			,intShipViaId			= NULL
 			,dblQty					= dblReceivedQty
-			,dblCost				= dblUnitRetail
+			,dblCost				= dblCaseCost --dblUnitRetail
 			,intCurrencyId			= @defaultCurrency
 			,dblExchangeRate		= 1
 			,intLotId				= NULL
@@ -189,7 +189,7 @@ BEGIN TRY
 			,ysnFreightInPrice		= NULL
 			,strActualCostId		= NULL
 			,intTaxGroupId			= NULL
-			,strVendorRefNo			= NULL
+			,strVendorRefNo			= strReceiptRefNoComment
 			,strSourceId			= NULL
 			,intPaymentOn			= NULL
 			,strChargesLink			= NULL
