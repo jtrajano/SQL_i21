@@ -3590,7 +3590,8 @@ BEGIN
 										,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
 										,[dblExchangeRate]						= NULL
 										,[strReceivePaymentType]				= 'Cash Receipts'
-										,[strPaymentOriginalId]					= NULL		-- Reference to the original/parent record
+										,[strPaymentOriginalId]					= CCP.intCustPaymentsId		-- Reference to the original/parent record
+																											-- This will also be used to create separate RCV for all rows in Customer Payments tab
 										,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 										,[ysnApplytoBudget]						= 0
 										,[ysnApplyOnAccount]					= 0
@@ -3658,7 +3659,7 @@ BEGIN
 						EXEC [dbo].[uspARProcessPayments]
 								@PaymentEntries	    = @PaymentsForInsert
 								,@UserId			= @intCurrentUserId
-								,@GroupingOption	= 6
+								,@GroupingOption	= 8 --6
 								,@RaiseError		= 0
 								,@ErrorMessage		= @ErrorMessage OUTPUT
 								,@LogId				= @intIntegrationLogId OUTPUT
