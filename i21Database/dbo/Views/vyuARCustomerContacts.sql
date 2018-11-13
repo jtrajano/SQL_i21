@@ -16,7 +16,8 @@ C.ysnPortalAccess,
 D.ysnActive,
 D.ysnReceiveEmail,
 C.ysnDefaultContact,
-intWarehouseId = ISNULL(G.intCompanyLocationId, -99)
+intWarehouseId = ISNULL(G.intCompanyLocationId, -99),
+D.strInternalNotes
 FROM dbo.tblARCustomer AS A INNER JOIN
 	dbo.tblEMEntity AS B ON A.[intEntityId] = B.intEntityId INNER JOIN
 	dbo.[tblEMEntityToContact] AS C ON A.[intEntityId] = C.intEntityId INNER JOIN

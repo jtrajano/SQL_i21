@@ -42,15 +42,22 @@ SELECT
 , strContact				= CUSTOMER.strFullAddress
 , strCompanyName			= COMPANY.strCompanyName
 , strCompanyAddress			= COMPANY.strCompanyAddress
+, strPhone1 				= CUSTOMER.strPhone
+, strEmail 					= CUSTOMER.strEmail
+, strInternalNotes			= CUSTOMER.strInternalNotes
 FROM vyuARCustomerAgingReport CAR
 CROSS APPLY (
 	SELECT dblCreditLimit
 		 , strTerm
 		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+		 , CC.strPhone
+		 , CC.strInternalNotes
+		 , CC.strEmail
 	FROM dbo.vyuARCustomerSearch C WITH (NOLOCK)
 		LEFT JOIN (SELECT intEntityId
 		                , strPhone
 						, strEmail
+						, strInternalNotes
 				   FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
 				   WHERE ysnDefaultContact = 1
 		) CC ON C.intEntityId = CC.intEntityId
