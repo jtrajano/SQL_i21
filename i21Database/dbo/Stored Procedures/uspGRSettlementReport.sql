@@ -426,7 +426,7 @@ BEGIN
 			LEFT JOIN (
 						SELECT intBillId,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail
-						WHERE intInventoryReceiptChargeId IS NOT NULL AND intInventoryReceiptItemId IS NULL
+						WHERE intInventoryReceiptChargeId IS NOT NULL AND intInventoryReceiptItemId IS NULL AND intConcurrencyId = 0
 						GROUP BY intBillId
 					   )BillByReceiptItem ON BillByReceiptItem.intBillId=BillDtl.intBillId  
 			LEFT JOIN (
@@ -435,7 +435,7 @@ BEGIN
 						,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 						 FROM tblAPPayment PYMT
 						 JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-						 JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
+						 JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId AND BillDtl.intConcurrencyId = 0
 						 JOIN tblICItem B ON B.intItemId = BillDtl.intItemId AND B.strType = 'Other Charge'
 						 WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL 	 
 						GROUP BY  PYMT.intPaymentId
@@ -456,7 +456,7 @@ BEGIN
 						  FROM tblAPPaymentDetail
 						  WHERE intInvoiceId IS NOT NULL
 						  GROUP BY intPaymentId
-					    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+					    ) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId
 			
 			LEFT JOIN (  SELECT 
 						  intPaymentId
@@ -466,9 +466,8 @@ BEGIN
 						  WHERE intBillId IS NOT NULL
 						  GROUP BY intPaymentId
 					    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
-
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
-				AND BNKTRN.strTransactionId = @strPaymentNo-- IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
+				AND BNKTRN.strTransactionId = @strPaymentNo
 				AND (
 					intInventoryReceiptChargeId IS NOT NULL
 					OR BillDtl.intInventoryReceiptItemId IS NOT NULL
@@ -601,6 +600,7 @@ BEGIN
 						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
+					WHERE A.intConcurrencyId = 0
 					GROUP BY A.intBillId
 				  ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
 			
@@ -608,7 +608,8 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTax) dblTax
-					FROM tblAPBillDetail A		  
+					FROM tblAPBillDetail A
+					WHERE A.intConcurrencyId = 0		  
 					GROUP BY A.intBillId
 				  ) tblTax ON tblTax.intBillId = Bill.intBillId
 			
@@ -618,6 +619,7 @@ BEGIN
 							,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
+						WHERE A.intConcurrencyId = 0
 						GROUP BY A.intBillId
 				      ) tblAdjustment ON tblAdjustment.intBillId = BillDtl.intBillId
 			
@@ -627,7 +629,7 @@ BEGIN
 							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 						FROM tblAPPayment PYMT
 						JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
+						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId AND BillDtl.intConcurrencyId = 0
 						JOIN tblICItem B ON B.intItemId = BillDtl.intItemId AND B.strType = 'Other Charge'
 						GROUP BY  PYMT.intPaymentId
 					  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
@@ -663,6 +665,7 @@ BEGIN
 							,SUM(dblQtyOrdered) dblTotalQty
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+						WHERE A.intConcurrencyId = 0
 						GROUP BY A.intBillId
 				      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 			LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
@@ -721,19 +724,6 @@ BEGIN
 				,dblGrossWeight				 = ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 = ISNULL(SC.dblTareWeight, 0)
 				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-				-- ,dblGrossWeight				= CASE 
-				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)													
-				-- 								ELSE
-				-- 									ISNULL(SC.dblGrossWeight, 0)
-				-- 							  END
-				-- ,dblTareWeight				= ISNULL(SC.dblTareWeight, 0)						  								 
-				-- ,dblNetWeight				= CASE 
-				-- 								WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0)
-				-- 									THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,StrgHstry.dblUnits)
-				-- 								ELSE
-				-- 									ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
-				-- 							  END
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyReceived) ELSE BillDtl.dblQtyReceived END
@@ -756,8 +746,7 @@ BEGIN
 											 			END
 											       ELSE CNTRCT.strContractNumber
 											   END
-				,TotalDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				--,NetDue						 = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
+				,TotalDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
 				,NetDue						 = (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId						 = Bill.strBillId
 				,intPaymentId				 = PYMT.intPaymentId
@@ -819,6 +808,7 @@ BEGIN
 						,SUM(dblTax) dblTax
 					FROM tblAPBillDetail A
 					JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
+					WHERE A.intConcurrencyId = 0
 					GROUP BY A.intBillId
 				  ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
 			
@@ -826,7 +816,8 @@ BEGIN
 					SELECT 
 						A.intBillId
 						,SUM(dblTax) dblTax
-					FROM tblAPBillDetail A		  
+					FROM tblAPBillDetail A	
+					WHERE A.intConcurrencyId = 0	  
 					GROUP BY A.intBillId
 				  ) tblTax ON tblTax.intBillId = Bill.intBillId
 			
@@ -836,6 +827,7 @@ BEGIN
 							,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
+						WHERE A.intConcurrencyId = 0
 						GROUP BY A.intBillId
 				      ) tblAdjustment ON tblAdjustment.intBillId = BillDtl.intBillId
 			
@@ -845,7 +837,7 @@ BEGIN
 							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 						FROM tblAPPayment PYMT
 						JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId
+						JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = PYMTDTL.intBillId AND BillDtl.intConcurrencyId = 0
 						JOIN tblICItem B ON B.intItemId = BillDtl.intItemId AND B.strType = 'Other Charge'
 						GROUP BY  PYMT.intPaymentId
 					  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
@@ -881,6 +873,7 @@ BEGIN
 							,SUM(dblQtyOrdered) dblTotalQty
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+						WHERE A.intConcurrencyId = 0
 						GROUP BY A.intBillId
 				      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 
