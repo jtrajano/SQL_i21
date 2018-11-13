@@ -978,6 +978,7 @@ BEGIN
 						,strActualCostId
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1007,7 +1008,7 @@ BEGIN
 						,ICTrans.strActualCostId 
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
-
+						,ICTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICLot Lot
 							ON ICTrans.intLotId = Lot.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -1073,6 +1074,7 @@ BEGIN
 						,strActualCostId
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1111,6 +1113,7 @@ BEGIN
 						,ICTrans.strActualCostId 
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
+						,ICTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -1171,6 +1174,7 @@ BEGIN
 						,strActualCostId
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1196,6 +1200,7 @@ BEGIN
 						,COALESCE(Detail.strFromLocationActualCostId, Header.strActualCostId, ICTrans.strActualCostId)
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
+						,ICTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN dbo.tblICInventoryTransfer Header
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
@@ -1317,6 +1322,7 @@ BEGIN
 							,strActualCostId
 							,intForexRateTypeId
 							,dblForexRate
+							,intCostingMethod
 					)
 					SELECT 	Detail.intItemId  
 							,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
@@ -1338,6 +1344,7 @@ BEGIN
 							,ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId)
 							,TransferSource.intForexRateTypeId
 							,TransferSource.dblForexRate
+							,TransferSource.intCostingMethod
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN dbo.tblICInventoryTransaction TransferSource
@@ -1586,6 +1593,7 @@ BEGIN
 							,strActualCostId 
 							,intForexRateTypeId
 							,dblForexRate
+							,intCostingMethod
 					)
 					SELECT 	RebuildInvTrans.intItemId  
 							,RebuildInvTrans.intItemLocationId 
@@ -1607,6 +1615,7 @@ BEGIN
 							,RebuildInvTrans.strActualCostId 
 							,RebuildInvTrans.intForexRateTypeId
 							,RebuildInvTrans.dblForexRate
+							,RebuildInvTrans.intCostingMethod
 					FROM	#tmpICInventoryTransaction RebuildInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
 								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId						
 								AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
@@ -1659,6 +1668,7 @@ BEGIN
 							,strActualCostId 
 							,intForexRateTypeId
 							,dblForexRate
+							,intCostingMethod
 					)
 					SELECT 	ISNULL(AdjDetail.intNewItemId, AdjDetail.intItemId)
 							,ISNULL(NewLotItemLocation.intItemLocationId, SourceLotItemLocation.intItemLocationId) 
@@ -1926,6 +1936,7 @@ BEGIN
 							,strActualCostId		= FromStock.strActualCostId 
 							,intForexRateTypeId		= NULL
 							,dblForexRate			= 1 
+							,intCostingMethod		= FromStock.intCostingMethod
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
@@ -2043,6 +2054,7 @@ BEGIN
 						,strActualCostId
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -2068,6 +2080,7 @@ BEGIN
 						,ICTrans.strActualCostId 
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
+						,ICTrans.intCostingMethod
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
@@ -2288,6 +2301,7 @@ BEGIN
 						,strActualCostId 	
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2342,6 +2356,7 @@ BEGIN
 						,RebuildInvTrans.strActualCostId
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
+						,RebuildInvTrans.intCostingMethod
 
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
@@ -2451,6 +2466,7 @@ BEGIN
 						,strActualCostId 	
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2505,7 +2521,7 @@ BEGIN
 						,RebuildInvTrans.strActualCostId
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
-
+						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
 						LEFT JOIN dbo.tblARInvoice Invoice
@@ -2737,6 +2753,7 @@ BEGIN
 						,dblForexRate
 						,intCategoryId
 						,dblUnitRetail
+						,intCostingMethod
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2852,6 +2869,7 @@ BEGIN
 								,NULL--DetailItem.ysnSubCurrency
 								,NULL--Header.intSubCurrencyCents
 							)
+						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
@@ -3470,6 +3488,7 @@ BEGIN
 						,strActualCostId
 						,intForexRateTypeId
 						,dblForexRate
+						,intCostingMethod
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -3495,6 +3514,7 @@ BEGIN
 						,ICTrans.strActualCostId 
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
+						,ICTrans.intCostingMethod
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
@@ -3734,6 +3754,7 @@ BEGIN
 						,dblUnitRetail
 						,dblAdjustCostValue
 						,dblAdjustRetailValue
+						,intCostingMethod
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -3800,7 +3821,7 @@ BEGIN
 						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
 						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
 						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
-
+						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
