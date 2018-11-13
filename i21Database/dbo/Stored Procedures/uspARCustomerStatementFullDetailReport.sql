@@ -234,6 +234,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , dblQuantity				= TRANSACTIONS.dblQuantity	     
 	 , dblInvoiceDetailTotal	= TRANSACTIONS.dblInvoiceDetailTotal
 	 , strTransactionType		= CAST(TRANSACTIONS.strTransactionType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
+	 , strInvoiceType			= CAST(TRANSACTIONS.strInvoiceType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
 	 , strType					= CAST(TRANSACTIONS.strType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
 	 , strPONumber				= TRANSACTIONS.strPONumber
 	 , strItemNo				= TRANSACTIONS.strItemNo
@@ -249,6 +250,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= I.strInvoiceNumber
 		 , strPONumber				= NULL
 		 , strTransactionType		= 'Invoice Detail'
+		 , strInvoiceType			= 'Invoice Detail'
 		 , strType					= I.strType
 		 , strItemNo				= ITEM.strItemNo
 		 , strItemDescription		= DETAIL.strItemDescription
@@ -289,6 +291,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= I.strInvoiceNumber
 		 , strPONumber				= I.strPONumber
 		 , strTransactionType		= 'Invoices'
+		 , strInvoiceType			= I.strTransactionType
 		 , strType					= I.strType
 		 , strItemNo				= 'INVOICE TOTAL'
 		 , strItemDescription		= NULL
@@ -314,6 +317,7 @@ LEFT JOIN (
 		 , strTransactionNumber		= NULL
 		 , strPONumber				= NULL
 		 , strTransactionType		= 'Payment'
+		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
 		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
@@ -355,6 +359,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dblQuantity				= NULL
 			 , dblInvoiceDetailTotal	= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , strTransactionType		= 'Customer Budget'
+			 , strInvoiceType			= 'Customer Budget'
 			 , strType					= NULL
 			 , strPONumber				= NULL
 			 , strItemNo				= NULL
@@ -384,6 +389,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , dblQuantity				= NULL
 	 , dblInvoiceDetailTotal	= ISNULL(BB.dblTotalAR, 0.000000)
 	 , strTransactionType		= 'Beginning Balance'
+	 , strInvoiceType			= 'Beginning Balance'
 	 , strType					= NULL
 	 , strPONumber				= NULL
 	 , strItemNo				= NULL
@@ -482,7 +488,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
 	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'') 
 											AND ISNULL(STATEMENTREPORT.strType, '''') <> ''CF Invoice'' 
-											AND ((STATEMENTREPORT.intPaymentId IS NULL OR (STATEMENTREPORT.intPaymentId IS NOT NULL AND STATEMENTREPORT.strTransactionType = ''Invoices'')))
+											AND ((STATEMENTREPORT.intPaymentId IS NULL OR (STATEMENTREPORT.intPaymentId IS NOT NULL AND ISNULL(STATEMENTREPORT.strInvoiceType, '''') = ''Overpayment'')))
 									      THEN 0 
 										  ELSE STATEMENTREPORT.dblInvoiceDetailTotal END
 								) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
