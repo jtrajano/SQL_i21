@@ -42,7 +42,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblUnitQty] 					,
 		[dblNetWeight] 					,
 		[intContractSeq]				,
-		[intLocationId]
+		[intLocationId]					,
+		[ysnSubCurrency]				,
+		[intCurrencyId]
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
@@ -82,7 +84,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblUnitQty] 					= 	A.dblUnitQty,
 		[dblNetWeight] 					=	A.dblNetWeight,
 		[intContractSeq]				=	G.intContractSeq,
-		[intLocationId]					=	B.intShipToId
+		[intLocationId]					=	B.intShipToId,
+		[ysnSubCurrency]				=	0,
+		[intCurrencyId]					=	B.intCurrencyId
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
