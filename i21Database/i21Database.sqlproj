@@ -7162,6 +7162,7 @@
     <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Tables\tblCMBankAccountRegisterRunningBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
