@@ -11,6 +11,7 @@
 	[dtmDate] [date] NULL,
 	[dtmDateReconciled] [datetime] NULL,
 	[ysnCheckVoid] [bit] NULL,
+	[ysnClr] [bit] NULL,
 	[dblEndingBalance] [decimal](18, 6) NULL,
 	[dblOpeningBalance] [decimal](18, 6) NULL,
 	[strUniqueId] [nvarchar](10) NULL,
