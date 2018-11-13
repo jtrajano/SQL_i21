@@ -24,7 +24,7 @@ FROM tblSCDeliverySheetSplit SDS
 INNER JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId = SDS.intDeliverySheetId
 INNER JOIN tblEMEntity EM ON EM.intEntityId = SDS.intEntityId
 INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
-INNER JOIN tblGRStorageScheduleRule GRSR ON GRSR.intStorageScheduleRuleId = SDS.intStorageScheduleRuleId
+LEFT JOIN tblGRStorageScheduleRule GRSR ON GRSR.intStorageScheduleRuleId = SDS.intStorageScheduleRuleId
 OUTER APPLY(
 	SELECT SUM(IRI.dblOpenReceive) AS Contract FROM tblICInventoryReceipt IR
 	INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
