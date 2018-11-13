@@ -564,6 +564,9 @@ BEGIN
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
 
+		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
+		VALUES(@EntityId, @intTermsId)
+
 		IF ISNULL(@ysnPymtCtrlEFTActive, 0) = 1
 		BEGIN
 			SET @ysnPymtCtrlActive = 1
