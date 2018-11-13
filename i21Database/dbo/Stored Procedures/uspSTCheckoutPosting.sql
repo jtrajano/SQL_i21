@@ -1708,7 +1708,7 @@ BEGIN
 
 
 				----------------------------------------------------------------------
-				-------------------------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01------------------------
+				--------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01---------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1020
 				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
@@ -1806,7 +1806,19 @@ BEGIN
 																						END
 																				ELSE ISNULL(CC.dblQuantity, 0)
 																			END
-																			, ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			--, ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			,CASE
+																				-- IF Item is Fuel
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN
+																						CASE
+																							WHEN (CC.dblAmount > 0)
+																								THEN (ISNULL(CC.dblAmount, 0) * -1)
+																							WHEN (CC.dblAmount < 0)
+																								THEN (ISNULL(CC.dblAmount, 0) * -1)
+																						END
+																				ELSE ISNULL(CC.dblAmount, 0)
+																			END
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -2041,12 +2053,12 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
-																							THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
+																							THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
 																																														WHEN (CC.dblAmount > 0)
 																																															THEN (CC.dblQuantity * -1)
 																																														WHEN (CC.dblAmount < 0)
 																																															THEN (CC.dblQuantity * -1)
-																																													END
+																																													END)
 																					END
 
 																			-- IF Item is BLANK
@@ -3175,7 +3187,7 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 										FROM @EntriesForInvoice
 
-										--SELECT * FROM @EntriesForInvoice
+										SELECT * FROM @EntriesForInvoice
 
 										-------------------------------------------------------------------------------
 										------------------------------- Start Rank ------------------------------------
