@@ -33,12 +33,13 @@ SELECT
 	,vendor.ysnOneBillPerPayment
 	,vendor.ysnWithholding
 	,payMethod.strPaymentMethod
-	,ISNULL(vendor.strVendorId, entity.strEntityNo) as strVendorId
+	,vendor.strVendorId
 	,commodity.strCommodityCode
 	,term.strTerm
 	,entity.strName
 	,payTo.strCheckPayeeName
 	,CAST(CASE WHEN voucher.intTransactionType = 14 THEN 1 ELSE 0 END AS BIT) AS ysnDeferredPayment
+	,ysnPastDue = dbo.fnIsDiscountPastDue(voucher.intTermsId, GETDATE(), voucher.dtmDate)
 FROM tblAPBill voucher
 INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 	ON vendor.intEntityId = voucher.intEntityVendorId

@@ -33,6 +33,10 @@ SET ANSI_WARNINGS OFF
 --	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
 --	RETURN;
 --END
+
+DECLARE @defaultCurrencyPref INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId > 0);
+DECLARE @USDCur INT = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'');
+
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
@@ -390,7 +394,8 @@ BEGIN
                 --Vendors
                 @intVendorType				= CASE WHEN ssvnd_co_per_ind = ''C'' THEN 0 ELSE 1 END,
                 @originVendor				= ssvnd_vnd_no,
-                @intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
+                @intCurrencyId				= ISNULL((SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS)
+											  ,ISNULL(@defaultCurrencyPref, @USDCur)),
                 @strVendorPayToId         	= ssvnd_pay_to,
                 @intPaymentMethodId       	= NULL,
                 @intVendorTaxCodeId     	= NULL,
@@ -465,7 +470,7 @@ BEGIN
 				--Vendors
 				@intVendorType				= 1,
 				@originVendor				= apchk_vnd_no,
-				@intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD''),
+				@intCurrencyId				= ISNULL(@defaultCurrencyPref, @USDCur),
 				@strVendorPayToId         	= NULL,
 				@intPaymentMethodId       	= NULL,
 				@intVendorTaxCodeId     	= NULL,
@@ -558,6 +563,9 @@ BEGIN
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
+
+		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
+		VALUES(@EntityId, @intTermsId)
 
 		IF ISNULL(@ysnPymtCtrlEFTActive, 0) = 1
 		BEGIN

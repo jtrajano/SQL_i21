@@ -709,4 +709,10 @@ BEGIN
 	SELECT 'Component9',1  
 	ORDER BY 1
 END
+GO
+IF EXISTS(SELECT 1 FROM tblSMStartingNumber WHERE strTransactionType = N'DPContract')
+BEGIN
+  DELETE FROM tblSMStartingNumber WHERE strTransactionType = N'DPContract'
+END
+GO
 PRINT('Contract 1_MasterTables End')

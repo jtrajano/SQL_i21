@@ -1886,17 +1886,20 @@ FROM(
 										dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblDummyContractBasis,0)) 
 								end 
 						end) as dblDummyContractBasis
-			,dblContractBasis
-			--,convert(decimal(24,6),
-			--			case when isnull(dblRate,0)=0 then 
-			--					dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))
-			--				else
-			--					case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end <> @intCurrencyUOMId then 
-			--							dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))*dblRate 
-			--						else 
-			--							dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0)) 
-			--					end 
-			--			end) as dblContractBasis
+			,case when @ysnCanadianCustomer= 1 then 
+					dblContractBasis 
+				else 
+				convert(decimal(24,6),
+						case when isnull(dblRate,0)=0 then 
+								dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))
+							else
+								case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end <> @intCurrencyUOMId then 
+										dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))*dblRate 
+									else 
+										dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0)) 
+								end 
+						end) 
+				end as dblContractBasis
 				--/case when isnull(ysnSubCurrency,0) = 1  then 100 else 1 end
 			,convert(decimal(24,6),
 						case when isnull(dblRate,0)=0 then 

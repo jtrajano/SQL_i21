@@ -895,14 +895,14 @@ BEGIN
 			)t  where dblTotal <> 0
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
-		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber)
+		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,intInvoiceId,strInvoiceNumber, intTicketId)
 	SELECT 
 		@strDescription
 		,'Net Receivable  ($)' [strType] 
 		,I.dblAmountDue
 		,L.strLocationName
-		,null intContractHeaderId
-		,'' strContractNumber
+		,intContractHeaderId = CT.intContractId
+		,CT.strContractNumber
 		,T.strTicketNumber
 		,I.dtmDate
 		,E.strName
@@ -913,12 +913,18 @@ BEGIN
 		,Cur.strCurrency
 		,I.intInvoiceId
 		,I.strInvoiceNumber
+		,T.intTicketId
 	FROM tblARInvoice I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId AND intInventoryShipmentChargeId IS NULL
 		INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
 		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 		INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
 		INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
+		OUTER APPLY(
+			SELECT TOP 1 intTicketId, intItemId, intContractId, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence) 
+			FROM vyuSCTicketView
+			WHERE intContractId IS NOT NULL AND intTicketId = T.intTicketId
+		) CT
 	WHERE I.ysnPosted = 1
 		AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= convert(datetime,@dtmToDate) 
 		AND dblAmountDue <> 0
@@ -939,18 +945,21 @@ BEGIN
 		,Cur.strCurrency
 		,I.intInvoiceId
 		,I.strInvoiceNumber
+		,T.intTicketId
+		,CT.intContractId
+		,CT.strContractNumber
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
-					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency)
+					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency, intTicketId)
 
 	select strCommodityCode,'NP Un-Paid Quantity' strType,dblQtyReceived,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
-					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency
+					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intBillId,strBillId,strCurrency, intTicketId
 					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
-	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency	)
+	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency, intTicketId)
 	select @strDescription,'NR Un-Paid Quantity' strType,dblQtyReceived,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
-	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency	
+	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType,intInvoiceId,strInvoiceNumber,strCurrency, intTicketId	
 	 from @tempFinal where strType= 'Net Receivable  ($)' and intCommodityId=@intCommodityId 
 
 	 INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,strShipmentNumber,intInventoryShipmentId,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)

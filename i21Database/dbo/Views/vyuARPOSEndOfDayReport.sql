@@ -28,7 +28,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
-	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0) * -1
+	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0)
 	 , dblCashSales			= ISNULL(EOD.dblExpectedEndingBalance,0)
 	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)

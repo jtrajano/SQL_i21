@@ -37,6 +37,20 @@ BEGIN TRY
 	END
 	ELSE 
 	BEGIN
+		--Validate if Load has posted Weight Claim
+		IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+			BEGIN
+				SELECT TOP 1 @strInvoiceNo = tblLGWeightClaim.strReferenceNumber 
+				FROM tblLGWeightClaim WHERE intLoadId = @intLoadId
+
+				SET @strMsg = 'Weight Claim ' + @strInvoiceNo + ' has been created for ' + @strLoadNumber 
+								+ '. Cannot unpost. Please delete the claim and try again.'
+
+				RAISERROR (@strMsg,16,1);
+
+				RETURN 0;
+		END
+
 		IF @intPurchaseSale = 1
 		BEGIN
 		

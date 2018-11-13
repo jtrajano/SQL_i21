@@ -308,16 +308,7 @@ GO
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'SaleContract')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 27
-			,[strTransactionType]	= N'DPContract'
-			,[strPrefix]			= N''
-			,[intNumber]			= 1
-			,[strModule]			= 'Contract Management'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'DPContract')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'SaleContract')	
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 28
 			,[strTransactionType]	= N'Notes Receivable'

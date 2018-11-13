@@ -267,7 +267,23 @@ BEGIN TRY
 		BEGIN
 			SET @ErrMsg = 'Created date is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
+		END		
+		IF	@dtmNewM2MDate IS NULL
+		BEGIN
+			SET @ErrMsg = 'M2M Date is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
 		END
+		IF	@dblNewQuantity > 99999999.999999
+		BEGIN
+			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewNoOfLoad > 99999
+		BEGIN
+			SET @ErrMsg = 'No Of Load cannot be greater than 99999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
 
 		--Active check
 		IF ISNULL(@ysnSlice,0) = 0

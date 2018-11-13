@@ -57,7 +57,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 										ELSE
 											''
 										END
-		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
+		,strTransactionType			= (CASE WHEN ty.strName IN ('Invoice', 'Credit Memo') THEN isnull(invoice.strTransactionType, ty.strName) ELSE ty.strName END)
 		,t.strTransactionForm		
 		,t.strTransactionId
 		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
@@ -149,7 +149,7 @@ FROM 	tblICItem i
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
-			AND ty.intTransactionTypeId = 33
+			AND ty.intTransactionTypeId in (33, 45)
 		LEFT JOIN tblAPBill bill
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId

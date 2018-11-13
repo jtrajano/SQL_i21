@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportReceipt]
 	@HandheldScannerId INT,
 	@UserId INT,
+	@strReceiptRefNoList NVARCHAR(MAX),
 	@ysnSuccess BIT OUTPUT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT
 AS
@@ -17,11 +18,45 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 
 BEGIN TRY
+	
+	-- Create table to handle Receipt Refference No.
+	DECLARE @tblTempItems TABLE
+	(
+		strReceiptRefNo NVARCHAR(150) COLLATE Latin1_General_CI_AS
+	)
+
+	-- Insert to table
+	INSERT INTO @tblTempItems
+	(
+		strReceiptRefNo
+	)
+	SELECT [strItem] AS strReceiptRefNo
+	FROM [dbo].[fnGetRowsFromDelimitedValuesReturnString](@strReceiptRefNoList)
+
+
+	--------------------------------------------------------------------------------------
+	-------------------- Start Validate if has record to Process -------------------------
+	--------------------------------------------------------------------------------------
+	IF NOT EXISTS(
+					SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportReceipt 
+					WHERE intHandheldScannerId = @HandheldScannerId  
+					AND strReceiptRefNoComment IN (SELECT strReceiptRefNo FROM @tblTempItems)
+				 )
+		BEGIN
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'There are no records to process. ' + @strReceiptRefNoList + ' ' + CAST(@HandheldScannerId AS NVARCHAR(20))
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	-------------------- End Validate if has record to Process ---------------------------
+	--------------------------------------------------------------------------------------
 
 	SELECT DISTINCT intVendorId, intCompanyLocationId
 	INTO #Vendors
 	FROM vyuSTGetHandheldScannerImportReceipt
 	WHERE intHandheldScannerId = @HandheldScannerId
+	AND strReceiptRefNoComment IN (SELECT strReceiptRefNo FROM @tblTempItems)
 
 	DECLARE @VendorId INT,
 		@ShipFrom INT,
@@ -39,7 +74,12 @@ BEGIN TRY
 	--------------------------------------------------------------------------------------
 	--------- Start Validate if items does not have intItemUOMId -------------------------
 	--------------------------------------------------------------------------------------
-	IF EXISTS (SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportReceipt WHERE intHandheldScannerId = @HandheldScannerId AND intItemUOMId IS NULL)
+	IF EXISTS (
+				SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportReceipt 
+				WHERE intHandheldScannerId = @HandheldScannerId 
+				AND intItemUOMId IS NULL 
+				AND strReceiptRefNoComment IN (SELECT strReceiptRefNo FROM @tblTempItems)
+			  )
 		BEGIN
 			DECLARE @strItemNoHasNoUOM AS NVARCHAR(MAX)
 
@@ -132,7 +172,7 @@ BEGIN TRY
 			,dtmDate				= dtmReceiptDate
 			,intShipViaId			= NULL
 			,dblQty					= dblReceivedQty
-			,dblCost				= dblUnitRetail
+			,dblCost				= dblCaseCost --dblUnitRetail
 			,intCurrencyId			= @defaultCurrency
 			,dblExchangeRate		= 1
 			,intLotId				= NULL
@@ -149,7 +189,7 @@ BEGIN TRY
 			,ysnFreightInPrice		= NULL
 			,strActualCostId		= NULL
 			,intTaxGroupId			= NULL
-			,strVendorRefNo			= NULL
+			,strVendorRefNo			= strReceiptRefNoComment
 			,strSourceId			= NULL
 			,intPaymentOn			= NULL
 			,strChargesLink			= NULL
@@ -165,6 +205,8 @@ BEGIN TRY
 		DROP TABLE #tmpImportReceipts
 
 		DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
+
+
 
 		-- Flag Success
 		SET @ysnSuccess = CAST(1 AS BIT)

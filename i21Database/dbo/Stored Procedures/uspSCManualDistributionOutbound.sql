@@ -307,7 +307,7 @@ ELSE
 
 	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
 	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
 	END
 
 	EXEC dbo.uspSMAuditLog 

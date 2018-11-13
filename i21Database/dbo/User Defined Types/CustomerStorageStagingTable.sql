@@ -41,5 +41,6 @@
     [strDiscountComment] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [dblDiscountsPaid] NUMERIC(18, 6) NULL, 
     [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
-	[intTransferStorageSplitId] INT NULL
+	[intTransferStorageSplitId] INT NULL,
+	[ysnTransferStorage] BIT NULL
 )

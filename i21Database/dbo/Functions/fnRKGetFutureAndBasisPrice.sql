@@ -82,9 +82,10 @@ BEGIN
 			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
 			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
-			WHERE bd.intItemId = @intItemId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
+			WHERE bd.intItemId = @intItemId 
+				AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN  isnull(bd.intCompanyLocationId, 0) = 0 THEN  isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
 				AND strContractInventory = 'Contract'
-				AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(@intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
+				AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(bd.intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
 			ORDER BY dtmM2MBasisDate DESC	
 
 		END
@@ -126,10 +127,11 @@ BEGIN
 			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
 			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
-			WHERE intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
+			WHERE intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId 
+			AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN  isnull(bd.intCompanyLocationId, 0) = 0 THEN  isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
 			AND strContractInventory = 'Contract'
-			 AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(@intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
-			 AND strContractInventory = 'Contract'
+			AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(bd.intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
+			AND strContractInventory = 'Contract'
 			ORDER BY dtmM2MBasisDate DESC
 		END
 		ELSE
@@ -170,10 +172,11 @@ BEGIN
 			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
 			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
-			WHERE intContractTypeId = @intTicketType AND intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
+			WHERE intContractTypeId = @intTicketType AND intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId 
+			AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN  isnull(bd.intCompanyLocationId, 0) = 0 THEN  isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END --AND ISNULL(dblBasisOrDiscount, 0) <> 0 
 			AND strContractInventory = 'Contract'
-			 AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(@intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
-			 AND strContractInventory = 'Contract'
+			AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(bd.intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
+			AND strContractInventory = 'Contract'
 			ORDER BY dtmM2MBasisDate DESC
 			
 		END

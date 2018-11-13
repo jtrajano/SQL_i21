@@ -7,121 +7,240 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @SQL					NVARCHAR(MAX) = '',
-			@ErrMsg					NVARCHAR(MAX),
-			@idoc					INT,
+	DECLARE @SQL						NVARCHAR(MAX) = '',
+			@ErrMsg						NVARCHAR(MAX),
+			@strCustomerContract		NVARCHAR(1000),
+			@idoc						INT,
 
-			@intCommodityId			INT,
-			@intCommodityUOMId		INT,
-			@ysnCategory			BIT,
-			@dblQuantity			NUMERIC(18,6),
-			@dtmContractDate		DATETIME,
-			@intContractHeaderId	INT,
-			@intContractTypeId		INT,
-			@intEntityId			INT,
-			@intSalespersonId		INT,
-			@strContractNumber		NVARCHAR(50),
-			@intPricingTypeId		INT,
-			@intCreatedById			INT,
-			@dtmCreated				DATETIME,
-			@intConcurrencyId		INT,
-			@intContractBasisId		INT,
-			@intTermId				INT,
-			@intContractTextId		INT,
-			@intWeightId			INT,
-			@intGradeId				INT,
-			@intCropYearId			INT,
-			@intAssociationId		INT,
-			@intProducerId			INT,
+			@intCommodityId				INT,
+			@intCommodityUOMId			INT,
+			@ysnCategory				BIT,
+			@dblQuantity				NUMERIC(18,6),
+			@dtmContractDate			DATETIME,
+			@intContractHeaderId		INT,
+			@intContractTypeId			INT,
+			@intEntityId				INT,
+			@intSalespersonId			INT,
+			@strContractNumber			NVARCHAR(50),
+			@intPricingTypeId			INT,
+			@intCreatedById				INT,
+			@dtmCreated					DATETIME,
+			@intConcurrencyId			INT,
+			@intContractBasisId			INT,
+			@intTermId					INT,
+			@intContractTextId			INT,
+			@intWeightId				INT,
+			@intGradeId					INT,
+			@intCropYearId				INT,
+			@intAssociationId			INT,
+			@intProducerId				INT,
 			@ysnMultiplePriceFixation	BIT,
-			@dblNoOfLots			NUMERIC(18,6),
-			@dblLotsFixed			NUMERIC(18,6),
-			@intYear				INT,
-			@intFiscalYearId		INT
+			@dblNoOfLots				NUMERIC(18,6),
+			@dblLotsFixed				NUMERIC(18,6),
+			@intYear					INT,
+			@intFiscalYearId			INT,
+			@dblDeferPayRate			NUMERIC(18,6),
+			@dblTolerancePct			NUMERIC(18,6),
+			@dblProvisionalInvoicePct   NUMERIC(18,6),
+			@dblQuantityPerLoad			NUMERIC(18,6),
+			@intNoOfLoad				INT,
+			
+			@intFutureMarketId			INT,
+			@intFutureMonthId			INT,
+			@dblFutures					NUMERIC(18, 6)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-	SELECT	@intCommodityId		=	intCommodityId,
-			@intCommodityUOMId	=	intCommodityUOMId,
-			@dblQuantity		=	dblQuantity,
-			@dtmContractDate	=	dtmContractDate,
-			@intContractHeaderId=	intContractHeaderId,
-			@intContractTypeId	=	intContractTypeId,
-			@intEntityId		=	intEntityId,
-			@intSalespersonId	=	intSalespersonId,
-			@strContractNumber	=	strContractNumber,
-			@ysnCategory		=	ysnCategory,
-			@intPricingTypeId	=	intPricingTypeId,
-			@intCreatedById		=	intCreatedById,
-			@dtmCreated			=	dtmCreated,
-			@intConcurrencyId	=	intConcurrencyId,
-			@intContractBasisId	=	intContractBasisId,
-			@intTermId			=	intTermId,
-			@intContractTextId	=	intContractTextId,
-			@intWeightId		=	intWeightId,
-			@intGradeId			=	intGradeId,
-			@intCropYearId		=	intCropYearId,
-			@intAssociationId	=	intAssociationId,
-			@intProducerId		=	intProducerId,
+	SELECT	@intCommodityId		            =	intCommodityId,
+			@intCommodityUOMId	            =	intCommodityUOMId,
+			@dblQuantity		            =	dblQuantity,
+			@dtmContractDate	            =	dtmContractDate,
+			@intContractHeaderId            =	intContractHeaderId,
+			@intContractTypeId	            =	intContractTypeId,
+			@intEntityId		            =	intEntityId,
+			@intSalespersonId	            =	intSalespersonId,
+			@strContractNumber	            =	strContractNumber,
+			@ysnCategory		            =	ysnCategory,
+			@intPricingTypeId	            =	intPricingTypeId,
+			@intCreatedById		            =	intCreatedById,
+			@dtmCreated			            =	dtmCreated,
+			@intConcurrencyId	            =	intConcurrencyId,
+			@intContractBasisId	            =	intContractBasisId,
+			@intTermId			            =	intTermId,
+			@intContractTextId	            =	intContractTextId,
+			@intWeightId		            =	intWeightId,
+			@intGradeId			            =	intGradeId,
+			@intCropYearId		            =	intCropYearId,
+			@intAssociationId	            =	intAssociationId,
+			@intProducerId		            =	intProducerId,
 			@ysnMultiplePriceFixation		=	ysnMultiplePriceFixation,
-			@dblNoOfLots		=	dblNoOfLots
+			@dblNoOfLots					=	dblNoOfLots
+           ,@strCustomerContract			=   strCustomerContract
+		   ,@dblDeferPayRate				=   dblDeferPayRate
+		   ,@dblTolerancePct				=   dblTolerancePct
+		   ,@dblProvisionalInvoicePct		=   dblProvisionalInvoicePct
+		   ,@dblQuantityPerLoad				=   dblQuantityPerLoad
+		   ,@intNoOfLoad					=   intNoOfLoad
 
 	FROM	OPENXML(@idoc, 'tblCTContractHeaders/tblCTContractHeader',2)
 	WITH
 	(
-			intCommodityId		INT,
-			intCommodityUOMId	INT,
-			dblQuantity			NUMERIC(18,6),
-			dtmContractDate		DATETIME,
-			intContractHeaderId	INT,
-			intContractTypeId	INT,
-			intEntityId			INT,
-			intSalespersonId	INT,
-			strContractNumber	NVARCHAR(50),
-			ysnCategory			BIT,
-			intPricingTypeId	INT,
-			intCreatedById		INT,
-			dtmCreated			DATETIME,
-			intConcurrencyId	INT,
-			intContractBasisId	INT,
-			intTermId			INT,
-			intContractTextId	INT,
-			intWeightId			INT,
-			intGradeId			INT,
-			intCropYearId		INT,
-			intAssociationId	INT,
-			intProducerId		INT,
+			intCommodityId				INT,
+			intCommodityUOMId			INT,
+			dblQuantity					NUMERIC(18,6),
+			dtmContractDate				DATETIME,
+			intContractHeaderId			INT,
+			intContractTypeId			INT,
+			intEntityId					INT,
+			intSalespersonId			INT,
+			strContractNumber			NVARCHAR(50),
+			ysnCategory					BIT,
+			intPricingTypeId			INT,
+			intCreatedById				INT,
+			dtmCreated					DATETIME,
+			intConcurrencyId			INT,
+			intContractBasisId			INT,
+			intTermId					INT,
+			intContractTextId			INT,
+			intWeightId					INT,
+			intGradeId					INT,
+			intCropYearId				INT,
+			intAssociationId			INT,
+			intProducerId				INT,
 			ysnMultiplePriceFixation	BIT,
-			dblNoOfLots			NUMERIC(18,6)
+			dblNoOfLots					NUMERIC(18,6),
+			strCustomerContract			NVARCHAR(1000),
+			dblDeferPayRate				NUMERIC(18,6),
+			dblTolerancePct				NUMERIC(18,6),
+			dblProvisionalInvoicePct	NUMERIC(18,6),
+			dblQuantityPerLoad			NUMERIC(18,6),
+			intNoOfLoad					INT
+			
 	);  
 
 	IF @RowState = 'Added'
 	BEGIN
-		IF	@dtmContractDate IS NULL
-		BEGIN
-			SET @ErrMsg = 'Contract Date is missing while creating contract.'
-			RAISERROR(@ErrMsg,16,1)
-		END
-		IF	@dblQuantity IS NULL
-		BEGIN
-			SET @ErrMsg = 'Quantity is missing while creating contract.'
-			RAISERROR(@ErrMsg,16,1)
-		END
 		IF	@intContractTypeId IS NULL
 		BEGIN
 			SET @ErrMsg = 'Contract Type is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
+		
 		IF	@intEntityId IS NULL
 		BEGIN
 			SET @ErrMsg = 'Entity is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
+
+		IF ISNULL(@ysnCategory,0) = 0 
+		BEGIN
+			IF	@intCommodityId IS NULL
+			BEGIN
+				SET @ErrMsg = 'Commodity is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+			IF	@intCommodityUOMId IS NULL
+			BEGIN
+				SET @ErrMsg = 'UOM is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+			IF NOT EXISTS(SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
+			BEGIN
+				SET @ErrMsg = 'Combination of commodity id and UOM id is not matching.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+		END
+		
+		IF	@dblQuantity IS NULL
+		BEGIN
+			SET @ErrMsg = 'Quantity is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		---Quantity UOM
+
+		IF	@dtmContractDate IS NULL
+		BEGIN
+			SET @ErrMsg = 'Contract Date is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
+		IF	@intPricingTypeId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Pricing Type is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
 		IF	@intSalespersonId IS NULL
 		BEGIN
 			SET @ErrMsg = 'Salesperson is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
+		
+		IF LEN(ISNULL(@strCustomerContract,'')) > 30
+		BEGIN
+			SET @ErrMsg = 'Entity Contract cannot be more than 30 characters.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
+		IF ISNULL(@dblDeferPayRate,0) > 999.99
+		BEGIN
+			SET @ErrMsg = 'Defer PayRate cannot be more than 999.99.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
+		IF ISNULL(@dblTolerancePct,0) > 99999999.9999
+		BEGIN
+			SET @ErrMsg = 'Tolerance Pct cannot be more than 99999999.9999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
+		IF ISNULL(@dblProvisionalInvoicePct,0) > 99999999.9999
+		BEGIN
+			SET @ErrMsg = 'Tolerance Pct cannot be more than 99999999.9999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF ISNULL(@dblQuantityPerLoad,0) > 99999999999999.9999
+		BEGIN
+			SET @ErrMsg = 'Quantity Per Load cannot be more than 99999999999999.9999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF ISNULL(@intNoOfLoad,0) > 9999
+		BEGIN
+			SET @ErrMsg = 'No Of Load cannot be more than 9999.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		
+		IF @ysnMultiplePriceFixation = 1
+		BEGIN
+			
+			IF ISNULL(@intFutureMarketId,0) = 0 
+			BEGIN
+				SET @ErrMsg = 'Future Market is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+			
+			IF ISNULL(@intFutureMonthId,0) = 0 
+			BEGIN
+				SET @ErrMsg = 'Future Month is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+			
+			IF ISNULL(@intPricingTypeId,0) = 1 AND @dblFutures IS NULL
+			BEGIN
+				SET @ErrMsg = 'Futures is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			IF ISNULL(@dblQuantity,0) > 0 AND ISNULL(@dblNoOfLots,0) = 0
+			BEGIN
+				SET @ErrMsg = 'No Of Lots is missing while creating contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+		END
+
 		IF	@strContractNumber IS NULL
 		BEGIN
 			SET @ErrMsg = 'Contract Number is missing while creating contract.'
@@ -142,24 +261,7 @@ BEGIN TRY
 			SET @ErrMsg = 'Concurrency Id is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
-		IF ISNULL(@ysnCategory,0) = 0 
-		BEGIN
-			IF	@intCommodityId IS NULL
-			BEGIN
-				SET @ErrMsg = 'Commodity is missing while creating contract.'
-				RAISERROR(@ErrMsg,16,1)
-			END
-			IF	@intCommodityUOMId IS NULL
-			BEGIN
-				SET @ErrMsg = 'UOM is missing while creating contract.'
-				RAISERROR(@ErrMsg,16,1)
-			END
-			IF NOT EXISTS(SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
-			BEGIN
-				SET @ErrMsg = 'Combination of commodity id and UOM id is not matching.'
-				RAISERROR(@ErrMsg,16,1)
-			END
-		END
+		
 
 		IF EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractTypeId  = @intContractTypeId AND strContractNumber = @strContractNumber)
 		BEGIN
@@ -210,7 +312,7 @@ BEGIN TRY
 		IF	@intGradeId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strWeightGradeDesc FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId
-			SET @ErrMsg = 'Geade ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			SET @ErrMsg = 'Grade ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 

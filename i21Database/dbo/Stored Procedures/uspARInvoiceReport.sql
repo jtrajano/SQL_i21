@@ -89,6 +89,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTicketNumber
 	 , strCustomerReference
 	 , strLoadNumber
+	 , strTruckDriver
 	 , blbLogo
 	 , strAddonDetailKey
 	 , ysnHasAddOnItem
@@ -205,6 +206,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strTicketNumber 			= INVOICEDETAIL.strTicketNumber
 	 , strCustomerReference		= INVOICEDETAIL.strCustomerReference
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
+	 , strTruckDriver			= INVOICEDETAIL.strTruckName
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -270,6 +272,7 @@ LEFT JOIN (
 		 , SCALE.strTicketNumber
 		 , SCALE.strCustomerReference
 		 , SCALE.strLoadNumber
+		 , SCALE.strTruckName
 		 , ID.dblPercentFull
 		 , ID.strAddonDetailKey
 		 , ID.ysnAddonParent
@@ -343,6 +346,7 @@ LEFT JOIN (
 		SELECT SC.intTicketId
 			 , SC.strTicketNumber
 			 , SC.strCustomerReference
+			 , SC.strTruckName
 			 , LG.strLoadNumber
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId

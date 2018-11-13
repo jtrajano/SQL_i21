@@ -317,10 +317,7 @@ BEGIN
 		SELECT
 			 [strTransactionType]					= 'Debit Memo'
 			,[strSCInvoiceNumber]					= ''
-			,[intSalesAccountId]					= (SELECT TOP 1 intGeneralAccountId 
-														FROM vyuARGetItemAccount 
-														WHERE intItemId = intItemId 
-														AND intLocationId = intARLocationId)--178--@accountId
+			,[intSalesAccountId]					= NULL--178--@accountId
 			,[strSourceTransaction]					= 'CF Invoice'
 			,[intSourceId]							= 1											-- TEMPORARY
 			,[strSourceId]							= strInvoiceReportNumber

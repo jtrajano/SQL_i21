@@ -409,9 +409,10 @@ BEGIN TRY
 					BEGIN
 
 						EXEC	uspARCreateInvoiceFromShipment 
-								 @ShipmentId		= @intInventoryShipmentId
-								,@UserId			= @intUserId
-								,@NewInvoiceId		= @intNewInvoiceId	OUTPUT
+								 @ShipmentId			=	@intInventoryShipmentId
+								,@UserId				=	@intUserId
+								,@OnlyUseShipmentPrice	=	1
+								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 

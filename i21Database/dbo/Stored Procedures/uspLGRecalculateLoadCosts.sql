@@ -21,11 +21,13 @@ BEGIN TRY
 		UPDATE LGC
 		SET dblAmount = LGC_Calc.dblAmount
 			,dblRate = LGC_Calc.dblRate
+			,strCostMethod = LGC_Calc.strCostMethod
 		FROM
 			tblLGLoadCost LGC
 			INNER JOIN 
 			(SELECT 
-			LGC.intLoadCostId,
+			intLoadCostId = LGC.intLoadCostId,
+			strCostMethod = ISNULL(IRC.strCostMethod, LGC.strCostMethod),
 			dblAmount = CASE WHEN (CTC.intContractCostId IS NOT NULL)
 							THEN 
 								--If Cost is in the original contract, apply only to the detail associated to the contract 
@@ -102,7 +104,7 @@ BEGIN TRY
 					) [IRC] --Join with Posted IR Costs on the same Item, Vendor, and Cost Method
 					ON LGC.intItemId = IRC.intChargeId
 					AND LGC.intVendorId = IRC.intEntityVendorId
-					AND LGC.strCostMethod = IRC.strCostMethod
+					--AND LGC.strCostMethod = IRC.strCostMethod
 					AND IRC.ysnInventoryCost = 1
 				LEFT JOIN tblLGLoadDetail LGD
 					ON LGD.intLoadId = @intLoadId
@@ -129,7 +131,7 @@ BEGIN TRY
 					) [CTC] --Join with Contract Costs on the same Item, Vendor, and Cost Method
 				ON LGC.intItemId = CTC.intItemId
 					AND LGC.intVendorId = CTC.intVendorId
-					AND LGC.strCostMethod = CTC.strCostMethod
+					--AND LGC.strCostMethod = CTC.strCostMethod
 					AND LGD.intPContractDetailId = CTC.intContractDetailId
 			WHERE LGC.intLoadCostId = @intLoadCostId
 			GROUP BY
@@ -143,6 +145,7 @@ BEGIN TRY
 				LGD.dblQuantity,
 				LGD.dblAmount,
 				IRC.dblAmount,
+				IRC.strCostMethod,
 				CTC.intContractCostId,
 				ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId),
 				ISNULL(IRC.dblRate, LGC.dblRate)) LGC_Calc ON LGC_Calc.intLoadCostId = LGC.intLoadCostId

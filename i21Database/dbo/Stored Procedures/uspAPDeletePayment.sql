@@ -33,7 +33,7 @@ BEGIN TRY
 	CREATE TABLE #tmpCreatedPayment(intCreatePaymentId INT, intBillId INT,intPaymentMethodId INT, ysnClr INT,ysnPrinted INT, ysnPosted INT, ysnVoid INT );
 
 	INSERT INTO #tmpCreatedPayment (intCreatePaymentId, intBillId,intPaymentMethodId, ysnClr, ysnPrinted, ysnPosted, ysnVoid)
-	SELECT	 VAP.intPaymentId 
+	SELECT  VAP.intPaymentId 
 			,VAP.intBillId
 			,P.intPaymentMethodId
 			,VAP.ysnCleared
@@ -42,7 +42,8 @@ BEGIN TRY
 			,VAP.ysnVoid
 	FROM vyuAPBillPayment VAP 
 	INNER JOIN tblAPPayment P ON P.intPaymentId = VAP.intPaymentId
-	where intBillId = @intBillId
+	WHERE intBillId = @intBillId
+	--ORDER BY VAP.intPaymentId DESC
 
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 	
@@ -70,8 +71,8 @@ BEGIN TRY
 		--CREATE ONLY ALL VALID PAYMENT TRANSACTIONS
 		ELSE 
 		BEGIN 
-			IF ( @ysnPrinted = 1 
-				OR (@ysnClear = 1 AND @ysnVoid = 0) --CHECK AND VOID
+			IF ( (@ysnPrinted = 1 AND @ysnVoid = 0) --PRINTED AND NOT VOID
+				OR (@ysnClear = 1 AND @ysnVoid = 0) --CHECK AND NOT VOID
 				OR (@ysnPosted = 1 AND @intPaymentMethodId = 10) --CASH
 				OR  @ysnPosted = 1 AND @intPaymentMethodId = 6) --ECHECK
 			BEGIN
@@ -88,6 +89,9 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN	
+				
+				IF EXISTS(SELECT TOP 1 1 FROM tblAPPaymentDetail where intBillId =  @intBillId AND intPaymentId = @intPaymentId)
+				BEGIN
 					EXEC uspAPPostPayment @userId = @UserEntityID,
 					@recap = 0,
 					@post = 0,
@@ -96,10 +100,13 @@ BEGIN TRY
 					@batchIdUsed = @batchIdUsed OUT,
 					@successfulCount = @totalPostedPayment OUT,
 					@invalidCount = @totalUnpostedPayment OUT
+				END
+				IF EXISTS(SELECT TOP 1 1 FROM tblAPPayment where  ysnPosted = 0 and  intPaymentId = @intPaymentId)
+				BEGIN	
+					DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
 
-			DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
-
-			DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+					DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+				END
 			END
 		END
 		SET @count = @count + 1;

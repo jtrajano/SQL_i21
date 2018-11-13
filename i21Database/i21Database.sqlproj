@@ -7189,6 +7189,17 @@
     <Build Include="dbo\Views\vyuHDTicketRACI.sql" />
     <Build Include="dbo\Views\vyuHDTicketRACICompanyAndThirdParty.sql" />
     <Build Include="dbo\Views\vyuHDTicketRACIContact.sql" />
+    <Build Include="dbo\Views\vyuSCDeliverySheetSummary.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
+    <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Tables\tblCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Functions\fnRKGetContracts.sql" />
+    <Build Include="dbo\Functions\fnGetItemValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7305,6 +7316,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
+    <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_M2MComputations.sql" />

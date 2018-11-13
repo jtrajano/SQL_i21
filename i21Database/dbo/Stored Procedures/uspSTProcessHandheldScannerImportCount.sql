@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
 	@HandheldScannerId INT,
 	@UserId INT,
+	@dtmCountDate DATETIME,
 	@NewInventoryCountId INT OUTPUT,
 	@ysnSuccess BIT OUTPUT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT
@@ -18,6 +19,21 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 
 BEGIN TRY
+	
+	--------------------------------------------------------------------------------------
+	-------------------- Start Validate if has record to Process -------------------------
+	--------------------------------------------------------------------------------------
+	IF NOT EXISTS(SELECT TOP 1 1 FROM vyuSTGetHandheldScannerImportCount WHERE intHandheldScannerId = @HandheldScannerId)
+		BEGIN
+			-- Flag Failed
+			SET @NewInventoryCountId = 0
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'There are no records to process.'
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	-------------------- End Validate if has record to Process ---------------------------
+	--------------------------------------------------------------------------------------
 
 	SELECT *
 	INTO #ImportCounts
@@ -25,7 +41,7 @@ BEGIN TRY
 	WHERE intHandheldScannerId = @HandheldScannerId
 
 	DECLARE @NewId INT,
-		@CountDate DATETIME = GETDATE(),
+		--@CountDate DATETIME = @dtmCountDate,
 		@CompanyLocationId INT,
 		@CountRecords InventoryCountStagingTable
 
@@ -40,7 +56,6 @@ BEGIN TRY
 	FROM #ImportCounts
 
 	SET @strStatusMsg = ''
-
 
 	--------------------------------------------------------------------------------------
 	--------- Start Validate if items does not have intItemUOMId -------------------------
@@ -67,7 +82,7 @@ BEGIN TRY
 	EXEC uspICAddInventoryCount
 	-- Header fields 
 		@intLocationId = @CompanyLocationId
-		,@dtmCountDate = @CountDate
+		,@dtmCountDate = @dtmCountDate
 		,@intCategoryId	= NULL 
 		,@intCommodityId = NULL 
 		,@intCountGroupId = NULL  	

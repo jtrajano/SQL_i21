@@ -104,16 +104,6 @@ BEGIN
 			BEGIN
 				SET @strInvoiceTransactionTypeMain = 'Cash Refund'
 			END
-
-		---- Set Invoice Type for CUSTOMER CHARGES
-		--IF(@dblCheckoutCustomerChargeAmount > 0)
-		--	BEGIN
-		--		SET @strInvoiceTypeCustomerCharges = 'Invoice'
-		--	END
-		--ELSE 
-		--	BEGIN
-		--		SET @strInvoiceTypeCustomerCharges = 'Credit Memo'
-		--	END
 		------------------------------------------------------------------------------
 
 
@@ -221,6 +211,7 @@ BEGIN
 				---------------------------- PUMP TOTALS 01--------------------------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1006
+				--http://jira.irelyserver.com/browse/ST-1016
 				IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)	
 					BEGIN
 						
@@ -539,15 +530,15 @@ BEGIN
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							LEFT OUTER JOIN
 							(
-							SELECT 
-							 [dblAdjustedTax] = SUM ([dblAdjustedTax])
-							 ,[intTempDetailIdForTaxes]
-							FROM
-								@LineItemTaxEntries
-							GROUP BY
-								[intTempDetailIdForTaxes]
+								SELECT 
+								 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+								 ,[intTempDetailIdForTaxes]
+								FROM
+									@LineItemTaxEntries
+								GROUP BY
+									[intTempDetailIdForTaxes]
 							) Tax
-								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
+							ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							
@@ -744,8 +735,6 @@ BEGIN
 							FROM tblSTCheckoutDepartmetTotals DT
 							JOIN tblSTCheckoutPumpTotals CPT
 								ON DT.intCategoryId = CPT.intCategoryId
-								AND DT.dblTotalSalesAmount = 0
-								AND CPT.dblAmount > 0
 							JOIN tblICItem I 
 								ON DT.intItemId = I.intItemId
 							JOIN tblICItemUOM UOM 
@@ -765,7 +754,8 @@ BEGIN
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							WHERE CH.intCheckoutId = @intCheckoutId
 							AND UOM.ysnStockUnit = CAST(1 AS BIT)
-
+							AND DT.dblTotalSalesAmount = 0
+							AND CPT.dblAmount > 0
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
@@ -1789,8 +1779,8 @@ BEGIN
 							ON I.intItemId = IP.intItemId
 							AND IL.intItemLocationId = IP.intItemLocationId	
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
-																			ISNULL(CC.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			ISNULL(CC.dblQuantity, 0)						    -- Qty
+																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)	-- Gross Amount CC.dblUnitPrice
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -1991,7 +1981,9 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																						WHEN (CC.dblAmount > 0)
+																							THEN (CC.dblQuantity * -1)
+																						WHEN (CC.dblAmount < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
 
@@ -2023,8 +2015,8 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
-																							THEN (CC.dblUnitPrice)
-																							-- THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
+																							-- THEN (CC.dblUnitPrice)
+																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
 																					END
 
 																			-- IF Item is BLANK
@@ -2044,7 +2036,13 @@ BEGIN
 											,[dtmMaintenanceDate]		= NULL
 											,[dblMaintenanceAmount]		= NULL
 											,[dblLicenseAmount]			= NULL
-											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+											,[intTaxGroupId]			= CASE 
+																				-- IF Item is Fuel
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN @intTaxGroupId
+																				ELSE NULL
+																		END	
+																			 
 											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
 											,[intSCInvoiceId]			= NULL
 											,[strSCInvoiceNumber]		= NULL
@@ -2088,8 +2086,8 @@ BEGIN
 								JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
-									--ON ST.intCheckoutCustomerId = vC.intEntityId
-									ON CC.intCustomerId = vC.intEntityId
+									ON ST.intCheckoutCustomerId = vC.intEntityId
+									--ON CC.intCustomerId = vC.intEntityId -- For separate Customer CHarges Only
 								LEFT JOIN tblICItemUOM UOM 
 									ON CC.intProduct = UOM.intItemUOMId
 								LEFT JOIN tblICItem I 
@@ -2100,6 +2098,17 @@ BEGIN
 								LEFT JOIN tblICItemPricing IP 
 									ON I.intItemId = IP.intItemId
 									AND IL.intItemLocationId = IP.intItemLocationId	
+								LEFT OUTER JOIN
+								(
+									SELECT 
+									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 ,[intTempDetailIdForTaxes]
+									FROM
+										@LineItemTaxEntries
+									GROUP BY
+										[intTempDetailIdForTaxes]
+								) FuelTax
+								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
 								--OUTER APPLY 
 								--(
 								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
@@ -2141,7 +2150,6 @@ BEGIN
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
 				----------------------------------------------------------------------
-
 
 
 
@@ -2628,8 +2636,8 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
-																							-- THEN (CC.dblUnitPrice - ISNULL(FuelTax.dblTax, 0))
-																							THEN CC.dblUnitPrice
+																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
+																							--THEN CC.dblUnitPrice
 																					END
 
 																			-- IF Item is BLANK
@@ -2649,7 +2657,12 @@ BEGIN
 											,[dtmMaintenanceDate]		= NULL
 											,[dblMaintenanceAmount]		= NULL
 											,[dblLicenseAmount]			= NULL
-											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+											,[intTaxGroupId]			= CASE 
+																				-- IF Item is Fuel
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN @intTaxGroupId
+																				ELSE NULL
+																		END	
 											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
 											,[intSCInvoiceId]			= NULL
 											,[strSCInvoiceNumber]		= NULL
@@ -2706,6 +2719,17 @@ BEGIN
 								LEFT JOIN tblICItemPricing IP 
 									ON I.intItemId = IP.intItemId
 									AND IL.intItemLocationId = IP.intItemLocationId	
+								LEFT OUTER JOIN
+								(
+									SELECT 
+									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 ,[intTempDetailIdForTaxes]
+									FROM
+										@LineItemTaxEntries
+									GROUP BY
+										[intTempDetailIdForTaxes]
+								) FuelTax
+								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
 								--OUTER APPLY 
 								--(
 								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
@@ -2983,9 +3007,9 @@ BEGIN
 
 										--SELECT * FROM @EntriesForInvoice
 
-										SELECT * FROM @LineItemTaxEntries
+										--SELECT * FROM @LineItemTaxEntries
 
-										SELECT * FROM @EntriesForInvoiceBatchPost
+										--SELECT * FROM @EntriesForInvoiceBatchPost
 
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
@@ -2997,45 +3021,58 @@ BEGIN
 													,@ErrorMessage				= @ErrorMessage OUTPUT
 													,@LogId					    = @intIntegrationLogId OUTPUT
 
-										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId)
+										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
 											BEGIN
-												
-												UPDATE tblSTCheckoutHeader
-												SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
-												WHERE intCheckoutId = @intCheckoutId
+												IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+													BEGIN
+														-- Posting to Sales Invoice was successfull
+														UPDATE tblSTCheckoutHeader
+														SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
+														WHERE intCheckoutId = @intCheckoutId
 
-												SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
-												FROM tblARInvoiceIntegrationLog
-												WHERE intIntegrationLogId = @intIntegrationLogId
+														SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
+														FROM tblARInvoiceIntegrationLog
+														WHERE intIntegrationLogId = @intIntegrationLogId
 
-												-- Insert to Temp Table
-												DELETE FROM @tblTempInvoiceIds
+														-- Insert to Temp Table
+														DELETE FROM @tblTempInvoiceIds
 
-												INSERT INTO @tblTempInvoiceIds
-												(
-													intInvoiceId
-												)
-												SELECT DISTINCT 
-													intInvoiceId
-												FROM tblARInvoiceIntegrationLogDetail
-												WHERE intIntegrationLogId = (
-																				SELECT intSalesInvoiceIntegrationLogId
-																				FROM tblSTCheckoutHeader
-																				WHERE intCheckoutId =  @intCheckoutId
-																			)
+														INSERT INTO @tblTempInvoiceIds
+														(
+															intInvoiceId
+														)
+														SELECT DISTINCT 
+															intInvoiceId
+														FROM tblARInvoiceIntegrationLogDetail
+														WHERE intIntegrationLogId = (
+																						SELECT intSalesInvoiceIntegrationLogId
+																						FROM tblSTCheckoutHeader
+																						WHERE intCheckoutId =  @intCheckoutId
+																					)
 
-												-- Populate variable with Invoice Ids
-												SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
-												FROM @tblTempInvoiceIds
-
+														-- Populate variable with Invoice Ids
+														SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+														FROM @tblTempInvoiceIds
 											END
-										--ELSE IF (@ErrorMessage IS NOT NULL AND @ErrorMessage <> '')
-										--	BEGIN
-										--		SET @strStatusMsg = 'Post Sales Invoice error: ' + @ErrorMessage
+										ELSE
+											BEGIN
+												-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+												SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+												SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
-										--		GOTO ExitWithRollback
-										--		RETURN
-										--	END
+												-- ROLLBACK
+												GOTO ExitWithRollback
+												RETURN
+											END
+									END
+								ELSE
+									BEGIN
+										SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+
+										-- ROLLBACK
+										GOTO ExitWithRollback
+										RETURN
+									END
 
 										---- POST Invoice
 										--EXEC [dbo].[uspARProcessInvoices]
@@ -3402,7 +3439,7 @@ BEGIN
 									BEGIN
 
 										-- SELECT * FROM tblARPaymentIntegrationLogDetail
-										SET @ErrorMessage = (SELECT strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+										SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 										SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 										-- ROLLBACK

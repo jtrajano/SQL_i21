@@ -3750,26 +3750,36 @@ BEGIN
 														, RebuildInvTrans.intItemLocationId
 														, RebuildInvTrans.intItemUOMId
 													) 
-												ELSE 
-													dbo.fnMultiply(
-														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
-														,dblUOMQty
+												ELSE
+													COALESCE(
+														dbo.fnMultiply(
+															COALESCE(
+																lot.dblLastCost
+																, (
+																	SELECT TOP 1 dblLastCost 
+																	FROM	tblICItemPricing 
+																	WHERE	intItemId = RebuildInvTrans.intItemId 
+																			and intItemLocationId = RebuildInvTrans.intItemLocationId
+																)
+															)
+															,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+														)
+														,RebuildInvTrans.dblCost
 													)
 											END 
 											
 										WHEN (RebuildInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
-											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
-
+											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
+														RebuildInvTrans.dblCost
 													ELSE 
 														dbo.fnMultiply (
 															dbo.fnDivide(
 																ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
 																,AdjItemUOM.dblUnitQty
 															)
-															,ItemUOM.dblUnitQty
+															,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 														)
-											END 								
-
+											END
 										 ELSE 
 											RebuildInvTrans.dblCost
 									END 
@@ -3811,8 +3821,8 @@ BEGIN
 							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
 							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
 						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
-							ON AdjDetail.intItemId = AdjItemUOM.intItemId
-							AND AdjDetail.intItemUOMId = AdjItemUOM.intItemUOMId
+							ON AdjItemUOM.intItemId = AdjDetail.intItemId
+							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId

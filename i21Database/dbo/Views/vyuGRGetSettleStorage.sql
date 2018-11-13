@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
-SELECT 
+SELECT DISTINCT
 	 intSettleStorageId			= SS.intSettleStorageId
 	,intEntityId				= SS.intEntityId
 	,strEntityName				= E.strName
@@ -29,23 +29,38 @@ SELECT
 	,intBillId					= SS.intBillId
 	,strBillId					= ISNULL(Bill.strBillId,'')
 	,strContractIds				= _strContractIds.strContractIds
-	,strContractNumbers          = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
-	,strUnits                   = CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
-	,intTransactionId			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN CS.intDeliverySheetId
-										WHEN CS.intTicketId IS NOT NULL THEN CS.intTicketId
-										ELSE TSS.intTransferStorageId
-									END
+	,strContractNumbers         = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
+	,strUnits                   =  CASE
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
+										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
+								END
+	,intTransactionId			= CASE 
+									WHEN SS.intParentSettleStorageId IS NULL THEN 99999999
+									ELSE
+										CASE
+											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId
+											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
+											ELSE TSS.intTransferStorageId
+										END
+								END
 	,strTransactionNumber		= CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN DeliverySheet.strDeliverySheetNumber
-										WHEN CS.intTicketId IS NOT NULL THEN SC.strTicketNumber
-										ELSE TS.strTransferStorageTicket
-									END
-	,strTransactionCode			  = CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL THEN 'DS' --DELIVERY SHEET
-										WHEN CS.intTicketId IS NOT NULL THEN 'SC' --SCALE TICKET
-										ELSE 'TS' --TRANSFER STORAGE
-									END
+									WHEN SS.intParentSettleStorageId IS NULL THEN ''
+									ELSE
+										CASE
+											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
+											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
+											ELSE TS.strTransferStorageTicket
+										END
+								END
+	,strTransactionCode			 = CASE 
+									WHEN SS.intParentSettleStorageId IS NULL THEN ''
+									ELSE
+										CASE
+											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
+											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
+											ELSE 'TS' --TRANSFER STORAGE
+										END
+								END
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -72,7 +87,10 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			INNER JOIN tblSCDeliverySheetSplit DSS	
 				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
 		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
-				AND DSS.intEntityId = E.intEntityId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+            AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+
 LEFT JOIN (tblGRTransferStorageSplit TSS
 			INNER JOIN tblGRTransferStorage TS
 				ON TS.intTransferStorageId = TSS.intTransferStorageId

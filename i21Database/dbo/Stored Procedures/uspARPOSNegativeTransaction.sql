@@ -127,7 +127,7 @@ SELECT
 	,[strItemDescription]					= DETAILS.strItemDescription 
 	,[intItemUOMId]							= DETAILS.intItemUOMId
 	,[dblQtyShipped]						= ABS(DETAILS.dblQuantity)
-	,[dblDiscount]							= DETAILS.dblDiscountPercent
+	,[dblDiscount]							= 0
 	,[dblPrice]								= DETAILS.dblPrice
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
