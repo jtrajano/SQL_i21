@@ -1,8 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateDiscountPastDueVouchers]
 	@currencyId INT,
-	@paymentMethodId INT,
+	@paymentMethodId INT = NULL,
 	@datePaid DATETIME,
-	@showDeferred BIT
+	@vendorId INT = NULL,
+	@payToAddressId INT = NULL,
+	@showDeferred BIT = 0,
+	@rowsAffected INT = NULL OUTPUT
 AS
 
 BEGIN
@@ -18,19 +21,43 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-UPDATE voucher
-	SET voucher.dblDiscount = 0
-FROM vyuAPBillForPayment forPay
-INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
-WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
-AND forPay.intCurrencyId = @currencyId
-AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
-			ELSE (CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) END)
-AND voucher.intTransactionType = 1
-AND voucher.ysnPaid = 0
-AND voucher.ysnDiscountOverride = 1
-AND voucher.dblDiscount != 0
-AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+IF @vendorId IS NULL
+BEGIN
+	--MULTI VENDOR
+	UPDATE voucher
+		SET voucher.dblDiscount = 0
+	FROM vyuAPBillForPayment forPay
+	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
+	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
+	AND forPay.intCurrencyId = @currencyId
+	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
+				ELSE (CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) END)
+	AND voucher.intTransactionType = 1
+	AND voucher.ysnPaid = 0
+	AND voucher.ysnDiscountOverride = 1
+	AND voucher.dblDiscount != 0
+	AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+END
+ELSE
+BEGIN
+	UPDATE voucher
+		SET voucher.dblDiscount = 0
+	FROM vyuAPBillForPayment forPay
+	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
+	WHERE 
+		voucher.intEntityVendorId = @vendorId
+	AND ISNULL(voucher.intPayToAddressId,0) = CASE WHEN NULLIF(@payToAddressId,0) IS NULL THEN ISNULL(voucher.intPayToAddressId,0) ELSE @payToAddressId END
+	AND forPay.intCurrencyId = @currencyId
+	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
+				ELSE (CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) END)
+	AND voucher.intTransactionType = 1
+	AND voucher.ysnPaid = 0
+	AND voucher.ysnDiscountOverride = 1
+	AND voucher.dblDiscount != 0
+	AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+END
+
+SET @rowsAffected = @@ROWCOUNT;
 
 IF @transCount = 0 COMMIT TRANSACTION
 
