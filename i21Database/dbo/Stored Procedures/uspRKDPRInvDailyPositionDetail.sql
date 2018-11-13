@@ -865,15 +865,15 @@ WHERE intLocationId IN (
 			  AND intStorageScheduleTypeId NOT IN(SELECT DISTINCT isnull(intStorageScheduleTypeId,0) FROM @Final WHERE intSeqId=5)
 	END
 
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,dtmDeliveryDate ,strTicket ,strLocationName,strItemNo,intCommodityId,
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,dtmDeliveryDate ,strTicket ,strLocationName,strCustomerReference,strItemNo,intCommodityId,
 	intFromCommodityUnitMeasureId,[Storage Due],intCompanyLocationId,intTicketId,strTicketNumber,dtmTicketDateTime,intInventoryReceiptId,intInventoryShipmentId,strReceiptNumber,strShipmentNumber)
 	SELECT * FROM 
 	(SELECT 7 AS intSeqId,'Total Non-Receipted' strSeqHeader,@strDescription strCommodityCode
-		,'Total Non-Receipted' [Storage Type]
+		,[Storage Type]
 		,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId ,ISNULL(Balance, 0)) dblTotal,
 		[Delivery Date],
 		 Ticket,
-		strLocationName,r.strItemNo, @intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId
+		strLocationName, r.[Customer], r.strItemNo, @intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId
 		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicket,dtmTicketDateTime
 		,r.intInventoryReceiptId
 		,r.intInventoryShipmentId
