@@ -707,7 +707,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -817,7 +817,7 @@ WHERE intLocationId IN (
 	--select intSeqId,strSeqHeader,strCommodityCode,strType,sum(dblTotal),strCustomer,intCustomerStorageId,strTicket,dtmDeliveryDate,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId from(
 	SELECT 5 AS intSeqId,[Storage Type] strSeqHeader,@strDescription strCommodityCode,[Storage Type] AS [strType],
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,Balance) dblTotal,
-	strName strCustomer,intTicketId,strTicket,[Delivery Date] dtmDeliveryDate
+	strName strCustomer,intCustomerStorageId,strTicket,[Delivery Date] dtmDeliveryDate
 	,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId
 	,intCompanyLocationId
 	,s.intInventoryReceiptId
@@ -874,7 +874,7 @@ WHERE intLocationId IN (
 		[Delivery Date],
 		 Ticket,
 		strLocationName, r.[Customer], r.strItemNo, @intCommodityId intCommodityId,@intCommodityUnitMeasureId intCommodityUnitMeasureId
-		,[Storage Due],intCompanyLocationId,r.intTicketId,r.strTicket,dtmTicketDateTime
+		,[Storage Due],intCompanyLocationId,r.intCustomerStorageId,r.strTicket,dtmTicketDateTime
 		,r.intInventoryReceiptId
 		,r.intInventoryShipmentId
 		,r.strReceiptNumber
@@ -968,7 +968,7 @@ SELECT * FROM (
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(Balance, 0)) dblTotal,r.intCommodityId  ,Loc AS strLocation ,
 			i.strItemNo,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS [Storage Due]  
-			,dtmLastStorageAccrueDate ,strScheduleId,@intCommodityUnitMeasureId intCommodityUnitMeasureId,intCompanyLocationId ,r.intTicketId,r.strTicketNumber,dtmTicketDateTime 
+			,dtmLastStorageAccrueDate ,strScheduleId,@intCommodityUnitMeasureId intCommodityUnitMeasureId,intCompanyLocationId ,r.intCustomerStorageId,r.strTicketNumber,dtmTicketDateTime 
 			FROM #tblGetStorageDetailByDate  r
 			join tblICItem i on r.intItemId=i.intItemId
 			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
@@ -1088,7 +1088,7 @@ SELECT * FROM (
 		FROM  (
 	SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(Balance)) dblTotal,CH.intCommodityId,Loc AS strLocation,i.strItemNo ,[Delivery Date] AS dtmDeliveryDate ,
 				Ticket strTicket ,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,
-				[Storage Due] AS [Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId,intCompanyLocationId,intTicketId,strTicketNumber,dtmTicketDateTime
+				[Storage Due] AS [Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId,intCompanyLocationId,intCustomerId,strTicketNumber,dtmTicketDateTime
 			FROM #tblGetStorageDetailByDate CH
 			join tblICItem i on CH.intItemId=i.intItemId
 			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
@@ -1112,7 +1112,7 @@ SELECT * FROM (
 		
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,dtmTicketDateTime)
 	SELECT 15 intSeqId,'Company Titled Stock',@strDescription,'DP',sum(dblTotal) dblTotal,intTicketId,strTicketNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,dtmTicketDateTime  from(
-			SELECT intTicketId,strTicketNumber,
+			SELECT intCustomerStorageId,strTicketNumber,
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					,ch.intCompanyLocationId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName,dtmTicketDateTime
 					FROM #tblGetStorageDetailByDate ch
