@@ -488,6 +488,9 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN --Update
+				DELETE
+				FROM @tblEMEntity
+
 				IF @ysnDeleted = 1
 				BEGIN
 					UPDATE tblEMEntity
@@ -796,6 +799,8 @@ BEGIN TRY
 						FROM @tblEMEntity
 						)
 				BEGIN
+					SELECT @strDetails = ''
+
 					SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
 					FROM @tblEMEntity EM
 					WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
