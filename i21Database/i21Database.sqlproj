@@ -7157,6 +7157,9 @@
     <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotAdjustDetail.sql" />
+    <Build Include="dbo\Functions\fnGetItemValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
