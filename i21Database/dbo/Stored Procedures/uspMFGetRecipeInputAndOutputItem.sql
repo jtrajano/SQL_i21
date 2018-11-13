@@ -323,6 +323,9 @@ BEGIN TRY
 		,Prod.dblWeightPerUnit
 		,Prod.strReferenceNo AS strReferenceNo
 		,Prod.strRemarks AS strRemarks
+		,CONVERT(INT, Row_Number() OVER (
+				ORDER BY ri.intRecipeId DESC
+				)) AS intRowNo
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -418,6 +421,9 @@ BEGIN TRY
 		,Cons.dtmFeedTime
 		,Cons.strReferenceNo
 		,GETDATE() AS dtmActualInputDateTime
+		,CONVERT(INT, Row_Number() OVER (
+				ORDER BY ri.intRecipeId DESC
+				)) AS intRowNo
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
