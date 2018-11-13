@@ -7164,6 +7164,9 @@
     <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountRegisterRunningBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetContracts.sql" />
+    <Build Include="dbo\Functions\fnGetItemValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
