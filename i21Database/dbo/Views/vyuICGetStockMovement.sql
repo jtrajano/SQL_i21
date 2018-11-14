@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuICGetStockMovement]
 AS
 
-SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryStockMovementId, 0) 		
+SELECT	intInventoryValuationKeyId  = COALESCE(t.intInventoryStockMovementId, i.intItemId) --ISNULL(t.intInventoryStockMovementId, 0) 		
 		,i.intItemId
 		,strItemNo					= i.strItemNo
 		,strItemDescription			= i.strDescription
