@@ -7200,6 +7200,8 @@
     <Build Include="dbo\Functions\fnGetItemValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
+    <Build Include="dbo\Tables\tblHDUpgradeType.sql" />
+    <Build Include="dbo\Tables\tblHDUpgradeEnvironment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
