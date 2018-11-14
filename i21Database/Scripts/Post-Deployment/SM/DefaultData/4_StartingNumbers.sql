@@ -10,6 +10,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Report Messages', strModule = 'System Manager'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Document Maintenance'
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Derivative Entry'
+	WHERE strTransactionType = N'FutOpt Transaction'
+
 GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
 
@@ -446,13 +449,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Match No')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 45
-			,[strTransactionType]	= N'FutOpt Transaction'
+			,[strTransactionType]	= N'Derivative Entry'
 			,[strPrefix]			= N'DER-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'FutOpt Transaction')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Derivative Entry')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 46
 			,[strTransactionType]	= N'Demand Number'
@@ -1408,12 +1411,13 @@ GO
 		WHERE strTransactionType = N'WarehouseBOLNo' and [strPrefix]='BOL-'
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'FutOpt Transaction')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Derivative Entry')
 	BEGIN
 		UPDATE tblSMStartingNumber
-		SET strTransactionType = 'Derivative Entry'
-		WHERE strTransactionType = N'FutOpt Transaction'
-	END
+		SET [strPrefix] = 'DER-'
+		WHERE strTransactionType = N'Derivative Entry'
+	END 
+
 GO
 	PRINT N'BEGIN RENAME S'
 
