@@ -220,7 +220,10 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	a.intCustomerStorageId,
 	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
-	,[Delivery Date] = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME,CONVERT(VARCHAR(10),gh.dtmHistoryDate,110),110) ELSE CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate,110),110) END
+	,[Delivery Date] = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME,CONVERT(VARCHAR(10),gh.dtmHistoryDate,110),110)
+		WHEN gh.strType = 'Reduced By Inventory Shipment' AND gh.intTicketId IS NOT NULL THEN CONVERT(DATETIME,CONVERT(VARCHAR(10),t.dtmTicketDateTime,110),110)
+		ELSE CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate,110),110) 
+		END
 	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
@@ -247,7 +250,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intSto
 	,i.intItemId as intItemId ,t.dtmTicketDateTime
 	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.intTransferStorageId when gh.strType = 'Settlement' then gh.intSettleStorageId else t.intTicketId end) intTicketId
 	,t.strTicketNumber
-	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket  when gh.strType = 'Settlement' then gh.strSettleTicket else a.strStorageTicketNumber end) strTicket
+	,(case when gh.strType ='From Transfer' OR gh.strType = 'Transfer' then gh.strTransferTicket  when gh.strType = 'Settlement' then gh.strSettleTicket WHEN gh.strType ='Reduced By Inventory Shipment' THEN t.strTicketNumber else a.strStorageTicketNumber end) strTicket
 	,gh.intInventoryReceiptId
 	,gh.intInventoryShipmentId
 	,ISNULL((select strReceiptNumber from tblICInventoryReceipt where intInventoryReceiptId = gh.intInventoryReceiptId),'') strReceiptNumber
