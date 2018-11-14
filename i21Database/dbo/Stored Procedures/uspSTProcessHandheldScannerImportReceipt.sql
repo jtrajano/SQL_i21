@@ -25,6 +25,7 @@ BEGIN TRY
 		strReceiptRefNo NVARCHAR(150) COLLATE Latin1_General_CI_AS
 	)
 
+
 	-- Insert to table
 	INSERT INTO @tblTempItems
 	(
@@ -51,6 +52,55 @@ BEGIN TRY
 	--------------------------------------------------------------------------------------
 	-------------------- End Validate if has record to Process ---------------------------
 	--------------------------------------------------------------------------------------
+
+
+
+	--------------------------------------------------------------------------------------
+	------------ Start Validate if All Items have the same Store Location ----------------
+	--------------------------------------------------------------------------------------
+	IF EXISTS(
+				SELECT TOP 1 1 
+				FROM tblSTHandheldScannerImportReceipt IR
+				INNER JOIN tblSTHandheldScanner HS
+					ON IR.intHandheldScannerId = HS.intHandheldScannerId
+				INNER JOIN tblSTStore ST
+					ON HS.intStoreId = ST.intStoreId
+				INNER JOIN tblICItem Item
+					ON IR.intItemId = Item.intItemId
+				LEFT JOIN tblICItemLocation ItemLoc
+					ON Item.intItemId = ItemLoc.intItemId
+					AND ST.intCompanyLocationId = ItemLoc.intLocationId
+				WHERE IR.intHandheldScannerId = @HandheldScannerId
+				AND ItemLoc.intItemLocationId IS NULL
+			 )
+		BEGIN
+			DECLARE @strItemNoLocationSameAsStore AS NVARCHAR(MAX)
+
+			SELECT @strItemNoLocationSameAsStore = COALESCE(@strItemNoLocationSameAsStore + ', ', '') + strItemNo
+			FROM tblSTHandheldScannerImportReceipt IR
+			INNER JOIN tblSTHandheldScanner HS
+				ON IR.intHandheldScannerId = HS.intHandheldScannerId
+			INNER JOIN tblSTStore ST
+				ON HS.intStoreId = ST.intStoreId
+			INNER JOIN tblICItem Item
+				ON IR.intItemId = Item.intItemId
+			LEFT JOIN tblICItemLocation ItemLoc
+				ON Item.intItemId = ItemLoc.intItemId
+				AND ST.intCompanyLocationId = ItemLoc.intLocationId
+			WHERE IR.intHandheldScannerId = @HandheldScannerId
+			AND ItemLoc.intItemLocationId IS NULL
+
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'Selected Item/s  ' + @strItemNoLocationSameAsStore + '  has no location setup same as location of selected Store.'
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	------------- End Validate if All Items have the same Store Location -----------------
+	--------------------------------------------------------------------------------------
+
+
+
 
 	SELECT DISTINCT intVendorId, intCompanyLocationId
 	INTO #Vendors
@@ -100,118 +150,122 @@ BEGIN TRY
 
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #Vendors)
-	BEGIN
-		DELETE FROM @ReceiptStagingTable
-
-		SELECT TOP 1 @VendorId = intVendorId, @CompanyLocationId = intCompanyLocationId FROM #Vendors
-
-		SELECT TOP 1 @ShipFrom = intShipFromId, @VendorNo = strVendorId FROM tblAPVendor WHERE intEntityId = @VendorId
-		IF (ISNULL(@ShipFrom, '') = '')
 		BEGIN
-			DECLARE @MSG NVARCHAR(250) = 'Vendor ' + @VendorNo + 'has no default Ship From!'
-			RAISERROR(@MSG, 16, 1)
-		END
+			DELETE FROM @ReceiptStagingTable
+
+			SELECT TOP 1 @VendorId = intVendorId, @CompanyLocationId = intCompanyLocationId FROM #Vendors
+
+			SELECT TOP 1 @ShipFrom = intShipFromId, @VendorNo = strVendorId FROM tblAPVendor WHERE intEntityId = @VendorId
+			IF (ISNULL(@ShipFrom, '') = '')
+			BEGIN
+				DECLARE @MSG NVARCHAR(250) = 'Vendor ' + @VendorNo + 'has no default Ship From!'
+				RAISERROR(@MSG, 16, 1)
+			END
 
 		
 
-		SELECT *
-		INTO #tmpImportReceipts
-		FROM vyuSTGetHandheldScannerImportReceipt
-		WHERE intHandheldScannerId = @HandheldScannerId
-			AND intVendorId = @VendorId
-			AND intCompanyLocationId = @CompanyLocationId
+			SELECT *
+			INTO #tmpImportReceipts
+			FROM vyuSTGetHandheldScannerImportReceipt
+			WHERE intHandheldScannerId = @HandheldScannerId
+				AND intVendorId = @VendorId
+				AND intCompanyLocationId = @CompanyLocationId
 		
-		INSERT INTO @ReceiptStagingTable(
-			strReceiptType
-			,strSourceScreenName
-			,intEntityVendorId
-			,intShipFromId
-			,intLocationId
-			,intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,strBillOfLadding
-			,intContractHeaderId
-			,intContractDetailId
-			,dtmDate
-			,intShipViaId
-			,dblQty
-			,dblCost
-			,intCurrencyId
-			,dblExchangeRate
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,ysnIsStorage
-			,dblFreightRate
-			,intSourceId	
-			,intSourceType		 	
-			,dblGross
-			,dblNet
-			,intInventoryReceiptId
-			,dblSurcharge
-			,ysnFreightInPrice
-			,strActualCostId
-			,intTaxGroupId
-			,strVendorRefNo
-			,strSourceId			
-			,intPaymentOn
-			,strChargesLink
-		)	
-		SELECT strReceiptType		= 'Direct'
-			,strSourceScreenName	= 'None'
-			,intEntityVendorId		= @VendorId
-			,intShipFromId			= @ShipFrom
-			,intLocationId			= @CompanyLocationId
-			,intItemId				= intItemId
-			,intItemLocationId		= intItemLocationId
-			,intItemUOMId			= intItemUOMId
-			,strBillOfLadding		= ''
-			,intContractHeaderId	= NULL
-			,intContractDetailId	= NULL
-			,dtmDate				= dtmReceiptDate
-			,intShipViaId			= NULL
-			,dblQty					= dblReceivedQty
-			,dblCost				= dblCaseCost --dblUnitRetail
-			,intCurrencyId			= @defaultCurrency
-			,dblExchangeRate		= 1
-			,intLotId				= NULL
-			,intSubLocationId		= NULL
-			,intStorageLocationId	= NULL
-			,ysnIsStorage			= 0
-			,dblFreightRate			= 0
-			,intSourceId			= NULL
-			,intSourceType		 	= 0
-			,dblGross				= NULL
-			,dblNet					= NULL
-			,intInventoryReceiptId	= NULL
-			,dblSurcharge			= NULL
-			,ysnFreightInPrice		= NULL
-			,strActualCostId		= NULL
-			,intTaxGroupId			= NULL
-			,strVendorRefNo			= strReceiptRefNoComment
-			,strSourceId			= NULL
-			,intPaymentOn			= NULL
-			,strChargesLink			= NULL
-		FROM #tmpImportReceipts
-		WHERE intCompanyLocationId = @CompanyLocationId
-			AND intVendorId = @VendorId
-
-		EXEC dbo.uspICAddItemReceipt 
-			@ReceiptStagingTable
-			,@OtherCharges
-			,@UserId;
-
-		DROP TABLE #tmpImportReceipts
-
-		DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
 
 
+			INSERT INTO @ReceiptStagingTable(
+				strReceiptType
+				,strSourceScreenName
+				,intEntityVendorId
+				,intShipFromId
+				,intLocationId
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,strBillOfLadding
+				,intContractHeaderId
+				,intContractDetailId
+				,dtmDate
+				,intShipViaId
+				,dblQty
+				,dblCost
+				,intCurrencyId
+				,dblExchangeRate
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId
+				,ysnIsStorage
+				,dblFreightRate
+				,intSourceId	
+				,intSourceType		 	
+				,dblGross
+				,dblNet
+				,intInventoryReceiptId
+				,dblSurcharge
+				,ysnFreightInPrice
+				,strActualCostId
+				,intTaxGroupId
+				,strVendorRefNo
+				,strSourceId			
+				,intPaymentOn
+				,strChargesLink
+				,dblUnitRetail
+			)	
+			SELECT strReceiptType		= 'Direct'
+				,strSourceScreenName	= 'None'
+				,intEntityVendorId		= @VendorId
+				,intShipFromId			= @ShipFrom
+				,intLocationId			= @CompanyLocationId
+				,intItemId				= intItemId
+				,intItemLocationId		= intItemLocationId
+				,intItemUOMId			= intItemUOMId
+				,strBillOfLadding		= ''
+				,intContractHeaderId	= NULL
+				,intContractDetailId	= NULL
+				,dtmDate				= dtmReceiptDate
+				,intShipViaId			= NULL
+				,dblQty					= dblReceivedQty
+				,dblCost				= dblCaseCost --dblUnitRetail
+				,intCurrencyId			= @defaultCurrency
+				,dblExchangeRate		= 1
+				,intLotId				= NULL
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
+				,ysnIsStorage			= 0
+				,dblFreightRate			= 0
+				,intSourceId			= NULL
+				,intSourceType		 	= 0
+				,dblGross				= NULL
+				,dblNet					= NULL
+				,intInventoryReceiptId	= NULL
+				,dblSurcharge			= NULL
+				,ysnFreightInPrice		= NULL
+				,strActualCostId		= NULL
+				,intTaxGroupId			= NULL
+				,strVendorRefNo			= strReceiptRefNoComment
+				,strSourceId			= NULL
+				,intPaymentOn			= NULL
+				,strChargesLink			= NULL
+				,dblUnitRetail			= dblUnitRetail
+			FROM #tmpImportReceipts
+			WHERE intCompanyLocationId = @CompanyLocationId
+				AND intVendorId = @VendorId
 
-		-- Flag Success
-		SET @ysnSuccess = CAST(1 AS BIT)
-		SET @strStatusMsg = ''
-	END	
+			EXEC dbo.uspICAddItemReceipt 
+				@ReceiptStagingTable
+				,@OtherCharges
+				,@UserId;
+
+			DROP TABLE #tmpImportReceipts
+
+			DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
+
+
+
+			-- Flag Success
+			SET @ysnSuccess = CAST(1 AS BIT)
+			SET @strStatusMsg = ''
+		END	
 	DROP TABLE #Vendors
 
 END TRY
