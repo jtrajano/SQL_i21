@@ -1259,7 +1259,6 @@ BEGIN TRY
 					,[dblNetWeight]
 					,[intWeightUOMId]
 					,[intInventoryReceiptItemId]
-					,[intWeightUOMId]
 				 )
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
@@ -1289,10 +1288,7 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
 													ELSE 0 
 												END
-					,[intWeightUOMId]			= CASE
-													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
-													ELSE NULL
-												END
+					,[intWeightUOMId]			= b.intItemUOMId
 					,[intInventoryReceiptItemId] = CASE 
 													WHEN ST.ysnDPOwnedType = 0 THEN NULL
 													ELSE
@@ -1309,7 +1305,6 @@ BEGIN TRY
 															ELSE NULL
 														END
 												END
-					,[intWeightUOMId]			= b.intItemUOMId
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
