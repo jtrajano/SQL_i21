@@ -488,18 +488,22 @@ BEGIN TRY
 				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
 				WHILE ISNULL(@intId,0) > 0
 				BEGIN
-					SELECT @strTransactionId = IR.strReceiptNumber, @InventoryReceiptId = IRI.intInventoryReceiptId, @EntitySplitId = IR.intEntityVendorId
-					, @dblBalance = ROUND(IRI.dblOpenReceive, @currencyDecimal) FROM tblICInventoryReceiptItem IRI 
+					SELECT @strTransactionId = IR.strReceiptNumber, @InventoryReceiptId = IRI.intInventoryReceiptId
+					, @EntitySplitId = IR.intEntityVendorId
+					, @intLocationId = IR.intLocationId
+					, @dblBalance = ROUND(IRI.dblOpenReceive, @currencyDecimal) 
+					FROM tblICInventoryReceiptItem IRI 
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intInventoryReceiptItemId = @intId
 					
 					SELECT @intItemId = intItemId
-					, @intLocationId = intProcessingLocationId
 					, @intDeliverySheetId = intDeliverySheetId 
-					, @intStorageScheduleTypeId = SCS.intStorageScheduleTypeId
+					, @intStorageScheduleTypeId = ISNULL(SCS.intStorageScheduleTypeId,SC.intStorageScheduleTypeId)
 					FROM tblSCTicket SC
-					INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId
-					WHERE SC.intTicketId = @intTicketId AND SCS.intCustomerId = @EntitySplitId
+					OUTER APPLY(
+						SELECT intStorageScheduleTypeId FROM tblSCTicketSplit WHERE intTicketId = @intTicketId AND intCustomerId = @EntitySplitId
+					) SCS
+					WHERE SC.intTicketId = @intTicketId 
 					
 					EXEC uspGRCustomerStorageBalance	
 						@EntitySplitId 
@@ -513,14 +517,14 @@ BEGIN TRY
 						,0
 						,@newBalance OUTPUT
 
-					IF ISNULL(ROUND(@newBalance, @currencyDecimal), 0) > 0
+					IF ISNULL(ROUND(ISNULL(@newBalance,0), @currencyDecimal), 0) > 0
 						DELETE FROM tblGRStorageHistory WHERE intInventoryReceiptId = @InventoryReceiptId
 					ELSE
 						EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 					
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
-
+					
 					SET @finalGrossWeight = ISNULL(@finalGrossWeight,0) + @dblBalance
 
 					SELECT @intId = MIN(intInventoryReceiptItemId) 
