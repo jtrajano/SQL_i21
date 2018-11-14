@@ -91,7 +91,10 @@ SELECT DISTINCT TOP 100 PERCENT
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CS.dblOriginalBalance
 											ELSE SH.dblUnits
 	 									END
-	,dtmHistoryDate						= SH.dtmHistoryDate
+	,dtmHistoryDate						= CASE 
+											WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN SH.dtmDistributionDate
+											ELSE SH.dtmHistoryDate
+										END
 	,dblPaidAmount						= ISNULL(SH.dblPaidAmount,0)
 	,strPaidDescription					= CASE 
 											WHEN SH.intTransactionTypeId = 3 THEN SH.strType 
