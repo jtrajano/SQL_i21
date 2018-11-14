@@ -564,9 +564,6 @@ BEGIN
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
 
-		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
-		VALUES(@EntityId, @intTermsId)
-
 		IF ISNULL(@ysnPymtCtrlEFTActive, 0) = 1
 		BEGIN
 			SET @ysnPymtCtrlActive = 1
@@ -574,6 +571,9 @@ BEGIN
 
 		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dblCreditLimit], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dblCreditLimit, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+
+		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
+		VALUES(@EntityId, @intTermsId)
 
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
