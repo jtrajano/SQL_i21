@@ -1,8 +1,8 @@
 CREATE VIEW [dbo].[vyuGRAccruedStorages]
 AS
 SELECT 
-	intAccountId				= SI.intAccountId
-	,strAccountId				= GL.strAccountId --ACCT #
+	intAccountId				= EM.intEntityId
+	,strAccountId				= EM.strEntityNo --ACCT #
 	,intEntityId				= CS.intEntityId
 	,strName					= EM.strName --NAME
 	,intCompanyLocationId		= CS.intCompanyLocationId
@@ -28,10 +28,6 @@ INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
-INNER JOIN tblARInvoice SI
-	ON SI.intInvoiceId = SH.intInvoiceId
-INNER JOIN tblGLAccount GL
-	ON GL.intAccountId = SI.intAccountId
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = CS.intEntityId
 INNER JOIN tblICCommodity CO
@@ -45,3 +41,5 @@ LEFT JOIN (tblSCDeliverySheet DS
 			AND DSS.intEntityId = EM.intEntityId
 			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
 			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+WHERE (SH.strType = 'Accrue Storage' AND SH.intInvoiceId IS NULL) --Accrued Storage
+	OR ((SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice') AND SH.intInvoiceId IS NOT NULL)--Generated Invoice
