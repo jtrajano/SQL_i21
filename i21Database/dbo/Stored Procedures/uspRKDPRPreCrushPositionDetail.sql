@@ -1052,6 +1052,9 @@ FROM (
 	WHERE f.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
 		AND f.intLocationId = ISNULL(@intLocationId, f.intLocationId)) t
 
+
+		-- TODO: Add Delta. basically option net hedge
+
 INSERT INTO @List (strCommodityCode
 	, intCommodityId
 	, strInternalTradeNo
