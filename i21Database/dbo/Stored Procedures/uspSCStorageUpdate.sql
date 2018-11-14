@@ -332,7 +332,6 @@ BEGIN TRY
 	LEFT JOIN tblICItem ICFees ON ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = SC.intItemId AND UOM.intItemUOMId = SC.intItemUOMIdTo
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = SC.intContractId
-	
 	WHERE SC.intTicketId = @intTicketId
 
 	EXEC uspGRCreateCustomerStorage @CustomerStorageStagingTable, @intHoldCustomerStorageId OUTPUT

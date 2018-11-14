@@ -100,9 +100,12 @@ BEGIN TRY
 		FROM tblSCDeliverySheetSplit SDS
 		INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SDS.intDeliverySheetId
 		WHERE SDS.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
-
-		INSERT INTO tblSCTicketSplit
-		SELECT * FROM @splitTable
+		
+		IF (SELECT COUNT(intTicketId) FROM @splitTable) > 1
+		BEGIN
+			INSERT INTO tblSCTicketSplit
+			SELECT * FROM @splitTable
+		END
 
 		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId FROM @splitTable
 		OPEN splitCursor;  
