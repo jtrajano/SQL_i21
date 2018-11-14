@@ -18,7 +18,10 @@ SELECT
 	,Item.strItemNo	
 	,dblUnits = CAST(dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, IU.intItemUOMId,SH.dblUnits) AS DECIMAL(18,6))
 	,SH.dblPaidAmount
-	,SH.strPaidDescription	
+	,strPaidDescription = CASE 
+							WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN 'Bill Storage'
+							ELSE 'Accrue'
+						END	
 	,dtmCalculatedStorageThru = CASE 
 									WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN SH.dtmDistributionDate
 									ELSE SH.dtmHistoryDate
