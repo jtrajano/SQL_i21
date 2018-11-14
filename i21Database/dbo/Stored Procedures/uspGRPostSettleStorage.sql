@@ -1001,6 +1001,7 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
+					,[intWeightUOMId]
 				 )
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
@@ -1017,6 +1018,7 @@ BEGIN TRY
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
 					,[dblNetWeight]				= 0 
+					,[intWeightUOMId]			= b.intItemUOMId
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
@@ -1055,6 +1057,7 @@ BEGIN TRY
 						,[dblCostUnitQty]
 						,[dblUnitQty]
 						,[dblNetWeight]
+						,[intWeightUOMId]
 						)
 						SELECT 
 							intCustomerStorageId 	= SST.intCustomerStorageId
@@ -1077,6 +1080,7 @@ BEGIN TRY
 						,[dblCostUnitQty] 		= 1
 						,[dblUnitQty]			= 1
 						,[dblNetWeight] 		= 0	
+						,[intWeightUOMId]		= CU.intCommodityUnitMeasureId
 					FROM tblICInventoryReceiptCharge ReceiptCharge
 					JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
 					JOIN tblGRStorageHistory SH ON SH.intInventoryReceiptId=ReceiptCharge.intInventoryReceiptId AND SH.strType='FROM Scale'
@@ -1162,6 +1166,7 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
+					,[intWeightUOMId]
 				 )
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
@@ -1195,6 +1200,7 @@ BEGIN TRY
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1
 				 ,[dblNetWeight]		  = 0 
+				 ,[intWeightUOMId]		  = UOM.intItemUOMId
 				 FROM 
 				 tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD ON CD.intContractDetailId =  CC.intContractDetailId
