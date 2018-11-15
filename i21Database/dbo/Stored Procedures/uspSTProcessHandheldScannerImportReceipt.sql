@@ -260,14 +260,17 @@ BEGIN TRY
 
 			DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
 
-
-
-			-- Flag Success
-			SET @ysnSuccess = CAST(1 AS BIT)
-			SET @strStatusMsg = ''
 		END	
+
 	DROP TABLE #Vendors
 
+	-- Clear record from table
+	DELETE FROM tblSTHandheldScannerImportReceipt 
+	WHERE intHandheldScannerId = @HandheldScannerId
+
+	-- Flag Success
+	SET @ysnSuccess = CAST(1 AS BIT)
+	SET @strStatusMsg = ''
 END TRY
 BEGIN CATCH
 	SELECT 

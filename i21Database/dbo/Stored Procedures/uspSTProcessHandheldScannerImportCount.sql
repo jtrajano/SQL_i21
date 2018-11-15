@@ -112,6 +112,10 @@ BEGIN TRY
 
 	SET @NewInventoryCountId = @NewId
 
+	-- Clear record from table
+	DELETE FROM tblSTHandheldScannerImportCount 
+	WHERE intHandheldScannerId = @HandheldScannerId
+
 	-- Flag Success
 	SET @ysnSuccess = CAST(1 AS BIT)
 	SET @strStatusMsg = ''
