@@ -641,9 +641,9 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '4', strType = 'Ethanol', strState = 'OR', strStatus = 'Exclude', intMasterId = 37438
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '4', strType = 'Gasoline', strState = 'OR', strStatus = 'Exclude', intMasterId = 37435
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '4', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Exclude', intMasterId = 37437
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Aviation Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37441
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37440
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Include', intMasterId = 37442
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Aviation Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37441
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37440
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Include', intMasterId = 37442
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5LO', strType = 'Biodiesel - Undyed (Stroutdale)', strState = 'OR', strStatus = 'Include', intMasterId = 37445
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5LO', strType = 'CNG', strState = 'OR', strStatus = 'Include', intMasterId = 37446
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '5LO', strType = 'Gasoline (Stroutdale)', strState = 'OR', strStatus = 'Include', intMasterId = 37443
