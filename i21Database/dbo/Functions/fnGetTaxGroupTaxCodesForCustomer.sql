@@ -98,12 +98,12 @@ BEGIN
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]			= 0
-		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
+		,[ysnSeparateOnInvoice]			= CAST(0 AS BIT)
+		,[ysnCheckoffTax]				= ISNULL(TC.[ysnCheckoffTax], CAST(0 AS BIT))
 		,[strTaxCode]					= TC.[strTaxCode]
-		,[ysnTaxExempt]					= E.[ysnTaxExempt]
-		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], 0)
-		,[ysnInvalidSetup]				= E.[ysnInvalidSetup]
+		,[ysnTaxExempt]					= ISNULL(E.[ysnTaxExempt], CAST(0 AS BIT))
+		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], CAST(0 AS BIT))
+		,[ysnInvalidSetup]				= ISNULL(E.[ysnInvalidSetup], CAST(0 AS BIT))
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= E.[strExemptionNotes]
 		,[intUnitMeasureId]				= R.[intUnitMeasureId]

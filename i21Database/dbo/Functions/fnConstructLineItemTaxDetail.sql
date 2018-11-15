@@ -176,7 +176,8 @@ BEGIN
 		,[ysnCheckoffTax]		
 		,[strTaxCode]
 		,[ysnTaxExempt]	
-		,[ysnTaxOnly]	
+		,[ysnTaxOnly]
+		,[ysnInvalidSetup]
 		,[ysnTaxAdjusted]
 		,[intUnitMeasureId]
 		,[ysnComputed]
@@ -197,9 +198,10 @@ BEGIN
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
 		,[ysnCheckoffTax]			= ISNULL(LITE.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
 		,[strTaxCode]				= SMTC.[strTaxCode]
-		,[ysnTaxExempt]				= LITE.[ysnTaxExempt]
-		,[ysnTaxOnly]				= LITE.[ysnTaxOnly]
-		,[ysnTaxAdjusted]			= LITE.[ysnTaxAdjusted] 
+		,[ysnTaxExempt]				= ISNULL(LITE.[ysnTaxExempt], CAST(0 AS BIT))
+		,[ysnTaxOnly]				= ISNULL(LITE.[ysnTaxOnly], CAST(0 AS BIT))
+		,[ysnInvalidSetup]          = CAST(0 AS BIT)
+		,[ysnTaxAdjusted]			= ISNULL(LITE.[ysnTaxAdjusted], CAST(0 AS BIT))
 		,[intUnitMeasureId]         = NULL
 		,[ysnComputed]              = CAST(0 AS BIT)
 		,[ysnTaxableFlagged]        = CAST(0 AS BIT)
