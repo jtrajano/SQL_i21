@@ -276,7 +276,7 @@ Begin
 		Select @strVendorBatch=strVendorLotID From tblCTContractDetail Where intContractDetailId=@intContractDetailId
 
 		--Find Doc Type
-		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU')
+		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU','CPT')
 			Set @strDocType='ZHDE'
 
 		If @strContractBasis IN ('FOB','CFR')
