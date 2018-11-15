@@ -34,6 +34,8 @@
 		,strMoveToStatus = y.strStatus
 		,strFeedbackWithSolution = (case a.intFeedbackWithSolutionId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end)
 		,strFeedbackWithRepresentative = (case a.intFeedbackWithRepresentativeId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end)
+		,strUpgradeType = z.strType
+		,strUpgradeTargetVersionNo = a1.strVersionNo
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -60,3 +62,5 @@
 		left join tblSMCurrencyExchangeRateType w on w.intCurrencyExchangeRateTypeId = a.intCurrencyExchangeRateTypeId
 		left join tblHDTicketStatusWorkflow x on x.intFromStatusId = a.intTicketStatusId and x.ysnActive = convert(bit,1) and x.strTiggerBy = 'Customer Responds'
 		left join tblHDTicketStatus y on y.intTicketStatusId = x.intToStatusId
+		left join tblHDUpgradeType z on z.intUpgradeTypeId = a.intUpgradeTypeId
+		left join tblHDVersion a1 on a1.intVersionId = a.intUpgradeTargetVersionId
