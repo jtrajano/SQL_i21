@@ -7172,6 +7172,7 @@
     <Build Include="dbo\Views\vyuGRTestWeightReport.sql" />
     <Build Include="dbo\Views\vyuGRDockageReport.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertReadingRanges.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

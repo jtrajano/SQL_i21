@@ -21,6 +21,8 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
+DECLARE @voucherAffected AS Id;
+
 IF @vendorId IS NULL
 BEGIN
 	--MULTI VENDOR
@@ -37,11 +39,14 @@ BEGIN
 	AND voucher.ysnDiscountOverride = 1
 	AND voucher.dblDiscount != 0
 	AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+
+	SET @rowsAffected = @@ROWCOUNT;
 END
 ELSE
 BEGIN
 	UPDATE voucher
 		SET voucher.dblDiscount = 0
+	OUTPUT inserted.intBillId INTO @voucherAffected
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	WHERE 
@@ -55,9 +60,43 @@ BEGIN
 	AND voucher.ysnDiscountOverride = 1
 	AND voucher.dblDiscount != 0
 	AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
-END
 
-SET @rowsAffected = @@ROWCOUNT;
+	SET @rowsAffected = @@ROWCOUNT;
+
+	--update unposted payment detail payment amount
+	UPDATE A
+		SET A.dblPayment = A.dblPayment - A.dblDiscount
+	FROM tblAPPaymentDetail A
+	INNER JOIN @voucherAffected A2 ON A.intBillId = A2.intId
+	INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+	WHERE B.ysnPosted = 0
+
+	--update unposted payment detail
+	UPDATE A
+		SET A.dblDiscount = 0
+	FROM tblAPPaymentDetail A
+	INNER JOIN @voucherAffected A2 ON A.intBillId = A2.intId
+	INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+	WHERE B.ysnPosted = 0
+
+	--update unposted payment total
+	UPDATE B
+		SET 
+		B.dblAmountPaid = details.dblPayment
+	FROM tblAPPayment B
+	INNER JOIN 
+	(
+		SELECT TOP 1
+			SUM(A.dblPayment) dblPayment,
+			MIN(A.intPaymentId) intPaymentId
+		FROM tblAPPaymentDetail A
+		INNER JOIN @voucherAffected A2 ON A.intBillId = A2.intId
+		INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+		WHERE B.ysnPosted = 0
+	) details
+	ON B.intPaymentId = details.intPaymentId
+	WHERE B.ysnPosted = 0
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 
