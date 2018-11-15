@@ -1,12 +1,13 @@
 CREATE VIEW [dbo].[vyuGRTestWeightReport]
 AS
-SELECT TOP 100 PERCENT
+SELECT
 	TW.strReadingRange
 	,TW.intCommodityId
 	,TW.strCommodityCode
 	,TW.intCompanyLocationId
 	,TW.strLocationName
-	,dblSubTotalByLocation = SUM(TW.dblSubTotal) 
+	,dblTotal = SUM(TW.dblOriginalBalance) 
+	,TW.strDeliveryYear
 FROM (
 	SELECT 
 		RR.strReadingRange
@@ -14,8 +15,8 @@ FROM (
 		,CO.strCommodityCode
 		,CS.intCompanyLocationId
 		,CL.strLocationName
-		,dblSubTotal = (QM.dblDiscountAmount * CS.dblOriginalBalance)
-		,CS.dtmDeliveryDate
+		,CS.dblOriginalBalance
+		,strDeliveryYear = YEAR(CS.dtmDeliveryDate)
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -34,12 +35,10 @@ FROM (
 			AND RR.intReadingType = 1
 	WHERE IM.strDescription = 'TEST WEIGHT' 
 		AND QM.strSourceType = 'Storage'
-		--AND dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate) BETWEEN CONVERT(DATETIME,'01/01/2017') AND CONVERT(DATETIME,'12/31/2017')
 ) TW
 GROUP BY TW.strReadingRange
 		,TW.intCommodityId
 		,TW.strCommodityCode
 		,TW.intCompanyLocationId
 		,TW.strLocationName
-ORDER BY TW.intCommodityId
-		,TW.strReadingRange DESC
+		,TW.strDeliveryYear

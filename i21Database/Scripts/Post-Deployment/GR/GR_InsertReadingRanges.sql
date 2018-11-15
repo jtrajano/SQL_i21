@@ -3309,9 +3309,15 @@ INSERT INTO tblGRReadingRanges VALUES('2.45-2.54',2.45,2.54,2)
 END
 IF NOT EXISTS(SELECT  strReadingRange FROM tblGRReadingRanges WHERE strReadingRange = '2.55 & up' AND intReadingType = 2)
 BEGIN
-INSERT INTO tblGRReadingRanges VALUES('2.55 & up',2.55,2.64,2)
+INSERT INTO tblGRReadingRanges VALUES('2.55 & up',2.55,999,2)
 END
-
+ELSE
+BEGIN
+	IF (SELECT intMaxValue FROM tblGRReadingRanges WHERE strReadingRange = '2.55 & up' AND intReadingType = 2) <> 999
+	BEGIN
+		UPDATE tblGRReadingRanges SET intMaxValue = 999 WHERE strReadingRange = '2.55 & up' AND intReadingType = 2
+	END
+END
 PRINT 'End inserting fixed data in tblGRReadingRanges'
 
 END
