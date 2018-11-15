@@ -187,10 +187,11 @@ OUTER APPLY (
 	SELECT intTransactionCount = COUNT(SMA.intTransactionId) 
 	FROM tblSMTransaction SMT 
 	INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
-	WHERE SMT.intRecordId = I.intInvoiceId 
-	  AND SMA.strType = 'Email' 
-	  AND SMA.strStatus = 'Sent'
-	  and SMT.intScreenId = 48
+	INNER JOIN tblSMScreen SC ON SMT.intScreenId = SC.intScreenId
+	WHERE SMT.intRecordId = I.intInvoiceId
+		AND SMA.strType = 'Email' 
+		AND SMA.strStatus = 'Sent'
+		AND SC.strScreenName = 'Invoice'
 ) EMAILSTATUS
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
