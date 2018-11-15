@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdatePaymentTotal]
-	@paymentIds AS Id
+	@paymentIds AS Id READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
