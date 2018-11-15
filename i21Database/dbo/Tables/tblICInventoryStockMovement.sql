@@ -35,7 +35,7 @@
 	[intInventoryTransactionId] INT NULL,
 	[intInventoryTransactionStorageId] INT NULL,
 	[intOwnershipType] INT NOT NULL,
-	CONSTRAINT [PK_tblICInventoryStockMovement] PRIMARY KEY ([intInventoryStockMovementId]),
+	CONSTRAINT [PK_tblICInventoryStockMovement] PRIMARY KEY NONCLUSTERED([intInventoryStockMovementId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICInventoryTransactionType] FOREIGN KEY ([intTransactionTypeId]) REFERENCES [tblICInventoryTransactionType]([intTransactionTypeId]),
@@ -50,3 +50,8 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryStockMovement_intItemId_intItemLocationId]
 	ON [dbo].[tblICInventoryStockMovement]([intItemId] ASC, [intItemLocationId] ASC);
+GO
+
+CREATE CLUSTERED INDEX [IX_tblICInventoryStockMovement_dtmDate]
+	ON [dbo].[tblICInventoryStockMovement]([dtmDate] ASC, [intInventoryStockMovementId] ASC);
+GO
