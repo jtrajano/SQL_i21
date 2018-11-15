@@ -303,7 +303,7 @@ BEGIN
 							ON ST.intCheckoutCustomerId = vC.intEntityId
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
 																			ISNULL(CPT.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) -- ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
 																			, @LineItems
 																			, 1										-- is Reversal
 																			, I.intItemId							-- Item Id
@@ -479,7 +479,7 @@ BEGIN
 										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
 										
-										, [dblPrice]				= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ((ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) * CPT.dblQuantity) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -1813,11 +1813,12 @@ BEGIN
 																					THEN
 																						CASE
 																							WHEN (CC.dblAmount > 0)
-																								THEN (ISNULL(CC.dblAmount, 0) * -1)
+																								--THEN (ISNULL(CC.dblAmount, 0) * -1)
+																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
 																							WHEN (CC.dblAmount < 0)
-																								THEN (ISNULL(CC.dblAmount, 0) * -1)
+																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
 																						END
-																				ELSE ISNULL(CC.dblAmount, 0)
+																				ELSE ISNULL(CC.dblUnitPrice, 0)
 																			END
 																			, @LineItems
 																			, 1										-- is Reversal
@@ -2053,12 +2054,13 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
-																							THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
-																																														WHEN (CC.dblAmount > 0)
-																																															THEN (CC.dblQuantity * -1)
-																																														WHEN (CC.dblAmount < 0)
-																																															THEN (CC.dblQuantity * -1)
-																																													END)
+																							THEN ABS(ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2)) * ABS(ISNULL(CC.dblQuantity, 0))) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
+																							--THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
+																							--																							WHEN (CC.dblAmount > 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																							WHEN (CC.dblAmount < 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																						END)
 																					END
 
 																			-- IF Item is BLANK
@@ -2066,9 +2068,11 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0)
-																							THEN CC.dblAmount
+																							--THEN CC.dblAmount
+																							THEN ISNULL(CC.dblUnitPrice, 0)			-- TEST01
 																						WHEN (CC.dblAmount < 0)
-																							THEN (CC.dblAmount * -1)
+																							--THEN (CC.dblAmount * -1)
+																							THEN (ISNULL(CC.dblUnitPrice, 0) * -1)	-- TEST01
 																					END
 																		END
 
@@ -2531,7 +2535,7 @@ BEGIN
 																						END
 																				ELSE ISNULL(CC.dblQuantity, 0)
 																			END
-																			, ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			, ABS(ISNULL(CAST(CC.dblUnitPrice AS DECIMAL(18,2)), 0)) --ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -2811,25 +2815,27 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
-																							THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
-																																														WHEN (CC.dblAmount > 0)
-																																															THEN CC.dblQuantity
-																																														WHEN (CC.dblAmount < 0)
-																																															THEN (CC.dblQuantity * -1)
-																																													END
+																							THEN ((ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2))) * ABS(CC.dblQuantity)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
+																							--THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
+																							--																							WHEN (CC.dblAmount > 0)
+																							--																								THEN CC.dblQuantity
+																							--																							WHEN (CC.dblAmount < 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																						END
+
 																							-- THEN ABS((ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity)
 																							--THEN CC.dblUnitPrice
 																					END
 
 																			-- IF Item is BLANK
 																			WHEN (I.intItemId IS NULL)
-																				THEN
-																					CASE
-																						WHEN (CC.dblAmount > 0)
-																							THEN CC.dblAmount
-																						WHEN (CC.dblAmount < 0)
-																							THEN (CC.dblAmount * -1)
-																					END
+																				THEN ABS(CC.dblUnitPrice) -- Always set this to positive
+																					--CASE
+																					--	WHEN (CC.dblAmount > 0)
+																					--		THEN CC.dblUnitPrice
+																					--	WHEN (CC.dblAmount < 0)
+																					--		THEN (CC.dblUnitPrice * -1)
+																					--END
 																		END
 
 											,[ysnRefreshPrice]			= 0
@@ -3187,7 +3193,7 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 										FROM @EntriesForInvoice
 
-										SELECT * FROM @EntriesForInvoice
+										--SELECT * FROM @EntriesForInvoice
 
 										-------------------------------------------------------------------------------
 										------------------------------- Start Rank ------------------------------------
@@ -3569,11 +3575,11 @@ BEGIN
 										,[ysnAllowOverpayment]
 										,[ysnFromAP]
 										)								
-									SELECT		 	
-										 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+									SELECT
+										 [intId]								= CCP.intCustPaymentsId -- ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
 										,[strSourceTransaction]					= 'Invoice'
-										,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
-										,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+										,[intSourceId]							= CCP.intCustPaymentsId --@intCheckoutId						--CCP.intCustPaymentsId
+										,[strSourceId]							= CAST(CCP.intCustPaymentsId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
 										,[intPaymentId]							= NULL									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
 										,[intEntityCustomerId]					= CCP.intCustomerId
 										,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
@@ -4044,11 +4050,11 @@ BEGIN
 											,[ysnAllowOverpayment]
 											,[ysnFromAP]
 										)								
-										SELECT		 	
-											 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+										SELECT --DISTINCT		-- Use idistinct to eliminate duplicates 		 	
+											 [intId]								= CCP.intCustPaymentsId --ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
 											,[strSourceTransaction]					= 'Invoice'
-											,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
-											,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+											,[intSourceId]							= CCP.intCustPaymentsId --@intCheckoutId						--CCP.intCustPaymentsId
+											,[strSourceId]							= CAST(CCP.intCustPaymentsId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
 											,[intPaymentId]							= Payment.intPaymentId									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
 											,[intEntityCustomerId]					= CCP.intCustomerId
 											,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
@@ -4078,7 +4084,7 @@ BEGIN
 											,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
 											,[intEntityId]							= @intCurrentUserId
 											--Detail																																															
-											,[intPaymentDetailId]					= ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+											,[intPaymentDetailId]					= NULL --ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
 											,[intInvoiceId]							= @intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
 											,[strTransactionType]					= NULL
 											,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
@@ -4106,6 +4112,7 @@ BEGIN
 
 										JOIN tblARPaymentIntegrationLogDetail ILD
 											ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
+											AND CCP.intCustPaymentsId = ILD.intSourceId
 										JOIN tblARPayment Payment
 											ON ILD.intPaymentId = Payment.intPaymentId
 
