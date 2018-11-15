@@ -1168,7 +1168,7 @@ SELECT strCommodityCode
 	, intCommodityId
 	, strInternalTradeNo
 	, intFutOptTransactionHeaderId
-	, strType = 'Net Futures Position'
+	, strType = 'Net Futures Position Net Hedge'
 	, strLocationName
 	, strContractEndMonth
 	, strContractEndMonthNearBy
@@ -1233,7 +1233,7 @@ INSERT INTO @List (strCommodityCode
 	, strCategory)
 SELECT strCommodityCode
 	, intCommodityId
-	, strType = 'Net Futures Position'
+	, strType = 'Net Futures Position Net Hedge'
 	, strLocationName
 	, strContractEndMonth = 'Near By'
 	, dblTotal = CONVERT(NUMERIC(24,6), - SUM(dblTotal))
