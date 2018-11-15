@@ -191,7 +191,7 @@ BEGIN TRY
 				CLOSE splitCursor;  
 				DEALLOCATE splitCursor;
 
-				EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, @intUserId
+				EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, 'DS', @intUserId
 
 				CREATE TABLE #tmpItemReceiptIds (
 					[intInventoryReceiptId] [INT] PRIMARY KEY,
