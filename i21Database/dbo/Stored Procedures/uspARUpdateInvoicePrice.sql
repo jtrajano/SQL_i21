@@ -2,6 +2,7 @@
 	 @InvoiceId			INT = NULL
 	,@InvoiceDetailId	INT
 	,@Price				NUMERIC(18,6)
+	,@ContractPrice		NUMERIC(18,6) = NULL
 	,@UserId			INT
 AS
 
@@ -34,6 +35,8 @@ BEGIN TRY
 	SET
 		 [dblPrice]		= @Price
 		,[dblBasePrice]	= ISNULL(ISNULL(@Price, @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+		,[dblUnitPrice]		= ISNULL(@ContractPrice, [dblUnitPrice])
+		,[dblBaseUnitPrice]	= ISNULL(ISNULL(@ContractPrice, [dblUnitPrice]) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
 	WHERE
 		[intInvoiceDetailId] = @InvoiceDetailId
 
