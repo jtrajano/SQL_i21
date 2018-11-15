@@ -7173,6 +7173,7 @@
     <Build Include="dbo\Views\vyuGRDockageReport.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertReadingRanges.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
+    <Build Include="dbo\Functions\fnSTGetRowsFromDelimitedValuesReturnString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

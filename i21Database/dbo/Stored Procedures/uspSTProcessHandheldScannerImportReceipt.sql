@@ -32,7 +32,7 @@ BEGIN TRY
 		strReceiptRefNo
 	)
 	SELECT [strItem] AS strReceiptRefNo
-	FROM [dbo].[fnGetRowsFromDelimitedValuesReturnString](@strReceiptRefNoList)
+	FROM [dbo].[fnSTGetRowsFromDelimitedValuesReturnString](@strReceiptRefNoList)
 
 
 	--------------------------------------------------------------------------------------
