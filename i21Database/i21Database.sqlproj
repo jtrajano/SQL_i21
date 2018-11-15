@@ -6413,6 +6413,7 @@
     <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
