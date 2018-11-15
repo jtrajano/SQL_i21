@@ -7168,6 +7168,10 @@
     <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
     <Build Include="dbo\Views\vyuGRBillStorageSearchView.sql" />
+    <Build Include="dbo\Tables\tblGRReadingRanges.sql" />
+    <Build Include="dbo\Views\vyuGRTestWeightReport.sql" />
+    <Build Include="dbo\Views\vyuGRDockageReport.sql" />
+    <None Include="Scripts\Post-Deployment\GR\GR_InsertReadingRanges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
