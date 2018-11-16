@@ -65,7 +65,14 @@ AS
 			DP.strCity						AS	strDestinationPoint,
 			ISNULL(IG.strCountry,OG.strCountry)					AS	strOrigin,
 			CA.strDescription				AS	strProductType,
-			dbo.fnCTGetApprovedSampleQuantity(CD.intContractDetailId) AS dblApprovedQty,
+			(	SELECT SUM(qty) 
+				FROM
+				(
+					SELECT 	(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, intRepresentingUOMId, CD.intUnitMeasureId,dblRepresentingQty) ) qty
+					FROM	tblQMSample 
+					WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = CD.intContractDetailId
+				)t
+			) AS dblApprovedQty,
 			SB.strSubLocationName,
 			--Required by other modules
 		
