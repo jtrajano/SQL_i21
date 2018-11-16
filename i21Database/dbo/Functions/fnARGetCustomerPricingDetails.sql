@@ -155,7 +155,9 @@ BEGIN
 			dblCustomerPrice = 
 				(CASE 
 					WHEN strPriceBasis = 'X'
-						THEN 0
+						THEN case when isnull(VI.dblSalePrice,0) < isnull(dblDeviation, 0) then VI.dblSalePrice
+								when isnull(VI.dblSalePrice,0) > isnull(dblDeviation, 0)  then isnull(dblDeviation, 0) 
+								else 0 end
 					WHEN strPriceBasis = 'F'
 						THEN dblDeviation
 					WHEN strPriceBasis = 'C'
@@ -231,7 +233,7 @@ BEGIN
 			,strPricing  = 
 				(CASE 
 					WHEN strPriceBasis = 'X'
-						THEN ''
+						THEN 'Customer Pricing of (X)Maximum'
 					WHEN strPriceBasis = 'F'
 						THEN 'Customer Pricing of (F)Fixed'
 					WHEN strPriceBasis = 'C'
@@ -258,7 +260,7 @@ BEGIN
 			,dblPriceBasis = 
 				(CASE 
 					WHEN strPriceBasis = 'X'
-						THEN 0
+						THEN ISNULL(VI.dblSalePrice, 0.00)
 					WHEN strPriceBasis = 'F'
 						THEN dblDeviation
 					WHEN strPriceBasis = 'C'
@@ -357,6 +359,7 @@ BEGIN
 			(VI.intItemId = @ItemId OR (VI.intCategoryId = @ItemCategoryId AND ISNULL(VI.intItemId,0) = 0))
 			AND VI.intLocationId = @LocationId 
 			--AND (@ItemUOMId IS NULL OR UOM.intItemUOMId = @ItemUOMId)
+			
 			
 
 		--(R)Fixed Rack			
