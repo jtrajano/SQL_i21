@@ -3249,7 +3249,6 @@ BEGIN
 
 										--SELECT * FROM @EntriesForInvoiceBatchPost
 
-
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
 													@InvoiceEntries				= @EntriesForInvoiceBatchPost
@@ -3425,6 +3424,7 @@ BEGIN
 									BEGIN CATCH
 										SET @ErrorMessage = ERROR_MESSAGE()
 										SET @strStatusMsg = 'Post Sales Invoice error: ' + @ErrorMessage
+										--PRINT @strStatusMsg
 
 										-- ********************************************************
 										-- Having Problem on Invoice posting
@@ -4315,6 +4315,10 @@ ExitWithCommit:
 
 ExitWithRollback:
     -- Rollback Transaction here
-	ROLLBACK TRANSACTION 
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION 
+		END
+	
 		
 ExitPost:
