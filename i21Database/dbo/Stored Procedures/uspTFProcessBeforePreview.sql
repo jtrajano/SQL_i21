@@ -23,6 +23,7 @@ BEGIN TRY
 		, @TransactionType NVARCHAR(50)
 		, @TaxAuthorityCode NVARCHAR(50)
 		, @TaxAuthorityId INT
+		, @StoreProcedure NVARCHAR(100)
 		, @RCId INT
 
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -46,6 +47,7 @@ BEGIN TRY
 			, @TransactionType = strTransactionType
 			, @TaxAuthorityCode = tblTFTaxAuthority.strTaxAuthorityCode
 			, @TaxAuthorityId = tblTFTaxAuthority.intTaxAuthorityId
+			, @StoreProcedure = tblTFReportingComponent.strStoredProcedure
 		FROM tblTFReportingComponent
 		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 		WHERE intReportingComponentId = @RCId
@@ -77,53 +79,81 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
-			INSERT INTO tblTFTransactionDynamicOR(
-				intTransactionId
-				, strOriginAltFacilityNumber
-				, strDestinationAltFacilityNumber
-				, strAltDocumentNumber
-				, strExplanation
-				, strInvoiceNumber
-			)
-			SELECT Trans.intTransactionId
-				, [strOriginAltFacilityNumber] = NULL
-				, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('1', '2', '3') THEN Origin.strOregonFacilityNumber ELSE NULL END
-				, [strAltDocumentNumber] = NULL
-				, [strExplanation] = NULL
-				, [strInvoiceNumber] = NULL
-			FROM #tmpTransaction Trans
-			LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = Trans.intTransactionNumberId
-			LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Receipt.intLocationId
-			WHERE Trans.strTransactionType = 'Receipt'
+			IF (@StoreProcedure = 'uspTFGetTransporterBulkInvoiceTax') -- FOR SPECIAL SP's
+			BEGIN
+				INSERT INTO tblTFTransactionDynamicOR(
+					intTransactionId
+					, strOriginAltFacilityNumber
+					, strDestinationAltFacilityNumber
+				)
+				SELECT Trans.intTransactionId
+					, [strOriginAltFacilityNumber] = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+					, [strDestinationAltFacilityNumber] = DestinationLoc.strOregonFacilityNumber
+				FROM tblTFTransaction Trans
+				INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionDetailId  = Trans.intTransactionNumberId
+				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblTRLoadDistributionDetail.intLoadDistributionHeaderId
+					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
+				INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+				INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId
+					LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId	
+					LEFT JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intSupplyPointId = tblTRLoadReceipt.intSupplyPointId 
+						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON SupplyPointLoc.intEntityLocationId = tblTRSupplyPoint.intEntityLocationId				
+				WHERE Trans.strTransactionType = 'Receipt'
+				AND Trans.uniqTransactionGuid = @Guid
+				AND Trans.intReportingComponentId = @ReportingComponentId
+				AND Trans.intTransactionId IS NOT NULL
+			END
+			ELSE
+			BEGIN
+				INSERT INTO tblTFTransactionDynamicOR(
+					intTransactionId
+					, strOriginAltFacilityNumber
+					, strDestinationAltFacilityNumber
+					, strAltDocumentNumber
+					, strExplanation
+					, strInvoiceNumber
+				)
+				SELECT Trans.intTransactionId
+					, [strOriginAltFacilityNumber] = NULL
+					, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('1', '2', '3') THEN Origin.strOregonFacilityNumber ELSE NULL END
+					, [strAltDocumentNumber] = NULL
+					, [strExplanation] = NULL
+					, [strInvoiceNumber] = NULL
+				FROM #tmpTransaction Trans
+				LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = Trans.intTransactionNumberId
+				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Receipt.intLocationId
+				WHERE Trans.strTransactionType = 'Receipt'
 
-			UNION ALL
+				UNION ALL
 
-			SELECT Trans.intTransactionId
-				, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK') THEN Origin.strOregonFacilityNumber WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFSite.strOregonFacilityNumber ELSE NULL END
-				--, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK', '5CRD', '6CRD') AND Invoice.strType = 'Tank Delivery' THEN tblTMSite.strFacilityNumber ELSE Destination.strOregonFacilityNumber END
-				, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN NULL WHEN Invoice.strType = 'Tank Delivery' AND tblTMSite.intSiteID IS NOT NULL THEN tblTMSite.strFacilityNumber ELSE Destination.strOregonFacilityNumber END
-				, [strAltDocumentNumber] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFCard.strCardNumber ELSE NULL END
-				, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFVehicle.strVehicleDescription ELSE NULL END
-				, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5BLK', '6BLK', '5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
-			FROM tblTFTransaction Trans
-			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
-				--LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
-				--LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
-				LEFT JOIN tblTMSite ON tblTMSite.intSiteID = InvoiceDetail.intSiteId
-			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
-			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
-			LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
-				LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
-				LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFTransaction.intVehicleId
-				LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
-			--LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
-			--LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
-			WHERE Trans.strTransactionType = 'Invoice'
-			AND Trans.uniqTransactionGuid = @Guid
-			AND Trans.intReportingComponentId = @ReportingComponentId
-			AND Trans.intTransactionId IS NOT NULL
+				SELECT Trans.intTransactionId
+					, [strOriginAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK') THEN Origin.strOregonFacilityNumber WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFSite.strOregonFacilityNumber ELSE NULL END
+					--, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5', '5LO', '6', '7', '5BLK', '6BLK', '5CRD', '6CRD') AND Invoice.strType = 'Tank Delivery' THEN tblTMSite.strFacilityNumber ELSE Destination.strOregonFacilityNumber END
+					, [strDestinationAltFacilityNumber] = CASE WHEN @ScheduleCode IN ('5CRD', '6CRD') THEN NULL WHEN Invoice.strType = 'Tank Delivery' AND tblTMSite.intSiteID IS NOT NULL THEN tblTMSite.strFacilityNumber ELSE Destination.strOregonFacilityNumber END
+					, [strAltDocumentNumber] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFCard.strCardNumber ELSE NULL END
+					, [strExplanation] = CASE WHEN Invoice.strType = 'CF Tran' AND @ScheduleCode IN ('5CRD', '6CRD') THEN tblCFVehicle.strVehicleDescription ELSE NULL END
+					, [strInvoiceNumber] = CASE WHEN @ScheduleCode IN ('5BLK', '6BLK', '5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
+				FROM tblTFTransaction Trans
+				LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+					--LEFT JOIN tblTMDeliveryHistoryDetail ON tblTMDeliveryHistoryDetail.intInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
+					--LEFT JOIN tblTMDeliveryHistory ON tblTMDeliveryHistory.intDeliveryHistoryID = tblTMDeliveryHistoryDetail.intDeliveryHistoryID
+					LEFT JOIN tblTMSite ON tblTMSite.intSiteID = InvoiceDetail.intSiteId
+				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+				LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
+				LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
+					LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
+				LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
+					LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
+					LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFTransaction.intVehicleId
+					LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
+				--LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
+				--LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
+				WHERE Trans.strTransactionType = 'Invoice'
+				AND Trans.uniqTransactionGuid = @Guid
+				AND Trans.intReportingComponentId = @ReportingComponentId
+				AND Trans.intTransactionId IS NOT NULL
+			END
 			
 		END
 		ELSE IF (@TaxAuthorityCode = 'NM' AND @ScheduleCode = 'A')
