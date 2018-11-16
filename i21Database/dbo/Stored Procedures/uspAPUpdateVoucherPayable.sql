@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherPayable]
+﻿/*
+	Use this stored procedure to update the tblAPVoucherPayable from tblAPBillDetail
+	This usually usually call when payables has been added on tblAPBillDetail
+	It will reduce/increase the tblAPVoucherPayable base on certain events happened on voucher(edit, delete, add)
+*/
+CREATE PROCEDURE [dbo].[uspAPUpdateVoucherPayable]
 	@voucherDetailIds AS Id READONLY,
 	@decrease BIT = 0
 AS
@@ -171,6 +176,8 @@ SELECT
 	,[dblActual]                        
 	,[dblDifference]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;
 
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint

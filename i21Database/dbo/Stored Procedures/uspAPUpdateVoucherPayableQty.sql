@@ -15,10 +15,12 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @insertedData TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @deleted TABLE(intVoucherPayableId INT);
 DECLARE @taxDeleted TABLE(intVoucherPayableId INT);
 DECLARE @invalidPayables TABLE(intVoucherPayableId INT, strError NVARCHAR(1000));
 DECLARE @validPayables AS VoucherPayable
+DECLARE @validPayablesTax AS VoucherDetailTax
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 
@@ -35,6 +37,7 @@ SELECT TOP 1
 	@error = strError
 FROM @invalidPayables
 
+--FILTER VALID PAYABLES
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherValidPayables')) DROP TABLE #tmpVoucherValidPayables
 
 SELECT
@@ -49,6 +52,33 @@ WHERE NOT EXISTS (
 ALTER TABLE #tmpVoucherValidPayables DROP COLUMN intVoucherPayableId
 INSERT INTO @validPayables
 SELECT * FROM #tmpVoucherValidPayables
+
+--FILTER VALID PAYABLES TAX
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherValidPayablesTax')) DROP TABLE #tmpVoucherValidPayablesTax
+
+SELECT
+	[intVoucherPayableId]    	=	B.intVoucherPayableId,   
+	[intTaxGroupId]				=	A.intTaxGroupId,	
+	[intTaxCodeId]				=	A.intTaxCodeId,		
+	[intTaxClassId]				=	A.intTaxClassId,	
+	[strTaxableByOtherTaxes]	=	A.strTaxableByOtherTaxes,
+	[strCalculationMethod]		=	A.strCalculationMethod,
+	[dblRate]					=	A.dblRate,
+	[intAccountId]				=	A.intAccountId,
+	[dblTax]					=	A.dblTax,
+	[dblAdjustedTax]			=	A.dblAdjustedTax,
+	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted,
+	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill,
+	[ysnCheckOffTax]			=	A.ysnCheckOffTax,
+	[ysnTaxExempt]              =	A.ysnTaxExempt,
+	[ysnTaxOnly]				=	A.ysnTaxOnly
+INTO #tmpVoucherValidPayablesTax
+FROM @voucherPayableTax A
+INNER JOIN @validPayables B
+	ON A.intVoucherPayableId = B.intVoucherPayableId
+
+INSERT INTO @validPayablesTax
+SELECT * FROM #tmpVoucherValidPayablesTax
 
 IF @error IS NOT NULL
 BEGIN
@@ -96,7 +126,10 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
 		)
 	BEGIN
-		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @voucherPayableTax, @throwError = 1
+		INSERT INTO @insertedData
+		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
+
+		SELECT * FROM @insertedData
 		RETURN;
 	END
 
@@ -852,7 +885,8 @@ ELSE SAVE TRAN @SavePoint
 			-- END
 
 			EXEC uspAPRemoveVoucherPayable @voucherPayable = @validPayables, @throwError = 1
-			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @throwError = 1
+			INSERT INTO @insertedData
+			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
 
 	END
@@ -874,7 +908,10 @@ ELSE
 		BEGIN
 			ROLLBACK TRANSACTION  @SavePoint
 		END
-	END	
+	END
+
+SELECT * FROM @insertedData
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
