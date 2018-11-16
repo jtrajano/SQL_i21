@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspAPAddVoucherPayable]
+﻿/*
+	This will use to add voucher payable on tblAPVoucherPayable table
+*/
+CREATE PROCEDURE [dbo].[uspAPAddVoucherPayable]
 	@voucherPayable AS VoucherPayable READONLY,
 	@voucherPayableTax AS VoucherDetailTax READONLY,
 	@throwError BIT = 0,
@@ -330,7 +333,9 @@ BEGIN
 		,[dblAdjustedTax]			
 		,[ysnTaxAdjusted]			
 		,[ysnSeparateOnBill]			
-		,[ysnCheckOffTax]			
+		,[ysnCheckOffTax]
+		,[ysnTaxOnly]	
+		,[ysnTaxExempt]		
 	)
 	SELECT
 		[intVoucherPayableId]		= B.intNewPayableId
@@ -346,11 +351,128 @@ BEGIN
 		,[ysnTaxAdjusted]			= A.ysnTaxAdjusted
 		,[ysnSeparateOnBill]		= A.ysnSeparateOnBill
 		,[ysnCheckOffTax]			= A.ysnCheckOffTax
+		,[ysnTaxOnly]				= A.ysnTaxOnly
+		,[ysnTaxExempt]				= A.ysnTaxExempt
 	FROM @voucherPayableTax A
 	INNER JOIN @insertedData B
 		ON B.intOldPayableId = A.intVoucherPayableId
 	INNER JOIN @voucherPayable payables
 		ON A.intVoucherPayableId = payables.intVoucherPayableId
+		
+	--IF NO TAX PROVIDED, WE WILL GENERATE TAX AND WILL USE TAX ACCOUNT
+	DECLARE @ParamTable AS TABLE
+		(intVoucherPayableId		INT
+		,intItemId					INT
+		,intVendorId				INT
+		,dtmTransactionDate			DATETIME
+		,dblItemCost				NUMERIC(38,20)
+		,dblQuantity				NUMERIC(38,20)
+		,intTaxGroupId				INT
+		,intCompanyLocationId		INT
+		,intVendorLocationId		INT
+		,ysnIncludeExemptedCodes	BIT
+		,intFreightTermId			INT
+		,ysnExcludeCheckOff			BIT
+		,intItemUOMId				INT)
+	DECLARE @companyLocation INT = (SELECT TOP 1 intCompanyLocationId  FROM tblSMUserRoleCompanyLocationPermission)
+		
+	INSERT INTO @ParamTable
+		(intVoucherPayableId
+		,intItemId
+		,intVendorId
+		,dtmTransactionDate
+		,dblItemCost
+		,dblQuantity
+		,intTaxGroupId
+		,intCompanyLocationId
+		,intVendorLocationId
+		,ysnIncludeExemptedCodes
+		,intFreightTermId
+		,ysnExcludeCheckOff
+		,intItemUOMId)
+	SELECT
+		intVoucherPayableId			= B.intNewPayableId
+		,intItemId					= A.intItemId
+		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
+		,dtmTransactionDate			= A.dtmDate
+		,dblItemCost				= A.dblCost
+		,dblQuantity				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0
+										THEN A.dblNetWeight
+										ELSE A.dblQuantityToBill END
+		,intTaxGroupId				= CASE 
+									WHEN A.intPurchaseTaxGroupId > 0 THEN A.intPurchaseTaxGroupId
+									ELSE D.intTaxGroupId END 
+		,intCompanyLocationId		= A.intShipToId
+		,intVendorLocationId		= A.intShipFromId
+		,ysnIncludeExemptedCodes	= 0
+		,intFreightTermId			= NULL
+		,ysnExcludeCheckOff			= 0
+		,intItemUOMId				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0
+										THEN A.intWeightUOMId
+										ELSE A.intQtyToBillUOMId END
+	FROM @voucherPayable A
+	INNER JOIN @insertedData B
+		ON A.intVoucherPayableId = B.intOldPayableId
+	LEFT JOIN @voucherPayableTax tax
+		ON A.intVoucherPayableId = tax.intVoucherPayableId
+	LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityVendorId] = D.intEntityId AND D.ysnDefaultLocation = 1
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @companyLocation
+	WHERE tax.intVoucherPayableId IS NULL --generate only for no tax provided
+
+	IF EXISTS(SELECT TOP 1 1 FROM @ParamTable)
+	BEGIN
+		INSERT INTO tblAPVoucherPayableTaxStaging(
+			[intVoucherPayableId]		
+			,[intTaxGroupId]				
+			,[intTaxCodeId]				
+			,[intTaxClassId]				
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[dblRate]					
+			,[intAccountId]				
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[ysnTaxAdjusted]			
+			,[ysnSeparateOnBill]			
+			,[ysnCheckOffTax]
+			,[ysnTaxOnly]	
+			,[ysnTaxExempt]		
+		)
+		SELECT
+			[intVoucherPayableId]	=	A.intVoucherPayableId, 
+			[intTaxGroupId]			=	Taxes.intTaxGroupId, 
+			[intTaxCodeId]			=	Taxes.intTaxCodeId, 
+			[intTaxClassId]			=	Taxes.intTaxClassId, 
+			[strTaxableByOtherTaxes]=	Taxes.strTaxableByOtherTaxes, 
+			[strCalculationMethod]	=	Taxes.strCalculationMethod, 
+			[dblRate]				=	Taxes.dblRate, 
+			[intAccountId]			=	Taxes.intTaxAccountId, 
+			[dblTax]				=	ISNULL(Taxes.dblTax,0), 
+			[dblAdjustedTax]		=	ISNULL(Taxes.dblAdjustedTax,0), 
+			[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
+			[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
+			[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax,
+			[ysnTaxOnly]			=	Taxes.ysnTaxOnly,
+			[ysnTaxExempt]			=	Taxes.ysnTaxExempt
+		FROM @ParamTable A	
+		CROSS APPLY fnGetItemTaxComputationForVendor
+			(intItemId
+			,intVendorId
+			,dtmTransactionDate
+			,dblItemCost
+			,dblQuantity
+			,intTaxGroupId
+			,intCompanyLocationId
+			,intVendorLocationId
+			,ysnIncludeExemptedCodes
+			,intFreightTermId
+			,ysnExcludeCheckOff
+			,intItemUOMId
+			,NULL
+			,NULL
+			,NULL) Taxes
+		WHERE Taxes.dblTax IS NOT NULL
+	END
 END
 
 IF @transCount = 0
@@ -371,6 +493,9 @@ ELSE
 			ROLLBACK TRANSACTION  @SavePoint
 		END
 	END	
+
+--RETURN THE NEW PAYABLE ID LINKED TO tblAPVoucherPayable
+SELECT * FROM @insertedData
 
 END TRY
 BEGIN CATCH

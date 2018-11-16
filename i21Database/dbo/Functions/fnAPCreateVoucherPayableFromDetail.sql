@@ -83,5 +83,16 @@ RETURNS TABLE AS RETURN
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
+	WHERE
+		B.intPurchaseDetailId > 0
+	OR	B.intInventoryReceiptItemId > 0
+	OR 	B.intInventoryReceiptChargeId > 0
+	OR	B.intContractCostId > 0
+	OR	B.intContractDetailId > 0
+	OR	B.intLoadDetailId > 0
+	OR	B.intCustomerStorageId > 0
+	OR	B.intPaycheckHeaderId > 0
+	OR	B.intBuybackChargeId > 0
+	OR	B.intScaleTicketId > 0
 )
 
