@@ -7,7 +7,7 @@ SELECT
 	,GD.strCommodityCode
 	,GD.strGrade
 	,dblTotalUnits = SUM(GD.dblOriginalBalance)
-	,GD.strDeliveryYear
+	,GD.intDeliveryYear
 FROM (
 	SELECT 
 		CL.intCompanyLocationId
@@ -16,7 +16,7 @@ FROM (
 		,CO.strCommodityCode
 		,strGrade = '#' + CAST(CAST(ISNULL(QM.dblGradeReading,0) AS INT) AS nvarchar(2))
 		,CS.dblOriginalBalance
-		,strDeliveryYear = YEAR(CS.dtmDeliveryDate)
+		,intDeliveryYear = YEAR(CS.dtmDeliveryDate)
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -39,4 +39,4 @@ GROUP BY GD.intCompanyLocationId
 	,GD.intCommodityId
 	,GD.strCommodityCode
 	,GD.strGrade
-	,GD.strDeliveryYear
+	,GD.intDeliveryYear
