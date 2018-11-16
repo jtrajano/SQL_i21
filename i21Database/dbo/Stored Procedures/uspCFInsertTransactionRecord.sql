@@ -1084,6 +1084,27 @@ BEGIN
 	BEGIN
 		SET @intVehicleId = NULL
 	END
+
+
+	DECLARE @ysnIgnoreVehicleError BIT
+	SET @ysnIgnoreVehicleError = 0
+
+	IF(ISNUMERIC(@strVehicleId) = 1)
+	BEGIN
+		SET @strVehicleId = CAST(@strVehicleId AS BIGINT)
+		IF(@strVehicleId = 0)
+		BEGIN
+			SET @ysnIgnoreVehicleError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @strVehicleId =  LTRIM(RTRIM(ISNULL(@strVehicleId,'')))
+		IF(@strVehicleId = '')
+		BEGIN
+			SET @ysnIgnoreVehicleError = 1
+		END
+	END
 	------------------------------------------------------------
 
 
@@ -1212,15 +1233,19 @@ BEGIN
 		IF(ISNULL(@intVehicleId,0) = 0)
 		BEGIN
 			SET @intVehicleId = NULL
-			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			
+			IF(ISNULL(@ysnVehicleRequire,0) = 1)
 			BEGIN
-				SET @ysnInvalid = 1
+				IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+				BEGIN
+					SET @ysnInvalid = 1
+				END
 			END
 			ELSE
 			BEGIN
-				IF(ISNULL(@strVehicleId,'') != '')
+				IF(@ysnIgnoreVehicleError = 0)
 				BEGIN
-					IF(@strVehicleId <> '0')
+					IF(@strTransactionType != 'Foreign Sale')
 					BEGIN
 						SET @ysnInvalid = 1
 					END
@@ -1472,33 +1497,69 @@ BEGIN
 		---------------- End get card type/ dual card
 		--------------------------------------------------------
 
-		IF(ISNULL(@ysnVehicleRequire,0) = 1)
+		IF(ISNULL(@intVehicleId,0) = 0)
 		BEGIN
-			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			IF(ISNULL(@ysnVehicleRequire,0) = 1)
 			BEGIN
-				IF(@strVehicleId <> '0')
+				IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
 				BEGIN
+					IF(@ysnIgnoreVehicleError = 0)
+					BEGIN
 					INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
 
 					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
-				END
-			END
-		END
-		ELSE
-		BEGIN
-			IF(ISNULL(@strVehicleId,'') != '')
-			BEGIN
-				IF(ISNULL(@intVehicleId,0) = 0 AND @strVehicleId <> '0')
-				BEGIN
+					END
 
 					INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Vehicle is required.')
+
+					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Vehicle is required.')
+				END
+			END
+			ELSE
+			BEGIN
+				IF(@ysnIgnoreVehicleError = 0)
+				BEGIN
+					IF(@strTransactionType != 'Foreign Sale')
+					BEGIN
+						INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
 
 					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+					END
 				END
 			END
 		END
+
+
+		--IF(ISNULL(@ysnVehicleRequire,0) = 1)
+		--BEGIN
+		--	IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+		--	BEGIN
+		--		IF(@strVehicleId <> '0')
+		--		BEGIN
+		--			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--			VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+
+		--			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+		--		END
+		--	END
+		--END
+		--ELSE
+		--BEGIN
+		--	IF(ISNULL(LTRIM(RTRIM(@strVehicleId)),'') != '')
+		--	BEGIN
+		--		IF(ISNULL(@intVehicleId,0) = 0 AND @strVehicleId <> '0' AND @strTransactionType != 'Foreign Sale')
+		--		BEGIN
+
+		--			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--			VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+
+		--			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+		--		END
+		--	END
+		--END
 		
 
 		

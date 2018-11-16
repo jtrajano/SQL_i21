@@ -5814,14 +5814,17 @@ BEGIN
 
 
 
-	IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND (@ysnDualCard = 1 OR (@intCardTypeId = 0 OR @intCardTypeId IS NULL)))
+	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 )
 	BEGIN
 		SET @intVehicleId = NULL
 		IF(@ysnVehicleRequire = 1)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
-			SET @ysnInvalid = 1
+			IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			BEGIN
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required')
+				SET @ysnInvalid = 1
+			END
 		END
 	END
 
