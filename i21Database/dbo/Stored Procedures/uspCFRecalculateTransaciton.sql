@@ -5774,18 +5774,30 @@ BEGIN
 	-------------- End get card type/ dual card
 	------------------------------------------------------
 
-	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0 ) AND @strTransactionType != 'Foreign Sale')
+	--IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0 ) AND @strTransactionType != 'Foreign Sale')
+	--BEGIN
+	--	SET @intVehicleId = NULL
+	--	IF(ISNULL(@ysnVehicleRequire,0) = 1)
+	--	BEGIN
+	--		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+	--		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
+	--		SET @ysnInvalid = 1
+	--	END
+	--END
+	
+	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 )
 	BEGIN
 		SET @intVehicleId = NULL
 		IF(ISNULL(@ysnVehicleRequire,0) = 1)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
-			SET @ysnInvalid = 1
+			IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			BEGIN
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required')
+				SET @ysnInvalid = 1
+			END
 		END
 	END
-	
-	
 
 	---------------------------------------------------
 	--					ZERO PRICING				 --
