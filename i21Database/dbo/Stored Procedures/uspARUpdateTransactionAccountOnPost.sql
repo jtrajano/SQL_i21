@@ -93,6 +93,16 @@ DECLARE @LineItemAccounts AS TABLE(
 	WHERE
         ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
 
+	UPDATE LIA
+	SET LIA.[intSalesAccountId] = LIA.[intAccountId]
+	FROM 
+		@LineItemAccounts LIA
+	INNER JOIN 
+		#ARPostInvoiceDetail ARID 
+			ON LIA.intDetailId = ARID.intInvoiceDetailId
+	WHERE
+        ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
+
 	--Software License
 	UPDATE LIA
 	SET LIA.intLicenseAccountId = IST.intGeneralAccountId
