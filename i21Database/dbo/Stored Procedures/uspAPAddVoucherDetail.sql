@@ -19,21 +19,26 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPAddVoucherDetail';
+DECLARE @insertedData TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @voucherDetailsInfo TABLE(intBillDetailId INT, intVoucherPayableId INT);
 DECLARE @voucherDetailIds AS Id;
 
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
---MAKE SURE TO ADD FIRST TO THE PAYALBES THE VOUCHER DETAIL BEING ADDED
---STORED PROCEDURE uspAPUpdateVoucherPayableQty WILL CHECK FIRST IF IT IS ALREADY ADDED, IF ADDED, WILL DO NOTHING
-EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @post = NULL, @throwError = @throwError, @error = @error OUT
+--MAKE SURE TO ADD FIRST TO THE PAYABLES THE VOUCHER DETAIL BEING ADDED
+--STORED PROCEDURE uspAPUpdateVoucherPayableQty WILL CHECK FIRST IF IT IS ALREADY ADDED, 
+--IF ALREADY ADDED, THIS WILL REMOVE THE EXISTING AND RE-INSERT THE NEW
+INSERT INTO @insertedData
+EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @post = 1, @throwError = @throwError, @error = @error OUT
 
 MERGE INTO tblAPBillDetail AS destination
 USING
 (
 	SELECT TOP 100 PERCENT
-		intBillId							=	A.intBillId
+		intVoucherPayableId					=	A.intVoucherPayableId
+		,intBillId							=	A.intBillId
 		,strMiscDescription					=	A.strMiscDescription
 		,intAccountId						=	CASE WHEN A.intAccountId > 0 THEN A.intAccountId ELSE vendor.intGLAccountExpenseId END
 		,intItemId							=	A.intItemId
@@ -384,7 +389,50 @@ VALUES
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
 )
-OUTPUT inserted.intBillDetailId INTO @voucherDetailIds;
+OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
+
+--ADD TAX DATA
+INSERT INTO tblAPBillDetailTax(
+	[intBillDetailId]		, 
+	[intTaxGroupId]			, 
+	[intTaxCodeId]			, 
+	[intTaxClassId]			, 
+	[strTaxableByOtherTaxes], 
+	[strCalculationMethod]	, 
+	[dblRate]				, 
+	[intAccountId]			, 
+	[dblTax]				, 
+	[dblAdjustedTax]		, 
+	[ysnTaxAdjusted]		, 
+	[ysnSeparateOnBill]		, 
+	[ysnCheckOffTax]		,
+	[ysnTaxOnly]			,
+	[ysnTaxExempt]	
+)
+SELECT
+	[intBillDetailId]		=	C.intBillDetailId, 
+	[intTaxGroupId]			=	A.intTaxGroupId, 
+	[intTaxCodeId]			=	A.intTaxCodeId, 
+	[intTaxClassId]			=	A.intTaxClassId, 
+	[strTaxableByOtherTaxes]=	A.strTaxableByOtherTaxes, 
+	[strCalculationMethod]	=	A.strCalculationMethod, 
+	[dblRate]				=	A.dblRate, 
+	[intAccountId]			=	A.intAccountId, 
+	[dblTax]				=	A.dblTax, 
+	[dblAdjustedTax]		=	A.dblAdjustedTax, 
+	[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
+	[ysnSeparateOnBill]		=	A.ysnSeparateOnBill, 
+	[ysnCheckOffTax]		=	A.ysnCheckOffTax,
+	[ysnTaxOnly]			=	A.ysnTaxOnly,
+	[ysnTaxExempt]			=	A.ysnTaxExempt
+FROM tblAPVoucherPayableTaxStaging A
+INNER JOIN @insertedData B
+	ON A.intVoucherPayableId = B.intNewPayableId
+INNER JOIN @voucherDetailsInfo C
+	ON B.intOldPayableId = C.intVoucherPayableId
+
+INSERT INTO @voucherDetailIds
+SELECT intBillDetailId FROM @voucherDetailsInfo
 
 --UPDATE AVAILABLE QTY
 EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
