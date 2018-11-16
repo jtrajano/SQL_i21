@@ -425,6 +425,7 @@ BEGIN TRY
 								 @InvoiceId			=	@intNewInvoiceId
 								,@InvoiceDetailId	=	@intInvoiceDetailId
 								,@Price				=	@dblFinalPrice
+								,@ContractPrice		=	@dblFinalPrice
 								,@UserId			=	@intUserId
 
 						EXEC	uspARPostInvoice
@@ -475,6 +476,7 @@ BEGIN TRY
 							 @InvoiceId			=	@intInvoiceId
 							,@InvoiceDetailId	=	@intInvoiceDetailId
 							,@Price				=	@dblFinalPrice
+							,@ContractPrice		=	@dblFinalPrice
 							,@UserId			=	@intUserId
 
 					IF ISNULL(@ysnInvoicePosted,0) = 1
