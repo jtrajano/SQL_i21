@@ -48,7 +48,7 @@ RETURNS TABLE AS RETURN
 									END																		
 						END
 			END AS DECIMAL(18,2)) AS dblForeignTotal
-		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN 0
+		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
 			   ELSE
 		       --units is only of inventory item
 			   dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 

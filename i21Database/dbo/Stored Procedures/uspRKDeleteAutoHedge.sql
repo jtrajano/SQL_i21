@@ -4,20 +4,24 @@ AS
 DECLARE @TransId int = 0
 DECLARE @ErrMsg nvarchar(max)
 BEGIN TRY
-IF EXISTS(SELECT * FROM tblRKMatchFuturesPSDetail WHERE intLFutOptTransactionId=@intFutOptTransactionId)
+IF EXISTS(SELECT * FROM tblRKMatchFuturesPSDetail d
+			JOIN tblRKMatchFuturesPSHeader mh on d.intMatchFuturesPSHeaderId=mh.intMatchFuturesPSHeaderId 
+			 WHERE intLFutOptTransactionId=@intFutOptTransactionId AND ISNULL(ysnPosted,0)=1)
 BEGIN
 SET @TransId = 1
 END
 
-IF EXISTS(SELECT * FROM tblRKMatchFuturesPSDetail WHERE intSFutOptTransactionId=@intFutOptTransactionId)
+IF EXISTS(SELECT * FROM tblRKMatchFuturesPSDetail d
+			JOIN tblRKMatchFuturesPSHeader mh on d.intMatchFuturesPSHeaderId=mh.intMatchFuturesPSHeaderId 
+			 WHERE intSFutOptTransactionId=@intFutOptTransactionId AND ISNULL(ysnPosted,0)=1)
 BEGIN
       SET @TransId = 1
 END
 
---IF (@TransId = 1)
---BEGIN
---      RAISERROR('The selected transaction is used for match PnS. Cannot delete this transaction.',16,1)
---END
+IF (@TransId = 1)
+BEGIN
+      RAISERROR('The selected transaction is used for match PnS and posted. Cannot delete this transaction.',16,1)
+END
 
 IF EXISTS
 (SELECT 1 FROM  tblRKFutOptTransaction t WHERE intFutOptTransactionId=@intFutOptTransactionId  AND ISNULL(ysnFreezed,0) = 1)

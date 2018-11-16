@@ -182,7 +182,7 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN 0
+					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
 									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 

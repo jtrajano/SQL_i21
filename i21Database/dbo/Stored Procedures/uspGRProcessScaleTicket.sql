@@ -53,8 +53,7 @@
 		SELECT @intTicketLVStagingId = MIN(intTicketLVStagingId) FROM tblSCTicketLVStaging WHERE ysnImported IS NULL 
 		AND intTicketLVStagingId > @intTicketLVStagingId AND ISNULL(strTicketNumber,'') <> @strTicketNo
 		
-	END
-	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 COMMIT TRANSACTION
+	END	
  END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()  

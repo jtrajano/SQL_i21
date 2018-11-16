@@ -113,6 +113,8 @@ BEGIN TRY
 		RAISERROR ('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
+	EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
+
 	INSERT INTO @voucherDetailData (
 		intVendorEntityId
 		,intLoadId
@@ -366,8 +368,6 @@ BEGIN TRY
 					,LC.dblRate
 					,C.dblQuantity
 					,LC.intLoadId
-
-				EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
 
 				--SELECT intInventoryReceiptChargeId
 				--FROM tblICInventoryReceiptCharge C

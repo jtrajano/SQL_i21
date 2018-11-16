@@ -29,7 +29,7 @@ BEGIN
 
 	--Create a temp table to store the ivoice number and corresponding amount
 	SELECT  strValues as strRawValue INTO #RawValue  FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceAndPayment)
-
+	declare @total NUMERIC (18, 6)
 	SELECT A.InvoiceNumber
 		,CONVERT(NUMERIC(18,6),Split.a.value('.', 'VARCHAR(100)')) AS Payment
 		INTO #InvoiceAndPayment
@@ -39,6 +39,8 @@ BEGIN
 		FROM #RawValue
 		) AS A
 	CROSS APPLY String.nodes('/M') AS Split(a);
+
+	select @total = isnull(@total, 0) + Payment from #InvoiceAndPayment
 
 	insert into @EntriesForPayment
 	(
@@ -97,7 +99,7 @@ BEGIN
 	,'' --Notes
 	,Inv.intAccountId
 	,NULL --Bank Account
-	,dblAmountDue
+	,@total -- dblAmountDue
 	,NULL --Set NULL to Create
 	,@intUserId
 	,Inv.intInvoiceId
@@ -183,3 +185,4 @@ END
 
 
 Exit_Routine:
+

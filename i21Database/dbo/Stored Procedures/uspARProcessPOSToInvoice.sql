@@ -399,7 +399,7 @@ BEGIN
 			FROM tblARPOSPayment POSPAYMENT
 			INNER JOIN (
 				SELECT intPaymentId
-					 , strPaymentMethod
+					 , strPaymentMethod = CASE WHEN strPaymentMethod ='Manual Credit Card' THEN 'Credit Card' ELSE strPaymentMethod END
 				FROM tblARPayment P
 				INNER JOIN fnGetRowsFromDelimitedValues(@strPaymentIds) CP ON P.intPaymentId = CP.intID
 			) CREATEDPAYMENTS ON POSPAYMENT.strPaymentMethod = CREATEDPAYMENTS.strPaymentMethod

@@ -268,12 +268,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		UPDATE B
 		SET	 B.intBookId = IR.intBookId
 			,B.intSubBookId = IR.intSubBookId
+			,B.strReference = IR.strBillOfLading
 		FROM tblAPBill B
 		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 		INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId 
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		WHERE BD.intBillId = @billId
 	END 
+	
 
 
 	IF @transCount = 0 COMMIT TRANSACTION

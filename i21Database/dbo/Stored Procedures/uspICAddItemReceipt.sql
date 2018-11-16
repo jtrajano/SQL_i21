@@ -823,6 +823,7 @@ BEGIN
 				,intPurchaseDetailId
 				,intContractHeaderId
 				,intContractDetailId
+				,dblUnitRetail
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -918,6 +919,7 @@ BEGIN
 				,intPurchaseDetailId			= RawData.intPurchaseDetailId
 				,intContractHeaderId			= RawData.intContractHeaderId
 				,intContractDetailId			= RawData.intContractDetailId
+				,dblUnitRetail			= RawData.dblUnitRetail 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

@@ -38,7 +38,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 		,@ADJUSTMENT_TYPE_OpeningInventory AS INT = 10
 
-SET @adjdt = ISNULL(GETDATE(),@adjdt)
+SET @adjdt = ISNULL(@adjdt, GETDATE())
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
@@ -125,6 +125,7 @@ BEGIN
 				,dblNewQuantity
 				,dblAdjustByQuantity
 				,intItemUOMId
+				,intNewItemUOMId
 				,dblCost
 				,intSubLocationId
 				,intStorageLocationId
@@ -139,6 +140,7 @@ BEGIN
 			,0
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,uom.intItemUOMId
 			,uom.intItemUOMId
 			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
@@ -178,6 +180,7 @@ BEGIN
 				,dblNewQuantity
 				,dblAdjustByQuantity
 				,intItemUOMId
+				,intNewItemUOMId
 				,dblCost
 				,intSubLocationId
 				,intStorageLocationId
@@ -192,6 +195,7 @@ BEGIN
 			,0
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,uom.intItemUOMId
 			,uom.intItemUOMId
 			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 

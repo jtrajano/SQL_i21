@@ -475,7 +475,7 @@ SELECT 1 intRowNumber,'1.Outright Coverage','Outright Coverage' Selection,'1.Pri
               null, 0.0 ,sum(dblNoOfLot) dblQuantity,1
 FROM (
   SELECT distinct    
-  'Purchase'+' - '+isnull(c.strDescription,'') as strAccountNumber,
+  'Purchase'+' - '+isnull(c.strDescription,'') as strAccountNumber,ic.intItemId,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,t.dblQuantity) dblNoOfLot
   FROM vyuRKGetInventoryValuation t  
    join tblICItem ic on t.intItemId=ic.intItemId 

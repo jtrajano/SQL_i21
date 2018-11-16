@@ -89,7 +89,7 @@ BEGIN
 			,[intCurrencyId]
 			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,dtmDateEntered
+			,GETDATE()
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
 			,[strJournalLineDescription]
 			,[intJournalLineNo]

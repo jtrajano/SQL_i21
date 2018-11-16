@@ -85,68 +85,120 @@ SELECT @strPurchaseSales='Purchase'
 END
 END
 
-DECLARE @FinalTable AS TABLE (
-					intRow int , 
-					intSeqId int, 
-					strSeqHeader nvarchar(100),
-					strCommodityCode nvarchar(100),
-					strType nvarchar(100),
-					dblTotal DECIMAL(24,10),
-					intCollateralId int,
-					strLocationName nvarchar(250),
-					strCustomer nvarchar(250),
-					intReceiptNo nvarchar(250),
-					intContractHeaderId int,
-					strContractNumber nvarchar(100),
-					strCustomerReference nvarchar(100),
-					strDistributionOption nvarchar(100),
-					strDPAReceiptNo nvarchar(100),
-					dblDiscDue DECIMAL(24,10),
-					[Storage Due] DECIMAL(24,10),	
-					dtmLastStorageAccrueDate datetime,
-					strScheduleId nvarchar(100),
-					strTicket nvarchar(100),
-					dtmOpenDate datetime,
-					dtmDeliveryDate datetime,
-					dtmTicketDateTime datetime,
-					dblOriginalQuantity  DECIMAL(24,10),
-					dblRemainingQuantity DECIMAL(24,10),
-					intCommodityId int,
-					strItemNo nvarchar(100),
-					strUnitMeasure nvarchar(100)
-					,intFromCommodityUnitMeasureId int
-					,intToCommodityUnitMeasureId int
-					,strTruckName  nvarchar(100)
-					,strDriverName  nvarchar(100)
-					,intCompanyLocationId int
-					,intItemId int
-					,intTicketId int,
-					strTicketNumber nvarchar(100)
-					,strShipmentNumber nvarchar(100)
-					,intInventoryShipmentId int
-					,intInventoryReceiptId int, 
-					strReceiptNumber  nvarchar(100)
-)
+DECLARE @FinalTable AS TABLE (intRow INT
+		, intSeqId INT
+		, strSeqHeader NVARCHAR(100)
+		, strCommodityCode NVARCHAR(100)
+		, strType NVARCHAR(100)
+		, dblTotal DECIMAL(24,10)
+		, intCollateralId INT
+		, strLocationName NVARCHAR(250)
+		, strCustomerName NVARCHAR(250)
+		, intReceiptNo NVARCHAR(250)
+		, intContractHeaderId INT
+		, strContractNumber NVARCHAR(100)
+		, strCustomerReference NVARCHAR(100)
+		, strDistributionOption NVARCHAR(100)
+		, strDPAReceiptNo NVARCHAR(100)
+		, dblDiscDue DECIMAL(24,10)
+		, dblStorageDue DECIMAL(24,10)
+		, dtmLastStorageAccrueDate DATETIME
+		, strScheduleId NVARCHAR(100)
+		, intTicketId INT
+		, strTicketType NVARCHAR(100)
+		, strTicketNumber NVARCHAR(100)		
+		, dtmOpenDate DATETIME
+		, dtmDeliveryDate DATETIME
+		, dtmTicketDateTime DATETIME
+		, dblOriginalQuantity  DECIMAL(24,10)
+		, dblRemainingQuantity DECIMAL(24,10)
+		, intCommodityId INT
+		, intItemId INT
+		, strItemNo NVARCHAR(100)
+		, strUnitMeasure NVARCHAR(100)
+		, intFromCommodityUnitMeasureId int
+		, intToCommodityUnitMeasureId int
+		, strTruckName NVARCHAR(100)
+		, strDriverName NVARCHAR(100)
+		, intCompanyLocationId INT
+		, strShipmentNumber NVARCHAR(100)
+		, intInventoryShipmentId INT
+		, intInventoryReceiptId INT
+		, strReceiptNumber NVARCHAR(100)
+		, strTransactionType NVARCHAR(100)
+		, intCategoryId INT
+		, strCategory NVARCHAR(100)
+		, intFutureMarketId INT
+		, strFutMarketName NVARCHAR(100)
+		, intFutureMonthId INT
+		, strFutureMonth NVARCHAR(100)
+		, strBrokerTradeNo NVARCHAR(100)
+		, strNotes NVARCHAR(100)
+		, ysnPreCrush BIT)
 
 
-INSERT INTO @FinalTable(intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-							intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-							strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-							dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName	,intInventoryReceiptId,strReceiptNumber,intTicketId,strShipmentNumber,
-							intInventoryShipmentId,intItemId, strTicketNumber)
+INSERT INTO @FinalTable(intRow
+			, intSeqId
+			, strSeqHeader
+			, strCommodityCode
+			, strType
+			, dblTotal
+			, strUnitMeasure
+			, intCollateralId
+			, strLocationName
+			, strCustomerName
+			, intReceiptNo
+			, intContractHeaderId
+			, strContractNumber
+			, dtmOpenDate
+			, dblOriginalQuantity
+			, dblRemainingQuantity
+			, intCommodityId
+			, strCustomerReference
+			, strDistributionOption
+			, strDPAReceiptNo
+			, dblDiscDue
+			, dblStorageDue
+			, dtmLastStorageAccrueDate
+			, strScheduleId
+			, intTicketId
+			, strTicketType
+			, strTicketNumber
+			, dtmTicketDateTime
+			, dtmDeliveryDate
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
+			, strTruckName
+			, strDriverName
+			, intInventoryReceiptId
+			, strReceiptNumber
+			, intInventoryShipmentId
+			, strShipmentNumber
+			, strTransactionType)
 EXEC uspRKDPRInvDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate
 
-SELECT 
-	intSeqId
-	,strSeqHeader
-	,strCommodityCode
-	,dblTotal 
-FROM 
-(
-	select intSeqId,strSeqHeader,strCommodityCode,sum(dblTotal) as dblTotal 
-	from @FinalTable
-	group by intSeqId,strSeqHeader,strCommodityCode
-) a 
-WHERE round(dblTotal,2) <> 0
+SELECT intSeqId
+	, strSeqHeader
+	, strCommodityCode
+	, dblTotal
+FROM (
+	SELECT intSeqId
+		, strSeqHeader
+		, strCommodityCode
+		, dblTotal = SUM(dblTotal)
+	FROM @FinalTable
+	GROUP BY intSeqId
+		, strSeqHeader
+		, strCommodityCode
+) a WHERE ROUND(dblTotal, 2) <> 0
 
 END

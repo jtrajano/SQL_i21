@@ -121,3 +121,6 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportReceiptandBill')
 	DROP PROCEDURE uspGRImportReceiptandBill
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspCTImportOriginContract')
+	DROP PROCEDURE uspCTImportOriginContract
+GO

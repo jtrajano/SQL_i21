@@ -13,7 +13,8 @@ SELECT	DISTINCT
 			,0 AS intBillId --Bill.intBillId 
 			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
 			,dblAmountPaid = ISNULL(bill.dblPayment,0)
-			,dblTotal = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN  ABS(ISNULL(dblReceiptLineTotal + dblReceiptTax,0)) ELSE ISNULL(dblReceiptLineTotal + dblReceiptTax,0)  END 
+			,dblTotal = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN (CASE WHEN (SELECT dbo.[fnAPGetIRPartialStatus](strReceiptNumber)) = 1 THEN 0 ELSE  ABS(ISNULL(dblReceiptLineTotal + dblReceiptTax,0)) END) 
+							 ELSE ISNULL(dblReceiptLineTotal + dblReceiptTax,0)  END 
 			,dblAmountDue =  CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0)) ELSE ISNULL(dblItemsPayable + dblTaxesPayable,0) END
 			,dblVoucherAmount = CASE 
 								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
@@ -107,8 +108,7 @@ SELECT	DISTINCT
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
 			,dblAmountDue = ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0))
 			,dblVoucherAmount = CASE 
-								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
-								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
+								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE 0 END),0)
 								ELSE 0 END    
 			,dblWithheld = 0
 			,dblDiscount = 0 

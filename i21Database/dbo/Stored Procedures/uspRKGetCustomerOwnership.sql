@@ -332,10 +332,10 @@ select @intColCount=count(name) from tempdb.sys.columns where object_id =object_
 SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  --Remove the comma at the end
 
 
-select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount
+select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount ORDER BY ORDINAL_POSITION ASC
 SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
 
-select @strPermtableListBF+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount and ( COLUMN_NAME like '%Net' OR COLUMN_NAME like '%Distribution%') 
+select @strPermtableListBF+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount and ( COLUMN_NAME like '%Net' OR COLUMN_NAME like '%Distribution%')  ORDER BY ORDINAL_POSITION ASC
 
 SELECT @strPermtableListBF= CASE WHEN LEN(@strPermtableListBF) = 0 THEN '' ELSE LEFT(@strPermtableListBF,LEN(@strPermtableListBF)-1)  END
 

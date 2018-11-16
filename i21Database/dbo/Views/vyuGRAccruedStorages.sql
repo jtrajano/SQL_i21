@@ -6,6 +6,7 @@ SELECT
 	,intEntityId				= CS.intEntityId
 	,strName					= EM.strName --NAME
 	,intCompanyLocationId		= CS.intCompanyLocationId
+	,strLocationName			= SM.strLocationName
 	,intStorageScheduleId		= CS.intStorageScheduleId
 	,strStorageScheduleId		= SR.strScheduleId --STORE TYPE
 	,intDeliverySheetId			= CS.intDeliverySheetId
@@ -24,6 +25,8 @@ SELECT
 FROM tblGRStorageHistory SH
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
+LEFT JOIN tblSMCompanyLocation SM 
+	ON SM.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 INNER JOIN tblGRStorageScheduleRule SR

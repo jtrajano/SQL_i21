@@ -849,6 +849,30 @@ END
 
 IF @Post = 0
 BEGIN
+
+	INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--ALREADY POSTED
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The transaction has not been posted yet.'
+	FROM
+		#ARPostPaymentHeader P
+    WHERE
+            P.[ysnPost] = 0
+        AND P.[ysnPosted] = 0
+		AND @Recap = 0
+		AND @Post = 0
+
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]

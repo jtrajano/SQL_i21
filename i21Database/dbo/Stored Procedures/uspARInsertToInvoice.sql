@@ -23,9 +23,7 @@ DECLARE @DateOnly				DATETIME,
 		@dblZeroAmount			NUMERIC(18, 6),
 		@RaiseError				BIT,
 		@ErrorMessage			NVARCHAR(MAX),
-		@CurrentErrorMessage	NVARCHAR(MAX),
-		@IsRecurring BIT = 0 
-		 
+		@CurrentErrorMessage	NVARCHAR(MAX)		 
 
 --VARIABLES FOR INVOICE HEADER
 DECLARE @EntityCustomerId		INT,
@@ -534,9 +532,8 @@ IF ISNULL(@RaiseError,0) = 0
 IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	BEGIN
 		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnRecurring = 1 AND strType = 'Software'
-		SELECT TOP 1 @IsRecurring = ISNULL(ysnRecurring,0) FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 
-		IF ISNULL(@SoftwareInvoiceId, 0) > 0 AND @IsRecurring = 1
+		IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
 				--UPDATE EXISTING RECURRING INVOICE
 				UPDATE tblARInvoice 
@@ -1245,7 +1242,7 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
 			END
 			
-		IF EXISTS(SELECT TOP 1 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId AND ICI.strType = 'Software' WHERE SOD.intSalesOrderId = @SalesOrderId) AND ISNULL(@NewInvoiceId, 0) > 0
+		IF EXISTS(SELECT TOP 1 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId AND ICI.strType = 'Software' WHERE SOD.intSalesOrderId = @SalesOrderId) AND ISNULL(@NewInvoiceId, 0) > 0 AND @SoftwareInvoiceId != @NewInvoiceId
 			BEGIN
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)

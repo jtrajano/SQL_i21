@@ -629,8 +629,7 @@ BEGIN TRY
 		EXEC	uspCTInsertINTOTableFromXML 'tblQMTicketDiscount',@strTblXML,@intTicketDiscountId OUTPUT
 		
 	END
-
-	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 COMMIT TRANSACTION
+		
 END TRY      
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      

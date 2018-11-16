@@ -250,6 +250,10 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		UPDATE tblICParentLot
+		SET strParentLotNumber = @strParentLotNumber
+		WHERE intParentLotId = @intParentLotId
+
 		UPDATE tblICLot
 		SET intParentLotId = @intParentLotId
 			,dtmManufacturedDate = CASE 

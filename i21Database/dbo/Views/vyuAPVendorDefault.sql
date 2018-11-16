@@ -21,7 +21,7 @@ SELECT
 	C.strCountry,
 	C.strState,
 	C.strZipCode,
-	C.intShipViaId,
+	ShipVia.intEntityId AS intShipViaId,
 	ShipVia.strShipVia,
 	C.intFreightTermId,
 	Freight.strFreightTerm,
