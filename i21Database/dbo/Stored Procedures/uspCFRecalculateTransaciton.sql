@@ -6030,6 +6030,13 @@ BEGIN
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 			---------------------------------------------------------------------------
+
+			UPDATE tblCFTransaction
+			SET
+			dblCalculatedTotalTax		= (SELECT SUM(ISNULL(dblCalculatedTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+			,dblOriginalTotalTax		= (SELECT SUM(ISNULL(dblOriginalTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+			WHERE tblCFTransaction.intTransactionId = @intTransactionId
+
 			--DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
 
 
@@ -6225,6 +6232,13 @@ BEGIN
 				FROM
 				tblCFTransactionTax
 				WHERE intTransactionId = @intTransactionId
+
+
+				UPDATE tblCFTransaction
+				SET
+				dblCalculatedTotalTax		= (SELECT SUM(ISNULL(dblCalculatedTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+				,dblOriginalTotalTax		= (SELECT SUM(ISNULL(dblOriginalTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+				WHERE tblCFTransaction.intTransactionId = @overfillId
 
 
 
