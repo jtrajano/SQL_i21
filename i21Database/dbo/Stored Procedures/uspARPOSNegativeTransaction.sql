@@ -108,6 +108,7 @@ INSERT INTO @EntriesForInvoice(
 ,[intSalesAccountId]
 ,[strPONumber]
 ,[ysnPost]
+,[intFreightTermId]
 )
 SELECT
 	 [strTransactionType]					= 'Credit Memo'
@@ -128,7 +129,7 @@ SELECT
 	,[intItemUOMId]							= DETAILS.intItemUOMId
 	,[dblQtyShipped]						= ABS(DETAILS.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= DETAILS.dblPrice
+	,[dblPrice]								= (DETAILS.dblExtendedPrice / DETAILS.dblQuantity)
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
@@ -138,8 +139,10 @@ SELECT
 	,[intSalesAccountId]					= NULL
 	,[strPONumber]							= POS.strPONumber
 	,[ysnPost]								= 1
+	,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
+INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
 WHERE POS.intPOSId = @intPOSId
 
 UNION ALL
@@ -173,6 +176,7 @@ SELECT TOP 1
 	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
 	,[strPONumber]							= POS.strPONumber
 	,[ysnPost]								= 1
+	,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
 FROM tblARPOS POS
 OUTER APPLY (
 	SELECT TOP 1 intDiscountAccountId 
@@ -181,6 +185,7 @@ OUTER APPLY (
 LEFT JOIN (
 	SELECT intDiscountAccountId
 	     , intCompanyLocationId
+		 , intFreightTermId
 	FROM tblSMCompanyLocation WITH (NOLOCK)
 ) COMPANYLOC ON POS.intCompanyLocationId = COMPANYLOC.intCompanyLocationId
 WHERE POS.intPOSId = @intPOSId

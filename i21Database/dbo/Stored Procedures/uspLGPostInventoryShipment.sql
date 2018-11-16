@@ -705,14 +705,18 @@ SELECT LD.intItemId
 		WHERE intItemId = LD.intItemId
 			AND intLocationId = ISNULL(CT.intCompanyLocationId,LD.intSCompanyLocationId)
 		)
-	,ISNULL(CT.intItemUOMId,LD.intItemUOMId)
+	,ISNULL(CT.intItemUOMId, --LD.intItemUOMId
+		CASE WHEN LDL.intLotId IS NULL THEN LD.intItemUOMId ELSE LDL.intWeightUOMId END
+	)
 	,LDL.intLotId
-	,LW.intSubLocationId
+	,ISNULL(LW.intSubLocationId, LOT.intSubLocationId)
 	,LOT.intStorageLocationId
 	,CASE 
 		WHEN @ysnPost = 1
-			THEN LD.dblQuantity
-		ELSE - LD.dblQuantity
+			THEN --LD.dblQuantity
+				CASE WHEN LDL.intLotId IS NULL THEN LD.dblQuantity ELSE LDL.dblGross END
+		ELSE -- -LD.dblQuantity
+				CASE WHEN LDL.intLotId IS NULL THEN -LD.dblQuantity ELSE -LDL.dblGross END
 		END
 	,LD.intLoadId
 	,CAST(L.strLoadNumber AS VARCHAR(100))
@@ -804,8 +808,8 @@ BEGIN
 		-- Detail 
 		,[intInventoryShipmentItemId]
 		,[intItemId]
-		,[intLotId]
-		,[strLotNumber]
+		--,[intLotId]
+		--,[strLotNumber]
 		,[intLocationId]
 		,[intItemLocationId]
 		,[intSubLocationId]
@@ -814,10 +818,10 @@ BEGIN
 		,[intWeightUOMId]
 		,[dblQty]
 		,[dblUOMQty]
-		,[dblNetWeight]
+		--,[dblNetWeight]
 		,[dblSalesPrice]
 		,[intDockDoorId]
-		,[intOwnershipType]
+		--,[intOwnershipType]
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
@@ -832,19 +836,19 @@ BEGIN
 		,LD.intCustomerEntityId
 		,LD.intLoadDetailId
 		,LD.intItemId
-		,LDL.intLotId
-		,Lot.strLotNumber
+		--,LDL.intLotId
+		--,Lot.strLotNumber
 		,[intLocationId] = LD.intSCompanyLocationId
-		,[intItemLocationId] = CASE 
-			WHEN IL.intItemLocationId IS NULL
-				THEN (
-						SELECT TOP 1 ITL.intItemLocationId
+		,[intItemLocationId] = --CASE 
+			--WHEN IL.intItemLocationId IS NULL
+			--	THEN (
+						(SELECT TOP 1 ITL.intItemLocationId
 						FROM tblICItemLocation ITL
 						WHERE ITL.intItemId = LD.intItemId
-							AND ITL.intLocationId = CD.intCompanyLocationId
-						)
-			ELSE IL.intItemLocationId
-			END
+							AND ITL.intLocationId = CD.intCompanyLocationId)
+				--		)
+			--ELSE IL.intItemLocationId
+			--END
 		,[intSubLocationId] = LD.intSSubLocationId
 		,[intStorageLocationId] = NULL
 		,[intItemUOMId] = LD.intItemUOMId
@@ -855,10 +859,10 @@ BEGIN
 					ELSE LD.dblQuantity
 					END
 		,[dblUOMQty] = IU.dblUnitQty
-		,[dblNetWeight] = LDL.dblGross - LDL.dblTare
+		--,[dblNetWeight] = LDL.dblGross - LDL.dblTare
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
 		,[intDockDoorId] = NULL
-		,[intOwnershipType] = ISNULL(Lot.intOwnershipType, 0)
+		--,[intOwnershipType] = ISNULL(Lot.intOwnershipType, 0)
 		,[intOrderId] = NULL
 		,[intSourceId] = NULL
 		,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
@@ -867,9 +871,9 @@ BEGIN
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = Lot.intItemLocationId
+	--LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	--LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	--LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = Lot.intItemLocationId
 	WHERE L.intLoadId = @intTransactionId
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment

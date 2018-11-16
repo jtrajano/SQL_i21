@@ -51,7 +51,8 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[intLoadReceive] INT NULL								-- For Load Contracts. Number of Load to Receive
-	,[intSort] INT NULL									
+	,[intSort] INT NULL
+	,[dblUnitRetail] NUMERIC(38, 20) NULL 
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

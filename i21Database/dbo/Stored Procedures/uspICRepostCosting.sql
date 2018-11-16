@@ -39,6 +39,7 @@ DECLARE @intId AS INT
 		,@intCategoryId INT 
 		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
+		,@intCostingMethod AS INT
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -98,6 +99,7 @@ SELECT  intId
 		,intCategoryId
 		,dblAdjustCostValue
 		,dblAdjustRetailValue
+		,intCostingMethod
 FROM	@ItemsToPost 
 
 OPEN loopItems;
@@ -128,6 +130,7 @@ FETCH NEXT FROM loopItems INTO
 	,@intCategoryId
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
+	,@intCostingMethod
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -145,8 +148,8 @@ BEGIN
 			AND strTransactionForm IS NOT NULL 
 
 	-- Get the costing method of an item 
-	SELECT	@CostingMethod = CostingMethod 
-	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
+	SELECT	@CostingMethod = ISNULL(@intCostingMethod, x.CostingMethod) 
+	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId) x
 
 	-- Initialize the dblUOMQty
 	SELECT	@dblUOMQty = dblUnitQty
@@ -365,8 +368,7 @@ BEGIN
 					AND dbo.fnDateGreaterThanEquals(@dtmDate, dtmDate) = 1
 		)
 		BEGIN 
-			DECLARE @intCostingMethod AS INT
-			SELECT @intCostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) 
+			SELECT @intCostingMethod = ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)) 
 
 			IF @intCostingMethod = @AVERAGECOST
 			BEGIN 
@@ -678,6 +680,7 @@ BEGIN
 		,@intCategoryId
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
+		,@intCostingMethod
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

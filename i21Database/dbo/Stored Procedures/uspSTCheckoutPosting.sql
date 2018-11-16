@@ -131,6 +131,13 @@ BEGIN
 			intInvoiceId INT
 		)
 
+		DECLARE @tblTempRank TABLE
+		(
+			intRankId INT
+			, intTempDetailIdForTaxes INT
+			, strSourceTransaction NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
+		)
+
 		-- Create the temp table for the intInvoiceId's.
 		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
 			BEGIN
@@ -208,13 +215,15 @@ BEGIN
 		IF(@ysnPost = 1)
 			BEGIN
 				----------------------------------------------------------------------
-				---------------------------- PUMP TOTALS 01--------------------------
+				---------------------------- PUMP TOTALS @strtblSTCheckoutPumpTotals01--------------------------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1006
 				--http://jira.irelyserver.com/browse/ST-1016
 				IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)	
 					BEGIN
 						
+						DECLARE @strtblSTCheckoutPumpTotals01 AS NVARCHAR(150) = 'tblSTCheckoutPumpTotals01'
+
 						-- For own tax computation
 						INSERT INTO @LineItemTaxEntries(
 								 [intId]
@@ -265,12 +274,12 @@ BEGIN
 								,[ysnTaxExempt] = TAX.ysnTaxExempt
 								,[ysnTaxOnly] = TAX.ysnTaxOnly
 								,[strNotes] = TAX.strNotes
-								,[intTempDetailIdForTaxes] = CPT.intPumpTotalsId --CAST((CAST(CPT.intPumpTotalsId AS NVARCHAR(50)) + '01') AS BIGINT) --CPT.intPumpTotalsId
+								,[intTempDetailIdForTaxes] = CPT.intPumpTotalsId        -- Mark for Rank
 								,[dblCurrencyExchangeRate] = 0
 								,[ysnClearExisting] = 0
 								,[strTransactionType] = ''
 								,[strType] = ''
-								,[strSourceTransaction] = ''
+								,[strSourceTransaction] = @strtblSTCheckoutPumpTotals01 -- Mark for Rank
 								,[intSourceId] = @intCheckoutId
 								,[strSourceId] = @intCheckoutId
 								,[intHeaderId] = @intCheckoutId
@@ -294,7 +303,7 @@ BEGIN
 							ON ST.intCheckoutCustomerId = vC.intEntityId
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
 																			ISNULL(CPT.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) -- ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
 																			, @LineItems
 																			, 1										-- is Reversal
 																			, I.intItemId							-- Item Id
@@ -470,7 +479,7 @@ BEGIN
 										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
 										
-										, [dblPrice]				= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ((ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) * CPT.dblQuantity) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -500,9 +509,9 @@ BEGIN
 										,[intPerformerId]			= NULL -- not sure
 										,[ysnLeaseBilling]			= NULL
 										,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-										,[strImportFormat]			= 'Not Familiar'
+										,[strImportFormat]			= @strtblSTCheckoutPumpTotals01 -- Mark for Rank
 										,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-										,[intTempDetailIdForTaxes]  = CPT.intPumpTotalsId --CAST((CAST(CPT.intPumpTotalsId AS NVARCHAR(50)) + '01') AS BIGINT) --CPT.intPumpTotalsId
+										,[intTempDetailIdForTaxes]  = CPT.intPumpTotalsId           -- Mark for Rank
 										,[intConversionAccountId]	= NULL -- not sure
 										,[intCurrencyExchangeRateTypeId]	= NULL
 										,[intCurrencyExchangeRateId]		= NULL
@@ -531,14 +540,17 @@ BEGIN
 							LEFT OUTER JOIN
 							(
 								SELECT 
-								 [dblAdjustedTax] = SUM ([dblAdjustedTax])
-								 ,[intTempDetailIdForTaxes]
+								   [dblAdjustedTax] = SUM ([dblAdjustedTax])
+								 , [intTempDetailIdForTaxes]
+								 , [strSourceTransaction]
 								FROM
 									@LineItemTaxEntries
 								GROUP BY
 									[intTempDetailIdForTaxes]
+									, [strSourceTransaction]
 							) Tax
 							ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
+							AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							
@@ -721,7 +733,7 @@ BEGIN
 										,[intPerformerId]			= NULL -- not sure
 										,[ysnLeaseBilling]			= NULL
 										,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-										,[strImportFormat]			= 'Not Familiar'
+										,[strImportFormat]			= ''
 										,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 										,[intTempDetailIdForTaxes]  = NULL
 										,[intConversionAccountId]	= NULL -- not sure
@@ -946,7 +958,7 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= ''
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
@@ -1217,7 +1229,7 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= ''
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
@@ -1432,7 +1444,7 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= ''
 											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
@@ -1655,7 +1667,7 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= ''
 											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
@@ -1696,12 +1708,14 @@ BEGIN
 
 
 				----------------------------------------------------------------------
-				-------------------------- CUSTOMER CHARGES 02------------------------
+				--------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01---------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1020
 				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
-						-- For own tax computation for Customer CHarges that has Fule Item
+						DECLARE @strtblSTCheckoutCustomerCharges01 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges01'
+
+						-- For own tax computation for Customer CHarges that has Fuel Item
 						INSERT INTO @LineItemTaxEntries(
 									 [intId]
 									,[intDetailId]
@@ -1751,12 +1765,12 @@ BEGIN
 									,[ysnTaxExempt] = FuelTax.ysnTaxExempt
 									,[ysnTaxOnly] = FuelTax.ysnTaxOnly
 									,[strNotes] = FuelTax.strNotes
-									,[intTempDetailIdForTaxes] = CC.intCustChargeId
+									,[intTempDetailIdForTaxes] = CC.intCustChargeId             -- Mark for Rank
 									,[dblCurrencyExchangeRate] = 0
 									,[ysnClearExisting] = 0
 									,[strTransactionType] = ''
 									,[strType] = ''
-									,[strSourceTransaction] = ''
+									,[strSourceTransaction] = @strtblSTCheckoutCustomerCharges01 -- Mark for Rank
 									,[intSourceId] = @intCheckoutId
 									,[strSourceId] = @intCheckoutId
 									,[intHeaderId] = @intCheckoutId
@@ -1779,8 +1793,33 @@ BEGIN
 							ON I.intItemId = IP.intItemId
 							AND IL.intItemLocationId = IP.intItemLocationId	
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
-																			ISNULL(CC.dblQuantity, 0)						    -- Qty
-																			, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)	-- Gross Amount CC.dblUnitPrice
+																			-- ISNULL(CC.dblQuantity, 0)						    -- Qty
+																			CASE
+																				-- IF Item is Fuel
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN
+																						CASE
+																							WHEN (CC.dblAmount > 0)
+																								THEN (ISNULL(CC.dblQuantity, 0) * -1)
+																							WHEN (CC.dblAmount < 0)
+																								THEN (ISNULL(CC.dblQuantity, 0) * -1)
+																						END
+																				ELSE ISNULL(CC.dblQuantity, 0)
+																			END
+																			--, ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			,CASE
+																				-- IF Item is Fuel
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN
+																						CASE
+																							WHEN (CC.dblAmount > 0)
+																								--THEN (ISNULL(CC.dblAmount, 0) * -1)
+																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
+																							WHEN (CC.dblAmount < 0)
+																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
+																						END
+																				ELSE ISNULL(CC.dblUnitPrice, 0)
+																			END
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -2014,9 +2053,14 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
-																							-- THEN (CC.dblUnitPrice)
-																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
+																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
+																							THEN ABS(ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2)) * ABS(ISNULL(CC.dblQuantity, 0))) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
+																							--THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
+																							--																							WHEN (CC.dblAmount > 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																							WHEN (CC.dblAmount < 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																						END)
 																					END
 
 																			-- IF Item is BLANK
@@ -2024,9 +2068,11 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount > 0)
-																							THEN CC.dblAmount
+																							--THEN CC.dblAmount
+																							THEN ISNULL(CC.dblUnitPrice, 0)			-- TEST01
 																						WHEN (CC.dblAmount < 0)
-																							THEN (CC.dblAmount * -1)
+																							--THEN (CC.dblAmount * -1)
+																							THEN (ISNULL(CC.dblUnitPrice, 0) * -1)	-- TEST01
 																					END
 																		END
 
@@ -2064,12 +2110,12 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= @strtblSTCheckoutCustomerCharges01 -- Mark for Rank
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = CASE 
 																			-- IF Item is Fuel
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																				THEN CC.intCustChargeId --CAST((CAST(CC.intCustChargeId AS NVARCHAR(50)) + '02') AS BIGINT) -- For Unique Id
+																				THEN CC.intCustChargeId  -- Mark for Rank
 																			ELSE NULL						
 																		END
 											,[intConversionAccountId]	= NULL -- not sure
@@ -2101,14 +2147,17 @@ BEGIN
 								LEFT OUTER JOIN
 								(
 									SELECT 
-									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
-									 ,[intTempDetailIdForTaxes]
+									   [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 , [intTempDetailIdForTaxes]
+									 , [strSourceTransaction]
 									FROM
 										@LineItemTaxEntries
 									GROUP BY
 										[intTempDetailIdForTaxes]
+										, [strSourceTransaction]
 								) FuelTax
 								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+								AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges01
 								--OUTER APPLY 
 								--(
 								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
@@ -2347,7 +2396,7 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= ''
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = NULL
 											,[intConversionAccountId]	= NULL -- not sure
@@ -2388,12 +2437,142 @@ BEGIN
 
 				-- START CREATE SEPARATE INVOICE for Customer Charges
 				----------------------------------------------------------------------
-				-------------------------- CUSTOMER CHARGES 02------------------------
+				-------------------------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges02------------------------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1019
 				--http://jira.irelyserver.com/browse/ST-1020
 				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
 					BEGIN
+						DECLARE @strtblSTCheckoutCustomerCharges02 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges02'
+
+						-- For own tax computation for Customer CHarges that has Fuel Item
+						INSERT INTO @LineItemTaxEntries(
+									 [intId]
+									,[intDetailId]
+									,[intDetailTaxId]
+									,[intTaxGroupId]
+									,[intTaxCodeId]
+									,[intTaxClassId]
+									,[strTaxableByOtherTaxes]
+									,[strCalculationMethod]
+									,[dblRate]
+									,[intTaxAccountId]
+									,[dblTax]
+									,[dblAdjustedTax]
+									,[ysnTaxAdjusted]
+									,[ysnSeparateOnInvoice]
+									,[ysnCheckoffTax]
+									,[ysnTaxExempt]
+									,[ysnTaxOnly]
+									,[strNotes]
+									,[intTempDetailIdForTaxes]
+									,[dblCurrencyExchangeRate]
+									,[ysnClearExisting]
+									,[strTransactionType]
+									,[strType]
+									,[strSourceTransaction]
+									,[intSourceId]
+									,[strSourceId]
+									,[intHeaderId]
+									,[dtmDate]
+					)
+					SELECT
+									 [intId] = CC.intCustChargeId
+									,[intDetailId] = NULL
+									,[intDetailTaxId] = NULL
+									,[intTaxGroupId] = FuelTax.intTaxGroupId
+									,[intTaxCodeId] = FuelTax.intTaxCodeId
+									,[intTaxClassId] = FuelTax.intTaxClassId
+									,[strTaxableByOtherTaxes] = FuelTax.strTaxableByOtherTaxes
+									,[strCalculationMethod] = FuelTax.strCalculationMethod
+									,[dblRate] = FuelTax.dblRate
+									,[intTaxAccountId] = FuelTax.intTaxAccountId
+									,[dblTax] = FuelTax.dblTax
+									,[dblAdjustedTax] = FuelTax.dblAdjustedTax
+									,[ysnTaxAdjusted] = 1
+									,[ysnSeparateOnInvoice] = 0
+									,[ysnCheckoffTax] = FuelTax.ysnCheckoffTax
+									,[ysnTaxExempt] = FuelTax.ysnTaxExempt
+									,[ysnTaxOnly] = FuelTax.ysnTaxOnly
+									,[strNotes] = FuelTax.strNotes
+									,[intTempDetailIdForTaxes] = CC.intCustChargeId             -- Mark for Rank
+									,[dblCurrencyExchangeRate] = 0
+									,[ysnClearExisting] = 0
+									,[strTransactionType] = ''
+									,[strType] = ''
+									,[strSourceTransaction] = @strtblSTCheckoutCustomerCharges02 -- Mark for Rank
+									,[intSourceId] = @intCheckoutId
+									,[strSourceId] = @intCheckoutId
+									,[intHeaderId] = @intCheckoutId
+									,[dtmDate] = GETDATE()
+						FROM tblSTCheckoutCustomerCharges CC
+						JOIN tblSTCheckoutHeader CH 
+							ON CC.intCheckoutId = CH.intCheckoutId
+						JOIN tblSTStore ST 
+							ON CH.intStoreId = ST.intStoreId
+						JOIN vyuEMEntityCustomerSearch vC 
+							ON CC.intCustomerId = vC.intEntityId
+						LEFT JOIN tblICItemUOM UOM 
+							ON CC.intProduct = UOM.intItemUOMId
+						LEFT JOIN tblICItem I 
+							ON UOM.intItemId = I.intItemId
+						LEFT JOIN tblICItemLocation IL 
+							ON I.intItemId = IL.intItemId
+							AND ST.intCompanyLocationId = IL.intLocationId
+						LEFT JOIN tblICItemPricing IP 
+							ON I.intItemId = IP.intItemId
+							AND IL.intItemLocationId = IP.intItemLocationId	
+						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+																			-- ISNULL(CC.dblQuantity, 0)						    -- Qty
+																			CASE
+																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
+																					THEN
+																						CASE
+																							WHEN (CC.dblAmount > 0)
+																								THEN ISNULL(CC.dblQuantity, 0)	
+																							WHEN (CC.dblAmount < 0)
+																								THEN (ISNULL(CC.dblQuantity, 0) * -1)
+																						END
+																				ELSE ISNULL(CC.dblQuantity, 0)
+																			END
+																			, ABS(ISNULL(CAST(CC.dblUnitPrice AS DECIMAL(18,2)), 0)) --ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			, @LineItems
+																			, 1										-- is Reversal
+																			--, I.intItemId							-- Item Id
+																			, CASE
+																				WHEN I.intItemId IS NOT NULL 
+																					THEN I.intItemId
+																				ELSE ST.intCustomerChargesItemId
+																			END
+																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
+																			, ST.intCompanyLocationId				-- Company Location Id
+																			, ST.intTaxGroupId						-- Tax Group Id
+																			, 0										-- 0 Price if not reversal
+																			, GETDATE()
+																			, vC.intShipToId						-- Ship to Location
+																			, 1
+																			, NULL
+																			, vC.intFreightTermId					-- FreightTermId
+																			, NULL
+																			, NULL
+																			, 0
+																			, 0
+																			, UOM.intItemUOMId
+																			,NULL									--@CFSiteId
+																			,0										--@IsDeliver
+																			,0                                      --@IsCFQuote
+																			,NULL
+																			,NULL
+																			,NULL
+																		
+						) FuelTax
+						WHERE CC.intCheckoutId = @intCheckoutId
+						AND ISNULL(CC.dblAmount, 0) != 0
+						AND I.intItemId IS NOT NULL
+						AND I.ysnFuelItem = CAST(1 AS BIT)
+
+
+
 						INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
 											,[strTransactionType]
@@ -2635,20 +2814,28 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
-																							THEN (ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity
+																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
+																							THEN ((ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2))) * ABS(CC.dblQuantity)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
+																							--THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
+																							--																							WHEN (CC.dblAmount > 0)
+																							--																								THEN CC.dblQuantity
+																							--																							WHEN (CC.dblAmount < 0)
+																							--																								THEN (CC.dblQuantity * -1)
+																							--																						END
+
+																							-- THEN ABS((ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity)
 																							--THEN CC.dblUnitPrice
 																					END
 
 																			-- IF Item is BLANK
 																			WHEN (I.intItemId IS NULL)
-																				THEN
-																					CASE
-																						WHEN (CC.dblAmount > 0)
-																							THEN CC.dblAmount
-																						WHEN (CC.dblAmount < 0)
-																							THEN (CC.dblAmount * -1)
-																					END
+																				THEN ABS(CC.dblUnitPrice) -- Always set this to positive
+																					--CASE
+																					--	WHEN (CC.dblAmount > 0)
+																					--		THEN CC.dblUnitPrice
+																					--	WHEN (CC.dblAmount < 0)
+																					--		THEN (CC.dblUnitPrice * -1)
+																					--END
 																		END
 
 											,[ysnRefreshPrice]			= 0
@@ -2684,13 +2871,12 @@ BEGIN
 											,[intPerformerId]			= NULL -- not sure
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= 'Not Familiar'
+											,[strImportFormat]			= @strtblSTCheckoutCustomerCharges02 -- Mark for Rank
 											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = CASE 
 																			-- IF Item is Fuel
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																				THEN CC.intCustChargeId -- For Unique Id
-																				--THEN CAST((CAST(CC.intCustChargeId AS NVARCHAR(50)) + '02') AS BIGINT) -- For Unique Id
+																				THEN CC.intCustChargeId		 -- Mark for Rank
 																			ELSE NULL						
 																		END
 											,[intConversionAccountId]	= NULL -- not sure
@@ -2707,7 +2893,6 @@ BEGIN
 								JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
-									--ON ST.intCheckoutCustomerId = vC.intEntityId
 									ON CC.intCustomerId = vC.intEntityId
 								LEFT JOIN tblICItemUOM UOM 
 									ON CC.intProduct = UOM.intItemUOMId
@@ -2722,14 +2907,17 @@ BEGIN
 								LEFT OUTER JOIN
 								(
 									SELECT 
-									 [dblAdjustedTax] = SUM ([dblAdjustedTax])
-									 ,[intTempDetailIdForTaxes]
+									   [dblAdjustedTax] = SUM ([dblAdjustedTax])
+									 , [intTempDetailIdForTaxes]
+									 , [strSourceTransaction]
 									FROM
 										@LineItemTaxEntries
 									GROUP BY
 										[intTempDetailIdForTaxes]
+										, [strSourceTransaction]
 								) FuelTax
 								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+								AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges02
 								--OUTER APPLY 
 								--(
 								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
@@ -3007,9 +3195,66 @@ BEGIN
 
 										--SELECT * FROM @EntriesForInvoice
 
+										-------------------------------------------------------------------------------
+										------------------------------- Start Rank ------------------------------------
+										-------------------------------------------------------------------------------
+										IF EXISTS(SELECT TOP 1 1 FROM @LineItemTaxEntries)
+											BEGIN
+												-- Table @LineItemTaxEntries
+												-- intTempDetailIdForTaxes - Primary Id
+												-- strSourceTransaction - origin table
+
+												-- Table @EntriesForInvoiceBatchPost
+												-- intTempDetailIdForTaxes - Primary Id
+												-- strImportFormat - origin table
+
+												-- Create Ranking
+												INSERT INTO @tblTempRank
+												(
+													intRankId
+													, intTempDetailIdForTaxes
+													, strSourceTransaction
+												)
+												SELECT 
+													RANK() OVER(ORDER BY intTempDetailIdForTaxes, strSourceTransaction) AS intRankId
+													, intTempDetailIdForTaxes
+													, strSourceTransaction
+												FROM @LineItemTaxEntries
+												
+												-- Update UDTables
+												UPDATE tbl
+												SET tbl.intTempDetailIdForTaxes = Ranking.intRankId
+												FROM @EntriesForInvoiceBatchPost tbl
+												INNER JOIN @tblTempRank Ranking
+													ON tbl.intTempDetailIdForTaxes = Ranking.intTempDetailIdForTaxes										-- Id
+													AND tbl.strImportFormat COLLATE SQL_Latin1_General_CP1_CS_AS = Ranking.strSourceTransaction				-- Table
+
+												UPDATE Tax
+												SET Tax.intTempDetailIdForTaxes = Ranking.intRankId
+												FROM @LineItemTaxEntries Tax
+												INNER JOIN @tblTempRank Ranking
+													ON Tax.intTempDetailIdForTaxes = Ranking.intTempDetailIdForTaxes											-- Id
+													AND Tax.strSourceTransaction COLLATE SQL_Latin1_General_CP1_CS_AS = Ranking.strSourceTransaction			-- Table
+
+												-- Clear values
+												UPDATE @LineItemTaxEntries
+												SET strSourceTransaction = ''
+												WHERE intTempDetailIdForTaxes IS NOT NULL
+												AND strSourceTransaction <> ''
+
+												UPDATE @EntriesForInvoiceBatchPost
+												SET strImportFormat = ''
+												WHERE intTempDetailIdForTaxes IS NOT NULL
+												AND strImportFormat <> ''
+											END
+										-------------------------------------------------------------------------------
+										------------------------------- End Rank --------------------------------------
+										-------------------------------------------------------------------------------
+
 										--SELECT * FROM @LineItemTaxEntries
 
 										--SELECT * FROM @EntriesForInvoiceBatchPost
+
 
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
@@ -3330,11 +3575,11 @@ BEGIN
 										,[ysnAllowOverpayment]
 										,[ysnFromAP]
 										)								
-									SELECT		 	
-										 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+									SELECT
+										 [intId]								= CCP.intCustPaymentsId -- ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
 										,[strSourceTransaction]					= 'Invoice'
-										,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
-										,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+										,[intSourceId]							= CCP.intCustPaymentsId --@intCheckoutId						--CCP.intCustPaymentsId
+										,[strSourceId]							= CAST(CCP.intCustPaymentsId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
 										,[intPaymentId]							= NULL									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
 										,[intEntityCustomerId]					= CCP.intCustomerId
 										,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
@@ -3351,7 +3596,8 @@ BEGIN
 										,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
 										,[dblExchangeRate]						= NULL
 										,[strReceivePaymentType]				= 'Cash Receipts'
-										,[strPaymentOriginalId]					= NULL		-- Reference to the original/parent record
+										,[strPaymentOriginalId]					= CCP.intCustPaymentsId		-- Reference to the original/parent record
+																											-- This will also be used to create separate RCV for all rows in Customer Payments tab
 										,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 										,[ysnApplytoBudget]						= 0
 										,[ysnApplyOnAccount]					= 0
@@ -3419,7 +3665,7 @@ BEGIN
 						EXEC [dbo].[uspARProcessPayments]
 								@PaymentEntries	    = @PaymentsForInsert
 								,@UserId			= @intCurrentUserId
-								,@GroupingOption	= 6
+								,@GroupingOption	= 8 --6
 								,@RaiseError		= 0
 								,@ErrorMessage		= @ErrorMessage OUTPUT
 								,@LogId				= @intIntegrationLogId OUTPUT
@@ -3804,11 +4050,11 @@ BEGIN
 											,[ysnAllowOverpayment]
 											,[ysnFromAP]
 										)								
-										SELECT		 	
-											 [intId]								= ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+										SELECT --DISTINCT		-- Use idistinct to eliminate duplicates 		 	
+											 [intId]								= CCP.intCustPaymentsId --ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
 											,[strSourceTransaction]					= 'Invoice'
-											,[intSourceId]							= @intCheckoutId						--CCP.intCustPaymentsId
-											,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+											,[intSourceId]							= CCP.intCustPaymentsId --@intCheckoutId						--CCP.intCustPaymentsId
+											,[strSourceId]							= CAST(CCP.intCustPaymentsId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
 											,[intPaymentId]							= Payment.intPaymentId									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
 											,[intEntityCustomerId]					= CCP.intCustomerId
 											,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
@@ -3838,7 +4084,7 @@ BEGIN
 											,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
 											,[intEntityId]							= @intCurrentUserId
 											--Detail																																															
-											,[intPaymentDetailId]					= ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+											,[intPaymentDetailId]					= NULL --ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
 											,[intInvoiceId]							= @intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
 											,[strTransactionType]					= NULL
 											,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
@@ -3866,6 +4112,7 @@ BEGIN
 
 										JOIN tblARPaymentIntegrationLogDetail ILD
 											ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
+											AND CCP.intCustPaymentsId = ILD.intSourceId
 										JOIN tblARPayment Payment
 											ON ILD.intPaymentId = Payment.intPaymentId
 

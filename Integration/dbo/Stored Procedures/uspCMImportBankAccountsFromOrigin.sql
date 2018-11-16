@@ -16,8 +16,7 @@ IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMImportBankAccoun
 	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN 
 
-	EXEC('
-		ALTER PROCEDURE [dbo].[uspCMImportBankAccountsFromOrigin]
+	EXEC('ALTER PROCEDURE [dbo].[uspCMImportBankAccountsFromOrigin]
 		AS
 
 		-- Bank Account Types:
@@ -84,7 +83,7 @@ BEGIN
 				,dtmLastModified
 				,intConcurrencyId
 			)
-		SELECT	strBankName				= LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) 
+		SELECT	strBankName				= LTRIM(RTRIM(ISNULL(RoutingNumber.apcbk_desc, ''''))) 
 				,strContact				= ''''
 				,strAddress				= ''''
 				,strZipCode				= ''''
@@ -96,58 +95,60 @@ BEGIN
 				,strWebsite				= ''''	
 				,strEmail				= ''''
 				,strRTN					= ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), '''') 
-				,intCreatedUserId		= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+				,intCreatedUserId		= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = RoutingNumber.apcbk_desc) 
 				,dtmCreated				= GETDATE()
-				,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+				,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = RoutingNumber.apcbk_desc) 
 				,dtmLastModified		= GETDATE()
 				,intConcurrencyId		= 1
 		FROM	(	SELECT	DISTINCT 
-							apcbk_desc = i.apcbk_desc COLLATE Latin1_General_CI_AS
+							apcbk_transit_route
 					FROM	apcbkmst i
-					WHERE apcbk_bnk_no IS NULL 
-					AND NOT EXISTS (SELECT TOP 1 1 FROM ssbnkmst where ssbnk_name = apcbk_desc) 
+					WHERE apcbk_bnk_no IS NULL AND apcbk_transit_route IS NOT NULL
+					AND NOT EXISTS (SELECT TOP 1 1 FROM ssbnkmst where ssbnk_transit_route = apcbk_transit_route) 
 				) QUERY
 		OUTER APPLY(
-			SELECT TOP 1 CAST(A.apcbk_transit_route AS nvarchar(20)) Text
-			FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc
+			SELECT TOP 1 CAST(A.apcbk_transit_route AS nvarchar(20)) Text, apcbk_desc 
+			FROM apcbkmst A WHERE A.apcbk_transit_route = QUERY.apcbk_transit_route
 		)RoutingNumber
 		OUTER APPLY (
 			SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 10))) + 
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 10) Value
 		)LeadingZero
 
-		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM vyuCMBank WHERE strRTN = ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), ''''))
 
 		UNION SELECT 
-				strBankName				= LTRIM(RTRIM(ISNULL(Q.ssbnk_name, '''')))
-				,strContact				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_contact,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
-				,strAddress				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_addr1,''''))) + char(13) + LTRIM(RTRIM(ISNULL(ssbnk_addr2,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
-				,strZipCode				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_zip,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
-				,strCity				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_city,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
-				,strState				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_state,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				strBankName				= LTRIM(RTRIM(ISNULL(RoutingNumber.ssbnk_name, '''')))
+				,strContact				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_contact,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
+				,strAddress				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_addr1,''''))) + char(13) + LTRIM(RTRIM(ISNULL(ssbnk_addr2,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
+				,strZipCode				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_zip,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
+				,strCity				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_city,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
+				,strState				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_state,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
 				,strCountry				= ''''
-				,strPhone				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_phone,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strPhone				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_phone,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
 				,strFax					= ''''
 				,strWebsite				= ''''	
-				,strEmail				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_email_addr,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strEmail				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_email_addr,''''))) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
 				,strRTN					= ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), '''')
-				,intCreatedUserId		= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,intCreatedUserId		= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
 				,dtmCreated				= GETDATE()
-				,intLastModifiedUserId	= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,intLastModifiedUserId	= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_transit_route = RoutingNumber.ssbnk_transit_route)
 				,dtmLastModified		= GETDATE()
 				,intConcurrencyId		= 1
 		FROM(
-				SELECT DISTINCT ssbnk_name FROM ssbnkmst
+				SELECT DISTINCT ssbnk_transit_route FROM ssbnkmst WHERE ssbnk_transit_route IS NOT NULL
 			) Q
 		OUTER APPLY(
-			SELECT TOP 1 CAST(ssbnk_transit_route AS nvarchar(20)) Text
-			FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name
+			SELECT TOP 1 CAST(ssbnk_transit_route AS nvarchar(20)) Text , ssbnk_name,ssbnk_transit_route
+			FROM ssbnkmst WHERE ssbnk_transit_route = Q.ssbnk_transit_route
 		)RoutingNumber
 		OUTER APPLY (
 			SELECT TOP 1 REPLICATE(''0'',  9 -  LEN(SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15) Value
 		)LeadingZero
-		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS)
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM vyuCMBank WHERE strRTN = ISNULL(CAST(LeadingZero.Value AS NVARCHAR(12)), ''''))
+
+		
 
 		-- Insert new record in tblCMBankAccount
 		INSERT INTO tblCMBankAccount (
@@ -258,7 +259,7 @@ BEGIN
 			SELECT REPLICATE(''0'',  9 -  LEN(substring(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'',RoutingNumber.Text), 15) Value
 		)LeadingZero
-		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)
-	')
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)'
+	)
 END 
 GO

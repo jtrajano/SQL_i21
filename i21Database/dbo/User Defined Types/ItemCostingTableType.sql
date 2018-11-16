@@ -34,4 +34,5 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL	
+	,[intCostingMethod] INT NULL 
 )

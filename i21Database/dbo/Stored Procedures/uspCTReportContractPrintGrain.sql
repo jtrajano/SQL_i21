@@ -65,14 +65,14 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	@strCompanyName + ', '  + CHAR(13)+CHAR(10) +
-			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
+	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
+			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
+			ISNULL(@strCity,'') +' ' + ISNULL(+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			AS	strA,
-			LTRIM(RTRIM(CH.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
+			ISNULL(' '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 			AS	strB,
