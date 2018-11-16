@@ -468,87 +468,92 @@ BEGIN
 				, intInventoryShipmentId
 				, strContractNumber
 				, intContractHeaderId
-				, dblShipmentQty
 				, intCompanyLocationId
 				, strLocationName
-				, intContractDetailId
-				, dblInvoiceQty
-				, dblBalanceToInvoice = (ISNULL(dblShipmentQty, 0) - ISNULL(dblInvoiceQty, 0))
-				, intCommodityId
-				, intUnitMeasureId = intCommodityUnitMeasureId
+				, dblBalanceToInvoice 
 				, intEntityId
-				, strCustomerReference = strName
+				, strCustomerReference 
 				, dtmTicketDateTime
 				, intTicketId
 				, strTicketNumber
+				, intCommodityId
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
+				, intCategoryId
 			INTO #tblGetSalesIntransitWOPickLot
 			FROM(
-				SELECT DISTINCT b.strShipmentNumber
-					, strContractNumber = d1.strContractNumber + '-' + CONVERT(NVARCHAR, d.intContractSeq)
-					, d1.intContractHeaderId
-					, b.intInventoryShipmentId
-					, dblShipmentQty = SUM(it.dblQty)
-					, dblInvoiceQty = ISNULL((SELECT SUM(ad.dblQtyShipped) FROM tblARInvoice ia
-											JOIN tblARInvoiceDetail ad ON ia.intInvoiceId = ad.intInvoiceId
-											WHERE ad.strDocumentNumber = b.strShipmentNumber
-												AND ysnPosted = 1 AND intInventoryShipmentChargeId IS NULL), 0)
-					, intCompanyLocationId = b.intShipFromLocationId
-					, l.strLocationName
-					, d.intContractDetailId
-					, i.intCommodityId
-					, iuom.intItemUOMId
-					, ium.intCommodityUnitMeasureId
-					, intEntityId = b.intEntityCustomerId
-					, e.strName
-					, t.dtmTicketDateTime
-					, t.intTicketId
-					, t.strTicketNumber
-					, i.intItemId
-					, i.strItemNo
-					, i.intCategoryId
-					, strCategory = Category.strCategoryCode
-				FROM tblICInventoryTransaction it
-				JOIN tblICInventoryShipment b ON b.strShipmentNumber = it.strTransactionId
-				JOIN tblICInventoryShipmentItem c ON c.intInventoryShipmentId = b.intInventoryShipmentId AND b.ysnPosted = 1
-				JOIN tblICItem i ON c.intItemId = i.intItemId
-				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
-				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICItemLocation il ON it.intItemId = i.intItemId AND it.intItemLocationId = il.intItemLocationId AND il.strDescription = 'In-Transit'
-				JOIN tblEMEntity e ON b.intEntityCustomerId = e.intEntityId
-				JOIN tblSMCompanyLocation l ON b.intShipFromLocationId = l.intCompanyLocationId
-				JOIN tblCTContractDetail d ON d.intContractDetailId = c.intLineNo
-				JOIN tblCTContractHeader d1 ON d1.intContractHeaderId = d.intContractHeaderId
-				LEFT JOIN tblSCTicket t ON c.intSourceId = t.intTicketId AND b.intSourceType = 1 --Source Type is Scale
-				WHERE i.intCommodityId = @intCommodityId
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), it.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					and ISNULL(b.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(b.intEntityId, 0))
-				GROUP BY b.strShipmentNumber
-					, d1.strContractNumber
-					, d1.intContractHeaderId
-					, intContractSeq
-					, b.intInventoryShipmentId
-					, c.intInventoryShipmentItemId
-					, intShipFromLocationId
-					, strLocationName
-					, d.intContractDetailId
-					, i.intCommodityId
-					, iuom.intItemUOMId
-					, i.strItemNo
-					, ium.intCommodityUnitMeasureId
-					, b.intEntityCustomerId
-					, strName
-					, t.dtmTicketDateTime
-					, t.intTicketId
-					, t.strTicketNumber
-					, i.intItemId
-					, i.strItemNo
-					, i.intCategoryId
-					, Category.strCategoryCode
+				SELECT 
+					strTransactionId AS strShipmentNumber
+					,intTransactionId AS intInventoryShipmentId
+					,strContractNumber
+					,intContractHeaderId
+					,strTicketNumber
+					,intTicketId
+					,dtmDate AS dtmTicketDateTime
+					,intLocationId AS intCompanyLocationId
+					,strLocationName
+					,strUOM
+					,intEntityId
+					,strEntity AS strCustomerReference
+					,intCommodityId
+					,intItemId
+					,strItemNo
+					,strCategory
+					,intCategoryId
+					,dblBalanceToInvoice 
+				FROM (
+					SELECT 
+						 Inv.strTransactionId
+						,Inv.intTransactionId
+						,strContractNumber = (SELECT TOP 1 strOrderNumber FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
+						,intContractHeaderId = (SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
+						,strTicketNumber = (SELECT TOP 1 strSourceNumber FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intSourceId IS NOT NULL)
+						,intTicketId = (SELECT TOP 1  intSourceId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intSourceId IS NOT NULL)
+						,Inv.dtmDate
+						,Inv.intLocationId
+						,Inv.strLocationName
+						,Inv.strUOM
+						,Inv.intEntityId
+						,Inv.strEntity
+						,C.intCommodityId
+						,Inv.intItemId
+						,Inv.strItemNo
+						,Inv.strCategory
+						,Inv.intCategoryId
+						,dblBalanceToInvoice = SUM(Inv.dblQuantity)
+						+ ISNULL((SELECT SUM(iv.dblQty)
+											FROM tblARInvoiceDetail i 
+												JOIN tblICInventoryTransaction iv ON i.intInvoiceDetailId = iv.intTransactionDetailId
+											WHERE 
+												iv.intInTransitSourceLocationId IS NOT NULL 
+												AND intTransactionTypeId = 33 --'Invoice'
+												and iv.intItemId = Inv.intItemId
+												and i.strDocumentNumber = Inv.strTransactionId), 0)
+					FROM vyuRKGetInventoryValuation Inv
+					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
+					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
+					WHERE Inv.ysnInTransit = 1  
+						AND Inv.strTransactionType = 'Inventory Shipment'
+						AND C.intCommodityId = @intCommodityId
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+					GROUP BY 
+						 Inv.strTransactionId
+						,Inv.intTransactionId
+						,Inv.dtmDate
+						,Inv.intLocationId
+						,Inv.strLocationName
+						,Inv.strUOM
+						,Inv.intEntityId
+						,Inv.strEntity
+						,C.intCommodityId
+						,Inv.intItemId
+						,Inv.strItemNo
+						,Inv.strCategory
+						,Inv.intCategoryId
+				) tbl
+				WHERE dblBalanceToInvoice <> 0
 			)t
 		
 			SELECT * INTO #tempCollateral
@@ -1061,7 +1066,7 @@ BEGIN
 				, intTicketId
 				, strTicketNumber
 			FROM (
-				SELECT dblBalanceToInvoice = dbo.fnCTConvertQuantityToTargetCommodityUOM(i.intUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(i.dblBalanceToInvoice, 0))
+				SELECT dblBalanceToInvoice 
 					, i.strLocationName
 					, i.intItemId
 					, i.strItemNo
