@@ -15,26 +15,37 @@ BEGIN TRY
 DECLARE @billIds Id
 INSERT INTO @billIds
 SELECT
-	intBillId
+	A.intBillId
 FROM tblAPPaymentDetail A
 INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
+INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE C.intTransactionType = 2
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
+--Check if there are still payment(PAY) for prepaid transaction
+--If none, set ysnPrepayHasPayment to false
 UPDATE A
-	SET A.ysnPrepayHasPayment = ISNULL(payments.ysnHasPayment,0)
+	SET A.ysnPrepayHasPayment = CASE WHEN prepayment.intPaymentId IS NOT NULL THEN 1 ELSE 0 END
 FROM tblAPBill A
 INNER JOIN @billIds B ON A.intBillId = B.intId
-OUTER APPLY (
-	SELECT
-		CASE WHEN E.strTransactionId IS NOT NULL THEN 1 ELSE 0 END AS ysnHasPayment
-	FROM tblAPPayment B
-	INNER JOIN @paymentIds C ON B.intPaymentId = C.intId
-	INNER JOIN tblAPPaymentDetail D ON B.intPaymentId = D.intPaymentId
-	LEFT JOIN tblCMBankTransaction E ON B.strPaymentRecordNum = E.strTransactionId
-	WHERE D.intBillId = A.intBillId AND E.ysnCheckVoid = 0
-) payments
+OUTER APPLY
+(
+	SELECT TOP 1 
+		pay.intPaymentId
+	FROM tblAPPaymentDetail payDetail
+	INNER JOIN tblAPPayment pay
+		ON pay.intPaymentId = payDetail.intPaymentId
+	LEFT JOIN tblCMBankTransaction E ON pay.strPaymentRecordNum = E.strTransactionId AND E.ysnCheckVoid = 0
+	WHERE 
+		B.intId = payDetail.intBillId
+	AND payDetail.dblPayment != 0
+	AND pay.ysnPrepay = 1
+	AND A.intTransactionType = 2
+	AND pay.ysnPosted = 1
+) prepayment
+
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
