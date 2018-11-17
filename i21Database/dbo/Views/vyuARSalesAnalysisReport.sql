@@ -98,7 +98,7 @@ SELECT
 	 , intInvoiceDetailId 		= SAR.intInvoiceDetailId
 	 , dblRebateAmount			= SAR.dblRebateAmount
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
-	 , strAccountStatusCode 	= dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId)
+	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 FROM
 (
 --NON SOftware
@@ -1270,7 +1270,19 @@ LEFT JOIN
 LEFT JOIN
 	vyuARItemUOM UOM 
 		ON SAR.intItemUOMId = UOM.intItemUOMId		
-LEFT JOIN 
-	tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
-LEFT JOIN
-	tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId
+LEFT JOIN tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
+LEFT JOIN tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId
+OUTER APPLY (
+	SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+	FROM (
+		SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+		FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intAccountStatusId
+					, strAccountStatusCode
+			FROM dbo.tblARAccountStatus WITH (NOLOCK)
+		) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+		WHERE CAS.intEntityCustomerId = SAR.intEntityCustomerId
+		FOR XML PATH ('')
+	) SC (strAccountStatusCode)
+) STATUSCODES
