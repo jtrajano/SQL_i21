@@ -7161,6 +7161,7 @@
     <Build Include="dbo\Stored Procedures\uspICSearchInventoryValuationSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
     <Build Include="dbo\Views\vyuGRBillStorageSearchView.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
