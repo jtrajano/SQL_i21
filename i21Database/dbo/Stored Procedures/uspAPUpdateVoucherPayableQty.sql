@@ -101,29 +101,29 @@ ELSE SAVE TRAN @SavePoint
 		SELECT TOP 1 1
 			FROM tblAPVoucherPayable A
 			INNER JOIN @validPayables C
-				ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
-				AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
-				AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
-				AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
-				AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
-				--AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
-				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
-				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
+				ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+				AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+				--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 		)
 		AND NOT EXISTS(
 			SELECT TOP 1 1
 			FROM tblAPVoucherPayableCompleted A
 			INNER JOIN @validPayables C
-				ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
-				AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
-				AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
-				AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
-				AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
-				--AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
-				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
-				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
+				ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+				AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+				--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 		)
 	BEGIN
 		INSERT INTO @insertedData
@@ -145,15 +145,15 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-			AND ISNULL(C.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
-			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
@@ -248,15 +248,15 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intVoucherPayableId]
 			FROM tblAPVoucherPayable B
 			INNER JOIN @validPayables C
-			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-				AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-				AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-				AND ISNULL(C.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
-				AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-				AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-				--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-				AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+				AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+				AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+				--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 			AND B.dblQuantityToBill = 0
 		) AS SourceData
@@ -567,15 +567,15 @@ ELSE SAVE TRAN @SavePoint
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
 			FROM @validPayables B
 			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
-					ON ISNULL(D.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-			AND ISNULL(D.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-			AND ISNULL(D.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
-			AND ISNULL(D.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-			AND ISNULL(D.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-			AND ISNULL(D.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(D.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(D.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+					ON ISNULL(D.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			AND ISNULL(D.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(D.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			AND ISNULL(D.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			AND ISNULL(D.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			AND ISNULL(D.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
@@ -803,15 +803,15 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-			AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-			AND ISNULL(C.intEntityVendorId,1) = ISNULL(B.intEntityVendorId,1)
-			AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
@@ -844,14 +844,14 @@ ELSE SAVE TRAN @SavePoint
 			-- FROM tblAPVoucherPayable B
 			-- INNER JOIN @voucherPayable C
 			-- --LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			-- 	ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-			-- 	AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-			-- 	AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-			-- 	AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-			-- 	AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			-- 	--AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			-- 	AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			-- 	AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			-- 	ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			-- 	AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			-- 	AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			-- 	--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- 	AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- 	AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 
 			-- --VALIDATE
 			-- --QTY OF VOUCHER PAYABLE SHOULD NOT BE GREATER THAN THE QTY VOUCHERED
@@ -861,13 +861,13 @@ ELSE SAVE TRAN @SavePoint
 			-- FROM tblAPBill C2 
 			-- INNER JOIN tblAPBillDetail C ON C.intBillId = C2.intBillId
 			-- INNER JOIN @voucherPayable B
-			-- 	ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(B.intPurchaseDetailId,1)
-			-- 	AND ISNULL(C.intContractDetailId,1) = ISNULL(B.intContractDetailId,1)
-			-- 	AND ISNULL(C.intScaleTicketId,1) = ISNULL(B.intScaleTicketId,1)
-			-- 	AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(B.intInventoryReceiptChargeId,1)
-			-- 	AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(B.intInventoryReceiptItemId,1)
-			-- 	AND ISNULL(C.intLoadDetailId,1) = ISNULL(B.intLoadShipmentDetailId,1)
-			-- 	AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(B.intInventoryShipmentChargeId,1)
+			-- 	ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			-- 	AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			-- 	AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			-- 	AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- 	AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			-- GROUP BY C.intPurchaseDetailId
 			-- ,C.intContractDetailId
 			-- ,C.intScaleTicketId
