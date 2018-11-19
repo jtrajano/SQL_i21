@@ -7162,6 +7162,7 @@
     <Build Include="dbo\Tables\tblICInventoryValuationSummary.sql" />
     <Build Include="dbo\Views\vyuGRBillStorageSearchView.sql" />
     <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
