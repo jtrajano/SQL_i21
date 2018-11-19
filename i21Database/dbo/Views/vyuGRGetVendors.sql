@@ -2,9 +2,10 @@
 AS   
 SELECT DISTINCT
   CS.intEntityId 
-  , E.strName AS strEntityName
-  , ET.strType AS strEntityType
-  , ST.ysnCustomerStorage  
+  ,E.strName AS strEntityName
+  ,E.strEntityNo
+  ,ET.strType AS strEntityType
+  ,ST.ysnCustomerStorage  
 FROM tblGRCustomerStorage CS  
 INNER JOIN tblEMEntity E 
   ON E.intEntityId = CS.intEntityId
