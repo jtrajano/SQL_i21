@@ -1462,8 +1462,8 @@ BEGIN
 					, strType = 'Net Receivable ($)'
 					, I.dblAmountDue
 					, L.strLocationName
-					, intContractHeaderId = null
-					, strContractNumber = ''
+					, intContractHeaderId = CT.intContractId 
+					, CT.strContractNumber 
 					, T.strTicketNumber
 					, I.dtmDate
 					, E.strName
@@ -1480,6 +1480,11 @@ BEGIN
 				INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 				INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
 				INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
+				OUTER APPLY( 
+					SELECT TOP 1 intTicketId, intItemId, intContractId, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)  
+					FROM vyuSCTicketView 
+					WHERE intContractId IS NOT NULL AND intTicketId = T.intTicketId 
+				) CT 
 				WHERE I.ysnPosted = 1
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND dblAmountDue <> 0 AND intCommodityId = @intCommodityId
@@ -1494,6 +1499,8 @@ BEGIN
 					, Cur.strCurrency
 					, I.intInvoiceId
 					, I.strInvoiceNumber
+					, CT.intContractId
+					, CT.strContractNumber
 				
 				INSERT INTO @tempFinal (strCommodityCode
 					, strType
