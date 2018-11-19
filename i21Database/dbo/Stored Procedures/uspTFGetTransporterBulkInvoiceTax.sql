@@ -161,7 +161,7 @@ BEGIN TRY
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
 						LEFT JOIN tblSMTransportationMode ON tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
-				INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId --AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
+				INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId AND tblTRLoadReceipt.strReceiptLine = tblTRLoadDistributionDetail.strReceiptLink --AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 					LEFT JOIN tblEMEntity AS Vendor ON Vendor.intEntityId = tblTRLoadReceipt.intTerminalId
 					LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId	
 					LEFT JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intSupplyPointId = tblTRLoadReceipt.intSupplyPointId 
