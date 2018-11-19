@@ -35,12 +35,12 @@ BEGIN
 		BEGIN
 			EXEC dbo.uspSMAuditLog 
 						 @keyValue			= 1									-- Primary Key Value of the Invoice. 
-						,@screenName		= 'i21.view.CompanyPreferenceOption'	-- Screen Namespace
+						,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
 						,@entityId			= 1									-- Entity Id.
 						,@actionType		= 'Added'							-- Action Type
 						,@changeDescription	= 'Updated APPreference'			-- Description
-						,@fromValue			= ''								-- Previous Value
-						,@toValue			= ''								-- New Value
+						,@fromValue			= '0'								-- Previous Value
+						,@toValue			= '1'								-- New Value
 		END
 END
 ELSE
@@ -54,12 +54,12 @@ BEGIN
 		BEGIN
 			EXEC dbo.uspSMAuditLog 
 					 @keyValue			= 1						-- Primary Key Value of the Invoice. 
-					,@screenName		= 'i21.view.CompanyPreferenceOption'	-- Screen Namespace
+					,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
 					,@entityId			= 1									-- Entity Id.
 					,@actionType		= 'Updated'							-- Action Type
 					,@changeDescription	= 'Updated APPreference'			-- Description
-					,@fromValue			= ''								-- Previous Value
-					,@toValue			= ''								-- New Value
+					,@fromValue			= '0'								-- Previous Value
+					,@toValue			= '1'								-- New Value
 		END		
 	END
 END
