@@ -617,18 +617,12 @@ BEGIN
 				, t.dtmTicketDateTime
 				, t.intTicketId
 				, t.strTicketNumber
-				,intContractHeaderId = CT.intContractNumber
-				,strContractNumber = CT.strContractNumber
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-			OUTER APPLY(
-				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
-				FROM dbo.fnRKGetContracts(s.intTransactionId, i.intItemId, s.strTransactionType)
-			) CT 
 			WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 				AND ISNULL(strTicketStatus, '') <> 'V'
@@ -702,9 +696,7 @@ BEGIN
 				, strTicketNumber
 				, intTicketId
 				, dtmTicketDateTime
-				, strTransactionType
-				, intContractHeaderId
-				, strContractNumber)
+				, strTransactionType)
 			SELECT intSeqId
 				, strSeqHeader
 				, strCommodityCode
@@ -726,8 +718,6 @@ BEGIN
 				, intTicketId
 				, dtmTicketDateTime
 				, strTransactionType
-				, intContractHeaderId
-				, strContractNumber
 			FROM (
 				SELECT 1 AS intSeqId
 					, strSeqHeader = 'In-House'
@@ -750,8 +740,6 @@ BEGIN
 					, intTicketId
 					, dtmTicketDateTime
 					, strTransactionType
-					, intContractHeaderId
-					, strContractNumber
 				FROM #invQty
 				WHERE intCommodityId = @intCommodityId
 			) t
@@ -775,8 +763,6 @@ BEGIN
 				, intTicketId
 				, dtmTicketDateTime
 				, strTransactionType
-				, intContractHeaderId
-				, strContractNumber
 		
 			--From Storages
 			INSERT INTO @Final(intSeqId
@@ -803,9 +789,7 @@ BEGIN
 				, strShipmentNumber
 				, strDistributionOption
 				, dtmTicketDateTime
-				, intStorageScheduleTypeId
-				, intContractHeaderId
-				, strContractNumber)
+				, intStorageScheduleTypeId)
 			SELECT 1 AS intSeqId
 				, strSeqHeader = 'In-House'
 				, strCommodityCode = @strCommodityCode
@@ -831,14 +815,8 @@ BEGIN
 				, 'Storage'
 				, dtmTicketDateTime
 				, intStorageScheduleTypeId
-				,CT.intContractNumber
-				,CT.strContractNumber
 			FROM #tblGetStorageDetailByDate s
 			JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
-			OUTER APPLY(
-				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
-				FROM dbo.fnRKGetContracts(s.intTicketId, s.intItemId, s.strTicketType)
-			) CT
 			WHERE intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 				AND ysnDPOwnedType <> 1 AND strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
