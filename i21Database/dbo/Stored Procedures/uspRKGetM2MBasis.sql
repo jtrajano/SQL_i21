@@ -3,12 +3,6 @@
 
 AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
-
 DECLARE @ErrorMessage NVARCHAR(4000)
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
@@ -249,7 +243,7 @@ BEGIN TRY
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo)) AS intRowNumber
 		, *
 	FROM @tempBasis
-	WHERE intFutureMarketId IS NOT NULL
+	WHERE intCommodityId IS NOT NULL
 	ORDER BY strMarketValuation
 		, strFutMarketName
 		, strCommodityCode
