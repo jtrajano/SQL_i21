@@ -134,8 +134,8 @@ BEGIN TRY
 						, NULL AS strConsignorName
 						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE Seller.strName END AS strVendorName
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE Seller.strFederalTaxId END AS strVendorFederalTaxId
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblSMCompanySetup.strCompanyName END AS strVendorName
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
 						, tblTFCompanyPreference.strCity
@@ -221,13 +221,9 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 							OR tblARCustomerAccountStatus.intAccountStatusId NOT IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0))					
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblAPVendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
-								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SellerShipVia.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1)))
-							)
+							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND tblAPVendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1)))
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
-								OR (tblTRLoadReceipt.strOrigin != 'Terminal'  AND ISNULL(SellerShipVia.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
-							)
+							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
 						AND ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Customer') OR
 							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))			
 				) Transactions
@@ -324,8 +320,8 @@ BEGIN TRY
 						, NULL AS strConsignorName
 						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE Seller.strName END AS strVendorName
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE Seller.strFederalTaxId END AS strVendorFederalTaxId
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblSMCompanySetup.strCompanyName END AS strVendorName
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
 						, tblTFCompanyPreference.strCity
@@ -410,13 +406,9 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 							OR tblARCustomerAccountStatus.intAccountStatusId NOT IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0))					
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblAPVendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
-								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SellerShipVia.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1)))
-							)
+							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND tblAPVendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1)))
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
-								OR (tblTRLoadReceipt.strOrigin != 'Terminal'  AND ISNULL(SellerShipVia.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
-							)
+							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
 						AND ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Customer') OR
 							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))			
 				) Transactions
