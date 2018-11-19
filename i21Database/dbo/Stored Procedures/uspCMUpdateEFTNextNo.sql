@@ -35,7 +35,7 @@ BEGIN
 		,@strTransactionId = strSourceTransactionId
 		FROM #tmpACHFromCustomer ORDER BY intUndepositedFundId ASC
 	
-		UPDATE tblCMUndepositedFund SET strReferenceNo = @intEFTNextNo WHERE intUndepositedFundId = @intTransactionId AND (strReferenceNo = '' OR strReferenceNo IS NULL)
+		UPDATE tblCMUndepositedFund SET strReferenceNo = @intEFTNextNo WHERE intUndepositedFundId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
 		
 		--Update the reference no of other module's transaction (AR Transaction)
 		UPDATE tblARPayment SET intCurrentStatus = 5 WHERE strRecordNumber = @strTransactionId
@@ -52,7 +52,7 @@ BEGIN
 	SELECT * INTO #tmpCMBankTransactions 
 	FROM tblCMBankTransaction 
 	WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND (strReferenceNo = '' OR strReferenceNo IS NULL)
+		AND ISNULL(strReferenceNo,'') = ''
 
 	WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactions) 
 	BEGIN
@@ -63,7 +63,7 @@ BEGIN
 		,@intBankTransactionTypeId = intBankTransactionTypeId
 		FROM #tmpCMBankTransactions ORDER BY intTransactionId ASC
 	
-		UPDATE tblCMBankTransaction SET strReferenceNo = @intEFTNextNo WHERE intTransactionId = @intTransactionId AND strReferenceNo = ''
+		UPDATE tblCMBankTransaction SET strReferenceNo = @intEFTNextNo WHERE intTransactionId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
 		
 		--Update the reference no of other module's transaction
 		IF @intBankTransactionTypeId = 22 OR @intBankTransactionTypeId = 122
