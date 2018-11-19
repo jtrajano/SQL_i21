@@ -1462,7 +1462,7 @@ BEGIN
 					, strType = 'Net Receivable ($)'
 					, I.dblAmountDue
 					, L.strLocationName
-					, intContractHeaderId = CT.intContractId 
+					, CT.intContractHeaderId 
 					, CT.strContractNumber 
 					, T.strTicketNumber
 					, I.dtmDate
@@ -1481,9 +1481,12 @@ BEGIN
 				INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
 				INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
 				OUTER APPLY( 
-					SELECT TOP 1 intTicketId, intItemId, intContractId, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)  
-					FROM vyuSCTicketView 
-					WHERE intContractId IS NOT NULL AND intTicketId = T.intTicketId 
+				    SELECT TOP 1 intTicketId, intItemId, CONTRACT.intContractHeaderId, strContractNumber = TICKET.strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)  
+					FROM vyuSCTicketView TICKET
+					LEFT JOIN (
+						SELECT intContractHeaderId, strContractNumber FROM tblCTContractHeader
+					)CONTRACT ON TICKET.strContractNumber = CONTRACT.strContractNumber
+					WHERE TICKET.strTicketNumber = T.strTicketNumber
 				) CT 
 				WHERE I.ysnPosted = 1
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
@@ -1499,7 +1502,7 @@ BEGIN
 					, Cur.strCurrency
 					, I.intInvoiceId
 					, I.strInvoiceNumber
-					, CT.intContractId
+					, CT.intContractHeaderId
 					, CT.strContractNumber
 				
 				INSERT INTO @tempFinal (strCommodityCode
