@@ -21,7 +21,6 @@ BEGIN
 		-- END Create Save Point.  
 		-- ==================================================================================================================- 
 
-		
 
 
 		-- ================================================================================================================== 
@@ -72,10 +71,6 @@ BEGIN
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
-
-
-
-
 
 
 		--Update values that are '' empty
@@ -139,28 +134,50 @@ BEGIN
 		ELSE
 			BEGIN
 
-					UPDATE dbo.tblSTCheckoutPumpTotals
-						 SET [dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-							, [dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-							, [dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-					 FROM #tempCheckoutInsert Chk
-					 JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
-						--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
-						--																								THEN IL.strPassportFuelId1
-						--																							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' 
-						--																								THEN IL.strPassportFuelId2
-						--																							WHEN ISNULL(IL.strPassportFuelId3, '') <> '' 
-						--																								THEN IL.strPassportFuelId3
-						--																						 END
+
+					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
+					UPDATE CPT
+					SET CPT.[dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					FROM dbo.tblSTCheckoutPumpTotals CPT
+					INNER JOIN tblSTCheckoutHeader CH
+						ON CPT.intCheckoutId = CH.intCheckoutId
+					INNER JOIN tblSTStore ST
+						ON CH.intStoreId = ST.intStoreId
+					INNER JOIN tblICItemUOM UOM
+						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
+					INNER JOIN tblICItem Item
+						ON UOM.intItemId = Item.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON Item.intItemId = IL.intItemId
+						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN #tempCheckoutInsert Chk
+						ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					WHERE CPT.intCheckoutId = @intCheckoutId
+
+					--UPDATE dbo.tblSTCheckoutPumpTotals
+				 --   SET [dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					--		, [dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					--		, [dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					-- FROM #tempCheckoutInsert Chk
+					-- JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					-- --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
+					--	--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
+					--	--																								THEN IL.strPassportFuelId1
+					--	--																							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' 
+					--	--																								THEN IL.strPassportFuelId2
+					--	--																							WHEN ISNULL(IL.strPassportFuelId3, '') <> '' 
+					--	--																								THEN IL.strPassportFuelId3
+					--	--																						 END
 																				
-					 JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId
-					 JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId
-					 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-					 JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
-					 WHERE intCheckoutId = @intCheckoutId
-					 AND intPumpCardCouponId = UOM.intItemUOMId
-					 AND S.intStoreId = @intStoreId
+					-- JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId
+					-- JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId
+					-- JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
+					-- JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
+					-- WHERE intCheckoutId = @intCheckoutId
+					-- AND intPumpCardCouponId = UOM.intItemUOMId
+					-- AND S.intStoreId = @intStoreId
 			END
 
 
@@ -168,17 +185,21 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
+
 		-- IF SUCCESS Commit Transaction
 		COMMIT TRAN @TransactionName
 	END TRY
 
 	BEGIN CATCH
 		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
+		IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRAN @TransactionName	
+		END
+		
 
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-
 		COMMIT TRAN @TransactionName
 	END CATCH
 END
