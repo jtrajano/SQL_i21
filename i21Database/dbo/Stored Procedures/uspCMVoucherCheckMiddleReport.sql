@@ -33,24 +33,6 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@AP_ECHECK AS INT = 20
   ,@PAYCHECK AS INT = 21
   
--- Sample XML string structure:  
---SET @xmlParam = '  
---<xmlparam>  
--- <filters>  
---  <filter>  
---   <fieldname>intBankAccountId</fieldname>  
---   <condition>Between</condition>  
---   <from>1</from>  
---   <to>1</to>  
---   <join>And</join>  
---   <begingroup>0</begingroup>  
---   <endgroup>0</endgroup>  
---   <datatype>String</datatype>  
---  </filter>  
--- </filters>  
--- <options />  
---</xmlparam>'  
-  
 -- Sanitize the @xmlParam   
 IF LTRIM(RTRIM(@xmlParam)) = ''   
  SET @xmlParam = NULL   
@@ -111,28 +93,13 @@ SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = 
 SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
 
 
+
 -- Report Query:  
 SELECT	
 		 CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,strPayee = CASE
-					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
-						ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT ' and ' + strName
-                             FROM tblAPVendorLien LIEN
-							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-							 WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-							 AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
-															tblAPPayment Pay 
-															INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-															INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-															WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
-                             ORDER BY intEntityVendorLienId
-                             FOR XML PATH('')), 
-                            1, 1, '')),CHK.strPayee)
-					ELSE
-						CHK.strPayee
-					END
+		,strPayee = Payee.Name + char(13) + replace(replace (Address1.Value,char(10),''),char(13),'')
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId
@@ -182,7 +149,7 @@ SELECT
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
 		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
-		,strVendorAddress = CASE	
+			,strVendorAddress = CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 									ELSE 
@@ -195,9 +162,6 @@ SELECT
 		,BNKACCNT.ysnCheckEnableMICRPrint
 		,strCheckMessage = ISNULL(PYMT.strCheckMessage,'') 
 FROM	dbo.tblCMBankTransaction CHK 
-			--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
-			--ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
-			--AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
 		INNER JOIN tblCMBankAccount BNKACCNT
 			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
 		INNER JOIN tblCMBank BNK
@@ -215,7 +179,47 @@ FROM	dbo.tblCMBankTransaction CHK
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
 		)AmtInWords
+		OUTER APPLY(
+			SELECT CASE
+			WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
+				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT ' and ' + strName
+                        FROM tblAPVendorLien LIEN
+						INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+						WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+						AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
+													tblAPPayment Pay 
+													INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+													INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+													WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
+                        ORDER BY intEntityVendorLienId
+                        FOR XML PATH('')), 
+                    1, 1, '')),CHK.strPayee)
+			ELSE
+				CHK.strPayee
+			END Name
+		
+		) Payee
+		OUTER APPLY (
+			SELECT CASE	
+				WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
+					dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
+				ELSE 
+					dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
+										
+			END Value
+		)Address
+		OUTER APPLY(
+			SELECT CASE 
+				WHEN LEN(Payee.Name) BETWEEN 151 AND 200 THEN -- Payee name reached 3rd line
+					LEFT(Address.Value,50)
+				
+				WHEN LEN(Payee.Name) > 200 THEN '' -- Payee name reached 4th line
+				ELSE
+					Address.Value
+			END Value
+		)Address1
+
+
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
-		--AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 ORDER BY CHK.strReferenceNo ASC
