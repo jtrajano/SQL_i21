@@ -14,6 +14,7 @@ DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUse
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
+	 , intInvoiceId
 	 , strInvoiceNumber
 	 , strTransactionType
 	 , dtmDate
@@ -35,7 +36,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strShipVia
 	 , intCompanyLocationId
 	 , strCompanyLocation
-	 , intInvoiceId
 	 , intInvoiceDetailId
 	 , intSiteId
 	 , dblQtyShipped
@@ -65,6 +65,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
+	 , intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strTransactionType		= INV.strTransactionType
 	 , dtmDate					= INV.dtmDate
@@ -95,7 +96,17 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 									THEN CONSUMPTIONSITE.strSiteNumber
 	   								  	ELSE [LOCATION].strLocationName
 								  END
-	 , INVOICEDETAIL.*
+	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
+	 , intSiteId				= INVOICEDETAIL.intSiteId
+	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
+	 , intItemId				= INVOICEDETAIL.intItemId
+	 , strItemNo				= INVOICEDETAIL.strItemNo
+	 , strItemDescription		= INVOICEDETAIL.strItemDescription
+	 , strContractNo			= INVOICEDETAIL.strContractNo
+	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
+	 , dblPrice					= INVOICEDETAIL.dblPrice
+	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax
+	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
