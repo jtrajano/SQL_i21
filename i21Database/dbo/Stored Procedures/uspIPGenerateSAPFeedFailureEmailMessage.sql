@@ -80,6 +80,7 @@ Begin
 
 	Update tblCTContractFeed Set ysnMailSent=1
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='Shipment'
@@ -106,6 +107,7 @@ Begin
 
 	Update tblLGLoadStg Set ysnMailSent=1
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='Receipt'
@@ -130,6 +132,7 @@ Begin
 
 	Update tblIPReceiptError Set ysnMailSent=1
 	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate) AND ISNULL(strErrorMessage,'') <>'Success'
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='MBN Receipt'
@@ -150,6 +153,7 @@ Begin
 
 	Update tblIPReceiptError Set ysnMailSent=1
 	Where strPartnerNo='0012XI01' AND ISNULL(strErrorMessage,'') <>'Success'
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
