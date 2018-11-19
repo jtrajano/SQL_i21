@@ -310,7 +310,7 @@ JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 left join tblSCTicket t on t.intTicketId=gh.intTicketId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
-and a.intCommodityId in (select intCommodity from @Commodity)
+and i.intCommodityId in (select intCommodity from @Commodity)
 
 union all
 SELECT ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC) intRowNum, 
@@ -354,7 +354,7 @@ JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0 and gh.intTransactionTypeId IN (1,3,4,5,9)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
-and a.intCommodityId in (select intCommodity from @Commodity)
+and i.intCommodityId in (select intCommodity from @Commodity)
 
 --select * from @tblGetStorageDetailByDate where intCommodityId = 3023
 --========================================
@@ -623,7 +623,7 @@ FROM (
 		JOIN tblICItem i1 on i1.intItemId=st.intItemId
 		JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-	WHERE st.intCommodityId  in(select intCommodity from @Commodity) and isnull(st.intDeliverySheetId,0) =0
+	WHERE i1.intCommodityId  in(select intCommodity from @Commodity) and isnull(st.intDeliverySheetId,0) =0
 			AND st.intProcessingLocationId  = CASE WHEN ISNULL(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 			AND convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110) <=CONVERT(DATETIME,@dtmToDate)
 			AND isnull(strTicketStatus,'') = 'H'

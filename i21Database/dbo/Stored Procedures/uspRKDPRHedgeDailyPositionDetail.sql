@@ -462,7 +462,7 @@ BEGIN
 		JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
 		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND a.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 	
 		UNION ALL
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC)
@@ -519,7 +519,7 @@ BEGIN
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND a.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 	) t
 	
 	SELECT dblTotal = s.dblQuantity

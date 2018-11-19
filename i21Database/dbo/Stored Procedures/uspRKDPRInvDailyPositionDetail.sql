@@ -324,7 +324,7 @@ BEGIN
 				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
 				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND a.intCommodityId = ISNULL(@intCommodityId, a.intCommodityId)
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 				
 				UNION ALL
@@ -390,7 +390,7 @@ BEGIN
 				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND a.intCommodityId = ISNULL(@intCommodityId, a.intCommodityId)
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 			)t
 		
@@ -456,7 +456,7 @@ BEGIN
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND a.intCommodityId = ISNULL(@intCommodityId, a.intCommodityId)
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(strTicketStatus, '') <> 'V'
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 			) t WHERE t.intRowNum = 1
@@ -673,7 +673,7 @@ BEGIN
 				JOIN tblICCategory Category ON Category.intCategoryId = i1.intCategoryId
 				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-				WHERE st.intCommodityId  = @intCommodityId and isnull(st.intDeliverySheetId,0) =0
+				WHERE i1.intCommodityId  = @intCommodityId and isnull(st.intDeliverySheetId,0) =0
 					AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 					AND ISNULL(st.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(st.intEntityId, 0))
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
