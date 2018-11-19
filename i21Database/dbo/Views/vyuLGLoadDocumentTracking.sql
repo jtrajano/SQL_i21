@@ -6,6 +6,7 @@ SELECT CH.strContractNumber
 	,Vendor.strName AS strVendorName
 	,Customer.strName AS strCustomerName
 	,I.strItemNo
+	,C.strCommodityCode
 	,LOAD.intLoadId
 	,LOAD.intConcurrencyId
 	,LOAD.[strLoadNumber]
@@ -241,6 +242,7 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
 		)
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = CD.intItemId
+JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId
 JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = LOAD.intLoadId
 JOIN tblICDocument DOC ON DOC.intDocumentId = LDOC.intDocumentId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
