@@ -7,9 +7,9 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	
-   select  B.strCategoryCode,B.strDescription, (A.dblTotalSalesAmount + A.dblPromotionalDiscountAmount + A.dblManagerDiscountAmount) 
-   As GrossAmount, (A.dblPromotionalDiscountAmount + A.dblManagerDiscountAmount) AS DiscontAmount, A.dblTotalSalesAmount 
-   as NetAmount, C.dblAmount as PumpTotal, ( C.dblAmount - A.dblTotalSalesAmount ) as Variance, SUM ( C.dblAmount - A.dblTotalSalesAmount ) 
+   select  B.strCategoryCode,B.strDescription, (A.dblTotalSalesAmountComputed + A.dblPromotionalDiscountAmount + A.dblManagerDiscountAmount) 
+   As GrossAmount, (A.dblPromotionalDiscountAmount + A.dblManagerDiscountAmount) AS DiscontAmount, A.dblTotalSalesAmountComputed 
+   as NetAmount, C.dblAmount as PumpTotal, ( C.dblAmount - A.dblTotalSalesAmountComputed ) as Variance, SUM ( C.dblAmount - A.dblTotalSalesAmountComputed ) 
    over() as TotalVariance from tblSTCheckoutDepartmetTotals A JOIN tblICCategory B ON A.intCategoryId = B.intCategoryId 
    JOIN (select intCategoryId , SUM(dblAmount) as dblAmount from tblSTCheckoutPumpTotals where intCheckoutId = @intCheckoutId 
    group by intCategoryId) C ON A.intCategoryId = C.intCategoryId  where A.intCheckoutId = @intCheckoutId  

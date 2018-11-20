@@ -79,12 +79,12 @@ BEGIN TRY
 		, @Store AS Store
 		, @CheckoutDate AS checkoutDate
 		, @ShitNo AS ShiftNo
-		, ISNULL (SUM(A.dblTotalSalesAmount) OVER (), 0) AS CategoryTotalSale
+		, ISNULL (SUM(A.dblTotalSalesAmountComputed) OVER (), 0) AS CategoryTotalSale
 		, ISNULL(C.dblTotalTax, 0) AS TotalTax
 		, ISNULL(D.dblAmount,0) AS TotalPayment
 		, ISNULL(E.dblAmount,0) AS TotalCustomerCharges
 		, ISNULL(F.dblAmount,0) AS TotalCustomerPayments
-		, (ISNULL(SUM (A.dblTotalSalesAmount) over(), 0) + ISNULL(C.dblTotalTax, 0) - ISNULL(D.dblAmount, 0) - ISNULL(E.dblAmount, 0) + ISNULL(F.dblAmount, 0)) AS TotalToDeposit
+		, (ISNULL(SUM (A.dblTotalSalesAmountComputed) over(), 0) + ISNULL(C.dblTotalTax, 0) - ISNULL(D.dblAmount, 0) - ISNULL(E.dblAmount, 0) + ISNULL(F.dblAmount, 0)) AS TotalToDeposit
    FROM tblSTCheckoutDepartmetTotals A  
    LEFT OUTER JOIN tblICCategory B 
 		ON A.intCategoryId = B.intCategoryId 

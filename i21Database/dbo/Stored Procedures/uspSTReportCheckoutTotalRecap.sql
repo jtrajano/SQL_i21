@@ -7,14 +7,14 @@ BEGIN TRY
 	
    DECLARE @ErrMsg NVARCHAR(MAX)
 
-   SELECT ISNULL(SUM(A.dblTotalSalesAmount) OVER (),0) AS CategoryTotalSale
+   SELECT ISNULL(SUM(A.dblTotalSalesAmountComputed) OVER (),0) AS CategoryTotalSale
 		, ISNULL(C.dblTotalTax ,0) AS TotalTax
 		, ISNULL(D.dblAmount,0) AS TotalPayment
 		, ISNULL(E.dblAmount,0) AS TotalCustomerCharges
 		, ISNULL(F.dblAmount,0) AS TotalCustomerPayments
-		, (ISNULL(SUM (A.dblTotalSalesAmount) OVER(),0) + ISNULL(C.dblTotalTax,0) - ISNULL(D.dblAmount,0) - ISNULL(E.dblAmount,0) + ISNULL(F.dblAmount,0)) AS TotalToDeposit
+		, (ISNULL(SUM (A.dblTotalSalesAmountComputed) OVER(),0) + ISNULL(C.dblTotalTax,0) - ISNULL(D.dblAmount,0) - ISNULL(E.dblAmount,0) + ISNULL(F.dblAmount,0)) AS TotalToDeposit
 		, ISNULL(G.dblTotalDeposit,0) AS TotalDeposits
-		, (ISNULL(G.dblTotalDeposit,0) - (ISNULL(SUM (A.dblTotalSalesAmount) OVER(),0) + ISNULL(C.dblTotalTax,0) - ISNULL(D.dblAmount,0) - ISNULL(E.dblAmount,0) + ISNULL(F.dblAmount,0))) AS CashOverShort
+		, (ISNULL(G.dblTotalDeposit,0) - (ISNULL(SUM (A.dblTotalSalesAmountComputed) OVER(),0) + ISNULL(C.dblTotalTax,0) - ISNULL(D.dblAmount,0) - ISNULL(E.dblAmount,0) + ISNULL(F.dblAmount,0))) AS CashOverShort
    FROM tblSTCheckoutDepartmetTotals A  
    LEFT OUTER JOIN tblICCategory B 
 		ON A.intCategoryId = B.intCategoryId 
