@@ -1,9 +1,9 @@
 CREATE VIEW vyuICGetItemStockUOMTotalsAllLocations
 AS
-SELECT xl.*
-FROM (
+	--SELECT xl.*
+	--FROM (
 	SELECT
-		  intLocationId = sl.intCompanyLocationId
+		intLocationId = sl.intCompanyLocationId
 		, i.intItemId
 		, i.strItemNo
 		, intSubLocationId = sl.intCompanyLocationSubLocationId
@@ -27,8 +27,8 @@ FROM (
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
 		LEFT JOIN vyuICGetItemStockUOMTotals v ON v.intSubLocationId = sl.intCompanyLocationSubLocationId
 			AND il.intItemLocationId = v.intItemLocationId
-            AND v.ysnStockUnit = 1
-            AND (v.dblOnHand > 0 OR v.intAllowNegativeInventory = 1)
+			AND v.ysnStockUnit = 1
+			AND ((v.dblStorageQty + v.dblOnHand) > 0 OR v.intAllowNegativeInventory = 1)
 	GROUP BY
 		  sl.intCompanyLocationId
 		, i.intItemId
@@ -49,5 +49,6 @@ FROM (
         , v.dblAvailableQty
 		, sl.strClassification
 		, il.intAllowNegativeInventory
-) AS xl
-WHERE ((xl.intAllowNegativeInventory = 3 AND xl.ysnHasStock = 1) OR (xl.intAllowNegativeInventory = 1))
+	HAVING (il.intAllowNegativeInventory = 3 AND (CAST(CASE WHEN v.strSubLocationName IS NULL THEN 0 ELSE 1 END AS BIT)) = 1) OR (il.intAllowNegativeInventory = 1)
+--) AS xl
+--WHERE ((xl.intAllowNegativeInventory = 3 AND xl.ysnHasStock = 1) OR (xl.intAllowNegativeInventory = 1))
