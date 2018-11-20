@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTCurrentUserRole]
 AS
-SELECT 
+SELECT
 	CLRP.intUserSecurityCompanyLocationRolePermissionId
 	, CL.strLocationName
 	, CL.intCompanyLocationId
@@ -8,11 +8,11 @@ SELECT
 	, UR.strRoleType
 	, UR.ysnAdmin
 	, US.intCompanyLocationId AS intDefaultCompanyLocationId
-FROM tblSMUserSecurityCompanyLocationRolePermission CLRP
-INNER JOIN tblSMUserSecurity US
-	ON CLRP.intEntityId = US.intEntityId
+FROM tblSMUserSecurity US
+LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission CLRP
+	ON US.intEntityId = CLRP.intEntityId
 INNER JOIN tblSMUserRole UR
-	ON CLRP.intUserRoleId = UR.intUserRoleID
+	ON US.intUserRoleID = UR.intUserRoleID
 INNER JOIN tblSMCompanyLocation CL
-	ON CLRP.intCompanyLocationId = CL.intCompanyLocationId
-	AND US.intCompanyLocationId = CL.intCompanyLocationId
+	--ON CLRP.intCompanyLocationId = CL.intCompanyLocationId
+	ON US.intCompanyLocationId = CL.intCompanyLocationId
