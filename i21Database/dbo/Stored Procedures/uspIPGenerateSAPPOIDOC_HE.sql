@@ -1561,7 +1561,7 @@ BEGIN
 			--Header
 			SET @strXmlHeaderStart += '<E1BPMEOUTHEADER>'
 			SET @strXmlHeaderStart += '<COMP_CODE>' + ISNULL(@strPurchasingGroup, '') + '</COMP_CODE>'
-			SET @strXmlHeaderStart += '<DOC_TYPE>' + ISNULL('MK', '') + '</DOC_TYPE>'
+			SET @strXmlHeaderStart += '<DOC_TYPE>' + ISNULL('ZMK', '') + '</DOC_TYPE>'
 			SET @strXmlHeaderStart += '<CREAT_DATE>' + ISNULL(CONVERT(VARCHAR(10), @dtmContractDate, 112), '') + '</CREAT_DATE>'
 			SET @strXmlHeaderStart += '<VENDOR>' + ISNULL(@strEntityNo, '') + '</VENDOR>'
 			SET @strXmlHeaderStart += '<PURCH_ORG>' + ISNULL(@strSAPLocation, '') + '</PURCH_ORG>'
