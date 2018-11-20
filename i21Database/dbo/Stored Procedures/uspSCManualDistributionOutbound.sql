@@ -51,7 +51,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@recapId AS INT
 		,@strWhereFinalizedWeight NVARCHAR(20)
 		,@strWhereFinalizedGrade NVARCHAR(20)
-		,@ysnCustomerStorage BIT;
+		,@ysnCustomerStorage BIT
+		,@intContractDetailId INT;
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -299,6 +300,23 @@ ELSE
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+	SELECT @intContractDetailId = MIN(si.intLineNo)
+    FROM tblICInventoryShipment s 
+    JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+    WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+ 
+    WHILE ISNULL(@intContractDetailId,0) > 0
+    BEGIN
+        IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+        BEGIN
+            EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+        END
+        SELECT @intContractDetailId = MIN(si.intLineNo)
+        FROM tblICInventoryShipment s 
+        JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+        WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1 AND si.intLineNo > @intContractDetailId
+    END
 
 	--INVOICE intergration
 	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
