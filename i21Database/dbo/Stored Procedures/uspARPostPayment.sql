@@ -444,6 +444,7 @@ BEGIN
 	INSERT INTO
 		#ARPostOverPayment
 	SELECT
+		DISTINCT
 		A.[intPaymentId]
 	FROM
 		tblARPayment A 
@@ -462,6 +463,7 @@ BEGIN
 	INSERT INTO
 		#ARPostPrePayment
 	SELECT
+		DISTINCT
 		A.[intPaymentId]
 	FROM
 		tblARPayment A 
