@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLUpdateFiscalYearStatus]
 	 @intFiscalYearId	AS INT
 	,@ysnPost			AS BIT				= 0
+	,@intEntityId		AS INT				= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -10,6 +11,7 @@ DECLARE  @strRetainedAcctGroup	 NVARCHAR(50)
 		,@intAccountId			 INT		
 		,@intYear				INT
 		,@strRetainedAccount	NVARCHAR(50)	= ''
+		,@actionType			NVARCHAR(50)	= ''
 
 IF @ysnPost = 1
 BEGIN
@@ -26,6 +28,9 @@ BEGIN
 			SELECT TOP 1 intFiscalYearId, dtmDateFrom,dtmDateTo  FROM tblGLFiscalYear WHERE strFiscalYear > @currentYear AND ysnStatus = 1 ORDER BY strFiscalYear 
 		)FY
 	END
+	SET @actionType = 'Close Year'
+
+
 END	
 ELSE IF @ysnPost = 0 
 BEGIN
@@ -38,4 +43,11 @@ BEGIN
 	UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionId = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearId = @intFiscalYearId
 	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1,ysnAROpen = 1, ysnAPOpen = 1, ysnINVOpen = 1, ysnCMOpen = 1, ysnPROpen = 1, ysnCTOpen = 1, ysnFAOpen = 1 where intFiscalYearId = @intFiscalYearId
+
+	SET @actionType = 'Open Year'
 END
+EXEC uspSMAuditLog
+        @keyValue = @intFiscalYearId,                             
+        @screenName = 'GeneralLedger.view.FiscalYear',
+        @entityId = @intEntityId,
+        @actionType = @actionType
