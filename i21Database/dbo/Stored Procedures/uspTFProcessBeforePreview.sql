@@ -88,13 +88,13 @@ BEGIN TRY
 				)
 				SELECT Trans.intTransactionId
 					, [strOriginAltFacilityNumber] = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
-					, [strDestinationAltFacilityNumber] = DestinationLoc.strOregonFacilityNumber
+					, [strDestinationAltFacilityNumber] = DestinationLoc.strOregonFacilityNumber 
 				FROM tblTFTransaction Trans
-				INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionDetailId  = Trans.intTransactionNumberId
-				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblTRLoadDistributionDetail.intLoadDistributionHeaderId
+				INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionDetailId = Trans.intTransactionNumberId
+				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblTRLoadDistributionDetail.intLoadDistributionHeaderId 
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 				INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
-				INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId
+				INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId AND tblTRLoadDistributionDetail.strReceiptLink = tblTRLoadReceipt.strReceiptLine
 					LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId	
 					LEFT JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intSupplyPointId = tblTRLoadReceipt.intSupplyPointId 
 						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON SupplyPointLoc.intEntityLocationId = tblTRSupplyPoint.intEntityLocationId				
