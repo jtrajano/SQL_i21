@@ -1367,6 +1367,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 						,@ysnTransferOnSameLocation
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR

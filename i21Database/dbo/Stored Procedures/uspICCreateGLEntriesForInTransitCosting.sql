@@ -478,7 +478,10 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
+				@InventoryTransactionTypeId_AutoNegative
+				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		)
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 UNION ALL  
@@ -546,5 +549,8 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
+				@InventoryTransactionTypeId_AutoNegative
+				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		)
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 

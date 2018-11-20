@@ -54,6 +54,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20) 
 	,@dblUnitRetail NUMERIC(38, 20) 
+	,@ysnTransferOnSameLocation AS BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -368,7 +369,7 @@ BEGIN
 				AND Stock.intItemId = @intItemId
 				AND Stock.intItemLocationId = @intItemLocationId				
 
-		IF ISNULL(@dblValue, 0) <> 0
+		IF ISNULL(@dblValue, 0) <> 0 AND (ISNULL(@ysnTransferOnSameLocation, 0) = 0) 
 		BEGIN 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
