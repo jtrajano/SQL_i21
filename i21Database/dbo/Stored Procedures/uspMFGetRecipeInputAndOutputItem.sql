@@ -340,7 +340,7 @@ BEGIN TRY
 		,IU.intItemUOMId AS intActualItemUOMId
 		,UM.intUnitMeasureId AS intActualItemUnitMeasureId
 		,UM.strUnitMeasure AS strActualItemUnitMeasure
-		,Prod.dblWeightPerUnit
+		,Prod.dblWeightPerUnit AS dblUnitQty
 		,Prod.strReferenceNo 
 		,Prod.strRemarks AS strComment
 		,CONVERT(INT, Row_Number() OVER (
