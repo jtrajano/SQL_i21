@@ -53,6 +53,8 @@ FROM (
 		, ft.ysnPreCrush
 		, fm.strFutureMonth
 		, strNotes = ft.strReference
+		, ft.intFutureMarketId
+		, ft.intFutureMonthId
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblRKFuturesMonth AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
