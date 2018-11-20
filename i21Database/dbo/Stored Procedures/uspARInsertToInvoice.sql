@@ -228,7 +228,9 @@ FROM tblSOSalesOrder SO
 	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
-	LEFT JOIN tblICInventoryShipmentItem ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
+	LEFT JOIN (
+				SELECT D.* FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON D.intInventoryShipmentId = H.intInventoryShipmentId AND H.ysnPosted = 1 AND H.intOrderType = 2
+				) ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
 WHERE SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining <> @dblZeroAmount
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
@@ -350,7 +352,7 @@ SELECT intItemId						= ICSI.intItemId
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
-INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId AND ICS.ysnPosted = 1
+INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId AND ICS.ysnPosted = 1 AND ICS.intOrderType = 2
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
 WHERE SO.intSalesOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
