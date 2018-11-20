@@ -7165,6 +7165,7 @@
     <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
     <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
     <Build Include="dbo\Functions\fnRKGetContracts.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
