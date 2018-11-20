@@ -1,9 +1,9 @@
 CREATE VIEW vyuICGetItemStockUOMTotalsAllStorageUnits
 AS
-	--SELECT xl.*
-	--FROM (
+	SELECT xl.*
+	FROM (
 	SELECT
-		intLocationId = sl.intCompanyLocationId
+			intLocationId = sl.intCompanyLocationId
 		, i.intItemId
 		, i.strItemNo
 		, intSubLocationId = sl.intCompanyLocationSubLocationId
@@ -22,22 +22,20 @@ AS
         , dblAvailableQty = ISNULL(v.dblAvailableQty, 0.00)
 		, ysnHasStock = (CAST(CASE WHEN v.strSubLocationName IS NULL THEN 0 ELSE 1 END AS BIT))
 		, il.intAllowNegativeInventory
-	FROM
-		tblICItem i INNER JOIN tblICItemLocation il
-		ON i.intItemId = il.intItemId
-		INNER JOIN tblSMCompanyLocationSubLocation sl
-		ON sl.intCompanyLocationId = il.intLocationId
-		LEFT JOIN tblICStorageLocation sloc
-		ON sloc.intSubLocationId = sl.intCompanyLocationSubLocationId
-			AND sloc.intLocationId = sl.intCompanyLocationId
-		LEFT JOIN vyuICGetItemStockUOMTotals v
-		ON v.intItemId = i.intItemId
-			AND v.intItemLocationId = il.intItemLocationId
-			AND v.intSubLocationId = sl.intCompanyLocationSubLocationId
-			AND v.intStorageLocationId = sloc.intStorageLocationId
-			AND v.ysnStockUnit = 1
-			AND ((v.dblStorageQty + v.dblOnHand) > 0 OR v.intAllowNegativeInventory = 1)
-	GROUP BY il.intAllowNegativeInventory, (CAST(CASE WHEN v.strSubLocationName IS NULL THEN 0 ELSE 1 END AS BIT)), il.intAllowNegativeInventory
-	HAVING (il.intAllowNegativeInventory = 3 AND (CAST(CASE WHEN v.strSubLocationName IS NULL THEN 0 ELSE 1 END AS BIT)) = 1) OR (il.intAllowNegativeInventory = 1)
---) AS xl
---WHERE ((xl.intAllowNegativeInventory = 3 AND xl.ysnHasStock = 1) OR (xl.intAllowNegativeInventory = 1))
+		FROM
+			tblICItem i INNER JOIN tblICItemLocation il
+			ON i.intItemId = il.intItemId
+			INNER JOIN tblSMCompanyLocationSubLocation sl
+			ON sl.intCompanyLocationId = il.intLocationId
+			LEFT JOIN tblICStorageLocation sloc
+			ON sloc.intSubLocationId = sl.intCompanyLocationSubLocationId
+				AND sloc.intLocationId = sl.intCompanyLocationId
+			LEFT JOIN vyuICGetItemStockUOMTotals v
+			ON v.intItemId = i.intItemId
+				AND v.intItemLocationId = il.intItemLocationId
+				AND v.intSubLocationId = sl.intCompanyLocationSubLocationId
+				AND v.intStorageLocationId = sloc.intStorageLocationId
+				AND v.ysnStockUnit = 1
+				AND ((v.dblStorageQty + v.dblOnHand) > 0 OR v.intAllowNegativeInventory = 1)
+) AS xl
+	WHERE ((xl.intAllowNegativeInventory = 3 AND xl.ysnHasStock = 1) OR (xl.intAllowNegativeInventory = 1))
