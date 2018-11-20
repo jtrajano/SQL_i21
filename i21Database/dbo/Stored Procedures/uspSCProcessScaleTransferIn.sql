@@ -101,7 +101,7 @@ BEGIN TRY
 			,intContractDetailId			= NULL
 			,dtmDate						= SC.dtmTicketDateTime
 			,dblQty							= SC.dblNetUnits
-			,dblCost						= ICTD.dblCost
+			,dblCost						= ICTran.dblCost
 			,dblExchangeRate				= 1 -- Need to check this
 			,intLotId						= NULL --No LOTS from scale
 			,intSubLocationId				= SC.intSubLocationId
@@ -110,15 +110,15 @@ BEGIN TRY
 			,dblFreightRate					= SC.dblFreightRate
 			,intSourceId					= SC.intTicketId
 			,intTicketId					= SC.intTicketId
-			,intInventoryTransferId			= ICT.intInventoryTransferId
+			,intInventoryTransferId			= ICTD.intInventoryTransferId
 			,intInventoryTransferDetailId	= ICTD.intInventoryTransferDetailId
 			,intSourceType		 			= 1 -- Source type for scale is 1 
 			,strSourceScreenName			= 'Scale Ticket'
 	FROM	tblSCTicket SC 
 			INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
-			LEFT JOIN tblICInventoryTransfer ICT ON ICT.intInventoryTransferId = SCMatch.intInventoryTransferId
 			LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
-	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
+			LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
+	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges(
