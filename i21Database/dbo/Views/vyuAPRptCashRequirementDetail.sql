@@ -65,6 +65,7 @@ SELECT DISTINCT
 	,GETDATE() as dtmCurrentDate
 	,C.strCompanyName
 	,strCompanyAddress = dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState,C.strZip)
+	,ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
 	FROM tblCMBankTransaction CBT
 	INNER JOIN tblAPPayment PYMT ON 
 		CBT.strTransactionId =  PYMT.strPaymentRecordNum
@@ -76,6 +77,8 @@ SELECT DISTINCT
 		ON APB.intBillId = APBD.intBillId 
 	INNER JOIN tblICItem Item 
 		ON APBD.intItemId = Item.intItemId
+	LEFT JOIN tblICCommodity commodity 
+		ON Item.intCommodityId = commodity.intCommodityId
 	LEFT JOIN tblGRStorageHistory GRH 
 		ON GRH.intCustomerStorageId = APBD.intCustomerStorageId AND GRH.strType = 'From Scale'
 	LEFT JOIN tblICInventoryReceiptItem IRI 
