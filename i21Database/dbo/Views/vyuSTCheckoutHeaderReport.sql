@@ -24,11 +24,11 @@ ST.intStoreId
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
 , Inv.ysnPosted
-, (SELECT SUM(CDT.dblTotalSalesAmount) 
+, (SELECT SUM(CDT.dblTotalSalesAmountComputed) 
 	FROM tblSTCheckoutDepartmetTotals CDT 
 	INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 	INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
-	WHERE CDT.intCheckoutId = CH.intCheckoutId AND CDT.dblTotalSalesAmount > 0) dblSalesAmount
+	WHERE CDT.intCheckoutId = CH.intCheckoutId AND CDT.dblTotalSalesAmountComputed > 0) dblSalesAmount
 , (SELECT SUM(CPT.dblAmount)
 	FROM tblSTCheckoutPumpTotals CPT 
 	INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPT.intPumpCardCouponId 

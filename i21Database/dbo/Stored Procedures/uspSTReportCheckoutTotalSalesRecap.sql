@@ -64,8 +64,8 @@ BEGIN TRY
    FROM	tblSMCompanySetup
 
    select @strCompanyName as CompanyName, D.intStoreNo as Store,CONVERT(VARCHAR(50),C.dtmCheckoutDate,101) as checkoutDate, 
-   C.intShiftNo as Shift,B.strCategoryCode, B.strDescription ,A.intTotalSalesCount, A.dblTotalSalesAmount,
-   A.dblRegisterSalesAmount , (ISNULL(SUM(A.dblTotalSalesAmount) OVER (),0))  as CategoryTotalSale
+   C.intShiftNo as Shift,B.strCategoryCode, B.strDescription ,A.intTotalSalesCount, A.dblTotalSalesAmountComputed,
+   A.dblRegisterSalesAmountComputed , (ISNULL(SUM(A.dblTotalSalesAmountComputed) OVER (),0))  as CategoryTotalSale
    from tblSTCheckoutDepartmetTotals A LEFT OUTER JOIN tblICCategory B ON A.intCategoryId = B.intCategoryId 
    JOIN tblSTCheckoutHeader C ON C.intCheckoutId = A.intCheckoutId
    JOIN tblSTStore D ON D.intStoreId = C.intStoreId where A.intCheckoutId = @intCheckoutId 

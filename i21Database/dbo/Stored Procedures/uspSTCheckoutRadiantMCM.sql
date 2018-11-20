@@ -25,16 +25,19 @@ BEGIN
 			BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
+				    , ISNULL(Chk.SalesAmount, 0) [dblTotalSalesAmountRaw]
+					, ISNULL(Chk.SalesAmount, 0) [dblRegisterSalesAmountRaw]
 					, Cat.intCategoryId [intCategoryId]
 					, (
 						CASE 
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
 								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+								-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 					    END
-					  ) [dblTotalSalesAmount]
-					, 0 [dblRegisterSalesAmount]
+					  ) [dblTotalSalesAmountComputed]
+					, 0 [dblRegisterSalesAmountComputed]
 					, '' [strDepartmentTotalsComment]
 					, CAST(Chk.PromotionCount AS INT) [intPromotionalDiscountsCount]
 					, CAST(Chk.PromotionAmount AS DECIMAL(18,6)) [dblPromotionalDiscountAmount]
@@ -62,12 +65,15 @@ BEGIN
 		ELSE
 			BEGIN
 				UPDATE DT  
-				SET	dblTotalSalesAmount = (
+				SET	[dblTotalSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
+					, [dblRegisterSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
+					, [dblTotalSalesAmountComputed] = (
 											CASE 
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0) 
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+													-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 											END
 										  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.PromotionCount AS INT),0) 
@@ -91,7 +97,10 @@ BEGIN
 				AND S.intStoreId = @intStoreId
 			END
 
-		UPDATE dbo.tblSTCheckoutDepartmetTotals SET dblRegisterSalesAmount = dblTotalSalesAmount Where intCheckoutId = @intCheckoutId
+		-- Update Register Amount
+		UPDATE dbo.tblSTCheckoutDepartmetTotals 
+		SET dblRegisterSalesAmountComputed = dblTotalSalesAmountComputed
+		Where intCheckoutId = @intCheckoutId
 
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
