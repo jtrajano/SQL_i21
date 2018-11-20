@@ -118,12 +118,12 @@ BEGIN TRY
 						, tblARInvoice.strPONumber
 						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END AS strDestinationState
-						, CASE WHEN SupplyPointLoc.strCity IS NOT NULL THEN SupplyPointLoc.strCity ELSE tblSMCompanyLocation.strCity END AS strOriginCity
-						, NULL AS strOriginCounty
-						, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
+						, tblARInvoice.strShipToCity AS strDestinationCity
+						, DestinationCounty.strCounty AS strDestinationCounty
+						, tblARInvoice.strShipToState AS strDestinationState
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
 						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
@@ -134,7 +134,7 @@ BEGIN TRY
 						, NULL AS strConsignorName
 						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblSMCompanySetup.strCompanyName END AS strVendorName
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
@@ -175,16 +175,16 @@ BEGIN TRY
 						LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 					INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 					INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
-						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId 
 					INNER JOIN tblSMShipVia SellerShipVia ON SellerShipVia.intEntityId = tblTRLoadHeader.intSellerId
 						INNER JOIN tblEMEntity Seller ON Seller.intEntityId = SellerShipVia.intEntityId
 					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
-						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId			
+						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
+						LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId
 						LEFT JOIN tblAPVendor ON tblAPVendor.intEntityId = tblTRLoadReceipt.intTerminalId
 							LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = tblAPVendor.intEntityId
-					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 					INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
 						LEFT JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARCustomer.intEntityId
@@ -196,20 +196,20 @@ BEGIN TRY
 						AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 						AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-							OR ((SupplyPointLoc.strState IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-								OR (SupplyPointLoc.strState IS NOT NULL AND SupplyPointLoc.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND OriginBulkLoc.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
+								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SupplyPointLoc.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 							)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-							OR ((SupplyPointLoc.strState IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-								OR (SupplyPointLoc.strState IS NOT NULL AND SupplyPointLoc.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND OriginBulkLoc.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SupplyPointLoc.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 							)
 					
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-							OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
+							OR ((tblARInvoice.intFreightTermId = 3 AND tblEMEntityLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 								OR (ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 							)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-							OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+							OR ((tblARInvoice.intFreightTermId = 3 AND tblEMEntityLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 								OR (ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 							)
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
@@ -304,12 +304,12 @@ BEGIN TRY
 						, tblARInvoice.strPONumber
 						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
-						, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END AS strDestinationState
-						, CASE WHEN SupplyPointLoc.strCity IS NOT NULL THEN SupplyPointLoc.strCity ELSE tblSMCompanyLocation.strCity END AS strOriginCity
-						, NULL AS strOriginCounty
-						, CASE WHEN SupplyPointLoc.strState IS NOT NULL THEN SupplyPointLoc.strState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
+						, tblARInvoice.strShipToCity AS strDestinationCity
+						, DestinationCounty.strCounty AS strDestinationCounty
+						, tblARInvoice.strShipToState AS strDestinationState
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
 						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
@@ -320,7 +320,7 @@ BEGIN TRY
 						, NULL AS strConsignorName
 						, NULL AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblSMCompanySetup.strCompanyName END AS strVendorName
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
@@ -366,10 +366,10 @@ BEGIN TRY
 					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
-						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId			
+						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
+						LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId
 						LEFT JOIN tblAPVendor ON tblAPVendor.intEntityId = tblTRLoadReceipt.intTerminalId
 							LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = tblAPVendor.intEntityId
-					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 					INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
 						LEFT JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARCustomer.intEntityId
@@ -381,20 +381,20 @@ BEGIN TRY
 						AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 						AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-							OR ((SupplyPointLoc.strState IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
-								OR (SupplyPointLoc.strState IS NOT NULL AND SupplyPointLoc.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND OriginBulkLoc.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
+								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SupplyPointLoc.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 							)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-							OR ((SupplyPointLoc.strState IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
-								OR (SupplyPointLoc.strState IS NOT NULL AND SupplyPointLoc.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
+							OR ((tblTRLoadReceipt.strOrigin = 'Terminal' AND OriginBulkLoc.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+								OR (tblTRLoadReceipt.strOrigin != 'Terminal' AND SupplyPointLoc.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 							)
 					
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-							OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
+							OR ((tblARInvoice.intFreightTermId = 3 AND tblEMEntityLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')) 
 								OR (ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
 							)
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-							OR ((tblARInvoice.intFreightTermId = 3 AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+							OR ((tblARInvoice.intFreightTermId = 3 AND tblEMEntityLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 								OR (ISNULL(tblARInvoice.intFreightTermId, 0) != 3 AND tblARInvoice.strShipToState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 							)
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
