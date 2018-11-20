@@ -9,7 +9,10 @@
   @intForecastWeeklyConsumptionUOMId INTEGER = null   ,
   @intBookId int = NULL, 
   @intSubBookId int = NULL,
-  @dtmPositionAsOf datetime = NULL
+	@strPositionBy nvarchar(100) = NULL,
+	@dtmPositionAsOf datetime = NULL,
+	@strUomType nvarchar(100) = NULL
+
 AS
 
 IF ISNULL(@intForecastWeeklyConsumptionUOMId,0) = 0
@@ -158,8 +161,7 @@ BEGIN
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 	)
-	EXEC uspRKRiskPositionInquiryBySummary 
-			 @intCommodityId = @intCommodityId
+	EXEC uspRKRiskPositionInquiryBySummary @intCommodityId = @intCommodityId
 			,@intCompanyLocationId = @intCompanyLocationId
 			,@intFutureMarketId = @intFutureMarketId
 			,@intFutureMonthId = @intFutureMonthId
@@ -167,10 +169,11 @@ BEGIN
 			,@intDecimal = @intDecimal
 			,@intForecastWeeklyConsumption=@intForecastWeeklyConsumption
 			,@intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId 
-			,@intBookId  = @intBookId
+			,@intBookId  = @intBookId 
 			,@intSubBookId = @intSubBookId
-			,@dtmPositionAsOf = @dtmPositionAsOf
-		   
+			,@strPositionBy=@strPositionBy
+			,@dtmPositionAsOf=@dtmPositionAsOf
+			,@strUomType=@strUomType
 
 	INSERT INTO @tblFinalDetail (intRowNumber
 		,strGroup
