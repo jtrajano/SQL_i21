@@ -219,7 +219,7 @@ SELECT
 	intKey							= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	, i.intItemId
 	, i.strItemNo 
-	, ItemUOM = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END
+	, intItemUOMId = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END
 	, strItemUOM = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.strUnitMeasure ELSE iUOM.strUnitMeasure END
 	, strItemUOMType = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.strUnitType ELSE iUOM.strUnitType END
 	, ysnStockUnit = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.ysnStockUnit ELSE ItemUOM.ysnStockUnit END
