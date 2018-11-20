@@ -61,9 +61,9 @@ AS
 	, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 	, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 	, LC.ysnRejected
-	, intForexRateTypeId		= ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId) 
-	, strForexRateType			= ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType)
-	, dblForexRate				= ISNULL(LogisticsView.dblForexRate, defaultForexRate.dblRate) 
+	, intForexRateTypeId		= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId) END
+	, strForexRateType			= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType) END
+	, dblForexRate				= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(LogisticsView.dblForexRate, defaultForexRate.dblRate) END
 	, ysnBundleItem				= CAST(0 AS BIT)
 	, intBundledItemId			= CAST(NULL AS INT)
 	, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
