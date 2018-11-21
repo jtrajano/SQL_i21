@@ -7198,6 +7198,13 @@
     <Build Include="dbo\Views\vyuSCProductionHistoryReportView.sql" />
     <Build Include="dbo\Views\vyuGRStorageAdjustmentRecords.sql" />
     <Build Include="dbo\Tables\tblSTStoreAppHistoryReports.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWC.sql" />
+    <Build Include="dbo\Views\vyuAPRptDM.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
+    <Build Include="dbo\Views\vyuAPRptWC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

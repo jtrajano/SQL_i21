@@ -1,0 +1,36 @@
+CREATE VIEW vyuAPRptVoucherCommonData
+AS
+
+SELECT DISTINCT
+A.intBillId
+,companySetup.strCompanyName AS strCompanyName
+,strCompanyAddress = ISNULL(RTRIM(companySetup.strCompanyName) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strPhone)+ CHAR(13) + char(10), '')
+,strShipFrom = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone)
+,strShipTo = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone)
+,A.strBillId
+,ContactEntity.strName AS strContactName
+,ContactEntity.strEmail AS strContactEmail
+,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 106)
+,Bank.strBankName
+,BankAccount.strBankAccountHolder
+,BankAccount.strIBAN
+,BankAccount.strSWIFT
+,Term.strTerm
+,A.strRemarks
+,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
+,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
+FROM tblAPBill A 
+INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId)
+	ON A.intEntityVendorId = B.intEntityVendorId
+CROSS JOIN tblSMCompanySetup companySetup
+LEFT JOIN tblEMEntityToContact EntityToContact ON A.intEntityId = EntityToContact.intEntityId AND EntityToContact.ysnDefaultContact = 1
+LEFT JOIN tblEMEntity ContactEntity ON EntityToContact.intEntityContactId = ContactEntity.intEntityId
+LEFT JOIN tblSMCompanyLocation TranLoc ON A.intStoreLocationId = TranLoc.intCompanyLocationId
+LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
+LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
+LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
+
