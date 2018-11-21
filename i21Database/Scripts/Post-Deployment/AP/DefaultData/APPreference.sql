@@ -38,7 +38,7 @@ BEGIN
 						,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
 						,@entityId			= 1									-- Entity Id.
 						,@actionType		= 'Added'							-- Action Type
-						,@changeDescription	= 'Updated APPreference'			-- Description
+						,@changeDescription	= 'Check Print Options'			-- Description
 						,@fromValue			= '0'								-- Previous Value
 						,@toValue			= '1'								-- New Value
 		END
@@ -57,7 +57,7 @@ BEGIN
 					,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
 					,@entityId			= 1									-- Entity Id.
 					,@actionType		= 'Updated'							-- Action Type
-					,@changeDescription	= 'Updated APPreference'			-- Description
+					,@changeDescription	= 'Check Print Options'			-- Description
 					,@fromValue			= '0'								-- Previous Value
 					,@toValue			= '1'								-- New Value
 		END		
