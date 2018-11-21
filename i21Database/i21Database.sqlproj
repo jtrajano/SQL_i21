@@ -7166,6 +7166,7 @@
     <Build Include="dbo\Views\vyuARSearchPOSDrawer.sql" />
     <Build Include="dbo\Functions\fnRKGetContracts.sql" />
     <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
