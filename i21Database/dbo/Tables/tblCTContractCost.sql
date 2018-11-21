@@ -34,3 +34,22 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	CONSTRAINT [FK_tblCTContractCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblCTContractCost_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_001] ON [dbo].tblCTContractCost
+(
+	[intContractDetailId] ASC,
+	intItemId ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+
+GO
+
+GO
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_002] ON [dbo].tblCTContractCost
+(
+	[intContractDetailId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+
+GO
