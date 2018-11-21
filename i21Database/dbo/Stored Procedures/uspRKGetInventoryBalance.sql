@@ -157,6 +157,7 @@ WHERE  i.intCommodityId= @intCommodityId
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 and st.intDeliverySheetId IS NOT NULL 
 		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 		 and r.intSourceType = 1
+		 and r.ysnPosted = 1
 
 UNION ALL --Delivery Sheet Split
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ELSE 0 END dblInQty,r.strReceiptNumber  
@@ -175,6 +176,7 @@ WHERE  i.intCommodityId= @intCommodityId
 		 and ri.intOwnershipType = 2 and  st.intStorageScheduleTypeId = -4 and st.intDeliverySheetId IS NOT NULL 
 		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 		 and r.intSourceType = 1
+		 and r.ysnPosted = 1
 		 
 		 )a
 

@@ -625,6 +625,12 @@ BEGIN
 			JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+			LEFT JOIN (
+				SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
+				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+			) Strg ON s.intTransactionId = Strg.intInventoryReceiptId
 			OUTER APPLY(
 				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
 				FROM dbo.fnRKGetContracts(s.intTransactionId, i.intItemId, s.strTransactionType)
@@ -632,6 +638,7 @@ BEGIN
 			WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 				AND ISNULL(strTicketStatus, '') <> 'V'
+				AND isnull(Strg.ysnDPOwnedType,0) = 0
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
@@ -753,7 +760,8 @@ BEGIN
 					, intContractHeaderId
 					, strContractNumber
 				FROM #invQty
-				WHERE intCommodityId = @intCommodityId
+				WHERE intCommodityId = @intCommodityId 
+					AND ISNULL(strDistributionOption,'') <> 'DP'
 			) t
 			GROUP BY intSeqId
 				, strSeqHeader
@@ -841,7 +849,6 @@ BEGIN
 			) CT
 			WHERE intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
-				AND ysnDPOwnedType <> 1 AND strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
 			INSERT INTO @Final(intSeqId
