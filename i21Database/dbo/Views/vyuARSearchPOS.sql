@@ -4,6 +4,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , intEntityCustomerId		= POS.intEntityCustomerId
 	 , intBillToId				= CUSTOMER.intBillToId
 	 , intShipToId				= CUSTOMER.intShipToId
+	 , intCompanyLocationId		= POS.intCompanyLocationId
 	 , dtmDate					= POS.dtmDate
 	 , strReceiptNumber			= POS.strReceiptNumber
 	 , strCustomerName			= CUSTOMER.strName
