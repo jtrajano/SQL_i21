@@ -123,7 +123,7 @@ GROUP BY UF.intBankAccountId
 	   , P.dtmDatePaid
 	   , UF.intLocationId
 	   , P.ysnVendorRefund
-	   , UF.intLastModifiedUserId
+	   , ISNULL(@intUserId, UF.intLastModifiedUserId)
 --PaymentDup
 INSERT INTO @BankTransactionDup(
 	  [intBankAccountId]
