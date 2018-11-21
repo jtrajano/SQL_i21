@@ -5474,6 +5474,13 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWC.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPRptDM.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
+    <Build Include="dbo\Views\vyuAPRptWC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
