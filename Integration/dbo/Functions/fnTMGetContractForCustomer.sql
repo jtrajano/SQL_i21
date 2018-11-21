@@ -255,12 +255,9 @@ BEGIN
 							,@ysnMaxPrice = A.ysnMaxPrice
 							,@dblPrice = A.vwcnt_un_prc
 						FROM vwcntmst A
-						INNER JOIN vwitmmst B
-							ON A.vwcnt_itm_or_cls = B.vwitm_no
 						INNER JOIN @ContractTable E
 							ON A.A4GLIdentity = E.intContractId
-						INNER JOIN @ItemTable F
-							ON B.A4GLIdentity =  F.intItemId
+						
 		
 						IF(@A4GLIdentity  IS NOT NULL)
 						BEGIN
@@ -280,7 +277,7 @@ BEGIN
 						,@dblPrice = A.vwcnt_un_prc
 					FROM vwcntmst A
 					INNER JOIN vwitmmst B
-						ON A.vwcnt_itm_or_cls = B.vwitm_no
+						ON A.vwcnt_itm_or_cls = B.vwitm_class
 					INNER JOIN @ContractTable E
 						ON A.A4GLIdentity = E.intContractId
 					INNER JOIN @ItemTable F
