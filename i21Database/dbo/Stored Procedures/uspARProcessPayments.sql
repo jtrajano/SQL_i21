@@ -264,10 +264,18 @@ BEGIN
 		,[ysnAllowOverpayment]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAllowOverpayment] ELSE NULL END) 
 		,[ysnFromAP]							= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnFromAP] ELSE NULL END) 
 	FROM
-		@PaymentEntries IE
-	INNER JOIN
-		#EntriesForProcessing EFP WITH (NOLOCK)
-			ON IE.[intId] = EFP.[intId]
+		#EntriesForProcessing EFP
+	CROSS APPLY
+		(	SELECT TOP 1 * 
+			FROM @PaymentEntries I
+			WHERE
+				I.[intId] = EFP.[intId]
+		)IE
+	
+	-- 	@PaymentEntries IE
+	-- INNER JOIN
+	-- 	#EntriesForProcessing EFP WITH (NOLOCK)
+	-- 		ON IE.[intId] = EFP.[intId]
 	WHERE
 		ISNULL(EFP.[ysnForInsert],0) = 1
 	ORDER BY
