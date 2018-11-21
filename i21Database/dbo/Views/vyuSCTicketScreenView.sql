@@ -55,8 +55,8 @@
 	,SCT.strContractNumber
 	,SCT.intContractSequence
 	,SCT.strContractLocation
-	,SCT.dblUnitPrice
-	,SCT.dblUnitBasis
+	,ISNULL(SCT.dblUnitPrice,0) dblUnitPrice
+	,ISNULL(SCT.dblUnitBasis,0) dblUnitBasis
 	,SCT.dblTicketFees
 	,SCT.intCurrencyId
 	,SCT.dblCurrencyRate
