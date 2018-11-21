@@ -235,7 +235,7 @@ DECLARE @Summary AS TABLE (
    SUM(ISNULL(dblShort, 0)) intShortContracts,  
    --isnull(CASE WHEN SUM(ShortWaitedPrice) = 0 THEN NULL ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL) END, 0)  
    sum(ShortWaitedPrice)  dblShortAvgPrice,  
-   SUM(dblNet) AS dblNet,  
+   SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS dblNet,  
    isnull(SUM(dblNetPnL), 0) dblUnrealized,  
    isnull(max(dblClosing), 0) dblClosing,  
    isnull(SUM(dblFutCommission), 0) dblFutCommission,  
@@ -348,13 +348,13 @@ DECLARE @Summary AS TABLE (
    ,ysnExpired  
   FROM(select *,((dblNet*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin from(  
   SELECT DISTINCT t.*,fm.dblContractSize,(select top 1 dblMinAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId   
-  and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMinAmount,  
+  and  @dtmToDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMinAmount,  
   (select top 1 dblMaxAmount from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId   
-  and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMaxAmount,  
+  and  @dtmToDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblMaxAmount,  
   (select top 1 dblPercenatage from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId   
-  and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPercenatage,  
+  and  @dtmToDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPercenatage,  
   (select top 1 dblPerFutureContract from tblRKBrokerageCommission bc where bc.intFutureMarketId = fm.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId   
-  and  t.dtmTradeDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPerFutureContract from @Summary t   
+  and  @dtmToDate between bc.dtmEffectiveDate and  isnull(bc.dtmEndDate,getdate())) dblPerFutureContract from @Summary t   
   join tblRKBrokerageAccount ba on t.strAccountNumber=ba.strAccountNumber  
   join tblEMEntity e on ba.intEntityId=e.intEntityId and e.strName=t.strName  
   join tblRKFutureMarket fm on t.intFutureMarketId=fm.intFutureMarketId  
