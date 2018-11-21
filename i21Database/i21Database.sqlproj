@@ -7167,6 +7167,7 @@
     <Build Include="dbo\Functions\fnRKGetContracts.sql" />
     <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
