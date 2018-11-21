@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportBasisComponent]
-	@xmlParam NVARCHAR(MAX) = NULL  
+		@xmlParam NVARCHAR(MAX) = NULL  
 AS
 	DECLARE @intContractDetailId	NVARCHAR(MAX),
 			@xmlDocumentId			INT,
@@ -13,7 +13,10 @@ AS
 			@EndToDate				DATETIME,
 			@Position				NVARCHAR(100),
 			@Vendor					NVARCHAR(900),
-			@strMappingXML			NVARCHAR(MAX)
+			@strMappingXML			NVARCHAR(MAX),
+			@dtmFromContractDate	DATETIME,
+			@dtmToContractDate		DATETIME,
+			@strProductType			NVARCHAR(100)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -88,14 +91,81 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractDetailId'
 
+	SELECT	@dtmFromContractDate = [from],
+			@dtmToContractDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'ContractDate'
+			AND	condition = 'Between'
+
+	SELECT	@strProductType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'ProductType'
+			AND	condition = 'Equal To'
+
 	IF OBJECT_ID('tempdb..##BasisComponent') IS NOT NULL  				
 		DROP TABLE ##BasisComponent				
+	
+	;WITH CTEDetail AS
+	(
+			SELECT	CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+					CD.strERPPONumber,
+					CD.dtmStartDate,
+					CD.dtmEndDate,				
+					CD.dblQuantity AS dblDetailQuantity,					
+					CD.dblNetWeight,
+					CD.dblFutures,
+					CD.dblBasis,
+					CD.dblCashPrice,
+					CD.intContractDetailId,
+					CD.dtmPlannedAvailabilityDate,
+					
+					CH.strInternalComment,
+					EY.strName AS strCustomerVendor,
+					IM.strItemNo,
+					UM.strUnitMeasure AS strItemUOM,
+					U4.strUnitMeasure AS strWeightUOM,
+					CH.dtmContractDate,
+					IC.strContractItemName, 
+					IC.strContractItemNo,
+					FM.strFutMarketName, 
+					MO.strFutureMonth,
+					CU.strCurrency,
+					U2.strUnitMeasure AS strPriceUOM,
+					PO.strPosition,
+					CA.strDescription  AS strProductType,
+					CB.strContractBasis,
+					CS.strContractStatus
+
+			FROM	tblCTContractDetail		CD
+			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+											AND	CD.intContractStatusId			<>	3
+											AND CH.dtmContractDate	BETWEEN ISNULL(@dtmFromContractDate,dtmContractDate)
+																	AND		ISNULL(@dtmToContractDate,dtmContractDate)
+			JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
+			JOIN	tblCTContractStatus		CS	ON	CS.intContractStatusId		=	CD.intContractStatusId
+			JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
+			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
+
+	LEFT	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
+	LEFT	JOIN	tblCTPosition			PO	ON	PO.intPositionId			=	CH.intPositionId
+	LEFT	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		
+	LEFT	JOIN	tblICUnitMeasure		U4	ON	U4.intUnitMeasureId			=	WU.intUnitMeasureId	
+	LEFT	JOIN	tblICItemContract		IC	ON	IC.intItemContractId		=	CD.intItemContractId
+	LEFT	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId
+	LEFT	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			
+	LEFT	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
+	LEFT	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		
+	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
+	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
+												AND	CA.strType					=	'ProductType'
+	WHERE	CA.strDescription = ISNULL(@strProductType,CA.strDescription)
+	)
 
 	SELECT	* 
 	INTO	##BasisComponent
 	FROM
 	(
-		SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+		SELECT  CD.strContractSeq,
 				CD.strERPPONumber,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
@@ -120,21 +190,20 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition AS Position,
+				CD.strPosition,
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
 				CD.strContractStatus
 
-		FROM	vyuCTSearchContractDetail	CD
+		FROM	CTEDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
 		JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
 		WHERE	CC.ysnBasis	=	1 
-		AND		CD.strContractStatus	<>	'Cancelled'
 
 		UNION ALL
 
-		SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+		SELECT  CD.strContractSeq,
 				CD.strERPPONumber,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
@@ -165,12 +234,11 @@ AS
 				CD.strContractBasis,
 				CD.strContractStatus
 
-		FROM	vyuCTSearchContractDetail	CD
-		WHERE	CD.strContractStatus	<>	'Cancelled'
+		FROM	CTEDetail	CD
 
 		UNION ALL
 
-		SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+		SELECT  CD.strContractSeq,
 				CD.strERPPONumber,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
@@ -201,8 +269,7 @@ AS
 				CD.strContractBasis,
 				CD.strContractStatus
 
-		FROM	vyuCTSearchContractDetail	CD
-		WHERE	CD.strContractStatus	<>	'Cancelled'
+		FROM	CTEDetail	CD
 	)t
 	
 	SELECT @strMappingXML = 
@@ -231,5 +298,6 @@ AS
 		SET @SQL = 'SELECT * FROM ##BasisComponent WHERE ' + @Condition
 	ELSE
 		SET @SQL = 'SELECT * FROM ##BasisComponent'
-
+	
+	--SELECT @SQL
 	EXEC sp_executesql @SQL
