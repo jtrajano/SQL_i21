@@ -12,6 +12,8 @@ SELECT
 	,SCD.dblShrink
 	,SCD.dblNet
 	,SCD.intSplitId
+	,SCD.strSplitDescription
+	,SCD.strCountyProducer
 	,SCD.ysnPost
 
 	,EM.strName
