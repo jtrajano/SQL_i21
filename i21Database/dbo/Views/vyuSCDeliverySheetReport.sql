@@ -17,6 +17,7 @@ SELECT
 	,SCD.dblGross
 	,SCD.dblShrink
 	,SCD.dblNet
+	,SCD.strSplitDescription
 	,SCD.ysnPost
 	,EM.strAddress AS strEntityAddress
 	,EM.strZipCode AS strEntityZipCode
