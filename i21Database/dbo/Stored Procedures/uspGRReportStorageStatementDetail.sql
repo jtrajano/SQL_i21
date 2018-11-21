@@ -15,7 +15,7 @@ BEGIN TRY
 	DECLARE @dtmTerminationOfReceipt DATETIME
 	DECLARE @strItemNo				 NVARCHAR(100)
 	DECLARE @strLicenseNumber		 NVARCHAR(100)
-	DECLARE @strPrefix               Nvarchar(100)
+	--DECLARE @strPrefix               Nvarchar(100)
 	DECLARE @intNumber				 INT
 	DECLARE @dtmEffectiveDate	     DATETIME
 	DECLARE @strItemStockUOM		 NVARCHAR(100)
@@ -32,9 +32,13 @@ BEGIN TRY
 	SELECT TOP 1 @dtmTerminationOfReceipt=ISNULL(dtmEndingDate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Date Range'
 	SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
 	SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
-	SELECT @strPrefix=[strPrefix],@intNumber=intNumber FROM tblSMStartingNumber WHERE [strTransactionType]	= N'Storage Statement FormNo'
+	SELECT 
+		--@strPrefix=[strPrefix],
+		  @intNumber = intNumber 
+	FROM tblSMStartingNumber 
+	WHERE [strTransactionType]	= N'Storage Statement FormNo'
 
-	IF ISNULL(@strFormNumber,'')=''
+	IF NOT EXISTS(SELECT 1 FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
 	BEGIN
 		SELECT	CS.intCustomerStorageId,
 			CS.strStorageTicketNumber,
@@ -128,12 +132,13 @@ BEGIN TRY
 		)
 	
 		UPDATE SST
-		SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15 = 0 THEN 0 ELSE 1 END)
+		SET strFormNumber = --@strPrefix+
+		LTRIM(@strFormNumber + CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15 = 0 THEN 0 ELSE 1 END)
 		FROM tblGRStorageStatement SST
 		JOIN CTE C ON C.intStorageStatementId=SST.intStorageStatementId
 
 		UPDATE tblSMStartingNumber 
-		SET intNumber=(SELECT MAX(CAST(REPLACE(strFormNumber,@strPrefix,'')AS INT)) FROM tblGRStorageStatement)
+		SET intNumber=(SELECT MAX(strFormNumber) FROM tblGRStorageStatement)
 		FROM tblSMStartingNumber SN	
 		WHERE SN.[strTransactionType]	= N'Storage Statement FormNo'
 

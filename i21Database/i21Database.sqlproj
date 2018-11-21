@@ -6411,6 +6411,7 @@
     <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
