@@ -29,8 +29,8 @@ BEGIN TRY
 	SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId	
 	SELECT @dtmEffectiveDate = dtmEffectiveDate,@strStorageRate = strStorageRate  FROM tblGRStorageScheduleRule WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	SELECT @dblThereAfterCharge=ISNULL(dblStorageRate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Thereafter'
-	SELECT TOP 1 @dtmTerminationOfReceipt=ISNULL(dtmEndingDate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Date Range'
-	SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
+	SELECT @dtmTerminationOfReceipt = dtmTerminationDate FROM tblGRStorageScheduleRule WHERE intStorageScheduleRuleId = @intStorageScheduleId
+	SELECT @strItemNo = strItemNo FROM tblICItem WHERE intItemId=@intItemId
 	SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
 	SELECT 
 		--@strPrefix=[strPrefix],

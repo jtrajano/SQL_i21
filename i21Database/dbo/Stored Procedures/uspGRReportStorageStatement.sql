@@ -66,23 +66,7 @@ BEGIN TRY
 	
 	SELECT  @strType = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'strType'
-
-	SELECT	@intEntityId = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intEntityId'
-
-	SELECT @intItemId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intItemId'
-		
-	SELECT @intStorageTypeId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intStorageTypeId'
-
-	SELECT @intStorageScheduleId=[from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intStorageScheduleRuleId'
+	WHERE	[fieldname] = 'strType'	
 		
 	IF EXISTS(SELECT 1 FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
 	BEGIN
@@ -110,6 +94,23 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		
+		SELECT	@intEntityId = [from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intEntityId'
+
+		SELECT @intItemId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intItemId'
+			
+		SELECT @intStorageTypeId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intStorageTypeId'
+
+		SELECT @intStorageScheduleId=[from]
+		FROM	@temp_xml_table   
+		WHERE	[fieldname] = 'intStorageScheduleRuleId'
+
 		SELECT @strItemNo = strItemNo 
 		FROM tblICItem 
 		WHERE intItemId= @intItemId
