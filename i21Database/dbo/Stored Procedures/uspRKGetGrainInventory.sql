@@ -616,10 +616,10 @@ SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributio
 		'' tranInvoiceNumber,
 		0.0 dblInvoiceQty,
 		null intInventoryReceiptId,
-		intInventoryShipmentId intInventoryShipmentId,
+		null intInventoryShipmentId,
 		null intInventoryAdjustmentId,
 		null intInventoryCountId,
-		null intInvoiceId,
+		intInvoiceId,
 		null intDeliverySheetId,
 		'' AS deliverySheetNumber,
 		null intTicketId,
@@ -630,7 +630,7 @@ FROM(
 		,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ID.dblQtyShipped) ,6) dblOutQty
 		,I.strInvoiceNumber strShipmentNumber
 		,'' strDistributionOption 
-		,I.intInvoiceId intInventoryShipmentId
+		,I.intInvoiceId
 	FROM tblARInvoice I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 		INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
