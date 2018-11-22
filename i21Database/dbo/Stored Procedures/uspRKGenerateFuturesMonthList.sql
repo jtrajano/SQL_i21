@@ -288,15 +288,6 @@ BEGIN TRY
 	FROM ##FinalFutMonths
 	WHERE ISNULL(strMonth,'') <> ''
 
-	BEGIN TRY
-		DELETE FROM tblRKFuturesMonth
-		WHERE intFutureMarketId = @FutureMarketId 
-		AND strFutureMonth NOT IN(SELECT strFMonth = LTRIM(RTRIM(strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(strYear, 2) FROM #FutTemp)
-	END TRY
-	BEGIN CATCH
-		RAISERROR('You cannot generate Future Trading Months. Current Future Trading Months already in use.', 16, 1);
-	END CATCH
-
 	IF EXISTS(SELECT TOP 1 1 FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND dtmFutureMonthsDate IS NULL)
 	BEGIN
 		UPDATE tblRKFuturesMonth
