@@ -554,9 +554,9 @@ BEGIN TRY
 	SELECT TOP 1 LH.strTransaction, LR.strReceiptLine, LR.strOrigin, LDH.strDestination, intReceiptLocationId = LR.intCompanyLocationId, intDistributionLocationId = LDH.intCompanyLocationId
 	INTO #tmpNoTrans
 	FROM tblTRLoadReceipt LR
-	LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
-	LEFT JOIN tblTRLoadDistributionHeader LDH ON LDH.intLoadHeaderId = LH.intLoadHeaderId
-	LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.strReceiptLink = LR.strReceiptLine AND LDD.intLoadDistributionHeaderId = LDH.intLoadDistributionHeaderId
+	JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
+	JOIN tblTRLoadDistributionHeader LDH ON LDH.intLoadHeaderId = LH.intLoadHeaderId
+	JOIN tblTRLoadDistributionDetail LDD ON LDD.strReceiptLink = LR.strReceiptLine AND LDD.intLoadDistributionHeaderId = LDH.intLoadDistributionHeaderId
 	WHERE LR.strOrigin = 'Location'
 		AND LDH.strDestination = 'Location'
 		AND LR.intCompanyLocationId = LDH.intCompanyLocationId
