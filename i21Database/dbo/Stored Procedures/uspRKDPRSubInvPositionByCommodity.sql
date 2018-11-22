@@ -445,20 +445,13 @@ FROM vyuRKGetInventoryValuation s
 	--Join tblICItemLocaiton il on  il.intItemLocationId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
-	LEFT JOIN tblSCTicket t on s.intSourceId = t.intTicketId	
-	LEFT JOIN (
-		SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
-		FROM tblGRStorageHistory SH
-		INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
-		INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
-	) Strg ON s.intTransactionId = Strg.intInventoryReceiptId	  
+	LEFT JOIN tblSCTicket t on s.intSourceId = t.intTicketId		  
 WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0 
 	AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end and isnull(strTicketStatus,'') <> 'V'
 	and isnull(s.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(s.intEntityId,0) else @intVendorId end
 	and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate) 
 	--and isnull(t.strDistributionOption,'') <> 'DP'
 	and ysnInTransit = 0
-	AND isnull(Strg.ysnDPOwnedType,0) = 0
 	and s.intLocationId  IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -702,7 +695,7 @@ BEGIN
 			,strDistributionOption
 		from @invQty 
 		where intCommodityId =@intCommodityId  and isnull(strTicketStatus,0) <> 'V' 
-			and ISNULL(strDistributionOption,'') <> 'DP'
+			--and ISNULL(strDistributionOption,'') <> 'DP'
 			and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 	)t
 	--group by intSeqId,strSeqHeader,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
@@ -743,6 +736,7 @@ BEGIN
 		where intCommodityId =@intCommodityId 
 			and intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 			and isnull(s.intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(s.intEntityId,0) else @intVendorId end
+			and ysnDPOwnedType <> 1 and strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 			and intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
@@ -841,7 +835,7 @@ BEGIN
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM @Final 
 	where strSeqHeader='In-House' and strType='Receipt' and intCommodityId =@intCommodityId
-	and ISNULL(strDistributionOption,'') <> 'DP'
+	--and ISNULL(strDistributionOption,'') <> 'DP' Will going to include DP here but subtract in the bottom using the company pref
 	)t
 	group by intSeqId,strSeqHeader,strType,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 
@@ -887,11 +881,11 @@ BEGIN
 				)
 	END
 
-	If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1)
+	If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
 	BEGIN
 		
 	INSERT INTO @Final(intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT 15 intSeqId,'Company Titled Stock','DP',sum(dblTotal) dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId  from(
+	SELECT 15 intSeqId,'Company Titled Stock','DP',-sum(dblTotal) dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId  from(
 			SELECT intTicketId,strTicketNumber,
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					,ch.intCompanyLocationId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName
