@@ -432,27 +432,29 @@ BEGIN
     WHERE
         NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])
         AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
-		AND B.[ysnPost] = @OneBit		
+		AND B.[ysnPost] = @OneBit	
+		
+    UPDATE 
+        ARPD
+    SET 
+         ARPD.dblAmountDue     = ((((ISNULL(C.dblInvoiceTotal, 0.00) + ISNULL(ARPD.dblInterest,0.00)) - ISNULL(ARPD.dblDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - C.dblPayment)
+        ,ARPD.dblBaseAmountDue = ((((ISNULL(C.dblBaseInvoiceTotal, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - C.dblBasePayment)
+    FROM
+        tblARPaymentDetail ARPD
+    INNER JOIN 
+    	#ARPostPaymentDetail P
+            ON ARPD.[intPaymentDetailId] = P.[intTransactionDetailId] 
+    INNER JOIN 
+        tblARInvoice C
+            ON P.intInvoiceId = C.intInvoiceId
+    WHERE
+        ISNULL(P.[ysnInvoicePrepayment],0) = 0	
 
 
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
 END
 
-UPDATE 
-    ARPD
-SET 
-     ARPD.dblAmountDue     = ((((ISNULL(C.dblInvoiceTotal, 0.00) + ISNULL(ARPD.dblInterest,0.00)) - ISNULL(ARPD.dblDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - ARPD.dblPayment)
-    ,ARPD.dblBaseAmountDue = ((((ISNULL(C.dblBaseInvoiceTotal, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - ARPD.dblBasePayment)
-FROM
-    tblARPaymentDetail ARPD
-INNER JOIN 
-	#ARPostPaymentDetail P
-        ON ARPD.[intPaymentDetailId] = P.[intTransactionDetailId] 
-INNER JOIN 
-    tblARInvoice C
-        ON P.intInvoiceId = C.intInvoiceId
-WHERE
-    ISNULL(P.[ysnInvoicePrepayment],0) = 0	
+
 
 UPDATE 
     ARPD
