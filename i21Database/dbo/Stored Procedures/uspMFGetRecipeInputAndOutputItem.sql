@@ -404,7 +404,7 @@ BEGIN TRY
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 		LEFT JOIN @tblMFProduceItem Prod ON Prod.intItemId = I.intItemId
-		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Prod.intStorageLocationId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(Prod.intStorageLocationId,@intTransferStorageLocationId)
 		LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = IsNULL(Prod.intWeightItemUOMId, I.intWeightUOMId)
 		LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 		LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Prod.intContainerId
