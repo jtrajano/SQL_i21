@@ -413,11 +413,11 @@ BEGIN TRY
 	WHERE S.intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFProductionSummary
-	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
+	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity) - (dblOpeningQuantity + dblInputQuantity)
 		,dblYieldPercentage = (
 			CASE 
 				WHEN dblOpeningQuantity > 0
-					THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity) * 100, 2)
+					THEN Round((dblConsumedQuantity + dblCountQuantity) / (dblOpeningQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END
 			)
@@ -453,7 +453,7 @@ BEGIN TRY
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
-		And F.dblYieldQuantity<0
+			AND F.dblYieldQuantity < 0
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
@@ -469,74 +469,76 @@ BEGIN TRY
 			IF @strInventoryTracking = 'Item Level'
 			BEGIN
 				SELECT @intWeightUOMId = NULL
-				,@intSubLocationId = NULL
-				,@dblOnHand = NULL
+					,@intSubLocationId = NULL
+					,@dblOnHand = NULL
 
-			SELECT @intWeightUOMId = S.intItemUOMId
-				,@intSubLocationId = S.intSubLocationId
-				,@dblOnHand = S.dblOnHand - S.dblUnitReserved
-			FROM dbo.tblICItemStockUOM S
-			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
-				AND S.intItemId = @intItemId
-				AND S.dblOnHand - S.dblUnitReserved > 0
-			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
-				AND IU.ysnStockUnit = 1
-			JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
-			WHERE S.intItemId = @intItemId
-				AND IL.intLocationId = @intLocationId
-				AND S.intStorageLocationId = @intStorageLocationId
-			AND S.dblOnHand - S.dblUnitReserved > 0
-			IF IsNULL(@dblOnHand,0)=0 or IsNULL(@dblOnHand,0) < IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity),0)
-			BEGIN
-				SELECT @strItemNo = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @intItemId
+				SELECT @intWeightUOMId = S.intItemUOMId
+					,@intSubLocationId = S.intSubLocationId
+					,@dblOnHand = S.dblOnHand - S.dblUnitReserved
+				FROM dbo.tblICItemStockUOM S
+				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+					AND S.intItemId = @intItemId
+					AND S.dblOnHand - S.dblUnitReserved > 0
+				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+					AND IU.ysnStockUnit = 1
+				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+				WHERE S.intItemId = @intItemId
+					AND IL.intLocationId = @intLocationId
+					AND S.intStorageLocationId = @intStorageLocationId
+					AND S.dblOnHand - S.dblUnitReserved > 0
 
-				SELECT @strMsg = 'Unable to pick a lot/pallet to adjust the yield qty for the item ' + @strItemNo
+				IF IsNULL(@dblOnHand, 0) = 0
+					OR IsNULL(@dblOnHand, 0) < IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity), 0)
+				BEGIN
+					SELECT @strItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intItemId
 
-				RAISERROR (
-						@strMsg
-						,16
-						,1
-						)
-			END
+					SELECT @strMsg = 'Unable to pick a lot/pallet to adjust the yield qty for the item ' + @strItemNo
 
-			SELECT @intShiftId = intShiftId
-			FROM dbo.tblMFShift
-			WHERE intLocationId = @intLocationId
-				AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
-					AND dtmShiftEndTime + intEndOffset
+					RAISERROR (
+							@strMsg
+							,16
+							,1
+							)
+				END
 
-			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
-				intWorkOrderId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,intItemId
-				,intTransactionId
-				,intTransactionTypeId
-				,strTransactionType
-				,dtmTransactionDate
-				,intProcessId
-				,intShiftId
-				,intStorageLocationId
-				,intSubLocationId
-				)
-			SELECT @intWorkOrderId
-				,NULL
-				,dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
-				,@intWeightUOMId
-				,@intItemId
-				,@intInventoryAdjustmentId
-				,25
-				,'Cycle Count Adj'
-				,GetDate()
-				,@intManufacturingProcessId
-				,@intShiftId
-				,@intStorageLocationId
-				,@intSubLocationId
+				SELECT @intShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
+						AND dtmShiftEndTime + intEndOffset
 
-			PRINT 'Call Adjust Qty procedure'
+				INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+					intWorkOrderId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,intItemId
+					,intTransactionId
+					,intTransactionTypeId
+					,strTransactionType
+					,dtmTransactionDate
+					,intProcessId
+					,intShiftId
+					,intStorageLocationId
+					,intSubLocationId
+					)
+				SELECT @intWorkOrderId
+					,NULL
+					,dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity)
+					,@intWeightUOMId
+					,@intItemId
+					,@intInventoryAdjustmentId
+					,25
+					,'Cycle Count Adj'
+					,GetDate()
+					,@intManufacturingProcessId
+					,@intShiftId
+					,@intStorageLocationId
+					,@intSubLocationId
+
+				PRINT 'Call Adjust Qty procedure'
 			END
 			ELSE
 			BEGIN
