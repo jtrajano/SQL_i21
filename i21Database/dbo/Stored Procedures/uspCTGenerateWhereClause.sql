@@ -63,6 +63,8 @@ BEGIN TRY
 	
 	DELETE FROM @temp_xml_table WHERE strFieldName = 'intSrCurrentUserId'
 
+	DELETE FROM @temp_xml_table WHERE strFieldName = 'strReportLogId'
+	
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @strMappingXML  
 
 	UPDATE	X
