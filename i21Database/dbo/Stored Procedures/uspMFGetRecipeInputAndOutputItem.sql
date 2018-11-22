@@ -299,7 +299,7 @@ BEGIN TRY
 		,intLotId
 		,intProduceUnitMeasureId
 	FROM (
-		SELECT Prod.intStorageLocationId
+		SELECT SL.intStorageLocationId
 			,SL.strName AS strStorageLocationName
 			,SL.intSubLocationId AS intStorageSubLocationId
 			,I.intItemId AS intActualItemId
