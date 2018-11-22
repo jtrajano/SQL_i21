@@ -625,12 +625,6 @@ BEGIN
 			JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-			LEFT JOIN (
-				SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
-				FROM tblGRStorageHistory SH
-				INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
-			) Strg ON s.intTransactionId = Strg.intInventoryReceiptId
 			OUTER APPLY(
 				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
 				FROM dbo.fnRKGetContracts(s.intTransactionId, i.intItemId, s.strTransactionType)
@@ -638,7 +632,6 @@ BEGIN
 			WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 				AND ISNULL(strTicketStatus, '') <> 'V'
-				AND isnull(Strg.ysnDPOwnedType,0) = 0
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
@@ -760,8 +753,7 @@ BEGIN
 					, intContractHeaderId
 					, strContractNumber
 				FROM #invQty
-				WHERE intCommodityId = @intCommodityId 
-					AND ISNULL(strDistributionOption,'') <> 'DP'
+				WHERE intCommodityId = @intCommodityId
 			) t
 			GROUP BY intSeqId
 				, strSeqHeader
@@ -849,6 +841,7 @@ BEGIN
 			) CT
 			WHERE intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
+				AND ysnDPOwnedType <> 1 AND strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
 			INSERT INTO @Final(intSeqId
@@ -1767,7 +1760,7 @@ BEGIN
 				, intCompanyLocationId
 				, strReceiptNumber
 				, strShipmentNumber
-				, intInventoryReceiptId
+				, f.intInventoryReceiptId
 				, intInventoryShipmentId
 				, intTicketId
 				, strTicketType
@@ -1777,8 +1770,77 @@ BEGIN
 				, intFutureMonthId
 				, strFutMarketName
 				, strFutureMonth
-			FROM @Final WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId AND ISNULL(strDistributionOption, '') <> 'DP'
+			FROM @Final f
+			LEFT JOIN (
+				SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
+				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+			) Strg ON f.intInventoryReceiptId = Strg.intInventoryReceiptId    
+			WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId AND isnull(Strg.ysnDPOwnedType,0) = 0
 		
+			
+			--Company Title from DP Settlement
+			INSERT INTO @Final(intSeqId
+				, strSeqHeader
+				, strCommodityCode
+				, strType
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intCompanyLocationId
+				, strReceiptNumber
+				, intInventoryReceiptId
+				, intTicketId
+				, strTicketNumber
+				, dtmTicketDateTime)
+			SELECT intSeqId = 15
+				, strSeqHeader = 'Company Titled Stock'
+				, @strCommodityCode
+				, strType = 'DP Settlement' 
+				, dblTotal 
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intCompanyLocationId
+				, strReceiptNumber
+				, intInventoryReceiptId
+				, intTicketId
+				, strTicketNumber
+				, dtmTicketDateTime 
+			FROM(
+				SELECT null as intTicketId
+					, '' as strTicketNumber
+					, CS.intItemId
+					, strItemNo
+					, strSettleTicket as strReceiptNumber
+					, intSettleStorageId as intInventoryReceiptId
+					, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,(isnull(dblUnits,0))) dblTotal
+					, CS.intCompanyLocationId
+					, intUnitMeasureId intFromCommodityUnitMeasureId
+					, CS.intCommodityId
+					, strLocationName
+					, dtmHistoryDate as dtmTicketDateTime
+				FROM tblGRCustomerStorage CS
+					inner join vyuGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+					inner join tblICItem I ON CS.intItemId = I.intItemId
+				WHERE CS.intStorageTypeId = 2 
+					AND intTransactionTypeId = 4 --Settlement & Reverse Settlement
+					AND CS.intCommodityId  = @intCommodityId
+					AND CS.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId else @intLocationId end
+				)t
+					WHERE intCompanyLocationId  IN (
+							SELECT intCompanyLocationId FROM tblSMCompanyLocation
+							WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+							WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+							ELSE isnull(ysnLicensed, 0) END
+			)
+
 			INSERT INTO @Final(intSeqId
 				, strSeqHeader
 				, strCommodityCode
