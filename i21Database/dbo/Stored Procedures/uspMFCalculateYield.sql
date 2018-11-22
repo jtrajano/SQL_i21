@@ -328,11 +328,11 @@ BEGIN TRY
 	WHERE S.intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFProductionSummary
-	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
+	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity) - (dblOpeningQuantity + dblInputQuantity)
 		,dblYieldPercentage = (
 			CASE 
 				WHEN dblOpeningQuantity > 0
-					THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity) * 100, 2)
+					THEN Round((dblConsumedQuantity + dblCountQuantity) / (dblOpeningQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END
 			)
@@ -377,7 +377,7 @@ BEGIN TRY
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
-		And F.dblYieldQuantity<0
+			AND F.dblYieldQuantity < 0
 
 		SELECT @strInventoryTracking = strInventoryTracking
 		FROM tblICItem
@@ -432,8 +432,10 @@ BEGIN TRY
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
 				AND S.intStorageLocationId = @intStorageLocationId
-			AND S.dblOnHand - S.dblUnitReserved > 0
-			IF IsNULL(@dblOnHand,0)=0 or IsNULL(@dblOnHand,0) < IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity),0)
+				AND S.dblOnHand - S.dblUnitReserved > 0
+
+			IF IsNULL(@dblOnHand, 0) = 0
+				OR IsNULL(@dblOnHand, 0) < IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblYieldQuantity), 0)
 			BEGIN
 				SELECT @strItemNo = strItemNo
 				FROM tblICItem
@@ -719,7 +721,7 @@ BEGIN TRY
 						WHERE LT.intWorkOrderId = @intWorkOrderId
 							AND LT.intLotId = L.intLotId
 						)
-				ORDER BY dtmDateCreated DESC
+				ORDER BY L.dtmDateCreated DESC
 
 				IF @intLotId IS NOT NULL
 				BEGIN
@@ -788,7 +790,7 @@ BEGIN TRY
 							WHERE LT.intWorkOrderId = @intWorkOrderId
 								AND LT.intLotId = L.intLotId
 							)
-					ORDER BY dtmDateCreated DESC
+					ORDER BY L.dtmDateCreated DESC
 
 					IF @intLotId IS NOT NULL
 					BEGIN
@@ -860,7 +862,7 @@ BEGIN TRY
 							WHERE LT.intWorkOrderId = @intWorkOrderId
 								AND LT.intLotId = L.intLotId
 							)
-					ORDER BY dtmDateCreated DESC
+					ORDER BY L.dtmDateCreated DESC
 
 					IF @intLotId IS NOT NULL
 					BEGIN
@@ -925,7 +927,7 @@ BEGIN TRY
 							WHERE LT.intWorkOrderId = @intWorkOrderId
 								AND LT.intLotId = L.intLotId
 							)
-					ORDER BY dtmDateCreated DESC
+					ORDER BY L.dtmDateCreated DESC
 
 					IF @intLotId IS NOT NULL
 					BEGIN
