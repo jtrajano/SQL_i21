@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportBasisComponent]
-		@xmlParam NVARCHAR(MAX) = NULL  
+				@xmlParam NVARCHAR(MAX) = NULL  
 AS
 	DECLARE @intContractDetailId	NVARCHAR(MAX),
 			@xmlDocumentId			INT,
@@ -16,7 +16,8 @@ AS
 			@strMappingXML			NVARCHAR(MAX),
 			@dtmFromContractDate	DATETIME,
 			@dtmToContractDate		DATETIME,
-			@strProductType			NVARCHAR(100)
+			@strProductType			NVARCHAR(100),
+			@strReportLogId			NVARCHAR(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -102,8 +103,17 @@ AS
 	WHERE	[fieldname] = 'ProductType'
 			AND	condition = 'Equal To'
 
-	IF OBJECT_ID('tempdb..##BasisComponent') IS NOT NULL  				
-		DROP TABLE ##BasisComponent				
+	SELECT	@strReportLogId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strReportLogId'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN	
+		RETURN
+	END
+
+	IF OBJECT_ID('tempdb..#BasisComponent') IS NOT NULL  				
+		DROP TABLE #BasisComponent				
 	
 	;WITH CTEDetail AS
 	(
@@ -162,7 +172,7 @@ AS
 	)
 
 	SELECT	* 
-	INTO	##BasisComponent
+	INTO	#BasisComponent
 	FROM
 	(
 		SELECT  CD.strContractSeq,
@@ -295,9 +305,11 @@ AS
 	END
 	
 	IF LEN(LTRIM(RTRIM(ISNULL(@Condition,'')))) > 0
-		SET @SQL = 'SELECT * FROM ##BasisComponent WHERE ' + @Condition
+		SET @SQL = 'SELECT * FROM #BasisComponent WHERE ' + @Condition
 	ELSE
-		SET @SQL = 'SELECT * FROM ##BasisComponent'
+		SET @SQL = 'SELECT * FROM #BasisComponent'
 	
+	INSERT INTO tblSRReportLog(strReportLogId,dtmDate) VALUES(@strReportLogId ,GETDATE())
+
 	--SELECT @SQL
 	EXEC sp_executesql @SQL
