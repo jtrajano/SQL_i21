@@ -470,9 +470,9 @@ BEGIN
 		--EXEC dbo.uspICCalculateOtherCharges
 		--	@intTransactionId			
 
-		---- Allocate the other charges and surcharges. 
-		--EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-		--	@intTransactionId		
+		-- Allocate the other charges and surcharges. 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+			@intTransactionId		
 				
 		---- Calculate Other Charges Taxes
 		--EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
