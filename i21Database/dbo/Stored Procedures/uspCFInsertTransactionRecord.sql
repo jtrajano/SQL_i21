@@ -1524,9 +1524,9 @@ BEGIN
 					IF(@strTransactionType != 'Foreign Sale')
 					BEGIN
 						INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
 
-					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
 					END
 				END
 			END
