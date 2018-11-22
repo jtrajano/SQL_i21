@@ -23,7 +23,7 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.dblQuantity					
 		,SQ.strItemUOM						
 		,SQ.dblNetWeight					
-		,dbo.fnCTConvertQuantityToTargetItemUOM(SQ.intItemId, U7.intUnitMeasureId, U8.intUnitMeasureId, SQ.dblNetWeight)	 	[NetWeight-MT]
+		,dbo.fnCTConvertQuantityToTargetItemUOM(SQ.intItemId, U7.intUnitMeasureId, U8.intUnitMeasureId, SQ.dblNetWeight)	 	[dblNetWeightMT]
 		,SQ.strNetWeightUOM				
 		,CD.strFixationBy					
 		,SQ.strPricingType					
