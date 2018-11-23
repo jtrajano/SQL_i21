@@ -247,26 +247,6 @@ FROM @tblInventoryTransactionGrouped t
 	ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) ON ItemUOM.intItemUOMId = t.intItemUOMId
 	LEFT OUTER JOIN (
-	SELECT
-		SUM(s.dblOnHand) dblOnHand
-		, SUM(s.dblUnitStorage) dblUnitStorage
-		, s.intItemId
-		, s.intItemLocationId
-		, u.strUnitMeasure
-		, i.intItemUOMId
-		, u.strUnitType
-		, i.dblUnitQty
-		, i.ysnStockUnit
-	FROM tblICItemStockUOM s
-		INNER JOIN tblICItemUOM i ON i.intItemUOMId = s.intItemUOMId
-			AND i.ysnStockUnit = 1
-		INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
-	WHERE s.intItemId = @intItemId
-		AND (s.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-		AND (s.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
-	GROUP BY s.intItemId, s.intItemLocationId, u.strUnitMeasure, i.intItemUOMId, u.strUnitType, i.dblUnitQty
-		, i.ysnStockUnit
-) stock ON stock.intItemLocationId = t.intItemLocationId
 		SELECT
 			SUM(s.dblOnHand) dblOnHand
 			, SUM(s.dblUnitStorage) dblUnitStorage
