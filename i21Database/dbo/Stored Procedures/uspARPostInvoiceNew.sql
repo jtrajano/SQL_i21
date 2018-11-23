@@ -571,6 +571,10 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
+
+IF @Post = 1
+	EXEC [dbo].[uspARPostItemResevation]
+
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @Post
         ,@Recap    = @Recap
@@ -700,7 +704,7 @@ BEGIN TRY
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @UserId
-
+	
 	IF @Post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]
 
