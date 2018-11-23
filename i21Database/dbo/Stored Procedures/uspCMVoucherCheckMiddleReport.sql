@@ -99,7 +99,7 @@ SELECT
 		 CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,strPayee = Payee.Name + char(13) + replace (Address1.Value,char(13)+char(10),' ')
+		,strPayee = Payee.Name + char(13) + Address1.Value
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId
@@ -182,7 +182,7 @@ FROM	dbo.tblCMBankTransaction CHK
 		OUTER APPLY(
 			SELECT CASE
 			WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
-				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT ' and ' + strName
+				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT DISTINCT ' and ' + strName
                         FROM tblAPVendorLien LIEN
 						INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
 						WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
@@ -191,7 +191,7 @@ FROM	dbo.tblCMBankTransaction CHK
 													INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
 													INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
 													WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
-                        ORDER BY intEntityVendorLienId
+                        --ORDER BY intEntityVendorLienId
                         FOR XML PATH('')), 
                     1, 1, '')),CHK.strPayee)
 			ELSE
