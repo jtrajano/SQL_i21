@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetItemRunningStock]
+CREATE PROCEDURE [dbo].[uspICGetItemRunningStock]
 	@intItemId AS INT,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
@@ -177,7 +177,7 @@ BEGIN
 		AND i.strLotTracking = 'No'
 END
 
--- Get the top record and ordered by the quantity. 
+-- Aggregrate the On-Hand and Storage Qty. 
 INSERT INTO @tblInventoryTransactionGrouped
 	(
 	intItemId
@@ -190,29 +190,27 @@ INSERT INTO @tblInventoryTransactionGrouped
 	,dblUnitStorage
 	,dblCost
 	)
-SELECT TOP 1
+SELECT 
 	i.intItemId
 	, intItemUOMId
 	, intItemLocationId
-	, intSubLocationId = intSubLocationId
-	, intStorageLocationId = intStorageLocationId
+	, intSubLocationId = @intSubLocationId
+	, intStorageLocationId = @intStorageLocationId
 	, intCostingMethod
 	, dblQty = SUM(t.dblQty) 
  	, dblUnitStorage = SUM(t.dblUnitStorage)
 	, dblCost = MAX(t.dblCost)
 FROM
 	@tblInventoryTransaction t INNER JOIN tblICItem i
-	ON t.intItemId = i.intItemId
+		ON t.intItemId = i.intItemId
+WHERE	
+	(@intSubLocationId IS NULL OR t.intSubLocationId = @intSubLocationId) 
+	AND (@intStorageLocationId IS NULL OR t.intStorageLocationId = @intStorageLocationId) 
 GROUP BY 
 	i.intItemId
 	,intItemUOMId
 	,intItemLocationId
-	,intSubLocationId
-	,intStorageLocationId
 	,intCostingMethod
-ORDER BY 
-	SUM(t.dblQty) DESC 
-	,SUM(t.dblUnitStorage) DESC
 
 -- Return the result back to the caller. 
 SELECT
@@ -234,8 +232,8 @@ SELECT
 	, strStorageLocationName			= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty			= CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.dblOnHand ELSE t.dblQty END
-	, dblStorageAvailableQty			= CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.dblUnitStorage ELSE t.dblUnitStorage END
+	, dblRunningAvailableQty			= t.dblQty 
+	, dblStorageAvailableQty			= t.dblUnitStorage
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
@@ -269,19 +267,39 @@ FROM @tblInventoryTransactionGrouped t
 	GROUP BY s.intItemId, s.intItemLocationId, u.strUnitMeasure, i.intItemUOMId, u.strUnitType, i.dblUnitQty
 		, i.ysnStockUnit
 ) stock ON stock.intItemLocationId = t.intItemLocationId
+		SELECT
+			SUM(s.dblOnHand) dblOnHand
+			, SUM(s.dblUnitStorage) dblUnitStorage
+			, s.intItemId
+			, s.intItemLocationId
+			, u.strUnitMeasure
+			, i.intItemUOMId
+			, u.strUnitType
+			, i.dblUnitQty
+			, i.ysnStockUnit
+		FROM tblICItemStockUOM s
+			INNER JOIN tblICItemUOM i ON i.intItemUOMId = s.intItemUOMId
+				AND i.ysnStockUnit = 1
+			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
+		WHERE s.intItemId = @intItemId
+			AND (s.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
+			AND (s.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
+		GROUP BY s.intItemId, s.intItemLocationId, u.strUnitMeasure, i.intItemUOMId, u.strUnitType, i.dblUnitQty
+			, i.ysnStockUnit
+	) stock ON stock.intItemLocationId = t.intItemLocationId
 		AND stock.intItemId = t.intItemId
-OUTER APPLY(
-	SELECT TOP 1
-		dblCost
-			, intItemUOMId
-	FROM tblICInventoryFIFO FIFO
-	WHERE	t.intItemId = FIFO.intItemId
-		AND t.intItemLocationId = FIFO.intItemLocationId
-		AND dblStockIn- dblStockOut > 0
-	ORDER BY dtmDate ASC
-) FIFO
+	OUTER APPLY(
+		SELECT TOP 1
+				dblCost
+				, intItemUOMId
+		FROM tblICInventoryFIFO FIFO
+		WHERE	t.intItemId = FIFO.intItemId
+			AND t.intItemLocationId = FIFO.intItemLocationId
+			AND dblStockIn- dblStockOut > 0
+		ORDER BY dtmDate ASC
+	) FIFO
 	LEFT JOIN tblICItemUOM StockUOM
-	ON StockUOM.intItemId = t.intItemId
+		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
 	ON ItemLocation.intItemLocationId = t.intItemLocationId

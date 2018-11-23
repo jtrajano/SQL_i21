@@ -153,6 +153,8 @@ USING (
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
 	AND ItemStockUOM.intItemUOMId = Source_Query.intItemUOMId
+	AND (ISNULL(Source_Query.intSubLocationId, 0) = 0 OR Source_Query.intSubLocationId = ItemStockUOM.intSubLocationId)
+	AND (ISNULL(Source_Query.intStorageLocationId, 0) = 0 OR Source_Query.intStorageLocationId = ItemStockUOM.intStorageLocationId)		
 
 -- If matched, update the In-Transit Outbound qty 
 WHEN MATCHED THEN 

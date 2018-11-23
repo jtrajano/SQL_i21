@@ -87,7 +87,7 @@ RETURN (
 						) 
 				,intErrorCode = 80023
 		FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation 
-					ON Item.intItemId = ItemLocation.intItemLocationId
+					ON Item.intItemId = ItemLocation.intItemId
 		WHERE	ISNULL(dbo.fnGetCostingMethod(ItemLocation.intItemId, ItemLocation.intItemLocationId), 0) = 0 
 				AND ItemLocation.intItemId = @intItemId 
 				AND ItemLocation.intItemLocationId = @intItemLocationId
