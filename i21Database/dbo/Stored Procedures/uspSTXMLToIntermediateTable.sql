@@ -165,11 +165,11 @@ BEGIN
 												)
 											))
 
-				IF(@strRegisterClassName = 'RADIANT')
+				IF(@strRegisterClassName = 'RADIANT' OR @strRegisterClassName = 'PASSPORT')
 					BEGIN
 						SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
 					END
-				ELSE IF(@strRegisterClassName <> 'RADIANT')
+				ELSE --IF(@strRegisterClassName <> 'RADIANT')
 					BEGIN
 						SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
 					END
@@ -325,7 +325,7 @@ BEGIN
 
 
 	-- =========================================================================================================== 
-	-- Validate Xml version
+	-- Start Validate Xml version
 	-- ===========================================================================================================
 	IF(@strRegisterClassName = 'PASSPORT' OR @strRegisterClassName = 'RADIANT')
 		BEGIN
@@ -380,7 +380,12 @@ BEGIN
 					RETURN
 				END
 		END
-    -- ===========================================================================================================
+    -- =========================================================================================================== 
+	-- End Validate Xml version
+	-- ===========================================================================================================
+
+
+
 
 
 	-- ===========================================================================================================

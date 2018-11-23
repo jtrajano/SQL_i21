@@ -14,12 +14,52 @@ BEGIN
 		-- Create Save Point.  
 		-- ------------------------------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportFGM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportFGM' + CAST(NEWID() AS NVARCHAR(100));
+		BEGIN TRANSACTION --@TransactionName 
+		--SAVE TRAN @TransactionName --> Save point		
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-- ==================================================================================================================- 
+
+
+
+		-- ==================================================================================================================  
+		-- Start Validate if FGM xml file matches the Mapping from i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Passport FGM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Passport FGM XML file did not match the layout mapping'
+
+					-- ROLLBACK
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if FGM xml file matches the Mapping from i21   
+		-- ==================================================================================================================  
+		
+		
+
 
 
 
@@ -68,6 +108,8 @@ BEGIN
 			) AS tbl
 		)
 		AND ISNULL(Chk.FuelGradeID, '') != ''
+
+		PRINT 'EXIT02'
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -139,8 +181,8 @@ BEGIN
 
 					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
 					UPDATE CPT
-					SET CPT.[dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))						
-						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))					
+					SET CPT.[dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
 						, CPT.[dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
 					FROM dbo.tblSTCheckoutPumpTotals CPT
 					INNER JOIN tblSTCheckoutHeader CH
@@ -189,20 +231,34 @@ BEGIN
 		SET @strStatusMsg = 'Success'
 
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		-- COMMIT
+		GOTO ExitWithCommit
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		IF @@TRANCOUNT > 0
-		BEGIN
-			ROLLBACK TRAN @TransactionName	
-		END
-		
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-		COMMIT TRAN @TransactionName
+		
+
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+	
+		
+ExitPost:

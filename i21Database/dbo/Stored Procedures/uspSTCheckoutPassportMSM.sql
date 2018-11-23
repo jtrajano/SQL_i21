@@ -19,20 +19,57 @@ BEGIN
 			  -- Create Save Point. 
 			  --------------------------------------------------------------------------------------------   
 			  -- Create a unique transaction name.
-			  DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutPassportMSM' + CAST(NEWID() AS NVARCHAR(100));
-			  DECLARE @intTransactionCount INT = @@TRANCOUNT;
+			  --DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutPassportMSM' + CAST(NEWID() AS NVARCHAR(100));
+			  --DECLARE @intTransactionCount INT = @@TRANCOUNT;
 
-			  IF(@intTransactionCount = 0)
-				  BEGIN
-					  BEGIN TRAN @SavedPointTransaction
-				  END
-			  ELSE
-				  BEGIN
-					  SAVE TRAN @SavedPointTransaction --> Save point
-				  END
+			  --IF(@intTransactionCount = 0)
+				 -- BEGIN
+					--  BEGIN TRAN @SavedPointTransaction
+				 -- END
+			  --ELSE
+				 -- BEGIN
+					--  SAVE TRAN @SavedPointTransaction --> Save point
+				 -- END
+			  BEGIN TRANSACTION
 			  -------------------------------------------------------------------------------------------- 
 			  -- END Create Save Point. 
 			  --------------------------------------------------------------------------------------------
+
+
+
+			-- ==================================================================================================================  
+			-- Start Validate if MSM xml file matches the Mapping on i21 
+			-- ------------------------------------------------------------------------------------------------------------------
+				IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+					BEGIN
+							-- Add to error logging
+							INSERT INTO tblSTCheckoutErrorLogs 
+							(
+								strErrorType
+								, strErrorMessage 
+								, strRegisterTag
+								, strRegisterTagValue
+								, intCheckoutId
+								, intConcurrencyId
+							)
+							VALUES
+							(
+								'XML LAYOUT MAPPING'
+								, 'Passport MSM XML file did not match the layout mapping'
+								, ''
+								, ''
+								, @intCheckoutId
+								, 1
+							)
+
+							SET @intCountRows = 0
+							SET @strStatusMsg = 'Passport MSM XML file did not match the layout mapping'
+
+							GOTO ExitWithCommit
+					END
+			-- ------------------------------------------------------------------------------------------------------------------
+			-- End Validate if MSM xml file matches the Mapping on i21   
+			-- ==================================================================================================================
 
 
 
@@ -318,26 +355,32 @@ BEGIN
               SET @intCountRows = 1
               SET @strStatusMsg = 'Success'
 
-			  --PRINT 'SUCCESS'
-
-              -- IF SUCCESS Commit Transaction
-			  IF(@intTransactionCount = 0)
-				BEGIN
-					COMMIT TRANSACTION @SavedPointTransaction
-				END
+			  -- COMMIT
+			  GOTO ExitWithCommit
        END TRY
 
        BEGIN CATCH
-              SET @intCountRows = 0
-              SET @strStatusMsg = ERROR_MESSAGE()
+		SET @intCountRows = 0
+		SET @strStatusMsg = ERROR_MESSAGE()
+		
 
-			  PRINT ERROR_MESSAGE()
-
-			  -- IF HAS Error Rollback Transaction
-			  IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0)) 
-				BEGIN
-					 ROLLBACK TRANSACTION @SavedPointTransaction;
-					 --THROW;
-				END
-       END CATCH
+		-- ROLLBACK
+		GOTO ExitWithRollback
+	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:
