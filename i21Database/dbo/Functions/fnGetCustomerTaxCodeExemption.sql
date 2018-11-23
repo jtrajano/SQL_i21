@@ -198,8 +198,11 @@ BEGIN
 
 		IF ISNULL(@FreightTermId,0) <> 0 AND @FOB = 'origin'
 			SET @State = ISNULL((SELECT TOP 1 strStateProvince FROM tblSMCompanyLocation WHERE	[intCompanyLocationId] = @CompanyLocationId), @TaxState)
+				
 	END
-	
+			
+	if isnull(@State, '') = ''
+		set @State = @TaxState
 	--Customer Tax Exemption
 	SET @ExemptionPercent = 0.00000
 	SELECT TOP 1
