@@ -25,7 +25,7 @@ SET @ZeroDecimal = 0.000000
 
 --	DELETE FROM @InvoiceSplitIds WHERE id = @InvoiceId1
 --END	 
-EXEC [dbo].[uspARPostItemResevation]
+-- EXEC [dbo].[uspARPostItemResevation] -- MDG this is moved prior to the validation of posting due to stock sensitivity
 
 --Process Finished Good Items
 --DECLARE @FinishedGoodItems TABLE(
