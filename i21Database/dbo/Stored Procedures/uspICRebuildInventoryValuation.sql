@@ -2641,9 +2641,9 @@ BEGIN
 						,[strTransactionId]			= i.strInvoiceNumber
 						,[intTransactionTypeId]		= @intTransactionTypeId
 						,[intLotId]					= t.intLotId
-						,[intSourceTransactionId]	= s.intInventoryShipmentId
-						,[strSourceTransactionId]		= s.strShipmentNumber 
-						,[intSourceTransactionDetailId] = si.intInventoryShipmentItemId
+						,[intSourceTransactionId]	= ISNULL(s.intInventoryShipmentId, l.intLoadId) 
+						,[strSourceTransactionId]		= ISNULL(s.strShipmentNumber, l.strLoadNumber)
+						,[intSourceTransactionDetailId] = ISNULL(si.intInventoryShipmentItemId, ld.intLoadDetailId) 
 						--,[intFobPointId]				= t.intFobPointId
 						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 				FROM	
@@ -2654,12 +2654,20 @@ BEGIN
 							AND t.intTransactionDetailId = id.intInvoiceDetailId 
 							AND t.strTransactionId = i.strInvoiceNumber 
 							AND t.ysnIsUnposted = 0 
-						INNER JOIN (
+						-- Invoice item came from Inventory Shipment. 
+						LEFT JOIN (
 							tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 								ON s.intInventoryShipmentId = si.intInventoryShipmentId
 						)
 							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
 							AND s.ysnPosted = 1
+						-- Invoice item came from Load Shipment (or Load Schedule) 
+						LEFT JOIN (
+							tblLGLoad l INNER JOIN tblLGLoadDetail ld
+								ON l.intLoadId = ld.intLoadId
+						)
+							ON ld.intLoadDetailId = id.intLoadDetailId
+							AND l.ysnPosted = 1
 
 				WHERE	i.strInvoiceNumber = @strTransactionId
 						AND t.intInTransitSourceLocationId IS NOT NULL 
