@@ -2629,7 +2629,7 @@ BEGIN
 						[intItemId]					= t.intItemId
 						,[intItemLocationId]		= t.intItemLocationId
 						,[intItemUOMId]				= t.intItemUOMId
-						,[dtmDate]					= i.dtmDate
+						,[dtmDate]					= t.dtmDate--i.dtmDate
 						,[dblQty]					= t.dblQty
 						,[dblUOMQty]				= t.dblUOMQty
 						,[dblCost]					= t.dblCost
