@@ -77,8 +77,7 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
         @dblNewBalance       NUMERIC(12,4),
         @strInOutFlag        NVARCHAR(4),
         @dblQuantity         NUMERIC(12,4),
-        @strAdjustmentNo     NVARCHAR(50),
-		@ysnPriceFixation	 BIT = 0;
+        @strAdjustmentNo     NVARCHAR(50);
 BEGIN TRY
 		IF @strDistributionOption = 'LOD' AND  @intLoadId IS NULL
 		BEGIN
