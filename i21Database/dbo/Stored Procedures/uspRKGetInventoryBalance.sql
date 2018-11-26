@@ -49,7 +49,7 @@ FROM (
 		,0.0 dblSalesInTransit
 		,0.0 tranDSInQty
 	FROM tblICInventoryTransaction it 
-	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23,33, 44,47)
+	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23, 33, 44, 45, 47)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId
