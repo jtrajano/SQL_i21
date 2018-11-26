@@ -76,9 +76,8 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
         @dblNewBalance       NUMERIC(12,4),
         @strInOutFlag        NVARCHAR(4),
         @dblQuantity         NUMERIC(12,4),
-        @strAdjustmentNo     NVARCHAR(50);
-		
-
+        @strAdjustmentNo     NVARCHAR(50),
+		@ysnPriceFixation	 BIT = 0;
 BEGIN TRY
 		IF @strDistributionOption = 'LOD' AND  @intLoadId IS NULL
 		BEGIN
@@ -547,7 +546,7 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
 	END
