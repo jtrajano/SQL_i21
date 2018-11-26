@@ -138,7 +138,7 @@ _Order AS
 (
 	SELECT 
 			a.*
-			,b.strTerm
+			,b.strTermCode
 			,c.strCurrency
 			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
 
