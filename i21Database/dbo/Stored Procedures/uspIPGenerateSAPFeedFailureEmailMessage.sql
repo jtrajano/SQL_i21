@@ -215,7 +215,7 @@ Begin
 
 	Select @strDetail=@strDetail + 
 	'<tr>
-		   <td>&nbsp;'  + 'Future' + '</td>'
+		   <td>&nbsp;'  + 'Option' + '</td>'
 		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strBook,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
@@ -229,6 +229,67 @@ Begin
 	Update tblRKStgOptionMatchPnS Set ysnMailSent=1
 	Where strStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmPostingDate)
 	AND ISNULL(ysnMailSent,0)=0
+End
+
+If @strMessageType='PO No Ack'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Feed Status</th>
+						<th>&nbsp;Contract No</th>
+						<th>&nbsp;Seq No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;PO No</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strFeedStatus,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strContractNumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intContractSeq),'') + '</td>'
+		+ '<td>&nbsp;' + CASE WHEN UPPER(strRowState)='ADDED' THEN 'Create' When UPPER(strRowState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strERPPONumber,'') + '</td>
+	</tr>'
+	FROM tblCTContractFeed
+	WHERE ISNULL(strFeedStatus, '') = 'Awt Ack'
+	--AND dtmFeedCreated > CONVERT(DATE, GETDATE() - 1)
+End
+
+If @strMessageType='GL No Ack'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Type</th>
+						<th>&nbsp;Match No</th>
+						<th>&nbsp;Book</th>
+						<th>&nbsp;Market Name</th>
+						<th>&nbsp;Reference No</th>
+						<th>&nbsp;Feed Status</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + 'Future' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strBook,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strReferenceNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strStatus,'') + '</td>
+	</tr>'
+	From tblRKStgMatchPnS 
+	WHERE ISNULL(strStatus, '') = 'Awt Ack'
+	--AND dtmFeedCreated > CONVERT(DATE, GETDATE() - 1)
+
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + 'Option' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strBook,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strReferenceNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strStatus,'') + '</td>
+	</tr>'
+	From tblRKStgOptionMatchPnS 
+	WHERE ISNULL(strStatus, '') = 'Awt Ack'
+	--AND dtmFeedCreated > CONVERT(DATE, GETDATE() - 1)
 End
 
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
