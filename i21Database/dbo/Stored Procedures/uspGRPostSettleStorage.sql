@@ -1360,7 +1360,7 @@ BEGIN TRY
 					INSERT INTO @detailCreated
 					SELECT intBillDetailId
 					FROM tblAPBillDetail
-					WHERE intBillId = @intCreatedBillId
+					WHERE intBillId = @intCreatedBillId AND CASE WHEN @ysnDPOwnedType = 1 THEN  CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
