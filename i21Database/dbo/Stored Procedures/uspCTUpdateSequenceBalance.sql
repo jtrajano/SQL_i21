@@ -107,7 +107,8 @@ BEGIN TRY
 			@dblOldValue			=	@dblOldBalance,
 			@dblTransactionQuantity =	@dblTransactionQuantity,
 			@dblNewValue			=	@dblNewBalance,	
-			@intUserId				=	@intUserId
+			@intUserId				=	@intUserId,
+			@dblBalance				=   @dblNewBalance
 	
 	EXEC	uspCTCreateCollateralAdjustment
 			@intContractDetailId	=	@intContractDetailId,

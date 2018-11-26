@@ -72,7 +72,8 @@ BEGIN TRY
 			@dblOldValue			=	@dblQuantity,
 			@dblTransactionQuantity =	@dblQuantityToUpdate,
 			@dblNewValue			=	@dblNewQuantity,	
-			@intUserId				=	@intUserId
+			@intUserId				=	@intUserId,
+			@dblBalance				=   @dblQuantityToUpdate
 
 	SET		@dblBalanceToUpdate		=	@dblQuantityToUpdate * -1
 

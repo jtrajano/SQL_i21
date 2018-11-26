@@ -142,7 +142,8 @@ BEGIN TRY
 				@dblTransactionQuantity =	@dblQuantityToUpdate,
 				@dblNewValue			=	@dblNewScheduleQty,	
 				@intUserId				=	@intUserId,
-				@strReason				=	@strReason
+				@strReason				=	@strReason,
+				@dblBalance				=   @dblBalance
 	END
 
 	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId

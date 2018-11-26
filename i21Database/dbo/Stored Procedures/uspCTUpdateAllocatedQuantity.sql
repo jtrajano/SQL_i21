@@ -15,6 +15,7 @@ BEGIN TRY
 			@dblNewAllocatedQty		NUMERIC(18,6),
 			@dblQuantityToIncrease	NUMERIC(18,6),
 			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate)
+		   ,@dblBalance				NUMERIC(18,6)
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -25,6 +26,7 @@ BEGIN TRY
 
 	SELECT	@dblQuantity			=	ISNULL(dblQuantity,0),
 			@dblAllocatedQty		=	ISNULL(dblAllocatedQty,0)
+		   ,@dblBalance				=   dblBalance
 	FROM	tblCTContractDetail
 	WHERE	intContractDetailId = @intContractDetailId
 	
@@ -55,7 +57,8 @@ BEGIN TRY
 				@dblOldValue			=	@dblAllocatedQty,
 				@dblTransactionQuantity =	@dblQuantityToUpdate,
 				@dblNewValue			=	@dblNewAllocatedQty,	
-				@intUserId				=	@intUserId
+				@intUserId				=	@intUserId,
+				@dblBalance				=   @dblBalance
 	END
 
 END TRY
