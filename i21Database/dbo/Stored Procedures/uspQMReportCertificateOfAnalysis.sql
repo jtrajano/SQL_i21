@@ -104,11 +104,11 @@ BEGIN TRY
 		,S.strComment
 		,S.strRefNo
 		,@strCheckPayeeName strCheckPayeeName
-		,L1.strLotNumber
-		,Convert(Decimal(24,2),SUM(LDL.dblLotQuantity)) dblLotQuantity
-		,UM.strUnitMeasure
+		,S.strLotNumber
+		,0.0 dblLotQuantity
+		,'' AS strUnitMeasure
 		--,IsNULL(Rtrim(Ltrim(L1.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(LDL.dblLotQuantity))) + ' ' + UM.strUnitMeasure + ')')),Rtrim(Ltrim(S.strLotNumber + ' ' + '(' + convert(NVARCHAR(50), Convert(Decimal(24,2),SUM(IsNULL(LD.dblQuantity,S.dblRepresentingQty)))) + ' ' + UM.strUnitMeasure + ')'))) AS [LotDetails]
-		,IsNULL(L1.strLotNumber,S.strLotNumber) AS [LotDetails]
+		,S.strLotNumber AS [LotDetails]
 		,@UserSign AS UserSignature
 		,(
 			CASE 
@@ -125,11 +125,7 @@ BEGIN TRY
 	INNER JOIN tblQMTest T ON T.intTestId = TR.intTestId
 	INNER JOIN tblQMProduct PRD ON PRD.intProductId = TR.intProductId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
-	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot L1 ON L1.intLotId = LDL.intLotId
-	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IsNULL(LDL.intItemUOMId,LD.intItemUOMId)
-	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IsNULL(IU.intUnitMeasureId,S.intRepresentingUOMId)
+	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId and LD.intItemId =S.intItemId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity E ON EL.intEntityId = E.intEntityId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = ISNULL(LD.intSCompanyLocationId, S.intLocationId)
@@ -155,9 +151,7 @@ BEGIN TRY
 		,S.strComment
 		,S.strRefNo
 		,EL.strCheckPayeeName
-		,L1.strLotNumber
 		,S.strLotNumber
-		,UM.strUnitMeasure
 		,CL.strLocationName
 		,PRD.strNote
 		,TR.intSequenceNo
