@@ -663,116 +663,116 @@ WHERE
     I.[intPeriodsToAccrue] <= 1
     AND I.[strTransactionType] <> 'Cash Refund'
 
-INSERT #ARInvoiceGLEntries
-    ([dtmDate]
-    ,[strBatchId]
-    ,[intAccountId]
-    ,[dblDebit]
-    ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
-    ,[strDescription]
-    ,[strCode]
-    ,[strReference]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[dtmDateEntered]
-    ,[dtmTransactionDate]
-    ,[strJournalLineDescription]
-    ,[intJournalLineNo]
-    ,[ysnIsUnposted]
-    ,[intUserId]
-    ,[intEntityId]
-    ,[strTransactionId]
-    ,[intTransactionId]
-    ,[strTransactionType]
-    ,[strTransactionForm]
-    ,[strModuleName]
-    ,[intConcurrencyId]
-    ,[dblDebitForeign]
-    ,[dblDebitReport]
-    ,[dblCreditForeign]
-    ,[dblCreditReport]
-    ,[dblReportingRate]
-    ,[dblForeignRate]
-    ,[strRateType]
-    ,[strDocument]
-    ,[strComments]
-    ,[strSourceDocumentId]
-    ,[intSourceLocationId]
-    ,[intSourceUOMId]
-    ,[dblSourceUnitDebit]
-    ,[dblSourceUnitCredit]
-    ,[intCommodityId]
-    ,[intSourceEntityId]
-    ,[ysnRebuild])
-SELECT
-     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
-    ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intItemAccountId]
-    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
-    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblDebitUnit]                 = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
-    ,[dblCreditUnit]                = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
-    ,[strDescription]               = I.[strDescription]
-    ,[strCode]                      = @CODE
-    ,[strReference]                 = I.[strCustomerNumber]
-    ,[intCurrencyId]                = I.[intCurrencyId]
-    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
-    ,[dtmDateEntered]               = I.[dtmDatePosted]
-    ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
-    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
-    ,[ysnIsUnposted]                = 0
-    ,[intUserId]                    = I.[intUserId]
-    ,[intEntityId]                  = I.[intEntityId]
-    ,[strTransactionId]             = I.[strInvoiceNumber]
-    ,[intTransactionId]             = I.[intInvoiceId]
-    ,[strTransactionType]           = I.[strTransactionType]
-    ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @MODULE_NAME
-    ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
-    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
-    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
-    ,[strDocument]                  = NULL
-    ,[strComments]                  = NULL
-    ,[strSourceDocumentId]          = NULL
-    ,[intSourceLocationId]          = NULL
-    ,[intSourceUOMId]               = NULL
-    ,[dblSourceUnitDebit]           = NULL
-    ,[dblSourceUnitCredit]          = NULL
-    ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
-    ,[ysnRebuild]                   = NULL
-FROM
-    #ARPostInvoiceDetail I
-WHERE
-    I.[intPeriodsToAccrue] <= 1
-    AND (
-        (	I.[intItemId] IS NULL 
-			AND
-			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
-		)
-        OR
-        (
-            I.[intItemId] IS NOT NULL
-            AND
-            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
-			AND 
-			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
-        )		
-        )
-    AND (
-        I.[dblTotal] <> @ZeroDecimal
-        OR
-	    I.[dblQtyShipped] <> @ZeroDecimal
-        )
-    AND I.[strTransactionType] <> 'Cash Refund'
+-- INSERT #ARInvoiceGLEntries
+--     ([dtmDate]
+--     ,[strBatchId]
+--     ,[intAccountId]
+--     ,[dblDebit]
+--     ,[dblCredit]
+--     ,[dblDebitUnit]
+--     ,[dblCreditUnit]
+--     ,[strDescription]
+--     ,[strCode]
+--     ,[strReference]
+--     ,[intCurrencyId]
+--     ,[dblExchangeRate]
+--     ,[dtmDateEntered]
+--     ,[dtmTransactionDate]
+--     ,[strJournalLineDescription]
+--     ,[intJournalLineNo]
+--     ,[ysnIsUnposted]
+--     ,[intUserId]
+--     ,[intEntityId]
+--     ,[strTransactionId]
+--     ,[intTransactionId]
+--     ,[strTransactionType]
+--     ,[strTransactionForm]
+--     ,[strModuleName]
+--     ,[intConcurrencyId]
+--     ,[dblDebitForeign]
+--     ,[dblDebitReport]
+--     ,[dblCreditForeign]
+--     ,[dblCreditReport]
+--     ,[dblReportingRate]
+--     ,[dblForeignRate]
+--     ,[strRateType]
+--     ,[strDocument]
+--     ,[strComments]
+--     ,[strSourceDocumentId]
+--     ,[intSourceLocationId]
+--     ,[intSourceUOMId]
+--     ,[dblSourceUnitDebit]
+--     ,[dblSourceUnitCredit]
+--     ,[intCommodityId]
+--     ,[intSourceEntityId]
+--     ,[ysnRebuild])
+-- SELECT
+--      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+--     ,[strBatchId]                   = I.[strBatchId]
+--     ,[intAccountId]                 = I.[intItemAccountId]
+--     ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+--     ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+--     ,[dblDebitUnit]                 = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
+--     ,[dblCreditUnit]                = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+--     ,[strDescription]               = I.[strDescription]
+--     ,[strCode]                      = @CODE
+--     ,[strReference]                 = I.[strCustomerNumber]
+--     ,[intCurrencyId]                = I.[intCurrencyId]
+--     ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+--     ,[dtmDateEntered]               = I.[dtmDatePosted]
+--     ,[dtmTransactionDate]           = I.[dtmDate]
+--     ,[strJournalLineDescription]    = I.[strItemDescription]
+--     ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+--     ,[ysnIsUnposted]                = 0
+--     ,[intUserId]                    = I.[intUserId]
+--     ,[intEntityId]                  = I.[intEntityId]
+--     ,[strTransactionId]             = I.[strInvoiceNumber]
+--     ,[intTransactionId]             = I.[intInvoiceId]
+--     ,[strTransactionType]           = I.[strTransactionType]
+--     ,[strTransactionForm]           = @SCREEN_NAME
+--     ,[strModuleName]                = @MODULE_NAME
+--     ,[intConcurrencyId]             = 1
+--     ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+--     ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+--     ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+--     ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+--     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+--     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+--     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
+--     ,[strDocument]                  = NULL
+--     ,[strComments]                  = NULL
+--     ,[strSourceDocumentId]          = NULL
+--     ,[intSourceLocationId]          = NULL
+--     ,[intSourceUOMId]               = NULL
+--     ,[dblSourceUnitDebit]           = NULL
+--     ,[dblSourceUnitCredit]          = NULL
+--     ,[intCommodityId]               = NULL
+--     ,[intSourceEntityId]            = NULL
+--     ,[ysnRebuild]                   = NULL
+-- FROM
+--     #ARPostInvoiceDetail I
+-- WHERE
+--     I.[intPeriodsToAccrue] <= 1
+--     AND (
+--         (	I.[intItemId] IS NULL 
+-- 			AND
+-- 			(I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
+-- 		)
+--         OR
+--         (
+--             I.[intItemId] IS NOT NULL
+--             AND
+--             (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
+-- 			AND 
+-- 			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
+--         )		
+--         )
+--     AND (
+--         I.[dblTotal] <> @ZeroDecimal
+--         OR
+-- 	    I.[dblQtyShipped] <> @ZeroDecimal
+--         )
+--     AND I.[strTransactionType] <> 'Cash Refund'
 
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
@@ -1356,7 +1356,7 @@ FROM
 WHERE
     I.[intPeriodsToAccrue] <= 1
     AND I.[dblQtyShipped] <> @ZeroDecimal
-    AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
+    -- AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
     AND I.[strTransactionType] = 'Debit Memo'
     AND I.[strItemType] <> 'Comment'
 
