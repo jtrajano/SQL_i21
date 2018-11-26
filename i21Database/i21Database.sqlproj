@@ -7212,6 +7212,7 @@
     <Build Include="dbo\Views\vyuGRGradesReport.sql" />
     <Build Include="dbo\Views\vyuGRStorageByDiscountReport.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceDiscountCalculationTempTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
