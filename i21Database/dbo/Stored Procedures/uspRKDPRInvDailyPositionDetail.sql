@@ -495,7 +495,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
 				join tblICItem i on i.intItemId=CD.intItemId
 				join tblSMCompanyLocation l on l.intCompanyLocationId=CD.intCompanyLocationId
-				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId 
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId 
 				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
 				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
 								FROM	   tblCTPriceFixationDetail
