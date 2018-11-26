@@ -121,6 +121,7 @@
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
+	CONSTRAINT [AK_tblSTStore_strHandheldScannerServerFolderPath] UNIQUE ([strHandheldScannerServerFolderPath] ASC),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intDefaultVendorId] FOREIGN KEY ([intDefaultVendorId]) REFERENCES tblEMEntity([intEntityId]), 
 	CONSTRAINT [FK_tblSTStore_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSTStore_tblEMEntity_intBegVendorNumberId] FOREIGN KEY ([intBegVendorNumberId]) REFERENCES tblEMEntity([intEntityId]), 
