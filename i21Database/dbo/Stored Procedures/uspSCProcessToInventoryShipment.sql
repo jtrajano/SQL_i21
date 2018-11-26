@@ -55,7 +55,8 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@strWhereFinalizedWeight NVARCHAR(20)
 		,@strWhereFinalizedGrade NVARCHAR(20)
 		,@ysnDPStorage AS BIT
-		,@intContractDetailId INT;
+		,@intContractDetailId INT
+		,@ysnPriceFixation BIT = 0;
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -533,6 +534,7 @@ BEGIN TRY
     BEGIN
         IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
         BEGIN
+			SET @ysnPriceFixation = 1;
             EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
         END
         SELECT @intContractDetailId = MIN(si.intLineNo)
