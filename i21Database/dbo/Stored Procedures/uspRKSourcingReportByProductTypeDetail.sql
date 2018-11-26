@@ -237,18 +237,21 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							t.intCompanyLocationId, ca.dblRatio dblStandardRatio, 
 							ic.intItemId,						
 							
-						(SELECT dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
-											isnull(sum(dbo.[fnCTConvertQuantityToTargetItemUOM](b.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,isnull(dblCost,0))),0),null,max(b.intCurrencyId))
-							 from tblCTAOP a
-							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId 
-							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 							 
-							 where a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
+							(SELECT sum(dblQty) FROM
+							(SELECT 
+								dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,
+								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null)) dblQty
+
+							FROM tblCTAOP a
+							 JOIN tblCTAOPDetail b on a.intAOPId=b.intAOPId 
+							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 
+							 WHERE a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
 							and b.intItemId=cd.intItemId
 							and a.intCommodityId=ic.intCommodityId
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							)  dblStandardPrice,
+							)t)  dblStandardPrice,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
@@ -296,18 +299,21 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null,null))	dblPrice,	
 							t.intCompanyLocationId, 
 							ic.intItemId,							
-							(SELECT dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
-											isnull(sum(dbo.[fnCTConvertQuantityToTargetItemUOM](b.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,isnull(dblCost,0))),0),null,max(b.intCurrencyId))
-							 from tblCTAOP a
-							 join tblCTAOPDetail b on a.intAOPId=b.intAOPId 
-							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 							 
-							 where a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
+							(SELECT sum(dblQty) FROM
+							(SELECT 
+								dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,
+								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null)) dblQty
+
+							FROM tblCTAOP a
+							 JOIN tblCTAOPDetail b on a.intAOPId=b.intAOPId 
+							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 
+							 WHERE a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
 							and b.intItemId=cd.intItemId
 							and a.intCommodityId=ic.intCommodityId
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							)  dblStandardPrice,
+							)t)  dblStandardPrice,
 							strLocationName	,strPricingType,strItemNo,strOrigin,strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
  FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
