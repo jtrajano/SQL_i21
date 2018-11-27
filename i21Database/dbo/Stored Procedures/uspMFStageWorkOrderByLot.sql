@@ -704,6 +704,7 @@ BEGIN TRY
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND RI.intItemId = @intInputItemId
+		AND RI.intRecipeItemTypeId=1
 
 	IF @intRecipeItemUOMId IS NULL
 	BEGIN
