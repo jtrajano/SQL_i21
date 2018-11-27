@@ -121,7 +121,6 @@
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
-	CONSTRAINT [AK_tblSTStore_strHandheldScannerServerFolderPath] UNIQUE ([strHandheldScannerServerFolderPath] ASC),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intDefaultVendorId] FOREIGN KEY ([intDefaultVendorId]) REFERENCES tblEMEntity([intEntityId]), 
 	CONSTRAINT [FK_tblSTStore_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSTStore_tblEMEntity_intBegVendorNumberId] FOREIGN KEY ([intBegVendorNumberId]) REFERENCES tblEMEntity([intEntityId]), 
@@ -137,6 +136,15 @@
 	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
-	--CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerPaymentItemId] FOREIGN KEY ([intCustomerPaymentItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId])
   );
+  GO
+
+  CREATE UNIQUE NONCLUSTERED INDEX [UK_tblSTStore_strHandheldScannerServerFolderPath]
+  ON dbo.tblSTStore
+  (
+	strHandheldScannerServerFolderPath
+  )
+  WHERE strHandheldScannerServerFolderPath IS NOT NULL
+  AND strHandheldScannerServerFolderPath <> ''
+ 
