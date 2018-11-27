@@ -1833,6 +1833,7 @@ BEGIN
 					AND intTransactionTypeId = 4 --Settlement & Reverse Settlement
 					AND CS.intCommodityId  = @intCommodityId
 					AND CS.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId else @intLocationId end
+					AND ISNULL(SH.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(SH.intEntityId, 0))
 				)t
 					WHERE intCompanyLocationId  IN (
 							SELECT intCompanyLocationId FROM tblSMCompanyLocation
