@@ -163,11 +163,18 @@ INSERT INTO @FinalTable(intRow
 			, strScheduleId
 			, intTicketId
 			, strTicketType
-			, strTicketNumber
-			, dtmTicketDateTime
+			, strTicketNumber 
 			, dtmDeliveryDate
+			, dtmTicketDateTime
 			, intItemId
 			, strItemNo
+			, strTruckName
+			, strDriverName
+			, intInventoryReceiptId
+			, strReceiptNumber 
+			, strShipmentNumber
+			, intInventoryShipmentId
+			, strTransactionType
 			, intCategoryId
 			, strCategory
 			, intFutureMarketId
@@ -176,14 +183,7 @@ INSERT INTO @FinalTable(intRow
 			, strFutureMonth
 			, strBrokerTradeNo
 			, strNotes
-			, ysnPreCrush
-			, strTruckName
-			, strDriverName
-			, intInventoryReceiptId
-			, strReceiptNumber
-			, intInventoryShipmentId
-			, strShipmentNumber
-			, strTransactionType)
+			, ysnPreCrush)
 EXEC uspRKDPRInvDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate
 
 SELECT intSeqId
