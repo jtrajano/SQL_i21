@@ -322,7 +322,7 @@ BEGIN
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
-				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5)
+				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
@@ -388,7 +388,7 @@ BEGIN
 				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
-				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5)
+				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
