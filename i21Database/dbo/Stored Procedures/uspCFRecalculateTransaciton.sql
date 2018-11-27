@@ -1109,6 +1109,10 @@ BEGIN
 					,@TaxValue8						=@TaxValue8	
 					,@TaxValue9						=@TaxValue9	
 					,@TaxValue10					=@TaxValue10
+					,@intSiteId						=@intSiteId
+					,@intCardId						=@intCardId
+					,@intVehicleId					=@intVehicleId
+					,@intFreightTermId				=@companyConfigFreightTermId
 
 				IF(ISNULL(@DevMode,0) = 1)
 				BEGIN
