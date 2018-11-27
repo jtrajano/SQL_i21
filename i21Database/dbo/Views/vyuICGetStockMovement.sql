@@ -82,7 +82,7 @@ FROM 	tblICItem i
 		LEFT JOIN (SELECT	intStorageLocationId
 							,strName
 							,strStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN LEFT(strName, PATINDEX('%[0-9]%', strName) - 1) ELSE strName END
-							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END
+							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CASE WHEN ISNUMERIC(SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) = 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END ELSE NULL END
 				FROM tblICStorageLocation
 			) strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
