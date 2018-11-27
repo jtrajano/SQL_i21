@@ -381,20 +381,24 @@ SELECT
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
 	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									C.aphgl_gl_un
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									C.aphgl_gl_un
 									*
 									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									C.aphgl_gl_un
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE 
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									C.aphgl_gl_un
 									*
 									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
