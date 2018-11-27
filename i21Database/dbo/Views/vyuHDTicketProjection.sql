@@ -36,6 +36,7 @@
 		,strFeedbackWithRepresentative = (case a.intFeedbackWithRepresentativeId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end)
 		,strUpgradeType = z.strType
 		,strUpgradeTargetVersionNo = a1.strVersionNo
+		,strScreenConnectLink = a2.strScreenConnectLink
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -64,3 +65,4 @@
 		left join tblHDTicketStatus y on y.intTicketStatusId = x.intToStatusId
 		left join tblHDUpgradeType z on z.intUpgradeTypeId = a.intUpgradeTypeId
 		left join tblHDVersion a1 on a1.intVersionId = a.intUpgradeTargetVersionId
+		left join tblARCustomer a2 on a2.intEntityId = a.intCustomerId

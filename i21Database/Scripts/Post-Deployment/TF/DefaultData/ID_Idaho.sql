@@ -171,7 +171,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '10U', strScheduleName = 'Gallons Delivered to Indiana Tribe, Fee Not Collected', strType = 'Propane', strNote = '', strTransactionType = 'Invoice', intSort = 870, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 121894, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '10U', strScheduleName = 'Gallons Delivered to Indiana Tribe, Fee Not Collected', strType = 'CNG', strNote = '', strTransactionType = 'Invoice', intSort = 880, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 121895, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '', strScheduleName = 'Main Form', strType = '', strNote = 'Form 1450 Distributor Report Main Form', strTransactionType = '', intSort = 900, strStoredProcedure = '', intMasterId = 121896, intComponentTypeId = 2
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'ID Excel Export', strFormName = 'ID Excel Export', strScheduleCode = 'Receipt', strScheduleName = 'ID Excel Export - Receipts', strType = '', strNote = '', strTransactionType = '', intSort = 950, strStoredProcedure = '', intMasterId = 121897, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'ID Excel Export Receipt', strFormName = 'ID Excel Export', strScheduleCode = 'Receipt', strScheduleName = 'ID Excel Export - Receipts', strType = '', strNote = '', strTransactionType = '', intSort = 950, strStoredProcedure = '', intMasterId = 121897, intComponentTypeId = 4
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '1', strScheduleName = 'Gallons Received, Tax Paid', strType = 'LNG', strNote = '', strTransactionType = 'Inventory', intSort = 85, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 121898, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '2', strScheduleName = 'Gallons Received from Licensed Distributor, Tax Unpaid', strType = 'LNG', strNote = '', strTransactionType = 'Inventory', intSort = 165, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 121899, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '3MT', strScheduleName = 'Gallons Imported from Montana Direct to Customer', strType = 'LNG', strNote = '', strTransactionType = 'Inventory', intSort = 245, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 121900, intComponentTypeId = 1
@@ -183,7 +183,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '9', strScheduleName = 'Gallons Delivered to State and Local Government, Tax Exempt', strType = 'LNG', strNote = '', strTransactionType = 'Invoice', intSort = 725, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 121906, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '10T', strScheduleName = 'Indian Tribe', strType = 'LNG', strNote = '', strTransactionType = 'Invoice', intSort = 805, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 121907, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '1450', strFormName = 'Distributor Report', strScheduleCode = '10U', strScheduleName = 'Gallons Delivered to Indiana Tribe, Fee Not Collected', strType = 'LNG', strNote = '', strTransactionType = 'Invoice', intSort = 885, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 121908, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'ID Excel Export', strFormName = 'ID Excel Export', strScheduleCode = 'Disbursement', strScheduleName = 'ID Excel Export - Disbursement', strType = '', strNote = '', strTransactionType = '', intSort = 950, strStoredProcedure = '', intMasterId = 121909, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'ID Excel Export Disbursement', strFormName = 'ID Excel Export', strScheduleCode = 'Disbursement', strScheduleName = 'ID Excel Export - Disbursement', strType = '', strNote = '', strTransactionType = '', intSort = 950, strStoredProcedure = '', intMasterId = 121909, intComponentTypeId = 4
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -2018,11 +2018,11 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '1450', strScheduleCode = '9', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 122811
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '1450', strScheduleCode = '9', strType = 'Other Distillates', ysnStatus = 1, intFrequency = 1, intMasterId = 122780
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '1450', strScheduleCode = '9', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 122781
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'ID Excel Export', strScheduleCode = 'Receipt', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 122800
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'ID Excel Export', strScheduleCode = 'Disbursement', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 122801
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'ID Excel Export Receipt', strScheduleCode = 'Receipt', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 122800
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'ID Excel Export Disbursement', strScheduleCode = 'Disbursement', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 122812
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
 END
 
-GO
+GO 

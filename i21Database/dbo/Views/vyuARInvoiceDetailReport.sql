@@ -14,8 +14,10 @@ SELECT I.intInvoiceId
 	 , CT.intContractSeq
 	 , strCustomerName		= C.strName
 	 , strCustomerNumber	= C.strCustomerNumber	
-	 , strItemNo = ITEM.strItemNo 
+	 , strItemNo 			= ITEM.strItemNo 
+	 , strUnitCostCurrency	= ID.strUnitCostCurrency
 	 , strItemDescription	= ITEM.strDescription
+	 , strComments			= I.strComments
 	 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
 	 , dblItemWeight		= ISNULL(ID.dblItemWeight, 0)
 	 , dblUnitCost			= ISNULL(ID.dblPrice, 0)
@@ -25,31 +27,38 @@ SELECT I.intInvoiceId
 	 , dblDiscount			= ISNULL(ID.dblDiscount, 0)
 	 , dblTotal				= ISNULL(ID.dblTotal, 0)
 	 , ysnPosted			= I.ysnPosted
-FROM 
-	dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN (SELECT intInvoiceId
-			     , intInvoiceDetailId
-				 , intContractHeaderId
-				 , intContractDetailId
-				 , intItemId
-				 , dblQtyShipped
-				 , dblItemWeight
-				 , dblPrice
-				 , dblTotalTax
-				 , dblDiscount
-				 , dblTotal
-			FROM 
-				dbo.tblARInvoiceDetail WITH (NOLOCK)
-			) ID ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN (SELECT EME.intEntityId
-				 , EME.strName
-				 , ARC.strCustomerNumber
-			FROM dbo.tblEMEntity EME WITH (NOLOCK)  
-			LEFT JOIN (SELECT intEntityId
-							, strCustomerNumber
-						 FROM 
-							tblARCustomer WITH (NOLOCK)) ARC ON EME.intEntityId = ARC.intEntityId
-			) C ON I.intEntityCustomerId = C.intEntityId
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN (
+	SELECT intInvoiceId
+		 , intInvoiceDetailId
+		 , intContractHeaderId
+		 , intContractDetailId
+		 , intItemId
+		 , dblQtyShipped
+		 , dblItemWeight
+		 , dblPrice
+		 , dblTotalTax
+		 , dblDiscount
+		 , dblTotal
+		 , strUnitCostCurrency = SC.strCurrency
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+	LEFT JOIN (
+		SELECT intCurrencyID
+		     , strCurrency
+		FROM dbo.tblSMCurrency
+	) SC ON ID.intSubCurrencyId = SC.intCurrencyID
+) ID ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN (
+	SELECT EME.intEntityId
+		 , EME.strName
+		 , ARC.strCustomerNumber
+	FROM dbo.tblEMEntity EME WITH (NOLOCK)  
+	LEFT JOIN (
+		SELECT intEntityId
+			 , strCustomerNumber
+		FROM tblARCustomer WITH (NOLOCK)
+	) ARC ON EME.intEntityId = ARC.intEntityId
+) C ON I.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intItemId
 				, strItemNo
 				, strDescription

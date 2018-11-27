@@ -20,6 +20,7 @@
 			,strInvoiceNo = d.strInvoiceNumber
 			,dtmDateExported = b.dtmBilled
 			,b.intTicketHoursWorkedId
+			,strServiceType = c.strServiceType
         from
 			tblHDTicket a
 			inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId

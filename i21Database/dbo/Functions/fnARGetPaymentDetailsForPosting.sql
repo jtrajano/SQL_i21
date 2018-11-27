@@ -6,7 +6,7 @@
     ,@BankAccountId     INT             = NULL
     ,@Post              BIT             = NULL
     ,@Recap             BIT             = 0
-    ,@UserId            BIT             = NULL
+    ,@UserId            INT             = NULL
     ,@IntegrationLogId  INT             = NULL
 )
 RETURNS @returntable TABLE

@@ -14,6 +14,7 @@
 		 ,c.strUnitMeasure
 		 ,e.intCompanyLocationId
 		 ,e.strLocationName
+		 ,strServiceType = a.strServiceType
 	from
 		tblICItem a
 		inner join tblICItemUOM b on b.intItemId = a.intItemId
