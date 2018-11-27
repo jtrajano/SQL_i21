@@ -21,7 +21,10 @@ DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @tranRecordId INT;
 DECLARE @tranType INT = @type;
 DECLARE @isVendorContact INT = 0;
+DECLARE @vendorId INT;
+DECLARE @locationId INT;
 DECLARE @resetData BIT = @reset;
+DECLARE @requireApproval BIT = 0;
 
 --DUPLICATING tblAPBill
 IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBill
@@ -283,6 +286,31 @@ INNER JOIN @billDetailTaxes B ON A.intBillDetailId = B.originalBillDetailId
 
 INSERT INTO tblAPBillDetailTax
 SELECT * FROM #tmpDuplicateBillDetailTaxes
+
+SELECT
+	@vendorId = intEntityVendorId
+	,@locationId = intShipToId
+FROM tblAPBill A
+WHERE A.intBillId = @billCreatedId
+
+EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+	@type = N'AccountsPayable.view.Voucher',
+	@transactionEntityId = @vendorId,
+	@currentUserEntityId = @userId,
+	@locationId = @locationId,
+	@amount = 0,
+	@requireApproval = @requireApproval OUTPUT
+
+IF @requireApproval = 1
+BEGIN
+	EXEC uspSMSubmitTransaction
+		@type = 'AccountsPayable.view.Voucher',
+		@recordId = @billCreatedId,
+		@transactionNo = @generatedBillRecordId,
+		@transactionEntityId = @vendorId,
+		@currentUserEntityId = @userId,
+		@amount = 0
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 
