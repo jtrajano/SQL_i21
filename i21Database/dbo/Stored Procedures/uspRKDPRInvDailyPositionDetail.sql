@@ -1190,7 +1190,6 @@ BEGIN
 				, strCommodityCode
 				, strType
 				, dblTotal
-				, strCustomerName
 				, dtmDeliveryDate
 				, strLocationName
 				, intItemId
@@ -1213,10 +1212,8 @@ BEGIN
 				SELECT intSeqId = 7
 					, strSeqHeader = 'Total Non-Receipted'
 					, strCommodityCode = @strCommodityCode
-					--, strStorageType = 'Total Non-Receipted'
-					, r.strStorageType
+					, strStorageType = 'Total Non-Receipted'
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblBalance, 0))
-					, r.strCustomerName
 					, dtmDeliveryDate
 					, strLocationName
 					, r.intItemId
