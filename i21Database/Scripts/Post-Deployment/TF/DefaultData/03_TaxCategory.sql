@@ -137,9 +137,8 @@ INSERT INTO @TaxCategoryKY(
 )
 SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Gasoline', intMasterId = 17108
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Diesel Clear', intMasterId = 17109
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Gasoline', intMasterId = 17167
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Special Fuels', intMasterId = 17168
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax LPG', intMasterId = 17169
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax Special Fuels', intMasterId = 17110
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Excise Tax LPG', intMasterId = 17111
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'KY', @TaxCategories = @TaxCategoryKY
 
