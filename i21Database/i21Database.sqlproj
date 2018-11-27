@@ -7183,6 +7183,7 @@
     <Build Include="dbo\Tables\tblSMExportLog.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
