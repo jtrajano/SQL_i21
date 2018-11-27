@@ -7172,6 +7172,7 @@
     <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
