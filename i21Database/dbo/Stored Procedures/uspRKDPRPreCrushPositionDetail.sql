@@ -1341,7 +1341,7 @@ BEGIN
 	END
 
 	INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType)
-	SELECT 	strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,11 intOrderId,'Overall Position' strType,strInventoryType from @List where intOrderId in(10, 9)
+	SELECT 	strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,11 intOrderId,'Price Risk' strType,strInventoryType from @List where intOrderId in(10, 9, 6)
 END
 
 ----------------
