@@ -75,10 +75,12 @@ GO
 GO
 	PRINT('Started updating old account id in tblGLAccount')
 GO
-	DECLARE @intDefaultAccountSystemId INT
-	SELECT TOP 1 @intDefaultAccountSystemId =intDefaultVisibleOldAccountSystemId FROM tblGLCompanyPreferenceOption 
-	IF @intDefaultAccountSystemId IS NOT NULL 
-		EXEC dbo.uspGLUpdateOldAccountId @intDefaultAccountSystemId
+	
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND OBJECT_ID = OBJECT_ID('dbo.uspGLUpdateOldAccountId'))
+	EXEC ('DECLARE @intDefaultAccountSystemId INT
+			SELECT TOP 1 @intDefaultAccountSystemId =intDefaultVisibleOldAccountSystemId FROM tblGLCompanyPreferenceOption 
+			IF @intDefaultAccountSystemId IS NOT NULL 
+			EXEC dbo.uspGLUpdateOldAccountId @intDefaultAccountSystemId')
 GO
 	PRINT('Finished updating old account id in tblGLAccount')
 GO
