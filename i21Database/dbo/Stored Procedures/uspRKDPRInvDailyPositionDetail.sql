@@ -2527,7 +2527,10 @@ BEGIN
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-		FROM @FinalTable WHERE strSeqHeader <> 'Company Titled Stock'-- and strType not like '%'+@strPurchaseSales+'%'
+		FROM @FinalTable 
+		WHERE strSeqHeader <> 'Company Titled Stock'
+			AND strType <> 'Receipt' 
+			-- and strType not like '%'+@strPurchaseSales+'%'
 		ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC
 	END
 END
