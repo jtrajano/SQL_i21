@@ -342,7 +342,9 @@ SELECT
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
 									C.apegl_gl_un
 									*
-									(CASE WHEN C.apegl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND C.apegl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative, this is offset voucher
+										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
@@ -353,7 +355,9 @@ SELECT
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
 									C.apegl_gl_un
 									*
-									(CASE WHEN C.apegl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND C.apegl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative 
+										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 	[dblTotal]				=	CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
