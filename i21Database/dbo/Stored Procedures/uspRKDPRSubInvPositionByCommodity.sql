@@ -659,6 +659,9 @@ BEGIN
 --IF ISNULL(@intVendorId,0) = 0
 --BEGIN
 
+	IF ISNULL(@intVendorId,0) = 0
+	BEGIN
+
 	INSERT INTO @Final(
 		intSeqId
 		,strSeqHeader
@@ -699,7 +702,8 @@ BEGIN
 			and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 	)t
 	--group by intSeqId,strSeqHeader,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
-	
+	END
+
 	INSERT INTO @Final(
 		intSeqId
 		,strSeqHeader
