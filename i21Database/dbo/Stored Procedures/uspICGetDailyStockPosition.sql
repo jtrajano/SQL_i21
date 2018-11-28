@@ -71,7 +71,44 @@ CREATE TABLE #tmpDailyStockPosition
 	intInTransitSourceLocationId	INT,
 	dblQty							NUMERIC(38,20)
 )	
-	
+	-----===== SOURCE -1 - Opening Qty
+	INSERT INTO #tmpDailyStockPosition
+	SELECT	-1,
+			t.intItemId,
+			intLocationId,
+			intTransactionTypeId,
+			intLotId,
+			NULL,
+			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, intItemUOMId, dblQty))
+	FROM tblICInventoryTransactionStorage t 
+	INNER JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemLocationId = t.intItemLocationId
+	WHERE ysnIsUnposted <> 1
+		AND dtmDate < @dtmDate
+	GROUP BY t.intItemId,
+			ItemLocation.intLocationId,
+			intTransactionTypeId,
+			intLotId
+
+	-----===== SOURCE 0 - Storage Qty
+	INSERT INTO #tmpDailyStockPosition
+	SELECT
+		0,
+		t.intItemId,
+		intLocationId,
+		intTransactionTypeId,
+		intLotId,
+		NULL,
+		dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, intItemUOMId, dblQty))
+	FROM tblICInventoryTransactionStorage t
+		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	WHERE ysnIsUnposted <> 1
+		AND dtmDate = @dtmDate
+	GROUP BY t.intItemId,
+		ItemLocation.intLocationId,
+		intTransactionTypeId,
+		intLotId
+
 	-----===== SOURCE 1 - Opening Qty
 	INSERT INTO #tmpDailyStockPosition
 	SELECT	1,
@@ -326,7 +363,7 @@ CREATE TABLE #tmpDailyStockPosition
 			strDescription			= Item.strDescription,
 			intItemUOMId			= StockUOM.intItemUOMId,
 			strItemUOM				= sUOM.strUnitMeasure,
-			dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
+			dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0) + ISNULL(tmpDSP.dblOpeningStorageQty, 0),
 			dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
 			dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
 			dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
@@ -334,6 +371,7 @@ CREATE TABLE #tmpDailyStockPosition
 			dblTransfersShipped		= ISNULL(tmpDSP.dblTransfersShipped, 0),
 			dblInTransitInbound		= ISNULL(tmpDSP.dblInTransitInbound, 0),
 			dblInTransitOutbound	= ISNULL(tmpDSP.dblInTransitOutbound, 0),
+			dblStorageQty			= ISNULL(tmpDSP.dblStorageQty, 0),
 			dblConsumed				= ISNULL(tmpDSP.dblConsumedQty, 0),
 			dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
 			dblClosingQty			= 
@@ -347,6 +385,7 @@ CREATE TABLE #tmpDailyStockPosition
 										- tmpDSP.dblInTransitOutbound 
 										- tmpDSP.dblConsumedQty 
 										+ tmpDSP.dblProduced
+										+ tmpDSP.dblStorageQty
 	FROM tblICItem Item
 	INNER JOIN (
 		tblICItemUOM StockUOM INNER JOIN tblICUnitMeasure sUOM
@@ -363,6 +402,8 @@ CREATE TABLE #tmpDailyStockPosition
 					dblTransfersShipped		= SUM(CASE WHEN intSourceType = 6 THEN dblQty ELSE 0 END),
 					dblInTransitInbound		= SUM(CASE WHEN intSourceType = 7 THEN dblQty ELSE 0 END),
 					dblInTransitOutbound	= SUM(CASE WHEN intSourceType = 8 THEN dblQty ELSE 0 END),
+					dblStorageQty			= SUM(CASE WHEN intSourceType = 0 THEN dblQty ELSE 0 END),
+					dblOpeningStorageQty	= SUM(CASE WHEN intSourceType = -1 THEN dblQty ELSE 0 END),
 					dblConsumedQty			= SUM(CASE WHEN intSourceType = 9 THEN dblQty ELSE 0 END),
 					dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END)
 		FROM #tmpDailyStockPosition 
@@ -375,3 +416,4 @@ CREATE TABLE #tmpDailyStockPosition
 		ON Category.intCategoryId = Item.intCategoryId
 	INNER JOIN tblSMCompanyLocation Loc 
 		ON Loc.intCompanyLocationId = tmpDSP.intLocationId
+	WHERE Item.intItemId = 689
