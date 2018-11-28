@@ -854,10 +854,10 @@ BEGIN
 		 FROM @Final where intSeqId in (9,8) and strType in('Collateral Receipts - Purchase','Collateral Receipts - Sales') and intCommodityId =@intCommodityId )t
 		 GROUP BY intSeqId,strSeqHeader,strCommodityCode,strType,intCommodityId,intFromCommodityUnitMeasureId,strLocationName) t where dblTotal<>0
 		 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	select 15 intSeqId,'Company Titled Stock'strSeqHeader,strType,dblTotal,strLocationName, intCommodityId,
-						intFromCommodityUnitMeasureId,intCompanyLocationId
-	FROM @Final WHERE intSeqId = 14 
+	--INSERT INTO @Final (intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	--select 15 intSeqId,'Company Titled Stock'strSeqHeader,strType,dblTotal,strLocationName, intCommodityId,
+	--					intFromCommodityUnitMeasureId,intCompanyLocationId
+	--FROM @Final WHERE intSeqId = 14 
 
 	If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
 	BEGIN
