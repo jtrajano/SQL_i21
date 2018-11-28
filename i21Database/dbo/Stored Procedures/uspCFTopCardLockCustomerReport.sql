@@ -160,56 +160,94 @@ BEGIN
 			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 		END
 
+		DECLARE @tblYTD TABLE
+		(
+			 intEntityCustomerId		INT
+			,dtmDate					DATETIME
+			,strCustomerNumber			NVARCHAR(MAX)
+			,strName					NVARCHAR(MAX)
+			,strContactName				NVARCHAR(MAX)
+			,strPhoneNumber				NVARCHAR(MAX)
+			,dblQtyShipped				NUMERIC(18,6)
+			,dblQtyOrdered				NUMERIC(18,6)
+			,dblInvoiceTotal			NUMERIC(18,6)
+		)
+
+		DECLARE @tblPYTD TABLE
+		(
+			 intEntityCustomerId		INT
+			,dtmDate					DATETIME
+			,strCustomerNumber			NVARCHAR(MAX)
+			,strName					NVARCHAR(MAX)
+			,dblQtyShipped				NUMERIC(18,6)
+			,dblQtyOrdered				NUMERIC(18,6)
+			,dblInvoiceTotal			NUMERIC(18,6)
+		)
+
+
 		DECLARE @dblTotal NUMERIC(18,6)
 
 		DECLARE @q NVARCHAR(max)
 
-		SET @q = '
+
+		INSERT INTO @tblYTD
+		(
+			 intEntityCustomerId
+			,strCustomerNumber	
+			,strName			
+			,strPhoneNumber		
+			,strContactName		
+			,dblQtyShipped		
+			,dblQtyOrdered		
+			,dblInvoiceTotal	
+		)
+		EXEC('
 		SELECT 
-		intEntityCustomerId
-		,strCustomerNumber
-		,strName
-		,strPhoneNumber
-		,strContactName
-		,SUM(dblQtyShipped) dblQtyShipped
-		,SUM(dblQtyOrdered) dblQtyOrdered
-		,SUM(dblInvoiceTotal) dblInvoiceTotal
-		INTO ##tblYTD FROM [vyuCFTopCardLockCustomer]'
+			intEntityCustomerId
+			,strCustomerNumber
+			,strName
+			,strPhoneNumber
+			,strContactName
+			,SUM(dblQtyShipped) dblQtyShipped
+			,SUM(dblQtyOrdered) dblQtyOrdered
+			,SUM(dblInvoiceTotal) dblInvoiceTotal
+		FROM [vyuCFTopCardLockCustomer]'
 		+ @YTDwhereClause + 
 		'GROUP BY 
 		intEntityCustomerId
 		,strCustomerNumber
 		,strName
 		,strPhoneNumber
-		,strContactName'
-
-		EXEC (@q)
-
-	--	select @q
+		,strContactName')
 
 
-		DECLARE @q2 NVARCHAR(max)
-		SET @q2 = '
+		
+		INSERT INTO @tblPYTD
+		(
+			 intEntityCustomerId
+			,strCustomerNumber	
+			,strName			
+			,dblQtyShipped		
+			,dblQtyOrdered		
+			,dblInvoiceTotal	
+		)
+		EXEC('
 		SELECT 
-		intEntityCustomerId
-		,strCustomerNumber
-		,strName
-		,SUM(dblQtyShipped) dblQtyShipped
-		,SUM(dblQtyOrdered) dblQtyOrdered
-		,SUM(dblInvoiceTotal) dblInvoiceTotal
-		INTO ##tblPYTD FROM [vyuCFTopCardLockCustomer]'
+			intEntityCustomerId
+			,strCustomerNumber
+			,strName
+			,SUM(dblQtyShipped) dblQtyShipped
+			,SUM(dblQtyOrdered) dblQtyOrdered
+			,SUM(dblInvoiceTotal) dblInvoiceTotal
+		FROM [vyuCFTopCardLockCustomer]'
 		+ @PYTDwhereClause +
 		'GROUP BY 
 		intEntityCustomerId
 		,strCustomerNumber
-		,strName'
+		,strName')
 
-		EXEC (@q2)
-
-	--	select @q2
-		
 		SELECT @dblTotal = SUM(dblInvoiceTotal)
-		FROM ##tblYTD
+		FROM @tblYTD
 
 
 		SELECT 
@@ -227,34 +265,24 @@ BEGIN
 		,ytd.strContactName 
 		,ytd.strPhoneNumber
 		FROM 
-		##tblYTD as ytd
+		@tblYTD as ytd
 		LEFT JOIN
-		##tblPYTD as pytd
+		@tblPYTD as pytd
 		on 
 		ytd.intEntityCustomerId = pytd.intEntityCustomerId
 
 
 	END
 
-	--DROP table ##tblPYTD
-	--DROP table ##tblYTD
+	
 
-	IF OBJECT_ID('tempdb..##tblPYTD') IS NOT NULL
-    DROP TABLE ##tblPYTD
-
-	IF OBJECT_ID('tempdb..##tblYTD') IS NOT NULL
-    DROP TABLE ##tblYTD
+	
 
 	END TRY
 	BEGIN CATCH
 
 		SELECT ERROR_MESSAGE()
-	
-		IF OBJECT_ID('tempdb..##tblPYTD') IS NOT NULL
-		DROP TABLE ##tblPYTD
 
-		IF OBJECT_ID('tempdb..##tblYTD') IS NOT NULL
-		DROP TABLE ##tblYTD
 
 	END CATCH 
     

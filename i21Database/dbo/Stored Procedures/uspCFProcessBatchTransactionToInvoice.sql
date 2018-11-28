@@ -18,9 +18,36 @@ DECLARE @UserEntityId INT
 DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 DECLARE @ysnRemoteTransaction INT
-
 DECLARE @companyConfigTermId	INT = NULL
 DECLARE @companyConfigFreightTermId	INT = NULL
+DECLARE @tmpTransactionId TABLE
+(
+	intTransactionId	INT
+)
+DECLARE @tmpForeignTransactionId TABLE
+(
+	 ysnPostForeignSales		BIT
+	,ysnPosted					BIT
+	,intTransactionId			INT
+	,intEntityId				INT
+	,intCustomerEntityId		INT
+	,intARLocationId			INT
+	,dtmTransactionDate			DATETIME
+	,dblAmount					NUMERIC(18,6)
+	,strEntityName				NVARCHAR(MAX)
+	,strLocationName			NVARCHAR(MAX)
+	,strDescription				NVARCHAR(MAX)
+	,strTransactionId			NVARCHAR(MAX)
+	,strTransactionType			NVARCHAR(MAX)
+	,strTransType				NVARCHAR(MAX)
+)
+DECLARE @tmpCreatedInvoice TABLE
+(
+	 intInvoiceId	INT
+	,intSourceId	INT
+	,ysnPosted		BIT
+)
+
 
 SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
@@ -42,49 +69,56 @@ BEGIN
 	RETURN
 END
 
-
---SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
 SET @UserEntityId = @UserId
 
-
+INSERT INTO @tmpTransactionId
+(
+	intTransactionId
+)
 SELECT 
 DISTINCT RecordKey = intTransactionId 
-INTO #tmpTransactionId 
 FROM vyuCFBatchPostTransactions 
 WHERE strTransType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0
 
+
+INSERT INTO @tmpForeignTransactionId
+(
+	 intTransactionId
+	,ysnPostForeignSales
+	,strTransType
+	,dtmTransactionDate
+	,strTransactionId
+	,strTransactionType
+	,ysnPosted
+	,strDescription
+	,dblAmount
+	,intEntityId	
+)
 SELECT 
- RecordKey = intTransactionId
-,ysnPostForeignSales
-,strTransType
-,dtmTransactionDate
-,strTransactionId
-,strTransactionType
-,ysnPosted
-,strDescription
-,dblAmount
-,intTransactionId
-,intEntityId
-INTO #tmpForeignTransactionId 
+	 intTransactionId
+	,ysnPostForeignSales
+	,strTransType
+	,dtmTransactionDate
+	,strTransactionId
+	,strTransactionType
+	,ysnPosted
+	,strDescription
+	,dblAmount
+	,intEntityId
 FROM vyuCFBatchPostTransactions 
 WHERE strTransType = 'Foreign Sale' AND ISNULL(ysnPostForeignSales,0) = 0
 
 
 
---ORDER BY intTransactionId
---OFFSET     0 ROWS       
---FETCH NEXT 1000 ROWS ONLY
-
-
 IF @TransactionId != 'ALL'
 BEGIN
-	DELETE FROM #tmpTransactionId WHERE RecordKey NOT IN (SELECT Record FROM [fnCFSplitString](@TransactionId,',') )
-	DELETE FROM #tmpForeignTransactionId WHERE RecordKey NOT IN (SELECT Record FROM [fnCFSplitString](@TransactionId,',') )
+	DELETE FROM @tmpTransactionId WHERE intTransactionId NOT IN (SELECT Record FROM [fnCFSplitString](@TransactionId,',') )
+	DELETE FROM @tmpForeignTransactionId WHERE intTransactionId NOT IN (SELECT Record FROM [fnCFSplitString](@TransactionId,',') )
 	
 END
 
-SELECT * FROM #tmpTransactionId
-SELECT * FROM #tmpForeignTransactionId
+SELECT * FROM @tmpTransactionId
+SELECT * FROM @tmpForeignTransactionId
 		
 				INSERT INTO @EntriesForInvoice(
 					 [intId]
@@ -169,7 +203,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnImpactInventory]
 				)
 				SELECT
-					[intId]						= TI.RecordKey
+					[intId]						= TI.intTransactionId
 					,[strTransactionType]		= (case
 												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
@@ -208,7 +242,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intLoadDistributionHeaderId]			= NULL
 					,[strActualCostId]						= ''
 					,[intShipmentId]						= NULL
-					,[intTransactionId]						= TI.RecordKey
+					,[intTransactionId]						= TI.intTransactionId
 					,[intEntityId]							= @UserEntityId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
@@ -271,8 +305,8 @@ SELECT * FROM #tmpForeignTransactionId
 															else 1
 															end)
 				FROM tblCFTransaction cfTrans
-				INNER JOIN #tmpTransactionId TI
-					ON cfTrans.intTransactionId = TI.RecordKey
+				INNER JOIN @tmpTransactionId TI
+					ON cfTrans.intTransactionId = TI.intTransactionId
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 				LEFT JOIN (SELECT icfCards.intCardId
@@ -397,7 +431,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnImpactInventory]
 				)
 				SELECT
-					 [intId]						= TI.RecordKey
+					 [intId]						= TI.intTransactionId
 					,[strTransactionType]		= (case
 												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
@@ -436,7 +470,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intLoadDistributionHeaderId]			= NULL
 					,[strActualCostId]						= ''
 					,[intShipmentId]						= NULL
-					,[intTransactionId]						= TI.RecordKey
+					,[intTransactionId]						= TI.intTransactionId
 					,[intEntityId]							= @UserEntityId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
@@ -504,8 +538,8 @@ SELECT * FROM #tmpForeignTransactionId
 															else 1
 															end)
 				FROM tblCFTransaction cfTrans
-				INNER JOIN #tmpTransactionId TI
-				ON cfTrans.intTransactionId = TI.RecordKey
+				INNER JOIN @tmpTransactionId TI
+				ON cfTrans.intTransactionId = TI.intTransactionId
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 
@@ -555,7 +589,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]
 					,[ysnClearExisting])
 				SELECT
-				[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC),TI.RecordKey)
+				[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC),TI.intTransactionId)
 				,[intTaxGroupId]			= NULL
 				,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 				,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -571,82 +605,24 @@ SELECT * FROM #tmpForeignTransactionId
 				,[ysnTaxExempt]				= 0
 				,[ysnTaxOnly]				= cfTaxCode.[ysnTaxOnly]
 				,[strNotes]					= ''
-				,[intTempDetailIdForTaxes]	= TI.RecordKey
+				,[intTempDetailIdForTaxes]	= TI.intTransactionId
 				,[ysnClearExisting]			= 1
 				FROM 
 				tblCFTransaction cfTransaction
-				INNER JOIN #tmpTransactionId TI
-					ON cfTransaction.intTransactionId = TI.RecordKey
+				INNER JOIN @tmpTransactionId TI
+					ON cfTransaction.intTransactionId = TI.intTransactionId
 				INNER JOIN tblCFTransactionTax cfTransactionTax
 				ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
 				INNER JOIN tblSMTaxCode  cfTaxCode
 				ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
-				---------------EXPENSE TRANS-------------
-				--INSERT INTO @TaxDetails
-				--	(
-				--	[intDetailId] 
-				--	,[intTaxGroupId]
-				--	,[intTaxCodeId]
-				--	,[intTaxClassId]
-				--	,[strTaxableByOtherTaxes]
-				--	,[strCalculationMethod]
-				--	,[dblRate]
-				--	,[intTaxAccountId]
-				--	,[dblTax]
-				--	,[dblAdjustedTax]
-				--	,[ysnTaxAdjusted]
-				--	,[ysnSeparateOnInvoice]
-				--	,[ysnCheckoffTax]
-				--	,[ysnTaxExempt]
-				--	,[ysnTaxOnly]
-				--	,[strNotes]
-				--	,[intTempDetailIdForTaxes]
-				--	,[ysnClearExisting])
-				--SELECT
-				--[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = ISNULL(cfTransaction.intInvoiceId,0) AND ISNULL(dblQtyShipped,0) < 0),TI.RecordKey+1)
-				--,[intTaxGroupId]			= NULL
-				--,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
-				--,[intTaxClassId]			= cfTaxCode.intTaxClassId
-				--,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
-				--,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
-				--,[dblRate]					= cfTransactionTax.dblTaxRate
-				--,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-				--,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount) * -1 
-				--,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount) * -1 --(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-				--,[ysnTaxAdjusted]			= 0
-				--,[ysnSeparateOnInvoice]		= 0 
-				--,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
-				--,[ysnTaxExempt]				= 0
-				--,[ysnTaxOnly]				= cfTaxCode.[ysnTaxOnly]
-				--,[strNotes]					= ''
-				--,[intTempDetailIdForTaxes]	= TI.RecordKey+1
-				--,[ysnClearExisting]			= 1
-				--FROM 
-				--tblCFTransaction cfTransaction
-				--INNER JOIN #tmpTransactionId TI
-				--	ON cfTransaction.intTransactionId = TI.RecordKey
-				--INNER JOIN tblCFTransactionTax cfTransactionTax
-				--ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
-				--INNER JOIN tblSMTaxCode  cfTaxCode
-				--ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
-				--WHERE ISNULL(ysnExpensed,0) = 1
-				---------------EXPENSE TRANS-------------
 				
 					
-
-	DROP TABLE #tmpTransactionId
-		
-	--BEGIN TRANSACTION
-
-
---	Foreign Sale
-
 	DECLARE @intForeignTransCount INT = 0
 	DECLARE @dtmDate DATETIME
 
 	SET @dtmDate = GETDATE();
-	SELECT @intForeignTransCount = COUNT(*) FROM #tmpForeignTransactionId
-	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId IN (SELECT RecordKey FROM #tmpForeignTransactionId)
+	SELECT @intForeignTransCount = COUNT(*) FROM @tmpForeignTransactionId
+	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId IN (SELECT intTransactionId FROM @tmpForeignTransactionId)
 	
 	INSERT INTO tblCFPostForeignTransResult
 	(
@@ -660,16 +636,14 @@ SELECT * FROM #tmpForeignTransactionId
 	)
 	SELECT 
 	 @BatchId
-	,RecordKey
+	,intTransactionId
 	,strTransactionId
 	,strTransactionType
 	,'Transaction successfully posted.'
 	,@dtmDate
 	,intEntityId
 	FROM 
-	#tmpForeignTransactionId
-
---	Foreign Sale
+	@tmpForeignTransactionId
 
 	
 	DECLARE @LogId INT
@@ -688,8 +662,23 @@ SELECT * FROM #tmpForeignTransactionId
 
 	--================--
 	SET @SuccessfulCount = 0;
-	SELECT DISTINCT intInvoiceId, intSourceId, ysnPosted  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 --AND ISNULL(ysnPosted,0) = 1
-	SELECT @SuccessfulCount = Count(intInvoiceId) FROM #tmpCreatedInvoice WHERE ISNULL(ysnPosted,0) = 1
+	INSERT INTO @tmpCreatedInvoice
+	(
+		 intInvoiceId
+		,intSourceId
+		,ysnPosted 
+	)
+	SELECT DISTINCT 
+	intInvoiceId
+	,intSourceId
+	,ysnPosted
+	FROM tblARInvoiceIntegrationLogDetail
+	WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 
+
+
+	SELECT @SuccessfulCount = Count(intInvoiceId) 
+	FROM @tmpCreatedInvoice
+	WHERE ISNULL(ysnPosted,0) = 1
 
 	IF (ISNULL(@Recap,0) = 0 AND (@Post = 1))
 	BEGIN
@@ -751,100 +740,3 @@ SELECT * FROM #tmpForeignTransactionId
 
 
 
-
-	--SET @SuccessfulCount = 0;
-
-	
-
-	--SELECT DISTINCT intInvoiceId, intSourceId, ysnPosted  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 --AND ISNULL(ysnPosted,0) = 1
-
-	--SELECT @SuccessfulCount = Count(intInvoiceId) FROM #tmpCreatedInvoice WHERE ISNULL(ysnPosted,0) = 1
-
-	----IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
-	----	BEGIN
-
-	--		IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
-	--		BEGIN
-							
-	--			UPDATE CFTran
-	--			SET 
-	--				CFTran.ysnPosted	 = ARL.ysnPosted
-	--				,CFTran.intInvoiceId = ARL.intInvoiceId
-	--			FROM
-	--				tblCFTransaction CFTran
-	--			INNER JOIN
-	--				#tmpCreatedInvoice ARL
-	--					ON CFTran.intTransactionId = ARL.intSourceId
-	--					--AND ARL.ysnPosted = 1
-
-	--			IF (@Post = 1)
-	--			BEGIN
-	--				UPDATE CFC
-	--					SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
-	--				FROM
-	--					tblCFCard CFC
-	--				INNER JOIN
-	--					(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
-	--						FROM
-	--							tblCFTransaction CFTran
-	--						INNER JOIN
-	--							#tmpCreatedInvoice ARL
-	--								ON CFTran.intTransactionId = ARL.intSourceId 
-	--								AND ARL.ysnPosted = 1
-	--							GROUP BY  CFTran.intCardId
-	--					) CFT
-	--						ON CFC.intCardId = CFT.intCardId					
-	--				WHERE 
-	--					(CFC.dtmLastUsedDated < CFT.dtmTransactionDate OR CFC.dtmLastUsedDated IS NULL)
-	--			END
-	--			ELSE
-	--			BEGIN
-	--				UPDATE CFC
-	--					SET CFC.dtmLastUsedDated = CFT.dtmTransactionDate
-	--				FROM
-	--					tblCFCard CFC
-	--				INNER JOIN
-	--					(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
-	--						FROM
-	--							tblCFTransaction CFTran
-	--						INNER JOIN
-	--							#tmpCreatedInvoice ARL
-	--								ON CFTran.intTransactionId = ARL.intSourceId 
-	--							GROUP BY CFTran.intCardId
-	--					) CFT
-	--						ON CFC.intCardId = CFT.intCardId					
-	--			END
-
-	--		END 
-	--		ELSE IF (@Recap = 1)
-	--		BEGIN
-	--			UPDATE CFTran
-	--			SET 
-	--				CFTran.intInvoiceId = ARL.intInvoiceId
-	--			FROM
-	--				tblCFTransaction CFTran
-	--			INNER JOIN
-	--				#tmpCreatedInvoice ARL
-	--					ON CFTran.intTransactionId = ARL.intSourceId 
-	--		END
-
-	--	--TRANSACTION COUNT + FOREIGN TRANSACTION COUNT (ysnPostForeignTrans = 0)
-		--SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
-
-		--COMMIT TRANSACTION
-	--END
-	--ELSE
-	--	BEGIN
-	--		IF(@intForeignTransCount > 0)
-	--		BEGIN
-	--			SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
-	--			COMMIT TRANSACTION
-	--		END
-	--		ELSE
-	--		BEGIN
-	--			ROLLBACK TRANSACTION
-	--		END
-	--	END
-
-	IF OBJECT_ID('tempdb..#tmpCreatedInvoice') IS NOT NULL DROP TABLE #tmpCreatedInvoice
-	IF OBJECT_ID('tempdb..##tmpForeignTransactionId') IS NOT NULL DROP TABLE #tmpForeignTransactionId

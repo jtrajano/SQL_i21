@@ -2020,22 +2020,6 @@ BEGIN
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
-		--INSERT INTO tblCFTransactionPrice
-		--(
-		--	 intTransactionId
-		--	,strTransactionPriceId
-		--	,dblOriginalAmount
-		--	,dblCalculatedAmount
-		--)
-		--SELECT 
-		--	@Pk
-		--	,strTransactionPriceId
-		--	,dblTaxOriginalAmount
-		--	,dblTaxCalculatedAmount
-		--FROM ##tblCFTransactionPriceType
-
-		-- prices are set on usp recalc--
-		
 
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)
