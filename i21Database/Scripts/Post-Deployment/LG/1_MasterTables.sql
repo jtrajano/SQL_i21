@@ -33,15 +33,15 @@ END
 /*
 * Set Container Numbers value 
 */
-IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'strContainerNumbers')
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoadDetail') AND name = 'strContainerNumbers')
 BEGIN
-	EXEC ('UPDATE L 
+	EXEC ('UPDATE LD
 			SET strContainerNumbers = STUFF(
 										(SELECT '', '' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
 										FROM tblLGLoadContainer
-										WHERE intLoadId = L.intLoadId
+										WHERE intLoadDetailId = LD.intLoadDetailId
 										FOR XML PATH (''''), TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'' '')
-			FROM tblLGLoad L
-			WHERE strContainerNumbers IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadContainer WHERE intLoadId = L.intLoadId)
+			FROM tblLGLoadDetail LD
+			WHERE strContainerNumbers IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadContainer WHERE intLoadDetailId = LD.intLoadDetailId)
 	')
 END
