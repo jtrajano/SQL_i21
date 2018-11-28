@@ -2,8 +2,8 @@ CREATE VIEW [dbo].[vyuICGetStockMovement]
 AS
 
 --SELECT	intInventoryValuationKeyId  = COALESCE(t.intInventoryStockMovementId, i.intItemId) --ISNULL(t.intInventoryStockMovementId, 0) 		
-SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.strCommodityCode, c.strCategoryCode, i.strItemNo, [Location].strLocationName, 
-									subLoc.strStorageLocationSorter, subLoc.intStorageLocationSorter, strgLoc.strStorageUnitSorter, strgLoc.intStorageUnitSorter, t.dtmDate) AS INT)
+SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.strCommodityCode, c.strCategoryCode, i.strItemNo, [Location].strLocationName, t.dtmDate, t.strTransactionId) AS INT)
+									--subLoc.strStorageLocationSorter, subLoc.intStorageLocationSorter, strgLoc.strStorageUnitSorter, strgLoc.intStorageUnitSorter, t.dtmDate) AS INT)
 		,i.intItemId
 		,strItemNo					= i.strItemNo
 		,strItemDescription			= i.strDescription
@@ -82,7 +82,7 @@ FROM 	tblICItem i
 		LEFT JOIN (SELECT	intStorageLocationId
 							,strName
 							,strStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN LEFT(strName, PATINDEX('%[0-9]%', strName) - 1) ELSE strName END
-							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CASE WHEN ISNUMERIC(SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) = 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END ELSE NULL END
+							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END
 				FROM tblICStorageLocation
 			) strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
