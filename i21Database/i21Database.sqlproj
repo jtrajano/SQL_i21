@@ -7213,6 +7213,7 @@
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
+    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
