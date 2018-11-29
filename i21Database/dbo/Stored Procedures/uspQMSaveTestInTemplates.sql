@@ -144,10 +144,10 @@ BEGIN
 			,intUnitMeasureId
 			,strFormula
 			,strFormulaParser
-			,PP.intCreatedUserId
-			,PP.dtmCreated
-			,PP.intLastModifiedUserId
-			,PP.dtmLastModified
+			,intCreatedUserId
+			,dtmCreated
+			,intLastModifiedUserId
+			,dtmLastModified
 			)
 		SELECT 1
 			,PP.intProductPropertyId
