@@ -44,25 +44,28 @@ FROM (
 			, strLocationName
 			, FOT.dblContractSize
 			, FOT.strFutMarketName
-			, strFutureMonth = FOT.strFutureMonth
-			, strOptionMonth = FOT.strOptionMonthYear
+			, FOT.strFutureMonth AS strFutureMonth
+			, FOT.strOptionMonthYear AS strOptionMonth
 			, dblStrike
 			, strOptionType
 			, FOT.strInstrumentType
-			, strBrokerAccount = FOT.strBrokerageAccount
-			, strBroker = FOT.strName
+			, FOT.strBrokerageAccount AS strBrokerAccount
+			, FOT.strName AS strBroker
 			, strBuySell
 			, FOTH.intFutOptTransactionHeaderId
-			, FOT.ysnPreCrush
-			, FOT.strNotes
-			, FOT.strBrokerTradeNo
+			, FOT.intFutureMarketId
+			, FOT.intFutureMonthId
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		
+			
+		UNION ALL
 		--Futures Sell
-		UNION SELECT FOT.dtmTransactionDate
+		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
 			, intOpenContract
 			, FOT.strCommodityCode
@@ -79,16 +82,19 @@ FROM (
 			, FOT.strName AS strBroker
 			, strBuySell
 			, FOTH.intFutOptTransactionHeaderId
-			, FOT.ysnPreCrush
-			, FOT.strNotes
-			, FOT.strBrokerTradeNo
+			, FOT.intFutureMarketId
+			, FOT.intFutureMonthId
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		
+			
+		UNION ALL
 		--Options Buy
-		UNION SELECT FOT.dtmTransactionDate
+		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
 			, intOpenContract
 			, FOT.strCommodityCode
@@ -105,16 +111,19 @@ FROM (
 			, FOT.strName AS strBroker
 			, strBuySell
 			, FOTH.intFutOptTransactionHeaderId
-			, FOT.ysnPreCrush
-			, FOT.strNotes
-			, FOT.strBrokerTradeNo
+			, FOT.intFutureMarketId
+			, FOT.intFutureMonthId
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		
-		--Options Sell	
-		UNION SELECT FOT.dtmTransactionDate
+				
+		UNION ALL
+		--Options Sell
+		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
 			, intOpenContract
 			, FOT.strCommodityCode
@@ -131,9 +140,11 @@ FROM (
 			, FOT.strName AS strBroker
 			, strBuySell
 			, FOTH.intFutOptTransactionHeaderId
-			, FOT.ysnPreCrush
-			, FOT.strNotes
-			, FOT.strBrokerTradeNo
+			, FOT.intFutureMarketId
+			, FOT.intFutureMonthId
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
