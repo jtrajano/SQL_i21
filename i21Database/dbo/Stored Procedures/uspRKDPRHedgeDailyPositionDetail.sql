@@ -314,6 +314,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 			UNION ALL
 			--Futures Sell
@@ -343,6 +344,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 			UNION ALL
 			--Options Buy
@@ -372,6 +374,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 				
 			UNION ALL
 			--Options Sell
@@ -401,6 +404,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 		)t2 
 	)t3 WHERE t3.intRowNum = 1
 
@@ -736,6 +740,7 @@ BEGIN
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+						AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
 				
 				-- Option NetHEdge
@@ -811,6 +816,7 @@ BEGIN
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+					AND ISNULL(t.ysnPreCrush, 0) = 0
 
 				-- Net Hedge option end
 				INSERT INTO @tempFinal(strCommodityCode
