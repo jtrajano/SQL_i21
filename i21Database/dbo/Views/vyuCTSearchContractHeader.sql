@@ -60,7 +60,7 @@ SELECT	CH.intContractHeaderId,
 		CH.ysnExported,
 		CH.dtmExported,
 		YR.strCropYear,
-		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses,
+		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	COLLATE Latin1_General_CI_AS AS	strStatuses,
 		CS.intUnitMeasureId AS intStockCommodityUnitMeasureId,
 		U1.strUnitMeasure AS strStockCommodityUnitMeasure
 

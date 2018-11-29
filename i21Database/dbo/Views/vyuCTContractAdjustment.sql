@@ -3,9 +3,9 @@ CREATE VIEW vyuCTContractAdjustment
 AS
 
 	SELECT	intContractDetailId,
-			CAST(NULL AS NVARCHAR(50)) AS strAdjustmentNo,
+			CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS AS strAdjustmentNo,
 			GETDATE() AS dtmAdjustmentDate,
-			CAST(NULL AS NVARCHAR(MAX)) AS strComment,
+			CAST(NULL AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS AS strComment,
 			D.intContractSeq,
 			D.dblQuantity,
 			D.intFutureMonthId,

@@ -15,14 +15,14 @@ AS
 
 	SELECT	intContractDetailId,
 			dblTotalApprovedQty AS dblApprovedQty,
-			CASE WHEN dblTotalApprovedQty>= dblQuantity THEN 'Approved' ELSE 'Partially Approved' END strSampleStatus
+			CASE WHEN dblTotalApprovedQty>= dblQuantity THEN 'Approved' ELSE 'Partially Approved' END COLLATE Latin1_General_CI_AS  AS strSampleStatus
 	FROM	cte
 
 	UNION ALL
 
 	SELECT	intContractDetailId,
 			dblTotalRejectedQty AS dblApprovedQty,
-			CASE WHEN dblTotalRejectedQty>= dblQuantity THEN 'Rejected' ELSE 'Partially Rejected' END strSampleStatus 
+			CASE WHEN dblTotalRejectedQty>= dblQuantity THEN 'Rejected' ELSE 'Partially Rejected' END COLLATE Latin1_General_CI_AS AS strSampleStatus 
 	FROM	
 	(
 			SELECT	SA.intContractDetailId,

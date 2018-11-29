@@ -2,7 +2,7 @@
 AS
  SELECT
  CONVERT(INT,ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS intNeedPlanId
-,CONVERT(NVARCHAR,dtmImportDate,106) strNeedPlan
+,CONVERT(NVARCHAR,dtmImportDate,106) COLLATE Latin1_General_CI_AS  AS strNeedPlan
 FROM 
 (   SELECT DISTINCT dtmImportDate FROM 
 	(

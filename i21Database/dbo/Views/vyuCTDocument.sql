@@ -9,7 +9,7 @@ AS
 					WHEN DO.intDocumentType = 2	THEN 'Bill Of Lading'
 					WHEN DO.intDocumentType = 3	THEN 'Container'
 					ELSE ''
-			END AS strDocumentType,
+			END COLLATE Latin1_General_CI_AS AS strDocumentType,
 			DO.intCommodityId,
 			DO.ysnStandard,
 			CO.strCommodityCode,

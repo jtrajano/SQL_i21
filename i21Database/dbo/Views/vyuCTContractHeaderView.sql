@@ -38,7 +38,7 @@ AS
 			YR.strCropYear,					TM.strTermCode,										
 																		
 			CASE WHEN NM.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
-			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
+			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	COLLATE Latin1_General_CI_AS AS	strStatuses
 			
 	FROM	tblCTContractHeader					CH	
 	LEFT JOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
