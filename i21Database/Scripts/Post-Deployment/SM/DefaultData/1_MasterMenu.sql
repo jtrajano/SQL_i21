@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'System Manager' AND strCommand = 'AccountsReceivable.view.EntitySalesperson?showSearch=true' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accrued Storage' AND strDescription = 'Accrued Storage Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Ticket Management'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3530,9 +3530,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accrued Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Accrued Storage', N'Ticket Management', @TicketManagementReportParentMenuId, N'Accrued Storage', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=AccruedStorage&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Accrued Storage', N'Ticket Management', @TicketManagementReportParentMenuId, N'Accrued Storage Description', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=AccruedStorage&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Reporting.view.ReportManager?group=Grain&report=AccruedStorage&direct=true&showCriteria=true' WHERE strMenuName = 'Accrued Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strDescription = N'Accrued Storage Description', strCommand = N'Reporting.view.ReportManager?group=Grain&report=AccruedStorage&direct=true&showCriteria=true' WHERE strMenuName = 'Accrued Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production History' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
