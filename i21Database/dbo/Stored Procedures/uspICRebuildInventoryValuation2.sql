@@ -112,7 +112,7 @@ END
 -- Get the new start date. 
 SELECT	@dtmNewStartDate = dbo.fnRemoveTimeOnDate(MIN(dtmDate))
 FROM	#tmpICTransactionForDateSorting
-WHERE	id > @id
+WHERE	id >= @id
 
 IF @dtmNewStartDate IS NOT NULL 
 BEGIN 
@@ -131,4 +131,4 @@ BEGIN
 		DROP TABLE #tmpICTransactionForDateSorting
 END
 
-RETURN @intReturnValue;
+RETURN ISNULL(@intReturnValue, 0);
