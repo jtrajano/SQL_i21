@@ -530,9 +530,12 @@ BEGIN
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
 												and i.strDocumentNumber = Inv.strTransactionId), 0)
+						,ysnInvoicePosted = i.ysnPosted
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
+					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
+					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
 					WHERE Inv.ysnInTransit = 1  
 						AND Inv.strTransactionType = 'Inventory Shipment'
 						AND C.intCommodityId = @intCommodityId
@@ -552,8 +555,9 @@ BEGIN
 						,Inv.strItemNo
 						,Inv.strCategory
 						,Inv.intCategoryId
+						,i.ysnPosted
 				) tbl
-				WHERE dblBalanceToInvoice <> 0
+				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
 		
 			SELECT * INTO #tempCollateral
@@ -1608,7 +1612,7 @@ BEGIN
 				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND ISNULL(inv.ysnPosted, 0) = 0
+					AND inv.intInvoiceId IS NULL
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
 			INSERT INTO @Final(intSeqId
@@ -1781,6 +1785,7 @@ BEGIN
 				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
 			) Strg ON f.intInventoryReceiptId = Strg.intInventoryReceiptId    
 			WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId AND isnull(Strg.ysnDPOwnedType,0) = 0
+				AND strReceiptNumber NOT IN (SELECT strShipmentNumber FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
 		
 			
 			--Company Title from DP Settlement
