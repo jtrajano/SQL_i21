@@ -38,10 +38,13 @@ BEGIN
 	EXEC ('UPDATE LD
 			SET strContainerNumbers = STUFF(
 										(SELECT '', '' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
-										FROM tblLGLoadContainer
-										WHERE intLoadDetailId = LD.intLoadDetailId
+										FROM tblLGLoadContainer LC 
+										INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+										WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
 										FOR XML PATH (''''), TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'' '')
 			FROM tblLGLoadDetail LD
-			WHERE strContainerNumbers IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadContainer WHERE intLoadDetailId = LD.intLoadDetailId)
+			WHERE strContainerNumbers IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadContainer LC 
+													INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+													 WHERE LDCL.intLoadDetailId = LD.intLoadDetailId)
 	')
 END
