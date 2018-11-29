@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportCheckoutDepartmentSaleRecap]
 	@intCheckoutId INT 
-	
 AS
 
 BEGIN TRY
@@ -11,7 +10,7 @@ BEGIN TRY
 		, B.strDescription 
 		, A.intTotalSalesCount
 		, A.dblTotalSalesAmountComputed
-		, A.dblTotalSalesAmountComputed 
+		, A.dblRegisterSalesAmountComputed 
 		, ISNULL(SUM(A.dblTotalSalesAmountComputed) OVER (),0) AS CategoryTotalSale
 		, ISNULL(C.dblTotalTax,0) AS TotalTax
 		, ISNULL(D.dblAmount,0) AS TotalPayment
