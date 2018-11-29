@@ -7,7 +7,7 @@ AS
 				EY.strName strEntityName,
 				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intSUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty) dblAllocatedQty,
 				AD.intPContractDetailId intContractDetailId,
-				'Sale' strContractType
+				'Sale' COLLATE Latin1_General_CI_AS AS strContractType
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId
@@ -22,7 +22,7 @@ AS
 				EY.strName strEntityName,
 				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty) dblAllocatedQty,
 				AD.intSContractDetailId,
-				'Purchase' strContractType
+				'Purchase' COLLATE Latin1_General_CI_AS AS strContractType
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId

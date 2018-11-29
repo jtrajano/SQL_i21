@@ -12,7 +12,7 @@ AS
 					IM.strUnitMeasure,
 					SH.intShipmentType,
 					SH.intLoadId,
-					'intLoadId' AS strIdColumn
+					'intLoadId' COLLATE Latin1_General_CI_AS AS strIdColumn
 			FROM	tblLGLoadDetail	CQ
 			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
 			JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
@@ -29,7 +29,7 @@ AS
 					IM.strUnitMeasure,
 					SH.intShipmentType,
 					SH.intLoadId,
-					'intLoadId' AS strIdColumn
+					'intLoadId' COLLATE Latin1_General_CI_AS AS strIdColumn
 			FROM	tblLGLoadDetail	CQ
 			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
 			JOIN	tblLGAllocationDetail		AD	ON	AD.intPContractDetailId =	CQ.intPContractDetailId
