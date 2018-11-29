@@ -4,7 +4,7 @@
 AS
 BEGIN
 	
-	IF EXISTS(SELECT * FROM tblSTCheckoutErrorLogs WHERE intCheckoutId = @intCheckoutId AND strErrorType IN('XML VERSION', 'XML LAYOUT MAPPING'))
+	IF EXISTS(SELECT * FROM tblSTCheckoutErrorLogs WHERE intCheckoutId = @intCheckoutId AND strErrorType IN('XML VERSION'))
 		BEGIN
 			-- Saving checkout should not continue is there's a mismatching xml version
 
@@ -14,7 +14,7 @@ BEGIN
 					, strRegisterTagValue
 			FROM tblSTCheckoutErrorLogs
 			WHERE intCheckoutId = @intCheckoutId
-			AND strErrorType IN('XML VERSION', 'XML LAYOUT MAPPING')
+			AND strErrorType IN('XML VERSION')
 
 			-- FLAGGED not to continue saving
 			SET @ysnContinueToSave = CAST(0 AS BIT)
@@ -34,6 +34,6 @@ BEGIN
 	
 
 	-- Delete Logs
-	DELETE FROM tblSTCheckoutErrorLogs
-	WHERE intCheckoutId = @intCheckoutId
+	--DELETE FROM tblSTCheckoutErrorLogs
+	--WHERE intCheckoutId = @intCheckoutId
 END
