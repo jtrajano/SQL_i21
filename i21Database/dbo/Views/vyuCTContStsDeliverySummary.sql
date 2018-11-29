@@ -4,8 +4,8 @@ AS
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY UP.intContractDetailId ASC) AS INT) intUniqueId,
 			UP.intContractDetailId,
-			UP.strName,
-			UP.strValue
+			UP.strName COLLATE Latin1_General_CI_AS strName,
+			UP.strValue COLLATE Latin1_General_CI_AS strValue
 	FROM	(
 				SELECT	AD.intPContractDetailId intContractDetailId,
 						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(ISNULL(MAX(SI.intItemId),MAX(LD.intItemId)),ISNULL(MAX(WU.intUnitMeasureId),MAX(LO.intWeightUnitMeasureId)),LP.intWeightUOMId,SUM(ISNULL(SI.dblQuantity,LD.dblQuantity)))AS NUMERIC(18, 6))) Delivered,

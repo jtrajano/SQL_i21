@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceContract]
 (
 	intPriceContractId INT IDENTITY (1, 1) NOT NULL,
-	strPriceContractNo NVARCHAR(50) NOT NULL,
+	strPriceContractNo NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL,
 	intCommodityId INT,
 	intFinalPriceUOMId INT NOT NULL,
 	intFinalCurrencyId INT,
