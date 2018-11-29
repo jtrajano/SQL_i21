@@ -1,39 +1,26 @@
 ﻿CREATE PROCEDURE uspGLUpdateTrialBalance 
 	@GLEntries RecapTableType READONLY
 AS
-DECLARE @dateTime DATETIME = GETDATE()
-MERGE 
-	INTO	dbo.tblGLTrialBalance
-	WITH	(HOLDLOCK) 
-	AS		TrialBalanceTable
-	USING(
-		SELECT intAccountId, sum(dblDebit-dblCredit) dblAmount , F.intGLFiscalYearPeriodId  FROM  @GLEntries
-		JOIN tblGLFiscalYearPeriod F on dtmDate between F.dtmStartDate and F.dtmEndDate
-		GROUP BY intAccountId, intGLFiscalYearPeriodId
-	)AS GLEntries
-	ON GLEntries.intAccountId = TrialBalanceTable.intAccountId  AND GLEntries.intGLFiscalYearPeriodId = TrialBalanceTable.intGLFiscalYearPeriodId 
-	WHEN MATCHED
-		THEN
-		UPDATE SET TrialBalanceTable.MTDBalance = TrialBalanceTable.MTDBalance + GLEntries.dblAmount,
-		TrialBalanceTable.YTDBalance = TrialBalanceTable.YTDBalance + GLEntries.dblAmount,
-		TrialBalanceTable.intConcurrencyId = TrialBalanceTable.intConcurrencyId + 1,
-		dtmDateModified = @dateTime
+DECLARE @intGLFiscalYearPeriodId INT, @intAccountId INT,@MTDBalance numeric(38,6), @YTDBalance numeric(38,6)
 
-	WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intAccountId
-			,intGLFiscalYearPeriodId
-			,MTDBalance
-			,YTDBalance
-			,dtmDateModified
-			,intConcurrencyId
-		)
-		VALUES (
-			GLEntries.intAccountId
-			,GLEntries.intGLFiscalYearPeriodId
-			,GLEntries.dblAmount
-			,GLEntries.dblAmount
-			,@dateTime
-			,1
-		);
+DECLARE @temp TABLE
+(
+  intAccountId int, 
+  dblAmount numeric(18,6),
+  intGLFiscalYearPeriodId int
+)
+INSERT INTO @temp
+select intAccountId, sum(dblDebit-dblCredit) dblAmount , F.intGLFiscalYearPeriodId  FROM  @GLEntries
+JOIN tblGLFiscalYearPeriod F on dtmDate between F.dtmStartDate and F.dtmEndDate
+GROUP BY intAccountId, intGLFiscalYearPeriodId
+
+
+UPDATE tblGLTrialBalance set 
+	MTDBalance = MTDBalance + T.dblAmount, 
+	YTDBalance= YTDBalance + T.dblAmount,
+	dtmDateModified = GETDATE(), 
+	intConcurrencyId = ISNULL(intConcurrencyId,0) +1
+FROM tblGLTrialBalance TB JOIN
+@temp T ON T.intAccountId = TB.intAccountId AND T.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
+
 GO
