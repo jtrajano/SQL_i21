@@ -201,16 +201,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1l_AlterTable.sql
 :r .\GL\DefaultData\1o_SegmentType.sql
 :r .\GL\GLEntryDataFix.sql
-:r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
-:r .\GL\ReportData\IncomeStatementStandard.sql
-:r .\GL\ReportData\TrialBalance.sql
-:r .\GL\ReportData\TrialBalanceDetail.sql
-:r .\GL\ReportData\BalanceSheetStandard.sql
 :r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 :r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 :r .\GL\DefaultData\1q_InsertOriginMapping.sql
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
+:r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
