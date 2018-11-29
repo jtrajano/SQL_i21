@@ -85,7 +85,7 @@ SELECT
     ,dblExchangeRate                = @rate
     ,intCurrencyExchangeRateTypeId  = @rateType
     ,dblCost                        = basisAdvance.dblAmountToAdvance / basisAdvance.dblQuantity
-    -- ,dblContractCost                = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis
+    --,dblContractCost                = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis
     ,intCostUOMId                   = receiptItem.intUnitMeasureId
     ,dblCostUnitQty                 = 1
     ,dblBasis                       = basisAdvance.dblUnitBasis
