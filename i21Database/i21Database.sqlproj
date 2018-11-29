@@ -6412,6 +6412,7 @@
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
     <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
+    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
