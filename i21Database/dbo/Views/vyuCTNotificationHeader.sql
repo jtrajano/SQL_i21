@@ -20,7 +20,7 @@ AS
 				CD.strFutMarketName,	CD.strItemUOM,			CD.strLocationName,		CD.strPriceUOM,
 				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
 				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		PW.intAllStatusId,
-				BC.strBasisComponent,
+				BC.strBasisComponent COLLATE Latin1_General_CI_AS AS strBasisComponent,
 				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo
 				
 		FROM	tblCTContractHeader			CH

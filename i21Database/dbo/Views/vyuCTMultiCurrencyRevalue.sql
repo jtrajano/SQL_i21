@@ -10,7 +10,7 @@ AS
 			,strCommodity			=	CY.strDescription
 			,strLineOfBusiness		=	CG.strDescription
 			,strLocation			=	CL.strLocationName
-			,strTicket				=	''
+			,strTicket				=	'' COLLATE Latin1_General_CI_AS 
 			,strContractNumber		=	CH.strContractNumber
 			,strItemId				=	IM.strItemNo
 			,dblQuantity			=	CD.dblQuantity
