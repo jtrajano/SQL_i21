@@ -25,14 +25,17 @@ BEGIN TRY
 		, @TaxAuthorityId INT
 		, @StoreProcedure NVARCHAR(100)
 		, @RCId INT
+		
+	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
+
+	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
-	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 		
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
+	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpRC)
 	BEGIN
-		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
+		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
 		SELECT * 
 		INTO #tmpTransaction
@@ -271,12 +274,10 @@ BEGIN TRY
 		
 		END
 
-		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
+		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
 		DROP TABLE #tmpTransaction
 	END
-
-	DROP TABLE #tmpRC
 
 END TRY
 BEGIN CATCH

@@ -15,8 +15,10 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	DECLARE @tmpCustomField TABLE (strColumn NVARCHAR(50), strConfigurationValue NVARCHAR(100))
+
+	INSERT INTO @tmpCustomField 
 	SELECT DISTINCT strColumn, strConfigurationValue
-	INTO #tmpCustomField
 	FROM vyuTFGetReportingComponentField
 	WHERE intReportingComponentId = @ReportingComponentId
 		AND ysnFromConfiguration = 1
@@ -30,9 +32,9 @@ BEGIN TRY
 		, @CreateTableScript NVARCHAR(MAX) = 'CREATE TABLE tblTFCustomField' + CAST(@ReportingComponentId AS NVARCHAR(50)) + '(intReportingComponentId INT,'
 		, @DropScript NVARCHAR(MAX) = 'IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = ''tblTFCustomField' + CAST(@ReportingComponentId AS NVARCHAR(50)) + ''')	DROP TABLE tblTFCustomField' + CAST(@ReportingComponentId AS NVARCHAR(50)) + ''
 
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomField)
+	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpCustomField)
 	BEGIN
-		SELECT TOP 1 @column = strColumn, @value = strConfigurationValue FROM #tmpCustomField
+		SELECT TOP 1 @column = strColumn, @value = strConfigurationValue FROM @tmpCustomField
 
 		IF (LEN(@QueryScript) > 0)
 		BEGIN
@@ -47,7 +49,7 @@ BEGIN TRY
 		SET @InsertScript +=  '[' + @column + '],'
 		SET @CreateTableScript +=  '[' + @column + '] NVARCHAR(100),'
 
-		DELETE FROM #tmpCustomField WHERE strColumn = @column
+		DELETE FROM @tmpCustomField WHERE strColumn = @column
 	END
 
 	IF (@InsertScript LIKE '%,')
@@ -70,7 +72,6 @@ BEGIN TRY
 	END
 	EXECUTE sp_executesql @QueryScript
 
-	DROP TABLE #tmpCustomField
 
 END TRY
 BEGIN CATCH
