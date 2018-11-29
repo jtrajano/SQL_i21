@@ -7174,6 +7174,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
     <Build Include="dbo\Functions\fnSTGetRowsFromDelimitedValuesReturnString.sql" />
+    <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
