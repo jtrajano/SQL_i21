@@ -727,9 +727,10 @@ FROM (
 		JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId
 	JOIN   tblICItemUOM                             PU     ON     PU.intItemUOMId                   =      cdv.intPriceItemUOMId   
 	JOIN tblICCommodityUnitMeasure PUOM on ch.intCommodityId=PUOM.intCommodityId and PUOM.intUnitMeasureId=PU.intUnitMeasureId 
-	
 	GROUP BY cdv.intContractDetailId
 	) t
+
+
 
 DECLARE @tblOpenContractList TABLE (     
                  intContractHeaderId int,
@@ -1990,7 +1991,6 @@ FROM(
 	)t 
 	ORDER BY intCommodityId,strContractSeq DESC    
 
-
 ------------- Calculation of Results ----------------------
    UPDATE #Temp set 
  
@@ -2234,7 +2234,7 @@ FROM (
 														WHEN Currency.strCurrency = 'USD'
 															THEN (CASE WHEN @strRateType = 'Contract'
 																		--Formula: Contract Price - Contract Futures
-																		THEN ((ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0))
+																		THEN ((ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0))
 																			/ ISNULL((SELECT dblRate FROM tblCTContractDetail
 																					WHERE dtmFXValidFrom < GETDATE() AND dtmFXValidTo > GETDATE()
 																						AND ISNULL(dblRate, 0) <> 0
@@ -2244,7 +2244,7 @@ FROM (
 																	--Configuration
 																	--Formula: Contract Price - Contract Futures
 																	ELSE ((ISNULL(dblContractBasis, 0)
-																			+ (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1))
+																			+ (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end)
 																			+ ISNULL(dblCash, 0)) / @dblRateConfiguration)
 																		- dblCalculatedFutures END)
 														--Can be used other currency exchange
@@ -2253,7 +2253,7 @@ FROM (
 								ELSE 0 END)
 		--Contract Futures
 		, dblActualFutures = dblCalculatedFutures
-		, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN 0
+		, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN dblFutures
 								ELSE dblCalculatedFutures END)
 		, dblCash  --Contract Cash
 		, dblCosts = ABS(dblCosts)
@@ -2286,22 +2286,22 @@ FROM (
 		, dblAdjustedContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
 											THEN (CASE WHEN intCurrencyId = @intCurrencyUOMId
 														--CAD/CAD
-														THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + dblCosts
+														THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) + dblCosts
 													WHEN Currency.strCurrency = 'USD'
 														--USD/CAD
 														THEN (CASE WHEN @strRateType = 'Contract'
-																	THEN (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) +  ISNULL(dblCash, 0) + dblCosts)
+																	THEN (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) +  ISNULL(dblCash, 0) + dblCosts)
 																		/ ISNULL((SELECT dblRate FROM tblCTContractDetail
 																				WHERE dtmFXValidFrom < GETDATE() AND dtmFXValidTo > GETDATE()
 																					AND ISNULL(dblRate, 0) <> 0
 																					AND intCurrencyExchangeRateId = @intCurrencyExchangeRateId
 																					AND intContractDetailId = #Temp.intContractDetailId), @dblRateConfiguration)
 																--Configuration
-																ELSE (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + dblCosts)
+																ELSE (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) + dblCosts)
 																	/ @dblRateConfiguration END)
 													--Can be used other currency exchange
-													ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + dblCosts END)
-										ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + dblCosts END)
+													ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) + dblCosts END)
+										ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) + dblCosts END)
 		, dblCashPrice
 		--Market Price
 		, dblMarketPrice = CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
@@ -2322,29 +2322,29 @@ FROM (
 												THEN ISNULL(dblMarketBasis, 0) + (ISNULL(dblFuturePrice, 0) * ISNULL(dblMarketRatio, 1)) + ISNULL(dblCashPrice, 0)
 											--Can be used other currency exchange
 											ELSE ISNULL(dblMarketBasis, 0) + (ISNULL(dblFuturePrice, 0) * ISNULL(dblMarketRatio, 1)) + ISNULL(dblCashPrice, 0) END)
-								ELSE ISNULL(dblMarketBasis, 0) + (ISNULL(dblFuturePrice,0) * ISNULL(dblMarketRatio, 1)) + ISNULL(dblCashPrice, 0) END
+								ELSE ISNULL(dblMarketBasis, 0) + (ISNULL(dblFuturePrice,0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCashPrice, 0) END
 		, dblResultBasis
 		, dblResultCash
 		--Contract Price
 		, dblContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
 									THEN (CASE WHEN intCurrencyId = @intCurrencyUOMId
 												--CAD/CAD
-												THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) +  ISNULL(dblCash, 0)
+												THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) +  ISNULL(dblCash, 0)
 											WHEN Currency.strCurrency = 'USD'
 												--USD/CAD
 												THEN (CASE WHEN @strRateType = 'Contract'
-															THEN (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0))
+															THEN (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0))
 																/ ISNULL((SELECT dblRate FROM tblCTContractDetail
 																		WHERE dtmFXValidFrom < GETDATE() AND dtmFXValidTo > GETDATE()
 																			AND ISNULL(dblRate, 0) <> 0
 																			AND intCurrencyExchangeRateId = @intCurrencyExchangeRateId 
 																			AND intContractDetailId = #Temp.intContractDetailId), @dblRateConfiguration)
 														--Configuration
-														ELSE (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0))
+														ELSE (ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0))
 															/ @dblRateConfiguration END)
 											--Can be used other currency exchange
-											ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) END)
-								ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) END)
+											ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) END)
+								ELSE ISNULL(dblContractBasis, 0) + (ISNULL(dblCalculatedFutures, 0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCash, 0) END)
 		, intQuantityUOMId
 		, intCommodityUnitMeasureId
 		, intPriceUOMId
