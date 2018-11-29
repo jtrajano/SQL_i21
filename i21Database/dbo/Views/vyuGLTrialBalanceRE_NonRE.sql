@@ -1,7 +1,13 @@
-﻿CREATE VIEW [dbo].[vyuGLTrialBalance] AS
+﻿CREATE VIEW [dbo].[vyuGLTrialBalanceRE_NonRE]
+AS
+WITH BeginningBalance AS(
+	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD  FROM vyuGLTrialBalance_NonRE 
+	UNION ALL
+	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD FROM  vyuGLTrialBalance_RE 
+)
 SELECT 
-ISNULL(B.MTDBalance,0)MTDBalance,
-ISNULL(B.YTDBalance,0)YTDBalance,
+ISNULL(B.MTD,0)MTDBalance,
+ISNULL(B.YTD,0)YTDBalance,
 A.intAccountId,
 ISNULL(Cat.strAccountCategory, '') strAccountCategory,
 ISNULL(strAccountGroup,'') strAccountGroup,
@@ -22,7 +28,7 @@ period.dtmEndDate dtmDateTo,
 B.intGLFiscalYearPeriodId
 FROM tblGLAccount A
 LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
-LEFT JOIN tblGLTrialBalance B ON A.intAccountId = B.intAccountId
+LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod period on period.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
 LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
