@@ -18,7 +18,7 @@ DECLARE @intNoOfShipRecord INT
 DECLARE @intNoOfShipRecordCounter INT
 DECLARE @intNoOfShipRecordParentCounter INT
 DECLARE @strTransactionName NVARCHAR(50)
-Declare @strLotNumber nvarchar(MAX)
+DECLARE @strLotNumber NVARCHAR(MAX)
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
 	,intParentId INT
@@ -130,7 +130,10 @@ DECLARE @tblLinkData AS TABLE (
 	,intToRecordId INT
 	,strTransactionName NVARCHAR(50)
 	)
-DECLARE @tblMFExlude AS TABLE (intId INT,strName nvarchar(MAX))
+DECLARE @tblMFExlude AS TABLE (
+	intId INT
+	,strName NVARCHAR(MAX)
+	)
 
 --Forward
 IF @intDirectionId = 1
@@ -1335,13 +1338,19 @@ BEGIN
 				IF @intId IS NULL
 					SELECT TOP 1 @intId = intLotId
 					FROM @tblNodeData
-					WHERE strType = 'S'
+					WHERE strType IN (
+							'S'
+							,'OS'
+							)
 					ORDER BY 1
 				ELSE
 					SELECT TOP 1 @intId = intLotId
 					FROM @tblNodeData
 					WHERE intLotId > @intId
-						AND strType = 'S'
+						AND strType IN (
+							'S'
+							,'OS'
+							)
 
 				--Invoice
 				INSERT INTO @tblData (
@@ -1505,7 +1514,10 @@ BEGIN
 			SET t.intParentId = n.intRecordId
 			FROM @tblTemp t
 			JOIN @tblNodeData n ON t.intLotId = n.intParentLotId
-			WHERE t.strType = 'S'
+			WHERE t.strType IN (
+					'S'
+					,'OS'
+					)
 
 			--Update intParentId for Lots 			
 			UPDATE t
@@ -1514,7 +1526,10 @@ BEGIN
 			JOIN (
 				SELECT *
 				FROM @tblTemp
-				WHERE strType = 'S'
+				WHERE strType IN (
+						'S'
+						,'OS'
+						)
 				) n ON t.intAttributeTypeId = n.intLotId
 			WHERE t.strType = 'L'
 
@@ -1943,13 +1958,13 @@ BEGIN
 	BEGIN
 		DECLARE @RCUR CURSOR SET @RCUR = CURSOR
 		FOR
-		SELECT Top 1 intLotId
+		SELECT TOP 1 intLotId
 			,intRecordId
 			,strType
 			,strTransactionName
 			,strLotNumber
 		FROM @tblTemp
-		Order by intRecordId 
+		ORDER BY intRecordId
 
 		OPEN @RCUR
 
@@ -1987,7 +2002,7 @@ BEGIN
 					,intAttributeTypeId
 					,strText
 					,dblWOQty
-						)
+					)
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
@@ -2075,7 +2090,12 @@ BEGIN
 							,'Merge'
 							)
 				END
-				INSERT INTO @tblMFExlude SELECT intLotId,strLotNumber from @tblData WHERE strText Like 'Merge Out%' 
+
+				INSERT INTO @tblMFExlude
+				SELECT intLotId
+					,strLotNumber
+				FROM @tblData
+				WHERE strText LIKE 'Merge Out%'
 			END
 
 			-- Lot Split
@@ -2239,7 +2259,8 @@ BEGIN
 			WHERE intParentId IS NULL
 
 			INSERT INTO @tblMFExlude
-			SELECT @intId,@strLotNumber
+			SELECT @intId
+				,@strLotNumber
 
 			FETCH NEXT
 			FROM @RCUR
@@ -2384,9 +2405,11 @@ BEGIN
 
 		DELETE
 		FROM @tblTemp
-		WHERE Exists (
+		WHERE EXISTS (
 				SELECT *
-				FROM @tblMFExlude Where intId=intLotId and strName=strLotNumber
+				FROM @tblMFExlude
+				WHERE intId = intLotId
+					AND strName = strLotNumber
 				)
 
 		SELECT @intMaxRecordCount = Max(intRecordId)
@@ -2444,7 +2467,7 @@ SELECT intRecordId AS [key]
 	,strItemDesc
 	,intCategoryId
 	,strCategoryCode
-	,IsNULL(dblWOQty,dblQuantity)
+	,IsNULL(dblWOQty, dblQuantity)
 	,strUOM
 	,dtmTransactionDate
 	,intParentLotId
@@ -2495,7 +2518,7 @@ SELECT intRecordId AS [key]
 			THEN strLotNumber
 		ELSE strLotNumber + CHAR(13) + '(' + strProcessName + ')'
 		END AS strNodeText
-	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + ISNULL(strItemDesc, '') + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(IsNULL(dblWOQty,dblQuantity)), '') + ' ' + ISNULL(strUOM + CHAR(13), '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
+	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + ISNULL(strItemDesc, '') + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(IsNULL(dblWOQty, dblQuantity)), '') + ' ' + ISNULL(strUOM + CHAR(13), '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
 		WHEN strType = 'R'
 			THEN 'Vendor     : ' + ISNULL(strVendor, '')
 		ELSE ''
