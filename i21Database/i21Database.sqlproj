@@ -7184,6 +7184,7 @@
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
+    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
