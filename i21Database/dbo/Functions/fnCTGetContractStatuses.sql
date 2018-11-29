@@ -2,7 +2,7 @@
 (
 	@intContractHeaderId INT
 )
-RETURNS NVARCHAR(MAX)
+RETURNS NVARCHAR(MAX) 
 AS 
 BEGIN 
 	DECLARE	@strStatus AS NVARCHAR(MAX)
@@ -21,5 +21,5 @@ BEGIN
 	FROM tblCTContractHeader CH																
 	WHERE intContractHeaderId = @intContractHeaderId	
 
-	RETURN @strStatus;	
+	RETURN @strStatus COLLATE Latin1_General_CI_AS ;	
 END

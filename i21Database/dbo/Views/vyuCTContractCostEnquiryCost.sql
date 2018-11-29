@@ -26,7 +26,7 @@ AS
 			BD.dblTotal * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblActual,
 			BD.dblTotal/ 
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer,
-			BD.strBillTranactionType
+			BD.strBillTranactionType COLLATE Latin1_General_CI_AS AS strBillTranactionType
 
 	FROM	
 	(

@@ -37,7 +37,7 @@ AS
 						WHEN	CH.strStatuses LIKE '%Complete%'
 						THEN	'Complete'
 						ELSE	CH.strStatuses
-				END		strStatuses,
+				END		COLLATE Latin1_General_CI_AS AS strStatuses,
 				CASE WHEN CH.ysnLoad = 1 THEN CH.strHeaderUnitMeasure + '/Load' ELSE CH.strHeaderUnitMeasure END strHeaderUnitMeasure
 
 				
