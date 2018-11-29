@@ -435,21 +435,21 @@ BEGIN
 			,dtmBillingDate				DATETIME
 			,dtmCreatedDate				DATETIME
 			,dtmInvoiceDate				DATETIME
-			,strGroupName				NVARCHAR
-			,strEmailDistributionOption	NVARCHAR
-			,strEmail					NVARCHAR
-			,strDiscountSchedule		NVARCHAR
-			,strNetwork					NVARCHAR
-			,strInvoiceCycle			NVARCHAR
-			,strTerm					NVARCHAR
-			,strType					NVARCHAR
-			,strCustomerName			NVARCHAR
-			,strCustomerNumber			NVARCHAR
-			,strInvoiceNumber			NVARCHAR
-			,strTransactionType			NVARCHAR
-			,strInvoiceReportNumber		NVARCHAR
-			,strPrintTimeStamp			NVARCHAR
-			,strTermCode				NVARCHAR
+			,strGroupName				NVARCHAR(MAX)
+			,strEmailDistributionOption	NVARCHAR(MAX)
+			,strEmail					NVARCHAR(MAX)
+			,strDiscountSchedule		NVARCHAR(MAX)
+			,strNetwork					NVARCHAR(MAX)
+			,strInvoiceCycle			NVARCHAR(MAX)
+			,strTerm					NVARCHAR(MAX)
+			,strType					NVARCHAR(MAX)
+			,strCustomerName			NVARCHAR(MAX)
+			,strCustomerNumber			NVARCHAR(MAX)
+			,strInvoiceNumber			NVARCHAR(MAX)
+			,strTransactionType			NVARCHAR(MAX)
+			,strInvoiceReportNumber		NVARCHAR(MAX)
+			,strPrintTimeStamp			NVARCHAR(MAX)
+			,strTermCode				NVARCHAR(MAX)
 		)
 		DECLARE @tblCFDiscountschedule TABLE
 		(
