@@ -114,6 +114,12 @@ SELECT	@dtmNewStartDate = dbo.fnRemoveTimeOnDate(MIN(dtmDate))
 FROM	#tmpICTransactionForDateSorting
 WHERE	id >= @id
 
+-- Null the new date if it is invalid.  
+SELECT	@dtmNewStartDate = NULL 
+FROM	#tmpICTransactionForDateSorting
+HAVING	dbo.fnDateEquals(MAX(dtmDate),  @dtmNewStartDate) = 1
+		AND MAX(id) = @id 
+
 IF @dtmNewStartDate IS NOT NULL 
 BEGIN 
 	EXEC @intReturnValue = [dbo].[uspICRebuildInventoryValuation]
