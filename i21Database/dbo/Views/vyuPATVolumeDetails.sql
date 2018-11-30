@@ -47,8 +47,12 @@ FROM (
 	FROM tblEMEntity EM
 	INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = EM.intEntityId AND AR.strStockStatus != '' AND AR.dtmMembershipDate IS NULL
-	CROSS JOIN tblGLFiscalYear FY
-	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
+	CROSS JOIN (
+		SELECT	FY.intFiscalYearId
+		FROM tblGLFiscalYear FY
+		CROSS JOIN tblGLCurrentFiscalYear CurrentFY
+		WHERE FY.dtmDateFrom <= CurrentFY.dtmBeginDate
+	) FY
 	UNION
 	SELECT	FY.intFiscalYearId,
 			EM.intEntityId,
@@ -59,8 +63,7 @@ FROM (
 	INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = EM.intEntityId AND AR.strStockStatus != '' AND AR.dtmMembershipDate IS NOT NULL
 	INNER JOIN tblGLFiscalYear FY
-		ON YEAR(AR.dtmMembershipDate) >= YEAR(FY.dtmDateFrom)
-	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
+		ON YEAR(FY.dtmDateFrom) >= YEAR(AR.dtmMembershipDate)
 ) CustomerVolume
 INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CustomerVolume.intCustomerPatronId
