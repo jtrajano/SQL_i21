@@ -7185,7 +7185,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
     <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateRegisterItemPreview.sql" />
+    <Build Include="dbo\Views\vyuSTItemUOMUpcCodeToNumeric.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
