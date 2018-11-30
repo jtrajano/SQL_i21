@@ -376,9 +376,9 @@ BEGIN TRY
 			,Prod.dblTareWeight
 			,Prod.dblGrossWeight
 			,Prod.dblNetWeight AS dblProduceQty
-			,IU.intItemUOMId AS intActualItemUOMId
-			,UM.intUnitMeasureId AS intActualItemUnitMeasureId
-			,UM.strUnitMeasure AS strActualItemUnitMeasure
+			,IU1.intItemUOMId AS intActualItemUOMId
+			,UM1.intUnitMeasureId AS intActualItemUnitMeasureId
+			,UM1.strUnitMeasure AS strActualItemUnitMeasure
 			,Prod.dblWeightPerUnit AS dblUnitQty
 			,Prod.strReferenceNo
 			,Prod.strRemarks AS strComment
