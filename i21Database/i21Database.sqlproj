@@ -7186,6 +7186,7 @@
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
     <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMUpcCodeToNumeric.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRegisterItemReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
