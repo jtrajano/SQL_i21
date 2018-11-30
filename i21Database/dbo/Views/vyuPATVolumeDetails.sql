@@ -20,11 +20,12 @@ FROM (
 		dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume - CV.dblVolumeProcessed ELSE 0 END,
 		ysnRefundProcessed = CAST(0 AS BIT)
 		FROM tblPATCustomerVolume CV
-	INNER JOIN tblEMEntity ENT
-		ON ENT.intEntityId = intCustomerPatronId
+	--INNER JOIN tblEMEntity ENT
+	--	ON ENT.intEntityId = intCustomerPatronId
 	INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
-	WHERE CV.dblVolume > CV.dblVolumeProcessed
+	WHERE CV.dblVolume > CV.dblVolumeProcessed 
+	OR (CV.dblVolume < 0 AND CV.dblVolumeProcessed = 0) --This is to include negative values
 	UNION
 	SELECT	CV.intFiscalYear,
 		CV.intCustomerPatronId,
@@ -32,8 +33,8 @@ FROM (
 		dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolumeProcessed ELSE 0 END,
 		ysnRefundProcessed = CAST(1 AS BIT)
 		FROM tblPATCustomerVolume CV
-	INNER JOIN tblEMEntity ENT
-		ON ENT.intEntityId = intCustomerPatronId
+	--INNER JOIN tblEMEntity ENT
+	--	ON ENT.intEntityId = intCustomerPatronId
 	INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
 	WHERE CV.dblVolumeProcessed > 0
