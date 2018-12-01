@@ -9,19 +9,29 @@ SELECT DISTINCT
     ,Item.strDescription
     ,ST.ysnCustomerStorage
     ,Com.ysnExchangeTraded
-    ,ISNULL(Com.intFutureMarketId,0) AS intFutureMarketId
+    ,intFutureMarketId = ISNULL(Com.intFutureMarketId,0)
     ,Com.dblPriceCheckMin
     ,Com.dblPriceCheckMax
     ,CS.intCommodityId
-    ,UOM.intItemUOMId AS intCommodityStockUomId
-    ,ISNULL(CS.intItemUOMId, UOM.intItemUOMId) AS intItemUOMId
-    ,CAST(
-        CASE
-            WHEN ST.ysnCustomerStorage = 0 THEN 1
-            WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
-            ELSE 0
-        END AS BIT
-    ) AS ysnShowInStorage
+    ,intCommodityStockUomId = UOM.intItemUOMId
+    ,intItemUOMId = ISNULL(CS.intItemUOMId, UOM.intItemUOMId)
+    ,ysnShowInStorage = CAST(
+							CASE
+								WHEN ST.ysnCustomerStorage = 0 THEN 1
+								WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+								ELSE 0
+							END AS BIT
+						)
+    ,ysnStorageItemReady = CAST(
+                                CASE
+                                    WHEN ysnTransferStorage = 1 THEN 1
+                                    ELSE 
+                                        CASE
+                                            WHEN CS.intTicketId IS NOT NULL THEN 1
+                                            WHEN CS.intDeliverySheetId IS NOT NULL THEN (SELECT ysnPost FROM tblSCDeliverySheet WHERE intDeliverySheetId = CS.intDeliverySheetId)
+                                        END
+                                END AS BIT
+                            )
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId

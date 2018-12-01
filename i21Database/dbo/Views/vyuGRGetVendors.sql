@@ -1,19 +1,26 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetVendors]
-AS   
+AS  
 SELECT DISTINCT
-  CS.intEntityId 
-  ,E.strName AS strEntityName
-  ,E.strEntityNo
-  ,ET.strType AS strEntityType
-  ,ST.ysnCustomerStorage  
+	CS.intEntityId 
+	,E.strName AS strEntityName
+	,E.strEntityNo
+	,ET.strType AS strEntityType
+	,ST.ysnCustomerStorage
+	,ysnStorageVendorReady = CAST(
+                                CASE
+                                  WHEN ysnTransferStorage = 1 THEN 1
+                                  ELSE 
+                                    CASE
+                                      WHEN CS.intTicketId IS NOT NULL THEN 1
+                                      WHEN CS.intDeliverySheetId IS NOT NULL THEN (SELECT ysnPost FROM tblSCDeliverySheet WHERE intDeliverySheetId = CS.intDeliverySheetId)
+                                    END
+                                END AS BIT
+                              )
 FROM tblGRCustomerStorage CS  
 INNER JOIN tblEMEntity E 
-  ON E.intEntityId = CS.intEntityId
+	ON E.intEntityId = CS.intEntityId
 INNER JOIN tblEMEntityType ET 
-  ON ET.intEntityId = E.intEntityId
+	ON ET.intEntityId = E.intEntityId
 INNER JOIN tblGRStorageType ST 
-  ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-WHERE CS.dblOpenBalance > 0 
-  AND ET.strType = 'Vendor'
-  AND ISNULL(CS.strStorageType,'') <> 'ITR'
-  AND ST.ysnCustomerStorage = 0 
+	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+WHERE CS.dblOpenBalance > 0
