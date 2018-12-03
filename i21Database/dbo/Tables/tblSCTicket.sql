@@ -161,8 +161,7 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
-    CONSTRAINT [FK_tblSCTicket_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId])
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]
 )
 
 GO
