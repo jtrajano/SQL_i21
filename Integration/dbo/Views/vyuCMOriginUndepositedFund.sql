@@ -17,8 +17,8 @@ AS
 WITH AR AS (
 	SELECT    
 		     	dbo.fnGetGLAccountIdFromOriginToi21(gl.apegl_gl_acct) intAccountId
-				,DefaultCurrency.Val intCurrencyId
 				,null intEntityCustomerId 
+				,DefaultCurrency.Val intCurrencyId
 				,null intSourceTransactionId
 				, CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
 				+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
