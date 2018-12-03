@@ -2194,7 +2194,7 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 	, intMarketZoneId
 	, strMarketZoneCode
 	, strLocationName 
-	, dblResult = (ISNULL(dblMarketPrice, 0) - ISNULL(dblAdjustedContractPrice, 0)) * ISNULL(dblOpenQty, 0)--(dblPricedQty + dblUnPricedQty)
+	, dblResult = (dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
 	, dblMarketFuturesResult = (dblFuturePrice - dblActualFutures) * dblOpenQty--(dblPricedQty + dblUnPricedQty)
 	, dblResultRatio =  (CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL
 								THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty) -- (dblPricedQty + dblUnPricedQty)
