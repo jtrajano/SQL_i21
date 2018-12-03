@@ -87,7 +87,7 @@ BEGIN TRY
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
 	WHERE strName = @strLotSourceLocation
-		AND intSubLocationId = @intSubLocationId
+		--AND intSubLocationId = @intSubLocationId
 		AND intLocationId = @intLocationId
 
 	SELECT @intAlternateLotId = intLotId
