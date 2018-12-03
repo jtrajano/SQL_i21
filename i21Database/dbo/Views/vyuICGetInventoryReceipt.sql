@@ -9,7 +9,7 @@ SELECT Receipt.intInventoryReceiptId
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
-		END)
+		END) COLLATE Latin1_General_CI_AS
 	, Receipt.intEntityVendorId
 	, Vendor.strVendorId
 	, strVendorName = Vendor.strName

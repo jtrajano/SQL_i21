@@ -4,7 +4,7 @@
 SELECT 
 	intTransactionId = intInventoryAdjustmentId
 	, strTransactionId = strAdjustmentNo
-	, strTransactionType = 'Inventory Adjustment'
+	, strTransactionType = 'Inventory Adjustment' COLLATE Latin1_General_CI_AS
 	, dtmDate = dtmAdjustmentDate
 	, strDescription
 	, intEntityId

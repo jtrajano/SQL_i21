@@ -9,7 +9,7 @@ FROM (
 		, intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
-		, strReceiptType = 'Purchase Order'
+		, strReceiptType = 'Purchase Order' COLLATE Latin1_General_CI_AS
 		, intLineNo = intPurchaseDetailId
 		, intOrderId = intPurchaseId
 		, strOrderNumber = strPurchaseOrderNumber
@@ -59,7 +59,7 @@ FROM (
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency = CAST(0  AS BIT)
 		, intCurrencyId = POView.intCurrencyId
-		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
+		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, dblGross = POView.dblNetWeight -- There is no gross from PO
 		, dblNet = POView.dblNetWeight -- There is no net from PO
 		, intForexRateTypeId = POView.intForexRateTypeId

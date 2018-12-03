@@ -2,8 +2,8 @@
 AS
 -- intKey - intLocationId, intEntityCustomerId, intLineNo
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityId, intContractDetailId) AS INT)
-	, strOrderType = 'Sales Contract'
-	, strSourceType = 'None'
+	, strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+	, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 	, intLocationId = intCompanyLocationId
 	, strShipFromLocation = strLocationName
 	, intEntityCustomerId = intEntityId

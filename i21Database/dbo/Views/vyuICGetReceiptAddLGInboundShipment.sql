@@ -6,7 +6,7 @@ AS
 	, intEntityVendorId			= LogisticsView.intEntityVendorId
 	, strVendorId				= LogisticsView.strVendor
 	, strVendorName				= LogisticsView.strVendor
-	, strReceiptType			= 'Purchase Contract'
+	, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
 	, intLineNo					= LogisticsView.intPContractDetailId
 	, intOrderId				= LogisticsView.intPContractHeaderId
 	, strOrderNumber			= LogisticsView.strPContractNumber
