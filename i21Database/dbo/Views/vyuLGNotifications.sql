@@ -39,7 +39,7 @@ FROM (
 			,strMVessel = NULL
 			,strMVoyageNumber = NULL
 			,dtmETAPOL = NULL
-			,'Contracts w/o shipping instruction' AS strType
+			,'Contracts w/o shipping instruction' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -103,7 +103,7 @@ FROM (
 			,L.strMVessel
 			,L.strMVoyageNumber
 			,L.dtmETAPOL
-			,'Contracts w/o shipping advice' AS strType
+			,'Contracts w/o shipping advice' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -162,7 +162,7 @@ FROM (
 		    ,L.strMVessel
 		    ,L.strMVoyageNumber
 		    ,L.dtmETAPOL
-			,'Contracts w/o document' AS strType
+			,'Contracts w/o document' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -219,7 +219,7 @@ FROM (
 		    ,L.strMVessel
 		    ,L.strMVoyageNumber
 		    ,L.dtmETAPOL
-			,'Contracts w/o weight claim' AS strType
+			,'Contracts w/o weight claim' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -279,7 +279,7 @@ FROM (
 		    ,L.strMVessel
 		    ,L.strMVoyageNumber
 		    ,L.dtmETAPOL
-			,'Weight claims w/o debit note' AS strType
+			,'Weight claims w/o debit note' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -335,7 +335,7 @@ FROM (
 		    ,L.strMVessel
 		    ,L.strMVoyageNumber
 		    ,L.dtmETAPOL
-			,'Contracts w/o 4C' AS strType
+			,'Contracts w/o 4C' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -391,7 +391,7 @@ FROM (
 		    ,L.strMVessel
 		    ,L.strMVoyageNumber
 		    ,L.dtmETAPOL
-			,'Contracts w/o TC' AS strType
+			,'Contracts w/o TC' COLLATE Latin1_General_CI_AS AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId

@@ -19,7 +19,7 @@ SELECT DISTINCT SSH.intStockSalesHeaderId
 	  ,CO.strCommodityCode
 	  ,PT.strPricingType
 	  ,0 AS intLoadId
-	  ,'' AS strLoadNumber
+	  ,'' COLLATE Latin1_General_CI_AS AS strLoadNumber
 	  ,CAST(0 AS BIT) AS ysnDelivered
 	  ,(SELECT TOP 1 dtmStartDate FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS dtmDeliveryFrom
 	  ,(SELECT TOP 1 dtmEndDate FROM tblCTContractDetail D WHERE D.intContractDetailId = CD.intContractDetailId) AS dtmDeliveryTo

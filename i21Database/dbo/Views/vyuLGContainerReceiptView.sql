@@ -22,7 +22,7 @@ SELECT
   dblWeightUom				=	Wm.strUnitMeasure ,
   dtmReceiptDate			=	Rc.dtmReceiptDate ,
   strRemarks				=	Cont.strComments ,
-  strContainerStatus		=	CASE ISNULL(Lot.dblOrderQty, 0) WHEN 0 THEN 'Containers Not Received' ELSE 'Containers  Received' END
+  strContainerStatus		=	CASE ISNULL(Lot.dblOrderQty, 0) WHEN 0 THEN 'Containers Not Received' ELSE 'Containers  Received' END COLLATE Latin1_General_CI_AS
 FROM tblLGLoadDetailContainerLink lk
 JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = lk.intLoadContainerId
 JOIN tblLGLoadDetail ld ON ld.intLoadDetailId = lk.intLoadDetailId

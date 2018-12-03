@@ -18,7 +18,7 @@ SELECT
 							WHEN 3 THEN 'By Delivered Wt'
 							WHEN 4 THEN 'By Quantity'
 							WHEN 5 THEN 'Manual Entry' 
-						   END
+						   END COLLATE Latin1_General_CI_AS
 		,Item.strItemNo
 		,WMH.intWarehouseRateMatrixHeaderId
 		,WMH.strServiceContractNo

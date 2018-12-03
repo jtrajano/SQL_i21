@@ -14,7 +14,7 @@ SELECT
 								'TM Sites'
 						  WHEN Rte.intSourceType = 5 THEN
 								'Entities'
-						END
+						END COLLATE Latin1_General_CI_AS
 	,Rte.intDriverEntityId
 	,strDriver = Driver.strName
 	,Rte.dtmDispatchedDate

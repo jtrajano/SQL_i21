@@ -18,8 +18,8 @@ SELECT CD.intContractDetailId
 	,CH.strContractNumber
 	,CH.dtmContractDate
 	,EY.strEntityName
-	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
-	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
+	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) COLLATE Latin1_General_CI_AS AS strStartDate
+	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) COLLATE Latin1_General_CI_AS AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
@@ -70,8 +70,8 @@ SELECT CD.intContractDetailId
 	,S.strSampleNumber
 	,S.strContainerNumber
 	,S.strSampleTypeName
-	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
-	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) COLLATE Latin1_General_CI_AS AS strTestingStartDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) COLLATE Latin1_General_CI_AS AS strTestingEndDate
 	,CASE 
 		WHEN S.intCompanyLocationSubLocationId IS NULL
 			THEN CD.intSubLocationId
@@ -165,8 +165,8 @@ SELECT CD.intContractDetailId
 	,CH.strContractNumber
 	,CH.dtmContractDate
 	,EY.strEntityName
-	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
-	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
+	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) COLLATE Latin1_General_CI_AS AS strStartDate
+	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) COLLATE Latin1_General_CI_AS AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
@@ -219,8 +219,8 @@ SELECT CD.intContractDetailId
 	,S.strSampleNumber
 	,S.strContainerNumber
 	,S.strSampleTypeName
-	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
-	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) COLLATE Latin1_General_CI_AS AS strTestingStartDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) COLLATE Latin1_General_CI_AS AS strTestingEndDate
 	,CASE 
 		WHEN S.intCompanyLocationSubLocationId IS NULL
 			THEN CD.intSubLocationId

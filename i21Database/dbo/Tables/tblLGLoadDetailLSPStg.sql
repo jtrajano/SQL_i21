@@ -13,7 +13,7 @@
 	[strStorageLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strBatchNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[dblDeliveredQty] NUMERIC(18,6), 
-	[strUnitOfMeasure] NVARCHAR(100), 
+	[strUnitOfMeasure] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[dblNetWt] NUMERIC(18,6), 
 	[dblGrossWt] NUMERIC(18,6), 
 	[strWeightUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 

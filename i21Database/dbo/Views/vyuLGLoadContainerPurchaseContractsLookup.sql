@@ -28,7 +28,7 @@ SELECT
 	, strItemNo						= Item.strItemNo
 	, strItemDescription			= Item.strDescription
 	, strLotTracking				= Item.strLotTracking
-	, strType						= CASE WHEN L.intPurchaseSale = 1 THEN 'Inbound' ELSE CASE WHEN L.intPurchaseSale = 2 THEN 'Outbound' ELSE 'Drop Ship' END END
+	, strType						= CASE WHEN L.intPurchaseSale = 1 THEN 'Inbound' ELSE CASE WHEN L.intPurchaseSale = 2 THEN 'Outbound' ELSE 'Drop Ship' END END COLLATE Latin1_General_CI_AS
 	, strUnitMeasure				= UOM.strUnitMeasure
 	, dblItemUOMCF					= ItemUOM.dblUnitQty
 	, strBLNumber					= L.strBLNumber

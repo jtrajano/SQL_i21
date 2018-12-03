@@ -20,7 +20,7 @@ SELECT DISTINCT SSH.intStockSalesHeaderId
 	  ,CO.strCommodityCode
 	  ,PT.strPricingType
 	  ,0 AS intLoadId
-	  ,'' AS strLoadNumber
+	  ,'' COLLATE Latin1_General_CI_AS AS strLoadNumber
 	  ,CAST(0 AS BIT) AS ysnDelivered
 FROM tblLGStockSalesHeader SSH
 JOIN tblLGStockSalesLotDetail SSLD ON SSH.intStockSalesHeaderId = SSLD.intStockSalesHeaderId

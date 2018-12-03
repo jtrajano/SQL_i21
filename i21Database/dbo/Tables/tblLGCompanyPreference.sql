@@ -32,7 +32,7 @@
 [ysnValidateExternalShipmentNo] [bit] NULL,
 [ysnETAMandatory] [bit] NULL,
 [ysnPOETAFeedToERP] [bit] NULL,
-[strSignature] NVARCHAR(MAX),
+[strSignature] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 [ysnContractSlspnOnEmail] BIT,
 [ysnShowContainersInWarehouseTab] BIT,
 [ysnShowReceivedLoadsInWarehouseTab] BIT,

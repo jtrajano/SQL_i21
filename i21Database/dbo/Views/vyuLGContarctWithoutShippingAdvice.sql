@@ -17,7 +17,7 @@ SELECT 2 intDataSeq
 	,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 	,L.dtmETAPOD AS dtmETAPOD
 	,dblRemainingQty = NULL
-	,'Contracts w/o shipping advice' AS strType
+	,'Contracts w/o shipping advice' COLLATE Latin1_General_CI_AS AS strType
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId

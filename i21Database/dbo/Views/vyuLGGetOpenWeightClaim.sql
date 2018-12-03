@@ -19,7 +19,7 @@ FROM (
 		,strType = CASE WHEN L.intPurchaseSale = 1 THEN 'Inbound' ELSE 
 					CASE WHEN L.intPurchaseSale = 2 THEN 'Outbound'
 					ELSE 'Drop Ship' END
-					END
+					END COLLATE Latin1_General_CI_AS 
 		,strContractNumber = CH.strContractNumber
 		,intContractSeq = CD.intContractSeq
 		,strEntityName = EM.strName
@@ -49,7 +49,7 @@ FROM (
 		,L.intLoadId
 		,L.strLoadNumber
 		,L.dtmScheduledDate
-		,strTransportationMode = CASE WHEN L.intPurchaseSale = 1 THEN 'Truck' ELSE 'Ocean Vessel' END
+		,strTransportationMode = CASE WHEN L.intPurchaseSale = 1 THEN 'Truck' ELSE 'Ocean Vessel' END COLLATE Latin1_General_CI_AS
 		,L.dtmETAPOD
 		,dtmLastWeighingDate = L.dtmETAPOD + ISNULL(ASN.intLastWeighingDays, 0)
 		,dtmClaimValidTill = NULL

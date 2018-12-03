@@ -26,8 +26,8 @@ AS
 			CD.intNumberOfContainers,
 			CD.intContainerTypeId,
 			CD.strVessel,
-			convert(nvarchar(100), CD.dtmStartDate, 101) as strStartDate,
-			convert(nvarchar(100), CD.dtmEndDate, 101) as strEndDate
+			convert(nvarchar(100), CD.dtmStartDate, 101) COLLATE Latin1_General_CI_AS as strStartDate,
+			convert(nvarchar(100), CD.dtmEndDate, 101) COLLATE Latin1_General_CI_AS as strEndDate
 
 	FROM vyuCTContractDetailView 		CD
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
