@@ -4,8 +4,8 @@
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomerId, intLineNo) AS INT)
 , * FROM (
 	SELECT 	
-		strOrderType = 'Sales Order'
-		, strSourceType = 'None'
+		strOrderType = 'Sales Order' COLLATE Latin1_General_CI_AS
+		, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 		, intLocationId = SODetail.intCompanyLocationId
 		, strShipFromLocation = SODetail.strLocationName
 		, SODetail.intEntityCustomerId

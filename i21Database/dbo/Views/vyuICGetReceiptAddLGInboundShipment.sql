@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuICGetReceiptAddLGInboundShipment]
 AS
+	, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intLineNo) AS INT)
 , * 

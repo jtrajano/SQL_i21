@@ -70,7 +70,7 @@ SELECT TransferDetail.intInventoryTransferId
 	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
-								ELSE NULL END)
+								ELSE NULL END) COLLATE Latin1_General_CI_AS
 	, ysnPosted
 	, ysnWeights
 FROM tblICInventoryTransferDetail TransferDetail

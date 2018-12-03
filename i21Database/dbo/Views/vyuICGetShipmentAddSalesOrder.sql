@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesOrder]
 AS
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
-	, strOrderType = 'Sales Order'
-	, strSourceType = 'None'
+	, strOrderType = 'Sales Order' COLLATE Latin1_General_CI_AS
+	, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 	, intLocationId = SODetail.intCompanyLocationId
 	, strShipFromLocation = SODetail.strLocationName
 	, SODetail.intEntityCustomerId

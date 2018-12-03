@@ -16,6 +16,7 @@ SELECT
 			WHEN Adj.intAdjustmentType = 6 THEN 'Expiry Date Change'
 			WHEN Adj.intAdjustmentType = 7 THEN 'Lot Merge'
 			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move' END)
+			COLLATE Latin1_General_CI_AS
 	, Adj.strAdjustmentNo
 	, Adj.strDescription
 	, Adj.intSort

@@ -25,8 +25,8 @@ SELECT	intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEn
 		,dtmLastVoucherDate = topVoucher.dtmBillDate			
 		,receiptAndVoucheredCharges.intCurrencyId
 		,receiptAndVoucheredCharges.strCurrency
-		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
-		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
 FROM	tblICInventoryReceipt Receipt 
 		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
