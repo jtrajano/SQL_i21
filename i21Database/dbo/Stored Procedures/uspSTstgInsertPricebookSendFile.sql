@@ -6,6 +6,7 @@
 	, @dtmBeginningChangeDate DATETIME
 	, @dtmEndingChangeDate DATETIME
 	, @ysnExportEntirePricebookFile BIT
+	, @strGuid UNIQUEIDENTIFIER
 	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @ysnSuccessResult BIT OUTPUT
@@ -97,20 +98,43 @@ BEGIN
 		WHERE intRegisterId = @intRegisterId
 
 		SET @XMLGatewayVersion = ISNULL(@XMLGatewayVersion, '')
-	
+		
+	    
+		--------------------------------------------------------------------------------------------------------------
+		---------------- Start Get Inventory Items that has modified/added date between date range -------------------
+		--------------------------------------------------------------------------------------------------------------
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTUpdateRegisterItemReport WHERE strGuid = @strGuid)
+			BEGIN
+				-- Remove
+				DELETE FROM tblSTUpdateRegisterItemReport 
+				WHERE strGuid = @strGuid
+			END
 
-		-- Use table to get the list of items modified during change date range
-		DECLARE @Tab_UpdatedItems TABLE(intItemId int)
+		DECLARE @tempTableItems TABLE
+		(
+			intItemId INT, 
+			strActionType NVARCHAR(20), 
+			dtmDate DATETIME
+		)
 
-
-		-- Get those Item using given date range
-		INSERT INTO @Tab_UpdatedItems
-		SELECT DISTINCT ITR.intItemId
-		FROM vyuSTItemsToRegister ITR
-		WHERE (
-			ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+		INSERT INTO @tempTableItems
+		SELECT DISTINCT intItemId
+						, CASE
+								WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC 
+									THEN 'Created' 
+								ELSE 'Updated'
+						  END AS strActionType
+						, CASE
+								WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC 
+									THEN dtmDateCreated 
+								ELSE dtmDateModified
+						  END AS dtmDate
+		FROM vyuSTItemsToRegister
+		WHERE 
+		(
+			dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 			OR 
-			ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
+			dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 		)
 		AND intCompanyLocationId = 
 		(
@@ -118,6 +142,11 @@ BEGIN
 			FROM tblSTStore
 			WHERE intStoreId = @intStoreId
 		)
+		--------------------------------------------------------------------------------------------------------------
+		----------------- End Get Inventory Items that has modified/added date between date range --------------------
+		--------------------------------------------------------------------------------------------------------------
+
+
 
 
 		-- PASSPORT
@@ -231,7 +260,10 @@ BEGIN
 								FROM tblICItem I
 								JOIN tblICCategory Cat 
 									ON Cat.intCategoryId = I.intCategoryId
-								JOIN @Tab_UpdatedItems tmpItem 
+								JOIN 
+								(
+									SELECT DISTINCT intItemId FROM @tempTableItems 
+								) AS tmpItem 
 									ON tmpItem.intItemId = I.intItemId 
 								JOIN tblICItemLocation IL 
 									ON IL.intItemId = I.intItemId
@@ -256,7 +288,82 @@ BEGIN
 								AND R.intRegisterId = @intRegisterId 
 								AND ST.intStoreId = @intStoreId
 
+								-- INSERT TO UPDATE REGISTER PREVIEW TABLE
+								INSERT INTO tblSTUpdateRegisterItemReport
+								(
+									strGuid, 
+									strActionType,
+									strUpcCode,
+									strDescription,
+									dblSalePrice,
+									ysnSalesTaxed,
+									ysnIdRequiredLiquor,
+									ysnIdRequiredCigarette,
+									strRegProdCode,
+									intItemId,
+									intConcurrencyId
+								)
+								SELECT 
+									strGuid = @strGuid,
+									strActionType = t1.strActionType,
+									strUpcCode = t1.strUpcCode,
+									strDescription = t1.strDescription,
+									dblSalePrice = t1.dblSalePrice,
+									ysnSalesTaxed = t1.ysnSalesTaxed,
+									ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
+									ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
+									strRegProdCode = t1.strRegProdCode,
+									intItemId = t1.intItemId,
+									intConcurrencyId = 1
+								FROM  
+								(
+								SELECT *,
+										rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									FROM 
+										(
+											SELECT DISTINCT
+												CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+												, IUOM.strLongUPCCode AS strUpcCode
+												, I.strDescription AS strDescription
+												, Prc.dblSalePrice AS dblSalePrice
+												, IL.ysnTaxFlag1 AS ysnSalesTaxed
+												, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+												, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+												, SubCat.strRegProdCode AS strRegProdCode
+												, I.intItemId AS intItemId
+											FROM tblICItem I
+											JOIN tblICCategory Cat 
+												ON Cat.intCategoryId = I.intCategoryId
+											JOIN @tempTableItems tmpItem 
+												ON tmpItem.intItemId = I.intItemId
+											JOIN tblICItemLocation IL 
+												ON IL.intItemId = I.intItemId
+											LEFT JOIN tblSTSubcategoryRegProd SubCat 
+												ON SubCat.intRegProdId = IL.intProductCodeId
+											JOIN tblSTStore ST 
+												ON ST.intStoreId = SubCat.intStoreId
+												AND IL.intLocationId = ST.intCompanyLocationId
+											JOIN tblSMCompanyLocation L 
+												ON L.intCompanyLocationId = IL.intLocationId
+											JOIN tblICItemUOM IUOM 
+												ON IUOM.intItemId = I.intItemId
+											JOIN tblICUnitMeasure IUM 
+												ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+											JOIN tblSTRegister R 
+												ON R.intStoreId = ST.intStoreId
+											JOIN tblICItemPricing Prc 
+												ON Prc.intItemLocationId = IL.intItemLocationId
+											LEFT JOIN tblICItemSpecialPricing SplPrc 
+												ON SplPrc.intItemId = I.intItemId
+											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+											AND R.intRegisterId = @intRegisterId 
+											AND ST.intStoreId = @intStoreId
+										) as t
+								) t1
+								WHERE rn = 1
 							END
+
+
 						ELSE IF(@ysnExportEntirePricebookFile = CAST(0 AS BIT))
 							BEGIN
 								INSERT INTO tblSTstgPassportPricebookITT33
@@ -353,7 +460,10 @@ BEGIN
 								FROM tblICItem I
 								JOIN tblICCategory Cat 
 									ON Cat.intCategoryId = I.intCategoryId
-								JOIN @Tab_UpdatedItems tmpItem 
+								JOIN 
+								(
+									SELECT DISTINCT intItemId FROM @tempTableItems 
+								) AS tmpItem  
 									ON tmpItem.intItemId = I.intItemId 
 								JOIN tblICItemLocation IL 
 									ON IL.intItemId = I.intItemId
@@ -393,6 +503,84 @@ BEGIN
 											Cat.intCategoryId = Cat.intCategoryId
 										)
 								)
+
+								-- INSERT TO UPDATE REGISTER PREVIEW TABLE
+								INSERT INTO tblSTUpdateRegisterItemReport
+								(
+									strGuid, 
+									strActionType,
+									strUpcCode,
+									strDescription,
+									dblSalePrice,
+									ysnSalesTaxed,
+									ysnIdRequiredLiquor,
+									ysnIdRequiredCigarette,
+									strRegProdCode,
+									intItemId,
+									intConcurrencyId
+								)
+								SELECT 
+									strGuid = @strGuid,
+									strActionType = t1.strActionType,
+									strUpcCode = t1.strUpcCode,
+									strDescription = t1.strDescription,
+									dblSalePrice = t1.dblSalePrice,
+									ysnSalesTaxed = t1.ysnSalesTaxed,
+									ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
+									ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
+									strRegProdCode = t1.strRegProdCode,
+									intItemId = t1.intItemId,
+									intConcurrencyId = 1
+								FROM  
+								(
+								SELECT *,
+										rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									FROM 
+										(
+											SELECT DISTINCT
+												CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+												, IUOM.strLongUPCCode AS strUpcCode
+												, I.strDescription AS strDescription
+												, Prc.dblSalePrice AS dblSalePrice
+												, IL.ysnTaxFlag1 AS ysnSalesTaxed
+												, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+												, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+												, SubCat.strRegProdCode AS strRegProdCode
+												, I.intItemId AS intItemId
+											FROM tblICItem I
+											JOIN tblICCategory Cat 
+												ON Cat.intCategoryId = I.intCategoryId
+											JOIN @tempTableItems tmpItem 
+												ON tmpItem.intItemId = I.intItemId
+											JOIN tblICItemLocation IL 
+												ON IL.intItemId = I.intItemId
+											LEFT JOIN tblSTSubcategoryRegProd SubCat 
+												ON SubCat.intRegProdId = IL.intProductCodeId
+											JOIN tblSTStore ST 
+												ON ST.intStoreId = SubCat.intStoreId
+												AND IL.intLocationId = ST.intCompanyLocationId
+											JOIN tblSMCompanyLocation L 
+												ON L.intCompanyLocationId = IL.intLocationId
+											JOIN tblICItemUOM IUOM 
+												ON IUOM.intItemId = I.intItemId
+											JOIN tblICUnitMeasure IUM 
+												ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+											JOIN tblSTRegister R 
+												ON R.intStoreId = ST.intStoreId
+											JOIN tblICItemPricing Prc 
+												ON Prc.intItemLocationId = IL.intItemLocationId
+											LEFT JOIN tblICItemSpecialPricing SplPrc 
+												ON SplPrc.intItemId = I.intItemId
+											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+											AND R.intRegisterId = @intRegisterId 
+											AND ST.intStoreId = @intStoreId
+											AND ((@strCategoryCode <>'whitespaces' 
+											AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@strCategoryCode,',')))
+											OR (@strCategoryCode ='whitespaces'  
+											AND Cat.intCategoryId = Cat.intCategoryId))
+										) as t
+								) t1
+								WHERE rn = 1
 							END
 
 						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookITT33 WHERE strUniqueGuid = @strUniqueGuid)
@@ -509,7 +697,10 @@ BEGIN
 						FROM tblICItem I
 						JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
-						JOIN @Tab_UpdatedItems tmpItem 
+						JOIN 
+						(
+							SELECT DISTINCT intItemId FROM @tempTableItems 
+						) AS tmpItem 
 							ON tmpItem.intItemId = I.intItemId 
 						JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
@@ -635,7 +826,10 @@ BEGIN
 						from tblICItem I
 						JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
-						JOIN @Tab_UpdatedItems tmpItem 
+						JOIN 
+						(
+							SELECT DISTINCT intItemId FROM @tempTableItems 
+						) AS tmpItem 
 							ON tmpItem.intItemId = I.intItemId 
 						JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
