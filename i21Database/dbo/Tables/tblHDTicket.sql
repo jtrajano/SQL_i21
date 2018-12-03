@@ -64,6 +64,9 @@
 	[dtmUpgradeEndTime] datetime null,
 	[intUpgradeTimeTook] [int] null,
 	[strUpgradeSpecialInstruction] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intRootCauseId] [int] null,
+	[intSubcauseId] [int] null,
+	[strRootCauseReason] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -83,6 +86,8 @@
     CONSTRAINT [FK_tblHDTicket_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId]),
     CONSTRAINT [FK_tblHDTicket_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
     CONSTRAINT [FK_tblHDTicket_tblHDUpgradeType_intUpgradeTypeId] FOREIGN KEY ([intUpgradeTypeId]) REFERENCES [dbo].[tblHDUpgradeType] ([intUpgradeTypeId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDTicketRootCause_intRootCauseId] FOREIGN KEY ([intRootCauseId]) REFERENCES [dbo].[tblHDTicketRootCause] ([intRootCauseId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDTicketSubcause_intSubcauseId] FOREIGN KEY ([intSubcauseId]) REFERENCES [dbo].[tblHDTicketSubcause] ([intSubcauseId]),
     CONSTRAINT [FK_tblHDTicket_tblHDVersion_intUpgradeTargetVersionId] FOREIGN KEY ([intUpgradeTargetVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId])
 )
 

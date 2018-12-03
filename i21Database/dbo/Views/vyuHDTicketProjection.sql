@@ -37,6 +37,8 @@
 		,strUpgradeType = z.strType
 		,strUpgradeTargetVersionNo = a1.strVersionNo
 		,strScreenConnectLink = a2.strScreenConnectLink
+		,a3.strRootCause
+		,a4.strSubcause
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -66,3 +68,5 @@
 		left join tblHDUpgradeType z on z.intUpgradeTypeId = a.intUpgradeTypeId
 		left join tblHDVersion a1 on a1.intVersionId = a.intUpgradeTargetVersionId
 		left join tblARCustomer a2 on a2.intEntityId = a.intCustomerId
+		left join tblHDTicketRootCause a3 on a3.intRootCauseId = a.intRootCauseId
+		left join tblHDTicketSubcause a4 on a4.intSubcauseId = a.intSubcauseId
