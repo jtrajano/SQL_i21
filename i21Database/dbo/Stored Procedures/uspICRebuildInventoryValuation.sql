@@ -1284,6 +1284,8 @@ BEGIN
 							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+							INNER JOIN tblICItem i 
+								ON i.intItemId = Detail.intItemId 
 							INNER JOIN dbo.tblICInventoryTransaction t
 								ON t.intItemId = Detail.intItemId
 								AND t.intTransactionDetailId = Detail.intInventoryTransferDetailId
@@ -1297,6 +1299,7 @@ BEGIN
 					WHERE	Header.strTransferNo = @strTransactionId
 							AND t.strBatchId = @strBatchId
 							AND Detail.intItemId = ISNULL(@intItemId, Detail.intItemId)
+							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -1356,6 +1359,8 @@ BEGIN
 							,TransferSource.intCostingMethod
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+							INNER JOIN tblICItem i
+								ON i.intItemId = Detail.intItemId
 							INNER JOIN dbo.tblICInventoryTransaction TransferSource
 								ON TransferSource.intItemId = Detail.intItemId
 								AND TransferSource.intTransactionDetailId = Detail.intInventoryTransferDetailId
@@ -1369,6 +1374,7 @@ BEGIN
 					WHERE	Header.strTransferNo = @strTransactionId
 							AND TransferSource.strBatchId = @strBatchId
 							AND Detail.intItemId = ISNULL(@intItemId, Detail.intItemId)
+							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -1428,7 +1434,8 @@ BEGIN
 						,@strGLDescription
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
-						,@strTransactionId 
+						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -1479,6 +1486,7 @@ BEGIN
 						,@strGLDescription
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -1528,7 +1536,8 @@ BEGIN
 						,@strGLDescription
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
-						--,@strTransactionId -- This is only used when rebuilding the stocks.
+						,NULL --,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -1563,6 +1572,8 @@ BEGIN
 									END								
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = AdjDetail.intItemId 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intLocationId = Adj.intLocationId 
 							AND ItemLocation.intItemId = AdjDetail.intItemId
@@ -1579,6 +1590,7 @@ BEGIN
 
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 				-- Reduce the stock from the source lot. 
 				BEGIN 
@@ -1629,10 +1641,12 @@ BEGIN
 					FROM	#tmpICInventoryTransaction RebuildInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
 								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId						
 								AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
-							LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							LEFT JOIN (
+								dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i
+									ON AdjDetail.intItemId = i.intItemId
+							)
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 								AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
-								AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
 							LEFT JOIN dbo.tblICItemUOM AdjItemUOM
 								ON AdjDetail.intItemId = AdjItemUOM.intItemId
 								AND AdjDetail.intItemUOMId = AdjItemUOM.intItemUOMId
@@ -1641,6 +1655,8 @@ BEGIN
 								AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	RebuildInvTrans.strBatchId = @strBatchId
 							AND RebuildInvTrans.dblQty < 0
+							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -2008,9 +2024,11 @@ BEGIN
 
 					IF EXISTS (
 						SELECT	TOP 1 1
-						FROM	tblICBackupDetailInventoryTransaction b
+						FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
+									ON b.intItemId = i.intItemId 
 						WHERE	b.intBackupId = @intBackupId 
 								AND b.intItemId = ISNULL(@intItemId, b.intItemId) 
+								AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 								AND b.strTransactionId = @strTransactionId
 								AND b.intInTransitSourceLocationId IS NOT NULL 
 								AND b.ysnIsUnposted = 0 
@@ -2162,6 +2180,7 @@ BEGIN
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
 					,@strTransactionId 
+					,@intCategoryId
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -2195,33 +2214,35 @@ BEGIN
 						,[intInTransitSourceLocationId]
 					)
 					SELECT 	
-							[intItemId] 
-							,[intItemLocationId] 
-							,[intItemUOMId] 
-							,[dtmDate] 
-							,-[dblQty] 
-							,[dblUOMQty] 
-							,[dblCost] 
-							,[dblValue] 
-							,[dblSalesPrice] 
-							,[intCurrencyId] 
-							,[dblExchangeRate] 
-							,[intTransactionId] 
-							,[intTransactionDetailId] 
-							,[strTransactionId] 
-							,[intTransactionTypeId] 
-							,[intLotId] 
-							,[intTransactionId] 
-							,[strTransactionId] 
-							,[intTransactionDetailId] 
+							t.[intItemId] 
+							,t.[intItemLocationId] 
+							,t.[intItemUOMId] 
+							,t.[dtmDate] 
+							,-t.[dblQty] 
+							,t.[dblUOMQty] 
+							,t.[dblCost] 
+							,t.[dblValue] 
+							,t.[dblSalesPrice] 
+							,t.[intCurrencyId] 
+							,t.[dblExchangeRate] 
+							,t.[intTransactionId] 
+							,t.[intTransactionDetailId] 
+							,t.[strTransactionId] 
+							,t.[intTransactionTypeId] 
+							,t.[intLotId] 
+							,t.[intTransactionId] 
+							,t.[strTransactionId] 
+							,t.[intTransactionDetailId] 
 							,[intFobPointId] = @intFobPointId
 							,[intInTransitSourceLocationId] = t.intItemLocationId
-					FROM	tblICInventoryTransaction t
+					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+								ON t.intItemId = i.intItemId 
 					WHERE	t.strTransactionId = @strTransactionId
 							AND t.ysnIsUnposted = 0 
 							AND t.strBatchId = @strBatchId
 							AND t.dblQty < 0 -- Ensure the Qty is negative. 
 							AND t.intItemId = ISNULL(@intItemId, t.intItemId)
+							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -2273,6 +2294,7 @@ BEGIN
 						,@strGLDescription
 						,@intItemId
 						,@strTransactionId
+						,@intCategoryId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2368,7 +2390,9 @@ BEGIN
 						,RebuildInvTrans.dblForexRate
 						,RebuildInvTrans.intCostingMethod
 
-				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
+							ON i.intItemId = RebuildInvTrans.intItemId 
+						INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
@@ -2382,6 +2406,7 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -2438,6 +2463,7 @@ BEGIN
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
+						,@intCategoryId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2532,7 +2558,9 @@ BEGIN
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
 						,RebuildInvTrans.intCostingMethod
-				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
+							ON RebuildInvTrans.intItemId = i.intItemId 
+						INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
@@ -2546,6 +2574,7 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -2603,6 +2632,7 @@ BEGIN
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
+						,@intCategoryId -- This is only used when rebuilding the stocks. 
 				END
 						
 				IF @intReturnValue <> 0 
@@ -2659,6 +2689,9 @@ BEGIN
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
+						INNER JOIN tblICItem item
+							ON item.intItemId = id.intItemId 
+							
 						INNER JOIN #tmpICInventoryTransaction t
 							ON t.intTransactionId = i.intInvoiceId
 							AND t.intTransactionDetailId = id.intInvoiceDetailId 
@@ -2682,6 +2715,7 @@ BEGIN
 				WHERE	i.strInvoiceNumber = @strTransactionId
 						AND t.intInTransitSourceLocationId IS NOT NULL 
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
+						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
@@ -2735,6 +2769,7 @@ BEGIN
 						,@strGLDescription
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
+						,@intCategoryId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -2893,10 +2928,13 @@ BEGIN
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
 							ON Receipt.intInventoryReceiptId = RebuildInvTrans.intTransactionId
 							AND Receipt.strReceiptNumber = RebuildInvTrans.strTransactionId			
-						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+						LEFT JOIN (
+							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i
+								ON ReceiptItem.intItemId = i.intItemId
+						)
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
-							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+							
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
@@ -2921,6 +2959,8 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
+						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				-- Get the Vendor Entity Id 
 				SELECT	@intEntityId = intEntityVendorId
@@ -3117,6 +3157,7 @@ BEGIN
 							,@strGLDescription
 							,@intItemId
 							,@strTransactionId
+							,@intCategoryId
 
 						IF @intReturnValue <> 0 
 						BEGIN 
@@ -3258,6 +3299,7 @@ BEGIN
 							,@strGLDescription
 							,@intItemId
 							,@strTransactionId
+							,@intCategoryId
 
 						IF @intReturnValue <> 0 
 						BEGIN 
@@ -3320,10 +3362,12 @@ BEGIN
 					EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntries
 						@strBatchId 
 						,@strAccountToCounterInventory
-						,@intEntityUserSecurityId
+						,@intEntityUserSecurityId	
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks.
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,NULL -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -3398,6 +3442,7 @@ BEGIN
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -3471,6 +3516,7 @@ BEGIN
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -3598,6 +3644,7 @@ BEGIN
 					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
 					,@strTransactionId 
+					,@intCategoryId
 					
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3629,33 +3676,35 @@ BEGIN
 					,[intInTransitSourceLocationId]
 				)
 				SELECT 	
-						[intItemId] 
-						,[intItemLocationId] 
-						,[intItemUOMId] 
-						,[dtmDate] 
-						,-[dblQty] 
-						,[dblUOMQty] 
-						,[dblCost] 
-						,[dblValue] 
-						,[dblSalesPrice] 
-						,[intCurrencyId] 
-						,[dblExchangeRate] 
-						,[intTransactionId] 
-						,[intTransactionDetailId] 
-						,[strTransactionId] 
-						,[intTransactionTypeId] 
-						,[intLotId] 
-						,[intTransactionId] 
-						,[strTransactionId] 
-						,[intTransactionDetailId] 
+						t.[intItemId] 
+						,t.[intItemLocationId] 
+						,t.[intItemUOMId] 
+						,t.[dtmDate] 
+						,-t.[dblQty] 
+						,t.[dblUOMQty] 
+						,t.[dblCost] 
+						,t.[dblValue] 
+						,t.[dblSalesPrice] 
+						,t.[intCurrencyId] 
+						,t.[dblExchangeRate] 
+						,t.[intTransactionId] 
+						,t.[intTransactionDetailId] 
+						,t.[strTransactionId] 
+						,t.[intTransactionTypeId] 
+						,t.[intLotId] 
+						,t.[intTransactionId] 
+						,t.[strTransactionId] 
+						,t.[intTransactionDetailId] 
 						,[intFobPointId] = @intFobPointId
 						,[intInTransitSourceLocationId] = t.intItemLocationId
-				FROM	tblICInventoryTransaction t
+				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
+							ON t.intItemId = i.intItemId 					
 				WHERE	t.strTransactionId = @strTransactionId
 						AND t.ysnIsUnposted = 0 
 						AND t.strBatchId = @strBatchId
 						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
@@ -3707,6 +3756,7 @@ BEGIN
 					,@strGLDescription
 					,@intItemId
 					,@strTransactionId
+					,@intCategoryId
 
 				IF @intReturnValue <> 0 
 				BEGIN 
@@ -3731,6 +3781,8 @@ BEGIN
 									END
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = AdjDetail.intItemId 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intLocationId = Adj.intLocationId 
 							AND ItemLocation.intItemId = AdjDetail.intItemId
@@ -3746,6 +3798,7 @@ BEGIN
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -3845,20 +3898,28 @@ BEGIN
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
 							ON Receipt.intInventoryReceiptId = RebuildInvTrans.intTransactionId
 							AND Receipt.strReceiptNumber = RebuildInvTrans.strTransactionId			
-						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+						LEFT JOIN (
+							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i1
+								ON i1.intItemId = ReceiptItem.intItemId
+						)
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
 							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+							AND ISNULL(i1.intCategoryId, 0) = COALESCE(@intCategoryId, i1.intCategoryId, 0)
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
 						LEFT JOIN dbo.tblICInventoryAdjustment Adj
 							ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId						
 							AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
-						LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+						LEFT JOIN (
+							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
+								ON i2.intItemId = AdjDetail.intItemId 
+						)
 							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
 							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+							AND ISNULL(i2.intCategoryId, 0) = COALESCE(@intCategoryId, i2.intCategoryId, 0)
 						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
 							ON AdjItemUOM.intItemId = AdjDetail.intItemId
 							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
@@ -3940,8 +4001,9 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,NULL 
-					,@intItemId-- This is only used when rebuilding the stocks.
-					,@strTransactionId 
+					,@intItemId -- This is only used when rebuilding the stocks.
+					,@strTransactionId -- This is only used when rebuilding the stocks.
+					,@intCategoryId -- This is only used when rebuilding the stocks.
 
 				IF @intReturnValue <> 0 
 				BEGIN 
