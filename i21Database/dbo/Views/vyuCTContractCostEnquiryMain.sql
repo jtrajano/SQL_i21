@@ -75,7 +75,7 @@ AS
 			,cd.strFutureMonth
 			,cd.dblDetailQuantity
 			,cd.strItemUOM
-			,ri.dblOpenReceive
+			,cd.dblOpenReceive
 			,cd.strItemUOM strReceivedUOM
 			,cd.dblCashPrice * ISNULL(dbo.fnCTGetCurrencyExchangeRate(cd.intContractDetailId, 0), 1) dblCashPrice
 			,cd.strPriceUOM
@@ -106,6 +106,7 @@ AS
 					CD.dtmEndDate,
 					CD.intContractSeq,
 					CD.intUnitMeasureId,
+					CD.dblQuantity - ISNULL(CD.dblBalance,0) dblOpenReceive,
 					PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 					FM.strFutMarketName,				
 					MO.strFutureMonth,
@@ -159,18 +160,18 @@ AS
 		LEFT JOIN dbo.tblICCommodityProductLine pl ON pl.intCommodityProductLineId = i.intProductLineId
 		LEFT JOIN dbo.tblICCommodityAttribute cp ON cp.intCommodityAttributeId = i.intProductTypeId
 		LEFT JOIN dbo.tblICCommodityAttribute cg ON cg.intCommodityAttributeId = i.intGradeId
-		LEFT JOIN 
-		(
-			SELECT 
-			ri.intLineNo intContractDetailId
-			,SUM(dbo.fnCTConvertQtyToTargetItemUOM(iri.intUnitMeasureId, cd.intItemUOMId, iri.dblOpenReceive)) dblOpenReceive
-			FROM dbo.tblICInventoryReceiptItem ri
-			JOIN dbo.tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
-			JOIN dbo.tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			JOIN dbo.tblICInventoryReceiptItem iri ON iri.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			WHERE r.strReceiptType = 'Purchase Contract' AND r.ysnPosted = 1
-			GROUP BY ri.intLineNo
-		) ri ON ri.intContractDetailId = cd.intContractDetailId
+		--LEFT JOIN 
+		--(
+		--	SELECT 
+		--	ri.intLineNo intContractDetailId
+		--	,SUM(dbo.fnCTConvertQtyToTargetItemUOM(iri.intUnitMeasureId, cd.intItemUOMId, iri.dblOpenReceive)) dblOpenReceive
+		--	FROM dbo.tblICInventoryReceiptItem ri
+		--	JOIN dbo.tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
+		--	JOIN dbo.tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		--	JOIN dbo.tblICInventoryReceiptItem iri ON iri.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		--	WHERE r.strReceiptType = 'Purchase Contract' AND r.ysnPosted = 1
+		--	GROUP BY ri.intLineNo
+		--) ri ON ri.intContractDetailId = cd.intContractDetailId
 		LEFT JOIN 
 		(
 			SELECT	 intContractDetailId

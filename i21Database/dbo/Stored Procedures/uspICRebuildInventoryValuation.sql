@@ -916,6 +916,15 @@ BEGIN
 			FROM	tblICInventoryTransactionType 
 			WHERE	intTransactionTypeId = @intTransactionTypeId
 
+			-- Set the contra-gl account to use based on transaction type. 
+			SET	@strAccountToCounterInventory = 
+					CASE 
+						WHEN @strTransactionType =  'Inventory Adjustment - Opening Inventory' THEN 
+							NULL 
+						ELSE 
+							@strAccountToCounterInventory
+					END
+
 			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
 			DELETE FROM @ItemsForInTransitCosting
@@ -3886,6 +3895,7 @@ BEGIN
 							, 'Inventory Transfer'
 							, 'Inventory Transfer with Shipment'
 							, 'Outbound Shipment'
+							, 'Inventory Adjustment - Opening Inventory'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 

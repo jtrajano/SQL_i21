@@ -384,22 +384,34 @@ SELECT
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
 	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									C.aphgl_gl_un
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									C.aphgl_gl_un
 									*
-									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE 
+										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										THEN 
+											(CASE WHEN C2.apivc_net_amt = 0 AND C.aphgl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									C.aphgl_gl_un
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE 
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									C.aphgl_gl_un
 									*
-									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE 
+										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										THEN 
+											(CASE WHEN C2.apivc_net_amt = 0 AND C.aphgl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), B.intGLAccountExpenseId),
 	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') --always reverse the amount of detail if type is C or A

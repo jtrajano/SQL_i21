@@ -28,6 +28,8 @@ dblCalculatedGrossPrice		= dblCalculatedAmount
 ,dblOriginalGrossPrice		= dblOriginalAmount
 FROM tblCFTransactionPrice as price
 WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND ISNULL(tblCFTransaction.dblCalculatedGrossPrice,0) = 0
+AND ISNULL(tblCFTransaction.dblOriginalGrossPrice,0) = 0
 AND price.strTransactionPriceId = 'Gross Price'
 
 
@@ -37,6 +39,8 @@ dblCalculatedNetPrice		= dblCalculatedAmount
 ,dblOriginalNetPrice		= dblOriginalAmount
 FROM tblCFTransactionPrice as price
 WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND ISNULL(tblCFTransaction.dblCalculatedNetPrice,0) = 0
+AND ISNULL(tblCFTransaction.dblOriginalNetPrice,0) = 0
 AND price.strTransactionPriceId = 'Net Price'
 
 
@@ -46,6 +50,8 @@ dblCalculatedTotalPrice		= dblCalculatedAmount
 ,dblOriginalTotalPrice		= dblOriginalAmount
 FROM tblCFTransactionPrice as price
 WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND ISNULL(tblCFTransaction.dblCalculatedTotalPrice,0) = 0
+AND ISNULL(tblCFTransaction.dblOriginalTotalPrice,0) = 0
 AND price.strTransactionPriceId = 'Total Amount'
 
 UPDATE tblCFTransaction
@@ -59,6 +65,8 @@ GROUP BY tax.intTransactionId)
 SUM(ISNULL(dblTaxOriginalAmount,0))
 FROM tblCFTransactionTax as tax
 WHERE tax.intTransactionId = tblCFTransaction.intTransactionId
+AND ISNULL(tblCFTransaction.dblCalculatedTotalTax,0) = 0
+AND ISNULL(tblCFTransaction.dblOriginalTotalTax,0) = 0
 GROUP BY tax.intTransactionId)
 
 

@@ -151,7 +151,6 @@
     <Folder Include="dbo\Triggers\" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
-    <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
     <Folder Include="Scripts\Post-Deployment\TM\Tables" />
     <Folder Include="Scripts\Utility" />
     <Folder Include="Scripts\Utility\IC" />
@@ -1800,11 +1799,6 @@
     <Build Include="dbo\Stored Procedures\uspMFStartWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddInboundShipmentToInventoryReceipt.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportData\GeneralLedgerByAccountDetail.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportData\IncomeStatementStandard.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
     <Build Include="dbo\Stored Procedures\uspEMDeactivateEntity.sql" />
     <Build Include="dbo\Tables\tblMFBlendDemand.sql" />
     <Build Include="dbo\Tables\tblMFBlendDemandStatus.sql" />
@@ -7174,7 +7168,25 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
     <Build Include="dbo\Functions\fnSTGetRowsFromDelimitedValuesReturnString.sql" />
+    <Build Include="dbo\Views\vyuGRGradesReport.sql" />
+    <Build Include="dbo\Views\vyuGRStorageByDiscountReport.sql" />
+    <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
+    <Build Include="dbo\Tables\tblSMExportLog.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
+    <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationDetailAPAR.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
+    <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
+    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
+    <Build Include="dbo\Views\vyuSTItemUOMUpcCodeToNumeric.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRegisterItemReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7373,6 +7385,7 @@
     <None Include="Scripts\Post-Deployment\GR\InsertStorageHistoryTypeTransaction.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

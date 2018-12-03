@@ -1,4 +1,4 @@
-CREATE PROC [dbo].[uspRKSummaryPnL] @dtmFromDate DATETIME,  
+﻿CREATE PROC [dbo].[uspRKSummaryPnL] @dtmFromDate DATETIME,  
  @dtmToDate DATETIME,  
  @intCommodityId INT = NULL,  
  @ysnExpired BIT,  

@@ -18,7 +18,7 @@
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
+			,strEmail = (select top 1 (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,ysni21User = 1
 			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,intConcurrencyId = 1

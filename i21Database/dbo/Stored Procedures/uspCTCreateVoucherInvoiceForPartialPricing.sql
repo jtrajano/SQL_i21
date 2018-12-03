@@ -66,7 +66,8 @@ BEGIN TRY
 			@dblQtyToCheck					NUMERIC(18,6),
 			@batchIdUsed					NVARCHAR(MAX),
 			@dblQtyShipped					NUMERIC(18,6),
-			@dblQtyReceived					NUMERIC(18,6)
+			@dblQtyReceived					NUMERIC(18,6),
+			@intPriceFixationDetailAPARId	INT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -105,13 +106,13 @@ BEGIN TRY
 	WHILE ISNULL(@intPriceFixationDetailId, 0)  > 0 
 	BEGIN
 
-		SELECT	@intBillId = NULL, @intBillDetailId = NULL, @intInvoiceId = NULL, @intInvoiceDetailId = NULL
+		--SELECT	@intBillId = NULL, @intBillDetailId = NULL, @intInvoiceId = NULL, @intInvoiceDetailId = NULL
 
 		SELECT	@dblPriceFixedQty	=	FD.dblQuantity, 
 				@intBillId			=	FD.intBillId,
 				@intBillDetailId	=	FD.intBillDetailId, 
-				@intInvoiceId		=	FD.intInvoiceId, 
-				@intInvoiceDetailId =	FD.intInvoiceDetailId, 
+				--@intInvoiceId		=	FD.intInvoiceId, 
+				--@intInvoiceDetailId =	FD.intInvoiceDetailId, 
 				@dblFinalPrice		=	[dbo].[fnCTConvertToSeqFXCurrency](PF.intContractDetailId,PC.intFinalCurrencyId,IU.intItemUOMId,FD.dblFinalPrice)
 		FROM	tblCTPriceFixationDetail	FD
 		JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -131,8 +132,8 @@ BEGIN TRY
 					RI.intInventoryReceiptItemId,
 					dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
 					RI.intUnitMeasureId,
-					BD.intBillId,
-					BD.intBillDetailId,
+					--BD.intBillId,
+					--BD.intBillDetailId,
 					IR.strReceiptNumber,
 					dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,CD.intItemUOMId,BD.dblQtyReceived) dblQtyReceived
 			
@@ -146,7 +147,7 @@ BEGIN TRY
 			WHERE	RI.intLineNo	=   @intContractDetailId 
 			
 
-			IF ISNULL(@intBillId,0) = 0
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId)--ISNULL(@intBillId,0) = 0
 			BEGIN
 
 				DELETE	FROM @tblToProcess
@@ -202,7 +203,7 @@ BEGIN TRY
 						END
 
 						INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
-						SELECT	2,@intInventoryReceiptItemId, @dblQtyReceived, @dblFinalPrice
+						SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
 				    
 						EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
 				    
@@ -217,7 +218,10 @@ BEGIN TRY
 							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 						END
 
-						UPDATE	tblCTPriceFixationDetail SET intBillId = @intBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
+						SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
+
+						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 					ELSE
 					BEGIN
@@ -231,7 +235,10 @@ BEGIN TRY
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
-						UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
+						SELECT @intPriceFixationDetailId,@intNewBillId,@intBillDetailId,1
+
+						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
 						SELECT	@intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
@@ -257,53 +264,68 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
-				
-				SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
-				
-				SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
-						@dblTotalBillQty = dblQtyReceived,
-						@dblQtyToCheck   = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intBillQtyUOMId,@dblPriceFixedQty),
-						@dblVoucherPrice = dblCost
-				FROM    tblAPBillDetail 
-				WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
+				SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-				IF  @dblVoucherPrice	<>	@dblFinalPrice
-					
+				WHILE ISNULL(@intPriceFixationDetailAPARId,0) > 0
 				BEGIN
-					EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
-									@type					=	N'AccountsPayable.view.Voucher',
-									@transactionEntityId	=	@intEntityId,
-									@currentUserEntityId	=	@intUserId,
-									@locationId				=	@intCompanyLocationId,
-									@amount					=	@dblTotal,
-									@requireApproval		=	@ysnRequireApproval OUTPUT
 
-					IF  ISNULL(@ysnRequireApproval , 0) = 0
+					SELECT	@intBillId = NULL, @intBillDetailId = NULL
+
+					SELECT	@intBillId = intBillId, 
+							@intBillDetailId = intBillDetailId 
+					FROM	tblCTPriceFixationDetailAPAR 
+					WHERE	intPriceFixationDetailAPARId = @intPriceFixationDetailAPARId
+
+					SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
+				
+					SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
+				
+					SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
+							@dblTotalBillQty = dblQtyReceived,
+							@dblQtyToCheck   = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intBillQtyUOMId,@dblPriceFixedQty),
+							@dblVoucherPrice = dblCost
+					FROM    tblAPBillDetail 
+					WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
+
+					IF  @dblVoucherPrice	<>	@dblFinalPrice
+					
 					BEGIN
-							IF ISNULL(@ysnBillPosted,0) = 1
-							BEGIN
-								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
-								IF ISNULL(@ysnSuccess, 0) = 0
+						EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
+										@type					=	N'AccountsPayable.view.Voucher',
+										@transactionEntityId	=	@intEntityId,
+										@currentUserEntityId	=	@intUserId,
+										@locationId				=	@intCompanyLocationId,
+										@amount					=	@dblTotal,
+										@requireApproval		=	@ysnRequireApproval OUTPUT
+
+						IF  ISNULL(@ysnRequireApproval , 0) = 0
+						BEGIN
+								IF ISNULL(@ysnBillPosted,0) = 1
 								BEGIN
-									SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
-									IF ISNULL(@ErrMsg, '') != ''
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
+									IF ISNULL(@ysnSuccess, 0) = 0
 									BEGIN
-										RAISERROR(@ErrMsg, 11, 1);
-										RETURN;
+										SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+										IF ISNULL(@ErrMsg, '') != ''
+										BEGIN
+											RAISERROR(@ErrMsg, 11, 1);
+											RETURN;
+										END
 									END
 								END
-							END
 
-							--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblQtyToCheck, dblQtyReceived = @dblQtyToCheck WHERE intBillDetailId = @intBillDetailId
+								--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblQtyToCheck, dblQtyReceived = @dblQtyToCheck WHERE intBillDetailId = @intBillDetailId
 
-							EXEC uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+								EXEC uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
-							IF ISNULL(@ysnBillPosted,0) = 1
-							BEGIN
-								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
-							END
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								END
+						END
 					END
+
+					SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND intPriceFixationDetailAPARId > @intPriceFixationDetailAPARId
 				END
 			END
 		END
@@ -316,8 +338,8 @@ BEGIN TRY
 			SELECT  RI.intInventoryShipmentId,
 					RI.intInventoryShipmentItemId,
 					dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
-					BD.intInvoiceId,
-					BD.intInvoiceDetailId,
+					--BD.intInvoiceId,
+					--BD.intInvoiceDetailId,
 					IR.strShipmentNumber,
 					dbo.fnCTConvertQtyToTargetItemUOM(BD.intItemUOMId,CD.intItemUOMId,BD.dblQtyShipped) dblQtyShipped
 			
@@ -331,7 +353,7 @@ BEGIN TRY
 			WHERE	RI.intLineNo	=   @intContractDetailId 
 			AND		BD.intInventoryShipmentChargeId IS NULL
 
-			IF ISNULL(@intInvoiceId,0) = 0
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId)--ISNULL(@intInvoiceId,0) = 0
 			BEGIN
 			
 				DELETE	FROM @tblToProcess
@@ -381,6 +403,7 @@ BEGIN TRY
 
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId,@dblQtyShipped = dblQtyShipped FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 
+						/*CT-2672
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
 							EXEC	uspARPostInvoice
@@ -389,9 +412,11 @@ BEGIN TRY
 									,@userId			= @intUserId
 									,@raiseError		= 1
 						END
+						*/
 
-						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyShipped, @dblFinalPrice, @intUserId
+						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyToInvoice, @dblFinalPrice, @intUserId,@intInvoiceDetailId OUTPUT
 
+						/*CT-2672
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
 							EXEC	uspARPostInvoice
@@ -400,10 +425,12 @@ BEGIN TRY
 									,@userId			= @intUserId
 									,@raiseError		= 1
 						END		
-						
-						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
+						*/
 
-						UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intInvoiceId, intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						--SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
+						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
+						SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
+						--UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intInvoiceId, intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 					ELSE
 					BEGIN
@@ -427,14 +454,18 @@ BEGIN TRY
 								,@Price				=	@dblFinalPrice
 								,@ContractPrice		=	@dblFinalPrice
 								,@UserId			=	@intUserId
-
+						
+						/*CT-2672
 						EXEC	uspARPostInvoice
 								 @param				= @intNewInvoiceId
 								,@post				= 1
 								,@userId			= @intUserId
 								,@raiseError		= 1
+						*/
 
-						UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intNewInvoiceId,intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
+						SELECT @intPriceFixationDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
+						--UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intNewInvoiceId,intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
@@ -442,52 +473,74 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT  @dblTotal = SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
-				
-				SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
-				
-				SELECT  @intInvoiceQtyUOMId =	intItemUOMId,
-						@dblTotalInvoiceQty =	dblQtyShipped,
-						@dblInvoicePrice	=	dblPrice,
-						@dblQtyShipped		=	dblQtyShipped,
-						@dblQtyToCheck		=	dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intInvoiceQtyUOMId,@dblPriceFixedQty)
 
-				FROM    tblARInvoiceDetail 
-				WHERE   intInvoiceDetailId = @intInvoiceDetailId AND intInventoryShipmentChargeId IS NULL
+				SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-				IF	@dblInvoicePrice	<>	@dblFinalPrice
+				WHILE ISNULL(@intPriceFixationDetailAPARId,0) > 0
 				BEGIN
 					
-					IF ISNULL(@ysnInvoicePosted,0) = 1
+					SELECT	@intInvoiceId = NULL, @intInvoiceDetailId = NULL
+
+					SELECT	@intInvoiceId = intInvoiceId, 
+							@intInvoiceDetailId = intInvoiceDetailId 
+					FROM	tblCTPriceFixationDetailAPAR 
+					WHERE	intPriceFixationDetailAPARId = @intPriceFixationDetailAPARId
+
+					SELECT  @dblTotal = SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
+				
+					SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+				
+					SELECT  @intInvoiceQtyUOMId =	intItemUOMId,
+							@dblTotalInvoiceQty =	dblQtyShipped,
+							@dblInvoicePrice	=	dblPrice,
+							@dblQtyShipped		=	dblQtyShipped,
+							@dblQtyToCheck		=	dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intInvoiceQtyUOMId,@dblPriceFixedQty)
+
+					FROM    tblARInvoiceDetail 
+					WHERE   intInvoiceDetailId = @intInvoiceDetailId AND intInventoryShipmentChargeId IS NULL
+
+					IF	@dblInvoicePrice	<>	@dblFinalPrice AND ISNULL(@ysnInvoicePosted,0) = 0
 					BEGIN
-						EXEC	uspARPostInvoice
-								 @param				= @intInvoiceId
-								,@post				= 0
-								,@userId			= @intUserId
-								,@raiseError		= 1
-					END
+					
+						/*CT-2672
+						IF ISNULL(@ysnInvoicePosted,0) = 1
+						BEGIN
+							EXEC	uspARPostInvoice
+									 @param				= @intInvoiceId
+									,@post				= 0
+									,@userId			= @intUserId
+									,@raiseError		= 1
+						END
+						*/
+
+						EXEC	uspARUpdateInvoiceDetails	
+								@intInvoiceDetailId	=	@intInvoiceDetailId,
+								@intEntityId		=	@intUserId, 
+								@dblQtyShipped		=	@dblQtyShipped
+
+						EXEC	uspARUpdateInvoicePrice 
+								 @InvoiceId			=	@intInvoiceId
+								,@InvoiceDetailId	=	@intInvoiceDetailId
+								,@Price				=	@dblFinalPrice
+								,@ContractPrice		=	@dblFinalPrice
+								,@UserId			=	@intUserId
 						
-					EXEC	uspARUpdateInvoiceDetails	
-							@intInvoiceDetailId	=	@intInvoiceDetailId,
-							@intEntityId		=	@intUserId, 
-							@dblQtyShipped		=	@dblQtyShipped
+						/*CT-2672
+						IF ISNULL(@ysnInvoicePosted,0) = 1
+						BEGIN
+							EXEC	uspARPostInvoice
+									 @param				= @intInvoiceId
+									,@post				= 1
+									,@userId			= @intUserId
+									,@raiseError		= 1
+						END	
+						*/				
+					END
 
-					EXEC	uspARUpdateInvoicePrice 
-							 @InvoiceId			=	@intInvoiceId
-							,@InvoiceDetailId	=	@intInvoiceDetailId
-							,@Price				=	@dblFinalPrice
-							,@ContractPrice		=	@dblFinalPrice
-							,@UserId			=	@intUserId
-
-					IF ISNULL(@ysnInvoicePosted,0) = 1
-					BEGIN
-						EXEC	uspARPostInvoice
-								 @param				= @intInvoiceId
-								,@post				= 1
-								,@userId			= @intUserId
-								,@raiseError		= 1
-					END					
+					SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND intPriceFixationDetailAPARId > @intPriceFixationDetailAPARId
 				END
+
+				
 			END
 		END
 

@@ -138,7 +138,10 @@ USING
 												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
 		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
-		,dblContractCost					=	ISNULL(ctDetail.dblSeqPrice,0)
+		,dblContractCost					=	CASE WHEN A.intTransactionType = 13
+													THEN A.dblFutures + A.dblBasis
+													ELSE ISNULL(ctDetail.dblSeqPrice,0)
+													END
 		/*1099 info*/						
 		,int1099Form						=	ISNULL(A.int1099Form,
 													(CASE WHEN patron.intEntityId IS NOT NULL 

@@ -226,6 +226,15 @@ USING	(
 		SELECT id = 54
 				,name = 'Storage Measurement Reading'
 				,form = 'Storage Measurement Reading'
+		UNION ALL
+		SELECT id = 55
+				,name = 'Maintain Storage'
+				,form = 'Maintain Storage'
+
+		/****************************************************************************************************
+		IMPORTANT! When adding a new transaction type, create a new jira to include it in the Stock Rebuild. 
+		We don't want to lose those transaction types after the stock has been rebuilt.
+		****************************************************************************************************/
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

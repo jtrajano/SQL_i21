@@ -1084,6 +1084,27 @@ BEGIN
 	BEGIN
 		SET @intVehicleId = NULL
 	END
+
+
+	DECLARE @ysnIgnoreVehicleError BIT
+	SET @ysnIgnoreVehicleError = 0
+
+	IF(ISNUMERIC(@strVehicleId) = 1)
+	BEGIN
+		SET @strVehicleId = CAST(@strVehicleId AS BIGINT)
+		IF(@strVehicleId = 0)
+		BEGIN
+			SET @ysnIgnoreVehicleError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @strVehicleId =  LTRIM(RTRIM(ISNULL(@strVehicleId,'')))
+		IF(@strVehicleId = '')
+		BEGIN
+			SET @ysnIgnoreVehicleError = 1
+		END
+	END
 	------------------------------------------------------------
 
 
@@ -1209,21 +1230,19 @@ BEGIN
 			SET @ysnInvalid = 1
 		END
 
-		IF(ISNULL(@intVehicleId,0) = 0)
+		
+		IF(ISNULL(@intVehicleId,0) = 0 AND @strTransactionType != 'Foreign Sale' )
 		BEGIN
 			SET @intVehicleId = NULL
-			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0))
 			BEGIN
 				SET @ysnInvalid = 1
 			END
 			ELSE
 			BEGIN
-				IF(ISNULL(@strVehicleId,'') != '')
+				IF(@ysnIgnoreVehicleError = 0)
 				BEGIN
-					IF(@strVehicleId <> '0')
-					BEGIN
-						SET @ysnInvalid = 1
-					END
+					SET @ysnInvalid = 1
 				END
 			END
 		END
@@ -1472,33 +1491,70 @@ BEGIN
 		---------------- End get card type/ dual card
 		--------------------------------------------------------
 
-		IF(ISNULL(@ysnVehicleRequire,0) = 1)
+		
+		IF(ISNULL(@intVehicleId,0) = 0 AND @strTransactionType != 'Foreign Sale' )
 		BEGIN
-			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			SET @intVehicleId = NULL
+			IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0))
 			BEGIN
-				IF(@strVehicleId <> '0')
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Vehicle is required.')
+
+				INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Vehicle is required.')
+
+				IF(@ysnIgnoreVehicleError = 0)
 				BEGIN
 					INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
 
 					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
 				END
+
+				SET @ysnInvalid = 1
+
 			END
-		END
-		ELSE
-		BEGIN
-			IF(ISNULL(@strVehicleId,'') != '')
+			ELSE
 			BEGIN
-				IF(ISNULL(@intVehicleId,0) = 0 AND @strVehicleId <> '0')
+				IF(@ysnIgnoreVehicleError = 0)
 				BEGIN
-
 					INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+					VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
 
-					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
+
+					SET @ysnInvalid = 1
 				END
 			END
 		END
+
+
+		--IF(ISNULL(@ysnVehicleRequire,0) = 1)
+		--BEGIN
+		--	IF(ISNULL(@ysnVehicleRequire,0) = 1 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+		--	BEGIN
+		--		IF(@strVehicleId <> '0')
+		--		BEGIN
+		--			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--			VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+
+		--			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+		--		END
+		--	END
+		--END
+		--ELSE
+		--BEGIN
+		--	IF(ISNULL(LTRIM(RTRIM(@strVehicleId)),'') != '')
+		--	BEGIN
+		--		IF(ISNULL(@intVehicleId,0) = 0 AND @strVehicleId <> '0' AND @strTransactionType != 'Foreign Sale')
+		--		BEGIN
+
+		--			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--			VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+
+		--			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recaclulate to remove this error and leave the vehicle as blank.')
+		--		END
+		--	END
+		--END
 		
 
 		
@@ -1629,10 +1685,10 @@ BEGIN
 				,strPriceMethod			= 'Standard Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
@@ -1653,10 +1709,10 @@ BEGIN
 				,strPriceMethod = 'Import File Price'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
@@ -1677,10 +1733,10 @@ BEGIN
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
@@ -1701,10 +1757,10 @@ BEGIN
 				,strPriceMethod = 'Special Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
@@ -1765,6 +1821,99 @@ BEGIN
 						SET @dblCalcQuantity = @dblQuantity
 					END
 
+						
+				UPDATE tblCFTransaction 
+				SET dblQuantity = @dblQuantity
+				WHERE intTransactionId = @Pk
+
+
+				EXEC dbo.uspCFRecalculateTransaciton 
+				 @ProductId						=	@intProductId
+				,@CardId						=	@intCardId
+				,@VehicleId						=	@intVehicleId
+				,@SiteId						=	@intSiteId
+				,@TransactionDate				=	@dtmTransactionDate
+				,@Quantity						=	@dblQuantity
+				,@OriginalPrice					=	@dblOriginalGrossPrice
+				,@TransactionType				=	@strTransactionType
+				,@NetworkId						=	@intNetworkId
+				,@TransferCost					=	@dblTransferCost
+				,@TransactionId					=	@Pk
+				,@CreditCardUsed				=	@ysnCreditCardUsed
+				,@PostedOrigin					=	@ysnOriginHistory  
+				,@PostedCSV						=	@ysnPostedCSV  
+				,@PumpId						=	@intPumpNumber
+				,@IsImporting					=	1
+				,@TaxState						=	@TaxState						
+				,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
+				,@StateExciseTaxRate1         	=	@StateExciseTaxRate1         
+				,@StateExciseTaxRate2         	=	@StateExciseTaxRate2         
+				,@CountyExciseTaxRate         	=	@CountyExciseTaxRate         
+				,@CityExciseTaxRate           	=	@CityExciseTaxRate           
+				,@StateSalesTaxPercentageRate 	=	@StateSalesTaxPercentageRate 
+				,@CountySalesTaxPercentageRate	=	@CountySalesTaxPercentageRate
+				,@CitySalesTaxPercentageRate  	=	@CitySalesTaxPercentageRate  
+				,@OtherSalesTaxPercentageRate	=	@OtherSalesTaxPercentageRate 
+				,@FederalExciseTax1				=   @FederalExciseTax1	
+				,@FederalExciseTax2				=   @FederalExciseTax2	
+				,@StateExciseTax1				=   @StateExciseTax1	
+				,@StateExciseTax2				=   @StateExciseTax2	
+				,@StateExciseTax3				=   @StateExciseTax3	
+				,@CountyTax1					=   @CountyTax1		
+				,@CityTax1						=   @CityTax1			
+				,@StateSalesTax					=   @StateSalesTax		
+				,@CountySalesTax				=   @CountySalesTax	
+				,@CitySalesTax					=   @CitySalesTax		
+				,@strGUID						=   @strGUID		
+				,@strProcessDate				=	@strProcessDate
+				,@Tax1							=	@Tax1		
+				,@Tax2							=	@Tax2		
+				,@Tax3							=	@Tax3		
+				,@Tax4							=	@Tax4		
+				,@Tax5							=	@Tax5		
+				,@Tax6							=	@Tax6		
+				,@Tax7							=	@Tax7		
+				,@Tax8							=	@Tax8		
+				,@Tax9							=	@Tax9		
+				,@Tax10							=	@Tax10		
+				,@TaxValue1						=	@TaxValue1	
+				,@TaxValue2						=	@TaxValue2	
+				,@TaxValue3						=	@TaxValue3	
+				,@TaxValue4						=	@TaxValue4	
+				,@TaxValue5						=	@TaxValue5	
+				,@TaxValue6						=	@TaxValue6	
+				,@TaxValue7						=	@TaxValue7	
+				,@TaxValue8						=	@TaxValue8	
+				,@TaxValue9						=	@TaxValue9	
+				,@TaxValue10					=	@TaxValue10
+				,@ForeignCardId					=   @strCardId
+
+
+				SELECT
+				 @dblPrcPriceOut				= dblPrice
+				,@strPrcPricingOut				= strPriceMethod
+				,@dblPrcOriginalPrice			= dblOriginalPrice
+				,@strPrcPriceBasis				= strPriceBasis
+				,@strPriceMethod   				= strPriceMethod
+				,@strPriceBasis 				= strPriceBasis
+				,@intPriceProfileId 			= intPriceProfileId 	
+				,@intPriceIndexId				= intPriceIndexId	
+				,@intSiteGroupId				= intSiteGroupId		
+				,@strPriceProfileId				= strPriceProfileId	
+				,@strPriceIndexId				= strPriceIndexId	
+				,@strSiteGroup					= strSiteGroup		
+				,@dblPriceProfileRate			= dblPriceProfileRate
+				,@dblPriceIndexRate				= dblPriceIndexRate	
+				,@dtmPriceIndexDate				= dtmPriceIndexDate	
+				,@ysnDuplicate					= ysnDuplicate
+				,@ysnRecalculateInvalid			= ysnInvalid
+				,@dblInventoryCost				= dblInventoryCost
+				,@dblMargin						= dblMargin
+				,@dblGrossTransferCost			= dblGrossTransferCost
+				,@dblNetTransferCost			= dblNetTransferCost
+				,@dblAdjustmentRate				= dblAdjustmentRate
+				FROM tblCFTransactionPricingType
+
 					
 				UPDATE tblCFTransaction 
 				SET strPriceBasis = null 
@@ -1776,10 +1925,10 @@ BEGIN
 				,dblQuantity = @dblQuantity
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
@@ -1815,10 +1964,10 @@ BEGIN
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
-				,intSiteGroupId			= null
+				,intSiteGroupId			= @intSiteGroupId
 				,strPriceProfileId		= ''
 				,strPriceIndexId		= ''
-				,strSiteGroup			= ''
+				,strSiteGroup			= @strSiteGroup
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null

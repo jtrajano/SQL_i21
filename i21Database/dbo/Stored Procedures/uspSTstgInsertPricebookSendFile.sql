@@ -250,7 +250,7 @@ BEGIN
 									ON R.intRegisterId = ST.intRegisterId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
-								JOIN tblICItemSpecialPricing SplPrc 
+								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
 								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 								AND R.intRegisterId = @intRegisterId 
@@ -372,7 +372,7 @@ BEGIN
 									ON R.intRegisterId = ST.intRegisterId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
-								JOIN tblICItemSpecialPricing SplPrc 
+								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
 								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 								AND R.intRegisterId = @intRegisterId 
@@ -528,7 +528,7 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
-						JOIN tblICItemSpecialPricing SplPrc 
+						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
 						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
@@ -654,7 +654,7 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
-						JOIN tblICItemSpecialPricing SplPrc 
+						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
 						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 

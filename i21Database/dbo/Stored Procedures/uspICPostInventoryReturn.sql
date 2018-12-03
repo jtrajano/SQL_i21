@@ -689,8 +689,8 @@ BEGIN
 				,strTransactionId = Header.strReceiptNumber  
 				,intTransactionTypeId = @INVENTORY_RETURN_TYPE  
 				,intLotId = DetailItemLot.intLotId 
-				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
-				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intSubLocationId = ISNULL(l.intSubLocationId, DetailItem.intSubLocationId)
+				,intStorageLocationId = ISNULL(l.intStorageLocationId, DetailItem.intStorageLocationId) 
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
@@ -702,6 +702,8 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				LEFT JOIN tblICLot l
+					ON l.intLotId = DetailItemLot.intLotId
 				OUTER APPLY (
 					SELECT  dblTotalNet = SUM(
 								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
