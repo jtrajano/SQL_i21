@@ -5258,6 +5258,7 @@ BEGIN
 	@tblCFTransactionTax as cft
 	INNER JOIN @tblCFCalculatedTaxExempt as cftx
 	ON cft.intTaxClassId = cftx.intTaxClassId
+	AND cft.intTaxCodeId = cftx.intTaxCodeId
 	WHERE cft.ysnTaxExempt = 1 AND 
 	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
 	-------------------NORMAL QTY TAX CALC------------------------
@@ -5278,6 +5279,7 @@ BEGIN
 	@tblCFTransactionTaxZeroQuantity as cft
 	INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
 	ON cft.intTaxClassId = cftx.intTaxClassId
+	AND cft.intTaxCodeId = cftx.intTaxCodeId
 	WHERE cft.ysnTaxExempt = 1 AND 
 	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
 	-------------------ZERO QTY TAX CALC------------------------
