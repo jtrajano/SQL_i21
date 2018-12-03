@@ -103,6 +103,7 @@ SELECT id							= NEWID()
 	 , intSubBookId					= SHIPPEDITEMS.intSubBookId
 	 , strBook						= BOOK.strBook
 	 , strSubBook					= SUBBOOK.strSubBook
+	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
 FROM (
 	SELECT strTransactionType				= 'Inventory Shipment'
 		 , strTransactionNumber				= SHP.strShipmentNumber
@@ -1390,6 +1391,11 @@ LEFT OUTER JOIN (
 	SELECT intTicketId
 		 , strTicketNumber
 		 , strCustomerReference
+		 , ysnShowForShipment = case when 
+		 								intTicketTypeId = 2 and 
+										intStorageScheduleTypeId = -6 
+											then 0
+		 						else 1 end
 	FROM dbo.tblSCTicket WITH (NOLOCK)
 ) SCALETICKET ON SHIPPEDITEMS.intTicketId = SCALETICKET.intTicketId
 LEFT OUTER JOIN (
