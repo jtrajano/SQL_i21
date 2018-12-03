@@ -582,7 +582,7 @@ BEGIN
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				INNER JOIN tblICItem Item 
 					ON Item.intItemId = Detail.intItemId
-				INNER JOIN dbo.tblICInventoryTransaction FromStock 
+				INNER JOIN dbo.tblICInventoryTransactionStorage FromStock 
 					ON FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
 					AND FromStock.intTransactionId = Detail.intInventoryTransferId
 					AND FromStock.intItemId = Detail.intItemId
