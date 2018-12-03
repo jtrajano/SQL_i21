@@ -86,6 +86,7 @@ BEGIN
 		SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
 		EXEC dbo.uspICDCBeginInventoryAg @Location, @StartDate, @intEntityUserSecurityId
 	END
+	ELSE IF @strType = 'RecipeFormula'  EXEC dbo.uspMFImportRecipe 0, @intEntityUserSecurityId  
 END
 ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
