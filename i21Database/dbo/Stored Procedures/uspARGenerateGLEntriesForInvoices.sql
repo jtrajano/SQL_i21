@@ -772,7 +772,7 @@ WHERE
         OR
 	    I.[dblQtyShipped] <> @ZeroDecimal
         )
-    AND I.[strTransactionType] <> 'Cash Refund'
+    AND I.[strTransactionType] NOT IN ('Debit Memo', 'Cash Refund')
 
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
@@ -1356,7 +1356,7 @@ FROM
 WHERE
     I.[intPeriodsToAccrue] <= 1
     AND I.[dblQtyShipped] <> @ZeroDecimal
-    AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
+    -- AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
     AND I.[strTransactionType] = 'Debit Memo'
     AND I.[strItemType] <> 'Comment'
 

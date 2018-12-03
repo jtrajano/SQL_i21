@@ -36,7 +36,8 @@ SET ANSI_WARNINGS OFF
 		[dblQuantity] NUMERIC(18,6),
 		[dblCost] NUMERIC(18,6),
 		[dblUnitQty] NUMERIC(18,6),
-		[ysnDirectCategory] BIT
+		[ysnDirectCategory] BIT,
+		[ysnSubtractVolume] BIT
 	);
 
 	DECLARE @tempPatronageVolumes TABLE(
@@ -69,7 +70,8 @@ SET ANSI_WARNINGS OFF
 					ABD.dblQtyReceived,
 					ABD.dblCost,
 					UOM.dblUnitQty,
-					ysnDirectCategory = 0
+					ysnDirectCategory = 0,
+					ysnSubtractVolume = CASE WHEN AB.intTransactionType = 3 THEN 1 ELSE 0 END
 			FROM tblAPBill AB
 			INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
@@ -100,7 +102,8 @@ SET ANSI_WARNINGS OFF
 				ARID.dblQtyShipped,
 				ARID.dblPrice,
 				UOM.dblUnitQty,
-				ysnDirectCategory = CAST((CASE WHEN ARID.intTicketId IS NOT NULL THEN 1 ELSE 0 END) AS BIT)
+				ysnDirectCategory = CAST((CASE WHEN ARID.intTicketId IS NOT NULL THEN 1 ELSE 0 END) AS BIT),
+				ysnSubtractVolume = CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN 1 ELSE 0 END
 		FROM tblARInvoice ARI
 		INNER JOIN tblARInvoiceDetail ARID
 			ON ARID.intInvoiceId = ARI.intInvoiceId
@@ -135,8 +138,14 @@ SET ANSI_WARNINGS OFF
 			PVS.intPatronageCategoryId,
 			ysnPosted = @post,
 			PVS.intFiscalYearId,
-			dblVolume = ROUND(SUM(CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
-						ELSE PVS.dblQuantity * PVS.dblUnitQty END), 2)
+			dblVolume = ROUND(SUM(
+								CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (
+									CASE WHEN PVS.dblQuantity <= 0 
+											THEN 0 
+											ELSE (PVS.dblQuantity * PVS.dblCost) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END 
+									END) 
+								ELSE PVS.dblQuantity * PVS.dblUnitQty * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END END
+							), 2) 
 	FROM @patronageVolumeStaging PVS
 	GROUP BY	PVS.intCustomerPatronId,
 				PVS.intPatronageCategoryId,
@@ -171,7 +180,7 @@ SET ANSI_WARNINGS OFF
 				ysnDirectSale = PVS.ysnDirectCategory,
 				intItemId = PVS.intItemId,
 				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
-						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2)
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END
 		FROM @patronageVolumeStaging PVS
 		WHERE PVS.strPurchaseSale = @TYPE_PURCHASE
 		UNION ALL
@@ -181,7 +190,7 @@ SET ANSI_WARNINGS OFF
 				ysnDirectSale = PVS.ysnDirectCategory,
 				intItemId = PVS.intItemId,
 				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
-						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2)
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END
 		FROM @patronageVolumeStaging PVS
 		WHERE PVS.strPurchaseSale = @TYPE_SALE
 	END

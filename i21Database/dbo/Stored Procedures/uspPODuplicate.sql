@@ -15,6 +15,10 @@ BEGIN TRY
 
 	DECLARE @transCount int = @@TRANCOUNT;
 	DECLARE @newPOId INT;
+	DECLARE @vendorId INT;
+	DECLARE @poNumber NVARCHAR(50);
+	DECLARE @locationId INT;
+	DECLARE @requireApproval BIT = 0;
 
 	IF @transCount = 0
 	BEGIN TRANSACTION
@@ -226,6 +230,32 @@ BEGIN TRY
 
 			EXEC uspPOUpdateOnOrder @newPOId,
 									0
+		END
+
+		SELECT
+			@vendorId = intEntityVendorId
+			,@locationId = intShipToId
+			,@poNumber = strPurchaseOrderNumber
+		FROM tblPOPurchase A
+		WHERE A.intPurchaseId = @newPOId
+
+		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'AccountsPayable.view.PurchaseOrder',
+			@transactionEntityId = @vendorId,
+			@currentUserEntityId = @userId,
+			@locationId = @locationId,
+			@amount = 0,
+			@requireApproval = @requireApproval OUTPUT
+
+		IF @requireApproval = 1 AND @intDuplicateType <> 1
+		BEGIN
+			EXEC uspSMSubmitTransaction
+				@type = 'AccountsPayable.view.PurchaseOrder',
+				@recordId = @newPOId,
+				@transactionNo = @poNumber,
+				@transactionEntityId = @vendorId,
+				@currentUserEntityId = @userId,
+				@amount = 0
 		END
 
 		SET @poIdCreated = @newPOId;

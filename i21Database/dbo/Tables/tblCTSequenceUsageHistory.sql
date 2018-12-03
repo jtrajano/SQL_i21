@@ -9,6 +9,7 @@
 	dblOldValue NUMERIC(18, 6)NOT NULL,
 	dblTransactionQuantity NUMERIC(18, 6) NOT NULL,
 	dblNewValue NUMERIC(18, 6)NOT NULL,
+	dblBalance  NUMERIC(18, 6) NULL,
 	
 	intUserId INT NOT NULL,
 	dtmTransactionDate DATETIME NOT NULL,

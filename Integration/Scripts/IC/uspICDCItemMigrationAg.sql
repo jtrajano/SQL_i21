@@ -187,15 +187,17 @@ where	C.intCategoryId = tblICItem.intCategoryId
 --------------------------------------------------------------------------------------------------------------------------------------------
 --import stock unit first. Stock unit is agitm_un_desc
 --items are repeated for location in origin. So pick only one item from the location to avoid duplicate entries 
+DECLARE @InsertedItemUOM table( intItemUOMId int);  
+
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
-
+OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
 SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
 		SELECT intItemId , 
 		intUnitMeasureId = U.intUnitMeasureId , 
 		dblUnitQty = 1 ,
-		strUpcCode = NULLIF(oi.strUpcCode,'') , 
+		strUpcCode = CASE WHEN ISNUMERIC(oi.strUpcCode) = 1 AND LEN(LTRIM(RTRIM(oi.strUpcCode))) >= 11 THEN  LTRIM(RTRIM(oi.strUpcCode)) ELSE NULL END ,   --strUpcCode = NULLIF(oi.strUpcCode,'') , 
 		ysnStockUnit = 1 ,
 		ysnAllowPurchase = 1 , 
 		ysnAllowSale = 1 , 
@@ -218,47 +220,68 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId 
 --add lb as additional uom for items which has agitm_lbs_per_un set
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
 SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
-select intItemId, 
-(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'LB') intUnitMeasureId, 
-Case oi.agitm_un_desc When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.agitm_lbs_per_un When 'CWT' then 1/oi.agitm_lbs_per_un else oi.agitm_lbs_per_un end dblUnitQty, 
-strUpcCode = NULLIF(oi.strUpcCode,'') , 
-0 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId 
-from tblICItem I 
-join 
-(select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc, min(agitm_lbs_per_un) agitm_lbs_per_un, MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
-where agitm_lbs_per_un not in (1,0) and agitm_un_desc <> 'LB'
-group by rtrim(agitm_no)) as oi 
-on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
-join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
-) a
+		select intItemId, 
+			(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'LB') intUnitMeasureId, 
+			Case oi.agitm_un_desc When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.agitm_lbs_per_un When 'CWT' then 1/oi.agitm_lbs_per_un else oi.agitm_lbs_per_un end dblUnitQty, 
+			strUpcCode = NULL, -- causes duplicates upc might already inserted -->>>> NULLIF(oi.strUpcCode,'') , 
+			0 ysnStockUnit,
+			1 ysnAllowPurchase, 
+			1 ysnAllowSale, 
+			1 intConcurrencyId 
+		FROM tblICItem I 
+		JOIN 
+			(SELECT rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc, min(agitm_lbs_per_un) agitm_lbs_per_un, MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
+			 WHERE agitm_lbs_per_un not in (1,0) and agitm_un_desc <> 'LB'
+			 GROUP BY rtrim(agitm_no)) as oi 
+		ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+		JOIN tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+	) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 -----------------------------------------------------------
 --add packing units for uoms which has agitm_un_per_pak set
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
 SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
-select I.intItemId, 
-	(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 
-	upper(rtrim(agitm_pak_desc))
-	COLLATE SQL_Latin1_General_CP1_CS_AS) intUnitMeasureId, 
-	oi.agitm_un_per_pak dblUnitQty, 
-	strUpcCode = NULLIF(oi.strUpcCode,'') , 
-	0 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId 
-	from tblICItem I 
-	join 
-	(select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_pak_desc))) agitm_pak_desc, min(agitm_un_per_pak) agitm_un_per_pak , MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
-	where agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
-	group by rtrim(agitm_no)) as oi 
-	on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
-	join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
-	left join tblICItemUOM iu on iu.intItemId = I.intItemId and iu.intUnitMeasureId = U.intUnitMeasureId
-	where iu.intItemId is null and iu.intUnitMeasureId is null
+		select I.intItemId, 
+			(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 	upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS) intUnitMeasureId, 
+			oi.agitm_un_per_pak dblUnitQty, 
+			strUpcCode = NULL, --set to null, UPC already inserted for the stock unit (UOM), 
+			0 ysnStockUnit,
+			1 ysnAllowPurchase
+			, 1 ysnAllowSale
+			, 1 intConcurrencyId 
+		from tblICItem I 
+		JOIN 
+			(SELECT rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_pak_desc))) agitm_pak_desc, min(agitm_un_per_pak) agitm_un_per_pak , MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
+			WHERE agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
+			GROUP BY RTRIM(agitm_no)) as oi 
+		ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+		JOIN tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+		LEFT JOIN tblICItemUOM iu on iu.intItemId = I.intItemId and iu.intUnitMeasureId = U.intUnitMeasureId
+		where iu.intItemId is null and iu.intUnitMeasureId is null
 ) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
+
+INSERT INTO tblICItemUomUpc(intItemUOMId,
+strUpcCode,
+strLongUpcCode)
+SELECT A.intItemUOMId,NULL, O.agupc_upc_cd 
+FROM @InsertedItemUOM A
+INNER JOIN tblICItemUOM UOM
+	ON A.intItemUOMId = UOM.intItemUOMId
+	 AND UOM.ysnStockUnit = 1
+INNER JOIN tblICItem I
+	ON UOM.intItemId = I.intItemId
+INNER JOIN agupcmst O
+	ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS  = O.agupc_item_no COLLATE SQL_Latin1_General_CP1_CS_AS 
+WHERE ISNUMERIC(agupc_upc_cd) = 1 AND LEN(LTRIM(RTRIM(agupc_upc_cd))) >= 11
+
 
 --set stock unit to No for Non Inventory Items
 update iu set ysnStockUnit = 0

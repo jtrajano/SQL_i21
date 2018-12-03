@@ -322,7 +322,7 @@ BEGIN
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
-				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5)
+				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
@@ -388,7 +388,7 @@ BEGIN
 				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
-				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5)
+				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
@@ -530,9 +530,12 @@ BEGIN
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
 												and i.strDocumentNumber = Inv.strTransactionId), 0)
+						,ysnInvoicePosted = i.ysnPosted
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
+					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
+					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
 					WHERE Inv.ysnInTransit = 1  
 						AND Inv.strTransactionType = 'Inventory Shipment'
 						AND C.intCommodityId = @intCommodityId
@@ -552,8 +555,9 @@ BEGIN
 						,Inv.strItemNo
 						,Inv.strCategory
 						,Inv.intCategoryId
+						,i.ysnPosted
 				) tbl
-				WHERE dblBalanceToInvoice <> 0
+				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
 		
 			SELECT * INTO #tempCollateral
@@ -998,114 +1002,6 @@ BEGIN
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
-			INSERT INTO @Final(intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intContractHeaderId
-				, strContractNumber
-				, intCommodityId
-				, intFromCommodityUnitMeasureId)
-			SELECT intSeqId = 3
-				, 'Purchase In-Transit'
-				, @strCommodityCode
-				, strType = 'Purchase In-Transit'
-				, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0))
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intContractHeaderId
-				, strContractNumber
-				, @intCommodityId
-				, @intCommodityUnitMeasureId
-			FROM (
-				SELECT i.intUnitMeasureId
-					, ReserveQty = ISNULL(i.dblPurchaseContractShippedQty, 0)
-					, i.strLocationName
-					, i.intItemId
-					, i.strItemNo
-					, i.intCategoryId
-					, i.strCategory
-					, i.intContractHeaderId
-					, i.intContractDetailId
-					, i.strContractNumber
-					, i.intCompanyLocationId
-				FROM vyuRKPurchaseIntransitView i
-				WHERE i.intCommodityId = @intCommodityId
-					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
-					-- Not sure why this part doesn't default to zero values for non-value
-					AND i.intEntityId = ISNULL(@intVendorId, i.intEntityId)					
-			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-		
-			INSERT INTO @Final(intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, strShipmentNumber
-				, intInventoryShipmentId
-				, strCustomerReference
-				, intContractHeaderId
-				, strContractNumber
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, dtmTicketDateTime
-				, intTicketId
-				, strTicketNumber)
-			SELECT intSeqId = 4
-				, 'Sales In-Transit'
-				, @strCommodityCode
-				, strType = 'Sales In-Transit'
-				, dblTotal = ISNULL(dblBalanceToInvoice, 0)
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, strShipmentNumber
-				, intInventoryShipmentId
-				, strCustomerReference
-				, intContractHeaderId
-				, strContractNumber
-				, @intCommodityId
-				, @intCommodityUnitMeasureId
-				, intCompanyLocationId
-				, dtmTicketDateTime
-				, intTicketId
-				, strTicketNumber
-			FROM (
-				SELECT dblBalanceToInvoice 
-					, i.strLocationName
-					, i.intItemId
-					, i.strItemNo
-					, i.intCategoryId
-					, i.strCategory
-					, strContractNumber
-					, intContractHeaderId
-					, strShipmentNumber
-					, intInventoryShipmentId
-					, strCustomerReference
-					, i.intCompanyLocationId
-					, dtmTicketDateTime
-					, intTicketId
-					, strTicketNumber
-				FROM #tblGetSalesIntransitWOPickLot i
-				WHERE i.intCommodityId = @intCommodityId
-					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId))t
 		
 			--========================
 			--Customer Storage
@@ -1190,6 +1086,7 @@ BEGIN
 				, strCommodityCode
 				, strType
 				, dblTotal
+				, strCustomerName
 				, dtmDeliveryDate
 				, strLocationName
 				, intItemId
@@ -1212,8 +1109,10 @@ BEGIN
 				SELECT intSeqId = 7
 					, strSeqHeader = 'Total Non-Receipted'
 					, strCommodityCode = @strCommodityCode
-					, strStorageType = 'Total Non-Receipted'
+					--, strStorageType = 'Total Non-Receipted'
+					, r.strStorageType
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblBalance, 0))
+					, r.strCustomerName
 					, dtmDeliveryDate
 					, strLocationName
 					, r.intItemId
@@ -1716,9 +1615,120 @@ BEGIN
 				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND ISNULL(inv.ysnPosted, 0) = 0
+					AND inv.intInvoiceId IS NULL
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
+			INSERT INTO @Final(intSeqId
+				, strSeqHeader
+				, strCommodityCode
+				, strType
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intContractHeaderId
+				, strContractNumber
+				, intCommodityId
+				, intFromCommodityUnitMeasureId)
+			SELECT intSeqId = 3
+				, 'Purchase In-Transit'
+				, @strCommodityCode
+				, strType = 'Purchase In-Transit'
+				, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ReserveQty, 0))
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intContractHeaderId
+				, strContractNumber
+				, @intCommodityId
+				, @intCommodityUnitMeasureId
+			FROM (
+				SELECT i.intUnitMeasureId
+					, ReserveQty = ISNULL(i.dblPurchaseContractShippedQty, 0)
+					, i.strLocationName
+					, i.intItemId
+					, i.strItemNo
+					, i.intCategoryId
+					, i.strCategory
+					, i.intContractHeaderId
+					, i.intContractDetailId
+					, i.strContractNumber
+					, i.intCompanyLocationId
+				FROM vyuRKPurchaseIntransitView i
+				WHERE i.intCommodityId = @intCommodityId
+					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
+					-- Not sure why this part doesn't default to zero values for non-value
+					AND i.intEntityId = ISNULL(@intVendorId, i.intEntityId)					
+			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		
+			INSERT INTO @Final(intSeqId
+				, strSeqHeader
+				, strCommodityCode
+				, strType
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, strShipmentNumber
+				, intInventoryShipmentId
+				, strCustomerReference
+				, intContractHeaderId
+				, strContractNumber
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intCompanyLocationId
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber)
+			SELECT intSeqId = 4
+				, 'Sales In-Transit'
+				, @strCommodityCode
+				, strType = 'Sales In-Transit'
+				, dblTotal = ISNULL(dblBalanceToInvoice, 0)
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, strShipmentNumber
+				, intInventoryShipmentId
+				, strCustomerReference
+				, intContractHeaderId
+				, strContractNumber
+				, @intCommodityId
+				, @intCommodityUnitMeasureId
+				, intCompanyLocationId
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber
+			FROM (
+				SELECT dblBalanceToInvoice 
+					, i.strLocationName
+					, i.intItemId
+					, i.strItemNo
+					, i.intCategoryId
+					, i.strCategory
+					, strContractNumber
+					, intContractHeaderId
+					, strShipmentNumber
+					, intInventoryShipmentId
+					, strCustomerReference
+					, i.intCompanyLocationId
+					, dtmTicketDateTime
+					, intTicketId
+					, strTicketNumber
+				FROM #tblGetSalesIntransitWOPickLot i
+				WHERE i.intCommodityId = @intCommodityId
+					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
+					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries'))t
+
+
 			--Company Title from Inventory Valuation
 			INSERT INTO @Final(intSeqId
 				, strSeqHeader
@@ -1778,6 +1788,7 @@ BEGIN
 				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
 			) Strg ON f.intInventoryReceiptId = Strg.intInventoryReceiptId    
 			WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId AND isnull(Strg.ysnDPOwnedType,0) = 0
+				AND strReceiptNumber NOT IN (SELECT strShipmentNumber FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
 		
 			
 			--Company Title from DP Settlement
@@ -1833,6 +1844,7 @@ BEGIN
 					AND intTransactionTypeId = 4 --Settlement & Reverse Settlement
 					AND CS.intCommodityId  = @intCommodityId
 					AND CS.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId else @intLocationId end
+					AND ISNULL(SH.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(SH.intEntityId, 0))
 				)t
 					WHERE intCompanyLocationId  IN (
 							SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -1910,61 +1922,61 @@ BEGIN
 					, strFutureMonth
 				) t WHERE dblTotal <> 0
 		
-			INSERT INTO @Final (intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, intCommodityId
-				, strLocationName
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, strDPAReceiptNo
-				, strContractNumber
-				, intInventoryShipmentId
-				, strShipmentNumber
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, intFutureMonthId
-				, strFutMarketName
-				, strFutureMonth)
-			SELECT intSeqId = 15
-				, strSeqHeader = 'Company Titled Stock'
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, intCommodityId
-				, strLocationName
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, strDPAReceiptNo
-				, strContractNumber
-				, intInventoryShipmentId
-				, strShipmentNumber
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, intFutureMonthId
-				, strFutMarketName
-				, strFutureMonth
-			FROM @Final WHERE intSeqId = 14 AND intCommodityId = @intCommodityId
+			--INSERT INTO @Final (intSeqId
+			--	, strSeqHeader
+			--	, strCommodityCode
+			--	, strType
+			--	, dblTotal
+			--	, intCommodityId
+			--	, strLocationName
+			--	, intTicketId
+			--	, strTicketType
+			--	, strTicketNumber
+			--	, dtmTicketDateTime
+			--	, strCustomerReference
+			--	, strDistributionOption
+			--	, intFromCommodityUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strDPAReceiptNo
+			--	, strContractNumber
+			--	, intInventoryShipmentId
+			--	, strShipmentNumber
+			--	, intItemId
+			--	, strItemNo
+			--	, intCategoryId
+			--	, strCategory
+			--	, intFutureMarketId
+			--	, intFutureMonthId
+			--	, strFutMarketName
+			--	, strFutureMonth)
+			--SELECT intSeqId = 15
+			--	, strSeqHeader = 'Company Titled Stock'
+			--	, strCommodityCode
+			--	, strType
+			--	, dblTotal
+			--	, intCommodityId
+			--	, strLocationName
+			--	, intTicketId
+			--	, strTicketType
+			--	, strTicketNumber
+			--	, dtmTicketDateTime
+			--	, strCustomerReference
+			--	, strDistributionOption
+			--	, intFromCommodityUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strDPAReceiptNo
+			--	, strContractNumber
+			--	, intInventoryShipmentId
+			--	, strShipmentNumber
+			--	, intItemId
+			--	, strItemNo
+			--	, intCategoryId
+			--	, strCategory
+			--	, intFutureMarketId
+			--	, intFutureMonthId
+			--	, strFutMarketName
+			--	, strFutureMonth
+			--FROM @Final WHERE intSeqId = 14 AND intCommodityId = @intCommodityId
 		
 			IF ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled FROM tblRKCompanyPreference) = 1)
 			BEGIN
@@ -2526,7 +2538,10 @@ BEGIN
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-		FROM @FinalTable WHERE strType <> 'Company Titled Stock'-- and strType not like '%'+@strPurchaseSales+'%'
+		FROM @FinalTable 
+		WHERE strSeqHeader <> 'Company Titled Stock'
+			AND strType <> 'Receipt' 
+			-- and strType not like '%'+@strPurchaseSales+'%'
 		ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC
 	END
 END

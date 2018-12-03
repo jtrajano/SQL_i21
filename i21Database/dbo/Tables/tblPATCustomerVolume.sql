@@ -9,5 +9,6 @@
 	[ysnRefundProcessed] BIT NOT NULL DEFAULT 0, -- TODO: Remove in 19.1
 	[intRefundCustomerId] INT NULL, -- TODO: Remove in 19.1
     [intConcurrencyId] INT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblPATCustomerVolume] PRIMARY KEY ([intCustomerVolumeId])
+    CONSTRAINT [PK_tblPATCustomerVolume] PRIMARY KEY ([intCustomerVolumeId]),
+	CONSTRAINT [AK_tblPATCustomerVolume] UNIQUE ([intCustomerPatronId], [intPatronageCategoryId], [intFiscalYear])
 )

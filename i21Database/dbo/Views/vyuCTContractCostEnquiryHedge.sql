@@ -49,18 +49,27 @@ AS
 						MO.strFutureMonth,
 						CAST(ISNULL(SY.intHedgedLots,0) AS NUMERIC(18, 6))+ISNULL(SY.dblAssignedLots,0) 					AS	dblLots,
 						FT.dblPrice,
-						dbo.fnCTGetLastSettlementPrice(FT.intFutureMarketId,FT.intFutureMonthId)							AS	dblLatestPrice,
+						--dbo.fnCTGetLastSettlementPrice(FT.intFutureMarketId,FT.intFutureMonthId)							AS	dblLatestPrice,
+						dblLastSettle AS	dblLatestPrice,
 						dbo.fnCTGetBrokerageCommission(FT.intBrokerageAccountId,FT.intFutureMarketId,FT.dtmTransactionDate) AS	dblCommission,
 						MA.dblContractSize,
 						CASE WHEN FT.strBuySell = 'Sell' THEN -1 ELSE 1 END intProffitLoss,
 						dbo.fnCTCalculateAmountBetweenCurrency(FT.intCurrencyId,null,1,1)									AS	dblDefaultCurrencyFactor,
 						ISNULL(CY.intCent,1) AS intCent
 				FROM	dbo.tblRKAssignFuturesToContractSummary SY
-				JOIN	dbo.tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	ISNULL(SY.intContractHeaderId, CD.intContractHeaderId)
-																	AND	CD.intContractDetailId		=	ISNULL(SY.intContractDetailId, CD.intContractDetailId)
+				JOIN	dbo.tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	SY.intContractHeaderId
 				JOIN	dbo.tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
 				JOIN	dbo.tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
 				JOIN	dbo.tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId
 				JOIN	dbo.tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId		
+		   LEFT JOIN 
+				(
+					SELECT		SP.intFutureMarketId,MP.intFutureMonthId,MP.dblLastSettle 
+					FROM		tblRKFutSettlementPriceMarketMap MP
+					JOIN		(
+									SELECT		ROW_NUMBER() OVER (PARTITION BY intFutureMarketId ORDER BY dtmPriceDate DESC) intRowNum,  intFutureMarketId,intFutureSettlementPriceId
+									FROM		tblRKFuturesSettlementPrice
+					) SP ON SP.intRowNum = 1 AND MP.intFutureSettlementPriceId = SP.intFutureSettlementPriceId
+				)	CM ON CM.intFutureMarketId = FT.intFutureMarketId AND CM.intFutureMonthId = FT.intFutureMonthId
 		)t
 	)o

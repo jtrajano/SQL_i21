@@ -13,12 +13,50 @@ BEGIN
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportISM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportISM' + CAST(NEWID() AS NVARCHAR(100)); 
+		BEGIN TRANSACTION --@TransactionName
+		--SAVE TRAN @TransactionName --> Save point
 		--------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-------------------------------------------------------------------------------------------- 
+
+
+
+
+		-- ==================================================================================================================  
+		-- Start Validate if ISM xml file matches the Mapping on i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Passport ISM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Passport ISM XML file did not match the layout mapping'
+
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if ISM xml file matches the Mapping on i21   
+		-- ==================================================================================================================  
+
 
 
 
@@ -263,18 +301,31 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		-- COMMIT
+		GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-
-		COMMIT TRAN @TransactionName
+		
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:

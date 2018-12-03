@@ -123,6 +123,7 @@ BEGIN
 				,dblAdjustByQuantity
 				,intItemUOMId
 				,intNewItemUOMId
+				,dblCost
 				,dblNewCost
 				,intSubLocationId
 				,intStorageLocationId
@@ -138,6 +139,7 @@ BEGIN
 				,uom.intItemUOMId
 				,uom.intItemUOMId
 				--,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
+				,ptitm_avg_cost 
 				,ptitm_avg_cost 
 				,(select sl.intSubLocationId 
 					from 

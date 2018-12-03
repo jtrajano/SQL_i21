@@ -52,7 +52,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@strWhereFinalizedWeight NVARCHAR(20)
 		,@strWhereFinalizedGrade NVARCHAR(20)
 		,@ysnCustomerStorage BIT
-		,@intContractDetailId INT;
+		,@intContractDetailId INT
+		,@ysnPriceFixation BIT = 0;
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -310,6 +311,7 @@ ELSE
     BEGIN
         IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
         BEGIN
+			SET @ysnPriceFixation = 1;
             EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
         END
         SELECT @intContractDetailId = MIN(si.intLineNo)
@@ -323,7 +325,7 @@ ELSE
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
 	END

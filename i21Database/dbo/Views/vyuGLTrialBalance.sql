@@ -1,13 +1,7 @@
-﻿CREATE VIEW [dbo].[vyuGLTrialBalance]
-AS
-WITH BeginningBalance AS(
-	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD  FROM vyuGLTrialBalance_NonRE 
-	UNION ALL
-	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD FROM  vyuGLTrialBalance_RE 
-)
+﻿CREATE VIEW [dbo].[vyuGLTrialBalance] AS
 SELECT 
-ISNULL(B.MTD,0)MTDBalance,
-ISNULL(B.YTD,0)YTDBalance,
+ISNULL(B.MTDBalance,0)MTDBalance,
+ISNULL(B.YTDBalance,0)YTDBalance,
 A.intAccountId,
 ISNULL(Cat.strAccountCategory, '') strAccountCategory,
 ISNULL(strAccountGroup,'') strAccountGroup,
@@ -28,7 +22,7 @@ period.dtmEndDate dtmDateTo,
 B.intGLFiscalYearPeriodId
 FROM tblGLAccount A
 LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
-LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
+LEFT JOIN tblGLTrialBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod period on period.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
 LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
@@ -42,3 +36,5 @@ OUTER APPLY(
 	JOIN tblGLAccountCategory C on C.intAccountCategoryId = S.intAccountCategoryId
 	WHERE M.intAccountId = A.intAccountId and S.intAccountStructureId = P.intAccountStructureId
 )Cat
+GO
+

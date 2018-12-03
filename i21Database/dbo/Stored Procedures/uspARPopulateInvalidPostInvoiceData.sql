@@ -1578,7 +1578,7 @@ BEGIN
 			AND [dbo].[fnGetItemLotType](ARID.[intItemId]) <> 0
 			AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 			AND ISNULL(ARID.[intLoadDetailId],0) = 0
-			AND ISNULL(ARID.[intTicketId],0) = 0
+			--AND ISNULL(ARID.[intTicketId],0) = 0
 			AND ISNULL(ARID.[ysnBlended],0) = 0
 	) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
 	LEFT JOIN (

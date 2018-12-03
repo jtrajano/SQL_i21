@@ -126,8 +126,8 @@ WITH Invoices AS(
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ) 
 SELECT TOP 10 
-a.*, 
-b.strTerm 
+a.*
+,b.strTermCode
 ,c.strCurrency
 FROM Invoices a
 LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID

@@ -1285,7 +1285,8 @@ SELECT
     ,[intMaintenanceAccountId]          = ARID.[intMaintenanceAccountId]
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
-    ,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
+    --,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
+    ,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
     ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
     ,[dblUnitQty]                       = ICIU.[dblUnitQty]
     ,[dblUnitOnHand]                    = ISNULL(ICIS.[dblUnitOnHand], @ZeroDecimal)
@@ -1380,11 +1381,11 @@ LEFT OUTER JOIN
     SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
     ) ICIU
         ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
-LEFT OUTER JOIN
-    (
-    SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
-    ) ICSUOM
-        ON ICI.[intItemId] = ICSUOM.[intItemId]
+-- LEFT OUTER JOIN
+--     (
+--     SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
+--     ) ICSUOM
+--         ON ICI.[intItemId] = ICSUOM.[intItemId]
 LEFT OUTER JOIN
     (
     SELECT [intItemId], [intItemLocationId], [dblUnitOnHand] FROM tblICItemStock WITH(NoLock)
@@ -1634,7 +1635,7 @@ SELECT
     ,[intMaintenanceAccountId]          = ARID.[intMaintenanceAccountId]
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
-    ,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
+    ,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal) --ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
     ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
     ,[dblUnitQty]                       = ICIU.[dblUnitQty]
     ,[dblUnitOnHand]                    = @ZeroDecimal
@@ -1789,11 +1790,11 @@ LEFT OUTER JOIN
     SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
     ) ICIU
         ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
-LEFT OUTER JOIN
-    (
-    SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
-    ) ICSUOM
-        ON ICI.[intItemId] = ICSUOM.[intItemId]
+--LEFT OUTER JOIN
+--    (
+--    SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
+--    ) ICSUOM
+--        ON ICI.[intItemId] = ICSUOM.[intItemId]
 LEFT OUTER JOIN
     (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)

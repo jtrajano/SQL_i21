@@ -3,22 +3,22 @@
 AS
 BEGIN
 	SELECT LoadDetail.*
-		,Item.strDescription AS strItemDescription
-		,PCL.strLocationName AS strPLocationName
-		,PCLSL.strSubLocationName AS strPSubLocationName
-		,SCLSL.strSubLocationName AS strSSubLocationName
-		,SCL.strLocationName AS strSLocationName
+		,strItemDescription = Item.strDescription
+		,strPLocationName = PCL.strLocationName
+		,strPSubLocationName = PCLSL.strSubLocationName
+		,strSSubLocationName = SCLSL.strSubLocationName
+		,strSLocationName = SCL.strLocationName
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
-		,PTP.strPricingType AS strPPricingType
-		,PDetail.intPricingTypeId AS intPPricingTypeId
+		,strPPricingType = PTP.strPricingType
+		,intPPricingTypeId = PDetail.intPricingTypeId
 		,ysnPLoad = PHeader.ysnLoad
 		,strSContractNumber = SHeader.strContractNumber
 		,intSContractSeq = SDetail.intContractSeq
-		,PDetail.intPricingTypeId AS intPPricingTypeId
-		,PTP.strPricingType AS strPPricingType
-		,SDetail.intPricingTypeId AS intSPricingTypeId
-		,PTS.strPricingType AS strSPricingType
+		,intPPricingTypeId = PDetail.intPricingTypeId
+		,strPPricingType = PTP.strPricingType
+		,intSPricingTypeId = SDetail.intPricingTypeId
+		,strSPricingType = PTS.strPricingType
 		,ysnSLoad = SHeader.ysnLoad
 		,strVendor = VEN.strName
 		,strCustomer = CEN.strName
@@ -30,28 +30,29 @@ BEGIN
 				ELSE 0
 				END)
 		,intContractItemId = ICI.intItemId
-		,CASE 
-			WHEN LOAD.intPurchaseSale = 2
+		,intContractHeaderId = CASE 
+			WHEN L.intPurchaseSale = 2
 				THEN SHeader.intContractHeaderId
 			ELSE PHeader.intContractHeaderId
-			END intContractHeaderId
-		,UOM.strUnitMeasure AS strItemUOM
+			END 
+		,strItemUOM = UOM.strUnitMeasure
 		,intUnitMeasureId = UOM.intUnitMeasureId
-		,WeightUOM.strUnitMeasure AS strWeightItemUOM
-		,dblWeightPerUnit = IsNull(dbo.fnLGGetItemUnitConversion (LoadDetail.intItemId, LoadDetail.intItemUOMId, LOAD.intWeightUnitMeasureId), 0.0)
-		,dblUnMatchedQty = CASE WHEN (SELECT COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadId = LOAD.intLoadId) > 0 THEN 0 ELSE LoadDetail.dblQuantity END
-		,CO.strCountry AS strOrigin
-		,CA.intCommodityAttributeId
-		,Item.intCommodityId
+		,strWeightItemUOM = WeightUOM.strUnitMeasure
+		,intWeightUnitMeasureId = WeightUOM.intUnitMeasureId
+		,dblWeightPerUnit = IsNull(dbo.fnLGGetItemUnitConversion (LoadDetail.intItemId, LoadDetail.intItemUOMId, ISNULL(L.intWeightUnitMeasureId, WeightUOM.intUnitMeasureId)), 0.0)
+		,dblUnMatchedQty = CASE WHEN (SELECT COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) > 0 THEN 0 ELSE LoadDetail.dblQuantity END
+		,strOrigin = CO.strCountry
+		,intCommodityAttributeId = CA.intCommodityAttributeId
+		,intCommodityId = Item.intCommodityId
 		,strExternalShipmentNumber
-		,B.strBillId
-		,PCU.strCurrency AS strPriceCurrency
-		,FXCU.strCurrency AS strForexCurrency
-		,ERT.strCurrencyExchangeRateType AS strForexRateType
-		,PUM.strUnitMeasure AS strPriceUOM
-		,PCU.ysnSubCurrency AS ysnSubCurrency
+		,strBillId = B.strBillId
+		,strPriceCurrency = PCU.strCurrency
+		,strForexCurrency = FXCU.strCurrency
+		,strForexRateType = ERT.strCurrencyExchangeRateType
+		,strPriceUOM = PUM.strUnitMeasure
+		,ysnSubCurrency = PCU.ysnSubCurrency
 	FROM tblLGLoadDetail LoadDetail
-		 JOIN tblLGLoad							LOAD			ON		LOAD.intLoadId = LoadDetail.intLoadId AND LOAD.intLoadId = @intLoadId
+		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
 	LEFT JOIN tblSMCompanyLocation				SCL				ON		SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	PCLSL			ON		PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId

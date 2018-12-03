@@ -659,6 +659,9 @@ BEGIN
 --IF ISNULL(@intVendorId,0) = 0
 --BEGIN
 
+	IF ISNULL(@intVendorId,0) = 0
+	BEGIN
+
 	INSERT INTO @Final(
 		intSeqId
 		,strSeqHeader
@@ -699,7 +702,8 @@ BEGIN
 			and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 	)t
 	--group by intSeqId,strSeqHeader,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
-	
+	END
+
 	INSERT INTO @Final(
 		intSeqId
 		,strSeqHeader
@@ -820,7 +824,7 @@ BEGIN
 			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
-			and ISNULL(inv.ysnPosted,0) = 0
+			AND inv.intInvoiceId IS NULL
 			)t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation

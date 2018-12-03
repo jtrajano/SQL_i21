@@ -2,8 +2,8 @@ CREATE VIEW [dbo].[vyuICGetStockMovement]
 AS
 
 --SELECT	intInventoryValuationKeyId  = COALESCE(t.intInventoryStockMovementId, i.intItemId) --ISNULL(t.intInventoryStockMovementId, 0) 		
-SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.strCommodityCode, c.strCategoryCode, i.strItemNo, [Location].strLocationName, 
-									subLoc.strStorageLocationSorter, subLoc.intStorageLocationSorter, strgLoc.strStorageUnitSorter, strgLoc.intStorageUnitSorter, t.dtmDate) AS INT)
+SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.strCommodityCode, c.strCategoryCode, i.strItemNo, [Location].strLocationName, t.dtmDate, t.strTransactionId) AS INT)
+									--subLoc.strStorageLocationSorter, subLoc.intStorageLocationSorter, strgLoc.strStorageUnitSorter, strgLoc.intStorageUnitSorter, t.dtmDate) AS INT)
 		,i.intItemId
 		,strItemNo					= i.strItemNo
 		,strItemDescription			= i.strDescription
@@ -82,8 +82,8 @@ FROM 	tblICItem i
 		LEFT JOIN (SELECT	intStorageLocationId
 							,strName
 							,strStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN LEFT(strName, PATINDEX('%[0-9]%', strName) - 1) ELSE strName END
-							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END
-				FROM tblICStorageLocation
+							,intStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN CASE WHEN ISNUMERIC(SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) = 1 THEN CONVERT(INT, SUBSTRING(strName, PATINDEX('%[0-9]%', strName), LEN(strName))) ELSE NULL END ELSE NULL END
+					FROM tblICStorageLocation
 			) strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 		LEFT JOIN (
@@ -95,7 +95,8 @@ FROM 	tblICItem i
 					intCompanyLocationSubLocationId
 					,strSubLocationName
 					,strStorageLocationSorter = CASE WHEN PATINDEX('%[0-9]%', strSubLocationName) > 1 THEN LEFT(strSubLocationName, PATINDEX('%[0-9]%', strSubLocationName) - 1) ELSE strSubLocationName END
-					,intStorageLocationSorter = CASE WHEN PATINDEX('%[0-9]%', strSubLocationName) > 1 THEN CONVERT(INT, SUBSTRING(strSubLocationName, PATINDEX('%[0-9]%', strSubLocationName), LEN(strSubLocationName))) ELSE 0 END
+					--,intStorageLocationSorter = CASE WHEN PATINDEX('%[0-9]%', strSubLocationName) > 1 THEN CONVERT(INT, SUBSTRING(strSubLocationName, PATINDEX('%[0-9]%', strSubLocationName), LEN(strSubLocationName))) ELSE 0 END
+					,intStorageLocationSorter = CASE WHEN PATINDEX('%[0-9]%', strSubLocationName) > 1 THEN CASE WHEN ISNUMERIC(SUBSTRING(strSubLocationName, PATINDEX('%[0-9]%', strSubLocationName), LEN(strSubLocationName))) = 1 THEN CONVERT(INT, SUBSTRING(strSubLocationName, PATINDEX('%[0-9]%', strSubLocationName), LEN(strSubLocationName))) ELSE NULL END ELSE NULL END
 					FROM tblSMCompanyLocationSubLocation
 			) subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId

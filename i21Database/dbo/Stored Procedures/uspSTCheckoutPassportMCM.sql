@@ -16,12 +16,50 @@ BEGIN
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportMCM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportMCM' + CAST(NEWID() AS NVARCHAR(100)); 
+		BEGIN TRANSACTION --@TransactionName
+		--SAVE TRAN @TransactionName --> Save point
 		--------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-------------------------------------------------------------------------------------------- 
+
+
+
+
+		-- ==================================================================================================================  
+		-- Start Validate if MCM xml file matches the Mapping on i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Passport MCM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Passport MCM XML file did not match the layout mapping'
+
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if MCM xml file matches the Mapping on i21   
+		-- ==================================================================================================================
+
 
 
 
@@ -87,11 +125,10 @@ BEGIN
 					, (
 						CASE 
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-								-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
 								-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))))
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 					    END
 					  ) [dblTotalSalesAmountComputed]
 					, 0 [dblRegisterSalesAmountComputed]
@@ -126,15 +163,14 @@ BEGIN
 				SET	[dblTotalSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
 					, [dblRegisterSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
 					, [dblTotalSalesAmountComputed] = (
-														CASE 
-															WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-																-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
-																THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
-															WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-																-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
-																THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))))
-														END
-													  )
+											CASE 
+												WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
+												WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
+													-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
+											END
+										  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.PromotionCount AS INT),0) 
 					, [dblPromotionalDiscountAmount] = ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0) 
 					, [intManagerDiscountCount] = ISNULL(CAST(Chk.DiscountCount AS INT),0) 
@@ -172,18 +208,32 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		-- COMMIT
+		GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-
-		COMMIT TRAN @TransactionName
+		
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:

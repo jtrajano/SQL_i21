@@ -9,6 +9,7 @@ BEGIN TRY
 	DECLARE	@ErrMsg	NVARCHAR(MAX)
 
 	UPDATE	tblCTPriceFixationDetail SET intBillId = NULL, intBillDetailId = NULL WHERE intBillId = @intBillId
+	UPDATE  tblCTPriceFixationDetailAPAR  SET intBillId = NULL, intBillDetailId = NULL WHERE intBillId = @intBillId
 
 END TRY
 
