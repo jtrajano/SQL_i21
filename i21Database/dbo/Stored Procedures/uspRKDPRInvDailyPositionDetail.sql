@@ -77,7 +77,7 @@ BEGIN
 		, strTicketType NVARCHAR(100)
 		, strTicketNumber NVARCHAR(100)
 		, dtmOpenDate DATETIME
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, dtmTicketDateTime DATETIME
 		, dblOriginalQuantity DECIMAL(24,10)
 		, dblRemainingQuantity DECIMAL(24,10)
@@ -104,7 +104,8 @@ BEGIN
 		, strFutureMonth NVARCHAR(100)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
-		, ysnPreCrush BIT)
+		, ysnPreCrush BIT
+		, strContractEndMonth NVARCHAR(50))
 		
 	DECLARE @FinalTable AS TABLE (intRow INT IDENTITY PRIMARY KEY
 		, intSeqId INT
@@ -129,7 +130,7 @@ BEGIN
 		, strTicketType NVARCHAR(100)
 		, strTicketNumber NVARCHAR(100)		
 		, dtmOpenDate DATETIME
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, dtmTicketDateTime DATETIME
 		, dblOriginalQuantity  DECIMAL(24,10)
 		, dblRemainingQuantity DECIMAL(24,10)
@@ -155,7 +156,8 @@ BEGIN
 		, strFutureMonth NVARCHAR(100)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
-		, ysnPreCrush BIT)
+		, ysnPreCrush BIT
+		, strContractEndMonth NVARCHAR(50))
 	
 	DECLARE @mRowNumber INT
 		, @strCommodityCode NVARCHAR(250)
@@ -194,6 +196,7 @@ BEGIN
 				, intContractHeaderId
 				, strContractNumber
 				, strLocationName
+				, strContractEndMonth
 				, dtmEndDate
 				, dblBalance
 				, intUnitMeasureId
@@ -220,6 +223,7 @@ BEGIN
 				, strFutMarketName
 				, strFutureMonth
 				, strCurrency
+				, strDeliveryDate
 			INTO #tblGetOpenContractDetail
 			FROM (
 				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
@@ -229,7 +233,8 @@ BEGIN
 					, intContractHeaderId
 					, strContractNumber
 					, strLocationName
-					, dtmEndDate = CASE  WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
+					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
 					, dblBalance
 					, intUnitMeasureId
 					, intPricingTypeId
@@ -254,6 +259,7 @@ BEGIN
 					, strFutMarketName
 					, strFutureMonth
 					, strCurrency
+					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 				FROM vyuRKContractDetail CD
 				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 			)t
@@ -267,7 +273,8 @@ BEGIN
 					, a.intCustomerStorageId
 					, a.intCompanyLocationId
 					, c.strLocationName
-					, dtmDeliveryDate = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME, CONVERT(VARCHAR(10), gh.dtmHistoryDate, 110), 110) ELSE CONVERT(DATETIME, CONVERT(VARCHAR(10), a.dtmDeliveryDate, 110), 110) END
+					, strContractEndMonth = CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END
+					, strDeliveryDate = CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END
 					, a.intEntityId
 					, strCustomerName = E.strName
 					, a.strDPARecieptNumber [Receipt]
@@ -332,8 +339,8 @@ BEGIN
 					, a.intCustomerStorageId
 					, a.intCompanyLocationId
 					, c.strLocationName
-					, dtmDeliveryDate = CASE WHEN gh.strType = 'Transfer' THEN CONVERT(DATETIME, CONVERT(VARCHAR(10), gh.dtmHistoryDate, 110), 110)
-											ELSE CONVERT(DATETIME, CONVERT(VARCHAR(10), a.dtmDeliveryDate, 110), 110) END
+					, strContractEndMonth = CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END
+					, strDeliveryDate = CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END
 					, a.intEntityId
 					, strCustomerName = E.strName
 					, [Receipt] = a.strDPARecieptNumber
@@ -403,7 +410,8 @@ BEGIN
 					, a.intCustomerStorageId
 					, a.intCompanyLocationId
 					, strLocationName = sl.strSubLocationName
-					, a.dtmDeliveryDate
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8)
+					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8)
 					, a.intEntityId
 					, strCustomerName = E.strName
 					, a.strDPARecieptNumber [Receipt]
@@ -588,6 +596,8 @@ BEGIN
 					, ch.intFutureMonthId
 					, ch.strFutMarketName
 					, ch.strFutureMonth
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8)
+					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8)
 				FROM tblRKCollateral c
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
@@ -602,7 +612,8 @@ BEGIN
 			--=============================
 			SELECT dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(s.dblQuantity ,0)))
 				, strCustomer = ''
-				, dtmDeliveryDate = dtmDate
+				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
+				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, s.strLocationName
 				, i.intItemId
 				, s.strItemNo
@@ -621,8 +632,8 @@ BEGIN
 				, t.dtmTicketDateTime
 				, t.intTicketId
 				, t.strTicketNumber
-				,intContractHeaderId = CT.intContractNumber
-				,strContractNumber = CT.strContractNumber
+				, intContractHeaderId = CT.intContractNumber
+				, strContractNumber = CT.strContractNumber
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
@@ -650,7 +661,8 @@ BEGIN
 					, dblTotal = (CASE WHEN st.strInOutFlag = 'I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(st.dblNetUnits, 0))
 									ELSE ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(st.dblNetUnits, 0))) * -1 END)
 					, strCustomerName = strName
-					, dtmDeliveryDate = dtmTicketDateTime
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmTicketDateTime, 106), 8)
+					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmTicketDateTime, 106), 8)
 					, cl.strLocationName
 					, i1.intItemId
 					, i1.strItemNo
@@ -702,7 +714,8 @@ BEGIN
 				, strReceiptNumber
 				, intInventoryReceiptId
 				, strDistributionOption
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, intTicketId
 				, dtmTicketDateTime
@@ -725,7 +738,8 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistributionOption
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, intTicketId
 				, dtmTicketDateTime
@@ -749,7 +763,8 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistributionOption
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, strTicketNumber
 					, intTicketId
 					, dtmTicketDateTime
@@ -774,7 +789,8 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistributionOption
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, intTicketId
 				, dtmTicketDateTime
@@ -792,7 +808,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -819,7 +836,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -857,7 +875,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -877,7 +896,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -898,7 +918,8 @@ BEGIN
 					, intTicketId
 					, strTicketType
 					, strTicketNumber
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, strLocationName
 					, intItemId
 					, strItemNo
@@ -921,7 +942,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -941,7 +963,8 @@ BEGIN
 				, intCommodityId 
 				, strLocationName
 				, strItemNo
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, strCustomerName
 				, strDPAReceiptNo
@@ -961,7 +984,8 @@ BEGIN
 				, intCommodityId
 				, strLocationName
 				, strItemNo
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, strCustomerName
 				, strDPAReceiptNo
@@ -981,7 +1005,8 @@ BEGIN
 					, i.strItemNo
 					, r.intCategoryId
 					, r.strCategory
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, r.intTicketId
 					, r.strTicketType
 					, r.strTicketNumber
@@ -1015,7 +1040,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -1039,7 +1065,8 @@ BEGIN
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -1087,7 +1114,8 @@ BEGIN
 				, strType
 				, dblTotal
 				, strCustomerName
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -1113,7 +1141,8 @@ BEGIN
 					, r.strStorageType
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblBalance, 0))
 					, r.strCustomerName
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, strLocationName
 					, r.intItemId
 					, r.strItemNo
@@ -1263,7 +1292,8 @@ BEGIN
 				, strItemNo
 				, intCategoryId
 				, strCategory
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, intTicketId
 				, strTicketType
 				, strTicketNumber
@@ -1289,7 +1319,8 @@ BEGIN
 					, r.strItemNo
 					, r.intCategoryId
 					, r.strCategory
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, intTicketId
 					, strTicketType
 					, strTicketNumber
@@ -1363,7 +1394,8 @@ BEGIN
 				, strItemNo
 				, intCategoryId
 				, strCategory
-				, dtmDeliveryDate
+				, strContractEndMonth
+				, strDeliveryDate
 				, strTicketNumber
 				, strCustomerName
 				, strDPAReceiptNo
@@ -1387,7 +1419,8 @@ BEGIN
 					, r.strItemNo
 					, r.intCategoryId
 					, r.strCategory
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, strTicketNumber
 					, strCustomerName
 					, strDPAReceiptNo = Receipt
@@ -1432,7 +1465,9 @@ BEGIN
 				, intFutureMonthId
 				, intFutureMarketId
 				, strFutMarketName
-				, strFutureMonth)
+				, strFutureMonth
+				, strContractEndMonth
+				, strDeliveryDate)
 			SELECT intSeqId
 				, strSeqHeader
 				, strCommodityCode
@@ -1459,6 +1494,8 @@ BEGIN
 				, intFutureMarketId
 				, strFutMarketName
 				, strFutureMonth
+				, strContractEndMonth
+				, strDeliveryDate
 			FROM (
 				SELECT 13 intSeqId
 					, strSeqHeader = 'Purchase Basis Deliveries'
@@ -1485,6 +1522,8 @@ BEGIN
 					, cd.intFutureMarketId
 					, cd.strFutMarketName
 					, cd.strFutureMonth
+					, cd.strContractEndMonth
+					, cd.strDeliveryDate
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
 				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -1521,6 +1560,8 @@ BEGIN
 				, intFutureMonthId
 				, strFutMarketName
 				, strFutureMonth
+				, strContractEndMonth
+				, strDeliveryDate
 		
 			INSERT INTO @Final (intSeqId
 				, strSeqHeader
@@ -1991,7 +2032,8 @@ BEGIN
 					, strItemNo
 					, intCategoryId
 					, strCategory
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, intTicketId
 					, strTicketType
 					, strTicketNumber
@@ -2017,7 +2059,8 @@ BEGIN
 					, strItemNo
 					, intCategoryId
 					, strCategory
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, intTicketId
 					, strTicketType
 					, strTicketNumber
@@ -2040,7 +2083,8 @@ BEGIN
 						, CH.strItemNo
 						, CH.intCategoryId
 						, CH.strCategory
-						, dtmDeliveryDate
+						, strContractEndMonth
+						, strDeliveryDate
 						, strCustomerName
 						, strDPAReceiptNo = Receipt
 						, dblDiscDue
@@ -2198,7 +2242,8 @@ BEGIN
 					, dblStorageDue
 					, dtmLastStorageAccrueDate
 					, strScheduleId
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, dtmTicketDateTime
 					, intItemId
 					, strItemNo
@@ -2237,7 +2282,8 @@ BEGIN
 					, dblStorageDue
 					, dtmLastStorageAccrueDate
 					, strScheduleId
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, dtmTicketDateTime
 					, intItemId
 					, strItemNo
@@ -2258,7 +2304,7 @@ BEGIN
 				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
 				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND ISNULL(dblTotal, 0) <> 0
-				ORDER BY intSeqId, dtmDeliveryDate
+				ORDER BY intSeqId, strContractEndMonth, strDeliveryDate
 			END
 			ELSE
 			BEGIN
@@ -2285,7 +2331,8 @@ BEGIN
 					, dblStorageDue
 					, dtmLastStorageAccrueDate
 					, strScheduleId
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, dtmTicketDateTime
 					, intItemId
 					, strItemNo
@@ -2324,7 +2371,8 @@ BEGIN
 					, dblStorageDue
 					, dtmLastStorageAccrueDate
 					, strScheduleId
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, dtmTicketDateTime
 					, intItemId
 					, strItemNo
@@ -2370,7 +2418,8 @@ BEGIN
 					, dblStorageDue
 					, dtmLastStorageAccrueDate
 					, strScheduleId
-					, dtmDeliveryDate
+					, strContractEndMonth
+					, strDeliveryDate
 					, dtmTicketDateTime
 					, intItemId
 					, strItemNo
@@ -2391,7 +2440,7 @@ BEGIN
 				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
 				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND intSeqId = 5
-				ORDER BY intSeqId, dtmDeliveryDate
+				ORDER BY intSeqId, strContractEndMonth, strDeliveryDate
 			END
 		END
 		
@@ -2464,7 +2513,8 @@ BEGIN
 			, intTicketId
 			, strTicketType
 			, strTicketNumber = ISNULL(strTicketNumber, '')
-			, dtmDeliveryDate
+			, strContractEndMonth
+			, strDeliveryDate
 			, dtmTicketDateTime
 			, intItemId
 			, strItemNo
@@ -2518,7 +2568,8 @@ BEGIN
 			, intTicketId
 			, strTicketType
 			, strTicketNumber = ISNULL(strTicketNumber, '')
-			, dtmDeliveryDate
+			, strContractEndMonth
+			, strDeliveryDate
 			, dtmTicketDateTime
 			, intItemId
 			, strItemNo

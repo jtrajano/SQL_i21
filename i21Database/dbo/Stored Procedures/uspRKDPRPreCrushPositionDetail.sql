@@ -71,7 +71,7 @@ BEGIN
 		, strFutMarketName NVARCHAR(100)
 		, intFutureMonthId INT
 		, strFutureMonth NVARCHAR(100)
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
@@ -107,7 +107,7 @@ BEGIN
 		, strFutMarketName NVARCHAR(100)
 		, intFutureMonthId INT
 		, strFutureMonth NVARCHAR(100)
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
@@ -335,7 +335,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate)
+				, strDeliveryDate)
 			SELECT strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
@@ -355,7 +355,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmEndDate
+				, strDeliveryDate
 			FROM (
 				SELECT strCommodityCode
 					, CD.intCommodityId
@@ -378,7 +378,7 @@ BEGIN
 					, CD.strFutMarketName
 					, CD.intFutureMonthId
 					, CD.strFutureMonth
-					, CD.dtmEndDate
+					, strDeliveryDate = CASE WHEN ISNULL(CD.dtmEndDate, '') = '' THEN '' ELSE RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) END
 				FROM @tblGetOpenContractDetail CD
 				JOIN tblCTContractDetail det ON CD.intContractDetailId = det.intContractDetailId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
@@ -429,7 +429,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate
+				, strDeliveryDate
 				, strBrokerTradeNo
 				, strNotes
 				, ysnPreCrush)
@@ -460,7 +460,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate
+				, strDeliveryDate
 				, strBrokerTradeNo
 				, strNotes
 				, ysnPreCrush
@@ -784,7 +784,7 @@ INSERT INTO @List (strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -824,7 +824,7 @@ SELECT strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -859,7 +859,7 @@ INSERT INTO @List (
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -899,7 +899,7 @@ SELECT strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -947,7 +947,7 @@ INSERT INTO @List (strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -969,7 +969,7 @@ SELECT strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -994,6 +994,7 @@ INSERT INTO @List (strCommodityCode
 	, intFutureMarketId
 	, strFutMarketName
 	, intFutureMonthId
+	, strFutureMonth
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -1003,7 +1004,7 @@ SELECT strCommodityCode
 	, intFutOptTransactionHeaderId
 	, 'Net Futures'
 	, strLocationName
-	, strFutureMonth
+	, strContractEndMonth
 	, dtmFutureMonthsDate
 	, HedgedQty
 	, intUnitMeasureId
@@ -1016,6 +1017,7 @@ SELECT strCommodityCode
 	, intFutureMarketId
 	, strFutureMarket
 	, intFutureMonthId
+	, strFutureMonth
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1028,7 +1030,7 @@ FROM (
 									ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END
 		, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(intOpenContract, 0) * m.dblContractSize)
 		, l.strLocationName
-		, strFutureMonth = CASE WHEN CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
+		, strContractEndMonth = CASE WHEN CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 								ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END
 		, m.intUnitMeasureId
 		, e.strName + '-' + ba.strAccountNumber strAccountNumber
@@ -1039,6 +1041,7 @@ FROM (
 		, f.intFutureMarketId
 		, oc.strFutureMarket
 		, f.intFutureMonthId
+		, fm.strFutureMonth
 		, oc.strBrokerTradeNo
 		, oc.strNotes
 		, oc.ysnPreCrush
@@ -1079,6 +1082,7 @@ INSERT INTO @List (strCommodityCode
 	, intFutureMarketId
 	, strFutMarketName
 	, intFutureMonthId
+	, strFutureMonth
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -1088,7 +1092,7 @@ SELECT strCommodityCode
 	, intFutOptTransactionHeaderId
 	, 'Delta Adjusted Options'
 	, strLocationName
-	, strFutureMonth
+	, strContractEndMonth
 	, dtmFutureMonthsDate
 	, HedgedQty
 	, intUnitMeasureId
@@ -1102,6 +1106,7 @@ SELECT strCommodityCode
 	, intFutureMarketId
 	, strFutureMarket
 	, intFutureMonthId
+	, strFutureMonth
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1119,7 +1124,7 @@ FROM (
 													AND oc.dblStrike = mm.dblStrike
 												ORDER BY dtmPriceDate DESC), 0) * m.dblContractSize
 		, l.strLocationName
-		, strFutureMonth = CASE WHEN CONVERT(DATETIME, '01 ' + om.strOptionMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
+		, strContractEndMonth = CASE WHEN CONVERT(DATETIME, '01 ' + om.strOptionMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 								ELSE LEFT(om.strOptionMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END
 		, m.intUnitMeasureId
 		, e.strName + '-' + ba.strAccountNumber strAccountNumber
@@ -1136,6 +1141,7 @@ FROM (
 		, f.intFutureMarketId
 		, oc.strFutureMarket
 		, f.intFutureMonthId
+		, strFutureMonth = om.strOptionMonth
 		, oc.strBrokerTradeNo
 		, oc.strNotes
 		, oc.ysnPreCrush
@@ -1179,11 +1185,10 @@ INSERT INTO @List (strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
-	, ysnPreCrush
-	)
+	, ysnPreCrush)
 SELECT strCommodityCode
 	, intCommodityId
 	, strInternalTradeNo
@@ -1208,7 +1213,7 @@ SELECT strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1234,7 +1239,7 @@ GROUP BY strCommodityCode
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1368,7 +1373,7 @@ DECLARE @ListFinal AS TABLE (intRowNumber1 INT IDENTITY
 	, strFutMarketName NVARCHAR(100)
 	, intFutureMonthId INT
 	, strFutureMonth NVARCHAR(100)
-	, dtmDeliveryDate DATETIME
+	, strDeliveryDate NVARCHAR(50)
 	, strBrokerTradeNo NVARCHAR(100)
 	, strNotes NVARCHAR(100)
 	, ysnPreCrush BIT)
@@ -1435,7 +1440,7 @@ INSERT INTO @ListFinal(intSeqNo
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -1468,7 +1473,7 @@ SELECT intSeqNo
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1504,7 +1509,7 @@ INSERT INTO @ListFinal(intSeqNo
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush)
@@ -1537,7 +1542,7 @@ SELECT intSeqNo
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
@@ -1573,7 +1578,7 @@ SELECT intSeqNo = intOrderId
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, dtmDeliveryDate
+	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
