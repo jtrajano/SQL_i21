@@ -108,7 +108,7 @@ SELECT	DISTINCT
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
 			,dblAmountDue = ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0))
 			,dblVoucherAmount = CASE 
-								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE 0 END),0)
+								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE  dblVoucherLineTotal + dblVoucherTax  END),0)
 								ELSE 0 END    
 			,dblWithheld = 0
 			,dblDiscount = 0 
