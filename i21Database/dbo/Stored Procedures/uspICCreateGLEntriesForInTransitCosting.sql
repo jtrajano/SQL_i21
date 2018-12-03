@@ -6,6 +6,7 @@
 	--,@intContraInventory_ItemLocationId AS INT = NULL 
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
+	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -52,13 +53,15 @@ SELECT	Query.intItemId
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId
-					, intItemLocationId = ISNULL(intInTransitSourceLocationId, intItemLocationId)
-					, intTransactionTypeId
-			FROM	dbo.tblICInventoryTransaction t 
+					t.intItemId
+					, intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+					, t.intTransactionTypeId
+			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+						ON t.intItemId = i.intItemId 
 			WHERE	t.strBatchId = @strBatchId
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		) Query
 
 -- Validate the GL Accounts
@@ -144,12 +147,15 @@ BEGIN
 				SELECT	TOP 1 1 
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 							ON t.intTransactionTypeId = TransType.intTransactionTypeId
+						INNER JOIN tblICItem i
+							ON i.intItemId = t.intItemId 
 				WHERE	t.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			)
 
 	SELECT	TOP 1 
@@ -258,11 +264,14 @@ AS
 			,t.dblForexRate
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i
+				ON i.intItemId = t.intItemId 
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			--AND t.intFobPointId IS NOT NULL 	
 			AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
