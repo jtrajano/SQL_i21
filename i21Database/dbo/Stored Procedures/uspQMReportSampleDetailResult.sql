@@ -18,11 +18,11 @@ BEGIN TRY
 	SELECT T.strTestName
 		,P.strPropertyName
 		,CASE 
-			WHEN P.intDataTypeId IN (
+			WHEN (P.intDataTypeId IN (
 					1
 					,2
 					,6
-					)
+					) AND ISNULL(TR.strPropertyValue, '') <> '')
 				THEN CONVERT(NVARCHAR, ROUND(ISNULL(TR.strPropertyValue, 0), @intNumberofDecimalPlaces))
 			ELSE TR.strPropertyValue
 			END AS strPropertyValue
@@ -31,6 +31,7 @@ BEGIN TRY
 		,TR.dblMaxValue
 		,TR.strComment
 		,TR.dtmLastModified
+		,P.intDataTypeId
 	FROM tblQMTestResult TR
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		AND TR.intSampleId = @intSampleId
