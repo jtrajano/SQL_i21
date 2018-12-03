@@ -418,9 +418,26 @@ SELECT
 											THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
 										--WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1 --reverse the amount of detail if type is I and amount is negative
 										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END, --IF 'I' the amount sign is correct
-	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
-										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) --Cost should always positive
-									ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') 
+									THEN
+										(CASE 
+											WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 
+											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) 
+										END) --Cost should always positive
+									ELSE 
+										ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) 
+									END) 
+									/ 
+									(CASE WHEN 
+										 (
+											 CASE WHEN C2.apivc_trans_type IN ('C','A') 
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1
+											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END
+										 ) < 0
+										THEN -(ABS(C.aphgl_gl_un)) --when line total is negative, get the cost by dividing to negative as well
+										ELSE C.aphgl_gl_un 
+									END),
 	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
 								THEN 
 									(
