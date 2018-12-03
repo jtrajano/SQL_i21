@@ -7214,6 +7214,7 @@
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
     <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
+    <Build Include="dbo\Tables\tblCFDriverPin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
