@@ -356,27 +356,42 @@ SELECT
 			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
 			-- 2. convert to sub currency cents. 
 			-- 3. and then convert into functional currency. 
+				CAST(
 				((B.dblQtyReceived * B.dblCost)
 					/ ISNULL(r.intSubCurrencyCents, 1) 
 					* ISNULL(rc.dblForexRate, 1)) 
-				- ((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+				AS DECIMAL(18,2))
+				- 
+				CAST(
+				((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
 					/ ISNULL(r.intSubCurrencyCents, 1) 
-					* ISNULL(rc.dblForexRate, 1) )   
+					* ISNULL(rc.dblForexRate, 1) )
+				AS DECIMAL(18,2))
 			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
 			-- Formula: 
 			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
 			-- 2. and then convert into functional currency. 
+			CAST(
 				(
 					(B.dblQtyReceived * B.dblCost)
 					/ ISNULL(r.intSubCurrencyCents, 1) )  
-				- (
+			AS DECIMAL(18,2))
+				- 
+				CAST(
+				(
 					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
 					/ ISNULL(r.intSubCurrencyCents, 1))
+				AS DECIMAL(18,2))
 			ELSE
 			-- Formula: 
 			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				CAST(
 				(B.dblQtyReceived * B.dblCost )  
-				- (rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
+				AS DECIMAL(18,2))
+				- 
+				CAST(
+				(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
+				AS DECIMAL(18,2))
 			END  
 	,[dtmDate] = A.dtmDate
 	,[intTransactionId] = A.intBillId
