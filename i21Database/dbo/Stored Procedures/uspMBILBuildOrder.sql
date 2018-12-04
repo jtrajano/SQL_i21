@@ -82,13 +82,15 @@ INSERT INTO tblMBILOrderItem(intOrderId
 	, intItemId
 	, intItemUOMId
 	, dblQuantity
-	, dblPrice)
+	, dblPrice
+	, intContractDetailId)
 SELECT [Order].intOrderId	
 	, #Dispatch.intSiteId
 	, #Dispatch.intItemId
 	, #Dispatch.intItemUOMId	
 	, #Dispatch.[dblQuantity]
 	, #Dispatch.[dblPrice]
+	, #Dispatch.[intContractDetailId]
 FROM #Dispatch
 LEFT JOIN vyuMBILOrder [Order] ON #Dispatch.intDispatchId = [Order].intDispatchId
 WHERE [Order].intDriverId = @intDriverId
