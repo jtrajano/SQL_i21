@@ -142,12 +142,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 						-- 		THEN TaxAmount.dblTax * -1 
 						-- 	ELSE TaxAmount.dblTax
 						-- END
+			,A.intTaxGroupId = TaxAmount.intTaxGroupId
 	FROM tblAPBillDetail A
 	INNER JOIN @billDetailIds B ON A.intBillDetailId = B.intId
 	CROSS APPLY (
 		SELECT 
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
+			,B.intTaxGroupId
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
+		GROUP BY B.intTaxGroupId
 	) TaxAmount
 	LEFT JOIN tblICInventoryReceiptCharge D ON A.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 	WHERE TaxAmount.dblTax IS NOT NULL
