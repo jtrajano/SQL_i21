@@ -5,9 +5,9 @@ SELECT t.*
 FROM (
 	SELECT DISTINCT CD.intContractDetailId
 		,0 AS intSampleId
-		,'' AS strSampleNumber
-		,'' AS strSampleTypeName
-		,'' AS strStatus
+		,'' COLLATE Latin1_General_CI_AS AS strSampleNumber
+		,'' COLLATE Latin1_General_CI_AS AS strSampleTypeName
+		,'' COLLATE Latin1_General_CI_AS AS strStatus
 		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 		,CD.dblQuantity
 		,CASE 
