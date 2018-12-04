@@ -902,18 +902,22 @@ BEGIN
 				intPaymentId INT,
 				intInvoiceId INT,
 				dblInvoiceTotal NUMERIC(18,6),
-				dblAmountDue NUMERIC(18,6),
+				dblInterest NUMERIC(18, 6),
+				dblDiscount NUMERIC(18, 6),
+                dblAmountDue NUMERIC(18,6),
 				dblPayment NUMERIC(18,6),
 				intPaymentDetailId INT,
 				strBatchId nvarchar(100),
 				strInvoiceNumber nvarchar(100)
 			);
 				
-			INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, intPaymentDetailId, strBatchId, strInvoiceNumber)
+			INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblInterest, dblDiscount, dblAmountDue, dblPayment, intPaymentDetailId, strBatchId, strInvoiceNumber)
 			SELECT distinct
                 A.intPaymentId
 				,C.intInvoiceId
 				,C.dblInvoiceTotal
+                ,B.dblInterest
+                ,B.dblDiscount
 				,C.dblAmountDue
 				,B.dblPayment
 				,B.intPaymentDetailId
@@ -937,9 +941,13 @@ BEGIN
 					
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
 			BEGIN
-				DECLARE @PayID INT
-						,@AmountDue NUMERIC(18,6) = 0
-				SELECT TOP 1 @PayID = intPaymentId, @AmountDue = dblAmountDue, @InvoicePayment = @InvoicePayment + dblPayment FROM @InvoicePaymentDetail ORDER BY intPaymentId
+				DECLARE @PayID      INT
+					  , @AmountDue  NUMERIC(18,6) = 0
+
+				SELECT TOP 1 @PayID = intPaymentId
+                           , @AmountDue = dblAmountDue + dblInterest
+                           , @InvoicePayment = @InvoicePayment + dblPayment 
+                FROM @InvoicePaymentDetail ORDER BY intPaymentId
 				
 				IF @AmountDue < @InvoicePayment
 				BEGIN
