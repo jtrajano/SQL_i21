@@ -170,13 +170,13 @@ BEGIN TRY
 					--, tblTFReportingComponentProductCode.intProductCodeId
 					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblOpenReceive
-					, tblICInventoryReceiptItem.dblGross
-					, tblICInventoryReceiptItem.dblNet
+					--, tblICInventoryReceiptItem.dblOpenReceive
+					--, tblICInventoryReceiptItem.dblGross
+					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					--(CASE WHEN tblICInventoryReceiptItem.dblBillQty >= tblTRLoadDistributionDetail.dblUnits THEN tblTRLoadDistributionDetail.dblUnits ELSE 0 END) 
 					--ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
@@ -358,13 +358,13 @@ BEGIN TRY
 					--, tblTFReportingComponentProductCode.intProductCodeId
 					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblOpenReceive
-					, tblICInventoryReceiptItem.dblGross
-					, tblICInventoryReceiptItem.dblNet
+					--, tblICInventoryReceiptItem.dblOpenReceive
+					--, tblICInventoryReceiptItem.dblGross
+					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					--, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblOpenReceive END dblReceived
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN DistributionDetail.intLoadDistributionDetailId IS NOT NULL THEN DistributionDetail.dblUnits  ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
