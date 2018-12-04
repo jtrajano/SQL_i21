@@ -11,7 +11,7 @@ SELECT	DISTINCT
 			  WHEN APB.intTransactionType = 6	THEN 'Bill Template' 
 			  WHEN APB.intTransactionType = 8	THEN 'Vendor Overpayment' 
 			  ELSE 'Not Bill Type'
-		END AS strTransactionType,
+		END COLLATE Latin1_General_CI_AS AS strTransactionType,
 		APB.intEntityId,
 		US.strUserName,
 		ISNULL(APB.strReference, '') AS strDescription,

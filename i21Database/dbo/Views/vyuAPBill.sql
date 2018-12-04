@@ -23,7 +23,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	dbo.fnAESDecryptASym(Payment.strBankAccountNo) AS strBankAccountNo,
+	dbo.fnAESDecryptASym(Payment.strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
 	F.strUserName AS strUserId,

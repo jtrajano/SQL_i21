@@ -2,7 +2,7 @@
 
 AS 
 SELECT 
-	(SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
+	(SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) COLLATE Latin1_General_CI_AS AS strCompanyName
 	,A.intPurchaseId
 	,A.dtmDate
 	,A.dtmExpectedDate
@@ -12,8 +12,8 @@ SELECT
 	,A.strReference
 	,C.strVendorId 
 	,RTRIM(LTRIM(C.strVendorId)) + ' - ' + C1.strName AS strVendorName
-	,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
-	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](C1.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
+	,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone)) COLLATE Latin1_General_CI_AS
+	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](C1.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone)) COLLATE Latin1_General_CI_AS
 	,intShipViaId
 	,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE [intEntityShipViaId] = A.intShipViaId)
 	,A.intTermsId

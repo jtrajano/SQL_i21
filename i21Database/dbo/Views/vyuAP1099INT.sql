@@ -9,7 +9,7 @@ SELECT
 									, B.strState
 									, +' ' + B.strZip
 									, B.strCountry
-									, B.strPhone)
+									, B.strPhone) COLLATE Latin1_General_CI_AS
 	, B.strCompanyName
 	, strEIN = B.strEin--B.strFederalTaxID
 	, A.strAddress

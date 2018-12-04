@@ -35,10 +35,10 @@ AS
 								WHEN APB.intTransactionType = 9 THEN '1099 Adjustment'
 								WHEN APB.intTransactionType = 10 THEN 'Patronage'
 							ELSE ''
-						  END) AS strTransactionType
-	,'' AS dblAmountPaid
-	,'' AS dblCost--tblAPBatchDetail.dblCost
-	,'' AS strTaxCode --tblAPBatchDetail.strTaxID AS strSalesTaxCode
+						  END) COLLATE Latin1_General_CI_AS AS strTransactionType
+	,'' COLLATE Latin1_General_CI_AS AS dblAmountPaid 
+	,'' COLLATE Latin1_General_CI_AS AS dblCost--tblAPBatchDetail.dblCost
+	,'' COLLATE Latin1_General_CI_AS AS strTaxCode --tblAPBatchDetail.strTaxID AS strSalesTaxCode
 	,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = APD.intItemId) AS strItem
 	,APD.strMiscDescription
 	,APD.intBillDetailId AS  intBillDetailId
@@ -52,7 +52,7 @@ AS
 							 FROM tblAPAppliedPrepaidAndDebit B
 							 INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
 							 WHERE B.ysnApplied = 1 AND APB.intBillId = B.intBillId)
-	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) COLLATE Latin1_General_CI_AS as strCompanyAddress
 	,APB.ysnPaid AS ysnPaid
 	--,strSegment = ISNULL((Select strSegmentCode from tblGLAccount where strAccountID = tblAPBatchDetail.strAccountID),'')
 	,Payment.strPaymentInfo	

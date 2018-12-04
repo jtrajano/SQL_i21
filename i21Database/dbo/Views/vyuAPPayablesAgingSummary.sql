@@ -35,7 +35,7 @@ A.dtmDate
 		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days' 
 		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'
 		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN 'Over 90' 
-		ELSE 'Current' END AS strAge
+		ELSE 'Current' END COLLATE Latin1_General_CI_AS AS strAge
 FROM  
 (
 	SELECT 

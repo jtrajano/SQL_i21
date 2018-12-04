@@ -12,7 +12,7 @@ SELECT
 								WHEN A.intTransactionType = 2	THEN 'Vendor Prepayment' 
 								WHEN A.intTransactionType = 3	THEN 'Debit Memo' 
 								ELSE 'Not Bill Type'
-						   END)
+						   END) COLLATE Latin1_General_CI_AS
 	,strBillId = A.strBillId
 	,strInvoiceNumber = strVendorOrderNumber
 	,dblTotal = (CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE ISNULL(A.dblTotal,0) END)

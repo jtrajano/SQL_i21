@@ -51,7 +51,7 @@ SELECT
 			THEN 'Prepayment was posted but not payment transaction created.'
 		WHEN A.ysnPosted = 1 AND A.intTransactionType = 2 AND A.dblPayment != 0 AND ISNULL(Payments.dblPayment,0) = 0
 			THEN 'Prepayment has payment but did no offset transaction'
-			ELSE 'OK' END AS strStatus
+			ELSE 'OK' END  COLLATE Latin1_General_CI_AS AS strStatus
 FROM tblAPBill A
 OUTER APPLY (
 	SELECT

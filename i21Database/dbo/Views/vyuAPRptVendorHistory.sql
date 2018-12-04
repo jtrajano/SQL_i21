@@ -11,7 +11,7 @@ SELECT
 			  WHEN APB.intTransactionType = 2	THEN 'Vendor Prepayment' 
 			  WHEN APB.intTransactionType = 3	THEN 'Debit Memo' 
 		 ELSE 'Not Bill Type'
-		 END AS strTransactionType 
+		 END COLLATE Latin1_General_CI_AS AS strTransactionType 
 		,strBillId = APB.strBillId
 		,strInvoiceNumber = APB.strVendorOrderNumber
 		,dblTotal = (CASE WHEN APB.intTransactionType != 1 AND APB.dblTotal > 0 THEN APB.dblTotal * -1 ELSE APB.dblTotal END)
