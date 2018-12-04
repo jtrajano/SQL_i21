@@ -57,7 +57,7 @@ SELECT
 	,strContactName					= EC.strName
 	,strTicketNumbers				= SCALETICKETS.strTicketNumbers
 	,strCustomerReferences			= CUSTOMERREFERENCES.strCustomerReferences
-	,ysnHasEmailSetup				= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
+	,ysnHasEmailSetup				= EMAILSETUP.ysnHasEmailSetup --CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
 	,dblWithholdingTax				= CASE WHEN (I.strTransactionType  IN ('Credit Memo','Customer Prepayment', 'Overpayment'))
 									  THEN
@@ -65,8 +65,8 @@ SELECT
 									  ELSE
 									  CASE WHEN ysnPaid = 1 THEN (I.dblPayment - (I.dblPayment - (I.dblPayment * (dblWithholdPercent / 100))))  ELSE I.dblAmountDue - (I.dblAmountDue - (I.dblAmountDue * (dblWithholdPercent / 100))) END
 									  END
-	,ysnMailSent					= CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	
+	,ysnMailSent					= isnull(EMAILSTATUS.ysnMailSent, 0)--CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
+	,strStatus						= CASE WHEN EMAILSETUP.ysnHasEmailSetup = 1 THEN 'Ready' ELSE 'Email not Configured.' END	
 	,dtmForgiveDate					=I.dtmForgiveDate
 	,strSalesOrderNumber			=SO.strSalesOrderNumber
 	,intBookId						=I.intBookId
@@ -170,7 +170,9 @@ OUTER APPLY (
 	--WHERE intCustomerEntityId = I.intEntityCustomerId 
 	--  AND ISNULL(strEmail, '') <> '' 
 	--  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
-	select intEmailSetupCount  = count(a.intEntityId) from 
+	select --intEmailSetupCount  = count(a.intEntityId),
+		ysnHasEmailSetup = CASE WHEN  count(a.intEntityId)  > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+		from 
 		tblEMEntityToContact a 
 			join tblEMEntity b 
 				on a.intEntityContactId = b.intEntityId 
@@ -183,16 +185,24 @@ LEFT OUTER JOIN (
 		 , strSalesOrderNumber
 	FROM dbo.tblSOSalesOrder  
 ) SO ON I.intSalesOrderId = SO.intSalesOrderId 
-OUTER APPLY (
-	SELECT intTransactionCount = COUNT(SMA.intTransactionId) 
-	FROM tblSMTransaction SMT 
-	INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
-	INNER JOIN tblSMScreen SC ON SMT.intScreenId = SC.intScreenId
-	WHERE SMT.intRecordId = I.intInvoiceId
-		AND SMA.strType = 'Email' 
-		AND SMA.strStatus = 'Sent'
-		AND SC.strScreenName = 'Invoice'
+left join (
+	SELECT 		
+		--intTransactionCount = COUNT(SMA.intTransactionId),
+		id = SMT.intRecordId ,
+		ysnMailSent = CASE WHEN COUNT(SMA.intTransactionId) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
+	FROM (select intRecordId, intTransactionId, intScreenId from tblSMTransaction WITH (NOLOCK) where intScreenId = 48) SMT 
+	INNER JOIN (select intTransactionId, strType, strStatus from tblSMActivity WITH (NOLOCK) where strType = 'Email' and strStatus = 'Sent') SMA on SMA.intTransactionId = SMT.intTransactionId 
+	GROUP by SMT.intRecordId
+
+	--SELECT intTransactionCount = COUNT(SMA.intTransactionId) 
+	--FROM tblSMTransaction SMT 
+	--INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
+	--WHERE SMT.intRecordId = I.intInvoiceId 
+	--  AND SMA.strType = 'Email' 
+	--  AND SMA.strStatus = 'Sent'
+	--  and SMT.intScreenId = 48
 ) EMAILSTATUS
+	on I.intInvoiceId = EMAILSTATUS.id
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 	FROM (
@@ -224,5 +234,6 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
+
 
 GO
