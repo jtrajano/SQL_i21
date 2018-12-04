@@ -193,7 +193,8 @@
 :r .\22_PAT\3_MigrateDataChanges.sql
 :r .\22_PAT\4_DefaultBillId.sql
 :r .\22_PAT\5_DuplicateStockTable.sql
-:r .\22_PAT\6_VolumeConstraintFix.sql
+:r .\22_PAT\6_VolumeSchemaFix.sql
+:r .\22_PAT\7_VolumeConstraintFix.sql
 
 --EM
 
