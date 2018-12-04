@@ -376,7 +376,7 @@ BEGIN TRY
 			,Prod.dblTareWeight
 			,Prod.dblGrossWeight
 			,Prod.dblNetWeight AS dblProduceQty
-			,IU1.intItemUOMId AS intActualItemUOMId
+			,IsNULL(IU1.intItemUOMId,IU2.intItemUOMId) AS intActualItemUOMId
 			,UM1.intUnitMeasureId AS intActualItemUnitMeasureId
 			,UM1.strUnitMeasure AS strActualItemUnitMeasure
 			,Prod.dblWeightPerUnit AS dblUnitQty
@@ -393,7 +393,7 @@ BEGIN TRY
 			,Prod.intParentLotId
 			,Prod.strThirdPartyLotNumber AS strLotNumber
 			,Prod.intThirdPartyLotId AS intLotId
-			,IU.intItemUOMId AS intProduceUnitMeasureId
+			,IsNULL(IU1.intItemUOMId,IU2.intItemUOMId) AS intProduceUnitMeasureId
 			,Prod.intWeightItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -405,8 +405,9 @@ BEGIN TRY
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 		LEFT JOIN @tblMFProduceItem Prod ON Prod.intItemId = I.intItemId
 		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(Prod.intStorageLocationId,@intTransferStorageLocationId)
-		LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = IsNULL(Prod.intWeightItemUOMId, I.intWeightUOMId)
-		LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId =Prod.intWeightItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId =  IsNULL(IU1.intUnitMeasureId, I.intWeightUOMId)
+		LEFT JOIN dbo.tblICItemUOM IU2 ON IU2.intItemId =I.intItemId and IU2.intUnitMeasureId=UM1.intUnitMeasureId
 		LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Prod.intContainerId
 		WHERE r.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 2
