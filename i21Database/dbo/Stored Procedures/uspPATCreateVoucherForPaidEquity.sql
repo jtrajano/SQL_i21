@@ -52,7 +52,8 @@ BEGIN
 		ON EM.intEntityId = EPS.intCustomerPatronId
 	LEFT OUTER JOIN vyuEMEntityType APV 
 		ON APV.intEntityId = EPS.intCustomerPatronId
-	WHERE EP.intEquityPayId = @equityPay AND EPS.intBillId IS NULL
+	WHERE EP.intEquityPayId = @equityPay
+		AND EPS.intBillId IS NULL
 END
 ELSE
 BEGIN
@@ -73,8 +74,16 @@ BEGIN
 		ON EM.intEntityId = EPS.intCustomerPatronId
 	LEFT OUTER JOIN vyuEMEntityType APV 
 		ON APV.intEntityId = EPS.intCustomerPatronId
-	WHERE EPS.intEquityPaySummaryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityPaymentIds))
+	WHERE EPS.intEquityPaySummaryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityPaymentIds)) 
+		AND EPS.intBillId IS NULL
 END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tempEquityPayments)
+	BEGIN
+		SET @strErrorMessage = 'There are no vouchers to process.';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
 
 	DECLARE @voucherPayable AS VoucherPayable;
 	DECLARE @createdVouchersId AS NVARCHAR(MAX);
