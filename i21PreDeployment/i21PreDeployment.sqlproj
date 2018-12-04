@@ -164,7 +164,8 @@
     <None Include="Scripts\Pre-Deployment\7_AR\00_DropTriggers.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\ChangePrimaryKeyToIdentity.sql" />
     <None Include="Scripts\Pre-Deployment\26_LG\0_DataCleanup.sql" />
-    <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeConstraintFix.sql" />
+    <None Include="Scripts\Pre-Deployment\22_PAT\7_VolumeConstraintFix.sql" />
+    <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeSchemaFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
