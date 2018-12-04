@@ -11,7 +11,6 @@ SELECT P.intPropertyId
 	,P.strIsMandatory
 	,P.ysnNotify
 	,dbo.fnQMGetTestNames(P.intPropertyId) COLLATE Latin1_General_CI_AS AS strTestNames
-	,I.strItemNo
 FROM tblQMProperty AS P
 JOIN tblQMAnalysisType AS AT ON AT.intAnalysisTypeId = P.intAnalysisTypeId
 JOIN tblQMDataType AS DT ON DT.intDataTypeId = P.intDataTypeId
