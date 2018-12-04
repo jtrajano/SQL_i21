@@ -25,7 +25,7 @@ SELECT DISTINCT P.intProductId
 				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
-		) 'strControlPoints'
+		) COLLATE Latin1_General_CI_AS 'strControlPoints'
 FROM tblQMProduct P
 JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId

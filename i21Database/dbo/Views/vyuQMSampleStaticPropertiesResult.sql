@@ -10,14 +10,14 @@ SELECT TR.intTestResultId
 	,TR.dblMinValue
 	,TR.dblMaxValue
 	,ST.strSampleTypeName
-	,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 101) AS dtmSampleReceivedDate
+	,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 101) COLLATE Latin1_General_CI_AS AS dtmSampleReceivedDate
 	,S.strLotNumber
 	,I.strItemNo
 	,I.strDescription
 	,IR.strReceiptNumber
 	,WO.strWorkOrderNo
 	,MC.strCellName
-	,CONVERT(NVARCHAR, S.dtmBusinessDate, 101) AS dtmBusinessDate
+	,CONVERT(NVARCHAR, S.dtmBusinessDate, 101) COLLATE Latin1_General_CI_AS AS dtmBusinessDate
 	,SHI.strShiftName
 FROM tblQMTestResult TR
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId

@@ -28,11 +28,11 @@ SELECT S.intSampleId
 	,(
 		SELECT strShipperCode
 		FROM dbo.fnQMGetShipperName(S.strMarks)
-		) AS strShipperCode
+		) COLLATE Latin1_General_CI_AS AS strShipperCode
 	,(
 		SELECT strShipperName
 		FROM dbo.fnQMGetShipperName(S.strMarks)
-		) AS strShipperName
+		) COLLATE Latin1_General_CI_AS AS strShipperName
 FROM dbo.tblQMSample AS S
 JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
 JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
