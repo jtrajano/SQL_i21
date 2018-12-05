@@ -635,13 +635,16 @@ BEGIN
 			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	FROM tblICInventoryStockMovement 
+	DELETE	m
+	FROM	tblICInventoryStockMovement m INNER JOIN tblICItem i
+				ON m.intItemId = i.intItemId 
 	WHERE	dbo.fnDateGreaterThanEquals(
-				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				CASE WHEN @isPeriodic = 0 THEN m.dtmCreated ELSE m.dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
-			AND intInventoryTransactionId IS NOT NULL
+			AND m.intItemId = ISNULL(@intItemId, m.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			AND m.intInventoryTransactionId IS NOT NULL
 END 
 
 --------------------------------------------------------------------
