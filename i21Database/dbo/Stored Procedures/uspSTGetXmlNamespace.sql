@@ -17,7 +17,7 @@ BEGIN TRY
 
 	SELECT @intStoreId = ST.intStoreId 
 		   , @strRegisterClass = R.strRegisterClass
-		   , @stri21FolderPath = REPLACE((R.strRegisterInboxPath + RFC.strFolderPath), '/', '\')
+		   , @stri21FolderPath = REPLACE(REPLACE((R.strRegisterInboxPath + '\' + RFC.strFolderPath), '/', '\'), '\\', '\') -- Make sure that there is a \ separator between Inbound folder and xml register folder
 		   , @strFileNamePattern = RFC.strFileNamePattern
 	FROM tblSTStore ST
 	JOIN tblSTRegister R
