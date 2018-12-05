@@ -18,7 +18,9 @@ INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,in
 exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
-exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
+SELECT strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId FROM  fnRKGetInHouseAndCompanyTitle (@dtmToDate,@strPositionIncludes,@intVendorId)
+
+
 
 SELECT distinct strCommodityCode,strUnitMeasure,intCommodityId,
 (SELECT distinct sum(dblTotal) dblInHouse FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='In-House' and t.strCommodityCode=f.strCommodityCode ) dblInHouse,
