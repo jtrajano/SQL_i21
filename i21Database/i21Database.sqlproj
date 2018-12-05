@@ -7187,6 +7187,8 @@
     <Build Include="dbo\Tables\tblSTUpdateRegisterItemReport.sql" />
     <Build Include="dbo\Tables\tblGRReadingRanges.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeSaveBrokerageCommission.sql" />
+    <Build Include="dbo\Functions\fnRKGetInHouseAndCompanyTitle.sql" />
+    <Build Include="dbo\Views\vyuRKGetICStockMovement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
