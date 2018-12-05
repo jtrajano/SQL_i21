@@ -18,7 +18,11 @@ SELECT Payment.intPaymentId
 	, Payment.strCheckNumber
 	, Payment.dblPayment
 	, Payment.strComments
+	, Payment.strVoidComments
 	, Payment.ysnPosted
+	, Payment.ysnVoided
+	, Payment.dtmPostedDate
+	, Payment.dtmVoidedDate
 	, Payment.intConcurrencyId
 FROM tblMBILPayment Payment
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Payment.intEntityCustomerId
