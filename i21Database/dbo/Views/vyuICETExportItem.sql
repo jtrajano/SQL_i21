@@ -9,7 +9,7 @@ SELECT DISTINCT
 	CAST(REPLACE(salesAccount.strAccountId, '-', '') AS VARCHAR(13)) salact,
 	unitMeasure.strUnitMeasure sunmsr,
 	1 msgno, NULL interm,
-	CASE WHEN item.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') THEN 'N' ELSE 'Y' END Counted
+	CASE WHEN item.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS Counted
 FROM tblICItem item
 	INNER JOIN tblICItemLocation itemLocation ON itemLocation.intItemId = item.intItemId
 	INNER JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = itemLocation.intLocationId

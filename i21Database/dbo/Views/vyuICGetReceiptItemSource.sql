@@ -14,7 +14,8 @@ SELECT
 			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
-		END),
+		END)
+		COLLATE Latin1_General_CI_AS,
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'

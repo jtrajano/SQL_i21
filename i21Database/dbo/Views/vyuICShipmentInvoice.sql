@@ -61,13 +61,13 @@ FROM tblICInventoryShipment s
 		AND it.strTransactionId = s.strShipmentNumber
 		AND iv.ysnPosted = 1
 	 LEFT JOIN (
-		  SELECT 1 intOrderTypeId, 'Sales Contract' strOrderType
+		  SELECT 1 intOrderTypeId, 'Sales Contract' COLLATE Latin1_General_CI_AS strOrderType
 		  UNION
-		  SELECT 2 intOrderTypeId, 'Sales Order' strOrderType
+		  SELECT 2 intOrderTypeId, 'Sales Order' COLLATE Latin1_General_CI_AS strOrderType
 		  UNION
-		  SELECT 3 intOrderTypeId, 'Transfer Order' strOrderType
+		  SELECT 3 intOrderTypeId, 'Transfer Order' COLLATE Latin1_General_CI_AS strOrderType
 		  UNION
-		  SELECT 4 intOrderTypeId, 'Direct' strOrderType
+		  SELECT 4 intOrderTypeId, 'Direct' COLLATE Latin1_General_CI_AS strOrderType
 	 ) AS ot ON ot.intOrderTypeId = s.intOrderType
 	 LEFT JOIN tblSMCurrency currency
 		ON currency.intCurrencyID = s.intCurrencyId
