@@ -378,7 +378,7 @@ OUTER APPLY (
 		 strEmailDistributionOption
 		,strEmail 
 	FROM vyuARCustomerContacts
-	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != ''
+	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
 ) AS arCustomerContact
 -------------------------------------------------------------
 WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
