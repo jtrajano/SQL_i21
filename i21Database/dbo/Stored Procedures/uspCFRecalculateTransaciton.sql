@@ -6028,6 +6028,8 @@ BEGIN
 			,dblOriginalTotalPrice	   = @dblOriginalTotalPrice	
 			,dblMargin				   = @dblMargin
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
+			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
+			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId

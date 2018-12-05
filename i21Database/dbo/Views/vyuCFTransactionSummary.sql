@@ -60,11 +60,11 @@ END) AS strName
 ,ROUND(ISNULL(cfTransaction.dblCalculatedTotalPrice,0),2) AS dblSalesAmount
 
 ,(CASE  
-		WHEN cfTransaction.strTransactionType='Local/Network'
+		WHEN cfTransaction.strTransactionType IN ('Local/Network','Foreign Sale','Foreign Sales') AND ISNULL(cfTransaction.dblInventoryCost,0) > 0
 		THEN 
-			ROUND(ISNULL(cfTransaction.dblInventoryCost,0)* ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
+			ROUND(ISNULL(cfTransaction.dblInventoryCost,0) * ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
 		ELSE
-			ROUND(ISNULL(cfTransaction.dblTransferCost,0)* ROUND(cfTransaction.dblQuantity,3),2) 
+			ROUND(ISNULL(cfTransaction.dblNetTransferCost,0) * ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0),2) 
 
 END) AS dblCost
 
