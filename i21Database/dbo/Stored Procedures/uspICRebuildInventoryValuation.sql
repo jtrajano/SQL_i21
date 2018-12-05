@@ -773,17 +773,18 @@ END
 ------------------------------------------------------------------------------
 BEGIN 
 	UPDATE	ItemPricing 
-	SET		dblLastCost = (
+	SET		dblLastCost = ISNULL(q.dblFindLastCost, ItemPricing.dblLastCost) 
+	FROM	tblICItemPricing ItemPricing INNER JOIN tblICItem i
+				ON ItemPricing.intItemId = i.intItemId
+			OUTER APPLY (
 				SELECT	TOP 1 
-						dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
+						dblFindLastCost = dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
 				FROM	dbo.tblICInventoryTransaction InvTrans 
 				WHERE	InvTrans.intItemId = ItemPricing.intItemId
 						AND InvTrans.intItemLocationId = ItemPricing.intItemLocationId
 						AND InvTrans.dblQty > 0 
-				ORDER BY InvTrans.dtmDate DESC 
-			)
-	FROM	tblICItemPricing ItemPricing INNER JOIN tblICItem i
-				ON ItemPricing.intItemId = i.intItemId
+				ORDER BY InvTrans.dtmDate DESC 						
+			) q
 	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
@@ -791,18 +792,19 @@ BEGIN
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
 
 	UPDATE	Lot
-	SET		dblLastCost = (
+	SET		dblLastCost = ISNULL(q.dblFindLastCost, Lot.dblLastCost) 
+	FROM	tblICLot Lot INNER JOIN tblICItem i
+				ON Lot.intItemId = i.intItemId
+			OUTER APPLY (
 				SELECT	TOP 1 
-						dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
+						dblFindLastCost = dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
 				FROM	dbo.tblICInventoryTransaction InvTrans 
 				WHERE	InvTrans.intItemId = Lot.intItemId
 						AND InvTrans.intItemLocationId = Lot.intItemLocationId
 						AND InvTrans.intLotId = Lot.intLotId
 						AND InvTrans.dblQty > 0 
 				ORDER BY InvTrans.dtmDate DESC 
-			)
-	FROM	tblICLot Lot INNER JOIN tblICItem i
-				ON Lot.intItemId = i.intItemId
+			) q
 	WHERE	Lot.intItemId = ISNULL(@intItemId, Lot.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
@@ -3852,7 +3854,7 @@ BEGIN
 							ON StockUnit.intItemId = AdjDetail.intItemId
 							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
 						LEFT JOIN dbo.tblICItemPricing ItemPricing
-							ON ItemPricing.intItemId = Lot.intItemId
+							ON ItemPricing.intItemId = AdjDetail.intItemId
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
