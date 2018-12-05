@@ -1356,7 +1356,11 @@ BEGIN
 							,ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId)
 							,TransferSource.intForexRateTypeId
 							,TransferSource.dblForexRate
-							,TransferSource.intCostingMethod
+							,intCostingMethod = 
+								CASE 
+									WHEN ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId) IS NOT NULL THEN @ACTUALCOST 
+									ELSE NULL 
+								END
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i
