@@ -93,7 +93,6 @@ SELECT distinct fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
-  JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=cv.intCompanyLocationId
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
@@ -139,7 +138,6 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId   
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId 
-  JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=cv.intCompanyLocationId 
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
@@ -189,7 +187,6 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
 				AND cv.intItemId NOT IN(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
 										AND ici.intProductLineId=pl.intCommodityProductLineId)  
-  JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=cv.intCompanyLocationId
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
