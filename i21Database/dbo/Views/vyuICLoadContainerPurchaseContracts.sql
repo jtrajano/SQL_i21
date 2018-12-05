@@ -38,7 +38,9 @@ SELECT LD.intLoadDetailId
 		WHEN 2
 			THEN 'Outbound'
 		ELSE 'Drop Ship'
-		END AS strType
+		END 
+		COLLATE Latin1_General_CI_AS
+		AS strType
 	,UOM.strUnitMeasure
 	,ItemUOM.dblUnitQty AS dblItemUOMCF
 	,ISNULL((SELECT TOP 1 intItemUOMId

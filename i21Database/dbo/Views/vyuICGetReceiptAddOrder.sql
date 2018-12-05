@@ -8,7 +8,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, [intEntityId]
 		, strVendorId
 		, strVendorName = strName
-		, strReceiptType = 'Purchase Order'
+		, strReceiptType = 'Purchase Order' COLLATE Latin1_General_CI_AS
 		, intLineNo = intPurchaseDetailId
 		, intOrderId = intPurchaseId
 		, strOrderNumber = strPurchaseOrderNumber
@@ -88,7 +88,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intEntityId
 		, strVendorId
 		, strVendorName = strEntityName
-		, strReceiptType = 'Purchase Contract'
+		, strReceiptType = 'Purchase Contract' COLLATE Latin1_General_CI_AS
 		, intLineNo = intContractDetailId
 		, intOrderId = intContractHeaderId
 		, strOrderNumber = strContractNumber
@@ -175,7 +175,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intEntityId			= ContractView.intEntityId
 		, strVendorId				= ContractView.strVendorId
 		, strVendorName				= ContractView.strEntityName
-		, strReceiptType			= 'Purchase Contract'
+		, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
 		, intLineNo					= ContractView.intContractDetailId
 		, intOrderId				= ContractView.intContractHeaderId
 		, strOrderNumber			= ContractView.strContractNumber
@@ -248,7 +248,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intEntityVendorId
 		, strVendor
 		, strVendor
-		, strReceiptType = 'Purchase Contract'
+		, strReceiptType = 'Purchase Contract' COLLATE Latin1_General_CI_AS
 		, intLineNo = intPContractDetailId
 		, intOrderId = intPContractHeaderId
 		, strOrderNumber = strPContractNumber
@@ -327,7 +327,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intEntityVendorId = TransferView.intToLocationId
 		, strVendorId = Loc.strLocationName
 		, strVendorName = Loc.strLocationName
-		, strReceiptType = 'Transfer Order'
+		, strReceiptType = 'Transfer Order' COLLATE Latin1_General_CI_AS
 		, intLineNo = TransferView.intInventoryTransferDetailId
 		, intOrderId = TransferView.intInventoryTransferId
 		, strOrderNumber = TransferView.strTransferNo

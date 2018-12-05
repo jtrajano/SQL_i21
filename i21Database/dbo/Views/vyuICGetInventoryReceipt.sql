@@ -11,6 +11,7 @@ SELECT Receipt.intInventoryReceiptId
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END)
+		COLLATE Latin1_General_CI_AS
 	, Receipt.intEntityVendorId
 	, Vendor.strVendorId
 	, strVendorName = Vendor.strName

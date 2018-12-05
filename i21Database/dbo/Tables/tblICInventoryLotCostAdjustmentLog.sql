@@ -21,7 +21,7 @@
 		[dblValue] NUMERIC(38, 20) NULL,
 		[ysnIsUnposted] BIT DEFAULT 0,
 		[dtmCreated] DATETIME NULL, 
-		[strRelatedTransactionId] NVARCHAR(50), 
+		[strRelatedTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		[intRelatedTransactionId] INT,
 		[intRelatedTransactionDetailId] INT,
 		[intRelatedInventoryTransactionId] INT,

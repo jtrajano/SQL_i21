@@ -65,8 +65,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 	UNION ALL 
 
 	SELECT 	
-		strOrderType = 'Sales Contract'
-		, strSourceType = 'None'
+		strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+		, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 		, intLocationId = intCompanyLocationId
 		, strShipFromLocation = strLocationName
 		, intEntityCustomerId = intEntityId
@@ -118,8 +118,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 	UNION ALL 
 
 	SELECT DISTINCT
-		strOrderType = 'Sales Contract'
-		, strSourceType = 'Pick Lot'
+		strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+		, strSourceType = 'Pick Lot' COLLATE Latin1_General_CI_AS
 		, intLocationId = PickLot.intCompanyLocationId
 		, strShipFromLocation = PickLot.strLocationName
 		, intEntityCustomerId = PickLot.intCustomerEntityId

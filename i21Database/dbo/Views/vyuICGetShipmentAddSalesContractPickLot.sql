@@ -3,8 +3,8 @@ AS
 -- intKey -intLocationId, intEntityCustomerId, intLineNo
 SELECT DISTINCT 
 	--intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocationId, PickLot.intCustomerEntityId, PickLotDetail.intSContractDetailId) AS INT)
-	strOrderType = 'Sales Contract'
-	, strSourceType = 'Pick Lot'
+	strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+	, strSourceType = 'Pick Lot' COLLATE Latin1_General_CI_AS
 	, intLocationId = PickLot.intCompanyLocationId
 	, strShipFromLocation = PickLot.strLocationName
 	, intEntityCustomerId = PickLot.intCustomerEntityId
@@ -43,15 +43,15 @@ SELECT DISTINCT
 	, dblPrice = ISNULL(dblCashPrice, 0)
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
 	, intGradeId = NULL
-	, strGrade = NULL
-	, strDestinationGrades = NULL
+	, strGrade = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	, strDestinationGrades = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	, intDestinationGradeId = NULL
-	, strDestinationWeights = NULL
+	, strDestinationWeights = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	, intDestinationWeightId = NULL
 	/* BEGIN The below multi-currency fields are dummy fields. Use it until LG adjusted to multi-currency. */
 	, intCurrencyId = CAST(NULL AS INT) 
 	, intForexRateTypeId = CAST(NULL AS INT)
-	, strForexRateType = CAST(NULL AS NVARCHAR(50))
+	, strForexRateType = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	, dblForexRate = CAST(NULL AS NUMERIC(18, 6)) 
 	/* END The above multi-currency fields are dummy fields. Use it until LG adjusted to multi-currency. */
 FROM vyuLGDeliveryOpenPickLots PickLot

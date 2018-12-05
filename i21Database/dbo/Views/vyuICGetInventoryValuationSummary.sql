@@ -26,7 +26,7 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intIte
 		--,t.dblQuantityInStockUOM
 		,Category.strCategoryCode
 		,Commodity.strCommodityCode
-		,strInTransitLocationName = ''
+		,strInTransitLocationName = '' COLLATE Latin1_General_CI_AS
 		,t.intLocationId
 		,intInTransitLocationId = null  
 		,t.ysnInTransit
