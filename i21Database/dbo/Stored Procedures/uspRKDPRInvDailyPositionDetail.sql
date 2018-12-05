@@ -489,6 +489,7 @@ BEGIN
 				, strItemNo
 				, strCategory
 				, intCategoryId
+				, strContractEndMonth
 			INTO #tblGetSalesIntransitWOPickLot
 			FROM(
 				SELECT 
@@ -510,6 +511,7 @@ BEGIN
 					,strCategory
 					,intCategoryId
 					,dblBalanceToInvoice 
+					,strContractEndMonth
 				FROM (
 					SELECT 
 						 Inv.strTransactionId
@@ -539,6 +541,7 @@ BEGIN
 												and iv.intItemId = Inv.intItemId
 												and i.strDocumentNumber = Inv.strTransactionId), 0)
 						,ysnInvoicePosted = i.ysnPosted
+						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
@@ -1522,7 +1525,7 @@ BEGIN
 					, cd.intFutureMarketId
 					, cd.strFutMarketName
 					, cd.strFutureMonth
-					, cd.strContractEndMonth
+					, strContractEndMonth = 'Near By'
 					, cd.strDeliveryDate
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
@@ -1589,7 +1592,8 @@ BEGIN
 				, intFutureMarketId
 				, intFutureMonthId
 				, strFutMarketName
-				, strFutureMonth)
+				, strFutureMonth
+				, strContractEndMonth)
 			SELECT intSeqId
 				, strSeqHeader
 				, strCommodityCode
@@ -1617,6 +1621,7 @@ BEGIN
 				, intFutureMonthId
 				, strFutMarketName
 				, strFutureMonth
+				, strContractEndMonth
 			FROM (
 				SELECT DISTINCT intSeqId = 14
 					, strSeqHeader = 'Sales Basis Deliveries'
@@ -1645,6 +1650,7 @@ BEGIN
 					, cd.intFutureMonthId
 					, cd.strFutMarketName
 					, cd.strFutureMonth
+					, strContractEndMonth = 'Near By'
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -1672,7 +1678,8 @@ BEGIN
 				, intContractHeaderId
 				, strContractNumber
 				, intCommodityId
-				, intFromCommodityUnitMeasureId)
+				, intFromCommodityUnitMeasureId
+				, strContractEndMonth)
 			SELECT intSeqId = 3
 				, 'Purchase In-Transit'
 				, @strCommodityCode
@@ -1687,6 +1694,7 @@ BEGIN
 				, strContractNumber
 				, @intCommodityId
 				, @intCommodityUnitMeasureId
+				, strContractEndMonth
 			FROM (
 				SELECT i.intUnitMeasureId
 					, ReserveQty = ISNULL(i.dblPurchaseContractShippedQty, 0)
@@ -1699,6 +1707,7 @@ BEGIN
 					, i.intContractDetailId
 					, i.strContractNumber
 					, i.intCompanyLocationId
+					, strContractEndMonth = 'Near By'
 				FROM vyuRKPurchaseIntransitView i
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
@@ -1726,7 +1735,8 @@ BEGIN
 				, intCompanyLocationId
 				, dtmTicketDateTime
 				, intTicketId
-				, strTicketNumber)
+				, strTicketNumber
+				, strContractEndMonth)
 			SELECT intSeqId = 4
 				, 'Sales In-Transit'
 				, @strCommodityCode
@@ -1748,6 +1758,7 @@ BEGIN
 				, dtmTicketDateTime
 				, intTicketId
 				, strTicketNumber
+				, strContractEndMonth
 			FROM (
 				SELECT dblBalanceToInvoice 
 					, i.strLocationName
@@ -1764,6 +1775,7 @@ BEGIN
 					, dtmTicketDateTime
 					, intTicketId
 					, strTicketNumber
+					, strContractEndMonth = 'Near By'
 				FROM #tblGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
@@ -1795,7 +1807,8 @@ BEGIN
 				, intFutureMarketId
 				, intFutureMonthId
 				, strFutMarketName
-				, strFutureMonth)
+				, strFutureMonth
+				, strContractEndMonth)
 			SELECT intSeqId = 15
 				, strSeqHeader = 'Company Titled Stock'
 				, strCommodityCode
@@ -1821,6 +1834,7 @@ BEGIN
 				, intFutureMonthId
 				, strFutMarketName
 				, strFutureMonth
+				, strContractEndMonth
 			FROM @Final f
 			LEFT JOIN (
 				SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
