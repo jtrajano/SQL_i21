@@ -106,7 +106,8 @@ DECLARE @FinalTable AS TABLE (intRow INT
 		, strScheduleId NVARCHAR(100)
 		, intTicketId INT
 		, strTicketType NVARCHAR(100)
-		, strTicketNumber NVARCHAR(100)		
+		, strTicketNumber NVARCHAR(100)	
+		, strContractEndMonth NVARCHAR(50)	
 		, dtmOpenDate DATETIME
 		, dtmDeliveryDate DATETIME
 		, dtmTicketDateTime DATETIME
@@ -164,6 +165,7 @@ INSERT INTO @FinalTable(intRow
 			, intTicketId
 			, strTicketType
 			, strTicketNumber 
+			, strContractEndMonth
 			, dtmDeliveryDate
 			, dtmTicketDateTime
 			, intItemId
