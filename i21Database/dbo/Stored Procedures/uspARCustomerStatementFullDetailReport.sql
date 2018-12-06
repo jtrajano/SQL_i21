@@ -397,12 +397,6 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 FROM #CUSTOMERS C
 LEFT JOIN #BEGINNINGBALANCE BB ON C.intEntityCustomerId = BB.intEntityCustomerId
 
---FILTERS
-IF @ysnPrintCreditBalanceLocal = 0
-	BEGIN
-		DELETE FROM #STATEMENTREPORT WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
-	END
-
 --UPDATE PRINT STATEMENT
 MERGE INTO tblARStatementOfAccount AS TARGET
 USING (SELECT strCustomerNumber, @dtmDateToLocal, ISNULL(dblTotalAR, 0) FROM #AGINGSUMMARY)
@@ -522,3 +516,17 @@ OUTER APPLY (
 ORDER BY STATEMENTREPORT.dtmDate'
 
 EXEC sp_executesql @query
+
+IF @ysnPrintCreditBalanceLocal = 0
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityUserId = @intEntityUserIdLocal 
+			AND strStatementFormat = 'Full Details - No Card Lock'
+			AND intEntityCustomerId IN (
+				SELECT DISTINCT intEntityCustomerId
+				FROM tblARCustomerAgingStagingTable AGINGREPORT
+				WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
+				AND AGINGREPORT.strAgingType = 'Summary'
+				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
+			)
+	END	
