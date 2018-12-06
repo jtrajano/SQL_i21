@@ -1583,6 +1583,6 @@ SELECT intSeqNo = intOrderId
 	, strNotes
 	, ysnPreCrush
 FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
-ORDER BY intSeqNo
-	, CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+	, intSeqNo
 	, strType
