@@ -47,6 +47,8 @@ BEGIN
 		,[strScaleTicketNumber]			
 		,[intInventoryReceiptItemId]		
 		,[intInventoryReceiptChargeId]	
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentItemId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intItemId]						
@@ -117,6 +119,8 @@ BEGIN
 		,[strScaleTicketNumber]				=	A.strScaleTicketNumber
 		,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptItemAllocatedChargeId
+		,[intInventoryShipmentChargeId]		=	A.intInventoryShipmentChargeId
+		,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
 		,[intLoadShipmentId]				=	A.intShipmentId
 		,[intLoadShipmentDetailId]			=	A.intLoadDetailId
 		,[intItemId]						=	A.intItemId
@@ -191,6 +195,8 @@ BEGIN
 		,[strScaleTicketNumber]			
 		,[intInventoryReceiptItemId]		
 		,[intInventoryReceiptChargeId]	
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentItemId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intItemId]						
@@ -261,6 +267,8 @@ BEGIN
 		,[strScaleTicketNumber]				=	A.strScaleTicketNumber
 		,[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	A.intInventoryReceiptItemAllocatedChargeId
+		,[intInventoryShipmentChargeId]		=	A.intInventoryShipmentChargeId
+		,[intInventoryShipmentItemId]		=	A.intInventoryShipmentItemId
 		,[intLoadShipmentId]				=	A.intShipmentId
 		,[intLoadShipmentDetailId]			=	A.intLoadDetailId
 		,[intItemId]						=	A.intItemId
