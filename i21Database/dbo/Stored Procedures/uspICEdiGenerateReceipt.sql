@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceipt] @VendorId INT, @LocationId INT, @UniqueId NVARCHAR(100), @UserId INT, @ErrorCount INT OUTPUT, @TotalRows INT OUTPUT
+﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceipt] @VendorId INT, @LocationId INT, @StoreLocations UdtCompanyLocations READONLY, @UniqueId NVARCHAR(100), @UserId INT, @ErrorCount INT OUTPUT, @TotalRows INT OUTPUT
 AS
 -------------------------- BUSINESS -----------------------------------------------------------
 DECLARE @Stores TABLE(FileIndex INT, RecordIndex INT, RecordType NVARCHAR(50), StoreNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
@@ -20,36 +20,45 @@ SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = (SELECT T
 IF(@LogId IS NULL)
 BEGIN
 	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Receipts successful', 'EDI', 'txt', '', GETDATE(), @UserId, 1
+	SELECT 'Import Receipts successful', 'EDI', 'plain text', '', GETDATE(), @UserId, 1
 	SET @LogId = @@IDENTITY
 END
 
 DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
 
+-- It's needed to increment each store indices by 1 since the reset file index is now based on the invoice record.
+-- Need to equalize file indices of all groupings
+UPDATE @Stores SET FileIndex = FileIndex + 1
+-- Regenerate missing stores using a default store. The number of invoices should be equal to the number of stores.
+INSERT INTO @Stores(FileIndex, RecordIndex, RecordType, StoreNumber)
+SELECT missing.FileIndex, -1, '0', CAST(st.intStoreNo AS NVARCHAR(500))
+FROM tblSTStore st
+	INNER JOIN @StoreLocations sl ON sl.intCompanyLocationId = st.intCompanyLocationId
+	CROSS JOIN (
+		SELECT FileIndex FROM @Invoices
+		EXCEPT
+		SELECT FileIndex FROM @Stores
+	) missing
+
 DEClARE @ReceiptStagingTable ReceiptStagingTable
-DECLARE @ReceiptOtherChargesTableType ReceiptOtherChargesTableType
+DECLARE @ReceiptOtherChargesTable ReceiptOtherChargesTableType
 DECLARE @ReceiptItemLotStagingTable ReceiptItemLotStagingTable
 
-DECLARE @StoreId INT
-SELECT TOP 1 @StoreId = intStoreStoreId
-FROM vyuAPVendor
-WHERE intEntityId = @VendorId
-
-DECLARE @ReceiptStore TABLE(FileIndex INT, RecordIndex INT, RecordType NVARCHAR(50), StoreNumber NVARCHAR(50), intStoreId INT)
-INSERT INTO @ReceiptStore(FileIndex, RecordIndex, RecordType, StoreNumber, intStoreId)
-SELECT s.FileIndex, s.RecordIndex, s.RecordType, s.StoreNumber, st.intStoreId
+DECLARE @ReceiptStore TABLE(FileIndex INT, RecordIndex INT, RecordType NVARCHAR(50), StoreNumber NVARCHAR(50), intStoreId INT, intLocationId INT)
+INSERT INTO @ReceiptStore(FileIndex, RecordIndex, RecordType, StoreNumber, intStoreId, intLocationId)
+SELECT s.FileIndex, s.RecordIndex, s.RecordType, s.StoreNumber, st.intStoreId, st.intCompanyLocationId
 FROM @Stores s
 	INNER JOIN tblSTStore st ON st.intStoreNo = CAST(s.StoreNumber AS INT)
 WHERE CAST(s.StoreNumber AS INT) = st.intStoreNo
 
-
+-- Populate receipt staging table
 INSERT INTO @ReceiptStagingTable(strReceiptType, intEntityVendorId, intShipFromId, intLocationId, dtmDate, intSourceId, intItemId, 
 	intItemLocationId, intItemUOMId, dblQty, dblCost, intCostUOMId, intSourceType, strVendorRefNo, intCurrencyId, intShipViaId)
 SELECT 
 	strReceiptType = 'Direct', 
 	intEntityVendorId = @VendorId, 
 	intShipFromId = el.intEntityLocationId, 
-	intLocationId = @LocationId, 
+	intLocationId = st.intLocationId, 
 	dtmDate = CASE WHEN ISDATE(inv.InvoiceDate) = 1 THEN CAST(inv.InvoiceDate AS DATETIME) ELSE NULL END,
 	intSourceId = 0, 
 	intItemId = it.intItemId, 
@@ -65,26 +74,27 @@ SELECT
 FROM @Invoices inv
 	INNER JOIN @ReceiptStore st ON inv.FileIndex = st.FileIndex
 	INNER JOIN @Items i ON i.FileIndex = inv.FileIndex
-	INNER JOIN tblICItemUOM lookupUom ON ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode) = i.ItemUpc 
+	INNER JOIN tblICItemUOM lookupUom ON 
+		SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
+		= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
 	INNER JOIN tblICItem it ON it.intItemId = lookupUom.intItemId
 	INNER JOIN vyuAPVendor v ON v.intEntityId = @VendorId
 	LEFT OUTER JOIN tblEMEntityLocation el ON el.intEntityId = @VendorId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
 	INNER JOIN tblICItemLocation il ON il.intItemId = it.intItemId
-		AND il.intLocationId = @LocationId
+		AND il.intLocationId = st.intLocationId
 	LEFT OUTER JOIN tblICItemUOM im ON im.intItemId = it.intItemId
 		AND im.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = i.UnitOfMeasure
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = it.intItemId
 		AND iu.intUnitMeasureId = u.intUnitMeasureId
-WHERE st.intStoreId = @StoreId
 
-INSERT INTO @ReceiptOtherChargesTableType(intEntityVendorId, strReceiptType, intLocationId, intShipViaId, intShipFromId, intCurrencyId, intChargeId, strCostMethod, dblAmount)
+INSERT INTO @ReceiptOtherChargesTable(intEntityVendorId, strReceiptType, intLocationId, intShipViaId, intShipFromId, intCurrencyId, intChargeId, strCostMethod, dblAmount)
 SELECT 
 	intEntityVendorId = @VendorId, 
 	strReceiptType = 'Direct',
-	intLocationId = @LocationId, 
+	intLocationId = st.intLocationId, 
 	intShipViaId = v.intShipViaId, 
 	intShipFromId = el.intEntityLocationId,
 	intCurrencyId = v.intCurrencyId,
@@ -98,19 +108,30 @@ FROM @Charges c
 	LEFT OUTER JOIN tblEMEntityLocation el ON el.intEntityId = @VendorId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
-WHERE st.intStoreId = @StoreId
-	AND c.Amount != 0
+	AND ISNULL(c.Amount, 0) != 0
 
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
-	EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable, @ReceiptOtherChargesTableType, @UserId, @ReceiptItemLotStagingTable
+	EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable, @ReceiptOtherChargesTable, @UserId, @ReceiptItemLotStagingTable
+ELSE
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
+	SELECT @LogId, 'Error', -1, NULL, NULL, 'Unable to generate receipts. Make sure you have selected a store location if store header is not included in the file.', 'Failed', 'No record(s) imported.', 1 
+	GOTO LogErrors;
+	RETURN
+END
 
 -- Log UPCs that don't have corresponding items
-INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
-SELECT @LogId, 'Error', i.RecordIndex, 'Item UPC', i.ItemUpc, 'Cannot find the item that matches the UPC: ' + i.ItemUpc, 'Skipped', 'Record not imported.', 1
-FROM @Items i
-	LEFT OUTER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = i.ItemUpc
-	LEFT JOIN tblICItem it ON it.intItemId = u.intItemId
-WHERE it.intItemId IS NULL
+--INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
+--SELECT @LogId, 'Error', i.RecordIndex, 'Item UPC', i.ItemUpc, 'Cannot find the item that matches the UPC: ' + i.ItemUpc, 'Skipped', 'Record not imported.', 1
+--FROM @Items i
+--	LEFT OUTER JOIN tblICItemUOM u ON SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
+--		= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
+--	LEFT JOIN tblICItem it ON it.intItemId = u.intItemId
+--WHERE it.intItemId IS NULL
+
+GOTO LogErrors
+
+LogErrors:
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
 SELECT @TotalRows = COUNT(*) FROM @ReceiptStagingTable
