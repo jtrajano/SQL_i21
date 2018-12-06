@@ -67,13 +67,13 @@ INSERT INTO @Transactions(intTransactionId, intItemId, intItemUOMId, intTransact
 SELECT t.intTransactionId, t.intItemId, t.intItemUOMId, t.intTransactionTypeId, t.intLotId, t.dblQty, t.intItemLocationId, t.intInTransitSourceLocationId, 1
 FROM tblICInventoryTransaction t
 WHERE t.ysnIsUnposted <> 1
-	AND t.dtmDate = @dtmDate
+	AND dbo.fnRemoveTimeOnDate(t.dtmDate) = @dtmDate
 
 INSERT INTO @Transactions(intTransactionId, intItemId, intItemUOMId, intTransactionTypeId, intLotId, dblQty, intItemLocationId, intInTransitSourceLocationId, ysnOwned)
 SELECT t.intTransactionId, t.intItemId, t.intItemUOMId, t.intTransactionTypeId, t.intLotId, t.dblQty, t.intItemLocationId, NULL, 0
 FROM tblICInventoryTransactionStorage t
 WHERE t.ysnIsUnposted <> 1
-	AND t.dtmDate = @dtmDate
+	AND dbo.fnRemoveTimeOnDate(t.dtmDate) = @dtmDate
 
 CREATE TABLE #tmpDailyStockPosition
 (
