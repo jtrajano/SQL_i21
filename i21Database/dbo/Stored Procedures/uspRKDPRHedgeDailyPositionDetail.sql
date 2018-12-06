@@ -740,7 +740,7 @@ BEGIN
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-						AND ISNULL(t.ysnPreCrush, 0) = 0
+						--AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
 				
 				-- Option NetHEdge
@@ -816,7 +816,7 @@ BEGIN
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-					AND ISNULL(t.ysnPreCrush, 0) = 0
+					--AND ISNULL(t.ysnPreCrush, 0) = 0
 
 				-- Net Hedge option end
 				INSERT INTO @tempFinal(strCommodityCode
