@@ -17,6 +17,7 @@ AS
 			,UH.intExternalHeaderId
 			,CAST(CASE WHEN ISNULL(AP.intExternalHeaderId,0) = 0 THEN 1 ELSE 0 END AS BIT) AS ysnDeleted
 			,AP.strHeaderIdColumn
-			
+			,AP.dtmScreenDate
+
 	FROM	tblCTSequenceUsageHistory	UH	CROSS
 	APPLY	dbo.fnCTGetSequenceUsageHistoryAdditionalParam(UH.intContractDetailId,UH.strScreenName,UH.intExternalId,UH.intUserId) AP
