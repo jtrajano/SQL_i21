@@ -45,7 +45,7 @@ ELSE IF (@Type = 'Date Driven')
             SET @DayMonthDue = @DaysInDueMonth;
 
 				
-        RETURN CAST((CAST(YEAR(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(MONTH(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(DAY(@DayMonthDue) AS NVARCHAR(10))) AS DATE)
+        RETURN CAST((CAST(YEAR(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(MONTH(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(@DayMonthDue AS NVARCHAR(10))) AS DATE)
  
 	END
 ELSE
