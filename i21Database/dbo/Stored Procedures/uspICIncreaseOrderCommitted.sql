@@ -8,10 +8,14 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intItemId AS INT 
+		,@strItemNo AS NVARCHAR(50)
+
+
 -- Validate the item-location. 
 BEGIN 
-	DECLARE @intItemId AS INT 
-			,@strItemNo AS NVARCHAR(50)
+	SET @intItemId = NULL 
+	SET @strItemNo = NULL 
 
 	SELECT	@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
@@ -29,6 +33,32 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		EXEC uspICRaiseError 80002, @strItemNo;
+		GOTO _Exit
+	END 
+END 
+
+-- Validate the item uom id. 
+-- WHEN @msgId = 80079 THEN 'Item UOM for %s is invalid or missing.'
+BEGIN 
+	SET @intItemId = NULL 
+	SET @strItemNo = NULL 
+
+	SELECT	@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	@ItemsToIncreaseOrderCommitted ItemsToValidate LEFT JOIN dbo.tblICItem Item
+				ON ItemsToValidate.intItemId = Item.intItemId
+	WHERE	NOT EXISTS (
+				SELECT TOP 1 1 
+				FROM	dbo.tblICItemUOM 
+				WHERE	tblICItemUOM.intItemUOMId = ItemsToValidate.intItemUOMId
+						AND tblICItemUOM.intItemId = ItemsToValidate.intItemId
+			)
+			AND ItemsToValidate.intItemId IS NOT NULL 	
+			
+	-- 'Item UOM for {Item} is invalid or missing.'
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		EXEC uspICRaiseError 80079, @strItemNo;
 		GOTO _Exit
 	END 
 END 

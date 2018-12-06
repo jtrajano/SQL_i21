@@ -140,9 +140,7 @@ UNION ALL
 -- Storage Stocks
 
 -- If transaction does not exists, add a dummy record. 
-IF NOT EXISTS(SELECT TOP 1
-	1
-FROM @tblInventoryTransaction)
+IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransaction)
 BEGIN
 	INSERT INTO @tblInventoryTransaction
 	SELECT i.intItemId,
@@ -239,14 +237,14 @@ SELECT
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
 				ELSE t.dblCost
 			END
-FROM @tblInventoryTransactionGrouped t
-	LEFT JOIN tblICItem i
-	ON i.intItemId = t.intItemId
+FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
+		ON i.intItemId = t.intItemId
 	INNER JOIN (
-	tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
-	ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
-	) ON ItemUOM.intItemUOMId = t.intItemUOMId
-	LEFT OUTER JOIN (
+		tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
+			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
+	) 
+		ON ItemUOM.intItemUOMId = t.intItemUOMId
+	CROSS APPLY (
 		SELECT
 			SUM(s.dblOnHand) dblOnHand
 			, SUM(s.dblUnitStorage) dblUnitStorage
@@ -257,23 +255,35 @@ FROM @tblInventoryTransactionGrouped t
 			, u.strUnitType
 			, i.dblUnitQty
 			, i.ysnStockUnit
-		FROM tblICItemStockUOM s
-			INNER JOIN tblICItemUOM i ON i.intItemUOMId = s.intItemUOMId
+		FROM	
+			tblICItemStockUOM s	INNER JOIN tblICItemUOM i 
+				ON i.intItemUOMId = s.intItemUOMId
+				AND s.intItemId = i.intItemId
 				AND i.ysnStockUnit = 1
-			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
-		WHERE s.intItemId = @intItemId
+			INNER JOIN tblICUnitMeasure u 
+				ON u.intUnitMeasureId = i.intUnitMeasureId
+		WHERE 
+			s.intItemId = @intItemId
 			AND (s.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 			AND (s.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
-		GROUP BY s.intItemId, s.intItemLocationId, u.strUnitMeasure, i.intItemUOMId, u.strUnitType, i.dblUnitQty
+			AND s.intItemLocationId = t.intItemLocationId
+		GROUP BY 
+			s.intItemId
+			, s.intItemLocationId
+			, u.strUnitMeasure
+			, i.intItemUOMId
+			, u.strUnitType
+			, i.dblUnitQty
 			, i.ysnStockUnit
-	) stock ON stock.intItemLocationId = t.intItemLocationId
-		AND stock.intItemId = t.intItemId
-	OUTER APPLY(
+	) stock 
+	CROSS APPLY(
 		SELECT TOP 1
-				dblCost
-				, intItemUOMId
-		FROM tblICInventoryFIFO FIFO
-		WHERE	t.intItemId = FIFO.intItemId
+			dblCost
+			, intItemUOMId
+		FROM	
+			tblICInventoryFIFO FIFO
+		WHERE	
+			t.intItemId = FIFO.intItemId
 			AND t.intItemLocationId = FIFO.intItemLocationId
 			AND dblStockIn- dblStockOut > 0
 		ORDER BY dtmDate ASC
@@ -282,12 +292,12 @@ FROM @tblInventoryTransactionGrouped t
 		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
-	ON ItemLocation.intItemLocationId = t.intItemLocationId
-	LEFT JOIN tblICCostingMethod CostMethod
-	ON CostMethod.intCostingMethodId = t.intCostingMethodId
+		ON ItemLocation.intItemLocationId = t.intItemLocationId
 	LEFT JOIN tblSMCompanyLocation CompanyLocation
-	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
+		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
-	ON SubLocation.intCompanyLocationSubLocationId = t.intSubLocationId
+		ON SubLocation.intCompanyLocationSubLocationId = t.intSubLocationId
 	LEFT JOIN tblICStorageLocation strgLoc
-	ON strgLoc.intStorageLocationId = t.intStorageLocationId
+		ON strgLoc.intStorageLocationId = t.intStorageLocationId
+	LEFT JOIN tblICCostingMethod CostMethod
+		ON CostMethod.intCostingMethodId = t.intCostingMethodId
