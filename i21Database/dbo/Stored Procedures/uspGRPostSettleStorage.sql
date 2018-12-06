@@ -119,10 +119,6 @@ BEGIN TRY
 	DECLARE @intShipFrom INT
 	DECLARE @shipFromEntityId INT
 
-	DECLARE @dblActualSettledUnits DECIMAL(24,10)
-	DECLARE @dblToSettledUnits DECIMAL(24,10)
-	DECLARE @ysnSettleUnits BIT
-
 	SET @dtmDate = GETDATE()
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -201,72 +197,6 @@ BEGIN TRY
    */
 	
 	SET @intParentSettleStorageId = @intSettleStorageId
-	
-	/*VALIDATE THE NUMBER OF UNITS THAT WILL BE SETTLED*/
-	IF OBJECT_ID('tempdb..#tmpStorage') IS NOT NULL DROP TABLE #tmpStorage
-
-	CREATE TABLE #tmpStorage
-	(
-		[intCustomerStorageId] INT
-		UNIQUE([intCustomerStorageId])
-	)
-
-	INSERT INTO #tmpStorage
-	SELECT DISTINCT
-		intCustomerStorageId
-	FROM tblGRSettleStorageTicket
-	WHERE intSettleStorageId = @intSettleStorageId
-
-	IF(SELECT COUNT(*) FROM #tmpStorage) > 0
-	BEGIN
-		DECLARE @id INT
-		SELECT @id = MIN(intCustomerStorageId)
-			FROM #tmpStorage
-
-		WHILE @id > 0
-		BEGIN
-			SELECT 
-				@dblActualSettledUnits = ISNULL(SUM(SST.dblUnits),0)
-			FROM tblGRSettleStorageTicket SST
-			INNER JOIN tblGRSettleStorage ST
-				ON ST.intSettleStorageId = SST.intSettleStorageId
-					AND ST.intParentSettleStorageId IS NOT NULL
-			INNER JOIN tblGRCustomerStorage CS
-				ON CS.intCustomerStorageId = SST.intCustomerStorageId
-			WHERE SST.intCustomerStorageId = @id
-				AND SST.intSettleStorageId <> @intSettleStorageId
-
-			SELECT DISTINCT 
-				@ysnSettleUnits = CAST(
-										CASE 
-											WHEN ISNULL((CS.dblOriginalBalance + C.adjusted),0) >= ISNULL(SST.dblUnits,0) THEN 1
-											ELSE 0
-										END AS BIT
-								)
-				,@dblToSettledUnits = SST.dblUnits
-			FROM tblGRSettleStorageTicket SST
-			INNER JOIN tblGRCustomerStorage CS
-				ON CS.intCustomerStorageId = SST.intCustomerStorageId
-			OUTER APPLY (
-				SELECT
-					adjusted = ISNULL(SUM(dblUnits),0)
-				FROM tblGRStorageHistory
-				WHERE (intTransactionTypeId = 9 AND intCustomerStorageId = @id)
-					OR (intCustomerStorageId = @id AND intTransactionTypeId = 3 AND strType = 'Transfer')
-			) C
-			WHERE SST.intSettleStorageId = @intSettleStorageId
-				AND SST.intCustomerStorageId = @id
-
-			IF @dblActualSettledUnits >= @dblToSettledUnits OR @ysnSettleUnits = 0
-			BEGIN
-				RAISERROR ('Transaction cannot be posted. <br/>One or more selected storages has already exceeded its available units for settlement.',16,1);
-			END
-
-			SELECT @id = ISNULL(MIN(intCustomerStorageId),0)
-			FROM #tmpStorage
-			WHERE intCustomerStorageId <> @id
-		END
-	END
 	
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
