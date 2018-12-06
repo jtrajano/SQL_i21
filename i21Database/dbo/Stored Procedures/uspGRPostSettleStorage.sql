@@ -208,7 +208,6 @@ BEGIN TRY
 	CREATE TABLE #tmpStorage
 	(
 		[intCustomerStorageId] INT
-		UNIQUE([intCustomerStorageId])
 	)
 
 	INSERT INTO #tmpStorage
@@ -220,8 +219,9 @@ BEGIN TRY
 	IF(SELECT COUNT(*) FROM #tmpStorage) > 0
 	BEGIN
 		DECLARE @id INT
-		SELECT @id = MIN(intCustomerStorageId)
-			FROM #tmpStorage
+		SELECT 
+			@id = MIN(intCustomerStorageId)
+		FROM #tmpStorage
 
 		WHILE @id > 0
 		BEGIN
@@ -239,11 +239,11 @@ BEGIN TRY
 			SELECT DISTINCT 
 				@ysnSettleUnits = CAST(
 										CASE 
-											WHEN ISNULL((CS.dblOriginalBalance + C.adjusted),0) >= ISNULL(SST.dblUnits,0) THEN 1
-											ELSE 0
+											WHEN ISNULL((CS.dblOriginalBalance + C.adjusted),0) = @dblActualSettledUnits THEN 0
+											WHEN ISNULL((CS.dblOriginalBalance + C.adjusted),0) < (@dblActualSettledUnits + ISNULL(SST.dblUnits,0)) THEN 0
+											ELSE 1
 										END AS BIT
 								)
-				,@dblToSettledUnits = SST.dblUnits
 			FROM tblGRSettleStorageTicket SST
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
@@ -257,14 +257,16 @@ BEGIN TRY
 			WHERE SST.intSettleStorageId = @intSettleStorageId
 				AND SST.intCustomerStorageId = @id
 
-			IF @dblActualSettledUnits >= @dblToSettledUnits OR @ysnSettleUnits = 0
+			IF @ysnSettleUnits = 0
 			BEGIN
 				RAISERROR ('Transaction cannot be posted. <br/>One or more selected storages has already exceeded its available units for settlement.',16,1);
 			END
 
+			UPDATE #tmpStorage SET intCustomerStorageId = 0 WHERE intCustomerStorageId = @id
+
 			SELECT @id = ISNULL(MIN(intCustomerStorageId),0)
 			FROM #tmpStorage
-			WHERE intCustomerStorageId <> @id
+			WHERE intCustomerStorageId <> @id AND intCustomerStorageId > 0
 		END
 	END
 	
