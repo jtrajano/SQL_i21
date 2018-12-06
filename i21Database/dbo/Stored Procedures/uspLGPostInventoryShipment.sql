@@ -825,6 +825,8 @@ BEGIN
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
+		,[intLoadShipped]
+		,[ysnLoad]
 		)
 	SELECT L.intLoadId
 		,L.strLoadNumber
@@ -866,9 +868,14 @@ BEGIN
 		,[intOrderId] = NULL
 		,[intSourceId] = NULL
 		,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
+		,[intLoadShipped] = CASE WHEN CH.ysnLoad = 1 THEN 
+								CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+							ELSE NULL END
+		,[ysnLoad] = CH.ysnLoad
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
 	--LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
