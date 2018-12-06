@@ -190,7 +190,8 @@ left join (
 		--intTransactionCount = COUNT(SMA.intTransactionId),
 		id = SMT.intRecordId ,
 		ysnMailSent = CASE WHEN COUNT(SMA.intTransactionId) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	FROM (select intRecordId, intTransactionId, intScreenId from tblSMTransaction WITH (NOLOCK) where intScreenId = 48) SMT 
+	FROM (select intRecordId, intTransactionId, intScreenId from tblSMTransaction WITH (NOLOCK)) SMT 
+	INNER JOIN (select intScreenId from tblSMScreen where strScreenName = 'Invoice' )SC ON SMT.intScreenId = SC.intScreenId
 	INNER JOIN (select intTransactionId, strType, strStatus from tblSMActivity WITH (NOLOCK) where strType = 'Email' and strStatus = 'Sent') SMA on SMA.intTransactionId = SMT.intTransactionId 
 	GROUP by SMT.intRecordId
 
