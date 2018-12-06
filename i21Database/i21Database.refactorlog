@@ -7119,4 +7119,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b7e29704-1004-4d61-9788-f58440a988ae" ChangeDateTime="12/06/2018 10:12:27">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicTX].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicTX]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="05ef88ca-a1be-47d1-a4e2-d9d22cb66ae9" ChangeDateTime="12/06/2018 10:14:50">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicTX].[intTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicTX]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionDynamicId" />
+  </Operation>
 </Operations>
