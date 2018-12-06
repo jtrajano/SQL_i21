@@ -395,8 +395,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = ARPAC.[intAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -417,10 +417,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
     ,[dblReportingRate]             = I.[dblAverageExchangeRate]
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]
     ,[strRateType]                  = NULL
