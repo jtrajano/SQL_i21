@@ -63,9 +63,7 @@ SELECT
 ,emEntity.strName
 ,emEntity.strCustomerNumber
 ----------------------------------------------
-,strBillTo =(CASE 
-				WHEN ISNULL(cfTrans.intInvoiceId,0) = 0
-				THEN dbo.fnARFormatCustomerAddress (
+,strBillTo =  dbo.fnARFormatCustomerAddress (
 				 NULL
 				,NULL
 				,emEntity.strBillToLocationName
@@ -76,9 +74,6 @@ SELECT
 				,emEntity.strBillToCountry
 				,emEntity.strName
 				,NULL)
-				ELSE
-				arInv.strBillTo
-			END)
 ,arInv.strShipTo
 ,arInv.strType
 ,arInv.strLocationName
