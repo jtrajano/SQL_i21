@@ -10,15 +10,40 @@ SELECT
 	,[strMiscDescription]						=	Item.strDescription
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
-	,[dblOrderQty]								=	1
+	,[dblOrderQty]								=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
 	,[dblPOOpenReceive]							=	0
-	,[dblOpenReceive]							=	1
-	,[dblQuantityToBill]						=	1
+	,[dblOpenReceive]							=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
+	,[dblQuantityToBill]						=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
 	,[intInventoryShipmentItemId]				=	ShipmentItem.intInventoryShipmentItemId --add for strSource reference
 	,[intInventoryShipmentChargeId]				=	ShipmentCharge.intInventoryShipmentChargeId
-	,[dblUnitCost]								=	CASE WHEN ShipmentCharge.ysnSubCurrency > 0 THEN (ShipmentCharge.dblAmount * 100) ELSE ShipmentCharge.dblAmount END
+	,[dblUnitCost]								=	--CASE WHEN ShipmentCharge.ysnSubCurrency > 0 THEN (ShipmentCharge.dblAmount * 100) ELSE ShipmentCharge.dblAmount END
+													CASE 
+														WHEN ShipmentCharge.ysnSubCurrency = 1 AND ShipmentCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
+															ABS(ISNULL(ShipmentCharge.dblRate, 0)) * 100
+														WHEN ShipmentCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
+															ABS(ISNULL(ShipmentCharge.dblRate, 0))
+														WHEN ShipmentCharge.ysnSubCurrency = 1 THEN 
+															ABS(ISNULL(ShipmentCharge.dblAmount, 0)) * 100
+														ELSE 
+															ABS(ISNULL(ShipmentCharge.dblAmount, 0))
+													END
 	,[dblTax]									=	0
 	,[intAccountId]								=	OtherChargeExpense.intAccountId 											 
 	,[strAccountId]								=	OtherChargeExpense.strAccountId
@@ -87,5 +112,11 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 
 WHERE	ShipmentCharge.ysnAccrue = 1 
 		AND ShipmentCharge.intEntityVendorId IS NOT NULL
-		AND Shipment.ysnPosted = 1
-
+		AND ISNULL(Shipment.ysnPosted, 0) = 1
+		AND (
+			ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ShipmentCharge.dblAmountBilled, 0) = 0 
+				AND ROUND(ShipmentCharge.dblAmount, 6) = 0 
+			)
+		)
