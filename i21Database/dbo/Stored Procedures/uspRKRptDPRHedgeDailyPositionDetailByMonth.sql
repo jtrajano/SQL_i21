@@ -1011,7 +1011,7 @@ END
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
-		exec (N' SELECT *, '''+@xmlParam +''' AS xmlParam FROM (
+		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam , '''+ @strCommodityCode +''' AS strCommodityCode, '''+ @dtmToDate +''' AS dtmToDate FROM (
 			select * from ##tmpTry2
 		union all
 		select col1,strContractEndMonth,
@@ -1041,6 +1041,8 @@ END
 			'' as col10,
 			'' as col11,
 			'' as col12,
-			@xmlParam as xmlParam
+			@xmlParam as xmlParam,
+			@strCommodityCode as strCommodityCode,
+			@dtmToDate as dtmToDate
 
 	END
