@@ -247,7 +247,7 @@ BEGIN
 				, intContractHeaderId
 				, strContractNumber
 				, strLocationName
-				, dtmEndDate
+				, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
 				, strFutureMonth
 				, dblBalance
 				, intUnitMeasureId
@@ -364,9 +364,9 @@ BEGIN
 					, CD.strType
 					, strLocationName
 					, strContractEndMonth = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-												ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+												ELSE (CASE WHEN ISNULL(CD.strFutureMonth, '') = '' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END) END
 					, strContractEndMonthNearBy = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-													ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+													ELSE (CASE WHEN ISNULL(CD.strFutureMonth, '') = '' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END) END
 					, dblTotal = CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) END
 					, CD.intUnitMeasureId intFromCommodityUnitMeasureId
 					, CD.strEntityName
@@ -1740,40 +1740,83 @@ SELECT intSeqNo
 FROM @List 
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
-SELECT intSeqNo = intOrderId
-	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
-	, strCommodityCode
-	, strContractNumber
-	, intContractHeaderId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strType
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, dblTotal
-	, strUnitMeasure
-	, strAccountNumber
-	, strTranType
-	, dblNoOfLot
-	, dblDelta
-	, intBrokerageAccountId
-	, strInstrumentType
-	, strEntityName
-	, intOrderId
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush
-FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
-ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
-	, intSeqNo
-	, strType
+IF (@strPositionBy = 'Delivery Month')
+BEGIN
+	SELECT intSeqNo = intOrderId
+		, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
+		, strCommodityCode
+		, strContractNumber
+		, intContractHeaderId
+		, strInternalTradeNo
+		, intFutOptTransactionHeaderId
+		, strType
+		, strLocationName
+		, strContractEndMonth
+		, strContractEndMonthNearBy
+		, dblTotal
+		, strUnitMeasure
+		, strAccountNumber
+		, strTranType
+		, dblNoOfLot
+		, dblDelta
+		, intBrokerageAccountId
+		, strInstrumentType
+		, strEntityName
+		, intOrderId
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategory
+		, intFutureMarketId
+		, strFutMarketName
+		, intFutureMonthId
+		, strFutureMonth
+		, strDeliveryDate
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
+	ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+		, intSeqNo
+		, strType
+END
+ELSE
+BEGIN
+	SELECT intSeqNo = intOrderId
+		, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
+		, strCommodityCode
+		, strContractNumber
+		, intContractHeaderId
+		, strInternalTradeNo
+		, intFutOptTransactionHeaderId
+		, strType
+		, strLocationName
+		, strContractEndMonth
+		, strContractEndMonthNearBy
+		, dblTotal
+		, strUnitMeasure
+		, strAccountNumber
+		, strTranType
+		, dblNoOfLot
+		, dblDelta
+		, intBrokerageAccountId
+		, strInstrumentType
+		, strEntityName
+		, intOrderId
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategory
+		, intFutureMarketId
+		, strFutMarketName
+		, intFutureMonthId
+		, strFutureMonth
+		, strDeliveryDate
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
+	ORDER BY intSeqNo
+		, CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+		, strType
+END
