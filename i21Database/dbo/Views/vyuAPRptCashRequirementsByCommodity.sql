@@ -16,7 +16,10 @@ AS
 	SELECT
 		 APB.intBillId,
 		C.strCommodityCode,
-		CASE WHEN APBD.intWeightUOMId > 0 THEN ISNULL(APBD.dblNetWeight,0) ELSE dblQtyReceived END  as dblNetUnits,
+		CASE WHEN IE.strType = 'Other Charge' THEN 0 ELSE
+		( CASE WHEN APBD.intWeightUOMId > 0 
+		  THEN ISNULL(APBD.dblNetWeight,0) 
+		  ELSE dblQtyReceived END ) END AS dblNetUnits,
 		APBD.dblTotal,
 		APBD.dblTax,
 		APB.dblAmountDue
@@ -24,7 +27,7 @@ AS
 	INNER JOIN tblAPBillDetail APBD
 		ON APB.intBillId = APBD.intBillId
 	INNER JOIN dbo.tblICItem IE 
-		ON IE.intItemId = APBD.intItemId
+		ON IE.intItemId = APBD.intItemId 
 	LEFT JOIN dbo.tblICCommodity C 
 		ON C.intCommodityId = IE.intCommodityId
 	WHERE APBD.intItemId IS NOT NULL 
@@ -40,7 +43,8 @@ AS
 		APBD.dblNetWeight,
 		APB.intBillId,
 		APBD.intWeightUOMId,
-		APB.dblAmountDue
+		APB.dblAmountDue,
+		IE.strType
 	) commodityHeader 
 	GROUP BY strCommodityCode
 GO
