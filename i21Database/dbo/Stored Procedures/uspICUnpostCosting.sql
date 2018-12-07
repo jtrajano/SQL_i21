@@ -66,6 +66,9 @@ DECLARE @intItemId AS INT
 		,@intFobPointId AS TINYINT
 		,@intInTransitSourceLocationId AS INT 
 
+DECLARE @intTransactionId_AutoNegative AS INT
+		,@strTransactionId_AutoNegative AS NVARCHAR(40)
+		
 -- Get the list of items to unpost
 BEGIN 
 	-- Insert the items per location, UOM, and if possible also by Lot. 
@@ -643,16 +646,20 @@ BEGIN
 		WHERE	ISNULL(intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) = @AVERAGECOST
 				AND dblQty > 0 
 				AND ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+				
+		SET @intTransactionId_AutoNegative = NULL 
+		SET @strTransactionId_AutoNegative = NULL 
 
 		SELECT	TOP 1 
 				@intCurrencyId				= intCurrencyId
 				,@dtmDate					= dtmDate
 				,@dblExchangeRate			= dblExchangeRate
-				,@intTransactionId			= intTransactionId
-				,@strTransactionId			= strTransactionId
+				,@intTransactionId_AutoNegative	= intTransactionId
+				,@strTransactionId_AutoNegative	= strTransactionId
 				,@strTransactionForm		= strTransactionForm
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
+				AND strTransactionId = @strTransactionId
 				AND ISNULL(ysnIsUnposted, 0) = 1 
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
@@ -710,8 +717,8 @@ BEGIN
 					,[dblSalesPrice]						= 0
 					,[intCurrencyId]						= NULL -- @intCurrencyId
 					,[dblExchangeRate]						= 1 -- @dblExchangeRate
-					,[intTransactionId]						= @intTransactionId
-					,[strTransactionId]						= @strTransactionId
+					,[intTransactionId]						= @intTransactionId_AutoNegative
+					,[strTransactionId]						= @strTransactionId_AutoNegative
 					,[strBatchId]							= @strBatchId
 					,[intTransactionTypeId]					= @AUTO_NEGATIVE
 					,[intLotId]								= NULL 
