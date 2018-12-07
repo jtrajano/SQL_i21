@@ -6549,17 +6549,17 @@ BEGIN
 	--SELECT * FROM @tblCFTransactionTax 
 
 	
-	IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1)
-	BEGIN
+	--IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1)
+	--BEGIN
 					
-		UPDATE @tblCFTransactionTax 
-		SET dblRate = CASE 
-		WHEN LOWER(strCalculationMethod) = 'percentage' 
-		THEN ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice)
-		ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
-		END
+		--UPDATE @tblCFTransactionTax 
+		--SET dblRate = CASE 
+		--WHEN LOWER(strCalculationMethod) = 'percentage' 
+		--THEN ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice)
+		--ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+		--END
 
-	END
+	--END
 
 	--COMPUTE REMOTE TAX--
 	IF(@IsImporting = 1)
