@@ -41,7 +41,7 @@ BEGIN TRY
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
 
-	SELECT @ysnPostGL = 0
+	SELECT @ysnPostGL = 1
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -103,13 +103,6 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intYieldCostId
-
-	IF @strYieldCostValue = 'False'
-		OR @strYieldCostValue IS NULL
-		OR @strYieldCostValue = ''
-	BEGIN
-		SELECT @ysnPostGL = 1
-	END
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
