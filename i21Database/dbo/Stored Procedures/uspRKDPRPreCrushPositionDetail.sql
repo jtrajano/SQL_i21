@@ -1351,89 +1351,6 @@ FROM (
 		AND f.intLocationId = ISNULL(@intLocationId, f.intLocationId)
 		AND ISNULL(oc.ysnPreCrush, 0) = 0) t
 
-INSERT INTO @List (strCommodityCode
-	, intCommodityId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strType
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, dblTotal
-	, intFromCommodityUnitMeasureId
-	, strAccountNumber
-	, strTranType
-	, intBrokerageAccountId
-	, strInstrumentType
-	, dblNoOfLot
-	, intOrderId
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush)
-SELECT strCommodityCode
-	, intCommodityId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strType = 'Net Hedge'
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, dblTotal = SUM(dblTotal)
-	, intFromCommodityUnitMeasureId
-	, strAccountNumber
-	, strTranType
-	, intBrokerageAccountId
-	, strInstrumentType
-	, dblNoOfLot
-	, 16
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush
-FROM @List WHERE intOrderId IN (12, 14, 15)
-GROUP BY strCommodityCode
-	, intCommodityId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, intFromCommodityUnitMeasureId
-	, strAccountNumber
-	, strTranType
-	, intBrokerageAccountId
-	, strInstrumentType
-	, dblNoOfLot
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush
-
 -- Crush records
 IF ((SELECT TOP 1 ysnPreCrush FROM tblRKCompanyPreference) = 1)
 BEGIN
@@ -1519,6 +1436,91 @@ BEGIN
 END
 
 ----------------
+
+INSERT INTO @List (strCommodityCode
+	, intCommodityId
+	, strInternalTradeNo
+	, intFutOptTransactionHeaderId
+	, strType
+	, strLocationName
+	, strContractEndMonth
+	, strContractEndMonthNearBy
+	, dblTotal
+	, intFromCommodityUnitMeasureId
+	, strAccountNumber
+	, strTranType
+	, intBrokerageAccountId
+	, strInstrumentType
+	, dblNoOfLot
+	, intOrderId
+	, intItemId
+	, strItemNo
+	, intCategoryId
+	, strCategory
+	, intFutureMarketId
+	, strFutMarketName
+	, intFutureMonthId
+	, strFutureMonth
+	, strDeliveryDate
+	, strBrokerTradeNo
+	, strNotes
+	, ysnPreCrush)
+SELECT strCommodityCode
+	, intCommodityId
+	, strInternalTradeNo
+	, intFutOptTransactionHeaderId
+	, strType = 'Net Hedge'
+	, strLocationName
+	, strContractEndMonth
+	, strContractEndMonthNearBy
+	, dblTotal = SUM(dblTotal)
+	, intFromCommodityUnitMeasureId
+	, strAccountNumber
+	, strTranType
+	, intBrokerageAccountId
+	, strInstrumentType
+	, dblNoOfLot
+	, 16
+	, intItemId
+	, strItemNo
+	, intCategoryId
+	, strCategory
+	, intFutureMarketId
+	, strFutMarketName
+	, intFutureMonthId
+	, strFutureMonth
+	, strDeliveryDate
+	, strBrokerTradeNo
+	, strNotes
+	, ysnPreCrush
+FROM @List WHERE intOrderId IN (12, 14, 15)
+GROUP BY strCommodityCode
+	, intCommodityId
+	, strInternalTradeNo
+	, intFutOptTransactionHeaderId
+	, strLocationName
+	, strContractEndMonth
+	, strContractEndMonthNearBy
+	, intFromCommodityUnitMeasureId
+	, strAccountNumber
+	, strTranType
+	, intBrokerageAccountId
+	, strInstrumentType
+	, dblNoOfLot
+	, intItemId
+	, strItemNo
+	, intCategoryId
+	, strCategory
+	, intFutureMarketId
+	, strFutMarketName
+	, intFutureMonthId
+	, strFutureMonth
+	, strDeliveryDate
+	, strBrokerTradeNo
+	, strNotes
+	, ysnPreCrush
+
+
 
 INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType)
 SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' strType,strInventoryType from @List where intOrderId in(19, 20, 21, 22)
