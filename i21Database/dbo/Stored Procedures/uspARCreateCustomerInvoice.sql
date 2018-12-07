@@ -132,6 +132,9 @@
 	,@intLineOfBusinessId			INT				= NULL
 	,@intICTId						INT				= NULL
 	,@intSalesOrderId				INT				= NULL
+	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
+	,@ItemAddonParent				BIT				= NULL
+	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
 AS
 
 BEGIN
@@ -729,6 +732,9 @@ BEGIN TRY
 		,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 		,@ItemDestinationGradeId		= @ItemDestinationGradeId
 		,@ItemDestinationWeightId		= @ItemDestinationWeightId
+        ,@ItemAddonDetailKey            = @ItemAddonDetailKey
+        ,@ItemAddonParent               = @ItemAddonParent
+        ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

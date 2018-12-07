@@ -195,4 +195,8 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 	,[intDestinationGradeId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Grade)
 	,[intDestinationWeightId]				INT												NULL		-- Key Value from tblCTWeightGrade (Grain Destination - Weight)
+
+    ,[strAddonDetailKey]                    NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[ysnAddonParent]                       BIT                                             NULL
+    ,[dblAddOnQuantity]                     NUMERIC(18, 6)                                  NULL
 )

@@ -55,6 +55,7 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , strTaxGroup						= TAXGROUP.strTaxGroup
 	 ,strAddonDetailKey					= SODETAIL.strAddonDetailKey
 	 ,ysnAddonParent					= SODETAIL.ysnAddonParent
+	 ,dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -93,6 +94,7 @@ INNER JOIN (
 		 , intStorageLocationId
 		 , strAddonDetailKey
 		 , ysnAddonParent
+		 , dblAddOnQuantity
 	FROM dbo.tblSOSalesOrderDetail WITH (NOLOCK)
 	WHERE dblQtyShipped < dblQtyOrdered
 	 AND (ISNULL(intItemId, 0) <> 0 OR ISNULL(strItemDescription, '') <> '') 

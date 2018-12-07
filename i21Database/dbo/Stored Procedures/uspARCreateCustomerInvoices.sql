@@ -167,6 +167,9 @@ INSERT INTO @InvoicesToGenerate (
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 )
 SELECT
 	 [intId]							= [intId]
@@ -308,6 +311,9 @@ SELECT
 	,[intStorageScheduleTypeId]			= [intStorageScheduleTypeId]
 	,[intDestinationGradeId]			= [intDestinationGradeId]
 	,[intDestinationWeightId]			= [intDestinationWeightId]
+    ,[strAddonDetailKey]                = [strAddonDetailKey]
+    ,[ysnAddonParent]                   = [ysnAddonParent]
+    ,[dblAddOnQuantity]                 = [dblAddOnQuantity]
 FROM
 	@InvoiceEntries 
 
@@ -1999,7 +2005,10 @@ BEGIN TRY
 		,[intSalesAccountId]
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
-		,[intDestinationWeightId])
+		,[intDestinationWeightId]
+        ,[strAddonDetailKey]
+        ,[ysnAddonParent]
+        ,[dblAddOnQuantity])
 	SELECT
 		 [intId]								= IL.[intId]
 		,[strTransactionType]					= ITG.[strTransactionType]
@@ -2140,6 +2149,9 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+        ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
+        ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
+        ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 	FROM
 		@InvoicesToGenerate ITG
 	INNER JOIN

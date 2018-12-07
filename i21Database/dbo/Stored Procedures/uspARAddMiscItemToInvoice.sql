@@ -38,8 +38,9 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@ItemTicketId					INT				= NULL
-	,@ItemstrAddonDetailKey			VARCHAR(MAX)    = NULL
-	,@ItemysnAddonParent			BIT				= NULL
+	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
+	,@ItemAddonParent				BIT				= NULL
+	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
 AS
 
 BEGIN
@@ -195,7 +196,8 @@ BEGIN TRY
 		,[dblTermDiscountRate]
 		,[ysnTermDiscountExempt]
 		,[strAddonDetailKey]
-		,[ysnAddonParent])
+		,[ysnAddonParent]
+		,[dblAddOnQuantity])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -272,8 +274,9 @@ BEGIN TRY
 		,[dblBaseItemTermDiscountExemption]	= @ZeroDecimal
 		,[dblTermDiscountRate]				= @ZeroDecimal
 		,[ysnTermDiscountExempt]			= 0
-		,[strAddonDetailKey]				= @ItemstrAddonDetailKey
-		,[ysnAddonParent]					= @ItemysnAddonParent
+		,[strAddonDetailKey]				= @ItemAddonDetailKey
+		,[ysnAddonParent]					= @ItemAddonParent
+		,[dblAddOnQuantity]					= @ItemAddOnQuantity
 			
 END TRY
 BEGIN CATCH

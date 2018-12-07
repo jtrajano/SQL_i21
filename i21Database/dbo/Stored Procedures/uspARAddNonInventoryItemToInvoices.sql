@@ -484,6 +484,9 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intStorageScheduleTypeId]			INT												NULL
 	,[intDestinationGradeId]			INT												NULL
 	,[intDestinationWeightId]			INT												NULL
+    ,[strAddonDetailKey]                NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
+    ,[ysnAddonParent]                   BIT                                             NULL
+    ,[dblAddOnQuantity]                 NUMERIC(18, 6)                                  NULL
 	,[intConcurrencyId]					INT												NULL
 	,[ysnRecomputeTax]					BIT												NULL
 	,[intEntityId]						INT												NULL
@@ -603,6 +606,9 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 	,[intConcurrencyId]
 	,[ysnRecomputeTax]
 	,[intEntityId]
@@ -737,6 +743,9 @@ SELECT
 	,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 	,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 	,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+    ,[strAddonDetailKey]                    = IE.[strAddonDetailKey]
+    ,[ysnAddonParent]                       = IE.[ysnAddonParent]
+    ,[dblAddOnQuantity]                     = IE.[dblAddOnQuantity]
 	,[intConcurrencyId]						= 1
 	,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
 	,[intEntityId]							= IE.[intEntityId]
@@ -927,6 +936,9 @@ USING
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+        ,[strAddonDetailKey]
+        ,[ysnAddonParent]
+        ,[dblAddOnQuantity]
 		,[intConcurrencyId]
 		,[ysnRecomputeTax]
 		,[intEntityId]
@@ -1050,6 +1062,9 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -1158,6 +1173,9 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 	,[intConcurrencyId]
 )
 OUTPUT  
