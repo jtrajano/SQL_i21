@@ -5,7 +5,7 @@ DECLARE @List NVARCHAR(800)
 	SELECT 
 	CASE when right(RTRIM(strCommodityAttributeId),1) = ',' then SUBSTRING(RTRIM(strCommodityAttributeId),1,LEN(RTRIM(strCommodityAttributeId))-1)
 	ELSE strCommodityAttributeId END strCommodityAttributeId
-	FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId is not null
+	FROM tblRKCommodityMarketMapping WHERE ISNULL(strCommodityAttributeId, '') <> ''
 )
 SELECT @List= COALESCE(@List + CASE WHEN strCommodityAttributeId <> '' THEN ',' ELSE '' END, '') + LTRIM(strCommodityAttributeId) 
 FROM CommaTrimmed 
