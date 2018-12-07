@@ -641,7 +641,7 @@ BEGIN
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND ium.ysnStockUOM = 1
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 			OUTER APPLY(
 				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
@@ -725,19 +725,19 @@ BEGIN
 				, strTransactionType
 				, intContractHeaderId
 				, strContractNumber)
-			SELECT intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal = SUM(dblTotal)
+			SELECT 1 AS intSeqId
+				, strSeqHeader = 'In-House'
+				, strCommodityCode = @strCommodityCode
+				, strType = 'Receipt'
+				, dblTotal = ISNULL(dblTotal, 0)
 				, strLocationName
 				, intItemId
 				, strItemNo
 				, intCategoryId
 				, strCategory
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
+				, intCommodityId = @intCommodityId
+				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+				, intCompanyLocationId = intLocationId
 				, strTransactionId
 				, intTransactionId
 				, strDistributionOption
@@ -749,57 +749,8 @@ BEGIN
 				, strTransactionType
 				, intContractHeaderId
 				, strContractNumber
-			FROM (
-				SELECT 1 AS intSeqId
-					, strSeqHeader = 'In-House'
-					, strCommodityCode = @strCommodityCode
-					, strType = 'Receipt'
-					, dblTotal = ISNULL(dblTotal, 0)
-					, strLocationName
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intCommodityId = @intCommodityId
-					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, intCompanyLocationId = intLocationId
-					, strTransactionId
-					, intTransactionId
-					, strDistributionOption
-					, strContractEndMonth
-					, strDeliveryDate
-					, strTicketNumber
-					, intTicketId
-					, dtmTicketDateTime
-					, strTransactionType
-					, intContractHeaderId
-					, strContractNumber
-				FROM #invQty
-				WHERE intCommodityId = @intCommodityId
-			) t
-			GROUP BY intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, strTransactionId
-				, intTransactionId
-				, strDistributionOption
-				, strContractEndMonth
-				, strDeliveryDate
-				, strTicketNumber
-				, intTicketId
-				, dtmTicketDateTime
-				, strTransactionType
-				, intContractHeaderId
-				, strContractNumber
+			FROM #invQty
+			WHERE intCommodityId = @intCommodityId
 		
 			--From Storages
 			INSERT INTO @Final(intSeqId

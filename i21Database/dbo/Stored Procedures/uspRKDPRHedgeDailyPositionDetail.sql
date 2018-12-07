@@ -543,7 +543,7 @@ BEGIN
 	FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i ON i.intItemId = s.intItemId
 	JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1 AND ISNULL(ysnInTransit, 0) = 0
-	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND ium.ysnStockUnit = 1 
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
