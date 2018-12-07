@@ -77,6 +77,7 @@ BEGIN
 		InvDet.dblPrice,
 		strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,2) AS NUMERIC(18,2))),
 		strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,4) AS NUMERIC(18,4))),
+		InvDet.dblQtyOrdered,
 		InvDet.dblQtyShipped,
 		InvDet.dblShipmentGrossWt,
 		InvDet.dblShipmentTareWt,
