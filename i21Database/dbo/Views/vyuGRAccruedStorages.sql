@@ -17,7 +17,7 @@ SELECT
 	,strCommodityCode			= CO.strCommodityCode --COMM
 	,intStorageTypeId			= CS.intStorageTypeId
 	,strStorageTypeCode			= ST.strStorageTypeCode --DIST
-	,dtmLastStorageAccrueDate	= CS.dtmLastStorageAccrueDate --STORE PD THRU DATE
+	,dtmLastStorageAccrueDate	= SH.dtmHistoryDate --STORE PD THRU DATE
 	,strStorageScheduleDesc		= SR.strScheduleDescription --DESCRIPTION
 	,dblAccruedUnits			= SH.dblUnits --UNITS
 	,dblAccrualRate				= SH.dblPaidAmount --RATE
