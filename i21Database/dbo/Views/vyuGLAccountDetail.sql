@@ -1,7 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetail]
 AS
 	SELECT      TOP 1000000 
-				account.intConcurrencyId,account.strAccountId,replace(account.strAccountId,'-','') strAccountId1,
+				account.intConcurrencyId,account.strAccountId,
+				strAccountIdText = account.strAccountId,
+				replace(account.strAccountId,'-','') strAccountId1,
 				account.strOldAccountId,replace(account.strOldAccountId,'-','') strOldAccountId1,
 				account.strDescription, grp.strAccountGroup, grp.strAccountType, cat.strAccountCategory, 
                 account.strComments, account.strCashFlow, account.ysnActive, account.ysnSystem, account.ysnRevalue, u.intAccountUnitId, 
