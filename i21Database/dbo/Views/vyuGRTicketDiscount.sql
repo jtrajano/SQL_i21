@@ -6,7 +6,7 @@ SELECT   TD.intTicketDiscountId
 		,TD.strShrinkWhat
 		,TD.dblShrinkPercent
 		,TD.dblDiscountAmount
-		,TD.dblDiscountDue
+		,dblDiscountDue = ISNULL(TD.dblDiscountDue,0)
 		,TD.dblDiscountPaid
 		,TD.ysnGraderAutoEntry
 		,TD.intDiscountScheduleCodeId
