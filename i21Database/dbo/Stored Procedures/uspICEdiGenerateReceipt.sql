@@ -6,13 +6,20 @@ DECLARE @Items TABLE(FileIndex INT, RecordIndex INT, ItemDescription NVARCHAR(20
 	ParentItemCode NVARCHAR(100), [PriceMulti-pack] NUMERIC(38, 20), Quantity NUMERIC(38, 20), 
 	RecordType NVARCHAR(50), RetailPrice NUMERIC(38, 20), UnitCost NUMERIC(38, 20),
 	UnitMultiplier NUMERIC(38, 20), UnitOfMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS, VendorItemCode NVARCHAR(50) COLLATE Latin1_General_CI_AS)
-DECLARE @Invoices TABLE(FileIndex INT, RecordIndex INT, InvoiceDate DATETIME, InvoiceNumber NVARCHAR(50), InvoiceTotal INT, RecordType NVARCHAR(50), VendorCode NVARCHAR(50))
+DECLARE @Invoices TABLE(FileIndex INT, RecordIndex INT, InvoiceDate DATETIME, InvoiceNumber NVARCHAR(50), InvoiceTotal NUMERIC(38, 20), RecordType NVARCHAR(50), VendorCode NVARCHAR(50))
 DECLARE @Charges TABLE(FileIndex INT, RecordIndex INT, Amount NUMERIC(38,20), ChargeType NVARCHAR(50), ItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS, RecordType NVARCHAR(50))
 
 INSERT INTO @Stores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
 INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
+
+-- Implied decimal conversions
+UPDATE @Invoices SET InvoiceTotal = CASE WHEN ISNULL(InvoiceTotal, 0) = 0 THEN 0 ELSE InvoiceTotal / 100.00 END
+UPDATE @Items
+	SET UnitCost = CASE WHEN ISNULL(UnitCost, 0) = 0 THEN 0 ELSE UnitCost / 100.00 END,
+	RetailPrice = CASE WHEN ISNULL(RetailPrice, 0) = 0 THEN 0 ELSE RetailPrice / 100.00 END
+UPDATE @Charges SET Amount = CASE WHEN ISNULL(Amount, 0) = 0 THEN 0 ELSE Amount / 100.00 END
 
 DECLARE @LogId INT
 SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
