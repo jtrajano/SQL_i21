@@ -343,6 +343,9 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+        ,[strAddonDetailKey]
+        ,[ysnAddonParent]
+        ,[dblAddOnQuantity]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -477,6 +480,9 @@ BEGIN
 		,[intStorageScheduleTypeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intStorageScheduleTypeId] ELSE NULL END)
 		,[intDestinationGradeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationGradeId] ELSE NULL END)
 		,[intDestinationWeightId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationWeightId] ELSE NULL END)
+        ,[strAddonDetailKey]                = (CASE WHEN @GroupingOption = 0 THEN IE.[strAddonDetailKey] ELSE NULL END)
+        ,[ysnAddonParent]                   = (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAddonParent] ELSE NULL END)
+        ,[dblAddOnQuantity]                 = (CASE WHEN @GroupingOption = 0 THEN IE.[dblAddOnQuantity] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -690,7 +696,10 @@ BEGIN
 			,[intSalesAccountId]
 			,[intStorageScheduleTypeId]
 			,[intDestinationGradeId]
-			,[intDestinationWeightId])
+			,[intDestinationWeightId]
+            ,[strAddonDetailKey]
+            ,[ysnAddonParent]
+            ,[dblAddOnQuantity])
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -831,6 +840,9 @@ BEGIN
 			,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 			,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 			,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+            ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
+            ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
+            ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
@@ -1295,6 +1307,9 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+        ,[strAddonDetailKey]
+        ,[ysnAddonParent]
+        ,[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]
 	)								
 	SELECT		 	
@@ -1430,6 +1445,9 @@ BEGIN
 		,[intStorageScheduleTypeId]			= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]			= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
+        ,[strAddonDetailKey]                = IE.[strAddonDetailKey]
+        ,[ysnAddonParent]                   = IE.[ysnAddonParent]
+        ,[dblAddOnQuantity]                 = IE.[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
 	FROM
 		#EntriesForProcessing EFP

@@ -82,8 +82,9 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@ItemSalesAccountId			INT				= NULL
-	,@ItemstrAddonDetailKey			VARCHAR(MAX)    = NULL
-	,@ItemysnAddonParent			BIT				= NULL
+	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
+	,@ItemAddonParent				BIT				= NULL
+	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
 AS
 
 BEGIN
@@ -378,6 +379,7 @@ BEGIN TRY
 				,[strVFDDocumentNumber]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
+				,[dblAddOnQuantity]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -486,8 +488,9 @@ BEGIN TRY
 				,[intDestinationGradeId]			= @ItemDestinationGradeId
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
 				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
-				,[strAddonDetailKey]				= @ItemstrAddonDetailKey
-				,[ysnAddonParent]					= @ItemysnAddonParent
+				,[strAddonDetailKey]				= @ItemAddonDetailKey
+				,[ysnAddonParent]					= @ItemAddonParent
+				,[dblAddOnQuantity]					= @ItemAddOnQuantity
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC

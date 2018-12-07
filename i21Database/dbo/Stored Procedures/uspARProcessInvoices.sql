@@ -301,6 +301,9 @@ DECLARE  @Id									INT
 		,@ItemStorageScheduleTypeId				INT
 		,@ItemDestinationGradeId				INT
 		,@ItemDestinationWeightId				INT
+        ,@ItemAddonDetailKey                    NVARCHAR(100)
+		,@ItemAddonParent                       BIT
+		,@ItemAddOnQuantity                     NUMERIC(18, 8)
 
 --INSERT
 BEGIN TRY
@@ -472,6 +475,9 @@ BEGIN
 		,@ItemStorageScheduleTypeId		= (CASE WHEN @GroupingOption = 0 THEN [intStorageScheduleTypeId] ELSE NULL END)
 		,@ItemDestinationGradeId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationGradeId] ELSE NULL END)
 		,@ItemDestinationWeightId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationWeightId] ELSE NULL END)
+        ,@ItemAddonDetailKey            = (CASE WHEN @GroupingOption = 0 THEN [strAddonDetailKey] ELSE NULL END)
+        ,@ItemAddonParent               = (CASE WHEN @GroupingOption = 0 THEN [ysnAddonParent] ELSE NULL END)
+        ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -711,6 +717,9 @@ BEGIN
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 			,@ItemDestinationGradeId		= @ItemDestinationGradeId
 			,@ItemDestinationWeightId		= @ItemDestinationWeightId
+            ,@ItemAddonDetailKey            = @ItemAddonDetailKey
+            ,@ItemAddonParent               = @ItemAddonParent
+            ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -883,6 +892,9 @@ BEGIN
 					,@ItemDestinationGradeId		= [intDestinationGradeId]
 					,@ItemDestinationWeightId		= [intDestinationWeightId]
 					,@ItemSalesAccountId			= [intSalesAccountId]
+					,@ItemAddonDetailKey            = [strAddonDetailKey]
+                    ,@ItemAddonParent               = [ysnAddonParent]
+                    ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -973,6 +985,9 @@ BEGIN
 						,@ItemDestinationGradeId		= @ItemDestinationGradeId
 						,@ItemDestinationWeightId		= @ItemDestinationWeightId
 						,@ItemSalesAccountId			= @ItemSalesAccountId
+                        ,@ItemAddonDetailKey            = @ItemAddonDetailKey
+                        ,@ItemAddonParent               = @ItemAddonParent
+                        ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1639,6 +1654,9 @@ BEGIN TRY
 						,@ItemDestinationGradeId		= [intDestinationGradeId]
 						,@ItemDestinationWeightId		= [intDestinationWeightId]
 						,@ItemSalesAccountId			= [intSalesAccountId]
+                        ,@ItemAddonDetailKey            = [strAddonDetailKey]
+                        ,@ItemAddonParent               = [ysnAddonParent]
+                        ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1723,6 +1741,9 @@ BEGIN TRY
 							,@ItemDestinationGradeId		= @ItemDestinationGradeId
 							,@ItemDestinationWeightId		= @ItemDestinationWeightId
 							,@ItemSalesAccountId			= @ItemSalesAccountId
+                            ,@ItemAddonDetailKey            = @ItemAddonDetailKey
+                            ,@ItemAddonParent               = @ItemAddonParent
+                            ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1949,6 +1970,9 @@ BEGIN TRY
 					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
 					,@ItemDestinationGradeId		= [intDestinationGradeId]
 					,@ItemDestinationWeightId		= [intDestinationWeightId]
+                    ,@ItemAddonDetailKey            = [strAddonDetailKey]
+                    ,@ItemAddonParent               = [ysnAddonParent]
+                    ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -2098,15 +2122,18 @@ BEGIN TRY
 						,[ysnLeaseBilling]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLeaseBilling ELSE [ysnLeaseBilling] END
 						,[ysnVirtualMeterReading]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVirtualMeterReading ELSE [ysnVirtualMeterReading] END
 						,[intConversionAccountId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemConversionAccountId ELSE [intConversionAccountId] END
-						,@ItemCurrencyExchangeRateTypeId		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateTypeId ELSE [intCurrencyExchangeRateTypeId] END
-						,@ItemCurrencyExchangeRateId			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateId ELSE [intCurrencyExchangeRateId] END
-						,@ItemCurrencyExchangeRate				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRate ELSE [dblCurrencyExchangeRate] END
-						,@ItemSubCurrencyId						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyId ELSE [intSubCurrencyId] END
-						,@ItemSubCurrencyRate					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyRate ELSE [dblSubCurrencyRate] END
+						,[intCurrencyExchangeRateTypeId]		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateTypeId ELSE [intCurrencyExchangeRateTypeId] END
+						,[intCurrencyExchangeRateId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateId ELSE [intCurrencyExchangeRateId] END
+						,[dblCurrencyExchangeRate]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRate ELSE [dblCurrencyExchangeRate] END
+						,[intSubCurrencyId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyId ELSE [intSubCurrencyId] END
+						,[dblSubCurrencyRate]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyRate ELSE [dblSubCurrencyRate] END
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
 						,[intStorageScheduleTypeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageScheduleTypeId ELSE [intStorageScheduleTypeId] END
 						,[intDestinationGradeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationGradeId ELSE [intDestinationGradeId] END
 						,[intDestinationWeightId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationWeightId ELSE [intDestinationWeightId] END
+						,[strAddonDetailKey]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemAddonDetailKey ELSE [strAddonDetailKey] END
+						,[ysnAddonParent]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemAddonParent ELSE [ysnAddonParent] END
+						,[dblAddOnQuantity]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemAddOnQuantity ELSE [dblAddOnQuantity] END
 					WHERE
 						[intInvoiceId] = @ExistingInvoiceId
 						AND [intInvoiceDetailId] = @InvoiceDetailId						
