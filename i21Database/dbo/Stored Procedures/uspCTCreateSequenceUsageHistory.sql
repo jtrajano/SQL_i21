@@ -7,7 +7,8 @@
 	@dblTransactionQuantity NUMERIC(18, 6),
 	@dblNewValue			NUMERIC(18, 6),	
 	@intUserId				INT,
-	@strReason				NVARCHAR(MAX) = ''
+	@strReason				NVARCHAR(MAX) = '',
+	@dblBalance				NUMERIC(18, 6)
 AS
 BEGIN TRY
 	DECLARE @ErrMsg					NVARCHAR(MAX),
@@ -30,11 +31,13 @@ BEGIN TRY
 			intContractDetailId,	strScreenName,				intExternalId,		strFieldName,	strReason,
 			dblOldValue,			dblTransactionQuantity,		dblNewValue,		intUserId,		dtmTransactionDate,
 			intExternalHeaderId,	intContractHeaderId,		intContractSeq,		strNumber,		strUserName
+		   ,dblBalance
 			
 	)
 	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,	@strReason,
 			ISNULL(@dblOldValue, 0),			@dblTransactionQuantity,	ISNULL(@dblNewValue, 0),		@intUserId,		GETDATE(),
 			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
+		   ,@dblBalance
 			
 	
 END TRY      

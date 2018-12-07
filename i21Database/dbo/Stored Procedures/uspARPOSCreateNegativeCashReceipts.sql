@@ -44,6 +44,7 @@ BEGIN
 				,dtmDatePaid
 				,intPaymentMethodId
 				,strPaymentMethod
+				,strPaymentInfo	
 				,intBankAccountId
 				,dblAmountPaid
 				,intEntityId
@@ -72,6 +73,7 @@ BEGIN
 				,dtmDatePaid					= GETDATE()
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
+				,strPaymentInfo					= CASE WHEN POSPAYMENT.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENT.dblAmount,0)) * -1
 				,intEntityId					= @intUserId

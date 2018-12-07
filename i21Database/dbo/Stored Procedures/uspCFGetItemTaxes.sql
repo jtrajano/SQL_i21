@@ -47,6 +47,10 @@
 	,@TaxValue8						NUMERIC(18,6)	= 0.000000
 	,@TaxValue9						NUMERIC(18,6)	= 0.000000
 	,@TaxValue10					NUMERIC(18,6)	= 0.000000
+	,@intSiteId						INT
+	,@intCardId						INT
+	,@intVehicleId					INT
+	,@intFreightTermId				INT
 AS    
 		
 SELECT
@@ -73,7 +77,7 @@ SELECT
 	,[strNotes]
 FROM
 	[dbo].[fnCFRemoteTaxes](
-	@TaxState		
+	 @TaxState		
 	,@strTaxCodeId
 	,@FederalExciseTaxRate        	
 	,@StateExciseTaxRate1         	
@@ -120,6 +124,11 @@ FROM
 	,@TaxValue7					
 	,@TaxValue8					
 	,@TaxValue9					
-	,@TaxValue10)
+	,@TaxValue10
+	,@intSiteId						
+	,@intCardId					
+	,@intVehicleId				
+	,@intFreightTermId			
+	)
 
 	RETURN

@@ -115,7 +115,7 @@ SELECT TOP 100 PERCENT * FROM (
                     END
                 END
             END  * 100
-        AS DECIMAL(18,6))
+        AS DECIMAL(18,2))
         AS dblTotalAdvance
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL OR basisFutures.dblPrice = 0 OR basisCommodity.dblPercentage = 0
                 THEN 0

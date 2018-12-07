@@ -294,5 +294,5 @@ LEFT OUTER JOIN (
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
 ) vyuARInvoicesForPayments
-LEFT JOIN tblARPOS POS on vyuARInvoicesForPayments.intSourceId = POS.intPOSId
+LEFT JOIN tblARPOS POS on vyuARInvoicesForPayments.[intTransactionId] = POS.[intInvoiceId]
 LEFT JOIN vyuARPOSEndOfDay EOD on POS.intPOSLogId = EOD.intPOSLogId

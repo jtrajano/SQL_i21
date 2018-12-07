@@ -370,12 +370,13 @@ BEGIN
 		-- Calculate the current cost adjustment
 		SET @CurrentCostAdjustment = 
 			CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-						CASE 
-							WHEN @dblNewAverageCost IS NOT NULL  THEN 
-								(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
-							ELSE 
-								@CostAdjustment 
-						END 
+						--CASE 
+						--	WHEN @dblNewAverageCost IS NOT NULL  THEN 
+						--		(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+						--	ELSE 
+						--		@CostAdjustment 
+						--END 
+						@CostAdjustment
 					WHEN 
 						@t_dblQty < 0 
 						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN
@@ -603,12 +604,13 @@ BEGIN
 				,[dblCost] = NULL 
 				,[dblValue] = 
 					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-								CASE 
-									WHEN @dblNewAverageCost IS NOT NULL THEN 
-										(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
-									ELSE 
-										@CostAdjustment
-								END 
+								--CASE 
+								--	WHEN @dblNewAverageCost IS NOT NULL THEN 
+								--		(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+								--	ELSE 
+								--		@CostAdjustment
+								--END 
+								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
 								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 							ELSE 
@@ -625,12 +627,13 @@ BEGIN
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-							CASE 
-								WHEN @dblNewAverageCost IS NOT NULL THEN 
-									(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
-								ELSE 
-									@CostAdjustment
-							END 
+							--CASE 
+							--	WHEN @dblNewAverageCost IS NOT NULL THEN 
+							--		(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+							--	ELSE 
+							--		@CostAdjustment
+							--END 
+							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
 							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 						ELSE 

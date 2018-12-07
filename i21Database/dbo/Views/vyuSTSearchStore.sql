@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSTSearchStore]
 AS
-SELECT ST.*
+SELECT DISTINCT
+	   ST.*
+	   , HS.intHandheldScannerId
        , CL.strLocationName
 	   , R.strRegisterClass
 	   , R.strSapphireIpAddress
@@ -14,6 +16,8 @@ SELECT ST.*
 			ELSE ''
 		 END AS strUrlRequestTranslog
 FROM tblSTStore ST
+LEFT JOIN tblSTHandheldScanner HS
+	ON ST.intStoreId = HS.intStoreId
 LEFT JOIN tblSTRegister R 
 	ON ST.intRegisterId = R.intRegisterId
 JOIN tblSMCompanyLocation CL

@@ -28,7 +28,7 @@ AS
 				CD.intContractDetailId,
 				MD.dblMatchQty,
 
-				'Long' AS strDirectAssociation,
+				'Long'  COLLATE Latin1_General_CI_AS AS strDirectAssociation,
 
 				FS.intFutOptTransactionId		AS	intShortFutOptTransactionId,
 				FS.intFutOptTransactionHeaderId AS	intShortFutOptTransactionHeaderId,
@@ -79,7 +79,7 @@ AS
 				FL.strFutureMonthYear			AS	strLongFutureMonthYear,
 				FL.strOptionMonthYear			AS	strLongOptionMonthYear,
 				FL.strOptionType				AS	strLongOptionType,
-				FL.strInstrumentType			AS	strLongInstrumentType,
+				FL.strInstrumentType			COLLATE Latin1_General_CI_AS AS	strLongInstrumentType,
 				FL.dblStrike					AS	dblLongStrike,
 				FL.strInternalTradeNo			AS	strLongInternalTradeNo,
 				FL.strName						AS	strLongBrokerName,
@@ -99,7 +99,7 @@ AS
 				FL.intCommodityId				AS	intLongCommodityId,
 				FL.strBankName					AS	strLongBankName,
 				FL.strBankAccountNo				AS	strLongBankAccountNo,
-				FL.strSelectedInstrumentType	AS	strLongSelectedInstrumentType,
+				FL.strSelectedInstrumentType	COLLATE Latin1_General_CI_AS AS	strLongSelectedInstrumentType,
 				FL.dtmMaturityDate				AS	dtmLongMaturityDate,
 				FL.strCurrencyExchangeRateType	AS	strLongCurrencyExchangeRateType,
 				FL.strFromCurrency				AS	strLongFromCurrency,
@@ -149,7 +149,7 @@ AS
 				CD.intContractDetailId,
 				MD.dblMatchQty,
 
-				'Short' AS strDirectAssociation,
+				'Short'  COLLATE Latin1_General_CI_AS AS strDirectAssociation,
 
 				FS.intFutOptTransactionId		AS	intShortFutOptTransactionId,
 				FS.intFutOptTransactionHeaderId AS	intShortFutOptTransactionHeaderId,
@@ -158,7 +158,7 @@ AS
 				FS.strFutureMonthYear			AS	strShortFutureMonthYear,
 				FS.strOptionMonthYear			AS	strShortOptionMonthYear,
 				FS.strOptionType				AS	strShortOptionType,
-				FS.strInstrumentType			AS	strShortInstrumentType,
+				FS.strInstrumentType			COLLATE Latin1_General_CI_AS AS	strShortInstrumentType,
 				FS.dblStrike					AS	dblShortStrike,
 				FS.strInternalTradeNo			AS	strShortInternalTradeNo,
 				FS.strName						AS	strShortBrokerName,
@@ -178,7 +178,7 @@ AS
 				FS.intCommodityId				AS	intShortCommodityId,
 				FS.strBankName					AS	strShortBankName,
 				FS.strBankAccountNo				AS	strShortBankAccountNo,
-				FS.strSelectedInstrumentType	AS	strShortSelectedInstrumentType,
+				FS.strSelectedInstrumentType	COLLATE Latin1_General_CI_AS AS	strShortSelectedInstrumentType,
 				FS.dtmMaturityDate				AS	dtmShortMaturityDate,
 				FS.strCurrencyExchangeRateType	AS	strShortCurrencyExchangeRateType,
 				FS.strFromCurrency				AS	strShortFromCurrency,

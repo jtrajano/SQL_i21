@@ -228,6 +228,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@ysnTransferOnSameLocation
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END

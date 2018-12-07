@@ -51,6 +51,10 @@
 		,@TaxValue8						NUMERIC(18,6)	= 0.000000
 		,@TaxValue9						NUMERIC(18,6)	= 0.000000
 		,@TaxValue10					NUMERIC(18,6)	= 0.000000
+		,@intSiteId						INT
+		,@intCardId						INT
+		,@intVehicleId					INT
+		,@intFreightTermId				INT
     )
 RETURNS @tblTaxTable TABLE
     (
@@ -207,13 +211,37 @@ BEGIN
 	INNER JOIN tblSMTaxCodeRate smTaxCodeRate
 		ON smTaxCode.intTaxCodeId = smTaxCodeRate.intTaxCodeId
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, NULL, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,NULL,NULL,NULL,NULL, @DisregardExemptionSetup
-			,NULL	--@CompanyLocationId
-			,NULL	--@FreightTermId
-			,NULL	--@CFSiteId
-			,1		--@IsDeliver
-			,0      --@IsCFQuote
-			) E
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails]
+		(
+		 @intCustomerId								 --@CustomerId				
+		,@dtmTransactionDate						 --@TransactionDate			
+		,NULL										 --@TaxGroupId				
+		,smTaxCode.intTaxCodeId						 --@TaxCodeId					
+		,smTaxClass.intTaxClassId					 --@TaxClassId				
+		,smTaxCode.strState							 --@TaxState					
+		,@intItemId									 --@ItemId					
+		,@intItemCategoryId							 --@ItemCategoryId			
+		,@intCustomerLocationId						 --@ShipToLocationId			
+		,NULL										 --@IsCustomerSiteTaxable		
+		,@intCardId									 --@CardId					
+		,@intVehicleId								 --@VehicleId					
+		,NULL										 --@SiteId					
+		,@DisregardExemptionSetup					 --@DisregardExemptionSetup	
+		,@intLocationId								 --@CompanyLocationId			
+		,@intFreightTermId							 --@FreightTermId				
+		,@intSiteId									 --@CFSiteId					
+		,0		--@IsDeliver						 --@IsDeliver					
+		,0      --@IsCFQuote						 --@IsCFQuote					
+		) E
+
+			--@intSiteId				
+			--@intCardId				
+			--@intVehicleId			
+			--@intFreightTermId		
+
+					
+					
+				
 	WHERE cfNetwork.intNetworkId = @intNetworkId
 
 	

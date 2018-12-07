@@ -314,6 +314,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 			UNION ALL
 			--Futures Sell
@@ -343,6 +344,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 			UNION ALL
 			--Options Buy
@@ -372,6 +374,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 				
 			UNION ALL
 			--Options Sell
@@ -401,6 +404,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND ISNULL(FOT.ysnPreCrush, 0) = 0
 		)t2 
 	)t3 WHERE t3.intRowNum = 1
 
@@ -462,7 +466,7 @@ BEGIN
 		JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
 		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND a.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 	
 		UNION ALL
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC)
@@ -519,7 +523,7 @@ BEGIN
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND a.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 	) t
 	
 	SELECT dblTotal = s.dblQuantity
@@ -539,7 +543,7 @@ BEGIN
 	FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i ON i.intItemId = s.intItemId
 	JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1 AND ISNULL(ysnInTransit, 0) = 0
-	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND ium.ysnStockUnit = 1 
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
@@ -736,6 +740,7 @@ BEGIN
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+						--AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
 				
 				-- Option NetHEdge
@@ -811,6 +816,7 @@ BEGIN
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+					--AND ISNULL(t.ysnPreCrush, 0) = 0
 
 				-- Net Hedge option end
 				INSERT INTO @tempFinal(strCommodityCode
@@ -1462,8 +1468,8 @@ BEGIN
 					, strType = 'Net Receivable ($)'
 					, I.dblAmountDue
 					, L.strLocationName
-					, intContractHeaderId = null
-					, strContractNumber = ''
+					, CT.intContractHeaderId 
+					, CT.strContractNumber 
 					, T.strTicketNumber
 					, I.dtmDate
 					, E.strName
@@ -1480,6 +1486,14 @@ BEGIN
 				INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 				INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
 				INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
+				OUTER APPLY( 
+				    SELECT TOP 1 intTicketId, intItemId, CONTRACT.intContractHeaderId, strContractNumber = TICKET.strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)  
+					FROM vyuSCTicketView TICKET
+					LEFT JOIN (
+						SELECT intContractHeaderId, strContractNumber FROM tblCTContractHeader
+					)CONTRACT ON TICKET.strContractNumber = CONTRACT.strContractNumber
+					WHERE TICKET.strTicketNumber = T.strTicketNumber
+				) CT 
 				WHERE I.ysnPosted = 1
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND dblAmountDue <> 0 AND intCommodityId = @intCommodityId
@@ -1494,6 +1508,8 @@ BEGIN
 					, Cur.strCurrency
 					, I.intInvoiceId
 					, I.strInvoiceNumber
+					, CT.intContractHeaderId
+					, CT.strContractNumber
 				
 				INSERT INTO @tempFinal (strCommodityCode
 					, strType

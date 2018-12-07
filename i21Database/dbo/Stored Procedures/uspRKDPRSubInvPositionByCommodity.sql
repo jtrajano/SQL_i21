@@ -310,7 +310,7 @@ JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 left join tblSCTicket t on t.intTicketId=gh.intTicketId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
-and a.intCommodityId in (select intCommodity from @Commodity)
+and i.intCommodityId in (select intCommodity from @Commodity)
 
 union all
 SELECT ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC) intRowNum, 
@@ -354,7 +354,7 @@ JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0 and gh.intTransactionTypeId IN (1,3,4,5,9)
 and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
-and a.intCommodityId in (select intCommodity from @Commodity)
+and i.intCommodityId in (select intCommodity from @Commodity)
 
 --select * from @tblGetStorageDetailByDate where intCommodityId = 3023
 --========================================
@@ -444,7 +444,7 @@ FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i on i.intItemId=s.intItemId
 	--Join tblICItemLocaiton il on  il.intItemLocationId
 	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
+	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND ium.ysnStockUnit = 1  
 	LEFT JOIN tblSCTicket t on s.intSourceId = t.intTicketId		  
 WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0 
 	AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end and isnull(strTicketStatus,'') <> 'V'
@@ -623,7 +623,7 @@ FROM (
 		JOIN tblICItem i1 on i1.intItemId=st.intItemId
 		JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-	WHERE st.intCommodityId  in(select intCommodity from @Commodity) and isnull(st.intDeliverySheetId,0) =0
+	WHERE i1.intCommodityId  in(select intCommodity from @Commodity) and isnull(st.intDeliverySheetId,0) =0
 			AND st.intProcessingLocationId  = CASE WHEN ISNULL(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 			AND convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110) <=CONVERT(DATETIME,@dtmToDate)
 			AND isnull(strTicketStatus,'') = 'H'
@@ -658,6 +658,9 @@ BEGIN
 
 --IF ISNULL(@intVendorId,0) = 0
 --BEGIN
+
+	IF ISNULL(@intVendorId,0) = 0
+	BEGIN
 
 	INSERT INTO @Final(
 		intSeqId
@@ -695,10 +698,12 @@ BEGIN
 			,strDistributionOption
 		from @invQty 
 		where intCommodityId =@intCommodityId  and isnull(strTicketStatus,0) <> 'V' 
+			--and ISNULL(strDistributionOption,'') <> 'DP'
 			and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 	)t
 	--group by intSeqId,strSeqHeader,strType,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
-	
+	END
+
 	INSERT INTO @Final(
 		intSeqId
 		,strSeqHeader
@@ -819,7 +824,7 @@ BEGIN
 			WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 			and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
-			and ISNULL(inv.ysnPosted,0) = 0
+			AND inv.intInvoiceId IS NULL
 			)t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -834,7 +839,7 @@ BEGIN
 	SELECT 15 intSeqId,'Company Titled Stock' strSeqHeader,strCommodityCode,'Receipt' strType,dblTotal ,strLocationName,intItemId,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId 
 	FROM @Final 
 	where strSeqHeader='In-House' and strType='Receipt' and intCommodityId =@intCommodityId
-	and ISNULL(strDistributionOption,'') <> 'DP'
+	--and ISNULL(strDistributionOption,'') <> 'DP' Will going to include DP here but subtract in the bottom using the company pref
 	)t
 	group by intSeqId,strSeqHeader,strType,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId
 
@@ -880,11 +885,11 @@ BEGIN
 				)
 	END
 
-	If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1)
+	If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
 	BEGIN
 		
 	INSERT INTO @Final(intSeqId,strSeqHeader,strType,dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT 15 intSeqId,'Company Titled Stock','DP',sum(dblTotal) dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId  from(
+	SELECT 15 intSeqId,'Company Titled Stock','DP',-sum(dblTotal) dblTotal,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId  from(
 			SELECT intTicketId,strTicketNumber,
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					,ch.intCompanyLocationId,intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName

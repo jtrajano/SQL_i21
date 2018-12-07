@@ -1042,6 +1042,10 @@ BEGIN
 					,@TaxValue8						=@TaxValue8	
 					,@TaxValue9						=@TaxValue9	
 					,@TaxValue10					=@TaxValue10
+					,@intSiteId						=@intSiteId
+					,@intCardId						=@intCardId
+					,@intVehicleId					=@intVehicleId
+					,@intFreightTermId				=@companyConfigFreightTermId
 
 				IF(ISNULL(@DevMode,0) = 1)
 				BEGIN
@@ -5987,6 +5991,8 @@ BEGIN
 			,dblOriginalTotalPrice	   = @dblOriginalTotalPrice	
 			,dblMargin				   = @dblMargin
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
+			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
+			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId

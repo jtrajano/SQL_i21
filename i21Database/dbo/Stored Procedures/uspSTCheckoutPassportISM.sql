@@ -13,12 +13,50 @@ BEGIN
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportISM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportISM' + CAST(NEWID() AS NVARCHAR(100)); 
+		BEGIN TRANSACTION --@TransactionName
+		--SAVE TRAN @TransactionName --> Save point
 		--------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-------------------------------------------------------------------------------------------- 
+
+
+
+
+		-- ==================================================================================================================  
+		-- Start Validate if ISM xml file matches the Mapping on i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Passport ISM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Passport ISM XML file did not match the layout mapping'
+
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if ISM xml file matches the Mapping on i21   
+		-- ==================================================================================================================  
+
 
 
 
@@ -53,8 +91,31 @@ BEGIN
 				SELECT DISTINCT
 					Chk.POSCode AS strXmlRegisterPOSCode
 				FROM #tempCheckoutInsert Chk
-				JOIN dbo.tblICItemUOM UOM 
-					ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, ''))
+
+				--JOIN dbo.tblICItemUOM UOM 
+				--	ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) -- Original
+				JOIN
+				(
+					SELECT intItemUOMId
+						, intItemId
+						, strUpcCode
+						, strLongUPCCode
+						, CASE 
+							WHEN strUpcCode NOT LIKE '%[^0-9]%' 
+								THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
+							ELSE NULL
+						END AS intUpcCode
+
+						, CASE 
+							WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
+								THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
+							ELSE NULL
+						END AS intLongUpcCode 
+					FROM dbo.tblICItemUOM
+				) AS UOM
+					ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
+					OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
+
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -110,13 +171,41 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM #tempCheckoutInsert Chk
-			JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
-							   OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
-			JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
-			JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
-			JOIN dbo.tblICItemPricing P ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
-			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-			JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
+
+			--JOIN dbo.tblICItemUOM UOM 
+			--	ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
+			--	OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
+			JOIN
+			(
+				SELECT intItemUOMId
+					, intItemId
+					, strUpcCode
+					, strLongUPCCode
+					, CASE 
+						WHEN strUpcCode NOT LIKE '%[^0-9]%' 
+							THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
+						ELSE NULL
+					END AS intUpcCode
+					, CASE 
+						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
+							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
+						ELSE NULL
+					END AS intLongUpcCode 
+				FROM dbo.tblICItemUOM
+			) AS UOM
+				ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
+				OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
+
+			JOIN dbo.tblICItem I 
+				ON I.intItemId = UOM.intItemId
+			JOIN dbo.tblICItemLocation IL 
+				ON IL.intItemId = I.intItemId
+			JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
+			JOIN dbo.tblSMCompanyLocation CL 
+				ON CL.intCompanyLocationId = IL.intLocationId
+			JOIN dbo.tblSTStore S 
+				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
 		END
 
@@ -157,14 +246,44 @@ BEGIN
 				END) AS strUpDownNotes
 			 , 1
 		FROM #tempCheckoutInsert Chk
-		JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
-						   OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
-		JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
-		JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
-		JOIN dbo.tblICItemPricing P ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
-		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-		JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
-		JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
+
+		--JOIN dbo.tblICItemUOM UOM 
+		--	ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
+		--	OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
+		JOIN
+		(
+			SELECT intItemUOMId
+				, intItemId
+				, strUpcCode
+				, strLongUPCCode
+				, CASE 
+					WHEN strUpcCode NOT LIKE '%[^0-9]%' 
+						THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
+					ELSE NULL
+				END AS intUpcCode
+				, CASE 
+					WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
+						THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
+					ELSE NULL
+				END AS intLongUpcCode 
+			FROM dbo.tblICItemUOM
+		) AS UOM
+			ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
+			OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
+
+		JOIN dbo.tblICItem I 
+			ON I.intItemId = UOM.intItemId
+		JOIN dbo.tblICItemLocation IL 
+			ON IL.intItemId = I.intItemId
+		JOIN dbo.tblICItemPricing P 
+			ON IL.intItemLocationId = P.intItemLocationId 
+			AND I.intItemId = P.intItemId
+		JOIN dbo.tblSMCompanyLocation CL 
+			ON CL.intCompanyLocationId = IL.intLocationId
+		JOIN dbo.tblICCategory IC 
+			ON IC.intCategoryId = I.intCategoryId
+		JOIN dbo.tblSTStore S 
+			ON S.intCompanyLocationId = CL.intCompanyLocationId
 		WHERE S.intStoreId = @intStoreId
 		AND I.strLotTracking = 'No'
 		AND ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) <> P.dblSalePrice
@@ -182,18 +301,31 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		-- COMMIT
+		GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-
-		COMMIT TRAN @TransactionName
+		
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:

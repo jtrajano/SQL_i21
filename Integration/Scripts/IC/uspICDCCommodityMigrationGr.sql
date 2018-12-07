@@ -126,6 +126,42 @@ join tblICItemUOM U on I.intItemId = U.intItemId
 left join tblSMCompanyLocation L on 1 = 1
 where U.ysnStockUnit = 1 and NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId and intLocationId = L.intCompanyLocationId))
 
+/*BEGIN PRICING*/
+/*http://jira.irelyserver.com/browse/IC-6416*/
+
+INSERT INTO [dbo].[tblICItemPricing] (
+	[intItemId]
+	,[intItemLocationId]
+	,[strPricingMethod]
+	,[dblLastCost]
+	,[dblStandardCost]
+	,[dblAverageCost]
+	,dblAmountPercent
+	,dblSalePrice
+	,[intConcurrencyId]
+	) 
+SELECT
+	intItemId, intItemLocationId, PricingMethod, LastCost, StandardCost, AverageCost, AmountPercent, SalePrice, ConcurrencyId
+FROM	(
+			SELECT inv.intItemId
+			,intItemLocationId = iloc.intItemLocationId
+			,PricingMethod = 'None' 
+			,LastCost = grCCP.gaprc_un_cash_prc 
+			,StandardCost = grCCP.gaprc_un_cash_prc 
+			,AverageCost = grCCP.gaprc_un_cash_prc 
+			,AmountPercent = 0 
+			,SalePrice = grCCP.gaprc_un_cash_prc 
+			,ConcurrencyId = 1 
+			FROM gaprcmst AS grCCP INNER JOIN tblICItem AS inv ON (grCCP.gaprc_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+			 INNER JOIN tblSMCompanyLocation AS loc ON (grCCP.gaprc_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
+			 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
+		) a
+		
+		
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemId = a.intItemId AND intItemLocationId = a.intItemLocationId)
+
+/*PRICING END*/
+
 
 ----====================================STEP 9======================================
 --Setup a grain discount category for each commodity if grain discounts are setup

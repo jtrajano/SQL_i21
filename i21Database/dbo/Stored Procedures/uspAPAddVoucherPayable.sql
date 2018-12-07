@@ -29,17 +29,16 @@ BEGIN
 		SELECT TOP 1 1
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable C
-			ON ISNULL(C.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
-			AND ISNULL(C.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
-			AND ISNULL(C.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
-			AND ISNULL(C.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
-			AND ISNULL(C.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
-			AND ISNULL(C.intInventoryShipmentItemId,1) = ISNULL(A.intInventoryShipmentItemId,1)
-			AND ISNULL(C.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
-			AND ISNULL(C.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-			AND ISNULL(C.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1))
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+			AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1))
 	BEGIN
-		RAISERROR('Payable already added.', 16, 1);
 		RETURN;
 	END
 	MERGE INTO tblAPVoucherPayable AS destination
@@ -56,7 +55,7 @@ BEGIN
 			,[dtmDate]							=	A.dtmDate
 			,[strReference]						=	A.strReference
 			,[strSourceNumber]					=	A.strSourceNumber
-			,[intPurchaseDetailId]				=	ISNULL(A.intPurchaseDetailId,1)
+			,[intPurchaseDetailId]				=	A.intPurchaseDetailId
 			,[strPurchaseOrderNumber]			=	po.strPurchaseOrderNumber
 			,[intContractHeaderId]				=	A.intContractHeaderId
 			,[intContractDetailId]				=	A.intContractDetailId
@@ -74,25 +73,104 @@ BEGIN
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strMiscDescription]				=	A.strMiscDescription
-			,[dblOrderQty]						=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.dblDetailQuantity
-													ELSE A.dblOrderQty END
-			,[dblOrderUnitQty]					=	CASE WHEN A.intContractDetailId > 0 THEN contractItemUOM.dblUnitQty
-													ELSE A.dblOrderUnitQty END
-			,[intOrderUOMId]					=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.intItemUOMId
-													ELSE A.intOrderUOMId END
-			,[strOrderUOM]						=	CASE WHEN A.intContractDetailId > 0 THEN contractUOM.strUnitMeasure
-													ELSE orderQtyUOM.strUnitMeasure END
+			,[dblOrderQty]						=	CASE 
+													WHEN A.intTransactionType = 1 --Consider contract logic if voucher only
+													THEN 
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN ctDetail.dblDetailQuantity
+														ELSE A.dblOrderQty
+														END
+													)
+													ELSE A.dblOrderQty 
+													END
+			,[dblOrderUnitQty]					=	CASE 
+													WHEN A.intTransactionType = 1
+													THEN
+													(
+														CASE
+														WHEN A.intContractDetailId > 0 
+														THEN contractItemUOM.dblUnitQty
+														ELSE A.dblOrderUnitQty 
+														END
+													)
+													ELSE A.dblOrderUnitQty
+													END
+			,[intOrderUOMId]					=	CASE 
+													WHEN A.intTransactionType = 1
+													THEN
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN ctDetail.intItemUOMId
+														ELSE A.intOrderUOMId
+														END
+													)
+													ELSE A.intOrderUOMId 
+													END
+			,[strOrderUOM]						=	CASE 
+													WHEN A.intTransactionType = 1
+													THEN
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN contractUOM.strUnitMeasure
+														ELSE orderQtyUOM.strUnitMeasure
+														END
+													)
+													ELSE orderQtyUOM.strUnitMeasure 
+													END
 			,[dblQuantityToBill]				=	A.dblQuantityToBill
 			,[dblQtyToBillUnitQty]				=	A.dblQtyToBillUnitQty
 			,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 			,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
-			,[dblCost]							=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.dblSeqPrice
-													ELSE A.dblCost END
-			,[dblCostUnitQty]					=	CASE WHEN A.intContractDetailId > 0 THEN contractItemCostUOM.dblUnitQty
-													ELSE A.dblCostUnitQty END
-			,[intCostUOMId]						=	CASE WHEN A.intContractDetailId > 0 THEN ctDetail.intPriceItemUOMId
-													ELSE A.intCostUOMId END
-			,[strCostUOM]						=	CASE WHEN A.intContractDetailId > 0 THEN contractCostUOM.strUnitMeasure
+			,[dblCost]							=	CASE 
+													WHEN A.intTransactionType = 1 
+													THEN 
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+														THEN ctDetail.dblSeqPrice
+														ELSE A.dblCost
+														END
+													)
+													ELSE A.dblCost
+													END
+			,[dblCostUnitQty]					=	CASE 
+													WHEN A.intTransactionType = 1 
+													THEN
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN contractItemCostUOM.dblUnitQty
+														ELSE A.dblCostUnitQty 
+														END
+													)
+													ELSE A.dblCostUnitQty 
+													END
+			,[intCostUOMId]						=	CASE 
+													WHEN A.intTransactionType = 1
+													THEN 
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN ctDetail.intPriceItemUOMId
+														ELSE A.intCostUOMId 
+														END
+													)
+													ELSE A.intCostUOMId 
+													END
+			,[strCostUOM]						=	CASE 
+													WHEN A.intTransactionType = 1
+													THEN
+													(
+														CASE 
+														WHEN A.intContractDetailId > 0 
+														THEN contractCostUOM.strUnitMeasure
+														ELSE costUOM.strUnitMeasure
+														END
+													)
 													ELSE costUOM.strUnitMeasure END
 			,[dblNetWeight]						=	A.dblNetWeight
 			,[dblWeightUnitQty]					=	A.dblWeightUnitQty
@@ -104,12 +182,12 @@ BEGIN
 			,[dblDiscount]						=	A.dblDiscount
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
 			,[strRateType]						=	exRates.strCurrencyExchangeRateType
-			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
+			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,-1)
 			,[ysnSubCurrency]					=	A.ysnSubCurrency
 			,[intSubCurrencyCents]				=	A.intSubCurrencyCents
-			,[intAccountId]						=	A.intAccountId
-			,[strAccountId]						=	accnt.strAccountId
-			,[strAccountDesc]					=	accnt.strDescription
+			,[intAccountId]						=	ISNULL(A.intAccountId, vendor.intGLAccountExpenseId)
+			,[strAccountId]						=	ISNULL(accnt.strAccountId, vendorAccnt.strAccountId)
+			,[strAccountDesc]					=	ISNULL(accnt.strDescription, vendorAccnt.strDescription)
 			,[intShipViaId]						=	A.intShipViaId
 			,[strShipVia]						=	shipVia.strShipVia
 			,[intTermId]						=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.intTermID
@@ -149,7 +227,9 @@ BEGIN
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
-		INNER JOIN vyuGLAccountDetail accnt ON A.intAccountId = accnt.intAccountId
+		LEFT JOIN tblGLAccount accnt ON A.intAccountId = accnt.intAccountId
+		--IF NO ACCOUNT PROVIDED, USE VENDOR EXPENSE ACCOUNT
+		LEFT JOIN tblGLAccount vendorAccnt ON vendor.intGLAccountExpenseId = vendorAccnt.intAccountId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = A.intLocationId
 		LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory

@@ -81,8 +81,9 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
 		,t.strTransactionForm	
 		,t.intTransactionId	
-		,t.strTransactionId		
-		,dblQuantity				= ISNULL(t.dblQty, 0)	
+		,t.strTransactionId	
+		,t.intTransactionDetailId	
+		,dblQuantity				= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
 		,t.strBatchId	
 		,strUOM						= umTransUOM.strUnitMeasure
 		,strEntity					= e.strName			

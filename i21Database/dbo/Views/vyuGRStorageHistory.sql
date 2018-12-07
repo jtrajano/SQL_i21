@@ -70,7 +70,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,strTransferTicket					= (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = SH.intTransferStorageId)
 	,intTransferStorageId				= SH.intTransferStorageId
 	,intInventoryReceiptId				= CASE 
-	 										WHEN SH.intTransactionTypeId = 1 OR SH.intTransactionTypeId = 5 THEN SC.intInventoryReceiptId 
+	 										WHEN SH.intTransactionTypeId = 1 OR SH.intTransactionTypeId = 5 THEN SH.intInventoryReceiptId 
 	 										ELSE NULL 
 	 									END
 	,strReceiptNumber					= Receipt.strReceiptNumber
@@ -127,7 +127,7 @@ LEFT JOIN tblSCTicketSplit SCTicketSplit
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId
 LEFT JOIN tblICInventoryReceipt Receipt 
-	ON Receipt.intInventoryReceiptId = SC.intInventoryReceiptId
+	ON Receipt.intInventoryReceiptId = SH.intInventoryReceiptId
 LEFT JOIN tblEMEntitySplit EMSplit 
 	ON EMSplit.intSplitId = ISNULL(SC.intSplitId,DS.intSplitId)
 LEFT JOIN tblSCDeliverySheetSplit DSSplit

@@ -139,7 +139,7 @@ BEGIN TRY
 								SELECT		intSContractDetailId,
 											CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty)),0) AS NUMERIC(18, 6))  AS dblAllocatedQty
 								FROM		tblLGAllocationDetail	RV		
-								JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intPContractDetailId AND CD.intContractDetailId = @intContractDetailId	 CROSS	
+								JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intSContractDetailId AND CD.intContractDetailId = @intContractDetailId	 CROSS	
 								APPLY		tblLGCompanyPreference	LP 
 								Group By	intSContractDetailId,CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId
 							)	SA	  ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT

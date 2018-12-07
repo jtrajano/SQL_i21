@@ -134,10 +134,6 @@ BEGIN
 
 SELECT *
 	,LTRIM(RTRIM(CASE 
-				WHEN ISNULL(strConsigneeText, '') = ''
-					THEN ''
-				ELSE strConsigneeText + CHAR(13)
-				END + CASE 
 				WHEN ISNULL(strConsignee, '') = ''
 					THEN ''
 				ELSE strConsignee + CHAR(13)
@@ -172,13 +168,13 @@ SELECT *
 				END + CASE 
 				WHEN ISNULL(strConsigneeMail, '') = ''
 					THEN ''
-				ELSE 'E-mail: ' + strConsigneeMail
+				ELSE 'E-mail: ' + strConsigneeMail + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strConsigneeText, '') = ''
+					THEN ''
+				ELSE strConsigneeText
 				END)) strConsigneeInfo
 	,LTRIM(RTRIM(CASE 
-				WHEN ISNULL(strFirstNotifyText, '') = ''
-					THEN ''
-				ELSE strFirstNotifyText + CHAR(13)
-				END + CASE 
 				WHEN ISNULL(strFirstNotify, '') = ''
 					THEN ''
 				ELSE strFirstNotify + CHAR(13)
@@ -213,13 +209,13 @@ SELECT *
 				END + CASE 
 				WHEN ISNULL(strFirstNotifyMail, '') = ''
 					THEN ''
-				ELSE 'E-mail: ' + strFirstNotifyMail
+				ELSE 'E-mail: ' + strFirstNotifyMail + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strFirstNotifyText, '') = ''
+					THEN ''
+				ELSE strFirstNotifyText
 				END)) strFirstNotifyInfo
 	,LTRIM(RTRIM(CASE 
-				WHEN ISNULL(strSecondNotifyText, '') = ''
-					THEN ''
-				ELSE strSecondNotifyText + CHAR(13)
-				END + CASE 
 				WHEN ISNULL(strSecondNotify, '') = ''
 					THEN ''
 				ELSE strSecondNotify + CHAR(13)
@@ -254,13 +250,13 @@ SELECT *
 				END + CASE 
 				WHEN ISNULL(strSecondNotifyMail, '') = ''
 					THEN ''
-				ELSE 'E-mail: ' + strSecondNotifyMail
+				ELSE 'E-mail: ' + strSecondNotifyMail + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strSecondNotifyText, '') = ''
+					THEN ''
+				ELSE strSecondNotifyText
 				END)) strSecondNotifyInfo
 	,LTRIM(RTRIM(CASE 
-				WHEN ISNULL(strThirdNotifyText, '') = ''
-					THEN ''
-				ELSE strThirdNotifyText + CHAR(13)
-				END + CASE 
 				WHEN ISNULL(strThirdNotify, '') = ''
 					THEN ''
 				ELSE strThirdNotify + CHAR(13)
@@ -295,7 +291,11 @@ SELECT *
 				END + CASE 
 				WHEN ISNULL(strThirdNotifyMail, '') = ''
 					THEN ''
-				ELSE 'E-mail: ' + strThirdNotifyMail
+				ELSE 'E-mail: ' + strThirdNotifyMail + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyText, '') = ''
+					THEN ''
+				ELSE strThirdNotifyText
 				END)) strThirdNotifyInfo
 	,strBOLInstructionText = @strBOLInstructionText
 	,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription

@@ -127,6 +127,7 @@ BEGIN
 		,intItemUOMId
 		,intNewItemUOMId
         ,dblCost
+		,dblNewCost
 		,intSubLocationId
 		,intStorageLocationId
         ,intConcurrencyId
@@ -142,6 +143,7 @@ BEGIN
 		,agitm_un_on_hand
 		,uom.intItemUOMId
 		,uom.intItemUOMId
+		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,(select sl.intSubLocationId 
 			from 
@@ -184,6 +186,7 @@ BEGIN
 		,ISNULL(aglot_un_on_hand,0)
 		,uom.intItemUOMId
 		,uom.intItemUOMId
+		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,(select sl.intSubLocationId 
 			from 

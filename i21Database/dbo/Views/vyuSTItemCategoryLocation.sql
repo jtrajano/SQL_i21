@@ -10,6 +10,7 @@ SELECT C.intCategoryId
 	  , CL.strLocationName
 	  , ST.intStoreId
 	  , ST.intStoreNo
+	  , C.intConcurrencyId
 FROM tblICCategory C
 LEFT JOIN tblICCategoryLocation CLOC
 	ON C.intCategoryId = CLOC.intCategoryId

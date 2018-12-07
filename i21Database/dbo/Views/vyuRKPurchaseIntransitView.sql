@@ -20,6 +20,8 @@ SELECT PCT.intCompanyLocationId intCompanyLocationId
 	, CH.intContractHeaderId
 	, PCT.intContractDetailId
 	, strContractNumber = CH.strContractNumber + '-' + CONVERT(NVARCHAR, PCT.intContractSeq)
+	, PCT.dtmStartDate
+	, PCT.dtmEndDate
 	, intUnitMeasureId = intCommodityUnitMeasureId
 	, L.intPurchaseSale
 	, L1.strLoadNumber
@@ -59,3 +61,5 @@ GROUP BY PCT.intCompanyLocationId
 	, L1.strLoadNumber
 	, LD1.intPContractDetailId
 	, LD.intPContractDetailId
+	, PCT.dtmStartDate
+	, PCT.dtmEndDate

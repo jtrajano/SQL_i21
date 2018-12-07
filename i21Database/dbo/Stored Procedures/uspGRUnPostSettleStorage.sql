@@ -30,6 +30,7 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
+	DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 	
 	DECLARE @isParentSettleStorage AS BIT
 
@@ -317,57 +318,71 @@ BEGIN TRY
 				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
 				DELETE FROM @GLEntries
-					
-					INSERT INTO @GLEntries 
-					(
-					 [dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]	
-					,[dblDebitReport]	
-					,[dblCreditForeign]	
-					,[dblCreditReport]	
-					,[dblReportingRate]	
-					,[dblForeignRate]
-					,[strRateType]
-				)
-				EXEC uspGRCreateGLEntries 
-					 'Storage Settlement'
-					,'OtherCharges'
-					,@intSettleStorageId
-					,@strBatchId
-					,@UserId
-					,0
-				UPDATE @GLEntries 
-				SET dblDebit = dblCredit
-				,dblCredit   = dblDebit
-						
-				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-				BEGIN 
+				DECLARE @intCustomerStorageId AS INT;
+
+				SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId FROM tblGRStorageHistory
+				WHERE intSettleStorageId = @intSettleStorageId
+
+				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+				FROM tblGRCustomerStorage CS 
+				JOIN tblGRStorageType ST 
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE CS.intCustomerStorageId = @intCustomerStorageId
+
+				IF @strOwnedPhysicalStock = 'Customer' 
+					BEGIN
+						INSERT INTO @GLEntries
+						(	 
+							 [dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+						)
+						EXEC uspGRCreateGLEntries 
+							'Storage Settlement'
+							,'OtherCharges'
+							,@intSettleStorageId
+							,@strBatchId
+							,@UserId
+							,0
+						UPDATE @GLEntries 
+						SET dblDebit = dblCredit
+						,dblCredit   = dblDebit
+								
+						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+						BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, 0 
-				END
+						END
+
+					END				
 			END
 
 			--4. Deleting History

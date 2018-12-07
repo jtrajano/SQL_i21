@@ -18,7 +18,6 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
-		-- BEGIN TRANSACTION
 		BEGIN TRANSACTION 
 
 		-- OUT Params
@@ -303,7 +302,7 @@ BEGIN
 							ON ST.intCheckoutCustomerId = vC.intEntityId
 						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
 																			ISNULL(CPT.dblQuantity, 0)						-- Qty
-																			, ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) -- ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
 																			, @LineItems
 																			, 1										-- is Reversal
 																			, I.intItemId							-- Item Id
@@ -479,7 +478,7 @@ BEGIN
 										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= ((ISNULL(CAST(CPT.dblPrice AS DECIMAL(18,2)), 0) * CPT.dblQuantity) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -766,7 +765,7 @@ BEGIN
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							WHERE CH.intCheckoutId = @intCheckoutId
 							AND UOM.ysnStockUnit = CAST(1 AS BIT)
-							AND DT.dblTotalSalesAmount = 0
+							AND DT.dblTotalSalesAmountComputed = 0
 							AND CPT.dblAmount > 0
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
@@ -993,7 +992,7 @@ BEGIN
 				----------------------------------------------------------------------
 				------------------------- DEPARTMENT TOTALS --------------------------
 				----------------------------------------------------------------------
-				IF EXISTS(SELECT * FROM tblSTCheckoutDepartmetTotals WHERE intCheckoutId = @intCheckoutId AND dblTotalSalesAmount > 0)
+				IF EXISTS(SELECT * FROM tblSTCheckoutDepartmetTotals WHERE intCheckoutId = @intCheckoutId AND dblTotalSalesAmountComputed > 0)
 					BEGIN																																																																																																																																															
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
@@ -1138,16 +1137,16 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= CASE 
 																				-- PUMP TOTALS
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
 																					THEN 0
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
 																					THEN 1
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
 																					THEN -1
 
 																				-- ITEM MOVEMENTS
 																			    WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
 																																	SELECT SUM(IM.dblTotalSales)
 																																	FROM tblSTCheckoutItemMovements IM
 																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
@@ -1164,16 +1163,16 @@ BEGIN
 											,[dblDiscount]				= 0
 											,[dblPrice]					= CASE
 																				-- PUMP TOTALS
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount = CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
 																					THEN 0
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
-																					THEN DT.dblTotalSalesAmount - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount > CPT.dblAmount)
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount)
-																					THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmount < CPT.dblAmount) - DT.dblTotalSalesAmount
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
+																					THEN DT.dblTotalSalesAmountComputed - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
+																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
+																					THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount) - DT.dblTotalSalesAmountComputed
 
 																				-- ITEM MOVEMENTS
 																				 WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
 																																	SELECT SUM(IM.dblTotalSales)
 																																	FROM tblSTCheckoutItemMovements IM
 																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
@@ -1185,7 +1184,7 @@ BEGIN
 																								) AS NUMERIC(18, 6))
 																							) >= 1 
 																						THEN (
-																								ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
 																																			SELECT SUM(dblTotalSales)
 																																			FROM tblSTCheckoutItemMovements IM
 																																			JOIN tblICItemUOM UOM 
@@ -1199,7 +1198,7 @@ BEGIN
 																																		), 0)
 																																	) AS NUMERIC(18, 6)))
 																						)
-																				ELSE ISNULL(DT.dblTotalSalesAmount, 0) -- If not match on Pump Totals and Item Movements
+																				ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
 																		END
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
@@ -1258,7 +1257,7 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
-								AND DT.dblTotalSalesAmount > 0
+								AND DT.dblTotalSalesAmountComputed > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
@@ -1813,10 +1812,9 @@ BEGIN
 																					THEN
 																						CASE
 																							WHEN (CC.dblAmount > 0)
-																								--THEN (ISNULL(CC.dblAmount, 0) * -1)
-																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
+																								THEN (ISNULL(CC.dblAmount, 0) * -1)
 																							WHEN (CC.dblAmount < 0)
-																								THEN (ISNULL(CC.dblUnitPrice, 0) * -1) --TEST01
+																								THEN (ISNULL(CC.dblAmount, 0) * -1)
 																						END
 																				ELSE ISNULL(CC.dblUnitPrice, 0)
 																			END
@@ -2054,7 +2052,7 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
-																							THEN ABS(ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2)) * ABS(ISNULL(CC.dblQuantity, 0))) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
+																							THEN ABS(ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
 																							--THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
 																							--																							WHEN (CC.dblAmount > 0)
 																							--																								THEN (CC.dblQuantity * -1)
@@ -2535,7 +2533,7 @@ BEGIN
 																						END
 																				ELSE ISNULL(CC.dblQuantity, 0)
 																			END
-																			, ABS(ISNULL(CAST(CC.dblUnitPrice AS DECIMAL(18,2)), 0)) --ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
+																			, ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0))	-- Gross Amount CC.dblUnitPrice
 																			, @LineItems
 																			, 1										-- is Reversal
 																			--, I.intItemId							-- Item Id
@@ -2815,7 +2813,7 @@ BEGIN
 																				THEN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
-																							THEN ((ABS(CAST(ISNULL(CC.dblUnitPrice, 0) AS DECIMAL(18,2))) * ABS(CC.dblQuantity)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
+																							THEN (ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
 																							--THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
 																							--																							WHEN (CC.dblAmount > 0)
 																							--																								THEN CC.dblQuantity
@@ -3255,7 +3253,6 @@ BEGIN
 
 										--SELECT * FROM @EntriesForInvoiceBatchPost
 
-
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
 													@InvoiceEntries				= @EntriesForInvoiceBatchPost
@@ -3431,6 +3428,7 @@ BEGIN
 									BEGIN CATCH
 										SET @ErrorMessage = ERROR_MESSAGE()
 										SET @strStatusMsg = 'Post Sales Invoice error: ' + @ErrorMessage
+										--PRINT @strStatusMsg
 
 										-- ********************************************************
 										-- Having Problem on Invoice posting
@@ -4323,6 +4321,10 @@ ExitWithCommit:
 
 ExitWithRollback:
     -- Rollback Transaction here
-	ROLLBACK TRANSACTION 
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION 
+		END
+	
 		
 ExitPost:

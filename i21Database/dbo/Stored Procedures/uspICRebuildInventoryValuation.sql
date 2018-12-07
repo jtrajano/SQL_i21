@@ -1442,6 +1442,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
+						,@strTransactionId
 						,@ysnTransferOnSameLocation
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
@@ -4132,7 +4133,8 @@ BEGIN
 		
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
-				AND intTransactionId = @intTransactionId
+				--AND intTransactionId = @intTransactionId
+				AND strTransactionId = @strTransactionId
 	END 
 END 
 

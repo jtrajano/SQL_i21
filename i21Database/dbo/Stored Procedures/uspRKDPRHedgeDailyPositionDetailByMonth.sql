@@ -60,7 +60,7 @@ BEGIN
 		, strFutMarketName NVARCHAR(100)
 		, intFutureMonthId INT
 		, strFutureMonth NVARCHAR(100)
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
@@ -96,7 +96,7 @@ BEGIN
 		, strFutMarketName NVARCHAR(100)
 		, intFutureMonthId INT
 		, strFutureMonth NVARCHAR(100)
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
@@ -146,7 +146,7 @@ BEGIN
 				, intCategoryId INT
 				, strCategory NVARCHAR(100)
 				, strFutMarketName NVARCHAR(100)
-				, dtmDeliveryDate DATETIME)
+				, strDeliveryDate NVARCHAR(50))
 			
 			INSERT INTO @tblGetOpenContractDetail (intRowNum
 				, strCommodityCode
@@ -179,7 +179,7 @@ BEGIN
 				, intCategoryId
 				, strCategory
 				, strFutMarketName
-				, dtmDeliveryDate)
+				, strDeliveryDate)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
 				, strCommodityCode
 				, intCommodityId
@@ -211,7 +211,7 @@ BEGIN
 				, intCategoryId
 				, strCategory
 				, strFutMarketName
-				, CD.dtmEndDate
+				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 			FROM vyuRKContractDetail CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				AND intCommodityId = @intCommodityId
@@ -277,7 +277,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate)
+				, strDeliveryDate)
 			SELECT strCommodityCode
 				, CD.intCommodityId
 				, intContractHeaderId
@@ -297,7 +297,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, CD.dtmDeliveryDate
+				, CD.strDeliveryDate
 			FROM @tblGetOpenContractDetail CD
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -484,7 +484,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate
+				, strDeliveryDate
 				, strBrokerTradeNo
 				, strNotes
 				, ysnPreCrush)
@@ -514,7 +514,7 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, dtmDeliveryDate
+				, strDeliveryDate
 				, strBrokerTradeNo
 				, strNotes
 				, ysnPreCrush
@@ -557,7 +557,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush)
@@ -587,7 +587,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush
@@ -620,7 +620,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush)
@@ -650,7 +650,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush
@@ -686,7 +686,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush)
@@ -716,7 +716,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
@@ -750,7 +750,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush)
@@ -780,7 +780,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
@@ -805,7 +805,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush)
@@ -825,7 +825,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dtmDeliveryDate
+		, strDeliveryDate
 		, strBrokerTradeNo
 		, strNotes
 		, ysnPreCrush
@@ -873,7 +873,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
@@ -913,7 +913,7 @@ BEGIN
 			, strFutMarketName
 			, intFutureMonthId
 			, strFutureMonth
-			, dtmDeliveryDate
+			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush

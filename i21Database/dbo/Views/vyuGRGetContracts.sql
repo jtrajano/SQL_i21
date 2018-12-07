@@ -29,7 +29,19 @@ SELECT
 	,intContractUOMId					= AD.intSeqPriceUOMId
 	,dblCostUnitQty						= dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, ItemUOM.intItemUOMId, 1)
 	,ysnIsAllowedToShow					= CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)
-	,ysnIsPricedOrBasis					= CAST(CASE WHEN CD.intPricingTypeId IN (1,2) THEN 1 ELSE 0 END AS BIT)
+	,ysnIsPricedOrBasis					= CAST(CASE 
+													WHEN (SELECT ysnApplyScaleToBasis FROM tblCTCompanyPreference ) = 0 THEN 
+														CASE 
+															WHEN CD.intPricingTypeId IN (1,6) THEN 1 
+															ELSE 0 
+														END 
+													ELSE
+														CASE 
+															WHEN CD.intPricingTypeId IN (1,2,6) THEN 1 
+															ELSE 0 
+														END
+												END 
+										AS BIT) --added Cash pricing type (GRN-1336)
 	,ysnIsAvailable						= CAST(
 												CASE 
 													WHEN (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0) > 0) THEN 1

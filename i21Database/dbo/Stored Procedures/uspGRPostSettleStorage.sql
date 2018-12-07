@@ -61,6 +61,7 @@ BEGIN TRY
 	DECLARE @dtmDate AS DATETIME
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	DECLARE @voucherDetailStorage AS [VoucherDetailStorage]
+	DECLARE @VoucherDetailReceiptCharge as [VoucherDetailReceiptCharge]
 	DECLARE @ItemsToStorage AS ItemCostingTableType
 	DECLARE @ItemsToPost AS ItemCostingTableType
 	DECLARE @strBatchId AS NVARCHAR(20)
@@ -1226,6 +1227,8 @@ BEGIN TRY
 			BEGIN
 				DELETE
 				FROM @voucherDetailStorage
+				DELETE 
+				FROM @VoucherDetailReceiptCharge
 
 				SET @intCreatedBillId = 0
 				UPDATE a
@@ -1325,7 +1328,6 @@ BEGIN TRY
 					AND SST.intSettleStorageId = @intSettleStorageId
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 
-				DECLARE @VoucherDetailReceiptCharge as VoucherDetailReceiptCharge
 				DECLARE @ysnDPOwnedType AS BIT = 0
 
 				SELECT TOP 1 @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) FROM @SettleVoucherCreate A
@@ -1592,7 +1594,7 @@ BEGIN TRY
 					INSERT INTO @detailCreated
 					SELECT intBillDetailId
 					FROM tblAPBillDetail
-					WHERE intBillId = @intCreatedBillId
+					WHERE intBillId = @intCreatedBillId AND CASE WHEN @ysnDPOwnedType = 1 THEN  CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 

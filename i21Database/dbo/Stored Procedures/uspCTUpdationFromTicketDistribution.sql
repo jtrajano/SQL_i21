@@ -40,7 +40,9 @@ BEGIN TRY
 			@UseScheduleForAvlCalc	BIT = 1,
 			@dblScheduleQty			INT,
 			@dblInreaseSchBy		NUMERIC(18,6),
+			@intStorageScheduleTypeId	INT,
 			@ysnLoad				BIT,
+			@dblBalanceLoad			NUMERIC(18,6),
 			@ysnAutoIncreaseQty		BIT = 0
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
@@ -63,7 +65,7 @@ BEGIN TRY
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
-	SELECT  @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
+	SELECT  @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 	IF @ysnDeliverySheet = 0
 		BEGIN
@@ -237,7 +239,9 @@ BEGIN TRY
 									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId,
-				@dblScheduleQty	=	ISNULL(CD.dblScheduleQty,0)
+				@dblScheduleQty	=	ISNULL(CD.dblScheduleQty,0),
+				@ysnLoad		=	ISNULL(CH.ysnLoad,0),
+				@dblBalanceLoad = ISNULL(CD.dblBalanceLoad,0)
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
  CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -262,6 +266,20 @@ BEGIN TRY
 			BREAK
 		END
 
+		IF @ysnLoad = 1 AND @intStorageScheduleTypeId = -6
+		BEGIN
+			IF @dblBalanceLoad > 0
+			BEGIN
+				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
+				SELECT @dblNetUnits = 0
+				BREAK
+			END
+			ELSE
+			BEGIN
+				INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
+				GOTO CONTINUEISH
+			END
+		END
 		IF NOT @dblAvailable > 0
 		BEGIN
 			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1

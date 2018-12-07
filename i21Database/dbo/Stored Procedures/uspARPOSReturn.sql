@@ -472,6 +472,9 @@ AS
 				)POS ON POSLOG.intPOSLogId  = POS.intPOSLogId
 				WHERE intPOSId = @intPOSId
 
+				UPDATE tblARInvoice
+				SET strComments = (SELECT strComment from tblARPOS WHERE intInvoiceId = @createdCreditMemoId)
+				WHERE intInvoiceId = @createdCreditMemoId
 
 			END
 			ELSE

@@ -12,7 +12,8 @@ RETURNS @returntable	TABLE
 	intContractSeq		INT,
 	strNumber			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strUserName			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	strHeaderIdColumn	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	strHeaderIdColumn	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	dtmScreenDate		DATETIME
 )
 AS
 BEGIN
@@ -22,7 +23,8 @@ BEGIN
 			@intContractSeq			INT,
 			@strNumber				NVARCHAR(MAX),
 			@strUserName			NVARCHAR(MAX), 
-			@strHeaderIdColumn		NVARCHAR(MAX) 
+			@strHeaderIdColumn		NVARCHAR(MAX),
+			@dtmScreenDate			DATETIME 
 
 	SELECT	@intContractHeaderId	=	intContractHeaderId,
 			@intContractSeq			=	intContractSeq 
@@ -37,7 +39,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryReceiptId,
 				@strNumber						=	HR.strReceiptNumber,
-				@strHeaderIdColumn				=	'intInventoryReceiptId'
+				@strHeaderIdColumn				=	'intInventoryReceiptId',
+				@dtmScreenDate					=	HR.dtmReceiptDate
 		FROM	tblICInventoryReceiptItem		DL
 		JOIN	tblICInventoryReceipt			HR	ON	HR.intInventoryReceiptId	=	DL.intInventoryReceiptId
 		WHERE	DL.intInventoryReceiptItemId	=	@intExternalId
@@ -118,7 +121,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryShipmentId,
 				@strNumber						=	HR.strShipmentNumber,
-				@strHeaderIdColumn				=	'intInventoryShipmentId'
+				@strHeaderIdColumn				=	'intInventoryShipmentId',
+				@dtmScreenDate					=	HR.dtmShipDate
 		FROM	tblICInventoryShipmentItem		DL
 		JOIN	tblICInventoryShipment			HR	ON	HR.intInventoryShipmentId	=	DL.intInventoryShipmentId
 		WHERE	DL.intInventoryShipmentItemId	=	@intExternalId
@@ -158,14 +162,16 @@ BEGIN
 			intContractSeq,
 			strNumber,
 			strUserName,
-			strHeaderIdColumn
+			strHeaderIdColumn,
+			dtmScreenDate
 	)
 	SELECT	@intExternalHeaderId, 
 			@intContractHeaderId, 
 			@intContractSeq,
 			@strNumber,
 			@strUserName,
-			@strHeaderIdColumn
+			@strHeaderIdColumn,
+			@dtmScreenDate
 		
 	RETURN;
 END

@@ -6,7 +6,7 @@ SELECT
 	, A.intInvoiceId 
 	, A.strInvoiceNumber 
 	, 0 AS dblAmountPaid 
-	, A.dblBaseInvoiceTotal AS dblTotal
+	, -A.dblBaseInvoiceTotal AS dblTotal
 	, A.dblBaseAmountDue  AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 

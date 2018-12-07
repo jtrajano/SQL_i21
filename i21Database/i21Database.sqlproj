@@ -185,7 +185,6 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1" />
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
-    <Folder Include="Scripts\Post-Deployment\PAT\18.3" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -6852,7 +6851,6 @@
     <Build Include="dbo\Functions\fnICCheckItemLocationIdIsNotUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostReturnCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetXmlNamespace.sql" />
-    <Build Include="dbo\Tables\tblSTStoreAppUploadHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM_330.sql" />
@@ -7205,17 +7203,6 @@
     <Build Include="dbo\Functions\fnSTGetRowsFromDelimitedValuesReturnString.sql" />
     <Build Include="dbo\Views\vyuGRGradesReport.sql" />
     <Build Include="dbo\Views\vyuGRStorageByDiscountReport.sql" />
-    <Build Include="dbo\Tables\tblCFInvoiceDiscountCalculationTempTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
-    <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
-    <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
-    <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
-    <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
-    <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
-    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
-    <Build Include="dbo\Tables\tblCFDriverPin.sql" />
-    <Build Include="dbo\Views\vyuHDTicketCorrectiveAction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,14 +1,18 @@
 ﻿CREATE PROC [dbo].[uspRKRiskPositionInquiryChart] 
-  @intCommodityId INTEGER
- ,@intCompanyLocationId INTEGER
- ,@intFutureMarketId INTEGER
- ,@intFutureMonthId INTEGER
- ,@intUOMId INTEGER
- ,@intDecimal INTEGER,
-  @intForecastWeeklyConsumption INTEGER = null,
-  @intForecastWeeklyConsumptionUOMId INTEGER = null   ,
-  @intBookId int = NULL, 
-  @intSubBookId int = NULL
+	@intCommodityId INTEGER
+	,@intCompanyLocationId INTEGER
+	,@intFutureMarketId INTEGER
+	,@intFutureMonthId INTEGER
+	,@intUOMId INTEGER
+	,@intDecimal INTEGER,
+	@intForecastWeeklyConsumption INTEGER = null,
+	@intForecastWeeklyConsumptionUOMId INTEGER = null   ,
+	@intBookId int = NULL, 
+	@intSubBookId int = NULL,
+	@strPositionBy nvarchar(100) = NULL,
+	@dtmPositionAsOf datetime = NULL,
+	@strUomType nvarchar(100) = NULL
+
 AS
 
 IF ISNULL(@intForecastWeeklyConsumptionUOMId,0) = 0
@@ -165,8 +169,11 @@ BEGIN
 			,@intDecimal = @intDecimal
 			,@intForecastWeeklyConsumption=@intForecastWeeklyConsumption
 			,@intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId 
-			,@intBookId  = @intBookId, 
-			@intSubBookId = @intSubBookId
+			,@intBookId  = @intBookId 
+			,@intSubBookId = @intSubBookId
+			,@strPositionBy=@strPositionBy
+			,@dtmPositionAsOf=@dtmPositionAsOf
+			,@strUomType=@strUomType
 
 	INSERT INTO @tblFinalDetail (intRowNumber
 		,strGroup
@@ -201,11 +208,11 @@ BEGIN
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 	FROM @RiskPositionInquiryBySummaryTable
-
+	
 	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
-		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.Selection = 'Outright Coverage' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
-		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.Selection='Futures Required' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk,
-		 strFutureMonth,'' as Selection  FROM @tblFinalDetail t WHERE Selection in('Outright Coverage','Futures Required') 
+		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.PriceStatus = '3.Market coverage' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
+		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.PriceStatus='4.Net Position' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk,
+		 strFutureMonth,'' as Selection  FROM @tblFinalDetail t WHERE PriceStatus in('3.Market coverage','4.Net Position')
 	group by  strFutureMonth
 	ORDER BY  CASE 
 		WHEN  strFutureMonth ='Previous' THEN '01/01/1900'
@@ -214,5 +221,3 @@ BEGIN
 	END
 
 END
-
-GO

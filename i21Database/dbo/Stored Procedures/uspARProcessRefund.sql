@@ -57,9 +57,9 @@ IF ISNULL(@intUserId, 0) = 0
 		RETURN 0;
 	END
 
-IF ISNULL(@strTransactionType, '') <> 'Credit Memo' AND ISNULL(@strTransactionType, '') <> 'Customer Prepayment'
+IF ISNULL(@strTransactionType, '') NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
 	BEGIN
-		SET @strErrorMessage = ISNULL(@strTransactionType, '') + ' is not valid for processing Refund. Only Credit Memo or Customer Prepayment is allowed.'
+		SET @strErrorMessage = ISNULL(@strTransactionType, '') + ' is not valid for processing Refund. Only Credit Memo, Customer Prepayment and Overpayment is allowed.'
 		RAISERROR(@strErrorMessage, 16, 1)  
 		RETURN 0;
 	END

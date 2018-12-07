@@ -16,12 +16,50 @@ BEGIN
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportMCM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportMCM' + CAST(NEWID() AS NVARCHAR(100)); 
+		BEGIN TRANSACTION --@TransactionName
+		--SAVE TRAN @TransactionName --> Save point
 		--------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-------------------------------------------------------------------------------------------- 
+
+
+
+
+		-- ==================================================================================================================  
+		-- Start Validate if MCM xml file matches the Mapping on i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Passport MCM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Passport MCM XML file did not match the layout mapping'
+
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if MCM xml file matches the Mapping on i21   
+		-- ==================================================================================================================
+
 
 
 
@@ -82,15 +120,18 @@ BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
 					, Cat.intCategoryId [intCategoryId]
+					, ISNULL(Chk.SalesAmount, 0) [dblTotalSalesAmountRaw]
+					, ISNULL(Chk.SalesAmount, 0) [dblRegisterSalesAmountRaw]
 					, (
 						CASE 
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
 								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+								-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 					    END
-					  ) [dblTotalSalesAmount]
-					, 0 [dblRegisterSalesAmount]
+					  ) [dblTotalSalesAmountComputed]
+					, 0 [dblRegisterSalesAmountComputed]
 					, '' [strDepartmentTotalsComment]
 					, CAST(Chk.PromotionCount AS INT) [intPromotionalDiscountsCount]
 					, CAST(Chk.PromotionAmount AS DECIMAL(18,6)) [dblPromotionalDiscountAmount]
@@ -119,12 +160,15 @@ BEGIN
 		ELSE
 			BEGIN
 				UPDATE DT  
-				SET	dblTotalSalesAmount = (
+				SET	[dblTotalSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
+					, [dblRegisterSalesAmountRaw] = ISNULL(Chk.SalesAmount, 0)
+					, [dblTotalSalesAmountComputed] = (
 											CASE 
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0) 
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+													-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 											END
 										  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.PromotionCount AS INT),0) 
@@ -137,35 +181,59 @@ BEGIN
 					, [intTotalSalesCount] = ISNULL(CAST(Chk.TransactionCount AS INT), 0) 
 					, [intItemId] = I.intItemId
 				FROM tblSTCheckoutDepartmetTotals DT
-				JOIN tblICCategory Cat ON DT.intCategoryId = Cat.intCategoryId
-				JOIN tblICCategoryLocation CatLoc ON Cat.intCategoryId = CatLoc.intCategoryId
-				JOIN #tempCheckoutInsert Chk ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
-				LEFT JOIN dbo.tblICItem I ON CatLoc.intGeneralItemId = I.intItemId
-				JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
-				JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-				JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
+				JOIN tblICCategory Cat 
+					ON DT.intCategoryId = Cat.intCategoryId
+				JOIN tblICCategoryLocation CatLoc 
+					ON Cat.intCategoryId = CatLoc.intCategoryId
+				JOIN #tempCheckoutInsert Chk 
+					ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
+				LEFT JOIN dbo.tblICItem I 
+					ON CatLoc.intGeneralItemId = I.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE DT.intCheckoutId = @intCheckoutId 
 				AND S.intStoreId = @intStoreId
 
 			END
 
-		UPDATE dbo.tblSTCheckoutDepartmetTotals SET dblRegisterSalesAmount = dblTotalSalesAmount Where intCheckoutId = @intCheckoutId
+		-- Update Register Amount
+		UPDATE dbo.tblSTCheckoutDepartmetTotals 
+		SET dblRegisterSalesAmountComputed = dblTotalSalesAmountComputed
+		Where intCheckoutId = @intCheckoutId
 
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		-- COMMIT
+		GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-
-		COMMIT TRAN @TransactionName
+		
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:

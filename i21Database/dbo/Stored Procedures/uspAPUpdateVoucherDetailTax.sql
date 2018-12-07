@@ -62,7 +62,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intItemUOMId)
 	SELECT
 		 intItemId					= B.intItemId
-		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
+		,intVendorId				= A.intEntityVendorId
 		,dtmTransactionDate			= A.dtmDate
 		,dblItemCost				= B.dblCost
 		,dblQuantity				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
@@ -72,9 +72,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 										-- 	THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
 										-- 	ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
 										-- END
-		,intTaxGroupId				= CASE 
-									   WHEN B.intTaxGroupId > 0 THEN B.intTaxGroupId
-									   ELSE D.intTaxGroupId END 
+		,intTaxGroupId				= B.intTaxGroupId
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 0
@@ -86,9 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 										ELSE B.intUnitOfMeasureId END
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId
-	LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityId] = D.intEntityId AND D.ysnDefaultLocation = 1
-	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId  FROM tblSMUserRoleCompanyLocationPermission)
+	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
 
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
@@ -170,12 +166,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		FROM tblAPBillDetail WHERE intBillId = A.intBillId
 	) TaxAmount
 	WHERE TaxAmount.dblTax IS NOT NULL
-
-	UPDATE A
-		SET A.intTaxGroupId = B.intTaxGroupId
-	FROM tblAPBillDetail A 
-	INNER JOIN @billDetailIds C ON A.intBillDetailId = C.intId
-	INNER JOIN tblAPBillDetailTax B ON A.intBillDetailId = B.intBillDetailId
 
 	INSERT INTO @voucherIds
 	SELECT DISTINCT

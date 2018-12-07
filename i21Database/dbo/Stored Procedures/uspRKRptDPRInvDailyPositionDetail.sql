@@ -106,7 +106,8 @@ DECLARE @FinalTable AS TABLE (intRow INT
 		, strScheduleId NVARCHAR(100)
 		, intTicketId INT
 		, strTicketType NVARCHAR(100)
-		, strTicketNumber NVARCHAR(100)		
+		, strTicketNumber NVARCHAR(100)	
+		, strContractEndMonth NVARCHAR(50)	
 		, dtmOpenDate DATETIME
 		, dtmDeliveryDate DATETIME
 		, dtmTicketDateTime DATETIME
@@ -163,11 +164,19 @@ INSERT INTO @FinalTable(intRow
 			, strScheduleId
 			, intTicketId
 			, strTicketType
-			, strTicketNumber
-			, dtmTicketDateTime
+			, strTicketNumber 
+			, strContractEndMonth
 			, dtmDeliveryDate
+			, dtmTicketDateTime
 			, intItemId
 			, strItemNo
+			, strTruckName
+			, strDriverName
+			, intInventoryReceiptId
+			, strReceiptNumber 
+			, strShipmentNumber
+			, intInventoryShipmentId
+			, strTransactionType
 			, intCategoryId
 			, strCategory
 			, intFutureMarketId
@@ -176,14 +185,7 @@ INSERT INTO @FinalTable(intRow
 			, strFutureMonth
 			, strBrokerTradeNo
 			, strNotes
-			, ysnPreCrush
-			, strTruckName
-			, strDriverName
-			, intInventoryReceiptId
-			, strReceiptNumber
-			, intInventoryShipmentId
-			, strShipmentNumber
-			, strTransactionType)
+			, ysnPreCrush)
 EXEC uspRKDPRInvDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate
 
 SELECT intSeqId

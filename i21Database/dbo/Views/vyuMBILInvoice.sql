@@ -18,10 +18,14 @@ SELECT Invoice.intInvoiceId
 	, Invoice.intShiftId
 	, Shift.intShiftNumber
 	, Invoice.strComments
+	, Invoice.strVoidComments
 	, Invoice.dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
 	, Invoice.ysnPosted
+	, Invoice.ysnVoided
+	, Invoice.dtmPostedDate
+	, Invoice.dtmVoidedDate
 	, Invoice.inti21InvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
 	, Invoice.intConcurrencyId

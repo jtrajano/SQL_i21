@@ -12,10 +12,10 @@ SELECT ST.intStoreId
 , ISNULL(Inv.ysnPosted, 0) ysnPosted
 , CDT.intItemsSold 
 , CDT.intTotalSalesCount
-, CDT.dblTotalSalesAmount
+, CDT.dblTotalSalesAmountComputed
 FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
 LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutDepartmetTotals CDT ON CDT.intCheckoutId = CH.intCheckoutId 
 INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
-WHERE CDT.dblTotalSalesAmount > 0
+WHERE CDT.dblTotalSalesAmountComputed > 0

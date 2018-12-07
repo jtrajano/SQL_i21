@@ -1,15 +1,20 @@
 ﻿GO
 PRINT N'*** BEGIN - Schema Fix for tblPATCustomerVolume ***'
 GO
-
-IF EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATCustomerVolume' AND [COLUMN_NAME] = 'dblVolumeProcessed') 
+IF EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATCustomerVolume') 
+	AND NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATCustomerVolume' AND [COLUMN_NAME] = 'dblVolumeProcessed')
 BEGIN
+	EXEC('
+		ALTER TABLE [dbo].[tblPATCustomerVolume]
+			ADD [dblVolumeProcessed] NUMERIC(18, 6) NULL DEFAULT(0)
+	');
+
 	-- Default existing dblVolumeProcessed to 0
 	EXEC('
 		UPDATE tblPATCustomerVolume 
 		SET dblVolumeProcessed = 0
 		WHERE dblVolumeProcessed IS NULL
-	')
+	');
 	
 	--	Column Value Transitioning for Volume Processed
 	EXEC('
@@ -45,8 +50,8 @@ BEGIN
 				AND tempVolume.intPatronageCategoryId = VolumeMaster.intPatronageCategoryId
 			WHEN MATCHED THEN
 				UPDATE SET
-					VolumeMaster.dblVolumeProcessed = VolumeMaster.dblVolumeProcessed + tempVolume.dblVolume,
-					VolumeMaster.dblVolume = VolumeMaster.dblVolumeProcessed + tempVolume.dblVolume
+					VolumeMaster.dblVolumeProcessed = tempVolume.dblVolume,
+					VolumeMaster.dblVolume = VolumeMaster.dblVolume + tempVolume.dblVolume
 			WHEN NOT MATCHED THEN
 				INSERT (
 					intFiscalYear,
@@ -69,7 +74,6 @@ BEGIN
 	')
 
 END
-
 GO
 PRINT N'*** END - Schema Fix for tblPATCustomerVolume ***'
 GO

@@ -54,7 +54,7 @@ BEGIN
 		SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
 		EXEC dbo.uspICDCBeginInventoryPt @Location, @StartDate, @intEntityUserSecurityId
 	END
-	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId	
+	ELSE IF @strType = 'RecipeFormula'  EXEC dbo.uspMFImportRecipe 0, @intEntityUserSecurityId
 END
 ELSE IF @strLineOfBusiness = 'Ag'
 BEGIN
@@ -65,13 +65,19 @@ BEGIN
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 	ELSE IF @strType = 'Items'				
 		BEGIN
-			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE
-			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE
-			
-			EXEC dbo.[uspICDCItemMigrationAg]
-			
-			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
-			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+
+		ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE  
+		ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE  
+		ALTER INDEX [AK_tblICItemUomUpc_strUpcCode] ON [dbo].[tblICItemUomUpc] DISABLE
+		ALTER INDEX [AK_tblICItemUomUpc_strLongUpcCode] ON [dbo].[tblICItemUomUpc] DISABLE
+     
+		EXEC dbo.[uspICDCItemMigrationAg]  
+     
+		ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
+		ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
+		ALTER INDEX [AK_tblICItemUomUpc_strUpcCode] ON [dbo].[tblICItemUomUpc] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+		ALTER INDEX [AK_tblICItemUomUpc_strLongUpcCode] ON [dbo].[tblICItemUomUpc] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+
 		END
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationAg
 	ELSE IF @strType = 'Balance'			
@@ -80,6 +86,7 @@ BEGIN
 		SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
 		EXEC dbo.uspICDCBeginInventoryAg @Location, @StartDate, @intEntityUserSecurityId
 	END
+	ELSE IF @strType = 'RecipeFormula'  EXEC dbo.uspMFImportRecipe 0, @intEntityUserSecurityId  
 END
 ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
@@ -102,6 +109,7 @@ BEGIN
 			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
 		END
+	ELSE IF @strType = 'RecipeFormula'  EXEC dbo.uspMFImportRecipe 0, @intEntityUserSecurityId
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 END
 ELSE IF @strLineOfBusiness = 'C-Store'

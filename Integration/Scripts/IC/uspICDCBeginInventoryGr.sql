@@ -2,6 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCBeginInventoryGr]; 
 GO 
 
+
 CREATE PROCEDURE [dbo].[uspICDCBeginInventoryGr]
 --** Below Stored Procedure is to migrate origin onhand unit balances from agitmmst table to i21 inventory by creating adjustments.
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
@@ -27,7 +28,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @StartingNumberId_InventoryAdjustment AS INT = 30;
 DECLARE @strAdjustmentNo AS NVARCHAR(50)
 		,@intAdjustmentNo AS INT
-		,@strAvgLast AS NVARCHAR(1)
+		--,@strAvgLast AS NVARCHAR(1)
 		,@cnt AS INT
 
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
@@ -45,7 +46,7 @@ BEGIN
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
 
-	select @strAvgLast = agctl_sa_cost_ind from agctlmst where agctl_key = 1
+	--select @strAvgLast = agctl_sa_cost_ind from agctlmst where agctl_key = 1
 
 	IF ( @adjLoc IS NULL or @adjLoc = '')
 		BEGIN
@@ -142,7 +143,7 @@ BEGIN
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
 			,uom.intItemUOMId
 			,uom.intItemUOMId
-			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+			,CCP.gaprc_un_cash_prc--0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
 										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
 										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
@@ -158,14 +159,17 @@ BEGIN
 			,1
 			--,lot.aglot_lot_no
 			--,aglot_expire_date
-			,(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId) lastcost
+			,CCP.gaprc_un_cash_prc --(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId) lastcost
 			,1
 		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
 					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itmGr.gapos_com_cd COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICItemUOM uom 
 					on uom.intItemId = inv.intItemId 
+					AND uom.ysnStockUnit = 1
 				left join tblICStorageLocation sl 
 					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
+				INNER JOIN gaprcmst CCP
+					ON inv.strItemNo COLLATE Latin1_General_CI_AS = CCP.gaprc_com_cd
 		WHERE	(gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
 		AND  gapos_loc_no = @adjLoc
 		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
@@ -197,7 +201,7 @@ BEGIN
 			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
 			,uom.intItemUOMId
 			,uom.intItemUOMId
-			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+			,CCP.gaprc_un_cash_prc                                                        --0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
 										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
 										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
@@ -213,14 +217,17 @@ BEGIN
 			,1
 			--,lot.aglot_lot_no
 			--,aglot_expire_date
-			,(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId   )  lastcost
+			,CCP.gaprc_un_cash_prc --(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId   )  lastcost
 			,2
 		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
 					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itmGr.gapos_com_cd COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICItemUOM uom 
 					on uom.intItemId = inv.intItemId 
+					AND uom.ysnStockUnit = 1
 				left join tblICStorageLocation sl 
 					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
+				INNER JOIN gaprcmst CCP
+					ON inv.strItemNo COLLATE Latin1_General_CI_AS = CCP.gaprc_com_cd
 		WHERE	(gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8) <> 0
 		AND  gapos_loc_no = @adjLoc
 		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
