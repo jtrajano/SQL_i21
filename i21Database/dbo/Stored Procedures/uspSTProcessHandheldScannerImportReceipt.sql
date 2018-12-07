@@ -267,6 +267,7 @@ BEGIN TRY
 	-- Clear record from table
 	DELETE FROM tblSTHandheldScannerImportReceipt 
 	WHERE intHandheldScannerId = @HandheldScannerId
+	AND strReceiptRefNoComment IN (SELECT strReceiptRefNo FROM @tblTempItems)
 
 	-- Flag Success
 	SET @ysnSuccess = CAST(1 AS BIT)
