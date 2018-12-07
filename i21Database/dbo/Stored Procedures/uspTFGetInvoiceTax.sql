@@ -610,7 +610,7 @@ BEGIN TRY
 		END
 			
 		-- GET MAX intId
-		SELECT @intMaxId = MAX(intId) FROM @tmpTransaction	
+		SELECT @intMaxId = ISNULL(MAX(intId), 0) FROM @tmpTransaction	
 
 		--INVENTORY TRANSFER - Track MFT Activity
 		INSERT INTO @tmpTransaction(intId
