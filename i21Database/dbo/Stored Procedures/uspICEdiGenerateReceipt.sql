@@ -122,7 +122,7 @@ IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 ELSE
 BEGIN
 	INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
-	SELECT @LogId, 'Error', -1, NULL, NULL, 'Unable to generate receipts. Make sure you have selected a store location if store header is not included in the file.', 'Failed', 'No record(s) imported.', 1 
+	SELECT @LogId, 'Error', -1, NULL, NULL, 'Unable to generate receipts. Possible reasons: (1) No store headers found in file and no selected location. (2) Store headers found but the locations do not exists in the system. (3) Items are not in the store location(s).', 'Failed', 'No record(s) imported.', 1 
 	GOTO LogErrors;
 	RETURN
 END
