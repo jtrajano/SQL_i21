@@ -533,14 +533,17 @@ BEGIN
 						,Inv.intCategoryId
 						,dblBalanceToInvoice = SUM(Inv.dblQuantity)
 						+ ISNULL((SELECT SUM(iv.dblQty)
-											FROM tblARInvoiceDetail i 
-												JOIN tblICInventoryTransaction iv ON i.intInvoiceDetailId = iv.intTransactionDetailId
+											FROM tblARInvoiceDetail id 
+												JOIN tblARInvoice i on id.intInvoiceId = i.intInvoiceId
+												JOIN tblICInventoryTransaction iv ON id.intInvoiceDetailId = iv.intTransactionDetailId
 											WHERE 
 												iv.intInTransitSourceLocationId IS NOT NULL 
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
-												and i.strDocumentNumber = Inv.strTransactionId), 0)
-						,ysnInvoicePosted = i.ysnPosted
+												and id.strDocumentNumber = Inv.strTransactionId
+												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
+												, 0)
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
@@ -566,7 +569,7 @@ BEGIN
 						,Inv.strItemNo
 						,Inv.strCategory
 						,Inv.intCategoryId
-						,i.ysnPosted
+						,i.dtmPostDate
 				) tbl
 				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
@@ -1731,7 +1734,6 @@ BEGIN
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
 					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries'))t
-
 
 			--Company Title from Inventory Valuation
 			INSERT INTO @Final(intSeqId
