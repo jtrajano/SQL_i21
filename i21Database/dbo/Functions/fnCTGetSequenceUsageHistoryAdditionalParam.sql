@@ -139,7 +139,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	CA.intAdjustmentId,
 				@strNumber						=	CA.strAdjustmentNo,
-				@strHeaderIdColumn				=	'intAdjustmentId'
+				@strHeaderIdColumn				=	'intAdjustmentId',
+				@dtmScreenDate					=	CA.dtmAdjustmentDate
 		FROM	tblCTContractAdjustment CA
 		WHERE	CA.intAdjustmentId	=	@intExternalId
 	END	
