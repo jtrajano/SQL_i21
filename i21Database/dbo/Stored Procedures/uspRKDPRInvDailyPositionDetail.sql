@@ -226,7 +226,7 @@ BEGIN
 				, strDeliveryDate
 			INTO #tblGetOpenContractDetail
 			FROM (
-				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
+				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
 					, dtmContractDate
 					, strCommodityCode
 					, intCommodityId
@@ -235,7 +235,7 @@ BEGIN
 					, strLocationName
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
-					, dblBalance
+					, CD.dblQuantity + ISNULL(SeqHis.dblTransactionQuantity,0) AS dblBalance
 					, intUnitMeasureId
 					, intPricingTypeId
 					, intContractTypeId
@@ -243,7 +243,7 @@ BEGIN
 					, strContractType
 					, strPricingType
 					, intCommodityUnitMeasureId
-					, intContractDetailId
+					, CD.intContractDetailId
 					, intContractStatusId
 					, intEntityId
 					, intCurrencyId
@@ -261,6 +261,17 @@ BEGIN
 					, strCurrency
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 				FROM vyuRKContractDetail CD
+				OUTER APPLY (
+					select 
+						sum(dblTransactionQuantity) as dblTransactionQuantity
+						,intContractDetailId 
+					from vyuCTSequenceUsageHistory 
+					where strFieldName = 'Balance' 
+						and ysnDeleted = 0
+						and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+						and intContractDetailId = CD.intContractDetailId
+					group by intContractDetailId
+				) SeqHis
 				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 			)t
 			

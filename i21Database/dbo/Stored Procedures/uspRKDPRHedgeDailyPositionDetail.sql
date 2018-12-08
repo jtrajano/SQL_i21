@@ -222,14 +222,14 @@ BEGIN
 		, intFutureMonthId
 		, strFutureMonth
 		, strCurrency)
-	SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
+	SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
 		, strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
 		, strContractNumber
 		, strLocationName
 		, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
-		, dblBalance
+		, CD.dblQuantity + ISNULL(SeqHis.dblTransactionQuantity,0) AS dblBalance
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
@@ -237,7 +237,7 @@ BEGIN
 		, strContractType
 		, strPricingType
 		, intCommodityUnitMeasureId
-		, intContractDetailId
+		, CD.intContractDetailId
 		, intContractStatusId
 		, intEntityId
 		, intCurrencyId
@@ -254,6 +254,17 @@ BEGIN
 		, strFutureMonth
 		, strCurrency
 	FROM vyuRKContractDetail CD
+	OUTER APPLY (
+		select 
+			sum(dblTransactionQuantity) as dblTransactionQuantity
+			,intContractDetailId 
+		from vyuCTSequenceUsageHistory 
+		where strFieldName = 'Balance' 
+			and ysnDeleted = 0
+			and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+			and intContractDetailId = CD.intContractDetailId
+		group by intContractDetailId
+	) SeqHis
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 		AND CD.intContractStatusId <> 6
 	

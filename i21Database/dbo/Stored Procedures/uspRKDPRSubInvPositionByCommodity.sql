@@ -201,14 +201,14 @@ INSERT INTO @tblGetOpenContractDetail(
 	intFutureMonthId,
 	strCurrency)
 SELECT  
-	ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum,
+	ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum,
 	strCommodityCode,
 	intCommodityId,
 	intContractHeaderId,
 	strContractNumber,
 	strLocationName,
 	dtmEndDate,
-	dblBalance,
+	CD.dblQuantity + ISNULL(SeqHis.dblTransactionQuantity,0) AS dblBalance,
 	intUnitMeasureId,
 	intPricingTypeId,
 	intContractTypeId,
@@ -216,7 +216,7 @@ SELECT
 	strContractType,
 	strPricingType,
 	intCommodityUnitMeasureId,
-	intContractDetailId,
+	CD.intContractDetailId,
 	intContractStatusId,
 	intEntityId,
 	intCurrencyId,
@@ -230,6 +230,17 @@ SELECT
 	strCurrency 
 FROM 
 vyuRKContractDetail CD
+OUTER APPLY (
+	select 
+		sum(dblTransactionQuantity) as dblTransactionQuantity
+		,intContractDetailId 
+	from vyuCTSequenceUsageHistory 
+	where strFieldName = 'Balance' 
+		and ysnDeleted = 0
+		and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+		and intContractDetailId = CD.intContractDetailId
+	group by intContractDetailId
+) SeqHis
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 
 --=============================================================

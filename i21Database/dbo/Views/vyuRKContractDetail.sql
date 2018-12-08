@@ -96,6 +96,7 @@ WITH Pricing AS
 			, strLocationName
 			, dtmEndDate
 			, strFutureMonth
+			, dblQuantity
 			, dblBalance = dblPricedQuantity - dblRecQty
 			, intUnitMeasureId
 			, intPricingTypeId
@@ -130,6 +131,7 @@ WITH Pricing AS
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
+			, CDT.dblQuantity
 			, dblBalance = (CDT.dblBalance - CDT.dblScheduleQty) - PRC.dblPricedQuantity
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
@@ -182,6 +184,7 @@ WITH Pricing AS
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
+			, CDT.dblQuantity
 			, dblBalance = PRC.dblPricedQuantity-dblRecQty
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
@@ -234,6 +237,7 @@ WITH Pricing AS
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
+			, CDT.dblQuantity
 			, dblBalance = CDT.dblQuantity - dblRecQty
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
@@ -286,6 +290,7 @@ WITH Pricing AS
 			, strLocationName
 			, dtmEndDate
 			, FM.strFutureMonth
+			, CDT.dblQuantity
 			, CDT.dblBalance
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
@@ -337,6 +342,7 @@ WITH Pricing AS
 			, strLocationName
 			, dtmEndDate
 			, FM.strFutureMonth
+			, CDT.dblQuantity
 			, CDT.dblBalance
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
