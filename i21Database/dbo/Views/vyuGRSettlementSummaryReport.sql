@@ -34,7 +34,7 @@ FROM
 			,InboundNetWeight			  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblQtyReceived												  END)
 			,InboundGrossDollars		  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END)
 			,InboundTax					  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END)
-			,InboundDiscount			  = ISNULL(BillByReceipt.dblTotal, 0)
+			,InboundDiscount			  = CASE WHEN BillDtl.intCustomerStorageId IS NOT NULL AND BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) ELSE ISNULL(BillByReceipt.dblTotal, 0) END
 			,InboundNetDue				  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax END)+ ISNULL(BillByReceipt.dblTotal, 0)
 			,OutboundNetWeight			  = 0
 			,OutboundGrossDollars		  = 0
@@ -58,6 +58,14 @@ FROM
 			 JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 			 JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId IS NULL
 			 LEFT JOIN tblICItem Item ON Item.intItemId = BillDtl.intItemId
+			LEFT JOIN (
+						SELECT 
+						 A.intBillId
+						,SUM(dblTotal) dblTotal
+						FROM tblAPBillDetail A
+						JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
+						GROUP BY A.intBillId
+				      ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId		
 			 LEFT JOIN (
 			 				SELECT intBillId ,SUM(dblTotal) dblTotal
 			 				FROM tblAPBillDetail
@@ -123,7 +131,9 @@ FROM
 			,PartialPayment.dblPayment
 			,PartialPayment.dblTotals
 			,PYMT.dblAmountPaid 	
-
+			,BillDtl.intCustomerStorageId
+			,BillDtl.intInventoryReceiptItemId
+			,tblOtherCharge.dblTotal
 			--------------------------------------------------------
 			-- SCALE --> Storage --> Settle Storage
 			--------------------------------------------------------
@@ -168,8 +178,7 @@ FROM
 						FROM tblAPBillDetail A
 						JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
-				      ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId
-			
+				      ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId			
 			JOIN (
 					SELECT 
 					 A.intBillId
