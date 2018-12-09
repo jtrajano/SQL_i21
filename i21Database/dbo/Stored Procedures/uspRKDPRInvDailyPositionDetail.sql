@@ -1667,6 +1667,7 @@ BEGIN
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
 					-- Not sure why this part doesn't default to zero values for non-value
+					AND i.intPurchaseSale = 1 -- 1.Purchase 2. Sales
 					AND i.intEntityId = ISNULL(@intVendorId, i.intEntityId)					
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
