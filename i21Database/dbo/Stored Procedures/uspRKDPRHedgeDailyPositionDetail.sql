@@ -537,7 +537,7 @@ BEGIN
 			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 	) t
 	
-	SELECT dblTotal = s.dblQuantity
+	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
 		, t.strTicketNumber
 		, s.strLocationName
 		, s.strItemNo
@@ -553,11 +553,12 @@ BEGIN
 	INTO #invQty
 	FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i ON i.intItemId = s.intItemId
-	JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1 AND ISNULL(ysnInTransit, 0) = 0
-	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND ium.ysnStockUnit = 1 
+	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUOM = 1
+	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-		AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
+		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END
