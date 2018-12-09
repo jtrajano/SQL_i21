@@ -162,6 +162,7 @@ BEGIN
 	DECLARE @mRowNumber INT
 		, @strCommodityCode NVARCHAR(250)
 		, @intCommodityUnitMeasureId INT
+		, @intCommodityStockUOMId INT
 	
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity WHERE intCommodity > 0
 	
@@ -169,7 +170,7 @@ BEGIN
 	BEGIN
 		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 		SELECT @strCommodityCode = strCommodityCode FROM tblICCommodity WHERE intCommodityId = @intCommodityId
-		SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
+		SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId, @intCommodityStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
 		
 		IF ISNULL(@intCommodityId, 0) > 0
 		BEGIN
@@ -627,7 +628,7 @@ BEGIN
 			--=============================
 			-- Inventory Valuation
 			--=============================
-			SELECT dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(s.dblQuantity ,0)))
+			SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
 				, strCustomer = ''
 				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
@@ -654,14 +655,14 @@ BEGIN
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
-			JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND ium.ysnStockUOM = 1
+			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 			OUTER APPLY(
 				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS 
 				FROM dbo.fnRKGetContracts(s.intTransactionId, i.intItemId, s.strTransactionType)
 			) CT 
-			WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
+			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 				AND ISNULL(strTicketStatus, '') <> 'V'
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
