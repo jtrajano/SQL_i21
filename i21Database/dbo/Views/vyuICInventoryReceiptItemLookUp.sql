@@ -24,7 +24,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
 		, dblGrossMargin = (
 			CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-					ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(ReceiptItem.dblUnitCost, 0)) / dblUnitRetail) * 100 END
+					ELSE ((ISNULL(dblUnitRetail, 0) - dbo.fnCalculateCostBetweenUOM(ItemCostUOM.intItemUOMId, ReceiptItem.intUnitMeasureId, ISNULL(ReceiptItem.dblUnitCost, 0))) / dblUnitRetail) * 100 END
 		)
 		, Item.strLifeTimeType
 		, Item.intLifeTime
