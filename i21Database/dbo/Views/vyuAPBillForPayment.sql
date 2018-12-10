@@ -31,6 +31,7 @@ SELECT
 	,voucher.ysnPrepayHasPayment
 	,vendor.intPaymentMethodId
 	,vendor.ysnOneBillPerPayment
+	,vendor.ysnPymtCtrlAlwaysDiscount
 	,vendor.ysnWithholding
 	,payMethod.strPaymentMethod
 	,vendor.strVendorId
