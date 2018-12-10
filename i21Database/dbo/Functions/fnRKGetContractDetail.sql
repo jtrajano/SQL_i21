@@ -234,7 +234,7 @@ WITH Pricing AS
 			select 
 				sum(dblTransactionQuantity) as dblTransactionQuantity
 				,intContractDetailId 
-			from vyuCTSequenceUsageHistory 
+			from vyuCTSequenceAudit 
 			where strFieldName  = 'Balance' 
 				and ysnDeleted = 0
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
@@ -305,7 +305,7 @@ WITH Pricing AS
 			, dtmEndDate
 			, FM.strFutureMonth
 			, CDT.dblQuantity
-			, dblBalance = CDT.dblQuantity + ISNULL(SeqHis.dblTransactionQuantity,0)
+			, dblBalance = CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0)
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
 			, ch.intContractTypeId
@@ -350,7 +350,7 @@ WITH Pricing AS
 			select 
 				sum(dblTransactionQuantity) as dblTransactionQuantity
 				,intContractDetailId 
-			from vyuCTSequenceUsageHistory 
+			from vyuCTSequenceAudit 
 			where strFieldName  = 'Balance' 
 				and ysnDeleted = 0
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
@@ -358,6 +358,7 @@ WITH Pricing AS
 			group by intContractDetailId
 		) SeqHis
 		WHERE CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CDT.dtmCreated, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 		
 		UNION ALL
 		SELECT c.strCommodityCode
@@ -368,7 +369,7 @@ WITH Pricing AS
 			, dtmEndDate
 			, FM.strFutureMonth
 			, CDT.dblQuantity
-			, CDT.dblBalance
+			, dblBalance = CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0)
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
 			, ch.intContractTypeId
@@ -409,6 +410,18 @@ WITH Pricing AS
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND CDT.intUnitMeasureId = ium.intUnitMeasureId
 		LEFT JOIN tblSMCurrency CUR ON CDT.intCurrencyId = CUR.intCurrencyID
 		JOIN tblICCategory Category ON Category.intCategoryId = IM.intCategoryId
+		OUTER APPLY (
+			select 
+				sum(dblTransactionQuantity) as dblTransactionQuantity
+				,intContractDetailId 
+			from vyuCTSequenceAudit 
+			where strFieldName  = 'Balance' 
+				and ysnDeleted = 0
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+				AND intContractDetailId = CDT.intContractDetailId
+			group by intContractDetailId
+		) SeqHis
 		WHERE CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
 			AND CDT.dblQuantity > ISNULL(CDT.dblInvoicedQty, 0) AND ISNULL(CDT.dblBalance, 0) > 0
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CDT.dtmCreated, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 ) t
