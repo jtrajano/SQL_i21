@@ -84,7 +84,6 @@ Begin
 						<th>&nbsp;Name</th>
 						<th>&nbsp;Account No</th>
 						<th>&nbsp;Country</th>
-						<th>&nbsp;Term</th>
 						<th>&nbsp;Currency</th>
 						<th>&nbsp;Error Message</th>
 					</tr>'
@@ -94,7 +93,6 @@ Begin
 		   <td>&nbsp;'  + ISNULL(strName,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strAccountNo,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strCountry,'') + '</td>'
-		+ '<td>&nbsp;' + ISNULL(strTerm,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strCurrency,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
 	</tr>'
