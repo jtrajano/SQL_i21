@@ -23,4 +23,13 @@ BEGIN
 	INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
 	SELECT intPriceFixationDetailId,intBillId,intBillDetailId,intInvoiceId,intInvoiceDetailId,1 FROM tblCTPriceFixationDetail WHERE (intInvoiceId IS NOT NULL OR intBillId IS NOT NULL) AND intInvoiceId NOT IN (SELECT intInvoiceId FROM tblCTPriceFixationDetailAPAR)
 END
+PRINT('End CT - 183')
 GO
+
+GO
+PRINT('Udate existing sequence History')
+ 
+EXEC uspCTUpdateExistingSequenceHistory
+ 
+PRINT('End Udate existing sequence History')
+ GO

@@ -5,10 +5,18 @@
 AS	   
 
 BEGIN TRY
-		DECLARE @ErrMsg	NVARCHAR(MAX)
-		DECLARE @intApprovalListId INT
-		DECLARE @intLastModifiedById INT
-		DECLARE @ysnAmdWoAppvl BIT
+		DECLARE @ErrMsg					NVARCHAR(MAX)
+		DECLARE @intApprovalListId		INT
+		DECLARE @intLastModifiedById	INT
+		DECLARE @ysnAmdWoAppvl			BIT,
+				@intSequenceHistoryId	INT,
+				@intPrevHistoryId		iNT,
+				@dblPrevQty				NUMERIC(18,6),
+				@dblPrevBal				NUMERIC(18,6),
+				@intPrevStatusId		INT,
+				@dblQuantity			NUMERIC(18,6),
+				@dblBalance				NUMERIC(18,6),
+				@intContractStatusId	INT
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -208,6 +216,39 @@ BEGIN TRY
 		WHERE   CD.intContractHeaderId  =   @intContractHeaderId
 		AND		CD.intContractDetailId	=   ISNULL(@intContractDetailId,CD.intContractDetailId)
     
+	SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY
+	WHILE	ISNULL(@intSequenceHistoryId,0) > 0
+	BEGIN
+		SELECT @intPrevHistoryId = NULL
+		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
+		SELECT @intPrevHistoryId = intSequenceHistoryId FROM tblCTSequenceHistory WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
+
+		IF @intPrevHistoryId IS NULL
+		BEGIN
+			SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
+			CONTINUE
+		END
+		ELSE
+		BEGIN
+			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intPrevHistoryId
+			SELECT	@dblQuantity = dblQuantity,@dblBalance = dblBalance,@intContractStatusId = intContractStatusId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
+
+			IF ISNULL(@dblPrevQty,0) <> ISNULL(@dblQuantity,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty,ysnQtyChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+			IF ISNULL(@dblPrevBal,0) <> ISNULL(@dblBalance,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal,ysnBalanceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+			IF ISNULL(@intPrevStatusId,0) <> ISNULL(@intContractStatusId,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId,ysnStatusChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+		END
+		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
+	END
+
 	IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND (ISNULL(ysnPrinted,0)=1 OR ISNULL(ysnSigned,0)=1))
 	BEGIN
 		IF EXISTS(SELECT 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
