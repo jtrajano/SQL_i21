@@ -164,12 +164,17 @@ BEGIN TRY
 
 		
 
-			SELECT *
+			SELECT 
+				IR.*
+				, UOM.intUnitMeasureId
 			INTO #tmpImportReceipts
-			FROM vyuSTGetHandheldScannerImportReceipt
-			WHERE intHandheldScannerId = @HandheldScannerId
-				AND intVendorId = @VendorId
-				AND intCompanyLocationId = @CompanyLocationId
+			FROM vyuSTGetHandheldScannerImportReceipt IR
+			LEFT JOIN tblICItemUOM UOM
+				ON IR.intItemUOMId = UOM.intItemUOMId
+			WHERE IR.intHandheldScannerId = @HandheldScannerId
+				AND IR.intVendorId = @VendorId
+				AND IR.intCompanyLocationId = @CompanyLocationId
+				AND UOM.ysnStockUnit = CAST(1 AS BIT)
 		
 
 
@@ -182,6 +187,7 @@ BEGIN TRY
 				,intItemId
 				,intItemLocationId
 				,intItemUOMId
+				, intCostUOMId
 				,strBillOfLadding
 				,intContractHeaderId
 				,intContractDetailId
@@ -219,6 +225,7 @@ BEGIN TRY
 				,intItemId				= intItemId
 				,intItemLocationId		= intItemLocationId
 				,intItemUOMId			= intItemUOMId
+				, intCostUOMId			= intUnitMeasureId
 				,strBillOfLadding		= ''
 				,intContractHeaderId	= NULL
 				,intContractDetailId	= NULL
