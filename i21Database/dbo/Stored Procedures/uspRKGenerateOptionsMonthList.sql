@@ -158,8 +158,8 @@ BEGIN TRY
 				,strMonthCode
 				,strSymbol
 				,intMonthCode
-				,CAST(DATENAME(month, CONVERT(DATETIME, CONVERT(NVARCHAR, dbo.fnRKGetClosestFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)) + '-1-' + CONVERT(nvarchar, YEAR(@Date) + @Count))) AS CHAR(3)) + ' ' + RIGHT(CONVERT(nvarchar, YEAR(@Date) + @Count), 2)
-				,dbo.fnRKGetFutureMonthId(@FutureMarketId, CAST(DATENAME(month, CONVERT(DATETIME, CONVERT(NVARCHAR, dbo.fnRKGetClosestFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)) + '-1-' + CONVERT(nvarchar, YEAR(@Date) + @Count))) AS CHAR(3)) + ' ' + RIGHT(CONVERT(nvarchar, YEAR(@Date) + @Count), 2))
+				,dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)
+				,dbo.fnRKGetFutureMonthId(@FutureMarketId, dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode))
 				,LTRIM(RTRIM(strMonth)) + ' ' + Right(LTRIM(YEAR(@Date) + @Count),2)
 		FROM ##AllowedOptMonths
 		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
@@ -241,16 +241,6 @@ BEGIN TRY
 	WHERE intFutureMonthId IS NULL
 	GROUP BY strOptionMonth
 
-	IF ISNULL(@MissingFutureMonths,'') <> '' AND ISNULL(@OrphanOptionMonths,'') <> ''
-	BEGIN
-		DECLARE @ErrorMsg NVARCHAR(4000)
-		SET @ErrorMsg = 'You need to create Futures Month: ' + @MissingFutureMonths +' to generate Option Months: ' + @OrphanOptionMonths;
-
-		BEGIN
-			RAISERROR(@ErrorMsg, 16, 1);
-		END
-	END
-	
 	IF OBJECT_ID('tempdb..#OptTemp') IS NOT NULL DROP TABLE #OptTemp
 	
 	SELECT RowNumber = ROW_NUMBER() OVER (ORDER BY strMonth)
@@ -271,6 +261,7 @@ BEGIN TRY
 	INTO #OptTemp
 	FROM  ##FinalOptMonths
 	WHERE ISNULL(strMonth,'') <> ''
+		AND ISNULL(intFutureMonthId,0) <> 0
 	ORDER BY strMonth
 
 	BEGIN TRY
@@ -286,29 +277,32 @@ BEGIN TRY
 	SELECT @strOptSymbol = strOptSymbol FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
 	
 	INSERT INTO tblRKOptionsMonth(intConcurrencyId
-		, intFutureMarketId
-		, intCommodityMarketId
-		, strOptionMonth
-		, intYear
-		, intFutureMonthId
-		, ysnMonthExpired
-		, dtmExpirationDate
-		, strOptMonthSymbol)
-	SELECT * FROM (
-		SELECT DISTINCT t.intConcurrencyId
-			, t.intFutureMarketId
-			, intCommodityMarketId = @intCommodityMarketId
-			, strOMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear,2)
-			, strYear = Right(strYear,2)
-			, t.intFutureMonthId
-			, ysnExpired = 0
-			, dtmExpirationDate = NULL
-			, strSymbol = @strOptSymbol + '' + strSymbol + '' + Right(strYear,2)
-		FROM #OptTemp t)t
-	WHERE t.strOMonth NOT IN (SELECT strOptionMonth COLLATE Latin1_General_CI_AS
-							FROM tblRKOptionsMonth
-							WHERE intCommodityMarketId =@intCommodityMarketId)
-	ORDER BY CONVERT(DATETIME,'01 ' + strOMonth) ASC
+			, intFutureMarketId
+			, intCommodityMarketId
+			, strOptionMonth
+			, intYear
+			, intFutureMonthId
+			, ysnMonthExpired
+			, dtmExpirationDate
+			, strOptMonthSymbol)
+		SELECT * FROM (
+			SELECT DISTINCT t.intConcurrencyId
+				, t.intFutureMarketId
+				, intCommodityMarketId = @intCommodityMarketId
+				, strOMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear,2)
+				, strYear = Right(strYear,2)
+				, t.intFutureMonthId
+				, ysnExpired = 0
+				, dtmExpirationDate = NULL
+				, strSymbol = @strOptSymbol + '' + strSymbol + '' + Right(strYear,2)
+			FROM #OptTemp t)t
+		WHERE t.strOMonth NOT IN (SELECT strOptionMonth COLLATE Latin1_General_CI_AS
+								FROM tblRKOptionsMonth
+								WHERE intCommodityMarketId =@intCommodityMarketId)
+		ORDER BY CONVERT(DATETIME,'01 ' + strOMonth) ASC
+
+	SELECT MissingFutureMonths = @MissingFutureMonths
+		,OrphanOptionMonths = @OrphanOptionMonths;
 
 	DROP TABLE ##AllowedOptMonths
 	DROP TABLE ##FinalOptMonths
