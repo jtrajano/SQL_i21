@@ -204,6 +204,11 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET intFutureMonthId = ISNULL(@FutureMonthId,intFutureMonthId) WHERE intContractDetailId = @intContractDetailId
 		END
 
+		IF @intConcurrencyId = 1
+		BEGIN
+			UPDATE tblCTContractDetail SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
+		END
+
 		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
 			SELECT @dblLotsFixed =  dblLotsFixed	FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
