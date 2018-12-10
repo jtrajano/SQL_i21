@@ -26,9 +26,11 @@ AS
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
 		,dblRebateQuantity =	CASE WHEN A.strTransactionType = 'Credit Memo' THEN 
-									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)) * -1
+									ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)) * -1,
+									(B.dblQtyShipped * -1))
 								ELSE
-									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6))
+									ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)),
+									B.dblQtyShipped)
 								END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
