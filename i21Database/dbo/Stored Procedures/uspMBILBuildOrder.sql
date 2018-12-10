@@ -14,7 +14,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	DELETE tblMBILOrder WHERE intDriverId = @intDriverId
+	DELETE tblMBILOrder WHERE intDriverId = @intDriverId and intOrderId NOT IN (select intOrderId from tblMBILInvoice)
 END
 
 SELECT intDispatchId = Dispatch.intDispatchID
