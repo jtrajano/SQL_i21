@@ -9,63 +9,55 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-
 DECLARE @EntityCustomerId	INT
-		,@Posted				BIT
-		,@ZeroDecimal		NUMERIC(18, 6)
-SELECT
-	 @EntityCustomerId	= [intEntityCustomerId]
-	,@Posted			= [ysnPosted]
-FROM
-	tblARInvoice
-WHERE
-	[intInvoiceId] = @InvoiceId
+	  , @Posted				BIT
+	  , @ZeroDecimal		NUMERIC(18, 6)
 
-IF 	@Posted = 1 RETURN;
+SELECT @EntityCustomerId	= [intEntityCustomerId]
+	 , @Posted				= [ysnPosted]
+FROM tblARInvoice
+WHERE [intInvoiceId] = @InvoiceId
+
+IF @Posted = 1 RETURN;
 
 SET @ZeroDecimal = 0.000000
 
 DECLARE @ErrorSeverity	INT
-		,@ErrorNumber	INT
-		,@ErrorState	INT
-		,@ErrorMessage	NVARCHAR(MAX)
-
+	  , @ErrorNumber	INT
+	  , @ErrorState		INT
+	  , @ErrorMessage	NVARCHAR(MAX)
 
 DECLARE @AppliedInvoices TABLE(
-	intPrepaymentId INT,
-	intInvoiceId INT,
-	dblAppliedInvoiceDetailAmount NUMERIC(18, 6)
-)		
-BEGIN TRY
+	  intPrepaymentId 					INT
+	, intInvoiceId 						INT
+	, dblAppliedInvoiceDetailAmount 	NUMERIC(18, 6)
+	, dblBaseAppliedInvoiceDetailAmount NUMERIC(18, 6)
+)
 
-	INSERT INTO @AppliedInvoices(intPrepaymentId, intInvoiceId, dblAppliedInvoiceDetailAmount)
-	SELECT intPrepaymentId, intInvoiceId, dblAppliedInvoiceDetailAmount FROM
-		tblARPrepaidAndCredit
-	WHERE
-		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId 
-			and ysnApplied = 1 
-			and ysnPosted = 0
+BEGIN TRY
+	INSERT INTO @AppliedInvoices(
+		  intPrepaymentId
+		, intInvoiceId
+		, dblAppliedInvoiceDetailAmount
+		, dblBaseAppliedInvoiceDetailAmount
+	)
+	SELECT intPrepaymentId
+		 , intInvoiceId
+		 , dblAppliedInvoiceDetailAmount
+		 , dblBaseAppliedInvoiceDetailAmount 
+	FROM tblARPrepaidAndCredit
+	WHERE tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId 
+	  AND ysnApplied = 1 
+	  AND ysnPosted = 0
 		
-	DELETE FROM
-		tblARPrepaidAndCredit
-	WHERE
-		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
-		
-	/*UPDATE
-		tblARInvoice
-	SET
-		 [dblPayment] = @ZeroDecimal
-		,[dblBasePayment] = @ZeroDecimal
-	WHERE
-		[intInvoiceId] = @InvoiceId 
-	*/	
-	--EXEC [dbo].uspARReComputeInvoiceAmounts @InvoiceId = @InvoiceId
+	DELETE FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId		
 END TRY
 BEGIN CATCH	
 	SET @ErrorSeverity = ERROR_SEVERITY()
 	SET @ErrorNumber   = ERROR_NUMBER()
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()	
+
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
 END CATCH		
 		
@@ -171,11 +163,14 @@ BEGIN TRY
 		  AND I.intInvoiceId <> @InvoiceId
 	) I
 
-	UPDATE A SET ysnApplied = 1, dblAppliedInvoiceDetailAmount = B.dblAppliedInvoiceDetailAmount
-		FROM tblARPrepaidAndCredit A
-			JOIN @AppliedInvoices B
-				ON A.intPrepaymentId = B.intPrepaymentId
-					AND A.intInvoiceId = B.intInvoiceId
+	UPDATE A 
+	SET ysnApplied = 1
+	  , dblAppliedInvoiceDetailAmount = B.dblAppliedInvoiceDetailAmount
+	  , dblBaseAppliedInvoiceDetailAmount	= B.dblBaseAppliedInvoiceDetailAmount
+	FROM tblARPrepaidAndCredit A
+		JOIN @AppliedInvoices B
+			ON A.intPrepaymentId = B.intPrepaymentId
+				AND A.intInvoiceId = B.intInvoiceId
 		
 END TRY
 BEGIN CATCH	
