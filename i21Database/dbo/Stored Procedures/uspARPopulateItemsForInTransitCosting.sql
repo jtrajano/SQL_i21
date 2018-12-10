@@ -121,8 +121,8 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		AND ARID.[intItemId] = ICIT.[intItemId]
 		AND [ysnIsUnposted] = 0			 
 WHERE
-	ICIT.[intFobPointId] IS NOT NULL
-	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
+	--ICIT.[intFobPointId] IS NOT NULL AND 
+	ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
 			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
 		OR
@@ -178,12 +178,12 @@ LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId], [intChildItemLinkId]  FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
-	ICIT.[intFobPointId] IS NOT NULL
-	AND (
-			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
-		OR
-			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
-		)
+	--ICIT.[intFobPointId] IS NOT NULL AND 
+	(
+		(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
+	OR
+		(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
+	)
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
