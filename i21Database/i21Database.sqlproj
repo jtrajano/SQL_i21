@@ -7189,6 +7189,8 @@
     <Build Include="dbo\Stored Procedures\uspCTBeforeSaveBrokerageCommission.sql" />
     <Build Include="dbo\Functions\fnRKGetInHouseAndCompanyTitle.sql" />
     <Build Include="dbo\Views\vyuRKGetICStockMovement.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceAudit.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateExistingSequenceHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
