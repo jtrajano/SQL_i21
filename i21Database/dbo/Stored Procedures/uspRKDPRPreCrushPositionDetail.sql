@@ -272,7 +272,7 @@ BEGIN
 				, intCategoryId
 				, strCategory
 				, strFutMarketName
-			FROM vyuRKContractDetail CD
+			FROM dbo.fnRKGetContractDetail(@dtmToDate) CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 						
 			DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
