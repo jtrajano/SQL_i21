@@ -77,30 +77,30 @@ BEGIN
 
 END
 
---------------------------------------------------------------------------------
--- Validate the Adjust By Qty or New Quantity
--------------------------------------------------------------------------------
-BEGIN 
-	SELECT	TOP 1 
-			@intItemId = Detail.intItemId,
-			@intLocationId = Header.intLocationId
-	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(Detail.dblAdjustByQuantity, 0) = 0
-			--OR ISNULL(Detail.dblNewQuantity, 0) = 0
+----------------------------------------------------------------------------------
+---- Validate the Adjust By Qty or New Quantity
+---------------------------------------------------------------------------------
+--BEGIN 
+--	SELECT	TOP 1 
+--			@intItemId = Detail.intItemId,
+--			@intLocationId = Header.intLocationId
+--	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+--				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+--	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+--			AND ISNULL(Detail.dblAdjustByQuantity, 0) = 0
+--			--OR ISNULL(Detail.dblNewQuantity, 0) = 0
 	
-	IF @intItemId IS NOT NULL 
-	BEGIN
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem Item 
-		WHERE intItemId = @intItemId		
+--	IF @intItemId IS NOT NULL 
+--	BEGIN
+--		SELECT @strItemNo = strItemNo
+--		FROM dbo.tblICItem Item 
+--		WHERE intItemId = @intItemId		
 
-		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		EXEC uspICRaiseError 80040;
-		RETURN -1
-	END
-END 
+--		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
+--		EXEC uspICRaiseError 80040;
+--		RETURN -1
+--	END
+--END 
 
 -- Get the next batch number
 BEGIN 
@@ -186,6 +186,7 @@ BEGIN
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+		AND Detail.dblAdjustByQuantity != 0
 
 END
 
@@ -266,6 +267,7 @@ BEGIN
 				ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId   
 			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
+			AND DetailItem.dblAdjustByQuantity != 0
 
 	-- Update currency fields to functional currency. 
 	BEGIN 
