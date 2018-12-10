@@ -65,10 +65,10 @@ SELECT
 								,APBD.dblTotal 
 								,APBD.dblTax
 								,0 AS dblCommodityTotal
-								,Payment.dblAmountPaid
+								,APD.dblAmountApplied AS dblAmountPaid
 								,Payment.strPaymentInfo
-								,Payment.ysnPosted AS ysnPaid
-								,Payment.dtmDatePaid
+								,APD.ysnApplied AS ysnPaid
+								,APB.dtmDate AS dtmDatePaid
 					FROM		dbo.tblAPBill APB
 								INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
 								INNER JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
@@ -91,7 +91,7 @@ SELECT
 								SELECT TOP 1 
 											 B1.dtmDatePaid,
 											 B1.dblAmountPaid,
-											 B1.ysnPosted,
+											 ISNULL(B1.ysnPosted,0) as ysnPosted,
 											 B1.strPaymentInfo
 											 FROM dbo.tblAPPayment B1
 								INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
@@ -233,7 +233,7 @@ SELECT
 								INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 								LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
-					OUTER APPLY(
+					CROSS APPLY(
 								SELECT TOP 1 
 											 B1.dtmDatePaid,
 											 B1.dblAmountPaid,
