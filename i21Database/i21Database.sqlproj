@@ -7191,6 +7191,7 @@
     <Build Include="dbo\Views\vyuRKGetICStockMovement.sql" />
     <Build Include="dbo\Views\vyuCTSequenceAudit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateExistingSequenceHistory.sql" />
+    <Build Include="dbo\Functions\fnRKGetContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
