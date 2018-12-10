@@ -45,7 +45,11 @@ SELECT
 	strSourceNumber = 
 		(
 			CASE WHEN Receipt.intSourceType = 1 -- Scale
-				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
+				THEN 
+					CASE 
+						WHEN Receipt.strReceiptType = 'Transfer Order' THEN TransferView.strSourceNumber
+						ELSE ticket.strTicketNumber
+					END 
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
@@ -53,7 +57,7 @@ SELECT
 			WHEN Receipt.intSourceType = 4 -- Settle Storage
 				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			WHEN Receipt.intSourceType = 5 -- Delivery Sheet
-				THEN (SELECT strDeliverySheetNumber FROM tblSCDeliverySheet WHERE intDeliverySheetId = ReceiptItem.intSourceId) COLLATE Latin1_General_CI_AS
+				THEN deliverySheet.strDeliverySheetNumber 
 			ELSE NULL
 			END
 		),
@@ -300,8 +304,9 @@ LEFT JOIN vyuPODetails POView
 	AND intPurchaseDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
-	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
-	AND Receipt.strReceiptType = 'Transfer Order'
+	ON 
+		TransferView.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+		AND Receipt.strReceiptType = 'Transfer Order'
 OUTER APPLY (
 	SELECT	strStorageTicketNumber
 	FROM	tblGRCustomerStorage
@@ -309,4 +314,15 @@ OUTER APPLY (
 			AND Receipt.intSourceType = 4
 ) vyuGRStorageSearchView
 
-
+OUTER APPLY (
+	SELECT	strTicketNumber 
+	FROM	tblSCTicket 
+	WHERE	intTicketId = ReceiptItem.intSourceId
+			AND Receipt.intSourceType = 1
+) ticket 
+OUTER APPLY (
+	SELECT	strDeliverySheetNumber 
+	FROM	tblSCDeliverySheet 
+	WHERE	intDeliverySheetId = ReceiptItem.intSourceId 
+			AND Receipt.intSourceType = 5
+) deliverySheet
