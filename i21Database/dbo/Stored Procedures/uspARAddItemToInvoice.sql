@@ -227,8 +227,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemDestinationGradeId		= @ItemDestinationGradeId
 			,@ItemDestinationWeightId		= @ItemDestinationWeightId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
-			,@ItemstrAddonDetailKey			= @ItemAddonDetailKey
-			,@ItemysnAddonParent			= @ItemAddonParent
+			,@ItemAddonDetailKey			= @ItemAddonDetailKey
+			,@ItemAddonParent				= @ItemAddonParent
 			,@ItemAddOnQuantity				= @ItemAddOnQuantity
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
