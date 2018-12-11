@@ -13,6 +13,7 @@
     [dtmTicketVoidDateTime] DATETIME NULL, 
 	[dtmTransactionDateTime] DATETIME NULL DEFAULT GETDATE(), 
     [intProcessingLocationId] INT NULL, 
+	[intTransferLocationId] INT NULL,
     [strScaleOperatorUser] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intEntityScaleOperatorId] INT NULL, 
     [strTruckName] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
@@ -100,6 +101,8 @@
 	[intMatchTicketId] INT NULL,
 	[intSubLocationId] INT NULL,
 	[intStorageLocationId] INT NULL,
+	[intSubLocationToId] INT NULL,
+	[intStorageLocationToId] INT NULL,
 	[intFarmFieldId] INT NULL,
 	[intDistributionMethod] INT NULL, 
 	[intSplitInvoiceOption] INT NULL, 
@@ -170,6 +173,10 @@
 	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
     CONSTRAINT [FK_tblSCTicket_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId] ON [dbo].[tblSCTicket](
+	[intDeliverySheetId] ASC
+);
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -1089,7 +1096,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'blbPlateNumber'
-
-
+GO
 
 	

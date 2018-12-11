@@ -11,12 +11,12 @@ RETURNS @CalculatedDiscount TABLE
 	,[dblTo] NUMERIC(38, 20) NULL
 	,[dblDiscountAmount] NUMERIC(38, 20) NULL
 	,[dblShrink] NUMERIC(38, 20) NULL
-	,[strMessage] NVARCHAR(40)
+	,[strMessage] NVARCHAR(MAX)
 	,[intDiscountCalculationOptionId] INT NULL
-	,[strCalculationDiscountOption] NVARCHAR(40)
+	,[strCalculationDiscountOption] NVARCHAR(50)
 	,[strDiscountChargeType] NVARCHAR(40)
 	,[intShrinkCalculationOptionId] INT NULL
-	,[strCalculationShrinkOption] NVARCHAR(40)
+	,[strCalculationShrinkOption] NVARCHAR(50)
 	,[intDiscountUOMId] INT NULL
 )
 AS

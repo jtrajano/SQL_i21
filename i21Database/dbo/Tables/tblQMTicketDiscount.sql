@@ -22,3 +22,8 @@
 	CONSTRAINT [FK_tblQMTicketDiscount_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
 	CONSTRAINT [FK_tblQMTicketDiscount_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblQMTicketDiscount_intTicketDiscountId] ON [dbo].[tblQMTicketDiscount]([strSourceType]) INCLUDE ([intTicketDiscountId],[intTicketFileId]);
+GO
+CREATE NONCLUSTERED INDEX [IX_tblQMTicketDiscount_intTicketFiledId_strSourceTYpe] ON [dbo].[tblQMTicketDiscount]([intTicketFileId],[strSourceType]) INCLUDE ([intTicketDiscountId]);
+GO
