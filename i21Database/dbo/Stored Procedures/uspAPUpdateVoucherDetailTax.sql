@@ -148,7 +148,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 	CROSS APPLY (
 		SELECT 
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
+			,B.intTaxGroupId
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
+		GROUP BY B.intTaxGroupId
 	) TaxAmount
 	LEFT JOIN tblICInventoryReceiptCharge D ON A.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 	WHERE TaxAmount.dblTax IS NOT NULL
