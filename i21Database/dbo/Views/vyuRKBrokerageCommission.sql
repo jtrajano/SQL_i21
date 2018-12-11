@@ -21,7 +21,7 @@ SELECT
 	,BC.intCommodityMarketId
 	,CMM.strCommodityCode AS strCommodityMarket
 	,CMM.intCommodityId
-	,BC.strProductType COLLATE Latin1_General_CI_AS
+	,BC.strProductType COLLATE Latin1_General_CI_AS AS strProductType
 	,dbo.fnRKRKConvertProductTypeKeyToName(isnull(BC.strProductType,'')) COLLATE Latin1_General_CI_AS AS strProductTypeDescription
 	,BC.dblMinAmount
 	,BC.dblMaxAmount
