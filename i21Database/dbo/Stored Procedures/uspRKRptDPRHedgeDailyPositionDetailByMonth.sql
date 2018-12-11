@@ -275,7 +275,6 @@ BEGIN
 		FROM [dbo].fnRKGetContractDetail(@dtmToDate) CD
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 			AND intCommodityId = @intCommodityId
-			AND CD.intContractStatusId <> 6
 
 		DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
 			, intOpenContract INT

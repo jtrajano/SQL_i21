@@ -194,8 +194,7 @@ SELECT
 	strCurrency 
 FROM 
 [dbo].fnRKGetContractDetail(@dtmToDate) CD
-WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
-AND CD.intContractStatusId <> 6
+WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 
 
 DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
