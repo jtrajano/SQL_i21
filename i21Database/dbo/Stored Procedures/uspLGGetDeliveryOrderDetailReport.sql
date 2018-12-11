@@ -18,6 +18,7 @@ BEGIN
 		  ,IU.strUnitMeasure AS strQtyUOM
 		  ,LDL.dblNet AS dblWeight
 		  ,WU.strUnitMeasure AS strWeightUOM
+		  ,WU.strSymbol AS strWeightUOMSymbol
 		  ,IRIL.strContainerNo AS strContainerNumber
 		  ,LC.strMarks
 		  ,LW.strDeliveryNoticeNumber
