@@ -263,8 +263,10 @@ BEGIN TRY
 	BEGIN
 		SELECT @dblCalculatedOutputQuantity = dblQuantity
 			,@intQuantityItemUOMId = intItemUOMId
-		FROM tblMFWorkOrderRecipe
+		FROM tblMFWorkOrderRecipeItem
 		WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intProductId
+		AND intRecipeItemTypeId=2
 
 		SELECT @dblCalculatedInputQuantity = dblCalculatedQuantity
 		FROM tblMFWorkOrderRecipeItem
