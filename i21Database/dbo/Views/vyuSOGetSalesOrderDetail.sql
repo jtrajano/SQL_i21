@@ -108,7 +108,8 @@ SELECT
 		--strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
 		strPriceUOM = PITMUOM.strUnitMeasure,
 		strAddonDetailKey,
-        ysnAddonParent
+        ysnAddonParent,
+		dblAddOnQuantity
 	from tblSOSalesOrderDetail SO
 		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
 			FROM tblSOSalesOrder  WITH(NOLOCK) ) OSO
