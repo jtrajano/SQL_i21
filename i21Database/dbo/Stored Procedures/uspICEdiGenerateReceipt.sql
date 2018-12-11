@@ -14,6 +14,11 @@ INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
 
+INSERT INTO MappedItems EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
+INSERT INTO MappedStores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
+INSERT INTO MappedInvoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
+INSERT INTO MappedCharges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
+
 -- Implied decimal conversions
 UPDATE @Invoices SET InvoiceTotal = CASE WHEN ISNULL(InvoiceTotal, 0) = 0 THEN 0 ELSE InvoiceTotal / 100.00 END
 UPDATE @Items
@@ -71,8 +76,8 @@ SELECT
 	intItemId = it.intItemId, 
 	intItemLocationId = il.intItemLocationId,
 	intItemUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId), 
-	dblQuantity = i.Quantity * i.UnitMultiplier, 
-	dblCost = i.UnitCost / i.UnitMultiplier, 
+	dblQuantity = CASE WHEN i.UnitMultiplier > 1 THEN i.Quantity * i.UnitMultiplier ELSE i.Quantity END, 
+	dblCost = CASE WHEN i.UnitMultiplier > 1 THEN i.UnitCost / i.UnitMultiplier ELSE i.UnitCost END, 
 	intCostUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId), 
 	intSourceType = 0,
 	strVendorRefNo = inv.InvoiceNumber,
@@ -131,13 +136,13 @@ BEGIN
 END
 
 -- Log UPCs that don't have corresponding items
---INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
---SELECT @LogId, 'Error', i.RecordIndex, 'Item UPC', i.ItemUpc, 'Cannot find the item that matches the UPC: ' + i.ItemUpc, 'Skipped', 'Record not imported.', 1
---FROM @Items i
---	LEFT OUTER JOIN tblICItemUOM u ON SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
---		= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
---	LEFT JOIN tblICItem it ON it.intItemId = u.intItemId
---WHERE it.intItemId IS NULL
+INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
+SELECT @LogId, 'Error', i.RecordIndex, 'Item UPC', i.ItemUpc, 'Cannot find the item that matches the UPC: ' + i.ItemUpc, 'Skipped', 'Record not imported.', 1
+FROM @Items i
+	LEFT OUTER JOIN tblICItemUOM u ON SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
+		= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
+	LEFT JOIN tblICItem it ON it.intItemId = u.intItemId
+WHERE it.intItemId IS NULL
 
 GOTO LogErrors
 
