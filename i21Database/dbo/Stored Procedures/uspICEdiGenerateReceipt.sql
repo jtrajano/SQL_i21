@@ -60,7 +60,7 @@ WHERE CAST(s.StoreNumber AS INT) = st.intStoreNo
 
 -- Populate receipt staging table
 INSERT INTO @ReceiptStagingTable(strReceiptType, intEntityVendorId, intShipFromId, intLocationId, dtmDate, intSourceId, intItemId, 
-	intItemLocationId, intItemUOMId, dblQty, dblCost, intCostUOMId, intSourceType, strVendorRefNo, intCurrencyId, intShipViaId, dblUnitRetail)
+	intItemLocationId, intItemUOMId, dblQty, dblCost, intCostUOMId, intSourceType, strVendorRefNo, intCurrencyId, intShipViaId, dblUnitRetail, intSort)
 SELECT 
 	strReceiptType = 'Direct', 
 	intEntityVendorId = @VendorId, 
@@ -78,7 +78,8 @@ SELECT
 	strVendorRefNo = inv.InvoiceNumber,
 	intCurrencyId = v.intCurrencyId, 
 	intShipVia = el.intShipViaId,
-	dblUnitRetail = i.RetailPrice
+	dblUnitRetail = i.RetailPrice,
+	intSort = i.RecordIndex
 FROM @Invoices inv
 	INNER JOIN @ReceiptStore st ON inv.FileIndex = st.FileIndex
 	INNER JOIN @Items i ON i.FileIndex = inv.FileIndex
@@ -97,6 +98,7 @@ FROM @Invoices inv
 	LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = i.UnitOfMeasure
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = it.intItemId
 		AND iu.intUnitMeasureId = u.intUnitMeasureId
+ORDER BY i.RecordIndex ASC
 
 INSERT INTO @ReceiptOtherChargesTable(intEntityVendorId, strReceiptType, intLocationId, intShipViaId, intShipFromId, intCurrencyId, intChargeId, strCostMethod, dblAmount)
 SELECT 
