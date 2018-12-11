@@ -253,8 +253,8 @@ BEGIN
 								,[strSourceId]
 								,[intHeaderId]
 								,[dtmDate]
-					)
-					SELECT
+						)
+						SELECT
 								 [intId] = CPT.intPumpTotalsId
 								,[intDetailId] = NULL
 								,[intDetailTaxId] = NULL
@@ -310,7 +310,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
@@ -326,7 +326,7 @@ BEGIN
 																			,NULL
 																			,NULL
 																			,NULL
-																		) TAX
+																	) TAX
 
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
@@ -1744,8 +1744,8 @@ BEGIN
 									,[strSourceId]
 									,[intHeaderId]
 									,[dtmDate]
-					)
-					SELECT
+						)
+						SELECT
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
@@ -1830,7 +1830,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
@@ -2473,8 +2473,8 @@ BEGIN
 									,[strSourceId]
 									,[intHeaderId]
 									,[dtmDate]
-					)
-					SELECT
+						)
+						SELECT
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
@@ -2546,7 +2546,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
