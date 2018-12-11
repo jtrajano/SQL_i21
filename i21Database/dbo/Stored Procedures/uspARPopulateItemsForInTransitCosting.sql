@@ -114,7 +114,8 @@ INNER JOIN
 INNER JOIN
 	(SELECT [intInventoryShipmentId], [strShipmentNumber] FROM tblICInventoryShipment) ICIS
 		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
-INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId], [intInTransitSourceLocationId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId], [intInTransitSourceLocationId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)
+			WHERE ISNULL([intInTransitSourceLocationId], 0) <> 0 ) ICIT
 		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] 
 		AND ICIS.[strShipmentNumber] = ICIT.[strTransactionId]
 		AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId]
