@@ -124,8 +124,10 @@ BEGIN TRY
 	,intFutureMarketId      = CD.intFutureMarketId
 	,intFutureMonthId       = CD.intFutureMonthId
 	,strFutureMonth			= MO.strFutureMonth
-	,dblCashPrice			= ISNULL(CD.dblCashPrice,0)
+	,dblFutures				= ISNULL(CD.dblFutures,0)
+	,dblBasis				= ISNULL(CD.dblBasis,0)
 	,dblQuantity			= ISNULL(CD.dblQuantity,0)
+	,dblCashPrice			= ISNULL(CD.dblCashPrice,0)
 	,dblAvailableQty		= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
 	,dblAmount				= (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)) * CD.dblCashPrice
 

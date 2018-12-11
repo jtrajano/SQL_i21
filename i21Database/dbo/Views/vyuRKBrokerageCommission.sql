@@ -7,12 +7,12 @@ SELECT
 	,BC.dtmEffectiveDate
 	,BC.dtmEndDate
 	,BC.intFuturesRateType
-	,CASE WHEN BC.intFuturesRateType = 1 THEN 'Round-turn' ELSE 'Half-turn' END AS strFuturesRateType
+	,CASE WHEN BC.intFuturesRateType = 1 THEN 'Round-turn' ELSE 'Half-turn' END COLLATE Latin1_General_CI_AS AS strFuturesRateType
 	,BC.dblFutCommission
 	,BC.intFutCurrencyId
 	,FutCur.strCurrency AS strFutCurrency
 	,BC.intOptionsRateType
-	,CASE WHEN BC.intOptionsRateType = 1 THEn 'Half-turn' ELSE '' END AS strOptionsRateType
+	,CASE WHEN BC.intOptionsRateType = 1 THEn 'Half-turn' ELSE '' END COLLATE Latin1_General_CI_AS AS strOptionsRateType
 	,BC.dblOptCommission
 	,BC.intOptCurrencyId
 	,OptCur.strCurrency AS strOptCurrency
@@ -21,8 +21,8 @@ SELECT
 	,BC.intCommodityMarketId
 	,CMM.strCommodityCode AS strCommodityMarket
 	,CMM.intCommodityId
-	,BC.strProductType
-	,dbo.fnRKRKConvertProductTypeKeyToName(isnull(BC.strProductType,'')) AS strProductTypeDescription
+	,BC.strProductType COLLATE Latin1_General_CI_AS AS strProductType
+	,dbo.fnRKRKConvertProductTypeKeyToName(isnull(BC.strProductType,'')) COLLATE Latin1_General_CI_AS AS strProductTypeDescription
 	,BC.dblMinAmount
 	,BC.dblMaxAmount
 	,BC.dblPercenatage

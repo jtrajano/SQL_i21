@@ -53,3 +53,8 @@
 	CONSTRAINT [FK_tblGRCustomerStorage_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [dbo].[tblSCDeliverySheet] ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intTicketId] ON [dbo].[tblGRCustomerStorage]([intTicketId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intDeliverySheetId] ON [dbo].[tblGRCustomerStorage]([intDeliverySheetId] ASC);
+GO

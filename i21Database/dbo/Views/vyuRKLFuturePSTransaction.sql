@@ -11,7 +11,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
 	  ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId where A.strType = 'Roll' Group By AD.intLFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLotRoll
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
       ,dblPrice as dblPrice
 	  	   ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime
       ,strBook 
@@ -64,7 +64,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
 	  ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId where A.strType = 'Roll' Group By AD.intLFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLotRoll
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
        ,ot.dblExchangeRate as dblPrice
 	    ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime  
       ,strBook 

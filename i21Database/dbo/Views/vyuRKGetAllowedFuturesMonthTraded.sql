@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKGetAllowedFuturesMonthTraded
 AS
-SELECT intFutureMarketId ,REPLACE(strMonth,'ysnFut' ,'') strFutureMonth
+SELECT intFutureMarketId ,REPLACE(strMonth,'ysnFut' ,'') COLLATE Latin1_General_CI_AS AS strFutureMonth
 	, intMonthCode = (CASE WHEN strMonth = 'ysnFutJan' THEN 1
 		WHEN strMonth = 'ysnFutFeb' THEN 2
 		WHEN strMonth = 'ysnFutMar' THEN 3
@@ -24,7 +24,7 @@ SELECT intFutureMarketId ,REPLACE(strMonth,'ysnFut' ,'') strFutureMonth
 		WHEN strMonth = 'ysnFutSep' THEN 'U'
 		WHEN strMonth = 'ysnFutOct' THEN 'V'
 		WHEN strMonth = 'ysnFutNov' THEN 'X'
-		WHEN strMonth = 'ysnFutDec' THEN 'Z' END)
+		WHEN strMonth = 'ysnFutDec' THEN 'Z' END) COLLATE Latin1_General_CI_AS
 FROM (SELECT ysnFutJan
 		, ysnFutFeb
 		, ysnFutMar

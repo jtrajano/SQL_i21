@@ -35,7 +35,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 													ELSE ''
 												END
 											ELSE ''
-										END
+										END COLLATE Latin1_General_CI_AS
 		,strSourceNumber			= CASE 
 										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
 											CASE	

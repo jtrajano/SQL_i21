@@ -2,7 +2,7 @@
 AS
 SELECT 		bd.intCommodityId
 		,bd.intFutureMarketId
-		,bd.strDeliveryMonth
+		,strDeliveryMonth = bd.strDeliveryMonth COLLATE Latin1_General_CI_AS
 		,bd.intFutureMonthId
 		,bd.dblBasis
 		,bd.intCompanyLocationId
