@@ -357,7 +357,7 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 			FROM (
-				SELECT strCommodityCode
+				SELECT DISTINCT strCommodityCode
 					, CD.intCommodityId
 					, CD.intContractHeaderId
 					, strContractNumber
@@ -379,6 +379,7 @@ BEGIN
 					, CD.intFutureMonthId
 					, CD.strFutureMonth
 					, strDeliveryDate = CASE WHEN ISNULL(CD.dtmEndDate, '') = '' THEN '' ELSE RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) END
+					, CD.intContractDetailId
 				FROM @tblGetOpenContractDetail CD
 				JOIN tblCTContractDetail det ON CD.intContractDetailId = det.intContractDetailId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3

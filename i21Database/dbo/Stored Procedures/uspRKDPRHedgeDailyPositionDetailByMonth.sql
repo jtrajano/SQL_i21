@@ -388,16 +388,16 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate)
 			SELECT strCommodityCode
-				, CD.intCommodityId
+				, intCommodityId
 				, intContractHeaderId
 				, strContractNumber
-				, CD.strType
+				, strType
 				, strLocationName
-				, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
-				, dblTotal = (CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0))
-								ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) END)
-				, CD.intUnitMeasureId
-				, CD.strEntityName
+				, strContractEndMonth
+				, strContractEndMonthNearBy
+				, dblTotal
+				, intUnitMeasureId
+				, strEntityName
 				, intItemId
 				, strItemNo
 				, intCategoryId
@@ -406,16 +406,39 @@ BEGIN
 				, strFutMarketName
 				, intFutureMonthId
 				, strFutureMonth
-				, CD.strDeliveryDate
-			FROM @tblGetOpenContractDetail CD
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
-				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																				WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																				ELSE ISNULL(ysnLicensed, 0) END)
-			WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
-				AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END
-				AND  CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
+				, strDeliveryDate
+			FROM (
+				SELECT DISTINCT strCommodityCode
+					, CD.intCommodityId
+					, intContractHeaderId
+					, strContractNumber
+					, CD.strType
+					, strLocationName
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
+					, strContractEndMonthNearBy = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
+					, dblTotal = (CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0))
+									ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) END)
+					, CD.intUnitMeasureId
+					, CD.strEntityName
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutMarketName
+					, intFutureMonthId
+					, strFutureMonth
+					, CD.strDeliveryDate
+				FROM @tblGetOpenContractDetail CD
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
+																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
+																					ELSE ISNULL(ysnLicensed, 0) END)
+				WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
+					AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END
+					AND  CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
+				) t
 			
 			INSERT INTO @List (strCommodityCode
 				, intCommodityId
