@@ -261,8 +261,8 @@ BEGIN
 				,[dblQuantity]				= RawData.dblQuantityToTransfer
 				,[intItemUOMId]				= RawData.intItemUOMId
 				,[intItemWeightUOMId]		= RawData.intItemWeightUOMId
-				,[dblGrossWeight]			= RawData.dblGrossWeight
-				,[dblTareWeight]			= RawData.dblTareWeight 
+				,[dblGrossWeight]			= ISNULL(RawData.dblGrossWeight, 0)
+				,[dblTareWeight]			= ISNULL(RawData.dblTareWeight, 0)
 				,[intNewLotId]				= NULL 
 				,[strNewLotId]				= RawData.strNewLotId
 				,[dblCost]					= COALESCE(NULLIF(RawData.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
