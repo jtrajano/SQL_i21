@@ -13,6 +13,7 @@
 	, @strLocationName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
+	, @strUserId					AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 0
 	, @ysnReprintInvoice			AS BIT				= 1
@@ -725,7 +726,7 @@ IF @ysnPrintFromCFLocal = 1
 			WHERE strType = 'CF Tran'
 			AND ysnPaid = 0
 			AND ysnPosted = 1
-			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable)
+			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId)
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
 
@@ -739,6 +740,7 @@ IF @ysnPrintFromCFLocal = 1
 					SELECT intCustomerId
 						 , dblTotalFee = SUM(dblFeeTotalAmount)
 					FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
+					WHERE strUserId = @strUserId
 					GROUP BY intCustomerId
 				) CF ON AGINGREPORT.intEntityCustomerId = CF.intCustomerId
 			END
