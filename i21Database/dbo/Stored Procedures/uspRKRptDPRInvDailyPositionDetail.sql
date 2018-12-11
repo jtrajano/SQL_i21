@@ -108,7 +108,7 @@ DECLARE @FinalTable AS TABLE (intRow INT
 		, strTicketType NVARCHAR(100)
 		, strTicketNumber NVARCHAR(100)		
 		, dtmOpenDate DATETIME
-		, dtmDeliveryDate DATETIME
+		, strDeliveryDate NVARCHAR(50)
 		, dtmTicketDateTime DATETIME
 		, dblOriginalQuantity  DECIMAL(24,10)
 		, dblRemainingQuantity DECIMAL(24,10)
@@ -134,10 +134,12 @@ DECLARE @FinalTable AS TABLE (intRow INT
 		, strFutureMonth NVARCHAR(100)
 		, strBrokerTradeNo NVARCHAR(100)
 		, strNotes NVARCHAR(100)
-		, ysnPreCrush BIT)
+		, ysnPreCrush BIT
+		, strContractEndMonth NVARCHAR(50))
 
 
-INSERT INTO @FinalTable(intRow
+INSERT INTO @FinalTable(
+			  intRow
 			, intSeqId
 			, strSeqHeader
 			, strCommodityCode
@@ -164,7 +166,8 @@ INSERT INTO @FinalTable(intRow
 			, intTicketId
 			, strTicketType
 			, strTicketNumber 
-			, dtmDeliveryDate
+			, strContractEndMonth
+			, strDeliveryDate
 			, dtmTicketDateTime
 			, intItemId
 			, strItemNo
@@ -172,7 +175,7 @@ INSERT INTO @FinalTable(intRow
 			, strDriverName
 			, intInventoryReceiptId
 			, strReceiptNumber 
-			, strShipmentNumber
+			, strShipmentNumber 
 			, intInventoryShipmentId
 			, strTransactionType
 			, intCategoryId
