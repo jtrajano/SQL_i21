@@ -14,11 +14,6 @@ INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
 
-INSERT INTO MappedItems EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
-INSERT INTO MappedStores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
-INSERT INTO MappedInvoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
-INSERT INTO MappedCharges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
-
 -- Implied decimal conversions
 UPDATE @Invoices SET InvoiceTotal = CASE WHEN ISNULL(InvoiceTotal, 0) = 0 THEN 0 ELSE InvoiceTotal / 100.00 END
 UPDATE @Items
