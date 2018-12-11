@@ -7106,7 +7106,6 @@
     <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureOptionMonthsNotInUse.sql" />
-    <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermError.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermArchive.sql" />
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
@@ -7191,6 +7190,9 @@
     <Build Include="dbo\Functions\fnRKGetContractDetail.sql" />
     <Build Include="dbo\Views\vyuCTSequenceAudit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateExistingSequenceHistory.sql" />
+    <Build Include="dbo\Functions\fnRKGetAssociatedFutureMonth.sql" />
+    <Build Include="dbo\Tables\tblQMListImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

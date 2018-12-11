@@ -10,6 +10,7 @@ SELECT	DISTINCT
 			,strBillOfLading	
 			,strOrderNumber
 			,ISNULL(dtmLastVoucherDate,dtmReceiptDate) AS dtmDate
+			,dtmLastVoucherDate AS dtmBillDate
 			,0 AS intBillId --Bill.intBillId 
 			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
 			,dblAmountPaid = ISNULL(bill.dblPayment,0)
@@ -102,6 +103,7 @@ SELECT	DISTINCT
 			,strBillOfLading	
 			,strOrderNumber
 			,dtmReceiptDate AS dtmDate
+			,dtmLastVoucherDate AS dtmBillDate
 			,0 AS intBillId --Bill.intBillId 
 			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
 			,dblAmountPaid = 0
@@ -184,6 +186,7 @@ SELECT DISTINCT
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Bill.dtmDate
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -266,6 +269,7 @@ SELECT DISTINCT
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Receipt.dtmReceiptDate
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -348,6 +352,7 @@ SELECT DISTINCT
 	, '' AS strOrderNumber
 	, dtmDate = CASE WHEN Bill.ysnPosted IS NOT NULL OR Bill.ysnPosted = 1
 				THEN  Bill.dtmDate ELSE  Receipt.dtmReceiptDate  END
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -429,6 +434,7 @@ SELECT DISTINCT
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Receipt.dtmReceiptDate
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -509,6 +515,7 @@ SELECT DISTINCT
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, Bill.dtmDate 
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -591,6 +598,7 @@ SELECT DISTINCT
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, Receipt.dtmReceiptDate as dtmDate
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
@@ -673,6 +681,7 @@ SELECT DISTINCT
 	, NULL AS strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
+	, dtmBillDate = Bill.dtmDate 
 	, 0 AS intBillId
 	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0

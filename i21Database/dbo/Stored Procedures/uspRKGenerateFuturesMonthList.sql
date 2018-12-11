@@ -26,6 +26,9 @@ BEGIN TRY
 		, @Month NVARCHAR(500)
 		, @HasOptionMonths INT = 0
 		, @CurrentFutureMonthsCount INT
+
+	DECLARE @GenerateOptionMonthResult TABLE( strMissingFutureMonths NVARCHAR(500) COLLATE Latin1_General_CI_AS
+		, strOrphanOptionMonths NVARCHAR(500) COLLATE Latin1_General_CI_AS);
 	
 	SELECT @FutMonthsToOpen = @intFutureMonthsToOpen
 		, @Date = GETDATE()
@@ -425,6 +428,10 @@ BEGIN TRY
 
 	IF (@intOptMonthsToOpen > 0 AND @HasOptionMonths = 1)
 	BEGIN
+	    INSERT INTO @GenerateOptionMonthResult(
+			strMissingFutureMonths
+			,strOrphanOptionMonths
+		)
 		EXEC uspRKGenerateOptionsMonthList @FutureMarketId,@intCommodityMarketId,@intOptMonthsToOpen
 	END
 	ELSE
@@ -438,6 +445,8 @@ BEGIN TRY
 	DROP TABLE ##AllowedFutMonth
 	DROP TABLE ##FinalFutMonths
 	DROP TABLE #FutTemp
+
+	SELECT * FROM @GenerateOptionMonthResult
 END TRY
 BEGIN CATCH
 	SELECT 

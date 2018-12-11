@@ -167,7 +167,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
 	CONSTRAINT [FK_tblSCTicket_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
+    CONSTRAINT [FK_tblSCTicket_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId])
 )
 
 GO

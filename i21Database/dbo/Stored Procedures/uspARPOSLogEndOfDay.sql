@@ -24,7 +24,7 @@ AS
 				,@intUndepositedFundsId	 = LOC.intUndepositedFundsId
 				,@strCompanyLocationName = LOC.strLocationName
 				,@strEODNumber			 = EOD.strEODNo
-				,@dblCashOverShort		 = @dblNewEndingBalance - (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0))
+				,@dblCashOverShort		 = @dblNewEndingBalance - ((EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0)) - ABS(dblCashReturn))
 			FROM tblARPOSEndOfDay EOD
 			INNER JOIN (
 				SELECT

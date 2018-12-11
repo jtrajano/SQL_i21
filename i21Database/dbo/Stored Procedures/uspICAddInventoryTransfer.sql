@@ -227,11 +227,13 @@ BEGIN
 				,[intToSubLocationId]
 				,[intFromStorageLocationId]
 				,[intToStorageLocationId]
+				,[dblOriginalAvailableQty]
+				,[dblOriginalStorageQty]
 				,[dblQuantity]
 				,[intItemUOMId]
-				,[intItemWeightUOMId]
-				,[dblGrossWeight]
-				,[dblTareWeight]
+				,[intGrossNetUOMId]
+				,[dblGross]
+				,[dblTare]
 				,[intNewLotId]
 				,[strNewLotId]
 				,[dblCost]
@@ -254,11 +256,13 @@ BEGIN
 				,[intToSubLocationId]		= RawData.intToSubLocationId
 				,[intFromStorageLocationId]	= RawData.intFromStorageLocationId
 				,[intToStorageLocationId]	= RawData.intToStorageLocationId
+				,[dblOriginalAvailableQty]  = ISNULL(StockQty.dblOnHand, 0)
+				,[dblOriginalStorageQty]	= ISNULL(StockQty.dblUnitStorage, 0)
 				,[dblQuantity]				= RawData.dblQuantityToTransfer
 				,[intItemUOMId]				= RawData.intItemUOMId
-				,[intItemWeightUOMId]		= Lot.intWeightUOMId
-				,[dblGrossWeight]			= 0
-				,[dblTareWeight]			= 0 
+				,[intItemWeightUOMId]		= RawData.intItemWeightUOMId
+				,[dblGrossWeight]			= RawData.dblGrossWeight
+				,[dblTareWeight]			= RawData.dblTareWeight 
 				,[intNewLotId]				= NULL 
 				,[strNewLotId]				= RawData.strNewLotId
 				,[dblCost]					= COALESCE(NULLIF(RawData.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
@@ -286,6 +290,12 @@ BEGIN
 				LEFT JOIN dbo.tblICItemPricing ItemPricing
 					ON ItemPricing.intItemId = RawData.intItemId
 					AND ItemPricing.intItemLocationId = FromItemLocation.intItemLocationId
+				LEFT JOIN tblICItemStockUOM StockQty
+					ON StockQty.intItemId = RawData.intItemId
+					AND StockQty.intItemLocationId = FromItemLocation.intItemLocationId
+					AND StockQty.intItemUOMId = RawData.intItemUOMId
+					AND ISNULL(StockQty.intSubLocationId, 0) = ISNULL(RawData.intFromSubLocationId, 0)
+					AND ISNULL(StockQty.intStorageLocationId, 0) = ISNULL(RawData.intFromStorageLocationId, 0)
 		WHERE	RawHeaderData.intId = @intId
 
 		-- Log successful inserts. 

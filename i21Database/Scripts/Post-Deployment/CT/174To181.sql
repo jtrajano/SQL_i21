@@ -33,3 +33,18 @@ EXEC uspCTUpdateExistingSequenceHistory
  
 PRINT('End Udate existing sequence History')
  GO
+
+GO
+PRINT('Udate Original Quantity')
+ 
+UPDATE CD SET CD.dblOriginalQty = t.dblQuantity
+FROM tblCTContractDetail CD
+JOIN (
+select intContractDetailId,dblQuantity,
+ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId ASC) intRowNum 
+from tblCTSequenceHistory 
+)t ON t.intContractDetailId = CD.intContractDetailId
+WHERE t.intRowNum = 1 AND CD.dblOriginalQty IS NULL
+ 
+PRINT('End Udate Original Quantity')
+GO
