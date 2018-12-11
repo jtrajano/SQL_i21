@@ -60,7 +60,7 @@ WHERE CAST(s.StoreNumber AS INT) = st.intStoreNo
 
 -- Populate receipt staging table
 INSERT INTO @ReceiptStagingTable(strReceiptType, intEntityVendorId, intShipFromId, intLocationId, dtmDate, intSourceId, intItemId, 
-	intItemLocationId, intItemUOMId, dblQty, dblCost, intCostUOMId, intSourceType, strVendorRefNo, intCurrencyId, intShipViaId)
+	intItemLocationId, intItemUOMId, dblQty, dblCost, intCostUOMId, intSourceType, strVendorRefNo, intCurrencyId, intShipViaId, dblUnitRetail)
 SELECT 
 	strReceiptType = 'Direct', 
 	intEntityVendorId = @VendorId, 
@@ -71,13 +71,14 @@ SELECT
 	intItemId = it.intItemId, 
 	intItemLocationId = il.intItemLocationId,
 	intItemUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId), 
-	dblQuantity = i.Quantity, 
-	dblCost = i.UnitCost, 
+	dblQuantity = i.Quantity * i.UnitMultiplier, 
+	dblCost = i.UnitCost / i.UnitMultiplier, 
 	intCostUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId), 
 	intSourceType = 0,
 	strVendorRefNo = inv.InvoiceNumber,
 	intCurrencyId = v.intCurrencyId, 
-	intShipVia = el.intShipViaId
+	intShipVia = el.intShipViaId,
+	dblUnitRetail = i.RetailPrice
 FROM @Invoices inv
 	INNER JOIN @ReceiptStore st ON inv.FileIndex = st.FileIndex
 	INNER JOIN @Items i ON i.FileIndex = inv.FileIndex
