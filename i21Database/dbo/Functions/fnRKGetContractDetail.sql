@@ -241,7 +241,6 @@ WITH Pricing AS
 				AND intContractDetailId = CDT.intContractDetailId
 			group by intContractDetailId
 		) SeqHis
-		WHERE dblPricedQuantity > dblRecQty
 		
 		UNION ALL
 		SELECT c.strCommodityCode
@@ -252,7 +251,7 @@ WITH Pricing AS
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
 			, CDT.dblQuantity
-			, dblBalance = CDT.dblQuantity - dblRecQty
+			, dblBalance = CDT.dblQuantity - PRC.dblPricedQuantity
 			, CDT.intUnitMeasureId
 			, CDT.intPricingTypeId
 			, ch.intContractTypeId

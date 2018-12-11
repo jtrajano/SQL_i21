@@ -163,6 +163,7 @@ SELECT
     intOriginDestWeight = DWEIGHT.intOriginDest,
 	strAddonDetailKey,
     ysnAddonParent,
+	dblAddOnQuantity,
 	INV.dblPriceAdjustment
 FROM  ( SELECT intInvoiceId, intCompanyLocationId 
 			FROM tblARInvoice WITH(NOLOCK) ) PINV		

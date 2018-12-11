@@ -390,7 +390,6 @@ BEGIN
 				WHERE intContractTypeId IN (1, 2) AND CD.intCommodityId = @intCommodityId
 					AND CD.intCompanyLocationId = ISNULL(@intLocationId, CD.intCompanyLocationId)
 					AND CD.intEntityId = ISNULL(@intVendorId, CD.intEntityId)
-					AND CD.intContractStatusId <> 6
 			) t WHERE dblTotal <> 0
 						
 			DECLARE @intUnitMeasureId INT
@@ -599,7 +598,6 @@ BEGIN
 					WHERE c.intCommodityId = @intCommodityId 
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						AND ch.intContractStatusId <> 6
 				) a WHERE a.intRowNum = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName
