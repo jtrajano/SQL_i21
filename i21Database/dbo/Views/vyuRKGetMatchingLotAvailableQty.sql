@@ -3,7 +3,7 @@
 AS
 
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
+SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType = strType COLLATE Latin1_General_CI_AS FROM (
 	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
 	FROM tblRKFutOptTransaction ot 
 		INNER JOIN (SELECT SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intLFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
@@ -15,7 +15,7 @@ SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0
 
 UNION 
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
+SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType = strType COLLATE Latin1_General_CI_AS FROM (
 	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
 	FROM tblRKFutOptTransaction ot 
 		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intSFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
@@ -27,7 +27,7 @@ SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0
 
 UNION
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
+SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType = strType COLLATE Latin1_General_CI_AS FROM (
 	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
 	FROM tblRKFutOptTransaction ot 
 		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intLFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
@@ -39,7 +39,7 @@ SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0
 
 UNION 
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
+SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType = strType COLLATE Latin1_General_CI_AS FROM (
 	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
 	FROM tblRKFutOptTransaction ot 
 		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intSFutOptTransactionId from tblRKMatchFuturesPSDetail mf 

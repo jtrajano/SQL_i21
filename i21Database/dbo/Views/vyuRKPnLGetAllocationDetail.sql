@@ -19,7 +19,7 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dv.intContractTypeId,dv.intContractHeaderId intContractHeaderId,dv.dblBasis,dv.intItemUOMId intPItemUOMId,
 		dv.intPriceUomId intSItemUOMId
 		,dv.intPriceUomId,dv.ysnSubCurrency
-		,'With Allocation' strAllocationType
+		,'With Allocation' COLLATE Latin1_General_CI_AS AS strAllocationType
 		,dv.strSalespersonName
 FROM tblLGAllocationDetail ad 
 JOIN vyuRKPnLContractDetailView dv on dv.intContractDetailId=ad.intSContractDetailId and dv.intContractTypeId=2
@@ -41,7 +41,7 @@ select dvp.strSequenceNumber,dvp.intItemId,
 		dvp.intContractTypeId,dvp.intContractHeaderId intContractHeaderId,dvp.dblBasis,dvp.intItemUOMId intPItemUOMId,
 		dvp.intPriceUomId intSItemUOMId
 		,dvp.intPriceUomId,dvp.ysnSubCurrency
-		,'With Allocation' strAllocationType
+		,'With Allocation' COLLATE Latin1_General_CI_AS AS strAllocationType
 		,dvp.strSalespersonName
 FROM tblLGAllocationDetail ad 
 JOIN vyuRKPnLContractDetailView dv on dv.intContractDetailId=ad.intSContractDetailId 
@@ -66,7 +66,7 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dv.intContractTypeId,dv.intContractHeaderId intContractHeaderId,dv.dblBasis,dv.intItemUOMId intPItemUOMId,
 		dv.intPriceUomId intSItemUOMId
 		,dv.intPriceUomId,dv.ysnSubCurrency
-		,'Without Allocation' strAllocationType
+		,'Without Allocation' COLLATE Latin1_General_CI_AS AS strAllocationType
 		,dv.strSalespersonName
 FROM  tblLGLoadDetail					ad
 		JOIN	tblLGLoadDetailLot				DL	ON	ad.intLoadDetailId				=	DL.intLoadDetailId
@@ -96,7 +96,7 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dv.intContractTypeId,dv.intContractHeaderId intContractHeaderId,dv.dblBasis,dv.intItemUOMId intPItemUOMId,
 		dv.intPriceUomId intSItemUOMId
 		,dv.intPriceUomId,dv.ysnSubCurrency
-		,'Without Allocation' strAllocationType
+		,'Without Allocation' COLLATE Latin1_General_CI_AS AS strAllocationType
 		,dv.strSalespersonName
 FROM  tblLGLoadDetail	AD
 		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 

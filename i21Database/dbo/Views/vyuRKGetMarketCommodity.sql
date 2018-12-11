@@ -12,7 +12,7 @@ SELECT
 	um.strUnitMeasure,
 	sm.intCurrencyID,
 	sm.strCurrency,
-	strCommodityAttributeId =  dbo.fnRKRKConvertProductTypeKeyToName(mm.strCommodityAttributeId)
+	strCommodityAttributeId =  dbo.fnRKRKConvertProductTypeKeyToName(mm.strCommodityAttributeId) COLLATE Latin1_General_CI_AS
 FROM tblICCommodity c
 JOIN tblRKCommodityMarketMapping mm on c.intCommodityId=mm.intCommodityId
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=mm.intFutureMarketId

@@ -2,7 +2,7 @@
 AS
 SELECT DISTINCT bac.intFutureMarketId,strFutMarketName,ba.intEntityId,e.strName,
 ba.intBrokerageAccountId,
-strAccountNumber,it.intInstrumentTypeId,it.strInstrumentType,cmm.intCommodityId
+strAccountNumber,it.intInstrumentTypeId,strInstrumentType = it.strInstrumentType COLLATE Latin1_General_CI_AS,cmm.intCommodityId
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 --JOIN tblRKBrokersAccountMarketMapping amm on amm.intBrokerageAccountId=ba.intBrokerageAccountId

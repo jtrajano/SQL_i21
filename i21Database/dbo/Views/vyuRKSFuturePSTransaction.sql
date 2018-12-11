@@ -10,7 +10,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLot1  
    ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId where A.strType = 'Roll' Group By AD.intSFutOptTransactionId   
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLotRoll  
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell  
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell  
       ,dblPrice as dblPrice  
       ,strBook   
       ,strSubBook   
@@ -61,7 +61,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLot1  
    ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId where A.strType = 'Roll' Group By AD.intSFutOptTransactionId   
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLotRoll  
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell  
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell  
       ,ot.dblExchangeRate as dblPrice  
       ,strBook   
       ,strSubBook   

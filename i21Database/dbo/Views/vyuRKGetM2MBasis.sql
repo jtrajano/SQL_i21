@@ -7,12 +7,12 @@ SELECT DISTINCT strCommodityCode
 	, strOriginDest = ca.strDescription
 	, fm.strFutMarketName
 	, fm1.strFutureMonth
-	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
+	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
 	, strLocationName
 	, strMarketZoneCode
 	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
 	, strPricingType
-	, strContractInventory = 'Contract'
+	, strContractInventory = 'Contract' COLLATE Latin1_General_CI_AS
 	, strContractType
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
@@ -54,12 +54,12 @@ UNION SELECT DISTINCT strCommodityCode
 	, strOriginDest = ca.strDescription
 	, fm.strFutMarketName
 	, fm1.strFutureMonth
-	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
+	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
 	, strLocationName
 	, strMarketZoneCode
 	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
 	, strPricingType
-	, strContractInventory = 'Contract'
+	, strContractInventory = 'Contract' COLLATE Latin1_General_CI_AS
 	, strContractType
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
@@ -107,7 +107,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, strMarketZoneCode
 	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
 	, strPricingType
-	, strContractInventory = 'Inventory'
+	, strContractInventory = 'Inventory' COLLATE Latin1_General_CI_AS
 	, strContractType
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
