@@ -553,7 +553,10 @@ BEGIN TRY
 		,[strVFDDocumentNumber]
 		,[intCompanyLocationSubLocationId]
 		,[intCurrencyExchangeRateTypeId]
-		,[dblCurrencyExchangeRate])
+		,[dblCurrencyExchangeRate]
+		,[strAddonDetailKey]
+        ,[ysnAddonParent]
+		,[dblAddOnQuantity])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= CASE WHEN @IsCancel = 1 THEN ARID.[strDocumentNumber] ELSE '' END
@@ -639,6 +642,9 @@ BEGIN TRY
 		,[intCompanyLocationSubLocationId] = ARID.intCompanyLocationSubLocationId
 		,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
 		,[dblCurrencyExchangeRate]		= ARID.[dblCurrencyExchangeRate]
+		,[strAddonDetailKey]			= ARID.[strAddonDetailKey]
+        ,[ysnAddonParent]				= ARID.[ysnAddonParent]
+		,[dblAddOnQuantity]				= ARID.[dblAddOnQuantity]
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN

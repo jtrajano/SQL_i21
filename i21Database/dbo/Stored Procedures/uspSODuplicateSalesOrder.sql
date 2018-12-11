@@ -234,7 +234,10 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
-					,intSubLocationId
+				   ,intSubLocationId
+				   ,[strAddonDetailKey]
+				   ,[ysnAddonParent]
+		           ,[dblAddOnQuantity]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -282,6 +285,9 @@ BEGIN
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
 				   ,intSubLocationId
+				   ,[strAddonDetailKey]
+				   ,[ysnAddonParent]
+			       ,[dblAddOnQuantity]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
