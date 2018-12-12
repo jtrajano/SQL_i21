@@ -219,14 +219,14 @@ BEGIN TRY
 	,dblFutures				= ISNULL(CD.dblFutures,0)
 	,dblBasis				= ISNULL(CD.dblBasis,0)
 	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0)
-	,dblCashPrice			= ISNULL(CD.dblCashPrice,0)
+	,dblCashPrice			= ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)
 	--,dblAvailableQty		= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
 	,dblAvailableQty		= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity),0)- ISNULL(BL.dblQuantity,0)-- gmo
 	--,dblAmount				= (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)) * CD.dblCashPrice
 	,dblAmount				= (
 								ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity),0) - ISNULL(BL.dblQuantity,0)
 							  ) 
-							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), CD.dblCashPrice),0) --gmo
+							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0) --gmo
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
