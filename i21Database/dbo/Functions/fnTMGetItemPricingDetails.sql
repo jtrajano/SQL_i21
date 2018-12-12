@@ -380,7 +380,7 @@ BEGIN
 				,@TransactionDate		
 				,@Quantity				
 				,@ContractHeaderId		
-				,@A4GLIdentity
+				,@ContractDetailId		
 				,@ContractNumber		
 				,@ContractSeq			
 				,@AvailableQuantity		
