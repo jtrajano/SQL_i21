@@ -586,8 +586,9 @@ BEGIN TRY
 			, @dtmBalanceForwardDate = @dtmBalanceForwardDate
 			, @ysnPrintFromCF = 1
 			, @strCustomerNumber = @strCustomerNumber		
-			,@intEntityUserId = @intEntityUserId
-			,@ysnReprintInvoice = @ysnReprintInvoice
+			, @intEntityUserId = @intEntityUserId
+			, @ysnReprintInvoice = @ysnReprintInvoice
+			, @strUserId = @UserId
 
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
