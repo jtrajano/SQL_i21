@@ -44,7 +44,7 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
-			LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intShipFromId
+			LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intPayToAddressId
 			INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
@@ -126,7 +126,7 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
-			LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intShipFromId
+			LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intPayToAddressId
 			INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
