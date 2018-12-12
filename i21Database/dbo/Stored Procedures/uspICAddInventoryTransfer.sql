@@ -234,6 +234,7 @@ BEGIN
 				,[intGrossNetUOMId]
 				,[dblGross]
 				,[dblTare]
+				,[dblNet]
 				,[intNewLotId]
 				,[strNewLotId]
 				,[dblCost]
@@ -263,6 +264,7 @@ BEGIN
 				,[intItemWeightUOMId]		= RawData.intItemWeightUOMId
 				,[dblGrossWeight]			= ISNULL(RawData.dblGrossWeight, 0)
 				,[dblTareWeight]			= ISNULL(RawData.dblTareWeight, 0)
+				,[dblNet]					= ISNULL(RawData.dblGrossWeight, 0) - ISNULL(RawData.dblTareWeight, 0)
 				,[intNewLotId]				= NULL 
 				,[strNewLotId]				= RawData.strNewLotId
 				,[dblCost]					= COALESCE(NULLIF(RawData.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
