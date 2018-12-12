@@ -253,8 +253,8 @@ BEGIN TRY
 	AND   CH.intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0	   THEN @IntCommodityId		  ELSE CH.intCommodityId	   END
 	AND   CD.dtmCreated			 >= CASE WHEN @dtmStartDate IS NOT NULL			   THEN @dtmStartDate		  ELSE CD.dtmStartDate		   END
 	AND   CD.dtmCreated			 <= CASE WHEN @dtmEndDate IS NOT NULL			   THEN @dtmEndDate			  ELSE CD.dtmEndDate		   END
-	and   CH.dtmContractDate	 >= CASE WHEN @dtmStartDate IS NOT NULL			   THEN @dtmStartDate		  ELSE CD.dtmStartDate		   END
-	and   CH.dtmContractDate	 <= CASE WHEN @dtmEndDate IS NOT NULL			   THEN @dtmEndDate			  ELSE CD.dtmEndDate		   END
+	--and   CH.dtmContractDate	 >= CASE WHEN @dtmStartDate IS NOT NULL			   THEN @dtmStartDate		  ELSE CD.dtmStartDate		   END
+	--and   CH.dtmContractDate	 <= CASE WHEN @dtmEndDate IS NOT NULL			   THEN @dtmEndDate			  ELSE CD.dtmEndDate		   END
 	AND   CD.intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0 THEN @intCompanyLocationId ELSE CD.intCompanyLocationId END
 	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId	   END
 	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId     END
