@@ -80,7 +80,7 @@ join tblEMEntityTariffType c on c.intEntityTariffTypeId = b.intEntityTariffTypeI
 join tblEMEntityTariffCategory d on d.intEntityTariffId = b.intEntityTariffId
 join tblICCategory e on e.intCategoryId = d.intCategoryId
 join tblICItem f on f.intCategoryId = e.intCategoryId and f.intItemId = @intItemId
-join tblARCustomerFreightXRef g on g.intCategoryId = e.intCategoryId and lower(strFreightType) = 'rate'
+join tblARCustomerFreightXRef g on g.intCategoryId = e.intCategoryId and lower(strFreightType) in ('rate', 'miles')
 join tblARCustomer h on h.intEntityId = g.intEntityCustomerId and h.intEntityTariffTypeId = c.intEntityTariffTypeId and h.intEntityId = @intEntityCustomerId
 where
 a.intEntityId = @intShipViaId
