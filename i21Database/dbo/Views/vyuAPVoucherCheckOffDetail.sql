@@ -11,6 +11,7 @@ SELECT	DISTINCT
 			,ISNULL(EL.strCity, 'N/A') AS strVendorCity
 			,ISNULL(EL.strState, 'N/A') AS strVendorState
 			,ISNULL(EL.strZipCode,'N/A') AS strVendorZipCode
+			,ISNULL(EL.strCounty,'N/A') AS strVendorCounty
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
@@ -63,7 +64,7 @@ OUTER APPLY(
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
 			WHERE B.intBillId = APB.intBillId 
-				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
+				  --AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
 			OUTER APPLY (
@@ -93,6 +94,7 @@ SELECT	DISTINCT
 			,ISNULL(EL.strCity, 'N/A') AS strVendorCity
 			,ISNULL(EL.strState, 'N/A') AS strVendorState
 			,ISNULL(EL.strZipCode,'N/A') AS strVendorZipCode
+			,ISNULL(EL.strCounty,'N/A') AS strVendorCounty
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
@@ -156,7 +158,7 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
 			WHERE B.intBillId = APB.intBillId 
-				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
+				  --AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
 				
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
