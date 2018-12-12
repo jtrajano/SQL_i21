@@ -10,7 +10,14 @@ DECLARE		@intContractDetailId	INT,
 			@intPrevStatusId		INT,
 			@dblQuantity			NUMERIC(18,6),
 			@dblBalance				NUMERIC(18,6),
-			@intContractStatusId	INT
+			@intContractStatusId	INT,
+
+			@dblPrevFutures			NUMERIC(18,6),
+			@dblPrevBasis			NUMERIC(18,6),
+			@dblPrevCashPrice		NUMERIC(18,6),
+			@dblFutures				NUMERIC(18,6),
+			@dblBasis				NUMERIC(18,6),
+			@dblCashPrice			NUMERIC(18,6)
 
 DECLARE  @tblToProcess TABLE
 (
@@ -34,15 +41,22 @@ BEGIN
 	BEGIN
 		IF @intPrevHistoryId IS NULL
 		BEGIN
-			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
+			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId ,
+					@dblPrevFutures = dblFutures,@dblPrevBasis = dblBasis,@dblPrevCashPrice = dblCashPrice
+			FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 			SELECT @intPrevHistoryId = @intSequenceHistoryId
 			SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId) FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId AND intSequenceHistoryId > @intSequenceHistoryId
 			CONTINUE
 		END
 		ELSE
 		BEGIN
-			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intPrevHistoryId
-			SELECT	@dblQuantity = dblQuantity,@dblBalance = dblBalance,@intContractStatusId = intContractStatusId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
+			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId,
+					@dblPrevFutures = dblFutures,@dblPrevBasis = dblBasis,@dblPrevCashPrice = dblCashPrice
+			FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intPrevHistoryId
+
+			SELECT	@dblQuantity = dblQuantity,@dblBalance = dblBalance,@intContractStatusId = intContractStatusId,
+					@dblFutures = dblFutures,@dblBasis = dblBasis,@dblCashPrice = dblCashPrice
+			FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 
 			IF ISNULL(@dblPrevQty,0) <> ISNULL(@dblQuantity,0)
 			BEGIN
@@ -55,6 +69,19 @@ BEGIN
 			IF ISNULL(@intPrevStatusId,0) <> ISNULL(@intContractStatusId,0)
 			BEGIN
 				UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId,ysnStatusChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+
+			IF ISNULL(@dblPrevFutures,0) <> ISNULL(@dblFutures,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures,ysnFuturesChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+			IF ISNULL(@dblPrevBasis,0) <> ISNULL(@dblBasis,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis,ysnBasisChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+			END
+			IF ISNULL(@dblPrevCashPrice,0) <> ISNULL(@dblCashPrice,0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice,ysnCashPriceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
 			END
 		END
 		SELECT @intPrevHistoryId = @intSequenceHistoryId

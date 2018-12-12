@@ -68,6 +68,13 @@
 	ysnStatusChange			BIT,
 	ysnBalanceChange		BIT,
 
+	dblOldFutures			NUMERIC(18,6),
+	dblOldBasis				NUMERIC(18,6),
+	dblOldCashPrice			NUMERIC(18,6),
+	ysnFuturesChange		BIT,
+	ysnBasisChange			BIT,
+	ysnCashPriceChange		BIT,
+
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC),
     CONSTRAINT [FK_tblCTSequenceHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES [tblCTContractDetail](intContractDetailId) ON DELETE CASCADE
 )
