@@ -4,9 +4,9 @@ AS
 SELECT 
  mm.intCommodityMarketId
 ,mm.intCommodityId
-,dbo.fnRKRKConvertProductTypeKeyToName(isnull(strCommodityAttributeId,'')) strCommodityAttributeId
+,dbo.fnRKRKConvertProductTypeKeyToName(isnull(strCommodityAttributeId,'')) COLLATE Latin1_General_CI_AS AS strCommodityAttributeId
 ,ic.strCommodityCode
-,dbo.fnRKRKConvertProductTypeKeyToName(isnull(strCommodityAttributeId,'')) as strDescription
+,dbo.fnRKRKConvertProductTypeKeyToName(isnull(strCommodityAttributeId,'')) COLLATE Latin1_General_CI_AS	 as strDescription
 ,um1.strUnitMeasure
 ,c.strCurrency strCurrency
 ,um.strUnitMeasure strForecastUnitMeasure 

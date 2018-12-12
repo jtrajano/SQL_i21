@@ -9,7 +9,7 @@ dblMarketValue,
  case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as  dblMTM,  
  strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,  
  -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,  
- strHedgeUOM,strBuySell,dblContractSize,intFutOptTransactionHeaderId,intCurrencyId,intCent,ysnSubCurrency,dtmExpirationDate,ysnExpired,intTypeId
+ strHedgeUOM,strBuySell COLLATE Latin1_General_CI_AS AS strBuySell,dblContractSize,intFutOptTransactionHeaderId,intCurrencyId,intCent,ysnSubCurrency,dtmExpirationDate,ysnExpired,intTypeId
  ,intEntityId,intFutureMarketId,intCommodityId,intOptionMonthId   
   FROM (  
 	SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots,'' as dblSelectedLot,  
@@ -52,7 +52,7 @@ SELECT DISTINCT
   ORDER BY 1 desc),0) as dblDelta  
    ,'' as DeltaHedge  
    ,um.strUnitMeasure as strHedgeUOM  
-   ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId,  
+   ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell,intFutOptTransactionId,  
     isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots,      
     isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where  opa.intFutOptTransactionId= ot.intFutOptTransactionId),0) intAssignedLots  
 	,c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,intFutOptTransactionHeaderId,
