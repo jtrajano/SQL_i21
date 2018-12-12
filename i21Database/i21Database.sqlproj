@@ -7193,6 +7193,8 @@
     <Build Include="dbo\Functions\fnRKGetAssociatedFutureMonth.sql" />
     <Build Include="dbo\Tables\tblQMListImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportList.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportAttribute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
