@@ -545,7 +545,7 @@ BEGIN
 	INTO #invQty
 	FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i ON i.intItemId = s.intItemId
-	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUOM = 1
+	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
