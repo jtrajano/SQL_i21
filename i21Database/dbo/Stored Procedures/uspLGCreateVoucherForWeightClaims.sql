@@ -260,9 +260,8 @@ BEGIN TRY
 			SET intLoadId = @intLoadId,
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount,
-				dbl1099 = @dblClaimAmount,
+				dblClaimAmount = ROUND(@dblClaimAmount, 2),
+				dblTotal = ROUND(@dblClaimAmount, 2),
 				dblNetWeight = @dblNetWeight
 			WHERE intBillId = @intBillId
 		END
@@ -276,9 +275,8 @@ BEGIN TRY
 			SET intLoadId = @intLoadId,
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount,
-				dbl1099 = @dblClaimAmount,
+				dblClaimAmount = ROUND(@dblClaimAmount, 2),
+				dblTotal = ROUND(@dblClaimAmount, 2),
 				dblNetWeight = @dblNetWeight
 			WHERE intBillId = @intBillId
 		END
@@ -306,9 +304,8 @@ BEGIN TRY
 	UPDATE BD
 	SET intCurrencyId = WCD.intCurrencyId
 		,ysnSubCurrency = 1
-		,dblClaimAmount = WCD.dblClaimAmount
-		,dblTotal = WCD.dblClaimAmount
-		,dbl1099 = WCD.dblClaimAmount
+		,dblClaimAmount = ROUND(WCD.dblClaimAmount, 2)
+		,dblTotal = ROUND(WCD.dblClaimAmount, 2)
 		,dblNetWeight = WCD.dblToNet
 		,intLoadId = WC.intLoadId
 		,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
@@ -319,7 +316,6 @@ BEGIN TRY
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
 		AND WC.intWeightClaimId = @intWeightClaimId 
-		AND B.intTransactionType = 11
 
 END TRY
 
