@@ -11,6 +11,14 @@ BEGIN
 		,@strColumn8 NVARCHAR(100)
 		,@strColumn9 NVARCHAR(100)
 		,@strColumn10 NVARCHAR(100)
+		,@dtmOrderDate DATETIME
+		,@intItemId INT
+		,@intManufacturingProcessId INT
+		,@strWorkOrderNo NVARCHAR(50)
+		,@strProcessName NVARCHAR(50)
+		,@strDescription NVARCHAR(250)
+		,@strTargetItemNo NVARCHAR(50)
+		,@strTargetDescription NVARCHAR(250)
 
 	SELECT @strColumn1 = ''
 		,@strColumn2 = ''
@@ -137,6 +145,23 @@ BEGIN
 				,strColumn10
 				)) AS PivotTable
 
+	SELECT @intItemId = intItemId
+		,@intManufacturingProcessId = intManufacturingProcessId
+		,@strWorkOrderNo = strWorkOrderNo
+		,@dtmOrderDate = dtmOrderDate
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strProcessName = strProcessName
+		,@strDescription = strDescription
+	FROM tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
+	SELECT @strTargetItemNo = strItemNo
+		,@strTargetDescription = strDescription
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
 	SELECT W.intWorkOrderInputLotId
 		,L.intLotId
 		,L.strLotNumber
@@ -176,6 +201,12 @@ BEGIN
 		,CV.strColumn8
 		,CV.strColumn9
 		,CV.strColumn10
+		,@strProcessName AS strProcessName
+		,@strDescription AS strProcessDescription
+		,@strWorkOrderNo AS strWorkOrderNo
+		,@dtmOrderDate AS strWorkOrderDate
+		,@strTargetItemNo AS strTargetItemNo
+		,@strTargetDescription AS strTargetDescription
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
@@ -236,6 +267,12 @@ BEGIN
 		,NULL AS strColumn8
 		,NULL AS strColumn9
 		,NULL AS strColumn10
+		,@strProcessName AS strProcessName
+		,@strDescription AS strProcessDescription
+		,@strWorkOrderNo AS strWorkOrderNo
+		,@dtmOrderDate AS strWorkOrderDate
+		,@strTargetItemNo AS strTargetItemNo
+		,@strTargetDescription AS strTargetDescription
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
