@@ -7205,6 +7205,17 @@
     <Build Include="dbo\Views\vyuGRStorageByDiscountReport.sql" />
     <Build Include="dbo\Tables\tblQMListImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportList.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceDiscountCalculationTempTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
+    <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
+    <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
+    <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
+    <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
+    <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
+    <Build Include="dbo\Tables\tblCFDriverPin.sql" />
+    <Build Include="dbo\Views\vyuHDTicketCorrectiveAction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
