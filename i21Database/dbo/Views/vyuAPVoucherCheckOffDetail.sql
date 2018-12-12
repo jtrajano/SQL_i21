@@ -21,7 +21,7 @@ SELECT	DISTINCT
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
 			,strItem = IE.strItemNo 
-			,intTicketId
+			,SC.intTicketId
 			,SC.strTicketNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
@@ -99,7 +99,7 @@ SELECT	DISTINCT
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
 			,strItem = IE.strItemNo 
-			,intTicketId
+			,SC.intTicketId
 			,SC.strTicketNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate

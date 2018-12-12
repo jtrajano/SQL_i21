@@ -56,6 +56,13 @@ Type the overview for the table here.
 		[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intParentItemLinkId] INT NULL,
 		[intChildItemLinkId] INT NULL,
+		[intTicketId] INT NULL, -- Scale Ticket Id
+		[intInventoryTransferId] INT NULL, -- Inventory Transfer Header Id
+		[intInventoryTransferDetailId] INT NULL, -- Inventory Transfer Detail Id
+		[intPurchaseId] INT NULL, -- Purchase Order Header Id
+		[intPurchaseDetailId] INT NULL, -- Purchase Order Detail Id
+		[intContractHeaderId] INT NULL, -- Contract Header Id
+		[intContractDetailId] INT NULL, -- Contract Detail Id
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
@@ -76,7 +83,11 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryReceiptItem]([intInventoryReceiptId] ASC, [intInventoryReceiptItemId] ASC, [strChargesLink] ASC);
 
 	GO
-
+	
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_SourceId
+		ON tblICInventoryReceiptItem (intSourceId, intLineNo, intOrderId)
+	GO
+	
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',
 		@level0type = N'SCHEMA',

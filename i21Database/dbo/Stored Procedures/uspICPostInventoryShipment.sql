@@ -236,8 +236,10 @@ BEGIN
 		INNER JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentItemId = sl.intInventoryShipmentItemId
 		INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = si.intInventoryShipmentId
 		INNER JOIN tblICLot l ON l.intLotId = sl.intLotId
+		LEFT OUTER JOIN tblICLotStatus stat ON stat.intLotStatusId = l.intLotStatusId
 	WHERE s.intInventoryShipmentId = @intTransactionId
-		AND l.intLotStatusId <> 1
+		AND stat.strPrimaryStatus <> 'Active'
+		-- AND l.intLotStatusId <> 1
 
 	IF @strLotNo IS NOT NULL
 	BEGIN

@@ -74,13 +74,13 @@ FROM	(
 
 				OUTPUT 
 					$action
-					, Inserted.intInventoryTransactionId
-					, Inserted.intTransactionId
-					, Inserted.strTransactionId
-					, Inserted.intRelatedTransactionId
-					, Inserted.strRelatedTransactionId
-					, Inserted.intTransactionTypeId
-					, Inserted.dblQty 
+					, inserted.intInventoryTransactionId
+					, inserted.intTransactionId
+					, inserted.strTransactionId
+					, inserted.intRelatedTransactionId
+					, inserted.strRelatedTransactionId
+					, inserted.intTransactionTypeId
+					, inserted.dblQty 
 		) AS Changes (
 			action
 			, intInventoryTransactionId

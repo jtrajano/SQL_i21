@@ -161,6 +161,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId] INT NULL 
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
+			,[dblNewAverageCost] NUMERIC(38,20) NULL
 		)
 	END 
 END 

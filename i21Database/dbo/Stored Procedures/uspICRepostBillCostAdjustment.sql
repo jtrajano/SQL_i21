@@ -260,6 +260,7 @@ BEGIN
 					ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
 			)
 				ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
+				AND B.intItemId = E2.intItemId 
 			INNER JOIN tblICItem item 
 				ON B.intItemId = item.intItemId
 			INNER JOIN tblICItemLocation D

@@ -164,6 +164,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId] INT NULL 
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
+			,[dblNewAverageCost] NUMERIC(38,20) NULL
 		)
 	END 
 END 
@@ -309,7 +310,8 @@ BEGIN
 
 	-- Get the original average cost. 
 	SELECT @OriginalAverageCost = 
-		CASE	WHEN @RunningQty > 0 THEN ISNULL(@OriginalRunningValue, 0) / @RunningQty
+		CASE	WHEN @RunningQty > 0 AND ISNULL(@OriginalRunningValue, 0) / @RunningQty > 0 THEN 
+					ISNULL(@OriginalRunningValue, 0) / @RunningQty
 				ELSE 
 					(
 						SELECT	TOP 1 
@@ -482,7 +484,7 @@ BEGIN
 
 		-- Calculate the Original Average Cost 
 		SET @OriginalAverageCost = 
-			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 AND @OriginalRunningValue / (@RunningQty + @t_dblQty) > 0 THEN 
 						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
 					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
 						CASE 
@@ -515,6 +517,9 @@ BEGIN
 					ELSE 
 						@NewAverageCost
 			END	 
+
+		SET @NewAverageCost = 
+				CASE WHEN ISNULL(@NewAverageCost, 0) < 0 THEN @OriginalAverageCost ELSE @NewAverageCost END 
 
 		-- Calculate the running qty. 
 		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
@@ -551,22 +556,26 @@ BEGIN
 			SET @EscalateCostAdjustment = (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
 
 			SET @EscalateInventoryTransactionTypeId = NULL 
-			EXEC [uspICPostCostAdjustmentEscalate]
-				@dtmDate 
-				,@t_intItemId 
-				,@t_intItemLocationId 
-				,@t_dblQty 
-				,@t_strBatchId 
-				,@t_intTransactionId 
-				,@t_intTransactionDetailId 
-				,@t_strTransactionId 
-				,@t_intInventoryTransactionId 
-				,@EscalateCostAdjustment 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
-				,@EscalateInventoryTransactionTypeId OUTPUT 
 
+			IF (@NewAverageCost <> @OriginalAverageCost)
+			BEGIN 
+				EXEC [uspICPostCostAdjustmentEscalate]
+					@dtmDate 
+					,@t_intItemId 
+					,@t_intItemLocationId 
+					,@t_dblQty 
+					,@t_strBatchId 
+					,@t_intTransactionId 
+					,@t_intTransactionDetailId 
+					,@t_strTransactionId 
+					,@t_intInventoryTransactionId 
+					,@EscalateCostAdjustment 
+					,@intTransactionId 
+					,@intTransactionDetailId 
+					,@strTransactionId 
+					,@EscalateInventoryTransactionTypeId OUTPUT 
+					,@NewAverageCost
+			END 
 
 			-- Keep this code for debugging purposes. 
 			---- DEBUG -------------------------------------------------

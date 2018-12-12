@@ -30,6 +30,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveActual]
 	,@intOtherChargeItemId AS INT = NULL
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@IsEscalate AS BIT = 0 
+	,@dblNewAverageCost AS NUMERIC(38,20) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -158,6 +159,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId] INT NULL 
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
+			,[dblNewAverageCost] NUMERIC(38,20) NULL
 		)
 	END 
 END 
@@ -353,19 +355,30 @@ BEGIN
 
 		-- Calculate the Cost Bucket cost 
 		SET @CostBucketNewCost = 
-			CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-						(@CostBucketOriginalValue + @CostAdjustment) / @t_dblQty
-					ELSE
-						@CostBucketNewCost
+			CASE	
+				WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+					CASE 
+						WHEN @dblNewAverageCost IS NOT NULL  THEN 
+							@dblNewAverageCost 
+						ELSE 
+							(@CostBucketOriginalValue + @CostAdjustment) / @t_dblQty
+					END 
+				ELSE
+					@CostBucketNewCost
 			END 
 		
 		-- Calculate the current cost adjustment
 		SET @CurrentCostAdjustment = 
 			CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-						@CostAdjustment 
+						CASE 
+							WHEN @dblNewAverageCost IS NOT NULL  THEN 
+								(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+							ELSE 
+								@CostAdjustment 
+						END 
 					WHEN 
 						@t_dblQty < 0 
-						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 							
+						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN
 							@t_dblQty * @CostBucketNewCost
 							+ (-@t_dblQty * @t_NegativeStockCost) 
 
@@ -379,7 +392,13 @@ BEGIN
 		IF @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId  
 		BEGIN 
 			-- Validate if the cost is going to be negative. 
-			IF (@CostBucketOriginalValue + @CostAdjustment) < 0 
+			IF (
+				1 = CASE 
+						WHEN ISNULL(@dblNewAverageCost, 0) < 0 THEN 1
+						WHEN (@CostBucketOriginalValue + @CostAdjustment) < 0 THEN 1
+						ELSE 0
+					END 
+			)
 			BEGIN 
 				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 				FROM	tblICItem 
@@ -409,10 +428,14 @@ BEGIN
 
 			UPDATE	cb
 			SET		cb.dblCost = 
-						dbo.fnDivide(
-							(@CostBucketOriginalValue + @CostAdjustment) 
-							,cb.dblStockIn 
-						) 
+						CASE 
+							WHEN @dblNewAverageCost IS NOT NULL THEN @dblNewAverageCost 
+							ELSE  
+								dbo.fnDivide(
+									(@CostBucketOriginalValue + @CostAdjustment) 
+									,cb.dblStockIn 
+								) 
+						END 
 			FROM	tblICInventoryActualCost cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryActualCostId = @CostBucketId
@@ -463,7 +486,7 @@ BEGIN
 				,@intTransactionDetailId 
 				,@strTransactionId 
 				,@EscalateInventoryTransactionTypeId OUTPUT 
-
+				,@dblNewAverageCost
 
 			-- Keep this code for debugging purposes. 
 			---- DEBUG -------------------------------------------------
@@ -580,7 +603,12 @@ BEGIN
 				,[dblCost] = NULL 
 				,[dblValue] = 
 					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-								@CostAdjustment
+								CASE 
+									WHEN @dblNewAverageCost IS NOT NULL THEN 
+										(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+									ELSE 
+										@CostAdjustment
+								END 
 							WHEN @t_dblQty < 0 THEN 
 								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 							ELSE 
@@ -597,7 +625,12 @@ BEGIN
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-							@CostAdjustment
+							CASE 
+								WHEN @dblNewAverageCost IS NOT NULL THEN 
+									(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
+								ELSE 
+									@CostAdjustment
+							END 
 						WHEN @t_dblQty < 0 THEN 
 							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 						ELSE 
@@ -644,11 +677,22 @@ BEGIN
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost	
 
-	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+	IF @dblNewAverageCost IS NOT NULL 
+	BEGIN 
+		SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@dblNewAverageCost, 0) AS MONEY), 1)
 
-	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
-	FROM	tblICItem i 
-	WHERE	i.intItemId = @intItemId
+		SELECT	@strDescription = 'A new average cost, ' + @strNewCost + ', is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+	END 
+	ELSE 
+	BEGIN 
+		SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+
+		SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+	END
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
 	--IF ISNULL(@CurrentCostAdjustment, 0) <> 0 

@@ -301,7 +301,7 @@ OUTER APPLY (
 ) LoadReceipt
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId 
-	AND intPurchaseDetailId = ReceiptItem.intLineNo
+	AND POView.intPurchaseDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON 
@@ -313,7 +313,6 @@ OUTER APPLY (
 	WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
 			AND Receipt.intSourceType = 4
 ) vyuGRStorageSearchView
-
 OUTER APPLY (
 	SELECT	strTicketNumber 
 	FROM	tblSCTicket 

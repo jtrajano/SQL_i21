@@ -16,6 +16,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentEscalate]
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(50) 
 	,@EscalateInventoryTransactionTypeId AS INT OUTPUT 
+	,@dblEscalateAvgCost AS NUMERIC(38, 20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -57,6 +58,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId] INT NULL 
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
+			,[dblNewAverageCost] NUMERIC(38,20) NULL
 		)
 	END 
 END 
@@ -268,6 +270,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[dblNewAverageCost]
 	)
 	SELECT 
 			[intItemId]						= t.intItemId
@@ -293,14 +296,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 			,[intFobPointId]				= t.intFobPointId
 			,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+			,[dblNewAverageCost]			= @dblEscalateAvgCost
 	FROM	dbo.tblICInventoryTransaction t 
-			--LEFT JOIN tblICInventoryActualCost actualCostCb
-			--	ON actualCostCb.strTransactionId = t.strTransactionId
-			--	AND actualCostCb.intTransactionId = t.intTransactionId
-			--	AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
-			--	AND actualCostCb.intItemId = t.intItemId
-			--	AND actualCostCb.intItemLocationId = t.intItemLocationId
-			--	AND t.intCostingMethod = @ACTUALCOST
-			--	AND actualCostCb.ysnIsUnposted = 0 
 	WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 END 

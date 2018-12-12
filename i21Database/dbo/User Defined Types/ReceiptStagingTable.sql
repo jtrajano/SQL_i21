@@ -59,4 +59,11 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intInventoryReceiptId] INT NULL						-- Existing id of an Inventory Receipt. 
 	,[strSourceId] NVARCHAR(50) NULL						-- String Id of the source transaction. 
 	,[strSourceScreenName] NVARCHAR(50) NULL				-- Name of the screen name where the transaction is coming from.
+	
+	-- New Integration Field added on 18.1 created on or after Oct-24-2018. 
+	,[intTicketId] INT NULL									-- Scale Ticket Id
+	,[intInventoryTransferId] INT NULL						-- Inventory Transfer Header Id
+	,[intInventoryTransferDetailId] INT NULL				-- Inventory Transfer Detail Id
+	,[intPurchaseId] INT NULL								-- Purchase Order Header Id
+	,[intPurchaseDetailId] INT NULL							-- Purchase Order Detail Id
 )
