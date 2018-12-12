@@ -5,7 +5,7 @@ SELECT 	ft.intFutOptTransactionId,fom.dblContractSize,strCurrencyExchangeRateTyp
 ,fom.strFutMarketName,strAccountNumber,e.strName,e1.strName as strSalespersonId,
 CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
 	 WHEN ft.intInstrumentTypeId = 2 then 'Options'
-	 WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' end strInstrumentType,
+	 WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' end COLLATE Latin1_General_CI_AS AS strInstrumentType,
 CASE WHEN strBuySell = 'Sell' then -intNoOfContract else intNoOfContract end intGetNoOfContract,
 case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId) 				
 				) else (fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty,

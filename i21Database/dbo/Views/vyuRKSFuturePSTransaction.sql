@@ -8,7 +8,7 @@ SELECT intSelectedInstrumentTypeId,
       ,convert(int,ot.intNoOfContract) as intTotalLot
       ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD Group By AD.intSFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLot1
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
       ,dblPrice as dblPrice
       ,strBook 
       ,strSubBook 
@@ -48,7 +48,7 @@ SELECT intSelectedInstrumentTypeId,
       ,convert(int,ot.dblContractAmount) as intTotalLot
       ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD GROUP BY AD.intSFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLot1
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
       ,ot.dblExchangeRate as dblPrice
       ,strBook 
       ,strSubBook 

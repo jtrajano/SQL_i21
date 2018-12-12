@@ -63,7 +63,7 @@ CASE   WHEN   CD.intPricingTypeId = 2
               WHEN   CD.intPricingTypeId = 1      
                            THEN   'Priced'      
               ELSE   ''      
-END           AS strPricingStatus,
+END COLLATE Latin1_General_CI_AS AS strPricingStatus,
  CA.strDescription as strOrgin,isnull(ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation ,
  FM.intUnitMeasureId  intMarketUOMId,FM.intCurrencyId intMarketCurrencyId  
       

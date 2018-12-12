@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKGetFilledDate
 AS
-SELECT top 100 percent CONVERT(INT,ROW_NUMBER() OVER(ORDER BY CONVERT(VARCHAR(10),dtmFilledDate,110))) intRowNum,CONVERT(VARCHAR(11),dtmFilledDate,106) dtmFilledDate from 
+SELECT top 100 percent CONVERT(INT,ROW_NUMBER() OVER(ORDER BY CONVERT(VARCHAR(10),dtmFilledDate,110))) intRowNum,CONVERT(VARCHAR(11),dtmFilledDate,106) COLLATE Latin1_General_CI_AS AS dtmFilledDate from 
 (	SELECT DISTINCT  convert(datetime,CONVERT(VARCHAR(10),dtmFilledDate,110)) dtmFilledDate FROM  tblRKFutOptTransaction t
 	WHERE CONVERT(VARCHAR(10),dtmFilledDate,110) NOT IN(SELECT CONVERT(VARCHAR(10),dtmFilledDate,110) FROM tblRKReconciliationBrokerStatementHeader t1
 															WHERE isnull(t.ysnFreezed,0) = 1 and t.intFutureMarketId=t1.intFutureMarketId
