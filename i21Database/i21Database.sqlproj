@@ -6425,6 +6425,7 @@
     <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
     <Build Include="dbo\Views\vyuAPRptWC.sql" />
     <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
