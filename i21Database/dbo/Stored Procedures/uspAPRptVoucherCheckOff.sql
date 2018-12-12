@@ -48,7 +48,8 @@ BEGIN
 					dblTax ,
 					strCompanyName ,
 					strCompanyAddress ,
-					strCounty
+					strCounty,
+					strTaxCode
 					FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
 END
 
@@ -161,7 +162,8 @@ SET @query = 'SELECT * FROM (
 					strCompanyName ,
 					strCompanyAddress,
 					GETDATE() as dtmCurrentDate,
-					strCounty
+					strCounty,
+					strTaxCode
 					FROM 
 				[vyuAPRptVoucherCheckOff]
 				ORDER BY StateOfOrigin DESC
