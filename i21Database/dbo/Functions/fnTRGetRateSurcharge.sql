@@ -3,6 +3,8 @@
 	,@dtmTransportLoadDate datetime
 	,@intItemId int
 	,@intEntityCustomerId int
+	,@intBulkLocationId int
+	,@ysnLocationOrigin bit
 )
 RETURNS numeric(18,6)
 AS
@@ -10,9 +12,37 @@ BEGIN
 
 declare @intEntityTariffId int;
 declare @intEntityTariffTypeId int;
+declare @strBulkZipCode nvarchar(10);
 
 declare @dblSurcharge numeric(18,6);
 set @dblSurcharge = null;
+
+if (@ysnLocationOrigin = convert(bit,1))
+begin
+
+	select top 1 @strBulkZipCode = strZipPostalCode from tblSMCompanyLocation where intCompanyLocationId = @intBulkLocationId
+
+	if (@strBulkZipCode is not null)
+	begin
+		if not exists
+		(
+			select
+				* 
+			from
+				tblARCustomerFreightXRef a
+				,tblICItem b 
+			where
+				a.intEntityCustomerId = @intEntityCustomerId
+				and a.strZipCode = @strBulkZipCode
+				and a.intCategoryId = b.intCategoryId
+				and b.intItemId = @intItemId
+		)
+		begin
+			set @intEntityCustomerId = 0;
+		end
+	end
+
+end
 
 select top 1 @intEntityTariffId = intEntityTariffId, @intEntityTariffTypeId = intEntityTariffTypeId
 from
