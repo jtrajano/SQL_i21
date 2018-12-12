@@ -23,6 +23,16 @@ AS
 				,CAST(ISNULL(CD.intContractDetailId,0) AS BIT) ^ 1 ysnDeleted
 				,dtmHistoryCreated AS dtmScreenDate
 
+				,SH.dblFutures
+				,SH.dblBasis
+				,SH.dblCashPrice
+				,SH.dblOldFutures
+				,SH.dblOldBasis
+				,SH.dblOldCashPrice
+				,SH.ysnFuturesChange
+				,SH.ysnBasisChange
+				,SH.ysnCashPriceChange
+
 		FROM	tblCTSequenceHistory		SH
 		LEFT	JOIN tblEMEntity			EY ON EY.intEntityId			=	SH.intUserId 
 		LEFT	JOIN tblCTContractDetail	CD ON CD.intContractDetailId	=	SH.intContractDetailId
@@ -94,6 +104,8 @@ AS
 
 		FROM	CTEAudit SH
 		WHERE	ysnBalanceChange = 1 AND ysnQtyChange = 1
+
+		------------------Status changes---------------------
 
 		UNION ALL
 
@@ -232,4 +244,75 @@ AS
 
 		FROM	CTEAudit SH
 		WHERE	ysnStatusChange = 1 AND SH.intOldStatusId = 6
+
+		------------------Price changes---------------------
+
+		UNION ALL
+
+		SELECT	 SH.intContractDetailId
+				,SH.intContractHeaderId
+				,SH.intContractSeq
+				,SH.dtmTransactionDate
+				,'Contract' AS strScreenName
+				,SH.strNumber
+				,'Futures' AS strFieldName
+				,SH.dblOldFutures AS dblOldValue
+				,SH.dblFutures - dblOldFutures AS dblTransactionQuantity
+				,SH.dblFutures AS dblNewValue
+				,SH.dblBalance
+				,SH.strUserName
+				,SH.intContractHeaderId AS intExternalHeaderId
+				,SH.ysnDeleted
+				,'intContractHeaderId' AS strHeaderIdColumn
+				,SH.dtmScreenDate
+				,-9 AS intSequenceUsageHistoryId
+
+		FROM	CTEAudit SH
+		WHERE	ysnFuturesChange = 1
+
+		UNION ALL
+
+		SELECT	 SH.intContractDetailId
+				,SH.intContractHeaderId
+				,SH.intContractSeq
+				,SH.dtmTransactionDate
+				,'Contract' AS strScreenName
+				,SH.strNumber
+				,'Basis' AS strFieldName
+				,SH.dblOldBasis AS dblOldValue
+				,SH.dblBasis - dblOldBasis AS dblTransactionQuantity
+				,SH.dblBasis AS dblNewValue
+				,SH.dblBalance
+				,SH.strUserName
+				,SH.intContractHeaderId AS intExternalHeaderId
+				,SH.ysnDeleted
+				,'intContractHeaderId' AS strHeaderIdColumn
+				,SH.dtmScreenDate
+				,-10 AS intSequenceUsageHistoryId
+
+		FROM	CTEAudit SH
+		WHERE	ysnBasisChange = 1
+
+		UNION ALL
+
+		SELECT	 SH.intContractDetailId
+				,SH.intContractHeaderId
+				,SH.intContractSeq
+				,SH.dtmTransactionDate
+				,'Contract' AS strScreenName
+				,SH.strNumber
+				,'Cash Price' AS strFieldName
+				,SH.dblCashPrice AS dblOldValue
+				,SH.dblCashPrice - dblOldCashPrice AS dblTransactionQuantity
+				,SH.dblCashPrice AS dblNewValue
+				,SH.dblBalance
+				,SH.strUserName
+				,SH.intContractHeaderId AS intExternalHeaderId
+				,SH.ysnDeleted
+				,'intContractHeaderId' AS strHeaderIdColumn
+				,SH.dtmScreenDate
+				,-11 AS intSequenceUsageHistoryId
+
+		FROM	CTEAudit SH
+		WHERE	ysnCashPriceChange = 1
 	)t 
