@@ -352,7 +352,7 @@ BEGIN
 							AND t.intLocationId in (SELECT intCompanyLocationId FROM @Location)
 							AND t.intBrokerageAccountId in (SELECT intBrokerageAccountId from @BrokerageAttributeFinal
 																WHERE strCommodityAttributeId=@intLCommodityAttributeId)
-						--AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate
+						    AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate
 						)t
 					 GROUP BY  strFutMarketName,strFutureMonth,intFutureMarketId
 					 )t
