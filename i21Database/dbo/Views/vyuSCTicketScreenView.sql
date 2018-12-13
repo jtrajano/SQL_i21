@@ -252,7 +252,7 @@
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId
 	LEFT JOIN tblICStorageLocation ICStorageLocation on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationId
-	LEFT JOIN tblICStorageLocation ICStorageLocationTransfer on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationToId
+	LEFT JOIN tblICStorageLocation ICStorageLocationTransfer on ICStorageLocationTransfer.intStorageLocationId = SCT.intStorageLocationToId
 	LEFT JOIN tblICCommodityAttribute ICCA  on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
 	LEFT JOIN tblICItem ICFreight on ICFreight.intItemId = SCSetup.intFreightItemId
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId
