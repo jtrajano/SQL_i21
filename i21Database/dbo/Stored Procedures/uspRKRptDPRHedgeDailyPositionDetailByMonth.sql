@@ -86,7 +86,7 @@ DECLARE @strCommodityCode NVARCHAR(50)
 	 INSERT INTO @Commodity(intCommodity)
 	 SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
 
-SELECT  @strCommodityCode = strCommodityCode FROM tblICCommodity	WHERE intCommodityId IN (SELECT intCommodityId FROM @Commodity)
+SELECT  @strCommodityCode = strCommodityCode FROM tblICCommodity WHERE intCommodityId IN (SELECT intCommodity FROM @Commodity)
 
 DECLARE @strLocationName NVARCHAR(150)
 
