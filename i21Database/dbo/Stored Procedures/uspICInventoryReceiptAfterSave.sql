@@ -234,14 +234,8 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId,
 			currentSnapshot.intLineNo,
 			currentSnapshot.intItemUOMId,
-			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) 
-					THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (
-						CASE WHEN @ForDelete = 1 
-							THEN currentSnapshot.dblOpenReceive 
-							ELSE (currentSnapshot.dblOpenReceive - dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, currentSnapshot.intItemUOMId, previousSnapshot.dblOpenReceive)) 
-						END))
-					ELSE currentSnapshot.intLoadReceive 
-				END 
+			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
+				ELSE currentSnapshot.intLoadReceive END 
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
 			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
