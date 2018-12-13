@@ -70,10 +70,10 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblDebitUnit]                 = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
-    ,[dblCreditUnit]                = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
@@ -92,10 +92,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
     ,[dblReportingRate]             = I.[dblAverageExchangeRate]
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]
     ,[strRateType]                  = NULL
@@ -395,8 +395,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = ARPAC.[intAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -417,10 +417,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
     ,[dblReportingRate]             = I.[dblAverageExchangeRate]
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]
     ,[strRateType]                  = NULL
