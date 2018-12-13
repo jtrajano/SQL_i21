@@ -7195,6 +7195,7 @@
     <Build Include="dbo\Stored Procedures\uspQMImportList.sql" />
     <Build Include="dbo\Tables\tblQMAttributeImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportAttribute.sql" />
+    <Build Include="dbo\Views\vyuSCProductionHistoryReportView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
