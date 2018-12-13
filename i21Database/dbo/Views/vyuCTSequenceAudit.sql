@@ -22,6 +22,7 @@ AS
 				,SH.intContractHeaderId AS intExternalHeaderId
 				,CAST(ISNULL(CD.intContractDetailId,0) AS BIT) ^ 1 ysnDeleted
 				,dtmHistoryCreated AS dtmScreenDate
+				,SH.intPricingTypeId
 
 				,SH.dblFutures
 				,SH.dblBasis
@@ -81,6 +82,7 @@ AS
 
 		FROM	CTEAudit SH
 		WHERE	ysnQtyChange = 1
+		AND     intPricingTypeId <> 5
 
 		UNION ALL
 
@@ -104,6 +106,7 @@ AS
 
 		FROM	CTEAudit SH
 		WHERE	ysnBalanceChange = 1 AND ysnQtyChange = 1
+		AND     intPricingTypeId <> 5
 
 		------------------Status changes---------------------
 
