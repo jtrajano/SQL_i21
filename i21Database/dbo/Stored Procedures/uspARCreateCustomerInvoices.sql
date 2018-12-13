@@ -783,7 +783,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intAccountId] IS NULL
-	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash')
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -807,7 +807,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash')
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
 INSERT INTO #ARInvalidInvoiceRecords
@@ -835,7 +835,7 @@ INNER JOIN
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
 WHERE
 	ITG.[intAccountId] IS NULL
-	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
+	AND ITG.[strTransactionType] = 'Cash'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -862,8 +862,63 @@ INNER JOIN
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
 WHERE
 	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
+	AND ITG.[strTransactionType] = 'Cash'
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Undeposited Funds' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'There is no AP account account setup under Company Location - ' + SMCL.[strLocationName]
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN
+	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+WHERE
+	ITG.[intAccountId] IS NULL
+	AND ITG.[strTransactionType] = 'Cash Refund'
+
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The account id provided is not a valid account of category "AP Account".'
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN
+	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+WHERE
+	ITG.[intAccountId] IS NOT NULL
+	AND ITG.[strTransactionType] = 'Cash Refund'
+	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AP Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]

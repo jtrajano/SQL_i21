@@ -173,7 +173,7 @@ BEGIN
 		#ARPostInvoiceHeader I					
 	WHERE
 		I.[dblInvoiceTotal] = @ZeroDecimal
-		AND I.[strTransactionType] != 'Cash Refund'
+		AND I.[strTransactionType] <> 'Cash Refund'
 		AND I.[strImportFormat] <> 'CarQuest'		
 		AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.[intItemId] IS NOT NULL)		
 
@@ -519,10 +519,35 @@ BEGIN
 	WHERE
 		(ISNULL(I.[intUndepositedFundsId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 		AND (
-			I.[strTransactionType] IN ('Cash','Cash Refund')
+			I.[strTransactionType] = 'Cash'
 			OR
 			(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.[intInvoiceId] = I.[intInvoiceId] AND tblARPrepaidAndCredit.[ysnApplied] = 1 AND tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount] <> 0 ))
 			)
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--AP Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The AP account of Company Location ' + I.[strCompanyLocationName] + ' is not valid.' ELSE 'The AP account of Company Location ' + I.[strCompanyLocationName] + ' was not set.' END
+	FROM 
+		#ARPostInvoiceHeader I
+	LEFT OUTER JOIN tblGLAccount  GLA
+			ON I.[intAPAccount] = GLA.[intAccountId]					
+	WHERE
+		(ISNULL(I.[intAPAccount], 0) = 0 OR GLA.[intAccountId] IS NULL)
+		AND I.[strTransactionType] = 'Cash Refund'
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2081,7 +2106,7 @@ BEGIN
 			ON ARPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
 		@Recap = 0
-		AND I.strTransactionType != 'Cash Refund'
+		AND I.strTransactionType <> 'Cash Refund'
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

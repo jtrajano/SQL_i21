@@ -88,20 +88,20 @@ WHERE
 	ARI.[ysnPosted] = 1
 	AND APPD.[dblPayment] <> @ZeroDecimal
 
---Update Customer's AR Balance
-UPDATE CUSTOMER
-SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
-FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-INNER JOIN (SELECT intEntityCustomerId
-				 , dblTotalPayment = SUM(PD.dblPayment)
-			FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
-				INNER JOIN (SELECT intInvoiceId
-								 , intEntityCustomerId
-							FROM dbo.tblARInvoice WITH (NOLOCK)
-				) I ON I.intInvoiceId = (CASE WHEN @void = 0 THEN PD.intInvoiceId ELSE PD.intOrigInvoiceId END)
-			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
-			GROUP BY intEntityCustomerId
-) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+----Update Customer's AR Balance
+--UPDATE CUSTOMER
+--SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
+--FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+--INNER JOIN (SELECT intEntityCustomerId
+--				 , dblTotalPayment = SUM(PD.dblPayment)
+--			FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
+--				INNER JOIN (SELECT intInvoiceId
+--								 , intEntityCustomerId
+--							FROM dbo.tblARInvoice WITH (NOLOCK)
+--				) I ON I.intInvoiceId = (CASE WHEN @void = 0 THEN PD.intInvoiceId ELSE PD.intOrigInvoiceId END)
+--			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
+--			GROUP BY intEntityCustomerId
+--) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 SELECT
 	@InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))
