@@ -458,8 +458,11 @@ BEGIN TRY
 					ON DItem.intItemId = a.intItemId
 				LEFT JOIN @SettleContract SC 
 					ON SC.ContractEntityId = CS.intEntityId
+				LEFT JOIN tblCTContractDetail CD
+					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE ISNULL(CS.strStorageType, '') <> 'ITR' 
 					AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 			END
 
 			--Unpaid Fee		
@@ -1565,6 +1568,7 @@ BEGIN TRY
 					ON UOM.intItemUOMId = CC.intItemUOMId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
 				 WHERE ItemLocation.intLocationId = @LocationId
+				 AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0

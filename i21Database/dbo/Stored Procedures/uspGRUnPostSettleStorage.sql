@@ -152,10 +152,9 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
 			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
 			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType IN ('From Scale','From Delivery Sheet')
-		
 			UNION ALL
 		
-			SELECT 
+			SELECT  DISTINCT
 				 intSettleStorageTicketId  = UH.intExternalId
 				,intPricingTypeId		   = 1 
 				,strDepletionType		   = 'Purchase Contract' 
@@ -165,6 +164,8 @@ BEGIN TRY
 			FROM tblCTSequenceUsageHistory UH
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
 			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId AND SH.intSettleStorageId = UH.intExternalHeaderId
+			LEFT JOIN tblCTContractDetail CD ON
+				CD.intContractDetailId = UH.intContractDetailId
 			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType = 'Settlement'
 
 			BEGIN
