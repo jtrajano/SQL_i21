@@ -544,7 +544,7 @@ BEGIN
 												and id.strDocumentNumber = Inv.strTransactionId
 												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
 												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) THEN 1 ELSE 0 END )
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
@@ -570,6 +570,7 @@ BEGIN
 						,Inv.strItemNo
 						,Inv.strCategory
 						,Inv.intCategoryId
+						,i.ysnPosted
 						,i.dtmPostDate
 				) tbl
 				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
