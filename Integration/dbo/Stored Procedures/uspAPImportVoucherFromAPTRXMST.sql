@@ -335,28 +335,28 @@ SELECT
 	[strMiscDescription]	=	A.strReference,
 	[dblQtyOrdered]			=	(CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
-									C.apegl_gl_un
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									* 
 									 (CASE WHEN C.apegl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
-									C.apegl_gl_un
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									*
 									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
-										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND C.apegl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative, this is offset voucher
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND ISNULL(NULLIF(C.apegl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative, this is offset voucher
 										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
-									C.apegl_gl_un
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									* 
 									 (CASE WHEN C.apegl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
 									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
-									C.apegl_gl_un
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									*
 									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
-										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND C.apegl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative 
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND ISNULL(NULLIF(C.apegl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative 
 										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
@@ -378,8 +378,8 @@ SELECT
 											(CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
 												THEN C.apegl_gl_amt * (-1) 
 											ELSE C.apegl_gl_amt END) < 0 
-										THEN -(ABS(C.apegl_gl_un)) --when line total is negative, get the cost by dividing to negative as well
-										ELSE C.apegl_gl_un 
+										THEN -(ABS(ISNULL(NULLIF(C.apegl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+										ELSE ISNULL(NULLIF(C.apegl_gl_un,0),1) 
 									END),
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
