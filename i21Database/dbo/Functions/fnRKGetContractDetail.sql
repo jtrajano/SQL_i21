@@ -241,6 +241,7 @@ WITH Pricing AS
 				AND intContractDetailId = CDT.intContractDetailId
 			group by intContractDetailId
 		) SeqHis
+		WHERE CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0) <> 0 --This means the sequence is already close
 		
 		UNION ALL
 		SELECT c.strCommodityCode
@@ -293,7 +294,19 @@ WITH Pricing AS
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND CDT.intUnitMeasureId = ium.intUnitMeasureId
 		JOIN tblSMCurrency CUR ON CDT.intCurrencyId = CUR.intCurrencyID
 		JOIN tblICCategory Category ON Category.intCategoryId = IM.intCategoryId
+		OUTER APPLY (
+			select 
+				sum(dblTransactionQuantity) as dblTransactionQuantity
+				,intContractDetailId 
+			from vyuCTSequenceAudit 
+			where strFieldName  = 'Balance' 
+				and ysnDeleted = 0
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmScreenDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+				AND intContractDetailId = CDT.intContractDetailId
+			group by intContractDetailId
+		) SeqHis
 		WHERE dblPricedQuantity < dblRecQty
+		AND CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0) <> 0 --This means the sequence is already close
 		
 		UNION ALL
 		SELECT c.strCommodityCode
