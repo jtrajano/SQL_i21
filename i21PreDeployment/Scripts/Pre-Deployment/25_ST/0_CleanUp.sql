@@ -208,19 +208,29 @@ END
 
 
 
-
 ----------------------------------------------------------------------------------------------------------------------------------
--- Start: Delete tblSTStoreAppUploadHistory
+-- Start: Rename tblSTStoreAppUploadHistory
 ----------------------------------------------------------------------------------------------------------------------------------
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreAppUploadHistory') 
 	BEGIN
-		PRINT('Drop tblSTStoreAppUploadHistory')
+		PRINT('Rename tblSTStoreAppUploadHistory to tblSTStoreAppHistoryReports')
 		EXEC('
-				DROP TABLE tblSTStoreAppUploadHistory
+				EXEC sp_rename ''dbo.tblSTStoreAppUploadHistory'', ''tblSTStoreAppHistoryReports''
 			')
+
+		PRINT('Rename tblSTStoreAppHistoryReports.stri21FolderPath to tblSTStoreAppHistoryReports.strServerFolderPath')
+		EXEC('
+				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21FolderPath'' , ''strServerFolderPath'', ''COLUMN''
+			')
+
+		PRINT('Rename tblSTStoreAppHistoryReports.stri21ConvertedFilename to tblSTStoreAppHistoryReports.strServerFilename')
+		EXEC('
+				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21ConvertedFilename'' , ''strServerFilename'', ''COLUMN''
+			')
+
 	END
 ----------------------------------------------------------------------------------------------------------------------------------
--- End: Delete tblSTStoreAppUploadHistory
+-- End: Rename tblSTStoreAppUploadHistory
 ----------------------------------------------------------------------------------------------------------------------------------
 
 PRINT('ST Cleanup - End')
