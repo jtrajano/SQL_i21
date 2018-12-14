@@ -30,7 +30,7 @@ SELECT	DISTINCT
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
 			,APBD.dblTotal + APBD.dblTax as dblTotal
-			,APBD.dblTax
+			,APBDT.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
 			,strCompanyAddress = (SELECT TOP 1 
@@ -113,7 +113,7 @@ SELECT	DISTINCT
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
 			,APBD.dblTotal + APBD.dblTax as dblTotal
-			,APBD.dblTax
+			,APBDT.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
 			,strCompanyAddress = (SELECT TOP 1 
