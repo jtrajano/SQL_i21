@@ -4,6 +4,7 @@
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ItemsToPost AS ItemCostingTableType READONLY 
+	,@ysnTransferOnSameLocation AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -674,6 +675,7 @@ END
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
+IF ISNULL(@ysnTransferOnSameLocation, 0) = 0 
 BEGIN 
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 
@@ -844,16 +846,26 @@ BEGIN
 	WHERE	--dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
 			ROUND(i.dblUnitOnHand, 6) = 0 
 
+	--SELECT	TOP 1 
+	--		@intInventoryTransactionId	= intInventoryTransactionId
+	--		,@dtmDate					= dtmDate
+	--		,@intTransactionId			= intTransactionId
+	--		,@strTransactionId			= strTransactionId
+	--		,@strTransactionForm		= strTransactionForm
+	--		,@intCostingMethod			= intCostingMethod
+	--FROM	dbo.tblICInventoryTransaction
+	--WHERE	strBatchId = @strBatchId
+	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+
 	SELECT	TOP 1 
-			@intInventoryTransactionId	= intInventoryTransactionId
-			,@dtmDate					= dtmDate
-			,@intTransactionId			= intTransactionId
-			,@strTransactionId			= strTransactionId
-			,@strTransactionForm		= strTransactionForm
-			,@intCostingMethod			= intCostingMethod
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	strBatchId = @strBatchId
-			AND ISNULL(ysnIsUnposted, 0) = 0 
+			@dtmDate					= i2p.dtmDate
+			,@intTransactionId			= i2p.intTransactionId
+			,@strTransactionId			= i2p.strTransactionId
+			,@intCurrencyId				= i2p.intCurrencyId
+	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
+				on i2p.intItemId = i.intItemId
+				AND i2p.intItemLocationId = i.intItemLocationId			
+	WHERE	ROUND(i.dblUnitOnHand, 6) = 0 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
 	BEGIN 
@@ -901,7 +913,7 @@ BEGIN
 				,[dblCost]								= 0
 				,[dblValue]								= -currentValuation.floatingValue
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= NULL -- @intCurrencyId
+				,[intCurrencyId]						= @intCurrencyId -- @intCurrencyId
 				,[dblExchangeRate]						= 1 -- @dblExchangeRate
 				,[intTransactionId]						= @intTransactionId
 				,[strTransactionId]						= @strTransactionId

@@ -184,7 +184,7 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = CASE WHEN item.intItemId IS NULL OR item.strType != 'Inventory' THEN 0
+					dblUnits = CASE WHEN item.intItemId IS NULL OR item.strType != 'Inventory' THEN R.dblQtyReceived
 									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
@@ -415,7 +415,7 @@ BEGIN
 			LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1					
 			OUTER APPLY( --	AP-4269 TIMEOUT ISSUE
 					SELECT
-							(CASE WHEN item.intItemId IS NULL OR item.strType != 'Inventory' THEN 0 ELSE
+							(CASE WHEN item.intItemId IS NULL OR item.strType != 'Inventory' THEN billDetails.dblQtyReceived ELSE
 														CASE WHEN item.strType = 'Inventory' THEN --units is only of inventory item
 															dbo.fnCalculateQtyBetweenUOM((CASE WHEN billDetails.intWeightUOMId > 0 
 																							THEN billDetails.intWeightUOMId ELSE billDetails.intUnitOfMeasureId END), 

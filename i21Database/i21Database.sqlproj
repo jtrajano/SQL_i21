@@ -6410,9 +6410,22 @@
     <Build Include="dbo\Stored Procedures\uspMFRemoveReservation.sql" />
     <Build Include="dbo\Functions\fnAllowLotTrackingToChange.sql" />
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
-    <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
     <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWC.sql" />
+    <Build Include="dbo\Views\vyuAPRptDM.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
+    <Build Include="dbo\Views\vyuAPRptWC.sql" />
     <Build Include="dbo\Functions\fnTRGetRateSurcharge.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

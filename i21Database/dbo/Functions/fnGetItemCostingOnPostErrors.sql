@@ -153,7 +153,8 @@ RETURN (
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
-							)							
+							)
+							AND @dblQty < 0							
 				)
 
 		-- Check for negative stocks at the lot table. 

@@ -15,7 +15,10 @@ AS
 			IK.dblReceiveStandardCost,		IK.dblReceiveAverageCost,		IK.dblReceiveEndMonthCost,	IK.strIssueUOM,
 			IK.dblIssueSalePrice,			IK.dblIssueMSRPPrice,			IK.dblIssueLastCost,		IK.dblIssueStandardCost,
 			IK.dblIssueAverageCost,			IK.dblIssueEndMonthCost,		IK.dblMinOrder,				IK.dblReorderPoint,
-			IK.intAllowNegativeInventory,	IK.strAllowNegativeInventory,	IK.intCostingMethod,		IK.strCostingMethod,
+			IK.intAllowNegativeInventory,	
+			IK.strAllowNegativeInventory COLLATE Latin1_General_CI_AS AS strAllowNegativeInventory,	
+			IK.intCostingMethod ,		
+			IK.strCostingMethod COLLATE Latin1_General_CI_AS AS strCostingMethod,
 			IK.dblAmountPercent,			IK.dblSalePrice,				IK.dblMSRPPrice,			IK.strPricingMethod,
 			IK.dblLastCost,					IK.dblStandardCost,				IK.dblAverageCost,			IK.dblEndMonthCost,
 			IK.dblUnitOnHand,				IK.dblOnOrder,					IK.dblOrderCommitted,		IK.dblBackOrder

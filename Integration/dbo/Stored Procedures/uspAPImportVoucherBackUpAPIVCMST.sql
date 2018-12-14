@@ -120,9 +120,16 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '') 
-										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
-									ELSE A.[apivc_chk_no] END,
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL --IF NO PAYMENT, GENERATE CHECK NUMBER IF PAID
+										THEN
+											(
+												CASE WHEN NULLIF(A.apivc_chk_no,'') IS NULL AND A.apivc_status_ind = 'P'
+													THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+													ELSE A.apivc_chk_no
+												END
+											)
+									ELSE A.[apivc_chk_no]
+									END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
@@ -172,6 +179,7 @@ BEGIN
 			AND G.apchk_alt_trx_ind != 'O'
 	) PaymentInfo
 	WHERE A.apivc_trans_type IN ('I', 'C', 'A')
+	AND A.apivc_status_ind = 'U'
 
 	SET @hasCCReconciliation = 0;
 END
@@ -216,9 +224,17 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '')
-										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
-									ELSE A.[apivc_chk_no] END,
+		[apivc_chk_no]			=	
+									-- CASE WHEN PaymentInfo.A4GLIdentity IS NULL --IF NO PAYMENT, GENERATE CHECK NUMBER IF PAID
+									-- 	THEN
+									-- 		(
+												CASE WHEN NULLIF(A.apivc_chk_no,'') IS NULL AND A.apivc_status_ind = 'P'
+													THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+													ELSE A.apivc_chk_no
+												END,
+									-- 		)
+									-- ELSE A.[apivc_chk_no]
+									-- END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
@@ -244,29 +260,29 @@ BEGIN
 		[apivc_user_id]			=	A.[apivc_user_id]		,
 		[apivc_user_rev_dt]		=	A.[apivc_user_rev_dt]	,
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
-		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
+		[apchk_A4GLIdentity]	=	NULL--PaymentInfo.A4GLIdentity
 	FROM apivcmst A
 	--INNER JOIN aphglmst B --join to make sure import only those have details
 	--	ON A.apivc_ivc_no = B.aphgl_ivc_no 
 	--	AND A.apivc_vnd_no = B.aphgl_vnd_no
 	--join to make sure import only those have details will get top 1 to avoid unique constraints error.
 	CROSS APPLY
-        (
-        SELECT  TOP 1 *
-        FROM    aphglmst B
-        WHERE   A.apivc_ivc_no = B.aphgl_ivc_no  
+	(
+		SELECT  TOP 1 *
+		FROM    aphglmst B
+		WHERE   A.apivc_ivc_no = B.aphgl_ivc_no  
 			AND A.apivc_vnd_no = B.aphgl_vnd_no
-        ) aphglmst
-	OUTER APPLY (
-		SELECT 
-			G.A4GLIdentity
-		FROM apchkmst G
-		WHERE G.apchk_vnd_no = A.apivc_vnd_no
-			AND G.apchk_chk_no = A.apivc_chk_no
-			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
-			AND G.apchk_cbk_no = A.apivc_cbk_no
-			--AND G.apchk_chk_amt <> 0
-	) PaymentInfo
+	) aphglmst
+	-- OUTER APPLY (
+	-- 	SELECT 
+	-- 		G.A4GLIdentity
+	-- 	FROM apchkmst G
+	-- 	WHERE G.apchk_vnd_no = A.apivc_vnd_no
+	-- 		AND G.apchk_chk_no = A.apivc_chk_no
+	-- 		AND G.apchk_rev_dt = A.apivc_chk_rev_dt
+	-- 		AND G.apchk_cbk_no = A.apivc_cbk_no
+	-- 		--AND G.apchk_chk_amt <> 0
+	-- ) PaymentInfo
 	WHERE 1 = CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 	AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
@@ -274,6 +290,7 @@ BEGIN
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
 	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
+	AND A.apivc_status_ind = 'U'
 
 	IF EXISTS(SELECT TOP 1 1 FROM tmp_apivcmstImport A WHERE A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
 	AND A.apivc_trans_type IN ('I', 'C', 'A'))

@@ -168,7 +168,7 @@ BEGIN
 				,strItemDescription =  E.strDescription
 				,strCustomerName = C.strName
 				,strItemUnitDescription = G.strUnitMeasure
-				,ysnMaxPrice = CAST(0 AS BIT)
+				,ysnMaxPrice = CAST(ISNULL(ysnMaxPrice,0) AS BIT)
  			FROM tblCTContractHeader A
 			INNER JOIN vyuCTContractHeaderNotMapped H
 				ON A.intContractHeaderId = H.intContractHeaderId

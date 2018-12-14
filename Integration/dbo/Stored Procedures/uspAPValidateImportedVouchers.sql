@@ -63,55 +63,55 @@ FROM (
 WHERE i21Total <> i21DetailTotal --Verify if total and detail total are equal
 
 --GET THOSE PAID VOUCHERS THAT DO NOT HAVE PAYMENT
-INSERT INTO @log
-SELECT
-	C.strBillId + ' has been paid but do not have payment created.' AS strBillId
-FROM tmp_apivcmstImport C2
-INNER JOIN tblAPapivcmst C3 ON C2.intBackupId = C3.intId
-INNER JOIN tblAPBill C ON C3.intBillId = C.intBillId
-LEFT JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
-LEFT JOIN tblGLDetail E ON E.intTransactionId = C.intBillId AND E.strTransactionId = C.strBillId
-WHERE C.ysnPaid = 1 AND D.intPaymentDetailId IS NULL AND C.ysnOrigin = 1 AND C.ysnPosted = 1 AND E.intGLDetailId IS NULL
+-- INSERT INTO @log
+-- SELECT
+-- 	C.strBillId + ' has been paid but do not have payment created.' AS strBillId
+-- FROM tmp_apivcmstImport C2
+-- INNER JOIN tblAPapivcmst C3 ON C2.intBackupId = C3.intId
+-- INNER JOIN tblAPBill C ON C3.intBillId = C.intBillId
+-- LEFT JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
+-- LEFT JOIN tblGLDetail E ON E.intTransactionId = C.intBillId AND E.strTransactionId = C.strBillId
+-- WHERE C.ysnPaid = 1 AND D.intPaymentDetailId IS NULL AND C.ysnOrigin = 1 AND C.ysnPosted = 1 AND E.intGLDetailId IS NULL
 
 --GET THOSE INVALID PAYMENT TRANSACTION
-INSERT INTO @log
-SELECT
-	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
-							THEN ' total do not match. Header: ' + CAST(i21Total AS NVARCHAR) + ' Detail:' +  CAST(i21DetailTotal AS NVARCHAR)
-							END AS strPaymentRecordNum
-FROM (
-	SELECT DISTINCT
-	intPaymentId
-	,strPaymentRecordNum
-	,i21Total
-	,SUM(i21DetailTotal) i21DetailTotal
-	FROM (
-			SELECT 
-			A.intPaymentId
-			,A.strPaymentRecordNum
-			,(CASE WHEN LOWER(PM.strPaymentMethod) = 'deposit' THEN A.dblAmountPaid * -1 ELSE A.dblAmountPaid END) i21Total
-			,ISNULL((CASE WHEN C.intTransactionType != 1 AND (A.ysnPrepay = 0 OR LOWER(PM.strPaymentMethod) = 'deposit')
-						THEN B.dblPayment * -1 
-						ELSE B.dblPayment END),0) i21DetailTotal
-			FROM tblAPPayment A
-			INNER JOIN tblSMPaymentMethod PM ON A.intPaymentMethodId = PM.intPaymentMethodID
-			LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-			LEFT JOIN tblAPBill C ON B.intBillId = C.intBillId
-			LEFT JOIN tblGLDetail D ON D.intTransactionId = A.intPaymentId AND D.strTransactionId = A.strPaymentRecordNum
-			WHERE A.ysnOrigin = 1 AND D.intGLDetailId IS NULL
-			AND B.intBillId  IN (
-				SELECT 
-					V2.intBillId
-				FROM tmp_apivcmstImport V
-				INNER JOIN tblAPapivcmst  V2 ON V.intBackupId = V2.intId
-			)
-			) ImportedBills
-	GROUP BY 
-	intPaymentId
-	,strPaymentRecordNum
-	,i21Total
-	) Summary
-WHERE i21Total <> i21DetailTotal
+-- INSERT INTO @log
+-- SELECT
+-- 	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
+-- 							THEN ' total do not match. Header: ' + CAST(i21Total AS NVARCHAR) + ' Detail:' +  CAST(i21DetailTotal AS NVARCHAR)
+-- 							END AS strPaymentRecordNum
+-- FROM (
+-- 	SELECT DISTINCT
+-- 	intPaymentId
+-- 	,strPaymentRecordNum
+-- 	,i21Total
+-- 	,SUM(i21DetailTotal) i21DetailTotal
+-- 	FROM (
+-- 			SELECT 
+-- 			A.intPaymentId
+-- 			,A.strPaymentRecordNum
+-- 			,(CASE WHEN LOWER(PM.strPaymentMethod) = 'deposit' THEN A.dblAmountPaid * -1 ELSE A.dblAmountPaid END) i21Total
+-- 			,ISNULL((CASE WHEN C.intTransactionType != 1 AND (A.ysnPrepay = 0 OR LOWER(PM.strPaymentMethod) = 'deposit')
+-- 						THEN B.dblPayment * -1 
+-- 						ELSE B.dblPayment END),0) i21DetailTotal
+-- 			FROM tblAPPayment A
+-- 			INNER JOIN tblSMPaymentMethod PM ON A.intPaymentMethodId = PM.intPaymentMethodID
+-- 			LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+-- 			LEFT JOIN tblAPBill C ON B.intBillId = C.intBillId
+-- 			LEFT JOIN tblGLDetail D ON D.intTransactionId = A.intPaymentId AND D.strTransactionId = A.strPaymentRecordNum
+-- 			WHERE A.ysnOrigin = 1 AND D.intGLDetailId IS NULL
+-- 			AND B.intBillId  IN (
+-- 				SELECT 
+-- 					V2.intBillId
+-- 				FROM tmp_apivcmstImport V
+-- 				INNER JOIN tblAPapivcmst  V2 ON V.intBackupId = V2.intId
+-- 			)
+-- 			) ImportedBills
+-- 	GROUP BY 
+-- 	intPaymentId
+-- 	,strPaymentRecordNum
+-- 	,i21Total
+-- 	) Summary
+-- WHERE i21Total <> i21DetailTotal
 
 INSERT INTO tblAPImportVoucherLog
 (

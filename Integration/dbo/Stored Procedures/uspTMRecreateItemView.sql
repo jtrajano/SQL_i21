@@ -126,7 +126,7 @@ BEGIN
 				,vwitm_search = CAST(''''  AS CHAR(13))    
 				,vwitm_desc = A.strDescription COLLATE Latin1_General_CI_AS
 				,vwitm_un_desc = ''''
-				,vwitm_un_prc1 = CAST(0.0  AS DECIMAL(18,6))    
+				,vwitm_un_prc1 = ISNULL(E.dblSalePrice,0.0) 
 				,vwitm_un_prc2 = CAST(0.0  AS DECIMAL(18,6))   
 				,vwitm_un_prc3 = CAST(0.0  AS DECIMAL(18,6))    
 				,vwitm_un_prc4 = CAST(0.00  AS DECIMAL(18,6))    
@@ -154,7 +154,7 @@ BEGIN
 				ON A.intCategoryId = D.intCategoryId
 			LEFT JOIN tblICItemPricing E
 				ON A.intItemId = E.intItemId 
-				AND B.intLocationId = E.intItemLocationId
+				AND B.intItemLocationId = E.intItemLocationId
 		')
 	END
 END

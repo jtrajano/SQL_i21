@@ -37,6 +37,79 @@ BEGIN
 
 BEGIN TRY
 
+	DECLARE @idoc INT
+	
+	--READ XML
+	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
+
+	--TEMP TABLE FOR PARAMETERS
+	DECLARE @temp_params TABLE (
+		 [fieldname] NVARCHAR(MAX)
+		,[condition] NVARCHAR(MAX)      
+		,[from] NVARCHAR(MAX)
+		,[to] NVARCHAR(MAX)
+		,[join] NVARCHAR(MAX)
+		,[begingroup] NVARCHAR(MAX)
+		,[endgroup] NVARCHAR(MAX) 
+		,[datatype] NVARCHAR(MAX)
+	) 
+
+	--XML DATA TO TABLE
+	INSERT INTO @temp_params
+	SELECT *
+	FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
+	WITH ([fieldname] NVARCHAR(MAX)
+		, [condition] NVARCHAR(MAX)
+		, [from] NVARCHAR(MAX)
+		, [to] NVARCHAR(MAX)
+		, [join] NVARCHAR(MAX)
+		, [begingroup] NVARCHAR(MAX)
+		, [endgroup] NVARCHAR(MAX)
+		, [datatype] NVARCHAR(MAX))
+
+	
+	DECLARE @ysnIncludeRemittancePage BIT
+	SELECT TOP 1
+			@ysnIncludeRemittancePage = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnIncludeRemittancePage'
+
+	DECLARE @ysnReprintInvoice BIT
+	SELECT TOP 1
+			@ysnReprintInvoice = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+	DECLARE @dtmBalanceForwardDate DATETIME
+	SELECT TOP 1
+		@dtmBalanceForwardDate = [from]
+	FROM @temp_params WHERE [fieldname] = 'dtmBalanceForwardDate'
+
+	DECLARE @dtmInvoiceDate DATETIME
+	SELECT TOP 1
+		@dtmInvoiceDate = [from]
+	FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+
+	--DECLARE @dtmTransactionDateFrom DATETIME
+	--DECLARE @dtmTransactionDateTo DATETIME
+	--SELECT TOP 1
+	--		@dtmTransactionDateFrom = [from]
+	--		,@dtmTransactionDateFrom = [to]
+	--FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
+
+	DECLARE @strInvoiceCycle NVARCHAR(MAX)
+	SELECT TOP 1
+		@strInvoiceCycle = ISNULL([from],'')
+	FROM @temp_params WHERE [fieldname] = 'strInvoiceCycle'
+		
+
+	DECLARE @strCustomerNumber NVARCHAR(MAX)
+	SELECT TOP 1
+		@strCustomerNumber = ISNULL([from],'')
+	FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+
+		
+	SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
+
+
 
 	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
 
@@ -279,7 +352,7 @@ BEGIN TRY
 	,dtmPostedDate
 	,dtmDiscountDate
 	,dtmDueDate
-	,dtmInvoiceDate
+	,@dtmInvoiceDate --dtmInvoiceDate
 	,ISNULL(dblTotalMiles				  ,0) AS dblTotalMiles
 	,ISNULL(dblQuantity					  ,0) AS dblQuantity
 	,ISNULL(dblCalculatedTotalAmount	  ,0) AS dblCalculatedTotalAmount
@@ -350,81 +423,12 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam , @UserId = @UserId
 
 
-	DECLARE @idoc INT
 	
-	--READ XML
-	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
-
-	--TEMP TABLE FOR PARAMETERS
-	DECLARE @temp_params TABLE (
-		 [fieldname] NVARCHAR(MAX)
-		,[condition] NVARCHAR(MAX)      
-		,[from] NVARCHAR(MAX)
-		,[to] NVARCHAR(MAX)
-		,[join] NVARCHAR(MAX)
-		,[begingroup] NVARCHAR(MAX)
-		,[endgroup] NVARCHAR(MAX) 
-		,[datatype] NVARCHAR(MAX)
-	) 
-
-	--XML DATA TO TABLE
-	INSERT INTO @temp_params
-	SELECT *
-	FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
-	WITH ([fieldname] NVARCHAR(MAX)
-		, [condition] NVARCHAR(MAX)
-		, [from] NVARCHAR(MAX)
-		, [to] NVARCHAR(MAX)
-		, [join] NVARCHAR(MAX)
-		, [begingroup] NVARCHAR(MAX)
-		, [endgroup] NVARCHAR(MAX)
-		, [datatype] NVARCHAR(MAX))
-
-	
-	DECLARE @ysnIncludeRemittancePage BIT
-	SELECT TOP 1
-			@ysnIncludeRemittancePage = ISNULL([from],0)
-	FROM @temp_params WHERE [fieldname] = 'ysnIncludeRemittancePage'
-
-	DECLARE @ysnReprintInvoice BIT
-	SELECT TOP 1
-			@ysnReprintInvoice = ISNULL([from],0)
-	FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
 
 
 	IF(@ysnIncludeRemittancePage = 1)
 	BEGIN
 
-		DECLARE @dtmBalanceForwardDate DATETIME
-		SELECT TOP 1
-				@dtmBalanceForwardDate = [from]
-		FROM @temp_params WHERE [fieldname] = 'dtmBalanceForwardDate'
-
-		DECLARE @dtmInvoiceDate DATETIME
-		SELECT TOP 1
-				@dtmInvoiceDate = [from]
-		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
-
-		--DECLARE @dtmTransactionDateFrom DATETIME
-		--DECLARE @dtmTransactionDateTo DATETIME
-		--SELECT TOP 1
-		--		@dtmTransactionDateFrom = [from]
-		--		,@dtmTransactionDateFrom = [to]
-		--FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
-
-		DECLARE @strInvoiceCycle NVARCHAR(MAX)
-		SELECT TOP 1
-				@strInvoiceCycle = ISNULL([from],'')
-		FROM @temp_params WHERE [fieldname] = 'strInvoiceCycle'
-		
-
-		DECLARE @strCustomerNumber NVARCHAR(MAX)
-		SELECT TOP 1
-				@strCustomerNumber = ISNULL([from],'')
-		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
-
-		
-		SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
 		EXEC uspARCustomerStatementBalanceForwardReport 
 				@dtmDateFrom = NULL			
@@ -724,6 +728,7 @@ BEGIN TRY
 		  from tblARCustomerStatementStagingTable
 		  where dblTotalAR IS NOT NULL
 		   AND intEntityCustomerId = STAGING.intEntityCustomerId
+		   AND intEntityUserId = STAGING.intEntityUserId
 		  group by 
 		  dblTotalAR 
 		  ,intEntityCustomerId

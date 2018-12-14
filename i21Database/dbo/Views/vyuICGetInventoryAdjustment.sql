@@ -18,6 +18,7 @@ SELECT
 			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move'
 			WHEN Adj.intAdjustmentType = 9 THEN 'Lot Owner Change'
 		END)
+		COLLATE Latin1_General_CI_AS
 	, Adj.strAdjustmentNo
 	, Adj.strDescription
 	, Adj.intSort

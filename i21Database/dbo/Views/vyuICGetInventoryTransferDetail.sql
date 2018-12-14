@@ -84,6 +84,7 @@ AS
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
 								ELSE NULL END)
+						COLLATE Latin1_General_CI_AS
 	, [Transfer].ysnPosted
 	, ysnWeights
 	, [Transfer].strDescription
@@ -115,6 +116,7 @@ AS
 		,DEFAULT 
 		,DEFAULT 
 	)
+	COLLATE Latin1_General_CI_AS
 	, strTransferToAddress = [dbo].[fnARFormatCustomerAddress](
 		DEFAULT
 		,DEFAULT 
@@ -127,6 +129,7 @@ AS
 		,DEFAULT 
 		,DEFAULT 
 	)
+	COLLATE Latin1_General_CI_AS
 	, Receipt.strWarehouseRefNo
 	, TransferDetail.strLotCondition
 	, TransferDetail.dblWeightPerQty

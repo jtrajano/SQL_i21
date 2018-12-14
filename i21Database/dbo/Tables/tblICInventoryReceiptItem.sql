@@ -83,7 +83,11 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryReceiptItem]([intInventoryReceiptId] ASC, [intInventoryReceiptItemId] ASC, [strChargesLink] ASC);
 
 	GO
-
+	
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_SourceId
+		ON tblICInventoryReceiptItem (intSourceId, intLineNo, intOrderId)
+	GO
+	
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',
 		@level0type = N'SCHEMA',

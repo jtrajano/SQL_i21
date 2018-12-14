@@ -9,7 +9,7 @@ FROM (
 			, intEntityVendorId			= CAST(h.intToLocationId AS INT) 
 			, strVendorId				= CAST(Loc.strLocationName AS NVARCHAR(50))
 			, strVendorName				= CAST(Loc.strLocationName AS NVARCHAR(50))
-			, strReceiptType			= 'Transfer Order'
+			, strReceiptType			= 'Transfer Order' COLLATE Latin1_General_CI_AS
 			, intLineNo					= d.intInventoryTransferDetailId
 			, intOrderId				= h.intInventoryTransferId
 			, strOrderNumber			= h.strTransferNo
@@ -17,7 +17,7 @@ FROM (
 			, dblReceived				= CAST(NULL AS NUMERIC(38, 20))
 			, intSourceType				= CAST(0 AS INT)
 			, intSourceId				= d.intInventoryTransferDetailId
-			, strSourceNumber			= CAST(NULL AS NVARCHAR(50))
+			, strSourceNumber			= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, intItemId					= d.intItemId
 			, strItemNo					= item.strItemNo
 			, strItemDescription		= item.strDescription
@@ -47,7 +47,7 @@ FROM (
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
 			, intContainerId			= CAST(NULL AS INT)
-			, strContainer				= CAST(NULL AS NVARCHAR(50))
+			, strContainer				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, intSubLocationId			= toSubLocation.intCompanyLocationSubLocationId
 			, strSubLocationName		= toSubLocation.strSubLocationName 
 			, intStorageLocationId		= toStorageLocation.intStorageLocationId
@@ -57,7 +57,7 @@ FROM (
 			, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
 			, intItemUOMId				= ItemUOM.intItemUOMId
 			, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
-			, strUnitType				= CAST(NULL AS NVARCHAR(50))
+			, strUnitType				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			-- Gross/Net UOM --------------------------------------------------------
 			, intWeightUOMId			= GrossNetUOM.intItemUOMId
 			, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
@@ -82,18 +82,18 @@ FROM (
 			, strLifeTimeType			= item.strLifeTimeType
 			, ysnLoad					= CAST(0 AS BIT) 
 			, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
-			, strBOL					= CAST(NULL AS NVARCHAR(50))
+			, strBOL					= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, dblFranchise				= CAST(0 AS NUMERIC(18, 6))
 			, dblContainerWeightPerQty	= CAST(0 AS NUMERIC(18, 6))
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
-			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
+			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, dblGross					= ISNULL(d.dblGross, 0) -- There is no gross from transfer
 			, dblNet					= ISNULL(d.dblNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
-			, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
-			, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+			, strBundledItemNo = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			, strBundledItemDescription = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, ysnIsBasket = CAST(0 AS BIT)
 			, item.strBundleType
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN tblICInventoryTransferDetail d 

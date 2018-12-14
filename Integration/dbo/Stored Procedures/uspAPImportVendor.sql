@@ -33,6 +33,10 @@ SET ANSI_WARNINGS OFF
 --	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
 --	RETURN;
 --END
+
+DECLARE @defaultCurrencyPref INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId > 0);
+DECLARE @USDCur INT = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'');
+
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
@@ -390,7 +394,8 @@ BEGIN
                 --Vendors
                 @intVendorType				= CASE WHEN ssvnd_co_per_ind = ''C'' THEN 0 ELSE 1 END,
                 @originVendor				= ssvnd_vnd_no,
-                @intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
+                @intCurrencyId				= ISNULL((SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS)
+											  ,ISNULL(@defaultCurrencyPref, @USDCur)),
                 @strVendorPayToId         	= ssvnd_pay_to,
                 @intPaymentMethodId       	= NULL,
                 @intVendorTaxCodeId     	= NULL,
@@ -465,7 +470,7 @@ BEGIN
 				--Vendors
 				@intVendorType				= 1,
 				@originVendor				= apchk_vnd_no,
-				@intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD''),
+				@intCurrencyId				= ISNULL(@defaultCurrencyPref, @USDCur),
 				@strVendorPayToId         	= NULL,
 				@intPaymentMethodId       	= NULL,
 				@intVendorTaxCodeId     	= NULL,
@@ -551,8 +556,8 @@ BEGIN
 		END
 		
 
-		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
+		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strCheckPayeeName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+		VALUES								(@EntityId, @strLocationName, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
@@ -564,6 +569,9 @@ BEGIN
 
 		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dblCreditLimit], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dblCreditLimit, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+
+		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
+		VALUES(@EntityId, @intTermsId)
 
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
@@ -579,6 +587,7 @@ BEGIN
 		INSERT [dbo].[tblEMEntityLocation]    
 		([intEntityId], 
 		 [strLocationName], 
+		 [strCheckPayeeName],
 		 [strAddress], 
 		 [strCity], 
 		 [strCountry], 
@@ -592,6 +601,10 @@ BEGIN
 		select 				
 					--ssvnd_pay_to,
 					@EntityId, 
+					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
 						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
@@ -622,6 +635,7 @@ BEGIN
 		INSERT [dbo].[tblEMEntityLocation]    
 		([intEntityId], 
 		 [strLocationName], 
+		 [strCheckPayeeName],
 		 [strAddress], 
 		 [strCity], 
 		 [strCountry], 
@@ -640,7 +654,12 @@ BEGIN
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
 								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
 					, 0 , 100),
-								
+					SUBSTRING ( 
+						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
+					, 0 , 100),			
 								--+ CAST(A4GLIdentity AS NVARCHAR),
 					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 					ssvnd_city,

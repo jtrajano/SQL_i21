@@ -4,7 +4,7 @@ SELECT
 	 strTransactionType			= rc.strReceiptType
 	,strTransactionId			= rc.strSourceNumber
 	,strTransactionDate			= rc.dtmDate
-	,strTransactionDueDate		= CAST(NULL AS NVARCHAR(50))
+	,strTransactionDueDate		= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVendorName				= rc.strName
 	,strCommodity				= c.strCommodityCode
 	,strLineOfBusiness			= lob.strLineOfBusiness

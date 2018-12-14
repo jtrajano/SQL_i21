@@ -261,6 +261,7 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
+			AND cbOut.intRevalueLotId IS NULL 
 END 
 
 -- Remember the original cost from the cost bucket
@@ -673,11 +674,17 @@ END
 BEGIN 
 	-- Calculate the value to book. 
 	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
-	SELECT	@CurrentCostAdjustment = 
-				SUM((cb.dblStockIn - cb.dblStockOut) * cb.dblCost)
-				- SUM((cb.dblStockIn - cb.dblStockOut) * cbo.dblCost) 
-	FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
-				ON cb.intInventoryLotId = cbo.intInventoryLotId
+	-- SELECT	@CurrentCostAdjustment = 
+	-- 			SUM((cb.dblStockIn - cb.dblStockOut) * cb.dblCost)
+	-- 			- SUM((cb.dblStockIn - cb.dblStockOut) * cbo.dblCost) 
+	-- FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
+	-- 			ON cb.intInventoryLotId = cbo.intInventoryLotId
+
+	SET 	@CurrentCostAdjustment = NULL 
+	SELECT	@CurrentCostAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
+	FROM	tblICInventoryLotCostAdjustmentLog	
+	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost	
 
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
 

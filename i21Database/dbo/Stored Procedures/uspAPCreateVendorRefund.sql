@@ -44,7 +44,7 @@ INSERT INTO #tmpVouchersForPay
 SELECT
 	intBillId
 	,intPaymentId
-	,dblTempPayment
+	,ABS(dblTempPayment)
 FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
 WHERE dblTempPayment < 0
 

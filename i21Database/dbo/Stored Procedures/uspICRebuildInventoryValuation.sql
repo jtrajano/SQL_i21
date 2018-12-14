@@ -745,6 +745,8 @@ BEGIN
 			SET @strAccountToCounterInventory = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									'Inventory Adjustment'
+								WHEN @strTransactionForm IN ('Inventory Count') THEN 
+									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
@@ -992,8 +994,8 @@ BEGIN
 			-- Repost 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer', 'Inventory Transfer with Shipment'))
 			BEGIN 
-				DECLARE @ysnTransferOnSameLocation AS BIT
 				DECLARE @ysnShipmentRequired AS BIT 
+				DECLARE @ysnTransferOnSameLocation AS BIT 
 				SET @ysnTransferOnSameLocation = 0 
 				SET @ysnShipmentRequired = 0 
 				
@@ -1068,6 +1070,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+					,@ysnTransferOnSameLocation
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
@@ -1261,7 +1264,7 @@ BEGIN
 						,@intEntityUserSecurityId
 						,@strGLDescription
 						,NULL 
-						,@intItemId-- This is only used when rebuilding the stocks. 								
+						,@intItemId-- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 

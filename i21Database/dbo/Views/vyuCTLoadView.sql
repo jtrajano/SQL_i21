@@ -16,7 +16,7 @@ AS
 				,LD.dblQuantity
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
-				,'Shipment' AS strShipmentType
+				,'Shipment' COLLATE Latin1_General_CI_AS AS strShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
@@ -37,7 +37,7 @@ AS
 						FOR XML PATH(''), TYPE)
 						.value('.','NVARCHAR(MAX)'
 					),1,2,' '
-				) strContainerNumber,
+				) COLLATE Latin1_General_CI_AS AS strContainerNumber,
 				LO.strBookingReference
 				,LO.intLoadId
 
@@ -90,7 +90,7 @@ AS
 				,LD.dblQuantity 
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
-				,'Shipping Instructions' AS strShipmentType
+				,'Shipping Instructions' COLLATE Latin1_General_CI_AS AS strShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate

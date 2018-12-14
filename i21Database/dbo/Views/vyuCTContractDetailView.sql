@@ -102,7 +102,7 @@ AS
 					WHEN	CD.intPricingTypeId = 1
 							THEN	'Priced'
 					ELSE	''
-			END		AS strPricingStatus,
+			END		COLLATE Latin1_General_CI_AS AS strPricingStatus,
 			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CD.dblNoOfLots)	AS NUMERIC(18, 6))			AS	dblUnpricedLots,
 			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18, 6))		AS	dblUnhedgedLots,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)										AS	intLoadReceived,

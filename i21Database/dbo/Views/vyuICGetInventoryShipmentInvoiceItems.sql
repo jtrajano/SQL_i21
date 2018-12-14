@@ -24,8 +24,8 @@ SELECT	Shipment.intInventoryShipmentId
 		,dblInvoiceItemTotal = ShipmentAndInvoicedItems.InvoiceItemTotal
 		,dblItemsReceivable = ShipmentAndInvoicedItems.dblItemsReceivable
 		,dtmLastInvoiceDate = topInvoice.dtmDate
-		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) 
-		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
 FROM	tblICInventoryShipment Shipment 
 		INNER JOIN tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
@@ -137,13 +137,13 @@ FROM	tblICInventoryShipment Shipment
 			ON currency.intCurrencyID = Shipment.intCurrencyId
 
 		LEFT JOIN (
-			SELECT 1 intOrderTypeId, 'Sales Contract' strOrderType
+			SELECT 1 intOrderTypeId, 'Sales Contract' COLLATE Latin1_General_CI_AS strOrderType
 			UNION
-			SELECT 2 intOrderTypeId, 'Sales Order' strOrderType
+			SELECT 2 intOrderTypeId, 'Sales Order' COLLATE Latin1_General_CI_AS strOrderType
 			UNION
-			SELECT 3 intOrderTypeId, 'Transfer Order' strOrderType
+			SELECT 3 intOrderTypeId, 'Transfer Order' COLLATE Latin1_General_CI_AS strOrderType
 			UNION
-			SELECT 4 intOrderTypeId, 'Direct' strOrderType
+			SELECT 4 intOrderTypeId, 'Direct' COLLATE Latin1_General_CI_AS strOrderType
 		) AS ot 
 			ON ot.intOrderTypeId = Shipment.intOrderType
 

@@ -19,7 +19,12 @@ RETURNS TABLE AS RETURN
 		,forPay.dblTotal
 		,forPay.dblDiscount
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
-							THEN dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+									THEN 
+									(
+										CASE WHEN voucher.ysnDiscountOverride = 1 THEN voucher.dblDiscount
+											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+										END
+									) 
 							ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblInterest 
 		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 
@@ -46,6 +51,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strName
 		,forPay.strCheckPayeeName
 		,forPay.ysnDeferredPayment
+		,ysnPastDue = dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate)
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)

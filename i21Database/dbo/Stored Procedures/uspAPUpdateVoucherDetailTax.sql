@@ -137,16 +137,20 @@ IF @transCount = 0 BEGIN TRANSACTION
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A
-		SET A.dblTax = CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.intInventoryReceiptChargeId > 0 AND D.ysnPrice = 1
-								THEN TaxAmount.dblTax * -1 
-							ELSE TaxAmount.dblTax
-						END
+		SET A.dblTax = TaxAmount.dblTax
+						-- CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.intInventoryReceiptChargeId > 0 AND D.ysnPrice = 1
+						-- 		THEN TaxAmount.dblTax * -1 
+						-- 	ELSE TaxAmount.dblTax
+						-- END
+			,A.intTaxGroupId = TaxAmount.intTaxGroupId
 	FROM tblAPBillDetail A
 	INNER JOIN @billDetailIds B ON A.intBillDetailId = B.intId
 	CROSS APPLY (
 		SELECT 
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
+			,B.intTaxGroupId
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
+		GROUP BY B.intTaxGroupId
 	) TaxAmount
 	LEFT JOIN tblICInventoryReceiptCharge D ON A.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 	WHERE TaxAmount.dblTax IS NOT NULL

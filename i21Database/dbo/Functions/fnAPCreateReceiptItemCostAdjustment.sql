@@ -84,6 +84,7 @@ BEGIN
 													Cost Adjustment Value = 
 													[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
 												*/
+												CAST(
 												dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
@@ -98,7 +99,10 @@ BEGIN
 																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 													END 													
 												)
-												- dbo.fnMultiply(
+												AS DECIMAL(18,2))
+												- 
+												CAST(
+												dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													
@@ -137,6 +141,7 @@ BEGIN
 														END 
 													END
 												)
+												AS DECIMAL(18,2))
 		,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 		--,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
 		,[intTransactionId]					=	A.intBillId

@@ -31,7 +31,7 @@ SELECT
 	,COALESCE(t2.strItemNo, t1.strItemNo) strItemNo
 	,COALESCE(t2.strItemDescription, t1.strItemDescription) strItemDescription
 	,COALESCE(t2.strLotTracking, t1.strLotTracking) strLotTracking
-	,COALESCE(t2.strType, t1.strType) strType
+	,COALESCE(t2.strType, t1.strType) COLLATE Latin1_General_CI_AS strType
 	,COALESCE(t2.strUnitMeasure, t1.strItemUOM) strUnitMeasure
 	,COALESCE(t2.dblItemUOMCF, t1.dblItemUOMCF) dblItemUOMCF
 	,COALESCE(t2.intStockUOM, t1.intPStockUOM) intStockUOM

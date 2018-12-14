@@ -19,6 +19,7 @@ SELECT Lot.intLotId
 						WHEN Lot.intOwnershipType = 3 THEN 'Consigned Purchase'
 						WHEN Lot.intOwnershipType = 4 THEN 'Consigned Sale'
 						END)
+						COLLATE Latin1_General_CI_AS
 	, Lot.intSubLocationId
 	, SubLocation.strSubLocationName
 	, Lot.intStorageLocationId

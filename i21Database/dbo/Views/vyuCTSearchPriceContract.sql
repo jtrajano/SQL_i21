@@ -37,7 +37,7 @@ AS
 					intSalespersonId,
 					intCurrencyId,
 					intCompanyLocationId,
-					'Unpriced' AS strStatus,
+					'Unpriced' COLLATE Latin1_General_CI_AS AS strStatus,
 					CAST(0 AS INT) AS dblLotsFixed,
 					dblNoOfLots AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
@@ -105,7 +105,7 @@ AS
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
-					'Unpriced' AS strStatus,
+					'Unpriced' COLLATE Latin1_General_CI_AS AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
 					CH.dblNoOfLots AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
@@ -202,7 +202,7 @@ AS
 							THEN 'Fully Priced' 
 							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
-					END		AS strStatus,
+					END		COLLATE Latin1_General_CI_AS AS strStatus,
 					PF.[dblLotsFixed],
 					PF.[dblTotalLots]-[dblLotsFixed] AS dblBalanceNoOfLots,
 					PF.intLotsHedged,
@@ -273,7 +273,7 @@ AS
 							THEN 'Fully Priced' 
 							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
-					END		AS strStatus,
+					END		COLLATE Latin1_General_CI_AS AS strStatus,
 					PF.[dblLotsFixed],
 					PF.[dblTotalLots]-PF.[dblLotsFixed] AS dblBalanceNoOfLots,
 					PF.intLotsHedged,
