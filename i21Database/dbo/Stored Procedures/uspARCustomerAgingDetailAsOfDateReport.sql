@@ -219,7 +219,7 @@ WHERE ysnPosted = 1
 		INNER JOIN (SELECT intAccountCategoryId
 						 , strAccountCategory 
 					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
+					WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -385,7 +385,7 @@ FROM
 	  , I.strType
 	  , strRecordNumber			= NULL
 FROM #POSTEDINVOICES I WITH (NOLOCK)
-WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
+WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 
 UNION ALL
 
@@ -464,7 +464,7 @@ LEFT JOIN (
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId	
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
-WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
+WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
  
 ) AS TBL) AS B    
 
