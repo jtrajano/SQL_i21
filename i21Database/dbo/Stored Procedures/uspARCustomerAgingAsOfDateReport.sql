@@ -256,7 +256,7 @@ WHERE ysnPosted = 1
 		INNER JOIN (SELECT intAccountCategoryId
 						 , strAccountCategory 
 					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
+					WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
@@ -350,7 +350,7 @@ FROM
 	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 THEN 'Over 90' END
 				 END
 FROM #POSTEDINVOICES I WITH (NOLOCK)
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
+WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS A  
 
@@ -389,7 +389,7 @@ FROM
 	  , dblPrepayments		= 0
 	  , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
-WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
+WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 
 UNION ALL
 
@@ -462,7 +462,7 @@ LEFT JOIN (
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
+WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS TBL) AS B
           
