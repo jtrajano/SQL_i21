@@ -4,7 +4,7 @@ AS
 SELECT mh.*,
 cl.strLocationName,c.strCommodityCode,m.strFutMarketName,fm.strFutureMonth,e.strName,ba.strAccountNumber,b.strBook,sb.strSubBook,
 ert.strCurrencyExchangeRateType,bk.strBankName,bac.strBankAccountNo, 
-CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end as strSelectedInstrumentType,
+CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end COLLATE Latin1_General_CI_AS as strSelectedInstrumentType,
 sum(md.dblMatchQty)   dblMatchedQty,
 sum(md.dblNetPL) dblNetPL,
 sum(md.dblGrossPL)dblGrossPL,

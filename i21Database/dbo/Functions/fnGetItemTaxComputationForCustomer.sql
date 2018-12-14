@@ -309,8 +309,8 @@ BEGIN
 			UPDATE
 				@ItemTaxes
 			SET
-				dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
-				,dblAdjustedTax = ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				dblTax			= dbo.fnRoundBanker(@ItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
+				,dblAdjustedTax = dbo.fnRoundBanker(@ItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
 				,ysnComputed	= 1 
 			WHERE
 				[Id] = @Id				

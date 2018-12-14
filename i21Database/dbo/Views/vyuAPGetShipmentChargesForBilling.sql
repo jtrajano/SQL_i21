@@ -26,7 +26,7 @@ SELECT DISTINCT
 	, dblVoucherLineTotal						=	voucher.LineTotal
 	, dblRecordTax								=	0
 	, dblVoucherTax								=	ISNULL(Taxes.dblTax,0)
-	, dblOpenQty								=	1 - ISNULL(voucher.QtyTotal, 0)
+	, dblOpenQty								=	A.dblQuantityBilled
 	, dblItemsPayable							=	ROUND(A.dblAmount, 2) - ISNULL(voucher.LineTotal, 0)
 	, dblTaxesPayable							=	0
 	, dtmLastVoucherDate						=	topVoucher.dtmBillDate

@@ -704,6 +704,7 @@ BEGIN TRY
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND RI.intItemId = @intInputItemId
+		AND RI.intRecipeItemTypeId=1
 
 	IF @intRecipeItemUOMId IS NULL
 	BEGIN
@@ -832,39 +833,39 @@ BEGIN TRY
 		,WI.intItemIssuedUOMId
 		,L.strLotNumber
 
-	SELECT @intOrderHeaderId = intOrderHeaderId
-	FROM tblMFStageWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
+	--SELECT @intOrderHeaderId = intOrderHeaderId
+	--FROM tblMFStageWorkOrder
+	--WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO @ItemsToReserve (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,dblQty
-		,intTransactionId
-		,strTransactionId
-		,intTransactionTypeId
-		)
-	SELECT intItemId = T.intItemId
-		,intItemLocationId = IL.intItemLocationId
-		,intItemUOMId = T.intItemUOMId
-		,intLotId = T.intLotId
-		,intSubLocationId = SL.intSubLocationId
-		,intStorageLocationId = T.intToStorageLocationId 
-		,dblQty = T.dblPickQty
-		,intTransactionId = @intWorkOrderId
-		,strTransactionId = @strWorkOrderNo
-		,intTransactionTypeId = @intInventoryTransactionType
-	FROM tblMFTask T
-	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
-	JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
-		AND IL.intLocationId = SL.intLocationId
-	WHERE T.intOrderHeaderId = @intOrderHeaderId
-		AND T.intTaskStateId = 4
-		and not exists(Select *from @ItemsToReserve R Where R.intLotId=T.intLotId )
+	--INSERT INTO @ItemsToReserve (
+	--	intItemId
+	--	,intItemLocationId
+	--	,intItemUOMId
+	--	,intLotId
+	--	,intSubLocationId
+	--	,intStorageLocationId
+	--	,dblQty
+	--	,intTransactionId
+	--	,strTransactionId
+	--	,intTransactionTypeId
+	--	)
+	--SELECT intItemId = T.intItemId
+	--	,intItemLocationId = IL.intItemLocationId
+	--	,intItemUOMId = T.intItemUOMId
+	--	,intLotId = T.intLotId
+	--	,intSubLocationId = SL.intSubLocationId
+	--	,intStorageLocationId = T.intToStorageLocationId 
+	--	,dblQty = T.dblPickQty
+	--	,intTransactionId = @intWorkOrderId
+	--	,strTransactionId = @strWorkOrderNo
+	--	,intTransactionTypeId = @intInventoryTransactionType
+	--FROM tblMFTask T
+	--JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+	--JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+	--	AND IL.intLocationId = SL.intLocationId
+	--WHERE T.intOrderHeaderId = @intOrderHeaderId
+	--	AND T.intTaskStateId = 4
+	--	and not exists(Select *from @ItemsToReserve R Where R.intLotId=T.intLotId )
 
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 		,@intWorkOrderId

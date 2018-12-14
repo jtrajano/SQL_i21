@@ -994,8 +994,13 @@ BEGIN
 			-- Repost 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer', 'Inventory Transfer with Shipment'))
 			BEGIN 
+<<<<<<< HEAD
 				DECLARE @ysnShipmentRequired AS BIT 
 				DECLARE @ysnTransferOnSameLocation AS BIT 
+=======
+				DECLARE @ysnTransferOnSameLocation AS BIT
+				DECLARE @ysnShipmentRequired AS BIT 
+>>>>>>> 18.1DevB
 				SET @ysnTransferOnSameLocation = 0 
 				SET @ysnShipmentRequired = 0 
 				

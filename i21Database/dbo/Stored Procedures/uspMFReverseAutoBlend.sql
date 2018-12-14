@@ -81,7 +81,9 @@ Begin
 
 	If Not Exists (Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId IN 
 	(Select intWorkOrderId From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId) AND ISNULL(ysnProductionReversed,0)=0)
-		RaisError('Load Distribution Line is already reversed.',16,1)
+	Begin
+		Return
+	End
 End
 
 If @strOrderType='SALES ORDER'

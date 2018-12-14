@@ -2,15 +2,34 @@
 	@dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@strCustomerName NVARCHAR(50)
+	,@ysnFiscalMonth BIT = 1
 	)
 AS
 DECLARE @intOwnerId INT
+	,@dtmCurrentDate DATETIME
 
-IF @dtmFromDate IS NULL
-	SELECT @dtmFromDate = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) --First day of previous month
+IF @ysnFiscalMonth = 0
+BEGIN
+	IF @dtmFromDate IS NULL
+		SELECT @dtmFromDate = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) --First day of previous month
 
-IF @dtmToDate IS NULL
-	SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) --Last Day of previous month
+	IF @dtmToDate IS NULL
+		SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) --Last Day of previous month
+END
+ELSE
+BEGIN
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+	SELECT @dtmCurrentDate=dtmStartDate-1
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE @dtmCurrentDate BETWEEN dtmStartDate
+			AND dtmEndDate
+
+	SELECT @dtmFromDate = dtmStartDate,@dtmToDate=dtmEndDate
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE @dtmCurrentDate BETWEEN dtmStartDate
+			AND dtmEndDate
+END
 
 SELECT @intOwnerId = E.intEntityId
 FROM tblEMEntity E
@@ -21,6 +40,7 @@ WHERE strName = @strCustomerName
 
 SELECT DT.strReceiptNumber AS [Receipt Number]
 	,DT.strBillOfLading AS [BOL]
+	,DT.strWarehouseRefNo As [Reference No]
 	,ROW_NUMBER() OVER (
 		PARTITION BY DT.strReceiptNumber ORDER BY DT.strReceiptNumber
 			,DT.strItemNo
@@ -33,11 +53,12 @@ SELECT DT.strReceiptNumber AS [Receipt Number]
 	,DT.strUnitMeasure AS [UOM]
 	,DT.dtmCreated AS [Created Date]
 	,DT.dtmReceiptDate AS [Receipt Date]
-	,IsNULL(DT.strPutawayDate,DT.dtmReceiptDate) AS [Putaway Date]
-	,IsNULL(DT.strCompletedDate,DT.dtmReceiptDate) AS [Completed Date]
+	,IsNULL(DT.strPutawayDate, DT.dtmReceiptDate) AS [Putaway Date]
+	,IsNULL(DT.strCompletedDate, DT.dtmReceiptDate) AS [Completed Date]
 FROM (
 	SELECT IR.strReceiptNumber
 		,IR.strBillOfLading
+		,IR.strWarehouseRefNo
 		,I.strItemNo
 		,I.strDescription
 		,IRL.strVendorLotId
@@ -55,15 +76,16 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
-	JOIN dbo.tblICLot L on L.intLotId=LI.intLotId
-	JOIN dbo.tblICItemOwner IO1 on IO1.intItemOwnerId =L.intItemOwnerId 
-	Left JOIN vyuMFGetPutawayDate PD ON PD.intLotId=IRL.intLotId
+	JOIN dbo.tblICLot L ON L.intLotId = LI.intLotId
+	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
+	LEFT JOIN vyuMFGetPutawayDate PD ON PD.intLotId = IRL.intLotId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-			AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
+		AND IO1.intOwnerId = IsNULL(@intOwnerId, IO1.intOwnerId)
 	) AS DT
 GROUP BY DT.strReceiptNumber
 	,DT.strBillOfLading
+	,DT.strWarehouseRefNo
 	,DT.strItemNo
 	,DT.strDescription
 	,DT.strVendorLotId

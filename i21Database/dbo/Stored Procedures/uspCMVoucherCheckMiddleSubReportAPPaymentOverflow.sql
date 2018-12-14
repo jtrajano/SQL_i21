@@ -31,98 +31,17 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@AR_PAYMENT AS INT = 18
   ,@VOID_CHECK AS INT = 19
   ,@AP_ECHECK AS INT = 20
-  ,@PAYCHECK AS INT = 21
+  ,@PAYCHECK AS INT = 21;
   
--- Sample XML string structure:  
---SET @xmlparam = '  
---<xmlparam>  
--- <filters>  
---  <filter>  
---   <fieldname>intTransactionId</fieldname>  
---   <condition>Between</condition>  
---   <from>14973</from>  
---   <to>14973</to>  
---   <join>And</join>  
---   <begingroup>0</begingroup>  
---   <endgroup>0</endgroup>  
---   <datatype>String</datatype>  
---  </filter>  
--- </filters>  
--- <options />  
---</xmlparam>'  
-  
--- Sanitize the @xmlParam   
---IF LTRIM(RTRIM(@xmlParam)) = ''   
--- SET @xmlParam = NULL   
-  
----- Declare the variables.  
---DECLARE @intTransactionIdFrom AS INT    
-  
---  -- Declare the variables for the XML parameter  
---  ,@xmlDocumentId AS INT  
-    
----- Create a table variable to hold the XML data.     
---DECLARE @temp_xml_table TABLE (  
--- [fieldname] NVARCHAR(50)  
--- ,condition NVARCHAR(20)        
--- ,[from] NVARCHAR(50)  
--- ,[to] NVARCHAR(50)  
--- ,[join] NVARCHAR(10)  
--- ,[begingroup] NVARCHAR(50)  
--- ,[endgroup] NVARCHAR(50)  
--- ,[datatype] NVARCHAR(50)  
---)  
-  
----- Prepare the XML   
---EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
-  
----- Insert the XML to the xml table.     
---INSERT INTO @temp_xml_table  
---SELECT *  
---FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
---WITH (  
--- [fieldname] nvarchar(50)  
--- , condition nvarchar(20)  
--- , [from] nvarchar(50)  
--- , [to] nvarchar(50)  
--- , [join] nvarchar(10)  
--- , [begingroup] nvarchar(50)  
--- , [endgroup] nvarchar(50)  
--- , [datatype] nvarchar(50)  
---)  
-  
----- Gather the variables values from the xml table.   
---SELECT @intTransactionIdFrom = [from]  
---FROM @temp_xml_table   
---WHERE [fieldname] = 'intTransactionId'  
-  
--- Sanitize the parameters  
---SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
+WITH Invoices as(
 
--- Report Query:  
-SELECT * FROM (
-	SELECT 
-			intTransactionId
-			,strBillId
-			,strInvoice
-			,dtmDate
-			,strComment
-			,dblAmount
-			,dblDiscount
-			,dblNet
-			,strPaymentRecordNum
-			,dblTotalAmount
-			,dtmCheckDate
-			,strCheckNumber
-			,strCurrency
-			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
-	 FROM 
-	(
 		SELECT 
 				intTransactionId = F.intTransactionId
 				,strBillId = BILL.strBillId
 				,strInvoice = BILL.strVendorOrderNumber
 				,dtmDate = BILL.dtmBillDate
+				,dtmDueDate = BILL.dtmDueDate
+				,intTermsId = BILL.intTermsId
 				,strComment = SUBSTRING(BILL.strComment,1,25)
 				,dblAmount = CASE WHEN BILL.intTransactionType = 3
 						THEN BILL.dblTotal * -1
@@ -141,7 +60,7 @@ SELECT * FROM (
 				,dtmCheckDate = F.dtmDate
 				,strCheckNumber = F.strReferenceNo
 				,PYMTDetail.intPaymentDetailId
-				,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
+				,F.intCurrencyId
 		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 					ON F.strTransactionId = PYMT.strPaymentRecordNum
 				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -156,6 +75,8 @@ SELECT * FROM (
 			,strBillId = preBILL.strBillId
 			,strInvoice = preBILL.strVendorOrderNumber
 			,dtmDate = preBILL.dtmBillDate
+			,dtmDueDate = preBILL.dtmDueDate
+			,intTermsId = preBILL.intTermsId
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
 			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
 						THEN preBILL.dblTotal * -1
@@ -168,7 +89,7 @@ SELECT * FROM (
 			,dtmCheckDate = F.dtmDate
 			,strCheckNumber = F.strReferenceNo
 			,PYMTDetail.intPaymentDetailId
-			,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
+			,F.intCurrencyId
 		FROM	[dbo].[tblCMBankTransaction] F
 			INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON PYMT.strPaymentRecordNum = F.strTransactionId
@@ -188,6 +109,8 @@ SELECT * FROM (
 				,strBillId = INV.strInvoiceNumber
 				,strInvoice = ''
 				,dtmDate = INV.dtmDate
+				,dtmDueDate = INV.dtmDueDate
+				,intTermsId = INV.intTermId
 				,strComment = SUBSTRING(INV.strComments,1,25)
 				,dblAmount = INV.dblInvoiceTotal
 				,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
@@ -200,7 +123,7 @@ SELECT * FROM (
 				,dtmCheckDate = F.dtmDate
 				,strCheckNumber = F.strReferenceNo
 				,PYMTDetail.intPaymentDetailId
-				,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
+				,F.intCurrencyId
 		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 					ON F.strTransactionId = PYMT.strPaymentRecordNum
 				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -209,6 +132,20 @@ SELECT * FROM (
 					ON PYMTDetail.intInvoiceId = INV.intInvoiceId	
 		WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
 				AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
-	) Data
-) tbl
+
+),
+_Order AS
+(
+	SELECT 
+			a.*
+			,b.strTermCode
+			,c.strCurrency
+			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
+
+	 FROM Invoices a
+	 LEFT JOIN tblSMTerm b ON a.intTermsId = b.intTermID
+	 LEFT JOIN tblSMCurrency c ON a.intCurrencyId = c.intCurrencyID
+)
+SELECT * FROM _Order
+ 
 WHERE [row_number] > 10

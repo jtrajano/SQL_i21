@@ -397,68 +397,116 @@ BEGIN TRY
 			,ri.intItemId
 			,SUM(CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
-						THEN CAST(CEILING((
-										(
-											CASE 
-												WHEN @strPickByUpperToleranceQty = 'True'
-													THEN ri.dblCalculatedUpperTolerance
-												ELSE ri.dblCalculatedQuantity
-												END
-											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
-										)) AS NUMERIC(38, 2))
-					ELSE (
-							(
+						THEN (
 								CASE 
-									WHEN @strPickByUpperToleranceQty = 'True'
-										THEN ri.dblCalculatedUpperTolerance
-									ELSE ri.dblCalculatedQuantity
+									WHEN ri.ysnScaled = 1
+										THEN (
+												CAST(CEILING((
+															(
+																CASE 
+																	WHEN @strPickByUpperToleranceQty = 'True'
+																		THEN ri.dblCalculatedUpperTolerance
+																	ELSE ri.dblCalculatedQuantity
+																	END
+																) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+															)) AS NUMERIC(38, 2))
+												)
+									ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
 									END
-								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+								)
+					ELSE (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											(
+												(
+													CASE 
+														WHEN @strPickByUpperToleranceQty = 'True'
+															THEN ri.dblCalculatedUpperTolerance
+														ELSE ri.dblCalculatedQuantity
+														END
+													) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+												)
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
 							)
 					END)
 			,ri.intItemUOMId
 			,SUM(CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
-						THEN CAST(CEILING((
-										(
-											CASE 
-												WHEN @strPickByUpperToleranceQty = 'True'
-													THEN ri.dblCalculatedUpperTolerance
-												ELSE ri.dblCalculatedQuantity
-												END
-											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
-										)) AS NUMERIC(38, 2))
-					ELSE (
-							(
+						THEN (
 								CASE 
-									WHEN @strPickByUpperToleranceQty = 'True'
-										THEN ri.dblCalculatedUpperTolerance
-									ELSE ri.dblCalculatedQuantity
+									WHEN ri.ysnScaled = 1
+										THEN (
+												CAST(CEILING((
+															(
+																CASE 
+																	WHEN @strPickByUpperToleranceQty = 'True'
+																		THEN ri.dblCalculatedUpperTolerance
+																	ELSE ri.dblCalculatedQuantity
+																	END
+																) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+															)) AS NUMERIC(38, 2))
+												)
+									ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
 									END
-								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+								)
+					ELSE (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											(
+												(
+													CASE 
+														WHEN @strPickByUpperToleranceQty = 'True'
+															THEN ri.dblCalculatedUpperTolerance
+														ELSE ri.dblCalculatedQuantity
+														END
+													) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+												)
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
 							)
 					END)
 			,ri.intItemUOMId
 			,MAX(IU.dblUnitQty)
 			,SUM(CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
-						THEN CAST(CEILING((
-										(
-											CASE 
-												WHEN @strPickByUpperToleranceQty = 'True'
-													THEN ri.dblCalculatedUpperTolerance
-												ELSE ri.dblCalculatedQuantity
-												END
-											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
-										)) AS NUMERIC(38, 2))
-					ELSE (
-							(
+						THEN (
 								CASE 
-									WHEN @strPickByUpperToleranceQty = 'True'
-										THEN ri.dblCalculatedUpperTolerance
-									ELSE ri.dblCalculatedQuantity
+									WHEN ri.ysnScaled = 1
+										THEN (
+												CAST(CEILING((
+															(
+																CASE 
+																	WHEN @strPickByUpperToleranceQty = 'True'
+																		THEN ri.dblCalculatedUpperTolerance
+																	ELSE ri.dblCalculatedQuantity
+																	END
+																) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+															)) AS NUMERIC(38, 2))
+												)
+									ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
 									END
-								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+								)
+					ELSE (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											(
+												(
+													CASE 
+														WHEN @strPickByUpperToleranceQty = 'True'
+															THEN ri.dblCalculatedUpperTolerance
+														ELSE ri.dblCalculatedQuantity
+														END
+													) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+												)
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
 							)
 					END)
 			,ISNULL(NULL, I.intUnitPerLayer)
