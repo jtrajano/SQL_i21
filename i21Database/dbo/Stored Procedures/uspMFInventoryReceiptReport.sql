@@ -144,7 +144,7 @@ BEGIN
 		,RIL.strLotAlias AS strBatchNo
 		,R.intInventoryReceiptId
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-		,RIL.strGarden
+		,e3.strName AS strGarden
 		,replace(convert(VARCHAR(11), RIL.dtmExpiryDate, 106), ' ', '-') dtmExpiryDate
 		,C.strCountry
 	FROM tblICInventoryReceipt R
@@ -158,5 +158,6 @@ BEGIN
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RIL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 	LEFT JOIN tblSMCountry C ON C.intCountryID = RIL.intOriginId
+	Left JOIN tblEMEntity e3 on e3.intEntityId=RIL.intProducerId
 	WHERE R.strReceiptNumber = @strReceiptNo
 END
