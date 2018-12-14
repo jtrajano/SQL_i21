@@ -77,7 +77,7 @@ BEGIN TRY
 	IF ISNULL(@intSampleUOMId, 0) > 0
 		AND ISNULL(@intRepresentingUOMId, 0) > 0
 	BEGIN
-		SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intRepresentingUOMId, @intSampleUOMId, @dblSampleQty)
+		SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intSampleUOMId, @intRepresentingUOMId, @dblSampleQty)
 
 		IF @dblConvertedSampleQty > @dblRepresentingQty
 		BEGIN
