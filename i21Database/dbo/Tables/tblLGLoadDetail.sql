@@ -39,6 +39,7 @@
 	[intPSubLocationId] INT NULL, 
 	[intSSubLocationId] INT NULL, 
 	[intNumberOfContainers] INT NULL, 
+	[strContainerNumbers] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strExternalShipmentItemNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strExternalBatchNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[ysnNoClaim] BIT,

@@ -15,15 +15,7 @@ SELECT
 	,dblAdjustedGross = SUM(tblPRPaycheck.dblAdjustedGross)
 	,dblGrossYTD = MAX(tblPRPaycheck.dblGrossYTD)
 	,dblAdjustedGrossYTD = MAX(dblAdjustedGrossYTD)
-	,dblTaxable = CASE WHEN (dblLimit - ISNULL(MAX(dblAdjustedGrossYTD), dblLimit) < 0) THEN 0
-						ELSE
-						CASE WHEN ((dblLimit - ISNULL(MAX(dblAdjustedGrossYTD), dblLimit)) > SUM(tblPRPaycheck.dblAdjustedGross))
-							THEN 
-								SUM(tblPRPaycheck.dblAdjustedGross)
-							ELSE 
-								dblLimit - (dblLimit - SUM(tblPRPaycheck.dblAdjustedGross))
-							END
-						END
+	,dblTaxable = SUM(vyuPRPaycheckTax.dblTaxableAmount)
 	,dblRate = vyuPRPaycheckTax.dblAmount
 	,dblLimit = vyuPRPaycheckTax.dblLimit
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
@@ -53,7 +45,7 @@ FROM
 			GROUP BY intPaycheckId, intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PE
 			LEFT JOIN
 			(SELECT intPaycheckId, intYear = YEAR(dtmPayDate), intQuarter = DATEPART(QQ, dtmPayDate), dblPretax = SUM(dblTotal), dblPretaxYTD = SUM(dblTotalYTD)
-			FROM vyuPRPaycheckDeduction WHERE ysnSUITaxable = 1
+			FROM vyuPRPaycheckDeduction WHERE ysnSUITaxable = 1 AND strPaidBy = 'Employee'
 			GROUP BY intPaycheckId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PD
 			ON PE.intPaycheckId = PD.intPaycheckId) tblPRPaycheck
 		ON tblPREmployee.[intEntityId] = tblPRPaycheck.intEntityEmployeeId)
@@ -73,6 +65,5 @@ GROUP BY
 	,vyuPRPaycheckTax.dblLimit
 	,vyuPRPaycheckTax.strTaxId
 	,tblPRPaycheck.intEntityEmployeeId
-HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
 
 GO

@@ -11,7 +11,7 @@ SELECT TR.intTestResultId
 	,P.intDataTypeId
 	,P.intDecimalPlaces
 	,P.intListId
-	,'' AS strListItemName
+	,'' COLLATE Latin1_General_CI_AS AS strListItemName
 	--,LI.strListItemName
 FROM tblQMTestResult TR
 JOIN tblQMTest T ON T.intTestId = TR.intTestId

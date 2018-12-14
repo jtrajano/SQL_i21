@@ -7,6 +7,7 @@
 	[ysnIsSamplePrintEnable] BIT NOT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnIsSamplePrintEnable] DEFAULT 0,
 	[intApproveLotStatus] INT,
 	[intRejectLotStatus] INT,
+	ysnAllowReversalSampleEntry BIT CONSTRAINT [DF_tblQMCompanyPreference_ysnAllowReversalSampleEntry] DEFAULT 0,
 	[ysnChangeLotStatusOnApproveforPreSanitizeLot] BIT NOT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnChangeLotStatusOnApproveforPreSanitizeLot] DEFAULT 0,
 	[ysnRejectLGContainer] BIT NOT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnRejectLGContainer] DEFAULT 1,
 	[intUserSampleApproval] INT,

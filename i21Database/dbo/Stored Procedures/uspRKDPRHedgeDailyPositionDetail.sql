@@ -271,7 +271,7 @@ SELECT (SELECT sum(qty) Qty from (
                             JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
                             JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId                                                                                   
                             WHERE s.intCommodityId  = @intCommodityId
-                            AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end        AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0                                                            
+                            AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end        AND s.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0                                                            
                             )t             WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
                                                                                                                                                                                                             WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
                                                                                                                                                                                                             WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -319,7 +319,7 @@ SELECT (SELECT sum(qty) Qty from (
 				CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) ELSE 0  END) dblPurBasisQty ,intCompanyLocationId,CH.intCommodityId,strContractNumber
 				FROM tblCTContractDetail CD
 				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
-				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId
 				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
 				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
 								FROM	   tblCTPriceFixationDetail
@@ -467,7 +467,7 @@ SELECT @strDescription,
                                                                 JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
                                                                 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId                                                                                   
                                                                 WHERE s.intCommodityId  = @intCommodityId
-                                                                AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end        AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0                                                            
+                                                                AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end        AND s.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0                                                            
                                                                 )t             WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
                                                                                                                                                                                                                                                 WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
                                                                                                                                                                                                                                                 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -572,7 +572,7 @@ SELECT @strDescription,
 					,intCommodityId
 					,strCurrency
 					)
-				SELECT distinct 
+				SELECT  
 					@strDescription
 					,'Net Payable  ($)' [strType]
 					,dblAmountDue 
@@ -776,7 +776,10 @@ SELECT @strDescription,
                 JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
                 LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
                 WHERE t.intCommodityId= @intCommodityId  and strType not in('Net Payable  ($)','Net Receivable  ($)')
-                UNION
+                
+				INSERT INTO @Final (strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strContractType,strContractEndMonth, 
+                dblTotal,strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType 
+                                ,invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency)
                 SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strContractType,strContractEndMonth, 
                     dblTotal dblTotal,
                                 case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
@@ -1005,7 +1008,7 @@ SELECT @strDescription, 'Sales Gross Dollars' [strType], 'Sales Gross Dollars',I
 					,intCommodityId
 					,strCurrency
 					)
-				SELECT distinct 
+				SELECT  
 					@strDescription
 					,'Net Payable  ($)' [strType]
 					,dblAmountDue 
@@ -1196,11 +1199,13 @@ SELECT @strDescription, 'Sales Gross Dollars' [strType], 'Sales Gross Dollars',I
                 JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
                 LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
                 WHERE t.intCommodityId= @intCommodityId and strType not in('Net Payable  ($)','Net Receivable  ($)')
-                UNION
-
+                
+				INSERT INTO @Final (strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strSubType,strContractType,strContractEndMonth, 
+                dblTotal,strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType 
+                                ,invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency)
                 SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strSubType,strContractType,
                 strContractEndMonth, dblTotal dblTotal,case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,
-strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
+				strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
                                 ,invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency
                 FROM @tempFinal t
                 JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 

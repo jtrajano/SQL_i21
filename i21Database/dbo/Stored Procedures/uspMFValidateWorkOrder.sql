@@ -111,6 +111,10 @@ WHERE intManufacturingProcessId = @intManufacturingProcessId
 	AND intLocationId = @intLocationId
 	AND intAttributeId = @intPackagingCategoryId
 
+SELECT @strPackagingCategory = strCategoryCode
+	FROM tblICCategory
+	WHERE intCategoryId = @intPMCategoryId
+
 DECLARE @tblMFItem TABLE (
 	intItemId INT
 	,dblQuantity NUMERIC(38, 20)

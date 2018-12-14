@@ -6,7 +6,7 @@
     ,@BankAccountId INT             = NULL
     ,@Post          BIT             = NULL
     ,@Recap         BIT             = 0
-    ,@UserId        BIT             = NULL
+    ,@UserId        INT             = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -104,7 +104,7 @@ SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblAR
 SET @GainLossAccount = (SELECT TOP 1 intAccountsReceivableRealizedId FROM tblSMMultiCurrency WHERE intAccountsReceivableRealizedId IS NOT NULL AND intAccountsReceivableRealizedId <> 0)
 SET @CFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WHERE intGLAccountId IS NOT NULL AND intGLAccountId <> 0)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
+SET @AllowOtherUserToPost = CAST(ISNULL((SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId),0) AS BIT)
 SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
 
 DECLARE @Header AS [dbo].[ReceivePaymentPostingTable]

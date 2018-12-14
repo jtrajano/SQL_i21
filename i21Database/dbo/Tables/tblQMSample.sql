@@ -9,6 +9,7 @@
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
 	[intProductValueId] INT, -- Transaction Object Id
 	[intSampleStatusId] INT NOT NULL, 
+	intPreviousSampleStatusId INT,
 	[intItemId] INT, -- Inventory Item
 	[intItemContractId] INT, -- Contract Item
 	[intContractHeaderId] INT, 

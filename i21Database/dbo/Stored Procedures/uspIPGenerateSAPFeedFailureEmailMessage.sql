@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPFeedFailureEmailMessage]
 	@strMessageType NVARCHAR(50)
 AS
+BEGIN TRY
 Declare @strStyle  NVARCHAR(MAX),
 		@strHtml   NVARCHAR(MAX),
 		@strHeader NVARCHAR(MAX),
@@ -73,12 +74,13 @@ Begin
 		+ '<td>&nbsp;' + ISNULL(strCommodityCode,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
 	</tr>'
-	From tblCTContractFeed 
+	From tblCTContractFeed WITH (NOLOCK) 
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
 	AND ISNULL(ysnMailSent,0)=0
 
 	Update tblCTContractFeed Set ysnMailSent=1
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='Shipment'
@@ -96,15 +98,16 @@ Begin
 		   <td>&nbsp;'  + ISNULL(strLoadNumber,'') + '</td>'
 		+ '<td>&nbsp;' + CASE WHEN UPPER(strMessageState)='ADDED' THEN 'Create' When UPPER(strMessageState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strExternalShipmentNumber,'') + '</td>'
-		+ '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblLGLoadDetailStg Where intLoadStgId=lg.intLoadStgId),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblLGLoadDetailStg WITH (NOLOCK) Where intLoadStgId=lg.intLoadStgId),'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
 	</tr>'
-	From tblLGLoadStg lg
+	From tblLGLoadStg lg WITH (NOLOCK)
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
 	AND ISNULL(ysnMailSent,0)=0
 
 	Update tblLGLoadStg Set ysnMailSent=1
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='Receipt'
@@ -129,6 +132,7 @@ Begin
 
 	Update tblIPReceiptError Set ysnMailSent=1
 	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate) AND ISNULL(strErrorMessage,'') <>'Success'
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 If @strMessageType='MBN Receipt'
@@ -149,6 +153,7 @@ Begin
 
 	Update tblIPReceiptError Set ysnMailSent=1
 	Where strPartnerNo='0012XI01' AND ISNULL(strErrorMessage,'') <>'Success'
+	AND ISNULL(ysnMailSent,0)=0
 End
 
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
@@ -159,3 +164,8 @@ If ISNULL(@strDetail,'')=''
 	Set @strMessage=''
 
 Select @strMessage AS strMessage
+END TRY
+
+BEGIN CATCH
+	SELECT '' AS strMessage
+END CATCH

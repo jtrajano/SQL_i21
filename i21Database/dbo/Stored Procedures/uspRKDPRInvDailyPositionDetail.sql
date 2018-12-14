@@ -214,7 +214,7 @@ BEGIN
 					FROM vyuICGetItemStockUOM s  		
 					JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   		  
-				    WHERE s.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0
+				    WHERE s.intCommodityId = @intCommodityId AND s.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0
 						 AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
 			UNION all
 				SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription,[Storage Type] AS [strType],
@@ -495,7 +495,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
 				join tblICItem i on i.intItemId=CD.intItemId
 				join tblSMCompanyLocation l on l.intCompanyLocationId=CD.intCompanyLocationId
-				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId 
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId 
 				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
 				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
 								FROM	   tblCTPriceFixationDetail
@@ -545,7 +545,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 				FROM vyuICGetItemStockUOM s  		
 				JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
-				                           WHERE s.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0 
+				                           WHERE s.intCommodityId = @intCommodityId AND s.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0 
 				AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
 				 )t WHERE intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation

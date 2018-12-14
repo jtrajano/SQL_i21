@@ -101,7 +101,7 @@ BEGIN
 			,IA.dtmDate
 			,l.intParentLotId
 
-		UNION
+		/*UNION
 		
 		SELECT 'Merge' AS strTransactionName
 			,l.intLotId
@@ -138,7 +138,7 @@ BEGIN
 
 			,um.strUnitMeasure 
 			,IA.dtmDate 
-			,l.intParentLotId
+			,l.intParentLotId*/
 	IF @ysnParentLot = 0 and @ysnDetail=1
 		SELECT 'Merge' AS strTransactionName
 			,l.intLotId
@@ -164,7 +164,7 @@ BEGIN
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 		WHERE IA.intDestinationLotId = @intLotId
 
-		UNION
+		/*UNION
 		
 		SELECT 'Merge' AS strTransactionName
 			,l.intLotId
@@ -188,7 +188,7 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intSourceLotId = @intLotId
+		WHERE IA.intSourceLotId = @intLotId*/
 
 	IF @ysnParentLot = 1
 		SELECT 'Merge' AS strTransactionName

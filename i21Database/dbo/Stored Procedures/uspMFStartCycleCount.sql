@@ -658,39 +658,59 @@ BEGIN TRY
 				WHEN I.intCategoryId = @intPMCategoryId
 					AND P.dblMaxWeightPerPack > 0
 					THEN (
-							CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
-										WHEN ri.ysnPartialFillConsumption = 1
-											THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / P.dblMaxWeightPerPack))
-										ELSE 0
-										END) AS NUMERIC(38, 20))
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / P.dblMaxWeightPerPack))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
 							)
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
-									WHEN ri.ysnPartialFillConsumption = 1
-										THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
-									ELSE 0
-									END) AS NUMERIC(38, 20))
-				ELSE (
-						ri.dblCalculatedQuantity * (
-							dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / (
-								CASE 
-									WHEN r.intRecipeTypeId = 1
-										THEN r.dblQuantity
-									ELSE 1
-									END
-								)
-							) + CASE 
-							WHEN ri.ysnPartialFillConsumption = 1
-								THEN ri.dblCalculatedQuantity * (
-										dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / (
-											CASE 
-												WHEN r.intRecipeTypeId = 1
-													THEN r.dblQuantity
-												ELSE 1
-												END
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
 											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN r.dblQuantity
+													ELSE 1
+													END
+												)
+											) + CASE 
+											WHEN ri.ysnPartialFillConsumption = 1
+												THEN ri.dblCalculatedQuantity * (
+														dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / (
+															CASE 
+																WHEN r.intRecipeTypeId = 1
+																	THEN r.dblQuantity
+																ELSE 1
+																END
+															)
+														)
+											ELSE 0
+											END
 										)
-							ELSE 0
+							ELSE ri.dblCalculatedQuantity
 							END
 						)
 				END AS RequiredQty
@@ -746,39 +766,59 @@ BEGIN TRY
 				WHEN I.intCategoryId = @intPMCategoryId
 					AND P.dblMaxWeightPerPack > 0
 					THEN (
-							CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
-										WHEN RI.ysnPartialFillConsumption = 1
-											THEN (RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / P.dblMaxWeightPerPack))
-										ELSE 0
-										END) AS NUMERIC(38, 20))
+							CASE 
+								WHEN RI.ysnScaled = 1
+									THEN (
+											CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+														WHEN RI.ysnPartialFillConsumption = 1
+															THEN (RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / P.dblMaxWeightPerPack))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(RI.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
 							)
 				WHEN I.intCategoryId = @intPMCategoryId
-					THEN CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
-									WHEN RI.ysnPartialFillConsumption = 1
-										THEN (RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
-									ELSE 0
-									END) AS NUMERIC(38, 20))
-				ELSE (
-						RI.dblCalculatedQuantity * (
-							dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / (
-								CASE 
-									WHEN r.intRecipeTypeId = 1
-										THEN r.dblQuantity
-									ELSE 1
-									END
-								)
-							) + CASE 
-							WHEN RI.ysnPartialFillConsumption = 1
-								THEN RI.dblCalculatedQuantity * (
-										dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / (
-											CASE 
-												WHEN r.intRecipeTypeId = 1
-													THEN r.dblQuantity
-												ELSE 1
-												END
+					THEN (
+							CASE 
+								WHEN RI.ysnScaled = 1
+									THEN (
+											CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
+														WHEN RI.ysnPartialFillConsumption = 1
+															THEN (RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
 											)
+								ELSE CAST(CEILING(RI.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN RI.ysnScaled = 1
+								THEN (
+										RI.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN r.dblQuantity
+													ELSE 1
+													END
+												)
+											) + CASE 
+											WHEN RI.ysnPartialFillConsumption = 1
+												THEN RI.dblCalculatedQuantity * (
+														dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / (
+															CASE 
+																WHEN r.intRecipeTypeId = 1
+																	THEN r.dblQuantity
+																ELSE 1
+																END
+															)
+														)
+											ELSE 0
+											END
 										)
-							ELSE 0
+							ELSE RI.dblCalculatedQuantity
 							END
 						)
 				END AS RequiredQty
@@ -1084,7 +1124,7 @@ BEGIN TRY
 	BEGIN
 		INSERT INTO @tblMFWorkOrderInputLot
 		SELECT DISTINCT I.intItemId
-			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (
 				PARTITION BY I.intItemId
 				,CASE 
 					WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
@@ -1092,16 +1132,16 @@ BEGIN TRY
 					ELSE WI.intMachineId
 					END
 				)
-			,WI.intItemUOMId
+			,I.intItemUOMId
 			,(
-				SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
+				SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (
 					PARTITION BY I.intItemId
 					,CASE 
 						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
 							THEN NULL
 						ELSE WI.intMachineId
 						END
-					) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId,I.intItemUOMId,WI.dblQuantity), 0)) OVER (
+					) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (
 					PARTITION BY I.intMainItemId
 					,CASE 
 						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'

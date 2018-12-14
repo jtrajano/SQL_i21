@@ -302,3 +302,5 @@
 :r "..\dbo\Views\vyuPROriginEmployeeEarning.sql"
 :r "..\dbo\Views\vyuPROriginEmployeeTax.sql"
 :r "..\dbo\Views\vyuPROriginTaxTable.sql"
+:r "..\dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql"
+:r "..\dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql"

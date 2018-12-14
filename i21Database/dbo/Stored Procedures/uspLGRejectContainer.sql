@@ -95,7 +95,7 @@ BEGIN TRY
 				
 			SELECT @intContractDetailId = intContractDetailId
 					,@intLoadDetailId = intLoadDetailId
-					,@dblContainerLinkQty = CASE WHEN @ysnRejectContainer = 1 THEN -1 * dblLinkQty ELSE  dblLinkQty END 
+					,@dblContainerLinkQty = CASE WHEN @ysnRejectContainer = 0 THEN -1 * dblLinkQty ELSE  dblLinkQty END 
 					,@intLoadDetailItemUOMId = intLoadDetailItemUOMId
 			FROM @tblLoadContract WHERE intRecordId = @intRecordId
 

@@ -126,9 +126,14 @@ Begin
 		Select @intMinSeq=Min(intContractFeedId) From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'') 
 				AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 
-		Select @strContractFeedIds=COALESCE(CONVERT(VARCHAR,@strContractFeedIds) + ',', '') + CONVERT(VARCHAR,intContractFeedId) 
+		SELECT @strContractFeedIds = ''
+
+		SELECT @strContractFeedIds = @strContractFeedIds + CONVERT(VARCHAR, intContractFeedId) + ','
 		From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strSubLocation,'')=ISNULL(@strSubLocation,'')
 			AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
+
+		IF Len(@strContractFeedIds) > 0
+			SELECT @strContractFeedIds = Left(@strContractFeedIds, Len(@strContractFeedIds) - 1)
 
 		If ISNULL(@strSubLocation,'')=''
 		Begin
@@ -275,7 +280,7 @@ Begin
 		Select @strVendorBatch=strVendorLotID From tblCTContractDetail Where intContractDetailId=@intContractDetailId
 
 		--Find Doc Type
-		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU')
+		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU','CPT')
 			Set @strDocType='ZHDE'
 
 		If @strContractBasis IN ('FOB','CFR')

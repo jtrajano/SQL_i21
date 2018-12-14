@@ -16,7 +16,7 @@ BEGIN
 
 	SELECT	B.intBillId
 			,B.[intPurchaseDetailId]
-			,B.dblQtyReceived
+			,Billed.dblQtyReceived
 			,B.intItemId
 			,A.ysnPosted
 	INTO	#tmpReceivedPOMiscItems
@@ -27,6 +27,9 @@ BEGIN
 				ON B.intItemId = C.intItemId
 			LEFT JOIN tblPOPurchaseDetail D
 					ON D.intPurchaseDetailId = B.intPurchaseDetailId
+	CROSS APPLY (
+			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQtyReceived FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = D.intPurchaseDetailId
+	) Billed	
 	WHERE	A.intBillId= @billId
 	AND (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR C.intItemId IS NULL)
 	AND D.intPurchaseDetailId IS NOT NULL

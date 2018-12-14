@@ -130,7 +130,7 @@ SELECT DISTINCT c.intCommodityId
 		FROM vyuICGetItemStockUOM s
 		JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
-		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
+		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND s.ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
 		) t)AS invQty
 	,isnull((
 			SELECT isnull(SUM(dblRemainingQuantity), 0) CollateralSale
@@ -277,7 +277,7 @@ SELECT DISTINCT c.intCommodityId
 				CD.dblQuantity - ISNULL(CD.dblBalance,0) - ISNULL(FD.dblQuantity,0) ELSE 0  END) dblPurBasisQty ,intCompanyLocationId,CH.intCommodityId,strContractNumber
 				FROM tblCTContractDetail CD
 				join tblCTContractHeader CH on CH.intContractHeaderId=CD.intContractHeaderId and intContractTypeId=1 and CD.intPricingTypeId=2
-				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CH.intCommodityUOMId=ium.intUnitMeasureId
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CH.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId
 				LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId 
 				LEFT   JOIN	 (SELECT  intPriceFixationId,SUM(dblQuantity) AS  dblQuantity
 								FROM	   tblCTPriceFixationDetail

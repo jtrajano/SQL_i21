@@ -29,8 +29,10 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @dblSampleQty NUMERIC(18, 6)
 	DECLARE @intSampleUOMId INT
+	DECLARE @intPreviousSampleStatusId INT
 	DECLARE @intItemId INT
 	DECLARE @intLotId INT
+	DECLARE @intLotStatusId INT
 	DECLARE @dblQty NUMERIC(18, 6)
 	DECLARE @intItemUOMId INT
 	DECLARE @intCreatedUserId INT
@@ -48,6 +50,7 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@dblSampleQty = dblSampleQty
 		,@intSampleUOMId = intSampleUOMId
+		,@intPreviousSampleStatusId = intSampleStatusId
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -61,9 +64,16 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
+			,intSampleStatusId INT
 			,intItemId INT
 			,intCreatedUserId INT
 			)
+
+	-- If sample status is Approved / Rejected, setting default to Received
+	IF @intPreviousSampleStatusId = 3 OR @intPreviousSampleStatusId = 4
+	BEGIN
+		SELECT @intPreviousSampleStatusId = 1
+	END
 
 	IF @intStorageLocationId IS NULL
 		AND @strLotNumber IS NOT NULL
@@ -230,6 +240,26 @@ BEGIN TRY
 	FROM tblQMSampleType
 	WHERE intSampleTypeId = @intSampleTypeId
 
+	IF ISNULL(@strLotNumber, '') <> ''
+	BEGIN
+		IF @ysnEnableParentLot = 0 -- Lot
+		BEGIN
+			SELECT TOP 1 @intLotStatusId = intLotStatusId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
+			ORDER BY intLotId DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intLotStatusId = L.intLotStatusId
+			FROM tblICParentLot PL
+			JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
+				AND PL.strParentLotNumber = @strLotNumber
+			ORDER BY PL.intParentLotId DESC
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -241,6 +271,7 @@ BEGIN TRY
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
+		,intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
 		--,intContractHeaderId
@@ -299,6 +330,7 @@ BEGIN TRY
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
+		,@intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
 		--,intContractHeaderId
@@ -313,7 +345,7 @@ BEGIN TRY
 		,intLoadDetailId
 		,intCountryID
 		,ysnIsContractCompleted
-		,intLotStatusId
+		,@intLotStatusId
 		,IsNULL(intStorageLocationId, @intStorageLocationId)
 		,IsNULL(ysnAdjustInventoryQtyBySampleQty, @ysnAdjustInventoryQtyBySampleQty)
 		,intEntityId
@@ -369,7 +401,6 @@ BEGIN TRY
 			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
-			,intLotStatusId INT
 			,intStorageLocationId INT
 			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT

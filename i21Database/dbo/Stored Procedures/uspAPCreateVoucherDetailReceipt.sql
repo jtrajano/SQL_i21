@@ -439,8 +439,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INNER JOIN tblICItemLocation D
 			ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
 		LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
-			ON E.intEntityId = A.intEntityVendorId 
-					AND E.intContractHeaderId = B.intOrderId 
+			ON  
+					E.intContractHeaderId = B.intOrderId 
 					AND E1.intContractDetailId = B.intLineNo
 		LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId)
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))

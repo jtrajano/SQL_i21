@@ -33,7 +33,7 @@ BEGIN TRY
 			
 	)
 	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,	@strReason,
-			@dblOldValue,			@dblTransactionQuantity,	@dblNewValue,		@intUserId,		GETDATE(),
+			ISNULL(@dblOldValue, 0),			@dblTransactionQuantity,	ISNULL(@dblNewValue, 0),		@intUserId,		GETDATE(),
 			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
 			
 	

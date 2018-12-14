@@ -144,6 +144,14 @@ BEGIN
 	  INSERT BANK TRANSACTION DETAIL - EARNINGS
 	*********************************************/
 
+	--Check if Earning Distribution total is 100%
+	IF (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution 
+				WHERE intEntityEmployeeId = @intEmployeeId), 100) <> 100)
+	BEGIN
+		RAISERROR('%s', 11, 1, 'GL Location Distribution total is not 100%.')
+		GOTO Post_Exit
+	END
+
 	--Create Earning Distribution Temporary Table
 	CREATE TABLE #tmpEarning (
 		intTmpEarningId			INT IDENTITY(1, 1)

@@ -2,15 +2,35 @@
 	@dtmFromDate DATETIME = NULL
 	,@dtmToDate DATETIME = NULL
 	,@strCustomerName NVARCHAR(50) = ''
+	,@ysnFiscalMonth BIT = 1
 	)
 AS
 DECLARE @intOwnerId INT
+	,@dtmCurrentDate DATETIME
 
-IF @dtmFromDate IS NULL
-	SELECT @dtmFromDate = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) --First day of previous month
+IF @ysnFiscalMonth = 0
+BEGIN
+	IF @dtmFromDate IS NULL
+		SELECT @dtmFromDate = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) --First day of previous month
 
-IF @dtmToDate IS NULL
-	SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) --Last Day of previous month
+	IF @dtmToDate IS NULL
+		SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) --Last Day of previous month
+END
+ELSE
+BEGIN
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+	SELECT @dtmCurrentDate = dtmStartDate - 1
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE @dtmCurrentDate BETWEEN dtmStartDate
+			AND dtmEndDate
+
+	SELECT @dtmFromDate = dtmStartDate
+		,@dtmToDate = dtmEndDate
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE @dtmCurrentDate BETWEEN dtmStartDate
+			AND dtmEndDate
+END
 
 SELECT @intOwnerId = E.intEntityId
 FROM tblEMEntity E
@@ -51,11 +71,11 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = IR.intEntityVendorId
-	JOIN dbo.tblICLot L on L.intLotId=IRL.intLotId
+	JOIN dbo.tblICLot L ON L.intLotId = IRL.intLotId
 	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-			AND IO1.intOwnerId = @intOwnerId
+		AND IO1.intOwnerId = @intOwnerId
 	
 	UNION
 	
@@ -76,12 +96,12 @@ FROM (
 			)
 		,0 AS dblReceiptQty
 		,ROUND((
-			SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(IA.intItemUOMId, IU.intItemUOMId, IA.dblQty)
-			FROM tblICItemUOM IU
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-				AND IU.intItemId = I.intItemId
-				AND UM.strUnitType <> 'Weight'
-			),0) AS dblAdjustQty
+				SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(IA.intItemUOMId, IU.intItemUOMId, IA.dblQty)
+				FROM tblICItemUOM IU
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND IU.intItemId = I.intItemId
+					AND UM.strUnitType <> 'Weight'
+				), 0) AS dblAdjustQty
 		,0 AS dblShipQty
 	FROM tblMFInventoryAdjustment IA
 	JOIN dbo.tblICLot L ON L.intLotId = IA.intSourceLotId
@@ -93,7 +113,7 @@ FROM (
 	WHERE IA.intTransactionTypeId = 10
 		AND IA.dtmBusinessDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-			AND IO1.intOwnerId = @intOwnerId
+		AND IO1.intOwnerId = @intOwnerId
 	
 	UNION
 	
@@ -131,7 +151,7 @@ FROM (
 	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE InvS.dtmShipDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-			AND IO1.intOwnerId = @intOwnerId
+		AND IO1.intOwnerId = @intOwnerId
 	) AS DT
 GROUP BY strItemNo
 	,strDescription
@@ -145,4 +165,3 @@ GROUP BY strItemNo
 ORDER BY DT.strItemNo
 	,DT.strParentLotNumber
 	,DT.dtmReceiptDate
-
