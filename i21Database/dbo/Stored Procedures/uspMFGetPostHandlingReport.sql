@@ -35,7 +35,7 @@ BEGIN TRY
 
 	SELECT @FinalActualNetWeight = strValue
 	FROM @Table
-	WHERE strControlName = 'Vendor Net Weight'
+	WHERE strControlName = 'Final Actual Net Weight'
 
 	SELECT @TotalPieces = strValue
 	FROM @Table
@@ -47,7 +47,7 @@ BEGIN TRY
 
 	SELECT @NetWeightPerPiece = strValue
 	FROM @Table
-	WHERE strControlName = 'Average Net Weight Per Piece'
+	WHERE strControlName = 'Net Weight Per Piece'
 
 	SELECT @Comments = strValue
 	FROM @Table
