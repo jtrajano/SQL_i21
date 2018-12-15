@@ -107,6 +107,7 @@ LEFT JOIN
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
+		AND ICIS.strReferenceNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
