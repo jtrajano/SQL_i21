@@ -118,6 +118,7 @@ BEGIN TRY
 	,strQuantityUOM			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	,dblCashPrice			NUMERIC(38,20)
 	,strPriceUOM			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strStockUOM			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	,dblAvailableQty		NUMERIC(38,20)
 	,dblAmount				NUMERIC(38,20)
 	)	
@@ -244,7 +245,7 @@ BEGIN TRY
 	   ,InvTran.dtmDate
 	  ,@dtmStartDate AS dtmStartDate 
 	  ,@dtmEndDate  AS dtmEndDate
-	  ,SUM(LD.dblQuantity) dblQuantity
+	  ,SUM(InvTran.dblQty)*-1 dblQuantity
 	  ,0
 	  FROM tblICInventoryTransaction InvTran
 	  JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
@@ -294,15 +295,26 @@ BEGIN TRY
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 	  	,CD.intContractDetailId,InvTran.dtmDate
 
-		
-
-		INSERT INTO @Balance(intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity)
-		SELECT 
-		 CH.intContractTypeId
-		,'Settle Storage' 
+	  INSERT INTO @Shipment
+	  (
+	    intContractTypeId
+	   ,intContractHeaderId	
+	   ,intContractDetailId	
+	   ,dtmDate				
+	   ,dtmStartDate		
+	   ,dtmEndDate			
+	   ,dblQuantity
+	   ,dblAllocatedQuantity			
+	  )
+	SELECT 
+		 CH.intContractTypeId		
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
+		,dbo.fnRemoveTimeOnDate(SS.dtmCreated)
+		,@dtmStartDate AS dtmStartDate 
+	    ,@dtmEndDate  AS dtmEndDate
 		,SUM(SC.dblUnits) AS dblQuantity
+		,0
 		FROM tblGRSettleContract SC
 		JOIN tblGRSettleStorage  SS ON SS.intSettleStorageId = SC.intSettleStorageId
 		JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
@@ -312,7 +324,7 @@ BEGIN TRY
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-			,CD.intContractDetailId
+			,CD.intContractDetailId,SS.dtmCreated
 	
 	 
 	 
@@ -415,7 +427,8 @@ BEGIN TRY
 	  ,dblQuantity
 	  ,strQuantityUOM			
 	  ,dblCashPrice
-	  ,strPriceUOM			
+	  ,strPriceUOM
+	  ,strStockUOM			
 	  ,dblAvailableQty		
 	  ,dblAmount				
 	)				
@@ -440,24 +453,25 @@ BEGIN TRY
 								  WHEN CD.intPricingTypeId = 7 THEN 'I'
 							 END
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
-	,strShipMethod			= FT.strFreightTerm
+	,strShipMethod			= StockUM.strUnitMeasure
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
 	,intFutureMarketId      = CD.intFutureMarketId
 	,intFutureMonthId       = CD.intFutureMonthId
 	,strFutureMonth			= MO.strFutureMonth
-	,dblFutures				= ISNULL(CD.dblFutures,0)
-	,dblBasis				= ISNULL(CD.dblBasis,0)
+	,dblFutures				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0)
+	,dblBasis				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity + ISNULL(BL.dblQuantity,0)) ,0)
+	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)	
 	,strQuantityUOM			= IUM.strUnitMeasure
-	,dblCashPrice			= ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)	
+	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)	
 	,strPriceUOM			= PUOM.strUnitMeasure
-	,dblAvailableQty		= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity + ISNULL(BL.dblQuantity,0)) ,0)	
+	,strStockUOM			= StockUM.strUnitMeasure
+	,dblAvailableQty		= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)	
 	,dblAmount				= (
-								ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity + ISNULL(BL.dblQuantity,0)) ,0)
+								ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)	
 							  ) 
-							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0) --gmo
+							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
@@ -476,7 +490,9 @@ BEGIN TRY
 																								 ELSE 'Customer' 
 																							  END
 																							 )
-	
+	JOIN tblICItemUOM						StockUOM   ON StockUOM.intItemId			= CD.intItemId AND StockUOM.ysnStockUnit = 1 
+	JOIN tblICUnitMeasure					StockUM	   ON StockUM.intUnitMeasureId		= StockUOM.intUnitMeasureId
+
 	JOIN tblICItemUOM						ItemUOM   ON ItemUOM.intItemUOMId			= CD.intItemUOMId
 	JOIN tblICUnitMeasure					IUM		  ON IUM.intUnitMeasureId			= ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM					BASISUOM  ON BASISUOM.intItemUOMId			= CD.intBasisUOMId
@@ -509,9 +525,10 @@ BEGIN TRY
 								  WHEN SH.intPricingTypeId = 6 THEN 'C'
 								  WHEN SH.intPricingTypeId = 7 THEN 'I'
 						 END
-       ,dblFutures        = SH.dblFutures
-	   ,dblBasis          = SH.dblBasis
-	   ,dblCashPrice      = SH.dblCashPrice
+       ,dblFutures        = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
+	   ,dblBasis          = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
+	   ,dblCashPrice      = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
+							+ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
 	   ,intFutureMarketId = SH.intFutureMarketId
 	   ,intFutureMonthId  = SH.intFutureMonthId
 	   ,strFutureMonth    = MO.strFutureMonth
@@ -547,7 +564,8 @@ BEGIN TRY
 	,dblQuantity
 	,strQuantityUOM			
 	,dblCashPrice
-	,strPriceUOM			
+	,strPriceUOM
+	,strStockUOM					
 	,dblAvailableQty		
 	,dblAmount				
 	)			
@@ -566,7 +584,7 @@ BEGIN TRY
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
 	,strPricingType			= 'P'
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
-	,strShipMethod			= FT.strFreightTerm
+	,strShipMethod			= StockUM.strUnitMeasure
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
 	,intFutureMarketId      = CD.intFutureMarketId
@@ -575,12 +593,13 @@ BEGIN TRY
 	,dblFutures				= ISNULL(PF.dblFutures,0)
 	,dblBasis				= ISNULL(PF.dblBasis,0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0)) ,0)
+	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)
 	,strQuantityUOM			= IUM.strUnitMeasure
-	,dblCashPrice			= ISNULL(PF.dblCashPrice,0)
-	,strPriceUOM			=  PUOM.strUnitMeasure	
-	,dblAvailableQty		= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0)) ,0)
-	,dblAmount				= (ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0)) * ISNULL(PF.dblCashPrice,0)	
+	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
+	,strPriceUOM			=  PUOM.strUnitMeasure
+	,strStockUOM			= StockUM.strUnitMeasure	
+	,dblAvailableQty		= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)
+	,dblAmount				= (ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)) * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
@@ -601,6 +620,9 @@ BEGIN TRY
 																								 ELSE 'Customer' 
 																							  END
 																							 )
+	JOIN tblICItemUOM						StockUOM   ON StockUOM.intItemId			= CD.intItemId AND StockUOM.ysnStockUnit = 1 
+	JOIN tblICUnitMeasure					StockUM	   ON StockUM.intUnitMeasureId		= StockUOM.intUnitMeasureId
+
 	JOIN tblICItemUOM						ItemUOM   ON ItemUOM.intItemUOMId			= CD.intItemUOMId
 	JOIN tblICUnitMeasure					IUM		  ON IUM.intUnitMeasureId			= ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM					BASISUOM  ON BASISUOM.intItemUOMId			= CD.intBasisUOMId
