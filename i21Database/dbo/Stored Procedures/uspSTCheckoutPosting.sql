@@ -1182,7 +1182,7 @@ BEGIN
 																																	AND CATT.intCategoryId = DT.intCategoryId
 																															   ),0)
 																								) AS NUMERIC(18, 6))
-																							) >= 1 
+																							) > 0 
 																						THEN (
 																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
 																																			SELECT SUM(dblTotalSales)
@@ -1198,6 +1198,46 @@ BEGIN
 																																		), 0)
 																																	) AS NUMERIC(18, 6)))
 																						)
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) < 0 
+																						THEN (
+																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																			SELECT SUM(dblTotalSales)
+																																			FROM tblSTCheckoutItemMovements IM
+																																			JOIN tblICItemUOM UOM 
+																																				ON IM.intItemUPCId = UOM.intItemUOMId
+																																			JOIN tblICItem I 
+																																				ON UOM.intItemId = I.intItemId
+																																			JOIN tblICCategory CATT 
+																																				ON I.intCategoryId = CATT.intCategoryId 
+																																			WHERE intCheckoutId = @intCheckoutId
+																																			AND CATT.intCategoryId = DT.intCategoryId
+																																		), 0)
+																																	) AS NUMERIC(18, 6)))
+																						)
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) = 0 
+																						THEN  0
 																				ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
 																		END
 											,[ysnRefreshPrice]			= 0
@@ -1257,7 +1297,7 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
-								AND DT.dblTotalSalesAmountComputed > 0
+								AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
@@ -4328,3 +4368,5 @@ ExitWithRollback:
 	
 		
 ExitPost:
+GO
+
