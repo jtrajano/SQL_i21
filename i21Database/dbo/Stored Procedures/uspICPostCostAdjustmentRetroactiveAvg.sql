@@ -932,10 +932,10 @@ BEGIN
 			,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
 														dbo.fnFormatMessage(
 														dbo.fnICGetErrorMessage(80078)
-														,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)
-														,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
-														,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
-														,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+														,dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
+														,Stock.dblUnitOnHand
+														,ItemPricing.dblAverageCost
+														,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
 														, DEFAULT
 														, DEFAULT
 														, DEFAULT

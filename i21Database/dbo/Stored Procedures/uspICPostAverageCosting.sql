@@ -69,6 +69,8 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4
 		,@ACTUALCOST AS INT = 5
 
+DECLARE @strDescription AS NVARCHAR(255)
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
@@ -294,6 +296,22 @@ BEGIN
 						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
 						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
+					-- 'Inventory variance is created to adjust the negative stock from {Transaction Id}. Qty was {Quantity}. Cost was {Original Cost}. New cost is {New Cost}.'
+					SET @strDescription =
+							dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80224)
+								,@strRelatedTransactionId
+								,@QtyOffset
+								,@CostUsed
+								,@dblCost
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+
 					EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 							@intItemId = @intItemId
 							,@intItemLocationId = @intItemLocationId
@@ -324,6 +342,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@dblUnitRetail = @dblUnitRetail
+							,@strDescription = @strDescription
 				END 
 			END
 			
@@ -355,55 +374,7 @@ BEGIN
 					AND TRANS.intItemLocationId = @intItemLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-					AND @NewFifoId IS NOT NULL  	
-
-		SET @dblValue = 0
-		SELECT	@dblValue = dbo.fnMultiply(
-								(dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand) 								
-								,dbo.fnDivide(@dblCost, @dblUOMQty)
-							) 
-							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
-		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand < 0 
-				AND dbo.fnMultiply(@dblQty, @dblUOMQty) > 0 
-				AND Stock.intItemId = @intItemId
-				AND Stock.intItemLocationId = @intItemLocationId				
-
-		IF ISNULL(@dblValue, 0) <> 0 AND (ISNULL(@ysnTransferOnSameLocation, 0) = 0) 
-		BEGIN 
-			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
-					@intItemId = @intItemId
-					,@intItemLocationId = @intItemLocationId
-					,@intItemUOMId = @intItemUOMId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@dtmDate = @dtmDate
-					,@dblQty = 0
-					,@dblUOMQty = 0
-					,@dblCost = 0
-					,@dblValue = @dblValue
-					,@dblSalesPrice = @dblSalesPrice
-					,@intCurrencyId = @intCurrencyId
-					--,@dblExchangeRate = @dblExchangeRate
-					,@intTransactionId = @intTransactionId
-					,@intTransactionDetailId = @intTransactionDetailId
-					,@strTransactionId = @strTransactionId
-					,@strBatchId = @strBatchId
-					,@intTransactionTypeId = @INVENTORY_AUTO_VARIANCE
-					,@intLotId = NULL 
-					,@intRelatedInventoryTransactionId = NULL 
-					,@intRelatedTransactionId = NULL
-					,@strRelatedTransactionId = NULL 
-					,@strTransactionForm = @strTransactionForm
-					,@intEntityUserSecurityId = @intEntityUserSecurityId
-					,@intCostingMethod = @AVERAGECOST
-					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
-					,@intForexRateTypeId = @intForexRateTypeId
-					,@dblForexRate = @dblForexRate
-					,@dblUnitRetail = @dblUnitRetail
-
-			IF @intReturnValue < 0 RETURN @intReturnValue;
-		END 
+					AND @NewFifoId IS NOT NULL
 	END 
 	-- Do Mark Up/Down. Only the Retail Value will be affected, not the cost.
 	ELSE IF @intTransactionTypeId = @INVENTORY_MarkUpOrDown AND ISNULL(@dblUnitRetail, 0) <> 0 
