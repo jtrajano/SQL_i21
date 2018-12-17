@@ -228,5 +228,5 @@ BEGIN
 END  
   
 SELECT  convert(int,ROW_NUMBER() over (ORDER BY strItemNo)) AS intRowNumber,* from @tempBasis   
-WHERE intFutureMarketId is not null  
+WHERE intCommodityId is not null  
 order by strMarketValuation,strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo) 
