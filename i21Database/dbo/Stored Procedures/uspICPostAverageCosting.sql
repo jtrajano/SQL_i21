@@ -103,6 +103,7 @@ DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
+		,@TransactionType_InventoryAdjustment_OpeningInventory AS INT = 47
 
 DECLARE @intReturnValue AS INT 
 
@@ -115,21 +116,20 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
-		---- Get the average cost when reducing stock. 
-		---- Except if doing vendor stock returns using Inventory Receipt/Return 
-		--SELECT	@dblCost = AverageCost
-		--FROM	dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
-		--WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
-
 		-- Get the item's last cost when reducing stock. 
-		-- Except if doing vendor stock returns using Inventory Receipt/Return 
+		-- Except if (1) doing vendor stock returns using Inventory Receipt/Return or (2) if it is an Opening Inventory
 		SELECT	@dblCost = COALESCE(
 					NULLIF(ItemPricing.dblAverageCost, 0)
 					, NULLIF(ItemPricing.dblLastCost, 0)
 					, ItemPricing.dblStandardCost
 				)
 		FROM	tblICItemPricing ItemPricing 
-		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
+		WHERE	@intTransactionTypeId NOT IN (
+					@TransactionType_InventoryReceipt
+					,@TransactionType_InventoryReturn
+					,@TransactionType_InventoryAdjustment_OpeningInventory
+
+				)
 				AND ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId
 		
