@@ -16,11 +16,11 @@ AS
 		,pro.strProduct
 		,smmo.strModule
 		,ver.strVersionNo
-		,strCreateBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intCreatedUserEntityId)
+		,strCreateBy = created.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCreatedUserEntityId)
 		,tic.dtmCreated
 		,tic.dtmLastModified
 		,strCustomer = tic.strCustomerNumber
-		,strAssignedTo = (select top 1 strName from tblEMEntity where intEntityId = tic.intAssignedToEntity)
+		,strAssignedTo = assignto.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intAssignedToEntity)
 		,tic.intConcurrencyId
 		,intAssignToEntity = tic.intAssignedToEntity
 		,strContactName = contact.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
@@ -37,11 +37,11 @@ AS
 		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
 		,tic.intTicketProductId
 		,strTicketType = tic.strType
-		,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
+		,strCustomerName = cus.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
 		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
-		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
-		,cam.strCampaignName
+		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
+		,strCampaignName = null
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
 		,tic.strDescription
@@ -64,15 +64,19 @@ AS
 										  end)
 	from
 		tblHDTicket tic
-		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
-		left outer join tblHDTicketStatus sta on sta.intTicketStatusId = tic.intTicketStatusId
-		left outer join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
-		left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
-		left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
-		left outer join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
-		left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
-		left outer join tblHDProject proj on proj.intProjectId = (select top 1 projt.intProjectId from tblHDProjectTask projt where projt.intTicketId = tic.intTicketId)
-		left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = tic.intOpportunityCampaignId
-		left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = tic.intCompanyLocationId
-		left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
-		left outer join tblEMEntity contact on contact.intEntityId = tic.intCustomerContactId
+		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
+		join tblHDTicketStatus sta on sta.intTicketStatusId = tic.intTicketStatusId
+		join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
+		join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
+		join tblHDModule mo on mo.intModuleId = tic.intModuleId
+		join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
+		join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
+		join tblEMEntity contact on contact.intEntityId = tic.intCustomerContactId
+		join tblEMEntity cus on cus.intEntityId = tic.intCustomerId
+		join tblEMEntity created on created.intEntityId = tic.intCreatedUserEntityId
+		left join tblHDProjectTask projt on projt.intTicketId = tic.intTicketId
+		left join tblHDProject proj on proj.intProjectId = projt.intProjectId
+		left join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = tic.intCompanyLocationId
+		left join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
+		left join tblEMEntity lastcomment on lastcomment.intEntityId = tic.intLastCommentedByEntityId
+		left join tblEMEntity assignto on assignto.intEntityId = tic.intAssignedToEntity
