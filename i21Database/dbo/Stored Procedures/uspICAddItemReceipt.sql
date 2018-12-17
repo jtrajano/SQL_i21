@@ -1003,6 +1003,7 @@ BEGIN
 					AND RawData.intSourceType = 3
 
 		WHERE RawHeaderData.intId = @intId
+		ORDER BY RawData.intSort, RawData.intId
 
 		--------------------------------------------
 		------ Validate Other Charges Fields -------
