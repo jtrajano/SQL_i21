@@ -7225,6 +7225,12 @@
     <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
     <Build Include="dbo\Views\vyuAPRptWC.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyImport.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblQMTestImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportTest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
