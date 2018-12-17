@@ -819,6 +819,31 @@ BEGIN
 				,@intLotId				= intLotId
 		FROM	@ItemsForAutoNegative
 
+		-- BEGIN DEBUG
+		DECLARE		@strDescriptionDEBUG AS NVARCHAR(MAX)
+		SELECT		@strDescriptionDEBUG = 
+						dbo.fnFormatMessage(
+						dbo.fnICGetErrorMessage(80078)
+						,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+						,Stock.dblUnitOnHand
+						,ItemPricing.dblAverageCost
+						,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+					)
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+		WHERE	ItemPricing.intItemId = @intItemId
+				AND ItemPricing.intItemLocationId = @intItemLocationId			
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+		PRINT 'DEBUG @strDescriptionDEBUG'
+		PRINT @strDescriptionDEBUG
+
 		INSERT INTO dbo.tblICInventoryTransaction (
 					[intItemId]
 					,[intItemLocationId]
@@ -879,13 +904,13 @@ BEGIN
 				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @AVERAGECOST
-				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
+				,[strDescription]						= -- Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c. 
 														 dbo.fnFormatMessage(
 															dbo.fnICGetErrorMessage(80078)
-															,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
-															,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
-															,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
-															,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+															,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+															,Stock.dblUnitOnHand
+															,ItemPricing.dblAverageCost
+															,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
 															, DEFAULT
 															, DEFAULT
 															, DEFAULT
@@ -1006,7 +1031,7 @@ BEGIN
 															dbo.fnFormatMessage(
 																dbo.fnICGetErrorMessage(80093) 
 																, i.strItemNo
-																, cl.strLocationName														
+																, cl.strLocationName
 																, DEFAULT
 																, DEFAULT
 																, DEFAULT
