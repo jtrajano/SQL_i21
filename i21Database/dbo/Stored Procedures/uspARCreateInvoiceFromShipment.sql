@@ -614,6 +614,17 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 		RETURN 0;
 	END
 
+
+IF EXISTS (SELECT TOP 1 1 FROM @UnsortedEntriesForInvoice A 
+				JOIN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intPricingTypeId = 2) B 
+					ON A.intContractDetailId = B.intContractDetailId
+ )
+	BEGIN
+		RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);
+		RETURN 0;
+	END
+
+
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice
 
