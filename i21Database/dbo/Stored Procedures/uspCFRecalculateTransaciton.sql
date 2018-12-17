@@ -4987,6 +4987,10 @@ BEGIN
 				,@TaxValue8						=@TaxValue8	
 				,@TaxValue9						=@TaxValue9	
 				,@TaxValue10					=@TaxValue10
+				,@intSiteId						=@intSiteId
+				,@intCardId						=@intCardId
+				,@intVehicleId					=@intVehicleId
+				,@intFreightTermId				=@companyConfigFreightTermId
 
 				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
