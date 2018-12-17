@@ -79,6 +79,19 @@ BEGIN
 							,'<null>'
 						)
 					) 
+				WHEN @pos > 0 AND SUBSTRING(@msg, @pos, 2) = '%c' THEN 
+					STUFF(
+						@msg
+						, @pos
+						, 2
+						, COALESCE (							
+							CASE 
+								WHEN ROUND(CAST(@p AS NUMERIC(18, 6)), 6) < 0.000001 THEN REPLACE(RTRIM(REPLACE(CAST(CAST(@p AS NUMERIC(38, 20)) AS NVARCHAR(50)), '0', ' ')), ' ' , '0') -- Format the float value as 20 decimal. 
+								ELSE REPLACE(RTRIM(REPLACE(CAST(CAST(@p AS NUMERIC(18, 6)) AS NVARCHAR(50)) , '0', ' ')), ' ', '0') -- Format the float value as 6 decimal. 
+							END 
+							,'<null>'
+						)
+					) 
 				ELSE 
 					@msg
 			END 

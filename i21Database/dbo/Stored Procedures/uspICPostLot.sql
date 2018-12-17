@@ -40,6 +40,8 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4
 		,@ACTUALCOST AS INT = 5
 
+DECLARE @strDescription AS NVARCHAR(255)
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
@@ -367,6 +369,22 @@ BEGIN
 						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
 						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
+					-- 'Inventory variance is created to adjust the negative stock from {Transaction Id}. Qty was {Quantity}. Cost was {Original Cost}. New cost is {New Cost}.'
+					SET @strDescription =
+							dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80224)
+								,@strRelatedTransactionId
+								,@QtyOffset
+								,@CostUsed
+								,@dblCost
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+
 					EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 							@intItemId = @intItemId
 							,@intItemLocationId = @intItemLocationId
@@ -397,6 +415,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@dblUnitRetail = @dblUnitRetail
+							,@strDescription = @strDescription
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 

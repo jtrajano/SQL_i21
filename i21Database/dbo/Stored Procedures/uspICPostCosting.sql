@@ -801,12 +801,13 @@ BEGIN
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @AVERAGECOST
 				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
+														-- 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
 														 dbo.fnFormatMessage(
 															dbo.fnICGetErrorMessage(80078)
-															,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
-															,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
-															,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
-															,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+															,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+															,Stock.dblUnitOnHand
+															,ItemPricing.dblAverageCost
+															,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
 															, DEFAULT
 															, DEFAULT
 															, DEFAULT
@@ -923,19 +924,20 @@ BEGIN
 				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= il.intCostingMethod -- @intCostingMethod
-				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-															dbo.fnFormatMessage(
-																dbo.fnICGetErrorMessage(80093) 
-																, i.strItemNo
-																, cl.strLocationName														
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
+				,[strDescription]						=	
+														-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
+														dbo.fnFormatMessage(
+															dbo.fnICGetErrorMessage(80093) 
+															, i.strItemNo
+															, cl.strLocationName
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
 														)
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
