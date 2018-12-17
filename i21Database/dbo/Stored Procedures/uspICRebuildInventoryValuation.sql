@@ -72,6 +72,9 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@AdjustmentTypeExpiryDateChange AS INT = 6
 		,@AdjustmentTypeLotMerge AS INT = 7
 		,@AdjustmentTypeLotMove AS INT = 8 
+		,@AdjustmentTypeLotOwnerChange AS INT = 9
+		,@AdjustmentTypeOpeningInventory AS INT = 10
+		,@AdjustmentTypeChangeLotWeight AS INT = 11
 
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
@@ -3896,6 +3899,8 @@ BEGIN
 						,dblCost  = CASE 
 										WHEN RebuildInvTrans.dblQty < 0 THEN 
 											CASE	
+												WHEN Adj.intAdjustmentType = @AdjustmentTypeOpeningInventory THEN 
+													ISNULL(AdjDetail.dblNewCost, RebuildInvTrans.dblCost) 
 												WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 													dbo.fnGetItemAverageCost(
 														RebuildInvTrans.intItemId
@@ -3924,12 +3929,17 @@ BEGIN
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
 														RebuildInvTrans.dblCost
 													ELSE 
-														dbo.fnMultiply (
-															dbo.fnDivide(
-																ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
-																,AdjItemUOM.dblUnitQty
-															)
-															,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+														--dbo.fnMultiply (
+														--	dbo.fnDivide(
+														--		ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
+														--		,AdjItemUOM.dblUnitQty
+														--	)
+														--	,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+														--)
+														dbo.fnCalculateCostBetweenUOM( 
+															AdjNewCostUOM.intItemUOMId
+															,ItemUOM.intItemUOMId
+															,ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
 														)
 											END
 										 ELSE 
@@ -3986,6 +3996,9 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM AdjNewCostUOM
+							ON AdjNewCostUOM.intItemId = AdjDetail.intItemId
+							AND AdjNewCostUOM.intItemUOMId = ISNULL(AdjDetail.intNewItemUOMId, AdjDetail.intItemUOMId) 
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = RebuildInvTrans.intLotId 
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId

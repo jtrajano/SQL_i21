@@ -72,6 +72,7 @@ DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
+		,@TransactionType_InventoryAdjustment_OpeningInventory AS INT = 47
 
 DECLARE @intReturnValue AS INT 
 
@@ -115,10 +116,36 @@ BEGIN
 				-- Compute the Qty if it has weights. 
 				-- and Get the Lot's Last cost. 
 				SELECT	@dblReduceQty =	dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
-						,@intItemUOMId = Lot.intWeightUOMId 
-						,@dblCost = Lot.dblLastCost 
+						,@intItemUOMId = Lot.intWeightUOMId 						
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
+
+				-- Get the lot's last cost when reducing stock. 
+				SELECT	@dblCost = Lot.dblLastCost 
+				FROM	dbo.tblICLot Lot
+				WHERE	@intTransactionTypeId NOT IN (
+							@TransactionType_InventoryReceipt
+							,@TransactionType_InventoryReturn
+							,@TransactionType_InventoryAdjustment_OpeningInventory
+
+						)
+
+				-- Get the item's last cost when reducing stock. 
+				-- Except if (1) doing vendor stock returns using Inventory Receipt/Return or (2) if it is an Opening Inventory
+				SELECT	@dblCost = COALESCE(
+							NULLIF(ItemPricing.dblLastCost, 0)
+							, ItemPricing.dblStandardCost
+						)
+				FROM	tblICItemPricing ItemPricing 
+				WHERE	@intTransactionTypeId NOT IN (
+							@TransactionType_InventoryReceipt
+							,@TransactionType_InventoryReturn
+							,@TransactionType_InventoryAdjustment_OpeningInventory
+
+						)
+						AND ItemPricing.intItemId = @intItemId
+						AND ItemPricing.intItemLocationId = @intItemLocationId
+						AND @dblCost IS NULL 
 				
 				-- Make sure the reduce qty is not null. 
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
