@@ -10,15 +10,47 @@ BEGIN
 	DECLARE @dblTotalOrderedQty		NUMERIC(18, 6) = 0
 	DECLARE @dblContractMaxQty		NUMERIC(18,6) = 0
 	DECLARE @dblOrigNetWeight 		NUMERIC(18,6) = @dblNetWeight
+	DECLARE @intUnitMeasureId 		INT = NULL
+	DECLARE @strInvalidItem			NVARCHAR(MAX) = ''
+	DECLARE @strUnitMeasure			NVARCHAR(100) = ''
 
-	SELECT @dblTotalOrderedQty = SUM(ISNULL(SOD.dblQtyOrdered, 0))
+	SELECT @intUnitMeasureId 	= IUOM.intUnitMeasureId
+		 , @strUnitMeasure		= UOM.strUnitMeasure
+	FROM dbo.tblICItemUOM IUOM WITH (NOLOCK)
+	INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE IUOM.intItemUOMId = @intScaleUOMId
+
+	SELECT TOP 1 @strInvalidItem = I.strItemNo + ' - ' + I.strDescription
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT I.intItemId
+		     , I.strItemNo
+			 , I.strDescription
 		FROM dbo.tblICItem I WITH (NOLOCK)
+		LEFT JOIN dbo.tblICItemUOM IUOM ON I.intItemId = IUOM.intItemId AND IUOM.intUnitMeasureId = @intUnitMeasureId
 		WHERE I.ysnUseWeighScales = 1
+		  AND IUOM.intItemUOMId IS NULL
+	) I ON SOD.intItemId = I.intItemId 
+	WHERE intSalesOrderId = @intSalesOrderId
+
+	IF ISNULL(@strInvalidItem, '') <> ''
+		BEGIN
+			DECLARE @strErrorMsg NVARCHAR(MAX) = 'Item ' + @strInvalidItem + ' doesn''t have UOM setup for ' + @strUnitMeasure + '.'
+
+			RAISERROR(@strErrorMsg, 16, 1)
+			RETURN;
+		END
+
+	SELECT @dblTotalOrderedQty = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, I.intItemUOMId, SOD.dblQtyOrdered), 0))
+	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
+	INNER JOIN (
+	SELECT I.intItemId
+		 , IUOM.intItemUOMId
+	FROM dbo.tblICItem I WITH (NOLOCK)
+	INNER JOIN tblICItemUOM IUOM ON I.intItemId = IUOM.intItemId AND IUOM.intUnitMeasureId = @intUnitMeasureId	
+	WHERE I.ysnUseWeighScales = 1	  
 	) I ON SOD.intItemId = I.intItemId
-	WHERE intSalesOrderId = @intSalesOrderId 
+	WHERE intSalesOrderId = @intSalesOrderId
 
 	IF ISNULL(@intSalesOrderId, 0) = 0
 		BEGIN
