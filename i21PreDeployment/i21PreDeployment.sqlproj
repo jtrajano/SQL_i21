@@ -365,4 +365,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1810_Fix_GL_Account.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\24_SC\3_UpdateSplitIdForSCTicket.sql" />
+  </ItemGroup>
 </Project>
