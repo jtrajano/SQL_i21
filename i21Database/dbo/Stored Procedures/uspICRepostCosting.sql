@@ -819,31 +819,6 @@ BEGIN
 				,@intLotId				= intLotId
 		FROM	@ItemsForAutoNegative
 
-		-- BEGIN DEBUG
-		DECLARE		@strDescriptionDEBUG AS NVARCHAR(MAX)
-		SELECT		@strDescriptionDEBUG = 
-						dbo.fnFormatMessage(
-						dbo.fnICGetErrorMessage(80078)
-						,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
-						,Stock.dblUnitOnHand
-						,ItemPricing.dblAverageCost
-						,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-					)
-		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
-					ON ItemPricing.intItemId = Stock.intItemId
-					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
-		WHERE	ItemPricing.intItemId = @intItemId
-				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
-		PRINT 'DEBUG @strDescriptionDEBUG'
-		PRINT @strDescriptionDEBUG
-
 		INSERT INTO dbo.tblICInventoryTransaction (
 					[intItemId]
 					,[intItemLocationId]
