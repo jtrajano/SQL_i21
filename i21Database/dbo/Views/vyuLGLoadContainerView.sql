@@ -104,7 +104,7 @@ SELECT   L.intLoadId
 								WHEN 11
 									THEN 'Invoiced'
 								ELSE ''
-							  END
+							  END COLLATE Latin1_General_CI_AS
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty
 		,CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty ,0) = 0 THEN 0 ELSE 1 END) AS BIT) AS  ysnReceived
 		,PDetail.dblCashPrice AS dblPCashPrice

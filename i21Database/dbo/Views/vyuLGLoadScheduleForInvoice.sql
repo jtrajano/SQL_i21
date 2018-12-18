@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuLGLoadScheduleForInvoice]
 AS
-SELECT strTransactionType = 'Load Schedule'
+SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,strTransactionNumber = L.strLoadNumber
-	,strShippedItemId = 'lgis:' + CAST(L.intLoadId AS NVARCHAR(250))
+	,strShippedItemId = 'lgis:' + CAST(L.intLoadId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,intEntityCustomerId = LD.intCustomerEntityId
 	,intCurrencyId = CASE WHEN L.intSourceType = 7 THEN LD.intPriceCurrencyId ELSE AD.intSeqCurrencyId END
 	,intSalesOrderId = NULL

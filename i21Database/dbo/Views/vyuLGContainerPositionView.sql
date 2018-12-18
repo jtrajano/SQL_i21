@@ -16,7 +16,7 @@ FROM (
 			WHEN 'Priced'
 				THEN 'FX'
 			ELSE 'UF'
-			END
+			END COLLATE Latin1_General_CI_AS
 		,dblBasis = CD.dblBasis
 		,strFinalPrice = MAX(CD.dblCashPrice)
 		,strPriceWeightUOM = MAX(U2.strUnitMeasure)
@@ -31,7 +31,7 @@ FROM (
 		,intNoOfIntegrationRequests = SUM(CAST(ISNULL(LDLink.ysnExported, 0) AS INT))
 		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,IC.intItemContractId,CD.dblBasis, CD.dtmStartDate, CD.dtmEndDate)
 		,strRemarks = CH.strInternalComment
-		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
+		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2) COLLATE Latin1_General_CI_AS
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId

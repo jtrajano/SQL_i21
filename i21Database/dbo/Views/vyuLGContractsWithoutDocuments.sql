@@ -18,7 +18,7 @@ SELECT * FROM (
 		,L.dtmETAPOL AS dtmETAPOL
 		,L.dtmETSPOL AS dtmETSPOL
 		,DOC.strDocumentName
-		,'Contracts w/o shipping advice' AS strType
+		,'Contracts w/o shipping advice' COLLATE Latin1_General_CI_AS AS strType
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
@@ -55,7 +55,7 @@ FROM (
 		,L.dtmETAPOL AS dtmETAPOL
 		,L.dtmETSPOL AS dtmETSPOL
 		,DOC.strDocumentName
-		,'Contracts w/o document' AS strType
+		,'Contracts w/o document' COLLATE Latin1_General_CI_AS AS strType
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId

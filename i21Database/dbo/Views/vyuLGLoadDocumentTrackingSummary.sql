@@ -43,10 +43,10 @@ SELECT DT.strContractNumber
 				)
 			THEN 'Y'
 		ELSE 'N'
-		END strDocumentsReceived
+		END COLLATE Latin1_General_CI_AS strDocumentsReceived
 	,DT.dblQuantity
 	,DT.ysnInvoice
-	,CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END strInvoice
+	,CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END COLLATE Latin1_General_CI_AS strInvoice
 	,L.intBookId
 	,BO.strBook
 	,L.intSubBookId
