@@ -547,6 +547,11 @@ BEGIN
 		/*INSERT INTO tblEMEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
 		VALUES (@EntityId, @ContactEntityId, 0, 1)*/
 
+		--set term default values if null
+		IF LEN(@intTermsId) < 0 OR @intTermsId IS NULL
+		BEGIN
+			(SELECT TOP 1 @intTermsId = intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')
+		END
 
 		--insert into tblEMEntityType		
 		IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Vendor'' and intEntityId = @EntityId)
