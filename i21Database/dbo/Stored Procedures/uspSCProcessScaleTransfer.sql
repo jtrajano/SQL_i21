@@ -12,8 +12,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
-DECLARE @InventoryReceiptId AS INT; 
-DECLARE @ErrMsg                    NVARCHAR(MAX);
+DECLARE @lotType AS INT; 
+DECLARE @ErrMsg  NVARCHAR(MAX);
  IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
     BEGIN
         CREATE TABLE #tmpAddInventoryTransferResult (
@@ -21,6 +21,7 @@ DECLARE @ErrMsg                    NVARCHAR(MAX);
 			,intInventoryTransferId INT
         )
     END
+SELECT @lotType = dbo.fnGetItemLotType(intItemId) FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 BEGIN TRY
 DECLARE @TransferEntries AS InventoryTransferStagingTable,
@@ -76,9 +77,9 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		,[intLotId]                 = SC.intLotId
 		,[intItemUOMId]             = SC.intItemUOMIdTo
 		,[dblQuantityToTransfer]    = SC.dblNetUnits
-		,[intItemWeightUOMId]		= SC.intItemUOMIdFrom
-		,[dblGrossWeight]			= SC.dblGrossWeight
-		,[dblTareWeight]			= SC.dblTareWeight
+		,[intItemWeightUOMId]		= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.intItemUOMIdFrom ELSE SC.intItemUOMIdTo END
+		,[dblGrossWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.dblGrossWeight ELSE SC.dblGrossUnits END
+		,[dblTareWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.dblTareWeight ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblGrossUnits - SC.dblShrink ELSE 0 END END
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = SC.intSubLocationId
 		,[intToSubLocationId]       = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intSubLocationToId ELSE NULL END
@@ -95,6 +96,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		,[strSourceScreenName]		= 'Scale Ticket'
     FROM tblSCTicket SC 
 	INNER JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
+	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
     WHERE SC.intTicketId = @intTicketId 
 
 	--if No Records to Process exit
