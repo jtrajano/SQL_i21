@@ -5306,15 +5306,15 @@ BEGIN
 	
 	DECLARE @dblQuoteNetPrice			 numeric(18,6)
 	DECLARE @dblQuoteGrossPrice			 numeric(18,6)
+	DECLARE @dblImportFileGrossPrice	 NUMERIC(18,6)
 
 
 	IF (@strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
-	OR @strPriceMethod = 'Posted Trans from CSV'
 	OR @strPriceMethod = 'Origin History')
 		BEGIN
 
-			DECLARE @dblImportFileGrossPrice NUMERIC(18,6)
+			
 			SET @dblImportFileGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 
 			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
@@ -5338,6 +5338,29 @@ BEGIN
 			SET @dblQuoteNetPrice			 = ROUND(((Round((@dblQuoteGrossPrice * @dblZeroQuantity),2) - (ISNULL(@totalCalculatedTaxZeroQuantity,0)) ) / @dblZeroQuantity),6)
 
 		END
+	
+	ELSE IF @strPriceMethod = 'Posted Trans from CSV'
+	BEGIN
+			DECLARE @dblPostedTranGrossPrice NUMERIC(18,6)
+			SET @dblPostedTranGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+			SET @dblImportFileGrossPrice = @dblPostedTranGrossPrice
+
+			IF(ISNULL(@ysnForceRounding,0) = 1) 
+			BEGIN
+				SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+			END
+
+
+			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPrice
+			SET @dblOriginalGrossPrice		 = @dblOriginalPrice
+			SET @dblCalculatedNetPrice		 = ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblOriginalNetPrice		 = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblCalculatedTotalPrice	 = ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			SET @dblOriginalTotalPrice		 = ROUND(@dblOriginalPrice * @dblQuantity,2)
+
+			SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
+			SET @dblQuoteNetPrice			 = ROUND(((Round((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+	END
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
 		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
@@ -5357,7 +5380,7 @@ BEGIN
 		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) - (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity),6)
+		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
