@@ -83,12 +83,14 @@
 	SC.strDistributionOption = 'SPL' THEN 'Split' WHEN
 	SC.strDistributionOption = 'HLD' THEN 'Hold' END) AS
 	strStorageTypeDescription,
+	tblEMEntity.strEntityNo,
 	tblEMEntity.strName,
 	EMLocation.strAddress,
 	EMLocation.strCity,
 	EMLocation.strCountry,
 	EMLocation.strPhone,
 	tblSCListTicketTypes.strTicketType,
+	tblSMCompanyLocation.strLocationNumber,
 	tblSMCompanyLocation.strLocationName,
 	tblSMCompanyLocationSubLocation.strSubLocationName, 
 	tblEMEntitySplit.strSplitNumber,
@@ -105,6 +107,7 @@
 	tblSMCompanySetup.strCompanyCountry,
 	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.strReceiptNumber,
+	tblGRDiscountId.strDiscountId,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   FROM tblSCTicket SC
@@ -129,12 +132,22 @@
 		,strCountry AS strCompanyCountry
 	 FROM tblSMCompanySetup
   )AS tblSMCompanySetup
-  OUTER APPLY(
-	SELECT TOP 1 ICI.intInventoryReceiptItemId
-		,IC.intInventoryReceiptId
+ OUTER APPLY(
+	SELECT IC.intInventoryReceiptId
 		,IC.strReceiptNumber
-		,IC.dtmReceiptDate  from tblICInventoryReceipt IC 
+		,IC.dtmReceiptDate 
+		,ICI.intInventoryReceiptItemId
+		,ICI.dblGross
+		,ICI.dblNet
+		,(ICI.dblGross - ICI.dblNet) [dblShrinkage]
+		,LineCtr.totalTicket
+	FROM tblICInventoryReceipt IC 
 	INNER JOIN tblICInventoryReceiptItem ICI ON IC.intInventoryReceiptId = ICI.intInventoryReceiptId
+	OUTER APPLY(
+		SELECT COUNT(*) as totalTicket FROM tblICInventoryReceipt IR
+		INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		WHERE intSourceId = SC.intTicketId AND IR.intSourceType = 1
+	)LineCtr
 	WHERE ICI.intSourceId = SC.intTicketId AND IC.intSourceType = 1
   )AS ReceiptItem
   OUTER APPLY(
