@@ -43,6 +43,29 @@ BEGIN
 	RETURN -80216; 
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblICBackup WHERE ysnRebuilding = 1)
+BEGIN 
+	-- 'A stock rebuild is already in progress.'
+	EXEC uspICRaiseError 80225;
+	RETURN -80225; 
+END 
+
+-- Create the backup header
+BEGIN 
+	DECLARE @strRemarks VARCHAR(200)
+	DECLARE @strItems VARCHAR(50)
+
+	SET @strItems = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
+	SET @strRemarks = 'Rebuild inventory for ' + @strItems + ' in a '+
+		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
+		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
+
+	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart)
+	SELECT GETDATE(), @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE()
+
+	SET @intBackupId = SCOPE_IDENTITY()
+END 
+
 -- 'Unable to find an open fiscal year period to match the transaction date.'
 IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
 BEGIN 	
@@ -103,20 +126,14 @@ END
 
 --BEGIN TRANSACTION 
 
--- Backup Inventory
-DECLARE @strRemarks VARCHAR(200)
-DECLARE @strItems VARCHAR(50)
-
-SET @strItems = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
-SET @strRemarks = 'Rebuild inventory for ' + @strItems + ' in a '+
-	(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
-	' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
-
-EXEC dbo.uspICBackupInventory 
-	@intUserId = @intUserId
-	, @strOperation = 'Rebuild Inventory'
-	, @strRemarks = @strRemarks
-	, @intBackupId = @intBackupId OUTPUT 
+-- Backup Inventory transactions 
+BEGIN 
+	EXEC dbo.uspICBackupInventory 
+		@intUserId = @intUserId
+		, @strOperation = 'Rebuild Inventory'
+		, @strRemarks = @strRemarks
+		, @intBackupId = @intBackupId OUTPUT 
+END 
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
@@ -535,7 +552,11 @@ BEGIN
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
-		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [intItemId] ASC);
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [strTransactionId] ASC);
+
+	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_lookup]
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [strTransactionId] ASC, [intItemId] ASC, [intTransactionDetailId] ASC, [intLotId] ASC, [intItemLocationId] ASC);
+
 
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
@@ -1702,7 +1723,7 @@ BEGIN
 							,RebuildInvTrans.dblForexRate
 							,RebuildInvTrans.intCostingMethod
 					FROM	#tmpICInventoryTransaction RebuildInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
-								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId						
+								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
 								AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
 							LEFT JOIN (
 								dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i
@@ -3980,7 +4001,7 @@ BEGIN
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
 						LEFT JOIN dbo.tblICInventoryAdjustment Adj
-							ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId						
+							ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
 							AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
 						LEFT JOIN (
 							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
@@ -4222,6 +4243,14 @@ BEGIN
 
 	GOTO _CLEAN_UP
 END
+
+-- Flag the rebuild as done. 
+BEGIN 
+	UPDATE	tblICBackup 
+	SET		ysnRebuilding = 0
+			,dtmEnd = GETDATE()
+	WHERE intBackupId = @intBackupId
+END 
 
 _CLEAN_UP: 
 BEGIN 

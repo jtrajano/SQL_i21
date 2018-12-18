@@ -7217,6 +7217,8 @@
     <Build Include="dbo\Tables\tblICStagingDailyStockPosition.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_GrossQuantityInStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_FarmField.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

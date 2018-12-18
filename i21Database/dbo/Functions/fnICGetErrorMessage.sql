@@ -238,6 +238,7 @@ BEGIN
 		WHEN @msgId = 80222 THEN 'Please check if there is enough stock to do the split.'
 		WHEN @msgId = 80223 THEN 'Receiving a negative stock for %s is not allowed.'
 		WHEN @msgId = 80224 THEN 'Inventory variance is created to adjust the negative stock from %s. Qty was %f. Cost was %c. New cost is %c.'
+		WHEN @msgId = 80225 THEN 'A stock rebuild is already in progress.'
 	END 
 
 	RETURN @msg
