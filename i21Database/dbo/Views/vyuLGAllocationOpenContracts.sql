@@ -34,7 +34,7 @@ AS
 			CH.intCommodityId,
 			CD.intItemUOMId,
 			CD.intCompanyLocationId,
-			CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
+			CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END COLLATE Latin1_General_CI_AS AS strPurchaseSale,
 			Comm.strDescription as strCommodity,
 			CL.strLocationName,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4,5,6) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,

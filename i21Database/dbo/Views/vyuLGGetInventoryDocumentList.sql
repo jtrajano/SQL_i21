@@ -11,7 +11,7 @@ SELECT intDocumentId
 			THEN 'Bill Of Lading'
 		WHEN 3
 			THEN 'Container'
-		END
+		END COLLATE Latin1_General_CI_AS
 	,C.intCommodityId
 	,ysnStandard
 	,intCertificationId
