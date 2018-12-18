@@ -106,7 +106,13 @@
 	tblSMCompanySetup.strCompanyCity,
 	tblSMCompanySetup.strCompanyCountry,
 	ReceiptItem.intInventoryReceiptId,
+	ReceiptItem.intInventoryReceiptItemId,
 	ReceiptItem.strReceiptNumber,
+	ReceiptItem.dblGross,
+	ReceiptItem.dblShrinkage,
+	ReceiptItem.dblNet,
+	(ReceiptItem.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) AS dblLineGrossWeight,
+	((ReceiptItem.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
