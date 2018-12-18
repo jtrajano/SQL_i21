@@ -35,7 +35,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractWithoutShippingInstructionCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o shipping instruction' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -44,7 +44,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractsWithoutTCCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o TC' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -53,7 +53,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractsWithout4CCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o 4C' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -62,7 +62,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intWeightClaimsWithoutDebitNoteCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Weight claims w/o debit note' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -71,7 +71,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractsWithoutWeightClaimCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o weight claim' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -80,7 +80,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractsWithoutDocumentCount' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o document' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 	
@@ -89,7 +89,7 @@ BEGIN TRY
 		SELECT COUNT(1) intCount
 			,'intContractsWithoutShippingAdvice' AS strNotificationCount
 		FROM vyuLGNotifications NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType
+		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strType COLLATE Latin1_General_CI_AS
 		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
 		WHERE strType = 'Contracts w/o shipping advice' AND NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode)
 		) t

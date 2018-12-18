@@ -29,9 +29,9 @@ SELECT strTransactionType
 	,intInventoryAccountId
 	,ysnPosted
 FROM (
-	SELECT [strTransactionType] = 'Load Schedule'
+	SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 		,[strTransactionNumber] = L.[strLoadNumber]
-		,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
+		,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		,[intEntityCustomerId] = LD.intCustomerEntityId
 		,[strCustomerName] = EME.[strName]
 		,[intCurrencyId] = ISNULL(ISNULL(WRMD.[intCurrencyId], ARC.[intCurrencyId]), (

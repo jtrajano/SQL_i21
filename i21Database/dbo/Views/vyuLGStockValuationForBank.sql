@@ -42,7 +42,7 @@ SELECT DISTINCT CH.intContractHeaderId
 		WHEN ProductLine.strDescription LIKE '%Green Organic%'
 			THEN 'Y'
 		ELSE 'N'
-		END AS ysnOrganic
+		END COLLATE Latin1_General_CI_AS AS ysnOrganic
 	,STUFF((
 			SELECT DISTINCT ', ' + LTRIM(BD.strCertificationName)
 			FROM (
@@ -52,7 +52,7 @@ SELECT DISTINCT CH.intContractHeaderId
 				WHERE CC.intContractDetailId = CD.intContractDetailId
 				) BD
 			FOR XML PATH('')
-			), 1, 2, '') strCertificationName
+			), 1, 2, '') COLLATE Latin1_General_CI_AS strCertificationName
 	,CASE 
 		WHEN C.ysnSubCurrency = 1
 			THEN CU.strCurrency
