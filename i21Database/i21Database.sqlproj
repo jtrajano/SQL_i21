@@ -7193,6 +7193,8 @@
     <Build Include="dbo\Functions\fnRKGetContractDetail.sql" />
     <Build Include="dbo\Tables\tblSTStoreAppHistoryReports.sql" />
     <None Include="Scripts\Post-Deployment\CF\4_18.1To18.3DataConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
