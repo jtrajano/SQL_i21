@@ -334,7 +334,7 @@ BEGIN TRY
 	 ,'Audit'
 	 ,Audi.intContractHeaderId
 	 ,Audi.intContractDetailId
-	 ,SUM(Audi.dblTransactionQuantity) AS dblQuantity
+	 ,SUM(Audi.dblTransactionQuantity*-1) AS dblQuantity
 	 FROM vyuCTSequenceAudit Audi
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = Audi.intContractHeaderId
 	 WHERE Audi.strFieldName = 'Quantity'	
@@ -512,6 +512,7 @@ BEGIN TRY
 	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId	                 END
 	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId                   END
 	
+	
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
 	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
 	WHERE  dbo.fnRemoveTimeOnDate(dtmHistoryCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END
@@ -643,11 +644,12 @@ BEGIN TRY
 	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId					 END
 	AND   ISNULL(BL.dblQuantity,0) <= 0
 	
+
 	UPDATE @FinalResult 
 	SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
 
 	DELETE FROM @FinalResult 
-							WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTSequenceHistory WHERE intContractStatusId = 6 
+							WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTSequenceHistory WHERE intContractStatusId IN (3,6 )
 							AND dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END) 
 
 	SELECT * FROM @FinalResult WHERE  dblAvailableQty > 0 

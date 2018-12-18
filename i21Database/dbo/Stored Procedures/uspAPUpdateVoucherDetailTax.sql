@@ -62,7 +62,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intItemUOMId)
 	SELECT
 		 intItemId					= B.intItemId
-		,intVendorId				= A.intEntityVendorId
+		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
 		,dblItemCost				= B.dblCost
 		,dblQuantity				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0

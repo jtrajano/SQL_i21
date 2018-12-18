@@ -127,7 +127,7 @@ BEGIN
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUniqueInvoiceList) 
 	BEGIN
 		--BEGIN TRANSACTION
-		
+		SET @strStatus = ''
 		
 		SELECT TOP 1
 			@strCustomerNumber = strCustomerNumber
@@ -176,8 +176,9 @@ BEGIN
 		BEGIN
 			SET @strErrorMessage = ''
 			SET @ContractOverFillQuantity = 0
-			SET @strStatus = ''
+			
 			SET @strContractNumber = ''
+			SET @intContractDetailId = NULL
 			SET @dblQuantity = 0
 			SET @getARPrice = 0
 			--SET @ysnProcessNextAsHeader = 0
@@ -262,7 +263,7 @@ BEGIN
 			--								WHERE A.strContractNumber = @strContractNumber
 			--								AND A.intEntityId = @intCustomerEntityId
 			--								AND B.intContractSeq = @intContractSequence)
-			SET @intContractDetailId = NULL
+			
 			SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
 						,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
 			FROM
@@ -285,7 +286,7 @@ BEGIN
 			--get another contract if contract number from file does not available
 			IF(@intContractDetailId IS NULL)
 				BEGIN
-				SET @intContractDetailId = NULL
+				
 				SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
 							,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
 				FROM

@@ -195,7 +195,7 @@ SELECT
 FROM 
 [dbo].fnRKGetContractDetail(@dtmToDate) CD
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
-
+AND CD.intCommodityId in (select intCommodity from @Commodity)
 
 DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 		, dtmTransactionDate DATETIME

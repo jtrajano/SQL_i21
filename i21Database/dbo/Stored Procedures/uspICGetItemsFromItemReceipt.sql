@@ -7,7 +7,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
 SELECT	
 		-- Header
 		[intInventoryReceiptId]			= Receipt.intInventoryReceiptId
@@ -20,14 +19,14 @@ SELECT
 
 		-- Detail 
 		,[intInventoryReceiptDetailId]	= ReceiptItem.intInventoryReceiptItemId
-		,[intItemId]					= ReceiptItem.intItemId
+		,[intItemId]					= CASE WHEN ISNULL(ReceiptItem.strItemType,'') = 'Option' THEN ItemBundleDetail.intItemId ELSE ReceiptItem.intItemId END
 		,[intLotId]						= ItemLot.intLotId
 		,[strLotNumber]					= ItemLot.strLotNumber
 		,[intLocationId]				= ItemLocation.intLocationId
 		,[intItemLocationId]			= ItemLocation.intItemLocationId
 		,[intSubLocationId]				= ItemLot.intSubLocationId
 		,[intStorageLocationId]			= ItemLot.intStorageLocationId
-		,[intItemUOMId]					= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId)
+		,[intItemUOMId]					= CASE WHEN ISNULL(ReceiptItem.strItemType,'') = 'Option' THEN dbo.[fnGetMatchingItemUOMId](ItemBundleDetail.intItemId, ReceiptItem.intUnitMeasureId) ELSE ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId) END
 		,[intWeightUOMId]				= ReceiptItem.intWeightUOMId		
 		,[dblQty]						= ISNULL(ItemLot.dblQuantity, ReceiptItem.dblOpenReceive) 
 		,[dblUOMQty]					= ISNULL(LotItemtUOM.dblUnitQty, ItemUOM.dblUnitQty)
@@ -57,7 +56,17 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		LEFT JOIN vyuCTCompactContractDetailView ContractView
 			ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 				AND Receipt.strReceiptType = 'Purchase Contract'
-WHERE	Receipt.intInventoryReceiptId = @intReceiptId		
+
+		LEFT JOIN tblICItemBundle ItemBundle
+			ON ItemBundle.intItemBundleId = ReceiptItem.intParentItemLinkId
+			AND ISNULL(ReceiptItem.strItemType,'') = 'Option'
+		LEFT JOIN tblICItem ItemBundleDetail
+			ON ItemBundleDetail.intItemId = ItemBundle.intItemId
+			AND ItemBundleDetail.strType = 'Bundle'
+			AND ISNULL(ItemBundleDetail.strBundleType,'') = 'Option'
+
+WHERE	Receipt.intInventoryReceiptId = @intReceiptId	
 		AND 1 = CASE WHEN ISNULL(ReceiptItem.strItemType,'') <> '' AND Item.strType = 'Bundle' THEN 1
-					WHEN  ISNULL(ReceiptItem.strItemType,'') <> '' THEN 0
+					WHEN ISNULL(ReceiptItem.strItemType,'') = 'Option' THEN 1
+					WHEN ISNULL(ReceiptItem.strItemType,'') <> '' THEN 0
 					ELSE 1 END
