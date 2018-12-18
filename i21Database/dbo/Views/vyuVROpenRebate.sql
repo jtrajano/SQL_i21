@@ -95,6 +95,7 @@ AS
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
-		AND A.strTransactionType IN ('Invoice', 'Credit Memo')) A
+		AND A.strTransactionType IN ('Invoice', 'Credit Memo')
+		AND I.ysnActive = 1) A
 
 GO
