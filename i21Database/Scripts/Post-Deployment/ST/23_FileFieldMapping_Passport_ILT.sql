@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Outbound'
        ,[strXMLInitiater] = '<?xml version="1.0"?>'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 6
+       ,[intConcurrencyId] = 8
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Passport Pricebook Item List - ILT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,6)
+      ('Passport Pricebook Item List - ILT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,8)
 END
 --END CHECK HEADER
 
@@ -46,7 +46,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,1,0,'NAXML-MaintenanceRequest','tblSTstgPassportPricebookItemListILT33',NULL,NULL,0,NULL,1,1)
+      (@intImportFileHeaderId,NULL,1,0,'NAXML-MaintenanceRequest','tblSTstgPassportPricebookItemListILT33',NULL,NULL,0,NULL,1,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -63,7 +63,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLength] = 0
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 3
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -430,7 +430,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileColumnDetailId,1,'Version',NULL,NULL,'3.3',1,1)
+      (@intImportFileColumnDetailId,1,'version',NULL,NULL,'3.4',1,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -438,12 +438,12 @@ BEGIN
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
-       ,[strTagAttribute] = 'Version'
+       ,[strTagAttribute] = 'version'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
-       ,[strDefaultValue] = '3.3'
+       ,[strDefaultValue] = '3.4'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 3
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
