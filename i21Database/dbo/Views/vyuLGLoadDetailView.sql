@@ -152,7 +152,7 @@ SELECT LoadDetail.intLoadDetailId
 	, Load.strExternalLoadNumber
 	, strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound'
 					ELSE CASE WHEN Load.intPurchaseSale = 2 THEN 'Outbound' 
-							ELSE 'Drop Ship' END END
+							ELSE 'Drop Ship' END END COLLATE Latin1_General_CI_AS
 	, intGenerateReferenceNumber = GLoad.intReferenceNumber
 	, intGenerateSequence = Load.intGenerateSequence
 	, intNumberOfLoads = GLoad.intNumberOfLoads
@@ -181,7 +181,7 @@ SELECT LoadDetail.intLoadDetailId
 	, Load.intTransUsedBy
 	, strTransUsedBy = CASE WHEN Load.intTransUsedBy = 1 THEN 'None'
 							WHEN Load.intTransUsedBy = 2 THEN 'Scale Ticket'
-							WHEN Load.intTransUsedBy = 3 THEN 'Transport Load' END
+							WHEN Load.intTransUsedBy = 3 THEN 'Transport Load' END COLLATE Latin1_General_CI_AS
 	, Load.intSourceType
 	, Load.ysnPosted
 	, intInboundTaxGroupId = VendorTax.intTaxGroupId

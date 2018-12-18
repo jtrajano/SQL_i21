@@ -7,11 +7,11 @@ FROM (
 			WHEN CH.intContractTypeId = 1
 				THEN 'PO'
 			ELSE 'SO'
-			END AS Quant_Type
+			END COLLATE Latin1_General_CI_AS AS Quant_Type
 		,CH.strContractNumber AS Partijnr
 		,CD.intContractSeq AS Seq
 		,CL.strLocationName AS CompanyLocation
-		,dbo.fnLGGetShipmentStatus(CD.intContractDetailId) Shipment_Status
+		,dbo.fnLGGetShipmentStatus(CD.intContractDetailId) COLLATE Latin1_General_CI_AS Shipment_Status
 		,I.strDescription AS Soort_Koffie
 		,ProductType.strDescription AS Type_of_coffee
 		,CASE 
@@ -27,8 +27,8 @@ FROM (
 						), '') = ''
 				THEN 'Regular Coffee'
 			ELSE 'Fair Trade'
-			END AS MH
-		,UPPER(LEFT(DATENAME(MONTH, CD.dtmEndDate), 3)) + DATENAME(YEAR, CD.dtmEndDate) AS Position_Month
+			END COLLATE Latin1_General_CI_AS AS MH
+		,UPPER(LEFT(DATENAME(MONTH, CD.dtmEndDate), 3)) + DATENAME(YEAR, CD.dtmEndDate) COLLATE Latin1_General_CI_AS AS Position_Month
 		,(SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = IRI.intSubLocationId) AS Warehouse 		
 		,UM.strUnitMeasure AS Packing_Unit
 		,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, (

@@ -43,14 +43,14 @@ SELECT GL.intGenerateLoadId
 			THEN 'Outbound'
 		WHEN 3
 			THEN 'Drop Ship'
-		END AS strType
+		END COLLATE Latin1_General_CI_AS AS strType
 	  ,GL.intSourceType
 	  ,CASE GL.intSourceType
 		WHEN 1
 			THEN 'Manual'
 		WHEN 2
 			THEN 'Allocation'
-		END AS strSourceType
+		END COLLATE Latin1_General_CI_AS AS strSourceType
 	  ,GL.intTransUsedBy
 	  ,CASE GL.intTransUsedBy
 		WHEN 1
@@ -59,7 +59,7 @@ SELECT GL.intGenerateLoadId
 			THEN 'Scale Ticket'
 		WHEN 3
 			THEN 'Transport Load'
-		END AS strTransUsedBy	  
+		END COLLATE Latin1_General_CI_AS AS strTransUsedBy	  
 	  ,GL.intAllocationDetailId
 	  ,AH.strAllocationNumber
 

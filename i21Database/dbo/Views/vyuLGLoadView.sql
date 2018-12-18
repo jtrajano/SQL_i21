@@ -37,13 +37,13 @@ SELECT -- Load Header
 			THEN 'Picked Lots'
 		WHEN LOAD.intSourceType = 6
 			THEN 'Pick Lots'
-		END
+		END COLLATE Latin1_General_CI_AS
 	,strTransportationMode = CASE 
 		WHEN LOAD.intTransportationMode = 1 
 			THEN 'Truck'
 		WHEN LOAD.intTransportationMode = 2
 			THEN 'Ocean Vessel'
-		END
+		END COLLATE Latin1_General_CI_AS
 	,LOAD.intTransUsedBy
 	,strTransUsedBy = CASE 
 		WHEN LOAD.intTransUsedBy = 1 
@@ -52,7 +52,7 @@ SELECT -- Load Header
 			THEN 'Scale Ticket'
 		WHEN LOAD.intTransUsedBy = 3
 			THEN 'Transport Load'
-		END
+		END COLLATE Latin1_General_CI_AS
 	,strPosition = P.strPosition
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = LOAD.intGenerateSequence

@@ -15,7 +15,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Outbound'
 		WHEN 3
 			THEN 'Drop Ship'
-		END AS strDefaultShipmentTransType
+		END COLLATE Latin1_General_CI_AS AS strDefaultShipmentTransType
 	,CP.intDefaultShipmentSourceType
 	,CASE CP.intDefaultShipmentSourceType
 		WHEN 1
@@ -24,14 +24,14 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Contracts'
 		WHEN 3
 			THEN 'Orders'
-		END AS strDefaultShipmentSourceType
+		END COLLATE Latin1_General_CI_AS AS strDefaultShipmentSourceType
 	,CP.intDefaultTransportationMode
 	,CASE CP.intDefaultTransportationMode
 		WHEN 1
 			THEN 'Truck'
 		WHEN 2
 			THEN 'Ocean Vessel'
-		END AS strDefaultTransportationMode
+		END COLLATE Latin1_General_CI_AS AS strDefaultTransportationMode
 	,CP.intDefaultPositionId
 	,PO.strPosition
 	,PO.strPositionType
@@ -49,7 +49,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'TM Sites'
 		WHEN 5
 			THEN 'Entities'
-		END AS strDefaultLeastCostSourceType
+		END COLLATE Latin1_General_CI_AS AS strDefaultLeastCostSourceType
 	,CP.strALKMapKey
 	,CP.intTransUsedBy
 	,CASE CP.intTransUsedBy
@@ -59,7 +59,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Scale Ticket'
 		WHEN 3
 			THEN 'Transport Load'
-		END AS strTransUsedBy
+		END COLLATE Latin1_General_CI_AS AS strTransUsedBy
 	,CP.ysnAlertApprovedQty
 	,CP.ysnUpdateVesselInfo
 	,CP.ysnValidateExternalPONo
@@ -80,7 +80,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipment'
 		WHEN 2
 			THEN 'Shipping Instructions'
-		END strDefaultShipmentType
+		END COLLATE Latin1_General_CI_AS strDefaultShipmentType
 	,CP.intCompanyLocationId
 	,CL.strLocationName AS strCompanyLocationName
 	,CP.intShippingInstructionReportFormat
@@ -89,14 +89,14 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Instruction Report Format - 1'
 		WHEN 2
 			THEN 'Shipping Instruction Report Format - 2'
-		END AS strShippingInstructionReportFormat
+		END COLLATE Latin1_General_CI_AS AS strShippingInstructionReportFormat
 	,CP.intDeliveryOrderReportFormat
 	,CASE CP.intDeliveryOrderReportFormat
 		WHEN 1
 			THEN 'Delivery Order Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strDeliveryOrderReportFormat
+		END COLLATE Latin1_General_CI_AS strDeliveryOrderReportFormat
 	,CP.intInStoreLetterReportFormat
 	,CASE CP.intInStoreLetterReportFormat
 		WHEN 1
@@ -105,56 +105,56 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'In-Store Letter Report Format - 2'
 		WHEN 3
 			THEN 'In-Store Letter Report Format - 3'
-		END strInStoreLetterReportFormat
+		END COLLATE Latin1_General_CI_AS strInStoreLetterReportFormat
 	,CP.intShippingAdviceReportFormat
 	,CASE CP.intShippingAdviceReportFormat
 		WHEN 1
 			THEN 'Shipping Advice Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strShippingAdviceReportFormat
+		END COLLATE Latin1_General_CI_AS strShippingAdviceReportFormat
 	,CP.intInsuranceLetterReportFormat
 	,CASE CP.intInsuranceLetterReportFormat
 		WHEN 1
 			THEN 'Insurance Letter Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strInsuranceLetterReportFormat
+		END COLLATE Latin1_General_CI_AS strInsuranceLetterReportFormat
 	,CP.intCarrierShipmentOrderReportFormat
 	,CASE CP.intCarrierShipmentOrderReportFormat
 		WHEN 1
 			THEN 'Carrier Shipment Order Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strCarrierShipmentOrderReportFormat
+		END COLLATE Latin1_General_CI_AS strCarrierShipmentOrderReportFormat
 	,CP.intDebitNoteReportFormat
 	,CASE CP.intDebitNoteReportFormat
 		WHEN 1
 			THEN 'Debit Note Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strDebitNoteReportFormat
+		END COLLATE Latin1_General_CI_AS strDebitNoteReportFormat
 	,CP.intCreditNoteReportFormat
 	,CASE CP.intCreditNoteReportFormat
 		WHEN 1
 			THEN 'Credit Note Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strCreditNoteReportFormat
+		END COLLATE Latin1_General_CI_AS strCreditNoteReportFormat
 	,CP.intOrganicDeclarationReportFormat
 	,CASE CP.intOrganicDeclarationReportFormat
 		WHEN 1
 			THEN 'Organic Declaration Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strOrganicDeclarationReportFormat
+		END COLLATE Latin1_General_CI_AS strOrganicDeclarationReportFormat
 	,CP.intBOLReportFormat
 	,CASE CP.intBOLReportFormat
 		WHEN 1
 			THEN 'BOL Report Format - 1'
 		WHEN 2
 			THEN ''
-		END strBOLReportFormat
+		END COLLATE Latin1_General_CI_AS strBOLReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
@@ -170,13 +170,13 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Light Truck'
 		WHEN 2
 			THEN 'Automobile'
-		END strVehicleType
+		END COLLATE Latin1_General_CI_AS strVehicleType
 	,CASE CP.intRoutingType
 		WHEN 0
 			THEN 'Practical'
 		WHEN 1
 			THEN 'Shortest'
-		END strRoutingType
+		END COLLATE Latin1_General_CI_AS strRoutingType
 	,CASE CP.intHazMatType
 		WHEN 0
 			THEN 'None'
@@ -192,7 +192,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Inhalants'
 		WHEN 6
 			THEN 'Radioactive'
-		END strHazMatType
+		END COLLATE Latin1_General_CI_AS strHazMatType
 	,CASE CP.intRouteOptimizationType
 		WHEN 0
 			THEN 'None'
@@ -200,7 +200,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Optimize All Stops'
 		WHEN 2
 			THEN 'Optimize Intermediate Stops'
-		END strRouteOptimizationType
+		END COLLATE Latin1_General_CI_AS strRouteOptimizationType
 	,CAST(ISNULL(ysnUpdateCompanyLocation,0) AS BIT) ysnUpdateCompanyLocation
 	,CAST(ISNULL(ysnLoadContainerTypeByOrigin,0) AS BIT) ysnLoadContainerTypeByOrigin
 	,CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT) ysnRestrictIncreaseSeqQty

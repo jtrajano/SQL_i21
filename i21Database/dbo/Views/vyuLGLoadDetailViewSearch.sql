@@ -28,7 +28,7 @@ SELECT   Load.intLoadId
 							ELSE
 							'Drop Ship'
 							END
-						END
+						END COLLATE Latin1_General_CI_AS
         ,intGenerateSequence = Load.intGenerateSequence
         ,Load.dtmScheduledDate
         ,ysnInProgress = IsNull(Load.ysnInProgress, 0)
@@ -53,7 +53,7 @@ SELECT   Load.intLoadId
 				THEN 'Scale Ticket'
 			WHEN Load.intTransUsedBy = 3
 				THEN 'Transport Load'
-			END
+			END COLLATE Latin1_General_CI_AS
 		,Load.intSourceType
 		,Load.ysnPosted
 		,LoadDetail.intLoadDetailId
@@ -212,7 +212,7 @@ SELECT   Load.intLoadId
 				THEN 'Truck'
 			WHEN Load.intTransportationMode = 2
 				THEN 'Ocean Vessel'
-			END
+			END COLLATE Latin1_General_CI_AS
 		,strPCompanyLocation = PCL.strLocationName
 		,strSCompanyLocation = SCL.strLocationName
 		,ICI.strContractItemNo

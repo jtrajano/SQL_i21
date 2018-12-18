@@ -24,7 +24,7 @@ SELECT L.strLoadNumber
 	,L.dtmPostedDate
 	,E.intEntityId
 	,E.strName AS strEntityName
-	,'Inbound' AS strShipmentType
+	,'Inbound' COLLATE Latin1_General_CI_AS AS strShipmentType
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -67,7 +67,7 @@ SELECT L.strLoadNumber
 	,L.dtmPostedDate
 	,E.intEntityId
 	,E.strName AS strEntityName
-	,'Outbound' AS strShipmentType
+	,'Outbound' COLLATE Latin1_General_CI_AS AS strShipmentType
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
