@@ -42,8 +42,9 @@ SELECT
 	, StorageUnitType.strInternalCode
 	, intItemId = StorageLocation.intItemId
 	, strItemNo = Item.strItemNo
+	, intCount = ISNULL(cnt.intCount, 0) 
 FROM tblICStorageLocation StorageLocation
-	INNER JOIN (
+	LEFT JOIN (
 		tblICStorageLocationCategory StorageLocationCategory INNER JOIN tblICCategory Category
 			ON Category.intCategoryId = StorageLocationCategory.intCategoryId
 	)
@@ -62,3 +63,9 @@ FROM tblICStorageLocation StorageLocation
 		ON UnitMeasure.intUnitMeasureId = StorageLocation.intBatchSizeUOMId
 	LEFT JOIN tblICItem Item 
 		ON Item.intItemId = StorageLocation.intItemId
+	OUTER APPLY (
+		SELECT	intCount = COUNT(1) 
+		FROM	tblICStorageLocationCategory StorageLocationCategory INNER JOIN tblICCategory Category
+					ON Category.intCategoryId = StorageLocationCategory.intCategoryId
+		WHERE	StorageLocationCategory.intStorageLocationId = StorageLocation.intStorageLocationId	
+	) cnt
