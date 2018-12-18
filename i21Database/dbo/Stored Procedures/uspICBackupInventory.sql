@@ -5,11 +5,15 @@
 	, @intBackupId INT = NULL OUTPUT 
 AS
 
-INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks)
-SELECT GETDATE(), @intUserId, @strOperation, @strRemarks
+-- Make the backup header 
+IF @intBackupId IS NULL
+BEGIN 
+	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart)
+	SELECT GETDATE(), @intUserId, @strOperation, @strRemarks, 1, GETDATE()
 
---DECLARE @intBackupId INT
-SET @intBackupId = SCOPE_IDENTITY()
+	--DECLARE @intBackupId INT
+	SET @intBackupId = SCOPE_IDENTITY()
+END 
 
 INSERT INTO tblICBackupDetailLot(			
 	  [intBackupId]				

@@ -6,5 +6,8 @@
 	[strOperation] VARCHAR(50) NOT NULL,
 	[strRemarks] VARCHAR(200) NULL,
 	[intCompanyId] INT NULL, 
+	[ysnRebuilding] BIT NULL DEFAULT(0), 
+	[dtmStart] DATETIME NULL,
+	[dtmEnd] DATETIME NULL,
 	CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
 )
