@@ -54,7 +54,7 @@
 				(
 				select
 					RepId = tblEMEntity.intEntityId
-					,RepName = (case when tblEMEntity.strName is null then 'No Name' else (case when rtrim(ltrim(tblEMEntity.strName)) = '' then 'No Name' else tblEMEntity.strName end) end)
+					,RepName = (case when tblEMEntity.strName is null then 'No Name' else (case when rtrim(ltrim(tblEMEntity.strName)) = '' then 'No Name' else tblEMEntity.strName end) end) COLLATE Latin1_General_CI_AS
 					,tblHDProject.intProjectId
 					,tblHDProject.strProjectName
 					,tblHDProject.strProjectStatus

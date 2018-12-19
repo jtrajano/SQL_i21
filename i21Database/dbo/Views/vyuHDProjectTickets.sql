@@ -8,14 +8,14 @@
 			,t.intTicketStatusId
 			,t.strTicketNumber
 			,t.strSubject
-			,strCustomerName = ''--cusEnt.strName
+			,strCustomerName = '' COLLATE Latin1_General_CI_AS
 			,strContactName = conEnt.strName
 			,strModule = m.strModule
 			,strPriority = prio.strPriority
 			,strAssignedTo = assEnt.strName
 			,intAssignedToEntityId = t.intAssignedToEntity
 			,t.dtmDueDate
-			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101)
+			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101) COLLATE Latin1_General_CI_AS
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
 			,dblQuotedHours = isnull(t.dblQuotedHours,0)
 			,dblActualHours = isnull(t.dblActualHours,0)

@@ -8,7 +8,7 @@
 					   when tc.ysnEncoded = 1
 					   then dbo.fnHDDecodeComment(SUBSTRING(tc.strComment,4,len(tc.strComment)-3)) 
 					   else tc.strComment
-					   end)+'</br><hr></br>'
+					   end)+'</br><hr></br>' COLLATE Latin1_General_CI_AS
 		,ysnComment = 1
 		,dtmCreated = tc.dtmCreated
 	from
@@ -21,7 +21,7 @@
 		t.intTicketId
 		,t.strTicketNumber
 		,t.strCustomerNumber
-		,strNote = '<p>'+tn.strNote+'</p></br><hr></br>'
+		,strNote = '<p>'+tn.strNote+'</p></br><hr></br>' COLLATE Latin1_General_CI_AS
 		,ysnComment = 0
 		,dtmCreated = tn.dtmCreated
 	from

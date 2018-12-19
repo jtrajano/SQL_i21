@@ -24,8 +24,8 @@ A.intBillId
 ,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 FROM tblAPBill A 
-INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId)
-	ON A.intEntityVendorId = B.intEntityVendorId
+INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityId = B2.intEntityId)
+	ON A.intEntityVendorId = B.intEntityId
 CROSS JOIN tblSMCompanySetup companySetup
 LEFT JOIN tblEMEntityToContact EntityToContact ON A.intEntityId = EntityToContact.intEntityId AND EntityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntity ContactEntity ON EntityToContact.intEntityContactId = ContactEntity.intEntityId

@@ -12,7 +12,7 @@
 			  ,intContactId = ec.[intEntityId]
 			  ,intCustomerId = c.[intEntityId]
 			  ,ysnActiveContact = ec.ysnActive
-			  ,strMobile = ''
+			  ,strMobile = '' COLLATE Latin1_General_CI_AS
 			  ,intConcurrencyId = 1
 			  ,intTicketProductId = null
 			  ,intVersionId = null

@@ -3,7 +3,7 @@
 		select
 		b.intEntityId
 		,a.intTimeOffRequestId
-		,strFullName = ltrim(rtrim(isnull(b.strFirstName, ''))) + ' ' + ltrim(rtrim(isnull(b.strMiddleName,''))) + ' ' + ltrim(rtrim(isnull(b.strLastName,'')))
+		,strFullName = ltrim(rtrim(isnull(b.strFirstName, ''))) + ' ' + ltrim(rtrim(isnull(b.strMiddleName,''))) + ' ' + ltrim(rtrim(isnull(b.strLastName,''))) COLLATE Latin1_General_CI_AS
 		,a.dtmDateFrom
 		,a.dtmDateTo
 		,c.intTypeTimeOffId
@@ -11,7 +11,7 @@
 		,c.strDescription
 		,dtmDateNow = getdate()
 		,intDateNow = convert(int, convert(nvarchar(8), getDate(), 112))
-		,strDateNowName = DATENAME(weekday,getdate())
+		,strDateNowName = DATENAME(weekday,getdate()) COLLATE Latin1_General_CI_AS
 		,intDateNowPart = DATEpart(weekday,getdate())
 		,intEntityRecipientId = e.intEntityId
 		,strRecipientFullName = ltrim(rtrim(e.strName))

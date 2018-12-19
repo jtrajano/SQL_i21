@@ -10,7 +10,7 @@
 				,intEntityLocationId = e.intEntityLocationId
 				,strLocationName = e.strLocationName
 				,d.ysnActive
-				,strEntityType = dbo.fnCRMCoalesceEntityType(b.intEntityId)
+				,strEntityType = dbo.fnCRMCoalesceEntityType(b.intEntityId) COLLATE Latin1_General_CI_AS
 				,f.strPhone
 			from
 				tblEMEntity b

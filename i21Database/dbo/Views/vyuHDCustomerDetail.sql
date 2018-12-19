@@ -1,24 +1,24 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerDetail]
 	AS 
 	select
-			strCustomer = ''
-			,strFullName = ''
-			,strPhone = ''
-			,strTimeZone = ''
-			,strLocation = ''
-			,strSLAPlan = ''
-			,strReplyDue = ''
+			strCustomer = '' COLLATE Latin1_General_CI_AS
+			,strFullName = '' COLLATE Latin1_General_CI_AS
+			,strPhone = '' COLLATE Latin1_General_CI_AS
+			,strTimeZone = '' COLLATE Latin1_General_CI_AS
+			,strLocation = '' COLLATE Latin1_General_CI_AS
+			,strSLAPlan = '' COLLATE Latin1_General_CI_AS
+			,strReplyDue = '' COLLATE Latin1_General_CI_AS
 			,intUserId = 0
-			,strName = ''
-			,strUserName = ''
-			,strFirstName = ''
-			,strMiddleName = ''
-			,strLastName = ''
-			,strEmail = ''
+			,strName = '' COLLATE Latin1_General_CI_AS
+			,strUserName = '' COLLATE Latin1_General_CI_AS
+			,strFirstName = '' COLLATE Latin1_General_CI_AS
+			,strMiddleName = '' COLLATE Latin1_General_CI_AS
+			,strLastName = '' COLLATE Latin1_General_CI_AS
+			,strEmail = '' COLLATE Latin1_General_CI_AS
 			,ysni21User = 0
 			,imgPhoto = null
 			,intConcurrencyId = 1
-			,strEntityType = ''
+			,strEntityType = '' COLLATE Latin1_General_CI_AS
 		--select
 		--	strCustomer = cus.strCustomerNumber
 		--	,strFullName = ec.strEmail

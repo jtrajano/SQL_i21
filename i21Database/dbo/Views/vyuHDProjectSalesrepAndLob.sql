@@ -2,7 +2,7 @@
 	AS
 		Select intId = convert(int,ROW_NUMBER() over (order by intEntityId)),intEntityId,strEntityName,intSalespersonId,strSalespersonName,intLineOfBusinessId,strLineOfBusiness from 
 		(
-		select a.intEntityId, strEntityName = a.strName, intSalespersonId = b.intSalespersonId, strSalespersonName = c.strName, intLineOfBusinessId = 0, strLineOfBusiness = 'Default'
+		select a.intEntityId, strEntityName = a.strName, intSalespersonId = b.intSalespersonId, strSalespersonName = c.strName, intLineOfBusinessId = 0, strLineOfBusiness = 'Default' COLLATE Latin1_General_CI_AS
 		from tblARCustomer b 
 		left join tblEMEntity a on b.intEntityId = a.intEntityId
 		left join tblEMEntity c on c.intEntityId = b.intSalespersonId
