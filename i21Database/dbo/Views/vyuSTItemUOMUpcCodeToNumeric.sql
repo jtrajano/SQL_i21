@@ -1,17 +1,17 @@
 ﻿CREATE VIEW vyuSTItemUOMUpcCodeToNumeric
 AS
-SELECT intItemUOMId
-					, intItemId
-					, strUpcCode
-					, strLongUPCCode
-					, CASE 
-						WHEN strUpcCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
-						ELSE NULL
-					END AS intUpcCode
-					, CASE 
-						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-						ELSE NULL
-					END AS intLongUpcCode 
-				FROM dbo.tblICItemUOM
+SELECT Item.strItemNo
+	 , UOM.intItemUOMId
+	 , UOM.intItemId
+	 , UOM.strLongUPCCode
+	 , CASE 
+		 WHEN UOM.strLongUPCCode NOT LIKE '%[^0-9]%' 
+			 THEN CONVERT(NUMERIC(32, 0),CAST(UOM.strLongUPCCode AS FLOAT))
+		 ELSE NULL
+	 END AS intLongUpcCode 
+	 , ItemLoc.intLocationId
+FROM dbo.tblICItemUOM UOM
+INNER JOIN dbo.tblICItem Item
+	ON UOM.intItemId = Item.intItemId
+INNER JOIN dbo.tblICItemLocation ItemLoc
+	ON Item.intItemId = ItemLoc.intItemId
