@@ -453,7 +453,7 @@ BEGIN TRY
 								  WHEN CD.intPricingTypeId = 7 THEN 'I'
 							 END
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
-	,strShipMethod			= StockUM.strUnitMeasure
+	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
 	,intFutureMarketId      = CD.intFutureMarketId
@@ -585,7 +585,7 @@ BEGIN TRY
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
 	,strPricingType			= 'P'
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
-	,strShipMethod			= StockUM.strUnitMeasure
+	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
 	,intFutureMarketId      = CD.intFutureMarketId
