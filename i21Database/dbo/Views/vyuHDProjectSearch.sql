@@ -45,8 +45,8 @@
 					,strSalesPipeStatus = pipe.strStatus
 					,proj.dtmLastDescriptionModified
 					,dtmExpectedCloseDate = proj.dtmSalesDate
-					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101)
-					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
+					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101) COLLATE Latin1_General_CI_AS
+					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%' COLLATE Latin1_General_CI_AS
 					,dblOpportunityAmmount = (select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblHDOpportunityQuote.intSalesOrderId from tblHDOpportunityQuote where tblHDOpportunityQuote.intProjectId = proj.intProjectId))
 					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblHDOpportunityQuote.intSalesOrderId from tblHDOpportunityQuote where tblHDOpportunityQuote.intProjectId = proj.intProjectId)))
 					,dtmLastActivityDate = (select max(tblHDTicket.dtmCreated) from tblHDTicket where tblHDTicket.intTicketId in (select tblHDProjectTask.intTicketId from tblHDProjectTask where tblHDProjectTask.intProjectId = proj.intProjectId))
@@ -55,7 +55,7 @@
 					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityId])
 					,strContactName = (select top 1 strName from tblEMEntity where intEntityId = con.[intEntityId])
 					,strType = (select top 1 strType from tblHDTicketType where intTicketTypeId = typ.intTicketTypeId)
-					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
+					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101) COLLATE Latin1_General_CI_AS
 					,proj.intPercentComplete
 					,proj.ysnCompleted
 					,proj.strProjectStatus
