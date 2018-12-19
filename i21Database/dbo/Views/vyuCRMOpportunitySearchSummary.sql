@@ -3,7 +3,7 @@
 		select
 			intId = ROW_NUMBER() over (order by strProjectType)
 			,intCustomerId
-			,strProjectType COLLATE Latin1_General_CI_AS
+			,strProjectType
 			,strCustomerName
 			,dblTotalNetOpportunityAmount = (case when sum(dblNetOpportunityAmmount) is null then 0 else sum(dblNetOpportunityAmmount) end)
 		from
