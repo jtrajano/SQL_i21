@@ -28,7 +28,7 @@ AS
 		,intContactRank = ISNULL(contact.intEntityRank,1)
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101) COLLATE Latin1_General_CI_AS
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101) COLLATE Latin1_General_CI_AS
-		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId) COLLATE Latin1_General_CI_AS
+		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId, convert(bit,0)) COLLATE Latin1_General_CI_AS
 		,strJiraKeyDisplay = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,1)) COLLATE Latin1_General_CI_AS
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
