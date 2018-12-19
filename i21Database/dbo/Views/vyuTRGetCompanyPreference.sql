@@ -16,7 +16,7 @@ SELECT CP.intCompanyPreferenceId
 	, strFreightCostAllocationMethod = (CASE WHEN CP.intFreightCostAllocationMethod = 1 THEN 'Bulk Plant Loads Only'
 											WHEN CP.intFreightCostAllocationMethod = 2 THEN 'All Loads'
 											WHEN CP.intFreightCostAllocationMethod = 3 THEN 'No Load'
-											ELSE NULL END)
+											ELSE NULL END) COLLATE Latin1_General_CI_AS
 	, CP.intRackPriceImportMappingId
 	, strRackPriceImportMapping = Import.strLayoutTitle
     , CP.ysnImportSupplyPoint

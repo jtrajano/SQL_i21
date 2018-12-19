@@ -9,7 +9,7 @@ ST2.intSupplyPointId,
                          A.dblFactor
 FROM                                     dbo.tblTRSupplyPointRackPriceEquation A) ST1
 WHERE        ST1.intItemId = ST2.intItemId AND ST2.intSupplyPointId = ST1.intSupplyPointId
-ORDER BY ST2.intItemId FOR XML PATH('')) [strEquation]
+ORDER BY ST2.intItemId FOR XML PATH('')) COLLATE Latin1_General_CI_AS [strEquation]
 FROM            (SELECT DISTINCT  A.intItemId, A.intSupplyPointId, A.strOperand, 
                          A.dblFactor
 FROM                                     dbo.tblTRSupplyPointRackPriceEquation A) ST2    
