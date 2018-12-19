@@ -11,7 +11,7 @@
         e.strCity,  
         e.strState,  
         e.strZipCode,
-		strType = 'Lead'
+		strType = 'Lead' COLLATE Latin1_General_CI_AS
     FROM         
             tblEMEntity a
         join vyuEMEntityType b
