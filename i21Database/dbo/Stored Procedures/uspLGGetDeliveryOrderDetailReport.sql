@@ -19,7 +19,7 @@ BEGIN
 		  ,LDL.dblNet AS dblWeight
 		  ,WU.strUnitMeasure AS strWeightUOM
 		  ,IRIL.strContainerNo AS strContainerNumber
-		  ,LC.strMarks
+		  ,strMarks = ISNULL(IRIL.strMarkings, LC.strMarks)
 		  ,LW.strDeliveryNoticeNumber
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
