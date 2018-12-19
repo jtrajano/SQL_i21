@@ -38,26 +38,26 @@ SELECT * FROM c UNION
 SELECT * FROM d
 )
 SELECT
-ISNULL(a.strType COLLATE Latin1_General_CI_AS,'') strType,
-ISNULL(c.strAccountId COLLATE Latin1_General_CI_AS,'')strAccountId,
+ISNULL(a.strType,'') COLLATE Latin1_General_CI_AS strType,
+ISNULL(c.strAccountId,'') COLLATE Latin1_General_CI_AS strAccountId,
 ISNULL(c.intAccountId,0)intAccountId,
 a.dtmDate,
-ISNULL(c.strCode COLLATE Latin1_General_CI_AS,'')strCode,
-ISNULL(c.strBatchId COLLATE Latin1_General_CI_AS,'')strBatchId,
+ISNULL(c.strCode,'') COLLATE Latin1_General_CI_AS strCode,
+ISNULL(c.strBatchId,'') COLLATE Latin1_General_CI_AS strBatchId,
 a.strTransactionId,
 ISNULL(c.intEntityId,0)intEntityId,
-ISNULL(c.strDescription COLLATE Latin1_General_CI_AS,'')strDescription,
+ISNULL(c.strDescription,'') COLLATE Latin1_General_CI_AS strDescription,
 a.dblDebit,
 a.dblCredit,
 ISNULL(a.dblDebitUnit,0)dblDebitUnit,
 ISNULL(a.dblCreditUnit,0)dblCreditUnit,
-ISNULL(c.strUOMCode COLLATE Latin1_General_CI_AS,'')strUOMCode,
+ISNULL(c.strUOMCode,'') COLLATE Latin1_General_CI_AS strUOMCode,
 a.dblDebitForeign,
 a.dblCreditForeign,
-ISNULL(c.strReference COLLATE Latin1_General_CI_AS,'')strReference,
-ISNULL(c.strDocument COLLATE Latin1_General_CI_AS,'')strDocument,
-ISNULL(c.strComments COLLATE Latin1_General_CI_AS,'')strComments,
-ISNULL(c.strUserName COLLATE Latin1_General_CI_AS,'') strUserName
+ISNULL(c.strReference,'') COLLATE Latin1_General_CI_AS strReference,
+ISNULL(c.strDocument,'') COLLATE Latin1_General_CI_AS strDocument,
+ISNULL(c.strComments,'') COLLATE Latin1_General_CI_AS strComments,
+ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_ASstrUserName
 FROM u a LEFT JOIN
 vyuGLDetail c ON a.intGLDetailId = c.intGLDetailId
 GO
