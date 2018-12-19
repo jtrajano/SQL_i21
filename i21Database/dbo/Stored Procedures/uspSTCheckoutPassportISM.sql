@@ -91,21 +91,11 @@ BEGIN
 				SELECT DISTINCT
 					Chk.POSCode AS strXmlRegisterPOSCode
 				FROM #tempCheckoutInsert Chk
-
-				--JOIN dbo.tblICItemUOM UOM 
-				--	ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) -- Original
-				JOIN
+				INNER JOIN
 				(
 					SELECT intItemUOMId
 						, intItemId
-						, strUpcCode
 						, strLongUPCCode
-						, CASE 
-							WHEN strUpcCode NOT LIKE '%[^0-9]%' 
-								THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
-							ELSE NULL
-						END AS intUpcCode
-
 						, CASE 
 							WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
 								THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
@@ -113,19 +103,18 @@ BEGIN
 						END AS intLongUpcCode 
 					FROM dbo.tblICItemUOM
 				) AS UOM
-					ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
-					OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
-
-				JOIN dbo.tblICItem I 
+					ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
+					OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
+				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
-				JOIN dbo.tblICItemLocation IL 
+				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-				JOIN dbo.tblICItemPricing P 
+				INNER JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
-				JOIN dbo.tblSMCompanyLocation CL 
+				INNER JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
-				JOIN dbo.tblSTStore S 
+				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
 					AND ISNULL(Chk.POSCode, '') != ''
@@ -174,21 +163,11 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM #tempCheckoutInsert Chk
-
-			--JOIN dbo.tblICItemUOM UOM 
-			--	ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
-			--	OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
-			JOIN
+			INNER JOIN
 			(
 				SELECT intItemUOMId
 					, intItemId
-					, strUpcCode
 					, strLongUPCCode
-					, CASE 
-						WHEN strUpcCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
-						ELSE NULL
-					END AS intUpcCode
 					, CASE 
 						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
 							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
@@ -196,18 +175,18 @@ BEGIN
 					END AS intLongUpcCode 
 				FROM dbo.tblICItemUOM
 			) AS UOM
-				ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
-				OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
+				ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
+				OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
 
-			JOIN dbo.tblICItem I 
+			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
-			JOIN dbo.tblICItemLocation IL 
+			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-			JOIN dbo.tblICItemPricing P 
+			INNER JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
-			JOIN dbo.tblSMCompanyLocation CL 
+			INNER JOIN dbo.tblSMCompanyLocation CL 
 				ON CL.intCompanyLocationId = IL.intLocationId
-			JOIN dbo.tblSTStore S 
+			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
 		END
@@ -249,21 +228,11 @@ BEGIN
 				END) AS strUpDownNotes
 			 , 1
 		FROM #tempCheckoutInsert Chk
-
-		--JOIN dbo.tblICItemUOM UOM 
-		--	ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
-		--	OR Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strLongUPCCode
-		JOIN
+		INNER JOIN
 		(
 			SELECT intItemUOMId
 				, intItemId
-				, strUpcCode
 				, strLongUPCCode
-				, CASE 
-					WHEN strUpcCode NOT LIKE '%[^0-9]%' 
-						THEN CONVERT(NUMERIC(32, 0),CAST(strUpcCode AS FLOAT))
-					ELSE NULL
-				END AS intUpcCode
 				, CASE 
 					WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
 						THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
@@ -271,21 +240,21 @@ BEGIN
 				END AS intLongUpcCode 
 			FROM dbo.tblICItemUOM
 		) AS UOM
-			ON Chk.POSCode COLLATE Latin1_General_CI_AS IN (ISNULL(UOM.strUpcCode, ''), ISNULL(UOM.strLongUPCCode, '')) 
-			OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) IN (UOM.intUpcCode, UOM.intLongUpcCode)
+			ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
+			OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
 
-		JOIN dbo.tblICItem I 
+		INNER JOIN dbo.tblICItem I 
 			ON I.intItemId = UOM.intItemId
-		JOIN dbo.tblICItemLocation IL 
+		INNER JOIN dbo.tblICItemLocation IL 
 			ON IL.intItemId = I.intItemId
-		JOIN dbo.tblICItemPricing P 
+		INNER JOIN dbo.tblICItemPricing P 
 			ON IL.intItemLocationId = P.intItemLocationId 
 			AND I.intItemId = P.intItemId
-		JOIN dbo.tblSMCompanyLocation CL 
+		INNER JOIN dbo.tblSMCompanyLocation CL 
 			ON CL.intCompanyLocationId = IL.intLocationId
-		JOIN dbo.tblICCategory IC 
+		INNER JOIN dbo.tblICCategory IC 
 			ON IC.intCategoryId = I.intCategoryId
-		JOIN dbo.tblSTStore S 
+		INNER JOIN dbo.tblSTStore S 
 			ON S.intCompanyLocationId = CL.intCompanyLocationId
 		WHERE S.intStoreId = @intStoreId
 		AND I.strLotTracking = 'No'
