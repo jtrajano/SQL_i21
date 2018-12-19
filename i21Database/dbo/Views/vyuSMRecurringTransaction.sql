@@ -5,7 +5,7 @@ AS
 SELECT 
 	   rectrans.intRecurringId
 	  ,ent.strName
-	  ,'' as strAssignedUser
+	  ,'' COLLATE Latin1_General_CI_AS as strAssignedUser
       ,rectrans.intTransactionId
       ,rectrans.strTransactionNumber
       ,rectrans.strTransactionType
