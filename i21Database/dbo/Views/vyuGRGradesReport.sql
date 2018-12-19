@@ -14,7 +14,7 @@ FROM (
 		,CL.strLocationName
 		,CO.intCommodityId
 		,CO.strCommodityCode
-		,strGrade = '#' + CAST(CAST(ISNULL(QM.dblGradeReading,0) AS INT) AS nvarchar(2))
+		,'#' + CAST(CAST(ISNULL(QM.dblGradeReading,0) AS INT) AS nvarchar(2)) COLLATE Latin1_General_CI_AS as strGrade
 		,CS.dblOriginalBalance
 		,intDeliveryYear = YEAR(CS.dtmDeliveryDate)
 	FROM tblQMTicketDiscount QM
