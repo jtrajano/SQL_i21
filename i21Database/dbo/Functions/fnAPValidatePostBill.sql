@@ -264,7 +264,7 @@ BEGIN
 			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN CAST(B.dblQtyReceived  AS DECIMAL (18,2)) * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN  
-																																CAST(dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId ,B.intWeightUOMId, B.dblQtyReceived) AS DECIMAL (18,2)) 
+																																 CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId  ,B.intUnitOfMeasureId , B.dblNetWeight) AS DECIMAL (18,2))
 																																ELSE  CAST(B.dblQtyReceived  AS DECIMAL (18,2))  END) END)) > CAST( C.dblOpenReceive  AS DECIMAL (18,2)) 
 
 		--VALIDATION FOR MISCELLANEOUS ITEM
