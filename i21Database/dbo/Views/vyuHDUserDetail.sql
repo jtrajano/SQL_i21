@@ -1,16 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuHDUserDetail]
 	AS 
 	select
-			strCustomer = 'i21 User'
+			strCustomer = 'i21 User' COLLATE Latin1_General_CI_AS
 			,intCustomerId = null
-			,strCompanyName = 'iRely'
+			,strCompanyName = 'iRely' COLLATE Latin1_General_CI_AS
 			,us.strFullName
 			,us.strPhone
-			,strMobile = ''
-			,strTimeZone = ''
+			,strMobile = '' COLLATE Latin1_General_CI_AS
+			,strTimeZone = '' COLLATE Latin1_General_CI_AS
 			,strLocation = us.strLocation
-			,strSLAPlan = ''
-			,strReplyDue = ''
+			,strSLAPlan = '' COLLATE Latin1_General_CI_AS
+			,strReplyDue = '' COLLATE Latin1_General_CI_AS
 			,intUserId = us.[intEntityId]
 			,intEntityId = us.[intEntityId]
 			,ur.strName
@@ -23,7 +23,7 @@
 			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
-			,strEntityType = 'Agent'
+			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur
@@ -41,8 +41,8 @@
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
 			,strLocation = (select top 1 el.strLocationName from [tblEMEntityLocation] el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId]))
-			,strSLAPlan = ''
-			,strReplyDue = ''
+			,strSLAPlan = '' COLLATE Latin1_General_CI_AS
+			,strReplyDue = '' COLLATE Latin1_General_CI_AS
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
@@ -63,16 +63,16 @@
 		union all
 
 		select
-			strCustomer = 'i21 User'
+			strCustomer = 'i21 User' COLLATE Latin1_General_CI_AS
 			,intCustomerId = null
-			,strCompanyName = 'iRely'
+			,strCompanyName = 'iRely' COLLATE Latin1_General_CI_AS
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
 			,strLocation = (select top 1 el.strLocationName from [tblEMEntityLocation] el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId]))
-			,strSLAPlan = ''
-			,strReplyDue = ''
+			,strSLAPlan = '' COLLATE Latin1_General_CI_AS
+			,strReplyDue = '' COLLATE Latin1_General_CI_AS
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
@@ -85,7 +85,7 @@
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.[intEntityId] and ysnDefaultContact = 1)
-			,strEntityType = 'Agent'
+			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 		from
 			tblEMEntity ec
 			inner join tblARSalesperson sp on sp.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
