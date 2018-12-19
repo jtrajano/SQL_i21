@@ -3,7 +3,7 @@ AS
 SELECT intScreenId
 ,strScreenId
 ,REPLACE(mm.strMenuName, '(Portal)', '' )AS strScreenName
-,RTRIM(ISNULL(sc.strGroupName,mm.strCategory)) AS strModule 
+,RTRIM(ISNULL(sc.strGroupName,mm.strCategory)) COLLATE Latin1_General_CI_AS AS strModule 
 ,strNamespace
 ,strTableName
 ,ysnApproval

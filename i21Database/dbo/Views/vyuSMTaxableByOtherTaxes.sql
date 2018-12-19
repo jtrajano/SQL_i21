@@ -11,7 +11,7 @@ SELECT	intTaxableByOtherTaxesId, intTaxCodeId, strTaxCode,
 				WHERE B2.intTaxCodeId = B1.intTaxCodeId	
 				ORDER BY strTaxCode
 				FOR XML	PATH('')
-				), 1, 1, '')
+				), 1, 1, '') COLLATE Latin1_General_CI_AS
 FROM (SELECT b.intID as intTaxableByOtherTaxesId
 		,a.intTaxCodeId
 		,c.strTaxCode

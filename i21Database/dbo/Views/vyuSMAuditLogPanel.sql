@@ -4,7 +4,7 @@ SELECT
 intAuditLogId,
 en.strName,
 [dbo].[fnSMAddSpaceToTitleCase](right(strTransactionType, CHARINDEX('.', REVERSE(strTransactionType)) - 1), 0) as strTransactionType,
-strActionType + ' a record' as strActionType,
+strActionType + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
 strRecordNo
 strDescription,
 strRoute,
