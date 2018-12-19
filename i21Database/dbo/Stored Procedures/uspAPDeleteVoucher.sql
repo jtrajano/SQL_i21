@@ -20,7 +20,7 @@ BEGIN TRY
 		RAISERROR('The transaction is already posted.',16,1)			
 
 	--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
-	UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+	--UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
