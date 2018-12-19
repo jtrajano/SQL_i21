@@ -2027,7 +2027,7 @@ SELECT
     ,[intItemWeightUOMId]               = ARID.[intItemWeightUOMId]
     ,[intItemAccountId]                 = ARID.[intAccountId]
     ,[intServiceChargeAccountId]        = ARID.[intServiceChargeAccountId]
-	,[intSalesAccountId]                = ARID.[intSalesAccountId]
+	,[intSalesAccountId]                = ISNULL(ARID.[intSalesAccountId], ARI.[intLocationSalesAccountId])
     ,[intCOGSAccountId]                 = ARID.[intCOGSAccountId]
     ,[intInventoryAccountId]            = ARID.[intInventoryAccountId]
     ,[intLicenseAccountId]              = ARID.[intLicenseAccountId]
