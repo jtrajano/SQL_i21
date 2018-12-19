@@ -128,7 +128,7 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.POSCode, '') != ''
+					AND ISNULL(Chk.POSCode, '') != ''
 			) AS tbl
 		)
 		AND ISNULL(Chk.POSCode, '') != ''
@@ -165,9 +165,12 @@ BEGIN
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
-			  , dblCurrentPrice		= ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
-			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0)
-			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
+									  -- (Total - (DiscountAmount + PromotionAmount)) / Qty
+			  , dblCurrentPrice		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+									  -- (DiscountAmount + PromotionAmount)
+			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0)
+									  -- (Total - (DiscountAmount + PromotionAmount))
+			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0))
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM #tempCheckoutInsert Chk
@@ -220,29 +223,29 @@ BEGIN
 
 			 -- Sales Price
 			 , (CASE 
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice 
-						THEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) - P.dblSalePrice
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice 
-						THEN P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) > P.dblSalePrice 
+						THEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) - P.dblSalePrice
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) < P.dblSalePrice 
+						THEN P.dblSalePrice - (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0))
 				END) AS dblRetailUnit
 
 			 -- Total Amount
 			 , (CASE 
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice 
-						THEN (ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice 
-						THEN (P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) > P.dblSalePrice 
+						THEN ((ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) < P.dblSalePrice 
+						THEN (P.dblSalePrice - (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0))) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 				END) AS dblAmount
 
 			 , (CASE 
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice 
-						THEN CAST((ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) - P.dblSalePrice) AS DECIMAL(18,6))
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice 
-						THEN CAST((P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)) AS DECIMAL(18,6))
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) > P.dblSalePrice 
+						THEN CAST(((ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) - P.dblSalePrice) AS DECIMAL(18,6))
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) < P.dblSalePrice 
+						THEN CAST((P.dblSalePrice - (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0))) AS DECIMAL(18,6))
 				END) AS dblShrink
 			 , (CASE 
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN 'Mark Up'
-					WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice THEN 'Mark Down' 
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) > P.dblSalePrice THEN 'Mark Up'
+					WHEN (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) < P.dblSalePrice THEN 'Mark Down' 
 				END) AS strUpDownNotes
 			 , 1
 		FROM #tempCheckoutInsert Chk

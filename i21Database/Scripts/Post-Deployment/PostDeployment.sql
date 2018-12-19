@@ -517,6 +517,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CF\1_ImportMapping.sql
 :r .\CF\2_DataFix.sql
 :r .\CF\3_DataFixPriceAdjustment.sql
+:r .\CF\4_18.1To18.3DataConversion.sql
 
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
