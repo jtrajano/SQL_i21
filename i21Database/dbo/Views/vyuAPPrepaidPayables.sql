@@ -22,7 +22,8 @@ SELECT
 	, A.dtmDueDate
 	, A.ysnPosted 
 	, A.ysnPaid
-	, A.intAccountId
+	, prepaidDetail.intAccountId
+	, (SELECT TOP 1 strAccountId FROM tblGLAccount where intAccountId =  prepaidDetail.intAccountId ) as strAccountId
 	, EC.strClass
 	, intPrepaidRowType = 1
 FROM dbo.tblAPBill A
@@ -31,7 +32,8 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 OUTER APPLY (
 	SELECT TOP 1
-		bd.dblRate
+		bd.dblRate,
+		bd.intAccountId
 	FROM tblAPBillDetail bd
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail
@@ -59,6 +61,7 @@ SELECT
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	, 1
 FROM dbo.tblAPPayment  A
@@ -69,6 +72,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -102,12 +106,14 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	, 1
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -142,12 +148,14 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	, 2
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -176,6 +184,7 @@ SELECT
 	, B.ysnPosted 
 	, B.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	, 2
 FROM dbo.tblAPBill A
@@ -183,6 +192,7 @@ INNER JOIN tblAPBill B ON A.intTransactionReversed = B.intBillId
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -212,6 +222,7 @@ SELECT
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	, 2
 FROM dbo.tblAPPayment  A
@@ -222,6 +233,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -253,13 +265,15 @@ SELECT
 	,A.ysnPosted
 	,C.ysnPaid
 	,A.intAccountId
+	,F.strAccountId
 	,EC.strClass
 	,2
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId	
 WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
@@ -284,6 +298,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	,2
 FROM dbo.tblARPayment  A
@@ -294,6 +309,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2)

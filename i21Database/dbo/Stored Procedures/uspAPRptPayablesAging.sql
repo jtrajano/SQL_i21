@@ -144,8 +144,10 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @strAccountId = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
+					,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -156,6 +158,8 @@ SET @innerQuery = 'SELECT --DISTINCT
 
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
+					,intAccountId
+					,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -238,6 +242,17 @@ BEGIN
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
 END
 
+
+IF @strAccountId IS NOT NULL
+BEGIN 
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+		--SET @originInnerQuery = @originInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+	END
+END
+
+
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
@@ -312,16 +327,16 @@ END
 	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
 	--END  
 
-	 SELECT @strAccountId = [fieldname], 
-		   @from = [from], 
-		   @to = [to], 
-		   @join = [join], 
-		   @datatype = [datatype] 
-	FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
-	IF @strAccountId IS NOT NULL
-	BEGIN
-		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strAccountId, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+	-- SELECT @strAccountId = [fieldname], 
+	--	   @from = [from], 
+	--	   @to = [to], 
+	--	   @join = [join], 
+	--	   @datatype = [datatype] 
+	--FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
+	--IF @strAccountId IS NOT NULL
+	--BEGIN
+	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strAccountId, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
 
 	SELECT @strVendorOrderNumber = [fieldname], 
 		   @from = [from], 
