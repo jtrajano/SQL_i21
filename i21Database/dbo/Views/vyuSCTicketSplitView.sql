@@ -6,7 +6,7 @@
 			WHEN tblSCTicket.strTicketStatus = 'C' THEN 'COMPLETED'
 			WHEN tblSCTicket.strTicketStatus = 'V' THEN 'VOID'
 			WHEN tblSCTicket.strTicketStatus = 'R' THEN 'REOPENED'
-		END) AS strTicketStatusDescription,
+		END) COLLATE Latin1_General_CI_AS AS strTicketStatusDescription,
 	   tblSCTicket.strTicketStatus,
        tblSCTicket.strTicketNumber,
        tblSCTicket.intScaleSetupId,

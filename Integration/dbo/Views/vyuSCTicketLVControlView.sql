@@ -19,13 +19,13 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					WHEN gasct_tic_type = ''O'' THEN ''Load Out''
 					WHEN gasct_tic_type = ''M'' THEN ''Memo Weight''
 					ELSE gasct_tic_type
-				END) AS strTicketType
+				END) COLLATE Latin1_General_CI_AS AS strTicketType
 				,gasct_tic_type COLLATE Latin1_General_CI_AS AS strInOutFlag
 				,(CASE 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,gasct_open_close_ind as strTicketStatus
+				,gasct_open_close_ind  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_itm_no COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
@@ -82,7 +82,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 						WHEN gasct_dist_option = ''C'' THEN ''Contract''
 						WHEN gasct_dist_option = ''S'' THEN ''Spot Sale''
 						ELSE gasct_dist_option
-				END) AS strDistributionDescription
+				END) COLLATE Latin1_General_CI_AS  AS strDistributionDescription
 				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
