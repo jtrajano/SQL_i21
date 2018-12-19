@@ -5,7 +5,7 @@ SELECT intScreenId
 --,strScreenName
 --,strModule
 ,REPLACE(mm.strMenuName, '(Portal)', '' )AS strScreenName
-,sc.strGroupName AS strModule
+,sc.strGroupName COLLATE Latin1_General_CI_AS AS strModule
 ,strNamespace
 ,strTableName
 ,ysnApproval
