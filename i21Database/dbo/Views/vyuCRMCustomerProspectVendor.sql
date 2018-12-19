@@ -4,7 +4,7 @@
 			intEntityCustomerId = a.intEntityId
 			,strCustomerNumber = b.strEntityNo
 			,strName = b.strName
-			,strType = dbo.fnCRMCoalesceEntityType(a.intEntityId)
+			,strType = dbo.fnCRMCoalesceEntityType(a.intEntityId) COLLATE Latin1_General_CI_AS
 			,ysnActive = b.ysnActive
 		from
 			tblEMEntityType a

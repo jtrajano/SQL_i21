@@ -52,8 +52,8 @@
 					,strSalesPipeStatus = pipe.strStatus
 					,proj.dtmLastDescriptionModified
 					,dtmExpectedCloseDate = proj.dtmSalesDate
-					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101)
-					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
+					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101) COLLATE Latin1_General_CI_AS
+					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%' COLLATE Latin1_General_CI_AS
 					,dblOpportunityAmmount = (sum(qs.dblSalesOrderTotal))
 					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(sum(qs.dblSalesOrderTotal)))
 					,dblSoftwareAmmount = sum(qs.dblSoftwareAmount)
@@ -88,12 +88,12 @@
 					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = proj.intCustomerId)
 					,strContactName = (select top 1 strName from tblEMEntity where intEntityId = con.[intEntityId])
 					,strType = (select top 1 strType from tblHDTicketType where intTicketTypeId = typ.intTypeId)
-					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
+					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101) COLLATE Latin1_General_CI_AS
 					,proj.intPercentComplete
 					,proj.ysnCompleted
 					,strOpportunityStatus = (select top 1 tblCRMStatus.strStatus from tblCRMStatus where tblCRMStatus.intStatusId = proj.intStatusId)
 					,strProjectManager = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalProjectManager)
-					,strProjectType = 'CRM'
+					,strProjectType = 'CRM' COLLATE Latin1_General_CI_AS
 					,proj.intCustomerContactId
 					,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = proj.intCustomerId and et.strType in ('Customer','Prospect'))--dbo.fnCRMCoalesceEntityType(proj.intCustomerId)
 					,proj.dtmCreated
