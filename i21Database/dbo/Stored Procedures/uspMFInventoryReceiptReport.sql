@@ -127,8 +127,8 @@ BEGIN
 		,(
 			CASE 
 				WHEN ISNULL(RIL.strContainerNo, '') = ''
-					THEN RIL.strGarden
-				ELSE RIL.strContainerNo + ' / ' + RIL.strGarden
+					THEN ISNULL(RIL.strGarden, '')
+				ELSE RIL.strContainerNo + ' / ' + ISNULL(RIL.strGarden, '')
 				END
 			) AS strContainerSealNo
 		,RIL.strParentLotNumber
