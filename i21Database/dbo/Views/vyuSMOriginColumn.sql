@@ -2,11 +2,11 @@
 AS  
   
 SELECT   
-	A.[name]						AS strColumnName,  
-	C.[name]						AS strTableName,
+	A.[name]						COLLATE Latin1_General_CI_AS AS strColumnName,  
+	C.[name]						COLLATE Latin1_General_CI_AS AS strTableName,
 	A.[object_id]					AS intTableId,
 	A.[column_id]					AS intColumnId,
-	B.[name]						AS strDataType,
+	B.[name]						COLLATE Latin1_General_CI_AS AS strDataType,
 	A.[is_nullable]					AS ysnAllowNull,
 	CAST(A.[max_length] AS INT)		AS intSize,
 	CAST(A.[precision]	AS INT)		AS intPrecision,

@@ -12,7 +12,7 @@ ISNULL(Entity.strName, '')				AS	strVendorName,
 ISNULL(UserSecurity.strUserName, '')	AS	strUserName,
 BatchPosting.strDescription				AS	strDescription,
 BatchPosting.dtmDate					AS	dtmDate,
-CONVERT(NVARCHAR(100),ISNULL(Fiscal.guid, ForBatchPosting.strBatchId))	AS  strFiscalUniqueId,
+CONVERT(NVARCHAR(100),ISNULL(Fiscal.guid, ForBatchPosting.strBatchId)) COLLATE Latin1_General_CI_AS	AS  strFiscalUniqueId,
 CompanyLocation.strLocationName			AS	strLocation
 FROM 
 (

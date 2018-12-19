@@ -3,6 +3,6 @@ AS
 SELECT intCompanyLocationId
 ,ysnEnableCreditCardProcessing
 ,strMerchantId
-,dbo.fnAESDecryptASym(strMerchantPassword) AS strMerchantPassword
+,dbo.fnAESDecryptASym(strMerchantPassword) COLLATE Latin1_General_CI_AS AS strMerchantPassword
 FROM
 tblSMCompanyLocation
