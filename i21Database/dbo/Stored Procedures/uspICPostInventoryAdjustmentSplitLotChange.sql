@@ -208,6 +208,7 @@ BEGIN
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own -- process only company-owned stocks 
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -298,6 +299,7 @@ BEGIN
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks 
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -653,6 +655,7 @@ BEGIN
 			AND FromStock.strBatchId = @strBatchId
 			AND NewLot.intLotId IS NOT NULL 
 			AND NewLot.intOwnershipType = @OWNERSHIP_TYPE_Own
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -994,6 +997,7 @@ BEGIN
 			AND FromStock.strBatchId = @strBatchId
 			AND NewLot.intLotId IS NOT NULL 
 			AND NewLot.intOwnershipType = @OWNERSHIP_TYPE_Storage
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	

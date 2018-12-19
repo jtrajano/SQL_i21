@@ -289,6 +289,7 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own
+			AND Detail.dblAdjustByQuantity != 0
 			--AND Lot.dblQty > 0 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
@@ -328,6 +329,7 @@ BEGIN
 	WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 		AND Item.strLotTracking = 'No'
 		AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own
+		AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -405,6 +407,7 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage
+			AND Detail.dblAdjustByQuantity != 0
 			--AND Lot.dblQty > 0 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
@@ -444,6 +447,7 @@ BEGIN
 	WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 		AND Item.strLotTracking = 'No'
 		AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Storage
+		AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -527,6 +531,7 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own
+			AND Detail.dblAdjustByQuantity != 0
 			--AND SourceTransaction.dblQty < 0 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intNewItemId
@@ -570,6 +575,7 @@ BEGIN
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Item.strLotTracking = 'No'
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
@@ -650,6 +656,7 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Storage
+			AND Detail.dblAdjustByQuantity != 0
 			--AND SourceTransaction.dblQty < 0 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intNewItemId
@@ -697,6 +704,7 @@ BEGIN
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Item.strLotTracking = 'No'
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Storage
+			AND Detail.dblAdjustByQuantity != 0
 
 	-------------------------------------------
 	-- Call the costing SP	
