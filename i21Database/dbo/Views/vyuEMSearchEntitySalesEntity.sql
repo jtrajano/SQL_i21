@@ -22,7 +22,7 @@
 			case when Competitor = 1 then 'Competitor, ' else '' end +
 			case when [Partner] = 1 then 'Partner, ' else '' end +
 			case when Prospect = 1 then 'Prospect, ' else '' end+
-			case when Buyer = 1 then 'Buyer, ' else '' end,
+			case when Buyer = 1 then 'Buyer, ' else '' end COLLATE Latin1_General_CI_AS,
 		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
 		intEntitySalespersonId = m.intEntityId,
 		strEntitySalespersonName = m.strName

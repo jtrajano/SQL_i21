@@ -16,7 +16,7 @@
 		D.strTitle,
 		ysnContactActive = D.ysnActive,  	
 		C.ysnDefaultContact,
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(B.intEntityId),
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(B.intEntityId) COLLATE Latin1_General_CI_AS,
 
 		 ysnVendor = CAST(X.Vendor AS BIT),  
 		 ysnCustomer = CAST(X.Customer AS BIT),  
