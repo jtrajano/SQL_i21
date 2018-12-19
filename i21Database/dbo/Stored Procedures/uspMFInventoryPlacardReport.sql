@@ -187,7 +187,10 @@ BEGIN TRY
 			SELECT x.Item COLLATE DATABASE_DEFAULT
 			FROM dbo.fnSplitString(@strLotNumber, '^') x
 			)
-		AND R.strReceiptNumber = @strReceiptNo
+		AND R.strReceiptNumber IN (
+			SELECT x.Item COLLATE DATABASE_DEFAULT
+			FROM dbo.fnSplitString(@strReceiptNo, '^') x
+			)
 END TRY
 
 BEGIN CATCH
