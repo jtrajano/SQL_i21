@@ -38,6 +38,8 @@ from tblCTSequenceHistory
 )t ON t.intContractDetailId = CD.intContractDetailId
 WHERE t.intRowNum = 1 AND CD.dblOriginalQty IS NULL
  
+UPDATE tblCTContractDetail SET dblOriginalQty = dblQuantity WHERE dblOriginalQty IS NULL
+
 PRINT('End Udate Original Quantity')
 GO
 
