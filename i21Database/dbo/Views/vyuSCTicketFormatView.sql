@@ -20,7 +20,7 @@
 		WHEN SCFormat.intTicketFormatSelection = 15 THEN 'Full Sheet Kiosk'
 		WHEN SCFormat.intTicketFormatSelection = 16 THEN '80mm Kiosk (Narrow)'
 		WHEN SCFormat.intTicketFormatSelection = 17 THEN 'Combined Elevator Receipt'
-	END as strTicketFormatSelection
+	END COLLATE Latin1_General_CI_AS as strTicketFormatSelection
 	,SCFormat.ysnSuppressCompanyName
 	,SCFormat.ysnFormFeedEachCopy
 	,SCFormat.strTicketHeader

@@ -4,7 +4,7 @@
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
     SC.strTicketStatus = 'V' THEN 'VOID' WHEN
-    SC.strTicketStatus = 'R' THEN 'REOPENED' END) AS
+    SC.strTicketStatus = 'R' THEN 'REOPENED' END) COLLATE Latin1_General_CI_ AS
     strTicketStatusDescription, 
 	SC.strTicketStatus,
     SC.strTicketNumber, 
