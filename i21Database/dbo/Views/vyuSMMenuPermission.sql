@@ -6,7 +6,7 @@ AS
 		--intUserRoleId, 
 		P.intCompanyLocationId,
 		P.intEntityId,
-		'Full Access' AS strPermission
+		'Full Access' COLLATE Latin1_General_CI_AS AS strPermission
 	FROM tblSMUserRoleMenu A 
 		INNER JOIN tblSMMasterMenu B ON A.intMenuId = B.intMenuID 
 		INNER JOIN vyuSMUserLocationSubRolePermission P ON A.intUserRoleId = P.intUserRoleId
