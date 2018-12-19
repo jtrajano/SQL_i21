@@ -5,7 +5,7 @@
 	intEntityId = a.intEntityId,
 	strName = a.strName,
 	strEntityNo = a.strEntityNo,
-	strEntityType = case when b.Vendor = 1 then 'Vendor,' else '' end + case when b.Customer = 1 then 'Customer,'  else '' end,
+	strEntityType = case when b.Vendor = 1 then 'Vendor,' else '' end + case when b.Customer = 1 then 'Customer,'  else '' end COLLATE Latin1_General_CI_AS,
 	
 	intVendorCurrencyId = c.intCurrencyId,
 	strVendorCurrency = e.strCurrency,

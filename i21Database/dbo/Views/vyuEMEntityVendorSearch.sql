@@ -10,15 +10,15 @@ SELECT DISTINCT
 	  intEntityId			= Vendor.intEntityId
 	, strCustomerNumber		= entityToVendor.strEntityNo
 	, strName				= entityToVendor.strName
-	, strAccountNumber		= ''--ISNULL(Vendor.strAccountNumber,'')
+	, strAccountNumber		= '' COLLATE Latin1_General_CI_AS--ISNULL(Vendor.strAccountNumber,'')
 	, strPhone				= entityPhone.strPhone
-	, strSalesPersonName	= ''--entityToSalesperson.strName
+	, strSalesPersonName	= '' COLLATE Latin1_General_CI_AS--entityToSalesperson.strName
 	, intSalespersonId		= null--Vendor.intSalespersonId
 	, strCurrency			= custCurrency.strCurrency
-	, strWarehouse			= ''--entityLocation.strLocationName
+	, strWarehouse			= '' COLLATE Latin1_General_CI_AS--entityLocation.strLocationName
 	, intWarehouseId		= -99--ISNULL(entityLocation.intCompanyLocationId, -99)
 	, dblCreditLimit		= CAST(0 AS NUMERIC(18,6))--CUSTOMER.dblCreditLimit
-	, strPricingLevelName	= ''--entityLocationPricingLevel.strPricingLevelName
+	, strPricingLevelName	= '' COLLATE Latin1_General_CI_AS--entityLocationPricingLevel.strPricingLevelName
 	, dtmOriginationDate	= entityToVendor.dtmOriginationDate
 	, dtmLastInvoice		= null
 	, dtmLastPayment		= null
@@ -27,7 +27,7 @@ SELECT DISTINCT
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
-	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(Vendor.intEntityId)
+	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(Vendor.intEntityId) COLLATE Latin1_General_CI_AS
 	, strClass				= entityClass.strClass
 	, ysnHasBudgetSetup		= CAST(0 AS BIT)
 	, intPaymentMethodId	= Vendor.intPaymentMethodId
@@ -56,7 +56,7 @@ SELECT DISTINCT
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= Vendor.intCurrencyId
 	, intTermsId			= Vendor.intTermsId
-	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
+	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds COLLATE Latin1_General_CI_AS
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CAST(0 AS BIT)--CUSTOMER.ysnCreditHold
@@ -68,11 +68,11 @@ SELECT DISTINCT
 	, strInternalNotes		= entityToVendor.strInternalNotes
 	, ysnPORequired			= CAST(0 AS BIT)--ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))
 	, intCreditStopDays		= 0--CUSTOMER.intCreditStopDays
-	, strCreditCode			= ''--CUSTOMER.strCreditCode
+	, strCreditCode			= '' COLLATE Latin1_General_CI_AS--CUSTOMER.strCreditCode
 	, dtmCreditLimitReached = null--CUSTOMER.dtmCreditLimitReached
 	, intCreditLimitReached = NULL--DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
 	, ysnHasPastDueBalances	= CAST(0 AS BIT) 
-	, strEntityType = 'Vendor'
+	, strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 FROM tblAPVendor Vendor
 INNER JOIN tblEMEntity entityToVendor ON Vendor.intEntityId = entityToVendor.intEntityId
 --LEFT JOIN tblEMEntity entityToSalesperson ON Vendor.intSalespersonId = entityToSalesperson.intEntityId

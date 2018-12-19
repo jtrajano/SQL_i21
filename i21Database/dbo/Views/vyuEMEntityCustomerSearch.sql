@@ -26,7 +26,7 @@ SELECT DISTINCT
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
-	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(CUSTOMER.intEntityId) --LOB.strLineOfBusiness
+	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(CUSTOMER.intEntityId) COLLATE Latin1_General_CI_AS --LOB.strLineOfBusiness
 	, strClass				= entityClass.strClass
 	, ysnHasBudgetSetup		= ISNULL(BUDGET.ysnHasBudgetSetup, CAST(0 AS BIT))
 	, intPaymentMethodId	= CUSTOMER.intPaymentMethodId
@@ -55,7 +55,7 @@ SELECT DISTINCT
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= CUSTOMER.intCurrencyId
 	, intTermsId			= CUSTOMER.intTermsId
-	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
+	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds COLLATE Latin1_General_CI_AS
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold

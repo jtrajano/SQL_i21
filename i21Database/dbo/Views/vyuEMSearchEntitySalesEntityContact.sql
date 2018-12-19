@@ -8,13 +8,13 @@ select
 		strContactName = g.strName,
 		intEntityContactId,
         strPhone = h.strPhone,          
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),		
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS,		
 		strType = 
 			case when Vendor = 1 then 'Vendor, ' else '' end + 
 			case when Customer = 1 then 'Customer, ' else '' end +
 			case when Competitor = 1 then 'Competitor, ' else '' end +
 			case when [Partner] = 1 then 'Partner, ' else '' end +
-			case when Prospect = 1 then 'Prospect, ' else '' end,
+			case when Prospect = 1 then 'Prospect, ' else '' end COLLATE Latin1_General_CI_AS,
 		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
 		
 		--Contact Information
@@ -49,10 +49,10 @@ select
 		f.ysnPortalAccess,
 		
 		strEntityAssociation = l.strName,
-		strContactLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(g.intEntityId),		
-		strContactAreaOfInterest = dbo.fnEMGetEntityAreaOfInterest(g.intEntityId),
-		strEntityCurrentSystem = dbo.fnEMGetEntityCompetitors(a.intEntityId),
-		strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId),
+		strContactLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(g.intEntityId) COLLATE Latin1_General_CI_AS,		
+		strContactAreaOfInterest = dbo.fnEMGetEntityAreaOfInterest(g.intEntityId) COLLATE Latin1_General_CI_AS,
+		strEntityCurrentSystem = dbo.fnEMGetEntityCompetitors(a.intEntityId) COLLATE Latin1_General_CI_AS,
+		strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId) COLLATE Latin1_General_CI_AS,
 		k.ysnOutOfAdvertising,
 		k.dtmOutDate
     FROM         

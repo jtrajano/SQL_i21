@@ -9,7 +9,7 @@
 	,website		= a.strWebsite
 	,type			= case when e.[intEntityId] is not null then 'vendor,' else '' end + 
 						case when f.[intEntityId] is not null then 'customer,' else '' end + 
-						case when g.[intEntityId] is not null then 'salesperson,' else '' end
+						case when g.[intEntityId] is not null then 'salesperson,' else '' end COLLATE Latin1_General_CI_AS
 	--Contact
 	,con_name		= c.strName
 	,con_phone		= l.strPhone--c.strPhone
@@ -56,7 +56,7 @@
 
 	--User
 	,user_name			= m.strUserName
-	,user_password		= m.strPassword
+	,user_password		= m.strPassword COLLATE Latin1_General_CI_AS
 	,user_role			= m.strUserRole
 	,user_policy		= m.strPolicyName
 	
