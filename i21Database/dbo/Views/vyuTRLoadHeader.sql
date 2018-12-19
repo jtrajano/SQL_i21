@@ -5,19 +5,19 @@ SELECT TL.intLoadHeaderId
 	, TL.strTransaction
 	, strReceiptLink = TR.strReceiptLine
 	, strRecordType = (CASE WHEN TR.intLoadReceiptId IS NULL THEN 'Header'
-							ELSE 'Receipt' END)
+							ELSE 'Receipt' END) COLLATE Latin1_General_CI_AS
 	, intEntityCustomerId = NULL
 	, strCustomer = NULL
 	, intCustomerLocationId = NULL
 	, strCustomerLocation = NULL
 	, intCustomerCompanyLocationId = NULL
 	, strCustomerCompanyLocation = NULL
-	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100))
+	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
 	, strFuelSupplier = Terminal.strName
-	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100))
+	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
 	, SP.strSupplyPoint
 	, strBOL = TR.strBillOfLading
-	, intReceiptCompanyLocationId = CAST(Location.intCompanyLocationId AS NVARCHAR(100))
+	, intReceiptCompanyLocationId = CAST(Location.intCompanyLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
 	, strReceiptCompanyLocation = Location.strLocationName
 	, Item.intItemId
 	, strItem = Item.strItemNo
@@ -33,9 +33,9 @@ SELECT TL.intLoadHeaderId
 	, strDriver = Driver.strName
 	, dtmDateTime = TL.dtmLoadDateTime
 	, TL.ysnPosted
-	, intInventoryReceiptId = CAST(Receipt.intInventoryReceiptId AS NVARCHAR(100))
+	, intInventoryReceiptId = CAST(Receipt.intInventoryReceiptId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
 	, strInventoryReceiptNo = Receipt.strReceiptNumber
-	, intInventoryTransferId = CAST(Transfer.intInventoryTransferId AS NVARCHAR(100))
+	, intInventoryTransferId = CAST(Transfer.intInventoryTransferId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
 	, strInventoryTransferNo = Transfer.strTransferNo
 	, intInvoiceId = ''
 	, strInvoiceNo = NULL
