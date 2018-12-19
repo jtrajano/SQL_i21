@@ -193,7 +193,7 @@ BEGIN
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 
 	
-	DECLARE @strTransactionType AS nvarchar(max)
+	--DECLARE @strTransactionType AS nvarchar(max)
 
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
