@@ -12,7 +12,7 @@
         e.strState,  
         e.strZipCode,
 		b.strType,
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS,
 		strContactName = g.strName
     FROM         
             tblEMEntity a
