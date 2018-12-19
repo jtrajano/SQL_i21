@@ -342,7 +342,7 @@ WITH Pricing AS
 			, EY.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' ' + pt.strPricingType 
+			, strType = ct.strContractType + ' ' + CASE WHEN CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0) <> 0  AND strPricingType = 'Priced' THEN 'Basis' ELSE strPricingType END
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
@@ -406,7 +406,7 @@ WITH Pricing AS
 			, EY.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' ' + strPricingType
+			, strType = ct.strContractType + ' ' + CASE WHEN CDT.dblOriginalQty + ISNULL(SeqHis.dblTransactionQuantity,0) <> 0 AND strPricingType = 'Priced' THEN 'Basis' ELSE strPricingType END
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
