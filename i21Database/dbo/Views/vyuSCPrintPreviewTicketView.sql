@@ -5,7 +5,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
     SC.strTicketStatus = 'V' THEN 'VOID' WHEN
     SC.strTicketStatus = 'R' THEN 'REOPENED' WHEN
-	SC.strTicketStatus = 'H' THEN 'HOLD' END) AS
+	SC.strTicketStatus = 'H' THEN 'HOLD' END) COLLATE Latin1_General_CI_AS AS
     strTicketStatusDescription, 
 	SC.strTicketStatus,
     SC.strTicketNumber, 

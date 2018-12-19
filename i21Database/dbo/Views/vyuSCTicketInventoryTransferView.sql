@@ -42,7 +42,7 @@
 	, ICTI.dblAvailableQty
 	, ICTI.dblQuantity
 	, ICTI.intOwnershipType
-	, ICTI.strOwnershipType
+	, ICTI.strOwnershipType COLLATE Latin1_General_CI_AS AS strOwnershipType
 	, ICTI.ysnPosted
 	FROM tblSCTicket SC 
 	INNER JOIN tblICInventoryTransfer ICT ON SC.intInventoryTransferId = ICT.intInventoryTransferId
