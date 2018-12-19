@@ -12,7 +12,7 @@
 			,tblEMEntity.ysnActive
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = tblARCustomer.intEntityId and et.strType in ('Customer','Prospect'))
 			,tblEMEntityPhoneNumber.strPhone
-			,strDirectionEntityType = 'Customer'
+			,strDirectionEntityType = 'Customer' COLLATE Latin1_General_CI_AS
 		from tblARCustomer
 			,[tblEMEntityToContact]
 			,tblEMEntity
