@@ -19,9 +19,11 @@ DECLARE @ysnIncludeInventoryM2M bit
 DECLARE @ysnEnterForwardCurveForMarketBasisDifferential bit
 DECLARE @ysnCanadianCustomer bit
 DECLARE @intDefaultCurrencyId int
+DECLARE @strBackDatedReportRunBy NVARCHAR(100) 
 
 SELECT @dtmPriceDate=dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId=@intM2MBasisId  
 SELECT @ysnIncludeBasisDifferentialsInResults=ysnIncludeBasisDifferentialsInResults FROM tblRKCompanyPreference
+SELECT @strBackDatedReportRunBy = isnull(strBackDatedReportRunBy,'Transaction Date') FROM tblRKCompanyPreference
 SELECT @ysnEnterForwardCurveForMarketBasisDifferential=ysnEnterForwardCurveForMarketBasisDifferential FROM tblRKCompanyPreference
 SELECT @dtmSettlemntPriceDate=dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId=@intFutureSettlementPriceId
 SELECT @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
@@ -238,14 +240,14 @@ FROM (
 			) intRowNum
 		,strCommodity strCommodityCode
 		,h.intCommodityId intCommodityId
-		,intContractHeaderId
-		,strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
+		,h.intContractHeaderId
+		,h.strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
 		,strLocation strLocationName
 		,dtmEndDate
-		, dblBalance
+		,dblBalance
 		,intDtlQtyUnitMeasureId intUnitMeasureId
-		,intPricingTypeId
-		,intContractTypeId
+		,h.intPricingTypeId
+		,h.intContractTypeId
 		,intCompanyLocationId
 		,strContractType
 		,strPricingType
@@ -257,15 +259,19 @@ FROM (
 		,strContractType + ' Priced' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,dtmHistoryCreated dtmContractDate
+		,case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+			convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
-		,intFutureMarketId
-		,intFutureMonthId,strPricingStatus
+		,h.intFutureMarketId
+		,h.intFutureMonthId,strPricingStatus
 	FROM tblCTSequenceHistory h
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo 
+	WHERE  
+	case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+	convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end <= @dtmTransactionDateUpTo 
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 	) a
 WHERE a.intRowNum = 1  AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6)
@@ -279,17 +285,17 @@ FROM (
 			) intRowNum
 		,strCommodity strCommodityCode
 		,h.intCommodityId intCommodityId
-		,intContractHeaderId
-		,strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
+		,h.intContractHeaderId
+		,h.strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
 		,strLocation strLocationName
 		,dtmEndDate
 		--,isnull(dblQtyUnpriced,dblQuantity) + ISNULL(dblQtyPriced - (dblQuantity - dblBalance),0) dblBalance
-		,case when strPricingStatus='Parially Priced' then dblQuantity - ISNULL(dblQtyPriced + (dblQuantity - dblBalance),0) 
-				else isnull(dblQtyUnpriced,dblQuantity) end dblBalance 		
+		,case when strPricingStatus='Parially Priced' then h.dblQuantity - ISNULL(dblQtyPriced + (h.dblQuantity - dblBalance),0) 
+				else isnull(dblQtyUnpriced,h.dblQuantity) end dblBalance 		
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
-		,intPricingTypeId
-		,intContractTypeId
+		,h.intPricingTypeId
+		,h.intContractTypeId
 		,intCompanyLocationId
 		,strContractType
 		,strPricingType
@@ -301,16 +307,19 @@ FROM (
 		,strContractType + ' Basis' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,dtmHistoryCreated dtmContractDate
+		,case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+		convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
-		,intFutureMarketId
-		,intFutureMonthId
+		,h.intFutureMarketId
+		,h.intFutureMonthId
 		,strPricingStatus
 	FROM tblCTSequenceHistory h
+		JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo 
+	WHERE  	case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+	convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end <= @dtmTransactionDateUpTo 
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 	
 	) a
@@ -325,15 +334,15 @@ FROM (
 			) intRowNum
 		,strCommodity strCommodityCode
 		,h.intCommodityId intCommodityId
-		,intContractHeaderId
-		,strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
+		,h.intContractHeaderId
+		,h.strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
 		,strLocation strLocationName
 		,dtmEndDate
-		,CASE WHEN dblQtyPriced - (dblQuantity - dblBalance) < 0 THEN 0 ELSE dblQtyPriced - (dblQuantity - dblBalance) END dblBalance
+		,CASE WHEN dblQtyPriced - (h.dblQuantity - dblBalance) < 0 THEN 0 ELSE dblQtyPriced - (h.dblQuantity - dblBalance) END dblBalance
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
-		,intPricingTypeId
-		,intContractTypeId
+		,h.intPricingTypeId
+		,h.intContractTypeId
 		,intCompanyLocationId
 		,strContractType
 		,strPricingType
@@ -345,16 +354,19 @@ FROM (
 		,strContractType + ' Priced' AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,dtmHistoryCreated dtmContractDate
+		,case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+		convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end dtmContractDate
 		,e.strName strEntityName
 		,'' strCustomerContract
-		,intFutureMarketId
-		,intFutureMonthId 
+		,h.intFutureMarketId
+		,h.intFutureMonthId 
 		,strPricingStatus
 	FROM tblCTSequenceHistory h
+		JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo 
+	WHERE 	case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+	convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end <= @dtmTransactionDateUpTo 
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 
 	) a
@@ -370,14 +382,14 @@ FROM (
 			) intRowNum
 		,strCommodity strCommodityCode
 		,h.intCommodityId intCommodityId
-		,intContractHeaderId
-		,strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
+		,h.intContractHeaderId
+		,h.strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
 		,strLocation strLocationName
 		,dtmEndDate
 		,dblBalance dblBalance
 		,intDtlQtyUnitMeasureId intUnitMeasureId
-		,intPricingTypeId
-		,intContractTypeId
+		,h.intPricingTypeId
+		,h.intContractTypeId
 		,intCompanyLocationId
 		,strContractType
 		,strPricingType
@@ -389,19 +401,23 @@ FROM (
 		,strContractType + ' ' + strPricingType AS strType
 		,i.intItemId intItemId
 		,strItemNo
-		,dtmHistoryCreated dtmContractDate
+		,case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+			convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end dtmContractDate 
 		,e.strName strEntityName
 		,'' strCustomerContract
-		,intFutureMarketId
-		,intFutureMonthId 
+		,h.intFutureMarketId
+		,h.intFutureMonthId 
 		,strPricingStatus
 	FROM tblCTSequenceHistory h
+		JOIN tblCTContractHeader ch on ch.intContractHeaderId=h.intContractHeaderId
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
 	WHERE intContractDetailId NOT IN (
 			SELECT intContractDetailId
 			FROM tblCTPriceFixation
-			) AND convert(DATETIME, CONVERT(VARCHAR(10), convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110), 110), 110) <= convert(DATETIME, @dtmTransactionDateUpTo) 
+			) AND 
+				case when @strBackDatedReportRunBy='Transaction Date' then convert(DATETIME, CONVERT(VARCHAR(10), ch.dtmContractDate, 110), 110) else 
+				convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) end <= @dtmTransactionDateUpTo 
 			AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 				
 	) a
