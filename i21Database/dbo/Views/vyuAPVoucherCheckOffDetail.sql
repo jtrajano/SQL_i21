@@ -59,7 +59,7 @@ OUTER APPLY(
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
 			WHERE B.intBillId = APB.intBillId 
-				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
+				  --AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
 			OUTER APPLY (
@@ -148,7 +148,7 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
 			WHERE B.intBillId = APB.intBillId 
-				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
+				  --AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
 WHERE  
