@@ -3,12 +3,12 @@
 
 SELECT TOP 100 PERCENT QD.intQuoteDetailId
 	, strCompanyName = CompanySetup.strCompanyName
-	, strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL, 0)
+	, strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	, QH.strQuoteNumber
 	, GETDATE() AS dtmGeneratedDate
 	, QH.dtmQuoteDate
-	, strCustomer = dbo.fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName, AR.ysnIncludeEntityName)
-	, strSalesperson = dbo.fnARFormatCustomerAddress(SP.strName, SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, 0)
+	, strCustomer = dbo.fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName, AR.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
+	, strSalesperson = dbo.fnARFormatCustomerAddress(SP.strName, SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, 0) COLLATE Latin1_General_CI_AS
 	, EL.strLocationName
 	, strItemNo = IC.strDescription
 	, TR.strSupplyPoint
@@ -16,7 +16,7 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 	, dblPriceChange = CASE WHEN ISNULL(QuotePrice.dblQuotePrice, 0) = 0 THEN CAST('N/A' AS NVARCHAR(50))
 							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) < 0 THEN CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50))
 							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) = 0 THEN CAST('0.00' AS NVARCHAR(50))
-							ELSE '+' + CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50)) END
+							ELSE '+' + CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50)) END COLLATE Latin1_General_CI_AS
 	--, dblQuotePrice = (CASE WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)--Roll-up
 	--						WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)--Itemize
 	--						WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0)--Rollup
@@ -36,7 +36,7 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 							ELSE CONVERT(BIT, 0) END
 	, QH.intQuoteHeaderId
 	, QH.strQuoteComments
-	, strNote = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Roll-up' THEN 'Note: Tax and Fees inclusive.' ELSE null END)
+	, strNote = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Roll-up' THEN 'Note: Tax and Fees inclusive.' ELSE null END) COLLATE Latin1_General_CI_AS
 	--, CustomerTransports.ysnShowTaxDetail
 	, ysnShowTaxDetail = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Itemize' THEN convert(bit,1) ELSE convert(bit,0) END)
 	, dblTax = ISNULL(QD.dblTax, 0)
