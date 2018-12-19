@@ -5,8 +5,8 @@
 		quote_header.intEntityCustomerId,
 		cus_location.strLocationName,
 		supply_point.strSupplyPoint,
-		strCategoryCode = dbo.fnEMGetCustomerTransportQuoteCategory(quote_header.intCustomerRackQuoteHeaderId),
-		strItemNo = dbo.fnEMGetCustomerTransportQuoteItem(quote_header.intCustomerRackQuoteHeaderId),
+		strCategoryCode = dbo.fnEMGetCustomerTransportQuoteCategory(quote_header.intCustomerRackQuoteHeaderId) COLLATE Latin1_General_CI_AS,
+		strItemNo = dbo.fnEMGetCustomerTransportQuoteItem(quote_header.intCustomerRackQuoteHeaderId) COLLATE Latin1_General_CI_AS,
 		ent.strName,
 		ent.strEntityNo,
 		intWarehouseId = isnull(eloc.intWarehouseId, -99)
