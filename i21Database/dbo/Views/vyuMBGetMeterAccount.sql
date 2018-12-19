@@ -18,7 +18,7 @@ SELECT MA.intMeterAccountId
 	, strPriceType = (
 		CASE WHEN MA.intPriceType = 1 THEN 'Gross'
 			WHEN MA.intPriceType = 2 THEN 'Net' END
-	)
+	) COLLATE Latin1_General_CI_AS
 	, MA.intConsignmentGroupId
 	, ConGroup.strConsignmentGroup
 	, ConGroup.strRateType
