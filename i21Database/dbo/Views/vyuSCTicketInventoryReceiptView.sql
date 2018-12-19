@@ -34,7 +34,7 @@
 		WHEN SC.strDistributionOption = 'SPT' THEN 'Spot Sale'
 		WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
 		WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
-	END) AS strDistributionOption
+	END) COLLATE Latin1_General_CI_AS AS strDistributionOption
 	FROM tblSCTicket SC 
 	INNER JOIN tblICInventoryReceipt ICR ON SC.intInventoryReceiptId = ICR.intInventoryReceiptId
 	INNER JOIN vyuICGetInventoryReceiptItem ICRI ON SC.strTicketNumber = ICRI.strSourceNumber
