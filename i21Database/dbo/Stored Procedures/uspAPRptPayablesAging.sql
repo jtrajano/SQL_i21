@@ -143,8 +143,10 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @strAccountId = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
+					,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -155,6 +157,8 @@ SET @innerQuery = 'SELECT --DISTINCT
 
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
+					,intAccountId
+					,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -222,6 +226,17 @@ BEGIN
 	SET @dateTo = GETDATE()
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
 END
+
+
+IF @strAccountId IS NOT NULL
+BEGIN 
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+		--SET @originInnerQuery = @originInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+	END
+END
+
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
@@ -297,16 +312,16 @@ END
 	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
 	--END  
 
-	 SELECT @strAccountId = [fieldname], 
-		   @from = [from], 
-		   @to = [to], 
-		   @join = [join], 
-		   @datatype = [datatype] 
-	FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
-	IF @strAccountId IS NOT NULL
-	BEGIN
-		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strAccountId, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+	-- SELECT @strAccountId = [fieldname], 
+	--	   @from = [from], 
+	--	   @to = [to], 
+	--	   @join = [join], 
+	--	   @datatype = [datatype] 
+	--FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
+	--IF @strAccountId IS NOT NULL
+	--BEGIN
+	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strAccountId, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
 
 	SELECT @strVendorOrderNumber = [fieldname], 
 		   @from = [from], 
@@ -347,7 +362,7 @@ SET @query = '
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,A.intAccountId
-	,D.strAccountId
+	,tmpAgingSummaryTotal.strAccountId
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,tmpAgingSummaryTotal.dblDiscount
@@ -384,6 +399,7 @@ SET @query = '
 	(
 		SELECT 
 			intBillId
+			,strAccountId as strAccountId
 			,SUM(tmpAPPayables.dblTotal) AS dblTotal
 			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
 			,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
@@ -392,10 +408,11 @@ SET @query = '
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
-		GROUP BY intBillId
+		GROUP BY intBillId, strAccountId
 		UNION ALL
 		SELECT 
 			intBillId
+			,strAccountId
 			,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
 			,SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
 			,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
@@ -404,7 +421,7 @@ SET @query = '
 		FROM ('
 				+ @prepaidInnerQuery +
 			') tmpAPPrepaidPayables 
-		GROUP BY intBillId, intPrepaidRowType
+		GROUP BY intBillId, intPrepaidRowType, strAccountId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 	ON A.intBillId = tmpAgingSummaryTotal.intBillId
