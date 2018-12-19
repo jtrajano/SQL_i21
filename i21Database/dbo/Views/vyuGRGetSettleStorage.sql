@@ -43,24 +43,24 @@ SELECT DISTINCT
 											ELSE TSS.intTransferStorageId
 										END
 								END
-	,strTransactionNumber		= CASE 
+	,CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
 									ELSE
 										CASE
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 											ELSE TS.strTransferStorageTicket
-										END
-								END
-	,strTransactionCode			 = CASE 
+										END 
+								END COLLATE Latin1_General_CI_AS AS strTransactionNumber
+	,CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
 									ELSE
 										CASE
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 											ELSE 'TS' --TRANSFER STORAGE
-										END
-								END
+										END 
+								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -96,7 +96,7 @@ LEFT JOIN (tblGRTransferStorageSplit TSS
 				ON TS.intTransferStorageId = TSS.intTransferStorageId
 		) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 CROSS APPLY (
-	SELECT strContractNumbers = (
+	SELECT (
 		SELECT ',' + (CH.strContractNumber + '-' + CONVERT(VARCHAR(20), CD.intContractSeq))
 		FROM tblCTContractDetail CD
 		INNER JOIN tblGRSettleContract SC
@@ -105,10 +105,10 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
-		FOR XML PATH(''))
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractNumbers
 ) AS _strContractNumbers
 CROSS APPLY (
-	SELECT strContractIds = (
+	SELECT (
 		SELECT CONVERT(VARCHAR(20), CH.intContractHeaderId) + '|^|'
 		FROM tblCTContractDetail CD
 		INNER JOIN tblGRSettleContract SC
@@ -117,5 +117,5 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
-		FOR XML PATH(''))
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractIds
 ) AS _strContractIds

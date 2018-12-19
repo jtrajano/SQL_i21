@@ -2,9 +2,9 @@ CREATE VIEW [dbo].[vyuGRItemsSettlementOpenContractReport]
 AS
 SELECT A.ItemName	 
 	 , PivotColumn = CONVERT(NVARCHAR,A.PivotColumn)
-	 , Amount = CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.Amount),0)))
+	 , CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.Amount),0))) COLLATE Latin1_General_CI_AS as Amount
 	 , A.UnitMeasure
-	 , intEntityId = CONVERT(NVARCHAR,A.intEntityId)
+	 , CONVERT(NVARCHAR,A.intEntityId)  COLLATE Latin1_General_CI_AS as intEntityId
 	 , PivotColumnId = CASE 
 						WHEN A.PivotColumn = 'Purchase' THEN 111
 						ELSE 222

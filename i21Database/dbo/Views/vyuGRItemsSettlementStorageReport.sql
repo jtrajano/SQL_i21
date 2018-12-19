@@ -6,9 +6,9 @@ INNER JOIN (
 		SELECT
 			ItemName		= A.strItemNo		
 			, PivotColumn	= CONVERT(NVARCHAR,A.strDistributionType)
-			, Amount		= CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.dblQtyReceived),0)))
+			, CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.dblQtyReceived),0))) COLLATE Latin1_General_CI_AS as Amount
 			, UnitMeasure	= UM.strUnitMeasure
-			, intEntityId	= CONVERT(NVARCHAR,A.intEntityVendorId)
+			, CONVERT(NVARCHAR,A.intEntityVendorId)  COLLATE Latin1_General_CI_AS as intEntityId
 			, PivotColumnId = A.intStorageScheduleTypeId
 		FROM (
 				SELECT 

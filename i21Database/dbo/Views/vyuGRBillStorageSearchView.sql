@@ -18,10 +18,10 @@ SELECT
 	,Item.strItemNo	
 	,dblUnits = CAST(dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, IU.intItemUOMId,SH.dblUnits) AS DECIMAL(18,6))
 	,SH.dblPaidAmount
-	,strPaidDescription = CASE 
+	,CASE 
 							WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN 'Bill Storage'
 							ELSE 'Accrue'
-						END	
+						END	 COLLATE Latin1_General_CI_AS AS strPaidDescription
 	,dtmCalculatedStorageThru = CASE 
 									WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN SH.dtmDistributionDate
 									ELSE SH.dtmHistoryDate
