@@ -57,7 +57,7 @@ a.dblCreditForeign,
 ISNULL(c.strReference,'') COLLATE Latin1_General_CI_AS strReference,
 ISNULL(c.strDocument,'') COLLATE Latin1_General_CI_AS strDocument,
 ISNULL(c.strComments,'') COLLATE Latin1_General_CI_AS strComments,
-ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_ASstrUserName
+ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_AS strUserName
 FROM u a LEFT JOIN
 vyuGLDetail c ON a.intGLDetailId = c.intGLDetailId
 GO
