@@ -11,8 +11,8 @@
 	from (
 		select
 			intEntityId = tblEMEntity.intEntityId
-			,strKeyword = '{Sales Person}'
-			,strDescription = 'Sales Person Name'
+			,strKeyword = '{Sales Person}' COLLATE Latin1_General_CI_AS
+			,strDescription = 'Sales Person Name' COLLATE Latin1_General_CI_AS
 			,strCurrentValue = tblEMEntity.strName
 			,imgCurrentValue = null
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
@@ -24,8 +24,8 @@
 
 		select
 			intEntityId = tblEMEntity.intEntityId
-			,strKeyword = '{Company}'
-			,strDescription = 'Sales Person Company'
+			,strKeyword = '{Company}' COLLATE Latin1_General_CI_AS
+			,strDescription = 'Sales Person Company' COLLATE Latin1_General_CI_AS
 			,strCurrentValue = (select top 1 tblSMCompanySetup.strCompanyName from tblSMCompanySetup)
 			,imgCurrentValue = null
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
@@ -37,9 +37,9 @@
 
 		select
 			intEntityId = tblEMEntity.intEntityId
-			,strKeyword = '{Enterprise Software Simplified}'
-			,strDescription = 'Enterprise Software Simplified'
-			,strCurrentValue = 'Enterprise Software Simplified'
+			,strKeyword = '{Enterprise Software Simplified}' COLLATE Latin1_General_CI_AS
+			,strDescription = 'Enterprise Software Simplified' COLLATE Latin1_General_CI_AS
+			,strCurrentValue = 'Enterprise Software Simplified' COLLATE Latin1_General_CI_AS
 			,imgCurrentValue = null
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
 		from

@@ -5,7 +5,7 @@
 			,intEntityId = tblEMEntity.intEntityId
 			,strSalespersonName = tblEMEntity.strName
 			,strCompanyName = tblSMCompanySetup.strCompanyName
-			,strEnterpriseSoftwareSimplified = 'Enterprise Software Simplified'
+			,strEnterpriseSoftwareSimplified = 'Enterprise Software Simplified' COLLATE Latin1_General_CI_AS
 			
 			,intMobileNumberContactEntityId = mob.intEntityId
 			,strMobileNumber = tblEMEntityMobileNumber.strPhone
