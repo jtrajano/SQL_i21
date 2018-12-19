@@ -4,7 +4,7 @@
 	,SCAlert.intTicketUncompletedDaysAlert
 	,SCAlert.intEntityId AS intUserId
 	,SCAlert.intCompanyLocationId
-	,SCTicket.strTicketStatusDescription
+	,SCTicket.strTicketStatusDescription COLLATE Latin1_General_CI_AS AS strTicketStatusDescription
 	,SCTicket.strTicketStatus
     ,SCTicket.strTicketNumber
     ,SCTicket.intScaleSetupId

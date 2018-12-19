@@ -129,7 +129,7 @@
     ,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
-	,SCT.strPlateNumber
+	,SCT.strPlateNumber COLLATE Latin1_General_CI_AS AS strPlateNumber
 	,SCT.blbPlateNumber
 	,SCT.strDriverName
 	--,SCT.intEntityContactId

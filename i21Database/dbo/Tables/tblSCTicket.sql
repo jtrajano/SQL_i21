@@ -138,7 +138,7 @@
 	[intInvoiceId] INT NULL,
 	[intCompanyId] INT NULL,
 	[intEntityContactId] INT NULL,
-	[strPlateNumber] NVARCHAR(50) NULL,
+	[strPlateNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[blbPlateNumber] VARBINARY(MAX) NULL,
 	[ysnDestinationWeightGradePost] BIT NOT NULL DEFAULT 0, 
 	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
