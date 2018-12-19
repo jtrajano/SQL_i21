@@ -7,8 +7,8 @@
 		,intCustomerContactId = i.intEntityId
 		,strCustomerName = b.strName
 		,a.ysnActive
-		,strLineOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId)
-		,strModule = dbo.fnCRMCoalesceModule(e.intEntityCustomerId,e.strCompanyId)
+		,strLineOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS
+		,strModule = dbo.fnCRMCoalesceModule(e.intEntityCustomerId,e.strCompanyId) COLLATE Latin1_General_CI_AS
 		,e.strCompanyId
 		,intNumberOfUser = isnull(e.intNumberOfUser,0)
 		,e.dtmDateExpiration
