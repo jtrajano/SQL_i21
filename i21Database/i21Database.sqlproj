@@ -7234,6 +7234,7 @@
     <Build Include="dbo\Stored Procedures\uspQMImportTest.sql" />
     <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
     <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationDetailAPAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
