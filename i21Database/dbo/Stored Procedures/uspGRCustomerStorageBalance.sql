@@ -8,6 +8,7 @@ CREATE PROCEDURE uspGRCustomerStorageBalance
 	,@intStorageTypeId INT = NULL
 	,@intStorageScheduleId INT = NULL
 	,@ysnDistribute BIT	
+	,@dblGrossQuantity DECIMAL(38,20)
 	,@newBalance DECIMAL(38,20) OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -22,11 +23,12 @@ BEGIN TRY
 	IF @ysnDistribute = 1
 	BEGIN
 		UPDATE tblGRCustomerStorage
-		SET dblOpenBalance = dblOpenBalance + @dblBalance
-			, dblOriginalBalance = dblOriginalBalance + @dblBalance
-			, intStorageTypeId = @intStorageTypeId
-			, intStorageScheduleId = @intStorageScheduleId
-		WHERE intCustomerStorageId = @intCustomerStorageId
+		SET dblOpenBalance 			= dblOpenBalance + @dblBalance
+			, dblOriginalBalance 	= dblOriginalBalance + @dblBalance
+			, dblGrossQuantity 		= dblGrossQuantity + @dblGrossQuantity
+			, intStorageTypeId 		= @intStorageTypeId
+			, intStorageScheduleId 	= @intStorageScheduleId
+		WHERE intCustomerStorageId 	= @intCustomerStorageId
 
 		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
 	END
@@ -34,19 +36,21 @@ BEGIN TRY
 	--undistribute ticket
 	BEGIN
 		UPDATE tblGRCustomerStorage
-		SET dblOpenBalance = dblOpenBalance - @dblBalance
-			, dblOriginalBalance = dblOriginalBalance - @dblBalance
-		WHERE intEntityId = @intEntityId AND intItemId = @intItemId 
-		AND intCompanyLocationId = @intLocationId 
-		AND intDeliverySheetId = @intDeliverySheetId
-		AND intStorageTypeId = @intStorageTypeId 
+		SET dblOpenBalance 			= dblOpenBalance - @dblBalance
+			, dblOriginalBalance 	= dblOriginalBalance - @dblBalance
+			, dblGrossQuantity 		= dblGrossQuantity - @dblGrossQuantity
+		WHERE intEntityId = @intEntityId 
+			AND intItemId = @intItemId 
+			AND intCompanyLocationId = @intLocationId 
+			AND intDeliverySheetId = @intDeliverySheetId
+			AND intStorageTypeId = @intStorageTypeId 
 
 		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage 
 		WHERE intEntityId = @intEntityId 
-		AND intItemId = @intItemId
-		AND intCompanyLocationId = @intLocationId 
-		AND intDeliverySheetId = @intDeliverySheetId
-		AND intStorageTypeId = @intStorageTypeId 
+			AND intItemId = @intItemId
+			AND intCompanyLocationId = @intLocationId 
+			AND intDeliverySheetId = @intDeliverySheetId
+			AND intStorageTypeId = @intStorageTypeId 
 
 	END
 END TRY

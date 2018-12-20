@@ -21,6 +21,7 @@ DECLARE @storageHistoryData AS [StorageHistoryStagingTable]
 DECLARE @intStorageHistoryId AS INT
 DECLARE @intStorageTypeId AS INT
 DECLARE @intStorageScheduleId AS INT
+DECLARE @dblGrossQuantity NUMERIC(38,20)
 
 BEGIN TRY
 	--check if a storage already exists 
@@ -32,6 +33,7 @@ BEGIN TRY
 		, @intDeliverySheetId		= CS.intDeliverySheetId
 		, @intStorageTypeId			= CS.intStorageTypeId
 		, @intStorageScheduleId		= CS.intStorageScheduleId
+		, @dblGrossQuantity			= CS.dblGrossQuantity
 	FROM @CustomerStorageStagingTable CS	
 
 	IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId AND intStorageTypeId = @intStorageTypeId)
@@ -48,6 +50,7 @@ BEGIN TRY
 				,@intStorageTypeId = @intStorageTypeId
 				,@intStorageScheduleId = @intStorageScheduleId
 				,@ysnDistribute = 1
+				,@dblGrossQuantity = @dblGrossQuantity
 				,@newBalance = @newBalance OUT
 	END
 	ELSE
@@ -87,7 +90,8 @@ BEGIN TRY
 				   ,[intCompanyLocationSubLocationId]
 				   ,[intStorageLocationId]
 				   ,[intUnitMeasureId]
-				   ,[intItemUOMId])
+				   ,[intItemUOMId]
+				   ,[dblGrossQuantity])
 		SELECT 	[intConcurrencyId]					= 1
 				,[intEntityId]						= CS.intEntityId
 				,[intCommodityId]					= CS.intCommodityId
@@ -122,6 +126,7 @@ BEGIN TRY
 				,[intStorageLocationId]				= CS.[intStorageLocationId]
 				,[intUnitMeasureId]					= CS.[intUnitMeasureId]
 				,[intItemUOMId]						= CS.[intItemUOMId]
+				,[dblGrossQuantity]					= CS.dblGrossQuantity
 		FROM	@CustomerStorageStagingTable CS
 
 		SELECT @intCustomerStorageId = SCOPE_IDENTITY()

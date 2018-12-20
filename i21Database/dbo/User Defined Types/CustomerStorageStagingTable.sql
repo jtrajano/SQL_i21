@@ -7,7 +7,7 @@
 	[intCompanyLocationId] INT NOT NULL,		-- Company Location Id
 	[intCompanyLocationSubLocationId] INT NULL,	-- Company Sub-Location Id
     [intStorageLocationId] INT NULL,			-- Storage Unit Id
-	[dblQuantity] NUMERIC(38, 20) NOT NULL,		-- Distributed Quantity
+	[dblQuantity] NUMERIC(38, 20) NOT NULL,		-- Distributed Quantity (Net)
     [intStorageTypeId] INT NULL,				-- Storage Type Id
 	[intStorageScheduleId] INT NULL,			-- Storage Schedule Id
     [intDiscountScheduleId] INT NULL,			-- Discount Schedule Id
@@ -42,5 +42,6 @@
     [dblDiscountsPaid] NUMERIC(18, 6) NULL, 
     [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intTransferStorageSplitId] INT NULL,
-	[ysnTransferStorage] BIT NULL
+	[ysnTransferStorage] BIT NULL,
+	[dblGrossQuantity] NUMERIC(38, 20) NOT NULL,-- Distributed Quantity (Gross)
 )
