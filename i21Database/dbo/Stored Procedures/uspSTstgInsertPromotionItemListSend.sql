@@ -242,6 +242,7 @@ BEGIN
 											) AS [ItemListMaintenance]
 										FOR XML PATH('NAXML-MaintenanceRequest'),TYPE
 								) AS VARCHAR(MAX))
+								SET @strGeneratedXML = REPLACE(@strGeneratedXML, '><', '>' + CHAR(13) + '<')
 								-- =========================================================================================================
 
 
