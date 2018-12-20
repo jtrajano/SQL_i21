@@ -100,7 +100,7 @@ SELECT
     INV.intSalesOrderId,
 
 	strPONumber = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strPONumber END,                                    
-	strDeliverPickup = '',
+	strDeliverPickup = '' COLLATE Latin1_General_CI_AS,
     strComments = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strComments END,
 	strDocumentCode = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE ISNULL(DOC.strCode, '') END,
 	strCode = ISNULL(DOC.strCode, ''),
@@ -109,7 +109,7 @@ SELECT
 
 	strCustomerNumber = CUS.strCustomerNumber,
     strCustomerName = CUS.strName,
-    intEntityLineOfBusinessIds = CUS.intEntityLineOfBusinessIds,
+    intEntityLineOfBusinessIds = CUS.intEntityLineOfBusinessIds COLLATE Latin1_General_CI_AS,
     ysnCreditHold = CUS.ysnCreditHold,
     dblCreditLimit = CUS.dblCreditLimit,
     dblARBalance = CUS.dblARBalance,                                                                            

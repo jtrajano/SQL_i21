@@ -46,7 +46,7 @@ FROM vyuARCustomerAgingReport CAR
 CROSS APPLY (
 	SELECT dblCreditLimit
 		 , strTerm
-		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.vyuARCustomerSearch C WITH (NOLOCK)
 		LEFT JOIN (SELECT intEntityId
 		                , strPhone

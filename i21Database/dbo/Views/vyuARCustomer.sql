@@ -40,7 +40,7 @@ SELECT
 ,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
 ,intServiceChargeId
 ,strCustomerTerm = TERM.strTerm
-,STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') as intEntityLineOfBusinessIds
+,STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS as intEntityLineOfBusinessIds
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

@@ -98,9 +98,9 @@ SELECT id							= NEWID()
 	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
 	 , strSubCurrency				= CURRENCY.strCurrency
 FROM (
-	SELECT strTransactionType				= 'Inventory Shipment'
+	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
 		 , strTransactionNumber				= SHP.strShipmentNumber
-		 , strShippedItemId					= 'icis:' + CAST(SHP.intInventoryShipmentId AS NVARCHAR(250))
+		 , strShippedItemId					= 'icis:' + CAST(SHP.intInventoryShipmentId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		 , intEntityCustomerId				= SO.intEntityCustomerId
 		 , intCurrencyId					= ISNULL(SHP.intCurrencyId, SO.intCurrencyId)
 		 , intSalesOrderId					= SO.intSalesOrderId
@@ -255,9 +255,9 @@ FROM (
 
 	UNION ALL
 
-	SELECT strTransactionType				= 'Inventory Shipment'
+	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
 	     , strTransactionNumber				= ICIS.strShipmentNumber
-	     , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250))
+	     , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	     , intEntityCustomerId				= ICIS.intEntityCustomerId
 	     , intCurrencyId					= ISNULL(ICIS.intCurrencyId, ARCC.intCurrencyId)
 	     , intSalesOrderId					= NULL
@@ -474,9 +474,9 @@ FROM (
 
 	UNION ALL
 
-	SELECT strTransactionType				= 'Inventory Shipment'
+	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
 		 , strTransactionNumber				= ICIS.strShipmentNumber
-		 , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250))
+		 , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		 , intEntityCustomerId				= ICIS.intEntityCustomerId
 		 , intCurrencyId					= ICISC.intCurrencyId
 		 , intSalesOrderId					= NULL
@@ -587,9 +587,9 @@ FROM (
 
 	UNION ALL
 
-	SELECT strTransactionType				= 'Sales Order'
+	SELECT strTransactionType				= 'Sales Order' COLLATE Latin1_General_CI_AS
 		 , strTransactionNumber				= SO.strSalesOrderNumber
-		 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
+		 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		 , intEntityCustomerId				= SO.intEntityCustomerId
 		 , intCurrencyId					= SO.intCurrencyId
 		 , intSalesOrderId					= SO.intSalesOrderId
@@ -695,9 +695,9 @@ FROM (
 	UNION ALL
 
 	SELECT DISTINCT
-		   strTransactionType				= 'Inventory Shipment'
+		   strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
 		 , strTransactionNumber				= ICIS.strShipmentNumber
-		 , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250))
+		 , strShippedItemId					= 'icis:' + CAST(ICIS.intInventoryShipmentId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		 , intEntityCustomerId				= ICIS.intEntityCustomerId
 		 , intCurrencyId					= ICISI.intCurrencyId
 		 , intSalesOrderId					= NULL
@@ -799,9 +799,9 @@ FROM (
 
 	UNION ALL 
 
-	SELECT strTransactionType				= strTransactionType
+	SELECT strTransactionType				= strTransactionType COLLATE Latin1_General_CI_AS
 	     , strTransactionNumber				= strTransactionNumber
-	     , strShippedItemId					= strShippedItemId
+	     , strShippedItemId					= strShippedItemId COLLATE Latin1_General_CI_AS
 	     , intEntityCustomerId				= intEntityCustomerId
 	     , intCurrencyId					= intCurrencyId
 	     , intSalesOrderId					= intSalesOrderId
@@ -879,9 +879,9 @@ FROM (
 	 
 	UNION ALL
 		
-	SELECT strTransactionType				= 'Load Schedule'
+	SELECT strTransactionType				= 'Load Schedule' COLLATE Latin1_General_CI_AS
 	     , strTransactionNumber				= strLoadNumber
-	     , strShippedItemId					= 'lgis:' + CAST(LWS.intLoadDetailId AS NVARCHAR(250))
+	     , strShippedItemId					= 'lgis:' + CAST(LWS.intLoadDetailId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	     , intEntityCustomerId				= intEntityCustomerId
 	     , intCurrencyId					= LWS.intCurrencyId
 	     , intSalesOrderId					= NULL
@@ -995,9 +995,9 @@ FROM (
 
 	UNION ALL
 
-	SELECT strTransactionType				= 'Load Schedule'
+	SELECT strTransactionType				= 'Load Schedule' COLLATE Latin1_General_CI_AS
 	     , strTransactionNumber				= strLoadNumber
-	     , strShippedItemId					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250))
+	     , strShippedItemId					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	     , intEntityCustomerId				= intEntityCustomerId
 	     , intCurrencyId					= LC.intCurrencyId
 	     , intSalesOrderId					= NULL
@@ -1120,9 +1120,9 @@ FROM (
 
 	UNION ALL
 
-	SELECT strTransactionType				= 'Load Schedule'
+	SELECT strTransactionType				= 'Load Schedule' COLLATE Latin1_General_CI_AS
 		 , strTransactionNumber				= strLoadNumber
-		 , strShippedItemId					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250))
+		 , strShippedItemId					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 		 , intEntityCustomerId				= intEntityCustomerId
 		 , intCurrencyId					= LC.intCurrencyId
 		 , intSalesOrderId					= NULL

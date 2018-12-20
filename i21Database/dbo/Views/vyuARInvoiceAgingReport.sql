@@ -309,14 +309,14 @@ INNER JOIN (
 	LEFT JOIN (
 		SELECT intEntityId
 			 , intEntityLocationId
-			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 		FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 	) DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId 
 				   AND C.intEntityId = DEFAULTSHIPTO.intEntityId
 	LEFT JOIN (
 		SELECT intEntityId
 			 , intEntityLocationId
-			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 		FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 	) DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId 
 				   AND C.intEntityId = DEFAULTBILLTO.intEntityId
@@ -352,7 +352,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , intEntityLocationId
-		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 	WHERE ysnDefaultLocation = 1
 ) SHIPTOLOCATION ON INVOICE.intShipToLocationId = SHIPTOLOCATION.intEntityLocationId 
@@ -360,7 +360,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , intEntityLocationId
-		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 	WHERE ysnDefaultLocation = 1
 ) BILLTOLOCATION ON INVOICE.intBillToLocationId = BILLTOLOCATION.intEntityLocationId 
@@ -368,7 +368,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , intEntityLocationId
-		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 	WHERE ysnDefaultLocation = 1
 ) DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId

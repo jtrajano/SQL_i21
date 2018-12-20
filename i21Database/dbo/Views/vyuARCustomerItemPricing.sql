@@ -26,7 +26,7 @@ SELECT
 	,[intSort]					= CAST(0 AS INT)											--CAST(NULL AS INT)
 	,[intSubCurrencyId]			= ARID.[intSubCurrencyId]
 	,[dblSubCurrencyRate]		= ARID.[dblSubCurrencyRate]
-	,[strSubCurrency]			= CAST('' AS NVARCHAR(40))
+	,[strSubCurrency]			= CAST('' AS NVARCHAR(40))		COLLATE Latin1_General_CI_AS
 	,[ysnDefaultPricing]		= CAST(0 AS BIT)
 FROM
 	tblARInvoiceDetail ARID

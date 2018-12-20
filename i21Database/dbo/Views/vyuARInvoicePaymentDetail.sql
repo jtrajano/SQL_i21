@@ -23,7 +23,7 @@ LEFT JOIN (
 		 , strPaymentMethod		= P.strPaymentMethod
 		 , strPaymentInfo		= P.strPaymentInfo
 		 , dtmDatePaid			= P.dtmDatePaid
-		 , strPaymentSource		= 'AR Payment'
+		 , strPaymentSource		= 'AR Payment' COLLATE Latin1_General_CI_AS
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -49,7 +49,7 @@ LEFT JOIN (
 		 , strPaymentMethod		= NULL
 		 , strPaymentInfo		= P.strPaymentInfo
 		 , dtmDatePaid			= P.dtmDatePaid
-		 , strPaymentSource		= 'AP Payment'
+		 , strPaymentSource		= 'AP Payment' COLLATE Latin1_General_CI_AS
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
