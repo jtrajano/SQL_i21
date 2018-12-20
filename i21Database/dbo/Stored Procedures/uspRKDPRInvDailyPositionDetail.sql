@@ -550,9 +550,9 @@ BEGIN
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
 												and id.strDocumentNumber = Inv.strTransactionId
-												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
+												and CONVERT(DATETIME,@dtmToDate) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
 												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 						,CT.strFutureMonth
 						,CT.strDeliveryDate
@@ -1648,7 +1648,7 @@ BEGIN
 				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND inv.intInvoiceId IS NULL
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,getDate())), 110), 110)
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
 			INSERT INTO @Final(intSeqId
@@ -1772,7 +1772,8 @@ BEGIN
 				FROM #tblGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
-					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries'))t
+					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
+					)t
 
 			--Company Title from Inventory Valuation
 			INSERT INTO @Final(intSeqId
