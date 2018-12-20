@@ -20,7 +20,7 @@
 	[intCategoryId]				INT				NULL,
 	[intCurrencyId]				INT				NULL,
     [intProgramId]				INT				NULL,
-    [strProgramType]			NVARCHAR(100)	NULL,
+    [strProgramType]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyId]				INT				NULL,
     [intConcurrencyId]			INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),

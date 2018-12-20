@@ -6,7 +6,7 @@ SELECT
 	,[dtmDate]					= A.[dtmDatePaid]
 	,[strName]					= E.[strName] 
 	,[dblAmount]				= CASE WHEN (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('Prepay')) THEN A.[dblAmountPaid]*-1 ELSE A.[dblAmountPaid] END
-	,[strSourceSystem]			= 'AR'
+	,[strSourceSystem]			= 'AR' COLLATE Latin1_General_CI_AS
 	,[intBankAccountId]			= A.[intBankAccountId]
 	,[intLocationId]			= A.[intLocationId] 
 	,[strPaymentMethod]			= SMPM.[strPaymentMethod]

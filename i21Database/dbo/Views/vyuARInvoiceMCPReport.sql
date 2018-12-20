@@ -16,11 +16,11 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , strBillToLocationName	= BILLTO.strEntityNo
 	 , strShipToLocationName	= SHIPTO.strEntityNo
-	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
 	 , strShipToAddress			= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
 										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
-								  END
+								  END COLLATE Latin1_General_CI_AS
 	 , strSource				= INV.strType
 	 , intTermId				= INV.intTermId
 	 , strTerm					= TERM.strTerm
@@ -38,8 +38,8 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery'
 	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
-								  END
-	 , strItemComments          = HAZMAT.strMessage
+								  END COLLATE Latin1_General_CI_AS
+	 , strItemComments          = HAZMAT.strMessage COLLATE Latin1_General_CI_AS
 	 , strOrigin				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL
 	 									THEN CONSUMPTIONSITE.strLocationName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
@@ -136,7 +136,7 @@ OUTER APPLY (
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
-									  END
+									  END COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 OUTER APPLY (

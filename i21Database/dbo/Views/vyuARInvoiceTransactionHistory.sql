@@ -25,7 +25,7 @@
 		,ysnPost = A.ysnPost
 		,A.intCommodityId
 		,CM.strCommodityCode
-		, strEvent = case  (A.ysnPost) when 1 then  'Post' when 0 then 'Unpost' else 'Add/Edit' end
+		, strEvent = case  (A.ysnPost) when 1 then  'Post' when 0 then 'Unpost' else 'Add/Edit' end COLLATE Latin1_General_CI_AS
 		--, dblBalanceAmount = A.dblInvoiceAmountDue + A.dblInvoicePayment
 	FROM
 		tblARInvoiceTransactionHistory A

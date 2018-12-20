@@ -1,44 +1,44 @@
 ﻿CREATE VIEW [dbo].[vyuARAgingSourceTransactionSearch]
 AS
 SELECT 
-	strSourceTransaction = 'Standard'
+	strSourceTransaction = 'Standard' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Software'
+	strSourceTransaction	= 'Software' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Tank Delivery'
+	strSourceTransaction	= 'Tank Delivery' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 	
 SELECT 
-	strSourceTransaction = 'Provisional'
+	strSourceTransaction = 'Provisional' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Service Charge'
+	strSourceTransaction	= 'Service Charge' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Transport Delivery'
+	strSourceTransaction	= 'Transport Delivery' COLLATE Latin1_General_CI_AS
 
 UNION ALL 
 
 SELECT 
-	strSourceTransaction	= 'Store'
+	strSourceTransaction	= 'Store' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Meter Billing'
+	strSourceTransaction	= 'Meter Billing' COLLATE Latin1_General_CI_AS
 
 UNION ALL
 
 SELECT 
-	strSourceTransaction	= 'Card Fueling'
+	strSourceTransaction	= 'Card Fueling' COLLATE Latin1_General_CI_AS

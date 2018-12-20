@@ -1,48 +1,47 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomer]
 AS
-SELECT     
- Entity.intEntityId 
-  ,CustoPM.strPaymentMethod
- ,Cus.intPaymentMethodId
-,Entity.strName
-,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
-,Cus.strType
-,EnPhoneNo.strPhone
-,Loc.strAddress
-,Loc.strCity
-,Loc.strState
-,Loc.strZipCode 
-,Cus.ysnActive
-,Cus.intSalespersonId
-,Cus.intCurrencyId
-,Cus.intTermsId
-,Loc.intShipViaId
-,ShipToLoc.strLocationName as strShipToLocationName
-,ShipToLoc.strAddress as strShipToAddress
-,ShipToLoc.strCity as strShipToCity
-,ShipToLoc.strState as strShipToState
-,ShipToLoc.strZipCode as strShipToZipCode
-,ShipToLoc.strCountry as strShipToCountry
-,BillToLoc.strLocationName as strBillToLocationName
-,BillToLoc.strAddress as strBillToAddress
-,BillToLoc.strCity as strBillToCity
-,BillToLoc.strState as strBillToState
-,BillToLoc.strZipCode as strBillToZipCode
-,BillToLoc.strCountry as strBillToCountry
-,Cus.intShipToId
-,Cus.intBillToId
-,dblCreditLimit = ISNULL(Cus.dblCreditLimit, 0)
-,Cus.strVatNumber
-,EnPhoneNo.strPhone as strPhone1
-,Con.strPhone2 as strPhone2
-,Loc.strCountry
-,Loc.strLocationName
-,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
-,intServiceChargeId
-,strCustomerTerm = TERM.strTerm
-,Con.strInternalNotes
-,Con.strEmail
-,STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') as intEntityLineOfBusinessIds
+SELECT Entity.intEntityId 
+     , CustoPM.strPaymentMethod
+     , Cus.intPaymentMethodId
+	 , Entity.strName
+	 , strCustomerNumber		= CASE WHEN Cus.strCustomerNumber = '' THEN	 Entity.strEntityNo ELSE Cus.strCustomerNumber END 
+	 , Cus.strType
+	 , EnPhoneNo.strPhone
+	 , Loc.strAddress
+	 , Loc.strCity
+	 , Loc.strState
+	 , Loc.strZipCode 
+	 , Cus.ysnActive
+	 , Cus.intSalespersonId
+	 , Cus.intCurrencyId
+	 , Cus.intTermsId
+	 , Loc.intShipViaId
+	 , strShipToLocationName	= ShipToLoc.strLocationName
+	 , strShipToAddress			= ShipToLoc.strAddress
+	 , strShipToCity			= ShipToLoc.strCity
+	 , strShipToState			= ShipToLoc.strState
+	 , strShipToZipCode			= ShipToLoc.strZipCode
+	 , strShipToCountry			= ShipToLoc.strCountry
+	 , strBillToLocationName	= BillToLoc.strLocationName
+	 , strBillToAddress			= BillToLoc.strAddress
+	 , strBillToCity			= BillToLoc.strCity
+	 , strBillToState			= BillToLoc.strState
+	 , strBillToZipCode			= BillToLoc.strZipCode
+	 , strBillToCountry			= BillToLoc.strCountry
+	 , Cus.intShipToId
+	 , Cus.intBillToId
+	 , dblCreditLimit			= ISNULL(Cus.dblCreditLimit, 0)
+	 , Cus.strVatNumber
+	 , strPhone1				= EnPhoneNo.strPhone
+	 , strPhone2				= Con.strPhone2
+	 , Loc.strCountry
+	 , Loc.strLocationName
+	 , ysnHasBudgetSetup		= CAST(CASE WHEN (SELECT TOP 1 1 FROM tblARCustomerBudget WHERE intEntityCustomerId = Cus.[intEntityId]) = 1 THEN 1 ELSE 0 END AS BIT)
+	 , intServiceChargeId
+	 , strCustomerTerm			= TERM.strTerm
+	 , Con.strInternalNotes
+	 , Con.strEmail
+	 , intEntityLineOfBusinessIds	= STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

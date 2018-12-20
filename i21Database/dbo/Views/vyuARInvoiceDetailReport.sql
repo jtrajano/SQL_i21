@@ -7,7 +7,7 @@ SELECT I.intInvoiceId
 	 , strType				= CASE WHEN ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN 'Final'
 								   WHEN I.strType = 'Provisional' THEN 'Provisional'
 								   ELSE 'Direct' 
-							  END
+							  END COLLATE Latin1_General_CI_AS
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , CT.strContractNumber

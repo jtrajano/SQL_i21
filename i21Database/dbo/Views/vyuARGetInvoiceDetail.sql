@@ -106,10 +106,10 @@ SELECT
 	INV.intDestinationWeightId,
 	INV.intConcurrencyId,
 	INV.strVFDDocumentNumber,
-	INV.strRebateSubmitted,
+	strRebateSubmitted	= INV.strRebateSubmitted COLLATE Latin1_General_CI_AS,
 	INV.dblRebateAmount,
 	INV.dblBaseRebateAmount,
-	INV.strBuybackSubmitted,
+	strBuybackSubmitted	= INV.strBuybackSubmitted COLLATE Latin1_General_CI_AS,
 	INV.dblBuybackAmount,
 	INV.dblBaseBuybackAmount,
 
@@ -121,7 +121,7 @@ SELECT
     strWeightUnitMeasure =  isnull(WOUM.strUnitMeasure, ''),
 	strSalespersonId =  isnull(SPER.strSalespersonId, ''),
 
-	strSiteNumber =  isnull(CSITE.strSiteNumber, ''),
+	strSiteNumber =  isnull(CSITE.strSiteNumber, '') COLLATE Latin1_General_CI_AS,
     strContractNumber =  isnull(CT.strContractNumber, ''),
 	intContractSeq =  CT.intContractSeq,
     dblOriginalQty =  INV.dblQtyShipped,
@@ -138,7 +138,7 @@ SELECT
 						WHEN INV.intPrepayTypeId = 2 THEN 'Unit' 
 						WHEN INV.intPrepayTypeId = 3 THEN 'Percentage' 
 					ELSE '0'
-					END,
+					END COLLATE Latin1_General_CI_AS,
     strStorageTypeDescription = isnull(GRSTYPE.strStorageTypeDescription, ''),
     strCurrency = isnull(CUR.strCurrency, ''),
     dblDefaultFull = ISNULL( ITMNO.dblDefaultFull, 0.0),

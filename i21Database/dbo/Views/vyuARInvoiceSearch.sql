@@ -66,7 +66,7 @@ SELECT
 									  CASE WHEN ysnPaid = 1 THEN (I.dblPayment - (I.dblPayment - (I.dblPayment * (dblWithholdPercent / 100))))  ELSE I.dblAmountDue - (I.dblAmountDue - (I.dblAmountDue * (dblWithholdPercent / 100))) END
 									  END
 	,ysnMailSent					= isnull(EMAILSTATUS.ysnMailSent, 0)--CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	,strStatus						= CASE WHEN EMAILSETUP.ysnHasEmailSetup = 1 THEN 'Ready' ELSE 'Email not Configured.' END	
+	,strStatus						= CASE WHEN EMAILSETUP.ysnHasEmailSetup = 1 THEN 'Ready' ELSE 'Email not Configured.' END COLLATE Latin1_General_CI_AS
 	,dtmForgiveDate					=I.dtmForgiveDate
 	,strSalesOrderNumber			=SO.strSalesOrderNumber
 	,intBookId						=I.intBookId
@@ -205,7 +205,7 @@ left join (
 ) EMAILSTATUS
 	on I.intInvoiceId = EMAILSTATUS.id
 OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
 		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		
@@ -220,7 +220,7 @@ OUTER APPLY (
 	) INV (strTicketNumber)
 ) SCALETICKETS
 OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
 		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		

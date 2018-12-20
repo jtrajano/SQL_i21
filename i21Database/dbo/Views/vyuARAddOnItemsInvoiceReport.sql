@@ -1,5 +1,5 @@
-﻿	CREATE VIEW [dbo].[vyuARAddOnItemsInvoiceReport]
-	AS SELECT ID.intInvoiceId
+﻿CREATE VIEW [dbo].[vyuARAddOnItemsInvoiceReport]
+AS SELECT ID.intInvoiceId
 	    , ID.intInvoiceDetailId
 		, ID.intCommentTypeId
 		, ID.dblTotalTax

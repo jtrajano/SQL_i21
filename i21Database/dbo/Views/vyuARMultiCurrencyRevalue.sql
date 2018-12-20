@@ -9,7 +9,7 @@ SELECT DISTINCT
 	,strCommodity				= ICCom.strDescription
 	,strLineOfBusiness			= ICC.strDescription
 	,strLocation				= EMEL.strLocationName
-	,strTicket					= ''
+	,strTicket					= '' COLLATE Latin1_General_CI_AS
 	,strContractNumber			= CTCH.strContractNumber
 	,strItemId					= ICI.strItemNo
 	,dblQuantity				= ARID.dblQtyShipped

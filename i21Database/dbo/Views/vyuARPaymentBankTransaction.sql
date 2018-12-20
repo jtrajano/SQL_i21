@@ -3,7 +3,7 @@ AS
 SELECT DISTINCT intPaymentId	= PAYMENTS.intPaymentId
 	 , strRecordNumber			= PAYMENTS.strRecordNumber
 	 , intUndepositedFundId		= UNDEPOSITED.intUndepositedFundId
-	 , strTransactionId 		= STUFF(_BANKTRANSACTIONS.strTransactionIds,1,1,'') 
+	 , strTransactionId 		= STUFF(_BANKTRANSACTIONS.strTransactionIds,1,1,'') COLLATE Latin1_General_CI_AS
 FROM tblCMUndepositedFund UNDEPOSITED
 INNER JOIN tblARPayment PAYMENTS ON UNDEPOSITED.intSourceTransactionId = PAYMENTS.intPaymentId
 							    AND UNDEPOSITED.strSourceTransactionId = PAYMENTS.strRecordNumber

@@ -14,7 +14,7 @@ SELECT
 												WHEN ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
 												ELSE ''
 											END
-										  )
+										  ) COLLATE Latin1_General_CI_AS
 	,[intPrepayTypeId]					= [intPrepayTypeId]
 	,[ysnRestricted]					= ARID.[ysnRestricted]
 	,[intContractHeaderId]				= CTCHV.[intContractHeaderId]
