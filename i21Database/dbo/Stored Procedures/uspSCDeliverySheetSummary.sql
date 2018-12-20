@@ -119,16 +119,19 @@ BEGIN
 		SET @Storage = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
-		AND GRS.intDeliverySheetId = @intDeliverySheetId AND GRS.intEntityId = @intEntityId
-		AND GRS.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId
-		AND GRS.intDeliverySheetId = @intDeliverySheetId), 0)
+		AND GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId 
+		AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId 
+		AND GRS.intDeliverySheetId = @intDeliverySheetId 
+		AND GRS.ysnTransferStorage = 0), 0)
 		
 		--For DP contract
 		SET @DP = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId
 		AND GR.ysnDPOwnedType = 1 AND GR.ysnCustomerStorage = 0
-		AND GRS.intDeliverySheetId = @intDeliverySheetId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
+		AND GRS.intDeliverySheetId = @intDeliverySheetId 
+		AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId
+		AND GRS.ysnTransferStorage = 0), 0)
 
 		--For basis contract
 		SET @Basis = 
@@ -145,7 +148,8 @@ BEGIN
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0 
 		AND GRS.intDeliverySheetId = @intDeliverySheetId AND GRS.intEntityId = @intEntityId 
-		AND GRS.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
+		AND GRS.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId
+		AND GRS.ysnTransferStorage = 0), 0)
 		
 		--For hold
 		SET @Hold = 0;
