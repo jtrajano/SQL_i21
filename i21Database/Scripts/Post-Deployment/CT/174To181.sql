@@ -187,3 +187,23 @@ BEGIN
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM @tblToProcess WHERE intContractDetailId > @intContractDetailId
 END
 GO
+
+GO
+PRINT('CT-2823 / CT-2822')
+
+UPDATE SH SET  intSequenceUsageHistoryId = UH.intSequenceUsageHistoryId  
+from tblCTSequenceHistory SH 
+JOIN tblCTSequenceUsageHistory UH ON UH.intContractDetailId = SH.intContractDetailId
+WHERE DATEADD(ms, -DATEPART(ms, SH.dtmHistoryCreated), SH.dtmHistoryCreated)  = DATEADD(ms, -DATEPART(ms, UH.dtmTransactionDate), UH.dtmTransactionDate)
+AND SH.ysnBalanceChange = 1 AND UH.strFieldName = 'Balance'
+AND SH.intSequenceUsageHistoryId IS NULL
+
+UPDATE SH SET  intSequenceUsageHistoryId = UH.intSequenceUsageHistoryId 
+from tblCTSequenceHistory SH 
+JOIN tblCTSequenceUsageHistory UH ON UH.intContractDetailId = SH.intContractDetailId
+WHERE DATEADD(ms, -DATEPART(ms, SH.dtmHistoryCreated), SH.dtmHistoryCreated)  = DATEADD(ms, -DATEPART(ms, UH.dtmTransactionDate), UH.dtmTransactionDate)
+AND SH.ysnQtyChange = 1 AND UH.strFieldName = 'Quantity'
+AND SH.intSequenceUsageHistoryId IS NULL
+
+PRINT('END CT-2823 / CT-2822')
+GO

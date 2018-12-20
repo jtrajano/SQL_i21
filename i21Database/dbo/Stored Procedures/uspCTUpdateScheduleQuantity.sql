@@ -30,7 +30,8 @@ BEGIN TRY
 			@dblTolerance			NUMERIC(18,6) = 0.0001,
 			@ysnAllowOverSchedule	BIT,
 			@strReason				NVARCHAR(MAX),
-			@ysnLoad				BIT
+			@ysnLoad				BIT,
+			@intSequenceUsageHistoryId	INT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -143,10 +144,15 @@ BEGIN TRY
 				@dblNewValue			=	@dblNewScheduleQty,	
 				@intUserId				=	@intUserId,
 				@strReason				=	@strReason,
-				@dblBalance				=   @dblBalance
+				@dblBalance				=   @dblBalance,
+				@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
 	END
 
-	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+	EXEC	uspCTCreateDetailHistory	
+	@intContractHeaderId		=	NULL,
+    @intContractDetailId		=	@intContractDetailId,
+	@strComment				    =	NULL,
+	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
 
 END TRY
 

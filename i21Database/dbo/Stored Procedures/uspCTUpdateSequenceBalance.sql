@@ -19,7 +19,8 @@ BEGIN TRY
 			@ysnCompleted			BIT	= 0,
 			@intPricingTypeId		INT,
 			@dblTolerance			NUMERIC(18,6) = 0.0001,
-			@ysnLoad				BIT
+			@ysnLoad				BIT,
+			@intSequenceUsageHistoryId	INT
 	
 	BEGINING:
 
@@ -108,7 +109,8 @@ BEGIN TRY
 			@dblTransactionQuantity =	@dblTransactionQuantity,
 			@dblNewValue			=	@dblNewBalance,	
 			@intUserId				=	@intUserId,
-			@dblBalance				=   @dblNewBalance
+			@dblBalance				=   @dblNewBalance,
+			@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
 	
 	EXEC	uspCTCreateCollateralAdjustment
 			@intContractDetailId	=	@intContractDetailId,
@@ -117,7 +119,11 @@ BEGIN TRY
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	@strScreenName
 
-	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+	EXEC	uspCTCreateDetailHistory	
+	@intContractHeaderId		=	NULL,
+    @intContractDetailId		=	@intContractDetailId,
+	@strComment				    =	NULL,
+	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
 
 END TRY
 
