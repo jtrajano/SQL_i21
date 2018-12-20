@@ -64,17 +64,6 @@ SELECT *
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'dtmToDate'
 
-if isnull(@strPurchaseSales,'') <> ''
-BEGIN
-	if @strPurchaseSales='Purchase'
-	BEGIN
-		SELECT @strPurchaseSales='Sale'
-	END
-	ELSE
-	BEGIN
-		SELECT @strPurchaseSales='Purchase'
-	END
-END
 
 DECLARE @strCommodityCode NVARCHAR(50)
 
@@ -98,6 +87,18 @@ END
 ELSE
 BEGIN
 	SET @strLocationName = 'All'
+END
+
+DECLARE @strEntityName NVARCHAR(150)
+
+IF isnull(@intVendorId,0) <> 0
+BEGIN
+	SELECT  @strEntityName = CASE WHEN @strPurchaseSales = 'Purchase' THEN 'Vendor: ' + strName ELSE 'Customer: ' + strName END FROM tblEMEntity WHERE intEntityId = @intVendorId
+
+END
+ELSE
+BEGIN
+	SET @strEntityName = ''
 END
 
 
@@ -281,7 +282,13 @@ END
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
-		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam , '''+ @strCommodityCode +''' AS strCommodityCode, '''+ @dtmToDate +''' AS dtmToDate, '''+ @strLocationName +''' AS strLocationName FROM (
+		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam 
+		, '''+ @strCommodityCode +''' AS strCommodityCode
+		, '''+ @dtmToDate +''' AS dtmToDate
+		, '''+ @strLocationName +''' AS strLocationName
+		, '''+ @strPositionIncludes +''' AS strPositionIncludes 
+		, '''+ @strEntityName +''' AS strEntityName 
+		FROM (
 			select * from ##tmpTry2
 		union all
 		select col1,strContractEndMonth,
@@ -314,7 +321,9 @@ END
 			@xmlParam as xmlParam,
 			@strCommodityCode as strCommodityCode,
 			@dtmToDate as dtmToDate,
-			@strLocationName as strLocationName
+			@strLocationName as strLocationName,
+			@strPositionIncludes as strPositionIncludes,
+			@strEntityName as strEntityName
 
 	END
 END
