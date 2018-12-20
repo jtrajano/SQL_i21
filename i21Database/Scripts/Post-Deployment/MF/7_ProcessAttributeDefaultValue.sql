@@ -3103,3 +3103,29 @@ END
 --		)
 --END
 
+Go
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 122
+		)
+	INSERT INTO tblMFManufacturingProcessAttribute (
+		intManufacturingProcessId
+		,intAttributeId
+		,strAttributeValue
+		,intLocationId
+		,intLastModifiedUserId
+		,dtmLastModified
+		,intConcurrencyId
+		)
+	SELECT intManufacturingProcessId
+		,122
+		,'True'
+		,1
+		,1
+		,GETDATE()
+		,1
+	FROM tblMFManufacturingProcess
+GO

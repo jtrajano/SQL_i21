@@ -37,6 +37,8 @@ BEGIN TRY
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
 		,@ysnCostEnabled BIT
+		,@strOriginalPostedDate NVARCHAR(50)
+		,@dtmProductionDate DATETIME
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -44,8 +46,6 @@ BEGIN TRY
 	SELECT @ysnPostGL = 1
 
 	SELECT @intTransactionCount = @@TRANCOUNT
-
-	SELECT @dtmCurrentDateTime = Getdate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -58,6 +58,39 @@ BEGIN TRY
 			,ysnNegativeQtyAllowed BIT
 			,intUserId INT
 			)
+
+	SELECT @dtmCurrentDateTime = Max(dtmActualInputDateTime)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND ysnConsumptionReversed = 0
+
+	IF @dtmCurrentDateTime IS NULL
+	BEGIN
+		SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dtmCurrentDateTime IS NULL
+			SELECT @dtmCurrentDateTime = Getdate()
+	END
+	ELSE
+	BEGIN
+		SELECT @dtmProductionDate = Max(dtmProductionDate)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dtmProductionDate IS NULL
+		BEGIN
+			SELECT @dtmCurrentDateTime = Getdate()
+		END
+		ELSE
+		BEGIN
+			IF @dtmProductionDate > @dtmCurrentDateTime
+				SELECT @dtmCurrentDateTime = @dtmProductionDate
+		END
+	END
 
 	SELECT @dblProduceQty = SUM(dblQuantity)
 		,@intItemUOMId = MIN(intItemUOMId)
@@ -87,6 +120,7 @@ BEGIN TRY
 		,@intManufacturingCellId = intManufacturingCellId
 		,@intSubLocationId = intSubLocationId
 		,@intWOItemUOMId = intItemUOMId
+		,@dtmCurrentDateTime = IsNull(dtmPostDate, @dtmCurrentDateTime)
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -113,6 +147,19 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
+
+	SELECT @strOriginalPostedDate = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 122
+
+	IF @strOriginalPostedDate = 'False'
+		OR @strOriginalPostedDate = ''
+		OR @strOriginalPostedDate IS NULL
+	BEGIN
+		SELECT @dtmCurrentDateTime = GETDATE()
+	END
 
 	IF @dblProduceQty > 0
 		AND @strInstantConsumption = 'False'
@@ -781,7 +828,7 @@ BEGIN TRY
 				,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
 				,[strTransactionId] = W.strWorkOrderNo
 				,[intTransactionTypeId] = 9
-				,[intLotId] = IsNULL(PL.intProducedLotId,PL.intLotId)
+				,[intLotId] = IsNULL(PL.intProducedLotId, PL.intLotId)
 				,[intSubLocationId] = L.intSubLocationId
 				,[intStorageLocationId] = L.intStorageLocationId
 				,[ysnIsStorage] = NULL
@@ -1252,11 +1299,16 @@ BEGIN TRY
 					,1
 			END
 		END
-
-		UPDATE tblMFWorkOrder
-		SET strCostAdjustmentBatchId = @strBatchId
-		WHERE intWorkOrderId = @intWorkOrderId
 	END
+
+	UPDATE tblMFWorkOrder
+	SET strCostAdjustmentBatchId = @strBatchId
+		,dtmPostDate = CASE 
+			WHEN dtmPostDate IS NULL
+				THEN @dtmCurrentDateTime
+			ELSE dtmPostDate
+			END
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	--DELETE T
 	--FROM dbo.tblMFTask T

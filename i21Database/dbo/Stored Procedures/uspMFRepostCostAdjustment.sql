@@ -197,7 +197,7 @@ BEGIN TRY
 						AND IL.intLocationId = @intLocationId
 					))
 		,[intItemUOMId] = PL.intItemUOMId
-		,[dtmDate] = Isnull(W.dtmCompletedDate , @dtmCurrentDateTime)
+		,[dtmDate] = IsNull(Isnull(W.dtmPostDate ,W.dtmCompletedDate), @dtmCurrentDateTime)
 		,[dblQty] =0
 		,[dblUOMQty] = 1
 		,[intCostUOMId] = PL.intItemUOMId

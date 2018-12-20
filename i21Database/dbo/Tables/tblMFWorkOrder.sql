@@ -75,6 +75,7 @@
 	strCostAdjustmentBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	intRecipeTypeId INT,
 	intCompanyId INT NULL,
+	dtmPostDate datetime,
     CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

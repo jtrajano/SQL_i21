@@ -3546,3 +3546,37 @@ UPDATE tblMFReportCategoryByCustomer
 SET intReportType = 1
 Where intReportType IS NULL
 GO
+DECLARE @tblMFWorkOrderInputLot TABLE (
+	intWorkOrderId INT
+	,dtmPostDate DATETIME
+	)
+DECLARE @tblMFWorkOrderProducedLot TABLE (
+	intWorkOrderId INT
+	,dtmPostDate DATETIME
+	)
+
+INSERT INTO @tblMFWorkOrderInputLot
+SELECT intWorkOrderId
+	,Max(dtmActualInputDateTime) dtmPostDate
+FROM tblMFWorkOrderInputLot
+GROUP BY intWorkOrderId
+
+UPDATE tblMFWorkOrder
+SET dtmPostDate = WI.dtmPostDate
+FROM tblMFWorkOrder W
+JOIN @tblMFWorkOrderInputLot WI ON W.intWorkOrderId = WI.intWorkOrderId
+WHERE W.dtmPostDate IS NULL
+
+INSERT INTO @tblMFWorkOrderProducedLot
+SELECT intWorkOrderId
+	,Max(dtmProductionDate) dtmPostDate
+FROM tblMFWorkOrderProducedLot
+GROUP BY intWorkOrderId
+
+UPDATE tblMFWorkOrder
+SET dtmPostDate = WI.dtmPostDate
+FROM tblMFWorkOrder W
+JOIN @tblMFWorkOrderProducedLot WI ON W.intWorkOrderId = WI.intWorkOrderId
+WHERE W.dtmPostDate IS NULL
+
+Go
