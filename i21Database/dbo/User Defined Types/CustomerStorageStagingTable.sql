@@ -43,5 +43,5 @@
     [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intTransferStorageSplitId] INT NULL,
 	[ysnTransferStorage] BIT NULL,
-	[dblGrossQuantity] NUMERIC(38, 20) NOT NULL,-- Distributed Quantity (Gross)
+	[dblGrossQuantity] NUMERIC(38, 20) NULL-- Distributed Quantity (Gross)
 )
