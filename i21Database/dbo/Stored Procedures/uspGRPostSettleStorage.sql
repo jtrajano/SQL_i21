@@ -1124,10 +1124,7 @@ BEGIN TRY
 					,[dblWeightUnitQty]			= 1 
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
-					,[dblNetWeight]				= CASE 
-													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
-													ELSE 0 
-												END
+					,[dblNetWeight]				= a.dblUnits 
 					,[intInventoryReceiptItemId] = CASE 
 													WHEN ST.ysnDPOwnedType = 0 THEN NULL
 													ELSE
