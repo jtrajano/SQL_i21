@@ -26,7 +26,7 @@ SELECT intCommissionId				= C.intCommissionId
 	 , strCommissionScheduleName	= CS.strCommissionScheduleName
 	 , dblHurdle					= ISNULL(CP.dblHurdle, 0.00)
 	 , dblCalculationAmount			= ISNULL(CP.dblCalculationAmount, 0.00)
-	 , strDateRange					= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101)
+	 , strDateRange					= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101) COLLATE Latin1_General_CI_AS
 	 , strBasis						= CP.strBasis
 	 , strCalculationType			= CP.strCalculationType	 
 	 , strPaymentRecordNum			= PAYMENT.strPaymentRecordNum
@@ -65,6 +65,6 @@ LEFT JOIN (
 ) PAYCHECK ON C.intPaycheckId = PAYCHECK.intPaycheckId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY

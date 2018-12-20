@@ -3,7 +3,7 @@ AS
 SELECT
 	 AR.strBatchId
 	,dtmDate					= AR.dtmBatchDate
-	,AR.strTransactionType
+	,strTransactionType			= AR.strTransactionType
 	,dblEntriesCount			= COUNT(AR.intTransactionId)  
 	,dblTotalAmount				= SUM(AR.dblTotal) 
 	,strUserName				= E.strName
@@ -12,25 +12,9 @@ SELECT
 	,AR.strCurrency
 	,AR.strCurrencyDescription
 	,AR.strPostingType
-FROM
-	--(SELECT DISTINCT
-	--	  strBatchId
-	--	, strCode
-	--	, intTransactionId
-	--	, strTransactionId
-	--	, dtmDate
-	--	, dtmDateEntered = CAST(dtmDateEntered AS DATE)
-	--	, intEntityId
-	--	, strTransactionType
-	--	, intAccountId
-	-- FROM
-	--	tblGLDetail
-	-- WHERE
-	--	ysnIsUnposted = 0) GL
---INNER JOIN
-	(
+FROM (
 		SELECT
-			 strPostingType			= 'Invoice' 
+			 strPostingType			= 'Invoice' COLLATE Latin1_General_CI_AS
 			,dblTotal				= INV.dblInvoiceTotal
 			,intTransactionId		= INV.intInvoiceId
 			,strTransactionId		= INV.strInvoiceNumber
@@ -77,7 +61,7 @@ FROM
 		UNION
 		
 		SELECT
-			 strPostingType		= 'Receive Payments' 
+			 strPostingType		= 'Receive Payments' COLLATE Latin1_General_CI_AS
 			,dblTotal			= AR.dblAmountPaid
 			,intTransactionId	= AR.intPaymentId
 			,strTransactionId	= AR.strRecordNumber

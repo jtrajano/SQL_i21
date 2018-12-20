@@ -26,8 +26,8 @@ SELECT DISTINCT intYear = YEAR(I.dtmDate)
 	  ,dblBeginQuantity = 0
 	  ,dblEndSalesAmount = 0
 	  ,dblEndQuantity = 0
-	  ,'' dtmBeginDate
-	  ,'' dtmEndingDate
+	  ,dtmBeginDate	= '' COLLATE Latin1_General_CI_AS
+	  ,dtmEndingDate = '' COLLATE Latin1_General_CI_AS
 	  , dblCost = dblCost * (CASE WHEN dblQty < 0 THEN  dblQty * -1 ELSE dblQty END) 
 FROM tblARInvoice I
 	INNER JOIN (tblARCustomer C INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId) 

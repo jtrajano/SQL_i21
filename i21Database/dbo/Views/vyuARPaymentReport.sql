@@ -13,7 +13,7 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.intEntityCustomerId
 	 , strCustomerNumber    = CUSTOMER.strCustomerNumber
      , strCustomerName      = CUSTOMER.strName
-     , strCustomerAddress   = dbo.fnARFormatCustomerAddress(NULL, NULL, CUSTOMER.strBillToLocationName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+     , strCustomerAddress   = dbo.fnARFormatCustomerAddress(NULL, NULL, CUSTOMER.strBillToLocationName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
 	 , dblCustomerARBalance = ISNULL(CUSTOMER.dblARBalance, 0.00) + ISNULL(PENDINGINVOICE.dblInvoiceTotal, 0.00) - ISNULL(PENDINGPAYMENT.dblPayment, 0.00)     
      , dblPendingInvoice    = ISNULL(PENDINGINVOICE.dblInvoiceTotal, 0.00)
 	 , dblPendingPayment    = ISNULL(PENDINGPAYMENT.dblPayment, 0.00)	 
@@ -26,14 +26,14 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.dblInterest
 	 , PAYMENTS.dblDiscount
 	 , PAYMENTS.dblPayment
-	 , strCompanyName       = CASE WHEN SMCL.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
+	 , strCompanyName       = CASE WHEN SMCL.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END COLLATE Latin1_General_CI_AS
      , strCompanyAddress	= CASE WHEN SMCL.strUseLocationAddress IS NULL OR SMCL.strUseLocationAddress IN ('','No','Always')
 										THEN COMPANY.strCompanyAddress
 								   WHEN SMCL.strUseLocationAddress = 'Yes'
 										THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, SMCL.strAddress, SMCL.strCity, SMCL.strStateProvince, SMCL.strZipPostalCode, SMCL.strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 								   WHEN SMCL.strUseLocationAddress = 'Letterhead'
 										THEN ''
-							  END
+							  END COLLATE Latin1_General_CI_AS
 
 FROM (
 	SELECT intPaymentId			= ARP.intPaymentId
@@ -156,7 +156,7 @@ LEFT OUTER JOIN (
      AND PAYMENTS.strRecordNumber = GLB.strTransactionId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
-			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
+			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
 			   , ysnIncludeEntityName
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY

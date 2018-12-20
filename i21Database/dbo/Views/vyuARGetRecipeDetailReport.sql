@@ -13,7 +13,7 @@ SELECT RECIPEITEMS.*
 	 , I.strInvoiceComments
 	 , UOM.strUnitMeasure 
 FROM
-	(SELECT strTransactionType		= 'Sales Order'
+	(SELECT strTransactionType		= 'Sales Order' COLLATE Latin1_General_CI_AS
 		  , strVFDDocumentNumber
 		  , intTransactionId		= intSalesOrderId
 		  , intTransactionDetailId	= intSalesOrderDetailId
@@ -33,7 +33,7 @@ FROM
 
 	UNION ALL
 
-	SELECT strTransactionType		= 'Invoice'
+	SELECT strTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 	     , strVFDDocumentNumber
 		 , intTransactionId			= intInvoiceId
 		 , intTransactionDetailId	= intInvoiceDetailId

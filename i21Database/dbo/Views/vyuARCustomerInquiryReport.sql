@@ -37,7 +37,7 @@ SELECT
 , dblAmountPastDue			= ISNULL(BUGETPASTDUE.dblAmountPastDue, 0)
 , intRemainingBudgetPeriods	= ISNULL(BUDGETPERIODS.intRemainingBudgetPeriods, 0)
 , intAveragePaymentDays     = 0
-, strBudgetStatus			= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END
+, strBudgetStatus			= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END COLLATE Latin1_General_CI_AS
 , strTerm					= CUSTOMER.strTerm
 , strContact				= CUSTOMER.strFullAddress
 , strCompanyName			= COMPANY.strCompanyName
@@ -49,7 +49,7 @@ FROM vyuARCustomerAgingReport CAR
 CROSS APPLY (
 	SELECT dblCreditLimit
 		 , strTerm
-		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 		 , CC.strPhone
 		 , CC.strInternalNotes
 		 , CC.strEmail
@@ -143,7 +143,7 @@ OUTER APPLY (
 ) LASTSTATEMENT
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 OUTER APPLY (
