@@ -125,6 +125,7 @@ WITH Pricing AS
 			, intFutureMarketId
 			, strFutMarketName
 		FROM Pricing WHERE intPricingTypeId = 1
+		AND dblPricedQuantity - dblQuantity <> 0
 		
 		UNION ALL
 		SELECT c.strCommodityCode
