@@ -588,7 +588,7 @@ BEGIN
 					,strDistributionOption
 				from @invQty 
 				where intCommodityId = @intCommodityId 
-					and isnull(strTicketStatus,0) <> 'V' 
+					--and isnull(strTicketStatus,0) <> 'V' 
 					--and ISNULL(strDistributionOption,'') <> 'DP'
 					and isnull(intEntityId,0) = case when isnull(@intVendorId,0)=0 then isnull(intEntityId,0) else @intVendorId end
 			)t
@@ -908,27 +908,27 @@ BEGIN
 		) t 
 		WHERE dblTotal<>0
 		 
-		INSERT INTO @Final (
-			intSeqId
-			,strSeqHeader
-			,strType
-			,dblTotal
-			,strLocationName
-			,intCommodityId
-			,intFromCommodityUnitMeasureId
-			,intCompanyLocationId
-		)
-		SELECT 
-			15 intSeqId
-			,'Company Titled Stock'strSeqHeader
-			,strType
-			,dblTotal
-			,strLocationName
-			,intCommodityId
-			,intFromCommodityUnitMeasureId
-			,intCompanyLocationId
-		FROM @Final 
-		WHERE intSeqId = 14 
+		--INSERT INTO @Final (
+		--	intSeqId
+		--	,strSeqHeader
+		--	,strType
+		--	,dblTotal
+		--	,strLocationName
+		--	,intCommodityId
+		--	,intFromCommodityUnitMeasureId
+		--	,intCompanyLocationId
+		--)
+		--SELECT 
+		--	15 intSeqId
+		--	,'Company Titled Stock'strSeqHeader
+		--	,strType
+		--	,dblTotal
+		--	,strLocationName
+		--	,intCommodityId
+		--	,intFromCommodityUnitMeasureId
+		--	,intCompanyLocationId
+		--FROM @Final 
+		--WHERE intSeqId = 14 
 
 		If ((SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1)
 		BEGIN
