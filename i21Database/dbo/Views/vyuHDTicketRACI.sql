@@ -8,7 +8,7 @@
 		,a.intThirdPartyEntityId
 		,a.intEntityContactId
 		,a.intConcurrencyId
-		,b.strResponsible COLLATE Latin1_General_CI_AS
+		,b.strResponsible
 		,strCompany = c.strName
 		,strThirdParty = d.strName
 		,strContactName = e.strName
