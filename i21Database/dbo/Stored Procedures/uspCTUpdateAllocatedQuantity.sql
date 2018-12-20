@@ -15,7 +15,8 @@ BEGIN TRY
 			@dblNewAllocatedQty		NUMERIC(18,6),
 			@dblQuantityToIncrease	NUMERIC(18,6),
 			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate)
-		   ,@dblBalance				NUMERIC(18,6)
+		   ,@dblBalance				NUMERIC(18,6),
+			@intSequenceUsageHistoryId	INT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -58,7 +59,8 @@ BEGIN TRY
 				@dblTransactionQuantity =	@dblQuantityToUpdate,
 				@dblNewValue			=	@dblNewAllocatedQty,	
 				@intUserId				=	@intUserId,
-				@dblBalance				=   @dblBalance
+				@dblBalance				=   @dblBalance,
+				@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
 	END
 
 END TRY

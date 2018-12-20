@@ -1,14 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateSequenceUsageHistory]
-	@intContractDetailId	INT,
-	@strScreenName			NVARCHAR(50),
-	@intExternalId			INT,
-	@strFieldName			NVARCHAR(50),
-	@dblOldValue			NUMERIC(18, 6),
-	@dblTransactionQuantity NUMERIC(18, 6),
-	@dblNewValue			NUMERIC(18, 6),	
-	@intUserId				INT,
-	@strReason				NVARCHAR(MAX) = '',
-	@dblBalance				NUMERIC(18, 6)
+	@intContractDetailId		INT,
+	@strScreenName				NVARCHAR(50),
+	@intExternalId				INT,
+	@strFieldName				NVARCHAR(50),
+	@dblOldValue				NUMERIC(18, 6),
+	@dblTransactionQuantity		NUMERIC(18, 6),
+	@dblNewValue				NUMERIC(18, 6),	
+	@intUserId					INT,
+	@strReason					NVARCHAR(MAX) = '',
+	@dblBalance					NUMERIC(18, 6),
+	@intSequenceUsageHistoryId	INT OUTPUT
 AS
 BEGIN TRY
 	DECLARE @ErrMsg					NVARCHAR(MAX),
@@ -39,7 +40,8 @@ BEGIN TRY
 			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
 		   ,@dblBalance
 			
-	
+	SELECT @intSequenceUsageHistoryId = SCOPE_IDENTITY()
+
 END TRY      
 BEGIN CATCH       
  SET @ErrMsg = ERROR_MESSAGE()           

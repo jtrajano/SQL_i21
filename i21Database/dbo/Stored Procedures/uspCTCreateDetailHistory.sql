@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId	   INT,
     @intContractDetailId	   INT = NULL,
-	@strComment				   NVARCHAR(100) = NULL
+	@strComment				   NVARCHAR(100) = NULL,
+	@intSequenceUsageHistoryId INT = NULL
 AS	   
 
 BEGIN TRY
@@ -145,19 +146,10 @@ BEGIN TRY
 			,dblBasis,						dblLotsPriced,					dblLotsUnpriced,					dblQtyPriced,				dblQtyUnpriced
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					strCommodity
 			,strContractNumber,				intContractSeq,					strLocation,						strContractType,		    strPricingType
-			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus
-			,intContractBasisId  
-			,intGradeId			
-			,intItemUOMId		
-			,intPositionId		
-			,intPriceItemUOMId   
-			,intTermId			
-			,intWeightId
-			,intBookId
-			,intSubBookId
-			,dblRatio
-			,strBook
-			,strSubBook		
+			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
+			,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
+			,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
+			,strSubBook,					intSequenceUsageHistoryId		
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
@@ -203,6 +195,7 @@ BEGIN TRY
 			,dblRatio			  = CD.dblRatio
 			,strBook			  = BK.strBook
 			,strSubBook			  = SB.strSubBook
+			,intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
