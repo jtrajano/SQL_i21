@@ -809,7 +809,7 @@ BEGIN
 				, strLocationName
 				, strContractEndMonth
 				, strContractEndMonthNearBy
-				, dblTotal = SUM(ISNULL(dblTotal, 0))
+				, dblTotal = (SUM(ISNULL(dblTotal, 0)) * -1)
 				, intSeqNo
 				, strUnitMeasure
 				, intFromCommodityUnitMeasureId
