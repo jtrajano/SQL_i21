@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoicesForPayment]
 AS
 
-SELECT EOD.ysnClosed, vyuARInvoicesForPayments.* FROM (
 SELECT 
 	 [intTransactionId]					= ARIFP.[intTransactionId]
 	,[strTransactionNumber]				= ARIFP.[strTransactionNumber]
@@ -64,7 +63,8 @@ SELECT
 										  END
 	,[ysnACHActive]						=  ISNULL(ysnACHActive, 0)
 	,[dblInvoiceDiscountAvailable]		= ARIFP.[dblInvoiceDiscountAvailable]
- 	,ARIFP.intSourceId  
+ 	,intSourceId						= ARIFP.intSourceId 
+	,ysnClosed							= ARIFP.ysnClosed 
 FROM (
 		SELECT 
 			 [intTransactionId]					= ARI.[intInvoiceId]
@@ -120,7 +120,8 @@ FROM (
 			,[dblCurrencyExchangeRate]			= ISNULL(ARI.[dblCurrencyExchangeRate], FX.[dblCurrencyExchangeRate])
 			,[ysnACHActive]						= EFT.[ysnActive]
 			,[dblInvoiceDiscountAvailable]		= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
-			,ARI.intSourceId
+			,intSourceId						= ARI.intSourceId
+			,ysnClosed							= CASE WHEN ISNULL(EOD.ysnClosed, 0) = 1 AND ISNULL(ONACCOUNT.intPOSPaymentId, 0) = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -204,7 +205,16 @@ FROM (
 				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
 				FOR XML PATH ('')
 			) INV (strCustomerReference)
-		) CUSTOMERREFERENCES
+		) CUSTOMERREFERENCES		
+		LEFT JOIN tblARPOS POS ON ARI.[intInvoiceId] = POS.[intInvoiceId]		
+		LEFT JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
+		LEFT JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+		OUTER APPLY (
+			SELECT TOP 1 intPOSPaymentId
+			FROM tblARPOSPayment
+			WHERE intPOSId = POS.intPOSId
+			AND strPaymentMethod = 'On Account'
+		) ONACCOUNT
 		WHERE ARI.[ysnPosted] = 1
 			AND ysnCancelled = 0			
 			AND strTransactionType != 'Credit Note'
@@ -262,7 +272,8 @@ FROM (
 			,[dblCurrencyExchangeRate]			= APB.[dblCurrencyExchangeRate]
 			,[ysnACHActive]						= APB.[ysnACHActive]
 			,[dblInvoiceDiscountAvailable]		= APB.[dblInvoiceDiscountAvailable]
-   			,[intSourceId] = NULL
+   			,[intSourceId] 						= NULL
+			,ysnClosed							= CAST(0 AS BIT)
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN (
 			SELECT intEntityId
@@ -293,6 +304,3 @@ LEFT OUTER JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
-) vyuARInvoicesForPayments
-LEFT JOIN tblARPOS POS on vyuARInvoicesForPayments.[intTransactionId] = POS.[intInvoiceId]
-LEFT JOIN vyuARPOSEndOfDay EOD on POS.intPOSLogId = EOD.intPOSLogId
