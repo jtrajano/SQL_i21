@@ -49,6 +49,7 @@ OUTER APPLY(
 	WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
 	AND GRS.intDeliverySheetId = SDS.intDeliverySheetId AND GRS.intEntityId = SDS.intEntityId
 	AND GRS.intItemId = DS.intItemId AND GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
+	AND GRS.ysnTransferStorage = 0
 )GRStorage
 OUTER APPLY(
 	SELECT dblOriginalBalance AS DP FROM tblGRCustomerStorage GRS
@@ -57,6 +58,7 @@ OUTER APPLY(
 	AND GR.ysnDPOwnedType = 1 AND GR.ysnCustomerStorage = 0
 	AND GRS.intDeliverySheetId = SDS.intDeliverySheetId 
 	AND GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
+	AND GRS.ysnTransferStorage = 0
 )DPStorage
 OUTER APPLY(
 	SELECT SUM(IRI.dblOpenReceive) AS Basis FROM tblICInventoryReceipt IR
@@ -73,4 +75,5 @@ OUTER APPLY(
 	WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0 
 	AND GRS.intDeliverySheetId = DS.intDeliverySheetId AND GRS.intEntityId = SDS.intEntityId 
 	AND GRS.intItemId = DS.intItemId AND GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
+	AND GRS.ysnTransferStorage = 0
 )WHGBStorage
