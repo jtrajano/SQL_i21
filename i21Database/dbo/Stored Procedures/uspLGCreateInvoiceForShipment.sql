@@ -2,9 +2,6 @@
 		@intLoadId    INT,
 		@intUserId    INT,
 		@NewInvoiceId INT = NULL OUTPUT			
-
-				
-		
 AS 
 BEGIN
 SET QUOTED_IDENTIFIER OFF
@@ -391,6 +388,31 @@ DECLARE
 
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM 
+				tblCTContractDetail CD
+				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1))
+	BEGIN
+		SELECT TOP 1 
+			@InvoiceNumber = CH.strContractNumber,
+			@ShipmentNumber = CAST(CD.intContractSeq AS nvarchar(10))
+		FROM 
+		tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1)
+
+		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+
+		SET @ErrorMessageNotPriced = 'Contract No. ' + @InvoiceNumber + '/' + @ShipmentNumber + ' is not Priced. Unable to create Invoice.';
+
+		RAISERROR(@ErrorMessageNotPriced, 16, 1);
+		RETURN 0;
+
 	END
 	
 	
