@@ -48,7 +48,7 @@ DECLARE @fieldname NVARCHAR(50)
 DECLARE @condition NVARCHAR(20)     
 DECLARE @id INT 
 DECLARE @strBillId NVARCHAR(50) 
-DECLARE @strAccountId NVARCHAR(50) 
+DECLARE @strAccountId NVARCHAR(100) 
 DECLARE @strVendorIdName NVARCHAR(150) 
 DECLARE @strVendorId NVARCHAR(50)
 DECLARE @strVendorOrderNumber NVARCHAR(50)
@@ -144,7 +144,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SELECT @strAccountId = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
+SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
 					,strAccountId
@@ -246,13 +246,12 @@ END
 IF @strAccountId IS NOT NULL
 BEGIN 
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
-		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
-		--SET @originInnerQuery = @originInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(10), @strAccountId, 110) + ''''
+		SET @innerQuery = @innerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
 	END
 END
 
-
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
