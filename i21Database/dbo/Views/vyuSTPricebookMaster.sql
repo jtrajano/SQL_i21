@@ -2,7 +2,7 @@
 AS
 SELECT 
 	ROW_NUMBER() OVER (ORDER BY IP.intItemPricingId, UOM.intItemUOMId ASC) AS intRowId 
-	, CAST(IP.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(UOM.intItemUOMId AS NVARCHAR(1000)) AS strUniqueId
+	, CAST(IP.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(UOM.intItemUOMId AS NVARCHAR(1000)) COLLATE Latin1_General_CI_AS AS strUniqueId
 	, IP.intItemPricingId
 	, IP.dblSalePrice
 	, IP.dblLastCost
