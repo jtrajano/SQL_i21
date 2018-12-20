@@ -831,7 +831,7 @@ BEGIN
 	SELECT L.intLoadId
 		,L.strLoadNumber
 		,1 AS intOrderType
-		,1 AS intSourceType
+		,-1 AS intSourceType
 		,GETDATE()
 		,intCurrencyId = NULL
 		,[dblExchangeRate] = 1
