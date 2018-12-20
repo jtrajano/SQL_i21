@@ -758,13 +758,15 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
-											ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
+					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 					, ri.intSourceId
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 				INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3 AND cd.intContractTypeId = 2
+				JOIN (SELECT intContractDetailId, dtmEndDate FROM tblCTContractDetail) det ON cd.intContractDetailId = det.intContractDetailId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
@@ -848,13 +850,15 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
-											ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
+					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
 				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 				INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT') AND ISNULL(ysnInTransit, 0) = 0
 				INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+				JOIN (SELECT intContractDetailId, dtmEndDate FROM tblCTContractDetail) det ON cd.intContractDetailId = det.intContractDetailId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
@@ -1122,7 +1126,6 @@ WHERE strInventoryType IN ('Company Titled', 'Collateral')
 
 INSERT INTO @List (strCommodityCode
 	, dblTotal
-	, strContractEndMonth
 	, strLocationName
 	, intCommodityId
 	, intFromCommodityUnitMeasureId
@@ -1141,10 +1144,12 @@ INSERT INTO @List (strCommodityCode
 	, strDeliveryDate
 	, strBrokerTradeNo
 	, strNotes
-	, ysnPreCrush)
+	, ysnPreCrush
+	, strContractNumber
+	, strContractEndMonth
+	, strContractEndMonthNearBy)
 SELECT strCommodityCode
 	, dblTotal
-	, strContractEndMonth
 	, strLocationName
 	, intCommodityId
 	, intFromCommodityUnitMeasureId
@@ -1164,6 +1169,9 @@ SELECT strCommodityCode
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
+	, strContractNumber
+	, strContractEndMonth
+	, strContractEndMonthNearBy = strContractEndMonth
 FROM @List WHERE intOrderId in(1, 2, 3, 4, 5, 6, 7)
 
 INSERT INTO @List (strCommodityCode
@@ -1755,6 +1763,17 @@ SELECT intSeqNo
 	, ysnPreCrush
 FROM @List 
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
+
+UPDATE @ListFinal SET strFutureMonth = CASE 
+		WHEN LEN(LTRIM(RTRIM(strFutureMonth))) = 6 THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(strFutureMonth))), 'MMM yyyy')
+		ELSE LTRIM(RTRIM(strFutureMonth))
+	END
+WHERE ISNULL(LTRIM(RTRIM(strFutureMonth)), '') <> '';
+
+UPDATE @ListFinal SET strContractEndMonthNearBy = CASE 
+			WHEN @strPositionBy = 'Futures Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strFutureMonth)),''),'Near By')
+			WHEN @strPositionBy = 'Delivery Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strDeliveryDate)),''),'Near By')
+		END
 
 SELECT intSeqNo = intOrderId
 	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
