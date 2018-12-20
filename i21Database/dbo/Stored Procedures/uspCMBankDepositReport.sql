@@ -109,7 +109,7 @@ SELECT  H.intBankAccountId
 		,dtmPostedDate = H.dtmDate
 		,dtmDetailDate = D.dtmDate		
 		,strDescription = D.strDescription
-		,dblAmount = D.dblCredit
+		,dblAmount = D.dblCredit - D.dblDebit
 		,strCheckNo = ISNULL(Pay.strPaymentInfo,'') -- TODO: This is the check number of the check deposited by a customer. Retrieve the check number from the undeposited funds table. 
 		,strPaymentMethod = ISNULL(PayMethod.strPaymentMethod,'') -- TODO: This is payment method used by the customer to pay a sales invoice. Retrieve it from the undeposited funds table. 
 		,strReceivedFrom = ISNULL(ED.strName, ISNULL(EH.strName, H.strPayee))
