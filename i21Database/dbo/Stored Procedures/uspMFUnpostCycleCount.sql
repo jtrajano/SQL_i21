@@ -106,7 +106,13 @@ BEGIN TRY
 		FROM tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
+		SELECT @dblNewCost = SUM([dbo].[fnMFGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
+			FROM (
+				SELECT DISTINCT intBatchId
+					,strBatchId
+				FROM tblMFWorkOrderConsumedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+				) AS DT
 
 		SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
 		FROM tblMFWorkOrderProducedLot PL
@@ -207,7 +213,7 @@ BEGIN TRY
 			,[dblQty] = PL.dblQuantity
 			,[dblUOMQty] = 1
 			,[intCostUOMId] = PL.intItemUOMId
-					,[dblNewCost] = -1*(CASE 
+					,[dblNewCost] = (CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
 					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)
 				ELSE ((@dblNewCost * RI.dblPercentage / 100/SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)) Over(Partition By PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity))
