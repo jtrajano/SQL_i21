@@ -9,7 +9,7 @@ SELECT
 	A.str1099Type,
 	intCurrencyId = ISNULL(C.intDefaultCurrencyId,B.intCurrencyId),
 	strCurrency = ISNULL(E1.strCurrency, E.strCurrency),
-	B.intTermsId,
+	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId  END as intTermsId,
 	J.strTerm,
 	D.intEntityId AS intDefaultContactId,
 	D.strName AS strDefaultContactName,
@@ -52,7 +52,7 @@ FROM
 	LEFT JOIN dbo.tblSMFreightTerms Freight
 		ON C.intFreightTermId = Freight.intFreightTermId
 	LEFT JOIN dbo.tblSMTerm J
-		ON B.intTermsId = J.intTermID
+		ON (CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END) = J.intTermID
 	LEFT JOIN dbo.tblGLAccount K
 		ON B.intGLAccountExpenseId = K.intAccountId
 GO
