@@ -93,8 +93,7 @@ DECLARE @strEntityName NVARCHAR(150)
 
 IF isnull(@intVendorId,0) <> 0
 BEGIN
-	SELECT  @strEntityName = CASE WHEN @strPurchaseSales = 'Purchase' THEN 'Vendor: ' + strName ELSE 'Customer: ' + strName END FROM tblEMEntity WHERE intEntityId = @intVendorId
-
+	SELECT  @strEntityName = CASE WHEN @strPurchaseSales = 'Purchase' THEN 'Vendor: ' + REPLACE(strName,'''','''''') ELSE 'Customer: ' + REPLACE(strName,'''','''''') END FROM tblEMEntity WHERE intEntityId = @intVendorId
 END
 ELSE
 BEGIN
