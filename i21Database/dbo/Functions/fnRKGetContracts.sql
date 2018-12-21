@@ -9,8 +9,6 @@ RETURNS @returntable TABLE
 	intContractNumber INT
 	,strContractIds NVARCHAR(1500)
 	,strContractNumbers NVARCHAR(1500)
-	,strDeliveryDates NVARCHAR(1500)
-	,strFutureMonth NVARCHAR(1500)
 )
 AS
 BEGIN
@@ -20,87 +18,55 @@ BEGIN
 
 	IF(@strTransactionType = 'Storage Settlement')
 	BEGIN
-		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers, strDeliveryDates, strFutureMonth)
+		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers)
 		SELECT TOP 1
 			 intContractHeaderId = CONVERT(INT, LEFT(strContractIds, CHARINDEX('|', strContractIds) - 1))
 			,strContractIds
 			,strContractNumber = LTRIM(RTRIM(strContractNumbers)) collate Latin1_General_CS_AS
-			,CT.strDeliveryDates
-			,CT.strFutureMonth
 		FROM vyuGRGetSettleStorage
-		OUTER APPLY(
-			SELECT intContractHeaderId
-			, strDeliveryDates
-			, strFutureMonth 
-			FROM dbo.fnRKGetContractInfo(CONVERT(INT, LEFT(strContractIds, CHARINDEX('|', strContractIds) - 1)), LTRIM(RTRIM(strContractNumbers)))
-		) CT
 		WHERE intSettleStorageId = @intTransactionId AND intItemId IS NOT NULL AND intItemId = @intItemId
 		 AND ISNULL(LTRIM(RTRIM(strContractIds)), '') <> '' AND ISNULL(LTRIM(RTRIM(strContractNumbers)),'') <> ''
 	END
 
 	IF(@strTransactionType = 'Inventory Shipment')
 	BEGIN
-		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers, strDeliveryDates, strFutureMonth)
+		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers)
 		SELECT TOP 1 
 			intOrderId
 			,''
 			,strContractNumbers = strOrderNumber + '-' + CONVERT(NVARCHAR(100), intContractSeq) 
-			,CT.strDeliveryDates
-			,CT.strFutureMonth
 		FROM vyuICGetInventoryShipmentItem
-		OUTER APPLY(
-			SELECT intContractHeaderId
-			, strDeliveryDates
-			, strFutureMonth 
-			FROM dbo.fnRKGetContractInfo(intOrderId, LTRIM(RTRIM(strOrderNumber + '-' + CONVERT(NVARCHAR(100), intContractSeq))))
-		) CT
 		WHERE intOrderId IS NOT NULL AND intContractSeq IS NOT NULL AND intItemId IS NOT NULL
 			AND intInventoryShipmentId = @intTransactionId AND intItemId = @intItemId
 	END
 
 	IF(@strTransactionType = 'Inventory Receipt')
 	BEGIN
-		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers, strDeliveryDates, strFutureMonth)
+		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers)
 		SELECT TOP 1 
 			intOrderId
 			,''
 			,strOrderNumber + '-' + CONVERT(NVARCHAR(100), intContractSeq)
-			,CT.strDeliveryDates
-			,CT.strFutureMonth
 		FROM vyuICGetInventoryReceiptItem
-		OUTER APPLY(
-			SELECT intContractHeaderId
-			, strDeliveryDates
-			, strFutureMonth 
-			FROM dbo.fnRKGetContractInfo(intOrderId, LTRIM(RTRIM(strOrderNumber + '-' + CONVERT(NVARCHAR(100), intContractSeq))))
-		) CT
 		WHERE intInventoryReceiptId IS NOT NULL AND intOrderId IS NOT NULL AND intContractSeq IS NOT NULL AND intItemId IS NOT NULL
 			AND intInventoryReceiptId = @intTransactionId AND intItemId = @intItemId 
 	END
 
 	IF(@strTransactionType = 'Scale')
 	BEGIN
-		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers, strDeliveryDates, strFutureMonth)
+		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers)
 		SELECT TOP 1 
-			t.intContractHeaderId
+			intContractHeaderId
 			,''
 			,strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)
-			,CT.strDeliveryDates
-			,CT.strFutureMonth
-		FROM vyuSCTicketScreenView t
-		OUTER APPLY(
-			SELECT intContractHeaderId
-			, strDeliveryDates
-			, strFutureMonth 
-			FROM dbo.fnRKGetContractInfo(intContractHeaderId, LTRIM(RTRIM(strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence))))
-		) CT
-		WHERE intTicketId IS NOT NULL AND t.intContractHeaderId IS NOT NULL AND intContractSequence IS NOT NULL AND intItemId IS NOT NULL
+		FROM vyuSCTicketScreenView
+		WHERE intTicketId IS NOT NULL AND intContractHeaderId IS NOT NULL AND intContractSequence IS NOT NULL AND intItemId IS NOT NULL
 			AND intTicketId = @intTransactionId AND intItemId = @intItemId 
 	END
 
 	IF(@strTransactionType = 'Outbound Shipment')
 	BEGIN
-		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers, strDeliveryDates, strFutureMonth)
+		INSERT INTO @returntable(intContractNumber, strContractIds, strContractNumbers)
 		SELECT intContractHeaderId = CASE WHEN ISNULL(T.intSalesContractNumber, 0) <> 0 THEN T.intSalesContractNumber 
 					WHEN ISNULL(T.intPurchaseContractNumber, 0) <> 0 THEN T.intPurchaseContractNumber 
 			   END
@@ -108,8 +74,6 @@ BEGIN
 			   ,strContractNumbers = CASE WHEN ISNULL(T.intSalesContractNumber, 0) <> 0 THEN T.strSalesContractNumber 
 						WHEN ISNULL(T.intPurchaseContractNumber, 0) <> 0 THEN T.strPurchaseContractNumber 
 				    END
-			   ,CT.strDeliveryDates
-			   ,CT.strFutureMonth
 		FROM(
 			SELECT TOP 1
 				 intLoadId
@@ -143,16 +107,6 @@ BEGIN
 			) PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 			WHERE intLoadId = @intTransactionId
 		) T
-		OUTER APPLY(
-			SELECT intContractHeaderId
-			, strDeliveryDates
-			, strFutureMonth 
-			FROM dbo.fnRKGetContractInfo(CASE WHEN ISNULL(T.intSalesContractNumber, 0) <> 0 THEN T.intSalesContractNumber 
-					WHEN ISNULL(T.intPurchaseContractNumber, 0) <> 0 THEN T.intPurchaseContractNumber 
-			   END, LTRIM(RTRIM(CASE WHEN ISNULL(T.intSalesContractNumber, 0) <> 0 THEN T.strSalesContractNumber 
-						WHEN ISNULL(T.intPurchaseContractNumber, 0) <> 0 THEN T.strPurchaseContractNumber 
-				    END)))
-		) CT
 	END
 
 	RETURN;

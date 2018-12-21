@@ -6,7 +6,7 @@
 	, @strPositionIncludes NVARCHAR(100) = NULL
 	, @dtmToDate DATETIME = NULL
 	, @strByType NVARCHAR(50) = NULL
-	, @strPositionBy NVARCHAR(50) = NULL
+
 AS
 
 BEGIN
@@ -232,8 +232,7 @@ BEGIN
 		, intContractHeaderId
 		, strContractNumber
 		, strLocationName
-		--, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
-		, dtmEndDate
+		, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
 		, CD.dblBalance
 		, intUnitMeasureId
 		, intPricingTypeId
@@ -1156,8 +1155,7 @@ BEGIN
 					, intFutureMarketId
 					, strFutMarketName
 					, intFutureMonthId
-					, strFutureMonth
-					, strDeliveryDate)
+					, strFutureMonth)
 				SELECT DISTINCT strCommodityCode
 					, strType = 'Price Risk'
 					, strContractType = 'Sales Basis Deliveries'
@@ -1176,7 +1174,6 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, FORMAT(cd.dtmEndDate, 'MMM yyyy')
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -1705,8 +1702,7 @@ BEGIN
 					, strNotes
 					, ysnPreCrush
 					, strEntityName
-					, strDeliveryDate
-					, strContractEndMonth)
+					, strDeliveryDate)
 				SELECT strCommodityCode
 					, strType = 'Avail for Spot Sale'
 					, strContractType
@@ -1734,7 +1730,6 @@ BEGIN
 					, ysnPreCrush
 					, strEntityName
 					, strDeliveryDate
-					, strContractEndMonth
 				FROM @tempFinal WHERE strType = 'Basis Risk' AND intCommodityId = @intCommodityId AND @ysnExchangeTraded = 1
 				
 				INSERT INTO @tempFinal (strCommodityCode
@@ -2489,21 +2484,6 @@ BEGIN
 	UPDATE @Final SET intSeqNo = 8 WHERE strType = 'Net Receivable ($)'
 	UPDATE @Final SET intSeqNo = 9 WHERE strType = 'NR Un-Paid Quantity'
 	UPDATE @Final SET intSeqNo = 10 WHERE strType = 'Avail for Spot Sale'
-	
-	UPDATE @Final SET strFutureMonth = CASE 
-		WHEN LEN(LTRIM(RTRIM(strFutureMonth))) = 6 THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(strFutureMonth))), 'MMM yyyy')
-		ELSE LTRIM(RTRIM(strFutureMonth))
-	END
-	WHERE ISNULL(LTRIM(RTRIM(strFutureMonth)), '') <> '';
-
-	IF(@strPositionBy = 'Futures Month')
-	BEGIN
-		UPDATE @Final SET strContractEndMonth = strFutureMonth;
-	END
-	ELSE IF(@strPositionBy = 'Delivery Month')
-	BEGIN
-		UPDATE @Final SET strContractEndMonth = strDeliveryDate;
-	END
 	
 	IF (@strByType = 'ByCommodity')
 	BEGIN
