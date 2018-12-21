@@ -17,7 +17,7 @@ SELECT strTransactionType = 'Load Schedule'
 	,strShipmentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intLoadId = L.intLoadId
 	,intLoadDetailId = LD.intLoadDetailId
-	,intLotId = LDL.intLotId
+	,intLotId = NULL
 	,strLoadNumber = L.strLoadNumber
 	,intRecipeItemId = NULL
 	,intContractHeaderId = CH.intContractHeaderId
@@ -45,11 +45,11 @@ SELECT strTransactionType = 'Load Schedule'
 				END
     ,dblShipmentUnitPrice = CASE WHEN L.intSourceType = 7 THEN  (
                          LD.dblUnitPrice
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
 					 ELSE (
                     (
                         dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
             ) 
 			END
 	,strPricing = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -59,23 +59,23 @@ SELECT strTransactionType = 'Load Schedule'
 	            (
                     (
                         LD.dblUnitPrice
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-	            ) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
+	            ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblNet)
 			 ELSE
 				(
 					(
 						dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
-					) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-				) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+					) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
+				) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblNet)
 			END
 	,intStorageLocationId = NULL
 	,intTermId = NULL
 	,intEntityShipViaId = NULL
 	,intTicketId = NULL
 	,intTaxGroupId = NULL
-	,dblGrossWt = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross, LD.dblGross))
-	,dblTareWt = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare, LD.dblTare))
-	,dblNetWt = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+	,dblGrossWt = dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblGross)
+	,dblTareWt = dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblTare)
+	,dblNetWt = dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblNet)
 	,strPONumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strBOLNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intSplitId = NULL
@@ -132,17 +132,6 @@ JOIN (
 		,intPriceUOMId
 	FROM dbo.tblLGLoadDetail WITH (NOLOCK)
 	) LD ON L.intLoadId = LD.intLoadId
-LEFT JOIN (
-	SELECT intLoadDetailId
-		,intWeightUOMId
-		,intLotId
-		,dblGross = SUM(dblGross)
-		,dblTare = SUM(dblTare)
-		,dblNet = SUM(dblNet)
-	FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
-	GROUP BY intLoadDetailId
-		,intLotId, intWeightUOMId
-	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 INNER JOIN (
 	SELECT [intItemId]
 		,[strItemNo]

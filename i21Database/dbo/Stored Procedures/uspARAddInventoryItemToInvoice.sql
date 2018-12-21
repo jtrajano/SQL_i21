@@ -527,7 +527,7 @@ DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
 
 
-IF(@ItemLoadDetailId IS NOT NULL AND @ItemLotId IS NOT NULL)
+IF(@ItemLoadDetailId IS NOT NULL)
 BEGIN
 	INSERT INTO tblARInvoiceDetailLot
 		([intInvoiceDetailId]
@@ -561,7 +561,6 @@ BEGIN
 		vyuLGLoadDetailLotsView
 	WHERE
 		intLoadDetailId = @ItemLoadDetailId 
-		AND intLotId = @ItemLotId	
 END
 		
 BEGIN TRY
