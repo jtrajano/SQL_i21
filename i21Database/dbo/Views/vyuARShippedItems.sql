@@ -1064,7 +1064,7 @@ FROM (
 	     , strShipmentNumber				= NULL
 	     , intLoadId						= LC.intLoadId
 	     , intLoadDetailId					= LC.intLoadDetailId
-	     , intLotId							= LGLDL.intLotId
+	     , intLotId							= NULL
 	     , strLoadNumber					= strLoadNumber
 	     , intRecipeItemId					= NULL
 	     , intContractHeaderId				= LC.intContractHeaderId
@@ -1160,18 +1160,6 @@ FROM (
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intLoadDetailId, 0) = 0
 	) ARID ON ARID.intLoadDetailId = LC.intLoadDetailId
-	LEFT OUTER JOIN (
-		SELECT LGLSC.intLoadId
-			 , LDL.intLotId
-			 , LDL.intLoadDetailId
-		FROM dbo.tblLGLoadDetailLot LDL WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intLoadId
-				 , intLoadDetailLotId
-			FROM dbo.tblLGLoadStorageCost WITH (NOLOCK)
-		) LGLSC ON LDL.intLoadDetailLotId = LGLSC.intLoadDetailLotId
-	) LGLDL ON LC.intLoadId = LGLDL.intLoadId
-		   AND LC.intLoadDetailId = LGLDL.intLoadDetailId
 
 	UNION ALL
 
@@ -1192,7 +1180,7 @@ FROM (
 		 , strShipmentNumber				= NULL
 		 , intLoadId						= LC.intLoadId
 		 , intLoadDetailId					= LC.intLoadDetailId
-		 , intLotId							= LGLDL.intLotId 
+		 , intLotId							= NULL
 		 , strLoadNumber					= strLoadNumber
 		 , intRecipeItemId					= NULL
 		 , intContractHeaderId				= LC.intContractHeaderId
@@ -1287,18 +1275,6 @@ FROM (
 		FROM tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intLoadDetailId, 0) = 0
 	) ARID ON ARID.intLoadDetailId = LC.intLoadDetailId
-	LEFT OUTER JOIN (
-		SELECT LGLSC.intLoadId
-			 , LDL.intLotId
-			 , LDL.intLoadDetailId
-		FROM dbo.tblLGLoadDetailLot LDL WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intLoadId
-				 , intLoadDetailLotId
-			FROM dbo.tblLGLoadStorageCost WITH (NOLOCK)
-		) LGLSC ON LDL.intLoadDetailLotId = LGLSC.intLoadDetailLotId
-	) LGLDL ON LC.intLoadId = LGLDL.intLoadId
-		   AND LC.intLoadDetailId = LGLDL.intLoadDetailId
 ) SHIPPEDITEMS
 INNER JOIN (
 	SELECT intEntityId
