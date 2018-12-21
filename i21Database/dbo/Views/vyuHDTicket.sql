@@ -48,6 +48,7 @@ AS
 		,tic.strResolution
 		,tic.strImageId
 		,tic.strFeedbackComment
+		,strCampaignName = null
 		,strFeedbackWithSolution = (case when tic.intFeedbackWithSolutionId = 1 then 'Very Dissatisfied'
 										 when tic.intFeedbackWithSolutionId = 2 then 'Dissatisfied'
 										 when tic.intFeedbackWithSolutionId = 3 then 'Neutral'
