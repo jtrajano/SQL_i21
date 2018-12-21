@@ -729,7 +729,7 @@ BEGIN
 		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[intAccountId]					=	B.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
 		[dblDebit]						=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
-												 ELSE (CASE WHEN A.intEntityVendorId = D.intEntityVendorId AND D.ysnPrice = 1 
+												 ELSE (CASE WHEN A.intEntityVendorId != ISNULL(NULLIF(D.intEntityVendorId,0),A.intEntityVendorId) AND D.ysnPrice = 1   
 												 			THEN D.dblAmount * -1 
 															 ELSE D.dblAmount
 															END)
@@ -765,12 +765,13 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
-												 ELSE D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
-													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
-												 END 
-											-- * ISNULL(NULLIF(B.dblRate,0),1) 
+												 ELSE (CASE WHEN A.intEntityVendorId != ISNULL(NULLIF(D.intEntityVendorId,0),A.intEntityVendorId) AND D.ysnPrice = 1   
+												 			THEN D.dblAmount * -1 
+															 ELSE D.dblAmount
+															END)
+											END 
 											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
-														ELSE 1 END AS DECIMAL(18,2)),      
+														ELSE 1 END AS DECIMAL(18,2)),    
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
