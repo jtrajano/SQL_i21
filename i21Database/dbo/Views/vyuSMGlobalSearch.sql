@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMGlobalSearch] WITH SCHEMABINDING
 AS
-SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle COLLATE Latin1_General_CI_AS as strDisplayTitle, strValueField COLLATE Latin1_General_CI_AS as strValueField, strValueData, strDisplayData, strTag, strSearchCommand COLLATE Latin1_General_CI_AS as strSearchCommand
+SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle COLLATE Latin1_General_CI_AS as strDisplayTitle, strValueField COLLATE Latin1_General_CI_AS as strValueField, strValueData, strDisplayData, strTag, strSearchCommand
 FROM
 (	
 	--ENTITY--
