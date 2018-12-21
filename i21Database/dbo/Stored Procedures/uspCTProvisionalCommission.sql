@@ -18,7 +18,9 @@ BEGIN TRY
 			 @blbFile				VARBINARY(MAX),
 			@intLaguageId			INT,
 			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month'
+			@strMonthLabelName		NVARCHAR(50) = 'Month',
+			@strBankTransferText	NVARCHAR(MAX),
+			@strComments			NVARCHAR(MAX)
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -85,6 +87,15 @@ BEGIN TRY
 	FROM	vyuCTGridBrokerageCommissionDetail
 	WHERE	intBrkgCommnId = @intBrkgCommnId
 
+	SELECT @strComments = ISNULL(strComments,'') FROM tblCTBrkgCommn WHERE	intBrkgCommnId = @intBrkgCommnId
+	
+	IF @strComments <>''
+	BEGIN
+		SELECT @strBankTransferText = 'Please transfer this amount in our favour with'+ CHAR(13)+CHAR(10) + strMessage
+									FROM vyuARDocumentMaintenanceMessage
+									WHERE strCode = @strComments 
+	END
+
 	SELECT	@strAddress =
 			LTRIM(RTRIM(CH.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -114,7 +125,8 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt3.strTranslation,BD.strRateUOM) AS strRate,
 			ISNULL(isnull(rtrt4.strTranslation,IG.strCountry),isnull(rtrt5.strTranslation,OG.strCountry))	AS	strOrigin,
 			strCurrency,
-			dblReqstdAmount
+			dblReqstdAmount,
+			@strBankTransferText AS strBankTransferText
 
 	FROM	vyuCTGridBrokerageCommissionDetail  BD
 	JOIN	tblCTContractDetail		CD  ON	CD.intContractDetailId		=   BD.intContractDetailId			   
