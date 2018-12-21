@@ -45,13 +45,15 @@ SET ANSI_WARNINGS OFF
 	,ysnTaxable
 	,strKeywords
 	,ysnCommisionable
+	,ysnTonnageTax
+	,intTonnageTaxUOMId
 	,intConcurrencyId
 	) 
 SELECT ei.ItemNo, ei.ItemType, ei.ShortName, ei.ItemName, ei.ItemStatus, ei.InvValuation, ei.LotTracking,
 	ei.CategoryId, ei.CommodityId, ei.[LifeTime], ei.LandedCost, ei.DropDhip, ei.SpecialCommission
 	, ei.ysnStockedItem, ei.DyedFuel, ei.BarcodePrinted, ei.MSDSRequired, ei.AvailableTM
 	, ei.DefaultFull, ei.PickTicket, ei.ExportEDI, ei.HazardMaterial, ei.MaterialFee, ei.CountCode
-	, ei.Taxable, ei.KeyWords, ei.Commisionable, ei.ConcurrencyId
+	, ei.Taxable, ei.KeyWords, ei.Commisionable,ei.TonnageTax,ei.TonnageTaxUOM, ei.ConcurrencyId
 FROM
 	 (
 	SELECT RTRIM(agitm_no) ItemNo
@@ -154,6 +156,20 @@ FROM
 			ELSE 0
 			END
 		) Commisionable
+	,(
+		CASE 
+		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
+			THEN 1
+		ELSE 0
+		END
+		) TonnageTax
+		,(
+		CASE 
+		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
+			THEN (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = 'TON') 
+		ELSE NULL
+		END
+		) TonnageTaxUOM
 	,1 ConcurrencyId
 		FROM agitmmst AS inv 
 		WHERE agitm_phys_inv_ynbo <> 'O'
