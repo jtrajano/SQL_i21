@@ -190,7 +190,7 @@ EXEC ('
 	IF EXISTS(SELECT TOP 1 1 FROM tblPRCompanyPreference WHERE dtmLastTimeOffAdjustmentReset IS NULL)
 	BEGIN
 		UPDATE tblPREmployeeTimeOff
-		SET ETO.dblHoursUsed = 0
+		SET dblHoursUsed = 0
 
 		UPDATE tblPRCompanyPreference SET dtmLastTimeOffAdjustmentReset = GETDATE()
 	END
