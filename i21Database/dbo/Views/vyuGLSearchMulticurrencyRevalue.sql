@@ -2,12 +2,12 @@
 CREATE VIEW [dbo].[vyuGLSearchMulticurrencyRevalue]
 AS
 select 
-strConsolidationNumber COLLATE Latin1_General_CI_AS strConsolidationNumber,
+strConsolidationNumber,
 intConsolidationId,
-B.strPeriod COLLATE Latin1_General_CI_AS strPeriod,
-D.strCurrency COLLATE Latin1_General_CI_AS strCurrency,
-strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,
-C.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType,
+B.strPeriod,
+D.strCurrency,
+strTransactionType,
+C.strCurrencyExchangeRateType,
 A.ysnPosted
 from tblGLRevalue A
 LEFT JOIN tblGLFiscalYearPeriod B

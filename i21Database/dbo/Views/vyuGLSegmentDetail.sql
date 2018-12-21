@@ -2,19 +2,18 @@
 AS
 SELECT        
 	S.intAccountSegmentId, 
-	U.intSort, 
-	S.strCode  COLLATE Latin1_General_CI_AS strCode, 
-	C.strAccountCategory  COLLATE Latin1_General_CI_AS strAccountCategory, 
+	U.intSort, S.strCode, 
+	C.strAccountCategory, 
 	S.intAccountCategoryId, 
-	S.strDescription  COLLATE Latin1_General_CI_AS strDescription, 
-	S.strChartDesc  COLLATE Latin1_General_CI_AS strChartDesc, 
-	G.strAccountType  COLLATE Latin1_General_CI_AS strAccountType, 
+	S.strDescription, 
+	S.strChartDesc, 
+	G.strAccountType, 
 	S.intAccountStructureId,
     G.intAccountGroupId,
-    G.strAccountGroup  COLLATE Latin1_General_CI_AS strAccountGroup,
+    G.strAccountGroup,
 	U.intStructureType,
-	U.strType  COLLATE Latin1_General_CI_AS strType,
-	U.strStructureName  COLLATE Latin1_General_CI_AS strStructureName,
+	U.strType,
+	U.strStructureName,
 	ISNULL(Mapping.c,0)  ysnUsed,
 	S.intConcurrencyId
 FROM            
