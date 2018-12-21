@@ -1,8 +1,8 @@
 ﻿CREATE VIEW vyuGLAccountFiscalBudget
 AS
 SELECT A.intBudgetId,
-B.strBudgetCode COLLATE Latin1_General_CI_AS strBudgetCode,
-B.strBudgetEnglishDescription COLLATE Latin1_General_CI_AS strBudgetEnglishDescription,  
+B.strBudgetCode,
+B.strBudgetEnglishDescription, 
 B.ysnDefault,
 B.intConcurrencyId, 
 B.intFiscalYearId, 

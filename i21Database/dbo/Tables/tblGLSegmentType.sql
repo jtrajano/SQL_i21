@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLSegmentType](
 	[intSegmentTypeId] [int] IDENTITY(1,1) NOT NULL,
-	[strSegmentType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strSegmentType] [nvarchar](50) NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblGLSegmentType] PRIMARY KEY CLUSTERED 
 (

@@ -1,19 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuGLSearchGJ]
 AS
-SELECT strJournalType ,
-           strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,
-           strSourceType COLLATE Latin1_General_CI_AS strSourceType,
-           j.strJournalId COLLATE Latin1_General_CI_AS strJournalId,
-           j.strDescription COLLATE Latin1_General_CI_AS strDescription,
+SELECT strJournalType,
+           strTransactionType,
+           strSourceType,
+           j.strJournalId,
+           j.strDescription,
            j.intJournalId,
            ysnPosted,
            dtmDate,
            dtmReverseDate,
            dtmDateEntered,
-           e.strName COLLATE Latin1_General_CI_AS strUserName,
+           e.strName strUserName,
            total.dblCredit,
            total.dblDebit,
-		   strCurrency COLLATE Latin1_General_CI_AS strCurrency,
+		   strCurrency,
 		   ysnRecurringTemplate
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
