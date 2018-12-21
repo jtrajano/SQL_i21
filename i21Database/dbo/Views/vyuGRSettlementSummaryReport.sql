@@ -44,13 +44,13 @@ FROM
 			,SalesAdjustment			  = ISNULL(Invoice.dblPayment,0)
 			,VoucherAdjustment			  = ISNULL(BillByReceiptItem.dblTotal, 0)
 			,dblVendorPrepayment		  = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment			     ELSE NULL END
-			,CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN 'Vendor Prepay'									 ELSE NULL END COLLATE Latin1_General_CI_AS as lblVendorPrepayment
+			,lblVendorPrepayment		  = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN 'Vendor Prepay'									     ELSE NULL END
 			,dblCustomerPrepayment		  = CASE WHEN ISNULL(Invoice.dblPayment, 0) <> 0				   THEN Invoice.dblPayment								     ELSE NULL END
-			,CASE WHEN ISNULL(Invoice.dblPayment, 0) <> 0				   THEN 'Customer Prepay'								     ELSE NULL END COLLATE Latin1_General_CI_AS as lblCustomerPrepayment
+			,lblCustomerPrepayment		  = CASE WHEN ISNULL(Invoice.dblPayment, 0) <> 0				   THEN 'Customer Prepay'								     ELSE NULL END
 			,dblGradeFactorTax			  = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0   THEN ScaleDiscountTax.dblGradeFactorTax				     ELSE NULL END
-			,CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0   THEN 'Factor Tax'										 ELSE NULL END COLLATE Latin1_General_CI_AS as lblFactorTax
+			,lblFactorTax				  = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0   THEN 'Factor Tax'										 ELSE NULL END
 			,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0		       THEN PartialPayment.dblTotals							 ELSE NULL END
-			,CASE WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0		       THEN 'Partial Payment Adj'							 ELSE NULL END COLLATE Latin1_General_CI_AS as lblPartialPrepayment
+			,lblPartialPrepayment		  = CASE WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0		       THEN 'Partial Payment Adj'								 ELSE NULL END
 			,dblPartialPrepayment		  = CASE WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0		       THEN PartialPayment.dblPayment - PartialPayment.dblTotals ELSE NULL END
 			,CheckAmount				  = PYMT.dblAmountPaid
 			 FROM tblAPPayment PYMT 
@@ -157,13 +157,13 @@ FROM
 			   ,SalesAdjustment              = ISNULL(Invoice.dblPayment,0) 
 			   ,VoucherAdjustment            = ISNULL(tblAdjustment.dblTotal, 0) 
 			   ,dblVendorPrepayment          = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment				 ELSE NULL END 
-			   ,CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'									 ELSE NULL END COLLATE Latin1_General_CI_AS as lblVendorPrepayment
+			   ,lblVendorPrepayment          = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'									 ELSE NULL END
 			   ,dblCustomerPrepayment        = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0					 THEN Invoice.dblPayment								 ELSE NULL END 
-			   ,CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0					 THEN 'Customer Prepay'									 ELSE NULL END COLLATE Latin1_General_CI_AS as lblCustomerPrepayment
+			   ,lblCustomerPrepayment        = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0					 THEN 'Customer Prepay'									 ELSE NULL END
 			   ,dblGradeFactorTax		     = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0	 THEN ScaleDiscountTax.dblGradeFactorTax				 ELSE NULL END 
-			   ,CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0	 THEN 'Factor Tax'										 ELSE NULL END COLLATE Latin1_General_CI_AS as lblFactorTax
+			   ,lblFactorTax			     = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0	 THEN 'Factor Tax'										 ELSE NULL END
 			   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN PartialPayment.dblTotals							 ELSE NULL END
-			   ,CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'								 ELSE NULL END COLLATE Latin1_General_CI_AS as lblPartialPrepayment
+			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'								 ELSE NULL END
 			   ,dblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END
 			   ,CheckAmount				     = PYMT.dblAmountPaid 		    
 			FROM tblAPPayment PYMT 

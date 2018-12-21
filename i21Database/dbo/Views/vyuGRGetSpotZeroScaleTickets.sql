@@ -4,7 +4,7 @@ SELECT
  intTicketId			= SC.intTicketId
 ,strTicketNumber		= SC.strTicketNumber
 ,strInOutIndicator		= TicketType.strInOutIndicator
-,CASE WHEN TicketType.strInOutIndicator='I' THEN 'Inbound' ELSE 'Outbound' END COLLATE Latin1_General_CI_AS AS strInOutTypeqweq
+,strInOutType			= CASE WHEN TicketType.strInOutIndicator='I' THEN 'Inbound' ELSE 'Outbound' END
 ,intItemId				= SC.intItemId
 ,strItemNo				= Item.strItemNo
 ,intCompanyLocationId	= SC.intProcessingLocationId
