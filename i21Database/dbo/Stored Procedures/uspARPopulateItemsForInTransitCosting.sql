@@ -169,7 +169,8 @@ INNER JOIN
 		ON LGLD.[intLoadId] = LGL.[intLoadId]
 INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
 		[intInTransitSourceLocationId], [ysnIsUnposted]
-	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+	FROM tblICInventoryTransaction WITH (NOLOCK)
+	WHERE ISNULL([intInTransitSourceLocationId], 0) <> 0) ICIT
 		ON ICIT.[intTransactionId] = LGL.[intLoadId] 
 		AND ICIT.[intTransactionDetailId] = LGLD.[intLoadDetailId] 
 		AND ICIT.[strTransactionId] = LGL.[strLoadNumber] 			 
