@@ -82,11 +82,11 @@ FROM
 												ELSE 0
 											END
 			
-				,CASE 
+				,dblGradeReading			= CASE 
 												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading)
 												WHEN StrgHstry.intBillId IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading)
 												ELSE 'N/A'
-											END COLLATE Latin1_General_CI_AS AS dblGradeReading
+											END
 
 				,dblAmount					= BillDtl.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0)
@@ -226,11 +226,11 @@ FROM
 												WHEN StrgHstry.intBillId	  IS NOT NULL THEN ISNULL(StorageDiscount.dblShrinkPercent, 0)
 												ELSE 0
 											END		
-				,CASE 
+				,dblGradeReading			= CASE 
 												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading)
 												WHEN StrgHstry.intBillId	  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading)
 												ELSE 'N/A'
-											END COLLATE Latin1_General_CI_AS AS dblGradeReading
+											END
 
 				,dblAmount					= BillDtl.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0)
