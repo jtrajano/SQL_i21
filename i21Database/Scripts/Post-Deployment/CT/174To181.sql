@@ -207,3 +207,22 @@ AND SH.intSequenceUsageHistoryId IS NULL
 
 PRINT('END CT-2823 / CT-2822')
 GO
+
+GO
+PRINT('CT-2813')
+
+UPDATE	SH
+SET		SH.strScreenName		=	'Load Schedule',
+		SH.intExternalHeaderId	=	LO.intLoadId,
+		SH.strNumber			=	LO.strLoadNumber
+FROM	tblLGLoadDetail LD 
+JOIN	tblLGLoad					LO	ON	LO.intLoadId			=	LD.intLoadId
+JOIN	tblCTSequenceUsageHistory	SH	ON	SH.intContractDetailId	=	LD.intSContractDetailId 
+										AND LD.intLoadDetailId		=	SH.intExternalId
+JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	SH.intContractHeaderId
+WHERE	strScreenName	=	'Inventory Shipment'
+AND		intTransUsedBy	=	1
+AND		LO.ysnPosted	=	1
+
+PRINT('END CT-2813')
+GO
