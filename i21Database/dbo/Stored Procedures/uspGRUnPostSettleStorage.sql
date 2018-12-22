@@ -24,9 +24,7 @@ BEGIN TRY
 	DECLARE @LocationId INT
 	DECLARE @ItemLocationId INT
 	DECLARE @dblUOMQty DECIMAL(24, 10)
-	DECLARE @CommodityStockUomId INT
 	DECLARE @intInventoryItemStockUOMId INT
-	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
@@ -34,17 +32,19 @@ BEGIN TRY
 	
 	DECLARE @isParentSettleStorage AS BIT
 
+	DECLARE @intDecimalPrecision INT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	SELECT @intSettleStorageId = intSettleStorageId,@UserId=intEntityUserSecurityId
+	SELECT 
+		@intSettleStorageId = intSettleStorageId
+		,@UserId			= intEntityUserSecurityId
 	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT)
 	
 	SET @intParentSettleStorageId = @intSettleStorageId
 
-	-- SELECT @UserName = strUserName
-	-- FROM tblSMUserSecurity
-	-- WHERE [intEntityId] = @UserId
+	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -63,13 +63,13 @@ BEGIN TRY
 		--check first if the settle storage being deleted is the parent, then its children should be deleted first
 		SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
 		FROM tblGRSettleStorage
-		WHERE intParentSettleStorageId =@intParentSettleStorageId
+		WHERE intParentSettleStorageId = @intParentSettleStorageId
 
-		SELECT @BillId = intBillId
-			,@TicketNo = strStorageTicket
-			,@ItemId = intItemId
-			,@LocationId = intCompanyLocationId
-			,@CommodityStockUomId=intCommodityStockUomId
+		SELECT 
+			@BillId					= intBillId
+			,@TicketNo				= strStorageTicket
+			,@ItemId				= intItemId
+			,@LocationId			= intCompanyLocationId
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
@@ -79,35 +79,36 @@ BEGIN TRY
 		BEGIN
 			SELECT @intSettleStorageId = MIN(intSettleStorageId)
 			FROM tblGRSettleStorage
-			WHERE intParentSettleStorageId =@intParentSettleStorageId
+			WHERE intParentSettleStorageId = @intParentSettleStorageId
 			
 			WHILE @intSettleStorageId >0
 			BEGIN
 				
-				SET @strXml=NULL				
-				SET @strXml=N'<root><intSettleStorageId>'+LTRIM(@intSettleStorageId)+'</intSettleStorageId><intEntityUserSecurityId>'+LTRIM(@UserId)+'</intEntityUserSecurityId></root>'
+				SET @strXml = NULL				
+				SET @strXml = N'<root><intSettleStorageId>'+LTRIM(@intSettleStorageId)+'</intSettleStorageId><intEntityUserSecurityId>'+LTRIM(@UserId)+'</intEntityUserSecurityId></root>'
 				EXEC uspGRUnPostSettleStorage @strXml
 
 				SELECT @intSettleStorageId = MIN(intSettleStorageId)
 				FROM tblGRSettleStorage
-				WHERE intParentSettleStorageId =@intParentSettleStorageId AND intSettleStorageId > @intSettleStorageId
+				WHERE intParentSettleStorageId = @intParentSettleStorageId
+					AND intSettleStorageId > @intSettleStorageId
 			END
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId=@intParentSettleStorageId
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 		END
 		ELSE
 		BEGIN
 
-			SELECT @dblUOMQty=dblUnitQty 
+			SELECT 
+				@dblUOMQty						= dblUnitQty
+				,@intInventoryItemStockUOMId	= intItemUOMId
 			FROM tblICItemUOM 
-			WHERE intItemUOMId=@CommodityStockUomId
+			WHERE intItemId = @ItemId
+				AND ysnStockUnit = 1
 
 			SELECT @ItemLocationId = intItemLocationId
 			FROM tblICItemLocation
-			WHERE intItemId = @ItemId AND intLocationId = @LocationId
-
-			SELECT @intInventoryItemStockUOMId = intItemUOMId
-			FROM tblICItemUOM
-			WHERE intItemId = @ItemId AND ysnStockUnit=1
+			WHERE intItemId = @ItemId 
+				AND intLocationId = @LocationId
 
 			--5. NEW REQUIREMENT: include the payment when unposting the settle storage
 			IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @BillId)
@@ -149,9 +150,17 @@ BEGIN TRY
 				,intContractDetailId	  = UH.intContractDetailId 
 				,dblUnits				  = UH.dblTransactionQuantity
 			FROM tblCTSequenceUsageHistory UH
-			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
-			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
-			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType IN ('From Scale','From Delivery Sheet')
+			JOIN tblGRSettleStorageTicket SST 
+				ON SST.intSettleStorageTicketId = UH.intExternalId 
+					AND SST.intSettleStorageId = UH.intExternalHeaderId
+			JOIN tblGRStorageHistory SH 
+				ON SH.intContractHeaderId = UH.intContractHeaderId 
+					AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			WHERE UH.intExternalHeaderId = @intSettleStorageId 
+				AND UH.strScreenName = 'Settle Storage' 
+				AND UH.strFieldName = 'Balance' 
+				AND SH.strType IN ('From Scale','From Delivery Sheet')
+
 			UNION ALL
 		
 			SELECT  DISTINCT
@@ -162,11 +171,19 @@ BEGIN TRY
 				,intContractDetailId       = UH.intContractDetailId 
 				,dblUnits                  = UH.dblTransactionQuantity
 			FROM tblCTSequenceUsageHistory UH
-			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
-			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId AND SH.intSettleStorageId = UH.intExternalHeaderId
-			LEFT JOIN tblCTContractDetail CD ON
-				CD.intContractDetailId = UH.intContractDetailId
-			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType = 'Settlement'
+			JOIN tblGRSettleStorageTicket SST 
+				ON SST.intSettleStorageTicketId = UH.intExternalId 
+					AND SST.intSettleStorageId = UH.intExternalHeaderId
+			JOIN tblGRStorageHistory SH 
+				ON SH.intContractHeaderId = UH.intContractHeaderId 
+					AND SH.intCustomerStorageId = SST.intCustomerStorageId 
+					AND SH.intSettleStorageId = UH.intExternalHeaderId
+			LEFT JOIN tblCTContractDetail CD 
+				ON CD.intContractDetailId = UH.intContractDetailId
+			WHERE UH.intExternalHeaderId = @intSettleStorageId 
+				AND UH.strScreenName = 'Settle Storage' 
+				AND UH.strFieldName = 'Balance' 
+				AND SH.strType = 'Settlement'
 
 			BEGIN
 				DECLARE @intDepletionKey INT
@@ -189,10 +206,10 @@ BEGIN TRY
 					SET @intItemUOMId = NULL
 
 					SELECT 
-						 @intSettleStorageTicketId = intSettleStorageTicketId
-						,@intPricingTypeId = intPricingTypeId
-						,@intContractDetailId = intContractDetailId
-						,@dblUnits = dblUnits
+						 @intSettleStorageTicketId	= intSettleStorageTicketId
+						,@intPricingTypeId			= intPricingTypeId
+						,@intContractDetailId		= intContractDetailId
+						,@dblUnits					= dblUnits
 					FROM @tblContractIncrement
 					WHERE intDepletionKey = @intDepletionKey
 
@@ -229,6 +246,7 @@ BEGIN TRY
 
 				UPDATE CS
 				SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
+					,CS.dblGrossQuantity = CS.dblGrossQuantity + ISNULL(GS.dblGrossSettledUnits,0)
 				FROM tblGRCustomerStorage CS
 				JOIN (
 						SELECT intCustomerStorageId
@@ -237,6 +255,12 @@ BEGIN TRY
 						WHERE intSettleStorageId = @intSettleStorageId
 						GROUP BY intCustomerStorageId
 					) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+				OUTER APPLY (
+					SELECT dblGrossSettledUnits
+					FROM tblGRSettleStorageTicket
+					WHERE intSettleStorageId = @intSettleStorageId
+						AND intCustomerStorageId = CS.intCustomerStorageId
+				) GS
 			END
 
 			--3. OnHand and OnStore Increment
@@ -304,10 +328,10 @@ BEGIN TRY
 
 				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 				BEGIN 
-							EXEC dbo.uspGLBookEntries @GLEntries, 0 
+					EXEC dbo.uspGLBookEntries @GLEntries, 0 
 				END
 
-		-- Unpost storage stocks. 
+				-- Unpost storage stocks. 
 				 EXEC	
 				 @intReturnValue = dbo.uspICUnpostStorage
 				 @intSettleStorageId
@@ -426,9 +450,9 @@ BEGIN TRY
 					,[intSettleStorageId]   = NULL
 					,[strVoucher]           = strVoucher
 				FROM tblGRStorageHistory
-				WHERE intSettleStorageId=@intSettleStorageId
+				WHERE intSettleStorageId = @intSettleStorageId
 
-				UPDATE tblGRStorageHistory SET intSettleStorageId=NULL,intBillId=NULL WHERE intSettleStorageId=@intSettleStorageId
+				UPDATE tblGRStorageHistory SET intSettleStorageId = NULL,intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 
 			END
 
@@ -438,7 +462,7 @@ BEGIN TRY
 				SELECT @intParentSettleStorageId = intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 			END
 
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 			
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN

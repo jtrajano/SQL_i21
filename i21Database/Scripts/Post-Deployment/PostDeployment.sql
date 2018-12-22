@@ -345,6 +345,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\InsertStorageHistoryTypeTransaction.sql
 :R .\GR\FixStorageHistoryData.sql
 :R .\GR\MigrateTransferStorageData.sql
+:R .\GR\GR_GrossQuantityInStorage.sql
+:R .\GR\GR_InsertReadingRanges.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuGRGetStorageItem]
+﻿CREATE VIEW [dbo].[vyuGRGetStorageItem]
 AS  
 SELECT DISTINCT
     CS.intEntityId
@@ -8,10 +7,10 @@ SELECT DISTINCT
     ,Item.strItemNo
     ,Item.strDescription
     ,ST.ysnCustomerStorage
-    ,Com.ysnExchangeTraded
-    ,intFutureMarketId = ISNULL(Com.intFutureMarketId,0)
-    ,Com.dblPriceCheckMin
-    ,Com.dblPriceCheckMax
+    ,COM.ysnExchangeTraded
+    ,intFutureMarketId = ISNULL(COM.intFutureMarketId,0)
+    ,COM.dblPriceCheckMin
+    ,COM.dblPriceCheckMax
     ,CS.intCommodityId
     ,intCommodityStockUomId = UOM.intItemUOMId
     ,intItemUOMId = ISNULL(CS.intItemUOMId, UOM.intItemUOMId)
@@ -35,14 +34,11 @@ SELECT DISTINCT
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId
+JOIN tblICItemUOM UOM 
+    ON UOM.intItemId = Item.intItemId
+		AND UOM.ysnStockUnit = 1
+JOIN tblICCommodity COM
+	ON COM.intCommodityId = Item.intCommodityId
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-JOIN tblICCommodity Com 
-    ON Com.intCommodityId = Item.intCommodityId
-JOIN tblICCommodityUnitMeasure CU 
-    ON CU.intCommodityId = Com.intCommodityId 
-        AND CU.ysnStockUnit = 1
-JOIN tblICItemUOM UOM 
-    ON UOM.intItemId = Item.intItemId 
-        AND UOM.intUnitMeasureId = CU.intUnitMeasureId
 WHERE CS.dblOpenBalance > 0 
