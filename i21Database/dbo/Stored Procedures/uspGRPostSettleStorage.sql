@@ -520,18 +520,10 @@ BEGIN TRY
 					UPDATE tblGRSettleStorage SET intCompanyLocationId = @intCompanyLocationId WHERE intSettleStorageId = @intTempSettleStorageId
 				END
 
-				SELECT @intShipFrom = ISNULL(DS.intFarmFieldId, EL.intEntityLocationId) 
-					,@shipFromEntityId = DS.intEntityId
-				FROM tblSCDeliverySheetSplit DSS
-				JOIN tblSCDeliverySheet DS
-					ON DS.intDeliverySheetId = DSS.intDeliverySheetId
-				LEFT JOIN tblEMEntityLocation EL 
-					ON EL.intEntityId = DS.intEntityId 
-						AND EL.ysnDefaultLocation = 1
-				JOIN tblGRCustomerStorage CS
-					ON DSS.intDeliverySheetId = CS.intDeliverySheetId
-						AND CS.intEntityId = DSS.intEntityId
-				WHERE CS.intCustomerStorageId = @intCustomerStorageId
+				--SELECT @intShipFrom = intShipFromLocationId
+				--	,@shipFromEntityId = intShipFromEntityId
+				--FROM tblGRCustomerStorage
+				--WHERE intCustomerStorageId = @intCustomerStorageId
 
 				--Storage Due		
 				SET @dblStorageDuePerUnit = 0
@@ -923,7 +915,10 @@ BEGIN TRY
 				DELETE 
 				FROM @GLEntries
 
-				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+				SELECT 
+					@strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+					,@intShipFrom = intShipFromLocationId
+					,@shipFromEntityId = intShipFromEntityId
 				FROM tblGRCustomerStorage CS 
 				JOIN tblGRStorageType ST 
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId

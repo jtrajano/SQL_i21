@@ -347,6 +347,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\MigrateTransferStorageData.sql
 :R .\GR\GR_GrossQuantityInStorage.sql
 :R .\GR\GR_InsertReadingRanges.sql
+:R .\GR\GR_FarmField.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

@@ -43,5 +43,7 @@
     [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intTransferStorageSplitId] INT NULL,
 	[ysnTransferStorage] BIT NULL,
-	[dblGrossQuantity] NUMERIC(38, 20) NULL-- Distributed Quantity (Gross)
+	[dblGrossQuantity] NUMERIC(38, 20) NULL, 	-- Distributed Quantity (Gross)
+	[intShipFromLocationId] INT NULL,			--Ship From (for Voucher); Farm/Field in DS or Entity Location
+	[intShipFromEntityId] INT NULL				--Ship From Entity (for Voucher)
 )
