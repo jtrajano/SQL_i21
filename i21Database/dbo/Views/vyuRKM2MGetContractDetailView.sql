@@ -49,7 +49,7 @@ CH.dblNoOfLots dblHeaderNoOfLots
 ,CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency,    
        CD.intCompanyLocationId,       
        MO.ysnExpired,    
-CASE   WHEN   CD.intPricingTypeId = 2    
+(CASE   WHEN   CD.intPricingTypeId = 2    
               THEN   CASE   WHEN   ISNULL(PF.[dblTotalLots],0) = 0     
                                          THEN   'Unpriced'    
                            ELSE    
@@ -64,7 +64,7 @@ CASE   WHEN   CD.intPricingTypeId = 2
               WHEN   CD.intPricingTypeId = 1    
                            THEN   'Priced'    
               ELSE   ''    
-END           AS strPricingStatus, CA.strDescription as strOrgin,isnull(ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation ,FM.intUnitMeasureId  intMarketUOMId,FM.intCurrencyId intMarketCurrencyId
+END) COLLATE Latin1_General_CI_AS AS strPricingStatus, CA.strDescription as strOrgin,isnull(ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation ,FM.intUnitMeasureId  intMarketUOMId,FM.intCurrencyId intMarketCurrencyId
     
 FROM   tblCTContractHeader                             CH         
        JOIN   tblCTContractDetail                      CD     ON     CH.intContractHeaderId            =      CD.intContractHeaderId            and intContractStatusId not in(2,3,6)     

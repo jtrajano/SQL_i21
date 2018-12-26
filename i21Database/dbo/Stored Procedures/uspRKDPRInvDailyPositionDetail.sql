@@ -994,19 +994,19 @@ END
 if isnull(@intVendorId,0) = 0
 BEGIN
 
-SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
+SELECT intRow,intSeqId,strSeqHeader COLLATE Latin1_General_CI_AS, strCommodityCode COLLATE Latin1_General_CI_AS,strType COLLATE Latin1_General_CI_AS,dblTotal ,strUnitMeasure COLLATE Latin1_General_CI_AS, intCollateralId,strLocationName COLLATE Latin1_General_CI_AS, strCustomer COLLATE Latin1_General_CI_AS,
+					intReceiptNo,intContractHeaderId,strContractNumber COLLATE Latin1_General_CI_AS, dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+					strCustomerReference COLLATE Latin1_General_CI_AS, strDistributionOption COLLATE Latin1_General_CI_AS, strDPAReceiptNo COLLATE Latin1_General_CI_AS, dblDiscDue ,[Storage Due] COLLATE Latin1_General_CI_AS as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId COLLATE Latin1_General_CI_AS, strTicket COLLATE Latin1_General_CI_AS,
+					dtmDeliveryDate ,dtmTicketDateTime,strItemNo COLLATE Latin1_General_CI_AS,strTruckName COLLATE Latin1_General_CI_AS,strDriverName COLLATE Latin1_General_CI_AS
 FROM @FinalTable WHERE dblTotal <> 0
  ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END
 ELSE
 BEGIN
-SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
+SELECT intRow,intSeqId,strSeqHeader COLLATE Latin1_General_CI_AS, strCommodityCode COLLATE Latin1_General_CI_AS,strType COLLATE Latin1_General_CI_AS,dblTotal ,strUnitMeasure COLLATE Latin1_General_CI_AS, intCollateralId,strLocationName COLLATE Latin1_General_CI_AS,strCustomer COLLATE Latin1_General_CI_AS,
+					intReceiptNo,intContractHeaderId,strContractNumber COLLATE Latin1_General_CI_AS,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+					strCustomerReference COLLATE Latin1_General_CI_AS,strDistributionOption COLLATE Latin1_General_CI_AS,strDPAReceiptNo COLLATE Latin1_General_CI_AS,dblDiscDue ,[Storage Due] COLLATE Latin1_General_CI_AS as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId COLLATE Latin1_General_CI_AS, strTicket COLLATE Latin1_General_CI_AS,
+					dtmDeliveryDate ,dtmTicketDateTime,strItemNo COLLATE Latin1_General_CI_AS,strTruckName COLLATE Latin1_General_CI_AS,strDriverName COLLATE Latin1_General_CI_AS
 FROM @FinalTable WHERE dblTotal <> 0 and strType <> 'Company Titled Stock' and strType not like '%'+@strPurchaseSales+'%'
  ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END

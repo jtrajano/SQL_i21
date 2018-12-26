@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKRealizedPnL  
 AS  
-SELECT TOP 100 PERCENT dblGrossPL1 a, dblFutCommission1 b, convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
+SELECT TOP 100 PERCENT dblGrossPL1 a, dblFutCommission1 b, convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, (strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName) COLLATE Latin1_General_CI_AS MonthOrder,
 dblGrossPL+dblFutCommission  AS dblNetPL,
 * from (
 SELECT *,-dblFutCommission1/ case when ComSubCurrency = 'true' then ComCent else 1 end as dblFutCommission FROM(  

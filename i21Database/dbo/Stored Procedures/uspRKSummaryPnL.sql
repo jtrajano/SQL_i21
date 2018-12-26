@@ -18,17 +18,17 @@ intFutOptTransactionId int
 ,dblLong numeric(24,10)
 ,dblShort numeric(24,10)
 ,dblFutCommission numeric(24,10)
-,strFutMarketName nvarchar(100)
-,strFutureMonth nvarchar(100)
+,strFutMarketName nvarchar(100) COLLATE Latin1_General_CI_AS
+,strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS
 ,dtmTradeDate datetime
-,strInternalTradeNo nvarchar(100)
-,strName nvarchar(100)
-,strAccountNumber nvarchar(100)
-,strBook nvarchar(100)
-,strSubBook nvarchar(100)
-,strSalespersonId nvarchar(100)
-,strCommodityCode nvarchar(100)
-,strLocationName nvarchar(100)
+,strInternalTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS
+,strName nvarchar(100) COLLATE Latin1_General_CI_AS
+,strAccountNumber nvarchar(100) COLLATE Latin1_General_CI_AS
+,strBook nvarchar(100) COLLATE Latin1_General_CI_AS
+,strSubBook nvarchar(100) COLLATE Latin1_General_CI_AS
+,strSalespersonId nvarchar(100) COLLATE Latin1_General_CI_AS
+,strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS
+,strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS
 ,Long1 int
 ,Sell1 int
 ,intNet int
@@ -44,7 +44,7 @@ intFutOptTransactionId int
 ,intFutureMonthId int
 ,intOriginalQty int
 ,intFutOptTransactionHeaderId int
-,MonthOrder nvarchar(100)
+,MonthOrder nvarchar(100) COLLATE Latin1_General_CI_AS
 ,RowNum int
 ,intCommodityId int
 ,ysnExpired bit
@@ -66,21 +66,21 @@ dtmLTransDate DateTime,
 dtmSTransDate DateTime,
 dblLPrice numeric(24,10),
 dblSPrice numeric(24,10),
-strLBrokerTradeNo nvarchar(100),
-strSBrokerTradeNo nvarchar(100),
+strLBrokerTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+strSBrokerTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS,
 dblContractSize numeric(24,10),
 dblFutCommission numeric(24,10),
-strFutMarketName nvarchar(100),
-strFutureMonth nvarchar(100),
+strFutMarketName nvarchar(100) COLLATE Latin1_General_CI_AS,
+strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
 intMatchNo int,
 dtmMatchDate DateTime,
-strName nvarchar(100),
-strAccountNumber nvarchar(100),
-strCommodityCode nvarchar(100),
-strLocationName nvarchar(100),
+strName nvarchar(100) COLLATE Latin1_General_CI_AS,
+strAccountNumber nvarchar(100) COLLATE Latin1_General_CI_AS,
+strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS,
 dblNetPL numeric(24,10),
 intFutureMarketId int,
-MonthOrder nvarchar(100),
+MonthOrder nvarchar(100) COLLATE Latin1_General_CI_AS,
 RowNum int,
 intCommodityId int,
 ysnExpired bit,

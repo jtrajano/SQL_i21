@@ -256,7 +256,7 @@ FROM @List where strContractEndMonth not in (select distinct  @strContractEndMon
 
 IF isnull(@intVendorId,0) = 0
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
+SELECT intSeqNo,intRowNumber,strCommodityCode COLLATE Latin1_General_CI_AS,strContractNumber COLLATE Latin1_General_CI_AS,intContractHeaderId,strInternalTradeNo COLLATE Latin1_General_CI_AS,intFutOptTransactionHeaderId,strType COLLATE Latin1_General_CI_AS,strLocationName COLLATE Latin1_General_CI_AS,strContractEndMonth COLLATE Latin1_General_CI_AS,strContractEndMonthNearBy COLLATE Latin1_General_CI_AS,dblTotal,strUnitMeasure COLLATE Latin1_General_CI_AS,strAccountNumber COLLATE Latin1_General_CI_AS,strTranType COLLATE Latin1_General_CI_AS,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  COLLATE Latin1_General_CI_AS
 FROM @List where dblTotal <> 0 
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo
@@ -264,7 +264,7 @@ FROM @List where dblTotal <> 0
 END
 ELSE
 BEGIN
-SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
+SELECT intSeqNo,intRowNumber,strCommodityCode COLLATE Latin1_General_CI_AS,strContractNumber COLLATE Latin1_General_CI_AS,intContractHeaderId,strInternalTradeNo COLLATE Latin1_General_CI_AS,intFutOptTransactionHeaderId,strType COLLATE Latin1_General_CI_AS,strLocationName COLLATE Latin1_General_CI_AS,strContractEndMonth COLLATE Latin1_General_CI_AS,strContractEndMonthNearBy COLLATE Latin1_General_CI_AS,dblTotal,strUnitMeasure COLLATE Latin1_General_CI_AS,strAccountNumber COLLATE Latin1_General_CI_AS,strTranType COLLATE Latin1_General_CI_AS,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType COLLATE Latin1_General_CI_AS 
 FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' 
 --ORDER BY CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END asc, 
 --case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc,intSeqNo

@@ -1314,7 +1314,7 @@ SELECT intRowNumber
 	,strFutureMonth
 	,cast(CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
 		WHEN  strFutureMonth ='Total' THEN '01/01/9999'
-		else CONVERT(DATETIME,'01 '+strFutureMonth) END as datetime)strFutureMonthOrder
+		else CONVERT(DATETIME,'01 '+strFutureMonth) END as datetime) COLLATE Latin1_General_CI_AS strFutureMonthOrder
 	,strAccountNumber
 	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
 	,strTradeNo

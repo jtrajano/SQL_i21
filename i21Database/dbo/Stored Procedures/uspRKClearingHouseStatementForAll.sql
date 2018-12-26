@@ -42,13 +42,25 @@ SELECT @strAccountNumber = [from] FROM @temp_xml_table	WHERE [fieldname] = 'strA
 SELECT @dtmTransactionFromDate = [from] FROM @temp_xml_table WHERE [fieldname] = 'dtmTransactionFromDate'
 SELECT @dtmTransactionToDate = [from] FROM @temp_xml_table WHERE [fieldname] = 'dtmTransactionToDate'
 
-SELECT *,'Trades between ''' +Left(replace(convert(varchar(9), @dtmTransactionFromDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionFromDate, 8),9) + ''' and ''' + Left(replace(convert(varchar(9), @dtmTransactionToDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionToDate, 8),9)+'''' as strDateHeading,
-@strAccountNumber strAccountNumber,@strName strBroker,@dtmTransactionFromDate dtmTransactionFromDate ,@dtmTransactionToDate as dtmTransactionToDate FROM 
-(
-SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) LdtmTransactionDate,
-	   intNoOfContract LintNoOfContract,strFutureMonth LstrFutureMonth,dblPrice LdblPrice,
-		null SdtmTransactionDate,null SintNoOfContract,null SstrFutureMonth,null SdblPrice,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*intNoOfContract as dblFutCommission
-		
+SELECT *
+	,'Trades between ''' +Left(replace(convert(varchar(9), @dtmTransactionFromDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionFromDate, 8),9) + ''' and ''' + Left(replace(convert(varchar(9), @dtmTransactionToDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionToDate, 8),9)+'''' COLLATE Latin1_General_CI_AS as strDateHeading
+	,@strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+	,@strName COLLATE Latin1_General_CI_AS strBroker
+	,@dtmTransactionFromDate dtmTransactionFromDate
+	,@dtmTransactionToDate as dtmTransactionToDate
+FROM (
+	SELECT strInternalTradeNo COLLATE Latin1_General_CI_AS
+		,strFutMarketName COLLATE Latin1_General_CI_AS
+		,dtmTransactionDate
+		,Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) LdtmTransactionDate
+		,intNoOfContract LintNoOfContract
+		,strFutureMonth COLLATE Latin1_General_CI_AS LstrFutureMonth
+		,dblPrice LdblPrice
+		,null SdtmTransactionDate
+		,null SintNoOfContract
+		,null SstrFutureMonth
+		,null SdblPrice
+		,CASE WHEN bc.intFuturesRateType = 1 then 0 else -isnull(bc.dblFutCommission, 0) end * intNoOfContract as dblFutCommission
 FROM tblRKFutOptTransaction t
 JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell='Buy'
@@ -59,11 +71,18 @@ WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND
 convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110)
 
 
-UNION
-
-SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,null LdtmTransactionDate,null LintNoOfContract,null LstrFutureMonth,null LdblPrice,
-LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) SdtmTransactionDate,
-		intNoOfContract SintNoOfContract,strFutureMonth SstrFutureMonth,dblPrice SdblPrice,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*intNoOfContract as dblFutCommission  
+UNION ALL SELECT strInternalTradeNo COLLATE Latin1_General_CI_AS
+	,strFutMarketName COLLATE Latin1_General_CI_AS
+	,dtmTransactionDate
+	,null LdtmTransactionDate
+	,null LintNoOfContract
+	,null LstrFutureMonth
+	,null LdblPrice
+	,LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) SdtmTransactionDate
+	,intNoOfContract SintNoOfContract
+	,strFutureMonth COLLATE Latin1_General_CI_AS SstrFutureMonth
+	,dblPrice SdblPrice
+	,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*intNoOfContract as dblFutCommission
 FROM tblRKFutOptTransaction t
 JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell='Sell'

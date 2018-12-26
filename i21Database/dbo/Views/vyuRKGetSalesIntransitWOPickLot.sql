@@ -9,7 +9,7 @@ SELECT strShipmentNumber as strTicket,strContractNumber,
 		(isnull(dblShipmentQty,0)-isnull(dblInvoiceQty,0)) dblBalanceToInvoice,intCommodityId,strContractItemName as  strItemName, intCommodityUnitMeasureId as intUnitMeasureId
 		,intEntityId,strName as strCustomerReference	
 FROM(
-				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,
+				SELECT b.strShipmentNumber, (d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber,
 				c.dblQuantity dblShipmentQty,
 				il.intLocationId intCompanyLocationId,
 				cl.strLocationName strLocationName,

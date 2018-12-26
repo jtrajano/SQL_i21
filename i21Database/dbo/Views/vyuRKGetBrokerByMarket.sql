@@ -13,7 +13,7 @@ JOIN tblEMEntity e on e.intEntityId=ba.intEntityId and it.intInstrumentTypeId<>0
 UNION
 SELECT DISTINCT bac.intFutureMarketId,strFutMarketName,ba.intEntityId,e.strName,
 ba.intBrokerageAccountId,
-strAccountNumber,1,'Futures',cmm.intCommodityId
+strAccountNumber,1,'Futures' COLLATE Latin1_General_CI_AS,cmm.intCommodityId
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 --JOIN tblRKBrokersAccountMarketMapping amm on amm.intBrokerageAccountId=ba.intBrokerageAccountId
@@ -24,7 +24,7 @@ JOIN tblEMEntity e on e.intEntityId=ba.intEntityId and it.intInstrumentTypeId=0
 UNION
 SELECT DISTINCT bac.intFutureMarketId,strFutMarketName,ba.intEntityId,e.strName,
 ba.intBrokerageAccountId,
-strAccountNumber,2,'Options',cmm.intCommodityId
+strAccountNumber,2,'Options' COLLATE Latin1_General_CI_AS,cmm.intCommodityId
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 --JOIN tblRKBrokersAccountMarketMapping amm on amm.intBrokerageAccountId=ba.intBrokerageAccountId

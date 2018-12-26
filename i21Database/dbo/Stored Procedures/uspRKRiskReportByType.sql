@@ -36,7 +36,7 @@ DECLARE @BrokerageAttribute AS TABLE
 (	intAttributeId INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutureMarketId int,
 	intBrokersAccountMarketMapId  INT,
-	strCommodityAttributeId nvarchar(max),
+	strCommodityAttributeId nvarchar(max) COLLATE Latin1_General_CI_AS,
 	intBrokerageAccountId int
 )
 
@@ -44,7 +44,7 @@ DECLARE @BrokerageAttributeFinal AS TABLE
 (	intAttributeId INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutureMarketId int,
 	intBrokerageAccountId  INT,
-	strCommodityAttributeId nvarchar(max)
+	strCommodityAttributeId nvarchar(max) COLLATE Latin1_General_CI_AS
 )
 INSERT INTO @BrokerageAttribute
 SELECT mm.intFutureMarketId,intBrokersAccountMarketMapId,strCommodityAttributeId,intBrokerageAccountId FROM @Market m
@@ -71,13 +71,13 @@ END
 
 SELECT * INTO #ContractTransaction from (     
 SELECT fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,  
-  strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
+  strContractType+' - '+isnull(ca.strDescription,'') COLLATE Latin1_General_CI_AS as strAccountNumber,  
       dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
   sum(
   case when intPricingTypeId=1 then 
   case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
   else 0 END) OVER (PARTITION BY cv.intContractDetailId )AS dblNoOfContract,  
-  LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
+  LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) COLLATE Latin1_General_CI_AS as strTradeNo, 
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
@@ -216,9 +216,9 @@ WHERE t.intFutureMarketId IN (select intFutureMarketId from @Market)
 DECLARE @FinalResult AS TABLE 
 (	    
 	intRowNum INT IDENTITY(1,1) PRIMARY KEY, 
-	strFutMarketName  nvarchar(100),
-	strFutMarketNameH  nvarchar(100),
-	strFutureMonth nvarchar(100),
+	strFutMarketName  nvarchar(100) COLLATE Latin1_General_CI_AS,
+	strFutMarketNameH  nvarchar(100) COLLATE Latin1_General_CI_AS,
+	strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
 	dblTotalPurchase numeric(24,10),
 	dblTotalSales numeric(24,10),
 	dblUnfixedPurchase numeric(24,10), 
@@ -228,16 +228,16 @@ DECLARE @FinalResult AS TABLE
 	intFutureMarketId int,
 	intFutureMonthId int,
 	intCAttributeId int,
-	strProductType nvarchar(100),
-	strProductTypeH nvarchar(100),
-	strColor nvarchar(50),
+	strProductType nvarchar(100) COLLATE Latin1_General_CI_AS,
+	strProductTypeH nvarchar(100) COLLATE Latin1_General_CI_AS,
+	strColor nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intMarketSumDummyId int
 )
 
 DECLARE @ContractTemp AS TABLE 
 (	    
-	strFutMarketName  nvarchar(100),
-	strFutureMonth nvarchar(100),
+	strFutMarketName  nvarchar(100) COLLATE Latin1_General_CI_AS,
+	strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
 	dblTotalPurchase numeric(24,10),
 	dblTotalSales numeric(24,10),
 	dblUnfixedPurchase numeric(24,10), 

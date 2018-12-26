@@ -11,21 +11,21 @@ AS
 DECLARE @tblResult TABLE
 (Id INT identity(1,1),
 dtmDate datetime,
-tranShipmentNumber nvarchar(50),
+tranShipmentNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 tranShipQty NUMERIC(24,10),
-tranReceiptNumber nvarchar(50),
+tranReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 tranRecQty NUMERIC(24,10),
 BalanceForward NUMERIC(24,10),
-tranAdjNumber nvarchar(50),
+tranAdjNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblAdjustmentQty NUMERIC(24,10),
-tranInvoiceNumber  nvarchar(50),
+tranInvoiceNumber  nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblInvoiceQty  NUMERIC(24,10),
-tranCountNumber nvarchar(50),
+tranCountNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblCountQty NUMERIC(24,10),
-strDistributionOption nvarchar(50),
-strShipDistributionOption nvarchar(50),
-strAdjDistributionOption nvarchar(50),
-strCountDistributionOption nvarchar(50),
+strDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS,
+strShipDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS,
+strAdjDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS,
+strCountDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS,
 intInventoryReceiptId int,
 intInventoryShipmentId int,
 intInventoryAdjustmentId int,
@@ -187,21 +187,28 @@ and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItem
 
  )t
 
-SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
-    dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber	
-                                            when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
-                                            when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
-											when isnull(tranInvoiceNumber,'') <> '' then tranInvoiceNumber
-											when isnull(tranCountNumber,'') <> '' then tranCountNumber end [strReceiptNumber],
-       
-    CASE WHEN isnull(strDistributionOption,'') <> '' THEN strDistributionOption
-                                            WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption
-                                            END 
-                                            strDistribution,
-       tranRecQty [dblIN],tranShipmentNumber [strShipTicketNo],
-	   isnull(tranShipQty,0) + isnull(dblInvoiceQty,0)   [dblOUT],
-	   tranAdjNumber [strAdjNo],
-       dblAdjustmentQty [dblAdjQty],tranCountNumber [strCountNumber],dblCountQty [dblCountQty],BalanceForward dblDummy,
-(SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
-	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId
+SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum
+	, dtmDate [dtmDate]
+	,case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber
+		when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
+		when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
+		when isnull(tranInvoiceNumber,'') <> '' then tranInvoiceNumber
+		when isnull(tranCountNumber,'') <> '' then tranCountNumber end COLLATE Latin1_General_CI_AS [strReceiptNumber]
+	,CASE WHEN isnull(strDistributionOption,'') <> '' THEN strDistributionOption
+		WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption END COLLATE Latin1_General_CI_AS strDistribution
+	,tranRecQty [dblIN]
+	,tranShipmentNumber COLLATE Latin1_General_CI_AS [strShipTicketNo]
+	,isnull(tranShipQty,0) + isnull(dblInvoiceQty,0)   [dblOUT]
+	,tranAdjNumber COLLATE Latin1_General_CI_AS [strAdjNo]
+	,dblAdjustmentQty [dblAdjQty]
+	,tranCountNumber COLLATE Latin1_General_CI_AS [strCountNumber]
+	,dblCountQty [dblCountQty]
+	,BalanceForward dblDummy
+	,(SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward
+	,strShipDistributionOption COLLATE Latin1_General_CI_AS
+	,intInventoryReceiptId
+	,intInventoryShipmentId
+	,intInventoryAdjustmentId
+	,intInventoryCountId
+	,intInvoiceId
 FROM @tblResult T1

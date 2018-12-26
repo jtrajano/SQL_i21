@@ -10,7 +10,7 @@ declare @strCommodityCode nvarchar(100)
 select @strCommodityCode=strCommodityCode from tblICCommodity WHERE intCommodityId=@intCommodityId
 
 SELECT 1 AS intSeqId
-              ,'Ownership' AS [strType]
+              ,'Ownership' COLLATE Latin1_General_CI_AS AS [strType]
               ,ISNULL(invQty, 0) + ISNULL(ReserveQty, 0) + ISNULL(InTransite, 0) + (isnull(dblPurchase,0) - ISNULL(dblSales,0)) AS dblTotal into #temp
        FROM (
               SELECT (
@@ -87,11 +87,11 @@ SELECT 1 AS intSeqId
 
 UNION
 SELECT 2 AS intSeqId
-              ,'Delayed Price' AS [strType],0 AS dblTotal 
+              ,'Delayed Price' COLLATE Latin1_General_CI_AS AS [strType],0 AS dblTotal 
 
 UNION
 SELECT 3 AS intSeqId
-              ,'Purchase Basis Delivery' AS [strType],
+              ,'Purchase Basis Delivery' COLLATE Latin1_General_CI_AS AS [strType],
        sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(ris.dblReceived,0)),0)) AS dblTotal 
 FROM tblICInventoryReceipt r
 INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -104,7 +104,7 @@ ANd ri.intItemId = case when isnull(@intItemId,0) = 0 then ri.intItemId else @in
 UNION
 
 SELECT 4 AS intSeqId
-              ,'Sales Basis Delivery' AS [strType],
+              ,'Sales Basis Delivery' COLLATE Latin1_General_CI_AS AS [strType],
        sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(ri.dblQuantity,0)),0)) AS dblTotal 
   FROM tblICInventoryShipment r  
   INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
@@ -115,4 +115,4 @@ SELECT 4 AS intSeqId
   ANd ri.intItemId = case when isnull(@intItemId,0) = 0 then ri.intItemId else @intItemId end
   AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
   
-  SELECT @strCommodityCode,'Inventory' strType,'Inventory' as strSecondSubHeading,strType as strSubHeading,'Inventory' as strMonth, round(isnull(dblTotal,0),4) dblTotal FROM #temp
+  SELECT @strCommodityCode,'Inventory' COLLATE Latin1_General_CI_AS strType,'Inventory' COLLATE Latin1_General_CI_AS as strSecondSubHeading,strType as strSubHeading,'Inventory' COLLATE Latin1_General_CI_AS as strMonth, round(isnull(dblTotal,0),4) dblTotal FROM #temp

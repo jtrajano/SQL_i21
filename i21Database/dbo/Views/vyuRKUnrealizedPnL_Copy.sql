@@ -2,7 +2,7 @@
 
 AS  
  
-SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from 
+SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, (strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName) COLLATE Latin1_General_CI_AS MonthOrder,* from 
 (SELECT *,(GrossPnL-dblFutCommission)  NetPnL FROM (  
 SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*dblContractSize/ case when ysnSubCurrency = 'true' then intCent else 1 end  GrossPnL,isnull(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice,  
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  

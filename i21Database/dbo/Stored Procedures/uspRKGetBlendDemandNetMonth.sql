@@ -7,10 +7,10 @@ DECLARE @DemandQty as Table (
      dblQuantity  numeric(24,10),  
      intUOMId  int,  
      dtmPeriod  datetime,  
-     strPeriod  nvarchar(200),
-	 strItemName nvarchar(200),
+     strPeriod  nvarchar(200) COLLATE Latin1_General_CI_AS,
+	 strItemName nvarchar(200) COLLATE Latin1_General_CI_AS,
 	 intItemId int,
-	 strDescription nvarchar(200)
+	 strDescription nvarchar(200) COLLATE Latin1_General_CI_AS
      )  
 
 DECLARE @DemandFinal as Table (  
@@ -18,10 +18,10 @@ DECLARE @DemandFinal as Table (
      dblQuantity  numeric(24,10),  
      intUOMId  int,  
      dtmPeriod  datetime,  
-     strPeriod  nvarchar(200),
-	 strItemName nvarchar(200),
+     strPeriod  nvarchar(200) COLLATE Latin1_General_CI_AS,
+	 strItemName nvarchar(200) COLLATE Latin1_General_CI_AS,
 	 intItemId int,
-	 strDescription nvarchar(200)
+	 strDescription nvarchar(200) COLLATE Latin1_General_CI_AS
      )
 
 INSERT INTO @DemandQty

@@ -623,9 +623,9 @@ END
 SELECT @mRowNumber = MIN(intFutOptTransactionId)	FROM tblRKFutOptTransactionImport	WHERE intFutOptTransactionId > @mRowNumber
 END
 
-SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg, convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
+SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName COLLATE Latin1_General_CI_AS,strAccountNumber COLLATE Latin1_General_CI_AS,strFutMarketName COLLATE Latin1_General_CI_AS,strInstrumentType COLLATE Latin1_General_CI_AS,strCommodityCode COLLATE Latin1_General_CI_AS,strLocationName COLLATE Latin1_General_CI_AS,
+		strSalespersonId COLLATE Latin1_General_CI_AS,strCurrency COLLATE Latin1_General_CI_AS,strBrokerTradeNo COLLATE Latin1_General_CI_AS,strBuySell COLLATE Latin1_General_CI_AS,intNoOfContract,strFutureMonth COLLATE Latin1_General_CI_AS,strOptionMonth COLLATE Latin1_General_CI_AS,strOptionType COLLATE Latin1_General_CI_AS,dblStrike,dblPrice,strReference COLLATE Latin1_General_CI_AS,strStatus COLLATE Latin1_General_CI_AS,
+		convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,strBook COLLATE Latin1_General_CI_AS,strSubBook COLLATE Latin1_General_CI_AS,intConcurrencyId,strErrorMsg COLLATE Latin1_General_CI_AS, convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
 
 DELETE FROM tblRKFutOptTransactionImport_ErrLog
 END TRY

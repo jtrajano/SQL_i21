@@ -34,12 +34,12 @@ DECLARE @tblResult TABLE
 (Id INT identity(1,1),
        intRowNum int,
        dtmDate datetime,
-       [Distribution] nvarchar(50),
+       [Distribution] nvarchar(50) COLLATE Latin1_General_CI_AS,
        [Unpaid IN] NUMERIC(24,10),
        [Unpaid Out] NUMERIC(24,10),
        [Unpaid Balance] NUMERIC(24,10),
        [InventoryBalanceCarryForward] NUMERIC(24,10),
-	   strReceiptNumber nvarchar(50),
+	   strReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	   intReceiptId int
 )
 
@@ -58,7 +58,7 @@ DECLARE @tblFirstResult TABLE
 DECLARE @tblResultFinal TABLE
 (Id INT identity(1,1),
        dtmDate datetime,
-       strItemNo nvarchar(50),
+       strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
        dblUnpaidIn NUMERIC(24,10),
        dblUnpaidOut NUMERIC(24,10),
        dblUnpaidBalance NUMERIC(24,10),
@@ -147,25 +147,25 @@ isnull(dblGNet,0)+isnull(dblHNet,0)+isnull(dblINet,0)+isnull(dblJNet,0)) + dblTo
 ,dblUnpaidBalance from
   (
   SELECT intRowNum,list.dtmDate dtmDate,dblReceiveIn,abs(dblShipOut) dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,  
-    (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) strDistributionA, 	
+    (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) COLLATE Latin1_General_CI_AS strDistributionA, 	
 	[dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblANet],
-	(CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) strDistributionB,
+	(CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) COLLATE Latin1_General_CI_AS strDistributionB,
 	[dblBIn],[dblBOut],(SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblBNet],
-	(CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionC,'') <>'') else strDistributionC end) strDistributionC,
+	(CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionC,'') <>'') else strDistributionC end) COLLATE Latin1_General_CI_AS strDistributionC,
 	[dblCIn],[dblCOut],(SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblCNet],
-	(CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionD,'') <>'') else strDistributionD end) strDistributionD,
+	(CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionD,'') <>'') else strDistributionD end) COLLATE Latin1_General_CI_AS strDistributionD,
 	[dblDIn],[dblDOut],(SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblDNet],
-	(CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionE,'') <>'') else strDistributionE end) strDistributionE,
+	(CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionE,'') <>'') else strDistributionE end) COLLATE Latin1_General_CI_AS strDistributionE,
 	[dblEIn],[dblEOut],(SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblENet],
-	(CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionF,'') <>'') else strDistributionF end) strDistributionF,
+	(CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionF,'') <>'') else strDistributionF end) COLLATE Latin1_General_CI_AS strDistributionF,
 	[dblFIn],[dblFOut],(SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblFNet],
-	(CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionG,'') <>'') else strDistributionG end) strDistributionG,
+	(CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionG,'') <>'') else strDistributionG end) COLLATE Latin1_General_CI_AS strDistributionG,
 	[dblGIn],[dblGOut],(SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblGNet],
-	(CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionH,'') <>'') else strDistributionH end) strDistributionH,
+	(CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionH,'') <>'') else strDistributionH end) COLLATE Latin1_General_CI_AS strDistributionH,
 	[dblHIn],[dblHOut],(SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblHNet],
-	(CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionI,'') <>'') else strDistributionI end) strDistributionI,
+	(CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionI,'') <>'') else strDistributionI end) COLLATE Latin1_General_CI_AS strDistributionI,
 	[dblIIn],[dblIOut],(SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblINet],
-	(CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionJ,'') <>'') else strDistributionJ end) strDistributionJ,
+	(CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionJ,'') <>'') else strDistributionJ end) COLLATE Latin1_General_CI_AS strDistributionJ,
 	[dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
    ,dblUnpaidIn,dblUnpaidOut,dblBalance,dblPaidBalance,dblTotalCompanyOwned,dblUnpaidBalance
   FROM #final list

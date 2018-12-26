@@ -1,23 +1,22 @@
-﻿CREATE PROC uspRKGetContractDetail 
-	@intCommodityId int,
-	@intLocationId int = NULL,
-	@intSeqId int
+﻿CREATE PROC uspRKGetContractDetail
+	@intCommodityId int
+	, @intLocationId int = NULL
+	, @intSeqId int
+
 AS
-declare  @tblTemp table
-			(intContractDetailId int,
-			strLocationName nvarchar(50),
-			strContractNumber nvarchar(50),
-			intContractSeq int,
-			strEntityName nvarchar(100),
-			dtmEndDate datetime,
-			Comments nvarchar(500),
-			strShipVia nvarchar(500),
-			dblCashPrice numeric(24,10),
-			strPricingType nvarchar(50),
-			strCurrency nvarchar(50),
-			dblTotal numeric(24,10),
-			intCommodityId int
-			)
+declare  @tblTemp table (intContractDetailId int
+	, strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS
+	, strContractNumber nvarchar(50) COLLATE Latin1_General_CI_AS
+	, intContractSeq int
+	, strEntityName nvarchar(100) COLLATE Latin1_General_CI_AS
+	, dtmEndDate datetime
+	, Comments nvarchar(500) COLLATE Latin1_General_CI_AS
+	, strShipVia nvarchar(500) COLLATE Latin1_General_CI_AS
+	, dblCashPrice numeric(24,10)
+	, strPricingType nvarchar(50) COLLATE Latin1_General_CI_AS
+	, strCurrency nvarchar(50) COLLATE Latin1_General_CI_AS
+	, dblTotal numeric(24,10)
+	, intCommodityId int)
 
 IF @intSeqId = 1
 BEGIN

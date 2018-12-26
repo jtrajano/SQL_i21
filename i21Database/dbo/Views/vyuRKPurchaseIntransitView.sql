@@ -13,7 +13,7 @@ SELECT
               sum(ISNULL(LD.dblDeliveredQuantity, 0)) as dblPurchaseContractReceivedQty,
               CH.intCommodityId,CH.intEntityId,e.strName,
               PCT.intContractDetailId,
-              CH.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
+              (CH.strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber,
                        intCommodityUnitMeasureId as intUnitMeasureId 
               ,L.intPurchaseSale
               ,L1.strLoadNumber

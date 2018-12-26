@@ -9,7 +9,7 @@ SELECT intSelectedInstrumentTypeId,
       ,convert(int,ot.intNoOfContract) as intTotalLot
       ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD Group By AD.intLFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,(CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End) COLLATE Latin1_General_CI_AS strBuySell
       ,dblPrice as dblPrice
 	  	   ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime
       ,strBook 
@@ -58,7 +58,7 @@ SELECT intSelectedInstrumentTypeId,
       ,convert(int,ot.dblContractAmount) as intTotalLot
       ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD GROUP BY AD.intLFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
-      ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
+      ,(CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End) COLLATE Latin1_General_CI_AS strBuySell
        ,ot.dblExchangeRate as dblPrice
 	    ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime  
       ,strBook 

@@ -71,8 +71,8 @@ join tblCTContractDetail cd on cd.intContractDetailId=t.intContractDetailId
 JOIN tblSMCompanyLocation l on l.intCompanyLocationId=cd.intCompanyLocationId
 WHERE i.strBatchId=@strToBatchId
 --Future
-SELECT c.strCommodityCode,'' strPricingType,ft.intFutOptTransactionId intContractDetailId,
-		'Future '+case when strBuySell = 'Buy' then '(Long)' else '(short)' end strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
+SELECT c.strCommodityCode,'' COLLATE Latin1_General_CI_AS strPricingType,ft.intFutOptTransactionId intContractDetailId,
+		('Future '+(case when strBuySell = 'Buy' then '(Long)' else '(short)' end)) COLLATE Latin1_General_CI_AS strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
 	  strFutureMonth strFutureMonth,strLocationName,
 	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty,t.dblPrice dblPricedAmount
 	   INTO #Fromtemp1  
@@ -88,8 +88,8 @@ JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND m.
 JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 WHERE i.strBatchId=@strFromBatchId and strTransactionType ='Mark To Market-Futures Derivative' 
 
- SELECT c.strCommodityCode,'' strPricingType,ft.intFutOptTransactionId intContractDetailId,
-		'Future '+case when strBuySell = 'Buy' then '(Long)' else '(short)' end strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
+ SELECT c.strCommodityCode,'' COLLATE Latin1_General_CI_AS strPricingType,ft.intFutOptTransactionId intContractDetailId,
+		('Future '+(case when strBuySell = 'Buy' then '(Long)' else '(short)' end)) COLLATE Latin1_General_CI_AS strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
 	  strFutureMonth strFutureMonth,strLocationName, 
 	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty,t.dblPrice  dblPricedAmount
 	  INTO #Totemp1 

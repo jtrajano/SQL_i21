@@ -16,7 +16,7 @@ IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
 IF OBJECT_ID('tempdb..#final') IS NOT NULL
     DROP TABLE #final
 
-SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet into #tempCustomer FROM (
+SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription COLLATE Latin1_General_CI_AS strDistribution,dblIn,dblOut,dblNet into #tempCustomer FROM (
    SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(dblOutQty,2)) dblOut,round(sum(dblInQty),2)-round(sum(dblOutQty),2) dblNet FROM(		
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
 																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  				

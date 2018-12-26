@@ -24,14 +24,14 @@ DECLARE @BrokerageAttribute AS TABLE
 (	intAttributeId INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutureMarketId int,
 	intBrokersAccountMarketMapId  INT,
-	strCommodityAttributeId nvarchar(max),
+	strCommodityAttributeId nvarchar(max) COLLATE Latin1_General_CI_AS,
 	intBrokerageAccountId int
 )
 DECLARE @BrokerageAttributeFinal AS TABLE 
 (	intAttributeId INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutureMarketId int,
 	intBrokerageAccountId  INT,
-	strCommodityAttributeId nvarchar(max)
+	strCommodityAttributeId nvarchar(max) COLLATE Latin1_General_CI_AS
 )
 INSERT INTO @BrokerageAttribute
 SELECT mm.intFutureMarketId,intBrokersAccountMarketMapId,strCommodityAttributeId,intBrokerageAccountId FROM tblRKFutureMarket m

@@ -10,7 +10,7 @@ AS
 
 if @intSequenceTypeId = 1
 BEGIN
-	SELECT TOP 1 dblBasisOrDiscount dblBasis,strUnitMeasure strBasisUnitMeasure FROM tblRKM2MBasis b
+	SELECT TOP 1 dblBasisOrDiscount dblBasis,strUnitMeasure COLLATE Latin1_General_CI_AS strBasisUnitMeasure FROM tblRKM2MBasis b
 	JOIN tblRKM2MBasisDetail bd on b.intM2MBasisId=bd.intM2MBasisId 
 	join tblICUnitMeasure u on bd.intUnitMeasureId=u.intUnitMeasureId
 	WHERE intContractTypeId= @intTicketType
@@ -23,7 +23,7 @@ BEGIN
 END
 ELSE IF  @intSequenceTypeId = 2
 BEGIN
-	SELECT TOP 1 isnull(dblLastSettle,0) dblSettlementPrice,strUnitMeasure strPriceUnitMeasure
+	SELECT TOP 1 isnull(dblLastSettle,0) dblSettlementPrice,strUnitMeasure COLLATE Latin1_General_CI_AS strPriceUnitMeasure
 	FROM tblRKFuturesSettlementPrice sp
 	INNER JOIN tblRKFutSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 	INNER JOIN tblRKFutureMarket m on sp.intFutureMarketId=m.intFutureMarketId
@@ -36,7 +36,7 @@ BEGIN
 END
 ELSE IF @intSequenceTypeId = 3
 BEGIN
-	SELECT TOP 1 dblBasisOrDiscount dblBasis,strUnitMeasure strBasisUnitMeasure,@strSeqMonth strMonth into #temp
+	SELECT TOP 1 dblBasisOrDiscount dblBasis,strUnitMeasure COLLATE Latin1_General_CI_AS strBasisUnitMeasure,@strSeqMonth COLLATE Latin1_General_CI_AS strMonth into #temp
 	 FROM tblRKM2MBasis b
 	JOIN tblRKM2MBasisDetail bd on b.intM2MBasisId=bd.intM2MBasisId 
 	JOIN tblICUnitMeasure u on bd.intUnitMeasureId=u.intUnitMeasureId
@@ -48,7 +48,7 @@ BEGIN
 		  AND ISNULL(dblBasisOrDiscount,0) <> 0 	  
 	ORDER BY dtmM2MBasisDate Desc
 
-	SELECT TOP 1 isnull(dblLastSettle,0) dblSettlementPrice,strUnitMeasure strPriceUnitMeasure,@strSeqMonth strMonth into #temp1
+	SELECT TOP 1 isnull(dblLastSettle,0) dblSettlementPrice,strUnitMeasure COLLATE Latin1_General_CI_AS strPriceUnitMeasure,@strSeqMonth COLLATE Latin1_General_CI_AS strMonth into #temp1
 	FROM tblRKFuturesSettlementPrice sp
 	INNER JOIN tblRKFutSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 	INNER JOIN tblRKFutureMarket m on sp.intFutureMarketId=m.intFutureMarketId
@@ -58,6 +58,6 @@ BEGIN
 		 AND  RIGHT(CONVERT(NVARCHAR,dtmFutureMonthsDate,106),8)  = @strSeqMonth AND dblLastSettle IS NOT NULL
 	ORDER BY dtmPriceDate DESC
 
-	SELECT dblBasis,strBasisUnitMeasure, dblSettlementPrice,strPriceUnitMeasure FROM #temp t
+	SELECT dblBasis,strBasisUnitMeasure COLLATE Latin1_General_CI_AS, dblSettlementPrice,strPriceUnitMeasure COLLATE Latin1_General_CI_AS FROM #temp t
 	full join #temp1 t1 on t.strMonth=t1.strMonth
 END

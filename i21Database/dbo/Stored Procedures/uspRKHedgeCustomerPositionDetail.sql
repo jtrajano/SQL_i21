@@ -209,11 +209,11 @@ END
 
 IF @strPurchaseSales = 'Sales'
 BEGIN
-	SELECT intSeqId,strType, dblTotal FROM #temp where strType not like '%Purchase%' 
+	SELECT intSeqId,strType COLLATE Latin1_General_CI_AS, dblTotal FROM #temp where strType not like '%Purchase%' 
 	order by intSeqId
 END
 ELSE
 BEGIN
-	SELECT intSeqId,strType, dblTotal FROM #temp where strType not like '%Sales%' 
+	SELECT intSeqId,strType COLLATE Latin1_General_CI_AS, dblTotal FROM #temp where strType not like '%Sales%' 
 	order by intSeqId
 END

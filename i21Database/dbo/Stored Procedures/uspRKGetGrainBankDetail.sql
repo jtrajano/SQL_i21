@@ -8,16 +8,16 @@ BEGIN
 
 declare  @tblTemp table
 			(intCustomerStorageId int,
-			strType nvarchar(50),
-			strLocation nvarchar(50),
+			strType nvarchar(50) COLLATE Latin1_General_CI_AS,
+			strLocation nvarchar(50) COLLATE Latin1_General_CI_AS,
 			dtmDeliveryDate datetime,
-			strTicket nvarchar(50),
-			strCustomerReference nvarchar(100),
-			strDPAReceiptNo nvarchar(50),
+			strTicket nvarchar(50) COLLATE Latin1_General_CI_AS,
+			strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS,
+			strDPAReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 			dblDiscDue numeric(24,10),
 			dblStorageDue numeric(24,10),
 			dtmLastStorageAccrueDate datetime,
-			strScheduleId nvarchar(50),
+			strScheduleId nvarchar(50) COLLATE Latin1_General_CI_AS,
 			dblTotal numeric(24,10),
 			intCommodityId int			
 			)

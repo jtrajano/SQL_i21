@@ -495,11 +495,11 @@ BEGIN
 				ORDER BY t.intCommodityId
 					,intLocationId
 				)) intRowNum
-		,t.strLocationName
+		,t.strLocationName COLLATE Latin1_General_CI_AS
 		,intLocationId
 		,t.intCommodityId
-		,strCommodityCode
-		,CASE WHEN isnull(@strUnitMeasure, '') = '' THEN t.strUnitMeasure ELSE @strUnitMeasure END AS strUnitMeasure		
+		,strCommodityCode COLLATE Latin1_General_CI_AS
+		,CASE WHEN isnull(@strUnitMeasure, '') = '' THEN t.strUnitMeasure COLLATE Latin1_General_CI_AS ELSE @strUnitMeasure COLLATE Latin1_General_CI_AS END AS strUnitMeasure		
 		,CASE WHEN ((isnull(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) THEN OpenPurchasesQty else
 			Convert(DECIMAL(24, 10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, cuc1.intCommodityUnitMeasureId , OpenPurchasesQty)) end OpenPurchasesQty
 		,CASE WHEN (isnull(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) THEN OpenSalesQty else
@@ -536,11 +536,11 @@ BEGIN
 				ORDER BY t.intCommodityId
 					,intLocationId
 				)) intRowNum
-		,t.strLocationName
+		,t.strLocationName COLLATE Latin1_General_CI_AS
 		,intLocationId
 		,t.intCommodityId
-		,strCommodityCode
-		,CASE WHEN isnull(@strUnitMeasure, '') = '' THEN um.strUnitMeasure ELSE @strUnitMeasure END AS strUnitMeasure
+		,strCommodityCode COLLATE Latin1_General_CI_AS
+		,CASE WHEN isnull(@strUnitMeasure, '') = '' THEN um.strUnitMeasure COLLATE Latin1_General_CI_AS ELSE @strUnitMeasure COLLATE Latin1_General_CI_AS END AS strUnitMeasure
 		,0.00 OpenPurchasesQty
 		,0.00 OpenSalesQty
 		,0.00 dblCompanyTitled

@@ -3,20 +3,20 @@
 	@intLocationId int = NULL
 AS
 
-DECLARE @tblTemp TABLE (strLocationName NVARCHAR(50),
+DECLARE @tblTemp TABLE (strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						dtmFilledDate DATETIME,
-						strInternalTradeNo NVARCHAR(50),
-						strFutureMonth NVARCHAR(50),
-						strInstrumentType NVARCHAR(50),
-						strBroker NVARCHAR(50),
-						strAccountNumber NVARCHAR(50), 
+						strInternalTradeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						strInstrumentType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						strBroker NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						strAccountNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 						intFutOptTransactionId INT,
-						strFutMarketName NVARCHAR(50),
+						strFutMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						intNoOfContract INT,
 						dblMatchQty NUMERIC(24,10),
 						dblContractSize NUMERIC(24,10),
 						intFutureMarketId INT,
-						BuySell NVARCHAR(50),
+						BuySell NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						OpenLots NUMERIC(24,10),
 						HedgedQty NUMERIC(24,10),
 						intCommodityId int)

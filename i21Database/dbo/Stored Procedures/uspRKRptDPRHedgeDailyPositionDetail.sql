@@ -77,20 +77,20 @@ SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodit
 DECLARE @tempFinal AS TABLE (
 		 intRow INT IDENTITY(1,1),
 		 intContractHeaderId int,
-		 strContractNumber NVARCHAR(200),
+		 strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		 intFutOptTransactionHeaderId int,
-		 strInternalTradeNo NVARCHAR(200),
-		 strCommodityCode NVARCHAR(200),   
-		 strType  NVARCHAR(50), 
-		 strSubType  NVARCHAR(50), 
-		 strContractType NVARCHAR(50),
-		 strLocationName NVARCHAR(100),
-		 strContractEndMonth NVARCHAR(50),
+		 strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+		 strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,   
+		 strType  NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+		 strSubType  NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+		 strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		 strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		 strContractEndMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		 intInventoryReceiptItemId INT
-		,strTicketNumber  NVARCHAR(50)
+		,strTicketNumber  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dtmTicketDateTime DATETIME
-		,strCustomerReference NVARCHAR(100)
-		,strDistributionOption NVARCHAR(50)
+		,strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strDistributionOption NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dblUnitCost NUMERIC(24, 10)
 		,dblQtyReceived NUMERIC(24, 10)
 		,dblTotal DECIMAL(24,10)
@@ -98,12 +98,12 @@ DECLARE @tempFinal AS TABLE (
 		,intFromCommodityUnitMeasureId int
 		,intToCommodityUnitMeasureId int
 		,intCommodityId int
-		,strAccountNumber NVARCHAR(100)
-		,strTranType NVARCHAR(20)
+		,strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strTranType NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		,dblNoOfLot NUMERIC(24, 10)
 		,dblDelta NUMERIC(24, 10)
 		,intBrokerageAccountId int
-		,strInstrumentType nvarchar(50)
+		,strInstrumentType nvarchar(50) COLLATE Latin1_General_CI_AS
 		,invQty NUMERIC(24, 10),
 		 PurBasisDelivary NUMERIC(24, 10),
 		 OpenPurQty NUMERIC(24, 10),
@@ -118,34 +118,34 @@ DECLARE @tempFinal AS TABLE (
 DECLARE @Final AS TABLE (
 		 intRow INT IDENTITY(1,1),
 		 intContractHeaderId int,
-		 strContractNumber NVARCHAR(200),
+		 strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		 intFutOptTransactionHeaderId int,
-		 strInternalTradeNo NVARCHAR(200),
-		 strCommodityCode NVARCHAR(200),   
-		 strType  NVARCHAR(50), 
-		 strSubType NVARCHAR(50), 
-		 strContractType NVARCHAR(50),
-		 strLocationName NVARCHAR(100),
-		 strContractEndMonth NVARCHAR(50),
+		 strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+		 strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,   
+		 strType  NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+		 strSubType NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+		 strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		 strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		 strContractEndMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		 intInventoryReceiptItemId INT
-		,strTicketNumber  NVARCHAR(50)
+		,strTicketNumber  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dtmTicketDateTime DATETIME
-		,strCustomerReference NVARCHAR(100)
-		,strDistributionOption NVARCHAR(50)
+		,strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strDistributionOption NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dblUnitCost NUMERIC(24, 10)
 		,dblQtyReceived NUMERIC(24, 10)
 		,dblTotal DECIMAL(24,10)
-		,strUnitMeasure NVARCHAR(50)
+		,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intSeqNo DECIMAL(24,10)
 		,intFromCommodityUnitMeasureId int
 		,intToCommodityUnitMeasureId int
 		,intCommodityId int
-		,strAccountNumber NVARCHAR(100)
-		,strTranType NVARCHAR(20)
+		,strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strTranType NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		,dblNoOfLot NUMERIC(24, 10)
 		,dblDelta NUMERIC(24, 10)
 		,intBrokerageAccountId int
-		,strInstrumentType nvarchar(50)
+		,strInstrumentType nvarchar(50) COLLATE Latin1_General_CI_AS
 		,invQty NUMERIC(24, 10),
 		 PurBasisDelivary NUMERIC(24, 10),
 		 OpenPurQty NUMERIC(24, 10),

@@ -23,7 +23,7 @@ SELECT intFutureMarketId,intCommodityId,intFutureMonthId,intBookId,intSubBookId 
 
 SELECT  CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName ASC)) intRowNumber ,* from (
 SELECT * FROM (
-SELECT strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
+SELECT strFutMarketName COLLATE Latin1_General_CI_AS,strFutureMonth COLLATE Latin1_General_CI_AS,strCommodityCode COLLATE Latin1_General_CI_AS,strBook COLLATE Latin1_General_CI_AS,strSubBook COLLATE Latin1_General_CI_AS, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
 SELECT 
        fm.strFutMarketName
        ,m.strFutureMonth
@@ -57,7 +57,7 @@ where dblOpenContract > dblLimit
 UNION
 
 SELECT * FROM (
-SELECT strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
+SELECT strFutMarketName COLLATE Latin1_General_CI_AS,strFutureMonth COLLATE Latin1_General_CI_AS,strCommodityCode COLLATE Latin1_General_CI_AS,strBook COLLATE Latin1_General_CI_AS,strSubBook COLLATE Latin1_General_CI_AS, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
 SELECT 
        fm.strFutMarketName
        ,null strFutureMonth

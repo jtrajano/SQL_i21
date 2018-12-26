@@ -9,7 +9,7 @@ BEGIN
 	    ,(dblLow * (CASE WHEN b.dblConversionRate IS NULL THEN 1 ELSE b.dblConversionRate END))   AS  Low  
 	    ,(dblOpen * (CASE WHEN b.dblConversionRate IS NULL THEN 1 ELSE b.dblConversionRate END))  AS [Open]  
 	    ,(dblLast * (CASE WHEN b.dblConversionRate IS NULL THEN 1 ELSE b.dblConversionRate END)) AS [Last]
-		,strMessage 
+		,strMessage  COLLATE Latin1_General_CI_AS
 	FROM tblRKElectronicPricingValue a
 	JOIN tblRKFutureMarket b ON b.intFutureMarketId=a.intFutureMarketId Where a.strURL=@StrURL AND b.intFutureMarketId=@FutureMarketId
 	ORDER BY a.intElectronicPricingValueId DESC

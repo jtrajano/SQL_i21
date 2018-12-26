@@ -4,7 +4,7 @@ SELECT *,
 CASE WHEN ISNULL(dblAvailableLot,0)-dblSelectedLot <=0 then 0 else isnull(dblAvailableLot,0)-dblSelectedLot end dblBalanceLot
  FROM
 (SELECT cd.intContractDetailId, strContractNumber, intContractSeq as intContractSeq,
-		strContractNumber + ' - ' + CONVERT(varchar,intContractSeq) as strContractSeq,
+		(strContractNumber + ' - ' + CONVERT(varchar,intContractSeq)) COLLATE Latin1_General_CI_AS as strContractSeq,
 		cd.strEntityName, 
 		cd.intFutureMarketId,cd.intFutureMonthId, cd.strContractType,
 		isnull(SUM(cd.dblNoOfLots),0) as dblAvailableLot,

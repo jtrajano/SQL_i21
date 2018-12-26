@@ -79,71 +79,71 @@ END
 DECLARE @Final AS TABLE (
 					intRow int IDENTITY(1,1) PRIMARY KEY , 
 					intSeqId int, 
-					strSeqHeader nvarchar(100),
-					strCommodityCode nvarchar(100),
-					strType nvarchar(100),
+					strSeqHeader nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strType nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dblTotal DECIMAL(24,10),
 					intCollateralId int,
-					strLocationName nvarchar(50),
-					strCustomer nvarchar(50),
-					intReceiptNo nvarchar(50),
+					strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+					strCustomer nvarchar(50) COLLATE Latin1_General_CI_AS,
+					intReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 					intContractHeaderId int,
-					strContractNumber nvarchar(100),
-					strCustomerReference nvarchar(100),
-					strDistributionOption nvarchar(100),
-					strDPAReceiptNo nvarchar(100),
+					strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strDistributionOption nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strDPAReceiptNo nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dblDiscDue DECIMAL(24,10),
 					[Storage Due] DECIMAL(24,10),	
 					dtmLastStorageAccrueDate datetime,
-					strScheduleId nvarchar(100),
-					strTicket nvarchar(100),
+					strScheduleId nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strTicket nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dtmOpenDate datetime,
 					dtmDeliveryDate datetime,
 					dtmTicketDateTime datetime,
 					dblOriginalQuantity  DECIMAL(24,10),
 					dblRemainingQuantity DECIMAL(24,10),
 					intCommodityId int,
-					strItemNo nvarchar(100),
-					strUnitMeasure nvarchar(100)
+					strItemNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strUnitMeasure nvarchar(100) COLLATE Latin1_General_CI_AS
 					,intFromCommodityUnitMeasureId int
 					,intToCommodityUnitMeasureId int
-					,strTruckName  nvarchar(100)
-					,strDriverName  nvarchar(100)
+					,strTruckName  nvarchar(100) COLLATE Latin1_General_CI_AS
+					,strDriverName  nvarchar(100) COLLATE Latin1_General_CI_AS
 )
 
 DECLARE @FinalTable AS TABLE (
 					intRow int IDENTITY(1,1) PRIMARY KEY , 
 					intSeqId int, 
-					strSeqHeader nvarchar(100),
-					strCommodityCode nvarchar(100),
-					strType nvarchar(100),
+					strSeqHeader nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strCommodityCode nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strType nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dblTotal DECIMAL(24,10),
 					intCollateralId int,
-					strLocationName nvarchar(50),
-					strCustomer nvarchar(50),
-					intReceiptNo nvarchar(50),
+					strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+					strCustomer nvarchar(50) COLLATE Latin1_General_CI_AS,
+					intReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 					intContractHeaderId int,
-					strContractNumber nvarchar(100),
-					strCustomerReference nvarchar(100),
-					strDistributionOption nvarchar(100),
-					strDPAReceiptNo nvarchar(100),
+					strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strDistributionOption nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strDPAReceiptNo nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dblDiscDue DECIMAL(24,10),
 					[Storage Due] DECIMAL(24,10),	
 					dtmLastStorageAccrueDate datetime,
-					strScheduleId nvarchar(100),
-					strTicket nvarchar(100),
+					strScheduleId nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strTicket nvarchar(100) COLLATE Latin1_General_CI_AS,
 					dtmOpenDate datetime,
 					dtmDeliveryDate datetime,
 					dtmTicketDateTime datetime,
 					dblOriginalQuantity  DECIMAL(24,10),
 					dblRemainingQuantity DECIMAL(24,10),
 					intCommodityId int,
-					strItemNo nvarchar(100),
-					strUnitMeasure nvarchar(100)
+					strItemNo nvarchar(100) COLLATE Latin1_General_CI_AS,
+					strUnitMeasure nvarchar(100) COLLATE Latin1_General_CI_AS
 					,intFromCommodityUnitMeasureId int
 					,intToCommodityUnitMeasureId int
-					,strTruckName  nvarchar(100)
-					,strDriverName  nvarchar(100)
+					,strTruckName  nvarchar(100) COLLATE Latin1_General_CI_AS
+					,strDriverName  nvarchar(100) COLLATE Latin1_General_CI_AS
 )
 
 DECLARE @mRowNumber INT

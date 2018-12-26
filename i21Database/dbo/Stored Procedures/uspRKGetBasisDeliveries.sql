@@ -4,11 +4,11 @@
 	@intSeqId int
 AS
 DECLARE @tblTemp TABLE (intInventoryShipmentItemId int,
-						strLocationName NVARCHAR(50),
-						strTicketNumber NVARCHAR(50),
+						strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						strTicketNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						dtmTicketDateTime datetime,
-						strCustomerReference NVARCHAR(50),
-					    strDistributionOption NVARCHAR(500),
+						strCustomerReference NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+					    strDistributionOption NVARCHAR(500) COLLATE Latin1_General_CI_AS,
 					    dblTotal NUMERIC(24,10),
 					    intCommodityId int)
 						

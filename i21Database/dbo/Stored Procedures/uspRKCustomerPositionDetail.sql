@@ -10,7 +10,8 @@ SELECT * INTO #temp FROM (
 		SELECT 1 AS intSeqId
 		,*
 		FROM (
-		SELECT [Storage Type] strType,ISNULL(SUM(ISNULL(Balance, 0)), 0) dblTotal FROM vyuGRGetStorageDetail
+		SELECT [Storage Type] COLLATE Latin1_General_CI_AS strType 
+			,ISNULL(SUM(ISNULL(Balance, 0)), 0) dblTotal FROM vyuGRGetStorageDetail
 		WHERE intCommodityId = @intCommodityId AND  intEntityId=@intVendorCustomerId	AND intCompanyLocationId=
 		CASE WHEN ISNULL(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end AND ysnDPOwnedType = 0 AND ysnReceiptedStorage = 0
 		GROUP BY [Storage Type]
@@ -18,7 +19,7 @@ SELECT * INTO #temp FROM (
 	
 UNION
 	SELECT 2 AS intSeqId
-		,'Total Non-Receipted' [Storage Type]
+		,'Total Non-Receipted' COLLATE Latin1_General_CI_AS [Storage Type]
 		,sum(Balance) dblTotal
 	FROM vyuGRGetStorageDetail
 	WHERE ysnReceiptedStorage = 0 AND strOwnedPhysicalStock = 'Customer' AND intEntityId=@intVendorCustomerId
@@ -27,7 +28,7 @@ UNION
 UNION		
 		
 	SELECT 3 AS intSeqId
-		,'Collatral Receipts - Purchase' AS [strType]
+		,'Collatral Receipts - Purchase' COLLATE Latin1_General_CI_AS AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
 		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount,c.intCollateralId,
@@ -43,7 +44,7 @@ UNION
 UNION
 	
 	SELECT 4 AS intSeqId
-		,'Collatral Receipts - Sales' AS [strType]
+		,'Collatral Receipts - Sales' COLLATE Latin1_General_CI_AS AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
 		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount	,c.intCollateralId,
@@ -61,7 +62,7 @@ UNION
 	SELECT 5 AS intSeqId
 		,*
 	FROM (
-		SELECT [Storage Type] strType,isnull(SUM(Balance), 0) dblTotal
+		SELECT [Storage Type] COLLATE Latin1_General_CI_AS strType,isnull(SUM(Balance), 0) dblTotal
 		FROM vyuGRGetStorageDetail
 		WHERE intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId	AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end AND ysnReceiptedStorage = 1
 		GROUP BY [Storage Type]
@@ -70,7 +71,7 @@ UNION
 UNION
 	
 	SELECT 6 AS intSeqId
-		,'Total Receipted Purchase' AS [strType]
+		,'Total Receipted Purchase' COLLATE Latin1_General_CI_AS AS [strType]
 		,isnull(dblTotal1, 0) +  isnull(CollateralPurchases, 0) dblTotal
 	FROM (
 		SELECT SUM(Balance) dblTotal1
@@ -115,7 +116,7 @@ UNION
 UNION
 	
 	SELECT 7 AS intSeqId
-		,'Total Receipted Sales' AS [strType]
+		,'Total Receipted Sales' COLLATE Latin1_General_CI_AS AS [strType]
 		,isnull(dblTotal1, 0) + (isnull(CollateralSale, 0)) dblTotal
 	FROM (
 		SELECT SUM(Balance) dblTotal1
@@ -159,7 +160,7 @@ UNION
 	
 UNION
 		SELECT 8 AS intSeqId
-		,'Purchase Priced' [strType]
+		,'Purchase Priced' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -172,7 +173,7 @@ UNION
 UNION
 	
 		SELECT 9 AS intSeqId
-		,'Sales Priced' [strType]
+		,'Sales Priced' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -186,7 +187,7 @@ UNION
 UNION
 	
 		SELECT 10 AS intSeqId
-		,'Purchase Basis' [strType]
+		,'Purchase Basis' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -199,7 +200,7 @@ UNION
 UNION
 	
 	SELECT 11 AS intSeqId
-		,'Sales Basis' [strType]
+		,'Sales Basis' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -212,7 +213,7 @@ UNION
 	
 UNION
 		SELECT 12 AS intSeqId
-		,'Purchase HTA' [strType]
+		,'Purchase HTA' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -225,7 +226,7 @@ UNION
 UNION
 		
 		SELECT 13 AS intSeqId
-		,'Sales HTA' [strType]
+		,'Sales HTA' COLLATE Latin1_General_CI_AS [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -237,7 +238,7 @@ UNION
 		
 UNION		
 	SELECT 14 AS intSeqId
-		,'Purchase Basis Deliveries' AS [strType]
+		,'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS AS [strType]
 		,isnull(SUM(dblTotal), 0) AS dblTotal
 	FROM (			
 		SELECT isnull(SUM(isnull(ri.dblOpenReceive, 0)), 0) AS dblTotal
@@ -252,7 +253,7 @@ UNION
 UNION
 		
 		SELECT 15 AS intSeqId
-		,'Purchase In-Transit' AS [strType]
+		,'Purchase In-Transit' COLLATE Latin1_General_CI_AS AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
 	FROM (SELECT sum(dblStockQty) ReserveQty FROM  vyuLGInventoryView v
 			JOIN vyuCTContractDetailView cd on cd.intContractDetailId=v.intContractDetailId and cd.intContractStatusId <> 3

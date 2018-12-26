@@ -30,8 +30,8 @@ SELECT * INTO #temp FROM(
 SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
-	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
-	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
+	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) COLLATE Latin1_General_CI_AS strInternalTradeNo,ti.strBrokerTradeNo COLLATE Latin1_General_CI_AS,ti.strBuySell COLLATE Latin1_General_CI_AS,ti.intNoOfContract,
+	   m.intFutureMonthId, intOptionMonthId,strOptionType COLLATE Latin1_General_CI_AS,ti.dblStrike,ti.dblPrice,strReference COLLATE Latin1_General_CI_AS,strStatus COLLATE Latin1_General_CI_AS,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
 JOIN tblRKBrokerageAccount ba on ba.strAccountNumber=ti.strAccountNumber

@@ -8,25 +8,25 @@ DECLARE @Commodity AS TABLE (
 	,intCommodity INT
 	)
 DECLARE @tblGetOpenContractDetail TABLE (
-	strCommodityCode NVARCHAR(100)
+	strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intContractHeaderId INT
-	,strContractNumber NVARCHAR(100)
-	,strLocationName NVARCHAR(100)
+	,strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,dtmEndDate DATETIME
 	,dblBalance NUMERIC(18, 6)
 	,intUnitMeasureId INT
 	,intPricingTypeId INT
 	,intContractTypeId INT
 	,intCompanyLocationId INT
-	,strContractType NVARCHAR(100)
-	,strPricingType NVARCHAR(100)
+	,strContractType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strPricingType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,intCommodityUnitMeasureId INT
 	,intContractDetailId INT
 	,intContractStatusId INT
 	,intEntityId INT
 	,intCurrencyId INT
-	,strType NVARCHAR(100)
+	,strType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 INSERT INTO @tblGetOpenContractDetail (
 	strCommodityCode

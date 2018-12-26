@@ -46,25 +46,25 @@ FROM(
 
  DECLARE @PhysicalFuturesResult TABLE (
 	intRowNum INT
-	,strContractType NVARCHAR(50)
-	,strNumber NVARCHAR(50)
-	,strDescription NVARCHAR(50)
-	,strConfirmed NVARCHAR(50)
+	,strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strConfirmed NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblAllocatedQty NUMERIC(24, 10)
 	,dblPrice NUMERIC(24, 10)
-	,strCurrency NVARCHAR(50)
+	,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblFX NUMERIC(24, 10)
 	,dblBooked NUMERIC(24, 10)
 	,dblAccounting NUMERIC(24, 10)
 	,dtmDate DATETIME
-	,strType Nvarchar(100)
+	,strType Nvarchar(100) COLLATE Latin1_General_CI_AS
 	,dblTranValue NUMERIC(24, 10)
 	,intSort INT
 	,dblTransactionValue NUMERIC(24, 10)
 	,dblForecast NUMERIC(24, 10)
 	,dblBasisUSD NUMERIC(24, 10)
 	,dblCostUSD NUMERIC(24, 10)
-	,strUnitMeasure nvarchar(200)
+	,strUnitMeasure nvarchar(200) COLLATE Latin1_General_CI_AS
 	,intContractDetailId int
 	,ysnPosted Bit
 	)

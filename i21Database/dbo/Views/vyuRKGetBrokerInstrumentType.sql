@@ -3,13 +3,13 @@ AS
 SELECT intBrokerageAccountId
  ,intEntityId
  ,intInstrumentTypeId
- ,CASE 
+ ,(CASE 
   WHEN intInstrumentTypeId = 1
    THEN 'Futures'
   WHEN intInstrumentTypeId = 2
    THEN 'Options'
   ELSE 'Futures & Options'
-  END AS strInstrumentType
+  END) COLLATE Latin1_General_CI_AS AS strInstrumentType
 FROM tblRKBrokerageAccount
 WHERE intInstrumentTypeId <> 3
 
@@ -18,7 +18,7 @@ UNION
 SELECT intBrokerageAccountId
  ,intEntityId
  ,2
- ,'Options' AS strInstrumentType
+ ,'Options' COLLATE Latin1_General_CI_AS AS strInstrumentType
 FROM tblRKBrokerageAccount
 WHERE intInstrumentTypeId = 3
 
@@ -27,6 +27,6 @@ UNION
 SELECT intBrokerageAccountId
  ,intEntityId
  ,1
- ,'Futures' AS strInstrumentType
+ ,'Futures' COLLATE Latin1_General_CI_AS AS strInstrumentType
 FROM tblRKBrokerageAccount
 WHERE intInstrumentTypeId = 3

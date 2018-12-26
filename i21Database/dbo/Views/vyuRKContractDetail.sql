@@ -7,7 +7,7 @@ WITH Pricing AS
     SELECT  c.strCommodityCode,
 		c.intCommodityId,
 		ch.intContractHeaderId,
-	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
+	    (strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
 		,strLocationName,
 		dtmEndDate,
 		SUM(PFD.dblQuantity) dblQuantity,
@@ -81,7 +81,7 @@ WITH Pricing AS
 		intContractStatusId,
 		intEntityId
 		,intCurrencyId
-		,strContractType+' Priced' AS strType	
+		,(strContractType+' Priced') COLLATE Latin1_General_CI_AS AS strType	
 		,intItemId
 		,strItemNo,dtmContractDate,strEntityName,strCustomerContract
     FROM    Pricing
@@ -91,7 +91,7 @@ WITH Pricing AS
     SELECT  c.strCommodityCode,
 		c.intCommodityId,
 		ch.intContractHeaderId,
-	   ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
+	   (ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
 		,cl.strLocationName,
 		CDT.dtmEndDate,
 		CDT.dblBalance - PRC.dblQuantity AS dblBalance,
@@ -106,7 +106,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
-		,ct.strContractType+' Basis' AS strType
+		,(ct.strContractType+' Basis') COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
@@ -134,7 +134,7 @@ WITH Pricing AS
 	c.strCommodityCode,
 		c.intCommodityId,
 		ch.intContractHeaderId,
-	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
+	    (strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
 		,strLocationName,
 		dtmEndDate,
 		CDT.dblBalance dblBalance,
@@ -149,7 +149,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,CASE WHEN CDT.intPricingTypeId = 1 THEN ct.strContractType+' Priced' ELSE ct.strContractType+' Basis' END AS strType
+		,(CASE WHEN CDT.intPricingTypeId = 1 THEN ct.strContractType+' Priced' ELSE ct.strContractType+' Basis' END) COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
@@ -177,7 +177,7 @@ WITH Pricing AS
 	c.strCommodityCode,
 		c.intCommodityId,
 		ch.intContractHeaderId,
-	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
+	    (strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
 		,strLocationName,
 		dtmEndDate,
 		CDT.dblBalance dblBalance,
@@ -192,7 +192,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+'HTA' END AS strType
+		,(CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+'HTA' END) COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM tblCTContractDetail CDT

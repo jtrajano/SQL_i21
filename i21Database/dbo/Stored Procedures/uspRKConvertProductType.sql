@@ -3,7 +3,7 @@
 AS
 
 DECLARE @List VARCHAR(8000)
-SELECT @List=COALESCE(@List + ',', '')+ltrim(intCommodityAttributeId) from tblICCommodityAttribute 
+SELECT @List=COALESCE(@List + ',', '')+ltrim(intCommodityAttributeId) COLLATE Latin1_General_CI_AS from tblICCommodityAttribute 
 WHERE strDescription IN(select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](@strCommodityAttributeId, ',')) and strType= 'ProductType'
 
 SELECT @List

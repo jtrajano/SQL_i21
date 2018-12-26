@@ -5,21 +5,21 @@ AS
 
 DECLARE @MatchedRec AS TABLE 
 (
-strFutMarketName  nvarchar(50),
-strCommodityCode  nvarchar(50),
-strFutureMonth  nvarchar(50),
+strFutMarketName  nvarchar(50) COLLATE Latin1_General_CI_AS,
+strCommodityCode  nvarchar(50) COLLATE Latin1_General_CI_AS,
+strFutureMonth  nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblSellMinusBuy DECIMAL(24,10) 
 )
 
 DECLARE @RollCostDetail AS TABLE 
 (intFutOptTransactionId int,
-strInternalTradeNo nvarchar(50),
+strInternalTradeNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 intFutureMarketId  int,
-strFutMarketName  nvarchar(50),
+strFutMarketName  nvarchar(50) COLLATE Latin1_General_CI_AS,
 intCommodityId int,
-strCommodityCode  nvarchar(50),
-strFutureMonth  nvarchar(50),
-strRollMonth nvarchar(50),
+strCommodityCode  nvarchar(50) COLLATE Latin1_General_CI_AS,
+strFutureMonth  nvarchar(50) COLLATE Latin1_General_CI_AS,
+strRollMonth nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblContractSize DECIMAL(24,10),
 ysnSubCurrency bit,
 intOpenContract int, 

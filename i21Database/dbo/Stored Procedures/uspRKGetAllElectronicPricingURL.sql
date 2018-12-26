@@ -46,8 +46,15 @@ BEGIN TRY
 
 	if isnull(@URL,'') <> ''
 	BEGIN
-		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶¶¶',@strUserName),'¶¶~~',@strPassword) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
-		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement,@dblConversionRate as dblConversionRate
+		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶¶¶',@strUserName),'¶¶~~',@strPassword) COLLATE Latin1_General_CI_AS as URL
+			,strFutureMonth COLLATE Latin1_General_CI_AS strFutureMonthYearWOSymbol
+			,intFutureMonthId as intFutureMonthId
+			,@strOpen COLLATE Latin1_General_CI_AS as strOpen
+			,@strHigh COLLATE Latin1_General_CI_AS as strHigh
+			,@strLow COLLATE Latin1_General_CI_AS as strLow
+			,@strLastSettle COLLATE Latin1_General_CI_AS as strLastSettle
+			,@strLastElement COLLATE Latin1_General_CI_AS as strLastElement
+			,@dblConversionRate as dblConversionRate
 		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
 	END
 	

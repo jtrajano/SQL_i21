@@ -3,7 +3,7 @@
 AS
 
 SELECT	DISTINCT
-   CH.strContractNumber + '-' + LTRIM(CD.intContractSeq) strSequenceNumber,
+   (CH.strContractNumber + '-' + LTRIM(CD.intContractSeq)) strSequenceNumber,
 	CD.intContractDetailId,
 	CH.intContractTypeId,
 	IM.strItemNo,

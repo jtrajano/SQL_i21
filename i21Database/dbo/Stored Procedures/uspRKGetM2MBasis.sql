@@ -27,21 +27,21 @@ SELECT TOP 1 @ysnIncludeInventoryM2M = ysnIncludeInventoryM2M,
 FROM tblRKCompanyPreference           
   
  DECLARE @tempBasis TABLE(  
-     strCommodityCode nvarchar(50)  
- ,strItemNo nvarchar(50)  
- ,strOriginDest nvarchar(50)  
- ,strFutMarketName nvarchar(50)  
- ,strFutureMonth nvarchar(50)  
+     strCommodityCode nvarchar(50) COLLATE Latin1_General_CI_AS 
+ ,strItemNo nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strOriginDest nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strFutMarketName nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strFutureMonth nvarchar(50)  COLLATE Latin1_General_CI_AS
  ,strPeriodTo nvarchar(50) COLLATE Latin1_General_CI_AS  
- ,strLocationName nvarchar(50)  
- ,strMarketZoneCode nvarchar(50)  
- ,strCurrency nvarchar(50)  
- ,strPricingType nvarchar(50)  
- ,strContractInventory nvarchar(50)  
- ,strContractType nvarchar(50)  
+ ,strLocationName nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strMarketZoneCode nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strCurrency nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strPricingType nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strContractInventory nvarchar(50)  COLLATE Latin1_General_CI_AS
+ ,strContractType nvarchar(50)  COLLATE Latin1_General_CI_AS
  ,dblCashOrFuture numeric(16,10)  
  ,dblBasisOrDiscount numeric(16,10)  
- ,strUnitMeasure nvarchar(50)  
+ ,strUnitMeasure nvarchar(50)  COLLATE Latin1_General_CI_AS
  ,intCommodityId int  
  ,intItemId int  
  ,intOriginId int  
@@ -54,7 +54,7 @@ FROM tblRKCompanyPreference
  ,intContractTypeId int  
  ,intUnitMeasureId  int  
  ,intConcurrencyId int
- ,strMarketValuation nvarchar(250)  
+ ,strMarketValuation nvarchar(250)  COLLATE Latin1_General_CI_AS
   )  
   
 IF (@strEvaluationBy='Commodity')  

@@ -110,7 +110,7 @@ BEGIN
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '10' THEN 'Oct' 
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '11' THEN 'Nov' 
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '12' THEN 'Dec' 
-			END  AS strMonthName
+			END  COLLATE Latin1_General_CI_AS AS strMonthName
 		INTO #Temp	
 			
 	FROM
@@ -120,7 +120,7 @@ BEGIN
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth	
 	SELECT DISTINCT strMonthName into #temp1 FROM #Temp 
-	SELECT strMonthName as strOptionMonth FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
+	SELECT strMonthName COLLATE Latin1_General_CI_AS as strOptionMonth FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
 END 
 
 

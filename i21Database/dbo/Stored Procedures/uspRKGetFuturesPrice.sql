@@ -21,7 +21,7 @@ BEGIN TRY
 		,ISNULL(dblLow,0)        AS  Low  
 		,ISNULL(dblOpen,0)       AS [Open]  
 		,ISNULL(dblLastSettle,0) AS [Last]
-		,'Success'               AS strMessage 
+		,'Success' COLLATE Latin1_General_CI_AS AS strMessage 
 		FROM tblRKFutSettlementPriceMarketMap a
 		JOIN tblRKFuturesSettlementPrice b ON b.intFutureSettlementPriceId=a.intFutureSettlementPriceId
 		WHERE b.intFutureMarketId=@FutureMarketId AND a.intFutureMonthId=@FutureMonthId

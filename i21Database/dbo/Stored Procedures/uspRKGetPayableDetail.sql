@@ -5,11 +5,11 @@
 AS
 DECLARE @tblTemp TABLE (
 	intInventoryReceiptItemId INT
-	,strLocationName NVARCHAR(50)
-	,strTicketNumber  NVARCHAR(50)
+	,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strTicketNumber  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmTicketDateTime DATETIME
-	,strCustomerReference NVARCHAR(100)
-	,strDistributionOption NVARCHAR(50)
+	,strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strDistributionOption NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblUnitCost NUMERIC(24, 10)
 	,dblQtyReceived NUMERIC(24, 10)
 	,intCommodityId INT

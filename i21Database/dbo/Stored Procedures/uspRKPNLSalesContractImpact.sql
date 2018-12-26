@@ -10,14 +10,14 @@ AS			--declare @intSContractDetailId INT = 2752
 
 DECLARE @ContractImpact TABLE ( 
 		intRowNum int identity(1,1),
-		strContractType nvarchar(50),
-		strContractNumber nvarchar(50),
+		strContractType nvarchar(50) COLLATE Latin1_General_CI_AS,
+		strContractNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 		intContractHeaderId int,
 		dblQuantity numeric(24,10),
 		dblSAllocatedQty numeric(24,10),
 		dblContractPercentage numeric(24,10),
-		strFutureMonth nvarchar(100),
-		strInternalTradeNo  nvarchar(100),
+		strFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS,
+		strInternalTradeNo  nvarchar(100) COLLATE Latin1_General_CI_AS,
 		dblAssignedLots numeric(24,10),
 		dblContractPrice numeric(24,10),
 		intNoOfLots numeric(24,10),
@@ -139,7 +139,7 @@ Insert into @ContractImpact
 		)t
 
 INSERT INTO @ContractImpact(strContractNumber,strFutureMonth,intNoOfLots,dblPrice,dblLatestSettlementPrice,dblFutureImpact   )
-SELECT 'Total' strContractType,strFutureMonth,sum(intNoOfLots) intNoOfLots,sum(dblPrice) dblPrice,max(dblLatestSettlementPrice) dblLatestSettlementPrice,sum(dblFutureImpact) dblFutureImpact   
+SELECT 'Total' COLLATE Latin1_General_CI_AS strContractType,strFutureMonth,sum(intNoOfLots) intNoOfLots,sum(dblPrice) dblPrice,max(dblLatestSettlementPrice) dblLatestSettlementPrice,sum(dblFutureImpact) dblFutureImpact   
 FROM @ContractImpact where isnull(strFutureMonth,'') <> ''  GROUP BY strFutureMonth
 ORDER BY case when isnull(strFutureMonth,'')='' then '' else CONVERT(DATETIME,'01 '+left(strFutureMonth,6)) end ASC 
 

@@ -10,13 +10,13 @@ AS
 DECLARE @tblResult TABLE
 (      Id INT identity(1,1),
        dtmDate datetime,
-       strItemNo nvarchar(50),
+       strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
        dblUnpaidIn NUMERIC(24,10),
        dblUnpaidOut NUMERIC(24,10),
        dblUnpaidBalance NUMERIC(24,10),
-       strDistributionOption nvarchar(50),
+       strDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS,
        InventoryBalanceCarryForward NUMERIC(24,10),
-       strReceiptNumber nvarchar(50),
+       strReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
        intReceiptId int
 )
 

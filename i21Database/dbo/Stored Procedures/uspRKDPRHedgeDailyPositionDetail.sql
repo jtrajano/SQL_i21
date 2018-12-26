@@ -1276,17 +1276,17 @@ UPDATE @Final set intSeqNo = 14 where strType='Avail for Spot Sale'
 	
 IF isnull(@intVendorId,0) = 0
 BEGIN
-	SELECT intSeqNo,intRow, strCommodityCode ,intContractHeaderId,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strContractType,strContractEndMonth,dblTotal,strUnitMeasure 
-				,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
-				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency  			
+	SELECT intSeqNo,intRow, strCommodityCode COLLATE Latin1_General_CI_AS,intContractHeaderId,strContractNumber COLLATE Latin1_General_CI_AS,strInternalTradeNo COLLATE Latin1_General_CI_AS,intFutOptTransactionHeaderId, strType COLLATE Latin1_General_CI_AS,strContractType COLLATE Latin1_General_CI_AS,strContractEndMonth COLLATE Latin1_General_CI_AS,dblTotal,strUnitMeasure COLLATE Latin1_General_CI_AS
+				,intInventoryReceiptItemId,strLocationName COLLATE Latin1_General_CI_AS,strTicketNumber COLLATE Latin1_General_CI_AS,dtmTicketDateTime,strCustomerReference COLLATE Latin1_General_CI_AS,strDistributionOption COLLATE Latin1_General_CI_AS,dblUnitCost,dblQtyReceived,strAccountNumber COLLATE Latin1_General_CI_AS,strTranType COLLATE Latin1_General_CI_AS,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType COLLATE Latin1_General_CI_AS,
+				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency COLLATE Latin1_General_CI_AS  			
 	FROM @Final where dblTotal <> 0 
 	ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
 ELSE
 BEGIN
-	SELECT intSeqNo,intRow, strCommodityCode ,intContractHeaderId,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strSubType,strContractType,strContractEndMonth,dblTotal,strUnitMeasure 
-				,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
-				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency  			
+	SELECT intSeqNo,intRow, strCommodityCode COLLATE Latin1_General_CI_AS,intContractHeaderId,strContractNumber COLLATE Latin1_General_CI_AS,strInternalTradeNo COLLATE Latin1_General_CI_AS,intFutOptTransactionHeaderId, strType COLLATE Latin1_General_CI_AS,strSubType COLLATE Latin1_General_CI_AS,strContractType COLLATE Latin1_General_CI_AS,strContractEndMonth COLLATE Latin1_General_CI_AS,dblTotal,strUnitMeasure COLLATE Latin1_General_CI_AS
+				,intInventoryReceiptItemId,strLocationName COLLATE Latin1_General_CI_AS,strTicketNumber COLLATE Latin1_General_CI_AS,dtmTicketDateTime,strCustomerReference COLLATE Latin1_General_CI_AS,strDistributionOption COLLATE Latin1_General_CI_AS,dblUnitCost,dblQtyReceived,strAccountNumber COLLATE Latin1_General_CI_AS,strTranType COLLATE Latin1_General_CI_AS,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType COLLATE Latin1_General_CI_AS,
+				invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled,strCurrency COLLATE Latin1_General_CI_AS 			
 	FROM @Final where dblTotal <> 0 and strSubType NOT like '%'+@strPurchaseSales+'%'  
 	ORDER BY intSeqNo ASC,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END

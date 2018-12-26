@@ -87,26 +87,24 @@ SELECT distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName el
 JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 
-DECLARE @tblDerivative TABLE (
-       intRowNum INT,
-	   intContractHeaderId int,
-	   strContractSeq nvarchar(100),
-	   strEntityName nvarchar(100),
-	   dblFixedPurchaseVolume NUMERIC(24, 10),
-	   dblUnfixedPurchaseVolume NUMERIC(24, 10),
-	   dblTotalValume NUMERIC(24, 10),
-	   dblPurchaseOpenQty NUMERIC(24, 10),
-	   dblPurchaseContractBasisPrice NUMERIC(24, 10),
-	   dblPurchaseFuturesPrice NUMERIC(24, 10),
-	   dblPurchaseCashPrice NUMERIC(24, 10),
-	   dblFixedPurchaseValue NUMERIC(24, 10),
-	   dblUnPurchaseOpenQty NUMERIC(24, 10),
-	   dblUnPurchaseContractBasisPrice NUMERIC(24, 10),
-	   dblUnPurchaseFuturesPrice NUMERIC(24, 10),
-	   dblUnPurchaseCashPrice NUMERIC(24, 10),
-	   dblUnfixedPurchaseValue NUMERIC(24, 10),
-	   dblTotalCommitedValue NUMERIC(24, 10)
-	   )
+DECLARE @tblDerivative TABLE (intRowNum INT
+	, intContractHeaderId int
+	, strContractSeq nvarchar(100) COLLATE Latin1_General_CI_AS
+	, strEntityName nvarchar(100) COLLATE Latin1_General_CI_AS
+	, dblFixedPurchaseVolume NUMERIC(24, 10)
+	, dblUnfixedPurchaseVolume NUMERIC(24, 10)
+	, dblTotalValume NUMERIC(24, 10)
+	, dblPurchaseOpenQty NUMERIC(24, 10)
+	, dblPurchaseContractBasisPrice NUMERIC(24, 10)
+	, dblPurchaseFuturesPrice NUMERIC(24, 10)
+	, dblPurchaseCashPrice NUMERIC(24, 10)
+	, dblFixedPurchaseValue NUMERIC(24, 10)
+	, dblUnPurchaseOpenQty NUMERIC(24, 10)
+	, dblUnPurchaseContractBasisPrice NUMERIC(24, 10)
+	, dblUnPurchaseFuturesPrice NUMERIC(24, 10)
+	, dblUnPurchaseCashPrice NUMERIC(24, 10)
+	, dblUnfixedPurchaseValue NUMERIC(24, 10)
+	, dblTotalCommitedValue NUMERIC(24, 10))
 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN	

@@ -6,10 +6,10 @@ AS
 
 declare  @tblTemp table
 			(intCollateralId int,
-			strLocationName nvarchar(50),
-			strCustomer nvarchar(50),
-			intReceiptNo nvarchar(50),
-			strContractNumber nvarchar(100),
+			strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+			strCustomer nvarchar(50) COLLATE Latin1_General_CI_AS,
+			intReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS,
+			strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS,
 			dtmOpenDate datetime,
 			dblOriginalQuantity  numeric(24,10),
 			dblRemainingQuantity numeric(24,10),

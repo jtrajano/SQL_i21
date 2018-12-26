@@ -44,16 +44,16 @@ BEGIN TRY
 
 	IF @FutureMonthId >0
 	BEGIN
-		SELECT @StrTradedMonthSymbol=strSymbol+RIGHT(intYear,1) from tblRKFuturesMonth Where  intFutureMonthId=@FutureMonthId
+		SELECT @StrTradedMonthSymbol=strSymbol+RIGHT(intYear,1) COLLATE Latin1_General_CI_AS from tblRKFuturesMonth Where  intFutureMonthId=@FutureMonthId
 	END
 	
-	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
+	SELECT @URL = strInterfaceWebServicesURL COLLATE Latin1_General_CI_AS FROM tblSMCompanyPreference
 
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
+	SELECT @strUserName = strProviderUserId COLLATE Latin1_General_CI_AS FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
 	
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
+	SELECT @strPassword = strProviderPassword COLLATE Latin1_General_CI_AS FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
 
-	SELECT @IntinterfaceSystem = intInterfaceSystemId FROM   tblSMCompanyPreference
+	SELECT @IntinterfaceSystem = intInterfaceSystemId COLLATE Latin1_General_CI_AS FROM   tblSMCompanyPreference
 
 	IF @IntinterfaceSystem = 1
 	BEGIN

@@ -86,11 +86,11 @@ SELECT strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intC
      DECLARE @DemandFinal1 as Table (  
      dblQuantity  numeric(24,10),  
      intUOMId  int,    
-     strPeriod  nvarchar(200),
-       strItemName nvarchar(200),
+     strPeriod  nvarchar(200) COLLATE Latin1_General_CI_AS,
+       strItemName nvarchar(200) COLLATE Latin1_General_CI_AS,
        dtmPeriod datetime,
        intItemId int,
-       strDescription nvarchar(200)
+       strDescription nvarchar(200) COLLATE Latin1_General_CI_AS
      )
 
        DECLARE @DemandQty as Table (  
@@ -98,10 +98,10 @@ SELECT strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intC
      dblQuantity  numeric(24,10),  
      intUOMId  int,  
      dtmPeriod  datetime,  
-     strPeriod  nvarchar(200),
-       strItemName nvarchar(200),
+     strPeriod  nvarchar(200) COLLATE Latin1_General_CI_AS,
+       strItemName nvarchar(200) COLLATE Latin1_General_CI_AS,
        intItemId int,
-       strDescription nvarchar(200)
+       strDescription nvarchar(200) COLLATE Latin1_General_CI_AS
      )  
 
 DECLARE @DemandFinal as Table (  
@@ -109,10 +109,10 @@ DECLARE @DemandFinal as Table (
      dblQuantity  numeric(24,10),  
      intUOMId  int,  
      dtmPeriod  datetime,  
-     strPeriod  nvarchar(200),
-       strItemName nvarchar(200),
+     strPeriod  nvarchar(200) COLLATE Latin1_General_CI_AS,
+       strItemName nvarchar(200) COLLATE Latin1_General_CI_AS,
        intItemId int,
-       strDescription nvarchar(200)
+       strDescription nvarchar(200) COLLATE Latin1_General_CI_AS
      )
 
 
@@ -169,7 +169,7 @@ GROUP BY intUOMId, strPeriod,strItemName,intItemId,strDescription ORDER BY CONVE
 
 DECLARE @ListFinal as Table (  
                             intRowNumber int,
-                            strGroup nvarchar(250),
+                            strGroup nvarchar(250) COLLATE Latin1_General_CI_AS,
                             Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
                             PriceStatus  nvarchar(200) COLLATE Latin1_General_CI_AS,  
                             strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
@@ -181,7 +181,7 @@ DECLARE @ListFinal as Table (
                             CustVendor nvarchar(200) COLLATE Latin1_General_CI_AS,       
                             dblNoOfLot decimal(24,10),  
                             dblQuantity decimal(24,10),
-                                             intOrderByHeading int,
+							intOrderByHeading int,
                             intContractHeaderId int ,
                             intFutOptTransactionHeaderId int           
      )  
@@ -772,9 +772,9 @@ INSERT INTO #temp (strGroup,Selection ,
             intOrderByHeading ,
             intContractHeaderId ,
             intFutOptTransactionHeaderId )
-SELECT DISTINCT '1.Outright Coverage',
-'Outright Coverage'  ,
-'1.Priced / Outright - (Outright position)',strFutureMonth, @strAccountNumber,
+SELECT DISTINCT '1.Outright Coverage' COLLATE Latin1_General_CI_AS,
+'Outright Coverage'  COLLATE Latin1_General_CI_AS,
+'1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS,strFutureMonth, @strAccountNumber,
 NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
 FROM #temp  WHERE strFutureMonth
 NOT IN (@strMonth)

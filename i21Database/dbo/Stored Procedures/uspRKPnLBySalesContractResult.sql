@@ -19,8 +19,8 @@ DECLARE @Result TABLE (
 	intResultId INT IDENTITY(1, 1) PRIMARY KEY
 	,intContractHeaderId INT
 	,intContractDetailId INT
-	,strContractNumber NVARCHAR(50)
-	,strContractType NVARCHAR(50)
+	,strContractNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblQty NUMERIC(18, 6)
 	,dblUSD NUMERIC(18, 6)
 	,dblBasis NUMERIC(18, 6)
@@ -29,32 +29,32 @@ DECLARE @Result TABLE (
 	,dblBasisUSD NUMERIC(18, 6)
 	,dblAllocatedQtyUSD NUMERIC(18, 6)
 	,dblCostUSD NUMERIC(18, 6)
-	,strUnitMeasure nvarchar(200)
+	,strUnitMeasure nvarchar(200) COLLATE Latin1_General_CI_AS
 	,dblPriceVariation NUMERIC(18, 6)
-	,strUOMVariation  NVARCHAR(100)
+	,strUOMVariation  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 
 	)
 DECLARE @PhysicalFuturesResult TABLE (
 	intRowNum INT
-	,strContractType NVARCHAR(50)
-	,strNumber NVARCHAR(50)
-	,strDescription NVARCHAR(50)
-	,strConfirmed NVARCHAR(50)
+	,strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strConfirmed NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblAllocatedQty NUMERIC(18, 6)
 	,dblPrice NUMERIC(18, 6)
-	,strCurrency NVARCHAR(50)
+	,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblFX NUMERIC(18, 6)
 	,dblBooked NUMERIC(18, 6)
 	,dblAccounting NUMERIC(18, 6)
 	,dtmDate DATETIME
-	,strType Nvarchar(100)
+	,strType Nvarchar(100) COLLATE Latin1_General_CI_AS
 	,dblTranValue NUMERIC(18, 6)
 	,intSort INT
 	,dblTransactionValue NUMERIC(18, 6)
 	,dblForecast NUMERIC(18, 6)
 	,dblBasisUSD NUMERIC(18, 6)
 	,dblCostUSD NUMERIC(18, 6)
-	,strUnitMeasure nvarchar(200)
+	,strUnitMeasure nvarchar(200) COLLATE Latin1_General_CI_AS
 	,intContractDetailId int
 	,ysnPosted Bit
 	)

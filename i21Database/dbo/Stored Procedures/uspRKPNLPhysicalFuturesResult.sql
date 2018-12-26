@@ -82,9 +82,9 @@ BEGIN
 			@intSContractDetailId as intContractDetailId
 	FROM
 	(
-		SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
-				'Sales - ' + SH.strContractNumber	AS	strNumber,
-				'Allocated' AS strDescription,
+		SELECT	(TP.strContractType + ' - ' + CH.strContractNumber) COLLATE Latin1_General_CI_AS strContractType,
+				('Sales - ' + SH.strContractNumber)	COLLATE Latin1_General_CI_AS AS	strNumber,
+				'Allocated' COLLATE Latin1_General_CI_AS AS strDescription,
 				NULL AS strConfirmed,
 				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) *-1 AS dblAllocatedQty,
 				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) *-1 AS dblAllocatedQtyPrice,
@@ -109,7 +109,7 @@ BEGIN
 				NUll AS dblBookedPrice,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				'3 Purchase Allocated'	AS strType,
+				'3 Purchase Allocated' COLLATE Latin1_General_CI_AS	AS strType,
 				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort,
 				CAST(0 AS BIT) ysnPosted
@@ -141,7 +141,7 @@ BEGIN
 		SELECT *,ROW_NUMBER() OVER (ORDER BY dblPrice ASC)  AS intSort FROM (
 			SELECT	DISTINCT NULL AS strContractType,
 					IV.strInvoiceNumber,
-					'Invoice' AS strDescription,
+					'Invoice' COLLATE Latin1_General_CI_AS AS strDescription,
 					NULL AS strConfirmed,
 					NULL AS dblAllocatedQty,
 					NULL AS dblAllocatedQtyPrice,
@@ -153,7 +153,7 @@ BEGIN
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBookedPrice,
 					ID.dblTotal AS dblAccounting,
 					IV.dtmDate AS dtmDate,
-					'2 Invoice'	AS strType,
+					'2 Invoice' COLLATE Latin1_General_CI_AS	AS strType,
 					0.0 AS dblTranValue, --Dummy
 					IV.ysnPosted
 
@@ -175,7 +175,7 @@ BEGIN
 
 		SELECT	DISTINCT NULL AS strContractType,
 				IV.strBillId,
-				'Supp. Invoice' AS strDescription,
+				'Supp. Invoice' COLLATE Latin1_General_CI_AS AS strDescription,
 				NULL AS strConfirmed,
 				NULL AS dblAllocatedQty,
 				NULL AS dblAllocatedQtyPrice,
@@ -186,7 +186,7 @@ BEGIN
 				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) * -1 AS dblBookedPrice,
 				ID.dblTotal *-1 AS dblAccounting,
 				IV.dtmDate AS dtmDate,
-				'4 Supp. Invoice'	AS strType,
+				'4 Supp. Invoice' COLLATE Latin1_General_CI_AS AS strType,
 				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort,
 				IV.ysnPosted
@@ -207,9 +207,9 @@ BEGIN
 		UNION ALL
 
 		SELECT *,ROW_NUMBER() OVER (ORDER BY dblAllocatedQty ASC)  AS intSort FROM (
-			SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
-					'Purchase - ' + PH.strContractNumber  AS strNumbe,
-					'Allocated' AS strDescription,
+			SELECT	(TP.strContractType + ' - ' + CH.strContractNumber) COLLATE Latin1_General_CI_AS strContractType,
+					('Purchase - ' + PH.strContractNumber) COLLATE Latin1_General_CI_AS AS strNumber,
+					'Allocated' COLLATE Latin1_General_CI_AS AS strDescription,
 					NULL AS strConfirmed,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) AS dblAllocatedQty,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQtyPrice,
@@ -232,7 +232,7 @@ BEGIN
 					NUll AS dblBookedPrice,
 					NULL AS dblAccounting,
 					AD.dtmAllocatedDate AS dtmDate,
-					'1 Sales Allocated'	AS strType,
+					'1 Sales Allocated' COLLATE Latin1_General_CI_AS AS strType,
 					0.0 AS dblTranValue, --Dummy
 					CAST(0 AS BIT) ysnPosted
 
@@ -263,7 +263,7 @@ BEGIN
 		FROM(
 			SELECT	IM.strItemNo,
 					strBillId,
-					TP.strContractType + ' - ' +  CH.strContractNumber AS strDescription,
+					(TP.strContractType + ' - ' +  CH.strContractNumber) COLLATE Latin1_General_CI_AS AS strDescription,
 					NULL AS strConfirmed,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) AS dblAllocatedQty,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQtyPrice,

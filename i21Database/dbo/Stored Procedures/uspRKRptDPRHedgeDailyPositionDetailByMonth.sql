@@ -79,51 +79,51 @@ DECLARE @strCommodityCode NVARCHAR(50)
 DECLARE @List AS TABLE (  
      intRowNumber INT IDENTITY(1,1),
 	 intContractHeaderId int,
-	 strContractNumber NVARCHAR(200),
+	 strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	 intFutOptTransactionHeaderId int,
-	 strInternalTradeNo NVARCHAR(200),
+	 strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	 intCommodityId int,
-	 strCommodityCode NVARCHAR(200),   
-     strType  NVARCHAR(50), 
-	 strLocationName NVARCHAR(100),
-	 strContractEndMonth NVARCHAR(50),
-	 strContractEndMonthNearBy NVARCHAR(50),
+	 strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,   
+     strType  NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	 strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	 strContractEndMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	 strContractEndMonthNearBy NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	 dblTotal DECIMAL(24,10)
 	 ,intSeqNo int
-	 ,strUnitMeasure NVARCHAR(50)
+	 ,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	 ,intFromCommodityUnitMeasureId int
 	 ,intToCommodityUnitMeasureId int
-	 ,strAccountNumber NVARCHAR(100)
-	 ,strTranType NVARCHAR(20)
+	 ,strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	 ,strTranType NVARCHAR(20) COLLATE Latin1_General_CI_AS
 	 ,dblNoOfLot NUMERIC(24, 10)
 	 ,dblDelta NUMERIC(24, 10)
 	 ,intBrokerageAccountId int
-	 ,strInstrumentType nvarchar(50)
+	 ,strInstrumentType nvarchar(50) COLLATE Latin1_General_CI_AS
      ) 
 
 DECLARE @FinalList AS TABLE (  
      intRowNumber INT IDENTITY(1,1),
 	 intContractHeaderId int,
-	 strContractNumber NVARCHAR(200),
+	 strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	 intFutOptTransactionHeaderId int,
-	 strInternalTradeNo NVARCHAR(200),
+	 strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	 intCommodityId int,
-	 strCommodityCode NVARCHAR(200),   
-     strType  NVARCHAR(50), 
-	 strLocationName NVARCHAR(100),
-	 strContractEndMonth NVARCHAR(50),
-	 strContractEndMonthNearBy NVARCHAR(50),
+	 strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,   
+     strType  NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	 strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	 strContractEndMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	 strContractEndMonthNearBy NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	 dblTotal DECIMAL(24,10)
 	 ,intSeqNo int
-	 ,strUnitMeasure NVARCHAR(50)
+	 ,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	 ,intFromCommodityUnitMeasureId int
 	 ,intToCommodityUnitMeasureId int
-	 ,strAccountNumber NVARCHAR(100)
-	 ,strTranType NVARCHAR(20)
+	 ,strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	 ,strTranType NVARCHAR(20) COLLATE Latin1_General_CI_AS
 	 ,dblNoOfLot NUMERIC(24, 10)
 	 ,dblDelta NUMERIC(24, 10)
 	 ,intBrokerageAccountId int
-	 ,strInstrumentType nvarchar(50)
+	 ,strInstrumentType nvarchar(50) COLLATE Latin1_General_CI_AS
      ) 
 
 

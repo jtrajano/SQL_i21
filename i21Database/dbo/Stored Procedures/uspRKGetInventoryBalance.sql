@@ -9,16 +9,16 @@ AS
 DECLARE @tblResultInventory TABLE
 (Id INT identity(1,1),
 dtmDate datetime,
-tranShipmentNumber nvarchar(50),
+tranShipmentNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 tranShipQty NUMERIC(24,10),
-tranReceiptNumber nvarchar(50),
+tranReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 tranRecQty NUMERIC(24,10),
 BalanceForward NUMERIC(24,10),
-tranAdjNumber nvarchar(50),
+tranAdjNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblAdjustmentQty NUMERIC(24,10),
-tranCountNumber nvarchar(50),
+tranCountNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblCountQty NUMERIC(24,10),
-tranInvoiceNumber  nvarchar(50),
+tranInvoiceNumber  nvarchar(50) COLLATE Latin1_General_CI_AS,
 dblInvoiceQty  NUMERIC(24,10)
 )
 

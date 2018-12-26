@@ -9,7 +9,7 @@ SELECT 		bd.intCommodityId
 		,intM2MGrainBasisId
 		,strCommodityCode
 		,strFutMarketName
-		,strFutureMonth +' ('+strSymbol+')' strFutureMonth
+		,(strFutureMonth +' ('+strSymbol+')') COLLATE Latin1_General_CI_AS strFutureMonth
 		,strLocationName
  FROM tblRKM2MGrainBasis bd
 JOIN tblRKM2MBasis mb on mb.intM2MBasisId=bd.intM2MBasisId

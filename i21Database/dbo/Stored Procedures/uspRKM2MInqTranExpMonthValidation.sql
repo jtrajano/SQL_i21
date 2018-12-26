@@ -17,14 +17,14 @@ SELECT CD.intContractDetailId
 	,CL.strLocationName
 	,CY.strCommodityCode
 	,TP.strContractType strContractType
-	,CH.strContractNumber + '-' + convert(NVARCHAR(10), CD.intContractSeq) strContractNumber
+	,CH.strContractNumber + '-' + convert(NVARCHAR(10), CD.intContractSeq) COLLATE Latin1_General_CI_AS strContractNumber
 	,EY.strName strEntityName
 	,IM.strItemNo
 	,PT.strPricingType
 	,MO.strFutureMonth
 	,FM.strFutMarketName
 	,MO.dtmLastTradingDate
-	,'Physical' strPhysicalOrFuture
+	,'Physical' COLLATE Latin1_General_CI_AS strPhysicalOrFuture
 FROM tblCTContractHeader CH
 JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -56,7 +56,7 @@ SELECT CT.intFutOptTransactionId intContractDetailId
 	,MO.strFutureMonth
 	,FM.strFutMarketName
 	,MO.dtmLastTradingDate
-	,'Derivative' strPhysicalOrFuture
+	,'Derivative' COLLATE Latin1_General_CI_AS strPhysicalOrFuture
 FROM vyuRKGetOpenContract OC
 JOIN tblRKFutOptTransaction CT ON CT.intFutOptTransactionId = OC.intFutOptTransactionId
 JOIN tblICCommodity C ON C.intCommodityId = CT.intCommodityId

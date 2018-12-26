@@ -3,8 +3,8 @@
 AS
 SELECT top 100 percent 
 	 CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutureMonthId)) AS intRow
-	,LEFT(strFutureMonth,3) strFutureMonth
-	,replace(strFutureMonth,' ','('+strSymbol+') ' ) strFutureMonthYear
+	,LEFT(strFutureMonth,3) COLLATE Latin1_General_CI_AS strFutureMonth
+	,replace(strFutureMonth,' ','('+strSymbol+') ' ) COLLATE Latin1_General_CI_AS strFutureMonthYear
 	,intFutureMonthId
 	,dtmFirstNoticeDate,
 	dtmLastTradingDate as dtmLastTradingDate
@@ -12,7 +12,7 @@ SELECT top 100 percent
 	,strFutureMonth strRollingMonth
 	,ysnExpired
 	,CONVERT(DATETIME,'01 '+strFutureMonth) as dtmMonthYear
-	,strFutureMonth +' ('+strSymbol+')' strFutureMonthWithSymbol
+	,strFutureMonth +' ('+strSymbol+')' COLLATE Latin1_General_CI_AS strFutureMonthWithSymbol
 	,intFutureMarketId
 	,intCommodityMarketId
 FROM tblRKFuturesMonth  

@@ -8,7 +8,7 @@ AS
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
-SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
+SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, (strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName) COLLATE Latin1_General_CI_AS MonthOrder,
 dblGrossPL - dblFutCommission  AS dblNetPL,dblGrossPL,
 intMatchFuturesPSHeaderId ,
 intMatchFuturesPSDetailId ,
