@@ -15,6 +15,7 @@ DECLARE @intEntityVendorId AS INT
 		,@type_Voucher AS INT = 1
 		,@type_DebitMemo AS INT = 3
 		,@billTypeToUse AS INT 
+		,@intSourceType AS INT 
 
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
@@ -28,16 +29,33 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
 
+DECLARE @SourceType_NONE AS INT = 0
+		,@SourceType_SCALE AS INT = 1
+		,@SourceType_INBOUND_SHIPMENT AS INT = 2
+		,@SourceType_TRANSPORT AS INT = 3
+		,@SourceType_SETTLE_STORAGE AS INT = 4
+		,@SourceType_DELIVERY_SHEET AS INT = 5
+		,@SourceType_PURCHASE_ORDER AS INT = 6
+		,@SourceType_STORE AS INT = 7
+
 DECLARE @Own AS INT = 1
 		,@Storage AS INT = 2
 		,@ConsignedPurchase AS INT = 3
 
 SELECT	@intEntityVendorId = intEntityVendorId
-		,@billTypeToUse = @type_Voucher 
+		,@billTypeToUse = 
+				CASE 
+					WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+						@type_DebitMemo
+					ELSE 
+						@type_Voucher
+				END 
+
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
 		,@strVendorRefNo = r.strVendorRefNo
 		,@intCurrencyId = r.intCurrencyId
+		,@intSourceType = r.intSourceType
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -63,7 +81,13 @@ BEGIN
 						ELSE NULL 
 					END 
 				,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
-				,[dblQtyReceived] = ri.dblOpenReceive - ri.dblBillQty
+				,[dblQtyReceived] = 
+					CASE 
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(ri.dblOpenReceive - ri.dblBillQty)
+						ELSE 
+							ri.dblOpenReceive - ri.dblBillQty
+					END 
 				,[dblCost] = ri.dblUnitCost
 				,[intTaxGroupId] = ri.intTaxGroupId
 		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
@@ -72,7 +96,7 @@ BEGIN
 					ON Item.intItemId = ri.intItemId
 		WHERE	r.ysnPosted = 1
 				AND r.intInventoryReceiptId = @intReceiptId
-				AND ri.dblBillQty < ri.dblOpenReceive 
+				AND ABS(ri.dblBillQty) < ABS(ri.dblOpenReceive)
 				AND ri.intOwnershipType = @Own
 				AND Item.strType <> 'Bundle'
 				AND ISNULL(r.strReceiptType, '') <> 'Transfer Order'

@@ -8,13 +8,15 @@ SELECT
 	Receipt.strReceiptType,
 	Receipt.intSourceType,
 	strSourceType = (
-		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
+		CASE 
+			WHEN Receipt.intSourceType = 0 THEN 'None'
+			WHEN Receipt.intSourceType = 1 THEN 'Scale'
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
 			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 6 THEN 'Purchase Order'
-			WHEN Receipt.intSourceType = 0 THEN 'None'
+			WHEN Receipt.intSourceType = 7 THEN 'Store'
 		END),
 	strOrderNumber = 
 		(
