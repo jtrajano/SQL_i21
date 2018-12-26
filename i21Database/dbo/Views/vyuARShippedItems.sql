@@ -886,8 +886,8 @@ FROM (
 		 , dblPriceUOMQuantity				= dblNetWt
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
-		 , dblUnitPrice						= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
 	     , dblTotalTax						= dblTotalTax
