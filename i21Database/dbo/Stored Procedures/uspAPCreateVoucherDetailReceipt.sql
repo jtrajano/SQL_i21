@@ -142,8 +142,8 @@ INSERT INTO @receiptItems(
 SELECT 
 	[intInventoryReceiptType]		=	A.intInventoryReceiptType,
 	[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
-	[dblQtyReceived]				=	(CASE WHEN A.dblQtyReceived IS NULL OR
-														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
+	[dblQtyReceived]				=	(CASE WHEN A.dblQtyReceived IS NULL --OR
+														--A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying -- commented as per Erick. 
 												THEN B.dblOpenReceive - B.dblBillQty
 												ELSE A.dblQtyReceived END),
 	[dblCost]						=	CASE WHEN contractDetail.dblSeqPrice > 0 

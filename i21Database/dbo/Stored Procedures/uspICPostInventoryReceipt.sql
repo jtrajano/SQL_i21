@@ -50,6 +50,9 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 		,@SOURCE_TYPE_SettleStorage AS INT = 4
+		,@SOURCE_TYPE_DeliverySheet AS INT = 5
+		,@SOURCE_TYPE_PurchaseOrder AS INT = 6
+		,@SOURCE_TYPE_Store AS INT = 7
 
 -- Posting variables
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -409,6 +412,7 @@ BEGIN
 	WHERE	r.intInventoryReceiptId = @intTransactionId
 			AND ISNULL(ri.dblOpenReceive, 0) < 0 
 			AND r.strReceiptType <> 'Inventory Return'
+			AND r.intSourceType <> @SOURCE_TYPE_Store
 
 	IF @intItemId IS NOT NULL
 	BEGIN
@@ -524,7 +528,9 @@ BEGIN
 	END 
 
 	-- Validate the receipt total. Do not allow negative receipt total. 
-	IF (dbo.fnICGetReceiptTotals(@intTransactionId, 6) < 0) AND ISNULL(@ysnRecap, 0) = 0
+	IF	(dbo.fnICGetReceiptTotals(@intTransactionId, 6) < 0) 
+		AND ISNULL(@ysnRecap, 0) = 0
+		AND @intSourceType <> @SOURCE_TYPE_Store
 	BEGIN
 		-- Unable to Post {Receipt Number}. The Inventory Receipt total is negative.
 		EXEC uspICRaiseError 80181, @strTransactionId;
@@ -1123,7 +1129,8 @@ BEGIN
 					,dblUnitRetail
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
-			
+					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
+		
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 

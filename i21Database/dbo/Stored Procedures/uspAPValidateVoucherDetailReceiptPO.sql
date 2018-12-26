@@ -24,7 +24,7 @@ SELECT TOP 1 @errorItem = D.strItemNo FROM tblICInventoryReceipt A
 			INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 			INNER JOIN @voucherDetailReceiptPO C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
 			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
-		WHERE A.ysnPosted = 1 AND ISNULL(C.dblQtyReceived, 0) > (B.dblOpenReceive - B.dblBillQty)
+		WHERE A.ysnPosted = 1 AND ABS(ISNULL(C.dblQtyReceived, 0)) > ABS(B.dblOpenReceive - B.dblBillQty)
 
 IF @errorItem IS NOT NULL
 BEGIN
