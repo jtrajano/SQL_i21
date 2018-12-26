@@ -131,7 +131,7 @@ BEGIN TRY
 				,[intStorageLocationId]				= CS.[intStorageLocationId]
 				,[intUnitMeasureId]					= CS.[intUnitMeasureId]
 				,[intItemUOMId]						= CS.[intItemUOMId]
-				,[dblGrossQuantity]					= CS.dblGrossQuantity
+				,[dblGrossQuantity]					= CASE WHEN CS.intDeliverySheetId > 0 THEN NULL ELSE CS.dblGrossQuantity END
 		FROM	@CustomerStorageStagingTable CS
 
 		SELECT @intCustomerStorageId = SCOPE_IDENTITY()
