@@ -78,8 +78,8 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		,[intItemUOMId]             = SC.intItemUOMIdTo
 		,[dblQuantityToTransfer]    = SC.dblNetUnits
 		,[intItemWeightUOMId]		= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.intItemUOMIdFrom ELSE SC.intItemUOMIdTo END
-		,[dblGrossWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.dblGrossWeight ELSE SC.dblGrossUnits END
-		,[dblTareWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.dblTareWeight ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblGrossUnits - SC.dblShrink ELSE 0 END END
+		,[dblGrossWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits) ELSE SC.dblGrossUnits END
+		,[dblTareWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink) ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblShrink ELSE 0 END END
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = SC.intSubLocationId
 		,[intToSubLocationId]       = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intSubLocationToId ELSE NULL END
