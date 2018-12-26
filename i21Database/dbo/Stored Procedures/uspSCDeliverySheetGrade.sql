@@ -23,13 +23,13 @@ DECLARE @strItemNo AS NVARCHAR(MAX)
 CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),intDiscountScheduleCodeId INT, Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT)
 
 INSERT INTO #DeliverySheetGrade (Item, intDiscountScheduleCodeId)
-SELECT IC.strItemNo,GR.intDiscountScheduleCodeId FROM tblSCDeliverySheet SCD
+SELECT DISTINCT IC.strItemNo,GR.intDiscountScheduleCodeId FROM tblSCDeliverySheet SCD
 LEFT JOIN tblGRDiscountCrossReference GRCR ON GRCR.intDiscountId = SCD.intDiscountId
 LEFT JOIN tblICItem ICItem ON ICItem.intItemId = SCD.intItemId
 LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GRCR.intDiscountScheduleId AND GRDS.intCurrencyId = SCD.intCurrencyId AND GRDS.intCommodityId = ICItem.intCommodityId
 LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleId = GRDS.intDiscountScheduleId
 INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND GR.intStorageTypeId = -1
 
 SELECT @total = SUM(SCT.dblNetUnits) FROM tblSCDeliverySheet SCD
 LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId

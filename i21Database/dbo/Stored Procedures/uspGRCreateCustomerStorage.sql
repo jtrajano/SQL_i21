@@ -54,7 +54,6 @@ BEGIN TRY
 				,@intStorageTypeId = @intStorageTypeId
 				,@intStorageScheduleId = @intStorageScheduleId
 				,@ysnDistribute = 1
-				,@dblGrossQuantity = @dblGrossQuantity
 				,@intShipFromLocationId = @intShipFromLocationId
 				,@intShipFromEntityId = @intShipFromEntityId
 				,@newBalance = @newBalance OUT

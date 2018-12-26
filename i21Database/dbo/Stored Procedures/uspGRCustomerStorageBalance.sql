@@ -8,7 +8,6 @@ CREATE PROCEDURE uspGRCustomerStorageBalance
 	,@intStorageTypeId INT = NULL
 	,@intStorageScheduleId INT = NULL
 	,@ysnDistribute BIT	
-	,@dblGrossQuantity DECIMAL(38,20)
 	,@intShipFromLocationId INT = NULL
 	,@intShipFromEntityId INT = NULL
 	,@newBalance DECIMAL(38,20) OUTPUT
@@ -27,7 +26,6 @@ BEGIN TRY
 		UPDATE tblGRCustomerStorage
 		SET dblOpenBalance 			= dblOpenBalance + @dblBalance
 			, dblOriginalBalance 	= dblOriginalBalance + @dblBalance
-			, dblGrossQuantity 		= dblGrossQuantity + @dblGrossQuantity
 			, intStorageTypeId 		= @intStorageTypeId
 			, intStorageScheduleId 	= @intStorageScheduleId
 			, intShipFromLocationId = @intShipFromLocationId
@@ -42,7 +40,6 @@ BEGIN TRY
 		UPDATE tblGRCustomerStorage
 		SET dblOpenBalance 			= dblOpenBalance - @dblBalance
 			, dblOriginalBalance 	= dblOriginalBalance - @dblBalance
-			, dblGrossQuantity 		= dblGrossQuantity - @dblGrossQuantity
 		WHERE intEntityId = @intEntityId 
 			AND intItemId = @intItemId 
 			AND intCompanyLocationId = @intLocationId 
