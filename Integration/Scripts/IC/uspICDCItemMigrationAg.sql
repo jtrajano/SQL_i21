@@ -166,7 +166,7 @@ FROM
 		,(
 		CASE 
 		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
-			THEN (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = 'TON') 
+			THEN (SELECT TOP 1 IUOM.intUnitMeasureId FROM tblICUnitMeasure IUOM WHERE UPPER(IUOM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = MIN(agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS)
 		ELSE NULL
 		END
 		) TonnageTaxUOM
