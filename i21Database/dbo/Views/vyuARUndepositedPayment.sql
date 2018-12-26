@@ -81,7 +81,7 @@ SELECT
 	,[intSourceTransactionId]	= EOD.intPOSEndOfDayId 
 	,[dtmDate]					= EOD.dtmClose
 	,[strName]					= ENTITY.strName
-	,[dblAmount]				= EOD.dblFinalEndingBalance - (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0))
+	,[dblAmount]				= EOD.dblFinalEndingBalance - ((EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0)) - ABS(ISNULL(EOD.dblCashReturn,0)))
 	,[strSourceSystem]			= 'AR'
 	,[intBankAccountId]			= NULL
 	,[intLocationId]			= DRAWER.intCompanyLocationId	
