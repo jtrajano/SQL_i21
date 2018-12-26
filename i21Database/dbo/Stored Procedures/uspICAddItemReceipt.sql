@@ -31,7 +31,17 @@ DECLARE @inventoryReceiptId AS INT
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strReceiptNumber AS NVARCHAR(50)
 		,@intLocationId AS INT 
-		
+
+
+DECLARE @SourceType_NONE AS INT = 0
+		,@SourceType_SCALE AS INT = 1
+		,@SourceType_INBOUND_SHIPMENT AS INT = 2
+		,@SourceType_TRANSPORT AS INT = 3
+		,@SourceType_SETTLE_STORAGE AS INT = 4
+		,@SourceType_DELIVERY_SHEET AS INT = 5
+		,@SourceType_PURCHASE_ORDER AS INT = 6
+		,@SourceType_STORE AS INT = 7
+
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
@@ -304,7 +314,16 @@ BEGIN
 		FROM @DataForReceiptHeader RawHeaderData
 		WHERE RawHeaderData.intId = @intId
 
-		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 6 OR @valueSourceTypeId < 0
+		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId	NOT IN (
+			@SourceType_NONE 
+			,@SourceType_SCALE 
+			,@SourceType_INBOUND_SHIPMENT 
+			,@SourceType_TRANSPORT 
+			,@SourceType_SETTLE_STORAGE 
+			,@SourceType_DELIVERY_SHEET 
+			,@SourceType_PURCHASE_ORDER 
+			,@SourceType_STORE 
+		)
 			BEGIN
 				-- Source Type Id is invalid or missing.
 				EXEC uspICRaiseError 80115; 
@@ -1952,7 +1971,14 @@ BEGIN
 		END 
 
 		-- Validate the receipt total. Do not allow negative receipt total. 
-		IF (dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0) 
+		-- However, allow it if source type is a 'STORE'
+		IF EXISTS (
+			SELECT 1
+			FROM	tblICInventoryReceipt r
+			WHERE	r.intInventoryReceiptId = @inventoryReceiptId
+					AND dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0
+					AND r.intSourceType <> @SourceType_STORE 
+		) 
 		BEGIN
 			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
 			EXEC uspICRaiseError 80182;

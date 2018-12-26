@@ -243,7 +243,7 @@ BEGIN TRY
 				,ysnIsStorage			= 0
 				,dblFreightRate			= 0
 				,intSourceId			= NULL
-				,intSourceType		 	= 0
+				,intSourceType		 	= 7 -- 7 means 'Store'
 				,dblGross				= NULL
 				,dblNet					= NULL
 				,intInventoryReceiptId	= NULL
