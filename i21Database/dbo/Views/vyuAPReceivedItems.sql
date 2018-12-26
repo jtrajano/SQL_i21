@@ -672,7 +672,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	TM.strTerm
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
@@ -723,6 +723,7 @@ FROM
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 													AND	CC.ysnAccrue		=	1
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -787,7 +788,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	TM.strTerm
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
@@ -839,6 +840,7 @@ FROM
 												AND	CC.ysnPrice				=	1
 												AND CD.intPricingTypeId		IN	(1,6)
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -908,7 +910,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	TM.strTerm
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
@@ -959,6 +961,7 @@ FROM
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 													AND	CC.ysnAccrue		=	1
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -1027,7 +1030,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	TM.strTerm
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]							=	NULL
@@ -1079,6 +1082,7 @@ FROM
 												AND	CC.ysnPrice				=	1
 												AND CD.intPricingTypeId		IN	(1,6)
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
