@@ -9,6 +9,8 @@ CREATE PROCEDURE uspGRCustomerStorageBalance
 	,@intStorageScheduleId INT = NULL
 	,@ysnDistribute BIT	
 	,@dblGrossQuantity DECIMAL(38,20)
+	,@intShipFromLocationId INT = NULL
+	,@intShipFromEntityId INT = NULL
 	,@newBalance DECIMAL(38,20) OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -28,6 +30,8 @@ BEGIN TRY
 			, dblGrossQuantity 		= dblGrossQuantity + @dblGrossQuantity
 			, intStorageTypeId 		= @intStorageTypeId
 			, intStorageScheduleId 	= @intStorageScheduleId
+			, intShipFromLocationId = @intShipFromLocationId
+			, intShipFromEntityId	= @intShipFromEntityId
 		WHERE intCustomerStorageId 	= @intCustomerStorageId
 
 		SELECT @newBalance = dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
