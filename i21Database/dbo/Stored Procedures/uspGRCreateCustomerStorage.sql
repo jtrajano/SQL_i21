@@ -21,7 +21,6 @@ DECLARE @storageHistoryData AS [StorageHistoryStagingTable]
 DECLARE @intStorageHistoryId INT
 DECLARE @intStorageTypeId INT
 DECLARE @intStorageScheduleId INT
-DECLARE @dblGrossQuantity NUMERIC(38,20)
 DECLARE @intShipFromLocationId INT
 DECLARE @intShipFromEntityId INT
 
@@ -35,7 +34,6 @@ BEGIN TRY
 		, @intDeliverySheetId		= CS.intDeliverySheetId
 		, @intStorageTypeId			= CS.intStorageTypeId
 		, @intStorageScheduleId		= CS.intStorageScheduleId
-		, @dblGrossQuantity			= CS.dblGrossQuantity
 		, @intShipFromLocationId	= CS.intShipFromLocationId
 		, @intShipFromEntityId		= CS.intShipFromEntityId
 	FROM @CustomerStorageStagingTable CS	
