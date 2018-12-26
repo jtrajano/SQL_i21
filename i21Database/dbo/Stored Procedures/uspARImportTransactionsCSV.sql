@@ -256,8 +256,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					FROM tblICCategoryTax 
 					WHERE intCategoryId = ICI.intCategoryId
 					) CATEGORYTAX
-				LEFT JOIN
-					tblSMTaxCode TC ON CATEGORYTAX.intTaxClassId = TC.intTaxClassId
+				CROSS APPLY
+					(SELECT TOP 1 intTaxCodeId, intTaxClassId
+					FROM tblSMTaxCode
+					WHERE intTaxClassId = CATEGORYTAX.intTaxClassId
+					) TC
 				LEFT JOIN
 					tblSMTaxGroupCode TGC ON TC.intTaxCodeId = TGC.intTaxCodeId
 				LEFT JOIN
