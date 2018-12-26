@@ -361,7 +361,7 @@ SET @query = '
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,A.intAccountId
-	,tmpAgingSummaryTotal.strAccountId
+	--,tmpAgingSummaryTotal.strAccountId
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,tmpAgingSummaryTotal.dblDiscount
@@ -398,7 +398,7 @@ SET @query = '
 	(
 		SELECT 
 			intBillId
-			,strAccountId as strAccountId
+			--,strAccountId as strAccountId
 			,SUM(tmpAPPayables.dblTotal) AS dblTotal
 			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
 			,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
@@ -407,11 +407,11 @@ SET @query = '
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
-		GROUP BY intBillId, strAccountId
+		GROUP BY intBillId--, strAccountId
 		UNION ALL
 		SELECT 
 			intBillId
-			,strAccountId
+			--,strAccountId
 			,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
 			,SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
 			,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
@@ -420,7 +420,7 @@ SET @query = '
 		FROM ('
 				+ @prepaidInnerQuery +
 			') tmpAPPrepaidPayables 
-		GROUP BY intBillId, intPrepaidRowType, strAccountId
+		GROUP BY intBillId, intPrepaidRowType--, strAccountId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 	ON A.intBillId = tmpAgingSummaryTotal.intBillId
