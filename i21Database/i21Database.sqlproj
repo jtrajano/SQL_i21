@@ -7219,6 +7219,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper2.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityBroker.sql" />
+    <Build Include="dbo\Functions\fnSCGetTicketDetailsFromLG.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
