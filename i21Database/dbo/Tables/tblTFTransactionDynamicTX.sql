@@ -5,5 +5,5 @@
     [strTXPurchaserSignedStatementNumber] NVARCHAR(50) NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTFTransactionDynamicTX] PRIMARY KEY ([intTransactionDynamicId]), 
-    CONSTRAINT [FK_tblTFTransactionDynamicTX_tblTFTransaction] FOREIGN KEY (intTransactionId) REFERENCES [tblTFTransaction]([intTransactionId]) 
+    CONSTRAINT [FK_tblTFTransactionDynamicTX_tblTFTransaction] FOREIGN KEY (intTransactionId) REFERENCES [tblTFTransaction]([intTransactionId])
 )
