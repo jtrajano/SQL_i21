@@ -7265,6 +7265,7 @@
     <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
     <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
+    <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
