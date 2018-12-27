@@ -591,7 +591,7 @@ BEGIN
 		,strType = strContractType + ' ' + strPricingType
 
 	DELETE FROM @FinalResult 
-	WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTSequenceHistory WHERE intContractStatusId IN (3,6 )
+	WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTSequenceHistory WHERE intContractStatusId IN (3,5,6)
 	AND dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE WHEN @dtmToDate IS NOT NULL THEN @dtmToDate	 ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END) 
 
 	DELETE FROM @FinalResult
