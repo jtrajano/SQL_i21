@@ -7,7 +7,7 @@ intStoreId
 , strDistrict
 , strStoreDescription
 , dtmCheckoutDate
-, ysnPosted
+, ISNULL(ysnPosted, 0) ysnPosted
 , SUM(dblSalesAmount) dblSalesAmount
 , SUM(dblAmountFuel) dblAmountFuel
 , SUM(dblSaleTax) dblSaleTax
