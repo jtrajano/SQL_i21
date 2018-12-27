@@ -7196,6 +7196,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuationWrapper2.sql" />
 	<Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
