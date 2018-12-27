@@ -1765,15 +1765,25 @@ FROM @List
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
 UPDATE @ListFinal SET strFutureMonth = CASE 
-		WHEN LEN(LTRIM(RTRIM(strFutureMonth))) = 6 THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(strFutureMonth))), 'MMM yyyy')
-		ELSE LTRIM(RTRIM(strFutureMonth))
-	END
-WHERE ISNULL(LTRIM(RTRIM(strFutureMonth)), '') <> '';
-
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
+END COLLATE Latin1_General_CI_AS
+FROM @ListFinal F
+LEFT JOIN (
+	SELECT intFutOptTransactionHeaderId
+		,strInternalTradeNo
+		,strFutureMonth = ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
+	FROM vyuRKFutOptTransaction
+)FOT ON FOT.intFutOptTransactionHeaderId = F.intFutOptTransactionHeaderId AND FOT.strInternalTradeNo COLLATE Latin1_General_CI_AS = F.strInternalTradeNo COLLATE Latin1_General_CI_AS
+	
 UPDATE @ListFinal SET strContractEndMonthNearBy = CASE 
-			WHEN @strPositionBy = 'Futures Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strFutureMonth)),''),'Near By')
-			WHEN @strPositionBy = 'Delivery Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strDeliveryDate)),''),'Near By')
-		END
+		WHEN @strPositionBy = 'Futures Month'  THEN ISNULL(NULLIF(LTRIM(RTRIM(strFutureMonth)),''),'Near By')
+		WHEN @strPositionBy = 'Delivery Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strDeliveryDate)),''),'Near By')
+	END
+WHERE ISNULL(intContractHeaderId, '') <> ''
+
+UPDATE @ListFinal SET strContractEndMonthNearBy = NULL, strFutureMonth = NULL, strDeliveryDate = NULL
+WHERE ISNULL(intContractHeaderId, '') = '' AND ISNULL(strInternalTradeNo, '') = ''
 
 SELECT intSeqNo = intOrderId
 	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 

@@ -2476,19 +2476,19 @@ BEGIN
 END
 
 UPDATE @FinalTable SET strFutureMonth = CASE 
-		WHEN LEN(LTRIM(RTRIM(strFutureMonth))) = 6 THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(strFutureMonth))), 'MMM yyyy')
-		ELSE LTRIM(RTRIM(strFutureMonth))
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
+END COLLATE Latin1_General_CI_AS
+FROM @FinalTable F
+	
+UPDATE @FinalTable SET strContractEndMonth = CASE 
+		WHEN @strPositionBy = 'Futures Month'  THEN ISNULL(NULLIF(LTRIM(RTRIM(strFutureMonth)),''),'Near By')
+		WHEN @strPositionBy = 'Delivery Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strDeliveryDate)),''),'Near By')
 	END
-WHERE ISNULL(LTRIM(RTRIM(strFutureMonth)), '') <> '';
+WHERE ISNULL(intContractHeaderId, '') <> ''
 
-IF(@strPositionBy = 'Futures Month')
-BEGIN
-	UPDATE @FinalTable SET strContractEndMonth = strFutureMonth;
-END
-ELSE IF(@strPositionBy = 'Delivery Month')
-BEGIN
-	UPDATE @FinalTable SET strContractEndMonth = strDeliveryDate;
-END
+UPDATE @FinalTable SET strContractEndMonth = NULL, strFutureMonth = NULL, strDeliveryDate = NULL
+WHERE ISNULL(intContractHeaderId, '') = ''
 
 IF (@strByType = 'ByLocation')
 BEGIN
