@@ -111,7 +111,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			WHERE glije_period between @startingPeriod and @endingPeriod
     			
 
-    		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
+    		IF EXISTS (SELECT * FROM @tmpID WHERE isnull(glije_date,0) < 19000000 or isnull(glije_date,0) > 21000000)
     		BEGIN
     			--EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
     			BEGIN
@@ -157,7 +157,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						A4GLIdentity
 						FROM glijemst A JOIN @tmpID B 
     					ON A.A4GLIdentity = B.ID
-    					WHERE B.glije_date = 0
+    					WHERE isnull(B.glije_date,0) < 19000000 or isnull(B.glije_date,0) > 21000000
     			END
 				-- INSERT TO COA IMPORT LOG TABLE HERE
 				
