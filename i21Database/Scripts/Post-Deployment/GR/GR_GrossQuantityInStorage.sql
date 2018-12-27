@@ -9,7 +9,10 @@ BEGIN
 DECLARE @cnt INT
 
 UPDATE GRS 
-SET GRS.dblGrossQuantity = ROUND(((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross),(SELECT intCurrencyDecimal FROM tblSMCompanyPreference))
+SET GRS.dblGrossQuantity = CASE 
+							WHEN SCD.dblNet > 0 THEN ROUND(((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross),(SELECT intCurrencyDecimal FROM tblSMCompanyPreference))
+							ELSE 0
+						END
 FROM tblSCDeliverySheet SCD
 INNER JOIN tblSCDeliverySheetSplit SCDS 
 	ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
@@ -49,7 +52,10 @@ BEGIN
 DECLARE @cnt INT
 
 UPDATE SST
-SET SST.dblGrossSettledUnits = ROUND(((SST.dblUnits / DS.dblNet) * DS.dblGross),(SELECT intCurrencyDecimal FROM tblSMCompanyPreference))
+SET SST.dblGrossSettledUnits = CASE
+									WHEN DS.dblNet > 0 THEN ROUND(((SST.dblUnits / DS.dblNet) * DS.dblGross),(SELECT intCurrencyDecimal FROM tblSMCompanyPreference))
+									ELSE 0
+							END
 FROM tblGRSettleStorageTicket SST
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SST.intCustomerStorageId
