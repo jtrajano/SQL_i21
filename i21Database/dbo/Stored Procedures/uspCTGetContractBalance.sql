@@ -89,6 +89,8 @@ BEGIN TRY
 	,strContractType		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intCommodityId			INT
 	,strCommodity			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,intItemId				INT
+	,strItemNo				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intCompanyLocationId	INT
 	,strLocationName		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strCustomer			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -400,7 +402,9 @@ BEGIN TRY
 	  ,strDate				
 	  ,strContractType		
 	  ,intCommodityId			
-	  ,strCommodity			
+	  ,strCommodity
+	  ,intItemId
+	  ,strItemNo			
 	  ,intCompanyLocationId	
 	  ,strLocationName		
 	  ,strCustomer			
@@ -433,6 +437,8 @@ BEGIN TRY
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
 	,strCommodity			= CM.strDescription +' '+UOM.strUnitMeasure
+	,intItemId				= CD.intItemId
+	,strItemNo				= IM.strItemNo
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,strLocationName		= L.strLocationName					   
 	,strCustomer			= EY.strEntityName
@@ -491,6 +497,7 @@ BEGIN TRY
 		) 												PF  ON  PF.intContractDetailId  =   CD.intContractDetailId
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
+	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
@@ -566,7 +573,9 @@ BEGIN TRY
 	,strDate				
 	,strContractType		
 	,intCommodityId			
-	,strCommodity			
+	,strCommodity
+	,intItemId		
+	,strItemNo					
 	,intCompanyLocationId	
 	,strLocationName		
 	,strCustomer			
@@ -599,6 +608,8 @@ BEGIN TRY
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
 	,strCommodity			= CM.strDescription +' '+UOM.strUnitMeasure
+	,intItemId				= CD.intItemId
+	,strItemNo				= IM.strItemNo
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,strLocationName		= L.strLocationName					   
 	,strCustomer			= EY.strEntityName
@@ -646,6 +657,7 @@ BEGIN TRY
 	JOIN @PriceFixation							PF  ON  PF.intContractDetailId          =   CD.intContractDetailId
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
+	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
