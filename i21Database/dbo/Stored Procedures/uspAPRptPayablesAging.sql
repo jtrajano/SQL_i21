@@ -147,7 +147,7 @@ SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_x
 SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
-					,strAccountId
+					--,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -159,7 +159,7 @@ SET @innerQuery = 'SELECT --DISTINCT
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
 					,intAccountId
-					,strAccountId
+					--,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
