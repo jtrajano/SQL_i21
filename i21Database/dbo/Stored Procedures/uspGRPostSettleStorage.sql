@@ -1124,7 +1124,10 @@ BEGIN TRY
 					,[dblWeightUnitQty]			= 1 
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
-					,[dblNetWeight]				= a.dblUnits 
+					,[dblNetWeight]				= CASE 
+													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
+													ELSE 0 
+												END 
 					,[intInventoryReceiptItemId] = CASE 
 													WHEN ST.ysnDPOwnedType = 0 THEN NULL
 													ELSE
@@ -1141,7 +1144,10 @@ BEGIN TRY
 															ELSE NULL
 														END
 												END
-					,[intWeightUOMId]			= b.intItemUOMId
+					,[intWeightUOMId]			= CASE
+													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
+													ELSE NULL
+												END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
@@ -1186,7 +1192,6 @@ BEGIN TRY
 						,[dblCostUnitQty]
 						,[dblUnitQty]
 						,[dblNetWeight]
-						,[intWeightUOMId]
 						)
 						SELECT 
 							intCustomerStorageId 	= SST.intCustomerStorageId
@@ -1209,7 +1214,6 @@ BEGIN TRY
 						,[dblCostUnitQty] 		= 1
 						,[dblUnitQty]			= 1
 						,[dblNetWeight] 		= 0	
-						,[intWeightUOMId]		= CU.intCommodityUnitMeasureId
 					FROM tblICInventoryReceiptCharge ReceiptCharge
 					JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
 					JOIN tblGRStorageHistory SH ON SH.intInventoryReceiptId=ReceiptCharge.intInventoryReceiptId AND SH.strType='FROM Scale'
@@ -1295,7 +1299,6 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
-					,[intWeightUOMId]
 				 )
 				 SELECT 
 				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
@@ -1329,7 +1332,6 @@ BEGIN TRY
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1
 				 ,[dblNetWeight]		  = 0 
-				 ,[intWeightUOMId]		  = UOM.intItemUOMId
 				 FROM 
 				 tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD ON CD.intContractDetailId =  CC.intContractDetailId
@@ -1339,8 +1341,6 @@ BEGIN TRY
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
-				UPDATE @VoucherDetailReceiptCharge SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
-				UPDATE @VoucherDetailReceiptCharge SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
 				
 				EXEC [dbo].[uspAPCreateBillData] 
 						   @userId = @intCreatedUserId
