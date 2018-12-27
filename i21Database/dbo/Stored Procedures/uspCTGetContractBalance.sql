@@ -491,7 +491,7 @@ BEGIN TRY
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
 	AND												   CD.intContractDetailId          =    BL.intContractDetailId
-	JOIN(
+	LEFT JOIN(
 			SELECT intContractDetailId,SUM(intShippedNoOfLoad) intShippedNoOfLoad FROM @PriceFixation
 			GROUP BY intContractDetailId
 		) 												PF  ON  PF.intContractDetailId  =   CD.intContractDetailId
