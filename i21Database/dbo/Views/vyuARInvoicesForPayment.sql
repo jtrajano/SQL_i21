@@ -153,7 +153,7 @@ FROM
 					tblEMEntityEFTInformation
 			) EFT ON CE.intEntityId = EFT.intEntityId				
 		OUTER APPLY (
-			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 			FROM (
 				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
 				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
@@ -168,7 +168,7 @@ FROM
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		OUTER APPLY (
-			SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+			SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
 			FROM (
 				SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
 				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		

@@ -7,7 +7,7 @@ SELECT
 	, EMEL.intEntityLocationId
 	, intWarehouseId							= ICIL.intLocationId
 	, ARC.intCompanyLocationPricingLevelId
-	, strPricing								= 'Inventory - Pricing Level'
+	, strPricing								= 'Inventory - Pricing Level' COLLATE Latin1_General_CI_AS
 	, strPricingName							= SMCL.strLocationName + ' - ' + ICIPL.strPriceLevel
 	, dblPrice									= UOMQty.dblUOMQuantity * ICIPL.dblUnitPrice		
 FROM 
@@ -28,11 +28,11 @@ INNER JOIN  (SELECT
 				tblICItemPricingLevel) ICIPL ON ICIL.intItemId = ICIPL.intItemId AND ICIL.intItemLocationId = ICIPL.intItemLocationId
 INNER JOIN (
 			SELECT 
-				intEntityCustomerId
+				intEntityId
 				, intCompanyLocationPricingLevelId 
 			FROM 
 				tblARCustomer
-			) ARC ON EMEL.intEntityId = ARC.intEntityCustomerId 
+			) ARC ON EMEL.intEntityId = ARC.intEntityId 
 LEFT JOIN (
 			SELECT intCompanyLocationId
 				, intCompanyLocationPricingLevelId
