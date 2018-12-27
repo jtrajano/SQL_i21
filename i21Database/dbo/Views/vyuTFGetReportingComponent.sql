@@ -18,17 +18,17 @@ SELECT RC.intReportingComponentId
 	, RC.strSPInvoice
 	, RC.strSPRunReport
 	, RC.ysnIncludeSalesFreightOnly
-	, dbo.fnTFCoalesceProductCode(RC.intReportingComponentId) strProductCodes
-	, dbo.fnTFCoalesceOriginState(RC.intReportingComponentId, 'Include') strIncludeOriginStates
-	, dbo.fnTFCoalesceOriginState(RC.intReportingComponentId, 'Exclude') strExcludeOriginStates
-	, dbo.fnTFCoalesceDestinationState(RC.intReportingComponentId, 'Include') strIncludeDestinationStates
-	, dbo.fnTFCoalesceDestinationState(RC.intReportingComponentId, 'Exclude') strExcludeDestinationStates
-	, dbo.fnTFCoalesceAccountStatusCode(RC.intReportingComponentId, 1) strIncludeAccountStatusCodes
-	, dbo.fnTFCoalesceAccountStatusCode(RC.intReportingComponentId, 0) strExcludeAccountStatusCodes
-	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 1) strIncludeVendors
-	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 0) strExcludeVendors
-	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 1) strIncludeCustomers
-	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 0) strExcludeCustomers
+	, dbo.fnTFCoalesceProductCode(RC.intReportingComponentId) COLLATE Latin1_General_CI_AS strProductCodes
+	, dbo.fnTFCoalesceOriginState(RC.intReportingComponentId, 'Include') COLLATE Latin1_General_CI_AS strIncludeOriginStates
+	, dbo.fnTFCoalesceOriginState(RC.intReportingComponentId, 'Exclude') COLLATE Latin1_General_CI_AS strExcludeOriginStates
+	, dbo.fnTFCoalesceDestinationState(RC.intReportingComponentId, 'Include') COLLATE Latin1_General_CI_AS strIncludeDestinationStates
+	, dbo.fnTFCoalesceDestinationState(RC.intReportingComponentId, 'Exclude') COLLATE Latin1_General_CI_AS strExcludeDestinationStates
+	, dbo.fnTFCoalesceAccountStatusCode(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeAccountStatusCodes
+	, dbo.fnTFCoalesceAccountStatusCode(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeAccountStatusCodes
+	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeVendors
+	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeVendors
+	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeCustomers
+	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeCustomers
 FROM tblTFReportingComponent RC
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = RC.intTaxAuthorityId
 LEFT JOIN tblTFComponentType CType ON CType.intComponentTypeId = RC.intComponentTypeId
