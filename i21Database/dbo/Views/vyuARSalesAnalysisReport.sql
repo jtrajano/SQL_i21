@@ -116,7 +116,7 @@ FROM
 		, intItemAccountId			= CASE WHEN ICI.strType IN ('Non-Inventory','Service','Other Charge') THEN ISNULL(ARID.intAccountId, ARID.intSalesAccountId) ELSE ISNULL(ARID.intSalesAccountId, ARID.intAccountId) END
 		, dblQtyOrdered				= ARID.dblQtyOrdered
 		, dblQtyShipped				= ARID.dblQtyShipped
-		, dblStandardCost			= (CASE WHEN ARI.strType = 'CF Tran' AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		, dblStandardCost			= (CASE WHEN ARI.strType = 'CF Tran' AND CFTRAN.strTransactionType IN ('Remote', 'Extended Remote')
 												THEN ISNULL(CFTRAN.dblNetTransferCost, 0)
 											WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 												THEN ISNULL(NONSO.dblCost, 0)
@@ -214,9 +214,9 @@ FROM
 	LEFT OUTER JOIN (
 		SELECT intInvoiceId
 			 , dblNetTransferCost
+			 , strTransactionType
 		FROM tblCFTransaction CF
 		WHERE ISNULL(CF.intInvoiceId, 0) <> 0
-		  AND CF.strTransactionType IN ('Remote', 'Extended Remote')
 	) AS CFTRAN ON ARI.intInvoiceId = CFTRAN.intInvoiceId 
 	           AND ARI.strType = 'CF Tran'
 	WHERE ARI.ysnPosted = 1 
