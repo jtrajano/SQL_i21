@@ -57,6 +57,13 @@ BEGIN
 	DECLARE @dblAllocatedQty		NUMERIC(38,20)
 	DECLARE @dblPriceQtyToAllocate  NUMERIC(38,20)
 
+	DECLARE @SequenceHistory TABLE
+	(
+		intContractDetailId INT,
+		intContractStatusId INT,
+		dtmHistoryCreated   DATETIME
+	)
+
 	DECLARE @Balance TABLE 
 	(  
 			intContractTypeId		INT,
@@ -702,15 +709,36 @@ BEGIN
 	UPDATE @FinalResult 
 	SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
 
-	DELETE FROM @FinalResult 
-							WHERE intContractDetailId IN 
-							(
-								SELECT intContractDetailId FROM tblCTSequenceHistory WHERE intContractStatusId IN (3,6 )
-								AND dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE 
-																					WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
-																					ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
-																				  END
-							) 
+	;WITH CTE
+	AS 
+	(
+		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
+		,SH.intContractDetailId
+		,SH.intContractStatusId
+		,SH.dtmHistoryCreated
+		FROM tblCTSequenceHistory SH
+		JOIN  @FinalResult FR ON SH.intContractDetailId = FR.intContractDetailId
+		WHERE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE 
+																WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
+																ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
+															END  
+	)
+	INSERT INTO @SequenceHistory
+	(
+		intContractDetailId,
+		intContractStatusId,
+		dtmHistoryCreated
+	)
+	SELECT 
+	intContractDetailId,
+	intContractStatusId,
+	dtmHistoryCreated
+	FROM CTE WHERE Row_Num = 1
+
+	DELETE FR
+	FROM @FinalResult FR
+	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
+	WHERE SH.intContractStatusId IN (3,6 )
 
 	DELETE FROM @FinalResult
 	WHERE dblAvailableQty <= 0
