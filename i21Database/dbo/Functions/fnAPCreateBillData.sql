@@ -107,7 +107,16 @@ BEGIN
 	FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 
 	SELECT TOP 1
-		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(CASE WHEN ISNULL(@shipFromId,0) > 0 THEN B.intTermsId ELSE A.intTermsId END, ISNULL(B.intTermsId,A.intTermsId)) END),
+		@term = ISNULL((CASE 
+							WHEN ISNULL(@termId,0) > 0 
+							THEN @termId 
+							ELSE ISNULL(CASE 
+											WHEN ISNULL(@shipFromId,0) > 0 
+											THEN B.intTermsId 
+											ELSE ISNULL(B.intTermsId, A.intTermsId)
+										END
+								, ISNULL(B.intTermsId,A.intTermsId)) 
+						END),
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
 		@shipFrom = ISNULL(@shipFromId, B.intEntityLocationId),
