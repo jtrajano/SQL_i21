@@ -14,8 +14,8 @@
 	[strPumpNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTransferType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
-    [strOriginCountryCode] NVARCHAR(50) NULL, 
-    [strDestinationCountryCode] NVARCHAR(50) NULL, 
+    [strOriginCountryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strDestinationCountryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblTFTransactionDynamicOR] PRIMARY KEY ([intTransactionDynamicId]), 
     CONSTRAINT [FK_tblTFTransactionDynamicOR_tblTFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblTFTransaction]([intTransactionId]) ON DELETE CASCADE
 )
