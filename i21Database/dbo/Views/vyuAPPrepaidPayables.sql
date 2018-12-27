@@ -23,7 +23,7 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, prepaidDetail.intAccountId
-	, (SELECT TOP 1 strAccountId FROM tblGLAccount where intAccountId =  prepaidDetail.intAccountId ) as strAccountId
+	, prepaidDetail.strAccountId
 	, EC.strClass
 	, intPrepaidRowType = 1
 FROM dbo.tblAPBill A
@@ -33,10 +33,13 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate,
-		bd.intAccountId
+		bd.intAccountId,
+		accnt.strAccountId
 	FROM tblAPBillDetail bd
+	LEFT JOIN tblGLAccount accnt ON bd.intAccountId = accnt.intAccountId
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail
+
 WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND A.intTransactionReversed IS NULL --Remove if already reversed, negative part will be offset by the reversal transaction
 AND NOT EXISTS (
@@ -330,6 +333,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, accnt.strAccountId
 	, EC.strClass
 	, 2
 FROM dbo.tblARPayment  A
@@ -340,6 +344,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN tblGLAccount accnt ON B.intAccountId = accnt.intAccountId
 OUTER APPLY (
 	--claim transaction
 	SELECT TOP 1
