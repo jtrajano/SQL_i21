@@ -738,7 +738,7 @@ IF @ysnPrintFromCFLocal = 1
 				FROM @temp_aging_table AGINGREPORT
 				INNER JOIN (
 					SELECT intCustomerId
-						 , dblTotalFee = SUM(dblFeeTotalAmount)
+						 , dblTotalFee = SUM(ISNULL(dblFeeAmount, 0))
 					FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
 					WHERE strUserId = @strUserId
 					GROUP BY intCustomerId
