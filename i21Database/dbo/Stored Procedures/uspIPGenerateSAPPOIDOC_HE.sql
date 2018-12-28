@@ -969,7 +969,12 @@ SET CF.strFeedStatus = ''
 				WHERE CH.intContractHeaderId = CF1.intContractHeaderId
 					AND IsNULL(CF1.strERPPONumber, '') <> ''
 				)
-			THEN CF.ysnMaxPrice
+			THEN (
+					SELECT TOP 1 CF1.ysnMaxPrice
+					FROM tblCTContractFeed CF1
+					WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+					ORDER BY intContractFeedId ASC
+					)
 		ELSE CH.ysnMaxPrice
 		END
 FROM tblCTContractFeed CF
@@ -1548,7 +1553,8 @@ BEGIN
 				)
 
 		IF IsNULL(@dblQuantity, 0) <> IsNULL(@dblNetWeight, 0)
-			AND ABS(IsNULL(@dblQuantity, 0) - IsNULL(@dblNetWeight, 0)) > 1 and @dblNetWeight is not null
+			AND ABS(IsNULL(@dblQuantity, 0) - IsNULL(@dblNetWeight, 0)) > 1
+			AND @dblNetWeight IS NOT NULL
 		BEGIN
 			UPDATE tblCTContractFeed
 			SET strMessage = 'Qty mismatch between contract table and feed table.'
