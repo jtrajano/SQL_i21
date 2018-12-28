@@ -5,6 +5,7 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX)
+	DECLARE @blbHeaderLogo			VARBINARY(MAX)
 	DECLARE @xmlDocumentId			INT
 	DECLARE @intContractTypeId		INT
 	DECLARE @intEntityId			INT
@@ -15,6 +16,15 @@ BEGIN TRY
 	DECLARE @intCompanyLocationId	INT
 	DECLARE @IntFutureMarketId		INT
 	DECLARE @IntFutureMonthId		INT
+	DECLARE @strCompanyName			NVARCHAR(500)
+
+	SELECT	@strCompanyName	=	CASE 
+									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
+									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
+								END
+	FROM	tblSMCompanySetup
+
+	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	
 
 
@@ -84,6 +94,57 @@ BEGIN TRY
 	SELECT	@IntFutureMonthId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intFutureMonthId'
+
+  /*
+	SELECT  
+	 CB.intContractHeaderId
+	,CB.strType
+	,CB.intContractDetailId
+	,strCompanyName = @strCompanyName		
+	,blbHeaderLogo	= @blbHeaderLogo		
+	,CB.strDate				
+	,CB.strContractType		
+	,CB.intCommodityId			
+	,strCommodity = CB.strCommodity  +' '+UOM.strUnitMeasure
+	,CB.intItemId		
+	,CB.strItemNo					
+	,CB.intCompanyLocationId	
+	,CB.strLocationName		
+	,CB.strCustomer			
+	,CB.strContract			
+	,strPricingType = LEFT(CB.strPricingType,1)
+	,CB.strContractDate		
+	,CB.strShipMethod			
+	,CB.strShipmentPeriod		
+	,CB.intFutureMarketId      
+	,CB.intFutureMonthId       
+	,CB.strFutureMonth			
+	,CB.dblFutures				
+	,CB.dblBasis
+	,CB.strBasisUOM				
+	,CB.dblQuantity
+	,CB.strQuantityUOM			
+	,CB.dblCashPrice
+	,CB.strPriceUOM
+	,CB.strStockUOM					
+	,CB.dblAvailableQty		
+	,CB.dblAmount		
+	FROM 
+	[dbo].[fnCTGetContractBalance]
+	(
+		 @intContractTypeId		
+		,@intEntityId			
+		,@IntCommodityId		
+		,@dtmStartDate			
+		,@dtmEndDate			
+		,@intCompanyLocationId
+		,@IntFutureMarketId   
+		,@IntFutureMonthId    
+		,NULL 
+	) CB
+	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CB.intCommodityId AND C1.ysnStockUnit=1
+	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
+ */
 
 	EXEC uspCTGetContractBalance
 		 @intContractTypeId		
