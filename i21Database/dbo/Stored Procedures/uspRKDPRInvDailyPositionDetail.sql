@@ -201,6 +201,7 @@ BEGIN
 				, strContractEndMonth
 				, dtmEndDate
 				, dblBalance
+				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
@@ -234,6 +235,7 @@ BEGIN
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE CD.dtmEndDate END
 					, dblBalance = CD.dblQuantity
+					, intUnitMeasureId
 					, intPricingTypeId
 					, intContractTypeId
 					, intCompanyLocationId
@@ -595,7 +597,6 @@ BEGIN
 					, cl.strLocationName
 					, ch.intItemId
 					, ch.strItemNo
-					, ch.intCategoryId
 					, ch.strCategory
 					, ch.strEntityName
 					, c.intReceiptNo
@@ -1151,7 +1152,6 @@ BEGIN
 				, strLocationName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, strCustomerName
 				, intReceiptNo
@@ -1179,7 +1179,6 @@ BEGIN
 					, strLocationName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, strEntityName
 					, intReceiptNo
@@ -1212,7 +1211,6 @@ BEGIN
 				, strLocationName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, strCustomerName
 				, intReceiptNo
@@ -1238,7 +1236,6 @@ BEGIN
 					, strLocationName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, strEntityName
 					, intReceiptNo
@@ -1550,10 +1547,8 @@ BEGIN
 				, strLocationName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, dtmTicketDateTime
-				, strCustomerReference
 				, strDistributionOption
 				, intFromCommodityUnitMeasureId
 				, intCompanyLocationId
@@ -1579,10 +1574,8 @@ BEGIN
 				, strLocationName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, dtmTicketDateTime
-				, strCustomerReference
 				, strDistributionOption
 				, intUnitMeasureId
 				, intCompanyLocationId
@@ -1609,12 +1602,10 @@ BEGIN
 					, cl.strLocationName
 					, cd.intItemId
 					, cd.strItemNo
-					, cd.intCategoryId
 					, cd.strCategory
 					, intTicketId = cd.intContractDetailId
 					, strTicketNumber = cd.strContractNumber
 					, dtmTicketDateTime = cd.dtmContractDate
-					, strCustomerReference = cd.strCustomerContract
 					, strDistributionOption = 'CNT'
 					, cd.intUnitMeasureId
 					, cl.intCompanyLocationId

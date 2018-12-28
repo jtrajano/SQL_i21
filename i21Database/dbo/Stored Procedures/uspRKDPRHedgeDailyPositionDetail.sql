@@ -1721,7 +1721,6 @@ BEGIN
 					, intContractTypeId
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1990,7 +1989,6 @@ BEGIN
 					, intCompanyLocationId
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
