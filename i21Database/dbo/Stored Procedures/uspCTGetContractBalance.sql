@@ -737,7 +737,7 @@ BEGIN TRY
 	DELETE FR
 	FROM @FinalResult FR
 	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
-	WHERE SH.intContractStatusId IN (3,6 )
+	WHERE SH.intContractStatusId IN (3,5,6)
 
 	SELECT * FROM @FinalResult WHERE  dblAvailableQty > 0 	
 
