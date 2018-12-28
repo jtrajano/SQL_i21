@@ -26,42 +26,42 @@ AS
 		,strContactName = contact.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
 		,tic.intCustomerContactId
 		,intContactRank = ISNULL(contact.intEntityRank,1)
-		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
-		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
-		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,0))
-		,strJiraKeyDisplay = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,1))
+		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101) COLLATE Latin1_General_CI_AS
+		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101) COLLATE Latin1_General_CI_AS
+		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId, convert(bit,0)) COLLATE Latin1_General_CI_AS
+		,strJiraKeyDisplay = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,1)) COLLATE Latin1_General_CI_AS
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
 		,proj.strProjectName
 		,tic.dtmDueDate
-		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
+		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101) COLLATE Latin1_General_CI_AS
 		,tic.intTicketProductId
 		,strTicketType = tic.strType
 		,strCustomerName = cus.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
-		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
-		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
-		,strCampaignName = null
+		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101) COLLATE Latin1_General_CI_AS
+		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
 		,tic.strDescription
 		,tic.strResolution
 		,tic.strImageId
 		,tic.strFeedbackComment
+		,strCampaignName = null
 		,strFeedbackWithSolution = (case when tic.intFeedbackWithSolutionId = 1 then 'Very Dissatisfied'
 										 when tic.intFeedbackWithSolutionId = 2 then 'Dissatisfied'
 										 when tic.intFeedbackWithSolutionId = 3 then 'Neutral'
 										 when tic.intFeedbackWithSolutionId = 4 then 'Satisfied'
 										 when tic.intFeedbackWithSolutionId = 5 then 'Very Satisfied'
 										 else ''
-									end)
+									end) COLLATE Latin1_General_CI_AS
 		,strFeedbackWithRepresentative = (case when tic.intFeedbackWithRepresentativeId = 1 then 'Very Dissatisfied'
 											   when tic.intFeedbackWithRepresentativeId = 2 then 'Dissatisfied'
 											   when tic.intFeedbackWithRepresentativeId = 3 then 'Neutral'
 											   when tic.intFeedbackWithRepresentativeId = 4 then 'Satisfied'
 											   when tic.intFeedbackWithRepresentativeId = 5 then 'Very Satisfied'
 											   else ''
-										  end)
+										  end) COLLATE Latin1_General_CI_AS
 	from
 		tblHDTicket tic
 		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

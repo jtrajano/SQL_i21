@@ -27,7 +27,7 @@
 					,intEntityId = vyuEMEntityContact.intEntityId
 					,intContactId = vyuEMEntityContact.intEntityContactId
 					,strEntityType = 
-						dbo.fnCRMCoalesceEntityType((select top 1 a.intEntityId from tblEMEntityToContact a where a.intEntityContactId = vyuEMEntityContact.intEntityContactId))
+						dbo.fnCRMCoalesceEntityType((select top 1 a.intEntityId from tblEMEntityToContact a where a.intEntityContactId = vyuEMEntityContact.intEntityContactId)) COLLATE Latin1_General_CI_AS
 				from
 					vyuEMEntityContact
 			) as result

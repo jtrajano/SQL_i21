@@ -6,7 +6,7 @@
 	, @strPositionIncludes NVARCHAR(100) = NULL
 	, @dtmToDate DATETIME = NULL
 	, @strByType NVARCHAR(50) = NULL
-
+	, @strPositionBy NVARCHAR(50) = NULL
 AS
 
 BEGIN
@@ -173,7 +173,6 @@ BEGIN
 		, intCompanyLocationId INT
 		, strContractType NVARCHAR(200)
 		, strPricingType NVARCHAR(200)
-		, intCommodityUnitMeasureId INT
 		, intContractDetailId INT
 		, intContractStatusId INT
 		, intEntityId INT
@@ -181,11 +180,9 @@ BEGIN
 		, strType NVARCHAR(200)
 		, intItemId INT
 		, strItemNo NVARCHAR(200)
-		, intCategoryId INT
 		, strCategory NVARCHAR(200)
 		, dtmContractDate datetime
 		, strEntityName NVARCHAR(200)
-		, strCustomerContract NVARCHAR(200)
 		, intFutureMarketId INT
 		, strFutMarketName NVARCHAR(100)
 		, intFutureMonthId INT
@@ -209,7 +206,6 @@ BEGIN
 		, intCompanyLocationId
 		, strContractType
 		, strPricingType
-		, intCommodityUnitMeasureId
 		, intContractDetailId
 		, intContractStatusId
 		, intEntityId
@@ -217,47 +213,43 @@ BEGIN
 		, strType
 		, intItemId
 		, strItemNo
-		, intCategoryId
 		, strCategory
 		, strEntityName
-		, strCustomerContract
 		, intFutureMarketId
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
 		, strCurrency)
 	SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
-		, strCommodityCode
+		, strCommodityCode = CD.strCommodity
 		, intCommodityId
 		, intContractHeaderId
-		, strContractNumber
+		, strContractNumber = CD.strContract
 		, strLocationName
-		, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
-		, CD.dblBalance
+		--, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
+		, dtmEndDate
+		, dblBalance = CD.dblQuantity
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
 		, intCompanyLocationId
 		, strContractType
 		, strPricingType
-		, intCommodityUnitMeasureId
 		, CD.intContractDetailId
 		, intContractStatusId
 		, intEntityId
 		, intCurrencyId
-		, strType
+		, strType = CD.strContractType + ' ' + CD.strPricingType
 		, intItemId
 		, strItemNo
-		, intCategoryId
 		, strCategory
-		, strEntityName
-		, strCustomerContract
+		, strEntityName = CD.strCustomer
 		, intFutureMarketId
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
 		, strCurrency
-	FROM [dbo].fnRKGetContractDetail(@dtmToDate) CD
+	FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 	
 	DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
@@ -562,7 +554,6 @@ BEGIN
 			, cl.strLocationName
 			, ch.intItemId
 			, ch.strItemNo
-			, ch.intCategoryId
 			, ch.strCategory
 			, ch.strEntityName
 			, c.intReceiptNo
@@ -629,7 +620,6 @@ BEGIN
 					, intContractTypeId
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -652,7 +642,6 @@ BEGIN
 						, intContractTypeId
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -668,7 +657,7 @@ BEGIN
 						, strContractType = 'Physical Contract'
 						, strLocationName
 						, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0))
+						, dblTotal =  ISNULL((cd.dblBalance), 0)
 						, cd.intUnitMeasureId
 						, intCommodityId = @intCommodityId
 						, cd.intCompanyLocationId
@@ -676,7 +665,6 @@ BEGIN
 						, intContractTypeId
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -771,7 +759,7 @@ BEGIN
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-						AND ISNULL(t.ysnPreCrush, 0) = 0
+						--AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
 				
 				-- Option NetHEdge
@@ -847,7 +835,7 @@ BEGIN
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-					AND ISNULL(t.ysnPreCrush, 0) = 0
+					--AND ISNULL(t.ysnPreCrush, 0) = 0
 
 				-- Net Hedge option end
 				INSERT INTO @tempFinal(strCommodityCode
@@ -926,7 +914,6 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -944,7 +931,6 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -961,7 +947,6 @@ BEGIN
 						, cd.strCurrency
 						, cd.intItemId
 						, cd.strItemNo
-						, cd.intCategoryId
 						, cd.strCategory
 						, cd.intFutureMarketId
 						, cd.strFutMarketName
@@ -986,7 +971,6 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -999,13 +983,11 @@ BEGIN
 					, dblTotal
 					, intContractHeaderId
 					, strContractNumber
-					, intFromCommodityUnitMeasureId
 					, intCommodityId
 					, strLocationName
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1019,13 +1001,11 @@ BEGIN
 					, dblTotal = CASE WHEN intContractTypeId = 1 THEN SUM(dblTotal) ELSE - SUM(dblTotal) END
 					, intContractHeaderId
 					, strContractNumber
-					, intFromCommodityUnitMeasureId
 					, intCommodityId
 					, strLocationName
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1035,10 +1015,9 @@ BEGIN
 					, strDeliveryDate
 				FROM (
 					SELECT strCommodityCode
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(cd.dblBalance, 0))
+						, dblTotal = ISNULL(cd.dblBalance, 0)
 						, intContractHeaderId
 						, strContractNumber
-						, intFromCommodityUnitMeasureId = cd.intCommodityUnitMeasureId
 						, intCommodityId
 						, strLocationName
 						, intCompanyLocationId
@@ -1046,7 +1025,6 @@ BEGIN
 						, strCurrency
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -1061,14 +1039,12 @@ BEGIN
 				GROUP BY strCommodityCode
 					, intContractHeaderId
 					, strContractNumber
-					, intFromCommodityUnitMeasureId
 					, intCommodityId
 					, strLocationName
 					, intContractTypeId
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1086,7 +1062,6 @@ BEGIN
 					, strLocationName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1101,7 +1076,6 @@ BEGIN
 					, strLocationName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1117,7 +1091,6 @@ BEGIN
 						, intCollateralId
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -1131,7 +1104,6 @@ BEGIN
 					, strLocationName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
@@ -1150,12 +1122,12 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName
 					, intFutureMonthId
-					, strFutureMonth)
+					, strFutureMonth
+					, strDeliveryDate)
 				SELECT DISTINCT strCommodityCode
 					, strType = 'Price Risk'
 					, strContractType = 'Sales Basis Deliveries'
@@ -1168,12 +1140,12 @@ BEGIN
 					, cd.strCurrency
 					, cd.intItemId
 					, cd.strItemNo
-					, cd.intCategoryId
 					, cd.strCategory
 					, cd.intFutureMarketId
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
+					, FORMAT(cd.dtmEndDate, 'MMM yyyy')
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -1702,7 +1674,8 @@ BEGIN
 					, strNotes
 					, ysnPreCrush
 					, strEntityName
-					, strDeliveryDate)
+					, strDeliveryDate
+					, strContractEndMonth)
 				SELECT strCommodityCode
 					, strType = 'Avail for Spot Sale'
 					, strContractType
@@ -1730,6 +1703,7 @@ BEGIN
 					, ysnPreCrush
 					, strEntityName
 					, strDeliveryDate
+					, strContractEndMonth
 				FROM @tempFinal WHERE strType = 'Basis Risk' AND intCommodityId = @intCommodityId AND @ysnExchangeTraded = 1
 				
 				INSERT INTO @tempFinal (strCommodityCode
@@ -1764,7 +1738,7 @@ BEGIN
 						, strContractType
 						, strLocationName
 						, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8)
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, - (cd.dblBalance))
+						, dblTotal = - (cd.dblBalance)
 						, cd.intUnitMeasureId
 						, intCommodityId = @intCommodityId
 						, cd.intCompanyLocationId
@@ -1772,7 +1746,6 @@ BEGIN
 						, intContractTypeId
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -2035,13 +2008,12 @@ BEGIN
 						, strContractType = 'Physical'
 						, strLocationName
 						, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8)
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0))
+						, dblTotal = ISNULL((cd.dblBalance), 0)
 						, cd.intUnitMeasureId
 						, intCommodityId = @intCommodityId
 						, cd.intCompanyLocationId
 						, intItemId
 						, strItemNo
-						, intCategoryId
 						, strCategory
 						, intFutureMarketId
 						, strFutMarketName
@@ -2484,6 +2456,27 @@ BEGIN
 	UPDATE @Final SET intSeqNo = 8 WHERE strType = 'Net Receivable ($)'
 	UPDATE @Final SET intSeqNo = 9 WHERE strType = 'NR Un-Paid Quantity'
 	UPDATE @Final SET intSeqNo = 10 WHERE strType = 'Avail for Spot Sale'
+	
+	UPDATE @Final SET strFutureMonth = CASE 
+		WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+		WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
+		WHEN ISNULL(F.intFutOptTransactionHeaderId, '') <> '' AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') = '' THEN FOT.strFutureMonth
+	END COLLATE Latin1_General_CI_AS
+	FROM @Final F
+	LEFT JOIN (
+		SELECT intFutOptTransactionHeaderId
+			,strInternalTradeNo
+			,strFutureMonth = ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
+		FROM vyuRKFutOptTransaction
+	)FOT ON FOT.intFutOptTransactionHeaderId = F.intFutOptTransactionHeaderId AND FOT.strInternalTradeNo COLLATE Latin1_General_CI_AS = F.strInternalTradeNo COLLATE Latin1_General_CI_AS
+	
+	UPDATE @Final SET strContractEndMonth = CASE 
+			WHEN @strPositionBy = 'Futures Month'  THEN ISNULL(NULLIF(LTRIM(RTRIM(strFutureMonth)),''),'Near By')
+			WHEN @strPositionBy = 'Delivery Month' THEN ISNULL(NULLIF(LTRIM(RTRIM(strDeliveryDate)),''),'Near By')
+		END
+
+	UPDATE @Final SET strContractEndMonth = NULL, strFutureMonth = NULL, strDeliveryDate = NULL
+	WHERE ISNULL(intContractHeaderId, '') = '' AND ISNULL(strInternalTradeNo, '') = ''
 	
 	IF (@strByType = 'ByCommodity')
 	BEGIN

@@ -142,7 +142,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 						-- 		THEN TaxAmount.dblTax * -1 
 						-- 	ELSE TaxAmount.dblTax
 						-- END
-		,A.intTaxGroupId = TaxAmount.intTaxGroupId
+			,A.intTaxGroupId = TaxAmount.intTaxGroupId
 	FROM tblAPBillDetail A
 	INNER JOIN @billDetailIds B ON A.intBillDetailId = B.intId
 	CROSS APPLY (

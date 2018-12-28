@@ -4,7 +4,7 @@ AS
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY UP.intContractDetailId ASC) AS INT) intUniqueId,
 			UP.intContractDetailId,
-			UP.strName,
+			UP.strName COLLATE Latin1_General_CI_AS AS strName,
 			UP.strValue
 			
 	FROM	(

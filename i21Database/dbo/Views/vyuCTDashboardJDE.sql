@@ -33,7 +33,7 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.dblCashPrice					
 		,CD.dblTotalCost						
 		,ISNULL(RY.strCountry, OG.strCountry)	AS strOrigin
-		,PG.strName								AS strPurchasingGroup
+		,PG.strName	COLLATE Latin1_General_CI_AS AS strPurchasingGroup
 		,CT.strContainerType		
 		,CD.intNumberOfContainers			
 		,SQ.strItemNo									
@@ -47,31 +47,31 @@ SELECT 	 SQ.intContractDetailId
 		,BK.strBook						
 		,SK.strSubBook					
 		,CD.strInvoiceNo						
-		,CF.strCertificationName	
+		,CF.strCertificationName COLLATE Latin1_General_CI_AS strCertificationName	
 		,CH.intContractHeaderId				
 		,ISNULL(CD.dblScheduleQty, 0)			AS dblScheduleQty
 		,CASE 	WHEN ISNULL(CD.ysnInvoice, 0) = 0 	
 						THEN 'N'
 						ELSE 'Y' 
-				END		AS ysnInvoice
+				END		COLLATE Latin1_General_CI_AS AS ysnInvoice
 		,CASE 	WHEN ISNULL(CD.ysnProvisionalInvoice, 0) = 0 	
 						THEN 'N'
 						ELSE 'Y' 
-				END		AS ysnProvisionalInvoice
+				END		COLLATE Latin1_General_CI_AS AS ysnProvisionalInvoice
 		,CASE 	WHEN ISNULL(CD.ysnQuantityFinal, 0) = 0 
 						THEN 'N'
 						ELSE 'Y' 
-				END		AS ysnQuantityFinal
+				END		COLLATE Latin1_General_CI_AS AS ysnQuantityFinal
 		,CH.strInternalComment
 		,LG.dblQuantity							AS dblShippingInsQty
 		,CASE 	WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 	
 						THEN 'N'
 						ELSE 'Y' 
-				END		AS ysnRiskToProducer
+				END		COLLATE Latin1_General_CI_AS AS ysnRiskToProducer
 		,CASE 	WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 0 	
 						THEN 'N'
 						ELSE 'Y' 
-				END		AS ysnClaimsToProducer
+				END		COLLATE Latin1_General_CI_AS AS ysnClaimsToProducer
 
 		,CD.strERPPONumber
 		,CD.strERPItemNumber
@@ -107,7 +107,7 @@ SELECT 	 SQ.intContractDetailId
 		,CASE 	WHEN ISNULL(LV.ysnDocsReceived, 0) = 0 	
 				THEN 'N'
 				ELSE 'Y' 
-		 END	AS ysnDocsReceived
+		 END	COLLATE Latin1_General_CI_AS AS ysnDocsReceived
 		,CD.strVendorLotID
 		,SQ.strContractItemName
 		,SQ.strContractItemNo
@@ -115,7 +115,7 @@ SELECT 	 SQ.intContractDetailId
 		,CASE 	WHEN CD.dblBalance <> CD.dblQuantity	
 				THEN 'Y'
 				ELSE 'N' 
-		 END	AS ysnQtyReceived
+		 END	COLLATE Latin1_General_CI_AS AS ysnQtyReceived
 		,SQ.dblAppliedQty
 		,CD.strRemark
 		,CH.dtmCreated

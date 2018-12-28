@@ -900,7 +900,7 @@ BEGIN
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-				WHEN L.intPurchaseSale = 1
+				WHEN L.intPurchaseSale IN (1,3)
 					THEN intPContractDetailId
 				ELSE intSContractDetailId
 				END

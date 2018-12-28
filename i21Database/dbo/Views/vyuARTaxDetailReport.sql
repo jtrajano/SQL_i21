@@ -10,7 +10,7 @@ FROM (
 		 , dblRate						= IDT.dblRate
 		 , intTaxCodeId					= IDT.intTaxCodeId
 		 , strCalculationMethod			= IDT.strCalculationMethod
-		 , strTaxTransactionType		= 'Invoice'
+		 , strTaxTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 	FROM tblARInvoiceDetailTax IDT 	
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	INNER JOIN (
@@ -28,7 +28,7 @@ FROM (
 		 , dblRate						= SDT.dblRate
 		 , intTaxCodeId					= SDT.intTaxCodeId
 		 , strCalculationMethod			= SDT.strCalculationMethod
-		 , strTaxTransactionType   		= 'Sales Order'
+		 , strTaxTransactionType   		= 'Sales Order' COLLATE Latin1_General_CI_AS
 	FROM tblSOSalesOrderDetailTax SDT
 	WHERE SDT.dblAdjustedTax <> 0
 ) AS TAXDETAIL

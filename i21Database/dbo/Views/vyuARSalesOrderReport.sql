@@ -9,7 +9,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, L.strAddress, L.strCity, L.strStateProvince, L.strZipPostalCode, L.strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN L.strUseLocationAddress = 'Letterhead'
 											THEN ''
-								  END
+								  END COLLATE Latin1_General_CI_AS
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
@@ -45,8 +45,8 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN CASE WHEN SALESORDERDETAIL.intProductTypeId IS NULL THEN 'No Product Type' ELSE SALESORDERDETAIL.strProductTypeName + ' - ' + SALESORDERDETAIL.strProductTypeDescription END ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN SALESORDERDETAIL.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
-	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
-	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
+	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
 	 , strSalespersonName		= SALESPERSON.strName
 	 , strOrderedByName			= EOB.strName
 	 , strSplitName				= CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
@@ -74,7 +74,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intRecipeId				= SALESORDERDETAIL.intRecipeId	 
 	 , intOneLinePrintId		= SALESORDERDETAIL.intOneLinePrintId
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
-	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket')
+	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket') COLLATE Latin1_General_CI_AS
 	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , dblTotalDiscount			= ISNULL(dblTotalDiscount,0) * -1
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)

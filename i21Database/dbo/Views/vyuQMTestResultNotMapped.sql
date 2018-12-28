@@ -11,7 +11,7 @@ SELECT TR.intTestResultId
 	,P.intDataTypeId
 	,P.intDecimalPlaces
 	,P.intListId
-	,'' AS strListItemName
+	,'' COLLATE Latin1_General_CI_AS AS strListItemName
 	--,LI.strListItemName
 	,PRTI.strItemNo AS strPropertyItemNo
 FROM tblQMTestResult TR

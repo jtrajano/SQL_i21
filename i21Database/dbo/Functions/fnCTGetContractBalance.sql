@@ -15,8 +15,6 @@ RETURNS @FinalResult TABLE
 	 intContractHeaderId	INT
 	,strType				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intContractDetailId	INT
-	,strCompanyName			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
-	,blbHeaderLogo			varbinary(max)		
 	,strDate				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
 	,strContractType		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intCommodityId			INT
@@ -44,6 +42,17 @@ RETURNS @FinalResult TABLE
 	,strStockUOM			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	,dblAvailableQty		NUMERIC(38,20)
 	,dblAmount				NUMERIC(38,20)
+	,intUnitMeasureId		INT
+	,intEntityId			INT
+	,intPricingTypeId		INT
+	,intContractTypeId		INT
+	,intContractStatusId	INT
+	,intCurrencyId			INT
+	,strCurrency			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dtmContractDate		DATETIME
+	,dtmEndDate				DATETIME
+	,strFutMarketName		NVARCHAR(250) COLLATE Latin1_General_CI_AS
+	,strCategory			NVARCHAR(250) COLLATE Latin1_General_CI_AS
   )	
 AS 
 BEGIN
@@ -126,15 +135,6 @@ BEGIN
 	IF @dtmEndDate IS NOT NULL
 		SET @dtmEndDate = dbo.fnRemoveTimeOnDate(@dtmEndDate)
 
-	DECLARE @strCompanyName			NVARCHAR(500)
-	
-	SELECT	@strCompanyName	=	CASE 
-									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
-									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
-								END
-	FROM	tblSMCompanySetup
-
-	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	 INSERT INTO @Shipment
 	  (
@@ -403,19 +403,20 @@ BEGIN
 	( 
 	   intContractHeaderId
 	  ,strType
-	  ,intContractDetailId
-	  ,strCompanyName			
-	  ,blbHeaderLogo			
-	  ,strDate				
+	  ,intContractDetailId	
+	  ,strDate		
+	  ,intContractTypeId		
 	  ,strContractType		
 	  ,intCommodityId			
 	  ,strCommodity
 	  ,intItemId
 	  ,strItemNo			
 	  ,intCompanyLocationId	
-	  ,strLocationName		
+	  ,strLocationName
+	  ,intEntityId		
 	  ,strCustomer			
-	  ,strContract			
+	  ,strContract	
+	  ,intPricingTypeId		
 	  ,strPricingType			
 	  ,strContractDate		
 	  ,strShipMethod			
@@ -432,30 +433,38 @@ BEGIN
 	  ,strPriceUOM
 	  ,strStockUOM			
 	  ,dblAvailableQty		
-	  ,dblAmount				
+	  ,dblAmount	
+	  ,intUnitMeasureId
+	  ,intContractStatusId
+	  ,strCurrency
+	  ,dtmContractDate
+	  ,dtmEndDate
+	  ,strFutMarketName
+	  ,strCategory 			
 	)				
 	SELECT				 			
 	 intContractHeaderId    = CH.intContractHeaderId
 	,strType				= 'Basis'
 	,intContractDetailId    = CD.intContractDetailId
-	,strCompanyName			= @strCompanyName
-	,blbHeaderLogo			= @blbHeaderLogo
 	,strDate				= LTRIM(DATEPART(mm,GETDATE())) + '-' + LTRIM(DATEPART(dd,GETDATE())) + '-' + RIGHT(LTRIM(DATEPART(yyyy,GETDATE())),2)
+	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
-	,strCommodity			= CM.strDescription +' '+UOM.strUnitMeasure
+	,strCommodity			= CM.strDescription
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
 	,intCompanyLocationId	= CD.intCompanyLocationId
-	,strLocationName		= L.strLocationName					   
+	,strLocationName		= L.strLocationName	
+	,intEntityId			= EY.intEntityId				   
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
+	,intPricingTypeId		= CD.intPricingTypeId
 	,strPricingType			= CASE 
-								  WHEN CD.intPricingTypeId = 1 THEN 'P' 
-								  WHEN CD.intPricingTypeId = 2 THEN 'B' 
-								  WHEN CD.intPricingTypeId = 3 THEN 'H'
-								  WHEN CD.intPricingTypeId = 6 THEN 'C'
-								  WHEN CD.intPricingTypeId = 7 THEN 'I'
+								  WHEN CD.intPricingTypeId = 1 THEN 'Priced' 
+								  WHEN CD.intPricingTypeId = 2 THEN 'Basis' 
+								  WHEN CD.intPricingTypeId = 3 THEN 'HTA'
+								  WHEN CD.intPricingTypeId = 6 THEN 'Cash'
+								  WHEN CD.intPricingTypeId = 7 THEN 'Index'
 							 END
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
@@ -493,7 +502,13 @@ BEGIN
 								  END
 							  ) 
 							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
-
+	,CD.intUnitMeasureId
+	,CD.intContractStatusId
+	,Cur.strCurrency
+	,CH.dtmContractDate
+	,CD.dtmEndDate
+	,FM.strFutMarketName
+	,strCategory = Category.strCategoryCode
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
@@ -505,6 +520,7 @@ BEGIN
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
 	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
+	JOIN	tblICCategory						Category  ON Category.intCategoryId			= IM.intCategoryId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
@@ -529,7 +545,9 @@ BEGIN
 
 	LEFT JOIN	tblSMFreightTerms			FT		  ON FT.intFreightTermId			=	CD.intFreightTermId
 	JOIN	tblRKFuturesMonth				MO		  ON MO.intFutureMonthId			=	CD.intFutureMonthId
-	
+	LEFT JOIN tblSMCurrency						Cur ON Cur.intCurrencyID			=	CD.intCurrencyId
+	LEFT JOIN	tblRKFutureMarket				FM	ON FM.intFutureMarketId			=	CD.intFutureMarketId
+
 	WHERE CH.intContractTypeId	  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0    THEN @intContractTypeId	  ELSE CH.intContractTypeId                  END
 	AND   CH.intEntityId		  = CASE WHEN ISNULL(@intEntityId ,0) > 0		   THEN @intEntityId		  ELSE CH.intEntityId		                 END
 	AND   CH.intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0	   THEN @IntCommodityId		  ELSE CH.intCommodityId	                 END
@@ -552,11 +570,11 @@ BEGIN
 
 	UPDATE @FinalResult 
 	SET strPricingType = CASE 
-								  WHEN SH.intPricingTypeId = 1 THEN 'P' 
-								  WHEN SH.intPricingTypeId = 2 THEN 'B' 
-								  WHEN SH.intPricingTypeId = 3 THEN 'H'
-								  WHEN SH.intPricingTypeId = 6 THEN 'C'
-								  WHEN SH.intPricingTypeId = 7 THEN 'I'
+								  WHEN SH.intPricingTypeId = 1 THEN 'Priced' 
+								  WHEN SH.intPricingTypeId = 2 THEN 'Basis' 
+								  WHEN SH.intPricingTypeId = 3 THEN 'HTA'
+								  WHEN SH.intPricingTypeId = 6 THEN 'Cash'
+								  WHEN SH.intPricingTypeId = 7 THEN 'Index'
 						 END
        ,dblFutures        = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
 	   ,dblBasis          = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
@@ -574,19 +592,20 @@ BEGIN
 	( 
 	 intContractHeaderId
 	 ,strType
-	,intContractDetailId
-	,strCompanyName		
-	,blbHeaderLogo			
-	,strDate				
+	,intContractDetailId			
+	,strDate		
+	,intContractTypeId		
 	,strContractType		
 	,intCommodityId			
 	,strCommodity
 	,intItemId		
 	,strItemNo					
 	,intCompanyLocationId	
-	,strLocationName		
+	,strLocationName	
+	,intEntityId	
 	,strCustomer			
-	,strContract			
+	,strContract		
+	,intPricingTypeId	
 	,strPricingType			
 	,strContractDate		
 	,strShipMethod			
@@ -603,25 +622,33 @@ BEGIN
 	,strPriceUOM
 	,strStockUOM					
 	,dblAvailableQty		
-	,dblAmount				
+	,dblAmount
+	,intUnitMeasureId
+	,intContractStatusId
+	,strCurrency
+	,dtmContractDate
+	,dtmEndDate
+	,strFutMarketName
+	,strCategory				
 	)			
 	SELECT DISTINCT 				 			
 	 intContractHeaderId    = CH.intContractHeaderId
 	,strType				= 'PriceFixation'
 	,intContractDetailId    = CD.intContractDetailId
-	,strCompanyName			= @strCompanyName
-	,blbHeaderLogo			= @blbHeaderLogo
 	,strDate				= LTRIM(DATEPART(mm,GETDATE())) + '-' + LTRIM(DATEPART(dd,GETDATE())) + '-' + RIGHT(LTRIM(DATEPART(yyyy,GETDATE())),2)
+	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
-	,strCommodity			= CM.strDescription +' '+UOM.strUnitMeasure
+	,strCommodity			= CM.strDescription 
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
 	,intCompanyLocationId	= CD.intCompanyLocationId
-	,strLocationName		= L.strLocationName					   
+	,strLocationName		= L.strLocationName		
+	,intEntityId			= EY.intEntityId			   
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
-	,strPricingType			= 'P'
+	,intPricingTypeId		= CD.intPricingTypeId
+	,strPricingType			= 'Priced'
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
@@ -656,6 +683,13 @@ BEGIN
 										(CD.intNoOfLoad - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 								END
 							  ) * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
+	,CD.intUnitMeasureId
+	,CD.intContractStatusId
+	,Cur.strCurrency
+	,CH.dtmContractDate
+	,CD.dtmEndDate
+	,FM.strFutMarketName
+	,strCategory = Category.strCategoryCode
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
@@ -665,6 +699,7 @@ BEGIN
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
 	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
+	JOIN	tblICCategory						Category  ON Category.intCategoryId			= IM.intCategoryId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
@@ -689,6 +724,8 @@ BEGIN
 	
 	LEFT JOIN	tblSMFreightTerms			FT		  ON	FT.intFreightTermId			=	CD.intFreightTermId
 	JOIN	tblRKFuturesMonth				MO		  ON	MO.intFutureMonthId			=	CD.intFutureMonthId
+	LEFT JOIN tblSMCurrency						Cur ON Cur.intCurrencyID			=	CD.intCurrencyId
+	LEFT JOIN	tblRKFutureMarket				FM	ON FM.intFutureMarketId			=	CD.intFutureMarketId
 	
 	WHERE CH.intContractTypeId	  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0    THEN @intContractTypeId	  ELSE CH.intContractTypeId					 END
 	AND   CH.intEntityId		  = CASE WHEN ISNULL(@intEntityId ,0) > 0		   THEN @intEntityId		  ELSE CH.intEntityId						 END
@@ -738,7 +775,7 @@ BEGIN
 	DELETE FR
 	FROM @FinalResult FR
 	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
-	WHERE SH.intContractStatusId IN (3,6 )
+	WHERE SH.intContractStatusId IN (3,5,6 )
 
 	DELETE FROM @FinalResult
 	WHERE dblAvailableQty <= 0

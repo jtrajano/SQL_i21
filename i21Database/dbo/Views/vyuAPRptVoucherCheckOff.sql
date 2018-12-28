@@ -3,9 +3,9 @@
 AS
 SELECT	DISTINCT	 
 			 APB.intBillId
-			,VendorId = ISNULL(V.strVendorId, E.strEntityNo)
-			,VendorName =  ISNULL(V.strVendorId,'') + ' ' + E.strName
-			,strDescription = C.strCommodityCode 
+			,VendorId = ISNULL(V.strVendorId, E.strEntityNo) 
+			,VendorName = ISNULL(V.strVendorId, E.strEntityNo)  +' - '+ E.strName
+			,strDescription = ISNULL(C.strCommodityCode, 'N/A')
 			,strItem = IE.strItemNo 
 			,intTicketId = ISNULL(SC.intTicketId, Scale.intTicketId)
 			,strTicketNumber = 	CASE WHEN (IR.intSourceType = 5) --Delivery Sheet
@@ -28,6 +28,7 @@ SELECT	DISTINCT
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
 			,strCounty = TC.strCounty
+			,TC.strTaxCode + ' - ' + TC.strDescription as strTaxCode
 	FROM	dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  
 				ON APBD.intBillId = APB.intBillId
@@ -77,3 +78,5 @@ SELECT	DISTINCT
 		  AND Payment.ysnPaid = 1 
 		  AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
 GO
+
+

@@ -4,7 +4,7 @@ SELECT intPOSId				= POS.intPOSId
 	 , strItemNo			= POSD.strItemNo
 	 , strCustomerName		= CUSTOMER.strName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
-	 , strCustomerAddress   = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strAddress, CUSTOMER.strCity, CUSTOMER.strState, CUSTOMER.strZipCode, NULL, NULL, NULL)
+	 , strCustomerAddress   = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strAddress, CUSTOMER.strCity, CUSTOMER.strState, CUSTOMER.strZipCode, NULL, NULL, NULL) COLLATE Latin1_General_CI_AS
 	 , strItemDescription	= POSD.strItemDescription
 	 , strItemUOM			= POSD.strItemUOM
 	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
@@ -70,7 +70,9 @@ INNER JOIN (
 LEFT JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
-		 , strLocationAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strStateProvince, strZipPostalCode, NULL, NULL, NULL), strPhone, strFax = strFax + ' Fax'
+		 , strLocationAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strStateProvince, strZipPostalCode, NULL, NULL, NULL) COLLATE Latin1_General_CI_AS
+		 , strPhone
+		 , strFax = strFax + ' Fax' COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 ) LOCATION ON LOCATION.intCompanyLocationId = DRAWER.intCompanyLocationId
 LEFT JOIN (
@@ -90,6 +92,8 @@ LEFT JOIN (
 ) CUSTOMER ON POS.intEntityCustomerId = CUSTOMER.intEntityId 
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
-			   , strFullAddress = dbo.fnConvertToFullAddress(strAddress, strCity, strState, strZip), strPhone, strFax = strFax + ' Fax'
+			   , strFullAddress = dbo.fnConvertToFullAddress(strAddress, strCity, strState, strZip) COLLATE Latin1_General_CI_AS
+			   , strPhone 
+			   , strFax = strFax + ' Fax' COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY

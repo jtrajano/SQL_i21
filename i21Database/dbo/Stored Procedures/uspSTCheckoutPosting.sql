@@ -253,8 +253,8 @@ BEGIN
 								,[strSourceId]
 								,[intHeaderId]
 								,[dtmDate]
-						)
-						SELECT
+					)
+					SELECT
 								 [intId] = CPT.intPumpTotalsId
 								,[intDetailId] = NULL
 								,[intDetailTaxId] = NULL
@@ -710,7 +710,7 @@ BEGIN
 										,[dtmMaintenanceDate]		= NULL
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
-										,[intTaxGroupId]			= @intTaxGroupId
+										,[intTaxGroupId]			= NULL --@intTaxGroupId
 										,[ysnRecomputeTax]			= 0 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
@@ -2513,8 +2513,8 @@ BEGIN
 									,[strSourceId]
 									,[intHeaderId]
 									,[dtmDate]
-						)
-						SELECT
+					)
+					SELECT
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL

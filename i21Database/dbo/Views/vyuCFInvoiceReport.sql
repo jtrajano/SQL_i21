@@ -61,9 +61,7 @@ SELECT
 ,emEntity.strName
 ,emEntity.strCustomerNumber
 ----------------------------------------------
-,strBillTo =(CASE 
-				WHEN ISNULL(cfTrans.intInvoiceId,0) = 0
-				THEN dbo.fnARFormatCustomerAddress (
+,strBillTo =  dbo.fnARFormatCustomerAddress (
 				 NULL
 				,NULL
 				,emEntity.strBillToLocationName
@@ -74,9 +72,6 @@ SELECT
 				,emEntity.strBillToCountry
 				,emEntity.strName
 				,NULL)
-				ELSE
-				arInv.strBillTo
-			END)
 ,arInv.strShipTo
 ,arInv.strType
 ,arInv.strLocationName
@@ -378,7 +373,7 @@ OUTER APPLY (
 		 strEmailDistributionOption
 		,strEmail 
 	FROM vyuARCustomerContacts
-	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != ''
+	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
 ) AS arCustomerContact
 -------------------------------------------------------------
 WHERE ISNULL(cfTrans.ysnPosted,0) = 1 

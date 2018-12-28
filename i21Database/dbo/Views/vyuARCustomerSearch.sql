@@ -62,7 +62,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , ysnCreditHold
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
-	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'')
+	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
 	 , intCreditStopDays		= CUSTOMER.intCreditStopDays
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached

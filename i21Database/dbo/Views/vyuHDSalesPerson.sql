@@ -10,7 +10,7 @@
 			,tblEMEntity.strPhone
 			,ysnActiveEntity = tblEMEntity.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
-			,strSalesPersonType = 'Sales Rep Entity'
+			,strSalesPersonType = 'Sales Rep Entity' COLLATE Latin1_General_CI_AS
 	from tblARSalesperson, tblEMEntity
 	where
 		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
@@ -27,7 +27,7 @@
 			,e.strPhone
 			,ysnActiveEntity = e.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
-			,strSalesPersonType = 'Sales Rep Contact'
+			,strSalesPersonType = 'Sales Rep Contact' COLLATE Latin1_General_CI_AS
 	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
 	where
 		tblEMEntityToContact.intEntityId = tblARSalesperson.[intEntityId]

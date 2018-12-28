@@ -4,7 +4,7 @@ SELECT RM.intInvPlngReportMasterID
 	,RM.strInvPlngReportName
 	,RM.intCategoryId
 	,C.strCategoryCode
-	,dbo.fnCTGetItemNames(RM.intInvPlngReportMasterID) AS strItemNames
+	,dbo.fnCTGetItemNames(RM.intInvPlngReportMasterID) COLLATE Latin1_General_CI_AS AS strItemNames
 	,RM.intNoOfMonths
 	,RM.ysnIncludeInventory
 	,RM.intCompanyLocationId

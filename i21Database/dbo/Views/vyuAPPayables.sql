@@ -26,6 +26,7 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBill A
@@ -33,6 +34,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
 -- GROUP BY  
 -- 	 A.dtmDate
@@ -71,12 +73,14 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
@@ -99,12 +103,14 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	-- ,'Origin' AS [Info]
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13) AND A.ysnOrigin = 1
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
@@ -133,6 +139,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
@@ -140,6 +147,7 @@ FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
@@ -166,6 +174,7 @@ SELECT
 	,A.ysnPosted
 	,C.ysnPaid
 	,A.intAccountId
+	,F.strAccountId
 	,EC.strClass
 	-- ,'Paid through Prepaid And Debit Memo' AS [Info]
 FROM dbo.tblAPBill A
@@ -179,6 +188,7 @@ OUTER APPLY (
 	FROM tblAPBillDetail voucherDetail
 	WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied
 ) voucherDetailApplied
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 1 AND B.ysnApplied = 1
 UNION ALL
 --APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
@@ -199,13 +209,15 @@ SELECT
 	,A.ysnPosted
 	,C.ysnPaid
 	,A.intAccountId
+	,F.strAccountId
 	,EC.strClass
 	-- ,'DM transactions have been paid using Prepaid And Debit Tab' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
 WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1 AND A.ysnPosted = 1
 UNION ALL
 SELECT --OVERPAYMENT
@@ -224,13 +236,15 @@ SELECT --OVERPAYMENT
 	, A.dtmDueDate
 	, A.ysnPosted 
 	, A.ysnPaid
-	,A.intAccountId
+	, A.intAccountId
+	, F.strAccountId
 	,EC.strClass
 	-- ,'Overpayment' AS [Info]
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId		
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1
 -- UNION ALL
 -- --APPLIED PREPAID TO VOUCHER
@@ -281,6 +295,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, F.strAccountId
 	, EC.strClass
 	-- ,'AR Payment' AS [Info]
 FROM dbo.tblARPayment  A
@@ -291,6 +306,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2)

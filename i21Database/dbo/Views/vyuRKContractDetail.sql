@@ -304,7 +304,7 @@ WITH Pricing AS
 			, EY.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + pt.strPricingType
+			, strType = ct.strContractType + ' ' + pt.strPricingType
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate

@@ -6,7 +6,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , dtmLogin				= EOD.dtmOpen
 	 , dtmLogout			= EOD.dtmClose
 	 , ysnClosed			= EOD.ysnClosed
-	 , strStatus			= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END)
+	 , strStatus			= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END) COLLATE Latin1_General_CI_AS
 	 , strLocation			= CL.strLocationName
 	 , strUserName			= EC.strUserName
 	 , strStore				= ISNULL(STORE.strDescription, '')

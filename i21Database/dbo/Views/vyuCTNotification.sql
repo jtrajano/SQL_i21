@@ -21,7 +21,7 @@ AS
 				CD.strFutMarketName,	CD.strItemUOM,			CD.strLocationName,		CD.strPriceUOM,
 				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
 				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		PW.intAllStatusId,
-				BC.strBasisComponent,
+				BC.strBasisComponent COLLATE Latin1_General_CI_AS AS strBasisComponent,
 				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo
 				
 		FROM	tblCTContractHeader			CH
@@ -89,7 +89,7 @@ AS
 				CD.strFutMarketName,			CD.strItemUOM,					CD.strLocationName,					CD.strPriceUOM,
 				CD.strCurrency,					CD.strFutureMonth,				CD.strStorageLocation,				CD.strSubLocation,
 				CD.strPurchasingGroup,			CD.strCreatedByNo,				CD.strContractNumber,				CD.dtmContractDate,
-				CD.strContractType,				CD.strCommodityCode,			CD.strEntityName,					'Unconfirmed' AS strNotificationType,
+				CD.strContractType,				CD.strCommodityCode,			CD.strEntityName,					'Unconfirmed' COLLATE Latin1_General_CI_AS AS strNotificationType,
 				CD.strItemDescription,			CH.dblQtyInStockUOM,			CD.intContractDetailId,				CD.strProductType,
 				dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'NOTIF') strBasisComponent,			
 												CH.strPosition,					CH.strContractBasis,				CH.strCountry,			

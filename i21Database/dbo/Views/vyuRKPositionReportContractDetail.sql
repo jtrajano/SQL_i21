@@ -41,7 +41,7 @@ WITH Pricing AS
 		  dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,CDT.intUnitMeasureId,fm.intUnitMeasureId, max(PFD.dblQuantity))/fm.dblContractSize dblLotsFixed,
 		dblYield,isnull(ysnDeltaHedge,0) ysnDeltaHedge,CA.strDescription AS	strItemOrigin,IM.strDescription strItemDescription	
 		,intMultiCompanyId,strCompanyName	,
-		 CONVERT(VARCHAR(11), CDT.dtmStartDate, 106) +'-'+CONVERT(VARCHAR(11), CDT.dtmEndDate, 106) strShipmentPeriod
+		 CONVERT(VARCHAR(11), CDT.dtmStartDate, 106) +'-'+CONVERT(VARCHAR(11), CDT.dtmEndDate, 106) COLLATE Latin1_General_CI_AS AS strShipmentPeriod
 	FROM    tblCTPriceFixationDetail  PFD
     JOIN    tblCTPriceFixation   PFX ON PFX.intPriceFixationId   = PFD.intPriceFixationId
     JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2)
@@ -125,7 +125,7 @@ WITH Pricing AS
 		,intProductTypeId,strProductType,intProductLineId,strProductLine,intFutureMonthId,strFutureMonth,intUnitMeasureId intFutMarketUOM
 		,dtmFutureMonthsDate,ysnExpired,strSymbol,dblContractSize,intItemUOMId,
 		((dblLotsFixed)* case when isnull(dblYield,0)=0 then 1 else dblYield/100 end)
-		dblNoOfLots,isnull(ysnDeltaHedge,0) ysnDeltaHedge,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod
+		dblNoOfLots,isnull(ysnDeltaHedge,0) ysnDeltaHedge,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod = strShipmentPeriod COLLATE Latin1_General_CI_AS
     FROM    Pricing  WHERE intPricingTypeId=1 
 
     UNION 
@@ -148,7 +148,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
-		,' Basis' AS strType
+		,' Basis' COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,PRC.strEntityName,ch.strCustomerContract
 	    ,PRC.intFutureMarketId
@@ -158,7 +158,7 @@ WITH Pricing AS
 		,IM.intProductTypeId,strProductType,IM.intProductLineId,strProductLine,PRC.intFutureMonthId,strFutureMonth,PRC.intUnitMeasureId intFutMarketUOM
 		,dtmFutureMonthsDate,ysnExpired,strSymbol,dblContractSize,PRC.intItemUOMId,
 		((PRC.dblNoOfLots-PRC.dblLotsFixed)* case when isnull(PRC.dblYield,0)=0 then 1 else PRC.dblYield/100 end)
-		 dblNoOfLots,isnull(ysnDeltaHedge,0) ysnDeltaHedge,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod
+		 dblNoOfLots,isnull(ysnDeltaHedge,0) ysnDeltaHedge,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod = strShipmentPeriod COLLATE Latin1_General_CI_AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
@@ -190,7 +190,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
-		,' Priced' AS strType
+		,' Priced' COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,PRC.strEntityName,ch.strCustomerContract
 		,PRC.intFutureMarketId
@@ -200,7 +200,7 @@ WITH Pricing AS
 		,IM.intProductTypeId,strProductType,IM.intProductLineId,strProductLine,PRC.intFutureMonthId,strFutureMonth,PRC.intUnitMeasureId intFutMarketUOM
 		,dtmFutureMonthsDate,ysnExpired,strSymbol,dblContractSize,PRC.intItemUOMId,
 		((PRC.dblLotsFixed-dblRecLots)* case when isnull(PRC.dblYield,0)=0 then 1 else PRC.dblYield/100 end),isnull(ysnDeltaHedge,0) ysnDeltaHedge
-		,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod
+		,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod = strShipmentPeriod COLLATE Latin1_General_CI_AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
@@ -232,7 +232,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		ch.intEntityId
 		,CDT.intCurrencyId
-		,' Basis' AS strType
+		,' Basis' COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,PRC.strEntityName,ch.strCustomerContract
 		,PRC.intFutureMarketId
@@ -242,7 +242,7 @@ WITH Pricing AS
 		,IM.intProductTypeId,strProductType,IM.intProductLineId,strProductLine,PRC.intFutureMonthId,strFutureMonth,PRC.intUnitMeasureId intFutMarketUOM
 		,dtmFutureMonthsDate,ysnExpired,strSymbol,dblContractSize,PRC.intItemUOMId, 
 		((CDT.dblNoOfLots- PRC.dblRecLots)* case when isnull(PRC.dblYield,0)=0 then 1 else PRC.dblYield/100 end),isnull(ysnDeltaHedge,0) ysnDeltaHedge
-		,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod
+		,strItemOrigin,strItemDescription,intMultiCompanyId,strCompanyName,strShipmentPeriod = strShipmentPeriod COLLATE Latin1_General_CI_AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
@@ -275,7 +275,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,case when pt.intPricingTypeId=1 then ' Priced'  else  ' Basis' end AS strType
+		,case when pt.intPricingTypeId=1 then ' Priced'  else  ' Basis' end COLLATE Latin1_General_CI_AS AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
 		,fm.intFutureMarketId

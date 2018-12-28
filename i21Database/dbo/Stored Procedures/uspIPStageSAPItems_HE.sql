@@ -182,6 +182,13 @@ BEGIN TRY
 				,1
 			FROM @tblItemUOM IU
 			JOIN tblIPItemStage I ON IU.strItemNo = I.strItemNo
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblIPItemUOMStage U
+					WHERE U.intStageItemId = I.intStageItemId
+						AND U.strItemNo = I.strItemNo
+						AND U.strUOM = IU.strUOM
+					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (

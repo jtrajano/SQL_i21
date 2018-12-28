@@ -21,8 +21,8 @@ AS
 			AC.strInternalCode,
 			AC.strRoute,
 
-			dbo.fnCTGetEventRecipientEmail(EV.intEventId) strEmailIds,
-			dbo.fnCTGetEventRecipientId(EV.intEventId) strUserIds
+			dbo.fnCTGetEventRecipientEmail(EV.intEventId) COLLATE Latin1_General_CI_AS  AS strEmailIds,
+			dbo.fnCTGetEventRecipientId(EV.intEventId) COLLATE Latin1_General_CI_AS AS strUserIds
 
 	 FROM	tblCTEvent	EV	LEFT
 	 JOIN	tblCTAction	AC	ON	AC.intActionId	=	EV.intActionId

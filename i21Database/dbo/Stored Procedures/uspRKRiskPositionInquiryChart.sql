@@ -73,6 +73,14 @@ BEGIN
 		,intOrderBySubHeading INT
 		,intContractHeaderId INT
 		,intFutOptTransactionHeaderId INT
+		,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strShipmentPeriod NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,intItemId INT
+		,strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		)
 		
 	INSERT INTO @RiskPositionInquiryTable

@@ -13,7 +13,7 @@ WITH SCHEMABINDING
 		J.strEmail,
 		case when C.ysnPassedThruArCustomer is null then 'Company Owned' 
 			 when C.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
-			 end strSiteType,
+			 end COLLATE Latin1_General_CI_AS strSiteType,
 		 ysnPostNetToArCustomer = C.ysnPassedThruArCustomer,
 		 0  as dblSharedFeePercentage,
 		 C.intCompanyOwnedSiteId,
@@ -47,7 +47,7 @@ WITH SCHEMABINDING
 		J.strEmail,
 		case when C.ysnSharedFee is null then 'Dealer Site' 
 			 when C.ysnSharedFee = 1 then 'Dealer Site Shared Fees' else 'Dealer Site' 		 
-			 end strSiteType,
+			 end COLLATE Latin1_General_CI_AS strSiteType,
 		C.ysnPostNetToArCustomer,
 		C.dblSharedFeePercentage,
 		C.intCompanyOwnedSiteId,

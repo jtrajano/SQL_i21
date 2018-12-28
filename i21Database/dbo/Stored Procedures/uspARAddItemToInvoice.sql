@@ -84,8 +84,9 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
-	,@ItemstrAddonDetailKey			VARCHAR(MAX)    = NULL
-	,@ItemysnAddonParent			BIT				= NULL
+	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
+	,@ItemAddonParent				BIT				= NULL
+	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
 AS
 BEGIN
 
@@ -226,8 +227,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemDestinationGradeId		= @ItemDestinationGradeId
 			,@ItemDestinationWeightId		= @ItemDestinationWeightId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
-			,@ItemstrAddonDetailKey			= @ItemstrAddonDetailKey
-			,@ItemysnAddonParent			= @ItemysnAddonParent
+			,@ItemAddonDetailKey			= @ItemAddonDetailKey
+			,@ItemAddonParent				= @ItemAddonParent
+			,@ItemAddOnQuantity				= @ItemAddOnQuantity
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -442,7 +444,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intTicketId]
 				,[intTicketHoursWorkedId]
 				,[strAddonDetailKey]
-				,[ysnAddonParent])
+				,[ysnAddonParent]
+				,[dblAddOnQuantity])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -522,8 +525,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemSalesAccountId
 				,@ItemTicketId
 				,@ItemTicketHoursWorkedId
-				,@ItemstrAddonDetailKey	
-				,@ItemysnAddonParent	
+				,@ItemAddonDetailKey	
+				,@ItemAddonParent
+				,@ItemAddOnQuantity
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -611,8 +615,9 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesAccountId			= @ItemSalesAccountId
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 			,@ItemTicketId					= @ItemTicketId
-			,@ItemstrAddonDetailKey			= @ItemstrAddonDetailKey
-			,@ItemysnAddonParent			= @ItemysnAddonParent
+            ,@ItemAddonDetailKey            = @ItemAddonDetailKey
+            ,@ItemAddonParent               = @ItemAddonParent
+            ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0

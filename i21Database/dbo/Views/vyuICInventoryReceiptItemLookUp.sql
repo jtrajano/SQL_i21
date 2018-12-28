@@ -44,7 +44,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 					THEN NULL
 				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
 					CASE	WHEN rtn.strReceiptType = 'Purchase Contract' 
-								THEN ContractView.strContractNumber							
+								THEN ContractView.strContractNumber
 							WHEN rtn.strReceiptType = 'Purchase Order'
 								THEN POView.strPurchaseOrderNumber
 							WHEN rtn.strReceiptType = 'Transfer Order'
@@ -60,8 +60,11 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 		, strSourceNumber = (
 				CASE WHEN Receipt.intSourceType = 1 THEN -- Scale
-					SCTicket.strTicketNumber 
-
+					--SCTicket.strTicketNumber 
+					CASE 
+						WHEN Receipt.strReceiptType = 'Transfer Order' THEN TransferView.strSourceNumber
+						ELSE SCTicket.strTicketNumber
+					END 
 				WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
 					ISNULL(LogisticsView.strLoadNumber, '')
 
@@ -346,8 +349,9 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,strUnitMeasure
 					,dblQuantity
 					,dblItemUOMCF
+					,strSourceNumber
 			FROM	vyuICGetInventoryTransferDetail TransferView
-			WHERE	TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
+			WHERE	TransferView.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
 					AND (
 						Receipt.strReceiptType = 'Transfer Order'
 						OR (

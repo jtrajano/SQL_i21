@@ -116,7 +116,7 @@ BEGIN
 	WHERE A.ysnDefaultLocation = 1 AND A.intEntityId = @shipFromEntityId
 
 	SELECT TOP 1
-		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(CASE WHEN ISNULL(@shipFromId,0) > 0 THEN B2.intTermsId ELSE A.intTermsId END, ISNULL(B.intTermsId,A.intTermsId)) END),
+		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(CASE WHEN ISNULL(@shipFromId,0) > 0 THEN B2.intTermsId ELSE ISNULL(B.intTermsId,A.intTermsId) END, ISNULL(B.intTermsId,A.intTermsId)) END),
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
 		@shipFrom =  ISNULL(@shipFromId, B.intEntityLocationId),

@@ -24,17 +24,17 @@
 	SC.strLoadNumber,
 	(CASE 
 		WHEN SC.intContractId > 0 THEN SC.strContractNumber + '-' + CONVERT(varchar(20), SC.intContractSequence)
-	END) AS strOrderNumber,
+	END) COLLATE Latin1_General_CI_AS AS strOrderNumber,
 	(CASE 
 		WHEN ISNULL(ICRI.strOrderNumber, '') = '' THEN GRSC.strStorageTypeDescription
-	END) AS strStorageTypeDescription,
+	END) COLLATE Latin1_General_CI_AS AS strStorageTypeDescription,
 	(CASE 
 		WHEN SC.strDistributionOption = 'CNT' THEN 'Contract'
 		WHEN SC.strDistributionOption = 'LOD' THEN 'Load'
 		WHEN SC.strDistributionOption = 'SPT' THEN 'Spot Sale'
 		WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
 		WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
-	END) AS strDistributionOption,
+	END) COLLATE Latin1_General_CI_AS AS strDistributionOption,
 	SC.intScaleSetupId
 	FROM tblSCTicket SC 
 	INNER JOIN tblICInventoryReceipt ICR ON SC.intInventoryReceiptId = ICR.intInventoryReceiptId

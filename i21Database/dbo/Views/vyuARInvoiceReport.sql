@@ -9,14 +9,14 @@ SELECT intInvoiceId				= INV.intInvoiceId
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
-								  END
+								  END COLLATE Latin1_General_CI_AS
 	 , strCompanyInfo			= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
-								  END  + CHAR(10) + ISNULL(COMPANY.strEmail,'')   + CHAR(10) + ISNULL(COMPANY.strPhone,'')
+								  END  + CHAR(10) + ISNULL(COMPANY.strEmail,'')   + CHAR(10) + ISNULL(COMPANY.strPhone,'') COLLATE Latin1_General_CI_AS
 	 , strCompanyPhoneNumber	= COMPANY.strPhone
 	 , strCompanyEmail			= COMPANY.strEmail
 	 , strType					= ISNULL(INV.strType, 'Standard')
@@ -28,11 +28,11 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCurrency				= CURRENCY.strCurrency	 	 
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strBillToLocationName	= INV.strBillToLocationName
-	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
 	 , strShipTo				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
 										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
-								  END
+								  END COLLATE Latin1_General_CI_AS
 	 , strSalespersonName		= SALESPERSON.strName
 	 , strPONumber				= INV.strPONumber
 	 , strBOLNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
@@ -79,8 +79,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
 								  ELSE NULL END
-	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
-	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
+	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END COLLATE Latin1_General_CI_AS
+	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END COLLATE Latin1_General_CI_AS
 	 , intTaxCodeId				= INVOICEDETAIL.intTaxCodeId
 	 , strTaxCode				= INVOICEDETAIL.strTaxCode
 	 , dblTaxDetail				= INVOICEDETAIL.dblAdjustedTax
@@ -314,7 +314,7 @@ OUTER APPLY (
 	  AND intInvoiceId = INV.intOriginalInvoiceId
 ) PROVISIONAL
 OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
 		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
@@ -339,7 +339,7 @@ OUTER APPLY (
 	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
 ) LOGO
 OUTER APPLY (
-	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1)
+	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(A.strMessage AS VARCHAR(MAX))  + ', '
 		FROM dbo.tblEMEntityMessage A WITH(NOLOCK)

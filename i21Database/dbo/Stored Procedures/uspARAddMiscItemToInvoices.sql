@@ -325,6 +325,9 @@ USING
 		,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+        ,[strAddonDetailKey]                    = IE.[strAddonDetailKey]
+        ,[ysnAddonParent]                       = IE.[ysnAddonParent]
+        ,[dblAddOnQuantity]                     = IE.[dblAddOnQuantity]
 		,[intConcurrencyId]						= 1
 		,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
 		,[intEntityId]							= IE.[intEntityId]
@@ -449,6 +452,9 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -557,6 +563,9 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+    ,[strAddonDetailKey]
+    ,[ysnAddonParent]
+    ,[dblAddOnQuantity]
 	,[intConcurrencyId]
 )
 OUTPUT  

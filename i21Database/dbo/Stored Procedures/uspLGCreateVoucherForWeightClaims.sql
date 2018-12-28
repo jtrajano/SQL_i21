@@ -129,37 +129,38 @@ BEGIN TRY
 		  ,intInventoryReceiptItemId
 		  ,intContractDetailId
 		  ,dblFranchiseAmount)
-	SELECT WC.intWeightClaimId
-		,WC.strReferenceNumber
-		,WCD.intWeightClaimDetailId
-		,WCD.intPartyEntityId
-		,WCD.dblFromNet AS dblNetShippedWeight
-		,ABS(WCD.dblWeightLoss) AS dblWeightLoss
-		,ABS(WCD.dblWeightLoss) AS dblNetWeight
-		,CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END AS dblFranchiseWeight
-		,(ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END) AS dblQtyReceived
-		,WCD.dblUnitPrice
-		,ISNULL(IU.dblUnitQty,1)
-		,ISNULL(WeightItemUOM.dblUnitQty,1)
+	/* Weight Claim Details */
+	SELECT intWeightClaimId = WC.intWeightClaimId
+		,strReferenceNumber = WC.strReferenceNumber
+		,intWeightClaimDetailId = WCD.intWeightClaimDetailId
+		,intPartyEntityId = WCD.intPartyEntityId
+		,dblNetShippedWeight = WCD.dblFromNet
+		,dblWeightLoss = ABS(WCD.dblWeightLoss)
+		,dblNetWeight = ABS(WCD.dblWeightLoss)
+		,dblFranchiseWeight = CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END
+		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
+		,dblCost = WCD.dblUnitPrice
+		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
+		,dblWeightUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
 		,dblClaimAmount
-		,ISNULL(ItemUOM.dblUnitQty,1)
-		,(
+		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
+		,intWeightUOMId = (
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = CD.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			) AS intWeightUOMId
-		,(
+			)
+		,intUOMId = (
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = CD.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			) AS intUOMId
-		,WCD.intPriceItemUOMId AS intCostUOMId
-		,WCD.intItemId
-		,CH.intContractHeaderId
-		,NULL AS intInventoryReceiptItemId
-		,WCD.intContractDetailId
+			)
+		,intCostUOMId = WCD.intPriceItemUOMId
+		,intItemId = WCD.intItemId
+		,intContractHeaderId = CH.intContractHeaderId
+		,intInventoryReceiptItemId = NULL
+		,intContractDetailId = WCD.intContractDetailId
 		,dblFranchiseAmount = ROUND(CASE 
 				 WHEN CU.ysnSubCurrency = 1
 					THEN (dbo.fnCTConvertQtyToTargetItemUOM(
@@ -185,38 +186,39 @@ BEGIN TRY
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
 	UNION
-	SELECT WC.intWeightClaimId
-		,WC.strReferenceNumber
-		,NULL
-		,WCOC.intVendorId
-		,ROUND(WCOC.dblWeight,2) AS dblNetShippedWeight
-		,ROUND(ABS(WCOC.dblWeight),2) AS dblWeightLoss
-		,ROUND(ABS(WCOC.dblWeight),2) AS dblNetWeight
-		,0 AS dblFranchiseWeight
-		,WCOC.dblQuantity AS dblQtyReceived
-		,WCOC.dblRate
-		,ISNULL(IU.dblUnitQty,1) AS dblCostUnitQty
-		,ISNULL(WeightItemUOM.dblUnitQty,1) AS dblWeightUnitQty
-		,WCOC.dblAmount
-		,ISNULL(ItemUOM.dblUnitQty,1) AS dblUnitQty
-		,(
+	/* Missing/Damaged/Reconditioned */
+	SELECT intWeightClaimId = WC.intWeightClaimId
+		,strReferenceNumber = WC.strReferenceNumber
+		,intWeightClaimDetailId = NULL
+		,intPartyEntityId = WCOC.intVendorId
+		,dblNetShippedWeight = ROUND(WCOC.dblWeight,2)
+		,dblWeightLoss = ROUND(ABS(WCOC.dblWeight),2)
+		,dblNetWeight = ROUND(ABS(WCOC.dblWeight),2)
+		,dblFranchiseWeight = 0
+		,dblQtyReceived = WCOC.dblQuantity
+		,dblCost = WCOC.dblRate
+		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
+		,dblWeightUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
+		,dblClaimAmount = WCOC.dblAmount
+		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
+		,intWeightUOMId = (
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = WCOC.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			) AS intWeightUOMId
-		,(
+			)
+		,intUOMId = (
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = WCOC.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			) AS intUOMId
-		,WCOC.intRateUOMId AS intCostUOMId
-		,WCOC.intItemId
-		,NULL
-		,NULL AS intInventoryReceiptItemId
-		,NULL
-		,0
+			)
+		,intCostUOMId = WCOC.intRateUOMId
+		,intItemId = WCOC.intItemId
+		,intContractHeaderId = NULL
+		,intInventoryReceiptItemId = NULL 
+		,intContractDetailId = NULL
+		,dblFranchiseAmount = 0
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -321,34 +323,53 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
-			WHERE intWeightClaimId = @intWeightClaimId
-
-			UPDATE BD
-				SET intLoadId = @intLoadId,
-				intCurrencyId = @intCurrencyId,
-				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = ROUND(vdd.dblClaimAmount, 2),
-				dblTotal = ROUND(vdd.dblClaimAmount,2),
-				dblNetWeight = vdd.dblNetWeight
-			FROM @voucherDetailData vdd
-			JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
-			WHERE intBillId = @intBillId
+			WHERE intWeightClaimId = @intWeightClaimId AND intContractDetailId IS NOT NULL
 		END
 		ELSE 
 		BEGIN
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
 			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
-			
-			UPDATE tblAPBillDetail
-			SET intLoadId = @intLoadId,
-				intCurrencyId = @intCurrencyId,
-				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = ROUND(@dblClaimAmount,2),
-				dblTotal = ROUND(@dblClaimAmount,2),
-				dblNetWeight = @dblNetWeight
-			WHERE intBillId = @intBillId AND intContractDetailId IS NOT NULL
 		END
+		
+		UPDATE BD
+			SET intLoadId = @intLoadId,
+			intCurrencyId = @intCurrencyId,
+			ysnSubCurrency = @ysnSubCurrency,
+			dblClaimAmount = ROUND(vdd.dblClaimAmount, 2),
+			dblTotal = ROUND(vdd.dblClaimAmount,2),
+			dblNetWeight = vdd.dblNetWeight
+		FROM @voucherDetailData vdd
+		JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
+		WHERE intBillId = @intBillId
+
+		SELECT @dblTotalForBill = SUM(dblTotal)
+		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
+		FROM tblAPBillDetail
+		WHERE intBillId = @intBillId
+
+		UPDATE tblAPBill
+		SET dblTotal = @dblTotalForBill
+		   ,dblAmountDue = @dblAmountDueForBill
+		WHERE intBillId = @intBillId
+
+		UPDATE BD
+		SET intCurrencyId = @intCurrencyId
+			,ysnSubCurrency = @ysnSubCurrency
+			,dblClaimAmount = ROUND(WCD.dblClaimAmount,2)
+			,dblTotal = ROUND(WCD.dblClaimAmount,2)
+			,dblNetWeight = WCD.dblToNet
+			,intLoadId = WC.intLoadId
+			,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
+		FROM tblAPBill B
+		JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+		JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
+		JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
+		JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+		WHERE WCD.intContractDetailId = BD.intContractDetailId
+			AND WC.intWeightClaimId = @intWeightClaimId 
+			AND BD.intBillId = @intBillId
+			AND B.intTransactionType = 11
 
 		DELETE
 		FROM @VoucherDetailClaim
@@ -360,33 +381,6 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
 	END
-
-	SELECT @dblTotalForBill = SUM(dblTotal)
-		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
-	FROM tblAPBillDetail
-	WHERE intBillId = @intBillId
-
-	UPDATE tblAPBill
-	SET dblTotal = @dblTotalForBill
-	   ,dblAmountDue = @dblAmountDueForBill
-	WHERE intBillId = @intBillId
-
-	UPDATE BD
-	SET intCurrencyId = @intCurrencyId
-		,ysnSubCurrency = @ysnSubCurrency
-		,dblClaimAmount = ROUND(WCD.dblClaimAmount,2)
-		,dblTotal = ROUND(WCD.dblClaimAmount,2)
-		,dblNetWeight = WCD.dblToNet
-		,intLoadId = WC.intLoadId
-		,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
-	FROM tblAPBill B
-	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
-	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
-	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-	WHERE WCD.intContractDetailId = BD.intContractDetailId
-		AND WC.intWeightClaimId = @intWeightClaimId 
-		AND B.intTransactionType = 11
 
 END TRY
 

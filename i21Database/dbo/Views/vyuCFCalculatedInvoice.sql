@@ -46,10 +46,11 @@ FROM (
 		'Ready' AS strStatus
 	FROM            dbo.tblCFInvoiceStagingTable AS cfInv 
 	LEFT JOIN
-	(SELECT        dblFeeTotalAmount, intAccountId
+	(SELECT        dblFeeTotalAmount, intAccountId, strUserId
 	FROM            dbo.tblCFInvoiceFeeStagingTable
-	GROUP BY intAccountId, dblFeeTotalAmount) AS cfInvFee 
-	ON cfInv.intAccountId = cfInvFee.intAccountId) AS outertable
+	GROUP BY intAccountId, dblFeeTotalAmount, strUserId) AS cfInvFee 
+	ON cfInv.intAccountId = cfInvFee.intAccountId
+	AND cfInv.strUserId = cfInvFee.strUserId) AS outertable
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
 	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus
 GO

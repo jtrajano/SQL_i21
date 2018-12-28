@@ -47,7 +47,11 @@ SELECT
 	strSourceNumber = 
 		(
 			CASE WHEN Receipt.intSourceType = 1 -- Scale
-				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
+				THEN 
+					CASE 
+						WHEN Receipt.strReceiptType = 'Transfer Order' THEN TransferView.strSourceNumber
+						ELSE ticket.strTicketNumber
+					END 
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
@@ -55,7 +59,7 @@ SELECT
 			WHEN Receipt.intSourceType = 4 -- Settle Storage
 				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			WHEN Receipt.intSourceType = 5 -- Delivery Sheet
-				THEN (SELECT strDeliverySheetNumber FROM tblSCDeliverySheet WHERE intDeliverySheetId = ReceiptItem.intSourceId) COLLATE Latin1_General_CI_AS
+				THEN deliverySheet.strDeliverySheetNumber 
 			WHEN Receipt.intSourceType = 6 -- Purchase Order
 				THEN (Select strPurchaseOrderNumber FROM vyuPODetails WHERE intPurchaseId = ReceiptItem.intSourceId)
 			ELSE NULL
@@ -274,7 +278,13 @@ LEFT JOIN vyuCTCompactContractDetailView ContractView
 	AND Receipt.strReceiptType = 'Purchase Contract'
 LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
 LEFT JOIN tblEMEntityFarm ContractFarm ON ContractFarm.intFarmFieldId = ContractDetail.intFarmFieldId
-LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId
+-- LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId
+OUTER APPLY (
+	SELECT	strTicketNumber, intFarmFieldId
+	FROM	tblSCTicket 
+	WHERE	intTicketId = ReceiptItem.intSourceId
+			AND Receipt.intSourceType = 1
+) ticket 
 LEFT JOIN tblEMEntityFarm ScaleFarm ON ScaleFarm.intFarmFieldId = ticket.intFarmFieldId
 OUTER APPLY (
 	SELECT	* 
@@ -313,11 +323,26 @@ LEFT JOIN vyuPODetails POView
 	AND POView.intPurchaseDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
-	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
-	AND Receipt.strReceiptType = 'Transfer Order'
+	ON 
+		TransferView.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+		AND Receipt.strReceiptType = 'Transfer Order'
 OUTER APPLY (
 	SELECT	strStorageTicketNumber
 	FROM	tblGRCustomerStorage
 	WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
 			AND Receipt.intSourceType = 4
 ) vyuGRStorageSearchView
+-- OUTER APPLY (
+-- 	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+-- 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+-- 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+-- 	WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
+-- 			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
+-- 			AND Receipt.strReceiptType = 'Inventory Return'
+-- ) rtn
+OUTER APPLY (
+	SELECT	strDeliverySheetNumber 
+	FROM	tblSCDeliverySheet 
+	WHERE	intDeliverySheetId = ReceiptItem.intSourceId 
+			AND Receipt.intSourceType = 5
+) deliverySheet

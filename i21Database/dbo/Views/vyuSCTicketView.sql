@@ -12,7 +12,7 @@
 				wHEN SCT.ysnDeliverySheetPost = 1 THEN 'COMPLETED' 
 				ELSE 'HOLD'
 			END
-		END) AS strTicketStatusDescription
+		END) COLLATE Latin1_General_CI_AS AS strTicketStatusDescription
 	   ,SCT.strTicketStatus
        ,SCT.strTicketNumber
        ,SCT.intScaleSetupId

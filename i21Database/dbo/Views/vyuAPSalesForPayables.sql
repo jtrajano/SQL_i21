@@ -18,12 +18,14 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, accnt.strAccountId
 	, EC.strClass
 	-- ,'Bill' AS [Info]
 FROM dbo.tblARInvoice A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityCustomerId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount accnt ON A.intAccountId = accnt.intAccountId
 WHERE A.ysnPosted = 1 AND A.strTransactionType = 'Cash Refund'
 UNION ALL
 SELECT  A.dtmDatePaid AS dtmDate,    
@@ -44,6 +46,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, accnt.strAccountId
 	, EC.strClass
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
@@ -53,7 +56,8 @@ FROM dbo.tblAPPayment  A
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount accnt ON B.intAccountId = accnt.intAccountId	
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.strTransactionType = 'Cash Refund'

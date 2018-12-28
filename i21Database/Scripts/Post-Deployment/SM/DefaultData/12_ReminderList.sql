@@ -233,30 +233,24 @@ GO
         SELECT	[strReminder]		=        N'Approve',
 				[strType]			=        N'Transaction',
 				[strMessage]		=        N'{0} {1} {2} unapproved.',
-				[strQuery]			=        N'SELECT intTransactionId 
-												FROM tblSMApproval A
-												WHERE  A.ysnCurrent = 1 AND 
-													A.strStatus IN (''Waiting for Approval'') AND
-													(
-														A.intApproverId = {0}
-														OR 
-														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
-													)',
+				[strQuery]			=        N'SELECT intTransactionId               
+												FROM tblSMApproval A              
+												left outer join tblSMApproverConfigurationForApprovalGroup B on A.intApprovalId = B.intApprovalId
+												WHERE  A.ysnCurrent = 1 AND                
+												A.strStatus = ''Waiting for Approval'' and 
+												(A.intApproverId = {0} OR B.intApproverId = {0})',
 				[strNamespace]		=        N'i21.view.Approval?activeTab=Pending',
 				[intSort]			=        11
 	END
 	ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
-		SET	[strQuery] =        N'SELECT intTransactionId 
-												FROM tblSMApproval A
-												WHERE  A.ysnCurrent = 1 AND 
-													A.strStatus IN (''Waiting for Approval'') AND
-													(
-														A.intApproverId = {0}
-														OR 
-														{0} IN (select intApproverId from tblSMApproverConfigurationForApprovalGroup where intApprovalId = A.intApprovalId)
-													)'
+		SET	[strQuery] =        N'SELECT intTransactionId               
+								FROM tblSMApproval A              
+								left outer join tblSMApproverConfigurationForApprovalGroup B on A.intApprovalId = B.intApprovalId
+								WHERE  A.ysnCurrent = 1 AND                
+								A.strStatus = ''Waiting for Approval'' and 
+								(A.intApproverId = {0} OR B.intApproverId = {0})'
 		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
 	END
 
@@ -332,22 +326,18 @@ GO
         SELECT [strReminder]        =        N'Rejected',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} rejected.',
-                [strQuery]          =        N'select * from tblSMApprovalHistory
-												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
-												and intEntityId not in (
-													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
-												)',
+                [strQuery]          =        N'select intEntityId from tblSMApprovalHistory              
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0              
+												and intEntityId not in (               select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1              )',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
 	ELSE
 		BEGIN
 			UPDATE [tblSMReminderList]
-			SET	[strQuery]			=		N'select * from tblSMApprovalHistory
-												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
-												and intEntityId not in (
-													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
-												)'
+			SET	[strQuery]			=		N'select intEntityId from tblSMApprovalHistory              
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0              
+												and intEntityId not in (               select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1              )'
 			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
 		END
 

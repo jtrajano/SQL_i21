@@ -185,6 +185,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -225,6 +226,7 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
+			,[dblGrossQuantity]					= CS.dblGrossQuantity
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -282,6 +284,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)
 		VALUES
 		(
@@ -324,6 +327,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,

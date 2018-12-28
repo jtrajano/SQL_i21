@@ -207,8 +207,8 @@ OPEN @MultipleHeaderInfo;
 	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		--SET @ErrorMessage = @ErrorMessage + char(13) + @strMeterAccountCusNo + char(9) +  ISNULL(@strMeterAccountLocNo, 'NULL') + char(9) + @strTermId + char(9) + @strtPriceType + char(9)  +ISNULL(@strConsignmentGroup,'NULL'); 
-		SET @ErrorMessage = FORMATMESSAGE(@ErrorMessage  + char(13) + '%-20s' + '%-20s' + '%-20s' + '%-20s',   @strMeterAccountCusNo , ISNULL(@strMeterAccountLocNo, 'NULL'),  ISNULL(@strTermId, 'NULL') , @strtPriceType  ) 
+		SET @ErrorMessage = @ErrorMessage + char(13) + @strMeterAccountCusNo + char(9) +  ISNULL(@strMeterAccountLocNo, 'NULL') + char(9) + @strTermId + char(9) + @strtPriceType + char(9)  +ISNULL(@strConsignmentGroup,'NULL'); 
+		--SET @ErrorMessage = FORMATMESSAGE(@ErrorMessage  + char(13) + '%-20s' + '%-20s' + '%-20s' + '%-20s',   @strMeterAccountCusNo , ISNULL(@strMeterAccountLocNo, 'NULL'),  ISNULL(@strTermId, 'NULL') , @strtPriceType  ) 
 	FETCH NEXT FROM @MultipleHeaderInfo INTO @strMeterAccountCusNo, @strMeterAccountLocNo, @strTermId , @strtPriceType, @strConsignmentGroup ; 
 	END
 	/****************************************************************************************************************************************************************/

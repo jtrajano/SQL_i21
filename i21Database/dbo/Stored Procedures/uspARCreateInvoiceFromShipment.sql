@@ -107,6 +107,7 @@ LEFT JOIN
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
+		AND ICIS.strReferenceNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
@@ -613,6 +614,17 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 		RAISERROR('There is no available item to Invoice.', 16, 1);
 		RETURN 0;
 	END
+
+
+IF EXISTS (SELECT TOP 1 1 FROM @UnsortedEntriesForInvoice A 
+				JOIN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intPricingTypeId = 2) B 
+					ON A.intContractDetailId = B.intContractDetailId
+ )
+	BEGIN
+		RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);
+		RETURN 0;
+	END
+
 
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice

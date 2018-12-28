@@ -16,7 +16,7 @@
        [dtmPostingDate] DATETIME,        
 	   [strUserName] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL,
 	   strReferenceNo nvarchar(MAX) COLLATE Latin1_General_CI_AS  NULL,
-	   strStatus nvarchar(50),
+	   strStatus nvarchar(50) COLLATE Latin1_General_CI_AS,
 	   [strMessage] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	   ysnMailSent BIT DEFAULT 0,
     [ysnPost] BIT NULL DEFAULT 0, 

@@ -130,7 +130,6 @@ BEGIN
 				, intCompanyLocationId INT
 				, strContractType NVARCHAR(100)
 				, strPricingType NVARCHAR(100)
-				, intCommodityUnitMeasureId INT
 				, intContractDetailId INT
 				, intContractStatusId INT
 				, intEntityId INT
@@ -140,10 +139,8 @@ BEGIN
 				, strItemNo NVARCHAR(100)
 				, dtmContractDate DATETIME
 				, strEntityName NVARCHAR(100)
-				, strCustomerContract NVARCHAR(100)
 				, intFutureMarketId INT
 				, intFutureMonthId INT
-				, intCategoryId INT
 				, strCategory NVARCHAR(100)
 				, strFutMarketName NVARCHAR(100)
 				, strDeliveryDate NVARCHAR(50))
@@ -163,7 +160,6 @@ BEGIN
 				, intCompanyLocationId
 				, strContractType
 				, strPricingType
-				, intCommodityUnitMeasureId
 				, intContractDetailId
 				, intContractStatusId
 				, intEntityId
@@ -173,46 +169,41 @@ BEGIN
 				, strItemNo
 				, dtmContractDate
 				, strEntityName
-				, strCustomerContract
 				, intFutureMarketId
 				, intFutureMonthId
-				, intCategoryId
 				, strCategory
 				, strFutMarketName
 				, strDeliveryDate)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode
+				, strCommodityCode = CD.strCommodity
 				, intCommodityId
 				, intContractHeaderId
-				, strContractNumber
+				, strContractNumber = CD.strContract
 				, strLocationName
 				, dtmEndDate
 				, strFutureMonth
-				, CD.dblBalance
+				, dblBalance = CD.dblQuantity
 				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
 				, strPricingType
-				, intCommodityUnitMeasureId
 				, CD.intContractDetailId
 				, intContractStatusId
 				, intEntityId
 				, intCurrencyId
-				, strType
+				, strType = CD.strContractType + ' ' + CD.strPricingType
 				, intItemId
 				, strItemNo
 				, dtmContractDate
-				, strEntityName
-				, strCustomerContract
+				, strEntityName = CD.strCustomer
 				, intFutureMarketId
 				, intFutureMonthId
-				, intCategoryId
 				, strCategory
 				, strFutMarketName
 				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-			FROM [dbo].fnRKGetContractDetail(@dtmToDate) CD
+			FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				AND intCommodityId = @intCommodityId
 
@@ -380,7 +371,6 @@ BEGIN
 				, strEntityName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -400,7 +390,6 @@ BEGIN
 				, strEntityName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -422,7 +411,6 @@ BEGIN
 					, CD.strEntityName
 					, intItemId
 					, strItemNo
-					, intCategoryId
 					, strCategory
 					, intFutureMarketId
 					, strFutMarketName

@@ -109,7 +109,7 @@ BEGIN
 		)
 		AND ISNULL(Chk.FuelGradeID, '') != ''
 
-		PRINT 'EXIT02'
+
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -181,9 +181,9 @@ BEGIN
 
 					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
 					UPDATE CPT
-					SET CPT.[dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.FuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FuelGradeSalesVolume AS DECIMAL(18,6)),0),0)
 						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-						, CPT.[dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.FuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FuelGradeSalesVolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
 					FROM dbo.tblSTCheckoutPumpTotals CPT
 					INNER JOIN tblSTCheckoutHeader CH
 						ON CPT.intCheckoutId = CH.intCheckoutId
@@ -230,7 +230,6 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-
 		-- COMMIT
 		GOTO ExitWithCommit
 	END TRY
@@ -238,7 +237,6 @@ BEGIN
 	BEGIN CATCH
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
-		
 
 		-- ROLLBACK
 		GOTO ExitWithRollback

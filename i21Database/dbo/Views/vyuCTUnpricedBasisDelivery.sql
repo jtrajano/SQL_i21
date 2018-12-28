@@ -54,7 +54,7 @@ FROM (SELECT
 	INNER JOIN tblSCTicketContractUsed SCTC
 		ON SCTC.intTicketId = SC.intTicketId
 	INNER JOIN tblCTContractDetail CD
-		ON SCTC.intContractDetailId = CD.intContractDetailId
+		ON SCTC.intContractDetailId = CD.intContractDetailId and CD.intPricingTypeId = 2
 	INNER JOIN tblCTContractHeader CH
 		ON CD.intContractHeaderId = CH.intContractHeaderId and CH.intPricingTypeId = 2
 	INNER JOIN tblEMEntity EME

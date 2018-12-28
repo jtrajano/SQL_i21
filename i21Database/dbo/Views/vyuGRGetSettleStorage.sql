@@ -31,7 +31,7 @@ SELECT DISTINCT
 	,strContractIds				= _strContractIds.strContractIds
 	,strContractNumbers         = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
 	,strUnits                   =  CASE
-										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
 										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
 								END
 	,intTransactionId			= CASE 
@@ -104,7 +104,7 @@ CROSS APPLY (
 				AND SC.intSettleStorageId = SS.intSettleStorageId
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE SS.intParentSettleStorageId IS NOT NULL
+		WHERE SS.intParentSettleStorageId IS NOT NULL AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH(''))
 ) AS _strContractNumbers
 CROSS APPLY (

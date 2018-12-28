@@ -47,6 +47,7 @@ BEGIN
 		NULL AS strBillOfLading,
 		NULL AS strOrderNumber,
 		NULL AS dtmDate,
+		NULL AS dtmBillDate,
 		NULL AS dtmDueDate,
 		NULL AS strVendorId,
 		0 AS intEntityVendorId,
@@ -129,6 +130,7 @@ SET @innerQuery = 'SELECT DISTINCT
 						,dblDiscount
 						,dblInterest
 						,(CASE WHEN dblQtyToVoucher <= 0 THEN dtmReceiptDate ELSE dtmDate END) AS dtmDate
+						,dtmBillDate 
 						,dtmDueDate
 						,dtmReceiptDate
 						,dblQtyToReceive
@@ -270,6 +272,7 @@ SELECT * FROM (
 	,tmpAgingSummaryTotal.strBillOfLading
 	,tmpAgingSummaryTotal.strOrderNumber AS strOrderNumber
 	,tmpAgingSummaryTotal.dtmDate
+	,tmpAgingSummaryTotal.dtmBillDate
 	,tmpAgingSummaryTotal.dtmDueDate
 	,tmpAgingSummaryTotal.strVendorId
 	,tmpAgingSummaryTotal.intBillId
@@ -311,6 +314,7 @@ SELECT * FROM (
 		,tmpAPClearables.strVendorId
 		,tmpAPClearables.strReceiptNumber
 		,tmpAPClearables.dtmDate
+		,tmpAPClearables.dtmBillDate
 		,tmpAPClearables.dtmDueDate
 		,tmpAPClearables.strTerm
 		,tmpAPClearables.dtmReceiptDate
@@ -329,7 +333,7 @@ SELECT * FROM (
 				+ @innerQuery +
 			   ') tmpAPClearables 
 		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,
-				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading 
+				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading, dtmBillDate 
 	) AS tmpAgingSummaryTotal
 	--LEFT JOIN vyuICGetInventoryReceipt IR
 	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId

@@ -262,11 +262,13 @@ BEGIN
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+			LEFT JOIN [vyuGRStorageAdjustmentRecords] SA  ON SA.intCustomerStorageId = B.intCustomerStorageId 
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN CAST(B.dblQtyReceived  AS DECIMAL (18,2)) * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN  
-																																 CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId  ,B.intUnitOfMeasureId , B.dblNetWeight) AS DECIMAL (18,2))
+																																CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId  ,B.intUnitOfMeasureId , B.dblNetWeight) AS DECIMAL (18,2))
 																																ELSE  CAST(B.dblQtyReceived  AS DECIMAL (18,2))  END) END)) > CAST( C.dblOpenReceive  AS DECIMAL (18,2)) 
-
+		AND (SA.ysnIsStorageAdjusted = 0 OR SA.ysnIsStorageAdjusted IS NULL) --WILL EXCLUDE STORAGE ADJUSTMENT TRANSACTION 
+		
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		-- SELECT

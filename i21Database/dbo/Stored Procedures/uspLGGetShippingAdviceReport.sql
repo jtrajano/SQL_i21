@@ -316,7 +316,7 @@ BEGIN
 						), 1, 2, '')) strMarks
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
 		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN		tblICItem I ON I.intItemId = CD.intItemId 
 

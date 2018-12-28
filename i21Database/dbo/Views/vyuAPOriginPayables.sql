@@ -21,11 +21,13 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, accnt.strAccountId
 	, EC.strClass
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount accnt ON A.intAccountId = accnt.intAccountId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13) AND A.ysnOrigin = 1
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
@@ -48,6 +50,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, accnt.strAccountId
 	, EC.strClass
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -56,7 +59,8 @@ FROM dbo.tblAPPayment  A
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount accnt ON B.intAccountId = accnt.intAccountId	
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2, 13)
@@ -80,12 +84,14 @@ SELECT
 	,A.ysnPosted
 	,C.ysnPaid
 	,A.intAccountId
+	,accnt.strAccountId
 	,EC.strClass
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblGLAccount accnt ON A.intAccountId = accnt.intAccountId		
 WHERE A.ysnPosted = 1 AND A.ysnOrigin = 1 AND C.ysnOrigin = 1
 UNION ALL
 SELECT --OVERPAYMENT
@@ -104,11 +110,13 @@ SELECT --OVERPAYMENT
 	, A.ysnPosted 
 	, A.ysnPaid
 	,A.intAccountId
+	,accnt.strAccountId
 	,EC.strClass
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId		
+LEFT JOIN dbo.tblGLAccount accnt ON A.intAccountId = accnt.intAccountId		
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1 AND A.ysnOrigin = 1
 
 

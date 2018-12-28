@@ -187,7 +187,6 @@ INSERT INTO @tblGetOpenContractDetail(
     ,intCompanyLocationId
     ,strContractType
     ,strPricingType
-    ,intCommodityUnitMeasureId
     ,intContractDetailId
     ,intContractStatusId
     ,intEntityId
@@ -196,39 +195,36 @@ INSERT INTO @tblGetOpenContractDetail(
     ,intItemId
     ,strItemNo
     ,strEntityName
-    ,strCustomerContract
     ,intFutureMarketId
     ,intFutureMonthId
     ,strCurrency)
 SELECT  
      ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
-    ,strCommodityCode
+    ,strCommodityCode = CD.strCommodity
     ,intCommodityId
     ,intContractHeaderId
-    ,strContractNumber
+    ,strContractNumber = CD.strContract
     ,strLocationName
     ,dtmEndDate
-    ,CD.dblBalance
-    ,intUnitMeasureId
+    ,dblBalance = CD.dblQuantity
+	,intUnitMeasureId
     ,intPricingTypeId
     ,intContractTypeId
     ,intCompanyLocationId
     ,strContractType
     ,strPricingType
-    ,intCommodityUnitMeasureId
     ,CD.intContractDetailId
     ,intContractStatusId
     ,intEntityId
     ,intCurrencyId
-    ,strType
+    ,strType = CD.strContractType + ' ' + CD.strPricingType
     ,intItemId
     ,strItemNo
-    ,strEntityName
-    ,strCustomerContract
+    ,strEntityName = CD.strCustomer
     ,NULL intFutureMarketId
     ,NULL intFutureMonthId
     ,strCurrency 
-FROM [dbo].fnRKGetContractDetail(@dtmToDate) CD
+FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 	AND CD.intCommodityId in (select intCommodity from @Commodity)
 

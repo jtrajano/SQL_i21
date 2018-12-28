@@ -42,7 +42,7 @@ SELECT
 		WHEN 2 THEN '1099 INT'
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
-		ELSE 'NONE' END AS str1099Form,
+		ELSE 'NONE' END COLLATE Latin1_General_CI_AS  AS str1099Form,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
 	IR.strReceiptNumber,

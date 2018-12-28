@@ -83,7 +83,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , strSalespersonName		= ESP.strName
 	 , strBillTo				= RTRIM(SAR.strBillToLocationName)
 	 , strShipTo				= RTRIM(SAR.strShipToLocationName)
-	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
+	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') COLLATE Latin1_General_CI_AS
 	 , strSiteDescription		= TMS.strDescription
 	 , strTicketNumber			= SCT.strTicketNumber
 	 , strCustomerReference		= SCT.strCustomerReference
@@ -1102,7 +1102,7 @@ LEFT JOIN vyuARItemUOM UOM ON SAR.intItemUOMId = UOM.intItemUOMId
 LEFT JOIN tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
 LEFT JOIN tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId
 OUTER APPLY (
-	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
 	 FROM (
 	  SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
 	  FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)

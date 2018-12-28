@@ -133,6 +133,7 @@ DECLARE @DataForReceiptHeader TABLE(
 	,Currency INT
 	,intSourceType INT
 	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,strVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	--,intTaxGroupId INT
 )
 
@@ -146,6 +147,7 @@ INSERT INTO @DataForReceiptHeader(
 		,ShipFrom
 		,Currency
 		,intSourceType
+		,strVendorRefNo
 		--,intTaxGroupId
 )
 SELECT	RawData.intEntityVendorId
@@ -156,6 +158,7 @@ SELECT	RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
+		,RawData.strVendorRefNo
 		--,RawData.intTaxGroupId
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
@@ -166,6 +169,7 @@ GROUP BY RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
+		,RawData.strVendorRefNo
 		--,RawData.intTaxGroupId
 ;
 
@@ -340,6 +344,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
+					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
 		WHERE	RawHeaderData.intId = @intId
 		ORDER BY RawData.intInventoryReceiptId DESC
 
@@ -441,7 +446,8 @@ BEGIN
 						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
-						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
+						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
+						AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)	
 			WHERE	RawHeaderData.intId = @intId
 		) AS IntegrationData
 			ON Receipt.intInventoryReceiptId = IntegrationData.intInventoryReceiptId
@@ -947,6 +953,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = RawData.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM			

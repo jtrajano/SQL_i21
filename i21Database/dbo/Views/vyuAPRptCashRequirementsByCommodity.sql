@@ -16,7 +16,12 @@ AS
 	SELECT
 		 APB.intBillId,
 		C.strCommodityCode,
-		CASE WHEN APBD.intWeightUOMId > 0 THEN ISNULL(APBD.dblNetWeight,0) ELSE dblQtyReceived END  as dblNetUnits,
+		CASE WHEN IE.strType = 'Other Charge' THEN 0 ELSE
+		( CASE 
+				WHEN APBD.intWeightUOMId > 0 
+				THEN dbo.fnCalculateQtyBetweenUOM(APBD.intWeightUOMId, CUM.intUnitMeasureId,  ISNULL(APBD.dblNetWeight,0)) --NET 
+				ELSE dbo.fnCalculateQtyBetweenUOM(APBD.intUnitOfMeasureId, CUM.intUnitMeasureId,  ISNULL(APBD.dblQtyReceived,0)) END --STOCK
+		) END AS dblNetUnits,
 		APBD.dblTotal,
 		APBD.dblTax,
 		APB.dblAmountDue
@@ -24,9 +29,11 @@ AS
 	INNER JOIN tblAPBillDetail APBD
 		ON APB.intBillId = APBD.intBillId
 	INNER JOIN dbo.tblICItem IE 
-		ON IE.intItemId = APBD.intItemId
+		ON IE.intItemId = APBD.intItemId 
 	LEFT JOIN dbo.tblICCommodity C 
 		ON C.intCommodityId = IE.intCommodityId
+	INNER JOIN tblICCommodityUnitMeasure CUM
+		ON CUM.intCommodityId = C.intCommodityId AND ysnStockUnit = 1
 	WHERE APBD.intItemId IS NOT NULL 
 		  AND APBD.intContractHeaderId IS NOT NULL --WILL SHOW ALL CONTRACT RELATED TRANSACTIONS 
 		  AND APB.intBillId NOT IN ( --WILL SHOW NOT PAID TRANSACTIONS ONLY
@@ -40,7 +47,10 @@ AS
 		APBD.dblNetWeight,
 		APB.intBillId,
 		APBD.intWeightUOMId,
-		APB.dblAmountDue
+		APB.dblAmountDue,
+		IE.strType,
+		CUM.intUnitMeasureId,
+		APBD.intUnitOfMeasureId
 	) commodityHeader 
 	GROUP BY strCommodityCode
 GO

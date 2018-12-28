@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspLGCreateLoadForPickLot @intPickLotHeaderId INT
+﻿CREATE PROCEDURE uspLGCreateLoadForPickLot 
+	@intPickLotHeaderId INT
 	,@intEntityUserSecurityId INT
 	,@intLoadId INT OUTPUT
 AS
@@ -17,6 +18,7 @@ BEGIN TRY
 	DECLARE @intPurchaseSaleId INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intPositionId INT
+	DECLARE @intFreightTerm INT
 	DECLARE @intTransportationMode INT
 	DECLARE @intTransUsedBy INT
 	DECLARE @intWeightUnitMeasureId INT
@@ -34,6 +36,7 @@ BEGIN TRY
 	SELECT @intTransportationMode = intDefaultTransportationMode
 		,@intTransUsedBy = intTransUsedBy
 		,@intPositionId = intDefaultPositionId
+		,@intFreightTerm = intDefaultFreightTermId 
 	FROM tblLGCompanyPreference
 
 	SELECT @intCurrencyId = intDefaultCurrencyId
@@ -90,6 +93,7 @@ BEGIN TRY
 		,intShipmentType
 		,intSourceType
 		,intTransportationMode
+		,intFreightTermId
 		,intTransUsedBy
 		,intUserSecurityId
 		,intWeightUnitMeasureId
@@ -106,6 +110,7 @@ BEGIN TRY
 		,1
 		,5
 		,1
+		,@intFreightTerm
 		,@intTransUsedBy
 		,@intEntityUserSecurityId
 		,@intWeightUnitMeasureId

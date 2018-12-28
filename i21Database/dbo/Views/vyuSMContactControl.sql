@@ -4,7 +4,7 @@ SELECT intControlId
 ,cl.intScreenId
 ,strControlId
 ,strControlName
-,ISNULL(sc.strGroupName,mm.strCategory) AS strGroupName 
+,ISNULL(sc.strGroupName,mm.strCategory) COLLATE Latin1_General_CI_AS AS strGroupName 
 ,strContainer
 ,strControlType
 ,cl.intConcurrencyId

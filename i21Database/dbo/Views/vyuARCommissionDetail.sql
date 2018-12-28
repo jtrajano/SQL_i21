@@ -13,7 +13,7 @@ SELECT C.*
 											THEN HELPDESK.strTicketNumber
 									   WHEN CD.strSourceType = 'tblGLDetail'
 											THEN GL.strTransactionId
-								  END	 
+								  END COLLATE Latin1_General_CI_AS	 
 FROM vyuARCommission C
 INNER JOIN tblARCommissionDetail CD WITH (NOLOCK) ON CD.intCommissionId = C.intCommissionId
 LEFT JOIN (
@@ -22,7 +22,7 @@ LEFT JOIN (
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON CD.intEntityId = E.intEntityId
 OUTER APPLY (
-	SELECT TOP 1intInvoiceId
+	SELECT TOP 1 intInvoiceId
 			, strInvoiceNumber
 	FROM dbo.tblARInvoice I WITH (NOLOCK) 
 	WHERE I.intInvoiceId = CD.intSourceId

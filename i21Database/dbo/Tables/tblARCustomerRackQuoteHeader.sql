@@ -8,7 +8,7 @@
 	[ysnShowTempAdjustments]				BIT         NULL,
 	[ysnShowMargin]							BIT         NULL,
 	[ysnShowLocation]						BIT         NULL,
-	[strShowTaxFeeDetail]					NVARCHAR(100) NULL,
+	[strShowTaxFeeDetail]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyId]							INT			NULL,
 	[intConcurrencyId]						INT         CONSTRAINT [DF_tblARCustomerRackQuoteHeader_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARCustomerRackQuoteHeader] PRIMARY KEY CLUSTERED ([intCustomerRackQuoteHeaderId] ASC),

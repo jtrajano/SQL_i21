@@ -596,7 +596,7 @@ BEGIN
 			SELECT @strShipmentNo = strShipmentNo
 			FROM @tblMFOrderNo
 
-			SELECT @strError = 'SSCC # is missing for the inventory shipment # ' + @strShipmentNo
+			SELECT @strError = 'No of SSCC labels are not matching with shipped Qty.' + @strShipmentNo
 
 			RAISERROR (
 					@strError

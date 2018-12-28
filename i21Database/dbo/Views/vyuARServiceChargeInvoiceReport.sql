@@ -15,7 +15,7 @@ SELECT ARI.intInvoiceId
 	, CUSTOMER.strCustomerNumber
 	, strCustomerName			= CUSTOMER.strName
 	, CUSTOMER.strAccountNumber
-	, strCustomerAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, CUSTOMER.strName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, NULL, NULL)
+	, strCustomerAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, CUSTOMER.strName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
 	, intCompanyLocationId		= SMCS.intCompanyLocationId
 	, strCompanyName			= SMCS.strCompanyName
 	, strCompanyPhone			= SMCS.strCompanyPhone

@@ -5054,6 +5054,10 @@ BEGIN
 				,@TaxValue8						=@TaxValue8	
 				,@TaxValue9						=@TaxValue9	
 				,@TaxValue10					=@TaxValue10
+				,@intSiteId						=@intSiteId
+				,@intCardId						=@intCardId
+				,@intVehicleId					=@intVehicleId
+				,@intFreightTermId				=@companyConfigFreightTermId
 
 				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
@@ -6033,6 +6037,8 @@ BEGIN
 			,dblOriginalTotalPrice	   = @dblOriginalTotalPrice	
 			,dblMargin				   = @dblMargin
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
+			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
+			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
@@ -6589,7 +6595,7 @@ BEGIN
 	--SELECT * FROM @tblCFTransactionTax 
 
 	
-	IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1)
+	IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1 AND ISNULL(@intTaxGroupId,0) = 0)
 	BEGIN
 					
 		UPDATE @tblCFTransactionTax 

@@ -121,7 +121,6 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		intCompanyLocationId int,
 		strContractType  NVARCHAR(200), 
 		strPricingType  NVARCHAR(200),
-		intCommodityUnitMeasureId int,
 		intContractDetailId int,
 		intContractStatusId int,
 		intEntityId int,
@@ -131,7 +130,6 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strItemNo  NVARCHAR(200),
 		dtmContractDate datetime,
 		strEntityName  NVARCHAR(200),
-		strCustomerContract  NVARCHAR(200),
 		intFutureMarketId int,
 		intFutureMonthId int,
 		strCurrency NVARCHAR(200))
@@ -151,7 +149,6 @@ INSERT INTO @tblGetOpenContractDetail(
 	intCompanyLocationId,
 	strContractType,
 	strPricingType,
-	intCommodityUnitMeasureId,
 	intContractDetailId,
 	intContractStatusId,
 	intEntityId,
@@ -160,42 +157,38 @@ INSERT INTO @tblGetOpenContractDetail(
 	intItemId,
 	strItemNo,
 	strEntityName,
-	strCustomerContract,
 	intFutureMarketId,
 	intFutureMonthId,
 	strCurrency)
 SELECT  
 	ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum,
-	strCommodityCode,
+	strCommodityCode = CD.strCommodity,
 	intCommodityId,
 	intContractHeaderId,
-	strContractNumber,
+	strContractNumber = CD.strContract,
 	strLocationName,
 	dtmEndDate,
-	CD.dblBalance,
+	dblBalance = CD.dblQuantity,
 	intUnitMeasureId,
 	intPricingTypeId,
 	intContractTypeId,
 	intCompanyLocationId,
 	strContractType,
 	strPricingType,
-	intCommodityUnitMeasureId,
 	CD.intContractDetailId,
 	intContractStatusId,
 	intEntityId,
 	intCurrencyId,
-	strType,
+	strType = CD.strContractType + ' ' + CD.strPricingType,
 	intItemId,
 	strItemNo,
-	strEntityName,
-	strCustomerContract,
+	strEntityName = CD.strCustomer,
 	NULL intFutureMarketId,
 	NULL intFutureMonthId, 
 	strCurrency 
-FROM 
-[dbo].fnRKGetContractDetail(@dtmToDate) CD
+FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
-
+AND CD.intCommodityId in (select intCommodity from @Commodity)
 
 DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 		, dtmTransactionDate DATETIME
@@ -593,7 +586,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],'Physical Contract' strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
+		isnull((cd.dblBalance),0) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId =@intCommodityId
@@ -711,12 +704,12 @@ BEGIN
 						ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
 	
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
+	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,strCurrency)
 	SELECT strCommodityCode,'Price Risk' [strType],'Open Contract' strContractType,
-	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
+	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName ,strCurrency
 		FROM (SELECT strCommodityCode,			
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(cd.dblBalance,0)) dblTotal,
-				intContractHeaderId,strContractNumber,cd.intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intCompanyLocationId,intContractTypeId,strCurrency
+				isnull(cd.dblBalance,0) dblTotal,
+				intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intCompanyLocationId,intContractTypeId,strCurrency
 				FROM @tblGetOpenContractDetail cd
 				WHERE intContractTypeId in(1,2) and intPricingTypeId IN (1,3) AND cd.intCommodityId  = @intCommodityId 
 				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end 
@@ -725,7 +718,7 @@ BEGIN
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
-				 group by strCommodityCode,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intContractTypeId,strCurrency	
+				 group by strCommodityCode,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intContractTypeId,strCurrency	
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
 	SELECT @strCommodityCode,'Price Risk' [strType],'Collateral' strContractType,sum(isnull(dblRemainingQuantity,0)) dblTotal,intFromCommodityUnitMeasureId,
@@ -831,7 +824,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,'Avail for Spot Sale' [strType], strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,-(cd.dblBalance)) AS dblTotal
+		-(cd.dblBalance) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and cd.intCommodityId=@intCommodityId
@@ -873,7 +866,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],[strType] strSubType,'Physical' strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
+		isnull((cd.dblBalance),0) AS dblTotal
 	   ,cd.intUnitMeasureId,intCommodityId,cd.intCompanyLocationId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE cd.intContractTypeId in(1,2) and
