@@ -116,6 +116,7 @@ BEGIN
 			,@strItemNo AS NVARCHAR(50) 
 
     DECLARE @strReceiptType AS NVARCHAR(50)
+			,@self AS INT 
 END 
 
 -- Compute the cost adjustment
@@ -231,15 +232,18 @@ BEGIN
 	BEGIN 
 		CREATE TABLE #tmpRetroactiveTransactions (
 			[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED	
+			,[intSort] INT 
 		)
 	END 
 
 	DELETE FROM #tmpRetroactiveTransactions
 	INSERT INTO #tmpRetroactiveTransactions (
 		intInventoryTransactionId
+		,intSort
 	)
 	-- Self: 
 	SELECT	t.intInventoryTransactionId 
+			,1 
 	FROM	tblICInventoryTransaction t
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId
@@ -252,6 +256,7 @@ BEGIN
 	-- Cost Bucket Out: 
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
+			,2 
 	FROM	tblICInventoryLotOut cbOut INNER JOIN tblICInventoryLot cb 
 				ON cbOut.intInventoryLotId = cb.intInventoryLotId
 	WHERE	cb.intItemId = @intItemId
@@ -261,7 +266,24 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
-			AND cbOut.intRevalueLotId IS NULL 
+			AND cbOut.intRevalueLotId IS NULL 	
+	-- Negative stocks 
+	 UNION ALL 
+	SELECT	t.intInventoryTransactionId 
+			,2	
+	FROM	tblICInventoryLot cb INNER JOIN (
+				tblICInventoryLotOut cbOut INNER JOIN tblICInventoryTransaction t 
+					ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbOut.intRevalueLotId IS NOT NULL 					
+			)
+				ON cb.intInventoryLotId = cbOut.intRevalueLotId		
+	WHERE	cb.intItemId = @intItemId
+			AND cb.intItemLocationId = @intItemLocationId
+			AND cb.intTransactionId = @intSourceTransactionId
+			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+			AND cb.strTransactionId = @strSourceTransactionId
+			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 END 
 
 -- Remember the original cost from the cost bucket
@@ -367,37 +389,33 @@ END
 -- Loop to perform the retroactive computation
 BEGIN 
 	DECLARE loopRetroactive CURSOR LOCAL FAST_FORWARD
-	FOR 
-	SELECT  t.intInventoryTransactionId
-			,t.intItemId
-			,t.intItemLocationId
-			,t.intItemUOMId
-			,dblQty = ISNULL(-cbOut.dblQty, t.dblQty)
-			,t.dblCost
-			,t.dblValue
-			,t.strTransactionId
-			,t.intTransactionId
-			,t.intTransactionDetailId
-			,t.intTransactionTypeId
-			,t.strBatchId 
-			,t.intLotId 
-			,il.intLocationId
-			,[negative stock cost] = cb.dblCost 
-	FROM	tblICInventoryTransaction t INNER JOIN #tmpRetroactiveTransactions tmp
-				ON t.intInventoryTransactionId = tmp.intInventoryTransactionId
-			INNER JOIN tblICItemLocation il
-				ON t.intItemLocationId = il.intItemLocationId
-				AND t.intItemId = il.intItemId
-			LEFT JOIN tblICInventoryLotOut cbOut 
-				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-				AND cbOut.intRevalueLotId IS NOT NULL 
-			LEFT JOIN tblICInventoryLot cb
-				ON cb.intInventoryLotId = cbOut.intRevalueLotId
-	WHERE	t.intItemId = @intItemId
-			AND t.intItemLocationId = @intItemLocationId			
-			AND ISNULL(t.ysnIsUnposted, 0) = 0 
-	ORDER BY t.intInventoryTransactionId ASC 
-
+	FOR 		
+		SELECT  t.intInventoryTransactionId
+				,t.intItemId
+				,t.intItemLocationId
+				,t.intItemUOMId
+				,dblQty = t.dblQty
+				,t.dblCost
+				,t.dblValue
+				,t.strTransactionId
+				,t.intTransactionId
+				,t.intTransactionDetailId
+				,t.intTransactionTypeId
+				,t.strBatchId 
+				,t.intLotId 
+				,il.intLocationId
+				,[negative stock cost] = 0
+		FROM	tblICInventoryTransaction t INNER JOIN #tmpRetroactiveTransactions tmp
+					ON t.intInventoryTransactionId = tmp.intInventoryTransactionId
+				INNER JOIN tblICItemLocation il
+					ON t.intItemLocationId = il.intItemLocationId
+					AND t.intItemId = il.intItemId
+		WHERE	t.intItemId = @intItemId
+				AND t.intItemLocationId = @intItemLocationId			
+				AND ISNULL(t.ysnIsUnposted, 0) = 0 
+		ORDER BY 
+				tmp.intSort
+				,t.intInventoryTransactionId ASC 	
 	OPEN loopRetroactive;
 
 	-- Initial fetch attempt
@@ -435,6 +453,45 @@ BEGIN
 				AND @t_intTransactionId = @intSourceTransactionId
 				AND @t_intTransactionDetailId = @intSourceTransactionDetailId
 				AND @t_dblQty > 0 
+
+		---- DEBUG -------------------------------------------------
+		--IF @strTransactionId = 'WO-232'
+		--BEGIN 
+		--	DECLARE @debugMsg AS NVARCHAR(MAX) 
+
+		--	SET @debugMsg = dbo.fnICFormatErrorMessage(
+		--		'Debug Lot: %s, %i, %i, %i, %s, %i, %i, %f'
+		--		,@t_strTransactionId
+		--		,@t_intLotId
+		--		,@intItemId
+		--		,@intItemLocationId
+		--		,@strSourceTransactionId
+		--		,@intSourceTransactionId
+		--		,@intSourceTransactionDetailId
+		--		,@t_dblQty
+		--		,DEFAULT
+		--		,DEFAULT
+		--	)
+
+		--	PRINT @debugMsg
+
+		--	SET @debugMsg = dbo.fnICFormatErrorMessage(
+		--		'Debug @IsSourceTransaction: item %i, il %i, strSource %s, intSource %i, intSourceDetail %i, Qty %f'
+		--		,@intItemId
+		--		,@intItemLocationId
+		--		,@strSourceTransactionId
+		--		,@intSourceTransactionId
+		--		,@intSourceTransactionDetailId
+		--		,@t_dblQty
+		--		,DEFAULT
+		--		,DEFAULT
+		--		,DEFAULT
+		--		,DEFAULT
+		--	)
+
+		--	PRINT @debugMsg
+		--END 
+		---- DEBUG -------------------------------------------------			
 
 		-- Get the original cost bucket value
 		IF @IsSourceTransaction = 1
@@ -544,6 +601,29 @@ BEGIN
                 FROM    tblICInventoryReceipt r
                 WHERE    r.strReceiptNumber = @t_strTransactionId
             END 
+
+			---- DEBUG -------------------------------------------------		
+			--IF @strTransactionId = 'WO-232'
+			--BEGIN 
+			--	DECLARE @debugMsg2 AS NVARCHAR(MAX) 
+
+			--	SET @debugMsg2 = dbo.fnICFormatErrorMessage(
+			--		'WHERE: source %i, qty %f, adj per lot %f, new cb cost %f, original cb cost %f'
+			--		,@IsSourceTransaction
+			--		,@t_dblQty
+			--		,@CostAdjustmentPerLot
+			--		,@CostBucketNewCost
+			--		,@CostBucketOriginalCost
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--		,DEFAULT
+			--	)
+
+			--	PRINT @debugMsg2
+			--END 
+			---- DEBUG -------------------------------------------------		
 
 			INSERT INTO tblICInventoryLotCostAdjustmentLog (
 				[intInventoryLotId]
