@@ -65,6 +65,7 @@ SELECT CD.intContractDetailId
 	,CD.intShippingLineId AS intShippingLineEntityId
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
+	,Cont.strContainerType
 	,CD.strVessel
 	,CH.intContractTypeId
 	,S.strSampleStatus
@@ -108,6 +109,7 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
@@ -215,6 +217,7 @@ SELECT CD.intContractDetailId
 	,CD.intShippingLineId AS intShippingLineEntityId
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
+	,Cont.strContainerType
 	,CD.strVessel
 	,CH.intContractTypeId
 	,S.strSampleStatus
@@ -252,6 +255,7 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
@@ -331,6 +335,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intShippingLineId
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
+	,Cont.strContainerType
 	,CD.strVessel
 	,S.strSampleStatus
 	,S.strSampleNumber
