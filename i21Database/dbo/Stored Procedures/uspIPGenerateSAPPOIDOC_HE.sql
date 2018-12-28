@@ -54,9 +54,9 @@ DECLARE @intMinSeq INT
 	,@strTblRowState NVARCHAR(50)
 	,@strMessageCode NVARCHAR(50)
 	,@strFLOId NVARCHAR(50)
-	,@intItemId int
-	,@intUnitMeasureId int
-
+	,@intItemId INT
+	,@intUnitMeasureId INT
+	,@dblNetWeight NUMERIC(18, 6)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strContractFeedIds NVARCHAR(MAX)
@@ -232,6 +232,16 @@ BEGIN
 	FROM tblCTContractFeed CF
 	JOIN @tblCTContractFeed CF1 ON CF1.intContractFeedId = CF.intContractFeedId
 
+	DELETE CF
+	FROM tblCTContractFeed CF
+	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
+		AND CF1.strItemNo = CF.strItemNo
+	WHERE ISNULL(CF.strFeedStatus, '') = ''
+		AND UPPER(CF.strRowState) IN (
+			'MODIFIED'
+			,'DELETE'
+			)
+
 	INSERT INTO tblCTContractFeed (
 		intContractHeaderId
 		,intContractDetailId
@@ -279,6 +289,7 @@ BEGIN
 		,strLocationName
 		,ysnPopulatedByIntegration
 		,ysnMaxPrice
+		,intItemId
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -330,10 +341,15 @@ BEGIN
 		,strLocationName
 		,1
 		,RC.ysnMaxPrice
+		,CF.intItemId
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
 	LEFT JOIN @tblRollUpFinalContract RC ON RC.intContractHeaderId = CF.intContractHeaderId
+	WHERE CF.intPricingTypeId IN (
+			1
+			,6
+			)
 
 	---********************************************************
 	--- Item Change
@@ -520,6 +536,7 @@ BEGIN
 				,strLocationName
 				,ysnPopulatedByIntegration
 				,ysnMaxPrice
+				,intItemId
 				)
 			OUTPUT inserted.intContractHeaderId
 				,inserted.strItemNo
@@ -570,6 +587,7 @@ BEGIN
 				,strLocationName
 				,1
 				,RC.ysnMaxPrice
+				,CF.intItemId
 			FROM vyuCTContractFeed CF
 			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 				AND CF1.strItemNo = CF.strItemNo
@@ -584,6 +602,10 @@ BEGIN
 							IsNULL(CF2.strFeedStatus, '') = ''
 							OR IsNULL(CF2.strFeedStatus, '') = 'Awt Ack'
 							)
+					)
+			WHERE CF.intPricingTypeId IN (
+					1
+					,6
 					)
 
 			DELETE CF1
@@ -639,6 +661,7 @@ BEGIN
 				,strMessage
 				,ysnPopulatedByIntegration
 				,ysnMaxPrice
+				,intItemId
 				)
 			SELECT CF2.intContractHeaderId
 				,intContractDetailId
@@ -687,6 +710,7 @@ BEGIN
 				,'System'
 				,1
 				,RC.ysnMaxPrice
+				,CF2.intItemId
 			FROM tblCTContractFeed CF2
 			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 				AND CF1.strItemNo = CF2.strItemNo
@@ -868,6 +892,7 @@ BEGIN
 			,strLocationName
 			,ysnPopulatedByIntegration
 			,ysnMaxPrice
+			,intItemId
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -915,6 +940,7 @@ BEGIN
 			,strLocationName
 			,1
 			,RC.ysnMaxPrice
+			,CF2.intItemId
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
@@ -966,6 +992,26 @@ SET strFeedStatus = 'IGNORE'
 WHERE IsNULL(strERPItemNumber, '') <> '00010'
 	AND IsNULL(strERPPONumber, '') <> ''
 	AND ISNULL(strFeedStatus, '') = ''
+
+UPDATE CF
+SET ysnMaxPrice = (
+		SELECT TOP 1 CF1.ysnMaxPrice
+		FROM tblCTContractFeed CF1
+		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+		ORDER BY intContractFeedId ASC
+		)
+FROM tblCTContractFeed CF
+WHERE ISNULL(strFeedStatus, '') = ''
+	AND ysnMaxPrice IS NULL
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblCTContractFeed
+		WHERE ISNULL(strFeedStatus, '') = ''
+		)
+BEGIN
+	RETURN
+END
 
 --Get the Headers
 IF UPPER(@strRowState) = 'ADDED'
@@ -1104,11 +1150,27 @@ BEGIN
 	BEGIN
 		SELECT @strContractFeedIds = ''
 
-		SELECT @strContractFeedIds = @strContractFeedIds + CONVERT(VARCHAR, intContractFeedId) + ','
-		FROM tblCTContractFeed
-		WHERE intContractHeaderId = @intContractHeaderId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND strItemNo = @strContractItemNo
+		IF UPPER(@strRowState) = 'ADDED'
+		BEGIN
+			SELECT @strContractFeedIds = @strContractFeedIds + CONVERT(VARCHAR, intContractFeedId) + ','
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+				AND Upper(strRowState) = 'ADDED'
+		END
+		ELSE
+		BEGIN
+			SELECT @strContractFeedIds = @strContractFeedIds + CONVERT(VARCHAR, intContractFeedId) + ','
+			FROM tblCTContractFeed
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+				AND UPPER(strRowState) IN (
+					'MODIFIED'
+					,'DELETE'
+					)
+		END
 
 		IF Len(@strContractFeedIds) > 0
 			SELECT @strContractFeedIds = Left(@strContractFeedIds, Len(@strContractFeedIds) - 1)
@@ -1174,7 +1236,7 @@ BEGIN
 			,@dblCashPrice = CF.dblCashPrice
 			,@dblUnitCashPrice = CASE 
 				WHEN strCurrency = 'USD'
-					THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,  IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId),PU.intUnitMeasureId, (
+					THEN dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 								CASE 
 									WHEN strFLOId = '10'
 										THEN CF.dblUnitCashPrice * 10
@@ -1185,7 +1247,7 @@ BEGIN
 									ELSE CF.dblUnitCashPrice
 									END
 								) * 100)
-				ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
+				ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 								CASE 
 									WHEN strFLOId = '10'
 										THEN CF.dblUnitCashPrice * 10
@@ -1221,9 +1283,11 @@ BEGIN
 				END
 		FROM tblCTContractFeed CF
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+			AND intContractFeedId = @intMinSeq
 		JOIN tblAPVendor V ON V.intEntityId = CH.intEntityId
-		JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
+		JOIN tblICUnitMeasure PUM ON PUM.strUnitMeasure = CF.strPriceUOM
+		JOIN tblICItemUOM PU ON PU.intItemId = CF.intItemId
+			AND PUM.intUnitMeasureId = PU.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = V.strTaxNumber
 		WHERE intContractFeedId = @intMinSeq
 	END
@@ -1258,7 +1322,7 @@ BEGIN
 				,@dblUnitCashPrice = SUM((
 						CASE 
 							WHEN CF.strCurrency = 'USD'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1269,7 +1333,7 @@ BEGIN
 												ELSE CF.dblUnitCashPrice
 												END
 											) * 100)
-							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1290,12 +1354,12 @@ BEGIN
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = (
-						CASE 
-							WHEN IsNULL(V.strTaxNumber, '') <> ''
-								THEN V.strTaxNumber
-							ELSE CF.strPriceUOM
-							END
-						)
+							CASE 
+								WHEN IsNULL(V.strTaxNumber, '') <> ''
+									THEN V.strTaxNumber
+								ELSE CF.strPriceUOM
+								END
+							)
 					)
 				,@strLocationName = CF.strLocationName
 				,@strTblRowState = CF.strRowState
@@ -1306,14 +1370,20 @@ BEGIN
 					END
 			FROM tblCTContractFeed CF
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+				AND CF.intContractHeaderId = @intContractHeaderId
 			JOIN tblAPVendor V ON V.intEntityId = CH.intEntityId
-			JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
+			JOIN tblICUnitMeasure PUM ON PUM.strUnitMeasure = CF.strPriceUOM
+			JOIN tblICItemUOM PU ON PU.intItemId = CF.intItemId
+				AND PUM.intUnitMeasureId = PU.intUnitMeasureId
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = V.strTaxNumber
 			WHERE CF.intContractHeaderId = @intContractHeaderId
-				AND strItemNo = @strContractItemNo
+				AND CF.strItemNo = @strContractItemNo
 				AND IsNULL(strFeedStatus, '') = ''
 				AND UPPER(strRowState) <> 'DELETE'
+				AND CF.intContractFeedId IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strContractFeedIds, ',')
+					)
 			GROUP BY CF.strContractBasis
 				,CF.strVendorAccountNum
 				,CF.strPurchasingGroup
@@ -1352,7 +1422,7 @@ BEGIN
 				,@dblUnitCashPrice = SUM((
 						CASE 
 							WHEN CF.strCurrency = 'USD'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1363,7 +1433,7 @@ BEGIN
 												ELSE CF.dblUnitCashPrice
 												END
 											) * 100)
-							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
+							ELSE [dbo].[fnIPGetSourcingCurrencyConversion](CF.intContractDetailId, @intToCurrencyId, dbo.fnCTConvertQuantityToTargetItemUOM(CF.intItemId, IsNULL(UM.intUnitMeasureId, PU.intUnitMeasureId), PU.intUnitMeasureId, (
 											CASE 
 												WHEN strFLOId = '10'
 													THEN CF.dblUnitCashPrice * 10
@@ -1384,12 +1454,12 @@ BEGIN
 					SELECT TOP 1 ISNULL(strSymbol, strUnitMeasure)
 					FROM tblICUnitMeasure
 					WHERE strUnitMeasure = (
-						CASE 
-							WHEN IsNULL(V.strTaxNumber, '') <> ''
-								THEN V.strTaxNumber
-							ELSE CF.strPriceUOM
-							END
-						)
+							CASE 
+								WHEN IsNULL(V.strTaxNumber, '') <> ''
+									THEN V.strTaxNumber
+								ELSE CF.strPriceUOM
+								END
+							)
 					)
 				,@strLocationName = CF.strLocationName
 				,@strTblRowState = CF.strRowState
@@ -1400,13 +1470,19 @@ BEGIN
 					END
 			FROM tblCTContractFeed CF
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+				AND CF.intContractHeaderId = @intContractHeaderId
 			JOIN tblAPVendor V ON V.intEntityId = CH.intEntityId
-			JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
+			JOIN tblICUnitMeasure PUM ON PUM.strUnitMeasure = CF.strPriceUOM
+			JOIN tblICItemUOM PU ON PU.intItemId = CF.intItemId
+				AND PUM.intUnitMeasureId = PU.intUnitMeasureId
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = V.strTaxNumber
 			WHERE CF.intContractHeaderId = @intContractHeaderId
 				AND CF.strItemNo = @strContractItemNo
 				AND IsNULL(CF.strFeedStatus, '') = ''
+				AND CF.intContractFeedId IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strContractFeedIds, ',')
+					)
 			GROUP BY CF.strContractBasis
 				,CF.strVendorAccountNum
 				,CF.strPurchasingGroup
@@ -1450,7 +1526,46 @@ BEGIN
 		GOTO NEXT_PO
 	END
 
-	IF NOT EXISTS(SELECT *FROM dbo.tblICUnitMeasure Where ISNULL(strSymbol, strUnitMeasure)=@strPriceUOM) or @strPriceUOM is null
+	IF @ysnMaxPrice = 1
+		AND UPPER(@strRowState) <> 'ADDED'
+	BEGIN
+		SELECT @dblNetWeight = NULL
+
+		SELECT @intItemId = NULL
+
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strContractItemNo
+
+		SELECT @dblNetWeight = SUM(dblNetWeight)
+		FROM tblCTContractDetail
+		WHERE intContractHeaderId = @intContractHeaderId
+			AND intItemId = @intItemId
+			AND intContractStatusId <> 3
+			AND intPricingTypeId IN (
+				1
+				,6
+				)
+
+		IF IsNULL(@dblQuantity, 0) <> IsNULL(@dblNetWeight, 0)
+			AND ABS(IsNULL(@dblQuantity, 0) - IsNULL(@dblNetWeight, 0)) > 1 and @dblNetWeight is not null
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strMessage = 'Qty mismatch between contract table and feed table.'
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND ISNULL(strFeedStatus, '') = ''
+				AND strItemNo = @strContractItemNo
+
+			GOTO NEXT_PO
+		END
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICUnitMeasure
+			WHERE ISNULL(strSymbol, strUnitMeasure) = @strPriceUOM
+			)
+		OR @strPriceUOM IS NULL
 	BEGIN
 		IF @ysnMaxPrice = 0
 		BEGIN
@@ -1471,15 +1586,24 @@ BEGIN
 		GOTO NEXT_PO
 	END
 
-	Select @intItemId=NULL
-	Select @intItemId=intItemId
-	from tblICItem
-	Where strItemNo=@strItemNo
+	SELECT @intItemId = NULL
 
-	SELECT @intUnitMeasureId=NULL
-	SELECT @intUnitMeasureId=intUnitMeasureId FROM dbo.tblICUnitMeasure Where ISNULL(strSymbol, strUnitMeasure)=@strPriceUOM
+	SELECT @intItemId = intItemId
+	FROM tblICItem
+	WHERE strItemNo = @strItemNo
 
-	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM Where intItemId=@intItemId and intUnitMeasureId=@intUnitMeasureId)
+	SELECT @intUnitMeasureId = NULL
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM dbo.tblICUnitMeasure
+	WHERE ISNULL(strSymbol, strUnitMeasure) = @strPriceUOM
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICItemUOM
+			WHERE intItemId = @intItemId
+				AND intUnitMeasureId = @intUnitMeasureId
+			)
 	BEGIN
 		IF @ysnMaxPrice = 0
 		BEGIN
@@ -1499,8 +1623,13 @@ BEGIN
 
 		GOTO NEXT_PO
 	END
-	
-	IF @strFLOId not in ('1','10','100','1000')
+
+	IF @strFLOId NOT IN (
+			'1'
+			,'10'
+			,'100'
+			,'1000'
+			)
 	BEGIN
 		IF @ysnMaxPrice = 0
 		BEGIN
@@ -1517,10 +1646,9 @@ BEGIN
 				AND ISNULL(strFeedStatus, '') = ''
 				AND strItemNo = @strContractItemNo
 		END
+
 		GOTO NEXT_PO
 	END
-
-
 
 	--Send Create Feed only Once
 	IF UPPER(@strRowState) = 'ADDED'
@@ -1581,7 +1709,7 @@ BEGIN
 	BEGIN
 		SET @strItemXml += '<E1BPMEOUTITEM>'
 		SET @strItemXml += '<MATERIAL>' + dbo.fnEscapeXML(ISNULL(Replace(@strItemNo, '-', ''), '')) + '</MATERIAL>'
-		SET @strItemXml += '<PLANT>' + ''+ '</PLANT>'
+		SET @strItemXml += '<PLANT>' + '' + '</PLANT>'
 		SET @strItemXml += '<TRACKINGNO>' + ISNULL(RIGHT('000' + CONVERT(VARCHAR, @intContractSeq), 3), '') + '</TRACKINGNO>'
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		SET @strItemXml += '<PO_UNIT>' + ISNULL(@strQuantityUOM, '') + '</PO_UNIT>'
