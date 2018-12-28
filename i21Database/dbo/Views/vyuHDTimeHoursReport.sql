@@ -7,7 +7,7 @@
 			,b.strSubject
 			,intProjectId = convert(nvarchar(20),d.intProjectId) COLLATE Latin1_General_CI_AS
 			,d.strProjectName
-			,intCustomerId = convert(nvarchar(20),f.intEntityId) COLLATE Latin1_General_CI_AS
+			,intCustomerId = f.intEntityId
 			,strCustomerName = f.strName
 			,k.strModule
 			,a.dtmDate
@@ -41,3 +41,4 @@
 			left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
 			left join tblHDModule j on j.intModuleId = b.intModuleId
 			left join tblSMModule k on k.intModuleId = j.intSMModuleId
+		where a.intAgentEntityId is not null and a.intAgentEntityId > 0

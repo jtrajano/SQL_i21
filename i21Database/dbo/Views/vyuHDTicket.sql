@@ -41,7 +41,6 @@ AS
 		,tic.dtmLastCommented
 		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
 		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
-		,strCampaignName = null
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
 		,tic.strDescription
