@@ -155,7 +155,7 @@ BEGIN
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
 									  -- (Total - (DiscountAmount + PromotionAmount)) / Qty
-			  , dblCurrentPrice		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+			  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
 									  -- (DiscountAmount + PromotionAmount)
 			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0)
 									  -- (Total - (DiscountAmount + PromotionAmount))
@@ -273,6 +273,7 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
+
 		-- COMMIT
 		GOTO ExitWithCommit
 
@@ -281,6 +282,7 @@ BEGIN
 	BEGIN CATCH
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
+
 		
 		-- ROLLBACK
 		GOTO ExitWithRollback
