@@ -201,24 +201,20 @@ BEGIN
 				, strContractEndMonth
 				, dtmEndDate
 				, dblBalance
-				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
 				, strPricingType
-				, intCommodityUnitMeasureId
 				, intContractDetailId
 				, intContractStatusId
-				, intEntityId
 				, intCurrencyId
 				, strType
 				, intItemId
 				, strItemNo
 				, dtmContractDate
+				, intEntityId
 				, strEntityName
-				, strCustomerContract
-				, intCategoryId
 				, strCategory
 				, intFutureMonthId
 				, intFutureMarketId
@@ -230,31 +226,27 @@ BEGIN
 			FROM (
 				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
 					, dtmContractDate
-					, strCommodityCode
+					, strCommodityCode = strCommodity
 					, intCommodityId
 					, intContractHeaderId
-					, strContractNumber
+					, strContractNumber = strContract
 					, strLocationName
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
-					, CD.dblBalance
-					, intUnitMeasureId
+					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE CD.dtmEndDate END
+					, dblBalance = CD.dblQuantity
 					, intPricingTypeId
 					, intContractTypeId
 					, intCompanyLocationId
 					, strContractType
 					, strPricingType
-					, intCommodityUnitMeasureId
 					, CD.intContractDetailId
 					, intContractStatusId
-					, intEntityId
 					, intCurrencyId
-					, strType
+					, strType = CD.strContractType + ' ' + CD.strPricingType
 					, intItemId
 					, strItemNo
-					, strEntityName
-					, strCustomerContract
-					, intCategoryId
+					, intEntityId
+					, strEntityName = CD.strCustomer
 					, strCategory
 					, intFutureMonthId
 					, intFutureMarketId
@@ -262,7 +254,7 @@ BEGIN
 					, strFutureMonth
 					, strCurrency
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-				FROM [dbo].fnRKGetContractDetail(@dtmToDate) CD
+				FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 			)t
 

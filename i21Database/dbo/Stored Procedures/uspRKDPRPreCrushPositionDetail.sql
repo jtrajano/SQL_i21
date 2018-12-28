@@ -193,7 +193,6 @@ BEGIN
 				, intCompanyLocationId INT
 				, strContractType NVARCHAR(100)
 				, strPricingType NVARCHAR(100)
-				, intCommodityUnitMeasureId INT
 				, intContractDetailId INT
 				, intContractStatusId INT
 				, intEntityId INT
@@ -203,10 +202,8 @@ BEGIN
 				, strItemNo NVARCHAR(100)
 				, dtmContractDate DATETIME
 				, strEntityName NVARCHAR(100)
-				, strCustomerContract NVARCHAR(100)
 				, intFutureMarketId INT
 				, intFutureMonthId INT
-				, intCategoryId INT
 				, strCategory NVARCHAR(100)
 				, strFutMarketName NVARCHAR(100))
 
@@ -225,7 +222,6 @@ BEGIN
 				, intCompanyLocationId
 				, strContractType
 				, strPricingType
-				, intCommodityUnitMeasureId
 				, intContractDetailId
 				, intContractStatusId
 				, intEntityId
@@ -235,44 +231,39 @@ BEGIN
 				, strItemNo
 				, dtmContractDate
 				, strEntityName
-				, strCustomerContract
 				, intFutureMarketId
 				, intFutureMonthId
-				, intCategoryId
 				, strCategory
 				, strFutMarketName)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode
+				, strCommodityCode = CD.strCommodity
 				, intCommodityId
 				, intContractHeaderId
-				, strContractNumber
+				, strContractNumber = CD.strContract
 				, strLocationName
 				, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
 				, strFutureMonth
-				, dblBalance
+				, dblBalance = CD.dblQuantity
 				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
 				, strPricingType
-				, intCommodityUnitMeasureId
 				, intContractDetailId
 				, intContractStatusId
 				, intEntityId
 				, intCurrencyId
-				, strType
+				, strType = CD.strContractType + ' ' + CD.strPricingType
 				, intItemId
 				, strItemNo
 				, dtmContractDate
-				, strEntityName
-				, strCustomerContract
+				, strEntityName = CD.strCustomer
 				, intFutureMarketId
 				, intFutureMonthId
-				, intCategoryId
 				, strCategory
 				, strFutMarketName
-			FROM dbo.fnRKGetContractDetail(@dtmToDate) CD
+			FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 						
 			DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
@@ -329,7 +320,6 @@ BEGIN
 				, strEntityName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -349,7 +339,6 @@ BEGIN
 				, strEntityName
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -372,7 +361,6 @@ BEGIN
 					, CD.strEntityName
 					, CD.intItemId
 					, CD.strItemNo
-					, CD.intCategoryId
 					, CD.strCategory
 					, CD.intFutureMarketId
 					, CD.strFutMarketName
@@ -704,7 +692,6 @@ BEGIN
 				, intOrderId
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -727,7 +714,6 @@ BEGIN
 				, intOrderId
 				, intItemId
 				, strItemNo
-				, intCategoryId
 				, strCategory
 				, intFutureMarketId
 				, strFutMarketName
@@ -752,7 +738,6 @@ BEGIN
 					, intOrderId = 6
 					, cd.intItemId
 					, cd.strItemNo
-					, cd.intCategoryId
 					, cd.strCategory
 					, cd.intFutureMarketId
 					, cd.strFutMarketName
