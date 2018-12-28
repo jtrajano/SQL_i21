@@ -86,6 +86,17 @@ SELECT	TOP 1
 		@strUnpostMode = strIRUnpostMode
 FROM	tblICCompanyPreference
 
+-- Change the source type to 'Store' if the IR's location configured in the store. 
+BEGIN 
+	UPDATE	r
+	SET		r.intSourceType = @SOURCE_TYPE_Store 
+	FROM	dbo.tblICInventoryReceipt r LEFT JOIN tblSTStore s
+				ON r.intLocationId = s.intCompanyLocationId
+	WHERE	strReceiptNumber = @strTransactionId  
+			AND s.intCompanyLocationId IS NOT NULL 
+			AND r.intSourceType <> @SOURCE_TYPE_Store
+END 
+
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
@@ -114,7 +125,8 @@ BEGIN
 				ON r.intFreightTermId = ft.intFreightTermId
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
-  
+
+ 
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
