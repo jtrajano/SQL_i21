@@ -51,7 +51,8 @@ AS
 				CH.strSalespersonId AS strSalesperson,
 				SE.strExternalERPId AS strSalespersonExternalERPId,
 				PR.strName AS strProducer
-			
+				,DL.intPricingTypeId
+				,IM.intItemId
 		FROM	vyuCTContractSequence	CD
 		JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
 		JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
