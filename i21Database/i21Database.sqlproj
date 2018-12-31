@@ -7223,6 +7223,8 @@
     <Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />
     <Build Include="dbo\Functions\fnCTGetContractBalance.sql" />
     <Build Include="dbo\Tables\tblSRReportLog.sql" />
+    <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
