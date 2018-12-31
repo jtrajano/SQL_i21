@@ -479,7 +479,8 @@ BEGIN
 				) AS INT)
 		,intCommodityId = Item.intCommodityId
 		,strCommodityCode = ISNULL(Commodity.strCommodityCode, '')
-		,dtmDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
+		,dtmFromDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
+		,dtmToDate = CAST(CONVERT(VARCHAR(10), @dtmToDate, 112) AS DATETIME)
 		,intCategoryId = Item.intCategoryId
 		,strCategoryCode = ISNULL(Category.strCategoryCode, '')
 		,intLocationId = FL.intLocationId
@@ -533,7 +534,8 @@ BEGIN
 		,intKey = 0
 		,intCommodityId = Item.intCommodityId
 		,strCommodityCode = ISNULL(Commodity.strCommodityCode, '')
-		,dtmDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
+		,dtmFromDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
+		,dtmToDate = CAST(CONVERT(VARCHAR(10), @dtmToDate, 112) AS DATETIME)
 		,intCategoryId = Item.intCategoryId
 		,strCategoryCode = ISNULL(Category.strCategoryCode, '')
 		,intLocationId = FL.intLocationId
@@ -587,7 +589,8 @@ BEGIN
 		,intKey
 		,intCommodityId
 		,strCommodityCode
-		,dtmDate
+		,dtmFromDate
+		,dtmToDate
 		,intCategoryId
 		,strCategoryCode
 		,intLocationId
@@ -627,7 +630,8 @@ BEGIN
 				) AS INT)
 		,intCommodityId
 		,strCommodityCode
-		,dtmDate
+		,dtmFromDate
+		,dtmToDate
 		,intCategoryId
 		,strCategoryCode
 		,intLocationId
@@ -663,7 +667,8 @@ BEGIN
 	GROUP BY guidSessionId
 		,intCommodityId
 		,strCommodityCode
-		,dtmDate
+		,dtmFromDate
+		,dtmToDate
 		,intCategoryId
 		,strCategoryCode
 		,intLocationId
