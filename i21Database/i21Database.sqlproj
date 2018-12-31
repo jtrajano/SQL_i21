@@ -7239,6 +7239,8 @@
     <Build Include="dbo\Views\vyuEMSearchEntityBroker.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicTX.sql" />
     <Build Include="dbo\Tables\tblSRReportLog.sql" />
+    <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
