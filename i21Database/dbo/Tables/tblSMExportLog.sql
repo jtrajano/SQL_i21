@@ -13,11 +13,11 @@
     [strMessage]            [text] COLLATE Latin1_General_CI_AS NULL,
     [intTotalColumns]       [int] NULL,
     [intTotalRecords]       [int] NULL,
-    [dblExecutionTime]      DECIMAL(18, 4) NULL,
-    [dtmCreated]            [datetime] NULL DEFAULT (GETUTCDATE()),
+    [intExecutionTime]      [int] NULL,
+    [dtmCreated]            [datetime] NULL DEFAULT (GETUTCDATE()), 
     [dtmStarted]            [datetime] NULL,
     [dtmProcessed]          [datetime] NULL,
-    [dtmCompleted]          [datetime] NULL,
+    [dtmCompleted]          [datetime] NULL, 
     [intConcurrencyId]      [int] NOT NULL DEFAULT (1),
     CONSTRAINT [FK_tblSMExportLog_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE
 )
