@@ -53,6 +53,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intLoadReceive] INT NULL								-- For Load Contracts. Number of Load to Receive
 	,[intSort] INT NULL
 	,[dblUnitRetail] NUMERIC(38, 20) NULL 
+	,[ysnAllowVoucher] BIT NULL
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

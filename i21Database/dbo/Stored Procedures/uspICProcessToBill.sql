@@ -2,7 +2,8 @@
 	@intReceiptId int,
 	@intUserId int,
 	@intBillId int OUTPUT,
-	@strBillIds NVARCHAR(MAX) = NULL OUTPUT
+	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
+	@intScreenId int = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -63,6 +64,7 @@ BEGIN
 		,@intUserId 
 		,@intBillId OUTPUT
 		,@strBillIds OUTPUT
+		,@intScreenId
 END 
 
 Post_Exit: 
