@@ -39,14 +39,26 @@ BEGIN TRY
 			WHEN @strMonth = 'Dec' THEN 'Z'
 		END
 
-	SELECT TOP 1 @dtmSpotDate = CASE WHEN DATEPART(m, dtmFutureMonthsDate) = 1
-			THEN CONVERT(DATETIME, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear - 1)) 
-		ELSE CONVERT(DATETIME, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear))
+	SELECT TOP 1 @dtmSpotDate = CASE WHEN ROW_NUMBER() OVER (ORDER BY dtmFutureMonthsDate) = 1
+			THEN CONVERT(DATE, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear - 1)) 
+		ELSE CONVERT(DATE, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear))
 	END
 	FROM tblRKFuturesMonth
 	WHERE intFutureMarketId = @intFutureMarketId
-	AND DATEPART(m, dtmFutureMonthsDate) < DATEPART(m, CONVERT(DATE, '1' + @strFutureMonth))
+		AND DATEPART(m, dtmFutureMonthsDate) < DATEPART(m, CONVERT(DATE, '1' + LTRIM(RTRIM(@strFutureMonth))))
 	ORDER BY DATEPART(m, dtmFutureMonthsDate) DESC
+
+	IF(ISNULL(@dtmSpotDate,'') = '')
+	BEGIN
+		SELECT TOP 1 @dtmSpotDate = CASE WHEN ROW_NUMBER() OVER (ORDER BY dtmFutureMonthsDate) = 1
+				THEN CONVERT(DATE, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear - 1)) 
+			ELSE CONVERT(DATE, CONVERT(NVARCHAR(10), DATEPART(m, dtmFutureMonthsDate)) + '-01-' + CONVERT(NVARCHAR(10), @intYear))
+		END
+		FROM tblRKFuturesMonth
+		WHERE intFutureMarketId = @intFutureMarketId
+			AND DATEPART(m, dtmFutureMonthsDate) > DATEPART(m, CONVERT(DATE, '1' + LTRIM(RTRIM(@strFutureMonth))))
+		ORDER BY DATEPART(m, dtmFutureMonthsDate) DESC
+	END
 
 	INSERT INTO tblRKFuturesMonth(intConcurrencyId
 		, strFutureMonth
@@ -61,7 +73,7 @@ BEGIN TRY
 		, dtmSpotDate
 		, ysnExpired)
 	VALUES(1
-		, @strFutureMonth
+		, LTRIM(RTRIM(@strFutureMonth))
 		, @intFutureMarketId
 		, @intCommodityMarketId
 		, CONVERT(DATETIME, '1' + LTRIM(RTRIM(@strFutureMonth)))
@@ -70,7 +82,7 @@ BEGIN TRY
 		, NULL
 		, NULL
 		, NULL
-		, @dtmSpotDate
+		, CONVERT(DATETIME, '1' + LTRIM(RTRIM(@strFutureMonth)))
 		, 0)
 
     SET @IntFutureMonthId = SCOPE_IDENTITY();
