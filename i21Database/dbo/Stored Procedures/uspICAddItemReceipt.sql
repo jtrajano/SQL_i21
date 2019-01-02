@@ -750,6 +750,7 @@ BEGIN
 				,intPurchaseDetailId
 				,intContractHeaderId
 				,intContractDetailId
+				,ysnAllowVoucher
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -837,6 +838,7 @@ BEGIN
 				,intPurchaseDetailId			= RawData.intPurchaseDetailId
 				,intContractHeaderId			= RawData.intContractHeaderId
 				,intContractDetailId			= RawData.intContractDetailId
+				,ysnAllowVoucher				= RawData.ysnAllowVoucher
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1238,6 +1240,7 @@ BEGIN
 				,[intForexRateTypeId]
 				,[dblForexRate]
 				,[strChargesLink]
+				,[ysnAllowVoucher]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1265,6 +1268,7 @@ BEGIN
 				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 						
 				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
 				,[strChargesLink]			= RawData.strChargesLink
+				,[ysnAllowVoucher]			= RawData.ysnAllowVoucher
 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
