@@ -138,7 +138,7 @@ SELECT W.intWorkOrderId
 	,WI.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
-	,WP.dtmBusinessDate
+	,WI.dtmActualInputDateTime
 	,BS.intShiftId AS intBusinessShiftId
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
@@ -179,7 +179,7 @@ SELECT W.intWorkOrderId
 	,L.strLotAlias
 	,S.intShiftId
 	,S.strShiftName
-	,IsNULL(WP.dtmProductionDate,W.dtmPlannedDate )
+	,WI.dtmActualInputDateTime
 	,1 AS intSequenceNo
 	,WI.strBatchId
 	,O.intOwnerId
@@ -198,14 +198,13 @@ SELECT W.intWorkOrderId
 	,L.dblLastCost 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
-Left JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 LEFT JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
 LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
