@@ -13,12 +13,28 @@ BEGIN TRY
 		,@strCostDistribution NVARCHAR(50)
 		,@ErrMsg NVARCHAR(MAX)
 		,@intTransactionCount INT
+		,@strAttributeValue NVARCHAR(50)
+		,@strBatchId NVARCHAR(50)
+		,@intBatchId INT
+		,@strWorkOrderNo NVARCHAR(50)
+		,@strAutoCycleCountOnWorkOrderClose NVARCHAR(50)
+		,@unpostCostAdjustment AS ItemCostAdjustmentTableType
+		,@strBatchIdForUnpost AS NVARCHAR(50)
+		,@intReturnValue AS INT
+		,@strErrorMessage AS NVARCHAR(4000)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
 		,@intLocationId = intLocationId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intAttributeId = 20 --Is Instant Consumption
+		AND intLocationId = @intLocationId
 
 	SELECT @strCostDistribution = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -46,10 +62,85 @@ BEGIN TRY
 	IF @strCostAdjustmentBatchId IS NOT NULL
 		AND @strCostDistribution = 'True'
 	BEGIN
-		SELECT @intTransactionId = intTransactionId
-			,@strTransactionId = strTransactionId
-		FROM tblICInventoryTransaction
-		WHERE strBatchId = @strCostAdjustmentBatchId
+		EXEC uspSMGetStartingNumber 3
+			,@strBatchIdForUnpost OUT
+
+		INSERT INTO @unpostCostAdjustment (
+			[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[intCostUOMId]
+			,[dblNewValue]
+			,[intCurrencyId]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[strActualCostId]
+			,[intSourceTransactionId]
+			,[intSourceTransactionDetailId]
+			,[strSourceTransactionId]
+			,intFobPointId
+			,dblVoucherCost
+			)
+		SELECT t.[intItemId]
+			,[intItemLocationId]
+			,t.[intItemUOMId]
+			,t.[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[intCostUOMId] = t.[intItemUOMId]
+			,[dblNewValue] = t.dblValue
+			,[intCurrencyId]
+			,[intTransactionId] = pl.intBatchId
+			,[intTransactionDetailId] = pl.intWorkOrderProducedLotId
+			,[strTransactionId]
+			,[intTransactionTypeId] = 9
+			,t.[intLotId]
+			,t.[intSubLocationId]
+			,t.[intStorageLocationId]
+			,[ysnIsStorage] = 0
+			,[strActualCostId]
+			,[intSourceTransactionId] = pl.intBatchId --t.intTransactionId
+			,[intSourceTransactionDetailId] = pl.intWorkOrderProducedLotId --t.intTransactionDetailId
+			,[strSourceTransactionId] = t.strTransactionId
+			,intFobPointId
+			,dblVoucherCost = NULL
+		FROM tblICInventoryTransaction t
+		INNER JOIN (
+			tblMFWorkOrderProducedLot pl LEFT JOIN tblMFWorkOrder wo ON pl.intWorkOrderId = wo.intWorkOrderId
+				AND pl.ysnProductionReversed = 0
+			) ON t.strTransactionId = wo.strWorkOrderNo
+			AND t.intLotId = ISNULL(pl.intProducedLotId, pl.intLotId)
+		WHERE t.strBatchId = @strCostAdjustmentBatchId
+			AND t.strTransactionId = t.strRelatedTransactionId
+			AND t.ysnIsUnposted = 0
+			AND t.intTransactionTypeId = 26
+
+		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
+			,@strBatchId = @strBatchIdForUnpost
+			,@intEntityUserSecurityId = @intUserId
+			,@ysnPost = 0
+
+		IF @intReturnValue <> 0
+		BEGIN
+			SELECT TOP 1 @strErrorMessage = strMessage
+			FROM tblICPostResult
+			WHERE strBatchNumber = @strBatchIdForUnpost
+
+			RAISERROR (
+					@strErrorMessage
+					,11
+					,1
+					);
+		END
 
 		INSERT INTO @GLEntries (
 			dtmDate
@@ -63,6 +154,7 @@ BEGIN TRY
 			,strCode
 			,strReference
 			,intCurrencyId
+			-- ,intCurrencyExchangeRateTypeId	
 			,dblExchangeRate
 			,dtmDateEntered
 			,dtmTransactionDate
@@ -84,11 +176,78 @@ BEGIN TRY
 			,dblReportingRate
 			,dblForeignRate
 			)
-		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strCostAdjustmentBatchId
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
 			,@strGLDescription = ''
 			,@ysnPost = 0
 			,@AccountCategory_Cost_Adjustment = 'Work In Progress'
+
+		-- Flag it as unposted. 
+		UPDATE @GLEntries
+		SET ysnIsUnposted = 1
+
+		IF EXISTS (
+				SELECT TOP 1 1
+				FROM @GLEntries
+				)
+		BEGIN
+			EXEC uspGLBookEntries @GLEntries
+				,1
+		END
+	END
+
+	IF @strAttributeValue = 'False' --Is Instant Consumption
+	BEGIN
+		SELECT @strBatchId = NULL
+			,@intBatchId = NULL
+
+		SELECT @strBatchId = strBatchId
+			,@intBatchId = intBatchId
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		DELETE
+		FROM @GLEntries
+
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			)
+		EXEC dbo.uspICUnpostCosting @intBatchId
+			,@strWorkOrderNo
+			,@strBatchId
+			,@intUserId
+			,0
 
 		IF EXISTS (
 				SELECT *
@@ -98,8 +257,44 @@ BEGIN TRY
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
 		END
-	END
 
+		DELETE
+		FROM dbo.tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intBatchId = @intBatchId
+			AND intItemId NOT IN (
+				SELECT intItemId
+				FROM tblMFWorkOrderProducedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intSpecialPalletLotId IS NOT NULL
+				)
+
+		UPDATE tblMFProductionSummary
+		SET dblConsumedQuantity = 0
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+
+		DELETE
+		FROM dbo.tblMFWorkOrderProducedLotTransaction
+		WHERE intWorkOrderId = @intWorkOrderId
+	END
+	SELECT @strAutoCycleCountOnWorkOrderClose = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 121 --Auto Cycle Count on Work Order Close
+
+	IF @strAutoCycleCountOnWorkOrderClose IS NULL
+		SELECT @strAutoCycleCountOnWorkOrderClose = 'False'
+
+	IF @strAutoCycleCountOnWorkOrderClose = 'True'
+	BEGIN
+		Exec uspMFUndoStartCycleCount @intWorkOrderId =@intWorkOrderId
+									,@intUserId =@intUserId
+	End
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 END TRY
