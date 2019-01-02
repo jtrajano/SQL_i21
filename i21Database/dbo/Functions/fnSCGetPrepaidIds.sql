@@ -24,7 +24,7 @@ BEGIN
 				ON B.intBillId = BD.intBillId
 			INNER JOIN @Ids ID
 				ON ID.intId = BD.intContractHeaderId
-			WHERE B.intTransactionType = 2
+			WHERE B.intTransactionType = 2 AND dblAmountDue != 0
 		END
 	ELSE
 		BEGIN
