@@ -81,7 +81,7 @@ IF (@dtmReverseDate IS NULL)
 		UPDATE	tblCMBankTransaction
 		SET		ysnCheckVoid = 1
 				,ysnPosted = 0
-				,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
+				--,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
 				,dtmLastModified = GETDATE()
 				,intLastModifiedUserId = @intUserId
 		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
@@ -124,7 +124,8 @@ ELSE
 			intCreatedUserId, intCompanyLocationId, dtmCreated, intLastModifiedUserId)
 		SELECT
 			F.strTransactionId + 'V', intBankTransactionTypeId + 100, intBankAccountId, intCurrencyId, dblExchangeRate, @dtmReversalDate, strPayee, intPayeeId, strAddress, 
-			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, 'Void Transaction for ' + F.strTransactionId, 'Voided-' + strReferenceNo, @dtmReversalDate, ysnCheckToBePrinted,
+			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, 'Void Transaction for ' + F.strTransactionId, 
+			strReferenceNo, @dtmReversalDate, ysnCheckToBePrinted,
 			1, 0, strLink, 0, @dtmReversalDate, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
 			@intUserId, intCompanyLocationId, getdate(), @intUserId
 		FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
@@ -227,7 +228,7 @@ ELSE
 		UPDATE	tblCMBankTransaction
 		SET		ysnCheckVoid = 1
 				,ysnClr = 1
-				,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
+				--,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
 				,dtmLastModified = GETDATE()
 				,dtmDateReconciled = @dtmReversalDate
 				,intLastModifiedUserId = @intUserId
