@@ -76,6 +76,7 @@ BEGIN
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
 					WHEN strType IN ('Amount', 'Per Unit')	THEN dblTranValue 
 					WHEN strType IN ('4 Supp. Invoice') AND strDescription <> 'Supp. Invoice' THEN dblPrice * -1 
+					WHEN strType IN ('4 Supp. Invoice') AND strDescription = 'Supp. Invoice' THEN dblTranValue * -1 
 			ELSE ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END END AS	dblTransactionValue,
 			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
 					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / dblFX / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END
@@ -201,10 +202,12 @@ BEGIN
 						THEN	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,CD.intUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) * -1 
 						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived)*AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) * -1
 				END AS dblBookedPrice,
-				ID.dblTotal * AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) *-1 AS dblAccounting,
+				--ID.dblTotal * AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) *-1 AS dblAccounting,
+				CASE WHEN IM.strType <> 'Other Charge' THEN ID.dblTotal * -1 ELSE ID.dblTotal * AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) *-1 END AS dblAccounting,
 				IV.dtmDate AS dtmDate,
 				'4 Supp. Invoice'	AS strType,
-				0.0 AS dblTranValue, --Dummy
+				--0.0 AS dblTranValue, --Dummy
+				CASE WHEN IM.strType <> 'Other Charge' THEN ID.dblTotal ELSE 0.0 END AS dblTranValue,
 				9999999 + AD.intPContractDetailId AS intSort,
 				IV.ysnPosted
 				
