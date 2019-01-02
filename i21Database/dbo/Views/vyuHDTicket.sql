@@ -39,7 +39,7 @@ AS
 		,strTicketType = tic.strType
 		,strCustomerName = cus.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
-		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
+		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101) COLLATE Latin1_General_CI_AS
 		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
