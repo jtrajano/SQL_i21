@@ -4,6 +4,7 @@ select
  t1.strVehicleNumber
 ,t1.intAccountId
 ,t1.strUserId
+,t1.strStatementType
 ,MIN(t1.dtmTransactionDate) as dtmMinDate
 ,ISNULL((select top 1 intOdometerAging 
 	from tblCFInvoiceStagingTable as t5 
@@ -14,4 +15,4 @@ select
 	order by t5.dtmTransactionDate desc),0) as intLastOdometer
 from tblCFInvoiceStagingTable as t1 
 --where strUserId = 'irelyadmin'
-group by t1.strVehicleNumber , t1.intAccountId , t1.strUserId
+group by t1.strVehicleNumber , t1.intAccountId , t1.strUserId, t1.strStatementType

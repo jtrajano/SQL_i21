@@ -86,8 +86,11 @@
     [ysnSummaryByDeptVehicleProd] BIT             NULL,
     [strGuid]                     NVARCHAR (MAX)  NULL,
     [strUserId]                   NVARCHAR (MAX)  NULL,
-    [intVehicleId]                INT             NULL
+    [intVehicleId]                INT             NULL,
+    [strStatementType]            NVARCHAR (MAX)  NULL
 );
+
+
 
 
 

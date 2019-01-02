@@ -16,6 +16,7 @@ BEGIN
 		DECLARE @companyLocationId		INT = 0
 		DECLARE @accountId				INT = NULL
 		DECLARE @executedLine			INT = 0 
+		DECLARE @statementType NVARCHAR(10)= 'invoice'
 		----------------------------------------
 
 		---------CREATE TEMPORARY TABLE---------
@@ -217,6 +218,7 @@ BEGIN
 		FROM tblCFInvoiceStagingTable
 		WHERE ISNULL(intInvoiceId,0) != 0
 		AND strUserId = @username
+		AND strStatementType = @statementType
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
@@ -397,6 +399,7 @@ BEGIN
 			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM tblCFInvoiceFeeStagingTable
 		WHERE strUserId = @username
+		
 		--AND intCustomerId IN (SELECT intCustomerId FROM @EntriesForInvoice)
 
 		--GROUP BY 
@@ -681,6 +684,7 @@ BEGIN
 			FROM tblCFInvoiceStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId AND ISNULL(intInvoiceId,0) != 0
 			AND strUserId = @username
+			AND strStatementType = @statementType
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
@@ -699,6 +703,7 @@ BEGIN
 			FROM tblCFInvoiceFeeStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId
 			AND strUserId = @username
+			
 
 			--SELECT 'debit memo'
 			--,@intEntityCustomerId
