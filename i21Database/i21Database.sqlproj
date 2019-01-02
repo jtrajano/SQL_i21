@@ -7225,6 +7225,7 @@
     <Build Include="dbo\Tables\tblSRReportLog.sql" />
     <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
