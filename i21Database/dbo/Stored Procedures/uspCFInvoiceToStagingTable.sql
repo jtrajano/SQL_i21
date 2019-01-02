@@ -2,11 +2,7 @@
 	 @xmlParam					NVARCHAR(MAX)  
 	,@Guid						NVARCHAR(MAX)  
 	,@UserId					NVARCHAR(MAX)  
-	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
-	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
-	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
-	,@SuccessfulPostCount		INT			   = 0		OUTPUT
-	,@ysnDevMode				BIT = 0
+	,@StatementType				NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -21,19 +17,19 @@ BEGIN
 	DECLARE @intEntityUserId INT;
 
 	select TOP 1 @intEntityUserId = intEntityId from tblSMUserSecurity where strUserName = @UserId
-
-
-	-------------CLEAN TEMP TABLES------------
-	DELETE FROM tblCFInvoiceReportTempTable			WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceSummaryTempTable		WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
 	
+	IF LOWER(@StatementType)  = 'invoice'
+	BEGIN
+		DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
+	END
+	
+	DELETE FROM tblCFInvoiceReportTempTable			WHERE strUserId = @UserId 
+	DELETE FROM tblCFInvoiceSummaryTempTable		WHERE strUserId = @UserId 
+	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+
 	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
 	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null
-
-	------------------------------------------
 
 BEGIN TRY
 
@@ -117,29 +113,19 @@ BEGIN TRY
 	-----------------------------------------------------------
 	-- EXECUTING THIS SP's WILL INSERT RECORDS ON TEMP TABLES--
 	-----------------------------------------------------------
+	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId 
+	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId 
 	
-	DELETE FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId
-	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId
+	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId 
+	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam , @UserId = @UserId 
 
-	--SELECT 'tblCFInvoiceReportTempTable',* FROM tblCFInvoiceReportTempTable
-	
-	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId
-	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam , @UserId = @UserId
-
-
-	--SELECT 'tblCFInvoiceSummaryTempTable',* FROM tblCFInvoiceSummaryTempTable
-	
 	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam , @UserId = @UserId
 
 
-	--SELECT 'tblCFInvoiceDiscountTempTable',* FROM tblCFInvoiceDiscountTempTable
-	
-
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
-	DELETE FROM tblCFInvoiceStagingTable WHERE strUserId = @UserId
-
+	DELETE FROM tblCFInvoiceStagingTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 	INSERT INTO tblCFInvoiceStagingTable
 	(
 	 intCustomerGroupId
@@ -273,6 +259,7 @@ BEGIN TRY
 	,strGuid
 	,strUserId
 	,ysnExpensed
+	,strStatementType
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -512,11 +499,12 @@ BEGIN TRY
 	,@Guid
 	,@UserId
 	,ysnExpensed
+	,@StatementType 
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
-	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
-	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId
-	INNER JOIN tblCFInvoiceDiscountTempTable AS cfInvRptDcnt
-	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId
+	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
+	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
+	INNER JOIN ( SELECT * FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId) AS cfInvRptDcnt
+	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId 
 	-------------------------------------------------------------
 	OUTER APPLY (
 		SELECT TOP (1) intOdometer 
@@ -561,8 +549,8 @@ BEGIN TRY
 	--) AS cfMiscOdom
 	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
-	AND cfInvRptSum.strUserId = @UserId
-	AND cfInvRptDcnt.strUserId = @UserId
+	--AND cfInvRptSum.strUserId = @UserId
+	--AND cfInvRptDcnt.strUserId = @UserId
 
 	--UPDATE tblCFInvoiceStagingTable SET dblTotalFuelExpensed = ISNULL((SELECT SUM(t.dblCalculatedTotalPrice * -1) FROM tblCFInvoiceStagingTable as s
 	--													INNER JOIN tblCFTransaction as t
@@ -580,9 +568,14 @@ BEGIN TRY
 	,intCustomerId
 	,strCustomerName
 	FROM tblCFInvoiceStagingTable
+	WHERE strUserId = @UserId 
+	AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 	--INSERT FEE RECORDS--
-	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam , @UserId = @UserId
+	IF LOWER(@StatementType)  = 'invoice'
+	BEGIN
+		EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam , @UserId = @UserId
+	END
 
 
 	
@@ -598,21 +591,22 @@ BEGIN TRY
 		INNER JOIN tblCFTransaction as t
 		ON s.intTransactionId = t.intTransactionId
 		WHERE ISNULL(t.ysnExpensed,0) = 1 
+		AND LOWER(s.strStatementType) =  LOWER(@StatementType)
 		AND s.strUserId = @UserId
 		GROUP BY s.intCustomerId
 	) AS cfInv
 	WHERE tblCFInvoiceStagingTable.intCustomerId = cfInv.intCustomerId
 	AND tblCFInvoiceStagingTable.strUserId = @UserId
+	AND LOWER(tblCFInvoiceStagingTable.strStatementType) =  LOWER(@StatementType)
 
 	
 
 
-	IF(@ysnIncludeRemittancePage = 1)
+	IF(@ysnIncludeRemittancePage = 1 AND LOWER(@StatementType)  = 'invoice')
 	BEGIN
 
-
 		EXEC uspARCustomerStatementBalanceForwardReport 
-				@dtmDateFrom = NULL			
+			  @dtmDateFrom = NULL			
 			, @dtmDateTo = @dtmInvoiceDate
 			, @ysnPrintZeroBalance = 1
 			, @dtmBalanceForwardDate = @dtmBalanceForwardDate
@@ -1028,10 +1022,11 @@ BEGIN TRY
 
 	END
 
-
-	UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL AND intEntityUserId = @intEntityUserId
-	UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId
-	
+	IF LOWER(@StatementType)  = 'invoice'
+	BEGIN
+		UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL AND intEntityUserId = @intEntityUserId
+		UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId
+	END
 
 	--SELECT * FROM vyuCFAccountTerm
 	--select * from vyuCFCardAccount
@@ -1054,18 +1049,22 @@ BEGIN CATCH
 		print @CatchErrorState
 
 	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
-  
+  --IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 	--SELECT   
 	--	@CatchErrorMessage = ERROR_MESSAGE(),  
 	--	@CatchErrorSeverity = ERROR_SEVERITY(),  
 	--	@CatchErrorState = ERROR_STATE();  
 
-	-------------CLEAN TEMP TABLES------------
+	-----------CLEAN TEMP TABLES------------
 	DELETE FROM tblCFInvoiceReportTempTable			 WHERE strUserId = @UserId
 	DELETE FROM tblCFInvoiceSummaryTempTable		 WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceDiscountTempTable		 WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceStagingTable			 WHERE strUserId = @UserId
-	DELETE FROM tblCFInvoiceFeeStagingTable			 WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceStagingTable			 WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+
+	IF LOWER(@StatementType)  = 'invoice'
+	BEGIN
+		DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
+	END
 	------------------------------------------
 
 	RAISERROR (@CatchErrorMessage,@CatchErrorSeverity,@CatchErrorState)

@@ -21,6 +21,7 @@ BEGIN
 		DECLARE @executedLine			INT = 0 
 		DECLARE @ysnAddPayment			BIT = 0
 		DECLARE @dtmInvoiceDate			DATETIME
+		DECLARE @statementType NVARCHAR(10)= 'invoice'
 		--------------------------------------
 
 		------------TEMPORARY TABLE-------------
@@ -97,6 +98,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
+		AND strStatementType = @statementType
 	
 	
 		-------------INVOICE LIST-------------
@@ -169,6 +171,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
+		AND strStatementType = @statementType
 		AND ISNULL(ysnExpensed,0) = 0
 		--------------------------------------
 

@@ -1,11 +1,10 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
+﻿CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
 AS
 
 SELECT  
 	 strCustomerNumber,
-	 strUserId,intCustomerId, 
+	 strUserId,
+	 intCustomerId, 
 	 strTempInvoiceReportNumber, 
 	 dblAccountTotalAmount , 
 	 dblAccountTotalDiscount, 
@@ -19,6 +18,7 @@ SELECT
 	 strEmail, 
 	 strEmailDistributionOption, 
 	 strStatus,
+	 strStatementType,
 	 CASE 
 			WHEN (ISNULL(strEmail,'') != '') AND (strEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)
@@ -40,24 +40,35 @@ FROM (
 			END
 			AS intTermID,
 		cfInv.dtmInvoiceDate, 
-		cfInvFee.dblFeeTotalAmount, 
-		ISNULL(cfInv.dblAccountTotalAmount,0) + ISNULL(cfInvFee.dblFeeTotalAmount,0) AS dblInvoiceTotal, 
+		dblFeeTotalAmount = CASE 
+								WHEN LOWER(strStatementType) = 'invoice'
+								THEN cfInvFee.dblFeeTotalAmount
+							ELSE 0
+							END, 
+		dblInvoiceTotal =	CASE 
+								WHEN LOWER(strStatementType) = 'invoice'
+								THEN ISNULL(cfInv.dblAccountTotalAmount,0) + ISNULL(cfInvFee.dblFeeTotalAmount,0)
+							ELSE ISNULL(cfInv.dblAccountTotalAmount,0)
+							END,
 		cfInv.dblQuantity, 
 		cfInv.dblEligableGallon, 
 		cfInv.strCustomerName, 
 		cfInv.strEmail, 
 		cfInv.strEmailDistributionOption, 
-		'Ready' AS strStatus,
-		dblTotalFuelExpensed
+		dblTotalFuelExpensed,
+		cfInv.strStatementType,
+		'Ready' AS strStatus
 	FROM            dbo.tblCFInvoiceStagingTable AS cfInv 
 	LEFT JOIN
-	(SELECT        dblFeeTotalAmount, intAccountId, strUserId
+	(SELECT        dblFeeTotalAmount 
+	, intAccountId, strUserId
 	FROM            dbo.tblCFInvoiceFeeStagingTable
 	GROUP BY intAccountId, dblFeeTotalAmount, strUserId) AS cfInvFee 
 	ON cfInv.intAccountId = cfInvFee.intAccountId
 	AND cfInv.strUserId = cfInvFee.strUserId) AS outertable
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
-	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed
+	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType
 GO
+
 
 
