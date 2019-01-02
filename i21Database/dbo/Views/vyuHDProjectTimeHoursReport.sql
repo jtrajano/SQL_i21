@@ -11,9 +11,9 @@
 			group by a.intProjectId
 		)
 		select
-					intProjectId = convert(nvarchar(20),result.intProjectId)
+					intProjectId = convert(nvarchar(20),result.intProjectId) COLLATE Latin1_General_CI_AS
 					,result.strProjectName
-					,intCustomerId = convert(nvarchar(20),result.intCustomerId)
+					,intCustomerId = convert(nvarchar(20),result.intCustomerId) COLLATE Latin1_General_CI_AS
 					,result.strCustomerName
 					,intEstimatedHours = estimatedhours.intEstimatedHours
 					,intHours = sum(result.intHours)
