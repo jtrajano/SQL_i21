@@ -2,7 +2,8 @@
 	@intReceiptId int,
 	@intUserId int,
 	@intBillId int OUTPUT,
-	@strBillIds NVARCHAR(MAX) = NULL OUTPUT
+	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
+	@intScreenId int = NULL 
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -17,6 +18,7 @@ DECLARE @intEntityVendorId AS INT
 		,@receiptType AS NVARCHAR(50) 
 		,@originalEntityVendorId AS INT 
 		,@strBillOfLading AS NVARCHAR(50)
+		,@strReceiptNumber AS NVARCHAR(50)
 
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
@@ -33,6 +35,8 @@ DECLARE @Own AS INT = 1
 		,@Storage AS INT = 2
 		,@ConsignedPurchase AS INT = 3
 
+DECLARE @intScreenId_InventoryReceipt AS INT = 1
+
 SELECT	@intEntityVendorId = intEntityVendorId
 		,@originalEntityVendorId = intEntityVendorId
 		,@billTypeToUse = 
@@ -45,6 +49,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intCurrencyId = r.intCurrencyId
 		,@receiptType = r.strReceiptType
 		,@strBillOfLading = r.strBillOfLading
+		,@strReceiptNumber = r.strReceiptNumber
 FROM	tblICInventoryReceipt r 
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -76,7 +81,7 @@ BEGIN
 			INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 			LEFT JOIN tblCTContractDetail contractSequence
-				ON receipt.strReceiptType = 'Purchase Contract'				
+				ON receipt.strReceiptType = 'Purchase Contract'
 				AND contractSequence.intContractDetailId = rtnItem.intLineNo
 				AND contractSequence.intContractHeaderId = rtnItem.intOrderId
 				AND contractSequence.ysnClaimsToProducer = 1
@@ -216,6 +221,14 @@ BEGIN
 				AND ri.dblBillQty < ri.dblOpenReceive 
 				AND ri.intOwnershipType = @Own
 				AND Item.strType <> 'Bundle'
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND ri.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END 
+				
 	END 
 
 	-- Check if the item is "Basis" priced and futures price is not blank. 
@@ -287,6 +300,61 @@ BEGIN
 						AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
 					)
 				)
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND rc.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END 
+
+	END 
+
+	-- Check if we can convert the IR Items to Voucher
+	IF (
+		EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceiptItem ri INNER JOIN tblICItem i
+						ON ri.intItemId = i.intItemId
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
+					AND ri.dblBillQty < ri.dblOpenReceive 
+					AND ri.intOwnershipType = @Own
+					AND i.strType <> 'Bundle'
+		)
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems) 
+	) 
+	BEGIN 
+		-- 'The items in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
+		EXEC uspICRaiseError 80221, @strReceiptNumber; 
+		RETURN -80221; 
+	END 
+
+	-- Check if we can convert the IR Other Charges to Voucher
+	IF (
+		EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceiptCharge rc INNER JOIN tblICInventoryReceipt r
+						ON rc.intInventoryReceiptId = r.intInventoryReceiptId
+			WHERE	rc.intInventoryReceiptId = @intReceiptId
+					AND 
+					(
+						(
+							rc.ysnPrice = 1
+							AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
+						)
+						OR (
+							rc.ysnAccrue = 1 
+							AND r.intEntityVendorId = ISNULL(rc.intEntityVendorId, r.intEntityVendorId) 
+							AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
+						)
+					)
+		)
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherOtherCharges) 
+	) 
+	BEGIN 
+		-- 'The other charges in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
+		EXEC uspICRaiseError 80222, @strReceiptNumber; 
+		RETURN -80222; 
 	END 
 
 	-- Check if we can convert the IR to Voucher

@@ -31,6 +31,7 @@
 	[dblQuantityBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblQuantityPriced] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnAllowVoucher] BIT NULL,
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 

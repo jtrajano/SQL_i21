@@ -27,6 +27,8 @@
 	,dblForexRate NUMERIC(18, 6) NULL
 	,strChargesLink NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,strAllocatePriceBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,ysnAllowVoucher BIT NULL
+	,ysnAllowInvoice BIT NULL
 
 	-- Fields for Internal Use Only
 	,intHeaderId INT NULL
