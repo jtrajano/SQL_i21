@@ -10,8 +10,29 @@ EXEC (
     '
       ALTER VIEW [dbo].[vyuGLglhstmstDifference] AS
 
-     select A.strJournalId, A.strAccountId, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strSourceId, A.strSourceType, A.strSourceKey,
-	  B.glhst_acct1_8, B.glhst_acct9_16, B.glhst_amt, B.glhst_units, B.glhst_dr_cr_ind, B.Debit, B.Credit, B.DebitUnit, B.CreditUnit, B.glhst_date, B.glhst_period, B.glhst_src_id, B.glhst_src_seq, CAST(B.A4GLIdentity AS int) A4GLIdentity
+     select A.strJournalId , 
+	 A.strAccountId COLLATE Latin1_General_CI_AS strAccountId, 
+	 A.dblDebit, 
+	 A.dblCredit, 
+	 A.dblDebitUnit, 
+	 A.dblCreditUnit, 
+	 A.strSourceId COLLATE Latin1_General_CI_AS strSourceId, 
+	 A.strSourceType COLLATE Latin1_General_CI_AS strSourceType, 
+	 A.strSourceKey COLLATE Latin1_General_CI_AS strSourceKey,
+	  B.glhst_acct1_8, 
+	  B.glhst_acct9_16, 
+	  B.glhst_amt, 
+	  B.glhst_units, 
+	  B.glhst_dr_cr_ind, 
+	  B.Debit, 
+	  B.Credit, 
+	  B.DebitUnit, 
+	  B.CreditUnit, 
+	  B.glhst_date, 
+	  B.glhst_period, 
+	  B.glhst_src_id COLLATE Latin1_General_CI_AS glhst_src_id, 
+	  B.glhst_src_seq COLLATE Latin1_General_CI_AS glhst_src_seq, 
+	  CAST(B.A4GLIdentity AS int) A4GLIdentity
 	  from ( SELECT	   B.strJournalId,
                   A.intLineNo,
                   C.intAccountId,
