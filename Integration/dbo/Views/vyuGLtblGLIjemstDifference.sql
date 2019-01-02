@@ -9,18 +9,18 @@ EXEC (
     ALTER VIEW [dbo].[vyuGLtblGLIjemstDifference] AS
      SELECT *
      FROM( 
-           SELECT B.strJournalId,
+           SELECT B.strJournalId COLLATE Latin1_General_CI_AS strJournalId,
                   A.intLineNo,
                   C.intAccountId,
-                  C.strAccountId,
+                  C.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
                   A.dblDebitUnit,
                   A.dblCreditUnit,
                   A.dblDebit,
                   A.dblCredit,
                   B.dtmDate,
-                  B.strSourceId,
-                  B.strSourceType,
-                  A.strSourceKey
+                  B.strSourceId COLLATE Latin1_General_CI_AS strSourceId,
+                  B.strSourceType COLLATE Latin1_General_CI_AS strSourceType,
+                  A.strSourceKey COLLATE Latin1_General_CI_AS strSourceKey
            FROM tblGLJournalDetail AS A
                 INNER JOIN tblGLJournal AS B ON A.intJournalId = B.intJournalId
                 INNER JOIN tblGLAccount AS C ON C.intAccountId = A.intAccountId
