@@ -6428,6 +6428,7 @@
     <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
     <Build Include="dbo\Tables\tblSMExportLog.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

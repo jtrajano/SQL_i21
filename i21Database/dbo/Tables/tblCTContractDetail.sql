@@ -138,6 +138,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblAllocationAdjQty] NUMERIC(18, 6) NULL, 
     [dblInvoicedQty] NUMERIC(18, 6) NULL, 
 	ysnPriceChanged BIT,
+	strCertifications NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

@@ -49,7 +49,7 @@ SELECT 	 SQ.intContractDetailId
 		,BK.strBook						
 		,SK.strSubBook					
 		,CD.strInvoiceNo						
-		,CF.strCertificationName COLLATE Latin1_General_CI_AS 	strCertificationName
+		,CD.strCertifications AS strCertificationName	
 		,CH.intContractHeaderId				
 		,ISNULL(CD.dblScheduleQty, 0)			AS dblScheduleQty
 		,CASE 	WHEN ISNULL(CD.ysnInvoice, 0) = 0 	
@@ -166,14 +166,3 @@ SELECT 	 SQ.intContractDetailId
 	)										 		LG	ON	LG.intPContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTLoadView						LV	ON	LV.intContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTQualityApprovedRejected		QA	ON	QA.intContractDetailId				=	CD.intContractDetailId
-	LEFT JOIN
-	(
-			SELECT intContractDetailId, strCertificationName = STUFF((
-			SELECT ', ' + IC.strCertificationName 
-			FROM	tblCTContractCertification	CF
-			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
-			WHERE intContractDetailId = x.intContractDetailId
-			FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
-			FROM tblCTContractCertification AS x
-			GROUP BY intContractDetailId
-	)												CF	ON	CF.intContractDetailId			=	CD.intContractDetailId
