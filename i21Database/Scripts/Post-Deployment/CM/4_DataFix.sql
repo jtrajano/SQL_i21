@@ -305,4 +305,16 @@ JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTrans
 WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
 GO
 
-print('/*******************  END Cash Management Data Fixess *******************/')
+--GL-6389
+PRINT('Begin removing Voided prefix in check numbers')
+GO
+
+UPDATE tblCMBankTransaction SET strReferenceNo = REPLACE(strReferenceNo,'Voided-','')
+UPDATE  tblCMCheckNumberAudit SET strCheckNo = REPLACE(strCheckNo,'Voided-','') 
+GO
+
+PRINT('Finished removing Voided prefix in check numbers')
+GO
+
+PRINT('/*******************  END Cash Management Data Fixess *******************/')
+GO
