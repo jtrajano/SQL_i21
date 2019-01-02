@@ -234,6 +234,8 @@ BEGIN
 		WHEN @msgId = 80218 THEN 'Pricing type for %s is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
 		WHEN @msgId = 80219 THEN 'Cost adjustment cannot continue. Cost adjustment for %s cannot be earlier than %d.'
 		WHEN @msgId = 80220 THEN 'Unable to post %s for %s. Available stock of %s as of %d is below the transaction quantity %f.'
+		WHEN @msgId = 80221 THEN 'The items in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
+		WHEN @msgId = 80222 THEN 'The other charges in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
 	END 
 
 	RETURN @msg
