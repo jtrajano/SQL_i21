@@ -5,7 +5,13 @@ IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT') = 1)) an
 BEGIN
 	EXEC('
 	ALTER VIEW [dbo].[vyuGLPTDrillDownDifference]
-		AS SELECT A.ptjdd_src_no, A.ptjdd_src_seq, ptjdd_acct_no, A.ptjdd_period, A.ptjdd_tran_amt_Total_PerAccountId, B.glije_amt_Total_PerAccountId, (A.ptjdd_tran_amt_Total_PerAccountId - B.glije_amt_Total_PerAccountId) AS Difference
+		AS SELECT A.ptjdd_src_no COLLATE Latin1_General_CI_AS ptjdd_src_no, 
+		A.ptjdd_src_seq COLLATE Latin1_General_CI_AS ptjdd_src_seq, 
+		ptjdd_acct_no, 
+		A.ptjdd_period, 
+		A.ptjdd_tran_amt_Total_PerAccountId, 
+		B.glije_amt_Total_PerAccountId, 
+		(A.ptjdd_tran_amt_Total_PerAccountId - B.glije_amt_Total_PerAccountId) AS Difference
    FROM(
    SELECT ptjdd_period,ptjdd_acct_no, ptjdd_src_seq, ptjdd_src_no, SUM(ptjdd_tran_amt) AS ptjdd_tran_amt_Total_PerAccountId
    FROM ptjddmst
