@@ -22,23 +22,9 @@ AS
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
 				,LO.dtmDeadlineCargo
-				,CAST(
-						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
-								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
-										ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId AND ysnReceived = 1),0) THEN 1
-								ELSE 0
-						END
-				AS BIT) ysnDocsReceived
-				,STUFF(
-					(
-						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
-						FROM	tblLGLoadContainer 
-						WHERE	intLoadId = LO.intLoadId
-						FOR XML PATH(''), TYPE)
-						.value('.','NVARCHAR(MAX)'
-					),1,2,' '
-				) COLLATE Latin1_General_CI_AS AS strContainerNumber,
-				LO.strBookingReference
+				,LO.ysnDocumentsReceived AS ysnDocsReceived
+				,LD.strContainerNumbers AS strContainerNumber
+				,LO.strBookingReference
 				,LO.intLoadId
 
 		FROM	tblLGLoad			LO
@@ -96,13 +82,7 @@ AS
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
 				,LO.dtmDeadlineCargo
-				,CAST(
-						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
-								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
-										ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId AND ysnReceived = 1),0) THEN 1
-								ELSE 0
-						END
-				AS BIT) ysnDocsReceived
+				,LO.ysnDocumentsReceived AS ysnDocsReceived
 				,NULL strContainerNumber
 				,LO.strBookingReference
 				,LO.intLoadId
