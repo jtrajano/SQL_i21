@@ -82,7 +82,7 @@ BEGIN TRY
 		, NULL
 		, NULL
 		, NULL
-		, CONVERT(DATETIME, '1' + LTRIM(RTRIM(@strFutureMonth)))
+		, @dtmSpotDate
 		, 0)
 
     SET @IntFutureMonthId = SCOPE_IDENTITY();
