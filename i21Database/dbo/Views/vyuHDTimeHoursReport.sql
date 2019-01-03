@@ -2,12 +2,12 @@
 	AS
 		select
 			a.intTicketHoursWorkedId
-			,intTicketId = convert(nvarchar(20),b.intTicketId)
+			,intTicketId = convert(nvarchar(20),b.intTicketId) COLLATE Latin1_General_CI_AS 
 			,b.strTicketNumber
 			,b.strSubject
-			,intProjectId = convert(nvarchar(20),d.intProjectId)
+			,intProjectId = convert(nvarchar(20),d.intProjectId) COLLATE Latin1_General_CI_AS 
 			,d.strProjectName
-			,intCustomerId = convert(nvarchar(20),f.intEntityId)
+			,intCustomerId = convert(nvarchar(20),f.intEntityId) COLLATE Latin1_General_CI_AS 
 			,strCustomerName = f.strName
 			,k.strModule
 			,a.dtmDate
