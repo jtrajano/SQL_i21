@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Puchase Summary' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Card Fueling'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Ticket Management'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3448,7 +3448,7 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @TicketManagementMaintenanceParentM
 UPDATE tblSMMasterMenu SET strMenuName = N'Tickets' WHERE strMenuName = 'Enter Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Production Evidence' WHERE strMenuName = 'Production Evidence Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Canadian Storage Receipt', strDescription = 'Canadian Storage Receipt' WHERE strMenuName = 'Storage Statement' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = 'Production History', strDescription = 'Production History' WHERE strMenuName = 'Production Evidence' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = 'Production History', strDescription = 'Production History' WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Production History by Delivery Sheet', strDescription = 'Production History by Delivery Sheet' WHERE strMenuName = 'Production Evidence by Delivery Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 -- END OF RENAMING
 
@@ -3540,17 +3540,23 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accrued S
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strDescription = N'Accrued Storage Description', strCommand = N'Reporting.view.ReportManager?group=Grain&report=AccruedStorage&direct=true&showCriteria=true' WHERE strMenuName = 'Accrued Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Production Evidence', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production Evidence Description', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReport&direct=true' WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production History' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Production History', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production History', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Production History', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production History', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionHistoryReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReport&direct=true' WHERE strMenuName = 'Production History' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionHistoryReport&direct=true' WHERE strMenuName = 'Production History' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production History by Delivery Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Production History by Delivery Sheet', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production History by Delivery Sheet', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReportByDeliverySheet&direct=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Production History by Delivery Sheet', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production History by Delivery Sheet', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReportByDeliverySheet&direct=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReportByDeliverySheet&direct=true' WHERE strMenuName = 'Production History by Delivery Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReportByDeliverySheet&direct=true' WHERE strMenuName = 'Production History by Delivery Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 --IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -3560,21 +3566,21 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage By Discount Factor' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Storage By Discount Factor', N'Ticket Management', @TicketManagementReportParentMenuId, N'Storage By Discount Factor', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=StorageByDiscountFactor&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Storage By Discount Factor', N'Ticket Management', @TicketManagementReportParentMenuId, N'Storage By Discount Factor', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=StorageByDiscountFactor&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByDiscountFactor&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Discount Factor' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByDiscountFactor&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Discount Factor' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage By Grades' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Storage By Grades', N'Ticket Management', @TicketManagementReportParentMenuId, N'Storage By Grades', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Storage By Grades', N'Ticket Management', @TicketManagementReportParentMenuId, N'Storage By Grades', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Grades' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Grades' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Unsent Tickets', N'Ticket Management', @TicketManagementReportParentMenuId, N'Unsent Tickets', N'Report', N'Screen', N'Unsent Tickets Report', N'small-menu-report', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Unsent Tickets', N'Ticket Management', @TicketManagementReportParentMenuId, N'Unsent Tickets', N'Report', N'Screen', N'Unsent Tickets Report', N'small-menu-report', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Unsent Tickets Report' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Unsent Tickets Report' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
