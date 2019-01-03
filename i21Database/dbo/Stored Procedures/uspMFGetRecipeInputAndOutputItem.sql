@@ -23,6 +23,34 @@ BEGIN TRY
 		,@intTransferStorageLocationId INT
 		,@intProductId INT
 		,@dblCalculatedQuantity DECIMAL(24, 10)
+		,@ysnSubstituteItem BIT
+		,@intMainItemId INT
+
+	CREATE TABLE #tblMFConsumptionDetail (
+		intContainerId INT
+		,strContainerId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intStorageLocationId INT
+		,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intStorageSubLocationId INT
+		,intInputItemId INT
+		,strInputItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strInputItemDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dblInputQuantity NUMERIC(38, 20) NULL
+		,intInputItemUOMId INT
+		,intUnitMeasureId INT
+		,strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intInputLotId INT
+		,strInputLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dblInputLotQuantity NUMERIC(38, 20) NULL
+		,strInputLotUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,ysnEmptyOutSource BIT
+		,dtmFeedTime DATETIME
+		,strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dtmActualInputDateTime DATETIME
+		,intRowNo INT IDENTITY(1, 1)
+		,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,ysnInputItem BIT
+		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -259,19 +287,31 @@ BEGIN TRY
 			,@strPackagingCategory = ''
 	END
 
+	SELECT @ysnSubstituteItem = 0
+
 	IF @strType = 'I'
 	BEGIN
 		SELECT @dblCalculatedOutputQuantity = dblQuantity
 			,@intQuantityItemUOMId = intItemUOMId
 		FROM tblMFWorkOrderRecipeItem
 		WHERE intWorkOrderId = @intWorkOrderId
-		AND intItemId = @intProductId
-		AND intRecipeItemTypeId=2
+			AND intItemId = @intProductId
+			AND intRecipeItemTypeId = 2
 
 		SELECT @dblCalculatedInputQuantity = dblCalculatedQuantity
-		FROM tblMFWorkOrderRecipeItem
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intItemId = @intItemId
+			,@ysnSubstituteItem = CASE 
+				WHEN rs.intRecipeItemId IS NULL
+					THEN 0
+				ELSE 1
+				END
+			,@intMainItemId = rs.intItemId
+		FROM tblMFWorkOrderRecipeItem ri
+		LEFT JOIN tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
+			AND (
+				ri.intItemId = @intItemId
+				OR rs.intSubstituteItemId = @intItemId
+				)
 
 		SELECT @dblQuantity = (@dblCalculatedOutputQuantity / @dblCalculatedInputQuantity) * @dblQuantity
 	END
@@ -289,9 +329,30 @@ BEGIN TRY
 	IF @dblCalculatedQuantity IS NULL
 		SELECT @dblCalculatedQuantity = 1
 
-	SELECT SL.intStorageLocationId
-		,SL.strName AS strStorageLocationName
-		,SL.intSubLocationId AS intStorageSubLocationId
+	SELECT (
+			CASE 
+				WHEN SL.intStorageLocationId IS NULL
+					AND r.intItemId = ri.intItemId
+					THEN SL1.intStorageLocationId
+				ELSE SL.intStorageLocationId
+				END
+			) AS intStorageLocationId
+		,(
+			CASE 
+				WHEN SL.intStorageLocationId IS NULL
+					AND r.intItemId = ri.intItemId
+					THEN SL1.strName
+				ELSE SL.strName
+				END
+			) AS strStorageLocationName
+		,(
+			CASE 
+				WHEN SL.intStorageLocationId IS NULL
+					AND r.intItemId = ri.intItemId
+					THEN SL1.intSubLocationId
+				ELSE SL.intSubLocationId
+				END
+			) AS intStorageSubLocationId
 		,I.intItemId AS intActualItemId
 		,I.strItemNo AS strActualItemNo
 		,I.strDescription AS strActualItemDescription
@@ -396,7 +457,8 @@ BEGIN TRY
 	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 	JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 	LEFT JOIN @tblMFProduceItem Prod ON Prod.intItemId = I.intItemId
-	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(Prod.intStorageLocationId, @intTransferStorageLocationId)
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Prod.intStorageLocationId
+	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = @intTransferStorageLocationId
 	LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = Prod.intWeightItemUOMId
 	LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IsNULL(IU1.intUnitMeasureId, I.intWeightUOMId)
 	LEFT JOIN dbo.tblICItemUOM IU2 ON IU2.intItemId = I.intItemId
@@ -567,116 +629,415 @@ BEGIN TRY
 		JOIN @tblMFFinalItem I ON I.intItemId = DT.intActualItemId
 	END
 
-	SELECT Cont.intContainerId
-		,Cont.strContainerId
-		,Cons.intStorageLocationId
-		,SL.strName AS strStorageLocationName
-		,SL.intSubLocationId AS intStorageSubLocationId
-		,I.intItemId AS intInputItemId
-		,I.strItemNo AS strInputItemNo
-		,I.strDescription AS strInputItemDescription
-		,CASE 
-			WHEN C.strCategoryCode = @strPackagingCategory
-				AND @ysnProducedQtyByWeight = 1
-				AND P.dblMaxWeightPerPack > 0
-				THEN (
-						CASE 
-							WHEN ri.ysnScaled = 1
-								THEN (
-										CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / P.dblMaxWeightPerPack)) + CASE 
-													WHEN ri.ysnPartialFillConsumption = 1
-														THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / P.dblMaxWeightPerPack))
-													ELSE 0
-													END) AS NUMERIC(38, 20))
-										)
-							ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
-							END
-						)
-			WHEN C.strCategoryCode = @strPackagingCategory
-				THEN (
-						CASE 
-							WHEN ri.ysnScaled = 1
-								THEN (
-										CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / @dblCalculatedQuantity)) + CASE 
-													WHEN ri.ysnPartialFillConsumption = 1
-														THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / @dblCalculatedQuantity))
-													ELSE 0
-													END) AS NUMERIC(38, 20))
-										)
-							ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
-							END
-						)
-			ELSE (
-					CASE 
-						WHEN ri.ysnScaled = 1
-							THEN (
-									ri.dblCalculatedQuantity * (
-										dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / (
-											CASE 
-												WHEN r.intRecipeTypeId = 1
-													THEN @dblCalculatedQuantity
-												ELSE 1
-												END
-											)
-										) + CASE 
-										WHEN ri.ysnPartialFillConsumption = 1
-											THEN ri.dblCalculatedQuantity * (
-													dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / (
-														CASE 
-															WHEN r.intRecipeTypeId = 1
-																THEN @dblCalculatedQuantity
-															ELSE 1
-															END
-														)
-													)
-										ELSE 0
-										END
-									)
-						ELSE ri.dblCalculatedQuantity
-						END
-					)
-			END AS dblInputQuantity
-		,IU.intItemUOMId AS intInputItemUOMId
-		,UM.intUnitMeasureId
-		,UM.strUnitMeasure AS strInputItemUnitMeasure
-		,Cons.intInputLotId AS intInputLotId
-		,Cons.strLotNumber AS strInputLotNumber
-		,0.0 AS dblInputLotQuantity
-		,UM.strUnitMeasure AS strInputLotUnitMeasure
-		,Cons.ysnEmptyOutSource
-		,Cons.dtmFeedTime
-		,Cons.strReferenceNo
-		,GETDATE() AS dtmActualInputDateTime
-		,IDENTITY(INT, 1, 1) AS intRowNo
-		,I.strInventoryTracking
-		,CONVERT(BIT, 1) AS ysnInputItem
-	INTO #tblMFConsumptionDetail
-	FROM dbo.tblMFWorkOrderRecipeItem ri
-	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
-		AND r.intWorkOrderId = ri.intWorkOrderId
-	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
-	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
-	JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
-	LEFT JOIN @tblMFConsumeItem Cons ON Cons.intItemId = I.intItemId
-	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Cons.intStorageLocationId
-	LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Cons.intContainerId
-	WHERE r.intWorkOrderId = @intWorkOrderId
-		AND ri.intRecipeItemTypeId = 1
-		AND (
-			(
-				ri.ysnYearValidationRequired = 1
-				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-					AND ri.dtmValidTo
-				)
-			OR (
-				ri.ysnYearValidationRequired = 0
-				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-					AND DATEPART(dy, ri.dtmValidTo)
-				)
+	IF @ysnSubstituteItem = 1
+		AND @strType = 'I'
+	BEGIN
+		INSERT INTO #tblMFConsumptionDetail (
+			intContainerId
+			,strContainerId
+			,intStorageLocationId
+			,strStorageLocationName
+			,intStorageSubLocationId
+			,intInputItemId
+			,strInputItemNo
+			,strInputItemDescription
+			,dblInputQuantity
+			,intInputItemUOMId
+			,intUnitMeasureId
+			,strInputItemUnitMeasure
+			,intInputLotId
+			,strInputLotNumber
+			,dblInputLotQuantity
+			,strInputLotUnitMeasure
+			,ysnEmptyOutSource
+			,dtmFeedTime
+			,strReferenceNo
+			,dtmActualInputDateTime
+			,strInventoryTracking
+			,ysnInputItem
 			)
-		AND ri.intConsumptionMethodId <> 4
+		SELECT Cont.intContainerId
+			,Cont.strContainerId
+			,Cons.intStorageLocationId
+			,SL.strName AS strStorageLocationName
+			,SL.intSubLocationId AS intStorageSubLocationId
+			,I.intItemId AS intInputItemId
+			,I.strItemNo AS strInputItemNo
+			,I.strDescription AS strInputItemDescription
+			,CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					AND @ysnProducedQtyByWeight = 1
+					AND P.dblMaxWeightPerPack > 0
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / P.dblMaxWeightPerPack)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / P.dblMaxWeightPerPack))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / @dblCalculatedQuantity)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / @dblCalculatedQuantity))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN @dblCalculatedQuantity
+													ELSE 1
+													END
+												)
+											) + CASE 
+											WHEN ri.ysnPartialFillConsumption = 1
+												THEN ri.dblCalculatedQuantity * (
+														dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / (
+															CASE 
+																WHEN r.intRecipeTypeId = 1
+																	THEN @dblCalculatedQuantity
+																ELSE 1
+																END
+															)
+														)
+											ELSE 0
+											END
+										)
+							ELSE ri.dblCalculatedQuantity
+							END
+						)
+				END AS dblInputQuantity
+			,IU.intItemUOMId AS intInputItemUOMId
+			,UM.intUnitMeasureId
+			,UM.strUnitMeasure AS strInputItemUnitMeasure
+			,Cons.intInputLotId AS intInputLotId
+			,Cons.strLotNumber AS strInputLotNumber
+			,0.0 AS dblInputLotQuantity
+			,UM.strUnitMeasure AS strInputLotUnitMeasure
+			,Cons.ysnEmptyOutSource
+			,Cons.dtmFeedTime
+			,Cons.strReferenceNo
+			,GETDATE() AS dtmActualInputDateTime
+			,I.strInventoryTracking
+			,CONVERT(BIT, 1) AS ysnInputItem
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
+			AND ri.intItemId <> @intMainItemId
+		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		LEFT JOIN @tblMFConsumeItem Cons ON Cons.intItemId = I.intItemId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Cons.intStorageLocationId
+		LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Cons.intContainerId
+		WHERE r.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId <> 4
+
+		INSERT INTO #tblMFConsumptionDetail (
+			intContainerId
+			,strContainerId
+			,intStorageLocationId
+			,strStorageLocationName
+			,intStorageSubLocationId
+			,intInputItemId
+			,strInputItemNo
+			,strInputItemDescription
+			,dblInputQuantity
+			,intInputItemUOMId
+			,intUnitMeasureId
+			,strInputItemUnitMeasure
+			,intInputLotId
+			,strInputLotNumber
+			,dblInputLotQuantity
+			,strInputLotUnitMeasure
+			,ysnEmptyOutSource
+			,dtmFeedTime
+			,strReferenceNo
+			,dtmActualInputDateTime
+			,strInventoryTracking
+			,ysnInputItem
+			)
+		SELECT Cont.intContainerId
+			,Cont.strContainerId
+			,Cons.intStorageLocationId
+			,SL.strName AS strStorageLocationName
+			,SL.intSubLocationId AS intStorageSubLocationId
+			,I.intItemId AS intInputItemId
+			,I.strItemNo AS strInputItemNo
+			,I.strDescription AS strInputItemDescription
+			,CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					AND @ysnProducedQtyByWeight = 1
+					AND P.dblMaxWeightPerPack > 0
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / P.dblMaxWeightPerPack)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / P.dblMaxWeightPerPack))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / @dblCalculatedQuantity)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / @dblCalculatedQuantity))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN @dblCalculatedQuantity
+													ELSE 1
+													END
+												)
+											) + CASE 
+											WHEN ri.ysnPartialFillConsumption = 1
+												THEN ri.dblCalculatedQuantity * (
+														dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / (
+															CASE 
+																WHEN r.intRecipeTypeId = 1
+																	THEN @dblCalculatedQuantity
+																ELSE 1
+																END
+															)
+														)
+											ELSE 0
+											END
+										)
+							ELSE ri.dblCalculatedQuantity
+							END
+						)
+				END AS dblInputQuantity
+			,IU.intItemUOMId AS intInputItemUOMId
+			,UM.intUnitMeasureId
+			,UM.strUnitMeasure AS strInputItemUnitMeasure
+			,Cons.intInputLotId AS intInputLotId
+			,Cons.strLotNumber AS strInputLotNumber
+			,0.0 AS dblInputLotQuantity
+			,UM.strUnitMeasure AS strInputLotUnitMeasure
+			,Cons.ysnEmptyOutSource
+			,Cons.dtmFeedTime
+			,Cons.strReferenceNo
+			,GETDATE() AS dtmActualInputDateTime
+			,I.strInventoryTracking
+			,CONVERT(BIT, 0) AS ysnInputItem
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
+			AND ri.intItemId = @intMainItemId
+		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+			AND r.intWorkOrderId = rs.intWorkOrderId
+			AND rs.intSubstituteItemId = @intItemId
+		JOIN dbo.tblICItem I ON I.intItemId = rs.intSubstituteItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = rs.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		LEFT JOIN @tblMFConsumeItem Cons ON Cons.intItemId = I.intItemId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Cons.intStorageLocationId
+		LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Cons.intContainerId
+		WHERE r.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId <> 4
+	END
+	ELSE
+	BEGIN
+		INSERT INTO #tblMFConsumptionDetail (
+			intContainerId
+			,strContainerId
+			,intStorageLocationId
+			,strStorageLocationName
+			,intStorageSubLocationId
+			,intInputItemId
+			,strInputItemNo
+			,strInputItemDescription
+			,dblInputQuantity
+			,intInputItemUOMId
+			,intUnitMeasureId
+			,strInputItemUnitMeasure
+			,intInputLotId
+			,strInputLotNumber
+			,dblInputLotQuantity
+			,strInputLotUnitMeasure
+			,ysnEmptyOutSource
+			,dtmFeedTime
+			,strReferenceNo
+			,dtmActualInputDateTime
+			,strInventoryTracking
+			,ysnInputItem
+			)
+		SELECT Cont.intContainerId
+			,Cont.strContainerId
+			,Cons.intStorageLocationId
+			,SL.strName AS strStorageLocationName
+			,SL.intSubLocationId AS intStorageSubLocationId
+			,I.intItemId AS intInputItemId
+			,I.strItemNo AS strInputItemNo
+			,I.strDescription AS strInputItemDescription
+			,CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					AND @ysnProducedQtyByWeight = 1
+					AND P.dblMaxWeightPerPack > 0
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / P.dblMaxWeightPerPack)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / P.dblMaxWeightPerPack))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (
+											CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / @dblCalculatedQuantity)) + CASE 
+														WHEN ri.ysnPartialFillConsumption = 1
+															THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / @dblCalculatedQuantity))
+														ELSE 0
+														END) AS NUMERIC(38, 20))
+											)
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblQuantity) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN @dblCalculatedQuantity
+													ELSE 1
+													END
+												)
+											) + CASE 
+											WHEN ri.ysnPartialFillConsumption = 1
+												THEN ri.dblCalculatedQuantity * (
+														dbo.fnMFConvertQuantityToTargetItemUOM(@intQuantityItemUOMId, r.intItemUOMId, @dblPartialQuantity) / (
+															CASE 
+																WHEN r.intRecipeTypeId = 1
+																	THEN @dblCalculatedQuantity
+																ELSE 1
+																END
+															)
+														)
+											ELSE 0
+											END
+										)
+							ELSE ri.dblCalculatedQuantity
+							END
+						)
+				END AS dblInputQuantity
+			,IU.intItemUOMId AS intInputItemUOMId
+			,UM.intUnitMeasureId
+			,UM.strUnitMeasure AS strInputItemUnitMeasure
+			,Cons.intInputLotId AS intInputLotId
+			,Cons.strLotNumber AS strInputLotNumber
+			,0.0 AS dblInputLotQuantity
+			,UM.strUnitMeasure AS strInputLotUnitMeasure
+			,Cons.ysnEmptyOutSource
+			,Cons.dtmFeedTime
+			,Cons.strReferenceNo
+			,GETDATE() AS dtmActualInputDateTime
+			,I.strInventoryTracking
+			,CONVERT(BIT, 1) AS ysnInputItem
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		LEFT JOIN @tblMFConsumeItem Cons ON Cons.intItemId = I.intItemId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = Cons.intStorageLocationId
+		LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Cons.intContainerId
+		WHERE r.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId <> 4
+	END
 
 	DECLARE @intRowNo INT
 		,@dblRequiredQty NUMERIC(24, 10)
@@ -702,6 +1063,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intRowNo)
 	FROM #tblMFConsumptionDetail
+	WHERE ysnInputItem=1
 
 	WHILE @intRowNo IS NOT NULL
 	BEGIN
@@ -1009,7 +1371,7 @@ BEGIN TRY
 		,intRowNo
 		,dblInputQuantity dblReadingQuantity
 	FROM #tblMFConsumptionDetail
-	Where dblInputQuantity>0
+	WHERE dblInputQuantity > 0
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
