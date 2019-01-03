@@ -28,7 +28,9 @@ ST.intStoreId
 	FROM tblSTCheckoutDepartmetTotals CDT 
 	INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 	INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
-	WHERE CDT.intCheckoutId = CH.intCheckoutId AND CDT.dblTotalSalesAmountComputed <> 0) dblSalesAmount
+	WHERE CDT.intCheckoutId = CH.intCheckoutId 
+		AND (CDT.dblTotalSalesAmountComputed <> 0
+		OR CDT.intTotalSalesCount <> 0)) dblSalesAmount
 , (SELECT SUM(ISNULL(CPT.dblAmount, 0))
 	FROM tblSTCheckoutPumpTotals CPT 
 	INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPT.intPumpCardCouponId 
