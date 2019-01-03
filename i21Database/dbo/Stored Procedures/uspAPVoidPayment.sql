@@ -318,9 +318,12 @@ BEGIN
 	--Unposting Process
 	UPDATE B
 	SET B.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
-												ELSE 
-											(CASE WHEN B.dblAmountDue = 0 THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) ELSE (B.dblAmountDue + B.dblPayment) END)
-											END
+								ELSE 
+									(CASE WHEN B.dblAmountDue = 0 
+										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
+										ELSE (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
+									END)
+							END
 		,B.intOrigBillId = B.intBillId
 		,B.intBillId = NULL
 		,B.intOrigInvoiceId = B.intInvoiceId
