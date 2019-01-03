@@ -207,6 +207,7 @@ BEGIN
 		,@dtmOrderDate AS strWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
+		,L.dblLastCost 
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
@@ -273,6 +274,7 @@ BEGIN
 		,@dtmOrderDate AS strWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
+		,L.dblLastCost 
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId

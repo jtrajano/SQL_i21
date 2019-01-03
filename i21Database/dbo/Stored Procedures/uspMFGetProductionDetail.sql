@@ -220,6 +220,8 @@ BEGIN
 		,@dtmOrderDate AS strWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
+		,L.dblLastCost 
+		,W.dblItemValue 
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	--LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId

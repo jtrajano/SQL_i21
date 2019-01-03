@@ -318,10 +318,14 @@ BEGIN TRY
 						AND intItemId <> @intItemId
 					)
 			BEGIN
+				SELECT @strName=strName 
+				FROM tblICStorageLocation 
+				WHERE intStorageLocationId = @intStorageLocationId
 				RAISERROR (
-						'The Storage Location is already used by other Lot.'
+						'The Storage Location ''%s'' is already used by other Lot.'
 						,11
 						,1
+						,@strName
 						)
 			END
 		END
