@@ -241,7 +241,7 @@ BEGIN
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
 				, strLocationName
-				, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
+				, dtmEndDate --= CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
 				, strFutureMonth
 				, dblBalance = CD.dblQuantity
 				, intUnitMeasureId
