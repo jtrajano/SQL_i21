@@ -6,7 +6,7 @@ SELECT ST.intStoreId
 , ST.strDistrict
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, CAST(0 AS BIT)) AS ysnPosted
 , ACC.strAccountId
 , STT.strTaxNo
 , SUM(STT.dblTotalTax) dblTotalTax
