@@ -6408,6 +6408,9 @@
     <Build Include="dbo\Tables\tblSMExportLog.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
