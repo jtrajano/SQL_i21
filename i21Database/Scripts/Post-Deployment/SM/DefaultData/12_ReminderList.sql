@@ -983,12 +983,44 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 	SELECT [strReminder]	= N''
 		,[strType]			= N'Contracts w/o weight claim'
 		,[strMessage]		= N'{0} Contracts are w/o weight claim.'
-		,[strQuery]			= N' SELECT intContractHeaderId
-							  FROM vyuLGNotifications vyu
-							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
-							  WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
-							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
+		,[strQuery]			=N'SELECT * FROM (
+									  SELECT 
+											 A.intCommodityId,
+											 B.intEventId   
+									   FROM (  
+											   SELECT
+												   CH.intContractHeaderId,
+												   CH.intCommodityId, 
+												   intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOD, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
+											   FROM tblCTContractHeader CH  
+											   JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId  
+											   JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId  
+											   JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10  
+											   JOIN tblICItem I ON I.intItemId = CD.intItemId  
+											   JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId  
+											   JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId  
+											   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId  
+											   WHERE L.intLoadId NOT IN (  
+														  SELECT WC.intLoadId  
+														  FROM tblLGWeightClaim WC  
+														  JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId  
+											   )  
+											   AND CH.intContractTypeId = 1  
+											   AND CO.intCommodityId = 1  
+											   AND CH.intContractHeaderId IN (SELECT DISTINCT intOrderId FROM tblICInventoryReceiptItem)  
+											   AND CD.intContractStatusId IN (1,2,4)  
+									   ) A,
+										(SELECT TOP 1 intEventId, intDaysToRemind FROM tblCTEvent WHERE strEventName = ''Contract Without Weight Claim'') B
+										WHERE A.intDayToShipment >= B.intDaysToRemind    
+							   ) vyuLGNotifications   
+									  WHERE 
+										EXISTS(
+											SELECT TOP 1 1 
+											FROM tblCTEventRecipient X 
+												LEFT JOIN tblCTEventRecipientFilter Y ON X.intEntityId = Y.intEntityId AND X.intEventId = Y.intEventId
+											WHERE vyuLGNotifications.intEventId  = X.intEventId AND 
+												  vyuLGNotifications.intCommodityId = ISNULL(Y.intCommodityId, vyuLGNotifications.intCommodityId) AND
+												  X.intEntityId = {0}  )'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20weight%20claim'
 		,[intSort]			= ISNULL(@intMaxSortOrder,0)+1
 END
@@ -996,12 +1028,44 @@ ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
 	SET [strMessage] = N'{0} Contracts are w/o weight claim.',
-	[strQuery]		 = N' SELECT intContractHeaderId
-					   FROM vyuLGNotifications vyu
-					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
-					   WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
-					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
+	[strQuery]		 = N'SELECT * FROM (
+							  SELECT 
+									 A.intCommodityId,
+									 B.intEventId   
+							   FROM (  
+									   SELECT
+										   CH.intContractHeaderId,
+										   CH.intCommodityId, 
+										   intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOD, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
+									   FROM tblCTContractHeader CH  
+									   JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId  
+									   JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId  
+									   JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10  
+									   JOIN tblICItem I ON I.intItemId = CD.intItemId  
+									   JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId  
+									   JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId  
+									   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId  
+									   WHERE L.intLoadId NOT IN (  
+												  SELECT WC.intLoadId  
+												  FROM tblLGWeightClaim WC  
+												  JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId  
+									   )  
+									   AND CH.intContractTypeId = 1  
+									   AND CO.intCommodityId = 1  
+									   AND CH.intContractHeaderId IN (SELECT DISTINCT intOrderId FROM tblICInventoryReceiptItem)  
+									   AND CD.intContractStatusId IN (1,2,4)  
+							   ) A,
+								(SELECT TOP 1 intEventId, intDaysToRemind FROM tblCTEvent WHERE strEventName = ''Contract Without Weight Claim'') B
+								WHERE A.intDayToShipment >= B.intDaysToRemind    
+					   ) vyuLGNotifications   
+							  WHERE 
+								EXISTS(
+									SELECT TOP 1 1 
+									FROM tblCTEventRecipient X 
+										LEFT JOIN tblCTEventRecipientFilter Y ON X.intEntityId = Y.intEntityId AND X.intEventId = Y.intEventId
+									WHERE vyuLGNotifications.intEventId  = X.intEventId AND 
+										  vyuLGNotifications.intCommodityId = ISNULL(Y.intCommodityId, vyuLGNotifications.intCommodityId) AND
+										  X.intEntityId = {0} )'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o weight claim'
 END
