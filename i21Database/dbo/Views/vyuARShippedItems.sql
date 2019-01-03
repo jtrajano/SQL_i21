@@ -876,7 +876,7 @@ FROM (
 		 , intPriceUOMId					= intWeightUOMId
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
-		 , intWeightUOMId					= intWeightUOMId
+		 , intWeightUOMId					= intItemUOMId
 		 , dblWeight						= dblWeight
 		 , dblQtyShipped					= dblQtyShipped
 		 , dblQtyOrdered					= dblQtyOrdered
@@ -897,9 +897,9 @@ FROM (
 	     , intEntityShipViaId				= intEntityShipViaId
 	     , intTicketId						= intTicketId
 	     , intTaxGroupId					= intTaxGroupId
-	     , dblGrossWt						= dblGrossWt
-	     , dblTareWt						= dblTareWt
-	     , dblNetWt							= dblNetWt
+	     , dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(intWeightUOMId, intItemUOMId, dblGrossWt)
+	     , dblTareWt						= dbo.fnCalculateQtyBetweenUOM(intWeightUOMId, intItemUOMId, dblTareWt)
+	     , dblNetWt							= dbo.fnCalculateQtyBetweenUOM(intWeightUOMId, intItemUOMId, dblNetWt)
 	     , strPONumber						= strPONumber
 	     , strBOLNumber						= strBOLNumber
 	     , intSplitId						= intSplitId
