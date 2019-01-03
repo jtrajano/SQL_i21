@@ -26,19 +26,19 @@ AS
 		,strContactName = contact.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
 		,tic.intCustomerContactId
 		,intContactRank = ISNULL(contact.intEntityRank,1)
-		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
-		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
-		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId)
+		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101) COLLATE Latin1_General_CI_AS
+		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101) COLLATE Latin1_General_CI_AS
+		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId) COLLATE Latin1_General_CI_AS
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
 		,proj.strProjectName
 		,tic.dtmDueDate
-		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
+		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101) COLLATE Latin1_General_CI_AS
 		,tic.intTicketProductId
 		,strTicketType = tic.strType
 		,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
-		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
+		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101) COLLATE Latin1_General_CI_AS
 		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,cam.strCampaignName
 		,strCompanyLocation = camloc.strLocationName

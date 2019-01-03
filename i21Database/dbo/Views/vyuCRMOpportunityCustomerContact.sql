@@ -12,7 +12,7 @@
 			,tblEMEntity.ysnActive
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = tblARCustomer.intEntityId and et.strType in ('Customer','Prospect'))
 			,tblEMEntityPhoneNumber.strPhone
-			,strDirectionEntityType = 'Customer'
+			,strDirectionEntityType = 'Customer' COLLATE Latin1_General_CI_AS
 		from tblARCustomer
 			,[tblEMEntityToContact]
 			,tblEMEntity
@@ -34,9 +34,9 @@
 			,intEntityLocationId = (select top 1 [tblEMEntityLocation].intEntityLocationId from [tblEMEntityLocation] where [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId)
 			,strLocationName = (select top 1 [tblEMEntityLocation].strLocationName from [tblEMEntityLocation] where [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId)
 			,tblEMEntity.ysnActive
-			,strEntityType = 'Vendor'
+			,strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 			,tblEMEntityPhoneNumber.strPhone
-			,strDirectionEntityType = 'Vendor'
+			,strDirectionEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 		from tblAPVendor
 			,[tblEMEntityToContact]
 			,tblEMEntity

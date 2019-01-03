@@ -11,7 +11,7 @@
 		,a.intProjectId
 		,intTicketId = a.intLinkId
 		,a.intProjectAuditLogId
-		,strLastUpdated = CONVERT(VARCHAR(10),a.dtmLastUpdated,101)
+		,strLastUpdated = CONVERT(VARCHAR(10),a.dtmLastUpdated,101) COLLATE Latin1_General_CI_AS
 	from
 		tblHDProjectAuditLog a
 		,tblEMEntity b

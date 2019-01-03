@@ -9,7 +9,7 @@
 			,result.strCompanyName
 			,result.strEmail
 			,result.intContactId
-			,strEntityType = result.strEntityType
+			,strEntityType = result.strEntityType COLLATE Latin1_General_CI_AS
 			,d.intActivityId
 			,strActivityType = d.strType
 			,d.strActivityNo

@@ -2,7 +2,7 @@
 (
 	[intOOPMonitoringId] [int] IDENTITY(1,1) NOT NULL,
 	[intTicketId] [int] NULL,
-	[strTicketNumber] nvarchar(20) NULL,
+	[strTicketNumber] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	[intEntityId] [int] NOT NULL,
 	[intDate] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,

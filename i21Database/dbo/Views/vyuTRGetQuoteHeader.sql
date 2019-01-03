@@ -21,7 +21,7 @@ SELECT QuoteHeader.intQuoteHeaderId
 	, QuoteHeader.strCustomerComments
 	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = Customer.intEntityId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Transport Quote' + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	, dblQuoteTotal = CONVERT(DECIMAL, 0.000000) 
-	, strStatus	=  CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = Customer.intEntityId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Transport Quote' + '%') > 0 THEN 'Ready' ELSE 'Email not configured' END
+	, strStatus	=  CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = Customer.intEntityId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Transport Quote' + '%') > 0 THEN 'Ready' ELSE 'Email not configured' END COLLATE Latin1_General_CI_AS
 FROM tblTRQuoteHeader QuoteHeader
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = QuoteHeader.intEntityCustomerId
 LEFT JOIN vyuEMSalesperson SalesPerson ON SalesPerson.intEntityId = Customer.intSalespersonId

@@ -10,7 +10,7 @@ SELECT DISTINCT RackPriceDetail.intRackPriceDetailId
 	, Item.strItemNo
 	, Item.strType
 	, Item.strDescription
-	, strEquation = ISNULL(PriceEquation.strEquation, '')
+	, strEquation = ISNULL(PriceEquation.strEquation, '') COLLATE Latin1_General_CI_AS
 	, RackPriceHeader.dtmEffectiveDateTime
 	, Entity.strName
 	, strVendorLocationName = EntityLocation.strLocationName

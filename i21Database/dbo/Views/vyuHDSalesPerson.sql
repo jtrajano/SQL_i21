@@ -10,7 +10,7 @@
 			,tblEMEntity.strPhone
 			,ysnActiveEntity = tblEMEntity.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
-			,strSalesPersonType = 'Sales Rep Entity'
+			,strSalesPersonType = 'Sales Rep Entity' COLLATE Latin1_General_CI_AS
 	from tblARSalesperson, tblEMEntity
 	where
 		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]

@@ -10,9 +10,9 @@
 			,intHoursWorked = hw.intHours
 			,dblRate = hw.dblRate
 			,dblTotalCost = hw.intHours * hw.dblRate
-			,strBillable = case hw.ysnBillable when 1 then 'Billable' else 'Non-billable' end
+			,strBillable = case hw.ysnBillable when 1 then 'Billable' else 'Non-billable' end COLLATE Latin1_General_CI_AS
 			,strDescription = hw.strDescription
-			,strSource = 'Help Desk'
+			,strSource = 'Help Desk' COLLATE Latin1_General_CI_AS
 			,strAgent = us.strFullName
 			,strUserName = us.strUserName
 			,strTicketNumber = t.strTicketNumber
