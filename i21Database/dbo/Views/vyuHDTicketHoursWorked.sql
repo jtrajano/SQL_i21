@@ -31,7 +31,7 @@
 			,strJobCode = e.strJobCode
 			,strCurrency = f.strCurrency
 			,strCurrencyExchangeRateType = g.strCurrencyExchangeRateType
-			,strDate = convert(nvarchar(20), a.dtmDate, 101) COLLATE Latin1_General_CI_AS 
+			,strDate = convert(nvarchar(20), a.dtmDate, 101) COLLATE Latin1_General_CI_AS
 			,strItemNo = h.strItemNo
 			,intTimeEntryId = 1
 			,i.strTicketNumber
