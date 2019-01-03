@@ -212,10 +212,21 @@ BEGIN
 			12
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN dbo.tblICInventoryReceiptCharge C ON B.intInventoryReceiptChargeId = C.intInventoryReceiptChargeId
 			INNER JOIN dbo.tblICItem D ON D.intItemId  = B.intItemId
+			INNER JOIN dbo.tblICInventoryReceiptCharge C ON B.intInventoryReceiptChargeId = C.intInventoryReceiptChargeId
+			OUTER APPLY
+			(
+				SELECT
+					SUM(details.dblQtyReceived) dblQtyReceived
+				FROM tblAPBill vouchers
+				INNER JOIN tblAPBillDetail details ON vouchers.intBillId = details.intBillId
+				WHERE 
+					details.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+				AND vouchers.intBillId != A.intBillId
+				AND vouchers.intEntityVendorId = A.intEntityVendorId
+			) voucherCharges
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
-			AND C.dblQuantityBilled = C.dblQuantity	  
+			AND C.dblQuantityBilled = voucherCharges.dblQtyReceived	  
 			AND A.intTransactionType = 1
 			AND C.ysnPrice = 0
 

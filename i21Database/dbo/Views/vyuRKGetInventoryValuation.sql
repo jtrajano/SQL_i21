@@ -29,13 +29,13 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 											WHEN shipment.intInventoryShipmentId IS NOT NULL THEN
 												CASE
 													WHEN shipment.intSourceType = 1 THEN 'Scale'
-													WHEN shipment.intSourceType = 2 THEN 'Inbound Shipment'
+													WHEN shipment.intSourceType = 2 THEN 'Outbound Shipment'
 													WHEN shipment.intSourceType = 3 THEN 'Pick Lot'
 													WHEN shipment.intSourceType = 4 THEN 'Delivery Sheet'
 													ELSE ''
 												END
 											ELSE ''
-										END
+										END COLLATE Latin1_General_CI_AS
 		,strSourceNumber			= CASE 
 										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
 											CASE	

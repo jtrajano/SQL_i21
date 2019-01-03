@@ -4,7 +4,7 @@
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
     SC.strTicketStatus = 'V' THEN 'VOID' WHEN
-    SC.strTicketStatus = 'R' THEN 'REOPENED' END) AS
+    SC.strTicketStatus = 'R' THEN 'REOPENED' END) COLLATE Latin1_General_CI_AS AS
     strTicketStatusDescription, 
 	SC.strTicketStatus,
     SC.strTicketNumber, 
@@ -103,8 +103,12 @@
 	tblSMCompanySetup.strCompanyPhone,
 	tblSMCompanySetup.strCompanyCity,
 	tblSMCompanySetup.strCompanyCountry,
-	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.strReceiptNumber,
+	ReceiptItem.intInventoryReceiptId,
+	ReceiptItem.dblGross,
+	ReceiptItem.dblNet,
+	ReceiptItem.dblShrinkage,
+	ReceiptItem.totalTicket,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   FROM tblSCTicket SC
@@ -130,11 +134,21 @@
 	 FROM tblSMCompanySetup
   )AS tblSMCompanySetup
   OUTER APPLY(
-	SELECT TOP 1 ICI.intInventoryReceiptItemId
-		,IC.intInventoryReceiptId
+	SELECT IC.intInventoryReceiptId
 		,IC.strReceiptNumber
-		,IC.dtmReceiptDate  from tblICInventoryReceipt IC 
+		,IC.dtmReceiptDate 
+		,ICI.intInventoryReceiptItemId
+		,ICI.dblGross
+		,ICI.dblNet
+		,(ICI.dblGross - ICI.dblNet) [dblShrinkage]
+		,LineCtr.totalTicket
+	FROM tblICInventoryReceipt IC 
 	INNER JOIN tblICInventoryReceiptItem ICI ON IC.intInventoryReceiptId = ICI.intInventoryReceiptId
+	OUTER APPLY(
+		SELECT COUNT(*) as totalTicket FROM tblICInventoryReceipt IR
+		INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		WHERE intSourceId = SC.intTicketId AND IR.intSourceType = 1
+	)LineCtr
 	WHERE ICI.intSourceId = SC.intTicketId AND IC.intSourceType = 1
   )AS ReceiptItem
   OUTER APPLY(
@@ -142,4 +156,4 @@
 	INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
 	WHERE APD.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
   )AS Voucher
-  WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0
+  WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0 AND ISNULL(ReceiptItem.intInventoryReceiptId, 0) > 0

@@ -129,18 +129,27 @@
     ,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
-	,SCT.strPlateNumber
+	,SCT.strPlateNumber COLLATE Latin1_General_CI_AS AS strPlateNumber
 	,SCT.blbPlateNumber
 	,SCT.strDriverName
 	--,SCT.intEntityContactId
+	,SCT.intTransferLocationId
+	,SCT.intSubLocationToId
+	,SCT.intStorageLocationToId
 	,SMC.strLocationName AS strProcessingLocationName
+	,SMCT.strLocationName AS strTransferLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
+	,SMCSubLocationTransfer.strSubLocationName AS strTransferSubLocationName
 	,SMCur.strCurrency
 	,CAST(
 		CASE WHEN ISNULL(SMCSubLocation.intCompanyLocationSubLocationId,0) = 0 THEN 0
 		ELSE 1 END
 	 AS BIT) AS ysnHasSubLocation
+	 ,CAST(
+		CASE WHEN ISNULL(SMCSubLocationTransfer.intCompanyLocationSubLocationId,0) = 0 THEN 0
+		ELSE 1 END
+	 AS BIT) AS ysnHasSubLocationTransfer
 
 	,GRStorage.strStorageTypeDescription
 	,GRDiscountId.strDiscountId
@@ -159,6 +168,7 @@
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
 	,ICStorageLocation.strName AS strStorageLocation
+	,ICStorageLocationTransfer.strName AS strTransferStorageLocation
 	,ICUM.strUnitMeasure
 	,ICCommodity.strCommodityCode
 	,ICCommodity.dblPriceCheckMin
@@ -232,6 +242,8 @@
 	LEFT JOIN tblSMCompanyLocation SMC on SMC.intCompanyLocationId = SCT.intProcessingLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SMCSubLocation on SMCSubLocation.intCompanyLocationSubLocationId = SCT.intSubLocationId
 	LEFT JOIN tblSMCurrency SMCur on SMCur.intCurrencyID = SCT.intCurrencyId
+	LEFT JOIN tblSMCompanyLocation SMCT on SMCT.intCompanyLocationId = SCT.intTransferLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation SMCSubLocationTransfer on SMCSubLocationTransfer.intCompanyLocationSubLocationId = SCT.intSubLocationToId
 
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCT.intSplitId
@@ -240,6 +252,7 @@
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId
 	LEFT JOIN tblICStorageLocation ICStorageLocation on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationId
+	LEFT JOIN tblICStorageLocation ICStorageLocationTransfer on ICStorageLocationTransfer.intStorageLocationId = SCT.intStorageLocationToId
 	LEFT JOIN tblICCommodityAttribute ICCA  on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
 	LEFT JOIN tblICItem ICFreight on ICFreight.intItemId = SCSetup.intFreightItemId
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId

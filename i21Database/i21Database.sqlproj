@@ -7241,6 +7241,28 @@
     <Build Include="dbo\Tables\tblSRReportLog.sql" />
     <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
+    <Build Include="dbo\Views\vyuSTItemUOMUpcCodeToNumeric.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRegisterItemReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeSaveBrokerageCommission.sql" />
+    <Build Include="dbo\Functions\fnRKGetInHouseAndCompanyTitle.sql" />
+    <Build Include="dbo\Views\vyuRKGetICStockMovement.sql" />
+    <Build Include="dbo\Functions\fnRKGetContractDetail.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceAudit.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateExistingSequenceHistory.sql" />
+    <Build Include="dbo\Functions\fnRKGetAssociatedFutureMonth.sql" />
+    <Build Include="dbo\Views\vyuSCProductionHistoryReportView.sql" />
+    <Build Include="dbo\Views\vyuGRStorageAdjustmentRecords.sql" />
+    <Build Include="dbo\Tables\tblSTStoreAppHistoryReports.sql" />
+    <None Include="Scripts\Post-Deployment\CF\4_18.1To18.3DataConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonth.sql" />
+    <Build Include="dbo\Functions\fnRKGetContractInfo.sql" />
+    <Build Include="dbo\Tables\tblICStagingDailyStockPosition.sql" />
+    <None Include="Scripts\Post-Deployment\GR\GR_GrossQuantityInStorage.sql" />
+    <None Include="Scripts\Post-Deployment\GR\GR_FarmField.sql" />
+    <Build Include="dbo\Functions\fnSCGetTicketDetailsFromLG.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

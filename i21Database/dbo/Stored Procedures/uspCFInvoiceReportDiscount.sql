@@ -74,7 +74,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intCustomerGroupId,intAccountId,strNetwork,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp,dtmBillingDate',',') 
+		FROM [fnCFSplitString]('strCustomerNumber,intCustomerGroupId,intAccountId,strNetwork,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp,dtmBillingDate',',') 
 
 
 		--READ XML
@@ -122,9 +122,15 @@ BEGIN
 			,@Condition = [condition]
 			,@Fieldname = [fieldname]
 		FROM @temp_params WHERE [fieldname] = @strField
+
+
+		SELECT *
+		FROM @temp_params
+
+
 		IF (UPPER(@Condition) = 'BETWEEN')
 		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
@@ -142,7 +148,7 @@ BEGIN
 		END
 		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
 		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
@@ -160,7 +166,7 @@ BEGIN
 		END
 		ELSE IF (UPPER(@Condition) = 'IN')
 		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
@@ -178,7 +184,7 @@ BEGIN
 		END
 		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
 		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
@@ -196,7 +202,7 @@ BEGIN
 		END
 		ELSE IF (UPPER(@Condition) = 'LESS THAN')
 		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
@@ -220,6 +226,18 @@ BEGIN
 		SET @To = ''
 		SET @Condition = ''
 		SET @Fieldname = ''
+
+
+		IF OBJECT_ID('tempdb..##tblCFInvoiceDiscount') IS NOT NULL
+		BEGIN
+				DROP TABLE ##tblCFInvoiceDiscount
+		END
+
+		IF OBJECT_ID('tempdb..##tmpInvoiceDiscount') IS NOT NULL
+		BEGIN
+				DROP TABLE ##tmpInvoiceDiscount
+		END
+
 
 
 

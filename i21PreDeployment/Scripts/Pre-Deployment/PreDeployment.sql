@@ -207,6 +207,11 @@
 --SC
 :r .\24_SC\3_UpdateSplitIdForSCTicket.sql
 
+--SC
+
+:r .\24_SC\3_UpdateSplitIdForSCTicket.sql
+
+
 --ST
 :r .\25_ST\0_CleanUp.sql
 

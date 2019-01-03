@@ -1,7 +1,5 @@
 CREATE PROCEDURE [dbo].[uspSCProcessScaleTransfer]
 	@intTicketId AS INT
-	,@intMatchTicketId AS INT
-	,@strInOutIndicator AS NVARCHAR(1)
 	,@intUserId AS INT
 AS
 
@@ -14,8 +12,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
-DECLARE @InventoryReceiptId AS INT; 
-DECLARE @ErrMsg                    NVARCHAR(MAX);
+DECLARE @lotType AS INT; 
+DECLARE @ErrMsg  NVARCHAR(MAX);
  IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
     BEGIN
         CREATE TABLE #tmpAddInventoryTransferResult (
@@ -23,6 +21,7 @@ DECLARE @ErrMsg                    NVARCHAR(MAX);
 			,intInventoryTransferId INT
         )
     END
+SELECT @lotType = dbo.fnGetItemLotType(intItemId) FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 BEGIN TRY
 DECLARE @TransferEntries AS InventoryTransferStagingTable,
@@ -30,85 +29,81 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 
 -- Insert the data needed to create the inventory transfer.
     INSERT INTO @TransferEntries (
-                -- Header
-                [dtmTransferDate]
-                ,[strTransferType]
-                ,[intSourceType]
-                ,[strDescription]
-                ,[intFromLocationId]
-                ,[intToLocationId]
-                ,[ysnShipmentRequired]
-                ,[intStatusId]
-                ,[intShipViaId]
-                ,[intFreightUOMId]
-                -- Detail
-                ,[intItemId]
-                ,[intLotId]
-                ,[intItemUOMId]
-                ,[dblQuantityToTransfer]
-                ,[strNewLotId]
-                ,[intFromSubLocationId]
-                ,[intToSubLocationId]
-                ,[intFromStorageLocationId]
-                ,[intToStorageLocationId]
-				,[ysnWeights]
-                -- Integration Field
-				,[intInventoryTransferId]
-                ,[intSourceId]   
-				,[strSourceId]  
-				,[strSourceScreenName]
+        -- Header
+        [dtmTransferDate]
+        ,[strTransferType]
+        ,[intSourceType]
+        ,[strDescription]
+        ,[intFromLocationId]
+        ,[intToLocationId]
+        ,[ysnShipmentRequired]
+        ,[intStatusId]
+        ,[intShipViaId]
+        ,[intFreightUOMId]
+        -- Detail
+        ,[intItemId]
+        ,[intLotId]
+        ,[intItemUOMId]
+        ,[dblQuantityToTransfer]
+		,[intItemWeightUOMId]		
+		,[dblGrossWeight]			
+		,[dblTareWeight]			
+        ,[strNewLotId]
+        ,[intFromSubLocationId]
+        ,[intToSubLocationId]
+        ,[intFromStorageLocationId]
+        ,[intToStorageLocationId]
+		,[ysnWeights]
+        -- Integration Field
+		,[intInventoryTransferId]
+        ,[intSourceId]   
+		,[strSourceId]  
+		,[strSourceScreenName]
     )
-    SELECT      -- Header
-                [dtmTransferDate]           = GETDATE()
-                ,[strTransferType]          = 'Location to Location'
-                ,[intSourceType]            = 1
-                ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
-                ,[intFromLocationId]        = SCS.intLocationId
-                ,[intToLocationId]          = SC.intProcessingLocationId
-                ,[ysnShipmentRequired]      = 1
-                ,[intStatusId]              = 1
-                ,[intShipViaId]             = NULL
-                ,[intFreightUOMId]          = null
-                -- Detail
-                ,[intItemId]                = SC.intItemId
-                ,[intLotId]                 = SC.intLotId
-                ,[intItemUOMId]             = SC.intItemUOMIdTo
-                ,[dblQuantityToTransfer]    = SC.dblNetUnits
-                ,[strNewLotId]              = NULL
-                ,[intFromSubLocationId]     = SC.intSubLocationId
-                ,[intToSubLocationId]       = NULL
-                ,[intFromStorageLocationId] = SC.intStorageLocationId
-                ,[intToStorageLocationId]   = NULL
-				,[ysnWeights]				= CASE
-												WHEN SC.intWeightId > 0 THEN 1
-												ELSE 0
-											END
-                -- Integration Field
-				,[intInventoryTransferId]   = NULL
-                ,[intSourceId]              = SC.intTicketId
-				,[strSourceId]				= SC.strTicketNumber
-				,[strSourceScreenName]		= 'Scale Ticket'
-    FROM	tblSCTicket SC 
+	SELECT      
+		-- Header
+		[dtmTransferDate]           = GETDATE()
+		,[strTransferType]          = 'Location to Location'
+		,[intSourceType]            = 1
+		,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
+		,[intFromLocationId]        = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intProcessingLocationId ELSE SCS.intLocationId END 
+		,[intToLocationId]          = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intTransferLocationId ELSE SC.intProcessingLocationId END 
+		,[ysnShipmentRequired]      = CASE WHEN SC.intTicketTypeId = 10 THEN 0 ELSE 1 END
+		,[intStatusId]              = 1
+		,[intShipViaId]             = NULL
+		,[intFreightUOMId]          = null
+		-- Detail
+		,[intItemId]                = SC.intItemId
+		,[intLotId]                 = SC.intLotId
+		,[intItemUOMId]             = SC.intItemUOMIdTo
+		,[dblQuantityToTransfer]    = SC.dblNetUnits
+		,[intItemWeightUOMId]		= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.intItemUOMIdFrom ELSE SC.intItemUOMIdTo END
+		,[dblGrossWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits) ELSE SC.dblGrossUnits END
+		,[dblTareWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink) ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblShrink ELSE 0 END END
+		,[strNewLotId]              = NULL
+		,[intFromSubLocationId]     = SC.intSubLocationId
+		,[intToSubLocationId]       = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intSubLocationToId ELSE NULL END
+		,[intFromStorageLocationId] = SC.intStorageLocationId
+		,[intToStorageLocationId]   = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intStorageLocationToId ELSE NULL END
+		,[ysnWeights]				= CASE
+										WHEN SC.intWeightId > 0 THEN 1
+										ELSE 0
+									END
+		-- Integration Field
+		,[intInventoryTransferId]   = NULL
+		,[intSourceId]              = SC.intTicketId
+		,[strSourceId]				= SC.strTicketNumber
+		,[strSourceScreenName]		= 'Scale Ticket'
+    FROM tblSCTicket SC 
 	INNER JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-    WHERE	SC.intTicketId = @intTicketId 
-			
+	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+    WHERE SC.intTicketId = @intTicketId 
 
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;
     IF (@total = 0)
 	   RETURN;
 
-    -- If the integrating module needs to know the created transfer(s), the create a temp table called tmpAddInventoryTransferResult
-    -- The temp table will be accessed by uspICAddInventoryTransfer to send feedback on the created transfer transaction.
-    --IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
-    --BEGIN
-    --    CREATE TABLE #tmpAddInventoryTransferResult (
-    --        intSourceId INT
-    --        ,intInventoryTransferId INT
-    --    )
-    --END
-     
-     
     -- Call uspICAddInventoryTransfer stored procedure.
     EXEC dbo.uspICAddInventoryTransfer
             @TransferEntries
@@ -127,7 +122,6 @@ _PostOrUnPost:
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddInventoryTransferResult) 
 	BEGIN
-
 		SELECT TOP 1 
 				@TransferId = intInventoryTransferId  
 		FROM	#tmpAddInventoryTransferResult 
@@ -137,13 +131,7 @@ _PostOrUnPost:
 		FROM	tblICInventoryTransfer 
 		WHERE	intInventoryTransferId = @TransferId
 
-		SELECT	TOP 1 @intEntityId = [intEntityId] 
-		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityId] = @intUserId
-
-		BEGIN
-	    	EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId;			
-		END
+	    EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId;			
 
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId

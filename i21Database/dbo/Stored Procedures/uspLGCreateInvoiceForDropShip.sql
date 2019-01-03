@@ -26,6 +26,31 @@ BEGIN
 		RETURN 0;
 	END
 
+	IF EXISTS (SELECT TOP 1 1 FROM 
+				tblCTContractDetail CD
+				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1))
+	BEGIN
+		SELECT TOP 1 
+			@strInvoiceNumber = CH.strContractNumber,
+			@strLoadNumber = CAST(CD.intContractSeq AS nvarchar(10))
+		FROM 
+		tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1)
+
+		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+
+		SET @ErrorMessageNotPriced = 'Contract No. ' + @strInvoiceNumber + '/' + @strLoadNumber + ' is not Priced. Unable to create Invoice.';
+
+		RAISERROR(@ErrorMessageNotPriced, 16, 1);
+		RETURN 0;
+
+	END
+
 	DECLARE  @ZeroDecimal		DECIMAL(18,6)
 			,@DateOnly			DATETIME
 			--,@ShipmentNumber	NVARCHAR(100)

@@ -45,7 +45,9 @@ DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
 		,@intOwnershipType				INT
 		,@strFreightCostMethod			NVARCHAR(40)
 		,@strFeesCostMethod				NVARCHAR(40)
-		,@dblTempAdjustByQuantity		NUMERIC (38,20);
+		,@dblTempAdjustByQuantity		NUMERIC (38,20)
+		,@shipFromEntityId				INT
+		,@shipFrom						INT;
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -54,7 +56,9 @@ DECLARE @splitTable TABLE(
 	[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
 	[intStorageScheduleTypeId] INT NULL,
 	[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
-	[intStorageScheduleId] INT NULL
+	[intStorageScheduleId] INT NULL,
+	[intShipFromEntityId] INT NULL,
+	[intShipFrom] INT NULL
 );
 
 DECLARE @processTicket TABLE(
@@ -86,6 +90,8 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]
 		,[strDistributionOption]
 		,[intStorageScheduleId]
+		,[intShipFromEntityId]
+		,[intShipFrom]
 	)
 	SELECT  
 		[intEntityId]					= SDS.intEntityId
@@ -95,13 +101,16 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]		= SDS.intStorageScheduleTypeId
 		,[strDistributionOption]		= SDS.strDistributionOption
 		,[intStorageScheduleId]			= SDS.intStorageScheduleRuleId
+		,[intShipFromEntityId]			= SCD.intEntityId
+		,[intShipFrom]					= ISNULL(SCD.intFarmFieldId,EM.intEntityLocationId)
 	FROM tblSCDeliverySheetSplit SDS
 	INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
+	LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SCD.intEntityId AND EM.ysnDefaultLocation = 1
 	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 	
-	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId FROM @splitTable
+	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable
 	OPEN splitCursor;  
-	FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;  
+	FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
 		SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
@@ -114,19 +123,9 @@ BEGIN TRY
 
 		UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 
-		EXEC uspGRCustomerStorageBalance
-				@intEntityId = NULL
-				,@intItemId = NULL
-				,@intLocationId = NULL
-				,@intDeliverySheetId = NULL
-				,@intCustomerStorageId = @intCustomerStorageId
-				,@dblBalance = @dblFinalSplitQty
-				,@intStorageTypeId = @intStorageScheduleTypeId
-				,@intStorageScheduleId = @intStorageScheduleId
-				,@ysnDistribute = 1
-				,@newBalance = @newBalance OUT
+		EXEC uspGRCustomerStorageBalance NULL,NULL,NULL,NULL,@intCustomerStorageId,@dblFinalSplitQty,@intStorageScheduleTypeId,@intStorageScheduleId,1,@shipFrom,@shipFromEntityId,@newBalance OUT
 
-		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;
+		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;
 	END
 	CLOSE splitCursor;  
 	DEALLOCATE splitCursor;
@@ -346,6 +345,14 @@ BEGIN TRY
 		FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
 	) SC
 	WHERE CS.intDeliverySheetId = @intDeliverySheetId
+		
+	UPDATE GRS SET GRS.dblGrossQuantity = ((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross)
+	FROM tblSCDeliverySheet SCD
+	INNER JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
+	INNER JOIN tblGRCustomerStorage GRS ON GRS.intDeliverySheetId = SCDS.intDeliverySheetId 
+	AND SCDS.intEntityId = GRS.intEntityId
+	AND SCDS.intStorageScheduleTypeId = GRS.intStorageTypeId  
+	where SCDS.intDeliverySheetId = @intDeliverySheetId and GRS.ysnTransferStorage = 0
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
 

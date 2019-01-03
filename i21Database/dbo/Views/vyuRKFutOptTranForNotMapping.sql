@@ -17,7 +17,7 @@ SELECT
 	,CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
 		WHEN ft.intInstrumentTypeId = 2 then 'Options'
 		WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' 
-	 end strInstrumentType
+	 end COLLATE Latin1_General_CI_AS AS strInstrumentType
 	,CASE WHEN strBuySell = 'Sell' then -intNoOfContract 
 		else intNoOfContract 
 	 end intGetNoOfContract
@@ -38,7 +38,7 @@ SELECT
 	,ft.intRollingMonthId
 	,CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' 
 		else 'OTC' 
-	 end as strSelectedInstrumentType
+	 end COLLATE Latin1_General_CI_AS as strSelectedInstrumentType
 	,intAssignedLots as intAssignedLots
 	,b.strBankName
 	,ba.strBankAccountNo

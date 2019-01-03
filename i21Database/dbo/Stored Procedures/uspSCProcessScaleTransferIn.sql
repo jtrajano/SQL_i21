@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCProcessScaleTransferIn]
 	@intTicketId AS INT
 	,@intMatchTicketId AS INT
-	,@strInOutIndicator AS NVARCHAR(1)
 	,@intUserId AS INT
 AS
 	SET QUOTED_IDENTIFIER OFF

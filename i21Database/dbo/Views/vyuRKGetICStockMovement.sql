@@ -56,7 +56,7 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.st
 			CASE 
 				WHEN t.intOwnershipType = 1 THEN 'Own'
 				WHEN t.intOwnershipType = 2 THEN 'Storage'
-			END 
+			END COLLATE Latin1_General_CI_AS
 		,dtmCreated					= dbo.fnRemoveTimeOnDate(t.dtmCreated)
 		,subLoc.strStorageLocationSorter
 		,subLoc.intStorageLocationSorter

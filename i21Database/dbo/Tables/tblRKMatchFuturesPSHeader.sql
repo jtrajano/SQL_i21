@@ -13,7 +13,7 @@
 	[intBookId] INT NULL, 
     [intSubBookId] INT NULL,
 	[intSelectedInstrumentTypeId] INT NULL,
-	[strType] NVARCHAR(10) DEFAULT (N'Realize'),
+	[strType] NVARCHAR(10) COLLATE Latin1_General_CI_AS DEFAULT (N'Realize'),
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[intBankId] INT NULL,
 	[intBankAccountId] INT NULL,

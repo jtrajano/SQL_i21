@@ -1,7 +1,7 @@
 ﻿CREATE VIEW dbo.vyuSTTranslogHeader
 AS
 SELECT ROW_NUMBER() OVER (ORDER BY TRR.intTermMsgSN ASC) AS intId 
-      , CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TRR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TRR.intStoreId AS NVARCHAR(MAX)) AS strUniqueId
+      , CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TRR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TRR.intStoreId AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS AS strUniqueId
       , TRR.intTermMsgSN
 	  , TRR.intStoreId
 	  , TRR.intCheckoutId

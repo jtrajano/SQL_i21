@@ -160,7 +160,7 @@ FROM (
 		LEFT JOIN tblSMCurrency C ON C.intCurrencyID = FM.intCurrencyId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = FM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM IU ON IU.intUnitMeasureId = UM.intUnitMeasureId AND IU.intItemId = Item.intItemId
-		LEFT JOIN tblSMCurrency BC ON C.intCurrencyID = CTDetail.intBasisCurrencyId
+		LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = CTDetail.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = CTDetail.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId

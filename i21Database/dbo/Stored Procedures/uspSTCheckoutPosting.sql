@@ -310,7 +310,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
@@ -326,7 +326,7 @@ BEGIN
 																			,NULL
 																			,NULL
 																			,NULL
-																		) TAX
+																	) TAX
 
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
@@ -710,7 +710,7 @@ BEGIN
 										,[dtmMaintenanceDate]		= NULL
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
-										,[intTaxGroupId]			= @intTaxGroupId
+										,[intTaxGroupId]			= NULL --@intTaxGroupId
 										,[ysnRecomputeTax]			= 0 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
@@ -1182,7 +1182,7 @@ BEGIN
 																																	AND CATT.intCategoryId = DT.intCategoryId
 																															   ),0)
 																								) AS NUMERIC(18, 6))
-																							) >= 1 
+																							) > 0 
 																						THEN (
 																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
 																																			SELECT SUM(dblTotalSales)
@@ -1198,6 +1198,46 @@ BEGIN
 																																		), 0)
 																																	) AS NUMERIC(18, 6)))
 																						)
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) < 0 
+																						THEN (
+																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																			SELECT SUM(dblTotalSales)
+																																			FROM tblSTCheckoutItemMovements IM
+																																			JOIN tblICItemUOM UOM 
+																																				ON IM.intItemUPCId = UOM.intItemUOMId
+																																			JOIN tblICItem I 
+																																				ON UOM.intItemId = I.intItemId
+																																			JOIN tblICCategory CATT 
+																																				ON I.intCategoryId = CATT.intCategoryId 
+																																			WHERE intCheckoutId = @intCheckoutId
+																																			AND CATT.intCategoryId = DT.intCategoryId
+																																		), 0)
+																																	) AS NUMERIC(18, 6)))
+																						)
+																				 WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																	SELECT SUM(IM.dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE IM.intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																								) AS NUMERIC(18, 6))
+																							) = 0 
+																						THEN  0
 																				ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
 																		END
 											,[ysnRefreshPrice]			= 0
@@ -1257,7 +1297,7 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
-								AND DT.dblTotalSalesAmountComputed > 0
+								AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
@@ -1744,8 +1784,8 @@ BEGIN
 									,[strSourceId]
 									,[intHeaderId]
 									,[dtmDate]
-					)
-					SELECT
+						)
+						SELECT
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
@@ -1830,7 +1870,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
@@ -2546,7 +2586,7 @@ BEGIN
 																			, ST.intCompanyLocationId				-- Company Location Id
 																			, ST.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
-																			, GETDATE()
+																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
 																			, NULL
@@ -4328,3 +4368,5 @@ ExitWithRollback:
 	
 		
 ExitPost:
+GO
+

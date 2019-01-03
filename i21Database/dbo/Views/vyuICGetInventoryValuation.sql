@@ -166,7 +166,7 @@ FROM 	tblICItem i
 					AND ld.intLoadDetailId = t.intTransactionDetailId
 					AND l.intLoadId = t.intTransactionId
 					AND ld.intItemId = t.intItemId		
-					AND ty.intTransactionTypeId = 44
+					AND ty.intTransactionTypeId IN (22,46)
 		) loadShipmentSchedule 
 		LEFT JOIN tblGRSettleStorage settleStorage 
 			ON settleStorage.intSettleStorageId = t.intTransactionId

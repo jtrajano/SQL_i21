@@ -23,7 +23,8 @@ BEGIN TRY
 			@intItemId					INT,
 			@intContractHeaderId		INT,
 			@ysnLoad					BIT,
-			@dblTolerance				NUMERIC(18,6) = 0.0001
+			@dblTolerance				NUMERIC(18,6) = 0.0001,
+			@intSequenceUsageHistoryId	INT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -65,15 +66,16 @@ BEGIN TRY
 	
 
 	EXEC	uspCTCreateSequenceUsageHistory 
-			@intContractDetailId	=	@intContractDetailId,
-			@strScreenName			=	@strScreenName,
-			@intExternalId			=	@intExternalId,
-			@strFieldName			=	'Quantity',
-			@dblOldValue			=	@dblQuantity,
-			@dblTransactionQuantity =	@dblQuantityToUpdate,
-			@dblNewValue			=	@dblNewQuantity,	
-			@intUserId				=	@intUserId,
-			@dblBalance				=   @dblQuantityToUpdate
+			@intContractDetailId		=	@intContractDetailId,
+			@strScreenName				=	@strScreenName,
+			@intExternalId				=	@intExternalId,
+			@strFieldName				=	'Quantity',
+			@dblOldValue				=	@dblQuantity,
+			@dblTransactionQuantity		=	@dblQuantityToUpdate,
+			@dblNewValue				=	@dblNewQuantity,	
+			@intUserId					=	@intUserId,
+			@dblBalance					=   @dblQuantityToUpdate,
+			@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
 
 	SET		@dblBalanceToUpdate		=	@dblQuantityToUpdate * -1
 
@@ -103,7 +105,12 @@ BEGIN TRY
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
-	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+	EXEC	uspCTCreateDetailHistory	
+	@intContractHeaderId		=	NULL,
+    @intContractDetailId		=	@intContractDetailId,
+	@strComment				    =	NULL,
+	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
+
 END TRY
 
 BEGIN CATCH

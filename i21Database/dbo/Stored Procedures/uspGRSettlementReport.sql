@@ -466,10 +466,9 @@ BEGIN
 				ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM 
 				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			LEFT JOIN tblSCTicket SC 
+			JOIN tblSCTicket SC 
 				ON SC.intTicketId = INVRCPTITEM.intSourceId
-			LEFT JOIN tblGRCustomerStorage CS 
-				ON CS.intTicketId = SC.intTicketId
+					AND BillDtl.intCustomerStorageId IS NULL
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -849,8 +848,15 @@ BEGIN
 				,dtmDeliveryDate				= CS.dtmDeliveryDate		
 				,intTicketId					= DS.intDeliverySheetId		
 				,strTicketNumber				= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
-				,strReceiptNumber				= ''
-				,intInventoryReceiptItemId		= 0 
+				,strReceiptNumber				= CASE 
+													WHEN BillDtl.intCustomerStorageId IS NOT NULL AND BillDtl.intInventoryReceiptItemId IS NOT NULL 
+														THEN (SELECT strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId))
+													ELSE ''
+												END
+				,intInventoryReceiptItemId		= CASE 
+													WHEN BillDtl.intCustomerStorageId IS NOT NULL AND BillDtl.intInventoryReceiptItemId IS NOT NULL THEN BillDtl.intInventoryReceiptItemId
+													ELSE 0
+												END
 				,intContractDetailId			= ISNULL(BillDtl.intContractDetailId, 0) 
 				,RecordId						= Bill.strBillId 		 
 				,lblSplitNumber					= NULL

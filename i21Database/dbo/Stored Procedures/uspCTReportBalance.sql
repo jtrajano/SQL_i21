@@ -4,9 +4,9 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg			NVARCHAR(MAX)
-	DECLARE @xmlDocumentId	INT
-
+	DECLARE @ErrMsg					NVARCHAR(MAX)
+	DECLARE @blbHeaderLogo			VARBINARY(MAX)
+	DECLARE @xmlDocumentId			INT
 	DECLARE @intContractTypeId		INT
 	DECLARE @intEntityId			INT
 	DECLARE @IntCommodityId			INT
@@ -16,6 +16,16 @@ BEGIN TRY
 	DECLARE @intCompanyLocationId	INT
 	DECLARE @IntFutureMarketId		INT
 	DECLARE @IntFutureMonthId		INT
+	DECLARE @strCompanyName			NVARCHAR(500)
+
+	SELECT	@strCompanyName	=	CASE 
+									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
+									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
+								END
+	FROM	tblSMCompanySetup
+
+	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
+	
 
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -32,9 +42,7 @@ BEGIN TRY
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
 	)  
-	
-	
-  
+
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
 	INSERT INTO @temp_xml_table  
@@ -87,74 +95,66 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intFutureMonthId'
 
-	
-	DECLARE @strCompanyName			NVARCHAR(500)
-	
-	SELECT	@strCompanyName	=	CASE 
-									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
-									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
-								END
-	FROM	tblSMCompanySetup
-
-
-
-	SELECT	
-	 strCompanyName			= @strCompanyName
-	,blbHeaderLogo			= dbo.fnSMGetCompanyLogo('Header')
-	,strDate				= LTRIM(DATEPART(mm,GETDATE())) + '-' + LTRIM(DATEPART(dd,GETDATE())) + '-' + RIGHT(LTRIM(DATEPART(yyyy,GETDATE())),2)
-	,strContractType		= TP.strContractType
-	,intCommodityId			= CH.intCommodityId
-	,strCommodity			= CM.strDescription +' '+UOM.strUnitMeasure
-	,intCompanyLocationId	= CD.intCompanyLocationId
-	,strLocationName		= L.strLocationName
-					   
-	,strCustomer			= EY.strEntityName
-	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
-	,strPricingType			= CASE 
-								  WHEN CD.intPricingTypeId = 1 THEN 'P' 
-								  WHEN CD.intPricingTypeId = 2 THEN 'B' 
-								  WHEN CD.intPricingTypeId = 3 THEN 'H'
-								  WHEN CD.intPricingTypeId = 6 THEN 'C'
-								  WHEN CD.intPricingTypeId = 7 THEN 'I'
-							 END
-	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
-	,strShipMethod			= FT.strFreightTerm
-	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
-								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
-	,intFutureMarketId      = CD.intFutureMarketId
-	,intFutureMonthId       = CD.intFutureMonthId
-	,strFutureMonth			= MO.strFutureMonth
-	,dblCashPrice			= ISNULL(CD.dblCashPrice,0)
-	,dblQuantity			= ISNULL(CD.dblQuantity,0)
-	,dblAvailableQty		= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
-	,dblAmount				= (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)) * CD.dblCashPrice
-
-	FROM tblCTContractDetail					CD	
-	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
-	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
-	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
+  /*
+	SELECT  
+	 CB.intContractHeaderId
+	,CB.strType
+	,CB.intContractDetailId
+	,strCompanyName = @strCompanyName		
+	,blbHeaderLogo	= @blbHeaderLogo		
+	,CB.strDate				
+	,CB.strContractType		
+	,CB.intCommodityId			
+	,strCommodity = CB.strCommodity  +' '+UOM.strUnitMeasure
+	,CB.intItemId		
+	,CB.strItemNo					
+	,CB.intCompanyLocationId	
+	,CB.strLocationName		
+	,CB.strCustomer			
+	,CB.strContract			
+	,strPricingType = LEFT(CB.strPricingType,1)
+	,CB.strContractDate		
+	,CB.strShipMethod			
+	,CB.strShipmentPeriod		
+	,CB.intFutureMarketId      
+	,CB.intFutureMonthId       
+	,CB.strFutureMonth			
+	,CB.dblFutures				
+	,CB.dblBasis
+	,CB.strBasisUOM				
+	,CB.dblQuantity
+	,CB.strQuantityUOM			
+	,CB.dblCashPrice
+	,CB.strPriceUOM
+	,CB.strStockUOM					
+	,CB.dblAvailableQty		
+	,CB.dblAmount		
+	FROM 
+	[dbo].[fnCTGetContractBalance]
+	(
+		 @intContractTypeId		
+		,@intEntityId			
+		,@IntCommodityId		
+		,@dtmStartDate			
+		,@dtmEndDate			
+		,@intCompanyLocationId
+		,@IntFutureMarketId   
+		,@IntFutureMonthId    
+		,NULL 
+	) CB
+	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CB.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
+ */
 
-	JOIN	tblCTContractType					TP	ON	TP.intContractTypeId			=	CH.intContractTypeId
-	JOIN    tblSMCompanyLocation				L	ON	L.intCompanyLocationId          =   CD.intCompanyLocationId
-	JOIN	vyuCTEntity							EY	ON	EY.intEntityId					=	CH.intEntityId	AND
-														EY.strEntityType				=	(
-																							 CASE 
-																								 WHEN CH.intContractTypeId = 1 THEN 'Vendor' 
-																								 ELSE 'Customer' 
-																							  END
-																							 )
-	LEFT JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId
-	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId
-	
-	WHERE CH.intContractTypeId	  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0    THEN @intContractTypeId	  ELSE CH.intContractTypeId    END
-	AND   CH.intEntityId		  = CASE WHEN ISNULL(@intEntityId ,0) > 0		   THEN @intEntityId		  ELSE CH.intEntityId		   END
-	AND   CH.intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0	   THEN @IntCommodityId		  ELSE CH.intCommodityId	   END
-	AND   CD.dtmStartDate        >= CASE WHEN @dtmStartDate IS NOT NULL			   THEN @dtmStartDate		  ELSE CD.dtmStartDate		   END
-	AND   CD.dtmEndDate			 <= CASE WHEN @dtmEndDate IS NOT NULL			   THEN @dtmEndDate			  ELSE CD.dtmEndDate		   END
-	AND   CD.intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0 THEN @intCompanyLocationId ELSE CD.intCompanyLocationId END
-	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId	   END
-	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId     END
+	EXEC uspCTGetContractBalance
+		 @intContractTypeId		
+		,@intEntityId			
+		,@IntCommodityId			
+		,@dtmStartDate			
+		,@dtmEndDate				
+		,@intCompanyLocationId 
+		,@IntFutureMarketId    
+		,@IntFutureMonthId     
 
 END TRY
 

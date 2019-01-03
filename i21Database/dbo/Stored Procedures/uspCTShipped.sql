@@ -28,10 +28,15 @@ BEGIN TRY
 				@intSourceId					INT,
 				@strShipmentId					NVARCHAR(50),
 				@strTicketNumber				NVARCHAR(50),
-				@intSequenceUsageHistoryId		INT
+				@intSequenceUsageHistoryId		INT,
+				@strScreenName					NVARCHAR(50) =	'Inventory Shipment'
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
 
+	IF @intSourceType = -1
+	BEGIN
+		SELECT @strScreenName = 'Load Schedule'
+	END
 
 	IF(@intOrderType <> 1)
 		RETURN
@@ -106,7 +111,7 @@ BEGIN TRY
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryShipmentItemId,
-					@strScreenName			=	'Inventory Shipment'
+					@strScreenName			=	@strScreenName
 		END
 		ELSE
 		BEGIN
@@ -115,18 +120,18 @@ BEGIN TRY
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryShipmentItemId,
-					@strScreenName			=	'Inventory Shipment' 
+					@strScreenName			=	@strScreenName
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-			IF @intSourceType IN (0,1,2,3,5)
+			IF @intSourceType IN (-1,0,1,2,3,5)
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInventoryShipmentItemId,
-						@strScreenName			=	'Inventory Shipment' 
+						@strScreenName			=	@strScreenName
 			END
 			
 			IF	@intSourceType = 1 AND 

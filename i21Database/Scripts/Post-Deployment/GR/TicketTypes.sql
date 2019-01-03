@@ -54,6 +54,12 @@ GO
         INSERT [dbo].[tblSCListTicketTypes] ([intTicketTypeId], [intTicketType], [strTicketType], [strInOutIndicator], [ysnActive], [intConcurrencyId])
         VALUES (9 , 6 , 'Direct Out' , 'O' , 1, 0)
     END
+GO
+    IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCListTicketTypes WHERE [intTicketType] = 7 AND [strInOutIndicator] = 'O')
+    BEGIN
+        INSERT [dbo].[tblSCListTicketTypes] ([intTicketTypeId], [intTicketType], [strTicketType], [strInOutIndicator], [ysnActive], [intConcurrencyId])
+        VALUES (10 , 7 , 'Transfer' , 'O' , 1, 0)
+    END
     SET IDENTITY_INSERT [dbo].[tblSCListTicketTypes] OFF
 GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE ISNULL([intTicketTypeId],0) = 0)

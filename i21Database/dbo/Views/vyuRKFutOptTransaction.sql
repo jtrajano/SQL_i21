@@ -15,7 +15,7 @@ FROM (
 		, ft.strOptionType
 		, strInstrumentType = CASE WHEN (ft.[intInstrumentTypeId] = 1) THEN N'Futures'
 								WHEN (ft.[intInstrumentTypeId] = 2) THEN N'Options'
-								WHEN (ft.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END
+								WHEN (ft.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
 		, ft.dblStrike
 		, ft.strInternalTradeNo
 		, e.strName
@@ -35,7 +35,7 @@ FROM (
 		, ft.intCommodityId
 		, strBankName
 		, strBankAccountNo
-		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' ELSE 'OTC' END)
+		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' ELSE 'OTC' END) COLLATE Latin1_General_CI_AS
 		, ft.dtmMaturityDate
 		, strCurrencyExchangeRateType
 		, ft.strFromCurrency

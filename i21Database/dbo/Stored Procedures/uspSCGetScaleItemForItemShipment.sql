@@ -65,7 +65,7 @@ BEGIN TRY
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = @dblNetUnits 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = CASE WHEN ScaleTicket.strInOutFlag = 'I' THEN @dblCost ELSE 0 END
+						,dblCost = @dblCost
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 

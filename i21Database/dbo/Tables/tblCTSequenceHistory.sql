@@ -61,6 +61,21 @@
 	strAmendmentComment		 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     intConcurrencyId		 INT,
 
+	dblOldQuantity			NUMERIC(18,6),
+	dblOldBalance			NUMERIC(18,6),
+	intOldStatusId			INT,
+	ysnQtyChange			BIT,
+	ysnStatusChange			BIT,
+	ysnBalanceChange		BIT,
+
+	dblOldFutures			NUMERIC(18,6),
+	dblOldBasis				NUMERIC(18,6),
+	dblOldCashPrice			NUMERIC(18,6),
+	ysnFuturesChange		BIT,
+	ysnBasisChange			BIT,
+	ysnCashPriceChange		BIT,
+	intSequenceUsageHistoryId	INT
+
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC),
     CONSTRAINT [FK_tblCTSequenceHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES [tblCTContractDetail](intContractDetailId) ON DELETE CASCADE
 )

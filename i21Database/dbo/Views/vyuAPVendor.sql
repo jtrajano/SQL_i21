@@ -31,7 +31,7 @@ SELECT
 	B.dblCreditLimit,
 	C.intShipViaId,
 	--C.intTaxCodeId,
-	B.intTermsId,
+	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId  END as intTermsId,
 	--C.strContactName,
 	C.strAddress,
 	C.strCity,

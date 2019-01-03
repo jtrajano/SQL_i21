@@ -49,7 +49,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intInvoiceId,
 				@strNumber				=	HR.strInvoiceNumber,
-				@strHeaderIdColumn		=	'intInvoiceId'
+				@strHeaderIdColumn		=	'intInvoiceId',
+				@dtmScreenDate			=	HR.dtmDate
 		FROM	tblARInvoiceDetail		DL
 		JOIN	tblARInvoice			HR	ON	HR.intInvoiceId	=	DL.intInvoiceId 
 		WHERE	DL.intInvoiceDetailId	=	@intExternalId
@@ -58,7 +59,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intLoadId,
 				@strNumber				=	HR.strLoadNumber,
-				@strHeaderIdColumn		=	'intLoadId'
+				@strHeaderIdColumn		=	'intLoadId',
+				@dtmScreenDate			=	HR.dtmScheduledDate
 		FROM	tblLGLoadDetail			DL
 		JOIN	tblLGLoad				HR	ON	HR.intLoadId	=	DL.intLoadId 
 		WHERE	DL.intLoadDetailId		=	@intExternalId
@@ -67,7 +69,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intLoadHeaderId,
 				@strNumber						=	HR.strTransaction,
-				@strHeaderIdColumn				=	'intLoadHeaderId'
+				@strHeaderIdColumn				=	'intLoadHeaderId',
+				@dtmScreenDate					=	HR.dtmLoadDateTime
 		FROM	tblTRLoadReceipt				DL
 		JOIN	tblTRLoadHeader					HR	ON	HR.intLoadHeaderId	=	DL.intLoadHeaderId
 		WHERE	DL.intLoadReceiptId				=	@intExternalId
@@ -76,7 +79,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intLoadHeaderId,
 				@strNumber						=	HR.strTransaction,
-				@strHeaderIdColumn				=	'intLoadHeaderId'
+				@strHeaderIdColumn				=	'intLoadHeaderId',
+				@dtmScreenDate					=	HR.dtmLoadDateTime
 		FROM	tblTRLoadDistributionDetail		DD
 		JOIN	tblTRLoadDistributionHeader		DL	ON	DL.intLoadDistributionHeaderId	=	DD.intLoadDistributionHeaderId 
 		JOIN	tblTRLoadHeader					HR	ON	HR.intLoadHeaderId				=	DL.intLoadHeaderId
@@ -86,7 +90,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intTicketId,
 				@strNumber				=	HR.strTicketNumber,
-				@strHeaderIdColumn		=	'intTicketId'
+				@strHeaderIdColumn		=	'intTicketId',
+				@dtmScreenDate			=	HR.dtmTicketDateTime
 		FROM	tblSCTicket				HR
 		WHERE	HR.intTicketId			=	@intExternalId
 		AND		strTicketStatus <> 'V'
@@ -95,7 +100,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intPurchaseId,
 				@strNumber				=	HR.strPurchaseOrderNumber,
-				@strHeaderIdColumn		=	'intPurchaseId'
+				@strHeaderIdColumn		=	'intPurchaseId',
+				@dtmScreenDate			=	HR.dtmDate
 		FROM	tblPOPurchaseDetail		DL
 		JOIN	tblPOPurchase			HR	ON	HR.intPurchaseId	=	DL.intPurchaseId 
 		WHERE	DL.intPurchaseDetailId	=	@intExternalId
@@ -104,7 +110,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intSettleStorageId,
 				@strNumber				=	HR.strStorageTicket,
-				@strHeaderIdColumn		=	'intSettleStorageId'
+				@strHeaderIdColumn		=	'intSettleStorageId',
+				@dtmScreenDate			=	(SELECT TOP 1 dtmDistributionDate FROM tblGRStorageHistory WHERE intSettleStorageId = HR.intSettleStorageId AND dtmDistributionDate IS NOT NULL)
 		FROM	tblGRSettleStorageTicket	DL
 		JOIN    tblGRSettleStorage      HR 	ON HR.intSettleStorageId=DL.intSettleStorageId
 		WHERE	DL.intSettleStorageTicketId	=	@intExternalId
@@ -114,6 +121,7 @@ BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
 				@strNumber				=	HR.strStorageTicketNumber,
 				@strHeaderIdColumn		=	'intCustomerStorageId'
+
 		FROM	tblGRCustomerStorage	HR	
 		WHERE	HR.intCustomerStorageId	=	@intExternalId
 	END
@@ -131,7 +139,8 @@ BEGIN
 	BEGIN
 		SELECT	@intExternalHeaderId			=	CA.intAdjustmentId,
 				@strNumber						=	CA.strAdjustmentNo,
-				@strHeaderIdColumn				=	'intAdjustmentId'
+				@strHeaderIdColumn				=	'intAdjustmentId',
+				@dtmScreenDate					=	CA.dtmAdjustmentDate
 		FROM	tblCTContractAdjustment CA
 		WHERE	CA.intAdjustmentId	=	@intExternalId
 	END	

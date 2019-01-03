@@ -7,6 +7,7 @@
     [strName]               [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTab]				[nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
     [strType]               [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+    [strQueueType]          [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
     [strJsonData]           [text] COLLATE Latin1_General_CI_AS NULL,
     [strStatus]             [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strMessage]            [text] COLLATE Latin1_General_CI_AS NULL,

@@ -61,9 +61,9 @@ AS
 	, dblNearingReorderBy = CAST(SUM(x.dblOnHand) - (ItemLocation.dblReorderPoint) AS NUMERIC(38, 7))
 	, x.ysnStockUnit
 	FROM (
-	SELECT
-			StockUOM.intSubLocationId,
-			StockUOM.intStorageLocationId,
+		SELECT
+			ISNULL(StockUOM.intSubLocationId,  CASE WHEN StockUnit.intItemUOMId = ItemUOM.intItemUOMId THEN StockUnit.intSubLocationId ELSE NULL END) intSubLocationId,
+			ISNULL(StockUOM.intStorageLocationId, CASE WHEN StockUnit.intItemUOMId = ItemUOM.intItemUOMId THEN StockUnit.intStorageLocationId ELSE NULL END) intStorageLocationId,
 			UnitMeasure.strUnitMeasure,
 			UnitMeasure.strUnitType,
 			ItemUOM.strUpcCode,
@@ -126,30 +126,32 @@ AS
 				AND StockUOM.intItemLocationId = ItemLocation.intItemLocationId
 				AND ItemUOM.ysnStockUnit <> 1
 			LEFT JOIN (
-			SELECT
-				ItemUOM.intItemId,
-				ItemLocation.intItemLocationId,
-				ItemUOM.intItemUOMId,
-				SUM(StockUOM.dblOnHand) dblOnHand,
-				SUM(StockUOM.dblInTransitInbound) dblInTransitInbound,
-				SUM(StockUOM.dblInTransitOutbound) dblInTransitOutbound,
-				SUM(StockUOM.dblConsignedPurchase) dblConsignedPurchase,
-				SUM(StockUOM.dblConsignedSale) dblConsignedSale,
-				SUM(StockUOM.dblOrderCommitted) dblOrderCommitted,
-				SUM(StockUOM.dblUnitReserved) dblUnitReserved,
-				SUM(StockUOM.dblOnOrder) dblOnOrder,
-				SUM(StockUOM.dblUnitStorage) dblUnitStorage
-			FROM tblICItemUOM ItemUOM
-				INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = ItemUOM.intItemId
-				INNER JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-				INNER JOIN tblICItemStockUOM StockUOM ON StockUOM.intItemUOMId = ItemUOM.intItemUOMId
-					AND StockUOM.intItemId = ItemUOM.intItemId
-					AND StockUOM.intItemLocationId = ItemLocation.intItemLocationId
-			WHERE ItemUOM.ysnStockUnit = 1
-			GROUP BY ItemUOM.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId
-		) StockUnit ON StockUnit.intItemId = ItemUOM.intItemId
+				SELECT
+					ItemUOM.intItemId,
+					ItemLocation.intItemLocationId,
+					ItemUOM.intItemUOMId,
+					SUM(StockUOM.dblOnHand) dblOnHand,
+					SUM(StockUOM.dblInTransitInbound) dblInTransitInbound,
+					SUM(StockUOM.dblInTransitOutbound) dblInTransitOutbound,
+					SUM(StockUOM.dblConsignedPurchase) dblConsignedPurchase,
+					SUM(StockUOM.dblConsignedSale) dblConsignedSale,
+					SUM(StockUOM.dblOrderCommitted) dblOrderCommitted,
+					SUM(StockUOM.dblUnitReserved) dblUnitReserved,
+					SUM(StockUOM.dblOnOrder) dblOnOrder,
+					SUM(StockUOM.dblUnitStorage) dblUnitStorage,
+					StockUOM.intStorageLocationId,
+					StockUOM.intSubLocationId
+				FROM tblICItemUOM ItemUOM
+					INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = ItemUOM.intItemId
+					INNER JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+					INNER JOIN tblICItemStockUOM StockUOM ON StockUOM.intItemUOMId = ItemUOM.intItemUOMId
+						AND StockUOM.intItemId = ItemUOM.intItemId
+						AND StockUOM.intItemLocationId = ItemLocation.intItemLocationId
+				WHERE ItemUOM.ysnStockUnit = 1
+				GROUP BY ItemUOM.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId, StockUOM.intStorageLocationId, StockUOM.intSubLocationId
+			) StockUnit ON StockUnit.intItemId = ItemUOM.intItemId
 				AND StockUnit.intItemLocationId = ItemLocation.intItemLocationId
-) x
+	) x
 		INNER JOIN tblICItem Item ON Item.intItemId = x.intItemId
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = x.intItemLocationId
 		LEFT OUTER JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

@@ -345,6 +345,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\InsertStorageHistoryTypeTransaction.sql
 :R .\GR\FixStorageHistoryData.sql
 :R .\GR\MigrateTransferStorageData.sql
+:R .\GR\GR_GrossQuantityInStorage.sql
+:R .\GR\GR_InsertReadingRanges.sql
+:R .\GR\GR_FarmField.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -526,6 +529,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CF\1_ImportMapping.sql
 :r .\CF\2_DataFix.sql
 :r .\CF\3_DataFixPriceAdjustment.sql
+:r .\CF\4_18.1To18.3DataConversion.sql
 
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql

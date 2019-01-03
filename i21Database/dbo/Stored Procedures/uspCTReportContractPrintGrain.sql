@@ -67,14 +67,15 @@ BEGIN TRY
 
 	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
-			ISNULL(@strCity,'') +' ' + ISNULL(+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
+			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
+			ISNULL(@strCountry,'')
 			AS	strA,
 			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
-			ISNULL(' '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
+			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 			AS	strB,
 			CH.dtmContractDate,
 			CH.strContractNumber,

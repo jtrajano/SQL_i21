@@ -185,6 +185,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -225,6 +226,7 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
+			,[dblGrossQuantity]					= CS.dblGrossQuantity
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -282,6 +284,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)
 		VALUES
 		(
@@ -324,6 +327,7 @@ BEGIN
 			,[intTicketId]
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
+			,[dblGrossQuantity]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
@@ -474,7 +478,9 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 
 		--strTransferTicket is being used by RM, we need to update the strTransferTicket so that they won't to look at our table just to get its corresponding string
-		UPDATE tblGRStorageHistory SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId)
+		UPDATE tblGRStorageHistory 
+		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
+		WHERE intTransferStorageId = @intTransferStorageId
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION

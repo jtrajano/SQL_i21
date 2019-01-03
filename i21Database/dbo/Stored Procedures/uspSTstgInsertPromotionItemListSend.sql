@@ -4,7 +4,7 @@
 	, @intRegisterId INT
 	, @dtmBeginningChangeDate DATETIME
 	, @dtmEndingChangeDate DATETIME
-	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
+	, @strGeneratedXML VARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @ysnSuccessResult BIT OUTPUT
 	, @strMessageResult NVARCHAR(1000) OUTPUT
@@ -89,7 +89,7 @@ BEGIN
 						DECLARE @strUniqueGuid AS NVARCHAR(50) = NEWID()
 
 						-- Table and Condition
-						DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookItemListILT33~strUniqueGuid=''' + @strUniqueGuid + ''''
+						DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookItemListILT33~strUniqueGuid=''' + @strUniqueGuid + ''' GROUP BY ItemListID'
 
 						INSERT INTO tblSTstgPassportPricebookItemListILT33
 						(
@@ -107,7 +107,7 @@ BEGIN
 						SELECT DISTINCT
 							ST.intStoreNo AS [StoreLocationID]
 							, 'iRely' AS [VendorName]  	
-							, 'Rel. 13.2.0' AS [VendorModelVersion]
+							, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
 							, 'addchange' AS [RecordActionType] 
 							, CASE PIL.ysnDeleteFromRegister 
 								WHEN 0 
@@ -117,54 +117,135 @@ BEGIN
 								ELSE 'addchange' 
 							END as [ItemListMaintenanceRecordActionType] 
 							, PIL.intPromoItemListNo AS [ItemListID]
-							, PIL.strPromoItemListDescription AS [ItemListDescription]
+							, ISNULL(PIL.strPromoItemListDescription, '') AS [ItemListDescription]
 							, CASE 
-								WHEN ISNUMERIC(IUOM.strUpcCode) = 0
-									THEN 'upcA'
-								WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
-									THEN 'PLU' 
-								ELSE 'upcA' 
-							END [POSCodeFormatFormat]
-							, CASE	
-								WHEN ISNUMERIC(IUOM.strUpcCode) = 0
-									THEN RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
-								WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
-									THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-								ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
-							END [POSCode],
-							@strUniqueGuid AS [strUniqueGuid]
+									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+										THEN CASE
+												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+													THEN 'upcA'
+												ELSE 'plu'
+											END
+									WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
+										THEN CASE
+												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+													THEN 'upcA'
+												ELSE 'plu'
+												END 
+									ELSE 'plu' 
+							END AS [POSCodeFormatFormat]
+							, CASE 
+									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+										THEN CASE
+												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+													THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
+												ELSE RIGHT('0000' + ISNULL(IUOM.strLongUPCCode,''),4)
+												END
+									WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
+										THEN CASE
+												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+													THEN RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
+												ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
+												END 
+									ELSE '0000' 
+							END [POSCode]
+							--, CASE 
+							--	WHEN ISNUMERIC(IUOM.strUpcCode) = 0
+							--		THEN 'upcA'
+							--	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
+							--		THEN 'PLU' 
+							--	ELSE 'upcA' 
+							--END [POSCodeFormatFormat]
+							--, CASE	
+							--	WHEN ISNUMERIC(IUOM.strUpcCode) = 0
+							--		THEN RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
+							--	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
+							--		THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+							--	ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
+							--END [POSCode],
+							, @strUniqueGuid AS [strUniqueGuid]
 						FROM tblICItem I
-						--JOIN @Tab_UpdatedItems tmpItem 
-						--	ON tmpItem.intItemId = I.intItemId 
-						JOIN tblICItemLocation IL 
+						INNER JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
-						JOIN tblSMCompanyLocation L 
-							ON L.intCompanyLocationId = IL.intLocationId
-						JOIN tblICItemUOM IUOM 
+						INNER JOIN tblSMCompanyLocation CL 
+							ON CL.intCompanyLocationId = IL.intLocationId
+						INNER JOIN tblSTStore ST 
+							ON ST.intCompanyLocationId = CL.intCompanyLocationId 
+						INNER JOIN tblSTPromotionItemList PIL 
+							ON PIL.intStoreId = ST.intStoreId 
+						INNER JOIN tblICItemUOM IUOM 
 							ON IUOM.intItemId = I.intItemId 
-						JOIN tblICUnitMeasure IUM 
+						INNER JOIN tblSTPromotionItemListDetail ILT
+							ON ILT.intItemUOMId = IUOM.intItemUOMId
+							AND PIL.intPromoItemListId = ILT.intPromoItemListId
+						INNER JOIN tblICUnitMeasure IUM 
 							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-						JOIN tblSTStore ST 
-							ON ST.intCompanyLocationId = L.intCompanyLocationId 
-						JOIN tblICCategory Cat 
+						INNER JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intStoreId = ST.intStoreId
-						JOIN tblSTRegister R 
+						INNER JOIN tblSTRegister R 
 							ON R.intStoreId = ST.intStoreId
-						JOIN tblSTPromotionItemList PIL 
-							ON PIL.intStoreId = ST.intStoreId 
 						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-						AND R.intRegisterId = @intRegisterId 
-						AND ST.intStoreId = @intStoreId
-						-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
+							-- AND R.intRegisterId = @intRegisterId 
+							AND ST.intStoreId = @intStoreId
+						ORDER BY PIL.intPromoItemListNo ASC
+							-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 
 
 
 						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookItemListILT33 WHERE strUniqueGuid = @strUniqueGuid)
 							BEGIN
 								-- Generate XML for the pricebook data availavle in staging table
-								EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
+								--EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
+
+								-- =========================================================================================================
+								-- MANUAL Query for ILT because of different format cannot handle by uspSMGenerateDynamicXML
+								SET @strGeneratedXML = 
+								CAST((
+										SELECT 
+											'3.4' AS '@version'
+											,(
+												SELECT TOP (1)
+													  StoreLocationID
+													  , VendorName
+													  , VendorModelVersion
+												FROM tblSTstgPassportPricebookItemListILT33
+												WHERE strUniqueGuid = @strUniqueGuid
+												FOR XML PATH('TransmissionHeader'),TYPE
+											)
+											,(
+												SELECT TOP (1)
+													RecordActionType AS 'RecordAction/@type'
+													,(
+														SELECT
+															A.ItemListID
+															, A.ItemListDescription
+															, (
+																SELECT 
+																	POSCodeFormatFormat AS 'ItemCode/POSCodeFormat/@format'
+																	, POSCode AS 'ItemCode/POSCode'
+																FROM tblSTstgPassportPricebookItemListILT33
+																WHERE strUniqueGuid = @strUniqueGuid
+																	AND ItemListID = A.ItemListID
+																ORDER BY POSCode ASC
+																FOR XML PATH('ItemListEntry'), TYPE
+															  )
+														FROM tblSTstgPassportPricebookItemListILT33 A
+														WHERE strUniqueGuid = @strUniqueGuid
+														GROUP BY ItemListID, ItemListDescription
+														ORDER BY ItemListID
+														FOR XML PATH('ILTDetail'), TYPE
+													)
+												FROM tblSTstgPassportPricebookItemListILT33
+												WHERE strUniqueGuid = @strUniqueGuid
+												FOR XML PATH(''), TYPE
+											) AS [ItemListMaintenance]
+										FOR XML PATH('NAXML-MaintenanceRequest'),TYPE
+								) AS VARCHAR(MAX))
+								SET @strGeneratedXML = REPLACE(@strGeneratedXML, '><', '>' + CHAR(13) + '<')
+								-- =========================================================================================================
+
+
 
 								--Once XML is generated delete the data from pricebook  staging table.
 								DELETE 

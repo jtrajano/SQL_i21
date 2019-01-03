@@ -1,9 +1,5 @@
 ﻿GO 
 
---update tblCFPriceProfileDetail set intLocalPricingIndex = null where intLocalPricingIndex = 0
---update tblCFAccount set intPriceRuleGroup = null where intPriceRuleGroup = 0
---update tblCFCard set intCardTypeId = null where intCardTypeId = 0 
---update tblCFIndexPricingBySiteGroupHeader set intPriceIndexId = null where intPriceIndexId = 0
 
 
 UPDATE tblCFPriceProfileDetail SET strBasis = 'Remote Index Cost' WHERE strBasis = 'Remote Pricing Index'
@@ -18,60 +14,6 @@ SET tblCFTransaction.intForDeleteTransId = CAST(REPLACE(strTransactionId,'CFDT-'
 
 
 UPDATE tblCFCompanyPreference set strEnvelopeType = '#10 Envelope' WHERE ISNULL(strEnvelopeType,'') = ''
-
-
---CF-1124
-
-UPDATE tblCFTransaction
-SET
-dblCalculatedGrossPrice		= dblCalculatedAmount
-,dblOriginalGrossPrice		= dblOriginalAmount
-FROM tblCFTransactionPrice as price
-WHERE price.intTransactionId = tblCFTransaction.intTransactionId
-AND ISNULL(tblCFTransaction.dblCalculatedGrossPrice,0) = 0
-AND ISNULL(tblCFTransaction.dblOriginalGrossPrice,0) = 0
-AND price.strTransactionPriceId = 'Gross Price'
-
-
-UPDATE tblCFTransaction
-SET
-dblCalculatedNetPrice		= dblCalculatedAmount
-,dblOriginalNetPrice		= dblOriginalAmount
-FROM tblCFTransactionPrice as price
-WHERE price.intTransactionId = tblCFTransaction.intTransactionId
-AND ISNULL(tblCFTransaction.dblCalculatedNetPrice,0) = 0
-AND ISNULL(tblCFTransaction.dblOriginalNetPrice,0) = 0
-AND price.strTransactionPriceId = 'Net Price'
-
-
-UPDATE tblCFTransaction
-SET
-dblCalculatedTotalPrice		= dblCalculatedAmount
-,dblOriginalTotalPrice		= dblOriginalAmount
-FROM tblCFTransactionPrice as price
-WHERE price.intTransactionId = tblCFTransaction.intTransactionId
-AND ISNULL(tblCFTransaction.dblCalculatedTotalPrice,0) = 0
-AND ISNULL(tblCFTransaction.dblOriginalTotalPrice,0) = 0
-AND price.strTransactionPriceId = 'Total Amount'
-
-UPDATE tblCFTransaction
-SET
-dblCalculatedTotalTax		= (SELECT 
-SUM(ISNULL(dblTaxCalculatedAmount,0))
-FROM tblCFTransactionTax as tax
-WHERE tax.intTransactionId = tblCFTransaction.intTransactionId
-GROUP BY tax.intTransactionId)
-,dblOriginalTotalTax		= (SELECT 
-SUM(ISNULL(dblTaxOriginalAmount,0))
-FROM tblCFTransactionTax as tax
-WHERE tax.intTransactionId = tblCFTransaction.intTransactionId
-AND ISNULL(tblCFTransaction.dblCalculatedTotalTax,0) = 0
-AND ISNULL(tblCFTransaction.dblOriginalTotalTax,0) = 0
-GROUP BY tax.intTransactionId)
-
-
---CF-1124
-
 
 
 --CF-1376

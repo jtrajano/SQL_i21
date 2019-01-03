@@ -121,7 +121,6 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		intCompanyLocationId int,
 		strContractType  NVARCHAR(200), 
 		strPricingType  NVARCHAR(200),
-		intCommodityUnitMeasureId int,
 		intContractDetailId int,
 		intContractStatusId int,
 		intEntityId int,
@@ -131,7 +130,6 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strItemNo  NVARCHAR(200),
 		dtmContractDate datetime,
 		strEntityName  NVARCHAR(200),
-		strCustomerContract  NVARCHAR(200),
 		intFutureMarketId int,
 		intFutureMonthId int,
 		strCurrency NVARCHAR(200))
@@ -151,7 +149,6 @@ INSERT INTO @tblGetOpenContractDetail(
 	intCompanyLocationId,
 	strContractType,
 	strPricingType,
-	intCommodityUnitMeasureId,
 	intContractDetailId,
 	intContractStatusId,
 	intEntityId,
@@ -160,64 +157,62 @@ INSERT INTO @tblGetOpenContractDetail(
 	intItemId,
 	strItemNo,
 	strEntityName,
-	strCustomerContract,
 	intFutureMarketId,
 	intFutureMonthId,
 	strCurrency)
 SELECT  
-	ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum,
-	strCommodityCode,
+	ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum,
+	strCommodityCode = CD.strCommodity,
 	intCommodityId,
 	intContractHeaderId,
-	strContractNumber,
+	strContractNumber = CD.strContract,
 	strLocationName,
 	dtmEndDate,
-	dblBalance,
+	dblBalance = CD.dblQuantity,
 	intUnitMeasureId,
 	intPricingTypeId,
 	intContractTypeId,
 	intCompanyLocationId,
 	strContractType,
 	strPricingType,
-	intCommodityUnitMeasureId,
-	intContractDetailId,
+	CD.intContractDetailId,
 	intContractStatusId,
 	intEntityId,
 	intCurrencyId,
-	strType,
+	strType = CD.strContractType + ' ' + CD.strPricingType,
 	intItemId,
 	strItemNo,
-	strEntityName,
-	strCustomerContract,
+	strEntityName = CD.strCustomer,
 	NULL intFutureMarketId,
 	NULL intFutureMonthId, 
 	strCurrency 
-FROM 
-vyuRKContractDetail CD
-WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
-AND CD.intContractStatusId <> 6
+FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
+AND CD.intCommodityId in (select intCommodity from @Commodity)
 
-
-DECLARE @tblGetOpenFutureByDate TABLE (
-		intRowNum int,
-		dtmTransactionDate datetime,
-		intFutOptTransactionId int, 
-		intOpenContract  int,
-		strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		dblContractSize numeric(24,10),
-		strFutureMarket NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strOptionMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		dblStrike numeric(24,10),
-		strOptionType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strInstrumentType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strBrokerAccount NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strBroker NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strNewBuySell NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		intFutOptTransactionHeaderId int 
-		)
+DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
+		, dtmTransactionDate DATETIME
+		, intFutOptTransactionId INT
+		, intOpenContract INT
+		, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblContractSize NUMERIC(24,10)
+		, strFutureMarket NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strOptionMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblStrike NUMERIC(24,10)
+		, strOptionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strInstrumentType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strBrokerAccount NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strBroker NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strNewBuySell NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, intFutOptTransactionHeaderId INT
+		, intFutureMarketId INT
+		, intFutureMonthId INT
+		, strBrokerTradeNo NVARCHAR(100)
+		, strNotes NVARCHAR(100)
+		, ysnPreCrush BIT)
 		
 INSERT INTO @tblGetOpenFutureByDate
 select * from (
@@ -225,103 +220,123 @@ SELECT ROW_NUMBER() OVER (
 				PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC
 				) intRowNum,*  FROM(
 	--Futures Buy
-	SELECT 
-		FOT.dtmTransactionDate,
-		intFutOptTransactionId, 
-		intOpenContract,
-		FOT.strCommodityCode,
-		strInternalTradeNo,
-		strLocationName,
-		FOT.dblContractSize,
-		FOT.strFutMarketName,
-		FOT.strFutureMonth AS strFutureMonth,
-		FOT.strOptionMonthYear AS strOptionMonth,
-		dblStrike,
-		strOptionType,
-		FOT.strInstrumentType,
-		FOT.strBrokerageAccount AS strBrokerAccount,
-		FOT.strName AS strBroker,
-		strBuySell,
-		FOTH.intFutOptTransactionHeaderId 
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
-		AND convert(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) 
-
-	UNION
+	SELECT FOT.dtmTransactionDate
+		, intFutOptTransactionId
+		, intOpenContract
+		, FOT.strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, FOT.dblContractSize
+		, FOT.strFutMarketName
+		, FOT.strFutureMonth AS strFutureMonth
+		, FOT.strOptionMonthYear AS strOptionMonth
+		, dblStrike
+		, strOptionType
+		, FOT.strInstrumentType
+		, FOT.strBrokerageAccount AS strBrokerAccount
+		, FOT.strName AS strBroker
+		, strBuySell
+		, FOTH.intFutOptTransactionHeaderId
+		, FOT.intFutureMarketId
+		, FOT.intFutureMonthId
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM tblRKFutOptTransactionHeader FOTH
+	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+	WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+			
+	UNION ALL
 	--Futures Sell
-	SELECT 
-		FOT.dtmTransactionDate,
-		intFutOptTransactionId, 
-		intOpenContract,
-		FOT.strCommodityCode,
-		strInternalTradeNo,
-		strLocationName,
-		FOT.dblContractSize,
-		FOT.strFutMarketName,
-		FOT.strFutureMonth AS strFutureMonth,
-		FOT.strOptionMonthYear AS strOptionMonth,
-		dblStrike,
-		strOptionType,
-		FOT.strInstrumentType,
-		FOT.strBrokerageAccount AS strBrokerAccount,
-		FOT.strName AS strBroker,
-		strBuySell,
-		FOTH.intFutOptTransactionHeaderId 
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
-		AND convert(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) 
-
-	UNION
+	SELECT FOT.dtmTransactionDate
+		, intFutOptTransactionId
+		, intOpenContract
+		, FOT.strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, FOT.dblContractSize
+		, FOT.strFutMarketName
+		, FOT.strFutureMonth AS strFutureMonth
+		, FOT.strOptionMonthYear AS strOptionMonth
+		, dblStrike
+		, strOptionType
+		, FOT.strInstrumentType
+		, FOT.strBrokerageAccount AS strBrokerAccount
+		, FOT.strName AS strBroker
+		, strBuySell
+		, FOTH.intFutOptTransactionHeaderId
+		, FOT.intFutureMarketId
+		, FOT.intFutureMonthId
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM tblRKFutOptTransactionHeader FOTH
+	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+	WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+			
+	UNION ALL
 	--Options Buy
-	SELECT 
-		FOT.dtmTransactionDate,
-		intFutOptTransactionId, 
-		intOpenContract,
-		FOT.strCommodityCode,
-		strInternalTradeNo,
-		strLocationName,
-		FOT.dblContractSize,
-		FOT.strFutMarketName,
-		FOT.strFutureMonth AS strFutureMonth,
-		FOT.strOptionMonthYear AS strOptionMonth,
-		dblStrike,
-		strOptionType,
-		FOT.strInstrumentType,
-		FOT.strBrokerageAccount AS strBrokerAccount,
-		FOT.strName AS strBroker,
-		strBuySell,
-		FOTH.intFutOptTransactionHeaderId 
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
-		AND convert(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) 
-
-	UNION
+	SELECT FOT.dtmTransactionDate
+		, intFutOptTransactionId
+		, intOpenContract
+		, FOT.strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, FOT.dblContractSize
+		, FOT.strFutMarketName
+		, FOT.strFutureMonth AS strFutureMonth
+		, FOT.strOptionMonthYear AS strOptionMonth
+		, dblStrike
+		, strOptionType
+		, FOT.strInstrumentType
+		, FOT.strBrokerageAccount AS strBrokerAccount
+		, FOT.strName AS strBroker
+		, strBuySell
+		, FOTH.intFutOptTransactionHeaderId
+		, FOT.intFutureMarketId
+		, FOT.intFutureMonthId
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM tblRKFutOptTransactionHeader FOTH
+	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+	WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+				
+	UNION ALL
 	--Options Sell
-	SELECT 
-		FOT.dtmTransactionDate,
-		intFutOptTransactionId, 
-		intOpenContract,
-		FOT.strCommodityCode,
-		strInternalTradeNo,
-		strLocationName,
-		FOT.dblContractSize,
-		FOT.strFutMarketName,
-		FOT.strFutureMonth AS strFutureMonth,
-		FOT.strOptionMonthYear AS strOptionMonth,
-		dblStrike,
-		strOptionType,
-		FOT.strInstrumentType,
-		FOT.strBrokerageAccount AS strBrokerAccount,
-		FOT.strName AS strBroker,
-		strBuySell,
-		FOTH.intFutOptTransactionHeaderId 
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
-		AND convert(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= convert(DATETIME, @dtmToDate) 
+	SELECT FOT.dtmTransactionDate
+		, intFutOptTransactionId
+		, intOpenContract
+		, FOT.strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, FOT.dblContractSize
+		, FOT.strFutMarketName
+		, FOT.strFutureMonth AS strFutureMonth
+		, FOT.strOptionMonthYear AS strOptionMonth
+		, dblStrike
+		, strOptionType
+		, FOT.strInstrumentType
+		, FOT.strBrokerageAccount AS strBrokerAccount
+		, FOT.strName AS strBroker
+		, strBuySell
+		, FOTH.intFutOptTransactionHeaderId
+		, FOT.intFutureMarketId
+		, FOT.intFutureMonthId
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+	FROM tblRKFutOptTransactionHeader FOTH
+	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+	WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		AND ISNULL(FOT.ysnPreCrush, 0) = 0
 
 )t2 )t3 WHERE t3.intRowNum = 1
 
@@ -464,7 +479,7 @@ DECLARE @invQty TABLE (
 
 INSERT INTO @invQty
 SELECT 
-	s.dblQuantity  dblTotal,
+	dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0))),
 	t.strTicketNumber Ticket,
 	s.strLocationName,
 	s.strItemNo,
@@ -478,10 +493,11 @@ SELECT
 	strTicketStatus	
 FROM vyuRKGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
-	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1 and  isnull(ysnInTransit,0)=0 
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND ium.ysnStockUnit = 1  
+	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 	LEFT JOIN tblSCTicket t on s.intSourceId=t.intTicketId		   		  
-WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStockUnit=1 AND ISNULL(s.dblQuantity,0) <>0
+WHERE i.intCommodityId in (select intCommodity from @Commodity) AND ISNULL(s.dblQuantity,0) <>0
 				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 							and s.intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -489,6 +505,7 @@ WHERE i.intCommodityId in (select intCommodity from @Commodity) and iuom.ysnStoc
 								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				) 
+				and ysnInTransit = 0
 				and ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END 
 
 DECLARE @tempCollateral TABLE (		
@@ -569,7 +586,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],'Physical Contract' strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
+		isnull((cd.dblBalance),0) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId =@intCommodityId
@@ -687,12 +704,12 @@ BEGIN
 						ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
 	
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
+	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,strCurrency)
 	SELECT strCommodityCode,'Price Risk' [strType],'Open Contract' strContractType,
-	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName ,strCurrency
+	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName ,strCurrency
 		FROM (SELECT strCommodityCode,			
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(cd.dblBalance,0)) dblTotal,
-				intContractHeaderId,strContractNumber,cd.intCommodityUnitMeasureId intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intCompanyLocationId,intContractTypeId,strCurrency
+				isnull(cd.dblBalance,0) dblTotal,
+				intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intCompanyLocationId,intContractTypeId,strCurrency
 				FROM @tblGetOpenContractDetail cd
 				WHERE intContractTypeId in(1,2) and intPricingTypeId IN (1,3) AND cd.intCommodityId  = @intCommodityId 
 				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end 
@@ -701,7 +718,7 @@ BEGIN
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
-				 group by strCommodityCode,intContractHeaderId,strContractNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,intContractTypeId,strCurrency	
+				 group by strCommodityCode,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intContractTypeId,strCurrency	
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
 	SELECT @strCommodityCode,'Price Risk' [strType],'Collateral' strContractType,sum(isnull(dblRemainingQuantity,0)) dblTotal,intFromCommodityUnitMeasureId,
@@ -807,7 +824,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,'Avail for Spot Sale' [strType], strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,-(cd.dblBalance)) AS dblTotal
+		-(cd.dblBalance) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE  intContractTypeId=1 and strType in('Purchase Priced','Purchase Basis') and cd.intCommodityId=@intCommodityId
@@ -849,7 +866,7 @@ BEGIN
 	SELECT * FROM 
 	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],[strType] strSubType,'Physical' strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
+		isnull((cd.dblBalance),0) AS dblTotal
 	   ,cd.intUnitMeasureId,intCommodityId,cd.intCompanyLocationId 
 	FROM @tblGetOpenContractDetail cd
 	WHERE cd.intContractTypeId in(1,2) and

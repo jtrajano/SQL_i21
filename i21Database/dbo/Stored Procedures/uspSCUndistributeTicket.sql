@@ -515,6 +515,8 @@ BEGIN TRY
 						,@intStorageScheduleTypeId
 						,NULL
 						,0
+						,NULL
+						,NULL
 						,@newBalance OUTPUT
 
 					IF ISNULL(ROUND(ISNULL(@newBalance,0), @currencyDecimal), 0) > 0

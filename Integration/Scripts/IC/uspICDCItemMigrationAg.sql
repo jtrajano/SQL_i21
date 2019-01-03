@@ -45,13 +45,15 @@ SET ANSI_WARNINGS OFF
 	,ysnTaxable
 	,strKeywords
 	,ysnCommisionable
+	,ysnTonnageTax
+	,intTonnageTaxUOMId
 	,intConcurrencyId
 	) 
 SELECT ei.ItemNo, ei.ItemType, ei.ShortName, ei.ItemName, ei.ItemStatus, ei.InvValuation, ei.LotTracking,
 	ei.CategoryId, ei.CommodityId, ei.[LifeTime], ei.LandedCost, ei.DropDhip, ei.SpecialCommission
 	, ei.ysnStockedItem, ei.DyedFuel, ei.BarcodePrinted, ei.MSDSRequired, ei.AvailableTM
 	, ei.DefaultFull, ei.PickTicket, ei.ExportEDI, ei.HazardMaterial, ei.MaterialFee, ei.CountCode
-	, ei.Taxable, ei.KeyWords, ei.Commisionable, ei.ConcurrencyId
+	, ei.Taxable, ei.KeyWords, ei.Commisionable,ei.TonnageTax,ei.TonnageTaxUOM, ei.ConcurrencyId
 FROM
 	 (
 	SELECT RTRIM(agitm_no) ItemNo
@@ -154,6 +156,20 @@ FROM
 			ELSE 0
 			END
 		) Commisionable
+	,(
+		CASE 
+		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
+			THEN 1
+		ELSE 0
+		END
+		) TonnageTax
+		,(
+		CASE 
+		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
+			THEN (SELECT TOP 1 IUOM.intUnitMeasureId FROM tblICUnitMeasure IUOM WHERE UPPER(IUOM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = MIN(agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS)
+		ELSE NULL
+		END
+		) TonnageTaxUOM
 	,1 ConcurrencyId
 		FROM agitmmst AS inv 
 		WHERE agitm_phys_inv_ynbo <> 'O'
@@ -197,21 +213,30 @@ FROM (
 		SELECT intItemId , 
 		intUnitMeasureId = U.intUnitMeasureId , 
 		dblUnitQty = 1 ,
-		strUpcCode = CASE WHEN ISNUMERIC(oi.strUpcCode) = 1 AND LEN(LTRIM(RTRIM(oi.strUpcCode))) >= 11 THEN  LTRIM(RTRIM(oi.strUpcCode)) ELSE NULL END ,   --strUpcCode = NULLIF(oi.strUpcCode,'') , 
+		strUpcCode = 
+		CASE WHEN AgUPC.UpcDupCount > 1 THEN
+			AGItemUPC + '_Dup_' + CAST(I.intItemId as NVARCHAR(50)) 
+		ELSE
+			CASE WHEN ISNUMERIC(oi.agitm_upc_code) = 1 AND LEN(LTRIM(RTRIM(oi.agitm_upc_code))) >= 11 THEN  LTRIM(RTRIM(oi.agitm_upc_code)) ELSE NULL END    
+		END ,
 		ysnStockUnit = 1 ,
 		ysnAllowPurchase = 1 , 
 		ysnAllowSale = 1 , 
 		intConcurrencyId = 1
 		FROM tblICItem I 
-		JOIN 
-			(SELECT rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc , MIN(RTRIM(agitm_upc_code)) strUpcCode
-			 FROM agitmmst agitm
-			 WHERE agitm_phys_inv_ynbo <> 'O'
-			 GROUP BY rtrim(agitm_no)
-			 ) as oi 
+		JOIN agitmmst oi
+			
 			ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+			AND agitm_phys_inv_ynbo <> 'O'
 		JOIN tblICUnitMeasure U 
 			ON UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+        LEFT JOIN (
+					 SELECT  rtrim(agitmUPC.agitm_upc_code) AGItemUPC , COUNT(agitmUPC.agitm_upc_code) UpcDupCount
+					 FROM agitmmst agitmUPC
+					 WHERE agitmUPC.agitm_phys_inv_ynbo <> 'O' AND RTRIM(agitmUPC.agitm_upc_code) <> ''
+					 GROUP BY rtrim(agitmUPC.agitm_upc_code) 
+                  ) AgUPC
+		ON oi.agitm_upc_code COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(AgUPC.AGItemUPC)  COLLATE SQL_Latin1_General_CP1_CS_AS
 		WHERE intItemId not in (select intItemId from tblICItemUOM)
 	) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
@@ -271,16 +296,29 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId 
 INSERT INTO tblICItemUomUpc(intItemUOMId,
 strUpcCode,
 strLongUpcCode)
-SELECT A.intItemUOMId,NULL, O.agupc_upc_cd 
+SELECT A.intItemUOMId
+, NULL
+, CASE WHEN AgUPC.UpcDupCount > 1 THEN
+	AGItemUPC + '_Dup_' + CAST(I.intItemId as NVARCHAR(50)) 
+  ELSE
+	CASE WHEN ISNUMERIC(AgUPC.AGItemUPC) = 1 AND LEN(LTRIM(RTRIM(AgUPC.AGItemUPC))) >= 11 THEN  LTRIM(RTRIM(AgUPC.AGItemUPC)) ELSE NULL END    
+  END agupc_upc_cd
 FROM @InsertedItemUOM A
 INNER JOIN tblICItemUOM UOM
 	ON A.intItemUOMId = UOM.intItemUOMId
 	 AND UOM.ysnStockUnit = 1
 INNER JOIN tblICItem I
 	ON UOM.intItemId = I.intItemId
-INNER JOIN agupcmst O
-	ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS  = O.agupc_item_no COLLATE SQL_Latin1_General_CP1_CS_AS 
-WHERE ISNUMERIC(agupc_upc_cd) = 1 AND LEN(LTRIM(RTRIM(agupc_upc_cd))) >= 11
+INNER JOIN agupcmst agUPCmst 
+	ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(agUPCmst.agupc_item_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+INNER JOIN (
+			SELECT  rtrim(agUPCmst.agupc_upc_cd) AGItemUPC , COUNT(agUPCmst.agupc_upc_cd) UpcDupCount
+			FROM agupcmst agUPCmst
+			WHERE RTRIM(agUPCmst.agupc_upc_cd) <> ''
+			GROUP BY rtrim(agUPCmst.agupc_upc_cd) 
+			) AgUPC
+ON agUPCmst.agupc_upc_cd COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(AgUPC.AGItemUPC) COLLATE SQL_Latin1_General_CP1_CS_AS
+WHERE ISNUMERIC(agUPCmst.agupc_upc_cd) = 1 AND LEN(LTRIM(RTRIM(agUPCmst.agupc_upc_cd))) >= 11
 
 
 --set stock unit to No for Non Inventory Items

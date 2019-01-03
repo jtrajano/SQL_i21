@@ -1,6 +1,70 @@
 ﻿PRINT('ST Cleanup - Start')
 
 ----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Handheld Scanner Clean Up
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTHandheldScanner') 
+	BEGIN
+		EXEC('
+				IF EXISTS (SELECT TOP 1 1 FROM tblSTHandheldScanner)
+					BEGIN
+						DECLARE @intCountHandheld AS INT = (SELECT COUNT(intStoreId) FROM tblSTHandheldScanner)
+
+						IF(@intCountHandheld > 1)
+							BEGIN
+								DECLARE @intStoreId AS INT
+								DECLARE @intRecordCount AS INT
+								DECLARE @intHandheldScannerId AS INT
+
+								PRINT ''Removing extra Store Ids from tblSTHandheldScanner table''
+
+								-- GET Store Ids
+								DECLARE @tblStoreId AS TABLE
+								(
+									intStoreId INT
+								)
+
+								INSERT INTO @tblStoreId
+								(
+									intStoreId
+								)
+								SELECT DISTINCT 
+									intStoreId
+								FROM tblSTHandheldScanner
+
+
+
+								-- Loop
+								WHILE EXISTS (SELECT TOP (1) 1 FROM @tblStoreId)
+									BEGIN
+										SELECT TOP 1 @intStoreId = intStoreId FROM @tblStoreId
+										SET @intRecordCount = (SELECT COUNT(intStoreId) FROM tblSTHandheldScanner WHERE intStoreId = @intStoreId)
+
+										IF(@intRecordCount > 1)
+											BEGIN
+												SET @intHandheldScannerId = (SELECT TOP (1) intHandheldScannerId FROM tblSTHandheldScanner WHERE intStoreId = @intStoreId)
+
+												DELETE FROM tblSTHandheldScanner
+												WHERE intStoreId = @intStoreId
+												AND intHandheldScannerId != @intHandheldScannerId
+											END
+
+
+										DELETE TOP (1) FROM @tblStoreId
+									END
+
+								PRINT ''Done removing extra Store Ids from tblSTHandheldScanner table''
+							END
+					END
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Handheld Scanner Clean Up
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Mark Up/Down Clean Up
 ----------------------------------------------------------------------------------------------------------------------------------
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTMarkUpDownDetail') 
@@ -141,5 +205,32 @@ END
 -- End: File Field Mapping Alter
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Rename tblSTStoreAppUploadHistory
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreAppUploadHistory') 
+	BEGIN
+		PRINT('Rename tblSTStoreAppUploadHistory to tblSTStoreAppHistoryReports')
+		EXEC('
+				EXEC sp_rename ''dbo.tblSTStoreAppUploadHistory'', ''tblSTStoreAppHistoryReports''
+			')
+
+		PRINT('Rename tblSTStoreAppHistoryReports.stri21FolderPath to tblSTStoreAppHistoryReports.strServerFolderPath')
+		EXEC('
+				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21FolderPath'' , ''strServerFolderPath'', ''COLUMN''
+			')
+
+		PRINT('Rename tblSTStoreAppHistoryReports.stri21ConvertedFilename to tblSTStoreAppHistoryReports.strServerFilename')
+		EXEC('
+				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21ConvertedFilename'' , ''strServerFilename'', ''COLUMN''
+			')
+
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Rename tblSTStoreAppUploadHistory
+----------------------------------------------------------------------------------------------------------------------------------
 
 PRINT('ST Cleanup - End')

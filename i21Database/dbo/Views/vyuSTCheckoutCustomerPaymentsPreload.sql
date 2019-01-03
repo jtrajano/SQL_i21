@@ -5,13 +5,13 @@ SELECT ST.intStoreId
        , EM.strName AS strName
 	   , ARC.strCustomerNumber AS strCustomerNumber
 	   , CAST(NULL AS INT) AS intInvoice
-	   , 'P' AS strType
+	   , 'P' COLLATE Latin1_General_CI_AS AS strType
 	   , CAST(NULL AS decimal(18,6)) AS dblAmount
-	   , '' AS strComment
+	   , '' COLLATE Latin1_General_CI_AS AS strComment
 	   --, I.intItemId AS intItemId
 	   --, I.strItemNo AS strItemNo
 	   --, I.strDescription AS strItemDescription
-	   , '' AS strCheckNo
+	   , '' COLLATE Latin1_General_CI_AS AS strCheckNo
 	   , CH.intCheckoutId
 FROM tblSTCheckoutCustomerPayments CCP
 JOIN tblSTCheckoutHeader CH

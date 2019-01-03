@@ -139,7 +139,7 @@ BEGIN
 											--												THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
 											--												ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) AS DECIMAL(18,2)),
 											CAST((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+													 ELSE Details.dblTotal END) AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,

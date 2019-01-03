@@ -141,7 +141,23 @@ BEGIN
 			,CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount) AS DECIMAL(18,2)) AS dblBalance
 		FROM (
 			SELECT
-				B1.*
+				 B1.dtmDate
+				,B1.intBillId
+				,B1.strBillId
+				,B1.dblAmountPaid
+				,B1.dblTotal
+				,B1.dblAmountDue
+				,B1.dblWithheld
+				,B1.dblDiscount
+				,B1.dblInterest
+				,B1.dblPrepaidAmount
+				,B1.strVendorId
+				,B1.strVendorIdName
+				,B1.dtmDueDate
+				,B1.ysnPosted
+				,B1.ysnPaid
+				,B1.intAccountId
+				,B1.strClass
 			FROM vyuAPPayables B1
 			INNER JOIN tblAPBill B ON B1.intBillId = B.intBillId
 			WHERE CONVERT(DATE, CAST(B1.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate

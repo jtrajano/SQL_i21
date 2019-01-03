@@ -2,21 +2,21 @@
 	  intInventoryValuationSummaryId INT IDENTITY(1,1) NOT NULL
 	, intInventoryValuationKeyId INT
 	, intItemId INT
-	, strItemNo NVARCHAR(100) 
-	, strItemDescription NVARCHAR(500)
+	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	, intItemLocationId INT
-	, strLocationName NVARCHAR(200)
+	, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, dblRunningQuantity NUMERIC(38, 20)
 	, dblRunningValue NUMERIC(38, 20)
 	, dblRunningLastCost NUMERIC(38, 20)
 	, dblRunningStandardCost NUMERIC(38, 20)
 	, dblRunningAverageCost NUMERIC(38, 20)
-	, strStockUOM NVARCHAR(50)
-	, strCategoryCode NVARCHAR(50)
-	, strCommodityCode NVARCHAR(50)
-	, strInTransitLocationName NVARCHAR(50)
+	, strStockUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strInTransitLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intLocationId INT
 	, intInTransitLocationId INT
 	, ysnInTransit BIT
-	, strPeriod NVARCHAR(50),
+	, strPeriod NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblICInventoryValuationSummary] PRIMARY KEY ([intInventoryValuationSummaryId]))

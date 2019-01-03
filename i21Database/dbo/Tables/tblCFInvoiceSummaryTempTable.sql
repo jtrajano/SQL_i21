@@ -21,8 +21,11 @@
     [intAccountId]                 INT             NULL,
     [intTransactionId]             INT             NULL,
     [strGuid]                      NVARCHAR (MAX)  NULL,
-    [strUserId]                    NVARCHAR (MAX)  NULL
+    [strUserId]                    NVARCHAR (MAX)  NULL,
+    [strStatementType]             NVARCHAR (MAX)  NULL
 );
+
+
 
 
 

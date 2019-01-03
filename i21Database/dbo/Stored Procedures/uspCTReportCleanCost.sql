@@ -67,7 +67,8 @@ BEGIN TRY
 	LEFT JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 	LEFT JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CC.intEntityId
 	LEFT JOIN	tblICInventoryReceipt	IR	ON	IR.intInventoryReceiptId	=	CC.intInventoryReceiptId
-	LEFT JOIN	tblLGLoad				LG	ON	LG.intLoadId				=	CC.intShipmentId
+	LEFT JOIN	tblLGLoadDetail			LD	ON	LD.intLoadDetailId			=	CC.intShipmentId
+	LEFT JOIN	tblLGLoad				LG	ON	LG.intLoadId				=	LD.intLoadId
 	WHERE		CC.intCleanCostId	=	@intCleanCostId
 	
 END TRY

@@ -164,13 +164,19 @@ BEGIN TRY
 
 		
 
-			SELECT *
+			SELECT 
+				IR.*
+				, UOM.intUnitMeasureId
+				, ROW_NUMBER() OVER (ORDER BY IR.intHandheldScannerImportReceiptId ASC) intSort
 			INTO #tmpImportReceipts
-			FROM vyuSTGetHandheldScannerImportReceipt
-			WHERE intHandheldScannerId = @HandheldScannerId
-				AND intVendorId = @VendorId
-				AND intCompanyLocationId = @CompanyLocationId
-		
+			FROM vyuSTGetHandheldScannerImportReceipt IR
+			LEFT JOIN tblICItemUOM UOM
+				ON IR.intItemUOMId = UOM.intItemUOMId
+			WHERE IR.intHandheldScannerId = @HandheldScannerId
+				AND IR.intVendorId = @VendorId
+				AND IR.intCompanyLocationId = @CompanyLocationId
+				AND UOM.ysnStockUnit = CAST(1 AS BIT)
+			ORDER BY IR.intHandheldScannerImportReceiptId ASC
 
 
 			INSERT INTO @ReceiptStagingTable(
@@ -182,6 +188,7 @@ BEGIN TRY
 				,intItemId
 				,intItemLocationId
 				,intItemUOMId
+				, intCostUOMId
 				,strBillOfLadding
 				,intContractHeaderId
 				,intContractDetailId
@@ -210,6 +217,7 @@ BEGIN TRY
 				,intPaymentOn
 				,strChargesLink
 				,dblUnitRetail
+				,intSort
 			)	
 			SELECT strReceiptType		= 'Direct'
 				,strSourceScreenName	= 'None'
@@ -219,6 +227,7 @@ BEGIN TRY
 				,intItemId				= intItemId
 				,intItemLocationId		= intItemLocationId
 				,intItemUOMId			= intItemUOMId
+				, intCostUOMId			= intUnitMeasureId
 				,strBillOfLadding		= ''
 				,intContractHeaderId	= NULL
 				,intContractDetailId	= NULL
@@ -247,18 +256,23 @@ BEGIN TRY
 				,intPaymentOn			= NULL
 				,strChargesLink			= NULL
 				,dblUnitRetail			= dblUnitRetail
+				,intSort				= intSort
 			FROM #tmpImportReceipts
 			WHERE intCompanyLocationId = @CompanyLocationId
 				AND intVendorId = @VendorId
+			ORDER BY intSort
+
 
 			EXEC dbo.uspICAddItemReceipt 
-				@ReceiptStagingTable
-				,@OtherCharges
-				,@UserId;
+				  @ReceiptStagingTable
+				, @OtherCharges
+				, @UserId;
 
 			DROP TABLE #tmpImportReceipts
 
-			DELETE FROM #Vendors WHERE intVendorId = @VendorId AND intCompanyLocationId = @CompanyLocationId
+			DELETE FROM #Vendors 
+			WHERE intVendorId = @VendorId 
+				AND intCompanyLocationId = @CompanyLocationId
 
 		END	
 
@@ -267,11 +281,13 @@ BEGIN TRY
 	-- Clear record from table
 	DELETE FROM tblSTHandheldScannerImportReceipt 
 	WHERE intHandheldScannerId = @HandheldScannerId
+		AND strReceiptRefNoComment IN (SELECT strReceiptRefNo FROM @tblTempItems)
 
 	-- Flag Success
 	SET @ysnSuccess = CAST(1 AS BIT)
 	SET @strStatusMsg = ''
 END TRY
+
 BEGIN CATCH
 	SELECT 
 		@ErrorMessage = ERROR_MESSAGE(),

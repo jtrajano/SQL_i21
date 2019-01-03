@@ -18,7 +18,7 @@ INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,in
 exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
-SELECT strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId FROM  fnRKGetInHouseAndCompanyTitle (@dtmToDate,@strPositionIncludes,@intVendorId)
+exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
 
 
 

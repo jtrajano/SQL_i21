@@ -1,4 +1,4 @@
-CREATE VIEW vyuICGetItemStockUOMTotalsAllLocations
+CREATE VIEW [dbo].[vyuICGetItemStockUOMTotalsAllLocations]
 AS
 	--SELECT xl.*
 	--FROM (
@@ -22,6 +22,12 @@ AS
         , dblAvailableQty = ISNULL(v.dblAvailableQty, 0.00)
 		, ysnHasStock = (CAST(CASE WHEN v.strSubLocationName IS NULL THEN 0 ELSE 1 END AS BIT))
 		, il.intAllowNegativeInventory
+		, dblCost = CASE 
+				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, il.intItemLocationId, v.intItemUOMId)
+				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, v.intItemUOMId, FIFO.dblCost)
+				ELSE FIFO.dblCost
+			END
+		, dblUnitQty = iu.dblUnitQty
 	FROM tblSMCompanyLocationSubLocation sl
 		INNER JOIN tblICItemLocation il ON il.intLocationId = sl.intCompanyLocationId
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
@@ -29,6 +35,19 @@ AS
 			AND il.intItemLocationId = v.intItemLocationId
 			AND v.ysnStockUnit = 1
 			AND ((v.dblStorageQty + v.dblOnHand) > 0 OR v.intAllowNegativeInventory = 1)
+		LEFT JOIN tblICCostingMethod CostMethod
+				ON CostMethod.intCostingMethodId = il.intCostingMethod
+		LEFT JOIN tblICItemUOM iu ON iu.intItemUOMId = v.intItemUOMId
+		OUTER APPLY(
+			SELECT TOP 1
+					dblCost
+					,intItemUOMId
+			FROM	tblICInventoryFIFO FIFO 
+			WHERE	i.intItemId = FIFO.intItemId 
+					AND il.intItemLocationId = FIFO.intItemLocationId 
+					AND dblStockIn- dblStockOut > 0
+			ORDER BY dtmDate ASC
+		) FIFO 
 	GROUP BY
 		  sl.intCompanyLocationId
 		, i.intItemId
@@ -39,6 +58,11 @@ AS
 		, sl.strSubLocationDescription
 		, v.strStorageLocationName
 		, v.intStorageLocationId
+		, v.intItemUOMId
+		, CostMethod.intCostingMethodId
+		, FIFO.intItemUOMId
+		, FIFO.dblCost
+		, iu.dblUnitQty
 		, v.dblOnHand
 		, v.strUnitMeasure
 		, v.intItemUOMId

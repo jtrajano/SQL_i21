@@ -191,6 +191,14 @@ BEGIN
 	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
+
+	
+	--DECLARE @strTransactionType AS nvarchar(max)
+
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @strTransactionType = 'Foreign Sale'
+	END
 	  
 	------------------------------------------------------------
 

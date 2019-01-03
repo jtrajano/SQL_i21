@@ -316,6 +316,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\24_SC\1_OfflineGuid.sql" />
+    <None Include="Scripts\Pre-Deployment\24_SC\2_UpdateZeroSplitIdTickets.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\21_PR\5_1720_to_1730.sql" />
