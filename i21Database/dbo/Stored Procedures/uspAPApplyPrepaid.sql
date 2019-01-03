@@ -14,26 +14,46 @@ BEGIN TRY
 DECLARE @voucherId INT = @billId;
 DECLARE @voucherIds AS Id;
 DECLARE @SaveTran NVARCHAR(32) = 'uspAPApplyPrepaid';
+DECLARE @prepaidId INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 
 	BEGIN TRANSACTION
 ELSE 
 	SAVE TRANSACTION @SaveTran
 
-EXEC uspAPPrepaidAndDebit @billId = @voucherId;
-
-UPDATE A
-	SET A.ysnApplied = 1
-	,A.dblAmountApplied = A.dblBalance
-    ,A.dblBalance = 0
-FROM tblAPAppliedPrepaidAndDebit A
-INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
-WHERE A.intTransactionId IN (SELECT intId FROM @prepaidIds) AND A.intBillId = @voucherId
-
 INSERT INTO @voucherIds
 SELECT @voucherId
 
-EXEC uspAPUpdateVoucherTotal @voucherIds
+EXEC uspAPPrepaidAndDebit @billId = @voucherId;
+
+DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+FOR
+    SELECT intId FROM @prepaidIds
+OPEN c;
+FETCH NEXT FROM c INTO @prepaidId
+
+WHILE @@FETCH_STATUS = 0 
+BEGIN
+
+    UPDATE A
+        SET A.ysnApplied = 1
+        ,A.dblAmountApplied = CASE WHEN A.dblBalance <= B2.dblAmountDue THEN A.dblBalance ELSE B2.dblAmountDue END
+        ,A.dblBalance = 0
+    FROM tblAPAppliedPrepaidAndDebit A
+    INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId --prepaid/dm
+    INNER JOIN tblAPBill B2 ON A.intBillId = B2.intBillId --Voucher
+    WHERE A.intTransactionId = @prepaidId AND A.intBillId = @voucherId
+
+    EXEC uspAPUpdateVoucherTotal @voucherIds
+
+    IF NOT EXISTS(SELECT 1 FROM tblAPBill WHERE intBillId = @voucherId AND dblAmountDue > 0)
+    BEGIN
+        BREAK;
+    END
+
+ FETCH NEXT FROM c INTO @prepaidId
+END
+CLOSE c; DEALLOCATE c;
 
 IF @transCount = 0 
 	COMMIT TRANSACTION
