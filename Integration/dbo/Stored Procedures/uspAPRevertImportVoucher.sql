@@ -169,12 +169,12 @@ END
 IF OBJECT_ID(N'dbo.tmp_apivcmstImport') IS NOT NULL
 BEGIN
 
-	-- DELETE A
-	-- FROM tblAPPayment A
-	-- INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	-- INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-	-- INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
-	-- INNER JOIN tmp_apivcmstImport E ON D.intId = E.intBackupId
+	DELETE A
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
+	INNER JOIN tmp_apivcmstImport E ON D.intId = E.intBackupId
 		
 	DELETE A
 	FROM tblAPBill A
