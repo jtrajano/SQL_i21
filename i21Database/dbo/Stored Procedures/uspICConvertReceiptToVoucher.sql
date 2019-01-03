@@ -18,6 +18,7 @@ DECLARE @intEntityVendorId AS INT
 		,@billTypeToUse AS INT 
 		,@intSourceType AS INT 
 		,@strReceiptNumber AS NVARCHAR(50)
+		,@dtmReceiptDate AS DATETIME
 
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
@@ -61,6 +62,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
+		,@dtmReceiptDate = r.dtmReceiptDate
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -245,6 +247,7 @@ BEGIN
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
 			,@billId = @intBillId OUTPUT
+			,@voucherDate = @dtmReceiptDate
 
 		IF(@throwedError <> '')
 		BEGIN
