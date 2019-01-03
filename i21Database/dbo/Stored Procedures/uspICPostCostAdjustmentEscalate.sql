@@ -88,6 +88,7 @@ BEGIN
 
 	DECLARE @EscalateInventoryTransactionId AS INT 
 
+	DECLARE @totalProduced AS NUMERIC(38, 20)
 END 
 
 -- Check if the system needs to escalate the cost adjustment. 
@@ -109,6 +110,99 @@ WHERE	@t_dblQty < 0
 				WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
 				ELSE 0 
 			END 
+
+-- Check if the produce happens before the consume. 
+-- This usually happens on work-orders
+IF @EscalateInventoryTransactionId IS NULL 
+BEGIN 
+	SET @totalProduced = 0 
+	SELECT	TOP 1 
+			@EscalateInventoryTransactionId = t.intInventoryTransactionId
+			,@EscalateInventoryTransactionTypeId = t.intTransactionTypeId
+	FROM	dbo.tblICInventoryTransaction t
+	WHERE	@t_dblQty < 0 
+			AND t.strBatchId <> @t_strBatchId 
+			--AND t.intTransactionId = @t_intTransactionId
+			AND t.strTransactionId = @t_strTransactionId
+			AND ISNULL(t.ysnIsUnposted, 0) = 0
+			AND ISNULL(t.dblQty, 0) > 0
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Produce
+
+	SELECT	@totalProduced = SUM(t.dblQty) 
+	FROM	dbo.tblICInventoryTransaction t
+	WHERE	@t_dblQty < 0 
+			AND t.strBatchId <> @t_strBatchId 
+			--AND t.intTransactionId = @t_intTransactionId
+			AND t.strTransactionId = @t_strTransactionId
+			AND ISNULL(t.ysnIsUnposted, 0) = 0
+			AND ISNULL(t.dblQty, 0) > 0
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Produce
+
+	IF @totalProduced > 0 AND @EscalateInventoryTransactionId IS NOT NULL 
+	BEGIN
+		INSERT INTO #tmpRevalueProducedItems (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblNewValue]
+				,[intCurrencyId] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[ysnIsStorage] 
+				,[strActualCostId] 
+				,[intSourceTransactionId] 
+				,[intSourceTransactionDetailId] 
+				,[strSourceTransactionId]
+				,[intRelatedInventoryTransactionId]
+				,[intFobPointId]
+				,[intInTransitSourceLocationId]
+				,[dblNewAverageCost]
+		)
+		SELECT 
+				[intItemId]						= t.intItemId
+				,[intItemLocationId]			= t.intItemLocationId
+				,[intItemUOMId]					= t.intItemUOMId
+				,[dtmDate]						= @dtmDate
+				,[dblQty]						= t.dblQty
+				,[dblUOMQty]					= t.dblUOMQty
+				,[dblNewValue]					= -dbo.fnMultiply(@dblEscalateValue, dbo.fnDivide(t.dblQty, @totalProduced)) 
+				,[intCurrencyId]				= t.intCurrencyId
+				,[intTransactionId]				= @intTransactionId
+				,[intTransactionDetailId]		= @intTransactionDetailId
+				,[strTransactionId]				= @strTransactionId
+				,[intTransactionTypeId]			= @EscalateInventoryTransactionTypeId
+				,[intLotId]						= t.intLotId
+				,[intSubLocationId]				= t.intSubLocationId
+				,[intStorageLocationId]			= t.intStorageLocationId
+				,[ysnIsStorage]					= NULL 
+				,[strActualCostId]				= t.strActualCostId 
+				,[intSourceTransactionId]		= t.intTransactionId
+				,[intSourceTransactionDetailId]	= t.intTransactionDetailId
+				,[strSourceTransactionId]		= t.strTransactionId
+				,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
+				,[intFobPointId]				= t.intFobPointId
+				,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+				,[dblNewAverageCost]			= @dblEscalateAvgCost
+		FROM	dbo.tblICInventoryTransaction t 
+		WHERE	@t_dblQty < 0 
+				AND t.strBatchId <> @t_strBatchId 
+				--AND t.intTransactionId = @t_intTransactionId
+				AND t.strTransactionId = @t_strTransactionId
+				AND ISNULL(t.ysnIsUnposted, 0) = 0
+				AND ISNULL(t.dblQty, 0) > 0
+				AND t.intTransactionTypeId = @INV_TRANS_TYPE_Produce
+
+		RETURN; 
+	END	
+END 
 
 -- If it was an offset from the negative stock scenario, the query below will do more digging. 
 IF @EscalateInventoryTransactionId IS NULL 
