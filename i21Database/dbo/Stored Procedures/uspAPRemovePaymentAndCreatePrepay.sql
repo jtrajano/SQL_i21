@@ -121,6 +121,7 @@ BEGIN
 		,prepay.dblSubtotal = @payment
 		,prepay.ysnPaid = 0
 		,prepay.dtmDatePaid = NULL
+		,prepay.ysnPrepayHasPayment = 1
 	FROM tblAPBill prepay
 	WHERE prepay.intBillId = @prepayCreated
 
@@ -141,7 +142,6 @@ BEGIN
 		RETURN;
 	END
 	
-	--CONVERT THE PAYMENT TO PREPAID
 	--update original bills associated to payment to unpaid
 	UPDATE origBill
 		SET origBill.ysnPaid = 0
@@ -152,44 +152,56 @@ BEGIN
 	INNER JOIN tblAPPaymentDetail payDetail ON origBill.intBillId = payDetail.intBillId
 	INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId
 	WHERE pay.intPaymentId = @currentPaymentId
-	-- WHERE origBill.intBillId = @voucherKey
+	AND origBill.intBillId = @voucherKey --UPDATE ONLY THE CURRENT VOUCHER
 
 	--update the payment to prepayment
-	UPDATE pay
-		SET pay.ysnPrepay = 1
-	FROM tblAPPayment pay
-	WHERE pay.intPaymentId = @currentPaymentId;
+	-- UPDATE pay
+	-- 	SET pay.ysnPrepay = 1
+	-- FROM tblAPPayment pay
+	-- WHERE pay.intPaymentId = @currentPaymentId;
 
 	--REMOVE OTHER BILL ASSOCIATED TO THE PAYMENT, IT SHOULD ONLY HAVE 1 BILL WHICH IS THE PREPAID CREATED
-	DELETE payDetail
-	FROM tblAPPaymentDetail payDetail
-	WHERE payDetail.intPaymentId = @currentPaymentId AND payDetail.intBillId != @voucherKey
+	-- DELETE payDetail
+	-- FROM tblAPPaymentDetail payDetail
+	-- WHERE payDetail.intPaymentId = @currentPaymentId AND payDetail.intBillId != @voucherKey
 
 	--update the association to the payment
 	UPDATE payDetail
 		SET payDetail.intBillId = @prepayCreated
 	FROM tblAPPaymentDetail payDetail 
-	WHERE payDetail.intPaymentId = @currentPaymentId;
+	WHERE 
+		payDetail.intPaymentId = @currentPaymentId
+	AND payDetail.intBillId = @voucherKey;
 
 	--update the gl record of payment
 	--SET THE OTHER GL DETAIL OF PAYMENT TO UNPOSTED (DO NOT DELETE FOR HISTORY PURPOSES)
-	UPDATE gl
-		SET gl.ysnIsUnposted = 1
-			,gl.strComments = gl.strComments + ' - ' + 'Reversed with ' + @voucherBillId
-	FROM tblGLDetail gl
-	WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
-	AND gl.strJournalLineDescription != @voucherBillId
+	-- UPDATE gl
+	-- 	SET gl.ysnIsUnposted = 1
+	-- 		,gl.strComments = gl.strComments + ' - ' + 'Reversed with ' + @voucherBillId
+	-- FROM tblGLDetail gl
+	-- WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
+	-- AND gl.strJournalLineDescription != @voucherBillId
+
+	-- --UPDATE THE JOURNAL LINE DESCRIPTION
+	-- UPDATE gl
+	-- 	SET gl.strJournalLineDescription = @prepayBillId
+	-- 	,gl.intAccountId = @prepayAccount
+	-- 	--to ensure correct debit/credit to update, check first if that is not equal to 0
+	-- 	,gl.dblDebit = (CASE WHEN gl.dblDebit != 0 THEN @payment ELSE gl.dblDebit END)
+	-- 	,gl.dblCredit = (CASE WHEN gl.dblCredit != 0 THEN @payment ELSE gl.dblCredit END)
+	-- FROM tblGLDetail gl
+	-- WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
+	-- AND gl.ysnIsUnposted = 0 --filter with unposted only to make sure we only update the correct association for the prepaid
 
 	--UPDATE THE JOURNAL LINE DESCRIPTION
 	UPDATE gl
 		SET gl.strJournalLineDescription = @prepayBillId
 		,gl.intAccountId = @prepayAccount
-		--to ensure correct debit/credit to update, check first if that is not equal to 0
-		,gl.dblDebit = (CASE WHEN gl.dblDebit != 0 THEN @payment ELSE gl.dblDebit END)
-		,gl.dblCredit = (CASE WHEN gl.dblCredit != 0 THEN @payment ELSE gl.dblCredit END)
 	FROM tblGLDetail gl
-	WHERE gl.strTransactionId = @paymentRecordNum AND gl.intTransactionId = @currentPaymentId
+	WHERE gl.strTransactionId = @paymentRecordNum 
+	AND gl.intTransactionId = @currentPaymentId
 	AND gl.ysnIsUnposted = 0 --filter with unposted only to make sure we only update the correct association for the prepaid
+	AND gl.strJournalLineDescription = @voucherBillId
 
 	SET @prepayCreatedIds = CAST(@prepayCreated AS NVARCHAR) + ','
 	FETCH NEXT FROM c INTO @currentPaymentId, @payment, @paymentRecordNum
