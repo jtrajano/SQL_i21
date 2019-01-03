@@ -176,6 +176,7 @@ BEGIN
 		,CV.strColumn8
 		,CV.strColumn9
 		,CV.strColumn10
+		,L.dblLastCost 
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
@@ -236,6 +237,7 @@ BEGIN
 		,NULL AS strColumn8
 		,NULL AS strColumn9
 		,NULL AS strColumn10
+		,L.dblLastCost 
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId

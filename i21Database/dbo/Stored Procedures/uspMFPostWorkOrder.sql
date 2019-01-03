@@ -39,6 +39,7 @@ BEGIN TRY
 		,@ysnCostEnabled BIT
 		,@strOriginalPostedDate NVARCHAR(50)
 		,@dtmProductionDate DATETIME
+		,@strWorkOrderNo nvarchar(50)
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -121,6 +122,7 @@ BEGIN TRY
 		,@intSubLocationId = intSubLocationId
 		,@intWOItemUOMId = intItemUOMId
 		,@dtmCurrentDateTime = IsNull(dtmPostDate, @dtmCurrentDateTime)
+		,@strWorkOrderNo=strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -693,7 +695,7 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 111
 
-		IF @strCostingByCoEfficient IS NULL
+		IF @strCostingByCoEfficient IS NULL or @strCostingByCoEfficient=''
 		BEGIN
 			SELECT @strCostingByCoEfficient = 'False'
 		END
@@ -702,10 +704,10 @@ BEGIN TRY
 		BEGIN
 			SELECT @dblOtherCost = 0
 
-			SELECT @intTransactionId = intBatchId
-				,@strBatchId = strBatchId
-			FROM tblMFWorkOrderConsumedLot
-			WHERE intWorkOrderId = @intWorkOrderId
+			--SELECT @intTransactionId = intBatchId
+			--	,@strBatchId = strBatchId
+			--FROM tblMFWorkOrderConsumedLot
+			--WHERE intWorkOrderId = @intWorkOrderId
 
 			SELECT @dblNewCost = SUM([dbo].[fnMFGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
 			FROM (
@@ -814,11 +816,11 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = CASE 
+				,[dblNewCost] = Round(CASE 
 					WHEN IsNULL(RI.dblPercentage, 0) = 0
 						THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
 					ELSE ((@dblNewCost * RI.dblPercentage / 100 / SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)) OVER (PARTITION BY PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
-					END
+					END,2)
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference
@@ -1180,7 +1182,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = (PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
+				,[dblNewCost] = ROUND((PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))),2)
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference
@@ -1229,6 +1231,11 @@ BEGIN TRY
 			AND @ysnCostEnabled = 1
 		BEGIN
 			DECLARE @intReturnValue AS INT
+
+			Update PL
+			Set PL.dblItemValue=CostAdj.dblNewValue
+			From @adjustedEntries CostAdj
+			JOIN dbo.tblMFWorkOrderProducedLot PL ON PL.intWorkOrderProducedLotId =CostAdj.intTransactionDetailId
 
 			EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
 				,@strBatchId
@@ -1297,6 +1304,26 @@ BEGIN TRY
 			BEGIN
 				EXEC uspGLBookEntries @GLEntries
 					,1
+				
+				--**************************************
+				--GL Post Valiation
+				--**************************************
+				If exists(SELECT 1
+						FROM tblGLDetail gd
+						JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
+						JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
+						JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
+						JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
+						WHERE gd.ysnIsUnposted = 0
+							AND ac.strAccountCategory IN ('Work In Progress')
+							AND gd.strTransactionId = @strWorkOrderNo
+						HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1)
+						Begin
+							RAISERROR (
+								'Mismatch in debit and credit amount for WIP account.'
+								,11
+								,1)
+						End
 			END
 		END
 	END
@@ -1308,6 +1335,7 @@ BEGIN TRY
 				THEN @dtmCurrentDateTime
 			ELSE dtmPostDate
 			END
+			,dblInputItemValue=@dblNewCost
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	--DELETE T

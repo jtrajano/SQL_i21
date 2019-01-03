@@ -198,6 +198,8 @@ BEGIN
 		,CV.strColumn8
 		,CV.strColumn9
 		,CV.strColumn10
+		,L.dblLastCost 
+		,W.dblItemValue 
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	--LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
