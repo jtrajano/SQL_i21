@@ -8,7 +8,6 @@ CREATE PROCEDURE [dbo].[uspSCGetScaleItemForItemShipment]
 	,@intContractId INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@LineItems ScaleTransactionTableType  ReadOnly
-
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -19,14 +18,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
-DECLARE @intTicketItemUOMId INT
 
 BEGIN TRY
-		SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
-		FROM tblSCTicket SC
-		WHERE SC.intTicketId = @intTicketId
-
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			BEGIN 
@@ -49,11 +42,10 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 0
 				FROM	@LineItems LI 
-				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
-				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-				JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId
-				AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				WHERE	LI.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+				INNER JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
+				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+				INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE LI.intTicketId = @intTicketId
 			END
 		END
 		ELSE IF @strDistributionOption = 'SPT'
@@ -65,7 +57,16 @@ BEGIN TRY
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = @dblNetUnits 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = @dblCost
+						,dblCost = CASE 
+										WHEN ISNULL(@dblCost , 0) > 0 THEN @dblCost
+										ELSE
+										ISNULL(
+											(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
+											FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, ScaleTicket.dtmTicketDateTime, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
+											LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
+										)
+									END
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
@@ -78,11 +79,9 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 0
 				FROM	tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId 
-							AND ItemUOM.intItemUOMId = ScaleTicket.intItemUOMIdTo
-						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE	ScaleTicket.intTicketId = @intTicketId
 			END
 		END
 		ELSE
@@ -107,14 +106,9 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM
-							ON ScaleTicket.intItemId = ItemUOM.intItemId
-							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE	ScaleTicket.intTicketId = @intTicketId
 			END
 		END
 END TRY
