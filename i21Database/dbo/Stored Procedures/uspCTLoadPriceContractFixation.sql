@@ -49,7 +49,7 @@ BEGIN TRY
 			[strContractType] [nvarchar](50) NULL,
 			[strEntityName] [nvarchar](100) NULL,
 			[strContractNumber] [nvarchar](50) NULL,
-			[dblConvertedBasis] [int] NULL,
+			[dblConvertedBasis] [numeric](18, 6) NULL,
 			[strMarketCurrency] [nvarchar](40) NULL,
 			[strMarketUOM] [nvarchar](50) NULL,
 			[ysnMultiplePriceFixation] [bit] NULL,
